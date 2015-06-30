@@ -42,8 +42,8 @@ INSTALLATION
   that that configuration and it will not be discussed in this README
   file.
 
-  Instructions for installation of Cygwin on a Windows are provided
-  in the following the provided paragraph.
+  Instructions for installation of Cygwin on Windows system are provided
+  in the following paragraph.
 
   NuttX can also be installed and built on a native Windows system, but
   with some potential tool-related issues (see the discussion "Native
@@ -112,9 +112,11 @@ Semi-Optional apps/ Package
   tarball.
 
   It is call "Semi-optional" because if you don't have some apps/
-  directory, NuttX will *fail* to build! You you do not necessarily
-  need to use use the NuttX apps tarball and may, instead, provide
-  your own custom application directory.
+  directory, NuttX will *fail* to build! You do not necessarily need
+  to use the NuttX apps tarball but may, instead, provide your own
+  custom application directory.  Such a custom directory would need
+  to include a valid Makefile to support the build and a valid Kconfig
+  file to support the configuration.  More about these file later.
 
   Download then unpack the apps tarball in the same directory where you
   unpacked the NuttX tarball.  After you unpack the apps tarball, you
@@ -123,8 +125,8 @@ Semi-Optional apps/ Package
   might want to rename the directory to simply apps/ to match what
   you read in the documentation
 
-  After unpacking the apps tarball, you will have two directories side
-  by side like this:
+  After unpacking (and renaming) the apps tarball, you will have two
+  directories side by side like this:
 
              |
         +----+----+
@@ -133,8 +135,8 @@ Semi-Optional apps/ Package
 
   This is important because the NuttX build will expect to find the
   apps directory in that (default) location.  That default location
-  can be changed by editing your NuttX configuration file, but that
-  is another story).
+  can be changed by modifying your NuttX configuration file, but that
+  is another story.
 
 Installation Directories with Spaces in the Path
 ------------------------------------------------
@@ -164,11 +166,11 @@ Downloading from Repositories
 
       git clone https://bitbucket.org/patacongo/nuttx.git nuttx
 
-    And the semi-optional apps/ application directory and be clone like:
+    And the semi-optional apps/ application directory and be cloned like:
 
       git clone https://bitbucket.org/nuttx/apps.git apps
 
-    That will give you a directory structure like this:
+    That will give you the same directory structure like this:
 
              |
         +----+----+
@@ -186,7 +188,7 @@ Downloading from Repositories
       git submodule init
       git submodule update
 
-  Configuring the Clone
+  Configuring the Clones
 
     The following steps need to be performed for each of the two
     repositories.  After changing to the clone directory:
@@ -217,6 +219,8 @@ Downloading from Repositories
 
 Related Repositories
 --------------------
+
+  These are standalone repositories:
 
   * https://bitbucket.org/nuttx/apps
 
@@ -253,6 +257,21 @@ Related Repositories
 
     Yes, this really is a Pascal compiler.  The Pascal p-code run-time and
     pcode debugger can be built as a part of NuttX.
+
+  These repositories are GIT sub-modules and logically a part of the base
+  NuttX repository.
+
+  * https://bitbucket.org/nuttx/boards
+
+    This repository contains the board support for logic for all boards
+    supported by NuttX.  This repository is a Sub-Module of NuttX and will
+    appear as nuttx/configs when the NuttX repository is cloned.
+
+  * https://bitbucket.org/nuttx/documentation
+
+    The repository contains all NuttX documentation.  It is also a NuttX
+    sub-module and will appear at nuttx/Documentation in the NuttX source
+    tree.
 
 Notes about Header Files
 ------------------------
@@ -1191,7 +1210,7 @@ NuttX documentation is also available online at http://www.nuttx.org.
 
 Below is a guide to the available README files in the NuttX source tree:
 
-nuttx
+nuttx/
  |
  |- arch/
  |   |
@@ -1497,7 +1516,10 @@ nuttx
  `- tools/
      `- README.txt
 
-apps
+Below is a guide to the available README files in the semi-optional apps/
+source tree:
+
+apps/
  |- examples/
  |   |- bastest/README.txt
  |   |- json/README.txt
@@ -1546,11 +1568,25 @@ apps
  |      `- README.txt
  `- README.txt
 
- NxWidgets
+Additional README.txt files in the other, related repositories:
+
+NxWidgets/
  |- Doxygen
  |   `- README.txt
  |- tools
  |   `- README.txt
  |- UnitTests
  |   `- README.txt
+ `- README.txt
+
+buildroot/
+ `- README.txt
+
+tools/
+ `- README.txt
+
+uClibc++/
+ `- README.txt
+
+pascal/
  `- README.txt
