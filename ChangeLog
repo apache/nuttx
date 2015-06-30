@@ -10639,4 +10639,6 @@
 	* arch/arm/src/armv6-m/up_assert.c: Port some per-process stack
 	  dumping logic from ARMv7-M to ARMv6-M.  From Alan Carvalho de Assis
 	  (2015-06-30).
+	* tools/testbuild.sh:  Add a script that can be used to perform
+	  building testing for several board configurations (2015-06-30).
 

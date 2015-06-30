@@ -566,7 +566,51 @@ refresh.sh
      difference to the command line.  refresh.sh will prompt
      you first to avoid overwriting the defconfig file with
      changes that you do not want.
-`
+
+       $ ./testbuild.sh -h
+
+       USAGE: ./testbuild.sh [-w|l] [-c|n] <testlist-file>
+       USAGE: ./testbuild.sh -h
+
+       where
+         -w|l selects Windows (w) or Linux (l).  Default: Linux
+         -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin
+         -h will show this help test and terminate
+         <testlist-file> selects the list of configurations to test.  No default
+
+       Your PATH variable must include the path to both the build tools and the
+       kconfig-frontends tools
+
+     These script needs essential two pieces of information.
+
+       a. A description of the platform that you are testing on.  This
+          description is provided by the optiona -w, -l, -c, and -n options.
+       b. A list of builds to perform.  That list is provided by a test list
+          file.  The final, non-optional parameter <testlist-file> provides
+          the path to that file.
+
+     The test list file is a sequence of build descriptons, one per line.  One
+     build descriptions consists of two comma separated values.  For example:
+
+       stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+
+     The first value is the usual configuration description which of then
+     form <board-name>/<configuration-name> and must correspond to a
+     configuration in the nuttx/configs directory.
+
+     The second value is valid name for a toolchain configuration to use
+     when building the configuration.  The set of valid toolchain
+     configuration names depnds on the underlying architecture of the
+     configured board.
+
+testbuild.sh
+------------
+
+  This script automates building of a sequence of configuration.  The
+  intent is simply to assure that the set of configurations build
+  correctly.  The -h option lists the usage:
+
+
 zipme.sh
 --------
 
