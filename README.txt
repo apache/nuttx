@@ -177,7 +177,6 @@ Downloading from Repositories
         |         |
       nuttx/     apps/
 
-
   Initialize Sub-Modules
 
     The NuttX repository contains GIT sub-modules for the Documentation/,
@@ -187,6 +186,11 @@ Downloading from Repositories
       cd nuttx
       git submodule init
       git submodule update
+
+    This command can be used later to refresh all submodules with the
+    latest files:
+
+      git submodule foreach git pull
 
   Configuring the Clones
 
