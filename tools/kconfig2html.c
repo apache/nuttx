@@ -2634,7 +2634,7 @@ int main(int argc, char **argv, char **envp)
   body("</p>\n");
   body("<p>\n");
   body("  <b>Maintenance Note</b>.\n");
-  body("  This documentation was auto-generated using the <a href=\"https://bitbucket.org/patacongo/nuttx/src/master/nuttx/tools/kconfig2html.c\">kconfig2html</a> tool\n");
+  body("  This documentation was auto-generated using the <a href=\"https://bitbucket.org/patacongo/nuttx/src/master/tools/kconfig2html.c\">kconfig2html</a> tool\n");
   body("  That tool analyzes the NuttX <code>Kconfig</code> files and generates this HTML document.\n");
   body("  This HTML document file should not be edited manually.\n");
   body("  In order to make changes to this document, you should instead modify the <code>Kconfig</code> file(s) that were used to generated this document and then execute the <code>kconfig2html</code> again to regenerate the HTML document file.\n");
