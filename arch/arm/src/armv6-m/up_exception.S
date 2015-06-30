@@ -152,7 +152,8 @@ exception_common:
 	 */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr		sp, =g_intstackbase
+	ldr		r7, =g_intstackbase		/* R7=Base of the interrupt stack */
+	mov		sp, r7					/* Set the new stack point */
 	push	{r1}					/* Save the MSP on the interrupt stack */
 	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
 	pop		{r1}					/* Recover R1=main stack pointer */
