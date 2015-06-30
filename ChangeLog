@@ -10633,4 +10633,8 @@
           and misc/sims (2015-06-27).
         * Removed the configs/ directory.  Replaced with a GIT submodule
           that will bring in the new standalone boards directory (2015-06-29).
+	* arch/arm/src/armv6-m/up_exception.S: Fix Cortex-M0 assembly error
+	  when the interrupt stack is enabled.  From Alan Carvalho de Assis
+	  (2015-06-30).
+
 
