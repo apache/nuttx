@@ -242,12 +242,13 @@ pid_t up_vfork(const struct vfork_s *context)
 
           /* REVISIT:  This logic is *not* common. */
 
-#if (defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)) && \
-     defined(CONFIG_BUILD_KERNEL)
+#if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
+#  ifdef CONFIG_BUILD_KERNEL
 
           child->cmn.xcp.syscall[index].cpsr =
             parent->xcp.syscall[index].cpsr;
 
+#  endif
 #elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
       defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM7)
 
