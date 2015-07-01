@@ -10630,9 +10630,8 @@
 	* Removed the Documentation/ directory.  Replaced with a GIT submodule
 	  that will bring in the new standalone Documentation directory
 	  (2015-06-29).
-          and misc/sims (2015-06-27).
-        * Removed the configs/ directory.  Replaced with a GIT submodule
-          that will bring in the new standalone boards directory (2015-06-29).
+	* Removed the configs/ directory.  Replaced with a GIT submodule
+	  that will bring in the new standalone boards directory (2015-06-29).
 	* arch/arm/src/armv6-m/up_exception.S: Fix Cortex-M0 assembly error
 	  when the interrupt stack is enabled.  From Alan Carvalho de Assis
 	  (2015-06-30).
@@ -10641,4 +10640,8 @@
 	  (2015-06-30).
 	* tools/testbuild.sh:  Add a script that can be used to perform
 	  building testing for several board configurations (2015-06-30).
-
+	* sched/pthread/pthread_create.c:  Group binding needs to be cleared
+	  before sched_releasetcb(), as otherwise group_leave() will be called
+	  and group->tg_nmembers decremented or group being released.
+	  group_leave() should be called only after group_join() is called,
+	  not after group_bind().  From Jussi Kivilinna (2015-07-01).
