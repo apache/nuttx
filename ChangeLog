@@ -10645,3 +10645,6 @@
 	  and group->tg_nmembers decremented or group being released.
 	  group_leave() should be called only after group_join() is called,
 	  not after group_bind().  From Jussi Kivilinna (2015-07-01).
+	* arch/arm/src/sama5/sam_ehci.c:  Fix some bad conditional compilation
+	  that left a function undefined if CONFIG_USBHOST_ASYNCH is not
+	  selected (2015-07-01).
