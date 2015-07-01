@@ -157,8 +157,8 @@ void spi_flush(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CALLBACK
-nt lpc17_spiregister(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                     FAR void *arg);
+int lpc17_spiregister(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                      FAR void *arg);
 #endif
 
 #if defined(__cplusplus)

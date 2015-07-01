@@ -75,13 +75,13 @@
 /* Number of Tx descriptors */
 
 #ifndef CONFIG_NET_NTXDESC
-#  define CONFIG_NET_NTXDESC 18
+#  define CONFIG_NET_NTXDESC 13
 #endif
 
 /* Number of Rx descriptors */
 
 #ifndef CONFIG_NET_NRXDESC
-#  define CONFIG_NET_NRXDESC 18
+#  define CONFIG_NET_NRXDESC 13
 #endif
 
 /* Size of the region at the beginning of AHB SRAM 0 set set aside for the EMAC.
