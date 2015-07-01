@@ -576,12 +576,13 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-w|l] [-c|n] <testlist-file>
+    USAGE: ./testbuild.sh [-w|l] [-c|n] [-s] <testlist-file>
     USAGE: ./testbuild.sh -h
 
     where
       -w|l selects Windows (w) or Linux (l).  Default: Linux
       -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin
+      -s Use C++ long size_t in new operator. Default unsigned long
       -h will show this help test and terminate
       <testlist-file> selects the list of configurations to test.  No default
 

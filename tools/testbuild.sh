@@ -36,18 +36,20 @@ WD=$PWD
 nuttx=$WD/../nuttx
 
 progname=$0
-host=l
-wenv=c
+host=linux
+wenv=cygwin
+sizet=uint
 unset testfile
 
 function showusage {
     echo ""
-    echo "USAGE: $progname [-w|l] [-c|n] <testlist-file>"
+    echo "USAGE: $progname [-w|l] [-c|n] [-s] <testlist-file>"
     echo "USAGE: $progname -h"
     echo ""
     echo "where"
     echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
     echo "  -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin"
+    echo "  -s Use C++ long size_t in new operator. Default unsigned long"
     echo "  -h will show this help test and terminate"
     echo "  <testlist-file> selects the list of configurations to test.  No default"
     echo ""
@@ -62,16 +64,19 @@ function showusage {
 while [ ! -z "$1" ]; do
     case $1 in
     -w )
-    host=w
+    host=windows
     ;;
     -l )
-    host=l
+    host=linux
     ;;
     -c )
-    wenv=c
+    wenv=cygwin
     ;;
     -n )
     wenv=n
+    ;;
+    -s )
+    sizet=long
     ;;
     -h )
     showusage
@@ -126,7 +131,7 @@ function configure {
 
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
-    if [ "X$host" == "Xl" ]; then
+    if [ "X$host" == "Xlinux" ]; then
         echo "  Select CONFIG_HOST_LINUX=y"
 
         kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_LINUX
@@ -142,7 +147,7 @@ function configure {
         kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_WINDOWS
         kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_LINUX
 
-        if [ "X$wenv" == "Xc" ]; then
+        if [ "X$wenv" == "Xcygwin" ]; then
           echo "  Select CONFIG_HOST_CYGWIN=y"
           kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_CYGWIN
           kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_NATIVE
@@ -159,6 +164,14 @@ function configure {
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OSX
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OTHER
 
+    if [ "X$sizet" == "Xlong" ]; then
+        echo "  Select CONFIG_CXX_NEWLONG=y"
+
+        kconfig-tweak --file $nuttx/.config --enable CONFIG_CXX_NEWLONG
+    else
+        echo "  Disable CONFIG_CXX_NEWLONG"
+        kconfig-tweak --file $nuttx/.config --disable CONFIG_CXX_NEWLONG
+    fi
 
     setting=`grep TOOLCHAIN $nuttx/.config | grep =y`
     varname=`echo $setting | cut -d'=' -f1`
