@@ -92,8 +92,8 @@
  * Private Data
  ****************************************************************************/
 
-FAR struct spi_dev_s *spi;
-FAR struct lcd_dev_s *dev;
+FAR struct spi_dev_s *g_spidev;
+FAR struct lcd_dev_s *g_lcddev;
 
 /****************************************************************************
  * Private Functions
@@ -115,8 +115,8 @@ int board_lcd_initialize(void)
   lpc17_gpiowrite(ZKITARM_OLED_RS, 1);
 
   zkit_sspinitialize();
-  spi = lpc17_sspinitialize(0);
-  if (!spi)
+  g_spidev = lpc17_sspinitialize(0);
+  if (!g_spidev)
     {
       glldbg("Failed to initialize SSP port 0\n");
       return 0;
@@ -134,8 +134,8 @@ int board_lcd_initialize(void)
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
-  dev = st7567_initialize(spi, lcddev);
-  if (!dev)
+  g_lcddev = st7567_initialize(g_spidev, lcddev);
+  if (!g_lcddev)
     {
       glldbg("Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
     }
@@ -144,8 +144,8 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
       gllvdbg("Bound SSI port 0 to OLCD %d\n", lcddev);
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
-      (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
-      return dev;
+      (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      return g_lcddev;
     }
 
   return NULL;

@@ -82,7 +82,7 @@
  * Private Data
  ****************************************************************************/
 
-/* LED definitions ******************************************************************
+/* LED definitions **********************************************************/
 
 /* The ZKit-ARM-1769 has 2 LEDs along the bottom of the board. Red or off.
  * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows for NuttX
