@@ -53,6 +53,8 @@
 
 /* Configuration ************************************************************/
 
+#ifdef CONFIG_NSH_ARCHINIT
+
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_LPCXPRESSO
@@ -98,6 +100,12 @@
 #ifndef CONFIG_NSH_MMCSDMINOR
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
+
+/* Currnently MMC/SD support is available only for NSH configurations */
+
+#else
+#  undef NSH_HAVEMMCSD
+#endif /* CONFIG_NSH_ARCHINIT */
 
 /****************************************************************************
  * Private Data

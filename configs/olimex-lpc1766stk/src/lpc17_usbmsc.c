@@ -49,6 +49,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "lpc17_gpio.h"
+#include "lpc17_ssp.h"
 #include "lpc1766stk.h"
 
 /****************************************************************************
