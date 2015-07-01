@@ -10651,3 +10651,8 @@
 	* arch/arm/src/common/up_vfork.c:  Fix a Cortex-A compilation error
 	  when system calls are enabled in modes other than CONFIG_BUILD_KERNEL
 	  (2015-07-01)
+	* include/nuttx/net/netconfig.h:  Fix some backward compilation that was
+	  emitting #error in the wrong condition when SLIP was enabled (2015-07-01).
+	* drivers/net/slip.c:  Fix a missed name change when many of network
+	  interface names changed sometime back but were apparently never updated
+	  for SLIP (2015-07-01).
