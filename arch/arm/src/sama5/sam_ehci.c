@@ -386,10 +386,8 @@ static void sam_asynch_completion(struct sam_epinfo_s *epinfo);
 
 static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg);
-#ifdef CONFIG_USBHOST_ASYNCH
 static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg);
-#endif
 static inline void sam_ioc_bottomhalf(void);
 static inline void sam_portsc_bottomhalf(void);
 static inline void sam_syserr_bottomhalf(void);
@@ -2699,7 +2697,6 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_USBHOST_ASYNCH
 static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 {
   DEBUGASSERT(qtd != NULL && bp != NULL);
@@ -2727,7 +2724,6 @@ static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
   sam_qtd_free(qtd);
   return OK;
 }
-#endif /* CONFIG_USBHOST_ASYNCH */
 
 /*******************************************************************************
  * Name: sam_qh_cancel
@@ -2740,7 +2736,6 @@ static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_USBHOST_ASYNCH
 static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 {
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)arg;
@@ -2802,7 +2797,6 @@ static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
   sam_qh_free(qh);
   return 1;
 }
-#endif /* CONFIG_USBHOST_ASYNCH */
 
 /*******************************************************************************
  * Name: sam_ioc_bottomhalf
