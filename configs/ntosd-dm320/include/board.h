@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/board/board.h
+ * configs/ntods-dm320/include/board/board.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-201, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_NTOSD_DM320_INCLUDE_BOARD_H
+#define __CONFIGS_NTOSD_DM320_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -123,6 +123,19 @@
 #define GIO_CFC_RESET    36
 #define GIO_CFC_STSCHG   37
 
+/* LED Usage */
+
+#define LED_STARTED      0
+#define LED_HEAPALLOCATE 0
+#define LED_IRQSENABLED  0
+#define LED_STACKCREATED GIO_LED_GREEN
+#define LED_INIRQ        GIO_LED_RED
+#define LED_SIGNAL       GIO_LED_RED
+#define LED_ASSERTION    GIO_LED_RED
+#define LED_PANIC        GIO_LED_RED
+#define LED_IDLE         0
+
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
@@ -131,4 +144,4 @@
 
 #endif
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_NTOSD_DM320_INCLUDE_BOARD_H */

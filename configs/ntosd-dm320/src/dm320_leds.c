@@ -41,6 +41,7 @@
 #include <nuttx/board.h>
 
 #include "up_internal.h"
+#include "chip.h"
 
 /************************************************************************
  * Pre-processor Definitions
