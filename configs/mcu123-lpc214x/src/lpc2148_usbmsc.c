@@ -60,13 +60,15 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_MCU123
+#ifdef CONFIG_ARCH_BOARD_MCU123_LPC214X
 #  undef LPC214X_MMCSDSPIPORTNO
 #  define LPC214X_MMCSDSPIPORTNO 1
 #  undef LPC214X_MMCSDSLOTNO
 #  define LPC214X_MMCSDSLOTNO 0
+
 #else
    /* Add configuration for new LPC214x boards here */
+
 #  error "Unrecognized LPC214x board"
 #endif
 
