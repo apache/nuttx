@@ -2873,7 +2873,6 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 static int lpc17_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
   FAR struct lpc17_ep_s *privep = (FAR struct lpc17_ep_s *)ep;
-  FAR struct lpc17_usbdev_s *priv;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG
@@ -2883,8 +2882,8 @@ static int lpc17_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPCANCEL, privep->epphy);
-  priv = privep->dev;
 
   flags = irqsave();
   lpc17_cancelrequests(privep);
