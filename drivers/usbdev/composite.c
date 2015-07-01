@@ -436,6 +436,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
   uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         ctrl->type, ctrl->req, value, index, len);
+  UNUSED(index);
 
   if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD)
     {

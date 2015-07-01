@@ -1617,7 +1617,9 @@ int usbmsc_exportluns(FAR void *handle)
 {
   FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
   FAR struct usbmsc_dev_s *priv;
+#ifndef CONFIG_USBMSC_COMPOSITE
   FAR struct usbmsc_driver_s *drvr;
+#endif
   irqstate_t flags;
   int ret = OK;
 
@@ -1630,7 +1632,9 @@ int usbmsc_exportluns(FAR void *handle)
 #endif
 
   priv = &alloc->dev;
+#ifndef CONFIG_USBMSC_COMPOSITE
   drvr = &alloc->drvr;
+#endif
 
   /* Start the worker thread
    *
