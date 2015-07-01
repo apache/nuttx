@@ -1349,7 +1349,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      else if (BUF->type == HTONS(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(dev);
 
