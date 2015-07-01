@@ -515,7 +515,7 @@ static void slip_txtask(int argc, FAR char *argv[])
             }
           else
             {
-              (void)uip_poll(&priv->dev, slip_uiptxpoll);
+              (void)devif_poll(&priv->dev, slip_uiptxpoll);
             }
 
           net_unlock(flags);
