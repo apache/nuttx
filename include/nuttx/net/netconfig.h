@@ -139,7 +139,7 @@
 #elif defined(CONFIG_NET_SLIP)
    /* There is no link layer header with SLIP */
 
-#  ifdef CONFIG_NET_IPv4
+#  ifndef CONFIG_NET_IPv4
 #    error SLIP requires IPv4 support
 #  endif
 
