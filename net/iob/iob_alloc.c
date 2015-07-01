@@ -88,7 +88,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
   FAR struct iob_s *iob;
   irqstate_t flags;
   FAR sem_t *sem;
-  int ret;
+  int ret = OK;
 
 #if CONFIG_IOB_THROTTLE > 0
   /* Select the semaphore count to check. */

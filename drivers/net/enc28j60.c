@@ -1929,6 +1929,7 @@ static void enc_toworker(FAR void *arg)
   DEBUGASSERT(ret == OK);
   ret = enc_ifup(&priv->dev);
   DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 
   /* Then poll uIP for new XMIT data */
 
@@ -1977,6 +1978,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 
   ret = work_queue(HPWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 }
 
 /****************************************************************************
@@ -2071,6 +2073,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
 
   ret = work_queue(HPWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 }
 
 /****************************************************************************

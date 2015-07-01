@@ -116,22 +116,25 @@ uint16_t hwtimer_read(int num)
 #define BASE_ADDR_WDOG		0xfffff800
 #define WDOG_REG(m)		(BASE_ADDR_WDOG + m)
 
-enum wdog_reg {
-	WD_CNTL_TIMER	= CNTL_TIMER,
-	WD_LOAD_TIMER	= LOAD_TIMER,
-	WD_READ_TIMER	= 0x02,
-	WD_MODE		= 0x04,
+enum wdog_reg
+{
+  WD_CNTL_TIMER	= CNTL_TIMER,
+  WD_LOAD_TIMER	= LOAD_TIMER,
+  WD_READ_TIMER	= 0x02,
+  WD_MODE		= 0x04,
 };
 
-enum wdog_ctl {
-	WD_CTL_START = (1 << 7),
-	WD_CTL_AUTO_RELOAD = (1 << 8)
+enum wdog_ctl
+{
+  WD_CTL_START = (1 << 7),
+  WD_CTL_AUTO_RELOAD = (1 << 8)
 };
 
-enum wdog_mode {
-	WD_MODE_DIS_ARM = 0xF5,
-	WD_MODE_DIS_CONFIRM = 0xA0,
-	WD_MODE_ENABLE = (1 << 15)
+enum wdog_mode
+{
+  WD_MODE_DIS_ARM = 0xF5,
+  WD_MODE_DIS_CONFIRM = 0xA0,
+  WD_MODE_ENABLE = (1 << 15)
 };
 
 #define WD_CTL_PRESCALE(value) (((value)&0x07) << 9)

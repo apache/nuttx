@@ -90,7 +90,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
 {
   FAR struct iob_qentry_s *qentry;
   irqstate_t flags;
-  int ret;
+  int ret = OK;
 
   /* The following must be atomic; interrupt must be disabled so that there
    * is no conflict with interrupt level I/O buffer chain container

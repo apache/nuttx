@@ -49,6 +49,8 @@
 
 #include <nuttx/nx/nx.h>
 
+#ifdef CONFIG_NX_MULTIUSER
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -565,4 +567,5 @@ int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
 }
 #endif
 
+#endif  /* CONFIG_NX_MULTIUSER */
 #endif  /* __INCLUDE_NUTTX_NX_NXMU_H */
