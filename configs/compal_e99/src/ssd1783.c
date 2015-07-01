@@ -186,7 +186,9 @@ static struct ssd1783_dev_s g_lcddev =
 };
 
 /* we trust gcc to move this expensive bitshifting out of
-   the loops in the drawing funtcions */
+ * the loops in the drawing funtcions
+ */
+
 static uint8_t rgb_to_pixel(uint16_t color)
 {
   uint8_t ret;
@@ -199,8 +201,11 @@ static uint8_t rgb_to_pixel(uint16_t color)
 }
 
 /* somehow the palette is messed up, RRR seems to have the
-   bits reversed!  R0 R1 R2 G G G B B ---> R2 R1 R0 G G G B B */
-uint8_t fix_rrr(uint8_t v){
+ * bits reversed!  R0 R1 R2 G G G B B ---> R2 R1 R0 G G G B B 
+ */
+
+uint8_t fix_rrr(uint8_t v)
+{
   return (v & 0x5f) | (v & 0x80) >> 2 | (v & 0x20) << 2;
 }
 
@@ -519,7 +524,8 @@ void board_lcd_uninitialize(void)
 
 void lcd_clear()
 {
-  struct ssd1783_cmdlist prepare_disp_write_cmds[] = {
+  struct ssd1783_cmdlist prepare_disp_write_cmds[] =
+  {
     { CMD,  0x8E },
     { DATA, 0x00 },
     { DATA, 0x00 },
@@ -528,11 +534,12 @@ void lcd_clear()
     { END,  0x00 }
   };
 
-  struct ssd1783_cmdlist nop[] = {
+  struct ssd1783_cmdlist nop_command[] =
+  {
     { CMD, 0x25 }, // NOP command
     { END, 0x00 }
   };
 
   fb_ssd1783_send_cmdlist(prepare_disp_write_cmds);
-  fb_ssd1783_send_cmdlist(nop);
+  fb_ssd1783_send_cmdlist(nop_command);
 }

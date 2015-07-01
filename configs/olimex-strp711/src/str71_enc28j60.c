@@ -88,6 +88,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/net/enc28j60.h>
 
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -154,9 +155,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR struct enc_lower_s *lower, xcpt_t handler);
-static void up_enable(FAR struct enc_lower_s *lower);
-static void up_disable(FAR struct enc_lower_s *lower);
+static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler);
+static void up_enable(FAR const struct enc_lower_s *lower);
+static void up_disable(FAR const struct enc_lower_s *lower);
 
 /****************************************************************************
  * Private Data
