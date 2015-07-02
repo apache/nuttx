@@ -49,13 +49,12 @@
  * Public Functions
  ************************************************************************************/
 
-/** Initialize Board
+/* Initialize Board
  *
  *   All STM32 architectures must provide the following entry point.  This entry point
  *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
- *
- **/
+ */
 
 void stm32_boardinitialize(void)
 {
@@ -87,3 +86,12 @@ void stm32_boardinitialize(void)
   board_led_initialize();
 #endif
 }
+
+/* Application initialization stub for boardctl() */
+
+#ifdef CONFIG_LIB_BOARDCTL
+int board_app_initialize(void)
+{
+  return OK;
+}
+#endif /* CONFIG_LIB_BOARDCTL */

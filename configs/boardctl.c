@@ -94,8 +94,25 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        */
 
       case BOARDIOC_INIT:
-        ret = board_app_initialize();
+        {
+          ret = board_app_initialize();
+        }
         break;
+
+#ifdef CONFIG_BOARDCTL_POWEROFF
+      /* CMD:           BOARDIOC_POWEROFF
+       * DESCRIPTION:   Power off the board
+       * ARG:           Integer value providing power off status information
+       * CONFIGURATION: CONFIG_BOARDCTL_POWEROFF
+       * DEPENDENCIES:  Board logic must provide board_power_off
+       */
+
+      case BOARDIOC_POWEROFF:
+        {
+          ret = board_power_off((int)arg);
+        }
+        break;
+#endif
 
 #ifdef CONFIG_BOARDCTL_TSCTEST
       /* CMD:           BOARDIOC_TSCTEST_SETUP

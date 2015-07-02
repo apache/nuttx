@@ -35,11 +35,7 @@
  *
  ****************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief VSN Sensor Interface
- *
- * Public interface:
+/* Public interface:
  *  - sif_init(): should be called just once after system starts, to
  *    initialize internal data structures, device driver and hardware
  *  - individual starts() and stops() that control gpio, usart, i2c, ...
@@ -66,31 +62,29 @@
  *  - Complete internal states and updateing is made via the struct
  *    vsn_sif_s, which is also accessible thru the ioctl() with
  *    SNP Message descriptor.
- **/
+ */
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-#include <semaphore.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
-#include <nuttx/time.h>
-#include <nuttx/progmem.h>
-
-#include <nuttx/i2c.h>
-#include <nuttx/sensors/lis331dl.h>
-
-#include <nuttx/spi/spi.h>
-#include <nuttx/wireless/cc1101.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <semaphore.h>
 #include <errno.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/clock.h>
+#include <nuttx/time.h>
+#include <nuttx/progmem.h>
+#include <nuttx/i2c.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/sensors/lis331dl.h>
+#include <nuttx/wireless/cc1101.h>
 
 #include "vsn.h"
 #include "stm32_gpio.h"
-
 
 /****************************************************************************
  * Declarations and Structures

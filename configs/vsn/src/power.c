@@ -73,15 +73,6 @@ void board_power_init(void)
   stm32_configgpio(GPIO_PCLR);
 }
 
-void board_power_reboot(void)
-{
-  /* low-level board reset (not just MCU reset)
-   * if external power is present, stimulate power-off as board
-   * will wake-up immediately, if power is not present, set an alarm
-   * before power off the board.
-   */
-}
-
 /****************************************************************************
  * Name: board_power_off
  *
@@ -92,16 +83,19 @@ void board_power_reboot(void)
  *   board due to some other constraints.
  *
  * Input Parameters:
- *   None
+ *   status - Status information provided with the power off event.
  *
  * Returned Value:
- *   None
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-void board_power_off(void)
+#ifdef CONFIG_BOARDCTL_POWEROFF
+int board_power_off(int status)
 {
-  /* Check if external supply is not present, otherwise return */
+  /* Check if external supply is not present, otherwise return
    * notifying that it is not possible to power-off the board
    * REVISIT
    */
@@ -119,3 +113,4 @@ void board_power_off(void)
   stm32_gpiowrite(GPIO_PCLR, true);
   for (;;);
 }
+#endif

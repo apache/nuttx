@@ -1667,6 +1667,10 @@ config LIB_BOARDCTL
 
 if LIB_BOARDCTL
 
+config BOARDCTL_POWEROFF
+	bool "Enable power off command"
+	default n
+
 config BOARDCTL_TSCTEST
 	bool "Enable touchscreen test interfaces"
 	default n
