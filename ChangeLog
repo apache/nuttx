@@ -10656,3 +10656,7 @@
 	* drivers/net/slip.c:  Fix a missed name change when many of network
 	  interface names changed sometime back but were apparently never updated
 	  for SLIP (2015-07-01).
+	* drivers/input/stmpe811_base.c:  In stmpe811_instanciate() when
+	  CONFIG_STMPE811_MULTIPLE is enabled, and the call to stmpe811_checkid()
+	  fails, then the linked device list is not restored to its previous state.
+	  From Sebastien Lorquet (2015-07-02).
