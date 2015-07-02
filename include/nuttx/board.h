@@ -273,6 +273,26 @@ int board_ioctl(unsigned int cmd, uintptr_t arg);
 #endif
 
 /****************************************************************************
+ * Name: board_power_off
+ *
+ * Description:
+ *   Power off the board.  This function may or may not be supported by a
+ *   particular board architecture.
+ *
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void board_power_off(void);
+
+/****************************************************************************
  * Name: board_lcd_initialize, board_lcd_getdev, board_lcd_uninitialize
  *
  * Description:
