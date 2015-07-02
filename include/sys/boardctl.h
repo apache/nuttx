@@ -58,6 +58,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL
  * DEPENDENCIES:  Board logic must provide board_app_initialization
  *
+ * CMD:           BOARDIOC_POWEROFF
+ * DESCRIPTION:   Power off the board
+ * ARG:           Integer value providing power off status information
+ * CONFIGURATION: CONFIG_BOARDCTL_POWEROFF
+ * DEPENDENCIES:  Board logic must provide board_power_off
+ *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
  * ARG:           Touch controller device minor number
@@ -91,11 +97,12 @@
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0002)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0003)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0004)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0005)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0006)
+#define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0003)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0004)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0005)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0006)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0007)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -104,7 +111,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0007)
+#define BOARDIOC_USER              _BOARDIOC(0x0008)
 
 /****************************************************************************
  * Public Type Definitions

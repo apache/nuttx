@@ -235,6 +235,42 @@ int board_adc_setup(void);
 int board_pwm_setup(void);
 
 /****************************************************************************
+ * Name: board_power_off
+ *
+ * Description:
+ *   Power off the board.  This function may or may not be supported by a
+ *   particular board architecture.
+ *
+ * Input Parameters:
+ *   status - Status information provided with the power off event.
+ *
+ * Returned Value:
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_POWEROFF
+int board_power_off(int status);
+#endif
+
+/****************************************************************************
+ * Name: board_ioctl
+ *
+ * Description:
+ *   If CONFIG_LIB_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
+ *   enable board specific commands.  In this case, all commands not
+ *   recognized by boardctl() will be forwarded to the board-provided
+ *   board_ioctl() function.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg);
+#endif
+
+/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:
@@ -256,41 +292,6 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
 struct fb_vtable_s;
 FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
 #endif
-
-/****************************************************************************
- * Name: board_ioctl
- *
- * Description:
- *   If CONFIG_LIB_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
- *   enable board specific commands.  In this case, all commands not
- *   recognized by boardctl() will be forwarded to the board-provided
- *   board_ioctl() function.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_IOCTL
-int board_ioctl(unsigned int cmd, uintptr_t arg);
-#endif
-
-/****************************************************************************
- * Name: board_power_off
- *
- * Description:
- *   Power off the board.  This function may or may not be supported by a
- *   particular board architecture.
- *
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void board_power_off(void);
 
 /****************************************************************************
  * Name: board_lcd_initialize, board_lcd_getdev, board_lcd_uninitialize

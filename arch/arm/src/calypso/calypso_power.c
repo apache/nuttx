@@ -2,6 +2,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
 
 #include <nuttx/board.h>
@@ -17,14 +19,17 @@
  *   board due to some other constraints.
  *
  * Input Parameters:
- *   None
+ *   status - Status information provided with the power off event.
  *
  * Returned Value:
- *   None
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-void board_power_off(void)
+#ifdef CONFIG_BOARDCTL_POWEROFF
+void board_power_off(int status)
 {
   uint16_t tx;
   struct spi_dev_s *spi = up_spiinitialize(0);
@@ -36,4 +41,8 @@ void board_power_off(void)
 
   tx = (1 << 6) | (30 << 1);
   SPI_SNDBLOCK(spi, &tx, 1);
+
+  return 0;
 }
+#endif
+
