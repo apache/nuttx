@@ -433,7 +433,7 @@ static struct str71x_spidev_s g_spidev0 =
 };
 #endif
 
-#ifdef CONFIG_STR71X_BSPI1
+#if defined(CONFIG_STR71X_BSPI1) && defined(CONFIG_ENC28J60)
 static struct str71x_spidev_s g_spidev1 =
 {
   .spidev  = { &g_spiops },
