@@ -192,10 +192,17 @@ Downloading from Repositories
 
       git submodule foreach git pull
 
+    The submodules use the Bitbucket.org HTTPS address.  If you have SSH
+    access to the NuttX team repositories, you can switch to SSH by
+    modifying the URLs in:
+
+      nuttx/.git/modules/configs/config, and
+      nuttx/.git/modules/Documentation/config
+
   Configuring the Clones
 
-    The following steps need to be performed for each of the two
-    repositories.  After changing to the clone directory:
+    The following steps need to be performed for each of the repositories.
+    After changing to the clone directory:
 
     Set your identity:
 
