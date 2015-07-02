@@ -112,6 +112,22 @@ static inline void arch_invalidate_dcache_all(void)
 #endif
 }
 
+/************************************************************************************
+ * Name: arch_invalidate_icache
+ *
+ * Description:
+ *   Invalidate all instruction caches to PoU, also flushes branch target cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#define arch_invalidate_icache() cp15_invalidate_icache()
+
 /****************************************************************************
  * Name: arch_clean_dcache
  *
