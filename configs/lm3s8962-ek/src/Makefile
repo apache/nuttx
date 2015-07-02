@@ -1,7 +1,7 @@
 ############################################################################
 # configs/lm3s8962-ek/src/Makefile
 #
-#   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,11 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS = lm_boot.c lm_leds.c lm_ethernet.c lm_ssi.c
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lm_nsh.c
 endif
+
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 CSRCS += lm_oled.c
 endif

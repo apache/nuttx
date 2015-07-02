@@ -53,6 +53,8 @@
 #include "chip/lpc17_syscon.h"
 #include "chip/lpc17_pwm.h"
 #include "lpc17_gpio.h"
+#include "lpc17_ssp.h"
+
 #include "lpc1766stk.h"
 
 #if defined(CONFIG_NX_LCDDRIVER) && defined(CONFIG_LCD_NOKIA6100) && defined(CONFIG_LPC17_SSP0)

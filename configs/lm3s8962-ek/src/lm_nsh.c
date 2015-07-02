@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/lm3s8962-ek/src/lm_nsh.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,26 +53,32 @@
 
 /* Configuration ************************************************************/
 
-/* PORT and SLOT number probably depend on the board configuration */
+#undef NSH_HAVEUSBDEV
+#define NSH_HAVEMMCSD  1
 
-#ifdef CONFIG_ARCH_BOARD_LM3S8962EK
-#  undef NSH_HAVEUSBDEV
-#  define NSH_HAVEMMCSD  1
+/* PORT and SLOT number depend on the board configuration */
+
+#ifdef CONFIG_NSH_ARCHINIT
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
 #    error "The LM3S8962 Eval Kit MMC/SD is on SSI0"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 0
 #  endif
+
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "The LM3S8962 Eval Kit MMC/SD is on SSI0 slot 0"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+
 #else
-   /* Add configuration for new LM3s boards here */
-#  error "Unrecognized lm3s board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
+#  define CONFIG_NSH_MMCSDSPIPORTNO 0
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Can't support USB features if USB is not enabled */
@@ -85,10 +91,6 @@
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
 #  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /****************************************************************************
@@ -105,6 +107,7 @@
 
 int board_app_initialize(void)
 {
+#ifdef NSH_HAVEMMCSD
   FAR struct spi_dev_s *spi;
   int ret;
 
@@ -139,5 +142,6 @@ int board_app_initialize(void)
 
   syslog(LOG_INFO, "Successfuly bound SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+#endif
   return OK;
 }

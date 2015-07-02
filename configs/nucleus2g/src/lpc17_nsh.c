@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/nucleus2g/src/lpc17_nsh.c
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,50 +47,60 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "lpc17_ssp.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
 
+#define HAVE_USBDEV 1
+#define HAVE_MMCSD  1
+
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G
-#  define NSH_HAVEUSBDEV 1
-#  define NSH_HAVEMMCSD  1
+#ifdef CONFIG_NSH_ARCHINIT
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
 #    error "The Nucleus-2G MMC/SD is on SSP0"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 0
 #  endif
+
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "The Nucleus-2G MMC/SD is only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
-#  ifndef CONFIG_LPC17_SSP0
-#    warning "CONFIG_LPC17_SSP0 is not enabled"
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
 #  endif
+
 #else
-#  error "Unrecognized board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
+#  define CONFIG_NSH_MMCSDSPIPORTNO 0
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Can't support USB device features if USB device is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
+#  undef HAVE_USBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
-#endif
+#ifdef HAVE_MMCSD
+#  ifndef CONFIG_LPC17_SSP0
+#    warning "CONFIG_LPC17_SSP0 is require for MMC/SD support"
+#    undef HAVE_MMCSD
+#  endif
 
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+#  ifdef CONFIG_DISABLE_MOUNTPOINT
+#    warning "No MMC/SD support.  Mountpoints disabled (CONFIG_DISABLE_MOUNTPOINT)"
+#    undef HAVE_MMCSD
+#  endif
 #endif
 
 /****************************************************************************
@@ -115,6 +125,7 @@
 
 int board_app_initialize(void)
 {
+#ifdef HAVE_MMCSD
   FAR struct spi_dev_s *ssp;
   int ret;
 
@@ -143,6 +154,7 @@ int board_app_initialize(void)
 
   syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+#endif
 
   return OK;
 }

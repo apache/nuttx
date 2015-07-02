@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mcu123-lpc214x/src/Makefile
 #
-#   Copyright (C) 2007-2010, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010, 2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS = lpc2148_spi1.c lpc2148_leds.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc2148_nsh.c
 endif
 

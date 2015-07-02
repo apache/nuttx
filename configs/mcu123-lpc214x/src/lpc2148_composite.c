@@ -59,17 +59,10 @@
 #  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
 #endif
 
-/* PORT and SLOT number probably depend on the board configuration */
+/* PORT and SLOT number depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_MCU123
-#  undef LPC214X_MMCSDSPIPORTNO
-#  define LPC214X_MMCSDSPIPORTNO 1
-#  undef LPC214X_MMCSDSLOTNO
-#  define LPC214X_MMCSDSLOTNO 0
-#else
-   /* Add configuration for new LPC214x boards here */
-#  error "Unrecognized LPC214x board"
-#endif
+#define LPC214X_MMCSDSPIPORTNO 1
+#define LPC214X_MMCSDSLOTNO 0
 
 /****************************************************************************
  * Public Functions

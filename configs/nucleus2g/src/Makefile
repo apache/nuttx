@@ -1,7 +1,7 @@
 ############################################################################
 # configs/nucleus2g/src/Makefile
 #
-#   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,11 @@ CFLAGS += -I$(TOPDIR)/sched
 
 ASRCS =
 CSRCS = lpc17_boot.c lpc17_leds.c lpc17_ssp.c lpc17_outputs.c
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc17_nsh.c
 endif
+
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc17_usbmsc.c
 endif

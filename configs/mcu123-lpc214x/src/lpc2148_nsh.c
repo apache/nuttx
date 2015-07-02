@@ -53,42 +53,44 @@
 
 /* Configuration ************************************************************/
 
-/* PORT and SLOT number probably depend on the board configuration */
+#define HAVE_USBDEV 1
+#define HAVE_MMCSD  1
 
-#ifdef CONFIG_ARCH_BOARD_MCU123
-#  define NSH_HAVEUSBDEV 1
-#  define NSH_HAVEMMCSD  1
+/* PORT and SLOT number depend on the board configuration */
+
+#ifdef CONFIG_NSH_ARCHINIT
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
 #    error "The LPC214x MMC/SD is on SPI1"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 1
 #  endif
+
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "The LPC214x MMC/SD is on SPI1"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+
 #else
-   /* Add configuration for new LPC214x boards here */
-#  error "Unrecognized LPC214x board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
+#  define CONFIG_NSH_MMCSDSPIPORTNO 1
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
+#  undef HAVE_USBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+#  undef HAVE_MMCSD
 #endif
 
 /****************************************************************************
@@ -105,6 +107,7 @@
 
 int board_app_initialize(void)
 {
+#ifdef HAVE_MMCSD
   FAR struct spi_dev_s *spi;
   int ret;
 
@@ -139,5 +142,7 @@ int board_app_initialize(void)
 
   syslog(LOG_INFO, "Successfuly bound SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+#endif
+
   return OK;
 }
