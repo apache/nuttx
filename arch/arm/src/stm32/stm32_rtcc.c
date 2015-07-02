@@ -1086,7 +1086,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
 #ifdef CONFIG_RTC_ALARM
 int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
-  irqstate_t flags;
   int ret = -EBUSY;
 
   /* Is there already something waiting on the ALARM? */
