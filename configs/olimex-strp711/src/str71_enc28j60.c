@@ -74,7 +74,6 @@
  * interrupt conflict with TMR1.
  */
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -85,10 +84,10 @@
 #include <stdio.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/net/enc28j60.h>
 
-#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -164,7 +163,7 @@ static void up_disable(FAR const struct enc_lower_s *lower);
  ****************************************************************************/
 
 /* The ENC28J60 normal provides interrupts to the MCU via a GPIO pin.  The
- * following structure provides an MCU-independent mechanixm for controlling
+ * following structure provides an MCU-independent mechanism for controlling
  * the ENC28J60 GPIO interrupt.
  */
 
@@ -185,7 +184,7 @@ static const struct enc_lower_s g_enclower =
 
 static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler)
 {
-  return irq_attach(ENC28J60_IRQ, handler)
+  return irq_attach(ENC28J60_IRQ, handler);
 }
 
 static void up_enable(FAR const struct enc_lower_s *lower)

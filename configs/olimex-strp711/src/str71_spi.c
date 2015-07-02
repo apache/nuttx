@@ -191,6 +191,11 @@
 #  define BSPI0_GPIO0_ALL    (BSPI0_GPIO0_ALT|ENC_GPIO0_ALL)
 
 #else
+#  ifdef CONFIG_STR71X_BSPI0
+#    warning "CONFIG_STR71X_BSPI0 has no function in this configuration"
+#    undef CONFIG_STR71X_BSPI0
+#  endif
+
 #  define BSPI0_GPIO0_INTTL  (0)
 #  define BSPI0_GPIO0_INCMOS (0)
 #  define BSPI0_GPIO0_OUTPP  (0)
@@ -429,16 +434,16 @@ static struct str71x_spidev_s g_spidev0 =
 {
   .spidev  = { &g_spiops },
   .spibase = STR71X_BSPI0_BASE,
-  .csbit   = MMCSD_GPIO0_CS
+  .csbit   = ENC_GPIO0_CS
 };
 #endif
 
-#if defined(CONFIG_STR71X_BSPI1) && defined(CONFIG_ENC28J60)
+#ifdef CONFIG_STR71X_BSPI1
 static struct str71x_spidev_s g_spidev1 =
 {
   .spidev  = { &g_spiops },
   .spibase = STR71X_BSPI1_BASE,
-  .csbit   = ENC_GPIO0_CS
+  .csbit   = MMCSD_GPIO0_CS
 };
 #endif
 
@@ -934,8 +939,10 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct spi_dev_s *ret;
-  irqstate_t flags;
+#if defined(CONFIG_STR71X_BSPI0) || defined(CONFIG_STR71X_BSPI1)
   uint16_t reg16;
+#endif
+  irqstate_t flags;
 
   flags = irqsave();
 #ifdef CONFIG_STR71X_BSPI0
@@ -1114,6 +1121,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
     {
       ret = NULL;
     }
+
   irqrestore(flags);
   return ret;
 }
