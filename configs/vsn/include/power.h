@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/vsn/include/power.h
- * include/arch/board/power.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved
  *
@@ -35,14 +34,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_POWER_H
+#ifndef __CONFIGS_VSN_INCLUDE_POWER_H
 #define __ARCH_BOARD_POWER_H
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -51,17 +51,9 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
-/** Perform system reset on board level
- */
-void board_power_reboot(void);
+/* Perform system reset on board level */
 
-/** Power off the board
- *
- * If it returns, then it was not possible to power-off the board due to some
- * other constraints. In the case of VSN due to external power supply, press
- * of a push-button or RTC alarm.
- */
-void board_power_off(void);
+void board_power_reboot(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

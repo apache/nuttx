@@ -35,26 +35,22 @@
  *
  ****************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief VSN Power
- */
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <arch/board/board.h>
-#include <arch/stm32/irq.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
+
+#include <arch/board/board.h>
+#include <arch/stm32/irq.h>
+
 #include "vsn.h"
-
-
-/****************************************************************************
- * Declarations and Structures
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -64,45 +60,62 @@ void board_power_register(void);
 void board_power_adjust(void);
 void board_power_status(void);
 
-
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 void board_power_init(void)
 {
-    stm32_configgpio(GPIO_PVS);
-    stm32_configgpio(GPIO_PST);
-    stm32_configgpio(GPIO_XPWR);
-    stm32_configgpio(GPIO_SCTC);
-    stm32_configgpio(GPIO_PCLR);
+  stm32_configgpio(GPIO_PVS);
+  stm32_configgpio(GPIO_PST);
+  stm32_configgpio(GPIO_XPWR);
+  stm32_configgpio(GPIO_SCTC);
+  stm32_configgpio(GPIO_PCLR);
 }
-
 
 void board_power_reboot(void)
 {
-    // low-level board reset (not just MCU reset)
-    // if external power is present, stimulate power-off as board
-    // will wake-up immediatelly, if power is not present, set an alarm
-    // before power off the board.
+  /* low-level board reset (not just MCU reset)
+   * if external power is present, stimulate power-off as board
+   * will wake-up immediately, if power is not present, set an alarm
+   * before power off the board.
+   */
 }
 
+/****************************************************************************
+ * Name: board_power_off
+ *
+ * Description:
+ *   Power off the board.
+ *
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some other constraints.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void board_power_off(void)
 {
-    // Check if external supply is not present, otherwise return
-    // notifying that it is not possible to power-off the board
+  /* Check if external supply is not present, otherwise return */
+   * notifying that it is not possible to power-off the board
+   * REVISIT
+   */
 
-    // \todo
+  /* stop background processes */
 
-    // stop background processes
-    irqsave();
+  irqsave();
 
-    // switch to internal HSI and get the PD0 and PD1 as GPIO
-    sysclock_select_hsi();
+  /* switch to internal HSI and get the PD0 and PD1 as GPIO */
 
-    // trigger shutdown with pull-up resistor (not push-pull!) and wait.
-    stm32_gpiowrite(GPIO_PCLR, true);
-    for (;;);
+  sysclock_select_hsi();
+
+  /* trigger shutdown with pull-up resistor (not push-pull!) and wait. */
+
+  stm32_gpiowrite(GPIO_PCLR, true);
+  for (;;);
 }
