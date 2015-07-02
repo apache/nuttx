@@ -29,7 +29,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BOARDCTL_POWEROFF
-void board_power_off(int status)
+int board_power_off(int status)
 {
   uint16_t tx;
   struct spi_dev_s *spi = up_spiinitialize(0);
