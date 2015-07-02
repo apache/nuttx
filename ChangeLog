@@ -10660,3 +10660,6 @@
 	  CONFIG_STMPE811_MULTIPLE is enabled, and the call to stmpe811_checkid()
 	  fails, then the linked device list is not restored to its previous state.
 	  From Sebastien Lorquet (2015-07-02).
+	* sched/sched/sched_waitpid.c: Implement WNOHANG for waitpid() only and
+	  for the case of CONFIG_SCHED_HAVE_PARENT not selected.  From Max
+	  Neklyudov (2015-07-02).
