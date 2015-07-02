@@ -277,6 +277,8 @@ static int nsh_usbhostinitialize(void)
     }
 #endif
 
+  UNUSED(ret);
+
   /* Then get an instance of the USB host interface */
 
   syslog(LOG_INFO, "Initialize USB host\n");
