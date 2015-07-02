@@ -1,7 +1,7 @@
 /*****************************************************************************
  * sched/sched/sched_waitpid.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,20 +232,35 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Then wait for the task to exit */
 
-  ret = sem_wait(&group->tg_exitsem);
-  if (ret < 0)
+  if (options & WNOHANG)
     {
-      /* Unlock pre-emption and return the ERROR (sem_wait has already set
-       * the errno).  Handle the awkward case of whether or not we need to
-       * nullify the stat_loc value.
-       */
+      /* Don't wait if status is not available */
 
-      if (mystat)
+      ret = sem_trywait(&group->tg_exitsem);
+      if (ret < 0)
         {
-          group->tg_statloc = NULL;
+          pid = 0;
         }
+    }
+  else
+    {
+      /* Wait if necessary for status to become available */
 
-      goto errout;
+      ret = sem_wait(&group->tg_exitsem);
+      if (ret < 0)
+        {
+          /* Unlock pre-emption and return the ERROR (sem_wait has already set
+           * the errno).  Handle the awkward case of whether or not we need to
+           * nullify the stat_loc value.
+           */
+
+          if (mystat)
+            {
+              group->tg_statloc = NULL;
+            }
+
+          goto errout;
+        }
     }
 
   /* On success, return the PID */
