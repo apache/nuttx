@@ -40,7 +40,7 @@
 
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
-CSRCS = dummy.c
+CSRCS = boot.c
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
