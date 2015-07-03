@@ -45,7 +45,7 @@
 #ifdef CONFIG_NET
 
 /****************************************************************************
- * Pre-processor Defintiions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_NET_HOSTNAME
