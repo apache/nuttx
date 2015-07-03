@@ -38,6 +38,7 @@ config ARCH_CHIP_CALYPSO
 	select ARCH_HAVE_HEAP2
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_OTHER_UART
+	select ARCH_HAVE_POWEROFF
 	---help---
 		TI Calypso-based cell phones (ARM7TDMI)
 
