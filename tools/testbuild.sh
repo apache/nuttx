@@ -205,7 +205,7 @@ function dotest {
     build
 }
 
-# Performt he build test for each entry in the test list file
+# Perform the build test for each entry in the test list file
 
 export APPSDIR=../apps
 
@@ -224,7 +224,7 @@ for line in $testlist; do
 
     path=$nuttx/configs/$config
     if [ ! -r "$path/defconfig" ]; then
-        echo "ERROR: no configuration fount at $path"
+        echo "ERROR: no configuration found at $path"
         showusage
     fi
 
