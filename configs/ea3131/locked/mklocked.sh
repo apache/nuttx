@@ -118,14 +118,14 @@ echo "EXTERN(up_vectoraddrexcptn)" >>ld-locked.inc
 echo "EXTERN(up_timer_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_LPC31_UART)
-if [ $answer = y ]; then
+if [ "$answer" = y ]; then
 	echo "EXTERN(up_earlyserialinit)" >>ld-locked.inc
 fi
 
 # up_i2cinitialize -- Not conditioned on anything
 
 answer=$(checkconfig CONFIG_USBDEV)
-if [ $answer = y ]; then
+if [ "$answer" = y ]; then
 	echo "EXTERN(up_usbinitialize)" >>ld-locked.inc
 fi
 
@@ -149,7 +149,7 @@ echo "EXTERN(up_boot)" >>ld-locked.inc
 # included in the locked text section (at least for now)
 
 answer=$(checkzero CONFIG_TASK_NAME_SIZE)
-if [ $answer = n ]; then
+if [ "$answer" = n ]; then
 	echo "EXTERN(up_boot)" >>ld-locked.inc
 fi
 
@@ -162,34 +162,34 @@ echo "EXTERN(wd_initialize)" >>ld-locked.inc
 echo "EXTERN(clock_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_DISABLE_POSIX_TIMERS)
-if [ $answer = n ]; then
+if [ "$answer" = n ]; then
 	echo "EXTERN(timer_initialize)" >>ld-locked.inc
 fi
 
 answer=$(checkconfig CONFIG_DISABLE_SIGNALS)
-if [ $answer = n ]; then
+if [ "$answer" = n ]; then
 	echo "EXTERN(sig_initialize)" >>ld-locked.inc
 fi
 
 echo "EXTERN(sem_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_DISABLE_MQUEUE)
-if [ $answer = n ]; then
+if [ "$answer" = n ]; then
 	echo "EXTERN(mq_initialize)" >>ld-locked.inc
 fi
 
 answer=$(checkconfig CONFIG_DISABLE_PTHREAD)
-if [ $answer = n ]; then
+if [ "$answer" = n ]; then
 	echo "EXTERN(pthread_initialize)" >>ld-locked.inc
 fi
 
 answer=$(checkzero CONFIG_NFILE_DESCRIPTORS)
-if [ $answer = n ]; then
+if [ "$answer" = n ]; then
 	echo "EXTERN(fs_initialize)" >>ld-locked.inc
 fi
 
 answer=$(checkconfig CONFIG_NET)
-if [ $answer = y ]; then
+if [ "$answer" = y ]; then
 	echo "EXTERN(net_initialize)" >>ld-locked.inc
 fi
 

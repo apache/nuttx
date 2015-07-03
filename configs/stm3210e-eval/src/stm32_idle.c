@@ -347,7 +347,7 @@ static void stm32_idlepm(void)
             /* Set the alarm as an EXTI Line */
 
 #ifdef CONFIG_RTC_ALARM
-            up_rtc_alarm(CONFIG_PM_ALARM_SEC, CONFIG_PM_ALARM_NSEC, true);
+            stm32_rtc_alarm(CONFIG_PM_ALARM_SEC, CONFIG_PM_ALARM_NSEC, true);
 #endif
             /* Wait 10ms */
 
@@ -386,7 +386,7 @@ static void stm32_idlepm(void)
             /* Configure the RTC alarm to Auto Reset the system */
 
 #ifdef CONFIG_PM_SLEEP_WAKEUP
-            up_rtc_alarm(CONFIG_PM_SLEEP_WAKEUP_SEC, CONFIG_PM_SLEEP_WAKEUP_NSEC, false);
+            stm32_rtc_alarm(CONFIG_PM_SLEEP_WAKEUP_SEC, CONFIG_PM_SLEEP_WAKEUP_NSEC, false);
 #endif
             /* Wait 10ms */
 

@@ -68,6 +68,7 @@
 #define BUTTON_MIN   0
 #ifdef CONFIG_DJOYSTICK
 #  define BUTTON_MAX 2
+#else
 #  define BUTTON_MAX 7
 #endif
 

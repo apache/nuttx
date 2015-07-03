@@ -37,24 +37,14 @@
 
 # Board-specific directory, board library, and application library
 
-PASS1_SRCDIR = arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
-PASS1_BOARDDIR = $(PASS1_SRCDIR)$(DELIM)board
-PASS1_LIBBOARD = $(PASS1_BOARDDIR)$(DELIM)libboard$(LIBEXT)
-
-# Where is the application library?
-
-ifneq ($(CONFIG_APPS_DIR),)
-PASS1_LIBAPPS = $(CONFIG_APPS_DIR)$(DELIM)libapps$(LIBEXT)
-else
-ifneq ($(APPDIR),)
-PASS1_LIBAPPS = $(APPDIR)$(DELIM)libapps$(LIBEXT)
-endif
-endif
+PASS1_SRCDIR   = arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+PASS1_LIBBOARD = libboard$(LIBEXT)
+PASS1_LIBAPPS  = libapps$(LIBEXT)
 
 # Remove the application library (libapps) from the list of libraries.  Add
 # the boad library (liboard)
 
-PASS1_LINKLIBS = $(filter-out $(PASS1_LIBAPPS),$(LINKLIBS))
+PASS1_LINKLIBS  = $(filter-out $(PASS1_LIBAPPS),$(LINKLIBS))
 PASS1_LINKLIBS += $(PASS1_LIBBOARD)
 
 # Get the paths to the libraries and the links script path in format that
@@ -85,27 +75,27 @@ all: $(PASS1_SRCDIR)$(DELIM)locked.r
 
 ld-locked.inc: mklocked.sh $(TOPDIR)$(DELIM).config
 	@echo "MK:  ld-locked.inc"
-	@.$(DELIM)mklocked.sh "$(TOPDIR)"
+	$(Q) .$(DELIM)mklocked.sh "$(TOPDIR)"
 
 # Make the board library. This is normally done in arch/arm/src/Makefile.
 # However, we need it earlier here when doing a two-pass build so that libboard.a
 # is available to link against.
 
 $(PASS1_LIBBOARD):
-	@$(MAKE) -C $(TOPDIR)$(DELIM)configs$(DELIM)ea3131$(DELIM)src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)configs$(DELIM)ea3131$(DELIM)src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 # Create the locked.r file containing all of the code (except the start-up code)
 # that needs to lie in the locked text region.
 
 locked.r: ld-locked.inc $(PASS1_LIBBOARD)
 	@echo "LD:  locked.r"
-	@$(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC)
-	@$(NM) $@ > locked.map
-	@fgrep " U " locked.map | grep -v os_start
-	@$(CROSSDEV)size $@
+	$(Q) $(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC)
+	$(Q) $(NM) $@ > locked.map
+	$(Q) fgrep " U " locked.map | grep -v os_start
+	$(Q) $(CROSSDEV)size $@
 
 $(PASS1_SRCDIR)$(DELIM)locked.r: locked.r
-	@cp -a locked.r $(TOPDIR)$(DELIM)$(PASS1_SRCDIR)$(DELIM)locked.r
+	$(Q) cp -a locked.r $(TOPDIR)$(DELIM)$(PASS1_SRCDIR)$(DELIM)locked.r
 
 .depend:
 

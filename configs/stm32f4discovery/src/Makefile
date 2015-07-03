@@ -81,7 +81,7 @@ CSRCS += stm32_pm.c
 endif
 
 ifeq ($(CONFIG_PM_BUTTONS),y)
-CSRCS += stm32_pm_buttons.c
+CSRCS += stm32_pmbuttons.c
 endif
 
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
