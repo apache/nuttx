@@ -927,6 +927,7 @@ config SAM34_HAVE_GPIOF_IRQ
 
 config SAM34_GPIO_IRQ
 	bool "GPIO pin interrupts"
+	depends on !ARCH_CHIP_SAM4L
 	---help---
 		Enable support for interrupting GPIO pins
 
