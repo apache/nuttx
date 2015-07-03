@@ -96,6 +96,8 @@
 
 #define fdatasync(f) fsync(f)
 
+#define HOST_NAME_MAX 32
+
 /****************************************************************************
  * Global Variables
  ****************************************************************************/
@@ -190,6 +192,10 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 FAR char **getoptargp(void); /* Optional argument following option */
 int       *getoptindp(void); /* Index into argv */
 int       *getoptoptp(void); /* unrecognized option character */
+
+#ifdef CONFIG_NET
+int     gethostname(char *name, size_t size);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

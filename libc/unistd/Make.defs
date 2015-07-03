@@ -52,6 +52,10 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS += lib_sleep.c lib_usleep.c
 endif
 
+ifeq ($(CONFIG_NET),y)
+CSRCS += lib_gethostname.c
+endif
+
 # Add the unistd directory to the build
 
 DEPPATH += --dep-path unistd

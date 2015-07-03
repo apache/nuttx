@@ -262,4 +262,10 @@ config NET_MULTICAST
 	---help---
 		Outgoing multi-cast address support
 
+config NET_HOSTNAME
+	string "Host name for current machine"
+	default ""
+	---help---
+		A unique name to identify device on the network
+
 endif # NET
