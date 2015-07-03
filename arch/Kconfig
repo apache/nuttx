@@ -154,6 +154,10 @@ config ARCH_HAVE_EXTCLK
 	bool
 	default n
 
+config ARCH_HAVE_POWEROFF
+	bool
+	default n
+
 config ARCH_USE_MMU
 	bool "Enable MMU"
 	default n
