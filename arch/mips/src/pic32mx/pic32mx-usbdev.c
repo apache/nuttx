@@ -1025,7 +1025,7 @@ static void pic32mx_rqrestart(int argc, uint32_t arg1, ...)
 
               privreq->req.xfrd    = 0;
               privreq->inflight[0] = 0;
-#ifdef CONFIG_USBDEV_NOWRITEAHEAD
+#ifndef CONFIG_USBDEV_NOWRITEAHEAD
               privreq->inflight[1] = 0;
 #endif
               (void)pic32mx_wrrequest(priv, privep);
@@ -1157,7 +1157,7 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
        * because we know that there is a BDT available.
        */
 
-#ifdef CONFIG_USBDEV_NOWRITEAHEAD
+#ifndef CONFIG_USBDEV_NOWRITEAHEAD
       DEBUGASSERT(privreq->inflight[1] == 0);
 #endif
       /* Has the transfer been initiated for all of the bytes? */
@@ -1299,6 +1299,8 @@ static int pic32mx_wrrequest(struct pic32mx_usbdev_s *priv, struct pic32mx_ep_s 
 
       (void)pic32mx_wrstart(priv, privep);
     }
+#else
+  UNUSED(ret);
 #endif
 
   /* We return OK to indicate that a write request is still in progress */
@@ -1769,6 +1771,8 @@ static void pic32mx_eptransfer(struct pic32mx_usbdev_s *priv, uint8_t epno,
 
           (void)pic32mx_rdrequest(priv, privep);
         }
+#else
+      UNUSED(ret);
 #endif
     }
   else
@@ -2090,6 +2094,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
                 privep            = &priv->eplist[epno];
                 privep->halted    = false;
                 ret               = pic32mx_epstall(&privep->ep, true);
+                UNUSED(ret);
               }
             else
               {
@@ -2175,6 +2180,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
                 privep            = &priv->eplist[epno];
                 privep->halted    = true;
                 ret               = pic32mx_epstall(&privep->ep, false);
+                UNUSED(ret);
               }
             else
               {
@@ -3263,7 +3269,6 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
 
 static int pic32mx_epdisable(struct usbdev_ep_s *ep)
 {
-  struct pic32mx_usbdev_s *priv;
   struct pic32mx_ep_s *privep;
   volatile uint32_t *ptr;
   int epno;
@@ -3280,7 +3285,6 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
 #endif
 
   privep = (struct pic32mx_ep_s *)ep;
-  priv   = privep->dev;
   epno   = USB_EPNO(ep->eplog);
   usbtrace(TRACE_EPDISABLE, epno);
 
@@ -3395,7 +3399,9 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->result          = -EINPROGRESS;
   req->xfrd            = 0;
   privreq->inflight[0] = 0;
+#ifndef CONFIG_USBDEV_NOWRITEAHEAD
   privreq->inflight[1] = 0;
+#endif
   flags                = irqsave();
 
   /* Add the new request to the request queue for the OUT endpoint */
@@ -3451,7 +3457,6 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 static int pic32mx_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct pic32mx_ep_s *privep = (struct pic32mx_ep_s *)ep;
-  struct pic32mx_usbdev_s *priv;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG
@@ -3461,8 +3466,8 @@ static int pic32mx_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
-  priv = privep->dev;
 
   flags = irqsave();
   pic32mx_cancelrequests(privep, -EAGAIN);
