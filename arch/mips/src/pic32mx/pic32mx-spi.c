@@ -65,7 +65,7 @@
  ****************************************************************************/
 /* Configuration */
 
-#ifndef CONFIG_SPI_EXCHANGE
+#ifdef CONFIG_SPI_EXCHANGE
   /* See arch/mips/src/pic32mz/pic32mz-spi.c for an implementation */
 
 #  error CONFIG_SPI_EXCHANGE not supported by this driver
@@ -812,6 +812,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
      /* Read from the buffer register to clear the status bit */
 
      regval = spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
+     UNUSED(regval);
      nwords--;
     }
 }
