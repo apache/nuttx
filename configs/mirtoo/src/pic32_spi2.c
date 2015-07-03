@@ -82,7 +82,7 @@
  */
 
 #define GPIO_SI             (GPIO_OUTPUT|GPIO_PORTA|GPIO_PIN1)
-#ifdef CONFIG_MIRTOO_RELEASE == 1
+#if CONFIG_MIRTOO_RELEASE == 1
 #  define GPIO_SO           (GPIO_INPUT|GPIO_PORTA|GPIO_PIN2)
 #else
 #  define GPIO_SO           (GPIO_INPUT|GPIO_PORTA|GPIO_PIN3)

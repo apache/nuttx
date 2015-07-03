@@ -4,7 +4,7 @@
  * Interface definition for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.
  * This LCD is based on the Himax HX8347-D LCD controller.
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,14 +60,12 @@
 #include "pic32mx-pmp.h"
 #include "pic32mx7mmb_internal.h"
 
-#ifdef CONFIG_LCD_MIO283QT2
-
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
 /* Configuration **********************************************************************/
 
-#ifndef CONFIG_PIC32MX_PMP
+#if defined(CONFIG_LCD_MIO283QT2) && !defined(CONFIG_PIC32MX_PMP)
 #  error "CONFIG_PIC32MX_PMP is required to use the LCD"
 #endif
 
@@ -147,6 +145,8 @@
 #  define lcddbg(x...)
 #  define lcdvdbg(x...)
 #endif
+
+#ifdef CONFIG_LCD_MIO283QT2
 
 /**************************************************************************************
  * Private Type Definition
@@ -504,7 +504,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  **************************************************************************************/
 
@@ -550,5 +550,3 @@ void pic32mx_lcdinitialize(void)
    pic32mx_configgpio(GPIO_LCD_BLED);
 #endif
 }
-
-
