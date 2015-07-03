@@ -584,6 +584,7 @@ static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
 
   status = sst25_waitwritecomplete(priv);
   DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == 0);
+  UNUSED(status);
 
   /* Select this FLASH part */
 
@@ -723,6 +724,7 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
       status = sst25_waitwritecomplete(priv);
       DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == 0);
+      UNUSED(status);
 
       /* Enable write access to the FLASH */
 
@@ -754,6 +756,7 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
       status = sst25_waitwritecomplete(priv);
       DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == (SST25_SR_WEL|SST25_SR_AAI));
+      UNUSED(status);
 
       /* Decrement the word count and advance the write position */
 
@@ -791,6 +794,7 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
           status = sst25_waitwritecomplete(priv);
           DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == (SST25_SR_WEL|SST25_SR_AAI));
+          UNUSED(status);
 
           /* Decrement the word count and advance the write position */
 
