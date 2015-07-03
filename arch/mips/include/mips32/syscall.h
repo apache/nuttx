@@ -246,7 +246,7 @@ uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
  *
  ****************************************************************************/
 
-uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2
+uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                     uintptr_t parm3);
 
 #undef EXTERN
