@@ -1025,6 +1025,7 @@ config ARCH_BOARD_VSN
 	depends on ARCH_CHIP_STM32F103RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_POWEROFF
 	---help---
 		ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
 		STMicro STM32F103RET6.  Contributed by Uros Platise.  See
@@ -1664,31 +1665,59 @@ endif
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"
 	default n
+	---help---
+		Enables support for the boardctl() interface.  Architecture
+		specific logic must provide board_app_initialize() interface.
 
 if LIB_BOARDCTL
 
 config BOARDCTL_POWEROFF
 	bool "Enable power off command"
 	default n
+	depends on ARCH_HAVE_POWEROFF
+	---help---
+		Enables support for the BOARDIOC_POWEROFF boardctl() command.
+		Architecture specific logic must provide board_power_off()
+		interface.
 
 config BOARDCTL_TSCTEST
 	bool "Enable touchscreen test interfaces"
 	default n
+	---help---
+		Enables support for the BOARDIOC_TSCTEST_SETUP and
+		BOARDIOC_TSCTEST_TEARDOWN boardctl() commands.  Architecture
+		specific logic must provide board_tsc_setup() and
+		board_tsc_teardown() interfaces.
 
 config BOARDCTL_ADCTEST
 	bool "Enable ADC test interfaces"
 	default n
+	---help---
+		Enables support for the BOARDIOC_ADCTEST_SETUP boardctl() command.
+		Architecture specific logic must provide board_adc_setup()
+		interface.
 
 config BOARDCTL_PWMTEST
 	bool "Enable PWM test interfaces"
 	default n
+	---help---
+		Enables support for the BOARDIOC_PWMTEST_SETUP boardctl() command.
+		Architecture specific logic must provide board_pwm_setup()
+		interface.
 
 config BOARDCTL_GRAPHICS
 	bool "Enable custom graphics initialization interfaces"
 	default n
+	---help---
+		Enables support for the BOARDIOC_GRAPHICS_SETUP boardctl() command.
+		Architecture specific logic must provide board_graphics_setup()
+		interface.
 
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n
+	---help---
+		Enables support for the BOARDIOC_POWEROFF boardctl() command.
+		Architecture specific logic must provide board_ioctl() interface.
 
 endif # LIB_BOARDCTL
