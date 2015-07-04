@@ -80,7 +80,7 @@ int uname(FAR struct utsname *name)
 {
   int ret = 1;
 
-  strcpy(name->sysname, "NuttX");
+  strncpy(name->sysname, "NuttX", SYS_NAMELEN);
 
 #ifdef CONFIG_NET
   /* Get the hostname */
@@ -94,9 +94,9 @@ int uname(FAR struct utsname *name)
   strcpy(name->nodename, "");
 #endif
 
-  strcpy(name->release, CONFIG_VERSION_STRING);
-  strcpy(name->version, CONFIG_VERSION_BUILD);
-  strcpy(name->machine, CONFIG_ARCH);
+  strncpy(name->release, CONFIG_VERSION_STRING, SYS_NAMELEN);
+  strncpy(name->version, CONFIG_VERSION_BUILD, SYS_NAMELEN);
+  strncpy(name->machine, CONFIG_ARCH, SYS_NAMELEN);
 
   return ret;
  }
