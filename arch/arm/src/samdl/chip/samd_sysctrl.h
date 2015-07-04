@@ -81,8 +81,8 @@
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 #  define SAM_SYSCTRL_DPLLCTRLA_OFFSET  0x0044  /* DPLL Control A */
 #  define SAM_SYSCTRL_DPLLRATIO_OFFSET  0x0048  /* DPLL ratio control */
-#  define SAM_SYSCTRL_DPLLCTRLB_OFFSET  0x0048  /* DPLL Control B */
-#  define SAM_SYSCTRL_DPLLSTATUS_OFFSET 0x0048  /* DPLL status */
+#  define SAM_SYSCTRL_DPLLCTRLB_OFFSET  0x004c  /* DPLL Control B */
+#  define SAM_SYSCTRL_DPLLSTATUS_OFFSET 0x0050  /* DPLL status */
 #endif
 
 /* SYSCTRL register addresses ***************************************************************/

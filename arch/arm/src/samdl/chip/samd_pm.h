@@ -93,8 +93,10 @@
 
 /* Control register */
 
-#define PM_CTRL_CFDEN             (1 << 2)  /* Bit 2: Clock Failure Detector Enable */
-#define PM_CTRL_BKUPCLK           (1 << 4)  /* Bit 4: Backup Clock Select */
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define PM_CTRL_CFDEN           (1 << 2)  /* Bit 2: Clock Failure Detector Enable */
+#  define PM_CTRL_BKUPCLK         (1 << 4)  /* Bit 4: Backup Clock Select */
+#endif
 
 /* Sleep mode register */
 
@@ -226,7 +228,7 @@
 #define PM_APBCMASK_PTC           (1 << 19) /* Bit 19: PTC */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define PM_APBBMASK_I2S         (1 << 10) /* Bit 20: Inter IC Sound */
+#  define PM_APBBMASK_I2S         (1 << 20) /* Bit 20: Inter IC Sound */
 #endif
 
 /* Interrupt enable clear, Interrupt enable set, and Interrupt flag status and clear registers */
