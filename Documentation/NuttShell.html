@@ -377,37 +377,43 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.49 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.49 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.50 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.50 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.51 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.51 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.52 Wait for Microseconds (usleep)</a>
+    <a href="#cmdurlencode">2.52 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.53 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.53 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.54 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.54 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.55 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2437,7 +2443,68 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.49 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmduname"><h2>2.49 Print system information (uname)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+uname [-a | -imnoprsv]
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Print certain system information.  With no options, the output is the same as -s.
+<p>
+<ul><table>
+  <tr>
+    <td><code>-a</code></td>
+    <td>
+      Print all information, in the following order, except omit -p and -i if unknown:
+    </td>
+  </tr>
+  <tr>
+    <td><code>-s, -o</code></td>
+    <td>
+      Print the operating system name (NuttX)
+    </td>
+  </tr>
+  <tr>
+    <td><code>-n</code></td>
+    <td>
+      Print the network node hostname (only availabel if <code>CONFIG_NET=y</code>)
+    </td>
+  </tr>
+  <tr>
+    <td><code>-r</code></td>
+    <td>
+      Print the kernel release
+    </td>
+  </tr>
+  <tr>
+    <td><code>-v</code></td>
+    <td>
+      Print the kernel version
+    </td>
+  </tr>
+  <tr>
+    <td><code>-m</code></td>
+    <td>
+      Print the machine hardware name
+    </td>
+  </tr>
+  <tr>
+    <td><code>-p, -i</code></td>
+    <td>
+      Print &quot;unknown&quot;
+    </td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdunset"><h2>2.50 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2463,7 +2530,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.50 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.51 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2480,7 +2547,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.51 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.52 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2497,7 +2564,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.52 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.53 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2514,7 +2581,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget">2.53 Get File Via HTTP (wget)</a>
+    <a name="cmdwget">2.54 Get File Via HTTP (wget)</a>
   </td>
   </tr>
 </table>
@@ -2541,7 +2608,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.54 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.55 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2861,6 +2928,11 @@ nsh>
     <td><b><code>umount</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
     <td><code>CONFIG_NSH_DISABLE_UMOUNT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>uname</code></b></td>
+    <td>br</td>
+    <td><code>CONFIG_NSH_DISABLE_UNAME</code></td>
   </tr>
   <tr>
     <td><b><code>unset</code></b></td>
@@ -4405,6 +4477,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdtest"><code>test</code></a></li>
   <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
   <li><a href="#cmdunmount"><code>umount</code></a></li>
+  <li><a href="#cmduname"><code>uname</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
   <li><a href="#looping"><code>until</code></a></li>
   <li><a href="#custinit"><code>up_nsh.c</code></a></li>
