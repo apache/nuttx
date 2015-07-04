@@ -809,11 +809,16 @@ static inline void sam_config_gclks(void)
 
 static inline void sam_dividers(void)
 {
+#ifdef PM_CTRL_CFDEN
   uint8_t regval;
+#endif
 
-  /* Set CPU divider and, optionally, enable failure detection */
+  /* Set the CPU divider using the divider value from the board.h header file */
 
   putreg8(BOARD_CPU_DIVIDER, SAM_PM_CPUSEL);
+
+#ifdef PM_CTRL_CFDEN
+  /* Optionally, enable failure detection */
 
   regval  = getreg8(SAM_PM_CTRL);
 #ifdef BOARD_CPU_FAILDECT
@@ -822,6 +827,7 @@ static inline void sam_dividers(void)
   regval &= ~PM_CTRL_CFDEN;
 #endif
   putreg8(regval, SAM_PM_CTRL);
+#endif
 
   /* Set the APBA, B, and C dividers */
 
