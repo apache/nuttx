@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: April 11, 2015</p>
+      <p>Last Updated: July 4, 2015</p>
     </td>
   </tr>
 </table>
@@ -311,91 +311,103 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdput">2.38 Send File Via TFTP (put)</a>
+    <a href="#cmdpoweroff">2.38 Shut the system down (poweroff)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdpwd">2.39 Show Current Working Directory (pwd)</a>
+    <a href="#cmdput">2.39 Send File Via TFTP (put)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrm">2.40 Remove a File (rm)</a>
+    <a href="#cmdpwd">2.40 Show Current Working Directory (pwd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmdir">2.41 Remove a Directory (rmdir)</a>
+    <a href="#cmdreboot">2.41 Reset and reboot the system (reboot)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdset">2.42 Set an Environment Variable (set)</a>
+    <a href="#cmdrm">2.42 Remove a File (rm)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsh">2.43 Execute an NSH Script (sh)</a>
+    <a href="#cmdrmdir">2.43 Remove a Directory (rmdir)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdshutdown">2.44 Shut the system down (shutdown)</a>
+    <a href="#cmdset">2.44 Set an Environment Variable (set)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.45 Wait for Seconds (sleep)</a>
+    <a href="#cmdsh">2.45 Execute an NSH Script (sh)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.46 Unmount a File System (umount)</a>
+    <a href="#cmdshutdown">2.46 Shut the system down (shutdown)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.47 Unset an Environment Variable (unset)</a>
+    <a href="#cmdsleep">2.47 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.48 URL Decode (urldecode)</a>
+    <a href="#cmdunmount">2.48 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.49 URL Encode (urlencode)</a>
+    <a href="#cmdunset">2.49 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.50 Wait for Microseconds (usleep)</a>
+    <a href="#cmdurldec">2.50 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.51 Get File Via HTTP (wget)</a>
+    <a href="#cmdurlencode">2.51 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.52 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdusleep">2.52 Wait for Microseconds (usleep)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdwget">2.53 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.54 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2134,7 +2146,29 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdput"><h2>2.38 Send File Via TFTP (put)</h2></a>
+    <a name="cmdpoweroff"><h2>2.38 Shut the system down (poweroff)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+poweroff
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Shutdown and power off the system immediately.
+  This command depends on hardware support to power down the system.
+</p>
+<p>
+  NOTE: Supporting both the <code>poweroff</code> and <code>shutdown</code> commands is redundant.
+</p>
+
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdput"><h2>2.39 Send File Via TFTP (put)</h2></a>
   </td>
   </tr>
 </table>
@@ -2169,7 +2203,7 @@ put [-b|-n] [-f &lt;remote-path&gt;] -h &lt;ip-address&gt; &lt;local-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdpwd"><h2>2.39 Show Current Working Directory (pwd)</h2></a>
+    <a name="cmdpwd"><h2>2.40 Show Current Working Directory (pwd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2199,7 +2233,29 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrm"><h2>2.40 Remove a File (rm)</h2></a>
+    <a name="cmdreboot"><h2>2.41 Reboot the system (reboot)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+reboot
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Reset and reboot the system immediately.
+  This command depends on hardware support to reset the system.
+</p>
+<p>
+<p>
+  NOTE: Supporting both the <code>reboot</code> and <code>shutdown</code> commands is redundant.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdrm"><h2>2.42 Remove a File (rm)</h2></a>
   </td>
 </tr>
 </table>
@@ -2233,7 +2289,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmdir"><h2>2.41 Remove a Directory (rmdir)</h2></a>
+    <a name="cmdrmdir"><h2>2.43 Remove a Directory (rmdir)</h2></a>
   </td>
 </tr>
 </table>
@@ -2268,7 +2324,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdset"><h2>2.42 Set an Environment Variable (set)</h2></a>
+    <a name="cmdset"><h2>2.44 Set an Environment Variable (set)</h2></a>
   </td>
   </tr>
 </table>
@@ -2294,7 +2350,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsh"><h2>2.43 Execute an NSH Script (sh)</h2></a>
+    <a name="cmdsh"><h2>2.45 Execute an NSH Script (sh)</h2></a>
   </td>
   </tr>
 </table>
@@ -2313,7 +2369,7 @@ sh &lt;script-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdshutdown"><h2>2.44 Shut the system down (shutdown)</h2></a>
+    <a name="cmdshutdown"><h2>2.46 Shut the system down (shutdown)</h2></a>
   </td>
   </tr>
 </table>
@@ -2327,11 +2383,14 @@ shutdown [--reboot]
   Shutdown and power off the system or, optionally, reset and reboot the system immediately.
   This command depends on hardware support to power down or reset the system; one, both, or neither behavior may be supported.
 </p>
+<p>
+  NOTE: The <code>shutdown</code> command duplicates the behavior of the <code>poweroff</code> and <code>eboot</code> commands.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.45 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdsleep"><h2>2.47 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2348,7 +2407,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.46 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.48 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2378,7 +2437,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.47 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.49 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2404,7 +2463,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.48 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.50 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2421,7 +2480,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.49 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.51 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2438,7 +2497,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.50 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.52 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2455,7 +2514,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget">2.51 Get File Via HTTP (wget)</a>
+    <a name="cmdwget">2.53 Get File Via HTTP (wget)</a>
   </td>
   </tr>
 </table>
@@ -2482,7 +2541,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.52 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.54 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2738,6 +2797,11 @@ nsh>
     <td><code>CONFIG_NSH_DISABLE_PING6</code></td>
   </tr>
   <tr>
+    <td><b><code>poweroff</code></b></td>
+    <td><code>CONFIG_BOARDCTL_POWEROFF</td>
+    <td><code>CONFIG_NSH_DISABLE_POWEROFF</code></td>
+  </tr>
+  <tr>
     <td><b><code>ps</code></b></td>
     <td><br></td>
     <td><code>CONFIG_NSH_DISABLE_PS</code></td>
@@ -2752,6 +2816,11 @@ nsh>
     <td><b><code>pwd</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
     <td><code>CONFIG_NSH_DISABLE_PWD</code></td>
+  </tr>
+  <tr>
+    <td><b><code>reboot</code></b></td>
+    <td><code>CONFIG_BOARD_RESET</code></td>
+    <td><code>CONFIG_NSH_DISABLE_REBOOT</code></td>
   </tr>
   <tr>
     <td><b><code>rm</code></b></td>
@@ -4285,10 +4354,10 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdmbhw"><code>mh</code></a></li>
   <li><a href="#cmdmbhw"><code>mw</code></a></li>
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
+  <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
   <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
   <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
   <li><a href="#custinit"><code>mkromfsimg.sh</code></a></li>
@@ -4311,12 +4380,14 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#overview">Overview</a></li>
   <li><a href="#cmdping"><code>ping</code></a></li>
   <li><a href="#cmdping"><code>ping6</code></a></li>
+  <li><a href="#cmdpoweroff"><code>poweroff</code></a></li>
   <li><a href="#nshprompt">Prompt</a></li>
   <li><a href="#cmdps"><code>ps</code></a></li>
   <li><a href="#cmdput"><code>put</code></a></li>
   <li><a href="#cmdpwd"><code>pwd</code></a></li>
   <li><a href="#environvars"><code>PWD</code></a></li>
   <li><a href="#custinit"><code>rcS.template</code></a></li>
+  <li><a href="#cmdreboot"><code>reboot</code></a></li>
   <li><a href="#cmdoverview">Re-directed commands</a></li>
   <li><a href="#custapps">Registration of builtin applications</a></li>
   <li><a href="#cmdrm"><code>rm</code></a></li>
