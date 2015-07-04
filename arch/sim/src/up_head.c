@@ -50,6 +50,8 @@
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
 
+#include "up_internal.h"
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -86,6 +88,9 @@ int main(int argc, char **argv, char **envp)
       os_start();
     }
 
+  /* Restore the original terminal mode and return the exit code */
+
+  simuart_teriminate();
   return retcode;
 }
 

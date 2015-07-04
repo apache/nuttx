@@ -39,6 +39,7 @@
 
 #include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 #include <termios.h>
 #include <pthread.h>
 
@@ -83,6 +84,13 @@ void simuart_post(void);
 void simuart_wait(void);
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct termios g_cooked;
+
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -92,17 +100,23 @@ void simuart_wait(void);
 
 static void setrawmode(void)
 {
-  struct termios term;
+  struct termios raw;
 
-  (void)tcgetattr(0, &term);
+  /* Get the current stdin terminal mode */
 
-  term.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-  term.c_oflag &= ~OPOST;
-  term.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-  term.c_cflag &= ~(CSIZE | PARENB);
-  term.c_cflag |= CS8;
+  (void)tcgetattr(0, &g_cooked);
 
-  (void)tcsetattr(0, TCSANOW, &term);
+  /* Switch to raw mode */
+
+  memcpy(&raw, &g_cooked, sizeof(struct termios));
+
+  raw.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+  raw.c_oflag &= ~OPOST;
+  raw.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+  raw.c_cflag &= ~(CSIZE | PARENB);
+  raw.c_cflag |= CS8;
+
+  (void)tcsetattr(0, TCSANOW, &raw);
 }
 
 /****************************************************************************
@@ -304,3 +318,13 @@ bool simuart_checkc(void)
   return g_uarthead != g_uarttail;
 }
 
+/****************************************************************************
+ * Name: simuart_teriminate
+ ****************************************************************************/
+
+void simuart_teriminate(void)
+{
+  /* Restore the original terminal mode */
+
+  (void)tcsetattr(0, TCSANOW, &g_cooked);
+}
