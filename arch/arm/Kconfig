@@ -233,6 +233,7 @@ config ARCH_CORTEXM0
 	bool
 	default n
 	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_RESET
 
 config ARCH_CORTEXM3
 	bool
@@ -240,6 +241,7 @@ config ARCH_CORTEXM3
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_HIPRI_INTERRUPT
+	select ARCH_HAVE_RESET
 
 config ARCH_CORTEXM4
 	bool
@@ -247,6 +249,7 @@ config ARCH_CORTEXM4
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_HIPRI_INTERRUPT
+	select ARCH_HAVE_RESET
 
 config ARCH_CORTEXM7
 	bool

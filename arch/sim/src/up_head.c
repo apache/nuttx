@@ -56,8 +56,8 @@
  * Private Data
  ****************************************************************************/
 
-static jmp_buf sim_abort;
-static int retcode = EXIT_SUCCESS;
+static jmp_buf g_simabort;
+static int g_exitcode = EXIT_SUCCESS;
 
 /****************************************************************************
  * Global Functions
@@ -83,7 +83,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Then start NuttX */
 
-  if (setjmp(sim_abort) == 0)
+  if (setjmp(g_simabort) == 0)
     {
       os_start();
     }
@@ -91,7 +91,7 @@ int main(int argc, char **argv, char **envp)
   /* Restore the original terminal mode and return the exit code */
 
   simuart_teriminate();
-  return retcode;
+  return g_exitcode;
 }
 
 /****************************************************************************
@@ -117,8 +117,8 @@ void up_assert(const uint8_t *filename, int line)
 
   /* Exit the simulation */
 
-  retcode = EXIT_FAILURE;
-  longjmp(sim_abort, 1);
+  g_exitcode = EXIT_FAILURE;
+  longjmp(g_simabort, 1);
 }
 
 /****************************************************************************
@@ -143,8 +143,8 @@ int board_power_off(int status)
 {
   /* Save the return code and exit the simulation */
 
-  retcode = status;
-  longjmp(sim_abort, 1);
+  g_exitcode = status;
+  longjmp(g_simabort, 1);
 }
 #endif
 
