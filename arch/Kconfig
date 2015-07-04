@@ -54,6 +54,7 @@ config ARCH_SH
 config ARCH_SIM
 	bool "Simulation"
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_POWEROFF
 	---help---
 		Linux/Cywgin user-mode simulation.
 

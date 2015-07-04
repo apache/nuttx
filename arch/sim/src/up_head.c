@@ -47,6 +47,7 @@
 
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/power/pm.h>
 
 /****************************************************************************
@@ -54,9 +55,18 @@
  ****************************************************************************/
 
 static jmp_buf sim_abort;
+static int retcode = 0;
 
 /****************************************************************************
  * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: main
+ *
+ * Description:
+ *   This is the main entry point into the simulation.
+ *
  ****************************************************************************/
 
 int main(int argc, char **argv, char **envp)
@@ -75,16 +85,61 @@ int main(int argc, char **argv, char **envp)
     {
       os_start();
     }
-  return 0;
+
+  return retcode;
 }
+
+/****************************************************************************
+ * Name: up_assert
+ *
+ * Description:
+ *   Called to terminate the simulation abnormally in the event of a failed
+ *   assertion.
+ *
+ ****************************************************************************/
 
 void up_assert(const uint8_t *filename, int line)
 {
+  /* Show the location of the failed assertion */
+
   fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
+
+  /* Allow for any board/configuration specific crash information */
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), g_readytorun.head, filename, line);
 #endif
 
+  /* Exit the simulation */
+
+  retcode = EXIT_FAILURE;
   longjmp(sim_abort, 1);
 }
+
+/****************************************************************************
+ * Name: board_power_off
+ *
+ * Description:
+ *   Power off the board.  This function may or may not be supported by a
+ *   particular board architecture.
+ *
+ * Input Parameters:
+ *   status - Status information provided with the power off event.
+ *
+ * Returned Value:
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_POWEROFF
+int board_power_off(int status)
+{
+  /* Save the return code and exit the simulation */
+
+  retcode = status;
+  longjmp(sim_abort, 1);
+}
+#endif
+

@@ -10663,3 +10663,5 @@
 	* sched/sched/sched_waitpid.c: Implement WNOHANG for waitpid() only and
 	  for the case of CONFIG_SCHED_HAVE_PARENT not selected.  From Max
 	  Neklyudov (2015-07-02).
+	* arch/sim/src/up_head.S: Implement board_power_off() for the simulation
+	  platform (2015-07-04).
