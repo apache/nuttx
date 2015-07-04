@@ -2320,12 +2320,12 @@ sh &lt;script-path&gt;
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-shutdown
+shutdown [--reset]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Shutdown and power off the system immediately.
-  This command depends on hardware support to power down the system.
+  Shutdown and power off the system or, optionally, reset the system immediately.
+  This command depends on hardware support to power down or reset the system; one, both, or neither behavior may be supported.
 </p>
 
 <table width ="100%">
@@ -2775,7 +2775,7 @@ nsh>
   </tr>
   <tr>
     <td><b><code>shutdown</code></b></td>
-    <td><code>CONFIG_BOARDCTL_POWEROFF</code></td>
+    <td><code>CONFIG_BOARDCTL_POWEROFF || CONFIG_BOARD_RESET</code></td>
     <td><code>CONFIG_NSH_DISABLE_SHUTDOWN</code></td>
   </tr>
   <tr>
