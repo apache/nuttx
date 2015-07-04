@@ -23,14 +23,16 @@ Contents
   - Atmel Studio 6.1
   - SAMD21 Xplained Pro-specific Configuration Options
   - Configurations
-
+cd p
 STATUS/ISSUES
 =============
 
     1. See configs/samd20-xplained/README.txt.  This port derives from the
        SAMD20 Xplained board board and all issues there should apply.
-    2. As of this writing, no testing has been performed.  The board is on
-       order and testing will begin when I have the board in hand.
+    2. 2015-06-28: As of this writing, no testing has been performed.  The
+       board is on order and testing will begin when I have the board in hand.
+    3. 2015-07-03: Board received.  Does not work on initial tests.  There
+       is, apparently, some problem in the clocking setup.
 
 Modules
 =======
