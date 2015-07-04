@@ -44,7 +44,15 @@
  * Public Functions
  ***************************************************************************/
 
-/* Application initialization stub for boardctl() */
+/****************************************************************************
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(void)

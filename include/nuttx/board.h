@@ -142,7 +142,7 @@ void board_initialize(void);
  *   called directly from application code, but only indirectly via the
  *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(void);
