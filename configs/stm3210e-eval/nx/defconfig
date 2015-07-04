@@ -946,7 +946,6 @@ CONFIG_EXAMPLES_NX_TOOLBAR_HEIGHT=16
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

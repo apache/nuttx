@@ -667,7 +667,6 @@ CONFIG_EXAMPLES_OSTEST_RR_RUNS=10
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # Temperature

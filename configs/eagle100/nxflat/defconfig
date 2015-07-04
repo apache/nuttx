@@ -659,7 +659,6 @@ CONFIG_EXAMPLES_NXFLAT=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

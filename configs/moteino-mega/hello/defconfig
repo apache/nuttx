@@ -636,7 +636,6 @@ CONFIG_EXAMPLES_HELLO=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # Temperature

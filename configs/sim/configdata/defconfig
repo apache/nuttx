@@ -611,7 +611,6 @@ CONFIG_PLATFORM_CONFIGDATA=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

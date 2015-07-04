@@ -1134,7 +1134,6 @@ CONFIG_XMLRPC_STRINGSIZE=64
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # VI Work-Alike Editor

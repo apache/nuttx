@@ -811,7 +811,6 @@ CONFIG_EXAMPLES_BUTTONS_NAME7="UP"
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

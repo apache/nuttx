@@ -674,7 +674,6 @@ CONFIG_EXAMPLES_HELLOXX_CXXINITIALIZE=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

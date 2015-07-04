@@ -573,7 +573,6 @@ CONFIG_EXAMPLES_MOUNT_DEVNAME="/dev/ram0"
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

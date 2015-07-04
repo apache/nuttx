@@ -1050,7 +1050,6 @@ CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # Temperature

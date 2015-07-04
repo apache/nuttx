@@ -699,7 +699,6 @@ CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

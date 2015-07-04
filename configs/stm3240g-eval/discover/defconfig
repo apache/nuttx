@@ -1141,7 +1141,6 @@ CONFIG_DISCOVER_DESCR="STM3240G-EVAL"
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # VI Work-Alike Editor

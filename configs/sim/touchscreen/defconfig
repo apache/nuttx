@@ -641,7 +641,6 @@ CONFIG_EXAMPLES_TOUCHSCREEN_ARCHINIT=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

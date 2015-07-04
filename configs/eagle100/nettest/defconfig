@@ -898,7 +898,6 @@ CONFIG_NETUTILS_NETLIB=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # VI Work-Alike Editor

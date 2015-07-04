@@ -708,7 +708,6 @@ CONFIG_SYSTEM_INIFILE_DEBUGLEVEL=0
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # VI Work-Alike Editor

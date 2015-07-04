@@ -644,7 +644,6 @@ CONFIG_EXAMPLES_RGMP=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # USB Monitor

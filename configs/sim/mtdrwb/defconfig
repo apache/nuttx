@@ -707,7 +707,6 @@ CONFIG_EXAMPLES_MTDRWB_NEBLOCKS=32
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # Temperature

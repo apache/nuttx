@@ -675,7 +675,6 @@ CONFIG_EXAMPLES_MTDPART_NPARTITIONS=3
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # Temperature

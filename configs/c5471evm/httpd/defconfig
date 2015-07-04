@@ -808,7 +808,6 @@ CONFIG_NETUTILS_HTTPD_KEEPALIVE_DISABLE=y
 #
 # Sysinfo
 #
-# CONFIG_SYSTEM_SYSINFO is not set
 
 #
 # VI Work-Alike Editor
