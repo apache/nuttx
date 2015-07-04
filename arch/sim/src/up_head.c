@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 static jmp_buf sim_abort;
-static int retcode = 0;
+static int retcode = EXIT_SUCCESS;
 
 /****************************************************************************
  * Global Functions
