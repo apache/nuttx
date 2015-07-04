@@ -114,6 +114,21 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_RESET
+      /* CMD:           BOARDIOC_RESET
+       * DESCRIPTION:   Reset the board
+       * ARG:           Integer value providing power off status information
+       * CONFIGURATION: CONFIG_BOARDCTL_RESET
+       * DEPENDENCIES:  Board logic must provide board_reset
+       */
+
+      case BOARDIOC_RESET:
+        {
+          ret = board_reset((int)arg);
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_TSCTEST
       /* CMD:           BOARDIOC_TSCTEST_SETUP
        * DESCRIPTION:   Touchscreen controller test configuration
