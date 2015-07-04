@@ -347,49 +347,55 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.44 Wait for Seconds (sleep)</a>
+    <a href="#cmdshutdown">2.44 Shut the system down (shutdown)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.45 Unmount a File System (umount)</a>
+    <a href="#cmdsleep">2.45 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.46 Unset an Environment Variable (unset)</a>
+    <a href="#cmdunmount">2.46 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.47 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.47 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.48 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.48 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.49 Wait for Microseconds (usleep)</a>
+    <a href="#cmdurlencode">2.49 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.50 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.50 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.51 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.51 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.52 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2303,10 +2309,29 @@ sh &lt;script-path&gt;
   to by <code>&lt;script-path&gt;</code>.
 </p>
 
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.44 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdshutdown"><h2>2.44 Shut the system down (shutdown)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+shutdown
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Shutdown and power off the system immediately.
+  This command depends on hardware support to power down the system.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdsleep"><h2>2.45 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2323,7 +2348,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.45 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.46 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2353,7 +2378,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.46 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.47 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2379,7 +2404,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.47 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.48 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2396,7 +2421,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.48 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.49 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2413,7 +2438,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.49 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.50 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2430,7 +2455,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget">2.50 Get File Via HTTP (wget)</a>
+    <a name="cmdwget">2.51 Get File Via HTTP (wget)</a>
   </td>
   </tr>
 </table>
@@ -2457,7 +2482,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.51 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.52 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2747,6 +2772,11 @@ nsh>
     <td><b><code>sh</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS &gt; 0 &amp;&amp; <code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_NSH_DISABLESCRIPT</code></td>
     <td><code>CONFIG_NSH_DISABLE_SH</code></td>
+  </tr>
+  <tr>
+    <td><b><code>shutdown</code></b></td>
+    <td><code>CONFIG_BOARDCTL_POWEROFF</code></td>
+    <td><code>CONFIG_NSH_DISABLE_SHUTDOWN</code></td>
   </tr>
   <tr>
     <td><b><code>sleep</code></b></td>
@@ -4294,6 +4324,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custinit">ROMFS, Modifying the ROMFS image</a></li>
   <li><a href="#cmdset"><code>set</code></a></li>
   <li><a href="#cmdsh"><code>sh</code></a></li>
+  <li><a href="#cmdshutdown"><code>shutdown</code></a></li>
   <li><a href="#cmdoverview">Simple commands</a></li>
   <li><a href="#cmdsleep"><code>sleep</code></a></li>
   <li><a href="#custinit">Start-up, Default behavior</a></li>
