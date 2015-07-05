@@ -75,6 +75,8 @@ uintptr_t STUB_sched_setscheduler(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_sched_unlock(int nbr);
 uintptr_t STUB_sched_yield(int nbr);
+uintptr_t STUB_set_errno(int nbr, uintptr_t parm1);
+uintptr_t STUB_uname(int nbr, uintptr_t parm1);
 
 /* Semaphores */
 
@@ -87,7 +89,6 @@ uintptr_t STUB_sem_timedwait(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sem_trywait(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_unlink(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_wait(int nbr, uintptr_t parm1);
-uintptr_t STUB_set_errno(int nbr, uintptr_t parm1);
 uintptr_t STUB_pgalloc(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_task_create(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
@@ -315,9 +316,8 @@ uintptr_t STUB_setenv(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_unsetenv(int nbr, uintptr_t parm1);
 
-/* The following are defined only if networking is upported */
+/* The following are defined only if networking is supported */
 
-uintptr_t STUB_gethostname(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sethostname(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following are defined only if networking AND sockets are supported */

@@ -57,6 +57,7 @@ SYSCALL_LOOKUP(sched_setscheduler,        3, STUB_sched_setscheduler)
 SYSCALL_LOOKUP(sched_unlock,              0, STUB_sched_unlock)
 SYSCALL_LOOKUP(sched_yield,               0, STUB_sched_yield)
 SYSCALL_LOOKUP(set_errno,                 1, STUB_set_errno)
+SYSCALL_LOOKUP(uname,                     1, STUB_uname)
 
 /* Semaphores */
 
@@ -301,7 +302,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 /* The following are defined only if networking is supported */
 
 #ifdef CONFIG_NET
-  SYSCALL_LOOKUP(gethostname,             2, STUB_gethostname)
   SYSCALL_LOOKUP(sethostname,             2, STUB_sethostname)
 
 /* The following are defined only if networking AND sockets are supported */

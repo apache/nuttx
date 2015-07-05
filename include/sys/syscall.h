@@ -81,24 +81,25 @@
 #define SYS_sched_unlock               (CONFIG_SYS_RESERVED+11)
 #define SYS_sched_yield                (CONFIG_SYS_RESERVED+12)
 #define SYS_set_errno                  (CONFIG_SYS_RESERVED+13)
+#define SYS_uname                      (CONFIG_SYS_RESERVED+14)
 
 /* Semaphores */
 
-#define SYS_sem_destroy                (CONFIG_SYS_RESERVED+14)
-#define SYS_sem_post                   (CONFIG_SYS_RESERVED+15)
-#define SYS_sem_timedwait              (CONFIG_SYS_RESERVED+16)
-#define SYS_sem_trywait                (CONFIG_SYS_RESERVED+17)
-#define SYS_sem_wait                   (CONFIG_SYS_RESERVED+18)
+#define SYS_sem_destroy                (CONFIG_SYS_RESERVED+15)
+#define SYS_sem_post                   (CONFIG_SYS_RESERVED+16)
+#define SYS_sem_timedwait              (CONFIG_SYS_RESERVED+17)
+#define SYS_sem_trywait                (CONFIG_SYS_RESERVED+18)
+#define SYS_sem_wait                   (CONFIG_SYS_RESERVED+19)
 
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+19)
-#  define SYS_sem_close                (CONFIG_SYS_RESERVED+20)
-#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+21)
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+22)
+#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+20)
+#  define SYS_sem_close                (CONFIG_SYS_RESERVED+21)
+#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+22)
+#  define __SYS_task_create            (CONFIG_SYS_RESERVED+23)
 #else
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+19)
+#  define __SYS_task_create            (CONFIG_SYS_RESERVED+20)
 #endif
 
 /* Task creation APIs based on global entry points cannot be use with
@@ -409,26 +410,25 @@
 /* The following are defined if networking is supported */
 
 #ifdef CONFIG_NET
-#  define SYS_gethostname              (__SYS_network+0)
-#  define SYS_sethostname              (__SYS_network+1)
+#  define SYS_sethostname              (__SYS_network+0)
 
 /* The following are defined only if networking AND sockets are supported */
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-#  define SYS_accept                   (__SYS_network+2)
-#  define SYS_bind                     (__SYS_network+3)
-#  define SYS_connect                  (__SYS_network+4)
-#  define SYS_getsockopt               (__SYS_network+5)
-#  define SYS_listen                   (__SYS_network+6)
-#  define SYS_recv                     (__SYS_network+7)
-#  define SYS_recvfrom                 (__SYS_network+8)
-#  define SYS_send                     (__SYS_network+9)
-#  define SYS_sendto                   (__SYS_network+10)
-#  define SYS_setsockopt               (__SYS_network+11)
-#  define SYS_socket                   (__SYS_network+12)
-#  define SYS_nnetsocket               (__SYS_network+13)
+#  define SYS_accept                   (__SYS_network+1)
+#  define SYS_bind                     (__SYS_network+2)
+#  define SYS_connect                  (__SYS_network+3)
+#  define SYS_getsockopt               (__SYS_network+4)
+#  define SYS_listen                   (__SYS_network+5)
+#  define SYS_recv                     (__SYS_network+6)
+#  define SYS_recvfrom                 (__SYS_network+7)
+#  define SYS_send                     (__SYS_network+8)
+#  define SYS_sendto                   (__SYS_network+9)
+#  define SYS_setsockopt               (__SYS_network+10)
+#  define SYS_socket                   (__SYS_network+11)
+#  define SYS_nnetsocket               (__SYS_network+12)
 #else
-#  define SYS_nnetsocket               (__SYS_network+2)
+#  define SYS_nnetsocket               (__SYS_network+1)
 #endif
 
 #else
