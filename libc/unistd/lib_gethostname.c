@@ -43,6 +43,8 @@
 #include <unistd.h>
 #include <unistd.h>
 
+#include <arch/irq.h>
+
 /* This file is only compiled if network support is enabled */
 
 #ifdef CONFIG_NET
@@ -106,9 +108,17 @@ static char g_hostname[HOST_NAME_MAX + 1] = CONFIG_NET_HOSTNAME;
 
 int gethostname(FAR char *name, size_t namelen)
 {
-  /* Return the host name, truncating to fit into the user provided buffer */
+  irqstate_t flags;
 
+  /* Return the host name, truncating to fit into the user provided buffer.
+   * The hostname is global resource.  There is a microscopic possibility
+   * that it could change while we are copying it.
+   */
+
+  flags = irqsave();
   strncpy(name, g_hostname, namelen);
+  irqrestore(flags);
+
   return 0;
 }
 
@@ -137,12 +147,19 @@ int gethostname(FAR char *name, size_t namelen)
 
 int sethostname(FAR const char *name, size_t size)
 {
+  irqstate_t flags;
+
   /* Save the new host name, truncating to HOST_NAME_MAX if necessary.  This
-   * internal copy is always NUL terminated.
+   * internal copy is always NUL terminated  .The hostname is global resource.
+   * There is a microscopic possibility that it could be accessed while we
+   * are setting it.
    */
 
+  flags = irqsave();
   strncpy(g_hostname, name, MIN(HOST_NAME_MAX, size));
   g_hostname[HOST_NAME_MAX] = '\0';
+  irqrestore(flags);
+
   return 0;
 }
 
