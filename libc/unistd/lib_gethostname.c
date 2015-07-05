@@ -41,16 +41,41 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <unistd.h>
+
+/* This file is only compiled if network support is enabled */
 
 #ifdef CONFIG_NET
+
+/* Further, in the protected and kernel build modes where kernel and
+ * application code are separated, the hostname is a common system property
+ * and must reside only in the kernel.  In that case, these accessor
+ * functions call only be called from user space is only via kernel system
+ * calls.
+ */
+
+#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
+      defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The default host name is a system configuration setting.  This may be
+ * changed via sethostname(), however.
+ */
+
 #ifndef CONFIG_NET_HOSTNAME
 #  define CONFIG_NET_HOSTNAME ""
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This is the system hostname */
+
+static char g_hostname[HOST_NAME_MAX + 1] = CONFIG_NET_HOSTNAME;
 
 /****************************************************************************
  * Public Functions
@@ -83,8 +108,43 @@ int gethostname(FAR char *name, size_t namelen)
 {
   /* Return the host name, truncating to fit into the user provided buffer */
 
-  strncpy(name, CONFIG_NET_HOSTNAME, namelen);
+  strncpy(name, g_hostname, namelen);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: sethostname
+ *
+ * Description:
+ *
+ *   sethostname() sets the hostname to the value given in the character
+ *   array name. The len argument specifies the number of bytes in name.
+ *   (Thus, name does not require a terminating null byte.)
+ *
+ * Conforming To
+ *   SVr4, 4.4BSD (these interfaces first appeared in 4.2BSD). POSIX.1-2001
+ *   specifies gethostname() but not sethostname().
+ *
+ * Input Parameters:
+ *   name - The user buffer to providing the new host name.
+ *   namelen - The size of the user buffer in bytes.
+ *
+ * Returned Value:
+ *   Upon successful completion, 0 will be returned; otherwise, -1 will be
+ *   returned.  No errors are defined;  errno variable is not set.
+ *
+ ****************************************************************************/
+
+int sethostname(FAR const char *name, size_t size)
+{
+  /* Save the new host name, truncating to HOST_NAME_MAX if necessary.  This
+   * internal copy is always NUL terminated.
+   */
+
+  strncpy(g_hostname, name, MIN(HOST_NAME_MAX, size));
+  g_hostname[HOST_NAME_MAX] = '\0';
   return 0;
 }
 
 #endif /* CONFIG_NET */
+#endif /* (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) || __KERNEL__ */

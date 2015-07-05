@@ -194,7 +194,8 @@ int       *getoptindp(void); /* Index into argv */
 int       *getoptoptp(void); /* unrecognized option character */
 
 #ifdef CONFIG_NET
-int     gethostname(char *name, size_t size);
+int     gethostname(FAR char *name, size_t size);
+int     sethostname(FAR const char *name, size_t size);
 #endif
 
 #undef EXTERN

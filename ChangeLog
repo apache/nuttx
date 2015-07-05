@@ -10665,3 +10665,5 @@
 	  Neklyudov (2015-07-02).
 	* arch/sim/src/up_head.S: Implement board_power_off() for the simulation
 	  platform (2015-07-04).
+	* libc/unistd/lib_gethostname.c: Add support for sethostname() (2015-07-05).
+
