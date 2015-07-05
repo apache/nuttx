@@ -315,6 +315,11 @@ uintptr_t STUB_setenv(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_unsetenv(int nbr, uintptr_t parm1);
 
+/* The following are defined only if networking is upported */
+
+uintptr_t STUB_gethostname(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_sethostname(int nbr, uintptr_t parm1, uintptr_t parm2);
+
 /* The following are defined only if networking AND sockets are supported */
 
 uintptr_t STUB_accept(int nbr, uintptr_t parm1, uintptr_t parm2,

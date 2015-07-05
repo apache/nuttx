@@ -298,9 +298,15 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(unsetenv,                1, STUB_unsetenv)
 #endif
 
+/* The following are defined only if networking is supported */
+
+#ifdef CONFIG_NET
+  SYSCALL_LOOKUP(gethostname,             2, STUB_gethostname)
+  SYSCALL_LOOKUP(sethostname,             2, STUB_sethostname)
+
 /* The following are defined only if networking AND sockets are supported */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
   SYSCALL_LOOKUP(accept,                  3, STUB_accept)
   SYSCALL_LOOKUP(bind,                    3, STUB_bind)
   SYSCALL_LOOKUP(connect,                 3, STUB_connect)
@@ -313,6 +319,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(setsockopt,              5, STUB_setsockopt)
   SYSCALL_LOOKUP(socket,                  3, STUB_socket)
 #endif
+#endif /* CONFIG_NET */
 
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 

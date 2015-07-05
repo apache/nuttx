@@ -611,6 +611,11 @@ testbuild.sh
   configuration names depends on the underlying architecture of the
   configured board.
 
+  NOTE: The environment variable APPSDIR should be set to the relative
+  path to the application directory when running this script like:
+
+    $ export APPSDIR=../apps
+
 zipme.sh
 --------
 

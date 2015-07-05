@@ -406,24 +406,34 @@
 #  define __SYS_network                __SYS_environ
 #endif
 
+/* The following are defined if networking is supported */
+
+#ifdef CONFIG_NET
+#  define SYS_gethostname              (__SYS_network+0)
+#  define SYS_sethostname              (__SYS_network+1)
+
 /* The following are defined only if networking AND sockets are supported */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)
-#  define SYS_accept                   (__SYS_network+0)
-#  define SYS_bind                     (__SYS_network+1)
-#  define SYS_connect                  (__SYS_network+2)
-#  define SYS_getsockopt               (__SYS_network+3)
-#  define SYS_listen                   (__SYS_network+4)
-#  define SYS_recv                     (__SYS_network+5)
-#  define SYS_recvfrom                 (__SYS_network+6)
-#  define SYS_send                     (__SYS_network+7)
-#  define SYS_sendto                   (__SYS_network+8)
-#  define SYS_setsockopt               (__SYS_network+9)
-#  define SYS_socket                   (__SYS_network+10)
-#  define SYS_nnetsocket               (__SYS_network+11)
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#  define SYS_accept                   (__SYS_network+2)
+#  define SYS_bind                     (__SYS_network+3)
+#  define SYS_connect                  (__SYS_network+4)
+#  define SYS_getsockopt               (__SYS_network+5)
+#  define SYS_listen                   (__SYS_network+6)
+#  define SYS_recv                     (__SYS_network+7)
+#  define SYS_recvfrom                 (__SYS_network+8)
+#  define SYS_send                     (__SYS_network+9)
+#  define SYS_sendto                   (__SYS_network+10)
+#  define SYS_setsockopt               (__SYS_network+11)
+#  define SYS_socket                   (__SYS_network+12)
+#  define SYS_nnetsocket               (__SYS_network+13)
+#else
+#  define SYS_nnetsocket               (__SYS_network+2)
+#endif
+
 #else
 #  define SYS_nnetsocket               __SYS_network
-#endif
+#endif /* CONFIG_NET */
 
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
