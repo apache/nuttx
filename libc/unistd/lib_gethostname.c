@@ -71,6 +71,14 @@
 #  define CONFIG_NET_HOSTNAME ""
 #endif
 
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -150,7 +158,7 @@ int sethostname(FAR const char *name, size_t size)
   irqstate_t flags;
 
   /* Save the new host name, truncating to HOST_NAME_MAX if necessary.  This
-   * internal copy is always NUL terminated  .The hostname is global resource.
+   * internal copy is always NUL terminated.  The hostname is global resource.
    * There is a microscopic possibility that it could be accessed while we
    * are setting it.
    */
