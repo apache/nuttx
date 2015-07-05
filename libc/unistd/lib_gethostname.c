@@ -39,53 +39,19 @@
 
 #include <nuttx/config.h>
 
+#include <sys/utsname.h>
 #include <string.h>
 #include <unistd.h>
-#include <unistd.h>
 
-#include <arch/irq.h>
+#include <nuttx/net/netdb.h>
 
 /* This file is only compiled if network support is enabled */
 
 #ifdef CONFIG_NET
 
-/* Further, in the protected and kernel build modes where kernel and
- * application code are separated, the hostname is a common system property
- * and must reside only in the kernel.  In that case, these accessor
- * functions call only be called from user space is only via kernel system
- * calls.
- */
-
-#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-      defined(__KERNEL__)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* The default host name is a system configuration setting.  This may be
- * changed via sethostname(), however.
- */
-
-#ifndef CONFIG_NET_HOSTNAME
-#  define CONFIG_NET_HOSTNAME ""
-#endif
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This is the system hostname */
-
-static char g_hostname[HOST_NAME_MAX + 1] = CONFIG_NET_HOSTNAME;
 
 /****************************************************************************
  * Public Functions
@@ -116,60 +82,41 @@ static char g_hostname[HOST_NAME_MAX + 1] = CONFIG_NET_HOSTNAME;
 
 int gethostname(FAR char *name, size_t namelen)
 {
-  irqstate_t flags;
+/* In the protected and kernel build modes where kernel and application code
+ * are separated, the hostname is a common system property and must reside
+ * only in the kernel.  In that case, we need to do things differently.
+ *
+ * uname() is implemented as a system call and can be called from user space.
+ * So, in these configurations we will get the hostname via the uname
+ * function.
+ */
 
-  /* Return the host name, truncating to fit into the user provided buffer.
-   * The hostname is global resource.  There is a microscopic possibility
-   * that it could change while we are copying it.
+#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
+      defined(__KERNEL__)
+
+  struct utsname info;
+  int ret;
+
+  /* Get uname data */
+
+  ret = uname(&info);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Return the nodename from the uname data */
+
+  strncpy(name, info.nodename, namelen);
+  return 0;
+
+#else
+  /* Otherwise, this function is just a thin wrapper around
+   * netdb_gethostname().
    */
 
-  flags = irqsave();
-  strncpy(name, g_hostname, namelen);
-  irqrestore(flags);
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: sethostname
- *
- * Description:
- *
- *   sethostname() sets the hostname to the value given in the character
- *   array name. The len argument specifies the number of bytes in name.
- *   (Thus, name does not require a terminating null byte.)
- *
- * Conforming To
- *   SVr4, 4.4BSD (these interfaces first appeared in 4.2BSD). POSIX.1-2001
- *   specifies gethostname() but not sethostname().
- *
- * Input Parameters:
- *   name - The user buffer to providing the new host name.
- *   namelen - The size of the user buffer in bytes.
- *
- * Returned Value:
- *   Upon successful completion, 0 will be returned; otherwise, -1 will be
- *   returned.  No errors are defined;  errno variable is not set.
- *
- ****************************************************************************/
-
-int sethostname(FAR const char *name, size_t size)
-{
-  irqstate_t flags;
-
-  /* Save the new host name, truncating to HOST_NAME_MAX if necessary.  This
-   * internal copy is always NUL terminated.  The hostname is global resource.
-   * There is a microscopic possibility that it could be accessed while we
-   * are setting it.
-   */
-
-  flags = irqsave();
-  strncpy(g_hostname, name, MIN(HOST_NAME_MAX, size));
-  g_hostname[HOST_NAME_MAX] = '\0';
-  irqrestore(flags);
-
-  return 0;
+  return netdb_gethostname(name, namelen);
+#endif
 }
 
 #endif /* CONFIG_NET */
-#endif /* (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) || __KERNEL__ */

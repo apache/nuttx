@@ -43,6 +43,16 @@
 #include <string.h>
 
 #include <nuttx/version.h>
+#include <nuttx/net/netdb.h>
+
+/* In the protected and kernel build modes where kernel and application code
+ * are separated, some of these common system property must reside only in
+ * the kernel.  In that case, uname() can only be called from user space via
+ * a kernel system call.
+ */
+
+#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
+      defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -91,7 +101,7 @@ int uname(FAR struct utsname *name)
 #ifdef CONFIG_NET
   /* Get the hostname */
 
-  if (-1 == gethostname(name->nodename, HOST_NAME_MAX))
+  if (-1 == netdb_gethostname(name->nodename, HOST_NAME_MAX))
     {
       ret = -1;
     }
@@ -113,3 +123,5 @@ int uname(FAR struct utsname *name)
 
   return ret;
  }
+
+#endif /* (!CONFIG_BUILD_PROTECTED) && !CONFIG_BUILD_KERNEL) || __KERNEL__ */

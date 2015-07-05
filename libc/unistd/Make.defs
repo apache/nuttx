@@ -53,7 +53,7 @@ CSRCS += lib_sleep.c lib_usleep.c
 endif
 
 ifeq ($(CONFIG_NET),y)
-CSRCS += lib_gethostname.c
+CSRCS += lib_gethostname.c lib_sethostname.c
 endif
 
 # Add the unistd directory to the build
