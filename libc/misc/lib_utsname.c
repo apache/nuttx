@@ -45,6 +45,10 @@
 #include <nuttx/version.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -80,6 +84,8 @@ int uname(FAR struct utsname *name)
 {
   int ret = 1;
 
+  /* Copy the strings.  Assure that each is NUL terminated. */
+
   strncpy(name->sysname, "NuttX", SYS_NAMELEN);
 
 #ifdef CONFIG_NET
@@ -90,13 +96,20 @@ int uname(FAR struct utsname *name)
       ret = -1;
     }
 
+  name->nodename[HOST_NAME_MAX-1] = '\0';
+
 #else
-  strcpy(name->nodename, "");
+  strncpy(name->nodename, "", HOST_NAME_MAX);
 #endif
 
-  strncpy(name->release, CONFIG_VERSION_STRING, SYS_NAMELEN);
-  strncpy(name->version, CONFIG_VERSION_BUILD, SYS_NAMELEN);
-  strncpy(name->machine, CONFIG_ARCH, SYS_NAMELEN);
+  strncpy(name->release,  CONFIG_VERSION_STRING, SYS_NAMELEN);
+  name->release[SYS_NAMELEN-1] = '\0';
+
+  strncpy(name->version,  CONFIG_VERSION_BUILD, VERSION_NAMELEN);
+  name->version[VERSION_NAMELEN-1] = '\0';
+
+  strncpy(name->machine,  CONFIG_ARCH, SYS_NAMELEN);
+  name->machine[SYS_NAMELEN-1] = '\0';
 
   return ret;
  }

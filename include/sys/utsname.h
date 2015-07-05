@@ -46,19 +46,29 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define	SYS_NAMELEN 16
+#define SYS_NAMELEN      16
+#define VERSION_NAMELEN  41
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* These are the values returned by uname:
+ *
+ * FIELD       Default
+ * sysname     NuttX
+ * nodename    CONFIG_NET_HOSTNAME
+ * release     From version.h
+ * version     From version.h
+ * machine     CONFIG_ARCH
+ */
 
 struct utsname
 {
-  char sysname[SYS_NAMELEN];    /* Name of OS */
-  char nodename[HOST_NAME_MAX]; /* Name of this network node */
-  char release[SYS_NAMELEN];    /* Release level */
-  char version[SYS_NAMELEN];    /* Version level */
-  char machine[SYS_NAMELEN];    /* Hardware type */
+  char sysname[SYS_NAMELEN];      /* Name of OS */
+  char nodename[HOST_NAME_MAX];   /* Name of this network node */
+  char release[SYS_NAMELEN];      /* Release level */
+  char version[VERSION_NAMELEN];  /* Version level */
+  char machine[SYS_NAMELEN];      /* Machine hardware */
 };
 
 /****************************************************************************
