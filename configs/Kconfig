@@ -1114,9 +1114,15 @@ endchoice
 if ARCH_BOARD_CUSTOM
 menu "Custom Board Configuration"
 
+config ARCH_BOARD_CUSTOM_NAME
+	string "Custom board name"
+	default ""
+	---help---
+		This is a name for the board.  It is not used except to return the
+		information via the NSH uname command.
+
 config ARCH_BOARD_CUSTOM_DIR
 	string "Custom board directory"
-	depends on ARCH_BOARD_CUSTOM
 	---help---
 		If the custom board configuration is selected, then it is necessary
 		to also tell the build system where it can find the board directory
