@@ -1206,7 +1206,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
-  int save_errno = errno; /* In case something we do changes it */
+  int save_errno = get_errno(); /* In case something we do changes it */
 
   /* Check for a error/timeout detected by the interrupt handler.  Errors are
    * signaled by negative errno values for the rcv length

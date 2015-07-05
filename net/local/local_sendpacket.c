@@ -95,7 +95,7 @@ static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
       nwritten = write(fd, buf, len);
       if (nwritten < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
           if (errcode != EINTR)

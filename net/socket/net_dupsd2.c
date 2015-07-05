@@ -116,7 +116,7 @@ int dup2(int sockfd1, int sockfd2)
 
 errout:
   sched_unlock();
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

@@ -375,7 +375,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
 
           if (ret < 0)
             {
-              ret = -errno;
+              ret = -get_errno();
             }
           else
             {
@@ -641,7 +641,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
   return OK;
 
 errout:
-   errno = err;
+  set_errno(err);
   return ERROR;
 }
 

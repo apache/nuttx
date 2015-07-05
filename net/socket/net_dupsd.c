@@ -140,7 +140,7 @@ int net_dupsd(int sockfd, int minsd)
 
 errout:
   sched_unlock();
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

@@ -72,7 +72,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
       ret = sem_wait(&server->lc_waitsem);
       if (ret < 0)
         {
-          int errval = errno;
+          int errval = get_errno();
           DEBUGASSERT(errval == EINTR);
           return -errval;
         }

@@ -186,7 +186,7 @@ static int local_create_fifo(FAR const char *path)
       ret = mkfifo(path, 0644);
       if (ret < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
           ndbg("ERROR: Failed to create FIFO %s: %d\n", path, errcode);
@@ -227,7 +227,7 @@ static int local_release_fifo(FAR const char *path)
       ret = unlink(path);
       if (ret < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
           ndbg("ERROR: Failed to unlink FIFO %s: %d\n", path, errcode);
@@ -257,7 +257,7 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
   conn->lc_infd = open(path, oflags);
   if (conn->lc_infd < 0)
     {
-      int errcode = errno;
+      int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
 
       ndbg("ERROR: Failed on open %s for reading: %d\n",
@@ -293,7 +293,7 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
   conn->lc_outfd = open(path, oflags);
   if (conn->lc_outfd < 0)
     {
-      int errcode = errno;
+      int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
 
       ndbg("ERROR: Failed on open %s for writing: %d\n",

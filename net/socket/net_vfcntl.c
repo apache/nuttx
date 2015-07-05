@@ -280,9 +280,10 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 errout:
   if (err != 0)
     {
-      errno = err;
+      set_errno(err);
       return ERROR;
     }
+
   return ret;
 }
 

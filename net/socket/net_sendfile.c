@@ -373,7 +373,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
                           pstate->snd_foffset + pstate->snd_sent, SEEK_SET);
           if (ret < 0)
             {
-              int errcode = errno;
+              int errcode = get_errno();
               nlldbg("failed to lseek: %d\n", errcode);
               pstate->snd_sent = -errcode;
               goto end_wait;
@@ -382,7 +382,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
           ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
           if (ret < 0)
             {
-              int errcode = errno;
+              int errcode = get_errno();
               nlldbg("failed to read from input file: %d\n", errcode);
               pstate->snd_sent = -errcode;
               goto end_wait;

@@ -204,7 +204,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
        */
 
       ret     = net_timedwait(&notify->nt_sem, &abstime);
-      errcode = ((ret < 0) ? errno : 0);
+      errcode = ((ret < 0) ? get_errno() : 0);
     }
   while (ret < 0 && errcode == EINTR);
 

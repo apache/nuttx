@@ -88,7 +88,7 @@ int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
       nread = read(fd, buf, remaining);
       if (nread < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
           if (errcode != EINTR)

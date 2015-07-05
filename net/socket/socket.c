@@ -288,7 +288,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
       goto errout;
     }
 
-#if !defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_LOCAL) && !defined(CONFIG_NET_LOCAL_STREAM) && !defined(CONFIG_NET_LOCAL_DGRAM)
   UNUSED(ipdomain);
 #endif
 

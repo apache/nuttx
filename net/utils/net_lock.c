@@ -86,7 +86,7 @@ static void _net_takesem(void)
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      ASSERT(get_errno() == EINTR);
     }
 }
 

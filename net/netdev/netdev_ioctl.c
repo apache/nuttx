@@ -989,7 +989,7 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
 /* On failure, set the errno and return -1 */
 
 errout:
-  errno = -ret;
+  set_errno(-ret);
   return ERROR;
 }
 

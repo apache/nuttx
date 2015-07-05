@@ -127,7 +127,7 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
            * the wait is awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          ASSERT(get_errno() == EINTR);
         }
     }
 
