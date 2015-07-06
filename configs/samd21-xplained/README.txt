@@ -23,16 +23,26 @@ Contents
   - Atmel Studio 6.1
   - SAMD21 Xplained Pro-specific Configuration Options
   - Configurations
-cd p
+
 STATUS/ISSUES
 =============
 
     1. See configs/samd20-xplained/README.txt.  This port derives from the
        SAMD20 Xplained board board and all issues there should apply.
-    2. 2015-06-28: As of this writing, no testing has been performed.  The
-       board is on order and testing will begin when I have the board in hand.
-    3. 2015-07-03: Board received.  Does not work on initial tests.  There
-       is, apparently, some problem in the clocking setup.
+
+    2. 2015-07-06:  The basic NSH configuration is working properly, but
+       not at 115200 baud which is the default BAUD selection in the
+       configurations.  It is necessary to drop the BAUD in the
+       configuration.
+
+       I suspect that this is an issue on my board and due to running the
+       system on uncalibrated OSC8M.  My bet is that the issue would not
+       exist on many boards or if OSC8M were calibrated or if a more precise
+       clock source were used (like XOSC32K).
+
+       ... After more experimentation, I am not sure this conclusion is
+       correct or not.  Perhaps the board just comes up with a bad clocking
+       configuration at times????
 
 Modules
 =======
