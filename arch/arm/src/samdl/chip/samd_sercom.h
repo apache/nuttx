@@ -58,16 +58,31 @@
  *
  * The baud-rate generator runs off the GCLK_SERCOMx_CORE clock (or, optionally, external
  * clock).
+ *
+ * These definitions must match the GCLK_CLKCTRL_ID_* values defined in samd_gclk.c.
  */
 
-#define SERCOM_GCLK_ID_SLOW          12
-#define SERCOM_GCLK_ID_CORE(n)       (13+(n))
-#  define SERCOM0_GCLK_ID_CORE       13
-#  define SERCOM1_GCLK_ID_CORE       14
-#  define SERCOM2_GCLK_ID_CORE       15
-#  define SERCOM3_GCLK_ID_CORE       16
-#  define SERCOM4_GCLK_ID_CORE       17
-#  define SERCOM5_GCLK_ID_CORE       18
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define SERCOM_GCLK_ID_SLOW          12
+#  define SERCOM_GCLK_ID_CORE(n)       (13+(n))
+#    define SERCOM0_GCLK_ID_CORE       13
+#    define SERCOM1_GCLK_ID_CORE       14
+#    define SERCOM2_GCLK_ID_CORE       15
+#    define SERCOM3_GCLK_ID_CORE       16
+#    define SERCOM4_GCLK_ID_CORE       17
+#    define SERCOM5_GCLK_ID_CORE       18
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SERCOM_GCLK_ID_SLOW          19
+#  define SERCOM_GCLK_ID_CORE(n)       (20+(n))
+#    define SERCOM0_GCLK_ID_CORE       20
+#    define SERCOM1_GCLK_ID_CORE       21
+#    define SERCOM2_GCLK_ID_CORE       22
+#    define SERCOM3_GCLK_ID_CORE       23
+#    define SERCOM4_GCLK_ID_CORE       24
+#    define SERCOM5_GCLK_ID_CORE       25
+#endif
 
 /********************************************************************************************
  * Public Types
