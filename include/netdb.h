@@ -276,10 +276,11 @@ int                  getaddrinfo(FAR const char *restrict,
                                  FAR const char *restrict,
                                  FAR const struct addrinfo *restrict,
                                  FAR struct addrinfo **restrict);
-FAR struct hostent  *gethostbyaddr(FAR const void *, socklen_t, int);
 #endif
 
-FAR struct hostent  *gethostbyname(FAR const char *);
+FAR struct hostent  *gethostbyaddr(FAR const void *addr, socklen_t len,
+                                   int type);
+FAR struct hostent  *gethostbyname(FAR const char *name);
 
 #if 0 /* None of these are yet supported */
 FAR struct hostent  *gethostent(void);
@@ -304,6 +305,9 @@ void                 setservent(int);
 
 /* Non-standard interfaces similar to Glibc 2 interfaces */
 
+int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
+                    FAR struct hostent *host, FAR char *buf,
+                    size_t buflen, int *h_errnop);
 int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
                     FAR char *buf, size_t buflen, int *h_errnop);
 

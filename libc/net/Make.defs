@@ -47,7 +47,8 @@ endif
 # netdb support
 
 ifeq ($(CONFIG_LIB_NETDB),y)
-CSRCS += lib_gethostbyname.c lib_gethostbynamer.c lib_parsehostfile.c
+CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
+CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c lib_parsehostfile.c
 endif
 
 # Add the net directory to the build

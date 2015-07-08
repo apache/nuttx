@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdb/lib_gethostbynamer.c
+ * libc/net/lib_gethostbynamer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,18 +58,6 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
-
-/* This is the maximum number of alternate host names supported by this
- * implementation:
- */
-
-#ifndef CONFIG_NETDB_MAX_ALTNAMES
-#  define CONFIG_NETDB_MAX_ALTNAMES 4
-#endif
-
-#ifndef CONFIG_NETDB_HOSTCONF_PATH
-#  define CONFIG_NETDB_HOSTCONF_PATH "/etc/hosts"
-#endif
 
 /* This is the layout of the caller provided memory area */
 
@@ -298,11 +286,11 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
            *     EAGAIN - Error parsing the line (E.g., missing hostname)
            */
 
-          if (ESPIPE)
+          if (nread == -ESPIPE)
             {
               nread = 0;
             }
-          else if (ERANGE)
+          else if (nread != -EAGAIN)
             {
               herrnocode = NO_RECOVERY;
               goto errorout_with_stream;

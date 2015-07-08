@@ -10666,4 +10666,7 @@
 	* arch/sim/src/up_head.S: Implement board_power_off() for the simulation
 	  platform (2015-07-04).
 	* libc/unistd/lib_gethostname.c: Add support for sethostname() (2015-07-05).
+	* libc/net:  Add support for gethostbyname() and gethostbyaddr().  Also
+	  support included for the non-standard gethostbyname_r() and
+	  gethostbyaddr_r() (2015-07-08).
 

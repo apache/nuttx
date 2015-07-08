@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdb/lib_parsehostile.c
+ * libc/net/lib_parsehostile.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,14 +55,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* This is the maximum number of alternate host names supported by this
- * implementation:
- */
-
-#ifndef CONFIG_NETDB_MAX_ALTNAMES
-#  define CONFIG_NETDB_MAX_ALTNAMES 4
-#endif
 
 /* Check if character is any kind of white space (except for newline) */
 

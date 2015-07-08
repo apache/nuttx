@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_gethostbyname.c
+ * libc/net/lib_netdb.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,53 +40,20 @@
 #include <nuttx/config.h>
 
 #include <netdb.h>
-#include <errno.h>
 
-#include "lib_internal.h"
 #include "net/lib_netdb.h"
 
 #ifdef CONFIG_LIB_NETDB
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
+
+struct hostent g_hostent;
+char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
 
 /****************************************************************************
- * Name: gethostname
- *
- * Description:
- *   The gethostbyname() function returns a structure of type hostent for
- *   the given host name. Here name is either a hostname, or an IPv4 address
- *   in standard dot notation (as for inet_addr(3)), or an IPv6 address in
- *   colon (and possibly dot) notation.
- *
- *   If name is an IPv4 or IPv6 address, no lookup is performed and
- *   gethostbyname_r() simply copies name into the h_name field
- *   and its struct in_addr equivalent into the h_addr_list[0] field of the
- *   returned hostent structure.
- *
- * Input Parameters:
- *   name - The name of the host to find.
- *
- * Returned Value:
- *   Upon successful completion, this function will return a pointer to a
- *   hostent structure if the requested entry was found, and a null pointer
- *   if the end of the database was reached or the requested entry was not
- *   found.
- *
- *   Upon unsuccessful completion, gethostbyname() will set h_errno to
- *   indicate the error
- *
+ * Public Functions
  ****************************************************************************/
-
-FAR struct hostent *gethostbyname(FAR const char *name)
-{
-  int ret;
-
-  DEBUGASSERT(name != NULL);
-  ret = gethostbyname_r(name, &g_hostent, g_hostbuffer, CONFIG_NETDB_BUFSIZE,
-                       &h_errno);
-  return ret == 0 ? &g_hostent : NULL;
-}
 
 #endif /* CONFIG_LIB_NETDB */
