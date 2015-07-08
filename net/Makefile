@@ -68,7 +68,6 @@ include local/Make.defs
 include tcp/Make.defs
 include udp/Make.defs
 include devif/Make.defs
-include netdb/Make.defs
 include route/Make.defs
 include utils/Make.defs
 endif

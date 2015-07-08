@@ -172,6 +172,8 @@ struct hostent
                             * terminated by a null pointer. */
 };
 
+#define h_addr h_addr_list[0] /* For backward compatibility */
+
 struct netent
 {
   FAR char  *n_name;       /* Official, fully-qualified (including the domain)

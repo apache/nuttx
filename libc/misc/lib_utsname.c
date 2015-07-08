@@ -43,7 +43,6 @@
 #include <string.h>
 
 #include <nuttx/version.h>
-#include <nuttx/net/netdb.h>
 
 /* In the protected and kernel build modes where kernel and application code
  * are separated, some of these common system property must reside only in
@@ -101,7 +100,7 @@ int uname(FAR struct utsname *name)
 #ifdef CONFIG_NET
   /* Get the hostname */
 
-  if (-1 == netdb_gethostname(name->nodename, HOST_NAME_MAX))
+  if (-1 == gethostname(name->nodename, HOST_NAME_MAX))
     {
       ret = -1;
     }

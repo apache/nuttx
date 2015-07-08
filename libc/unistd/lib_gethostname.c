@@ -2,7 +2,9 @@
  * libc/unistd/lib_gethostname.c
  *
  *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Stavros Polymenis <sp@orbitalfox.com>
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,7 +45,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <nuttx/net/netdb.h>
+#include <arch/irq.h>
 
 /* This file is only compiled if network support is enabled */
 
@@ -52,6 +54,22 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* The default host name is a system configuration setting.  This may be
+ * changed via sethostname(), however.
+ */
+
+#ifndef CONFIG_NET_HOSTNAME
+#  define CONFIG_NET_HOSTNAME ""
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This is the system hostname */
+
+char g_hostname[HOST_NAME_MAX + 1] = CONFIG_NET_HOSTNAME;
 
 /****************************************************************************
  * Public Functions
@@ -94,6 +112,21 @@ int gethostname(FAR char *name, size_t namelen)
 #if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
       defined(__KERNEL__)
 
+  irqstate_t flags;
+
+  /* Return the host name, truncating to fit into the user provided buffer.
+   * The hostname is global resource.  There is a microscopic possibility
+   * that it could change while we are copying it.
+   */
+
+  flags = irqsave();
+  strncpy(name, g_hostname, namelen);
+  irqrestore(flags);
+
+  return 0;
+
+#else
+
   struct utsname info;
   int ret;
 
@@ -110,12 +143,6 @@ int gethostname(FAR char *name, size_t namelen)
   strncpy(name, info.nodename, namelen);
   return 0;
 
-#else
-  /* Otherwise, this function is just a thin wrapper around
-   * netdb_gethostname().
-   */
-
-  return netdb_gethostname(name, namelen);
 #endif
 }
 

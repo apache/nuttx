@@ -21,7 +21,6 @@ Directory Structure
        +- route    - Routing table support
        +- tcp      - Transmission Control Protocol
        +- udp      - User Datagram Protocol
-       +- netdb    - Host name support
        `- utils    - Miscellaneous utility functions
 
 

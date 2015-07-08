@@ -39,9 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <unistd.h>
 
-#include <nuttx/net/netdb.h>
+#include <arch/irq.h>
 
 /* This file is only compiled if network support is enabled */
 
@@ -59,6 +60,26 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/* This is the system hostname (defined in lib_gethostname). */
+
+extern char g_hostname[HOST_NAME_MAX + 1];
 
 /****************************************************************************
  * Public Functions
@@ -89,9 +110,20 @@
 
 int sethostname(FAR const char *name, size_t size)
 {
-  /* This is just a thin layer over netdb_sethostname() */
+  irqstate_t flags;
 
-  return netdb_sethostname(name, size);
+  /* Save the new host name, truncating to HOST_NAME_MAX if necessary.  This
+   * internal copy is always NUL terminated.  The hostname is global resource.
+   * There is a microscopic possibility that it could be accessed while we
+   * are setting it.
+   */
+
+  flags = irqsave();
+  strncpy(g_hostname, name, MIN(HOST_NAME_MAX, size));
+  g_hostname[HOST_NAME_MAX] = '\0';
+  irqrestore(flags);
+
+  return 0;
 }
 
 #endif /* CONFIG_NET */
