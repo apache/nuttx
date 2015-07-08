@@ -504,6 +504,27 @@ config ARCH_BZERO
 
 endif # ARCH_OPTIMIZED_FUNCTIONS
 
+menuconfig LIB_NETDB
+	bool "Network database support"
+	default n
+	depends on FS_READABLE
+
+if LIB_NETDB
+
+config NETDB_HOSTCONF_PATH
+	string "Path to host configuration file"
+	default "/etc/hosts"
+
+config NETDB_MAX_ALTNAMES
+	int "Max number of alternate host names"
+	default 4
+
+config NETDB_BUFSIZE
+	int "gethostname() buffer size"
+	default 128
+
+endif # LIB_NETDB
+
 comment "Non-standard Library Support"
 
 if BUILD_PROTECTED || BUILD_KERNEL

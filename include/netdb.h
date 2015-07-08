@@ -156,6 +156,27 @@
 #define EAI_SYSTEM      8
 #define EAI_OVERFLOW    9
 
+/* h_errno values that may be returned by gethosbyname(), gethostbyname_r(),
+ * gethostbyaddr(), or gethostbyaddr_r()
+ *
+ *   HOST_NOT_FOUND - No such host is known.
+ *
+ *   NO_DATA - The server recognized the request and the name, but no
+ *     address is available. Another type of request to the name server
+ *     for the domain might return an answer.
+ *
+ *   NO_RECOVERY - An unexpected server failure occurred which cannot be
+ *     recovered.
+ *
+ *   TRY_AGAIN - A temporary and possibly transient error occurred, such as
+ *     a failure of a server to respond.
+ */
+
+#define HOST_NOT_FOUND 1
+#define NO_DATA        2
+#define NO_RECOVERY    3
+#define TRY_AGAIN      4
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -215,7 +236,7 @@ struct addrinfo
 
   FAR struct sockaddr *ai_addr;      /* Socket address of socket.  */
   FAR char            *ai_canonname; /* Canonical name of service location.  */
-  sFAR truct addrinfo *ai_next;      /* Pointer to next in list.  */
+  FAR struct addrinfo *ai_next;      /* Pointer to next in list.  */
 };
 
 /****************************************************************************
@@ -235,45 +256,58 @@ extern "C"
  * macro or an identifier declared with external linkage.
  */
 
-/* To be provided */
+/* REVISIT:  This should at least be per-task? */
+EXTERN int h_errno;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_LIB_NETDB
 #if 0 /* None of these are yet supported */
 
-void              endhostent(void);
-void              endnetent(void);
-void              endprotoent(void);
-void              endservent(void);
-void              freeaddrinfo(FAR struct addrinfo *);
-const char       *gai_strerror(int);
-int               getaddrinfo(FAR const char *restrict,
-                    FAR const char *restrict,
-                    FAR const struct addrinfo *restrict,
-                    FAR struct addrinfo **restrict);
-struct hostent   *gethostbyaddr(FAR const void *, socklen_t, int);
-struct hostent   *gethostbyname(FAR const char *);
-struct hostent   *gethostent(void);
-int               getnameinfo(FAR const struct sockaddr *restrict, socklen_t,
-                    FAR char *restrict, socklen_t, FAR char *restrict,
-                    socklen_t, int);
-struct netent    *getnetbyaddr(uint32_t, int);
-struct netent    *getnetbyname(FAR const char *);
-struct netent    *getnetent(void);
-struct protoent  *getprotobyname(FAR const char *);
-struct protoent  *getprotobynumber(int);
-struct protoent  *getprotoent(void);
-struct servent   *getservbyname(FAR const char *, FAR const char *);
-struct servent   *getservbyport(int, FAR const char *);
-struct servent   *getservent(void);
-void              sethostent(int);
-void              setnetent(int);
-void              setprotoent(int);
-void              setservent(int);
+void                 endhostent(void);
+void                 endnetent(void);
+void                 endprotoent(void);
+void                 endservent(void);
+void                 freeaddrinfo(FAR struct addrinfo *);
+FAR const char      *gai_strerror(int);
+int                  getaddrinfo(FAR const char *restrict,
+                                 FAR const char *restrict,
+                                 FAR const struct addrinfo *restrict,
+                                 FAR struct addrinfo **restrict);
+FAR struct hostent  *gethostbyaddr(FAR const void *, socklen_t, int);
+#endif
+
+FAR struct hostent  *gethostbyname(FAR const char *);
+
+#if 0 /* None of these are yet supported */
+FAR struct hostent  *gethostent(void);
+int                  getnameinfo(FAR const struct sockaddr *restrict, socklen_t,
+                                 FAR char *restrict, socklen_t, FAR char *restrict,
+                                 socklen_t, int);
+FAR struct netent   *getnetbyaddr(uint32_t, int);
+FAR struct netent   *getnetbyname(FAR const char *);
+FAR struct netent   *getnetent(void);
+FAR struct protoent *getprotobyname(FAR const char *);
+FAR struct protoent *getprotobynumber(int);
+FAR struct protoent *getprotoent(void);
+FAR struct servent  *getservbyname(FAR const char *, FAR const char *);
+FAR struct servent  *getservbyport(int, FAR const char *);
+FAR struct servent  *getservent(void);
+void                 sethostent(int);
+void                 setnetent(int);
+void                 setprotoent(int);
+void                 setservent(int);
 
 #endif /* None of these are yet supported */
+
+/* Non-standard interfaces similar to Glibc 2 interfaces */
+
+int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
+                    FAR char *buf, size_t buflen, int *h_errnop);
+
+#endif /* CONFIG_LIB_NETDB */
 
 #undef EXTERN
 #ifdef __cplusplus

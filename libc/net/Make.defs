@@ -44,6 +44,12 @@ ifeq ($(CONFIG_NET_ROUTE),y)
 CSRCS += lib_addroute.c lib_delroute.c
 endif
 
+# netdb support
+
+ifeq ($(CONFIG_LIB_NETDB),y)
+CSRCS += lib_gethostbyname.c lib_gethostbynamer.c lib_parsehostfile.c
+endif
+
 # Add the net directory to the build
 
 DEPPATH += --dep-path net

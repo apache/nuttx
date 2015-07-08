@@ -216,6 +216,13 @@ double lib_expi(size_t n);
 float lib_sqrtapprox(float x);
 #endif
 
+/* Defined in lib_parsehostfile.c */
+
+#ifdef CONFIG_LIB_NETDB
+ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
+                           FAR char *buf, size_t buflen);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
