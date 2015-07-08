@@ -287,7 +287,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
 
   addrstring[0] = ch;
 
-  nwritten = lib_copystring(stream, addrstring, &nread, 48, &ch);
+  nwritten = lib_copystring(stream, &addrstring[1], &nread, 47, &ch);
   if (nwritten <= 0)
     {
       return nwritten;
