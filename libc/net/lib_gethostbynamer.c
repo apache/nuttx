@@ -140,7 +140,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
         {
           return -ERANGE;
         }
-      
+
       ret = inet_pton(AF_INET6, name, ptr);
       if (ret < 0)
         {
@@ -228,7 +228,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
  *     host data.
  *   buflen - The size of the caller-provided buffer
  *   h_errnop - There h_errno value returned in the event of a failure.
- *   
+ *
  * Returned Value:
  *   Zero (OK) is returned on success, -1 (ERROR) is returned on a failure
  *   with the returned h_errno value provided the reason for the failure.

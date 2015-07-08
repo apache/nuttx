@@ -81,7 +81,7 @@ static char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
  *
  * Input Parameters:
  *   name - The name of the host to find.
- *   
+ *
  * Returned Value:
  *   Upon successful completion, this function will return a pointer to a
  *   hostent structure if the requested entry was found, and a null pointer

@@ -319,7 +319,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
         {
           return -ERANGE;
         }
-      
+
       ret = inet_pton(AF_INET6, addrstring, ptr);
       if (ret < 0)
         {
