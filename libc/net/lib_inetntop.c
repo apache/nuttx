@@ -54,6 +54,21 @@
 #include <arpa/inet.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* If netdb support is enabled, then we need to be able to manage IPv4 and
+ * IPv6 addresses, regardless of networking support.
+ */
+
+#ifdef CONFIG_LIB_NETDB
+#  undef  CONFIG_NET_IPv4
+#  undef  CONFIG_NET_IPv6
+#  define CONFIG_NET_IPv4 1
+#  define CONFIG_NET_IPv6 1
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
