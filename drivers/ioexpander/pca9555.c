@@ -126,23 +126,23 @@ static int pca9555_setbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
   uint8_t buf[2];
   buf[0] = addr;
 
-  if(pin>15)
+  if (pin > 15)
     {
       return -ENXIO;
     }
-  else if(pin>7)
+  else if (pin > 7)
     {
       addr += 1;
       pin  -= 8;
     }
 
   ret = I2C_WRITEREAD(i2c, &addr, 1, &buf[1], 1);
-  if(ret != 0)
+  if (ret != 0)
     {
       return ret;
     }
 
-  if(bitval)
+  if (bitval)
     {
       buf[1] |= (1<<pin);
     }
@@ -168,18 +168,18 @@ static int pca9555_getbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
   uint8_t buf;
   int ret;
 
-  if(pin>15)
+  if (pin>15)
     {
       return -ENXIO;
     }
-  else if(pin>7)
+  else if (pin>7)
     {
       addr += 1;
       pin  -= 8;
     }
 
   ret = I2C_WRITEREAD(i2c, &addr, 1, &buf, 1);
-  if(ret != 0)
+  if (ret != 0)
     {
       return ret;
     }
@@ -218,7 +218,7 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
   int ival = (int)val;
 
-  if(opt == IOEXPANDER_OPTION_INVERT)
+  if (opt == IOEXPANDER_OPTION_INVERT)
     {
       return pca9555_setbit(pca->i2c, PCA9555_REG_POLINV, pin, ival);
     }

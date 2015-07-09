@@ -10669,4 +10669,10 @@
 	* libc/net:  Add support for gethostbyname() and gethostbyaddr().  Also
 	  support included for the non-standard gethostbyname_r() and
 	  gethostbyaddr_r() (2015-07-08).
-
+	* drivers/ioexpander and include/nuttx/ioexpander: This commit adds:
+	  - headers in nuttx/ioexpander to define the "generic" ioexpander
+	    framework
+	  - files in drivers/ioexpander for the implementation of the NXP
+	    PCA9555 framework
+	  - bindings in drivers/Kconfig and drivers/Makefile
+	  From Sebastien Lorquet
