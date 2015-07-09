@@ -10676,3 +10676,5 @@
 	    PCA9555 framework
 	  - bindings in drivers/Kconfig and drivers/Makefile
 	  From Sebastien Lorquet
+	* arch/arm/src/lpc43xx/chip/lpc4310203050_pinconfig.h: Correct some
+	  LPC4350 GPIO pin configurations.  From Alessandro Temil (2015-07-09).
