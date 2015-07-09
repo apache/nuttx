@@ -285,6 +285,17 @@ if INPUT
 source drivers/input/Kconfig
 endif # INPUT
 
+menuconfig IOEXPANDER
+	bool "IO Expanders Support"
+	default n
+	---help---
+		This directory holds implementations of IO expander drivers.
+		See include/nuttx/ioexpander/ioexpander.h for registration information.
+
+if IOEXPANDER
+source drivers/ioexpander/Kconfig
+endif # IOEXPANDER
+
 menuconfig LCD
 	bool "LCD Driver Support"
 	default n
