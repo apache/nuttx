@@ -301,12 +301,35 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
           /* We successfully read the entry */
 
           nvdbg("Comparing %s to %s\n", name, host->h_name);
+
+          /* Check for a host name match */
+
           if (strcmp(name, host->h_name) == 0)
             {
                /* We have a match */
 
                fclose(stream);
                return OK;
+            }
+
+          /* For a match with any host alias */
+
+          if (host->h_aliases != NULL)
+            {
+              FAR char **alias;
+
+              for (alias = host->h_aliases; *alias != NULL; alias++)
+                {
+                  /* Check for a host alias match */
+
+                  if (strcmp(name, *alias) == 0)
+                    {
+                      /* We have a match */
+
+                      fclose(stream);
+                      return OK;
+                    }
+                }
             }
         }
     }
