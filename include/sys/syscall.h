@@ -435,10 +435,6 @@
 #  define SYS_nnetsocket               __SYS_network
 #endif
 
-#else
-#  define SYS_nnetsocket               __SYS_network
-#endif /* CONFIG_NET */
-
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
 #if CONFIG_TASK_NAME_SIZE > 0
