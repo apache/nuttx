@@ -97,7 +97,7 @@ int uname(FAR struct utsname *name)
 
   strncpy(name->sysname, "NuttX", SYS_NAMELEN);
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_LIBC_NETDB
   /* Get the hostname */
 
   if (-1 == gethostname(name->nodename, HOST_NAME_MAX))

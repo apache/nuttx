@@ -402,33 +402,37 @@
 #  define SYS_putenv                   (__SYS_environ+2)
 #  define SYS_setenv                   (__SYS_environ+3)
 #  define SYS_unsetenv                 (__SYS_environ+4)
-#  define __SYS_network                (__SYS_environ+5)
+#  define __SYS_netdb                  (__SYS_environ+5)
 #else
-#  define __SYS_network                __SYS_environ
+#  define __SYS_netdb                __SYS_environ
 #endif
 
-/* The following are defined if networking is supported */
+/* The following are defined if netdb is supported */
 
-#ifdef CONFIG_NET
-#  define SYS_sethostname              (__SYS_network+0)
+#ifdef CONFIG_LIBC_NETDB
+#  define SYS_sethostname              (__SYS_netdb+0)
+#  define __SYS_network                (__SYS_netdb+1)
+#else
+#  define __SYS_network                __SYS_netdb
+#endif
 
 /* The following are defined only if networking AND sockets are supported */
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-#  define SYS_accept                   (__SYS_network+1)
-#  define SYS_bind                     (__SYS_network+2)
-#  define SYS_connect                  (__SYS_network+3)
-#  define SYS_getsockopt               (__SYS_network+4)
-#  define SYS_listen                   (__SYS_network+5)
-#  define SYS_recv                     (__SYS_network+6)
-#  define SYS_recvfrom                 (__SYS_network+7)
-#  define SYS_send                     (__SYS_network+8)
-#  define SYS_sendto                   (__SYS_network+9)
-#  define SYS_setsockopt               (__SYS_network+10)
-#  define SYS_socket                   (__SYS_network+11)
-#  define SYS_nnetsocket               (__SYS_network+12)
+#  define SYS_accept                   (__SYS_network+0)
+#  define SYS_bind                     (__SYS_network+1)
+#  define SYS_connect                  (__SYS_network+2)
+#  define SYS_getsockopt               (__SYS_network+3)
+#  define SYS_listen                   (__SYS_network+4)
+#  define SYS_recv                     (__SYS_network+5)
+#  define SYS_recvfrom                 (__SYS_network+6)
+#  define SYS_send                     (__SYS_network+7)
+#  define SYS_sendto                   (__SYS_network+8)
+#  define SYS_setsockopt               (__SYS_network+9)
+#  define SYS_socket                   (__SYS_network+10)
+#  define SYS_nnetsocket               (__SYS_network+11)
 #else
-#  define SYS_nnetsocket               (__SYS_network+1)
+#  define SYS_nnetsocket               __SYS_network
 #endif
 
 #else

@@ -45,6 +45,7 @@
 "ftell","stdio.h","CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0","long","FAR FILE *"
 "fwrite","stdio.h","CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0","size_t","FAR const void *","size_t","size_t","FAR FILE *"
 "getcwd","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)","FAR char","FAR char *","size_t"
+"gethostname","unistd.h","defined(CONFIG_LIBC_NETDB)","int","FAR char*","size_t"
 "getopt","unistd.h","","int","int","FAR char *const[]","FAR const char *"
 "getoptargp","unistd.h","","FAR char *"
 "getoptindp","unistd.h","","int"

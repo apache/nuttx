@@ -121,7 +121,7 @@
 "sendto","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","ssize_t","int","FAR const void*","size_t","int","FAR const struct sockaddr*","socklen_t"
 "set_errno","errno.h","","void","int"
 "setenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char*","FAR const char*","int"
-"sethostname","unistd.h","defined(CONFIG_NET)","int","FAR const char*","size_t"
+"sethostname","unistd.h","defined(CONFIG_LIBC_NETDB)","int","FAR const char*","size_t"
 "setsockopt","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","int","int","FAR const void*","socklen_t"
 "shmat", "sys/shm.h", "defined(CONFIG_MM_SHM)", "FAR void *", "int", "FAR const void *", "int"
 "shmctl", "sys/shm.h", "defined(CONFIG_MM_SHM)", "int", "int", "int", "FAR struct shmid_ds *"

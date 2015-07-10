@@ -299,14 +299,15 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(unsetenv,                1, STUB_unsetenv)
 #endif
 
-/* The following are defined only if networking is supported */
+/* The following are defined only if netdb is supported */
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_LIBC_NETDB
   SYSCALL_LOOKUP(sethostname,             2, STUB_sethostname)
+#endif
 
 /* The following are defined only if networking AND sockets are supported */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)
   SYSCALL_LOOKUP(accept,                  3, STUB_accept)
   SYSCALL_LOOKUP(bind,                    3, STUB_bind)
   SYSCALL_LOOKUP(connect,                 3, STUB_connect)

@@ -316,7 +316,7 @@ uintptr_t STUB_setenv(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_unsetenv(int nbr, uintptr_t parm1);
 
-/* The following are defined only if networking is supported */
+/* The following are defined only if netb is supported */
 
 uintptr_t STUB_sethostname(int nbr, uintptr_t parm1, uintptr_t parm2);
 
