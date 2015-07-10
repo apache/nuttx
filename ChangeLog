@@ -10696,4 +10696,6 @@
 	  the DNS client logic from apps/netutils/dnscient to libc/netdb.
 	  Add support to gethostbyname() so that it will attempt a DNS host
 	  lookup before consulting the host table (if so enabled) (2015-07-10).
+	* arch/arm/src/samdl/chip/saml_usb.h:  Several fixes to register
+	  definitions and types. From Janne Rosberg (2015-07-10).
 
