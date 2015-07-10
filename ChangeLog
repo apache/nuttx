@@ -10692,3 +10692,8 @@
 	  management functions will operate on the userspace heap structure.
 	  This avoids the unnecessary system calls and, more importantly,
 	  failures do to freeing memory when a test exits (2015-07-10).
+	* libc/netdb:  Move netdb functions from lib/net to lib/netdb.  Move
+	  the DNS client logic from apps/netutils/dnscient to libc/netdb.
+	  Add support to gethostbyname() so that it will attempt a DNS host
+	  lookup before consulting the host table (if so enabled) (2015-07-10).
+
