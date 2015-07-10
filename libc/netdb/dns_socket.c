@@ -211,10 +211,10 @@ static FAR unsigned char *dns_parse_name(FAR unsigned char *query)
 
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
 static int dns_send_query(int sockfd, FAR const char *name,
-                           FAR struct sockaddr_in6 *addr)
+                          FAR struct sockaddr_in6 *addr)
 #else
 static int dns_send_query(int sockfd, FAR const char *name,
-                           FAR struct sockaddr_in *addr)
+                          FAR struct sockaddr_in *addr)
 #endif
 {
   register FAR struct dns_hdr *hdr;
@@ -482,11 +482,11 @@ int dns_free_sock(FAR int *sockfd)
 
 int dns_query_sock(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
 {
-#fdef CONFIG_NETDB_DNSCLIENT_IPv6
+#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
   struct sockaddr_in6 addr;
-#lse
+#else
   struct sockaddr_in addr;
-#ndif
+#endif
 
   /* First check if the host is an IP address. */
 
