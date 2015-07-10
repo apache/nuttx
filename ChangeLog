@@ -10678,3 +10678,17 @@
 	  From Sebastien Lorquet
 	* arch/arm/src/lpc43xx/chip/lpc4310203050_pinconfig.h: Correct some
 	  LPC4350 GPIO pin configurations.  From Alessandro Temil (2015-07-09).
+	* mm/umm_heap, include/nuttx/kmalloc.h, userspace.h, mm/mm.h, and all
+	  configurations that support protected mode:  Redesigned how the user
+	  space heap is accessed from the kernel code in protected mode.  It
+	  used to call memory management functions in user space via function
+	  pointers in the userspace interface.  That is inefficient because the
+	  first thing that those memory management functions do is to trap back
+	  into the kernel to get the current PID.  Worse, that operation can be
+	  fatal is certain fragile situations such as when a task is exiting.
+	  The solution is to remove all of the memory management function calls
+	  from the interface.  Instead, the interface exports the users pace
+	  heap structure and then kernel size implementations of those memory
+	  management functions will operate on the userspace heap structure.
+	  This avoids the unnecessary system calls and, more importantly,
+	  failures do to freeing memory when a test exits (2015-07-10).
