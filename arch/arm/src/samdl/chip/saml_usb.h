@@ -273,8 +273,10 @@
 #define USBDEV_CTRLB_UPRSM             (1 << 1)  /* Bit 1:  Upstream resume */
 #define USBDEV_CTRLB_SPDCONF_SHIFT     (2)       /* Bits 2-3: Speed configuration */
 #define USBDEV_CTRLB_SPDCONF_MASK      (3 << USBDEV_CTRLB_SPDCONF_SHIFT)
-#  define USBDEV_CTRLB_SPDCONF_LOW     (0 << USBDEV_CTRLB_SPDCONF_SHIFT) /* Low speed */
-#  define USBDEV_CTRLB_SPDCONF_FULL    (1 << USBDEV_CTRLB_SPDCONF_SHIFT) /* Full speed */
+#  define USBDEV_CTRLB_SPDCONF_FULL    (0 << USBDEV_CTRLB_SPDCONF_SHIFT) /* Full speed */
+#  define USBDEV_CTRLB_SPDCONF_LOW     (1 << USBDEV_CTRLB_SPDCONF_SHIFT) /* Low  speed */
+#  define USBDEV_CTRLB_SPDCONF_HIGH    (2 << USBDEV_CTRLB_SPDCONF_SHIFT) /* High speed capable */
+#  define USBDEV_CTRLB_SPDCONF_HIGH_TM (3 << USBDEV_CTRLB_SPDCONF_SHIFT) /* High speed Test Mode */
 #define USBDEV_CTRLB_NREPLY            (1 << 4)  /* Bit 4:  No reply except SETUP token */
 #define USBDEV_CTRLB_GNAK              (1 << 9)  /* Bit 9:  Global NAK */
 #define USBDEV_CTRLB_LPMHDSK_SHIFT     (10)      /* Bits 10-11: Link power management handshake */
