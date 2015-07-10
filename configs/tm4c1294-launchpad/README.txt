@@ -9,7 +9,7 @@ DK-TM4C129X
 ===========
 
   This board configuration derives from the DK-T4C129X.  Refer to the README
-  file at nuttx/configs/dk-tm4c129x for additional information that may be 
+  file at nuttx/configs/dk-tm4c129x for additional information that may be
   relevant to this board as well.
 
 Serial Console
@@ -125,8 +125,8 @@ Where <subdir> is one of the following:
          CONFIG_NET_ICMP=y
          CONFIG_NET_ICMP_PING=y
 
-         CONFIG_NETUTILS_DNSCLIENT=y
-         CONFIG_NETUTILS_DNSCLIENT_IPv4=y
+         CONFIG_NETDB_DNSCLIENT=y
+         CONFIG_NETDB_DNSCLIENT_IPv4=y
          CONFIG_NETUTILS_TELNETD=y
 
          CONFIG_NSH_IPADDR=0x0a000002

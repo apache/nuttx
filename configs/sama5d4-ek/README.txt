@@ -1373,7 +1373,7 @@ Networking
     CONFIG_ETH0_PHY_KSZ8081=y            : Select the KSZ8081 PHY used with EMAC0 and 1
 
   Application Configuration -> Network Utilities
-    CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
+    CONFIG_NETDB_DNSCLIENT=y             : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y            : Enable the Telnet daemon
     CONFIG_NETUTILS_TFTPC=y              : Enable TFTP data file transfers for get and put commands
     CONFIG_NETUTILS_NETLIB=y             : Network library support is needed
@@ -3953,8 +3953,8 @@ Configurations
          CONFIG_NET_ICMP=y
          CONFIG_NET_ICMP_PING=y
 
-         CONFIG_NETUTILS_DNSCLIENT=y
-         CONFIG_NETUTILS_DNSCLIENT_IPv4=y
+         CONFIG_NETDB_DNSCLIENT=y
+         CONFIG_NETDB_DNSCLIENT_IPv4=y
          CONFIG_NETUTILS_TELNETD=y
 
          CONFIG_NSH_IPADDR=0x0a000002

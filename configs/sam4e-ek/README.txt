@@ -309,8 +309,8 @@ Loading Code OpenOCD
 
   This is telling me that the Segger J-Link USB driver is incompatible
   with libUSB.  It may be necessary to replace the Segger J-Link driver
-  with the driver from libusb-win32-device-bin on sourceforge. 
-  
+  with the driver from libusb-win32-device-bin on sourceforge.
+
     - Go into Control Panel/System/Device Manager and update the J-Link
       driver to point at the new jlink.inf file made with the
       libusb-win32/bin inf-wizard.  Browse to the unsigned driver
@@ -434,7 +434,7 @@ Networking Support
     CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY (for EMAC)
 
   Application Configuration -> Network Utilities
-    CONFIG_NETUTILS_DNSCLIENT=y            : Enable host address resolution
+    CONFIG_NETDB_DNSCLIENT=y            : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
     CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
     CONFIG_NETUTILS_NETLIB=y            : Network library support is needed

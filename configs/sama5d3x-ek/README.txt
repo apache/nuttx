@@ -1005,7 +1005,7 @@ Networking
     CONFIG_ETH0_PHY_KSZ90x1=y            : Select the KSZ9021/31 PHY (for GMAC)
 
   Application Configuration -> Network Utilities
-    CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
+    CONFIG_NETDB_DNSCLIENT=y             : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y            : Enable the Telnet daemon
     CONFIG_NETUTILS_TFTPC=y              : Enable TFTP data file transfers for get and put commands
     CONFIG_NETUTILS_NETLIB=y             : Network library support is needed
