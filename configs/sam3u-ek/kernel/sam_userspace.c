@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/kernel/sam_userspace.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,10 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
   .us_bssstart      = (uintptr_t)&_sbss,
   .us_bssend        = (uintptr_t)&_ebss,
 
+  /* Memory manager heap structure */
+
+  .us_heap          = &g_mmheap,
+
   /* Task/thread startup routines */
 
   .task_startup     = task_startup,
@@ -113,20 +117,6 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
 #ifndef CONFIG_DISABLE_SIGNALS
   .signal_handler   = up_signal_handler,
 #endif
-
-  /* Memory manager entry points (declared in include/nuttx/mm/mm.h) */
-
-  .mm_initialize    = umm_initialize,
-  .mm_addregion     = umm_addregion,
-  .mm_trysemaphore  = umm_trysemaphore,
-  .mm_givesemaphore = umm_givesemaphore,
-
-  /* Memory manager entry points (declared in include/stdlib.h) */
-
-  .mm_malloc        = malloc,
-  .mm_realloc       = realloc,
-  .mm_zalloc        = zalloc,
-  .mm_free          = free,
 
   /* User-space work queue support (declared in include/nuttx/wqueue.h) */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/mikroe-stm32f4/scripts/user-space.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,21 +36,6 @@
 /* NOTE:  This depends on the memory.ld script having been included prior to
  * this script.
  */
-
-/* Make sure that the critical memory management functions are in user-space.
- * the user heap memory manager will reside in user-space but be usable both
- * by kernel- and user-space code
- */
-
-EXTERN(umm_initialize)
-EXTERN(umm_addregion)
-EXTERN(umm_trysemaphore)
-EXTERN(umm_givesemaphore)
-
-EXTERN(malloc)
-EXTERN(realloc)
-EXTERN(zalloc)
-EXTERN(free)
 
 OUTPUT_ARCH(arm)
 SECTIONS
