@@ -443,7 +443,9 @@ errorout_with_herrnocode:
 int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
                     FAR char *buf, size_t buflen, int *h_errnop)
 {
+#ifdef CONFIG_NETDB_DNSCLIENT
   int ret;
+#endif
 
   DEBUGASSERT(name != NULL && host != NULL && buf != NULL);
 
