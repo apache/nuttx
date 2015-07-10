@@ -482,31 +482,11 @@ int dns_free_sock(FAR int *sockfd)
 
 int dns_query_sock(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
 {
-#ifdef CONFIG_HAVE_GETHOSTBYNAME
-
-  FAR struct hostent *he;
-
-  nvdbg("Getting address of %s\n", hostname);
-  he = gethostbyname(hostname);
-  if (!he)
-    {
-      ndbg("gethostbyname failed: %d\n", h_errno);
-      return ERROR;
-    }
-
-  nvdbg("Using IP address %04x%04x\n",
-       (uint16_t)he->h_addr[1], (uint16_t)he->h_addr[0]);
-
-  memcpy(ipaddr, he->h_addr, sizeof(in_addr_t));
-  return OK;
-
-#else
-
-# ifdef CONFIG_NETDB_DNSCLIENT_IPv6
+#fdef CONFIG_NETDB_DNSCLIENT_IPv6
   struct sockaddr_in6 addr;
-# else
+#lse
   struct sockaddr_in addr;
-# endif
+#ndif
 
   /* First check if the host is an IP address. */
 
@@ -529,7 +509,6 @@ int dns_query_sock(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
   }
 
   return OK;
-#endif
 }
 
 /****************************************************************************
