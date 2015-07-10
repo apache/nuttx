@@ -218,7 +218,7 @@ float lib_sqrtapprox(float x);
 
 /* Defined in lib_parsehostfile.c */
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
                            FAR char *buf, size_t buflen);
 #endif

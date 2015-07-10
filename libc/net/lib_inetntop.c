@@ -61,7 +61,7 @@
  * IPv6 addresses, regardless of networking support.
  */
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 #  undef  CONFIG_NET_IPv4
 #  undef  CONFIG_NET_IPv6
 #  define CONFIG_NET_IPv4 1

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_netdb.c
+ * libc/netdb/lib_netdb.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,9 +41,9 @@
 
 #include <netdb.h>
 
-#include "net/lib_netdb.h"
+#include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
  * Public Data
@@ -56,4 +56,4 @@ char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_LIB_NETDB */
+#endif /* CONFIG_NETDB_HOSTFILE */

@@ -263,7 +263,7 @@ EXTERN int h_errno;
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_LIBC_NETDB
 #if 0 /* None of these are yet supported */
 
 void                 endhostent(void);
@@ -311,7 +311,7 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
 int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
                     FAR char *buf, size_t buflen, int *h_errnop);
 
-#endif /* CONFIG_LIB_NETDB */
+#endif /* CONFIG_LIBC_NETDB */
 
 #undef EXTERN
 #ifdef __cplusplus

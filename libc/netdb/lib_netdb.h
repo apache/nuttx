@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_netdb.h
+ * libc/netdb/lib_netdb.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 
 #include <netdb.h>
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
  * Pre-processor Definitions

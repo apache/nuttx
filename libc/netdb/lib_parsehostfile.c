@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_parsehostile.c
+ * libc/netdb/lib_parsehostile.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 
 #include "lib_internal.h"
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -446,4 +446,4 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
   return nread;
 }
 
-#endif /* CONFIG_LIB_NETDB */
+#endif /* CONFIG_NETDB_HOSTFILE */

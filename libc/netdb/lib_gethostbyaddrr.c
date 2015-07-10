@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_gethostbyaddrr.c
+ * libc/netdb/lib_gethostbyaddrr.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,9 +48,9 @@
 #include <arpa/inet.h>
 
 #include "lib_internal.h"
-#include "net/lib_netdb.h"
+#include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
  * Public Functions
@@ -185,4 +185,4 @@ errorout_with_herrnocode:
  return ERROR;
 }
 
-#endif /* CONFIG_LIB_NETDB */
+#endif /* CONFIG_NETDB_HOSTFILE */

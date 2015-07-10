@@ -504,12 +504,17 @@ config ARCH_BZERO
 
 endif # ARCH_OPTIMIZED_FUNCTIONS
 
-menuconfig LIB_NETDB
-	bool "Network database support"
+config LIBC_NETDB
+	bool
+	default n
+
+menuconfig NETDB_HOSTFILE
+	bool "Network host file support"
 	default n
 	depends on FS_READABLE
+	select LIBC_NETDB
 
-if LIB_NETDB
+if NETDB_HOSTFILE
 
 config NETDB_HOSTCONF_PATH
 	string "Path to host configuration file"
@@ -523,7 +528,49 @@ config NETDB_BUFSIZE
 	int "gethostname() buffer size"
 	default 128
 
-endif # LIB_NETDB
+endif # NETDB_HOSTFILE
+
+config NETDB_DNSCLIENT
+	bool "DNS Name resolution"
+	default n
+	depends on NET && NET_UDP
+	select LIBC_NETDB
+	---help---
+		Enable support for the name resolution.
+
+if NETDB_DNSCLIENT
+
+choice
+	prompt "Internet Protocol"
+	default NETDB_DNSCLIENT_IPv4 if NET_IPv4
+	default NETDB_DNSCLIENT_IPv6 if NET_IPv6 && !NET_IPv4
+
+config NETDB_DNSCLIENT_IPv4
+	bool "IPv4"
+	depends on NET_IPv4
+
+config NETDB_DNSCLIENT_IPv6
+	bool "IPv6"
+	depends on NET_IPv6
+
+endchoice # Internet Protocol
+
+config NETDB_DNSCLIENT_ENTRIES
+	int "Number of DNS resolver entries"
+	default 8
+	---help---
+		Number of DNS resolver entries.  Default: 8
+
+config NETDB_DNSCLIENT_MAXRESPONSE
+	int "Max response size"
+	default 96
+	---help---
+		This setting determines the maximum size of response message that
+		can be received by the DNS resolver.  The default is 96 but may
+		need to be larger on enterprise networks (perhaps 176).
+
+endif # NETDB_DNSCLIENT
+
 
 comment "Non-standard Library Support"
 

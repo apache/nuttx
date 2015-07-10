@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_gethostbynamer.c
+ * libc/netdb/lib_gethostbynamer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 
 #include "lib_internal.h"
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -353,4 +353,4 @@ errorout_with_herrnocode:
  return ERROR;
 }
 
-#endif /* CONFIG_LIB_NETDB */
+#endif /* CONFIG_NETDB_HOSTFILE */

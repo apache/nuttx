@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/net/lib_gethostbyname.c
+ * libc/netdb/lib_gethostbyaddr.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,30 +43,28 @@
 #include <errno.h>
 
 #include "lib_internal.h"
-#include "net/lib_netdb.h"
+#include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIB_NETDB
+#ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gethostname
+ * Name: gethostbyaddr
  *
  * Description:
- *   The gethostbyname() function returns a structure of type hostent for
- *   the given host name. Here name is either a hostname, or an IPv4 address
- *   in standard dot notation (as for inet_addr(3)), or an IPv6 address in
- *   colon (and possibly dot) notation.
- *
- *   If name is an IPv4 or IPv6 address, no lookup is performed and
- *   gethostbyname_r() simply copies name into the h_name field
- *   and its struct in_addr equivalent into the h_addr_list[0] field of the
- *   returned hostent structure.
- *
+ *   The gethostbyaddr() function returns a structure of type hostent for
+ *   the given host address addr of length len and address type type. Valid
+ *   address types are AF_INET and AF_INET6. The host address argument is a
+ *   pointer to a struct of a type depending on the address type, for example
+ *   a struct in_addr *  for address type AF_INET.
+ * 
  * Input Parameters:
- *   name - The name of the host to find.
+ *   addr - The address of the host to find.
+ *   len - The length of the address
+ *   type - The type of the address
  *
  * Returned Value:
  *   Upon successful completion, this function will return a pointer to a
@@ -74,19 +72,21 @@
  *   if the end of the database was reached or the requested entry was not
  *   found.
  *
- *   Upon unsuccessful completion, gethostbyname() will set h_errno to
+ *   Upon unsuccessful completion, gethostbyaddr() will set h_errno to
  *   indicate the error
  *
  ****************************************************************************/
 
-FAR struct hostent *gethostbyname(FAR const char *name)
+FAR struct hostent *gethostbyaddr(FAR const void *addr, socklen_t len, int type)
 {
   int ret;
 
-  DEBUGASSERT(name != NULL);
-  ret = gethostbyname_r(name, &g_hostent, g_hostbuffer, CONFIG_NETDB_BUFSIZE,
-                       &h_errno);
+  DEBUGASSERT(addr != NULL);
+  DEBUGASSERT(type == AF_INET || type == AF_INET6);
+
+  ret = gethostbyaddr_r(addr, len, type, &g_hostent, g_hostbuffer,
+                        CONFIG_NETDB_BUFSIZE, &h_errno);
   return ret == 0 ? &g_hostent : NULL;
 }
 
-#endif /* CONFIG_LIB_NETDB */
+#endif /* CONFIG_NETDB_HOSTFILE */

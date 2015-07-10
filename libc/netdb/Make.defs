@@ -1,5 +1,5 @@
 ############################################################################
-# libc/net/Make.defs
+# libc/netdb/Make.defs
 #
 #   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,25 +33,26 @@
 #
 ############################################################################
 
-# Add the networking C files to the build
+ifeq ($(CONFIG_LIBC_NETDB),y)
 
-CSRCS += lib_addrconfig.c lib_etherntoa.c lib_htons.c lib_htonl.c
-CSRCS += lib_inetaddr.c lib_inetntoa.c lib_inetntop.c lib_inetpton.c
+# Add the netdb C files to the build
 
-# Routing table support
-
-ifeq ($(CONFIG_NET_ROUTE),y)
-CSRCS += lib_addroute.c lib_delroute.c
-endif
-
-# netdb support
+# Add host file support
 
 ifeq ($(CONFIG_NETDB_HOSTFILE),y)
 CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
 CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c lib_parsehostfile.c
 endif
 
+# Add DNS support
+
+ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
+CSRCS = dns_resolver.c dns_socket.c dns_gethostip.c
+endif
+
 # Add the net directory to the build
 
-DEPPATH += --dep-path net
-VPATH += :net
+DEPPATH += --dep-path netdb
+VPATH += :netdb
+
+endif
