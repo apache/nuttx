@@ -223,7 +223,7 @@
 #define USB_CTRLA_RUNSTBY              (1 << 2)  /* Bit 2:  Run in standby */
 #define USB_CTRLA_MODE                 (1 << 7)  /* Bit 7:  Operating mode */
 #  define USB_CTRLA_MODE_DEVICE        (0)       /*         0 = USB device mode */
-#   define USB_CTRLA_MODE              (1 << 7)  /*         1 = USB hose mode */
+#   define USB_CTRLA_MODE_HOST         (1 << 7)  /*         1 = USB host mode */
 
 /* Synchronization Busy Register */
 
@@ -270,7 +270,7 @@
 /* Control B Register */
 
 #define USBDEV_CTRLB_DETACH            (1 << 0)  /* Bit 0:  Detach */
-#define USBDEV_CTRLB_UPRSM             (1 << 1)  /* Bit 1:  Upstresm resume */
+#define USBDEV_CTRLB_UPRSM             (1 << 1)  /* Bit 1:  Upstream resume */
 #define USBDEV_CTRLB_SPDCONF_SHIFT     (2)       /* Bits 2-3: Speed configuration */
 #define USBDEV_CTRLB_SPDCONF_MASK      (3 << USBDEV_CTRLB_SPDCONF_SHIFT)
 #  define USBDEV_CTRLB_SPDCONF_LOW     (0 << USBDEV_CTRLB_SPDCONF_SHIFT) /* Low speed */
@@ -310,7 +310,7 @@
 #define USBDEV_FNUM_MASK               (0x7ff << USBDEV_FNUM_SHIFT)
 #define USBDEV_FNUM_FNCERR             (1 << 15) /* Bit 15: Frame number CRC error */
 
-/* Common definitions for  Device Ineterrupt Enable Clear Register, Device interrupt
+/* Common definitions for Device Interrupt Enable Clear Register, Device interrupt
  * Enable Set Register, and SAM_USBDEV_INTFLAG_OFFSET
  */
 
