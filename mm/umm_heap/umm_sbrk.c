@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/umm_heap/umm_sbrk.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,20 +45,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/pgalloc.h>
 
-#if defined(CONFIG_BUILD_KERNEL)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* In the kernel build, there a multiple user heaps; one for each task
- * group.  In this build configuration, the user heap structure lies
- * in a reserved region at the beginning of the .bss/.data address
- * space (CONFIG_ARCH_DATA_VBASE).  The size of that region is given by
- * ARCH_DATA_RESERVE_SIZE
- */
-
-#define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
+#include "umm_heap/umm_heap.h"
 
 /****************************************************************************
  * Public Functions
@@ -100,5 +87,3 @@ FAR void *sbrk(intptr_t incr)
 {
   return mm_sbrk(USR_HEAP, incr, CONFIG_ARCH_HEAP_NPAGES << MM_PGSHIFT);
 }
-
-#endif /* CONFIG_BUILD_KERNEL */
