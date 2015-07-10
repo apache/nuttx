@@ -77,7 +77,7 @@
 
 /* Endpoint Register n offset */
 
-#define SAM_USBDEV_EP_OFFSET(n)        (0x0100 + ((n) << 4))
+#define SAM_USBDEV_EP_OFFSET(n)        (0x0100 + ((n) << 5))
 
 /* The following are then relative to the endpoint register n offset */
 
