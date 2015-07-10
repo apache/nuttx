@@ -377,13 +377,13 @@
 
 /* Packet Size (Both banks) */
 
-#define USBDEV_PKTSIZE_BCNT_SHIFT      (0)      /* Bits 0-5: Byte count */
-#define USBDEV_PKTSIZE_BCNT_MASK       (0x3f << USBDEV_PKTSIZE_BCNT_SHIFT)
+#define USBDEV_PKTSIZE_BCNT_SHIFT      (0)        /* Bits 0-13: Byte count */
+#define USBDEV_PKTSIZE_BCNT_MASK       (0x3fff << USBDEV_PKTSIZE_BCNT_SHIFT)
 #  define USBDEV_PKTSIZE_BCNT(n)       ((uint32_t)(n) << USBDEV_PKTSIZE_BCNT_SHIFT)
-#define USBDEV_PKTSIZE_MPKTSIZE_SHIFT  (14)      /* Bits 14-27:  Multi-packet size */
+#define USBDEV_PKTSIZE_MPKTSIZE_SHIFT  (14)       /* Bits 14-27:  Multi-packet size */
 #define USBDEV_PKTSIZE_MPKTSIZE_MASK   (0x3fff << USBDEV_PKTSIZE_MPKTSIZE_SHIFT)
 #  define USBDEV_PKTSIZE_MPKTSIZE(n)   ((uint32_t)(n) << USBDEV_PKTSIZE_MPKTSIZE_SHIFT)
-#define USBDEV_PKTSIZE_SIZE_SHIFT      (28)      /* Bits 28-30: Endpoint size */
+#define USBDEV_PKTSIZE_SIZE_SHIFT      (28)       /* Bits 28-30: Endpoint size */
 #define USBDEV_PKTSIZE_SIZE_MASK       (7 << USBDEV_PKTSIZE_SIZE_SHIFT)
 #  define USBDEV_PKTSIZE_SIZE_8B       (0 << USBDEV_PKTSIZE_SIZE_SHIFT) /* 8 bytes */
 #  define USBDEV_PKTSIZE_SIZE_16B      (1 << USBDEV_PKTSIZE_SIZE_SHIFT) /* 16 bytes */
