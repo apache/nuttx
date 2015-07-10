@@ -513,6 +513,9 @@ menuconfig NETDB_HOSTFILE
 	default n
 	depends on FS_READABLE
 	select LIBC_NETDB
+	---help---
+		Enable network host table look ups via gethostbyname() and
+		gethostbyaddr().
 
 if NETDB_HOSTFILE
 
@@ -536,7 +539,8 @@ config NETDB_DNSCLIENT
 	depends on NET && NET_UDP
 	select LIBC_NETDB
 	---help---
-		Enable support for the name resolution.
+		Enable support for the name resolution; Enable network host
+		resolution via gethostbyname().
 
 if NETDB_DNSCLIENT
 

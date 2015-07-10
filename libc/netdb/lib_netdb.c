@@ -43,7 +43,7 @@
 
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_NETDB_HOSTFILE
+#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Data
@@ -56,4 +56,4 @@ char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_NETDB_HOSTFILE */
+#endif /* CONFIG_LIBC_NETDB */

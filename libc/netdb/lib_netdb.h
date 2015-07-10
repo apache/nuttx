@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/netdb/lib_netdb.h
+ * libc/net/lib_netdb.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_NET_LIB_NETDB_H
-#define __LIBC_NET_LIB_NETDB_H
+#ifndef __LIBC_NETDB_LIB_NETDB_H
+#define __LIBC_NETDB_LIB_NETDB_H
 
 /****************************************************************************
  * Included Files
@@ -44,7 +44,7 @@
 
 #include <netdb.h>
 
-#ifdef CONFIG_NETDB_HOSTFILE
+#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,5 +94,5 @@ EXTERN char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
 }
 #endif
 
-#endif /* __INCLUDE_NETDB_H */
-#endif /* __LIBC_NET_LIB_NETDB_H */
+#endif /* CONFIG_LIBC_NETDB */
+#endif /* __LIBC_NETDB_LIB_NETDB_H */

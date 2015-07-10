@@ -45,7 +45,7 @@
 #include "lib_internal.h"
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_NETDB_HOSTFILE
+#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Functions
@@ -89,4 +89,4 @@ FAR struct hostent *gethostbyname(FAR const char *name)
   return ret == 0 ? &g_hostent : NULL;
 }
 
-#endif /* CONFIG_NETDB_HOSTFILE */
+#endif /* CONFIG_LIBC_NETDB */

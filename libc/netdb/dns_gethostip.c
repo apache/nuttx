@@ -75,7 +75,11 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
+int dns_gethostip(FAR const char *hostname, FAR struct in6_addr *ipaddr)
+#else
 int dns_gethostip(FAR const char *hostname, FAR in_addr_t *ipaddr)
+#endif
 {
   int sockfd = -1;
   int ret=ERROR;
