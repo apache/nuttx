@@ -154,6 +154,70 @@
 
 #define IOEXP_READBUF(dev,pin,valptr) ((dev)->ops->ioe_readbuf(dev,pin,valptr))
 
+#ifdef CONFIG_IOEXPANDER_MULTIPIN
+
+/****************************************************************************
+ * Name: IOEXP_MULTIWRITE
+ *
+ * Description:
+ *   Set the pin level for multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pins - The list of pin indexes to alter in this call
+ *   val - The list of pin levels.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+#define IOEXP_MULTIWRITEPIN(dev,pins,vals,count) \
+                           ((dev)->ops->ioe_multiwritepin(dev,pins,vals,count))
+
+/****************************************************************************
+ * Name: IOEXP_MULTIREADPIN
+ *
+ * Description:
+ *   Read the actual level for multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The list of pin indexes to read
+ *   valptr - Pointer to a buffer where the pin levels are stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+#define IOEXP_MULTIREADPIN(dev,pins,vals,count) \
+                          ((dev)->ops->ioe_multireadpin(dev,pins,vals,count))
+
+/****************************************************************************
+ * Name: IOEXP_MULTIREADBUF
+ *
+ * Description:
+ *   Read the buffered level of multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the buffered levels are stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+#define IOEXP_MULTIREADBUF(dev,pins,vals,count) \
+                          ((dev)->ops->ioe_multireadbuf(dev,pin,vals,count))
+
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -172,6 +236,14 @@ struct ioexpander_ops_s
                           bool *value);
   CODE int (*ioe_readbuf)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
+#ifdef CONFIG_IOEXPANDER_MULTIPIN
+  CODE int (*ioe_multiwrite)(FAR struct ioexpander_dev_s *dev,
+                             uint8_t *pins, bool *values, int count);
+  CODE int (*ioe_multireadpin)(FAR struct ioexpander_dev_s *dev,
+                               uint8_t *pins, bool *values, int count);
+  CODE int (*ioe_multireadbuf)(FAR struct ioexpander_dev_s *dev,
+                               uint8_t *pins, bool *values, int count);
+#endif
 };
 
 struct ioexpander_dev_s

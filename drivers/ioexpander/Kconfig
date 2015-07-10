@@ -3,6 +3,13 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config IOEXPANDER_MULTIPIN
+	bool "Support multi-pin access routines"
+	default n
+	---help---
+		This settings enable the definition of routines for
+		optimized simultaneous access to multiple pins.
+
 config IOEXPANDER_PCA9555
 	bool "PCA9555 I2C IO expander"
 	default n

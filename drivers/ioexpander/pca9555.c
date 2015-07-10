@@ -70,16 +70,27 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                             int dir);
-static int pca9555_option   (FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                             int opt, void *val);
-static int pca9555_write    (FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                             bool value);
-static int pca9555_readpin  (FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                             bool *value);
-static int pca9555_readbuf  (FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                             bool *value);
+static int pca9555_direction   (FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, int dir);
+static int pca9555_option      (FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, int opt, void *val);
+static int pca9555_write       (FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, bool value);
+static int pca9555_readpin     (FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, FAR bool *value);
+static int pca9555_readbuf     (FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, FAR bool *value);
+#ifdef CONFIG_IOEXPANDER_MULTIPIN
+static int pca9555_multiwrite  (FAR struct ioexpander_dev_s *dev,
+                                FAR uint8_t *pins, FAR bool *values,
+                                int count);
+static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
+                                FAR uint8_t *pins, FAR bool *values,
+                                int count);
+static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
+                                FAR uint8_t *pins, FAR bool *values,
+                                int count);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -105,6 +116,11 @@ static const struct ioexpander_ops_s g_pca9555_ops =
   pca9555_write,
   pca9555_readpin,
   pca9555_readbuf,
+#ifdef CONFIG_IOEXPANDER_MULTIPIN
+  pca9555_multiwrite,
+  pca9555_multireadpin,
+  pca9555_multireadbuf,
+#endif
 };
 
 /****************************************************************************
@@ -137,18 +153,18 @@ static int pca9555_setbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
     }
 
   ret = I2C_WRITEREAD(i2c, &addr, 1, &buf[1], 1);
-  if (ret != 0)
+  if (ret < 0)
     {
       return ret;
     }
 
   if (bitval)
     {
-      buf[1] |= (1<<pin);
+      buf[1] |= (1 << pin);
     }
   else
     {
-      buf[1] &= ~(1<<pin);
+      buf[1] &= ~(1 << pin);
     }
 
   return I2C_WRITE(i2c, buf, 2);
@@ -163,29 +179,29 @@ static int pca9555_setbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
  ****************************************************************************/
 
 static int pca9555_getbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
-                          uint8_t pin, bool *val)
+                          uint8_t pin, FAR bool *val)
 {
   uint8_t buf;
   int ret;
 
-  if (pin>15)
+  if (pin > 15)
     {
       return -ENXIO;
     }
-  else if (pin>7)
+  else if (pin > 7)
     {
       addr += 1;
       pin  -= 8;
     }
 
   ret = I2C_WRITEREAD(i2c, &addr, 1, &buf, 1);
-  if (ret != 0)
+  if (ret < 0)
     {
       return ret;
     }
-  *val = (buf >> pin) & 1;
 
-  return 0;
+  *val = (buf >> pin) & 1;
+  return OK;
 }
 
 /****************************************************************************
@@ -201,7 +217,7 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
   return pca9555_setbit(pca->i2c, PCA9555_REG_CONFIG, pin,
-                        (direction == IOEXPANDER_DIRECTION_IN)); 
+                        (direction == IOEXPANDER_DIRECTION_IN));
 }
 
 /****************************************************************************
@@ -222,7 +238,7 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     {
       return pca9555_setbit(pca->i2c, PCA9555_REG_POLINV, pin, ival);
     }
-  
+
   return -EINVAL;
 }
 
@@ -250,7 +266,7 @@ static int pca9555_write(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  ****************************************************************************/
 
 static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                           bool *value)
+                           FAR bool *value)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
   return pca9555_getbit(pca->i2c, PCA9555_REG_INPUT, pin, value);
@@ -265,11 +281,158 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  ****************************************************************************/
 
 static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                           bool *value)
+                           FAR bool *value)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev; 
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
   return pca9555_getbit(pca->i2c, PCA9555_REG_OUTPUT, pin, value);
 }
+
+#ifdef CONFIG_IOEXPANDER_MULTIPIN
+
+/****************************************************************************
+ * Name: pca9555_getmultibits
+ *
+ * Description:
+ *  Read multiple bits from PCA9555 registers.
+ *
+ ****************************************************************************/
+
+static int pca9555_getmultibits(FAR struct i2c_dev_s *i2c, uint8_t addr,
+                                FAR uint8_t *pins, FAR bool *values,
+                                int count)
+{
+  uint8_t buf[2];
+  int ret = OK;
+  int i;
+  int index;
+  int pin;
+
+  ret = I2C_WRITEREAD(i2c, &addr, 1, buf, 2);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Read the requested bits */
+
+  for (i = 0; i < count; i++)
+    {
+      index = 0;
+      pin   = pins[i];
+      if (pin > 15)
+        {
+          return -ENXIO;
+        }
+      else if(pin > 7)
+        {
+          index = 1;
+          pin  -= 8;
+        }
+
+      values[i] = (buf[index] >> pin) & 1;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pca9555_multiwrite
+ *
+ * Description:
+ *  See include/nuttx/ioexpander/ioexpander.h
+ *
+ ****************************************************************************/
+
+static int pca9555_multiwrite(FAR struct ioexpander_dev_s *dev,
+                              FAR uint8_t *pins, FAR bool *values,
+                              int count)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  uint8_t addr = PCA9555_REG_OUTPUT;
+  uint8_t buf[3];
+  int ret;
+  int i;
+  int index;
+  int pin;
+
+  /* Start by reading both registers, whatever the pins to change. We could
+   * attempt to read one port only if all pins were on the same port, but
+   * this would not save much. */
+
+  ret = I2C_WRITEREAD(pca->i2c, &addr, 1, &buf[1], 2);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Apply the user defined changes */
+
+  for (i = 0; i < count; i++)
+    {
+      index = 1;
+      pin = pins[i];
+      if (pin > 15)
+        {
+          return -ENXIO;
+        }
+      else if(pin > 7)
+        {
+          index = 2;
+          pin  -= 8;
+        }
+
+      if (values[i])
+        {
+          buf[index] |= (1 << pin);
+        }
+      else
+        {
+          buf[index] &= ~(1 << pin);
+        }
+    }
+
+  /* Now write back the new pins states */
+
+  buf[0] = addr;
+  return I2C_WRITE(pca->i2c, buf, 3);
+}
+
+/****************************************************************************
+ * Name: pca9555_multireadpin
+ *
+ * Description:
+ *  See include/nuttx/ioexpander/ioexpander.h
+ *
+ ****************************************************************************/
+
+static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
+                                FAR uint8_t *pins, FAR bool *values,
+                                int count)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  return pca9555_getmultibits(pca->i2c, PCA9555_REG_INPUT,
+                              pins, values, count);
+}
+
+/****************************************************************************
+ * Name: pca9555_multireadbuf
+ *
+ * Description:
+ *  See include/nuttx/ioexpander/ioexpander.h
+ *
+ ****************************************************************************/
+
+static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
+                                FAR uint8_t *pins, FAR bool *values,
+                                int count)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  return pca9555_getmultibits(pca->i2c, PCA9555_REG_OUTPUT,
+                              pins, values, count);
+}
+
+#endif
 
 #ifndef CONFIG_PCA9555_INT_DISABLE
 
@@ -284,7 +447,7 @@ static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_attach(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           ioexpander_handler_t handler)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev; 
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
   return 0;
 }
 
