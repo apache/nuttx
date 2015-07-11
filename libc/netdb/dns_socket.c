@@ -226,7 +226,7 @@ static int dns_send_query(int sockfd, FAR const char *name,
   char buffer[SEND_BUFFER_SIZE];
   int n;
 
-  hdr               = (FAR struct dns_hdr*)buffer;
+  hdr               = (FAR struct dns_hdr *)buffer;
   memset(hdr, 0, sizeof(struct dns_hdr));
   hdr->id           = htons(seqno);
   hdr->flags1       = DNS_FLAG1_RD;
@@ -402,14 +402,14 @@ static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dns_bind_sock
+ * Name: dns_bind
  *
  * Description:
  *   Initialize the DNS resolver using the caller provided socket.
  *
  ****************************************************************************/
 
-int dns_bind_sock(FAR int *sockfd)
+int dns_bind(FAR int *sockfd)
 {
   struct timeval tv;
   int ret;
@@ -418,7 +418,7 @@ int dns_bind_sock(FAR int *sockfd)
 
   if (*sockfd >= 0)
     {
-      dns_free_sock(sockfd);
+      dns_free(sockfd);
     }
 
   /* Create a new socket */
@@ -450,14 +450,14 @@ int dns_bind_sock(FAR int *sockfd)
 }
 
 /****************************************************************************
- * Name: dns_free_sock
+ * Name: dns_free
  *
  * Description:
  *   Release the DNS resolver by closing the socket.
  *
  ****************************************************************************/
 
-int dns_free_sock(FAR int *sockfd)
+int dns_free(FAR int *sockfd)
 {
   if (*sockfd >= 0)
     {
@@ -469,7 +469,7 @@ int dns_free_sock(FAR int *sockfd)
 }
 
 /****************************************************************************
- * Name: dns_query_sock
+ * Name: dns_query
  *
  * Description:
  *   Using the DNS resolver socket (sockfd), look up the the 'hostname', and
@@ -480,7 +480,7 @@ int dns_free_sock(FAR int *sockfd)
  *
  ****************************************************************************/
 
-int dns_query_sock(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
+int dns_query(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
 {
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
   struct sockaddr_in6 addr;
@@ -496,7 +496,7 @@ int dns_query_sock(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
        *  the host name to an IP address.
        */
 
-      if (dns_whois_socket(sockfd, hostname, &addr) < 0)
+      if (dns_whois(sockfd, hostname, &addr) < 0)
         {
           /* Needs to set the errno here */
 
@@ -560,7 +560,7 @@ void dns_getserver(FAR struct in_addr *dnsserver)
 }
 
 /****************************************************************************
- * Name: dns_whois_socket
+ * Name: dns_whois
  *
  * Description:
  *   Get the binding for 'name' using the DNS server accessed via 'sockfd'
@@ -568,10 +568,10 @@ void dns_getserver(FAR struct in_addr *dnsserver)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-int dns_whois_socket(int sockfd, FAR const char *name,
+int dns_whois(int sockfd, FAR const char *name,
                      FAR struct sockaddr_in6 *addr)
 #else
-int dns_whois_socket(int sockfd, FAR const char *name,
+int dns_whois(int sockfd, FAR const char *name,
                      FAR struct sockaddr_in *addr)
 #endif
 {

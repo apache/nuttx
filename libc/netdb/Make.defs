@@ -52,7 +52,7 @@ ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
 ifneq ($(CONFIG_NETDB_HOSTFILE),y)
 CSRCS += lib_gethostbyname.c lib_gethostbynamer.c
 endif
-CSRCS += dns_resolver.c dns_socket.c dns_gethostip.c
+CSRCS += dns_socket.c dns_gethostip.c
 endif
 
 # Add the net directory to the build

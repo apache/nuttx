@@ -69,8 +69,8 @@
  * Name: dns_gethostip
  *
  * Descriptions:
- *   Combines the operations of dns_bind_sock(), dns_query_sock(), and
- *   dns_free_sock() to obtain the the IP address ('ipaddr') associated with
+ *   Combines the operations of dns_bind(), dns_query(), and
+ *   dns_free() to obtain the the IP address ('ipaddr') associated with
  *   the 'hostname' in one operation.
  *
  ****************************************************************************/
@@ -82,13 +82,13 @@ int dns_gethostip(FAR const char *hostname, FAR in_addr_t *ipaddr)
 #endif
 {
   int sockfd = -1;
-  int ret=ERROR;
+  int ret = ERROR;
 
-  dns_bind_sock(&sockfd);
+  dns_bind(&sockfd);
   if (sockfd >= 0)
     {
-      ret = dns_query_sock(sockfd, hostname, ipaddr);
-      dns_free_sock(&sockfd);
+      ret = dns_query(sockfd, hostname, ipaddr);
+      dns_free(&sockfd);
     }
 
   return ret;

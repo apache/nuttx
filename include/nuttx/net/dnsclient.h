@@ -80,37 +80,27 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: dns_bind_sock
+ * Name: dns_bind
  *
  * Description:
  *   Initialize the DNS resolver using the caller provided socket.
  *
  ****************************************************************************/
 
-int dns_bind_sock(FAR int *sockfd);
+int dns_bind(FAR int *sockfd);
 
 /****************************************************************************
- * Name: dns_bind
- *
- * Description:
- *   Initialize the DNS resolver using an internal, share-able socket.
- *
- ****************************************************************************/
-
-int dns_bind(void);
-
-/****************************************************************************
- * Name: dns_free_sock
+ * Name: dns_free
  *
  * Description:
  *   Release the DNS resolver by closing the socket.
  *
  ****************************************************************************/
 
-int dns_free_sock(FAR int *sockfd);
+int dns_free(FAR int *sockfd);
 
 /****************************************************************************
- * Name: dns_query_sock
+ * Name: dns_query
  *
  * Description:
  *   Using the DNS resolver socket (sockfd), look up the the 'hostname', and
@@ -121,21 +111,7 @@ int dns_free_sock(FAR int *sockfd);
  *
  ****************************************************************************/
 
-int dns_query_sock(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr);
-
-/****************************************************************************
- * Name: dns_query
- *
- * Description:
- *   Using the internal DNS resolver socket, look up the the 'hostname', and
- *   return its IP address in 'ipaddr'
- *
- * Returned Value:
- *   Returns zero (OK) if the query was successful.
- *
- ****************************************************************************/
-
-int dns_query(FAR const char *hostname, FAR in_addr_t *ipaddr);
+int dns_query(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr);
 
 /****************************************************************************
  * Name: dns_setserver
@@ -166,7 +142,7 @@ void dns_getserver(FAR struct in_addr *dnsserver);
 #endif
 
 /****************************************************************************
- * Name: dns_whois_socket
+ * Name: dns_whois
  *
  * Description:
  *   Get the binding for 'name' using the DNS server accessed via 'sockfd'
@@ -174,34 +150,19 @@ void dns_getserver(FAR struct in_addr *dnsserver);
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-int  dns_whois_socket(int sockfd, FAR const char *name,
-                      FAR struct sockaddr_in6 *addr);
+int  dns_whois(int sockfd, FAR const char *name,
+               FAR struct sockaddr_in6 *addr);
 #else
-int  dns_whois_socket(int sockfd, FAR const char *name,
-                      FAR struct sockaddr_in *addr);
-#endif
-
-/****************************************************************************
- * Name: dns_whois
- *
- * Description:
- *   Get the binding for 'name' using the DNS server accessed via the DNS
- *   resolvers internal socket.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-int dns_whois(FAR const char *name, FAR struct sockaddr_in6 *addr);
-#else
-int dns_whois(FAR const char *name, FAR struct sockaddr_in *addr);
+int  dns_whois(int sockfd, FAR const char *name,
+               FAR struct sockaddr_in *addr);
 #endif
 
 /****************************************************************************
  * Name: dns_gethostip
  *
  * Descriptions:
- *   Combines the operations of dns_bind_sock(), dns_query_sock(), and
- *   dns_free_sock() to obtain the the IP address ('ipaddr') associated with
+ *   Combines the operations of dns_bind(), dns_query(), and
+ *   dns_free() to obtain the the IP address ('ipaddr') associated with
  *   the 'hostname' in one operation.
  *
  ****************************************************************************/
