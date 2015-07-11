@@ -64,6 +64,7 @@
 #include "chip.h"
 #include "chip/lpc11_uart.h"
 #include "lpc11_gpio.h"
+#include "lpc11_lowgetc.h"
 #include "lpc11_serial.h"
 
 /****************************************************************************

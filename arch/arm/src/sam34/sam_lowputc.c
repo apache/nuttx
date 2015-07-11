@@ -42,7 +42,6 @@
 #include <stdint.h>
 
 #include <arch/irq.h>
-#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -61,7 +60,10 @@
 #  error Unknown UART
 #endif
 
+/* The board.h file may redefine pin configurations defined in sam_pinmap.h */
+
 #include "chip/sam_pinmap.h"
+#include <arch/board/board.h>
 
 /**************************************************************************
  * Pre-processor Definitions

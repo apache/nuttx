@@ -135,7 +135,7 @@ static void __ramfunc__ sam_pmcwait(uint32_t bit)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_enablemosc(void)
+static void __ramfunc__ sam_enablemosc(void)
 {
   uint32_t regval;
 
@@ -190,7 +190,7 @@ static inline void __ramfunc__ sam_enablemosc(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_selectmosc(void)
+static void __ramfunc__ sam_selectmosc(void)
 {
   uint32_t regval;
 
@@ -218,7 +218,7 @@ static inline void __ramfunc__ sam_selectmosc(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_pllasetup(void)
+static void __ramfunc__ sam_pllasetup(void)
 {
   uint32_t regval;
 
@@ -255,7 +255,7 @@ static inline void __ramfunc__ sam_pllasetup(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_plladivider(void)
+static void __ramfunc__ sam_plladivider(void)
 {
   uint32_t regval;
 
@@ -306,7 +306,7 @@ static inline void __ramfunc__ sam_plladivider(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_mckprescaler(void)
+static void __ramfunc__ sam_mckprescaler(void)
 {
   uint32_t regval;
 
@@ -333,7 +333,7 @@ static inline void __ramfunc__ sam_mckprescaler(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_mckdivider(void)
+static void __ramfunc__ sam_mckdivider(void)
 {
   uint32_t regval;
 
@@ -365,7 +365,7 @@ static inline void __ramfunc__ sam_mckdivider(void)
  ****************************************************************************/
 
 #ifdef PMC_MCKR_H32MXDIV
-static inline void __ramfunc__ sam_h32mxdivider(void)
+static void __ramfunc__ sam_h32mxdivider(void)
 {
   uint32_t regval;
 
@@ -397,7 +397,7 @@ static inline void __ramfunc__ sam_h32mxdivider(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void __ramfunc__ sam_selectplla(void)
+static void __ramfunc__ sam_selectplla(void)
 {
   uint32_t regval;
 
