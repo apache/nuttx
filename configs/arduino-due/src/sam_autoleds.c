@@ -44,11 +44,14 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "sam_gpio.h"
 #include "arduino-due.h"
+
+/* The board.h file may override pin configurations defined in sam_pinmap.h */
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_LEDS
 

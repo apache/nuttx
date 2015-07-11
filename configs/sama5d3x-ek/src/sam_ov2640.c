@@ -197,6 +197,7 @@ static inline int ov2640_camera_initialize(void)
   actual = sam_pck_configure(PCK1, PCKSRC_MCK, OV2640_FREQUENCY);
   gvdbg("Desired PCK1 frequency: %ld Actual: %ld\n",
         (long)OV2640_FREQUENCY, (long)actual);
+  UNUSED(actual);
 
   sam_pck_enable(PCK1, true);
 
