@@ -144,9 +144,7 @@ void board_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(void);
-#endif /* CONFIG_LIB_BOARDCTL */
 
 /****************************************************************************
  * Name: board_power_off

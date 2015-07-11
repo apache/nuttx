@@ -504,9 +504,9 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
 #ifdef CONFIG_EFM32_LECLOCK
 uint32_t efm32_coreleclk_config( int frequency )
 {
+#ifdef CMU_CTRL_HFLE
   uint32_t regval;
 
-#ifdef CMU_CTRL_HFLE
   /* Check if the core frequency is higher than CMU_MAX_FREQ_HFLE */
 
    if (frequency > CMU_MAX_FREQ_HFLE)

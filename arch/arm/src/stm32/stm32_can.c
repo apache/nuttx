@@ -1127,7 +1127,7 @@ errout:
   regval  = can_getreg(priv, STM32_CAN_RF0R_OFFSET);
   regval |= CAN_RFR_RFOM;
   can_putreg(priv, STM32_CAN_RF0R_OFFSET, regval);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

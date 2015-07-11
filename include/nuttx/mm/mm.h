@@ -336,9 +336,7 @@ void kmm_initialize(FAR void *heap_start, size_t heap_size);
 
 /* Functions contained in umm_addregion.c ***********************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 void umm_addregion(FAR void *heapstart, size_t heapsize);
-#endif
 
 /* Functions contained in kmm_addregion.c ***********************************/
 
@@ -355,10 +353,8 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_sem.c ****************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
-#endif
 
 /* Functions contained in kmm_sem.c ****************************************/
 

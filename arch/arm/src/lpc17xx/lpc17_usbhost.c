@@ -1788,6 +1788,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
 
           td = (struct lpc17_gtd_s *)(HCCA->donehead & HCCA_DONEHEAD_MASK);
           HCCA->donehead = 0;
+          next = NULL;
 
           /* Process each TD in the write done list */
 

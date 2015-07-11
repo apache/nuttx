@@ -45,6 +45,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+
 #include "sched/sched.h"
 
 /************************************************************************
