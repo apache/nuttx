@@ -1291,7 +1291,6 @@ Where <subdir> is one of the following:
          CONFIG_NET_ICMP_PING=y
 
          CONFIG_NETDB_DNSCLIENT=y
-         CONFIG_NETDB_DNSCLIENT_IPv4=y
          CONFIG_NETUTILS_TELNETD=y
 
          CONFIG_NSH_IPADDR=0x0a000002
