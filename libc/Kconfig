@@ -544,21 +544,6 @@ config NETDB_DNSCLIENT
 
 if NETDB_DNSCLIENT
 
-choice
-	prompt "Internet Protocol"
-	default NETDB_DNSCLIENT_IPv4 if NET_IPv4
-	default NETDB_DNSCLIENT_IPv6 if NET_IPv6 && !NET_IPv4
-
-config NETDB_DNSCLIENT_IPv4
-	bool "IPv4"
-	depends on NET_IPv4
-
-config NETDB_DNSCLIENT_IPv6
-	bool "IPv6"
-	depends on NET_IPv6
-
-endchoice # Internet Protocol
-
 config NETDB_DNSCLIENT_ENTRIES
 	int "Number of DNS resolver entries"
 	default 8
@@ -574,7 +559,6 @@ config NETDB_DNSCLIENT_MAXRESPONSE
 		need to be larger on enterprise networks (perhaps 176).
 
 endif # NETDB_DNSCLIENT
-
 
 comment "Non-standard Library Support"
 

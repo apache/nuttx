@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/socket.h>
 #include <netinet/in.h>
 
 #include <nuttx/net/netconfig.h>
@@ -64,21 +65,6 @@
 #ifndef CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
 #  define CONFIG_NETDB_DNSCLIENT_MAXRESPONSE 96
 #endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-union dns_server_u
-{
-  struct sockaddr     addr;
-#ifdef CONFIG_NET_IPv4
-  struct sockaddr_in  ipv4;
-#endif
-#ifdef CONFIG_NET_IPv6
-  struct sockaddr_in6 ipv6;
-#endif
-};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -115,7 +101,7 @@ int dns_bind(void);
  * Name: dns_query
  *
  * Description:
- *   Using the DNS resolver socket (sockfd), look up the the 'hostname', and
+ *   Using the DNS resolver socket (sd), look up the the 'hostname', and
  *   return its IP address in 'ipaddr'
  *
  * Returned Value:
@@ -123,7 +109,8 @@ int dns_bind(void);
  *
  ****************************************************************************/
 
-int dns_query(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr);
+int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
+              FAR socklen_t *addrlen);
 
 #undef EXTERN
 #if defined(__cplusplus)

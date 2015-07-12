@@ -76,6 +76,21 @@
 #define RECV_BUFFER_SIZE CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+union dns_server_u
+{
+  struct sockaddr     addr;
+#ifdef CONFIG_NET_IPv4
+  struct sockaddr_in  ipv4;
+#endif
+#ifdef CONFIG_NET_IPv6
+  struct sockaddr_in6 ipv6;
+#endif
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -205,11 +220,8 @@ static int dns_send_query(int sd, FAR const char *name,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-#  error "Not implemented"
-#else
-static int dns_recv_response(int sd, FAR struct sockaddr_in *addr)
-#endif
+static int dns_recv_response(int sd, FAR struct sockaddr *addr,
+                             FAR socklen_t *addrlen)
 {
   FAR unsigned char *nameptr;
   char buffer[RECV_BUFFER_SIZE];
@@ -314,6 +326,11 @@ static int dns_recv_response(int sd, FAR struct sockaddr_in *addr)
 
       /* Check for IP address type and Internet class. Others are discarded. */
 
+#ifdef CONFIG_NET_IPv6
+#  warning Missing IPv6 support!
+#endif
+
+#ifdef CONFIG_NET_IPv4
       if (ans->type  == HTONS(1) &&
           ans->class == HTONS(1) &&
           ans->len   == HTONS(4))
@@ -330,10 +347,25 @@ static int dns_recv_response(int sd, FAR struct sockaddr_in *addr)
            * we want.
            */
 
-          addr->sin_addr.s_addr = ans->ipaddr.s_addr;
-          return OK;
+          if (*addrlen >=sizeof(struct sockaddr_in))
+            {
+              FAR struct sockaddr_in *inaddr;
+
+              inaddr                  = (FAR struct sockaddr_in *)addr;
+              inaddr->sin_family      = AF_INET;
+              inaddr->sin_port        = 0;
+              inaddr->sin_addr.s_addr = ans->ipaddr.s_addr;
+
+              *addrlen = sizeof(struct sockaddr_in);
+              return OK;
+            }
+          else
+            {
+              return -ERANGE;
+            }
         }
       else
+#endif
         {
           nameptr = nameptr + 10 + htons(ans->len);
         }
@@ -408,13 +440,9 @@ int dns_bind(void)
  *
  ****************************************************************************/
 
-int dns_query(int sd, FAR const char *hostname, FAR in_addr_t *ipaddr)
+int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
+              FAR socklen_t *addrlen)
 {
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-  struct sockaddr_in6 addr;
-#else
-  struct sockaddr_in addr;
-#endif
   int retries;
   int ret;
 
@@ -433,13 +461,12 @@ int dns_query(int sd, FAR const char *hostname, FAR in_addr_t *ipaddr)
 
       /* Obtain the response */
 
-      ret = dns_recv_response(sd, &addr);
+      ret = dns_recv_response(sd, addr, addrlen);
       if (ret >= 0)
         {
           /* Response received successfully */
           /* Save the host address -- Needs fixed for IPv6 */
 
-          *ipaddr = addr.sin_addr.s_addr;
           return OK;
         }
 

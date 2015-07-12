@@ -54,19 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* If both IPv4 and IPv6 are enabled, the DNS client can support only one or
- * the other.
- */
-
-#if !defined(CONFIG_NETDB_DNSCLIENT_IPv4) && \
-    !defined(CONFIG_NETDB_DNSCLIENT_IPv6)
-#  ifdef CONFIG_NET_IPv6
-#     define CONFIG_NETDB_DNSCLIENT_IPv6 1
-#  else
-#     define CONFIG_NETDB_DNSCLIENT_IPv4 1
-#  endif
-#endif
-
 #define DNS_FLAG1_RESPONSE        0x80
 #define DNS_FLAG1_OPCODE_STATUS   0x10
 #define DNS_FLAG1_OPCODE_INVERSE  0x08
@@ -108,7 +95,7 @@ struct dns_answer_s
   uint16_t class;
   uint16_t ttl[2];
   uint16_t len;
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
+#if 0 /* REVISIT: Not yet support for IPv6 */
   struct in6_addr ipaddr;
 #else
   struct in_addr ipaddr;

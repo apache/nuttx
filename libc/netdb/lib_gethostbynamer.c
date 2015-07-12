@@ -46,6 +46,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <arpa/inet.h>
 
@@ -203,11 +204,8 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-static int lib_dns_query(FAR const char *hostname, FAR struct in6_addr *ipaddr)
-#else
-static int lib_dns_query(FAR const char *hostname, FAR in_addr_t *ipaddr)
-#endif
+static int lib_dns_query(FAR const char *hostname,
+                         FAR struct sockaddr *addr, socklen_t *addrlen)
 {
   int sd;
   int ret;
@@ -222,7 +220,7 @@ static int lib_dns_query(FAR const char *hostname, FAR in_addr_t *ipaddr)
 
   /* Perform the query to get the IP address */
 
-  ret = dns_query(sd, hostname, ipaddr);
+  ret = dns_query(sd, hostname, addr, addrlen);
 
   /* Release the socket */
 
@@ -236,7 +234,7 @@ static int lib_dns_query(FAR const char *hostname, FAR in_addr_t *ipaddr)
  * Description:
  *   Try to look-up the host name from the DNS server
  *
- * Input paramters:
+ * Input Parameters:
  *   name - The name of the host to find.
  *   host - Caller provided location to return the host data.
  *   buf - Caller provided buffer to hold string data associated with the
@@ -279,20 +277,37 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
 
   /* Try to get the host address using the DNS name server */
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-  addrlen  = sizeof(struct in6_addr);
-  addrtype = AF_INET6;
-  ret      = lib_dns_query(name, (FAR struct in6_addr *)ptr);
-#else
-  addrlen  = sizeof(struct in6_addr);
-  addrtype = AF_INET;
-  ret      = lib_dns_query(name, (FAR in_addr_t *)ptr);
-#endif
+  addrlen = buflen;
+  ret = lib_dns_query(name, (FAR struct sockaddr *)ptr, &addrlen);
 
   /* Was the DNS lookup successful? */
 
   if (ret >= 0)
     {
+      /* Get the address type; verify the address size. */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
+#endif
+        {
+          DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
+          addrlen  = sizeof(struct sockaddr_in);
+          addrtype = AF_INET;
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
+          addrlen  = sizeof(struct sockaddr_in6);
+          addrtype = AF_INET6;
+        }
+#endif
+
       /* Yes.. Return the address that we obtained from the DNS name server. */
 
       info->hi_addrlist[0] = ptr;
