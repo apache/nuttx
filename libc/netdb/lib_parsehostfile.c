@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
+
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -277,7 +279,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
   FAR char addrstring[48];
   FAR char *ptr;
   FAR char *start;
-  size_t addrlen;
+  socklen_t addrlen;
   size_t nread = 0;
   ssize_t nwritten;
   int ret;

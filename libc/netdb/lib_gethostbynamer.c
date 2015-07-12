@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
@@ -100,7 +102,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   FAR char *ptr;
-  size_t addrlen;
+  socklen_t addrlen;
   int namelen;
   int ret;
 
@@ -252,7 +254,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   FAR char *ptr;
-  size_t addrlen;
+  socklen_t addrlen;
   int addrtype;
   int namelen;
   int ret;

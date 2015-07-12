@@ -75,28 +75,12 @@
 #define SEND_BUFFER_SIZE 64
 #define RECV_BUFFER_SIZE CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
 
-/* The size of an IP address */
-
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-#  define ADDRLEN sizeof(struct sockaddr_in6)
-#else
-#  define ADDRLEN sizeof(struct sockaddr_in)
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static uint8_t g_seqno;
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-static struct sockaddr_in6 g_dnsserver;
-#else
-static struct sockaddr_in g_dnsserver;
-#endif
+static union dns_server_u g_dns_server;
 
 /****************************************************************************
  * Private Functions
@@ -138,13 +122,8 @@ static FAR unsigned char *dns_parse_name(FAR unsigned char *query)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
 static int dns_send_query(int sd, FAR const char *name,
-                          FAR struct sockaddr_in6 *addr)
-#else
-static int dns_send_query(int sd, FAR const char *name,
-                          FAR struct sockaddr_in *addr)
-#endif
+                          FAR union dns_server_u *uaddr)
 {
   register FAR struct dns_header_s *hdr;
   FAR char *query;
@@ -153,6 +132,7 @@ static int dns_send_query(int sd, FAR const char *name,
   uint8_t seqno = g_seqno++;
   static unsigned char endquery[] = {0, 0, 1, 0, 1};
   char buffer[SEND_BUFFER_SIZE];
+  socklen_t addrlen;
   int errcode;
   int ret;
   int n;
@@ -185,8 +165,25 @@ static int dns_send_query(int sd, FAR const char *name,
 
   /* Send the request */
 
-  ret = sendto(sd, buffer, query + 5 - buffer, 0, (struct sockaddr*)addr,
-               ADDRLEN);
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (uaddr->addr.sa_family == AF_INET)
+#endif
+    {
+      addrlen = sizeof(struct sockaddr_in);
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      addrlen = sizeof(struct sockaddr_in6);
+    }
+#endif
+
+  ret = sendto(sd, buffer, query + 5 - buffer, 0, &uaddr->addr, addrlen);
 
   /* Return the negated errno value on sendto failure */
 
@@ -427,7 +424,7 @@ int dns_query(int sd, FAR const char *hostname, FAR in_addr_t *ipaddr)
     {
       /* Send the query */
 
-      ret = dns_send_query(sd, hostname, &g_dnsserver);
+      ret = dns_send_query(sd, hostname, &g_dns_server);
       if (ret < 0)
         {
           ndbg("ERROR: dns_send_query failed: %d\n", ret);
@@ -469,23 +466,64 @@ int dns_query(int sd, FAR const char *hostname, FAR in_addr_t *ipaddr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-void dns_setserver(FAR const struct in6_addr *dnsserver)
-#else
-void dns_setserver(FAR const struct in_addr *dnsserver)
-#endif
+int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-  g_dnsserver.sin6_family = AF_INET6;
-  g_dnsserver.sin6_port   = HTONS(53);
+  FAR uint16_t *pport;
+  size_t copylen;
 
-  memcpy(&g_dnsserver.sin6_addr, dnsserver, ADDRLEN);
-#else
-  g_dnsserver.sin_family  = AF_INET;
-  g_dnsserver.sin_port    = HTONS(53);
+  DEBUGASSERT(addr != NULL);
 
-  g_dnsserver.sin_addr.s_addr = dnsserver->s_addr;
+  /* Copy the new server IP address into our private global data structure */
+
+#ifdef CONFIG_NET_IPv4
+  /* Check for an IPv4 address */
+
+  if (addr->sa_family == AF_INET)
+    {
+      /* Set up for the IPv4 address copy */
+
+      copylen = sizeof(struct sockaddr_in);
+      pport   = &g_dns_server.ipv4.sin_port;
+    }
+  else
 #endif
+
+#ifdef CONFIG_NET_IPv6
+  /* Check for an IPv6 address */
+
+  if (addr->sa_family == AF_INET6)
+    {
+      /* Set up for the IPv6 address copy */
+
+      copylen = sizeof(struct sockaddr_in6);
+      pport   = &g_dns_server.ipv6.sin6_port;
+    }
+  else
+#endif
+    {
+      nvdbg("ERROR: Unsupported family: %d\n", addr->sa_family);
+      return -ENOSYS;
+    }
+
+  /* Copy the IP address */
+
+  if (addrlen < copylen)
+    {
+      nvdbg("ERROR: Invalid addrlen %ld for family %d\n",
+            (long)addrlen, addr->sa_family);
+      return -EINVAL;
+    }
+
+  memcpy(&g_dns_server.addr, addr, copylen);
+
+  /* A port number of zero means to use the default DNS server port number */
+
+  if (*pport == 0)
+    {
+      *pport = HTONS(53);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -496,15 +534,40 @@ void dns_setserver(FAR const struct in_addr *dnsserver)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-void dns_getserver(FAR struct in6_addr *dnsserver)
-#else
-void dns_getserver(FAR struct in_addr *dnsserver)
-#endif
+int dns_getserver(FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-  memcpy(dnsserver, &g_dnsserver.sin6_addr, ADDRLEN);
-#else
-  dnsserver->s_addr = g_dnsserver.sin_addr.s_addr;
+  socklen_t copylen;
+
+  DEBUGASSERT(addr != NULL && addrlen != NULL);
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (g_dns_server.addr.sa_family == AF_INET)
 #endif
+    {
+      copylen = sizeof(struct sockaddr_in);
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      copylen = sizeof(struct sockaddr_in6);
+    }
+#endif
+
+  /* Copy the DNS server address to the caller-provided buffer */
+
+  if (copylen > *addrlen)
+    {
+      nvdbg("ERROR: addrlen %ld too small for address family %d\n",
+            (long)addrlen, g_dns_server.addr.sa_family);
+      return -EINVAL;
+    }
+
+  memcpy(addr, &g_dns_server.addr, copylen);
+  *addrlen = copylen;
+  return OK;
 }

@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/socket.h>
 #include <netinet/in.h>
 
 #include <nuttx/net/netconfig.h>
@@ -131,15 +132,12 @@ extern "C"
  * Name: dns_setserver
  *
  * Description:
- *   Configure which DNS server to use for queries.
+ *   Configure which DNS server to use for queries.  Set the port number
+ *   to zero to use the default DNS server port.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-void dns_setserver(FAR const struct in6_addr *dnsserver);
-#else
-void dns_setserver(FAR const struct in_addr *dnsserver);
-#endif
+int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
  * Name: dns_getserver
@@ -149,11 +147,7 @@ void dns_setserver(FAR const struct in_addr *dnsserver);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-void dns_getserver(FAR struct in6_addr *dnsserver);
-#else
-void dns_getserver(FAR struct in_addr *dnsserver);
-#endif
+int dns_getserver(FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 
 #undef EXTERN
 #if defined(__cplusplus)
