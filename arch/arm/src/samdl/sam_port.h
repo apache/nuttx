@@ -76,9 +76,9 @@
  *   ------------ -----------------------------
  *   PORT Input:  MMRR .... .S.. .... ..PB BBBB
  *   PORT Output: MM.. .... D..V .... ..PB BBBB
- *   Peripheral:  MM.. FFF. .... II.. ..PB BBBB
+ *   Peripheral:  MM.. FFFO .... II.. ..PB BBBB
  *   ------------ -----------------------------
- *                MMRR FFF. DS.V II.. ..PB BBBB
+ *                MMRR FFFO DS.V II.. ..PB BBBB
  */
 
 /* Input/output/peripheral mode:
@@ -161,6 +161,23 @@
 #define PORT_FUNCF                 (PORT_PERIPHERAL | _PORT_FUNCF) /* Function F */
 #define PORT_FUNCG                 (PORT_PERIPHERAL | _PORT_FUNCG) /* Function G */
 #define PORT_FUNCH                 (PORT_PERIPHERAL | _PORT_FUNCH) /* Function H */
+
+/* Output and Input Buffer both enabled to let readback
+ *
+ *   MODE         BITFIELDS
+ *   ------------ -----------------------------
+ *                2222 1111 1111 1100 0000 0000
+ *                3210 9876 5432 1098 7654 3210
+ *   ------------ -----------------------------
+ *   PORT Input:  .... .... .... .... .... ....
+ *   PORT Output: .... .... .... .... .... ....
+ *   Peripheral:  .... ...O .... .... .... ....
+ */
+
+#define PORT_OUTREADBACK_SHIFT     (16)       /* Bit 16: Pin output and input buffer enabled */
+#define PORT_OUTREADBACK_MASK      (1 << PORT_OUTREADBACK_SHIFT)
+#  define PORT_OUTREADBACK_DISABLE (0 << PORT_OUTREADBACK_SHIFT)
+#  define PORT_OUTREADBACK_ENABLE  (1 << PORT_OUTREADBACK_SHIFT)
 
 /* Output drive control
  *

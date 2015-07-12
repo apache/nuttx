@@ -310,11 +310,26 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
   pin = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
   bit = (1 << pin);
 
+  /* If pin is output with readback then set the pin as output */
+
+  if ((pinset & PORT_OUTREADBACK_MASK) == PORT_OUTREADBACK_ENABLE)
+    {
+      putreg32(bit, base + SAM_PORT_DIRSET_OFFSET);
+    }
+
   /* Set the pin configuration.  This will be an peripheral with the
    * selected function.
    */
 
   regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_PMUXEN);
+
+  /* If pin is output with readback then enable the input buffer */
+
+  if ((pinset & PORT_OUTREADBACK_MASK) == PORT_OUTREADBACK_ENABLE)
+    {
+      regval |= PORT_WRCONFIG_INEN;
+    }
+
   if (pin > 16)
     {
        /* Select the upper half word and adjust the bit setting */
