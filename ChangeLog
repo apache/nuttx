@@ -10702,10 +10702,16 @@
 	  logic in preparation for IPv6 support (2015-07-12):
 	  - Rename include/nuttx/net/dnsclient.h to dns.h
 	  - Move internal DNS prototypes from dns.h to libc/netdb/lib_dns.h
-	  - Global standard DNS definitions from libc/netdb/dns_soccket.c to dns.h
-	  - Eliminate dns_gethostip().  This is now an internal part of gethostbyname()
+	  - Global standard DNS definitions from libc/netdb/dns_soccket.c to
+	    dns.h
+	  - Eliminate dns_gethostip().  This is now an internal part of
+	    gethostbyname()
 	  - Eliminate interface dns_whois().  Not needed in this new context.
 	* include/nuttx/net/ and libc/netdb: Modifications to DNS client logic
 	  and to dns_get/setserver() interfaces to support DNS clients at IPv6
-	  addresses (still no support for resolution to IPv6 addresses) (2015-07-12).
+	  addresses (still no support for resolution to IPv6 addresses)
+	  (2015-07-12).
+	* include/nuttx/net/ and libc/netdb: Implement the low-level network DNS
+	  packet protocol to request and receive IPv6 address mappings
+	  (2015-07-12).
  
