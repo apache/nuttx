@@ -1,19 +1,18 @@
 /****************************************************************************
- * libc/netdb/dns_gethostip.c
+ * include/nuttx/net/dns.h
+ * DNS resolver code header file.
  *
- *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Based heavily on portions of uIP:
+ * Inspired by/based on uIP logic by Adam Dunkels:
  *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2002-2003, Adam Dunkels.
- *   All rights reserved.
+ *   Copyright (c) 2002-2003, Adam Dunkels. All rights reserved.
+ *   Author Adam Dunkels <adam@dunkels.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -37,59 +36,128 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NET_DNS_H
+#define __INCLUDE_NUTTX_NET_DNS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/net/dnsclient.h>
+#include <netinet/in.h>
+
+#include <nuttx/net/netconfig.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+ /* If both IPv4 and IPv6 are enabled, the DNS client can support only one or
+ * the other.
+ */
+
+#if !defined(CONFIG_NETDB_DNSCLIENT_IPv4) && \
+    !defined(CONFIG_NETDB_DNSCLIENT_IPv6)
+#  ifdef CONFIG_NET_IPv6
+#     define CONFIG_NETDB_DNSCLIENT_IPv6 1
+#  else
+#     define CONFIG_NETDB_DNSCLIENT_IPv4 1
+#  endif
+#endif
+
+#define DNS_FLAG1_RESPONSE        0x80
+#define DNS_FLAG1_OPCODE_STATUS   0x10
+#define DNS_FLAG1_OPCODE_INVERSE  0x08
+#define DNS_FLAG1_OPCODE_STANDARD 0x00
+#define DNS_FLAG1_AUTHORATIVE     0x04
+#define DNS_FLAG1_TRUNC           0x02
+#define DNS_FLAG1_RD              0x01
+#define DNS_FLAG2_RA              0x80
+#define DNS_FLAG2_ERR_MASK        0x0f
+#define DNS_FLAG2_ERR_NONE        0x00
+#define DNS_FLAG2_ERR_NAME        0x03
 
 /****************************************************************************
- * Private Data
+ * Public Type Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+ /* The DNS message header */
+
+struct dns_header_s
+{
+  uint16_t id;
+  uint8_t  flags1;
+  uint8_t  flags2;
+  uint16_t numquestions;
+  uint16_t numanswers;
+  uint16_t numauthrr;
+  uint16_t numextrarr;
+};
+
+/* The DNS answer message structure */
+
+struct dns_answer_s
+{
+  /* DNS answer record starts with either a domain name or a pointer
+   * to a name already present somewhere in the packet.
+   */
+
+  uint16_t type;
+  uint16_t class;
+  uint16_t ttl[2];
+  uint16_t len;
+#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
+  struct in6_addr ipaddr;
+#else
+  struct in_addr ipaddr;
+#endif
+};
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: dns_gethostip
+ * Name: dns_setserver
  *
- * Descriptions:
- *   Combines the operations of dns_bind(), dns_query(), and
- *   dns_free() to obtain the the IP address ('ipaddr') associated with
- *   the 'hostname' in one operation.
+ * Description:
+ *   Configure which DNS server to use for queries.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-int dns_gethostip(FAR const char *hostname, FAR struct in6_addr *ipaddr)
+void dns_setserver(FAR const struct in6_addr *dnsserver);
 #else
-int dns_gethostip(FAR const char *hostname, FAR in_addr_t *ipaddr)
+void dns_setserver(FAR const struct in_addr *dnsserver);
 #endif
-{
-  int sockfd = -1;
-  int ret = ERROR;
 
-  dns_bind(&sockfd);
-  if (sockfd >= 0)
-    {
-      ret = dns_query(sockfd, hostname, ipaddr);
-      dns_free(&sockfd);
-    }
+/****************************************************************************
+ * Name: dns_getserver
+ *
+ * Description:
+ *   Obtain the currently configured DNS server.
+ *
+ ****************************************************************************/
 
-  return ret;
+#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
+void dns_getserver(FAR struct in6_addr *dnsserver);
+#else
+void dns_getserver(FAR struct in_addr *dnsserver);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_NET_DNS_H */

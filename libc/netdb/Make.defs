@@ -1,7 +1,7 @@
 ############################################################################
 # libc/netdb/Make.defs
 #
-#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
 ifneq ($(CONFIG_NETDB_HOSTFILE),y)
 CSRCS += lib_gethostbyname.c lib_gethostbynamer.c
 endif
-CSRCS += dns_socket.c dns_gethostip.c
+CSRCS += lib_dnsclient.c
 endif
 
 # Add the net directory to the build

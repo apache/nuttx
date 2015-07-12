@@ -1,13 +1,11 @@
 /****************************************************************************
- * libc/netdb/dns_socket.c
+ * libc/netdb/lib_dnsclient.c
  * DNS host name to IP address resolver.
  *
  * The uIP DNS resolver functions are used to lookup a hostname and
- * map it to a numerical IP address. It maintains a list of resolved
- * hostnames that can be queried. New hostnames can be resolved using the
- * dns_whois() function.
+ * map it to a numerical IP address.
  *
- *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based heavily on portions of uIP:
@@ -60,46 +58,24 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include <nuttx/net/dnsclient.h>
-#include <apps/netutils/netlib.h>
+#include <nuttx/net/dns.h>
+
+#include "netdb/lib_dns.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NETDB_DNSCLIENT_ENTRIES
-#  define RESOLV_ENTRIES 4
-#else /* CONFIG_NETDB_DNSCLIENT_ENTRIES */
-#  define RESOLV_ENTRIES CONFIG_NETDB_DNSCLIENT_ENTRIES
-#endif /* CONFIG_NETDB_DNSCLIENT_ENTRIES */
-
-#ifndef NULL
-#  define NULL (void *)0
-#endif /* NULL */
-
 /* The maximum number of retries when asking for a name */
 
-#define MAX_RETRIES 8
+#define MAX_RETRIES      8
 
-#define DNS_FLAG1_RESPONSE        0x80
-#define DNS_FLAG1_OPCODE_STATUS   0x10
-#define DNS_FLAG1_OPCODE_INVERSE  0x08
-#define DNS_FLAG1_OPCODE_STANDARD 0x00
-#define DNS_FLAG1_AUTHORATIVE     0x04
-#define DNS_FLAG1_TRUNC           0x02
-#define DNS_FLAG1_RD              0x01
-#define DNS_FLAG2_RA              0x80
-#define DNS_FLAG2_ERR_MASK        0x0f
-#define DNS_FLAG2_ERR_NONE        0x00
-#define DNS_FLAG2_ERR_NAME        0x03
+/* Buffer sizes */
 
 #define SEND_BUFFER_SIZE 64
+#define RECV_BUFFER_SIZE CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
 
-#ifdef CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
-#  define RECV_BUFFER_SIZE CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
-#else
-#  define RECV_BUFFER_SIZE 96
-#endif
+/* The size of an IP address */
 
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
 #  define ADDRLEN sizeof(struct sockaddr_in6)
@@ -110,53 +86,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* The DNS message header */
-
-struct dns_hdr
-{
-  uint16_t id;
-  uint8_t  flags1;
-  uint8_t  flags2;
-  uint16_t numquestions;
-  uint16_t numanswers;
-  uint16_t numauthrr;
-  uint16_t numextrarr;
-};
-
-/* The DNS answer message structure */
-
-struct dns_answer
-{
-  /* DNS answer record starts with either a domain name or a pointer
-   * to a name already present somewhere in the packet.
-   */
-
-  uint16_t type;
-  uint16_t class;
-  uint16_t ttl[2];
-  uint16_t len;
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-  struct in6_addr ipaddr;
-#else
-  struct in_addr ipaddr;
-#endif
-};
-
-struct namemap
-{
-  uint8_t state;
-  uint8_t tmr;
-  uint8_t retries;
-  uint8_t seqno;
-  uint8_t err;
-  char name[32];
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-  struct in6_addr ipaddr;
-#else
-  struct in_addr ipaddr;
-#endif
-};
 
 /****************************************************************************
  * Private Data
@@ -210,24 +139,26 @@ static FAR unsigned char *dns_parse_name(FAR unsigned char *query)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-static int dns_send_query(int sockfd, FAR const char *name,
+static int dns_send_query(int sd, FAR const char *name,
                           FAR struct sockaddr_in6 *addr)
 #else
-static int dns_send_query(int sockfd, FAR const char *name,
+static int dns_send_query(int sd, FAR const char *name,
                           FAR struct sockaddr_in *addr)
 #endif
 {
-  register FAR struct dns_hdr *hdr;
+  register FAR struct dns_header_s *hdr;
   FAR char *query;
   FAR char *nptr;
   FAR const char *nameptr;
   uint8_t seqno = g_seqno++;
   static unsigned char endquery[] = {0, 0, 1, 0, 1};
   char buffer[SEND_BUFFER_SIZE];
+  int errcode;
+  int ret;
   int n;
 
-  hdr               = (FAR struct dns_hdr *)buffer;
-  memset(hdr, 0, sizeof(struct dns_hdr));
+  hdr               = (FAR struct dns_header_s *)buffer;
+  memset(hdr, 0, sizeof(struct dns_header_s));
   hdr->id           = htons(seqno);
   hdr->flags1       = DNS_FLAG1_RD;
   hdr->numquestions = HTONS(1);
@@ -252,8 +183,21 @@ static int dns_send_query(int sockfd, FAR const char *name,
 
   memcpy(query, endquery, 5);
 
-  return sendto(sockfd, buffer, query + 5 - buffer,
-                0, (struct sockaddr*)addr, ADDRLEN);
+  /* Send the request */
+
+  ret = sendto(sd, buffer, query + 5 - buffer, 0, (struct sockaddr*)addr,
+               ADDRLEN);
+
+  /* Return the negated errno value on sendto failure */
+
+  if (ret < 0)
+    {
+      errcode = get_errno();
+      ndbg("ERROR: sendto failed: %d\n", errcode);
+      return -errcode;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -267,41 +211,45 @@ static int dns_send_query(int sockfd, FAR const char *name,
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
 #  error "Not implemented"
 #else
-static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
+static int dns_recv_response(int sd, FAR struct sockaddr_in *addr)
 #endif
 {
   FAR unsigned char *nameptr;
   char buffer[RECV_BUFFER_SIZE];
-  FAR struct dns_answer *ans;
-  FAR struct dns_hdr *hdr;
+  FAR struct dns_answer_s *ans;
+  FAR struct dns_header_s *hdr;
 #if 0 /* Not used */
   uint8_t nquestions;
 #endif
   uint8_t nanswers;
+  int errcode;
   int ret;
 
   /* Receive the response */
 
-  ret = recv(sockfd, buffer, RECV_BUFFER_SIZE, 0);
+  ret = recv(sd, buffer, RECV_BUFFER_SIZE, 0);
   if (ret < 0)
     {
-      return ret;
+      errcode = get_errno();
+      ndbg("ERROR: recv failed: %d\n", errcode);
+      return -errcode;
     }
 
-  hdr = (FAR struct dns_hdr *)buffer;
+  hdr = (FAR struct dns_header_s *)buffer;
 
-  ndbg("ID %d\n", htons(hdr->id));
-  ndbg("Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
-  ndbg("Error %d\n", hdr->flags2 & DNS_FLAG2_ERR_MASK);
-  ndbg("Num questions %d, answers %d, authrr %d, extrarr %d\n",
-       htons(hdr->numquestions), htons(hdr->numanswers),
-       htons(hdr->numauthrr), htons(hdr->numextrarr));
+  nvdbg("ID %d\n", htons(hdr->id));
+  nvdbg("Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
+  nvdbg("Error %d\n", hdr->flags2 & DNS_FLAG2_ERR_MASK);
+  nvdbg("Num questions %d, answers %d, authrr %d, extrarr %d\n",
+        htons(hdr->numquestions), htons(hdr->numanswers),
+        htons(hdr->numauthrr), htons(hdr->numextrarr));
 
-  /* Check for error. If so, call callback to inform */
+  /* Check for error */
 
   if ((hdr->flags2 & DNS_FLAG2_ERR_MASK) != 0)
     {
-      return ERROR;
+      ndbg("ERROR: DNS reported error: flags2=%02x\n", hdr->flags2);
+      return -EPROTO;
     }
 
   /* We only care about the question(s) and the answers. The authrr
@@ -352,7 +300,7 @@ static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
           /* Compressed name. */
 
           nameptr += 2;
-          ndbg("Compressed answer\n");
+          nvdbg("Compressed answer\n");
         }
       else
         {
@@ -361,11 +309,11 @@ static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
           nameptr = dns_parse_name(nameptr);
         }
 
-      ans = (struct dns_answer *)nameptr;
-      ndbg("Answer: type %x, class %x, ttl %x, length %x \n", /* 0x%08X\n", */
-           htons(ans->type), htons(ans->class),
-           (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
-           htons(ans->len) /* , ans->ipaddr.s_addr */);
+      ans = (struct dns_answer_s *)nameptr;
+      nvdbg("Answer: type %x, class %x, ttl %x, length %x \n", /* 0x%08X\n", */
+            htons(ans->type), htons(ans->class),
+            (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
+            htons(ans->len) /* , ans->ipaddr.s_addr */);
 
       /* Check for IP address type and Internet class. Others are discarded. */
 
@@ -375,11 +323,11 @@ static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
         {
           ans->ipaddr.s_addr = *(FAR uint32_t *)(nameptr + 10);
 
-          ndbg("IP address %d.%d.%d.%d\n",
-               (ans->ipaddr.s_addr       ) & 0xff,
-               (ans->ipaddr.s_addr >> 8  ) & 0xff,
-               (ans->ipaddr.s_addr >> 16 ) & 0xff,
-               (ans->ipaddr.s_addr >> 24 ) & 0xff);
+          nvdbg("IP address %d.%d.%d.%d\n",
+                (ans->ipaddr.s_addr       ) & 0xff,
+                (ans->ipaddr.s_addr >> 8  ) & 0xff,
+                (ans->ipaddr.s_addr >> 16 ) & 0xff,
+                (ans->ipaddr.s_addr >> 24 ) & 0xff);
 
           /* TODO: we should really check that this IP address is the one
            * we want.
@@ -394,7 +342,7 @@ static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
         }
     }
 
-  return ERROR;
+  return -EADDRNOTAVAIL;
 }
 
 /****************************************************************************
@@ -405,29 +353,33 @@ static int dns_recv_response(int sockfd, FAR struct sockaddr_in *addr)
  * Name: dns_bind
  *
  * Description:
- *   Initialize the DNS resolver using the caller provided socket.
+ *   Initialize the DNS resolver and return a socket bound to the DNS name
+ *   server.  The name server was previously selected via dns_server().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, the bound, non-negative socket descriptor is returned.  A
+ *   negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int dns_bind(FAR int *sockfd)
+int dns_bind(void)
 {
   struct timeval tv;
+  int errcode;
+  int sd;
   int ret;
-
-  /* If the socket is already open, then close it now */
-
-  if (*sockfd >= 0)
-    {
-      dns_free(sockfd);
-    }
 
   /* Create a new socket */
 
-  *sockfd = socket(PF_INET, SOCK_DGRAM, 0);
-  if (*sockfd < 0)
+  sd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (sd < 0)
     {
-      ndbg("ERROR: socket() failed: %d\n", errno);
-      return ERROR;
+      errcode = get_errno();
+      ndbg("ERROR: socket() failed: %d\n", errcode);
+      return -errcode;
     }
 
   /* Set up a receive timeout */
@@ -435,44 +387,23 @@ int dns_bind(FAR int *sockfd)
   tv.tv_sec  = 30;
   tv.tv_usec = 0;
 
-  ret = setsockopt(*sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv,
-                   sizeof(struct timeval));
-
+  ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
   if (ret < 0)
     {
-      ndbg("ERROR: setsockopt() failed: %d\n", errno);
-      close(*sockfd);
-      *sockfd = -1;
-      return ERROR;
+      errcode = get_errno();
+      ndbg("ERROR: setsockopt() failed: %d\n", errcode);
+      close(sd);
+      return -errcode;
     }
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: dns_free
- *
- * Description:
- *   Release the DNS resolver by closing the socket.
- *
- ****************************************************************************/
-
-int dns_free(FAR int *sockfd)
-{
-  if (*sockfd >= 0)
-    {
-      close(*sockfd);
-      *sockfd = -1;
-    }
-
-  return OK;
+  return sd;
 }
 
 /****************************************************************************
  * Name: dns_query
  *
  * Description:
- *   Using the DNS resolver socket (sockfd), look up the the 'hostname', and
+ *   Using the DNS resolver socket (sd), look up the the 'hostname', and
  *   return its IP address in 'ipaddr'
  *
  * Returned Value:
@@ -480,35 +411,54 @@ int dns_free(FAR int *sockfd)
  *
  ****************************************************************************/
 
-int dns_query(int sockfd, FAR const char *hostname, FAR in_addr_t *ipaddr)
+int dns_query(int sd, FAR const char *hostname, FAR in_addr_t *ipaddr)
 {
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
   struct sockaddr_in6 addr;
 #else
   struct sockaddr_in addr;
 #endif
+  int retries;
+  int ret;
 
-  /* First check if the host is an IP address. */
+  /* Loop while receive timeout errors occur and there are remaining retries */
 
-  if (!netlib_ipaddrconv(hostname, (uint8_t*)ipaddr))
+  for (retries = 0; retries < 3; retries++)
     {
-      /* 'host' does not point to a valid address string.  Try to resolve
-       *  the host name to an IP address.
-       */
+      /* Send the query */
 
-      if (dns_whois(sockfd, hostname, &addr) < 0)
+      ret = dns_send_query(sd, hostname, &g_dnsserver);
+      if (ret < 0)
         {
-          /* Needs to set the errno here */
-
-          return ERROR;
+          ndbg("ERROR: dns_send_query failed: %d\n", ret);
+          return ret;
         }
 
-      /* Save the host address -- Needs fixed for IPv6 */
+      /* Obtain the response */
 
-      *ipaddr = addr.sin_addr.s_addr;
-  }
+      ret = dns_recv_response(sd, &addr);
+      if (ret >= 0)
+        {
+          /* Response received successfully */
+          /* Save the host address -- Needs fixed for IPv6 */
 
-  return OK;
+          *ipaddr = addr.sin_addr.s_addr;
+          return OK;
+        }
+
+      /* Handler errors */
+
+      ndbg("ERROR: dns_recv_response failed: %d\n", ret);
+
+      if (ret != -EAGAIN)
+        {
+          /* Some failure other than receive timeout occurred */
+
+          return ret;
+        }
+    }
+
+  return -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -557,52 +507,4 @@ void dns_getserver(FAR struct in_addr *dnsserver)
 #else
   dnsserver->s_addr = g_dnsserver.sin_addr.s_addr;
 #endif
-}
-
-/****************************************************************************
- * Name: dns_whois
- *
- * Description:
- *   Get the binding for 'name' using the DNS server accessed via 'sockfd'
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
-int dns_whois(int sockfd, FAR const char *name,
-                     FAR struct sockaddr_in6 *addr)
-#else
-int dns_whois(int sockfd, FAR const char *name,
-                     FAR struct sockaddr_in *addr)
-#endif
-{
-  int retries;
-  int ret;
-
-  /* Loop while receive timeout errors occur and there are remaining retries */
-
-  for (retries = 0; retries < 3; retries++)
-    {
-      ret = dns_send_query(sockfd, name, &g_dnsserver);
-      if (ret < 0)
-        {
-          return ERROR;
-        }
-
-      ret = dns_recv_response(sockfd, addr);
-      if (ret >= 0)
-        {
-          /* Response received successfully */
-
-          return OK;
-        }
-
-      else if (errno != EAGAIN)
-        {
-          /* Some failure other than receive timeout occurred */
-
-          return ERROR;
-        }
-    }
-
-  return ERROR;
 }

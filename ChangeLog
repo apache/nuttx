@@ -10698,4 +10698,10 @@
 	  lookup before consulting the host table (if so enabled) (2015-07-10).
 	* arch/arm/src/samdl/chip/saml_usb.h:  Several fixes to register
 	  definitions and types. From Janne Rosberg (2015-07-10).
-
+	* include/nuttx/net/ and libc/netdb: Repartitioning of DNS client
+	  logic in preparation for IPv6 support (2015-07-12):
+	  - Rename include/nuttx/net/dnsclient.h to dns.h
+	  - Move internal DNS prototypes from dns.h to libc/netdb/lib_dns.h
+	  - Global standard DNS definitions from libc/netdb/dns_soccket.c to dns.h
+	  - Eliminate dns_gethostip().  This is now an internal part of gethostbyname()
+	  - Eliminate interface dns_whois().  Not needed in this new context.

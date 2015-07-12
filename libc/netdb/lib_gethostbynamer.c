@@ -47,9 +47,10 @@
 
 #include <arpa/inet.h>
 
-#include <nuttx/net/dnsclient.h>
+#include <nuttx/net/dns.h>
 
 #include "lib_internal.h"
+#include "netdb/lib_dns.h"
 
 #ifdef CONFIG_LIBC_NETDB
 
@@ -191,6 +192,43 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
 }
 
 /****************************************************************************
+ * Name: lib_dns_query
+ *
+ * Descriptions:
+ *   Combines the operations of dns_bind(), dns_query(), and dns_free() to
+ *   obtain the IP address ('ipaddr') associated with the 'hostname' in one
+ *   operation.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDB_DNSCLIENT_IPv6
+static int lib_dns_query(FAR const char *hostname, FAR struct in6_addr *ipaddr)
+#else
+static int lib_dns_query(FAR const char *hostname, FAR in_addr_t *ipaddr)
+#endif
+{
+  int sd;
+  int ret;
+
+  /* Create and bind a socket to the DNS server */
+
+  sd = dns_bind();
+  if (sd < 0)
+    {
+      return sd; 
+    }
+
+  /* Perform the query to get the IP address */
+
+  ret = dns_query(sd, hostname, ipaddr);
+
+  /* Release the socket */
+
+  close(sd);
+  return ret;
+}
+
+/****************************************************************************
  * Name: lib_dns_lookup
  *
  * Description:
@@ -242,11 +280,11 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
 #ifdef CONFIG_NETDB_DNSCLIENT_IPv6
   addrlen  = sizeof(struct in6_addr);
   addrtype = AF_INET6;
-  ret      = dns_gethostip(name, (FAR struct in6_addr *)ptr);
+  ret      = lib_dns_query(name, (FAR struct in6_addr *)ptr);
 #else
   addrlen  = sizeof(struct in6_addr);
   addrtype = AF_INET;
-  ret      = dns_gethostip(name, (FAR in_addr_t *)ptr);
+  ret      = lib_dns_query(name, (FAR in_addr_t *)ptr);
 #endif
 
   /* Was the DNS lookup successful? */

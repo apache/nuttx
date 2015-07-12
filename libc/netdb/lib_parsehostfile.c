@@ -92,6 +92,20 @@ int h_errno;
 
 /****************************************************************************
  * Name: lib_skipspaces
+ *
+ * Description:
+ *   Read from the 'stream' until a non-whitespace character is read or the
+ *   end-of-line or end-of-file is encountered.
+ *
+ * Input Parameters:
+ *   stream - The stream to read from
+ *   nread  - A count to the pointer of characters read.  Will be
+ *     incremented after each successful character read.
+ *
+ * Returned Value:
+ *   The first non-whitespace character read.  This will be the newline
+ *   character of EROF if the end-of-line or end-of-file is encountered.
+ *
  ****************************************************************************/
 
 static int lib_skipspaces(FAR FILE *stream, FAR size_t *nread)
@@ -115,6 +129,20 @@ static int lib_skipspaces(FAR FILE *stream, FAR size_t *nread)
 
 /****************************************************************************
  * Name: lib_skipline
+ *
+ * Description:
+ *   Read from the 'stream' until the end-of-line or end-of-file is
+ *   encountered.
+ *
+ * Input Parameters:
+ *   stream - The stream to read from
+ *   nread  - A count to the pointer of characters read.  Will be
+ *     incremented after each successful character read.
+ *
+ * Returned Value:
+ *   The character that terminated the line.  This may be either the newline
+ *   character or EOF.
+ *
  ****************************************************************************/
 
 static int lib_skipline(FAR FILE *stream, FAR size_t *nread)
@@ -139,12 +167,26 @@ static int lib_skipline(FAR FILE *stream, FAR size_t *nread)
 /****************************************************************************
  * Name: lib_copystring
  *
+ * Description:
+ *   Read from the 'stream' And copy each byte to the buffer at 'ptr' until
+ *   either a whitespace delimiter, the end-of-line, or the end-of-file is
+ *   encountered.
+ *
+ * Input Parameters:
+ *   stream - The stream to read from
+ *   ptr - The pointer to the buffer to receive the string
+ *   nread  - A count to the pointer of characters read.  Will be
+ *     incremented after each successful character read.
+ *   buflen - The size of the buffer in bytes
+ *   terminator - The actual character the terminated the copy is returned
+ *     to this location.
+ *
  * Returned Value:
  *  Number of bytes written to the buffer on success.  0 if the end of
  *  file is encountered (or a read error occurs).  A negated errno value on
  *  any failure:
  *
- *    -ERANGE - Insufficient buffer space
+ *    -ERANGE - Insufficient buffer space to hold the string.
  *
  ****************************************************************************/
 
