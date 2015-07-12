@@ -153,7 +153,7 @@
 #  define I2C_CTRLA_MODE_MASTER    (5 << I2C_CTRLA_MODE_SHIFT) /* I2C master mode */
 #define I2C_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define I2C_CTRLA_PINOUT           (1 << 16) /* Bit 16: Transmit data pinout */
-#  define I2C_CTRLA_1WIRE          (0)              /* 4-wire operation disable */
+#  define I2C_CTRLA_2WIRE          (0)              /* 4-wire operation disable */
 #  define I2C_CTRLA_4WIRE          I2C_CTRLA_PINOUT /* 4-wire operation enable */
 #define I2C_CTRLA_SDAHOLD_SHIFT    (20)      /* Bits 20-21: SDA Hold Time */
 #define I2C_CTRLA_SDAHOLD_MASK     (3 << I2C_CTRLA_SDAHOLD_SHIFT)
