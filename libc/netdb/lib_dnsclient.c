@@ -49,6 +49,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -94,12 +95,90 @@ union dns_server_u
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_seqno;
+static bool    g_dns_address;     /* We have the address of the DNS server */
+static uint8_t g_seqno;           /* Sequence number of the next request */
+
+/* The DNS server address */
+
 static union dns_server_u g_dns_server;
+
+#ifdef CONFIG_NETDB_DNSSERVER_IPv6
+/* This is the default IPv6 DNS server address */
+
+static const uint16_t g_ipv6_hostaddr[8] =
+{
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_1),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_2),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_3),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_4),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_5),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_6),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_7),
+  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_8)
+};
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: dns_initialize
+ *
+ * Description:
+ *   Make sure that the DNS client has been properly initialized for use.
+ *
+ ****************************************************************************/
+
+static bool dns_initialize(void)
+{
+  /* Has the DNS server IP address been assigned? */
+
+  if (!g_dns_address)
+    {
+#if defined(CONFIG_NETDB_DNSSERVER_IPv4)
+       struct sockaddr_in addr4;
+       int ret;
+
+       /* No, configure the default IPv4 DNS server address */
+
+       addr4.sin_family      = AF_INET;
+       addr4.sin_port        = DNS_DEFAULT_PORT;
+       addr4.sin_addr.s_addr = HTONL(CONFIG_NETDB_DNSSERVER_IPv4ADDR);
+
+       ret = dns_setserver((FAR struct sockaddr *)&addr4,
+                           sizeof(struct sockaddr_in));
+       if (ret < 0)
+         {
+           return false;
+         }
+
+#elif defined(CONFIG_NETDB_DNSSERVER_IPv6)
+       struct sockaddr_in6 addr6;
+       int ret;
+
+       /* No, configure the default IPv6 DNS server address */
+
+       addr6.sin6_family = AF_INET6;
+       addr6.sin6_port   = DNS_DEFAULT_PORT;
+       memcpy(addr6.sin6_addr.s6_addr, g_ipv6_hostaddr, 16);
+
+       ret = dns_setserver((FAR struct sockaddr *)&addr6,
+                           sizeof(struct sockaddr_in6));
+       if (ret < 0)
+         {
+           return false;
+         }
+
+#else
+       /* No, then we are not ready to perform DNS queries */
+
+       return false;
+#endif
+    }
+
+  return true;
+}
 
 /****************************************************************************
  * Name: dns_parse_name
@@ -144,7 +223,7 @@ static int dns_send_query(int sd, FAR const char *name,
   FAR uint8_t *dest;
   FAR uint8_t *nptr;
   FAR const char *src;
-  uint8_t seqno = g_seqno++;
+  uint8_t seqno = g_seqno++;  /* REVISIT: Not thread safe */
   uint8_t buffer[SEND_BUFFER_SIZE];
   socklen_t addrlen;
   int errcode;
@@ -435,6 +514,14 @@ int dns_bind(void)
   int sd;
   int ret;
 
+  /* Has the DNS client been properly initialized? */
+
+  if (!dns_initialize())
+    {
+      ndbg("ERROR: DNS client has not been initialized\n");
+      return -EDESTADDRREQ;
+    }
+
   /* Create a new socket */
 
   sd = socket(PF_INET, SOCK_DGRAM, 0);
@@ -667,9 +754,12 @@ int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (*pport == 0)
     {
-      *pport = HTONS(53);
+      *pport = HTONS(DNS_DEFAULT_PORT);
     }
 
+  /* We now have a valid DNS address */
+
+  g_dns_address = true;
   return OK;
 }
 

@@ -123,6 +123,10 @@
 #define DNS_FLAG2_ERR_NONE        0x00
 #define DNS_FLAG2_ERR_NAME        0x03
 
+/* Default DNS server port number */
+
+#define DNS_DEFAULT_PORT          53
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
