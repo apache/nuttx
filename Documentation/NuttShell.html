@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: July 4, 2015</p>
+      <p>Last Updated: July 13, 2015</p>
     </td>
   </tr>
 </table>
@@ -305,115 +305,121 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdping">2.37 Check Network Peer (ping/ping6)</a>
+    <a href="#cmdnslookup">2.37 Lookup a network address (nslookup)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdpoweroff">2.38 Shut the system down (poweroff)</a>
+    <a href="#cmdping">2.38 Check Network Peer (ping/ping6)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdput">2.39 Send File Via TFTP (put)</a>
+    <a href="#cmdpoweroff">2.39 Shut the system down (poweroff)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdpwd">2.40 Show Current Working Directory (pwd)</a>
+    <a href="#cmdput">2.40 Send File Via TFTP (put)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdreboot">2.41 Reset and reboot the system (reboot)</a>
+    <a href="#cmdpwd">2.41 Show Current Working Directory (pwd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrm">2.42 Remove a File (rm)</a>
+    <a href="#cmdreboot">2.42 Reset and reboot the system (reboot)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmdir">2.43 Remove a Directory (rmdir)</a>
+    <a href="#cmdrm">2.43 Remove a File (rm)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdset">2.44 Set an Environment Variable (set)</a>
+    <a href="#cmdrmdir">2.44 Remove a Directory (rmdir)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsh">2.45 Execute an NSH Script (sh)</a>
+    <a href="#cmdset">2.45 Set an Environment Variable (set)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdshutdown">2.46 Shut the system down (shutdown)</a>
+    <a href="#cmdsh">2.46 Execute an NSH Script (sh)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.47 Wait for Seconds (sleep)</a>
+    <a href="#cmdshutdown">2.47 Shut the system down (shutdown)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.48 Unmount a File System (umount)</a>
+    <a href="#cmdsleep">2.48 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.49 Print system information (uname)</a>
+    <a href="#cmdunmount">2.49 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.50 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.50 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.51 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.51 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.52 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.52 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.53 Wait for Microseconds (usleep)</a>
+    <a href="#cmdurlencode">2.53 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.54 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.54 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.55 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.55 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.56 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2115,7 +2121,24 @@ nfsmount &lt;server-address&gt; &lt;mount-point&gt; &lt;remote-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdping"><h2>2.37 Check Network Peer (ping/ping6)</h2></a>
+    <a name="cmdnslookup"><h2>2.37 Lookup a network address (nslookup)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+nslookup &lt;host-name&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Lookup and print the IP address associated with <code>&lt;host-name&gt;</code>.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdping"><h2>2.38 Check Network Peer (ping/ping6)</h2></a>
   </td>
   </tr>
 </table>
@@ -2152,7 +2175,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdpoweroff"><h2>2.38 Shut the system down (poweroff)</h2></a>
+    <a name="cmdpoweroff"><h2>2.39 Shut the system down (poweroff)</h2></a>
   </td>
   </tr>
 </table>
@@ -2174,7 +2197,7 @@ poweroff
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdput"><h2>2.39 Send File Via TFTP (put)</h2></a>
+    <a name="cmdput"><h2>2.40 Send File Via TFTP (put)</h2></a>
   </td>
   </tr>
 </table>
@@ -2209,7 +2232,7 @@ put [-b|-n] [-f &lt;remote-path&gt;] -h &lt;ip-address&gt; &lt;local-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdpwd"><h2>2.40 Show Current Working Directory (pwd)</h2></a>
+    <a name="cmdpwd"><h2>2.41 Show Current Working Directory (pwd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2239,7 +2262,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdreboot"><h2>2.41 Reboot the system (reboot)</h2></a>
+    <a name="cmdreboot"><h2>2.42 Reboot the system (reboot)</h2></a>
   </td>
   </tr>
 </table>
@@ -2261,7 +2284,7 @@ reboot
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrm"><h2>2.42 Remove a File (rm)</h2></a>
+    <a name="cmdrm"><h2>2.43 Remove a File (rm)</h2></a>
   </td>
 </tr>
 </table>
@@ -2295,7 +2318,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmdir"><h2>2.43 Remove a Directory (rmdir)</h2></a>
+    <a name="cmdrmdir"><h2>2.44 Remove a Directory (rmdir)</h2></a>
   </td>
 </tr>
 </table>
@@ -2330,7 +2353,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdset"><h2>2.44 Set an Environment Variable (set)</h2></a>
+    <a name="cmdset"><h2>2.45 Set an Environment Variable (set)</h2></a>
   </td>
   </tr>
 </table>
@@ -2356,7 +2379,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsh"><h2>2.45 Execute an NSH Script (sh)</h2></a>
+    <a name="cmdsh"><h2>2.46 Execute an NSH Script (sh)</h2></a>
   </td>
   </tr>
 </table>
@@ -2375,7 +2398,7 @@ sh &lt;script-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdshutdown"><h2>2.46 Shut the system down (shutdown)</h2></a>
+    <a name="cmdshutdown"><h2>2.47 Shut the system down (shutdown)</h2></a>
   </td>
   </tr>
 </table>
@@ -2396,7 +2419,7 @@ shutdown [--reboot]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.47 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdsleep"><h2>2.48 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2413,7 +2436,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.48 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.49 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2443,7 +2466,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.49 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.50 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -2510,7 +2533,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.50 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.51 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2536,7 +2559,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.51 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.52 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2553,7 +2576,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.52 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.53 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2570,7 +2593,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.53 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.54 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2587,7 +2610,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget">2.54 Get File Via HTTP (wget)</a>
+    <a name="cmdwget">2.55 Get File Via HTTP (wget)</a>
   </td>
   </tr>
 </table>
@@ -2614,7 +2637,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.55 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.56 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2856,6 +2879,11 @@ nsh>
     <td><b><code>nfsmount</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NFS</code></td>
     <td><code>CONFIG_NSH_DISABLE_NFSMOUNT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>nslookup</code></b></td>
+    <td><code>CONFIG_LIBC_NETDB</code> &amp;&amp; <code>CONFIG_NETDB_DNSCLIENT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_NSLOOKUP</code></td>
   </tr>
   <tr>
     <td><b><code>ping</code></b></td>
@@ -4371,10 +4399,10 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NOMAC</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_READLINE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
 </ul></td>
 <td width="33%" valign="top">
 <ul>
-  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSMOUNTPT</code></a></li>
@@ -4433,10 +4461,10 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdmbhw"><code>mw</code></a></li>
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
   <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
+  <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
   <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
   <li><a href="#custinit"><code>mkromfsimg.sh</code></a></li>
   <li><a href="#cmdmount"><code>mount</code></a></li>
@@ -4454,6 +4482,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custonshlib"><code>nsh_romfsetc()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_telnetstart()</code></a></li>
   <li><a href="#custonshlib"><code>nshlib</code></a></li>
+  <li><a href="#cmdnslookup"><code>nslookup</code></a></li>
   <li><a href="#environvars"><code>OLDPWD</code></a></li>
   <li><a href="#overview">Overview</a></li>
   <li><a href="#cmdping"><code>ping</code></a></li>
