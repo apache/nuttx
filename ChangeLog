@@ -10714,4 +10714,10 @@
 	* include/nuttx/net/ and libc/netdb: Implement the low-level network DNS
 	  packet protocol to request and receive IPv6 address mappings
 	  (2015-07-12).
- 
+	* libc/netdb:  Add a default value for DNS server IP address.  Make
+	  sure that the IP address has been initialized before permitting DNS
+	  queries (2015-07-13).
+	* libc/netdb:  Add support for a DNS host name resulution cache.  This
+	  can save a lot of DNS name server lookups (but might also have the
+	  negative consequence of using stale IP address mappings (2015-07-13).
+

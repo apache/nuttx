@@ -66,6 +66,14 @@
 #  define CONFIG_NETDB_DNSCLIENT_MAXRESPONSE 96
 #endif
 
+#ifndef CONFIG_NETDB_DNSCLIENT_NAMESIZE
+#  define CONFIG_NETDB_DNSCLIENT_NAMESIZE 32
+#endif
+
+#ifndef CONFIG_NETDB_DNSCLIENT_LIFESEC
+#  define CONFIG_NETDB_DNSCLIENT_LIFESEC 3600
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -104,6 +112,15 @@ int dns_bind(void);
  *   Using the DNS resolver socket (sd), look up the the 'hostname', and
  *   return its IP address in 'ipaddr'
  *
+ * Input Parameters:
+ *   sd       - The socket descriptor previously initialized by dsn_bind().
+ *   hostname - The hostname string to be resolved.
+ *   addr     - The location to return the IP address associated with the
+ *     hostname
+ *   addrlen  - On entry, the size of the buffer backing up the 'addr'
+ *     pointer.  On return, this location will hold the actual size of
+ *     the returned address.
+ *
  * Returned Value:
  *   Returns zero (OK) if the query was successful.
  *
@@ -111,6 +128,33 @@ int dns_bind(void);
 
 int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
               FAR socklen_t *addrlen);
+
+/****************************************************************************
+ * Name: dns_find_answer
+ *
+ * Description:
+ *   Check if we already have the resolved hostname address in the cache.
+ *
+ * Input Parameters:
+ *   hostname - The hostname string to be resolved.
+ *   addr     - The location to return the IP address associated with the
+ *     hostname
+ *   addrlen  - On entry, the size of the buffer backing up the 'addr'
+ *     pointer.  On return, this location will hold the actual size of
+ *     the returned address.
+ *
+ * Returned Value:
+ *   If the host name was successfully found in the DNS name resolution
+ *   cache, zero (OK) will be returned.  Otherwise, some negated errno
+ *   value will be returned, typically -ENOENT meaning that the hostname
+ *   was not found in the cache.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
+int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
+                    FAR socklen_t *addrlen);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

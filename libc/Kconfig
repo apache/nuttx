@@ -548,9 +548,41 @@ config NETDB_DNSCLIENT_ENTRIES
 	int "Number of DNS resolver entries"
 	default 0 if DEFAULT_SMALL
 	default 8 if !DEFAULT_SMALL
+	range 0 255
 	---help---
 		Number of cached DNS resolver entries.  Default: 8.  Zero disables
 		all cached name resolutions.
+
+		Disabling the DNS cache means that each access call to
+		gethostbyname() will result in a new DNS network query.  If
+		CONFIG_NETDB_DNSCLIENT_ENTRIES is non-zero, then entries will be
+		cached and if the name mapping can be found in that cache, the
+		network query can be avoid.  Of course, this is only useful if you
+		query the same name often and if the IP address of the name is
+		stable.  If the IP address can change, then cachin DNS address
+		might have undesirable side-effects (see help for
+		CONFIG_NETDB_DNSCLIENT_LIFESEC).
+
+config NETDB_DNSCLIENT_NAMESIZE
+	int "Max size of a cached hostname"
+	default 32
+	---help---
+		The size of a hostname string in the DNS resolver cache is fixed.
+		This setting provides the maximum size of a hostname.  Names longer
+		than this will be aliased!  Default: 32
+
+config NETDB_DNSCLIENT_LIFESEC
+	int "Life of a DNS cache entry (seconds)"
+	default 3600
+	---help---
+		Cached entries in the name resolution cache older than this will not
+		be used.  Default: 1 hour.  Zero means that entries will not expire.
+
+		Small values of CONFIG_NETDB_DNSCLIENT_LIFESEC may result in more
+		network DNS queries; larger values can make a host unreachable for
+		the entire duration of the timeout value.  This might happen, for
+		example, if the remote host was assigned a different IP address by
+		a DHCP server.
 
 config NETDB_DNSCLIENT_MAXRESPONSE
 	int "Max response size"

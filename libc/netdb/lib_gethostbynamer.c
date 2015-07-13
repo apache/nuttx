@@ -195,6 +195,112 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
 }
 
 /****************************************************************************
+ * Name: lib_find_answer
+ *
+ * Description:
+ *   Check if we previously resolved this hostname and if that resolved
+ *   address is already available in the DNS cache.
+ *
+ * Input Parameters:
+ *   name - The name of the host to find.
+ *   host - Caller provided location to return the host data.
+ *   buf - Caller provided buffer to hold string data associated with the
+ *     host data.
+ *   buflen - The size of the caller-provided buffer
+ *
+ * Returned Value:
+ *   Zero (0) is returned if the DNS lookup was successful.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDB_DNSCLIENT
+static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
+                           FAR char *buf, size_t buflen)
+{
+  FAR struct hostent_info_s *info;
+  FAR char *ptr;
+  socklen_t addrlen;
+  int addrtype;
+  int namelen;
+  int ret;
+
+  /* Verify that we have a buffer big enough to get started (it still may not
+   * be big enough).
+   */
+
+ if (buflen <= sizeof(struct hostent_info_s))
+   {
+     return -ERANGE;
+   }
+
+  /* Initialize buffers */
+
+  info    = (FAR struct hostent_info_s *)buf;
+  ptr     = info->hi_data;
+  buflen -= (sizeof(struct hostent_info_s) - 1);
+
+  memset(host, 0, sizeof(struct hostent));
+  memset(info, 0, sizeof(struct hostent_info_s));
+
+  /* Try to get the host address using the DNS name server */
+
+  addrlen = buflen;
+  ret = dns_find_answer(name, (FAR struct sockaddr *)ptr, &addrlen);
+  if (ret < 0)
+    {
+      /* No, nothing found in the cache */
+
+      return ret;
+    }
+
+ /* Get the address type; verify the address size. */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+   if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
+#endif
+    {
+      DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
+      addrlen  = sizeof(struct sockaddr_in);
+      addrtype = AF_INET;
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
+      addrlen  = sizeof(struct sockaddr_in6);
+      addrtype = AF_INET6;
+    }
+#endif
+
+  /* Yes.. Return the address that we obtained from the DNS cache. */
+
+  info->hi_addrlist[0] = ptr;
+  host->h_addr_list    = info->hi_addrlist;
+  host->h_addrtype     = addrtype;
+  host->h_length       = addrlen;
+
+  ptr                 += addrlen;
+  buflen              -= addrlen;
+
+  /* And copy the host name */
+
+  namelen = strlen(name);
+  if (addrlen + namelen + 1 > buflen)
+    {
+      return -ERANGE;
+    }
+
+  strncpy(ptr, name, buflen);
+  return OK;
+}
+#endif /* CONFIG_NETDB_DNSCLIENT */
+
+/****************************************************************************
  * Name: lib_dns_query
  *
  * Descriptions:
@@ -524,6 +630,18 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
   /* REVISIT: Not implemented */
 
 #ifdef CONFIG_NETDB_DNSCLIENT
+#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
+  /* Check if we already have this hostname mapping cached */
+
+  ret = lib_find_answer(name, host, buf, buflen);
+  if (ret >= 0)
+    {
+      /* Found the address mapping in the cache */
+
+      return OK;
+    }
+#endif
+
   /* Try to get the host address using the DNS name server */
 
   ret = lib_dns_lookup(name, host, buf, buflen);
