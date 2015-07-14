@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: June 29, 2015</p>
+      <p>Last Updated: July 14, 2015</p>
     </td>
   </tr>
 </table>
@@ -3287,6 +3287,11 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>CONFIG_NX_LCDDRIVER</code>:
       <dd>By default, NX builds to use a framebuffer driver (see <code>include/nuttx/video/fb.h</code>).
       If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd/lcd.h</code>).
+    <dt><code>CONFIG_NX_ANTIALIASING</code>:
+      <dd>Enable support for ant-aliasing when rendering lines as various
+      orientations.
+      This option is only available for use with frame buffer drivers and
+      only with 16-, 24-, or 32-bit RGB color formats.
   </li>
   </dl>
 </ul>
