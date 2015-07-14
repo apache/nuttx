@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/fb/nxglib_filltrapezoid.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,26 +50,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Make sure that this file is used in the proper context */
 
 #ifndef NXGLIB_SUFFIX
 #  error "NXGLIB_SUFFIX must be defined before including this header file"
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -191,6 +176,9 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
   while (nrows--)
     {
+#ifdef CONFIG_NX_ANTIALIASING
+      b16_t frac;
+#endif
       int ix1;
       int ix2;
 
@@ -265,12 +253,43 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
               NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, lnlen);
             }
 
-#else
+#else /* NXGLIB_BITSPERPIXEL < 8 */
+
           /* Then draw the run from (line + ix1) to (line + ix2) */
 
           dest = line + NXGL_SCALEX(ix1);
+
+#ifdef CONFIG_NX_ANTIALIASING
+
+          /* Perform blending on the first pixel of the row */
+
+          frac = b16ONE - b16frac(x1);
+          NXGL_BLEND(dest, (NXGL_PIXEL_T)color, frac);
+          dest += NXGL_SCALEX(1);
+          width--;
+
+          if (width > 0)
+            {
+              /* Copy pixels between the first and last pixel of the row. */
+
+              if (width > 1)
+                {
+                  NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, width-1);
+                }
+
+              /* And blend the final pixel */
+
+              dest += NXGL_SCALEX(width-1);
+              frac  = b16frac(x2);
+              NXGL_BLEND(dest, (NXGL_PIXEL_T)color, frac);
+            }
+
+#else /* CONFIG_NX_ANTIALIASING */
+
           NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, width);
-#endif
+
+#endif /* CONFIG_NX_ANTIALIASING */
+#endif /* NXGLIB_BITSPERPIXEL < 8 */
         }
 
       /* Move to the start of the next line */

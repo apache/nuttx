@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 24, 2015)
+NuttX TODO List (Last updated July 14, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -20,7 +20,7 @@ nuttx/
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics subsystem (graphics/)
+  (7)  Graphics subsystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -1515,20 +1515,6 @@ o Graphics subsystem (graphics/)
                commands.
   Status:      Open
   Priority:    Low, the need has not yet arisen.
-
-  Title:       ANTI-ALIASING
-  Description: Needed for proper rendering.  After some analysis, I believe
-               this change would only be required in the the trapezoid
-               rendering logic.  Essentially, it would need to blend the
-               fractional pixels at ends of each run with the underlying
-               pixel.
-
-               Hmmm.. graphics are sometimes erased by just redrawing them
-               with the background color.  Would this approach leave ghost
-               images around where the erase image was?
-  Status:      Open
-  Priority:    Medium-ish.  This would definitely improve graphics rendering
-               and line drawing.
 
   Title:       PER-WINDOW FRAMEBUFFERS
   Description: One of the most awkard things to handle in the NX windowing

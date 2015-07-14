@@ -770,13 +770,8 @@ void nxgl_circletraps(FAR const struct nxgl_point_s *center,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NX_DISABLE_24BPP) || !defined(CONFIG_NX_DISABLE_32BPP)
 uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1);
-#endif
-
-#ifndef CONFIG_NX_DISABLE_16BPP
 uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

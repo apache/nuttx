@@ -58,6 +58,13 @@
 #  error "NXGLIB_BITSPERPIXEL must be defined before including this header file"
 #endif
 
+/* Anti-aliasing can only be supported for 16-, 24-, and 32-bit RGB types */
+
+#if NXGLIB_BITSPERPIXEL < 16
+#  undef CONFIG_NX_ANTIALIASING
+#endif
+
+
 /* Set up bit blit macros for this BPP */
 
 #if NXGLIB_BITSPERPIXEL == 1
@@ -90,20 +97,24 @@
 
 #  define NXGL_SCALEX(x)           ((x) << 1)
 #  define NXGL_PIXEL_T             uint16_t
+#  define NXGL_BLENDER             nxglib_rgb565_blend
 
 #elif NXGLIB_BITSPERPIXEL == 24
 
 #  define NXGL_SCALEX(x)           (((x) << 1) + (x))
 #  define NXGL_PIXEL_T             uint32_t
+#  define NXGL_BLENDER             nxglib_rgb24_blend
 
 #elif NXGLIB_BITSPERPIXEL == 32
 
 #  define NXGL_SCALEX(x)           ((x) << 2)
 #  define NXGL_PIXEL_T             uint32_t
+#  define NXGL_BLENDER             nxglib_rgb24_blend
 
 #endif
 
 #if NXGLIB_BITSPERPIXEL < 8
+
 #  define NXGL_SCALEX(x)           ((x) >> NXGL_PIXELSHIFT)
 #  define NXGL_REMAINDERX(x)       ((x) & NXGL_PIXELMASK)
 #  define NXGL_ALIGNDOWN(x)        ((x) & ~NXGL_PIXELMASK)
@@ -118,6 +129,7 @@
          *_ptr++ = (value); \
        } \
    }
+
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
      FAR uint8_t *_dptr = (FAR uint8_t*)(dest); \
@@ -130,6 +142,7 @@
    }
 
 #elif NXGLIB_BITSPERPIXEL == 24
+
 #  define NXGL_MEMSET(dest,value,width) \
    { \
      FAR uint8_t *_ptr  = (FAR uint8_t*)(dest); \
@@ -141,6 +154,7 @@
          *_ptr++ = (value) >> 16; \
        } \
    }
+
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
      FAR uint8_t *_dptr = (FAR uint8_t*)(dest); \
@@ -153,7 +167,26 @@
          *_dptr++ = *_sptr++; \
        } \
    }
-#else
+
+#ifdef CONFIG_NX_ANTIALIASING
+
+#  define NXGL_BLEND(dest,color1,frac) \
+   { \
+     FAR uint8_t *_dptr = (FAR uint8_t*)(dest); \
+     uint32_t color2; \
+     uint32_t blend; \
+     color2 = ((uint32_t)_dptr[0] << 16) | \
+              ((uint32_t)_dptr[1] << 8) | \
+               (uint32_t)_dptr[2]; \
+     blend =  NXGL_BLENDER(color1, color2, frac); \
+     *_dptr++ = (blend >> 16) & 0xff; \
+     *_dptr++ = (blend >> 8)  & 0xff; \
+     *_dptr++ =  blend        & 0xff; \
+   }
+
+#endif /* CONFIG_NX_ANTIALIASING */
+#else /* NXGLIB_BITSPERPIXEL == 16 || NXGLIB_BITSPERPIXEL == 32 */
+
 #  define NXGL_MEMSET(dest,value,width) \
    { \
      FAR NXGL_PIXEL_T *_ptr = (FAR NXGL_PIXEL_T*)(dest); \
@@ -163,6 +196,7 @@
          *_ptr++ = (value); \
        } \
    }
+
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
      FAR NXGL_PIXEL_T *_dptr = (FAR NXGL_PIXEL_T*)(dest); \
@@ -173,7 +207,18 @@
          *_dptr++ = *_sptr++; \
        } \
    }
-#endif
+
+#ifdef CONFIG_NX_ANTIALIASING
+
+#  define NXGL_BLEND(dest,color1,frac) \
+   { \
+     FAR NXGL_PIXEL_T *_dptr = (FAR NXGL_PIXEL_T*)(dest); \
+     NXGL_PIXEL_T color2 = *_dptr; \
+     *_dptr = NXGL_BLENDER(color1, color2, frac); \
+   }
+
+#endif /* CONFIG_NX_ANTIALIASING */
+#endif /* NXGLIB_BITSPERPIXEL */
 
 /* Form a function name by concatenating two strings */
 

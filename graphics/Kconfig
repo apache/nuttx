@@ -39,6 +39,14 @@ config NX_BGCOLOR
 		logic would have to be extended if you want to support multiple
 		color planes.
 
+config NX_ANTIALIASING
+	bool "Anti-aliasing support"
+	default n
+	depends on (!NX_DISABLE_16BPP || !NX_DISABLE_24BPP || !NX_DISABLE_32BPP) && !NX_LCDDRIVER
+	---help---
+		Enable support for ant-alising when rendering lines as various
+		orientations.
+
 config NX_WRITEONLY
 	bool "Write-only Graphics Device"
 	default y if NX_LCDDRIVER && LCD_NOGETRUN
