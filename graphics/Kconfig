@@ -44,7 +44,7 @@ config NX_ANTIALIASING
 	default n
 	depends on (!NX_DISABLE_16BPP || !NX_DISABLE_24BPP || !NX_DISABLE_32BPP) && !NX_LCDDRIVER
 	---help---
-		Enable support for ant-alising when rendering lines as various
+		Enable support for ant-aliasing when rendering lines as various
 		orientations.
 
 config NX_WRITEONLY
