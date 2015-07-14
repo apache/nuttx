@@ -745,6 +745,39 @@ void nxgl_circletraps(FAR const struct nxgl_point_s *center,
                       nxgl_coord_t radius,
                       FAR struct nxgl_trapezoid_s *circle);
 
+/****************************************************************************
+ * Name: nxglib_rgb24_blend and nxglib_rgb565_blend
+ *
+ * Description:
+ *   Blend a foreground color onto a background color.  This is *not* alpha
+ *   blending:  color2 is assumed to be opaque and "under" a semi-
+ *   transparent color1.
+ *
+ *   The frac1 value could be though as related to the 1/alpha value for
+ *   color1.  However, the background, color2, is always treated as though
+ *   alpha == 1.
+ *
+ *   This algorithm is used to handle endpoints as part of the
+ *   implementation of anti-aliasing without transparency.
+ *
+ * Input Parameters:
+ *   color1 - The semi-transparent, forground color
+ *   color2 - The opaque, background color
+ *   frac1  - The fractional amount of color1 to blend into color2
+ *
+ * Returned Value:
+ *   The blended color, encoded just was the input color1 and color2
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NX_DISABLE_24BPP) || !defined(CONFIG_NX_DISABLE_32BPP)
+uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1);
+#endif
+
+#ifndef CONFIG_NX_DISABLE_16BPP
+uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

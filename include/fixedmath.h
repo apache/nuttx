@@ -121,6 +121,7 @@
 /* Conversions */
 
 #define b8toi(a)        ((a) >> 8)              /* Conversion to integer */
+#define ub8toi(a)       ((a) >> 8)              /* Conversion to unsigned integer */
 #define itob8(i)        (((b8_t)(i)) << 8)      /* Conversion from integer */
 #define uitoub8(i)      (((ub8_t)(i)) << 8)     /* Conversion from unsigned integer */
 #define b8tof(b)        (((float)b)/256.0)      /* Conversion to float */
@@ -152,6 +153,7 @@
 /* Conversions */
 
 #define b16toi(a)       ((a) >> 16)             /* Conversion to integer */
+#define ub16toi(a)      ((a) >> 16)             /* Conversion to unsgined integer */
 #define itob16(i)       (((b16_t)(i)) << 16)    /* Conversion from integer */
 #define uitoub16(i)     (((ub16_t)(i)) << 16)   /* Conversion from unsigned integer */
 #define b16tof(b)       (((float)b)/65536.0)    /* Conversion to float */
