@@ -10720,4 +10720,6 @@
 	* libc/netdb:  Add support for a DNS host name resulution cache.  This
 	  can save a lot of DNS name server lookups (but might also have the
 	  negative consequence of using stale IP address mappings (2015-07-13).
+	* graphics/, libnx/, and include/nuttx/nx:  Implement anti-aliasing in
+	  order to clean the drawing of all edges (2015-07-14).
 
