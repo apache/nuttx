@@ -87,6 +87,8 @@
 #  include <arch/stm32/stm32f30xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include <arch/stm32/stm32f37xxx_irq.h>
+#elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  include <arch/stm32/stm32f42xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include <arch/stm32/stm32f40xxx_irq.h>
 #else

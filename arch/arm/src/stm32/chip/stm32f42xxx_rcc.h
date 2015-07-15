@@ -36,9 +36,9 @@
 #ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_RCC_H
 #define __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_RCC_H
 
-/************************************************************************************
+/****************************************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -592,14 +592,14 @@
 #  define RCC_DCKCFGR_SAI1BSRC(n)    ((n) << RCC_DCKCFGR_SAI1BSRC_SHIFT)
 #define RCC_DCKCFGR_TIMPRE           (1 << 24) /* Bit 24: Timer clock prescaler selection */
 
-#define RCC_SAICLKSRC_PLLSAI        0
-#define RCC_SAICLKSRC_PLLI2S        1
-#define RCC_SAICLKSRC_ALTERNATE     2
+#define RCC_SAICLKSRC_PLLSAI         0
+#define RCC_SAICLKSRC_PLLI2S         1
+#define RCC_SAICLKSRC_ALTERNATE      2
 
-#define RCC_PLLSAIDIVR_DIV2         0
-#define RCC_PLLSAIDIVR_DIV4         1
-#define RCC_PLLSAIDIVR_DIV8         2
-#define RCC_PLLSAIDIVR_DIV16        3
+#define RCC_PLLSAIDIVR_DIV2          0
+#define RCC_PLLSAIDIVR_DIV4          1
+#define RCC_PLLSAIDIVR_DIV8          2
+#define RCC_PLLSAIDIVR_DIV16         3
 
 #endif /* CONFIG_STM32_STM32F427 || CONFIG_STM32_STM32F429 */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_RCC_H */

@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/include/stm32s/stm32f40xxx_irq.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,32 +153,8 @@
 #define STM32_IRQ_RNG         (STM32_IRQ_INTERRUPTS+80) /* 80: Hash and Rng global interrupt */
 #define STM32_IRQ_FPU         (STM32_IRQ_INTERRUPTS+81) /* 81: FPU global interrupt */
 
-#if !defined(CONFIG_STM32_STM32F427) && !defined(CONFIG_STM32_STM32F429)
-#  define NR_VECTORS            (STM32_IRQ_INTERRUPTS+82)
-#  define NR_IRQS               (STM32_IRQ_INTERRUPTS+82)
-
-#else
-#  define STM32_IRQ_UART7       (STM32_IRQ_INTERRUPTS+82) /* 82: UART7 interrupt */
-#  define STM32_IRQ_UART8       (STM32_IRQ_INTERRUPTS+83) /* 83: UART8 interrupt */
-#  define STM32_IRQ_SPI4        (STM32_IRQ_INTERRUPTS+84) /* 84: SPI4 interrupt */
-#  define STM32_IRQ_SPI5        (STM32_IRQ_INTERRUPTS+85) /* 85: SPI5 interrupt */
-#  define STM32_IRQ_SPI6        (STM32_IRQ_INTERRUPTS+86) /* 86: SPI6 interrupt */
-
-#if defined(CONFIG_STM32_STM32F429)
-#  define STM32_IRQ_SAI1        (STM32_IRQ_INTERRUPTS+87) /* 87: SAI1 interrupt */
-#  define STM32_IRQ_LTDCINT     (STM32_IRQ_INTERRUPTS+88) /* 88: LTDCINT interrupt */
-#  define STM32_IRQ_LTDCERRINT  (STM32_IRQ_INTERRUPTS+89) /* 89: LTDCERRINT interrupt */
-#  define STM32_IRQ_DMA2D       (STM32_IRQ_INTERRUPTS+90) /* 90: DMA2D interrupt */
-
-#  define NR_VECTORS            (STM32_IRQ_INTERRUPTS+91)
-#  define NR_IRQS               (STM32_IRQ_INTERRUPTS+91)
-
-#else
-#  define NR_VECTORS            (STM32_IRQ_INTERRUPTS+87)
-#  define NR_IRQS               (STM32_IRQ_INTERRUPTS+87)
-
-#endif
-#endif
+#define NR_VECTORS            (STM32_IRQ_INTERRUPTS+82)
+#define NR_IRQS               (STM32_IRQ_INTERRUPTS+82)
 
 /****************************************************************************************************
  * Public Types
