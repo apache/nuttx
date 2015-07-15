@@ -130,7 +130,11 @@
 /* STM32 F4 Family ******************************************************************/
 
 #elif defined(CONFIG_STM32_STM32F40XX)
-#  include "chip/stm32f40xxx_pinmap.h"
+#  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#    include "chip/stm32f42xxx_pinmap.h"
+#  else
+#    include "chip/stm32f40xxx_pinmap.h"
+#  endif
 #else
 #  error "No pinmap file for this STM32 chip"
 #endif
