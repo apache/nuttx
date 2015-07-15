@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_start.c
+ * arch/arm/src/stm32f7/stm32_start.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,9 +54,9 @@
 #  include "nvic.h"
 #endif
 
-#include "sam_clockconfig.h"
-#include "sam_userspace.h"
-#include "sam_start.h"
+#include "stm32_clockconfig.h"
+#include "stm32_userspace.h"
+#include "stm32_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -100,7 +100,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-static inline void sam_fpuconfig(void);
+static inline void stm32_fpuconfig(void);
 #endif
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
@@ -118,7 +118,7 @@ void __start(void) __attribute__ ((no_instrument_function));
 #endif
 
 /****************************************************************************
- * Name: sam_fpuconfig
+ * Name: stm32_fpuconfig
  *
  * Description:
  *   Configure the FPU.  Relative bit settings:
@@ -143,7 +143,7 @@ void __start(void) __attribute__ ((no_instrument_function));
 #ifdef CONFIG_ARCH_FPU
 #if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
 
-static inline void sam_fpuconfig(void)
+static inline void stm32_fpuconfig(void)
 {
   uint32_t regval;
 
@@ -173,7 +173,7 @@ static inline void sam_fpuconfig(void)
 
 #else
 
-static inline void sam_fpuconfig(void)
+static inline void stm32_fpuconfig(void)
 {
   uint32_t regval;
 
@@ -204,11 +204,11 @@ static inline void sam_fpuconfig(void)
 #endif
 
 #else
-#  define sam_fpuconfig()
+#  define stm32_fpuconfig()
 #endif
 
 /****************************************************************************
- * Name: sam_tcmenable
+ * Name: stm32_tcmenable
  *
  * Description:
  *   Enable/disable tightly coupled memories.  Size of tightly coupled
@@ -216,7 +216,7 @@ static inline void sam_fpuconfig(void)
  *
  ****************************************************************************/
 
-static inline void sam_tcmenable(void)
+static inline void stm32_tcmenable(void)
 {
   uint32_t regval;
 
@@ -342,7 +342,7 @@ void __start(void)
   /* Copy any necessary code sections from FLASH to RAM.  The correct
    * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initialization code
-   * at _framfuncs.  This should be done before sam_clockconfig() is
+   * at _framfuncs.  This should be done before stm32_clockconfig() is
    * called (in case it has some dependency on initialized C variables).
    */
 
@@ -355,17 +355,17 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  sam_clockconfig();
-  sam_fpuconfig();
-  sam_lowsetup();
+  stm32_clockconfig();
+  stm32_fpuconfig();
+  stm32_lowsetup();
 
   /* Enable/disable tightly coupled memories */
 
-  sam_tcmenable();
+  stm32_tcmenable();
 
   /* Initialize onboard resources */
 
-  sam_boardinitialize();
+  stm32_boardinitialize();
 
   /* Enable I- and D-Caches */
 
@@ -386,7 +386,7 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  sam_userspace();
+  stm32_userspace();
 #endif
 
   /* Then start NuttX */
