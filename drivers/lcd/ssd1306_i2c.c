@@ -44,11 +44,12 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/i2c.h>
 #include <nuttx/lcd/ssd1306.h>
 
 #include "ssd1306.h"
 
-#if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_UG2864HSWEG01_I2C)
+#if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_I2C)
 
 /****************************************************************************
  * Name: ssd1306_sendbyte
@@ -81,7 +82,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 
   /* Setup 8-bit SSD1306 address write message */
 
-  msg.addr   = priv->config->address; /* 7-bit address */
+  msg.addr   = priv->addr;            /* 7-bit address */
   msg.flags  = 0;                     /* Write transaction, beginning with START */
   msg.buffer = txbuffer;              /* Transfer from this address */
   msg.length = 1;                     /* Send one byte following the address
@@ -116,7 +117,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 
   /* Setup 8-bit SSD1306 address write message */
 
-  msg.addr   = priv->config->address; /* 7-bit address */
+  msg.addr   = priv->addr;            /* 7-bit address */
   msg.flags  = 0;                     /* Write transaction, beginning with START */
   msg.buffer = data;                  /* Transfer from this address */
   msg.length = len;                   /* Send one byte following the address
@@ -131,4 +132,4 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
     }
 }
 
-#endif /* CONFIG_LCD_SSD1306 &7 CONFIG_LCD_UG2864HSWEG01_I2C */
+#endif /* CONFIG_LCD_SSD1306 &7 CONFIG_LCD_SSD1306_I2C */

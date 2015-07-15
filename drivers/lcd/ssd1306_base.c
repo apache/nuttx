@@ -836,7 +836,10 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int
 #  endif
 
 #else
-  priv->i2c = dev;
+  /* Remember the I2C configuration */
+
+  priv->i2c  = dev;
+  priv->addr = CONFIG_SSD1306_I2CADDR;
 
   /* Set the I2C address and frequency.  REVISIT:  This logic would be
    * insufficient if we share the I2C bus with any other devices that also

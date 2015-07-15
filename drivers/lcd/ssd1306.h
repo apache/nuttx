@@ -235,6 +235,7 @@ struct ssd1306_dev_s
   FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
 #else
   FAR struct i2c_dev_s  *i2c;      /* Cached SPI device reference */
+  uint8_t                addr;     /* 7-bit I2C address */
 #endif
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */

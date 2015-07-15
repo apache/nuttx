@@ -48,7 +48,7 @@
 
 #include "ssd1306.h"
 
-#if defined(CONFIG_LCD_UG2864HSWEG01) && defined(CONFIG_LCD_UG2864HSWEG01_SPI)
+#if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_SPI)
 
 /****************************************************************************
  * Private Functions
@@ -67,7 +67,7 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
   lcdvdbg("Mode: %d Bits: 8 Frequency: %d\n",
           CONFIG_SSD1306_SPIMODE, CONFIG_SSD1306_FREQUENCY);
 
-  /* Configure SPI for the UG2864AMBAG01 */
+  /* Configure SPI for the SSD1306 */
 
   SPI_SETMODE(spi, CONFIG_SSD1306_SPIMODE);
   SPI_SETBITS(spi, 8);
@@ -83,13 +83,13 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
  * Name: ssd1306_sendbyte
  *
  * Description:
- *   Write a value to an 8-bit value to UG2864AMBAG01
+ *   Write a value to an 8-bit value to SSD1306
  *
  ****************************************************************************/
 
 void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 {
-#ifdef CONFIG_LCD_UG2864AMBAG01_REGDEBUG
+#ifdef CONFIG_LCD_SSD1306_REGDEBUG
   lldbg("->0x%02x\n", regval);
 #endif
 
@@ -102,7 +102,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
  * Name: ssd1306_sendblk
  *
  * Description:
- *   Write an array of bytes to UG2864AMBAG01
+ *   Write an array of bytes to SSD1306
  *
  ****************************************************************************/
 
@@ -117,7 +117,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
  * Name: ssd1306_select
  *
  * Description:
- *   Enable/Disable UG2864AMBAG01 SPI CS
+ *   Enable/Disable SSD1306 SPI CS
  *
  ****************************************************************************/
 
@@ -155,7 +155,7 @@ void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
  * Name: ssd1306_cmddata
  *
  * Description:
- *   Select Command/Data mode for UG2864AMBAG01
+ *   Select Command/Data mode for SSD1306
  *
  ****************************************************************************/
 
@@ -165,4 +165,4 @@ void ssd1306_cmddata(FAR struct ssd1306_dev_s *priv, bool cmd)
 
   SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, cmd);
 }
-#endif /* CONFIG_LCD_UG2864AMBAG01 && CONFIG_LCD_UG2864AMBAG01_SPI */
+#endif /* CONFIG_LCD_SSD1306 && CONFIG_LCD_SSD1306_SPI */
