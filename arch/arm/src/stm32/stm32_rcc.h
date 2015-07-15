@@ -55,6 +55,8 @@
 #  include "chip/stm32f30xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_rcc.h"
+#elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  include "chip/stm32f42xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_rcc.h"
 #endif
@@ -100,10 +102,10 @@ extern uint32_t _vectors[];  /* See stm32_vectors.S */
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO1 definitions from
- *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO1_HSI, RCC_CFGR_MCO1_LSE,
+ *     chip/stm32f4xxxx_rcc.h {RCC_CFGR_MCO1_HSI, RCC_CFGR_MCO1_LSE,
  *     RCC_CFGR_MCO1_HSE, RCC_CFGR_MCO1_PLL}
  *   div - One of the definitions for the RCC_CFGR_MCO1PRE definitions from
- *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO1PRE_NONE, RCC_CFGR_MCO1PRE_DIV2,
+ *     chip/stm32f4xxxx_rcc.h {RCC_CFGR_MCO1PRE_NONE, RCC_CFGR_MCO1PRE_DIV2,
  *     RCC_CFGR_MCO1PRE_DIV3, RCC_CFGR_MCO1PRE_DIV4, RCC_CFGR_MCO1PRE_DIV5}
  *
  * Returned Value:
@@ -201,10 +203,10 @@ static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO2 definitions from
- *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO2_SYSCLK, RCC_CFGR_MCO2_PLLI2S,
+ *     chip/stm32f4xxxx_rcc.h {RCC_CFGR_MCO2_SYSCLK, RCC_CFGR_MCO2_PLLI2S,
  *     RCC_CFGR_MCO2_HSE, RCC_CFGR_MCO2_PLL}
  *   div - One of the definitions for the RCC_CFGR_MCO2PRE definitions from
- *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO2PRE_NONE, RCC_CFGR_MCO2PRE_DIV2,
+ *     chip/stm32f4xxxx_rcc.h {RCC_CFGR_MCO2PRE_NONE, RCC_CFGR_MCO2PRE_DIV2,
  *     RCC_CFGR_MCO2PRE_DIV3, RCC_CFGR_MCO2PRE_DIV4, RCC_CFGR_MCO2PRE_DIV5}
  *
  * Returned Value:
