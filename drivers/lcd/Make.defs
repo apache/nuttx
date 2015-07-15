@@ -56,7 +56,15 @@ ifeq ($(CONFIG_LCD_UG9664HSWAG01),y)
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306),y)
-  CSRCS += ssd1306.c
+  CSRCS += ssd1306_base.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306_SPI),y)
+  CSRCS += ssd1306_spi.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
+  CSRCS += ssd1306_i2c.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1289),y)

@@ -3,7 +3,7 @@
  * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
  * Univision SSD1306 controller in SPI mode
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -129,11 +129,14 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/i2c.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
 
 #include <arch/irq.h>
+
+#include "ssd1306_helpers.h"
 
 #ifdef CONFIG_LCD_SSD1306
 
@@ -316,14 +319,17 @@
 
 struct ssd1306_dev_s
 {
-  struct lcd_dev_s       dev;      /* Publically visible device structure */
+  struct lcd_dev_s       dev;      /* Publicly visible device structure */
 
   /* Private LCD-specific information follows */
 
+#ifdef CONFIG_LCD_SSD1306_SPI
   FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
+#else
+  FAR struct i2c_dev_s  *i2c;      /* Cached SPI device reference */
+#endif
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */
-
 
  /* The SSD1306 does not support reading from the display memory in SPI mode.
   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
@@ -334,20 +340,8 @@ struct ssd1306_dev_s
 };
 
 /**************************************************************************************
- * Private Function Protototypes
+ * Private Function Prototypes
  **************************************************************************************/
-
-/* Low-level SPI helpers */
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ssd1306_configspi(FAR struct spi_dev_s *spi);
-#  define ssd1306_lock(spi)
-#  define ssd1306_unlock(spi)
-#else
-#  define ssd1306_configspi(spi)
-static void ssd1306_lock(FAR struct spi_dev_s *spi);
-static void ssd1306_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 /* LCD Data Transfer Methods */
 
@@ -445,96 +439,6 @@ static struct ssd1306_dev_s g_oleddev =
 /**************************************************************************************
  * Private Functions
  **************************************************************************************/
-
-/**************************************************************************************
- * Name: ssd1306_configspi
- *
- * Description:
- *   Configure the SPI for use with the UG-2864HSWEG01
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
-{
-  lcdvdbg("Mode: %d Bits: 8 Frequency: %d\n",
-          CONFIG_SSD1306_SPIMODE, CONFIG_SSD1306_FREQUENCY);
-
-  /* Configure SPI for the UG-2864HSWEG01.  But only if we own the SPI bus.  Otherwise,
-   * don't bother because it might change.
-   */
-
-  SPI_SETMODE(spi, CONFIG_SSD1306_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
-}
-#endif
-
-/**************************************************************************************
- * Name: ssd1306_lock
- *
- * Description:
- *   Select the SPI, locking and  re-configuring if necessary
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-#ifndef CONFIG_SPI_OWNBUS
-static inline void ssd1306_lock(FAR struct spi_dev_s *spi)
-{
-  /* Lock the SPI bus if there are multiple devices competing for the SPI bus. */
-
-  SPI_LOCK(spi, true);
-
-  /* Now make sure that the SPI bus is configured for the UG-2864HSWEG01 (it
-   * might have gotten configured for a different device while unlocked)
-   */
-
-  SPI_SETMODE(spi, CONFIG_SSD1306_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
-}
-#endif
-
-/**************************************************************************************
- * Name: ssd1306_unlock
- *
- * Description:
- *   De-select the SPI
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-#ifndef CONFIG_SPI_OWNBUS
-static inline void ssd1306_unlock(FAR struct spi_dev_s *spi)
-{
-  /* De-select UG-2864HSWEG01 chip and relinquish the SPI bus. */
-
-  SPI_LOCK(spi, false);
-}
-#endif
 
 /**************************************************************************************
  * Name:  ssd1306_putrun
@@ -711,35 +615,33 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   /* Lock and select device */
 
-  ssd1306_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  ssd1306_select(priv, true);
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  ssd1306_cmddata(priv, true);
 
   /* Set the starting position for the run */
   /* Set the column address to the XOFFSET value */
 
-  SPI_SEND(priv->spi, SSD1306_SETCOLL(devcol & 0x0f));
-  SPI_SEND(priv->spi, SSD1306_SETCOLH(devcol >> 4));
+  ssd1306_sendbyte(priv, SSD1306_SETCOLL(devcol & 0x0f));
+  ssd1306_sendbyte(priv, SSD1306_SETCOLH(devcol >> 4));
 
   /* Set the page address */
 
-  SPI_SEND(priv->spi, SSD1306_PAGEADDR(page));
+  ssd1306_sendbyte(priv, SSD1306_PAGEADDR(page));
 
   /* Select data transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+  ssd1306_cmddata(priv, false);
 
   /* Then transfer all of the data */
 
-  (void)SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
+  ssd1306_sendblk(priv, fbptr, pixlen);
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
-  ssd1306_unlock(priv->spi);
+  ssd1306_select(priv, false);
   return OK;
 }
 #else
@@ -975,34 +877,32 @@ static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
 static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
-  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER && priv->spi);
+  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   lcdvdbg("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
 
   /* Lock and select device */
 
-  ssd1306_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  ssd1306_select(priv, true);
 
   if (power <= 0)
     {
       /* Turn the display off */
 
-      (void)SPI_SEND(priv->spi, SSD1306_DISPOFF);
+      (void)ssd1306_sendbyte(priv, SSD1306_DISPOFF);
       priv->on = false;
     }
   else
     {
       /* Turn the display on */
 
-      (void)SPI_SEND(priv->spi, SSD1306_DISPON);
+      (void)ssd1306_sendbyte(priv, SSD1306_DISPON);
       priv->on = true;
     }
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
-  ssd1306_unlock(priv->spi);
+  ssd1306_select(priv, false);
   return OK;
 }
 
@@ -1060,23 +960,21 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Lock and select device */
 
-  ssd1306_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  ssd1306_select(priv, true);
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  ssd1306_cmddata(priv, true);
 
   /* Set the contrast */
 
-  (void)SPI_SEND(priv->spi, SSD1306_CONTRAST_MODE);    /* Set contrast control register */
-  (void)SPI_SEND(priv->spi, SSD1306_CONTRAST(scaled)); /* Data 1: Set 1 of 256 contrast steps */
+  (void)ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Set contrast control register */
+  (void)ssd1306_sendbyte(priv, SSD1306_CONTRAST(scaled)); /* Data 1: Set 1 of 256 contrast steps */
   priv->contrast = contrast;
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
-  ssd1306_unlock(priv->spi);
+  ssd1306_select(priv, false);
   return OK;
 }
 
@@ -1105,29 +1003,56 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int devno)
+#ifdef CONFIG_LCD_SSD1306_SPI
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev, unsigned int devno)
+#else
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int devno)
+#endif
 {
   FAR struct ssd1306_dev_s  *priv = &g_oleddev;
 
   lcdvdbg("Initializing\n");
   DEBUGASSERT(spi && devno == 0);
 
-  /* Save the reference to the SPI device */
+#ifdef CONFIG_LCD_SSD1306_SPI
+  priv->spi = dev;
 
-  priv->spi = spi;
+  /* If this SPI bus is not shared, then we can config it now.
+   * If it is shared, then other device could change our config,
+   * then just configure before sending data.
+   */
 
-  /* Configure the SPI */
+#  ifdef CONFIG_SPI_OWNBUS
+    /* Configure SPI */
 
-  ssd1306_configspi(spi);
+    SPI_SETMODE(priv->spi, CONFIG_SSD1306_SPIMODE);
+    SPI_SETBITS(priv->spi, 8);
+    SPI_SETFREQUENCY(priv->spi, CONFIG_SSD1306_FREQUENCY);
+#  else
+    /* Configure the SPI */
+
+    ssd1306_configspi(priv->spi);
+#  endif
+
+#else
+  priv->i2c = dev;
+
+  /* Set the I2C address and frequency.  REVISIT:  This logic would be
+   * insufficient if we share the I2C bus with any other devices that also
+   * modify the address and frequency.
+   */
+
+  I2C_SETADDRESS(priv->i2c, CONFIG_SSD1306_I2CADDR, 7);
+  I2C_SETFREQUENCY(priv->i2c, CONFIG_SSD1306_I2CFREQ);
+#endif
 
   /* Lock and select device */
 
-  ssd1306_lock(priv->spi);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  ssd1306_select(priv, true);
 
   /* Select command transfer */
 
-  SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+  ssd1306_cmddata(priv, true);
 
   /* Configure OLED SPI or I/O, must be delayed 1-10ms */
 
@@ -1135,45 +1060,44 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int
 
   /* Configure the device */
 
-  SPI_SEND(spi, SSD1306_DISPOFF);         /* Display off 0xae */
-  SPI_SEND(spi, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
-  SPI_SEND(spi, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
-  SPI_SEND(spi, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
-  /* SPI_SEND(spi, SSD1306_PAGEADDR(0));*//* Set page address  (Can ignore)*/
-  SPI_SEND(spi, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
-  SPI_SEND(spi ,SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
-  SPI_SEND(spi, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
-  /* SPI_SEND(spi, SSD1306_EDISPOFF); */  /* Normal display off 0xa4 (Can ignore)*/
-  SPI_SEND(spi, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
-  SPI_SEND(spi, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
-  SPI_SEND(spi, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
-  /* SPI_SEND(spi, SSD1306_SCANTOCOM0);*/ /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore)*/
-  SPI_SEND(spi, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
-  SPI_SEND(spi, SSD1306_DISPOFFS(0));
-  SPI_SEND(spi, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5*/
-  SPI_SEND(spi, SSD1306_CLKDIV(8,0));     /* 0x80*/
+  ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
+  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
+  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
+  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
+  /* ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));*//* Set page address  (Can ignore)*/
+  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
+  ssd1306_sendbyte(priv,SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
+  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
+  /* ssd1306_sendbyte(priv, SSD1306_EDISPOFF); */  /* Normal display off 0xa4 (Can ignore)*/
+  ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  /* ssd1306_sendbyte(priv, SSD1306_SCANTOCOM0);*/ /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore)*/
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5*/
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV(8,0));     /* 0x80*/
 
-  SPI_SEND(spi, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
-  SPI_SEND(spi, SSD1306_CHRGPER(0x0f,1)); /* 0xf1 or 0x22 Enhanced mode */
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,1)); /* 0xf1 or 0x22 Enhanced mode */
 
-  SPI_SEND(spi, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
-  SPI_SEND(spi, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
 
-  SPI_SEND(spi, SSD1306_VCOM_SET);        /* set vcomh 0xdb*/
-  SPI_SEND(spi, SSD1306_VCOM(0x40));
+  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb*/
+  ssd1306_sendbyte(priv, SSD1306_VCOM(0x40));
 
-  SPI_SEND(spi, SSD1306_CHRPUMP_SET);     /* Set Charge Pump enable/disable 0x8d ssd1306 */
-  SPI_SEND(spi, SSD1306_CHRPUMP_ON);      /* 0x14 close 0x10 */
+  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);     /* Set Charge Pump enable/disable 0x8d ssd1306 */
+  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);      /* 0x14 close 0x10 */
 
-  /* SPI_SEND(spi, SSD1306_DCDC_MODE); */ /* DC/DC control mode: on (SSD1306 Not supported) */
-  /* SPI_SEND(spi, SSD1306_DCDC_ON); */
+  /* ssd1306_sendbyte(priv, SSD1306_DCDC_MODE); */ /* DC/DC control mode: on (SSD1306 Not supported) */
+  /* ssd1306_sendbyte(priv, SSD1306_DCDC_ON); */
 
-  SPI_SEND(spi, SSD1306_DISPON);          /* Display ON 0xaf */
+  ssd1306_sendbyte(priv, SSD1306_DISPON);          /* Display ON 0xaf */
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-  ssd1306_unlock(priv->spi);
+  ssd1306_select(priv, false);
 
   /* Clear the display */
 
@@ -1219,8 +1143,7 @@ void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 
   /* Lock and select device */
 
-  ssd1306_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  ssd1306_select(priv, true);
 
   /* Visit each page */
 
@@ -1228,31 +1151,30 @@ void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
     {
       /* Select command transfer */
 
-      SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+      ssd1306_cmddata(priv, true);
 
       /* Set the column address to the XOFFSET value */
 
-      SPI_SEND(priv->spi, SSD1306_SETCOLL(SSD1306_DEV_XOFFSET));
-      SPI_SEND(priv->spi, SSD1306_SETCOLH(0));
+      ssd1306_sendbyte(priv, SSD1306_SETCOLL(SSD1306_DEV_XOFFSET));
+      ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));
 
       /* Set the page address */
 
-      SPI_SEND(priv->spi, SSD1306_PAGEADDR(page));
+      ssd1306_sendbyte(priv, SSD1306_PAGEADDR(page));
 
       /* Select data transfer */
 
-      SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+      ssd1306_cmddata(priv, false);
 
       /* Transfer one page of the selected color */
 
-      (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * SSD1306_DEV_XRES],
+      ssd1306_sendblk(priv, &priv->fb[page * SSD1306_DEV_XRES],
                          SSD1306_DEV_XRES);
     }
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
-  ssd1306_unlock(priv->spi);
+  ssd1306_select(priv, false);
 }
 
 #endif /* CONFIG_LCD_SSD1306 */

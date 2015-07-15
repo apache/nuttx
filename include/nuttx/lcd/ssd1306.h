@@ -4,7 +4,7 @@
  * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
  * Univision SSD1306 controller in SPI mode
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -97,6 +97,8 @@
  *   Clock phase:     Sample on trailing (rising edge) (CPHA 1)
  */
 
+#ifdef LCD_SSD1306_SPI
+
 #ifndef CONFIG_UG2864HSWEG01_SPIMODE
 #  define CONFIG_UG2864HSWEG01_SPIMODE SPIDEV_MODE3
 #endif
@@ -111,6 +113,24 @@
 #ifndef CONFIG_SPI_CMDDATA
 #  error "CONFIG_SPI_CMDDATA must be defined in your NuttX configuration"
 #endif
+
+#endif /* CONFIG_LCD_SSD1306_SPI */
+
+#ifdef CONFIG_LCD_SSD1306_I2C
+
+#ifndef CONFIG_I2C_TRANSFER
+#  error "CONFIG_I2C_TRANSFER must be defined in your NuttX configuration"
+#endif
+
+#ifndef CONFIG_SSD1306_I2CADDR
+#  define CONFIG_SSD1306_I2CADDR 0x78 /* 120 in decimal */
+#endif
+
+#ifndef CONFIG_SSD1306_I2CFREQ
+#  define CONFIG_SSD1306_I2CADDR 400000
+#endif
+
+#endif /* CONFIG_LCD_SSD1306_I2C */
 
 /* CONFIG_UG2864HSWEG01_NINTERFACES determines the number of physical interfaces
  * that will be supported.
@@ -207,7 +227,7 @@ extern "C"
  *
  * Input Parameters:
  *
- *   spi - A reference to the SPI driver instance.
+ *   dev - A reference to the SPI/I2C driver instance.
  *   devno - A value in the range of 0 through CONFIG_UG2864HSWEG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
@@ -220,7 +240,11 @@ extern "C"
 
 struct lcd_dev_s; /* See include/nuttx/lcd/lcd.h */
 struct spi_dev_s; /* See include/nuttx/spi/spi.h */
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
+#ifdef CONFIG_LCD_SSD1306_SPI
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev, unsigned int devno);
+#else
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int devno);
+#endif
 
 /************************************************************************************************
  * Name:  ssd1306_fill

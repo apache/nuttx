@@ -272,7 +272,6 @@ endif
 config LCD_UG2864HSWEG01
 	bool "UG-2864HSWEG01 OLED Display Module"
 	default n
-	depends on SPI
 	select LCD_SSD1306
 	---help---
 		OLED Display Module, UG-2864HSWEG01, Univision Technology Inc based
@@ -288,7 +287,7 @@ config LCD_UG2864HSWEG01
 config LCD_UG2832HSWEG04
 	bool "UG-2832HSWEG04 OLED Display Module"
 	default n
-	depends on SPI && !LCD_UG2864HSWEG01
+	depends on !LCD_UG2864HSWEG01
 	select LCD_SSD1306
 	---help---
 		OLED Display Module, UG-UG2832HSWEG04, Univision Technology Inc
@@ -306,6 +305,27 @@ config LCD_SSD1306
 	bool
 
 if LCD_SSD1306
+
+choice
+	prompt "UG-2832HSWEG04 Interface"
+	default LCD_SSD1306_SPI
+
+config LCD_SSD1306_SPI
+	bool "UG-2832HSWEG04 on SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface.
+
+config LCD_SSD1306_I2C
+	bool "UG-2832HSWEG04 on I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+endchoice # UG-2832HSWEG04 Interface
+endif # LCD_SSD1306
+
+if LCD_SSD1306_SPI
 
 config SSD1306_SPIMODE
 	int "SSD1306 SPI Mode"
@@ -328,7 +348,23 @@ config SSD1306_FREQUENCY
 #		supported.  NOTE:  At present, this must be undefined or defined to
 #		be 1.
 
-endif
+endif # LCD_SSD1306_SPI
+
+if LCD_SSD1306_I2C
+
+config SSD1306_I2CADDR
+	int "UG-2832HSWEG04 I2C Address"
+	default 120
+	---help---
+		I2C Address of SSD1306
+
+config SSD1306_I2CFREQ
+	int "UG-2832HSWEG04 I2C Frequency"
+	default 400000
+	---help---
+		I2C Frequency to communicate with SSD1306
+
+endif # LCD_SSD1306_I2C
 
 config LCD_ST7565
 	bool "ST7565 LCD Display Module"
