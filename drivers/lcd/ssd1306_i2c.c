@@ -46,7 +46,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/lcd/ssd1306.h>
 
-#include "ssd1306_helpers.h"
+#include "ssd1306.h"
 
 #if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_UG2864HSWEG01_I2C)
 
