@@ -10722,4 +10722,6 @@
 	  negative consequence of using stale IP address mappings (2015-07-13).
 	* graphics/, libnx/, and include/nuttx/nx:  Implement anti-aliasing in
 	  order to clean the drawing of all edges (2015-07-14).
-
+	* drivers/lcd/ and include/nuttx/lcd: Modify the SSD1306 LCD driver to
+	  support either the SPI or I2C interface.  From Alan Carvalho de Assis
+	  (2015-07-15).
