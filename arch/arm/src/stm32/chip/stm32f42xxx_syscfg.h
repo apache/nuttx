@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/stm32/chip/stm32f40xxx_syscfg.h
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F40XX
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -89,6 +89,9 @@
 /* SYSCFG peripheral mode configuration register */
 
 #define SYSCFG_PMC_MII_RMII_SEL       (1 << 23) /* Bit 23: Ethernet PHY interface selection */
+#define SYSCFG_PMC_ADC3DC2            (1 << 18) /* Bit 18: See AN4073 */
+#define SYSCFG_PMC_ADC2DC2            (1 << 17) /* Bit 17: See AN4073 */
+#define SYSCFG_PMC_ADC1DC2            (1 << 16) /* Bit 16: See AN4073 */
 
 /* SYSCFG external interrupt configuration register 1-4 */
 
@@ -147,5 +150,5 @@
 #define SYSCFG_CMPCR_CMPPD            (1 << 0)  /* Bit 0: Compensation cell power-down */
 #define SYSCFG_CMPCR_READY            (1 << 8)  /* Bit 8: Compensation cell ready flag */
 
-#endif /* CONFIG_STM32_STM32F40XX */
+#endif /* CONFIG_STM32_STM32F427 || CONFIG_STM32_STM32F429 */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H */
