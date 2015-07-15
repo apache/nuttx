@@ -168,8 +168,11 @@
 #define STM32_IRQ_I2C4ER      (STM32_IRQ_INTERRUPTS+96) /* 96: I2C4 Error interrupt */
 #define STM32_IRQ_SPDIFRX     (STM32_IRQ_INTERRUPTS+97) /* 97: SPDIFRX global interrupt */
 
-#define NR_VECTORS            (STM32_IRQ_INTERRUPTS+98)
-#define NR_IRQS               (STM32_IRQ_INTERRUPTS+98)
+#define STM32_IRQ_NEXTINT     98
+#define STM32_NR_IRQS         (STM32_IRQ_INTERRUPTS+STM32_IRQ_NEXTINT)
+
+#define NR_VECTORS            (STM32_IRQ_INTERRUPTS+STM32_IRQ_NEXTINT)
+#define NR_IRQS               (STM32_IRQ_INTERRUPTS+STM32_IRQ_NEXTINT)
 
 /****************************************************************************************************
  * Public Types
