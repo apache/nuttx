@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f40xxx_dma.h
+ * arch/arm/src/stm32/chip/stm32f42xxx_dma.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,16 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_DMA_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_DMA_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_DMA_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -438,11 +446,15 @@
 #define DMAMAP_USART2_TX           STM32_DMA_MAP(DMA1,DMA_STREAM6,DMA_CHAN4)
 #define DMAMAP_UART5_TX            STM32_DMA_MAP(DMA1,DMA_STREAM7,DMA_CHAN4)
 
+#define DMAMAP_UART8_TX            STM32_DMA_MAP(DMA1,DMA_STREAM0,DMA_CHAN5)
+#define DMAMAP_UART7_TX            STM32_DMA_MAP(DMA1,DMA_STREAM1,DMA_CHAN5)
 #define DMAMAP_TIM3_CH4            STM32_DMA_MAP(DMA1,DMA_STREAM2,DMA_CHAN5)
 #define DMAMAP_TIM3_UP             STM32_DMA_MAP(DMA1,DMA_STREAM2,DMA_CHAN5)
+#define DMAMAP_UART7_RX            STM32_DMA_MAP(DMA1,DMA_STREAM3,DMA_CHAN5)
 #define DMAMAP_TIM3_CH1            STM32_DMA_MAP(DMA1,DMA_STREAM4,DMA_CHAN5)
 #define DMAMAP_TIM3_TRIG           STM32_DMA_MAP(DMA1,DMA_STREAM4,DMA_CHAN5)
 #define DMAMAP_TIM3_CH2            STM32_DMA_MAP(DMA1,DMA_STREAM5,DMA_CHAN5)
+#define DMAMAP_UART8_RX            STM32_DMA_MAP(DMA1,DMA_STREAM6,DMA_CHAN5)
 #define DMAMAP_TIM3_CH3            STM32_DMA_MAP(DMA1,DMA_STREAM7,DMA_CHAN5)
 
 #define DMAMAP_TIM5_CH3            STM32_DMA_MAP(DMA1,DMA_STREAM0,DMA_CHAN6)
@@ -475,10 +487,14 @@
 #define DMAMAP_DCMI_1              STM32_DMA_MAP(DMA2,DMA_STREAM1,DMA_CHAN1)
 #define DMAMAP_ADC2_1              STM32_DMA_MAP(DMA2,DMA_STREAM2,DMA_CHAN1)
 #define DMAMAP_ADC2_2              STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN1)
+#define DMAMAP_SPI6_TX             STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN1)
+#define DMAMAP_SPI6_RX             STM32_DMA_MAP(DMA2,DMA_STREAM6,DMA_CHAN1)
 #define DMAMAP_DCMI_2              STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN1)
 
 #define DMAMAP_ADC3_1              STM32_DMA_MAP(DMA2,DMA_STREAM0,DMA_CHAN2)
 #define DMAMAP_ADC3_2              STM32_DMA_MAP(DMA2,DMA_STREAM1,DMA_CHAN2)
+#define DMAMAP_SPI5_RX_1           STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN2)
+#define DMAMAP_SPI5_TX_1           STM32_DMA_MAP(DMA2,DMA_STREAM4,DMA_CHAN2)
 #define DMAMAP_CRYP_OUT            STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN2)
 #define DMAMAP_CRYP_IN             STM32_DMA_MAP(DMA2,DMA_STREAM6,DMA_CHAN2)
 #define DMAMAP_HASH_IN             STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN2)
@@ -488,6 +504,8 @@
 #define DMAMAP_SPI1_TX_1           STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN3)
 #define DMAMAP_SPI1_TX_2           STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN3)
 
+#define DMAMAP_SPI4_RX_1           STM32_DMA_MAP(DMA2,DMA_STREAM0,DMA_CHAN4)
+#define DMAMAP_SPI4_TX_1           STM32_DMA_MAP(DMA2,DMA_STREAM1,DMA_CHAN4)
 #define DMAMAP_SPI4_TX_1           STM32_DMA_MAP(DMA2,DMA_STREAM1,DMA_CHAN4)
 #define DMAMAP_USART1_RX_1         STM32_DMA_MAP(DMA2,DMA_STREAM2,DMA_CHAN4)
 #define DMAMAP_SDIO_1              STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN4)
@@ -497,6 +515,8 @@
 
 #define DMAMAP_USART6_RX_1         STM32_DMA_MAP(DMA2,DMA_STREAM1,DMA_CHAN5)
 #define DMAMAP_USART6_RX_2         STM32_DMA_MAP(DMA2,DMA_STREAM2,DMA_CHAN5)
+#define DMAMAP_SPI4_RX_2           STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN5)
+#define DMAMAP_SPI4_TX_2           STM32_DMA_MAP(DMA2,DMA_STREAM4,DMA_CHAN5)
 #define DMAMAP_USART6_TX_1         STM32_DMA_MAP(DMA2,DMA_STREAM6,DMA_CHAN5)
 #define DMAMAP_USART6_TX_2         STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN5)
 
@@ -514,8 +534,11 @@
 #define DMAMAP_TIM8_CH1_2          STM32_DMA_MAP(DMA2,DMA_STREAM2,DMA_CHAN7)
 #define DMAMAP_TIM8_CH2_2          STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN7)
 #define DMAMAP_TIM8_CH3_2          STM32_DMA_MAP(DMA2,DMA_STREAM4,DMA_CHAN7)
+#define DMAMAP_SPI5_RX_2           STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN7)
+#define DMAMAP_SPI5_TX_2           STM32_DMA_MAP(DMA2,DMA_STREAM6,DMA_CHAN7)
 #define DMAMAP_TIM8_CH4            STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 #define DMAMAP_TIM8_TRIG           STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 #define DMAMAP_TIM8_COM            STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_DMA_H */
+#endif /* CONFIG_STM32_STM32F427 || CONFIG_STM32_STM32F429 */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_DMA_H */
