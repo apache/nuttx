@@ -707,6 +707,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
   dev->cd_ocount     = 0;
   dev->cd_ntxwaiters = 0;
   dev->cd_nrxwaiters = 0;
+  dev->cd_npendrtr   = 0;
 
   sem_init(&dev->cd_xmit.tx_sem, 0, 0);
   sem_init(&dev->cd_recv.rx_sem, 0, 0);
@@ -716,7 +717,6 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
     {
       sem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
       dev->cd_rtr[i].cr_msg = NULL;
-      dev->cd_npendrtr--;
     }
 
   /* Initialize/reset the CAN hardware */
@@ -798,6 +798,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               /* Mark the entry unused */
 
               rtr->cr_msg = NULL;
+              dev->cd_npendrtr--;
 
               /* And restart the waiting thread */
 
