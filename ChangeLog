@@ -10727,4 +10727,7 @@
 	  (2015-07-15).
 	* drivers/can.c:  Fix an issue in the CAN driver hwere the rx_sem
 	  count can grow beyond bounds (2015-07-15).
+	* configs/stm32f762g-disco/:  Add initialize support for the STMicor
+	  STM32 F7 Discovery board.  This is a work in progress and will be a
+	  while before it is fully functional (2015-07-16).
 
