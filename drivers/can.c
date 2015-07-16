@@ -326,7 +326,14 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
           /* Wait for a message to be received */
 
-          ret = sem_wait(&dev->cd_recv.rx_sem);
+          dev->cd_nrxwaiters++;
+          do
+            {
+              ret = sem_wait(&dev->cd_recv.rx_sem);
+            }
+          while (dev->cd_recv.rx_head == dev->cd_recv.rx_tail);
+          dev->cd_nrxwaiters--;
+
           if (ret < 0)
             {
               ret = -get_errno();
@@ -818,7 +825,11 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
        * message buffer.
        */
 
-      sem_post(&fifo->rx_sem);
+      if (dev->cd_nrxwaiters > 0)
+        {
+          sem_post(&fifo->rx_sem);
+        }
+
       err = OK;
     }
 

@@ -206,10 +206,10 @@ struct can_rtrwait_s
 {
   sem_t         cr_sem;                  /* Wait for RTR response */
   uint16_t      cr_id;                   /* The ID that is waited for */
-  FAR struct can_msg_s *cr_msg;          /* This is where the RTR reponse goes */
+  FAR struct can_msg_s *cr_msg;          /* This is where the RTR response goes */
 };
 
-/* This structure defines all of the operations providd by the architecture specific
+/* This structure defines all of the operations provided by the architecture specific
  * logic.  All fields must be provided with non-NULL function pointers by the
  * caller of can_register().
  */
@@ -284,6 +284,7 @@ struct can_dev_s
   uint8_t              cd_ocount;        /* The number of times the device has been opened */
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   uint8_t              cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
+  volatile uint8_t     cd_nrxwaiters;    /* Number of threads waiting to receive a message */
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   sem_t                cd_recvsem;       /* Used to wakeup user waiting for space in cd_recv.buffer */
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */

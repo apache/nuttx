@@ -10725,3 +10725,6 @@
 	* drivers/lcd/ and include/nuttx/lcd: Modify the SSD1306 LCD driver to
 	  support either the SPI or I2C interface.  From Alan Carvalho de Assis
 	  (2015-07-15).
+	* drivers/can.c:  Fix an issue in the CAN driver hwere the rx_sem
+	  count can grow beyond bounds (2015-07-15).
+
