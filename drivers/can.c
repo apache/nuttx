@@ -330,9 +330,8 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
           do
             {
               ret = sem_wait(&dev->cd_recv.rx_sem);
-              DEBUGASSERT(ret >= 0 || errno == EINTR);
             }
-          while (dev->cd_recv.rx_head == dev->cd_recv.rx_tail);
+          while (ret >= 0 && dev->cd_recv.rx_head == dev->cd_recv.rx_tail);
           dev->cd_nrxwaiters--;
 
           if (ret < 0)
