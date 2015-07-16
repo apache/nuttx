@@ -195,7 +195,7 @@ config ARCH_CHIP_SAMV7
 		Atmel SAMV7 (ARM Cortex-M7) architectures
 
 config ARCH_CHIP_STM32
-	bool "STMicro STM32"
+	bool "STMicro STM32 F1/F2/F3/F4"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_I2CRESET
@@ -203,6 +203,17 @@ config ARCH_CHIP_STM32
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
+
+config ARCH_CHIP_STM32F7
+	bool "STMicro STM32 F7"
+	select ARCH_HAVE_CMNVECTOR
+	select ARMV7M_CMNVECTOR
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RAMFUNCS
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		STMicro STM32 architectures (ARM Cortex-M7).
 
 config ARCH_CHIP_STR71X
 	bool "STMicro STR71x"
@@ -304,6 +315,7 @@ config ARCH_CHIP
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
+	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "str71x"	if ARCH_CHIP_STR71X
 
 config ARMV7M_USEBASEPRI
@@ -508,6 +520,9 @@ source arch/arm/src/samv7/Kconfig
 endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
+endif
+if ARCH_CHIP_STM32F7
+source arch/arm/src/stm32f7/Kconfig
 endif
 if ARCH_CHIP_STR71X
 source arch/arm/src/str71x/Kconfig
