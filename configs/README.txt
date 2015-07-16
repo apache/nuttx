@@ -607,6 +607,11 @@ configs/stm32f4discovery
 configs/stm32f429i-disco
   STMicro STM32F429I-Discovery board based on the STMicro STM32F429ZIT6 MCU.
 
+configs/stm32f746g-disco
+  STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
+  MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
+  memory and 300Kb SRAM.
+
 configs/stm32ldiscovery
   STMicro STM32L-Discovery board based on the STMicro STM32L152RB MCU.
 

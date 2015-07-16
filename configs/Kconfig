@@ -873,6 +873,17 @@ config ARCH_BOARD_STM32F429I_DISCO
 	---help---
 		STMicro STM32F429I-Discovery board based on the STMicro STM32F429ZIT6 MCU.
 
+config ARCH_BOARD_STM32F746G_DISCO
+	bool "STMicro STM32F746G-Discovery board"
+	depends on ARCH_CHIP_STM32F746
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 
+		MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
+		memory and 300Kb SRAM.
+
 config ARCH_BOARD_STM32L_DISCOVERY
 	bool "STMicro STM32L-Discovery board"
 	depends on ARCH_CHIP_STM32L152RB
@@ -1273,6 +1284,7 @@ config ARCH_BOARD
 	default "stm32f3discovery"         if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"         if ARCH_BOARD_STM32F4_DISCOVERY
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
+	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
@@ -1605,6 +1617,9 @@ source "configs/stm32f4discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32F429I_DISCO
 source "configs/stm32f429i-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32F746G_DISCO
+source "configs/stm32f746g-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L_DISCOVERY
 source "configs/stm32ldiscovery/Kconfig"
