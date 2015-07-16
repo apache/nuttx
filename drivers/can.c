@@ -704,7 +704,9 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 
   /* Initialize the CAN device structure */
 
-  dev->cd_ocount = 0;
+  dev->cd_ocount     = 0;
+  dev->cd_ntxwaiters = 0;
+  dev->cd_nrxwaiters = 0;
 
   sem_init(&dev->cd_xmit.tx_sem, 0, 0);
   sem_init(&dev->cd_recv.rx_sem, 0, 0);

@@ -286,7 +286,6 @@ struct can_dev_s
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
   volatile uint8_t     cd_nrxwaiters;    /* Number of threads waiting to receive a message */
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
-  sem_t                cd_recvsem;       /* Used to wakeup user waiting for space in cd_recv.buffer */
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */
   struct can_rxfifo_s  cd_recv;          /* Describes receive FIFO */
                                          /* List of pending RTR requests */
