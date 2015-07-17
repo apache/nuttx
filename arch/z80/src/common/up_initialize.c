@@ -175,8 +175,11 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
-  /* Initialize the netwok */
+#ifndef CONFIG_NETDEV_LATEINIT
+  /* Initialize the network */
 
   up_netinitialize();
+#endif
+
   board_led_on(LED_IRQSENABLED);
 }

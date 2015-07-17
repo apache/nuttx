@@ -478,10 +478,14 @@ void up_wdtinit(void);
 
 /* Networking ***************************************************************/
 
-/* Defined in board/up_network.c for board-specific Ethernet implementations,
+/* Defined in board/xyz_network.c for board-specific Ethernet implementations,
  * or chip/xyx_ethernet.c for chip-specific Ethernet implementations, or
- * common/up_etherstub.c for a cornercase where the network is enabled yet
+ * common/up_etherstub.c for a corner case where the network is enabled yet
  * there is no Ethernet driver to be initialized.
+ *
+ * Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
+ * use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
+ * up_initialize().  Then this stub would not be needed.
  */
 
 #ifdef CONFIG_NET

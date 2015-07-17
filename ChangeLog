@@ -10717,7 +10717,7 @@
 	* libc/netdb:  Add a default value for DNS server IP address.  Make
 	  sure that the IP address has been initialized before permitting DNS
 	  queries (2015-07-13).
-	* libc/netdb:  Add support for a DNS host name resulution cache.  This
+	* libc/netdb:  Add support for a DNS host name resolution cache.  This
 	  can save a lot of DNS name server lookups (but might also have the
 	  negative consequence of using stale IP address mappings (2015-07-13).
 	* graphics/, libnx/, and include/nuttx/nx:  Implement anti-aliasing in
@@ -10725,9 +10725,13 @@
 	* drivers/lcd/ and include/nuttx/lcd: Modify the SSD1306 LCD driver to
 	  support either the SPI or I2C interface.  From Alan Carvalho de Assis
 	  (2015-07-15).
-	* drivers/can.c:  Fix an issue in the CAN driver hwere the rx_sem
+	* arch/src/stm32f7 and arch/include/stm32f7:  Add architecture support
+	  for the STMicro STM32 F7 (2015-07-15).
+	* drivers/can.c:  Fix an issue in the CAN driver where the rx_sem
 	  count can grow beyond bounds (2015-07-15).
 	* configs/stm32f762g-disco/:  Add initialize support for the STMicor
 	  STM32 F7 Discovery board.  This is a work in progress and will be a
 	  while before it is fully functional (2015-07-16).
-
+	* arch/../up_etherstub.c, arch/../up_initialize, and other files: Add
+	  CONFIG_NETDEV_LATEINIT that can be used to suppress calls to
+	  up_netinitialize() from early in initialization (2015-07-17).

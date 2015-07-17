@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
-#   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,10 @@ CMN_CSRCS += up_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
 endif
 endif
+
+# Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
+# use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
+# up_initialize().  Then this stub would not be needed.
 
 ifeq ($(CONFIG_NET),y)
 ifneq ($(CONFIG_KINETIS_ENET),y)

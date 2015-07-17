@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_initialize.c
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -262,9 +262,11 @@ void up_initialize(void)
   ramlog_sysloginit();
 #endif
 
+#ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
   up_netinitialize();
+#endif
 
   /* Initialize USB */
 
