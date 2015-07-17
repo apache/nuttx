@@ -190,13 +190,10 @@ STM32F746G-DISCO-specific Configuration Options
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
-
-    In addition to internal SRAM, SRAM may also be available through the FSMC.
     In order to use FSMC SRAM, the following additional things need to be
     present in the NuttX configuration file:
 
-    CONFIG_STM32_FSMC_SRAM - Indicates that SRAM is available via the
+    CONFIG_STM32F7_FSMC_SRAM - Indicates that SRAM is available via the
       FSMC (as opposed to an LCD or FLASH).
 
     CONFIG_HEAP2_BASE - The base address of the SRAM in the FSMC address space (hex)
@@ -228,90 +225,106 @@ STM32F746G-DISCO-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-    AHB1
-    ----
-    CONFIG_STM32_CRC
-    CONFIG_STM32_BKPSRAM
-    CONFIG_STM32_CCMDATARAM
-    CONFIG_STM32_DMA1
-    CONFIG_STM32_DMA2
-    CONFIG_STM32_ETHMAC
-    CONFIG_STM32_OTGHS
-
-    AHB2
-    ----
-    CONFIG_STM32_DCMI
-    CONFIG_STM32_CRYP
-    CONFIG_STM32_HASH
-    CONFIG_STM32_RNG
-    CONFIG_STM32_OTGFS
-
-    AHB3
-    ----
-    CONFIG_STM32_FSMC
-
     APB1
     ----
-    CONFIG_STM32_TIM2
-    CONFIG_STM32_TIM3
-    CONFIG_STM32_TIM4
-    CONFIG_STM32_TIM5
-    CONFIG_STM32_TIM6
-    CONFIG_STM32_TIM7
-    CONFIG_STM32_TIM12
-    CONFIG_STM32_TIM13
-    CONFIG_STM32_TIM14
-    CONFIG_STM32_WWDG
-    CONFIG_STM32_IWDG
-    CONFIG_STM32_SPI2
-    CONFIG_STM32_SPI3
-    CONFIG_STM32_USART2
-    CONFIG_STM32_USART3
-    CONFIG_STM32_UART4
-    CONFIG_STM32_UART5
-    CONFIG_STM32_I2C1
-    CONFIG_STM32_I2C2
-    CONFIG_STM32_I2C3
-    CONFIG_STM32_CAN1
-    CONFIG_STM32_CAN2
-    CONFIG_STM32_DAC1
-    CONFIG_STM32_DAC2
-    CONFIG_STM32_PWR -- Required for RTC
+    CONFIG_STM32F7_TIM2           TIM2
+    CONFIG_STM32F7_TIM3           TIM3
+    CONFIG_STM32F7_TIM4           TIM4
+    CONFIG_STM32F7_TIM5           TIM5
+    CONFIG_STM32F7_TIM6           TIM6
+    CONFIG_STM32F7_TIM7           TIM7
+    CONFIG_STM32F7_TIM12          TIM12
+    CONFIG_STM32F7_TIM13          TIM13
+    CONFIG_STM32F7_TIM14          TIM14
+    CONFIG_STM32F7_LPTIM1         LPTIM1
+    CONFIG_STM32F7_RTC            RTC
+    CONFIG_STM32F7_BKP            BKP Registers
+    CONFIG_STM32F7_WWDG           WWDG
+    CONFIG_STM32F7_IWDG           IWDG
+    CONFIG_STM32F7_SPI2           SPI2
+    CONFIG_STM32F7_I2S2           I2S2
+    CONFIG_STM32F7_SPI3           SPI3
+    CONFIG_STM32F7_I2S3           I2S3
+    CONFIG_STM32F7_SPDIFRX        SPDIFRX
+    CONFIG_STM32F7_USART2         USART2
+    CONFIG_STM32F7_USART3         USART3
+    CONFIG_STM32F7_UART4          UART4
+    CONFIG_STM32F7_UART5          UART5
+    CONFIG_STM32F7_I2C1           I2C1
+    CONFIG_STM32F7_I2C2           I2C2
+    CONFIG_STM32F7_I2C3           I2C3
+    CONFIG_STM32F7_I2C4           I2C4
+    CONFIG_STM32F7_CAN1           CAN1
+    CONFIG_STM32F7_CAN2           CAN2
+    CONFIG_STM32F7_HDMICEC        HDMI-CEC
+    CONFIG_STM32F7_PWR            PWR
+    CONFIG_STM32F7_DAC            DAC
+    CONFIG_STM32F7_UART7          UART7
+    CONFIG_STM32F7_UART8          UART8
 
     APB2
     ----
-    CONFIG_STM32_TIM1
-    CONFIG_STM32_TIM8
-    CONFIG_STM32_USART1
-    CONFIG_STM32_USART6
-    CONFIG_STM32_ADC1
-    CONFIG_STM32_ADC2
-    CONFIG_STM32_ADC3
-    CONFIG_STM32_SDIO
-    CONFIG_STM32_SPI1
-    CONFIG_STM32_SYSCFG
-    CONFIG_STM32_TIM9
-    CONFIG_STM32_TIM10
-    CONFIG_STM32_TIM11
+    CONFIG_STM32F7_TIM1           TIM1
+    CONFIG_STM32F7_TIM8           TIM8
+    CONFIG_STM32F7_USART1         USART1
+    CONFIG_STM32F7_USART6         USART6
+    CONFIG_STM32F7_ADC            ADC1 - ADC2 - ADC3
+    CONFIG_STM32F7_SDMMC1         SDMMC1
+    CONFIG_STM32F7_SPI1           SPI1
+    CONFIG_STM32F7_SPI4           SPI4
+    CONFIG_STM32F7_SYSCFG         SYSCFG
+    CONFIG_STM32F7_EXTI           EXTI
+    CONFIG_STM32F7_TIM9           TIM9
+    CONFIG_STM32F7_TIM10          TIM10
+    CONFIG_STM32F7_TIM11          TIM11
+    CONFIG_STM32F7_SPI5           SPI5
+    CONFIG_STM32F7_SPI6           SPI6
+    CONFIG_STM32F7_SAI1           SAI1
+    CONFIG_STM32F7_SAI2           SAI2
+    CONFIG_STM32F7_LTDC           LCD-TFT
+
+    AHB1
+    ----
+    CONFIG_STM32F7_CRC            CRC
+    CONFIG_STM32F7_BKPSRAM        BKPSRAM
+    CONFIG_STM32F7_DMA1           DMA1
+    CONFIG_STM32F7_DMA2           DMA2
+    CONFIG_STM32F7_ETHMAC         Ethernet MAC
+    CONFIG_STM32F7_DMA2D          Chrom-ART (DMA2D)
+    CONFIG_STM32F7_USBOTGHS       USB OTG HS
+
+    AHB2
+    ----
+    CONFIG_STM32F7_USBOTGFS       USB OTG FS
+    CONFIG_STM32F7_DCMI           DCMI
+    CONFIG_STM32F7_CRYP           CRYP
+    CONFIG_STM32F7_HASH           HASH
+    CONFIG_STM32F7_RNG            RNG
+
+    AHB3
+    ----
+
+    CONFIG_STM32F7_FSMC           FSMC control registers
+    CONFIG_STM32F7_QUADSPI        QuadSPI Control
 
   Timer devices may be used for different purposes.  One special purpose is
-  to generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
+  to generate modulated outputs for such things as motor control.  If CONFIG_STM32F7_TIMn
   is defined (as above) then the following may also be defined to indicate that
   the timer is intended to be used for pulsed output modulation, ADC conversion,
   or DAC conversion. Note that ADC/DAC require two definition:  Not only do you have
   to assign the timer (n) for used by the ADC or DAC, but then you also have to
   configure which ADC or DAC (m) it is assigned to.
 
-    CONFIG_STM32_TIMn_PWM   Reserve timer n for use by PWM, n=1,..,14
-    CONFIG_STM32_TIMn_ADC   Reserve timer n for use by ADC, n=1,..,14
-    CONFIG_STM32_TIMn_ADCm  Reserve timer n to trigger ADCm, n=1,..,14, m=1,..,3
-    CONFIG_STM32_TIMn_DAC   Reserve timer n for use by DAC, n=1,..,14
-    CONFIG_STM32_TIMn_DACm  Reserve timer n to trigger DACm, n=1,..,14, m=1,..,2
+    CONFIG_STM32F7_TIMn_PWM   Reserve timer n for use by PWM, n=1,..,14
+    CONFIG_STM32F7_TIMn_ADC   Reserve timer n for use by ADC, n=1,..,14
+    CONFIG_STM32F7_TIMn_ADCm  Reserve timer n to trigger ADCm, n=1,..,14, m=1,..,3
+    CONFIG_STM32F7_TIMn_DAC   Reserve timer n for use by DAC, n=1,..,14
+    CONFIG_STM32F7_TIMn_DACm  Reserve timer n to trigger DACm, n=1,..,14, m=1,..,2
 
   For each timer that is enabled for PWM usage, we need the following additional
   configuration settings:
 
-    CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
+    CONFIG_STM32F7_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
 
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
@@ -319,10 +332,10 @@ STM32F746G-DISCO-specific Configuration Options
 
   JTAG Enable settings (by default only SW-DP is enabled):
 
-    CONFIG_STM32_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
-    CONFIG_STM32_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+    CONFIG_STM32F7_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+    CONFIG_STM32F7_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
       but without JNTRST.
-    CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
+    CONFIG_STM32F7_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
 
   STM32F746G-DISCO specific device driver settings
 
@@ -339,8 +352,8 @@ STM32F746G-DISCO-specific Configuration Options
 
   STM32F746G-DISCO CAN Configuration
 
-    CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
-      CONFIG_STM32_CAN2 must also be defined)
+    CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32F7_CAN1 or
+      CONFIG_STM32F7_CAN2 must also be defined)
     CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
       Standard 11-bit IDs.
     CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
@@ -349,8 +362,8 @@ STM32F746G-DISCO-specific Configuration Options
       Default: 4
     CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
       mode for testing. The STM32 CAN driver does support loopback mode.
-    CONFIG_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
-    CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
+    CONFIG_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32F7_CAN1 is defined.
+    CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32F7_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
     CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
@@ -358,16 +371,16 @@ STM32F746G-DISCO-specific Configuration Options
 
   STM32F746G-DISCO SPI Configuration
 
-    CONFIG_STM32_SPI_INTERRUPTS - Select to enable interrupt driven SPI
+    CONFIG_STM32F7_SPI_INTERRUPTS - Select to enable interrupt driven SPI
       support. Non-interrupt-driven, poll-waiting is recommended if the
       interrupt rate would be to high in the interrupt driven case.
-    CONFIG_STM32_SPI_DMA - Use DMA to improve SPI transfer performance.
-      Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
+    CONFIG_STM32F7_SPI_DMA - Use DMA to improve SPI transfer performance.
+      Cannot be used with CONFIG_STM32F7_SPI_INTERRUPT.
 
   STM32F746G-DISCO DMA Configuration
 
-    CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
-      and CONFIG_STM32_DMA2.
+    CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32F7_SDIO
+      and CONFIG_STM32F7_DMA2.
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
     CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
@@ -380,24 +393,24 @@ STM32F746G-DISCO-specific Configuration Options
 
    CONFIG_USBDEV          - Enable USB device support
    CONFIG_USBHOST         - Enable USB host support
-   CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
-   CONFIG_STM32_SYSCFG    - Needed
+   CONFIG_STM32F7_OTGFS     - Enable the STM32 USB OTG FS block
+   CONFIG_STM32F7_SYSCFG    - Needed
    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
 
   Options:
 
-   CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+   CONFIG_STM32F7_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
-   CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+   CONFIG_STM32F7_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
      in 32-bit words.  Default 96 (384 bytes)
-   CONFIG_STM32_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
+   CONFIG_STM32F7_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
      words.  Default 96 (384 bytes)
-   CONFIG_STM32_OTGFS_DESCSIZE - Maximum size of a descriptor.  Default: 128
-   CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
+   CONFIG_STM32F7_OTGFS_DESCSIZE - Maximum size of a descriptor.  Default: 128
+   CONFIG_STM32F7_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
      want to do that?
-   CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
+   CONFIG_STM32F7_USBHOST_REGDEBUG - Enable very low-level register access
      debug.  Depends on CONFIG_DEBUG.
-   CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
+   CONFIG_STM32F7_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
      packets. Depends on CONFIG_DEBUG.
 
 Configurations
@@ -448,8 +461,8 @@ Where <subdir> is one of the following:
        be manually enabled by selecting:
 
        CONFIG_PWM=y              : Enable the generic PWM infrastructure
-       CONFIG_STM32_TIM4=y       : Enable TIM4
-       CONFIG_STM32_TIM4_PWM=y   : Use TIM4 to generate PWM output
+       CONFIG_STM32F7_TIM4=y       : Enable TIM4
+       CONFIG_STM32F7_TIM4_PWM=y   : Use TIM4 to generate PWM output
 
        See also apps/examples/README.txt
 
@@ -463,10 +476,10 @@ Where <subdir> is one of the following:
        CONFIG_EXAMPLES_QENCODER=y : Enable the apps/examples/qencoder
        CONFIG_SENSORS=y           : Enable support for sensors
        CONFIG_QENCODER=y          : Enable the generic Quadrature Encoder infrastructure
-       CONFIG_STM32_TIM8=y        : Enable TIM8
-       CONFIG_STM32_TIM2=n        : (Or optionally TIM2)
-       CONFIG_STM32_TIM8_QE=y     : Use TIM8 as the quadrature encoder
-       CONFIG_STM32_TIM2_QE=y     : (Or optionally TIM2)
+       CONFIG_STM32F7_TIM8=y        : Enable TIM8
+       CONFIG_STM32F7_TIM2=n        : (Or optionally TIM2)
+       CONFIG_STM32F7_TIM8_QE=y     : Use TIM8 as the quadrature encoder
+       CONFIG_STM32F7_TIM2_QE=y     : (Or optionally TIM2)
 
        See also apps/examples/README.txt. Special debug options:
 
@@ -477,8 +490,8 @@ Where <subdir> is one of the following:
 
        CONFIG_EXAMPLES_WATCHDOG=y : Enable the apps/examples/watchdog
        CONFIG_WATCHDOG=y          : Enables watchdog timer driver support
-       CONFIG_STM32_WWDG=y        : Enables the WWDG timer facility, OR
-       CONFIG_STM32_IWDG=y        : Enables the IWDG timer facility (but not both)
+       CONFIG_STM32F7_WWDG=y        : Enables the WWDG timer facility, OR
+       CONFIG_STM32F7_IWDG=y        : Enables the IWDG timer facility (but not both)
 
        The WWDG watchdog is driven off the (fast) 42MHz PCLK1 and, as result,
        has a maximum timeout value of 49 milliseconds.  for WWDG watchdog, you
@@ -491,7 +504,7 @@ Where <subdir> is one of the following:
 
      7. USB Support (CDC/ACM device)
 
-        CONFIG_STM32_OTGFS=y          : STM32 OTG FS support
+        CONFIG_STM32F7_OTGFS=y          : STM32 OTG FS support
         CONFIG_USBDEV=y               : USB device support must be enabled
         CONFIG_CDCACM=y               : The CDC/ACM driver must be built
         CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
@@ -503,7 +516,7 @@ Where <subdir> is one of the following:
         (or PL2303) USB console.  The normal way that you would configure the
         the USB console would be to change the .config file like this:
 
-        CONFIG_STM32_OTGFS=y           : STM32 OTG FS support
+        CONFIG_STM32F7_OTGFS=y           : STM32 OTG FS support
         CONFIG_USART2_SERIAL_CONSOLE=n : Disable the USART2 console
         CONFIG_DEV_CONSOLE=n           : Inhibit use of /dev/console by other logic
         CONFIG_USBDEV=y                : USB device support must be enabled
@@ -519,7 +532,7 @@ Where <subdir> is one of the following:
         will use /dev/console.  Instead, it will use the normal /dev/ttyACM0
         USB serial device for the console:
 
-        CONFIG_STM32_OTGFS=y           : STM32 OTG FS support
+        CONFIG_STM32F7_OTGFS=y           : STM32 OTG FS support
         CONFIG_USART2_SERIAL_CONSOLE=y : Keep the USART2 console
         CONFIG_DEV_CONSOLE=y           : /dev/console exists (but NSH won't use it)
         CONFIG_USBDEV=y                : USB device support must be enabled
@@ -566,8 +579,8 @@ Where <subdir> is one of the following:
          CONFIG_USBHOST_MSC=y     : Enable the mass storage class
 
        System Type -> STM32 Peripheral Support
-         CONFIG_STM32_OTGHS=y     : Enable the STM32 USB OTG FH block (FS mode)
-         CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF HS support
+         CONFIG_STM32F7_OTGHS=y     : Enable the STM32 USB OTG FH block (FS mode)
+         CONFIG_STM32F7_SYSCFG=y    : Needed for all USB OTF HS support
 
        RTOS Features -> Work Queue Support
          CONFIG_SCHED_WORKQUEUE=y : High priority worker thread support is required
