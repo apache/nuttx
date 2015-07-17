@@ -68,7 +68,7 @@
 #define STM32_RCC_AH2BLPENR_OFFSET  0x0054  /* RCC AHB2 low power modeperipheral clock enable register */
 #define STM32_RCC_AH3BLPENR_OFFSET  0x0058  /* RCC AHB3 low power modeperipheral clock enable register */
 #define STM32_RCC_APB1LPENR_OFFSET  0x0060  /* RCC APB1 low power modeperipheral clock enable register */
-#define STM32_RCC_APB2LPENR_OFFSET  0x0060  /* RCC APB2 low power modeperipheral clock enable register */
+#define STM32_RCC_APB2LPENR_OFFSET  0x0064  /* RCC APB2 low power modeperipheral clock enable register */
 #define STM32_RCC_BDCR_OFFSET       0x0070  /* Backup domain control register */
 #define STM32_RCC_CSR_OFFSET        0x0074  /* Control/status register */
 #define STM32_RCC_SSCGR_OFFSET      0x0080  /* Spread spectrum clock generation register */
@@ -322,7 +322,7 @@
 #define RCC_APB2RSTR_SPI5RST        (1 << 20) /* Bit 20: SPI 5 reset */
 #define RCC_APB2RSTR_SPI6RST        (1 << 21) /* Bit 21: SPI 6 reset */
 #define RCC_APB2RSTR_SAI1RST        (1 << 22) /* Bit 22: SAI 1 reset */
-#endif
+
 #if defined(CONFIG_STM32_STM32F429)
 #  define RCC_APB2RSTR_LTDCRST      (1 << 26) /* Bit 26: LTDC reset */
 #endif
@@ -411,6 +411,7 @@
 #define RCC_APB2ENR_SPI5EN          (1 << 20) /* Bit 20: SPI5 clock enable */
 #define RCC_APB2ENR_SPI6EN          (1 << 21) /* Bit 21: SPI6 clock enable */
 #define RCC_APB2ENR_SAI1EN          (1 << 22) /* Bit 22: SAI1 clock enable */
+
 #if defined(CONFIG_STM32_STM32F429)
 #  define RCC_APB2ENR_LTDCEN        (1 << 26) /* Bit 26: LTDC clock enable */
 #endif
@@ -504,6 +505,7 @@
 #define RCC_APB2LPENR_SPI5LPEN      (1 << 20) /* Bit 20: SPI5 clock enable during Sleep mode */
 #define RCC_APB2LPENR_SPI6LPEN      (1 << 21) /* Bit 21: SPI6 clock enable during Sleep mode */
 #define RCC_APB2LPENR_SAI1LPEN      (1 << 22) /* Bit 22: SAI1 clock enable during Sleep mode */
+
 #if defined(CONFIG_STM32_STM32F429)
 #  define RCC_APB2LPENR_LTDCLPEN    (1 << 26) /* Bit 26: LTDC clock enable during Sleep mode */
 #endif
