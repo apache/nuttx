@@ -265,6 +265,7 @@ config ARCH_CORTEXM4
 config ARCH_CORTEXM7
 	bool
 	default n
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_HIPRI_INTERRUPT
