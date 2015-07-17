@@ -123,7 +123,9 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
 
-  /* If the address contains a colon, then it might be a numeric IPv6 */
+  /* If the address contains a colon, then it might be a numeric IPv6
+   * address
+   */
 
   if (strchr(name, ':') != NULL)
     {
@@ -136,7 +138,13 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
         }
 
       ret = inet_pton(AF_INET6, name, ptr);
-      if (ret < 0)
+
+      /* The inet_pton() function returns 1 if the conversion succeeds. It
+       * will return 0 if the input is not a valid IP address string, or -1
+       * if the address family argument is unsupported.
+       */
+
+      if (ret < 1)
         {
           /* Conversion failed.  Must not be a IPv6 address */
 
@@ -145,7 +153,10 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
 
       host->h_addrtype  = AF_INET6;
     }
-  /* If the address contains a colon, then it might be a numeric IPv6 */
+
+  /* If the address contains a colon, then it might be a numeric IPv6
+   * address.
+   */
 
   else if (strchr(name, '.') != NULL)
     {
@@ -158,7 +169,13 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
         }
 
       ret = inet_pton(AF_INET, name, ptr);
-      if (ret < 0)
+
+      /* The inet_pton() function returns 1 if the conversion succeeds. It
+       * will return 0 if the input is not a valid IP address string, or -1
+       * if the address family argument is unsupported.
+       */
+
+      if (ret < 1)
         {
           /* Conversion failed.  Must not be an IPv4 address */
 

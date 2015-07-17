@@ -88,10 +88,8 @@
  *          address (32 bits for AF_INET, 128 bits for AF_INET6).
  *
  * Returned Value:
- *   The inet_pton() function returns 1 if the conversion succeeds, with the
- *   address pointed to by dest in network byte order. It will return 0 if the
- *   input is not a valid IPv4 dotted-decimal string or a valid IPv6 address
- *   string, or -1 with errno set to EAFNOSUPPOR] if the af argument is unknown.
+ *   inet_ipv4_pton() will returns 1 if the conversion succeeds. It will
+ *   return 0 if the input is not a valid IPv4 dotted-decimal string string.
  *
  ****************************************************************************/
 
@@ -200,10 +198,8 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
  *          address (32 bits for AF_INET, 128 bits for AF_INET6).
  *
  * Returned Value:
- *   The inet_pton() function returns 1 if the conversion succeeds, with the
- *   address pointed to by dest in network byte order. It will return 0 if the
- *   input is not a valid IPv4 dotted-decimal string or a valid IPv6 address
- *   string, or -1 with errno set to EAFNOSUPPOR] if the af argument is unknown.
+ *   inet_ipv6_pton() will returns 1 if the conversion succeeds. It will
+ *   return 0 if the input is not a valid IPv6 address string.
  *
  ****************************************************************************/
 
@@ -384,7 +380,7 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
  *   The inet_pton() function returns 1 if the conversion succeeds, with the
  *   address pointed to by dest in network byte order. It will return 0 if the
  *   input is not a valid IPv4 dotted-decimal string or a valid IPv6 address
- *   string, or -1 with errno set to EAFNOSUPPORT] if the af argument is
+ *   string, or -1 with errno set to EAFNOSUPPORT if the af argument is
  *   unknown.
  *
  ****************************************************************************/
