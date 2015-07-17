@@ -49,7 +49,6 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "stm32.h"
 #include "stm32f746g-disco.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
