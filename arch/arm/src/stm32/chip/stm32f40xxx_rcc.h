@@ -60,7 +60,7 @@
 #define STM32_RCC_AH2BLPENR_OFFSET  0x0054  /* RCC AHB2 low power modeperipheral clock enable register */
 #define STM32_RCC_AH3BLPENR_OFFSET  0x0058  /* RCC AHB3 low power modeperipheral clock enable register */
 #define STM32_RCC_APB1LPENR_OFFSET  0x0060  /* RCC APB1 low power modeperipheral clock enable register */
-#define STM32_RCC_APB2LPENR_OFFSET  0x0060  /* RCC APB2 low power modeperipheral clock enable register */
+#define STM32_RCC_APB2LPENR_OFFSET  0x0064  /* RCC APB2 low power modeperipheral clock enable register */
 #define STM32_RCC_BDCR_OFFSET       0x0070  /* Backup domain control register */
 #define STM32_RCC_CSR_OFFSET        0x0074  /* Control/status register */
 #define STM32_RCC_SSCGR_OFFSET      0x0080  /* Spread spectrum clock generation register */
