@@ -54,7 +54,7 @@
 #  include "nvic.h"
 #endif
 
-#include "stm32_clockconfig.h"
+#include "stm32_rcc.h"
 #include "stm32_userspace.h"
 #include "stm32_start.h"
 
