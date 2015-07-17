@@ -73,7 +73,7 @@
  * Parts STM32F74xxG have 1024Kb of FLASH
  */
 
-#if defined(CONFIG_ARCH_CHIP_STM32F745) || defined(CONFIG_ARCH_CHIP_STM32F746) ||
+#if defined(CONFIG_ARCH_CHIP_STM32F745) || defined(CONFIG_ARCH_CHIP_STM32F746) || \
     defined(CONFIG_ARCH_CHIP_STM32F756)
 
 #if defined(CONFIG_ARCH_CHIP_STM32F745)
@@ -123,7 +123,7 @@
 #  define STM32F7_NUSBOTGHS                1   /* USB OTG HS */
 #  define STM32F7_NCAN                     2   /* CAN1-2 */
 #  define STM32F7_NSAI                     2   /* SAI1-2 */
-#  define STM32F7_NSPDFRX                  4   /* 4 SPDFRX inputs */
+#  define STM32F7_NSPDIFRX                 4   /* 4 SPDIFRX inputs */
 #  define STM32F7_NSDMMC                   1   /* SDMMC interface */
 #  define STM32F7_NDCMI                    1   /* Digital camera interface (DCMI) */
 #  define STM32F7_NDMA                     2   /* DMA1-2 */
