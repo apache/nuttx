@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/common/up_etherstub.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,18 +66,18 @@
  *
  * Description:
  *   This is a stub version os up_netinitialize.  Normally, up_netinitialize
- *   is defined in board/up_network.c for board-specific ethernet
- *   implementations, or chip/xyx_ethernet.c for chip-specific ethernet
- *   implementations.  The stub version here is used in the cornercase where
- *   the network is enable yet there is no ethernet driver to be initialized.
+ *   is defined in board/xyz_network.c for board-specific Ethernet
+ *   implementations, or chip/xyx_ethernet.c for chip-specific Ethernet
+ *   implementations.  The stub version here is used in the corner case where
+ *   the network is enable yet there is no Ethernet driver to be initialized.
  *   In this case, up_initialize will still try to call up_netinitialize()
- *   when one does not exist.  This cornercase would occur if, for example,
+ *   when one does not exist.  This corner case would occur if, for example,
  *   only a USB network interface is being used or perhaps if a SLIP is
- *   being used).  In those cases, the initialization path is very different.
+ *   being used).
  *
- *   In the long run, it might be better to have some kind of CONFIG_NO_ETHERNET
- *   to suppress the call to up_netinitialize() in up_initialize().  Then
- *   this stub would not be needed.
+ *   Use of this stub is deprecated.  The preferred mechanism is to use
+ *   CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
+ *   up_initialize().  Then this stub would not be needed.
  *
  ****************************************************************************/
 

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/mips/src/pic32mx/Make.defs
 #
-#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,10 @@ CMN_CSRCS += up_stackframe.c up_swint0.c up_udelay.c up_unblocktask.c
 CMN_CSRCS += up_usestack.c up_vfork.c
 
 # Configuration dependent common files
+
+# Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
+# use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
+# up_initialize().  Then this stub would not be needed.
 
 ifneq ($(CONFIG_PIC32MX_ETHERNET),y)
 ifeq ($(CONFIG_NET),y)

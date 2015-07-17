@@ -186,9 +186,11 @@ void up_initialize(void)
   ramlog_sysloginit();
 #endif
 
+#ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
   up_netinitialize();
+#endif
 
   /* Initialize USB */
 
