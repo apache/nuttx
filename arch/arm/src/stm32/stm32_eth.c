@@ -255,8 +255,8 @@
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_60_100
 #elif STM32_HCLK_FREQUENCY >= 100000000 && STM32_HCLK_FREQUENCY < 150000000
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_100_150
-#elif STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 168000000
-#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_150_168
+#elif STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 180000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_150_180
 #else
 #  error "STM32_HCLK_FREQUENCY not supportable"
 #endif
@@ -3662,9 +3662,11 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
 #endif
 #endif
 
+#ifdef CONFIG_STM32_ETH_PTP
   /* Enable pulse-per-second (PPS) output signal */
 
   stm32_configgpio(GPIO_ETH_PPS_OUT);
+#endif
 }
 
 /****************************************************************************
