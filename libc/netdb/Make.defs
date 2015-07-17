@@ -37,21 +37,18 @@ ifeq ($(CONFIG_LIBC_NETDB),y)
 
 # Add the netdb C files to the build
 
-CSRCS += lib_netdb.c
+CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
 
 # Add host file support
 
 ifeq ($(CONFIG_NETDB_HOSTFILE),y)
-CSRCS += lib_gethostbyname.c lib_gethostbynamer.c lib_gethostbyaddr.c
+CSRCS += lib_gethostbyaddr.c
 CSRCS += lib_gethostbyaddrr.c lib_parsehostfile.c
 endif
 
 # Add DNS lookup support
 
 ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
-ifneq ($(CONFIG_NETDB_HOSTFILE),y)
-CSRCS += lib_gethostbyname.c lib_gethostbynamer.c
-endif
 CSRCS += lib_dnsclient.c
 endif
 
