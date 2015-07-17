@@ -52,6 +52,14 @@
 struct hostent g_hostent;
 char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
 
+/* When the <netdb.h> header is included, h_errno shall be available as a
+ * modifiable lvalue of type int. It is unspecified whether h_errno is a
+ * macro or an identifier declared with external linkage.
+ */
+
+/* REVISIT:  This should at least be per-task? */
+int h_errno;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
