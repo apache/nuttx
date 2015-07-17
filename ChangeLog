@@ -10735,3 +10735,5 @@
 	* arch/../up_etherstub.c, arch/../up_initialize, and other files: Add
 	  CONFIG_NETDEV_LATEINIT that can be used to suppress calls to
 	  up_netinitialize() from early in initialization (2015-07-17).
+	* arch/arm/src/stm32: Extend STM32 Ethernet operating frequency to
+	  180MHz.  From Sebastien Lorquet (2015-07-17).
