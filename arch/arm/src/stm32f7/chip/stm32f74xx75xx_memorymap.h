@@ -37,6 +37,14 @@
 #define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XXX75XXX_MEMORYMAP_H
 
 /************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+
+#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+
+/************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
@@ -195,5 +203,5 @@
  * address range
  */
 
+#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XXX75XXX_MEMORYMAP_H */
-
