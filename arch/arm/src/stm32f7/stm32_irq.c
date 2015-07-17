@@ -44,7 +44,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include <arch/irq.h>
+#include <arch/stm32f7/chip.h>
 
 #include "nvic.h"
 #include "ram_vectors.h"
@@ -120,27 +122,37 @@ static void stm32_dumpnvic(const char *msg, int irq)
   lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
         getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-#if STM32_IRQ_NEXTINT > 15
+#if NR_INTERRUPTS > 15
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
         getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
 #endif
-#if STM32_IRQ_NEXTINT > 31
+#if NR_INTERRUPTS > 31
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
 #endif
-#if STM32_IRQ_NEXTINT > 47
+#if NR_INTERRUPTS > 47
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
         getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
 #endif
-#if STM32_IRQ_NEXTINT > 63
+#if NR_INTERRUPTS > 63
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
         getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
 #endif
-#if STM32_IRQ_NEXTINT > 79
+#if NR_INTERRUPTS > 79
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
+        getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
+#endif
+#if NR_INTERRUPTS > 95
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
+        getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
+#endif
+#if NR_INTERRUPTS > 111
 #  warning Missing logic
 #endif
   irqrestore(flags);
@@ -245,34 +257,34 @@ static inline void stm32_prioritize_syscall(int priority)
 static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                        uintptr_t offset)
 {
-  unsigned int extint = irq - STM32_IRQ_INTERRUPTS;
+  unsigned int extint = irq - STM32_IRQ_FIRST;
 
   DEBUGASSERT(irq >= STM32_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
-  if (irq >= STM32_IRQ_INTERRUPTS)
+  if (irq >= STM32_IRQ_FIRST)
     {
-#if STM32_IRQ_NEXTINT <= 32
-      if (extint < STM32_IRQ_NEXTINT)
+#if NR_INTERRUPTS <= 32
+      if (extint < NR_INTERRUPTS)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
       else
-#elif STM32_IRQ_NEXTINT <= 64
+#elif NR_INTERRUPTS <= 64
       if (extint < 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
-      else if (extint < STM32_IRQ_NEXTINT)
+      else if (extint < NR_INTERRUPTS)
         {
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (extint - 32);
         }
       else
-#elif STM32_IRQ_NEXTINT <= 96
+#elif NR_INTERRUPTS <= 96
       if (extint < 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
@@ -283,10 +295,32 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (extint - 32);
         }
-      else if (extint < STM32_IRQ_NEXTINT)
+      else if (extint < NR_INTERRUPTS)
         {
            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
            *bit     = 1 << (extint - 64);
+        }
+      else
+#elif NR_INTERRUPTS <= 128
+      if (extint < 32)
+        {
+           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+           *bit     = 1 << extint;
+        }
+      else if (extint < 64)
+        {
+           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+           *bit     = 1 << (extint - 32);
+        }
+      else if (extint < 96)
+        {
+           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+           *bit     = 1 << (extint - 64);
+        }
+      else if (extint < NR_INTERRUPTS)
+        {
+           *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
+           *bit     = 1 << (extint - 96);
         }
       else
 #else
@@ -502,7 +536,7 @@ void up_disable_irq(int irq)
        * clear the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= STM32_IRQ_INTERRUPTS)
+      if (irq >= STM32_IRQ_FIRST)
         {
           putreg32(bit, regaddr);
         }
@@ -549,7 +583,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= STM32_IRQ_INTERRUPTS)
+      if (irq >= STM32_IRQ_FIRST)
         {
           putreg32(bit, regaddr);
         }
@@ -607,7 +641,7 @@ int up_prioritize_irq(int irq, int priority)
   DEBUGASSERT(irq >= STM32_IRQ_MEMFAULT && irq < STM32_IRQ_NIRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
-  if (irq < STM32_IRQ_INTERRUPTS)
+  if (irq < STM32_IRQ_FIRST)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -620,7 +654,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= STM32_IRQ_INTERRUPTS;
+      irq    -= STM32_IRQ_FIRST;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 

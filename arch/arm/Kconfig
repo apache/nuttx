@@ -210,7 +210,8 @@ config ARCH_CHIP_STM32F7
 	select ARMV7M_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M7).
