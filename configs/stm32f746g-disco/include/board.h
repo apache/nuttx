@@ -56,37 +56,21 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The STM32F7 Discovery board features a single 8MHz crystal.  Space is provided
- * for a 32kHz RTC backup crystal, but it is not stuffed.
+/* The STM32F7 Discovery board provides the following clock sources:
  *
- * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 180000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 180000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
- *   SDIO and RNG clock
+ *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
+ *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
+ *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
+ *
+ * So we have these clock source available within the STM32
+ *
+ *   HSI: 16 MHz RC factory-trimmed
+ *   LSI: 32 KHz RC
+ *   HSE: On-board crystal frequency is 25MHz
+ *   LSE: 32.768 kHz
  */
 
-/* HSI - 16 MHz RC factory-trimmed
- * LSI - 32 KHz RC
- * HSE - On-board crystal frequency is 8MHz
- * LSE - 32.768 kHz
- */
-
-#define STM32_BOARD_XTAL        8000000ul
+#define STM32_BOARD_XTAL        25000000ul
 
 #define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000
@@ -95,31 +79,95 @@
 
 /* Main PLL Configuration.
  *
- * PLL source is HSE
+ * PLL source is HSE = 25,000,000
+ *
  * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (8,000,000 / 8) * 336
- *         = 336,000,000
+ * Subject to:
+ *
+ *     2 <= PLLM <= 63
+ *   192 <= PLLN <= 432
+ *   192 MHz <= PLL_VCO <= 432MHz
+ *
  * SYSCLK  = PLL_VCO / PLLP
- *         = 336,000,000 / 2 = 168,000,000
- * USB OTG FS, SDIO and RNG Clock
- *         =  PLL_VCO / PLLQ
- *         = 48,000,000
+ * Subject to
+ *
+ *   PLLP = {2, 4, 6, 8}
+ *   SYSCLK <= 216 MHz
+ *
+ * USB OTG FS, SDMMC and RNG Clock = PLL_VCO / PLLQ
+ * Subject to
+ *   The USB OTG FS requires a 48 MHz clock to work correctly. The SDMMC
+ *   and the random number generator need a frequency lower than or equal
+ *   to 48 MHz to work correctly.
+ *
+ * 2 <= PLLQ <= 15
  */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
+#if defined(CONFIG_STM32F7_USBOTHFS)
+/* Highest SYSCLK with USB OTG FS clock = 48 MHz
+ *
+ * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
+ * SYSCLK  = 384 MHz / 2 = 192 MHz
+ * USB OTG FS, SDMMC and RNG Clock = 384 MHz / 8 = 48MHz
+ */
+
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(384)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(8)
 
-#define STM32_SYSCLK_FREQUENCY  168000000ul
+#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 384)
+#define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
+#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
 
-/* AHB clock (HCLK) is SYSCLK (168MHz) */
+#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_RNG)
+/* Highest SYSCLK with USB OTG FS clock <= 48MHz
+ *
+ * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
+ * SYSCLK  = 432 MHz / 2 = 216 MHz
+ * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 10 = 43.2 MHz
+ */
+
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
+#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+
+#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 432)
+#define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
+#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 10)
+
+#else
+/* Highest SYSCLK
+ *
+ * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
+ * SYSCLK  = 432 MHz / 2 = 216 MHz
+ */
+
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
+#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+
+#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 432)
+#define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
+#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 10)
+#endif
+
+/* Several prescalers allow the configuration of the two AHB buses, the
+ * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum
+ * frequency of the two AHB buses is 216 MHz while the maximum frequency of
+ * the high-speed APB domains is 108 MHz. The maximum allowed frequency of
+ * the low-speed APB domain is 54 MHz.
+ */
+
+/* AHB clock (HCLK) is SYSCLK (216 MHz) */
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
-/* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
+/* APB1 clock (PCLK1) is HCLK/4 (54 MHz) */
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
@@ -136,7 +184,7 @@
 #define STM32_APB1_TIM13_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
-/* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
+/* APB2 clock (PCLK2) is HCLK/2 (108MHz) */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
@@ -149,21 +197,13 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
-/* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
- * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1
- */
-
-#define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
-
 /* LED definitions ******************************************************************/
 /* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the
  * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
  * indicate USB status, LD7 is controlled by the ST-Link).
  *
  * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 willilluminate the LED.
+ * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
  * The following definitions are used to access individual LEDs.
