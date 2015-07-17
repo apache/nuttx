@@ -42,7 +42,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include "stm32-gpio.h"
+#include "stm32_gpio.h"
 #include "stm32f746g-disco.h"
 
 #ifndef CONFIG_ARCH_LEDS

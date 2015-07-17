@@ -43,7 +43,7 @@
 
 #include <nuttx/arch.h>
 
-#include <arch/stm32/chip.h>
+#include <arch/stm32f7/chip.h>
 #include "chip.h"
 
 #if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
