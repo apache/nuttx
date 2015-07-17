@@ -75,9 +75,9 @@
 
 void board_led_initialize(void)
 {
-   /* Configure the LD1 GPIO for output. Initial state is OFF */
+  /* Configure the LD1 GPIO for output. Initial state is OFF */
 
-   stm32_configgpio(GPIO_LD1);
+  stm32_configgpio(GPIO_LD1);
 }
 
 /****************************************************************************
@@ -140,3 +140,5 @@ void board_led_off(int led)
       break;
     }
 }
+
+#endif /* CONFIG_ARCH_LEDS */
