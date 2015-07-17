@@ -50,4 +50,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_GPIO_H */
-
