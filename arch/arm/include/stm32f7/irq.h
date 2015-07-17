@@ -78,7 +78,7 @@
 
 #define STM32_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX)
+#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
 #  include <arch/stm32/stm32f74xx75xx_irq.h>
 #elif 
 #else
