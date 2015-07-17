@@ -14,31 +14,31 @@ choice
 
 config ARCH_CHIP_STM32F745
 	bool "STM32F745xx"
-	select STM32F7_STM32F74xx
+	select STM32F7_STM32F74XX
 	---help---
 		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
 
 config ARCH_CHIP_STM32F746
 	bool "STM32F746xx"
-	select STM32F7_STM32F74xx
+	select STM32F7_STM32F74XX
 	select STM32F7_HAVE_LTDC
 	---help---
 		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
 
 config ARCH_CHIP_STM32F756
 	bool "STM32F756xx"
-	select STM32F7_STM32F75xx
+	select STM32F7_STM32F75XX
 	select STM32F7_HAVE_LTDC
 	---help---
 		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
 
 endchoice # STM32 F7 Chip Selection
 
-config STM32F7_STM32F74xx
+config STM32F7_STM32F74XX
 	bool
 	default n
 
-config STM32F7_STM32F75xx
+config STM32F7_STM32F75XX
 	bool
 	default n
 

@@ -165,7 +165,7 @@
 #define STM32_GPIOJ_BASE     0x40022400     /* 0x40022400-0x400227ff: GPIOJ */
 #define STM32_GPIOK_BASE     0x40022800     /* 0x40022800-0x40022bff: GPIOK */
 #define STM32_CRC_BASE       0x40023000     /* 0x40023000-0x400233ff: CRC */
-#define STM32_RRC_BASE       0x40023800     /* 0x40023800-0x40023bff: RCC */
+#define STM32_RCC_BASE       0x40023800     /* 0x40023800-0x40023bff: RCC */
 #define STM32_FLASHIF_BASE   0x40023c00     /* 0x40023c00-0x40023fff: Flash interface */
 #define STM32_BKPSRAM_BASE   0x40024000     /* 0x40024000-0x40024fff: BKPSRAM */
 #define STM32_DMA1_BASE      0x40026000     /* 0x40026000-0x400263ff: DMA1 */
@@ -188,7 +188,7 @@
 #define STM32_FMCBANK2_BASE  0x70000000     /* 0x70000000-0x7fffffff: FMC bank 2 */
 #define STM32_FMCBANK3_BASE  0x80000000     /* 0x80000000-0x8fffffff: FMC bank 3 */
 #define STM32_FMCBANK4_BASE  0x90000000     /* 0x90000000-0x9fffffff: FMC bank 4 */
-#define STM32_FMC_BASE       0xa0000000     /* 0xa0000000-0xa0000fff: FMC control registers */
+#define STM32_FSMC_BASE      0xa0000000     /* 0xa0000000-0xa0000fff: FMC control registers */
 #define STM32_QUADSPI_BASE   0xa0001000     /* 0xa0001000-0xa0001fff: QuadSPI Control */
 #define STM32_FMCBANK5_BASE  0xc0000000     /* 0xc0000000-0xcfffffff: FMC bank 5 */
 #define STM32_FMCBANK6_BASE  0xd0000000     /* 0xd0000000-0xdfffffff: FMC bank 6 */
