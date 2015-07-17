@@ -167,6 +167,10 @@ config STM32F7_I2C1
 	default n
 	select STM32F7_I2C
 
+config STM32F7_CEC
+	bool "HDMI-CEC"
+	default n
+
 config STM32F7_I2C2
 	bool "I2C2"
 	default n
@@ -176,6 +180,10 @@ config STM32F7_I2C3
 	bool "I2C3"
 	default n
 	select STM32F7_I2C
+
+config STM32F7_LPTIM1
+	bool "Low-power timer 1"
+	default n
 
 config STM32F7_LTDC
 	bool "LTDC"
@@ -204,10 +212,11 @@ config STM32F7_OTGHS
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
-config STM32F7_PWR
-	bool "PWR"
+config STM32F7_QUADSPI
+	bool "QuadSPI"
 	default n
 
+config STM32F7_SAI1
 config STM32F7_RNG
 	bool "RNG"
 	default n
