@@ -45,8 +45,6 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include <arch/stm32/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -76,11 +74,10 @@
 
 /* External interrupts (vectors >= 16).  These definitions are chip-specific */
 
-#define STM32_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
+#define STM32_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
 
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
-#  include <arch/stm32/stm32f74xx75xx_irq.h>
-#elif 
+#  include <arch/stm32f7/stm32f74xx75xx_irq.h>
 #else
 #  error "Unsupported STM32 F7 chip"
 #endif

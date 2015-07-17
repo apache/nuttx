@@ -42,8 +42,7 @@ CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
 # Add host file support
 
 ifeq ($(CONFIG_NETDB_HOSTFILE),y)
-CSRCS += lib_gethostbyaddr.c
-CSRCS += lib_gethostbyaddrr.c lib_parsehostfile.c
+CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c lib_parsehostfile.c
 endif
 
 # Add DNS lookup support

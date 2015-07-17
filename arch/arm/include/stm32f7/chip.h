@@ -99,7 +99,6 @@
 
 #  define STM32F7_NLCDTFT                  1   /* One LCD-TFT */
 #endif
-#endif
 
 #  define STM32F7_SRAM1           (240*1024)   /* 240Kb SRAM1 on AHB bus Matrix */
 #  define STM32F7_SRAM2            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
