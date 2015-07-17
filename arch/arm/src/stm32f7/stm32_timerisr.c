@@ -56,23 +56,29 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* Select MCU-specific settings
+/* Select MCU-specific settings
  *
- * The SysTick timer is driven by the output of the Mast Clock Controller
- * prescaler output (i.e., the MDIV output divider is not applied so that
- * the driving frequency is the same as the CPU frequency).
+ * The RCC feeds the external clock of the Cortex System Timer (SysTick) with
+ * the AHB clock (HCLK) divided by 8. The SysTick can work either with this
+ * clock or with the Cortex clock (HCLK), configurable in the SysTick control
+ * and status register.
  *
- * The SysTick calibration value is fixed to 37500 which allows the generation
- * of a time base of 1 ms with SysTick clock to the maximum frequency on
- * MCK divided by 8. (?)
+ * The SysTick calibration value is fixed to 18750, which gives a reference
+ * time base of 1 ms with the SysTick clock set to 18.75 MHz (HCLK/8, with
+ * HCLK set to 150 MHz).
  */
 
-#define STM32_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY
+#define STM32_SYSTICK_CLOCK  (STM32_BOARD_HCLK / 8)
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
+ *
+ * For example, suppose HCLK = 216 MHz and CLK_TCK = 100, then:
+ *
+ *   STM32_SYSTICK_CLOCK = 216 MHz / 8 = 27 MHz
+ *   SYSTICK_RELOAD      = (27,000,000 / 100) - 1 = 269,999
  */
 
 #define SYSTICK_RELOAD ((STM32_SYSTICK_CLOCK / CLK_TCK) - 1)
@@ -108,10 +114,10 @@
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
@@ -136,10 +142,16 @@ void up_timer_initialize(void)
 
   (void)irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)up_timerisr);
 
-  /* Enable SysTick interrupts (no divide-by-8) */
+  /* Enable SysTick interrupts:
+   *
+   *   NVIC_SYSTICK_CTRL_CLKSOURCE=0 : Use the implementation defined clock
+   *                                   source which, for the STM32F7, will be
+   *                                   HCLK/8
+   *   NVIC_SYSTICK_CTRL_TICKINT=1   : Generate interrupts
+   *   NVIC_SYSTICK_CTRL_ENABLE      : Enable the counter
+   */
 
-  regval = (NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
-            NVIC_SYSTICK_CTRL_ENABLE);
+  regval = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
   putreg32(regval, NVIC_SYSTICK_CTRL);
 
   /* And enable the timer interrupt */
