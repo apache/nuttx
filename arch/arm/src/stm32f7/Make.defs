@@ -117,6 +117,16 @@ CHIP_CSRCS += stm32_procfs_dtcm.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32_PWR),y)
+CHIP_CSRCS += stm32_exti_pwr.c
+endif
+
+ifeq ($(CONFIG_RTC),y)
+ifeq ($(CONFIG_RTC_ALARM),y)
+CHIP_CSRCS += stm32_exti_alarm.c
+endif
+endif
+
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS += stm32_dumpgpio.c
 endif
