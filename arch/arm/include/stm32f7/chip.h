@@ -100,10 +100,10 @@
 #  define STM32F7_NLCDTFT                  1   /* One LCD-TFT */
 #endif
 
-#  define STM32F7_SRAM1           (240*1024)   /* 240Kb SRAM1 on AHB bus Matrix */
-#  define STM32F7_SRAM2            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
-#  define STM32F7_DTCM_SRAM        (64*1024)   /* 64Kb DTCM SRAM on TCM inerface */
-#  define STM32F7_ITCM_SRAM        (16*1024)   /* 16Kb ITCM SRAM on TCM inerface */
+#  define STM32F7_SRAM1_SIZE      (240*1024)   /* 240Kb SRAM1 on AHB bus Matrix */
+#  define STM32F7_SRAM2_SIZE       (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
+#  define STM32F7_DTCM_SRAM_SIZE   (64*1024)   /* 64Kb DTCM SRAM on TCM inerface */
+#  define STM32F7_ITCM_SRAM_SIZE   (16*1024)   /* 16Kb ITCM SRAM on TCM inerface */
 
 #  define STM32F7_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32F7_NETHERNET                1   /* 100/100 Ethernet MAC */

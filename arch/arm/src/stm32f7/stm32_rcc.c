@@ -92,7 +92,7 @@
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configurationfile.
  *
- *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking
  *   will be enabled by an externally provided, board-specific function called
  *   stm32_board_clockconfig().
  *
@@ -110,7 +110,7 @@ void stm32_clockconfig(void)
 
   rcc_reset();
 
-#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_STM32F7_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
@@ -142,8 +142,8 @@ void stm32_clockconfig(void)
  *   stm32_clockconfig():  It does not reset any devices, and it does not reset the
  *   currenlty enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking will
- *   be enabled by an externally provided, board-specific function called
+ *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking will be enabled
+ *   by an externally provided, board-specific function called
  *   stm32_board_clockconfig().
  *
  * Input Parameters:
@@ -157,7 +157,7 @@ void stm32_clockconfig(void)
 #ifdef CONFIG_PM
 void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_STM32F7_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
