@@ -199,7 +199,7 @@
 #define USART_CR1_PS              (1 << 9)  /* Bit 9:  Parity Selection */
 #define USART_CR1_PCE             (1 << 10) /* Bit 10: Parity Control Enable */
 #define USART_CR1_WAKE            (1 << 11) /* Bit 11: Receiver wakeup method */
-#define USART_CR1_M0              (1 << 12) /* Bit 12: Word length */
+#define USART_CR1_M0              (1 << 12) /* Bit 12: Word length, bit 0 */
 #define USART_CR1_MME             (1 << 13) /* Bit 13: Mute mode enable */
 #define USART_CR1_CMIE            (1 << 14) /* Bit 14: Character match interrupt enable */
 #define USART_CR1_OVER8           (1 << 15) /* Bit 15: Oversampling mode */
@@ -211,7 +211,7 @@
 #  define USART_CR1_DEAT(n)       ((uint32_t)(n) << USART_CR1_DEAT_SHIFT)
 #define USART_CR1_RTOIE           (1 << 26) /* Bit 26: Receiver timeout interrupt enable */
 #define USART_CR1_EOBIE           (1 << 27) /* Bit 27: End of Block interrupt enable */
-#define USART_CR1_M0              (1 << 28) /* Bit 31: Word length */
+#define USART_CR1_M1              (1 << 28) /* Bit 31: Word length, bit 1 */
 
 #define USART_CR1_ALLINTS \
   (USART_CR1_IDLEIE | USART_CR1_RXNEIE | USART_CR1_TCIE | USART_CR1_TXEIE |\
