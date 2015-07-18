@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_exti.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32_EXTI_H
 #define __ARCH_ARM_SRC_STM32F7_STM32_EXTI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +47,9 @@
 #include "chip.h"
 #include "chip/stm32_exti.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -62,49 +62,51 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpiosetevent
  *
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  *
  * Parameters:
- *  - pinset: gpio pin configuration
- *  - rising/falling edge: enables
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - event:       Generate event when set
+ *  - func:        When non-NULL, generate interrupt
  *
  * Returns:
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
+ *   The previous value of the interrupt handler function pointer.  This
+ *   value may, for example, be used to restore the previous handler when
+ *   multiple handlers are used.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                           bool event, xcpt_t func);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_exti_alarm
  *
  * Description:
  *   Sets/clears EXTI alarm interrupt.
  *
  * Parameters:
- *  - rising/falling edge: enables interrupt on rising/falling edges
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - event:       Generate event when set
+ *  - func:        When non-NULL, generate interrupt
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This value may,
- *   for example, be used to restore the previous handler when multiple handlers are
- *   used.
+ *   The previous value of the interrupt handler function pointer.  This
+ *   value may, for example, be used to restore the previous handler when
+ *   multiple handlers are used.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func);

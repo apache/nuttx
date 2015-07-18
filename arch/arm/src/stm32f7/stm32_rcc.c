@@ -49,9 +49,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip.h"
+#include "chip/stm32_flash.h"
 #include "stm32_rcc.h"
-#include "stm32_flash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
