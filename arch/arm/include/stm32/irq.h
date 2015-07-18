@@ -75,7 +75,7 @@
 
 /* External interrupts (vectors >= 16).  These definitions are chip-specific */
 
-#define STM32_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
+#define STM32_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
 
 #if defined(CONFIG_STM32_STM32L15XX)
 #  include <arch/stm32/stm32l15xxx_irq.h>
