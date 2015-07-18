@@ -197,6 +197,20 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* FLASH wait states
+ *
+ *  --------- ---------- -----------
+ *  VDD       MAX SYSCLK WAIT STATES
+ *  --------- ---------- -----------
+ *  1.7-2.1 V   180 MHz    8
+ *  2.1-2.4 V   216 MHz    9
+ *  2.4-2.7 V   216 MHz    8
+ *  2.7-3.6 V   216 MHz    7
+ *  --------- ---------- -----------
+ */
+
+#define BOARD_FLASH_WAITSTATES 7
+
 /* LED definitions ******************************************************************/
 /* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the
  * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
@@ -277,9 +291,8 @@
  *   -- ----- --------- -----
  */
 
-#warning Missing logic
-#define GPIO_USART6_RX ???
-#define GPIO_USART6_TX ???
+#define GPIO_USART6_RX GPIO_USART6_RX_1
+#define GPIO_USART6_TX GPIO_USART6_TX_1
 
 /************************************************************************************
  * Public Data
