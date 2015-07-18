@@ -76,10 +76,6 @@
 static xcpt_t stm32_exti_callbacks[16];
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
- /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -237,15 +233,16 @@ static int stm32_exti1510_isr(int irq, void *context)
  *   Sets/clears GPIO based event and interrupt triggers.
  *
  * Parameters:
- *  - pinset: gpio pin configuration
- *  - rising/falling edge: enables
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - event:       Generate event when set
+ *  - func:        When non-NULL, generate interrupt
  *
  * Returns:
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
+ *   The previous value of the interrupt handler function pointer.  This
+ *   value may, for example, be used to restore the previous handler when
+ *   multiple handlers are used.
  *
  ****************************************************************************/
 

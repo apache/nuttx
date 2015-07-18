@@ -42,6 +42,18 @@ config STM32F7_STM32F75XX
 	bool
 	default n
 
+choice
+	prompt "Embedded FLASH size"
+	default STM32F7_FLASH_1024KB
+
+config STM32F7_FLASH_512KB
+	bool "512 KB"
+
+config STM32F7_FLASH_1024KB
+	bool "1024 KB"
+
+endchoice # Embedded FLASH size
+
 menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
