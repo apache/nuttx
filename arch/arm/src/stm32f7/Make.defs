@@ -107,4 +107,9 @@ endif
 # Required STM32F7 files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = stm32_irq.c stm32_rcc.c stm32_start.c stm32_timerisr.c
+CHIP_CSRCS  = stm32_exti_gpio.c stm32_gpio.c stm32_irq.c stm32_rcc.c
+CHIP_CSRCS += stm32_start.c stm32_timerisr.c
+
+ifeq ($(CONFIG_DEBUG),y)
+CHIP_CSRCS += stm32_dumpgpio.c
+endif
