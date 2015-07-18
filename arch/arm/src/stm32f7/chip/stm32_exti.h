@@ -89,7 +89,7 @@
 #define EXTI_RTC_TAMPER          (1 << 21) /* EXTI line 21 = RTC Tamper and TimeStamp events */
 #define EXTI_RTC_TIMESTAMP       (1 << 21) /* EXTI line 21 = RTC Tamper and TimeStamp events */
 #define EXTI_RTC_WAKEUP          (1 << 22) /* EXTI line 22 = RTC Wakeup event */
-#define EXTI_RTC_WAKEUP          (1 << 23) /* EXTI line 23 = LPTIM1 asynchronous event */
+#define EXTI_LPTIM1_WAKEUP       (1 << 23) /* EXTI line 23 = LPTIM1 asynchronous event */
 
 /* Interrupt mask register */
 

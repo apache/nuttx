@@ -59,6 +59,14 @@
 
 #define HSE_DIVISOR (STM32_HSE_FREQUENCY + 500000) / 1000000
 
+/* FLASH wait states */
+
+#if !defined(BOARD_FLASH_WAITSTATES)
+#  error BOARD_FLASH_WAITSTATES not defined
+#elif BOARD_FLASH_WAITSTATES < 0 || BOARD_FLASH_WAITSTATES > 15
+#  error BOARD_FLASH_WAITSTATES is out of range
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -704,17 +712,17 @@ static void stm32_stdclockconfig(void)
   if (timeout > 0)
     {
       /* Select regulator voltage output Scale 1 mode to support system
-       * frequencies up to 168 MHz.
+       * frequencies up to 216 MHz.
        */
 
       regval  = getreg32(STM32_RCC_APB1ENR);
       regval |= RCC_APB1ENR_PWREN;
       putreg32(regval, STM32_RCC_APB1ENR);
 
-      regval  = getreg32(STM32_PWR_CR);
-      regval &= ~PWR_CR_VOS_MASK;
-      regval |= PWR_CR_VOS_SCALE_1;
-      putreg32(regval, STM32_PWR_CR);
+      regval  = getreg32(STM32_PWR_CR1);
+      regval &= ~PWR_CR1_VOS_MASK;
+      regval |= PWR_CR1_VOS_SCALE_1;
+      putreg32(regval, STM32_PWR_CR1);
 
       /* Set the HCLK source/divider */
 
@@ -769,29 +777,41 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-      /* Enable the Over-drive to extend the clock frequency to 180 Mhz */
+      /* Enable the Over-drive to extend the clock frequency to 216 Mhz */
 
-      regval  = getreg32(STM32_PWR_CR);
-      regval |= PWR_CR_ODEN;
-      putreg32(regval, STM32_PWR_CR);
-      while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODRDY) == 0)
+      regval  = getreg32(STM32_PWR_CR1);
+      regval |= PWR_CR1_ODEN;
+      putreg32(regval, STM32_PWR_CR1);
+      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODRDY) == 0)
         {
         }
 
-      regval = getreg32(STM32_PWR_CR);
-      regval |= PWR_CR_ODSWEN;
-      putreg32(regval, STM32_PWR_CR);
-      while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODSWRDY) == 0)
+      regval = getreg32(STM32_PWR_CR1);
+      regval |= PWR_CR1_ODSWEN;
+      putreg32(regval, STM32_PWR_CR1);
+      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODSWRDY) == 0)
         {
         }
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+      /* Configure FLASH wait states */
+
+      regval = FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
 
 #ifdef CONFIG_STM32F7_FLASH_PREFETCH
-      regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
-#else
-      regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
+      /* Enable FLASH prefetch */
+
+      regval |= FLASH_ACR_PRFTEN;
 #endif
+
+#ifdef CONFIG_ARMV7M_ITCM
+  /* The Flash memory interface accelerates code execution with a system of
+   * instruction prefetch and cache lines on ITCM interface (ART
+   * Accelerator™).
+   */
+
+      regval |= FLASH_ACR_ARTEN;
+#endif
+
       putreg32(regval, STM32_FLASH_ACR);
 
       /* Select the main PLL as system clock source */
