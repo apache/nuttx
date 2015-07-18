@@ -56,6 +56,7 @@
 
 #include "stm32_rcc.h"
 #include "stm32_userspace.h"
+#include "stm32_lowputc.h"
 #include "stm32_start.h"
 
 /****************************************************************************

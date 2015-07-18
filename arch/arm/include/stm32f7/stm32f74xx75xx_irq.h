@@ -168,68 +168,9 @@
 #define NR_INTERRUPTS         98
 #define NR_VECTORS            (STM32_IRQ_FIRST+NR_INTERRUPTS)
 
-/* EXTI events */
+/* EXTI interrupts (Do not use IRQ numbers) */
 
-#define STM32_EVENT_PIN0      0                    /* Port n, pin 0 */
-#define STM32_EVENT_PIN1      1                    /* Port n, pin 1 */
-#define STM32_EVENT_PIN2      2                    /* Port n, pin 2 */
-#define STM32_EVENT_PIN3      3                    /* Port n, pin 3 */
-#define STM32_EVENT_PIN4      4                    /* Port n, pin 4 */
-#define STM32_EVENT_PIN5      5                    /* Port n, pin 5 */
-#define STM32_EVENT_PIN6      6                    /* Port n, pin 6 */
-#define STM32_EVENT_PIN7      7                    /* Port n, pin 7 */
-#define STM32_EVENT_PIN8      8                    /* Port n, pin 8 */
-#define STM32_EVENT_PIN9      9                    /* Port n, pin 9 */
-#define STM32_EVENT_PIN10     10                   /* Port n, pin 10 */
-#define STM32_EVENT_PIN11     11                   /* Port n, pin 11 */
-#define STM32_EVENT_PIN12     12                   /* Port n, pin 12 */
-#define STM32_EVENT_PIN13     13                   /* Port n, pin 13 */
-#define STM32_EVENT_PIN14     14                   /* Port n, pin 14 */
-#define STM32_EVENT_PIN15     15                   /* Port n, pin 15 */
-
-#define STM32_EVENT_PVD       16                   /* PVD output */
-#define STM32_EVENT_RTCALM    17                   /* RTC Alarm event */
-#define STM32_EVENT_OTGFSWU   18                   /* USB OTG FS Wakeup event */
-#define STM32_EVENT_ETHWU     19                   /* Ethernet Wakeup event */
-#define STM32_EVENT_OTGHSWU   20                   /* USB OTG HS (FS mode) Wakeup event */
-#define STM32_EVENT_TAMPER    21                   /* RTC Tamper and TimeStamp events */
-#define STM32_EVENT_TIMESTAP  21                   /* RTC Tamper and TimeStamp events */
-#define STM32_EVENT_RTCWU     22                   /* RTC Wakeup event */
-#define STM32_EVENT_LPTIM1    23                   /* LPTIM1 asynchronous event */
-
-#define NR_EVENTS             24
-
-/* EXTI interrupts */
-
-#define STM32_IRQ_EXTI        NR_VECTORS
-#define STM32_IRQ_PIN0        (STM32_IRQ_EXTI+0)   /* 98: Port n, pin 0 */
-#define STM32_IRQ_PIN1        (STM32_IRQ_EXTI+1)   /* 99: Port n, pin 1 */
-#define STM32_IRQ_PIN2        (STM32_IRQ_EXTI+2)   /* 100: Port n, pin 2 */
-#define STM32_IRQ_PIN3        (STM32_IRQ_EXTI+3)   /* 101: Port n, pin 3 */
-#define STM32_IRQ_PIN4        (STM32_IRQ_EXTI+4)   /* 102: Port n, pin 4 */
-#define STM32_IRQ_PIN5        (STM32_IRQ_EXTI+5)   /* 103: Port n, pin 5 */
-#define STM32_IRQ_PIN6        (STM32_IRQ_EXTI+6)   /* 104: Port n, pin 6 */
-#define STM32_IRQ_PIN7        (STM32_IRQ_EXTI+7)   /* 105: Port n, pin 7 */
-#define STM32_IRQ_PIN8        (STM32_IRQ_EXTI+8)   /* 106: Port n, pin 8 */
-#define STM32_IRQ_PIN9        (STM32_IRQ_EXTI+9)   /* 107: Port n, pin 9 */
-#define STM32_IRQ_PIN10       (STM32_IRQ_EXTI+10)  /* 108: Port n, pin 10 */
-#define STM32_IRQ_PIN11       (STM32_IRQ_EXTI+11)  /* 109: Port n, pin 11 */
-#define STM32_IRQ_PIN12       (STM32_IRQ_EXTI+12)  /* 110: Port n, pin 12 */
-#define STM32_IRQ_PIN13       (STM32_IRQ_EXTI+13)  /* 111: Port n, pin 13 */
-#define STM32_IRQ_PIN14       (STM32_IRQ_EXTI+14)  /* 112: Port n, pin 14 */
-#define STM32_IRQ_PIN15       (STM32_IRQ_EXTI+15)  /* 113: Port n, pin 15 */
-
-#define STM32_IRQ_PVD         (STM32_IRQ_EXTI+16)  /* 114: PVD output */
-#define STM32_IRQ_RTCALM      (STM32_IRQ_EXTI+17)  /* 115: RTC Alarm event */
-#define STM32_IRQ_OTGFSWU     (STM32_IRQ_EXTI+18)  /* 116: USB OTG FS Wakeup event */
-#define STM32_IRQ_ETHWU       (STM32_IRQ_EXTI+19)  /* 117: Ethernet Wakeup event */
-#define STM32_IRQ_OTGHSWU     (STM32_IRQ_EXTI+20)  /* 118: USB OTG HS (FS mode) Wakeup event */
-#define STM32_IRQ_TAMPER      (STM32_IRQ_EXTI+21)  /* 119: RTC Tamper and TimeStamp events */
-#define STM32_IRQ_TIMESTAP    (STM32_IRQ_EXTI+21)  /* 119: RTC Tamper and TimeStamp events */
-#define STM32_IRQ_RTCWU       (STM32_IRQ_EXTI+22)  /* 120: RTC Wakeup event */
-#define STM32_IRQ_LPTIM1      (STM32_IRQ_EXTI+23)  /* 121: LPTIM1 asynchronous event */
-
-#define NR_IRQS               (NR_VECTORS+NR_EVENTS)
+#define NR_IRQS               NR_VECTORS
 
 /****************************************************************************************************
  * Public Types
