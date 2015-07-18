@@ -71,6 +71,9 @@
  *
  * Parts STM32F74xxE have 512Kb of FLASH
  * Parts STM32F74xxG have 1024Kb of FLASH
+ *
+ * The correct FLASH size must be set with a CONFIG_STM32F7_FLASH_*KB
+ * selection.
  */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F745) || defined(CONFIG_ARCH_CHIP_STM32F746) || \
