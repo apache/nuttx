@@ -169,7 +169,7 @@
 #define MII_LAN8720_IMR              0x1e      /* Interrupt Mask Register */
 #define MII_LAN8720_SCSR             0x1f      /* PHY Special Control/Status Register */
 
-/* SMSC LAN8740 PHY Extended Registers */
+/* SMSC LAN8740/LAN8742A PHY Extended Registers */
 
 #define MII_LAN8740_CONFIG           0x10      /* EDPD NDL/Crossover Timer/EEE Configuration */
 #define MII_LAN8740_MCSR             0x11      /* Mode Control/Status Register */
@@ -360,6 +360,11 @@
 
 #define MII_PHYID1_LAN8740A          0x0007    /* ID1 value for LAN8740A */
 #define MII_PHYID2_LAN8740A          0xc111    /* ID2 value for LAN8740A */
+
+/* SMSC LAN8742A MII ID1/2 register bits */
+
+#define MII_PHYID1_LAN8742A          0x0007    /* ID1 value for LAN8742A */
+#define MII_PHYID2_LAN8742A          0xc130    /* ID2 value for LAN8742A */
 
 /* Am79c874-specific register bit settings **********************************/
 /* Am79c874 MII ID1/2 register bits */
