@@ -444,4 +444,198 @@ config STM32F7_DTCM_PROCFS
 		will provide statistics about DTCM memory use similar to what you
 		would get from mallinfo() for the user heap.
 
+if STM32F7_ETHMAC
+menu "Ethernet MAC configuration"
+
+config STM32F7_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config STM32F7_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		STM32F7_PHYINIT is defined in the configuration then the board specific logic must
+		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
+		one time before it first uses the PHY.
+
+config STM32F7_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+choice
+	prompt "MII clock configuration"
+	default STM32F7_MII_EXTCLK
+	depends on STM32F7_MII
+
+config STM32F7_MII_MCO1
+	bool "Use MC01 as MII clock"
+	---help---
+		Use MCO1 to clock the MII interface.
+
+config STM32F7_MII_MCO2
+	bool "Use MC02 as MII clock"
+	---help---
+		Use MCO2 to clock the MII interface.
+
+config STM32F7_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice
+
+config STM32F7_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config STM32F7_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !STM32F7_AUTONEG
+	---help---
+		If STM32F7_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config STM32F7_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !STM32F7_AUTONEG
+	---help---
+		If STM32F7_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config STM32F7_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on STM32F7_AUTONEG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config STM32F7_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on STM32F7_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config STM32F7_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config STM32F7_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config STM32F7_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config STM32F7_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config STM32F7_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config STM32F7_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config STM32F7_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config STM32F7_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config STM32F7_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config STM32F7_ETH_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	---help---
+		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
+		with this condition.
+
+config STM32F7_RMII
+	bool
+	default y if !STM32F7_MII
+
+choice
+	prompt "RMII clock configuration"
+	default STM32F7_RMII_EXTCLK
+	depends on STM32F7_RMII
+
+config STM32F7_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	---help---
+		Use MCO1 to clock the RMII interface.
+
+config STM32F7_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	---help---
+		Use MCO2 to clock the RMII interface.
+
+config STM32F7_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice
+
+config STM32F7_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu
+endif # STM32F7_ETHMAC
 endif # ARCH_CHIP_STM32F7
