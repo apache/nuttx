@@ -196,19 +196,21 @@
 
 #define OPTIMAL_ETH_BUFSIZE ((CONFIG_NET_ETH_MTU + 4 + 15) & ~15)
 
-#ifndef CONFIG_STM32F7_ETH_BUFSIZE
-#  define CONFIG_STM32F7_ETH_BUFSIZE OPTIMAL_ETH_BUFSIZE
+#ifdef CONFIG_STM32F7_ETH_BUFSIZE
+#  define ETH_BUFSIZE CONFIG_STM32F7_ETH_BUFSIZE
+#else
+#  define ETH_BUFSIZE OPTIMAL_ETH_BUFSIZE
 #endif
 
-#if CONFIG_STM32F7_ETH_BUFSIZE > ETH_TDES1_TBS1_MASK
-#  error "CONFIG_STM32F7_ETH_BUFSIZE is too large"
+#if ETH_BUFSIZE > ETH_TDES1_TBS1_MASK
+#  error "ETH_BUFSIZE is too large"
 #endif
 
-#if (CONFIG_STM32F7_ETH_BUFSIZE & 15) != 0
-#  error "CONFIG_STM32F7_ETH_BUFSIZE must be aligned"
+#if (ETH_BUFSIZE & 15) != 0
+#  error "ETH_BUFSIZE must be aligned"
 #endif
 
-#if CONFIG_STM32F7_ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
+#if ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
 #  warning "You using an incomplete/untested configuration"
 #endif
 
@@ -222,6 +224,40 @@
 /* We need at least one more free buffer than transmit buffers */
 
 #define STM32_ETH_NFREEBUFFERS (CONFIG_STM32F7_ETH_NTXDESC+1)
+
+/* Buffers use fro DMA access must begin on an address aligned with the
+ * D-Cache line and must be an even multiple of the D-Cache line size.
+ * These size/alignment requirements are necessary so that D-Cache flush
+ * and invalidate operations will not have any additional effects.
+ *
+ * The TX and RX descriptors are normally 16 bytes in size but could be
+ * 32 bytes in size if the enhanced descriptor format is used (it is not).
+ */
+
+#define DMA_BUFFER_MASK    (ARMV7M_DCACHE_LINESIZE - 1)
+#define DMA_ALIGN_UP(n)    (((n) + DMA_BUFFER_MASK) & ~ARMV7M_DCACHE_LINESIZE)
+#define DMA_ALIGN_DOWBN(n) ((n) & ~ARMV7M_DCACHE_LINESIZE)
+
+#ifdef CONFIG_STM32F7_ETH_ENHANCEDDESC
+#  define RXDESC_SIZE       16
+#  define TXDESC_SIZE       16
+#else
+#  define RXDESC_SIZE       32
+#  define TXDESC_SIZE       32
+#endif
+
+#define RXDESC_PADSIZE      DMA_ALIGN_UP(RXDESC_SIZE)
+#define TXDESC_PADSIZE      DMA_ALIGN_UP(TXDESC_SIZE)
+#define ALIGNED_BUFSIZE     DMA_ALIGN_UP(ETH_BUFSIZE)
+
+#define RXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32F7_ETH_NRXDESC)
+#define TXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32F7_ETH_NTXDESC)
+
+#define RXBUFFER_SIZE       (CONFIG_STM32F7_ETH_NRXDESC * ALIGNED_BUFSIZE)
+#define RXBUFFER_ALLOC      (STM32F7_NETHERNET * RXBUFFER_SIZE)
+
+#define TXBUFFER_SIZE       (STM32_ETH_NFREEBUFFERS * ALIGNED_BUFSIZE)
+#define TXBUFFER_ALLOC      (STM32F7_NETHERNET * TXBUFFER_SIZE)
 
 /* Extremely detailed register debug that you would normally never want
  * enabled.
@@ -242,8 +278,10 @@
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_DIV42
 #elif STM32_HCLK_FREQUENCY >= 100000000 && STM32_HCLK_FREQUENCY < 150000000
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_DIV62
-#else /* if STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 216000000 */
+#elif STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 216000000
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_DIV102
+#else
+#  error "STM32_HCLK_FREQUENCY not supportable"
 #endif
 
 /* Timing *******************************************************************/
@@ -316,7 +354,7 @@
  * ETH_MACCR_WD    Watchdog disable               0 (enabled)
  * ETH_MACCR_CSTF  CRC stripping for Type frames  0 (disabled, F2/F4 only)
  *
- * The following are set conditioinally based on mode and speed.
+ * The following are set conditionally based on mode and speed.
  *
  * ETH_MACCR_DM       Duplex mode                    Depends on priv->fduplex
  * ETH_MACCR_FES      Fast Ethernet speed            Depends on priv->mbps100
@@ -540,6 +578,21 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* This union type forces the allocated size of RX descriptors to be the
+ * padded to a exact multiple of the Cortex-M7 D-Cache line size.
+ */
+
+union stm32_txdesc_u
+{
+  uint8_t             pad[TXDESC_PADSIZE];
+  struct eth_txdesc_s txdesc;
+};
+
+union stm32_rxdesc_u
+{
+  uint8_t             pad[RXDESC_PADSIZE];
+  struct eth_rxdesc_s rxdesc;
+};
 
 /* The stm32_ethmac_s encapsulates all state information for a single hardware
  * interface
@@ -550,6 +603,7 @@ struct stm32_ethmac_s
   uint8_t              ifup    : 1; /* true:ifup false:ifdown */
   uint8_t              mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
+  uint8_t              intf;        /* Ethernet interface number */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
 #ifdef CONFIG_NET_NOINTS
@@ -565,26 +619,44 @@ struct stm32_ethmac_s
   struct eth_txdesc_s *txhead;      /* Next available TX descriptor */
   struct eth_rxdesc_s *rxhead;      /* Next available RX descriptor */
 
-  struct eth_txdesc_s *txtail;      /* First "in_flight" TX descriptor */
-  struct eth_rxdesc_s *rxcurr;      /* First RX descriptor of the segment */
+  struct eth_txdesc_s *txtail;     /* First "in_flight" TX descriptor */
+  struct eth_rxdesc_s *rxcurr;     /* First RX descriptor of the segment */
   uint16_t             segments;    /* RX segment count */
   uint16_t             inflight;    /* Number of TX transfers "in_flight" */
   sq_queue_t           freeb;       /* The free buffer list */
-
-  /* Descriptor allocations */
-
-  struct eth_rxdesc_s rxtable[CONFIG_STM32F7_ETH_NRXDESC];
-  struct eth_txdesc_s txtable[CONFIG_STM32F7_ETH_NTXDESC];
-
-  /* Buffer allocations */
-
-  uint8_t rxbuffer[CONFIG_STM32F7_ETH_NRXDESC*CONFIG_STM32F7_ETH_BUFSIZE];
-  uint8_t alloc[STM32_ETH_NFREEBUFFERS*CONFIG_STM32F7_ETH_BUFSIZE];
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* DMA buffers.  DMA buffers must:
+ *
+ * 1. Be a multiple of the D-Cache line size.  This requirement is assured
+ *    by the definition of RXDMA buffer size above.
+ * 2. Be aligned a D-Cache line boundaries, and
+ * 3. Be positioned in DMA-able memory (*NOT* DTCM memory).  This must
+ *    be managed by logic in the linker script file.
+ *
+ * These DMA buffers are defined sequentially here to best assure optimal
+ * packing of the buffers.
+ */
+
+/* Descriptor allocations */
+
+static union stm32_rxdesc_u g_rxtable[RXTABLE_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+static union stm32_txdesc_u g_txtable[TXTABLE_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+
+/* Buffer allocations */
+
+static uint8_t g_rxbuffer[RXBUFFER_ALLOC]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+static uint8_t g_txbuffer[TXBUFFER_ALLOC]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+
+/* These are the pre-allocated Ethernet device structures */
 
 static struct stm32_ethmac_s g_stm32ethmac[STM32F7_NETHERNET];
 
@@ -605,44 +677,45 @@ static void stm32_checksetup(void);
 
 /* Free buffer management */
 
-static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv);
-static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv);
-static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv, uint8_t *buffer);
-static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv);
+static void stm32_initbuffer(struct stm32_ethmac_s *priv,
+                             uint8_t *txbuffer);
+static inline uint8_t *stm32_allocbuffer(struct stm32_ethmac_s *priv);
+static inline void stm32_freebuffer(struct stm32_ethmac_s *priv, uint8_t *buffer);
+static inline bool stm32_isfreebuffer(struct stm32_ethmac_s *priv);
 
 /* Common TX logic */
 
-static int  stm32_transmit(FAR struct stm32_ethmac_s *priv);
+static int  stm32_transmit(struct stm32_ethmac_s *priv);
 static int  stm32_txpoll(struct net_driver_s *dev);
-static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
+static void stm32_dopoll(struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
 
-static void stm32_enableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit);
-static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit);
+static void stm32_enableint(struct stm32_ethmac_s *priv, uint32_t ierbit);
+static void stm32_disableint(struct stm32_ethmac_s *priv, uint32_t ierbit);
 
-static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int segments);
-static int  stm32_recvframe(FAR struct stm32_ethmac_s *priv);
-static void stm32_receive(FAR struct stm32_ethmac_s *priv);
-static void stm32_freeframe(FAR struct stm32_ethmac_s *priv);
-static void stm32_txdone(FAR struct stm32_ethmac_s *priv);
+static void stm32_freesegment(struct stm32_ethmac_s *priv,
+                              struct eth_rxdesc_s *rxfirst, int segments);
+static int  stm32_recvframe(struct stm32_ethmac_s *priv);
+static void stm32_receive(struct stm32_ethmac_s *priv);
+static void stm32_freeframe(struct stm32_ethmac_s *priv);
+static void stm32_txdone(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_NOINTS
-static void stm32_interrupt_work(FAR void *arg);
+static void stm32_interrupt_work(void *arg);
 #endif
-static int  stm32_interrupt(int irq, FAR void *context);
+static int  stm32_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
-static inline void stm32_txtimeout_process(FAR struct stm32_ethmac_s *priv);
+static inline void stm32_txtimeout_process(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_NOINTS
-static void stm32_txtimeout_work(FAR void *arg);
+static void stm32_txtimeout_work(void *arg);
 #endif
 static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv);
+static inline void stm32_poll_process(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_NOINTS
-static void stm32_poll_work(FAR void *arg);
+static void stm32_poll_work(void *arg);
 #endif
 static void stm32_poll_expiry(int argc, uint32_t arg, ...);
 
@@ -651,16 +724,16 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...);
 static int  stm32_ifup(struct net_driver_s *dev);
 static int  stm32_ifdown(struct net_driver_s *dev);
 static int  stm32_ifdown(struct net_driver_s *dev);
-static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv);
+static inline void stm32_txavail_process(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_NOINTS
-static void stm32_txavail_work(FAR void *arg);
+static void stm32_txavail_work(void *arg);
 #endif
 static int  stm32_txavail(struct net_driver_s *dev);
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_IGMP
-static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int  stm32_ioctl(struct net_driver_s *dev, int cmd, long arg);
@@ -668,20 +741,23 @@ static int  stm32_ioctl(struct net_driver_s *dev, int cmd, long arg);
 
 /* Descriptor Initialization */
 
-static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv);
-static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
+static void stm32_txdescinit(struct stm32_ethmac_s *priv,
+                             union stm32_txdesc_u *txtable);
+static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
+                             union stm32_rxdesc_u *rxtable,
+                             uint8_t *rxbuffer);
 
 /* PHY Initialization */
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int  stm32_phyintenable(FAR struct stm32_ethmac_s *priv);
+static int  stm32_phyintenable(struct stm32_ethmac_s *priv);
 #endif
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
-static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv);
+static inline int stm32_dm9161(struct stm32_ethmac_s *priv);
 #endif
-static int  stm32_phyinit(FAR struct stm32_ethmac_s *priv);
+static int  stm32_phyinit(struct stm32_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
@@ -691,15 +767,15 @@ static inline void stm32_selectmii(void);
 #ifdef CONFIG_STM32F7_RMII
 static inline void stm32_selectrmii(void);
 #endif
-static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
-static void stm32_ethreset(FAR struct stm32_ethmac_s *priv);
-static int  stm32_macconfig(FAR struct stm32_ethmac_s *priv);
-static void stm32_macaddress(FAR struct stm32_ethmac_s *priv);
+static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv);
+static void stm32_ethreset(struct stm32_ethmac_s *priv);
+static int  stm32_macconfig(struct stm32_ethmac_s *priv);
+static void stm32_macaddress(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_ICMPv6
-static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv);
+static void stm32_ipv6multicast(struct stm32_ethmac_s *priv);
 #endif
-static int  stm32_macenable(FAR struct stm32_ethmac_s *priv);
-static int  stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
+static int  stm32_macenable(struct stm32_ethmac_s *priv);
+static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -831,7 +907,8 @@ static void stm32_checksetup(void)
  *   Initialize the free buffer list.
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   priv     - Reference to the driver state structure
+ *   txbuffer - DMA memory allocated for TX buffers.
  *
  * Returned Value:
  *   None
@@ -842,7 +919,7 @@ static void stm32_checksetup(void)
  *
  ****************************************************************************/
 
-static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
+static void stm32_initbuffer(struct stm32_ethmac_s *priv, uint8_t *txbuffer)
 {
   uint8_t *buffer;
   int i;
@@ -853,11 +930,11 @@ static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
 
   /* Add all of the pre-allocated buffers to the free buffer list */
 
-  for (i = 0, buffer = priv->alloc;
+  for (i = 0, buffer = txbuffer;
        i < STM32_ETH_NFREEBUFFERS;
-       i++, buffer += CONFIG_STM32F7_ETH_BUFSIZE)
+       i++, buffer += ALIGNED_BUFSIZE)
     {
-      sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+      sq_addlast((sq_entry_t *)buffer, &priv->freeb);
     }
 }
 
@@ -880,7 +957,7 @@ static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv)
+static inline uint8_t *stm32_allocbuffer(struct stm32_ethmac_s *priv)
 {
   /* Allocate a buffer by returning the head of the free buffer list */
 
@@ -907,11 +984,11 @@ static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv, uint8_t *buffer)
+static inline void stm32_freebuffer(struct stm32_ethmac_s *priv, uint8_t *buffer)
 {
   /* Free the buffer by adding it to to the end of the free buffer list */
 
-  sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+  sq_addlast((sq_entry_t *)buffer, &priv->freeb);
 }
 
 /****************************************************************************
@@ -932,7 +1009,7 @@ static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv, uint8_t *bu
  *
  ****************************************************************************/
 
-static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
+static inline bool stm32_isfreebuffer(struct stm32_ethmac_s *priv)
 {
   /* Return TRUE if the free buffer list is not empty */
 
@@ -959,7 +1036,7 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
+static int stm32_transmit(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
@@ -968,7 +1045,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
    * than the Ethernet buffer size.
    */
 
-#if OPTIMAL_ETH_BUFSIZE > CONFIG_STM32F7_ETH_BUFSIZE
+#if OPTIMAL_ETH_BUFSIZE > ALIGNED_BUFSIZE
   uint8_t *buffer;
   int bufcount;
   int lastsize;
@@ -992,13 +1069,13 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   DEBUGASSERT(priv->dev.d_len > 0 && priv->dev.d_buf != NULL);
 
-#if OPTIMAL_ETH_BUFSIZE > CONFIG_STM32F7_ETH_BUFSIZE
-  if (priv->dev.d_len > CONFIG_STM32F7_ETH_BUFSIZE)
+#if OPTIMAL_ETH_BUFSIZE > ALIGNED_BUFSIZE
+  if (priv->dev.d_len > ALIGNED_BUFSIZE)
     {
       /* Yes... how many buffers will be need to send the packet? */
 
-      bufcount = (priv->dev.d_len + (CONFIG_STM32F7_ETH_BUFSIZE-1)) / CONFIG_STM32F7_ETH_BUFSIZE;
-      lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_STM32F7_ETH_BUFSIZE;
+      bufcount = (priv->dev.d_len + (ALIGNED_BUFSIZE-1)) / ALIGNED_BUFSIZE;
+      lastsize = priv->dev.d_len - (bufcount - 1) * ALIGNED_BUFSIZE;
 
       nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
@@ -1046,8 +1123,8 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
               /* The size of the transfer is the whole buffer */
 
-              txdesc->tdes1  = CONFIG_STM32F7_ETH_BUFSIZE;
-              buffer        += CONFIG_STM32F7_ETH_BUFSIZE;
+              txdesc->tdes1  = ALIGNED_BUFSIZE;
+              buffer        += ALIGNED_BUFSIZE;
             }
 
           /* Give the descriptor to DMA */
@@ -1172,7 +1249,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_txpoll(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
 
   DEBUGASSERT(priv->dev.d_buf != NULL);
 
@@ -1270,9 +1347,9 @@ static int stm32_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
+static void stm32_dopoll(struct stm32_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
@@ -1331,7 +1408,7 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_enableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
+static void stm32_enableint(struct stm32_ethmac_s *priv, uint32_t ierbit)
 {
   uint32_t regval;
 
@@ -1359,7 +1436,7 @@ static void stm32_enableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
  *
  ****************************************************************************/
 
-static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
+static void stm32_disableint(struct stm32_ethmac_s *priv, uint32_t ierbit)
 {
   uint32_t regval;
 
@@ -1398,8 +1475,8 @@ static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
  *
  ****************************************************************************/
 
-static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int segments)
+static void stm32_freesegment(struct stm32_ethmac_s *priv,
+                              struct eth_rxdesc_s *rxfirst, int segments)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -1415,7 +1492,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* Reset the segment managment logic */
+  /* Reset the segment management logic */
 
   priv->rxcurr   = NULL;
   priv->segments = 0;
@@ -1455,7 +1532,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
+static int stm32_recvframe(struct stm32_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
   struct eth_rxdesc_s *rxcurr;
@@ -1564,7 +1641,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
                * and resetting the segment scanning logic
                */
 
-              priv->rxhead   = (struct eth_rxdesc_s*)rxdesc->rdes3;
+              priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               stm32_freesegment(priv, rxcurr, priv->segments);
 
               nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
@@ -1585,7 +1662,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
       /* Try the next descriptor */
 
-      rxdesc = (struct eth_rxdesc_s*)rxdesc->rdes3;
+      rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
   /* We get here after all of the descriptors have been scanned or when rxdesc points
@@ -1617,7 +1694,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_receive(FAR struct stm32_ethmac_s *priv)
+static void stm32_receive(struct stm32_ethmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
 
@@ -1785,7 +1862,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
+static void stm32_freeframe(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -1850,7 +1927,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
           /* Try the next descriptor in the TX chain */
 
-          txdesc = (struct eth_txdesc_s*)txdesc->tdes3;
+          txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
@@ -1881,7 +1958,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
+static void stm32_txdone(struct stm32_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
 
@@ -1923,7 +2000,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
+static inline void stm32_interrupt_process(struct stm32_ethmac_s *priv)
 {
   uint32_t dmasr;
 
@@ -2018,9 +2095,9 @@ static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NOINTS
-static void stm32_interrupt_work(FAR void *arg)
+static void stm32_interrupt_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   net_lock_t state;
 
   DEBUGASSERT(priv);
@@ -2054,9 +2131,9 @@ static void stm32_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, FAR void *context)
+static int stm32_interrupt(int irq, void *context)
 {
-  FAR struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
+  struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
 
 #ifdef CONFIG_NET_NOINTS
   uint32_t dmasr;
@@ -2123,7 +2200,7 @@ static int stm32_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static inline void stm32_txtimeout_process(FAR struct stm32_ethmac_s *priv)
+static inline void stm32_txtimeout_process(struct stm32_ethmac_s *priv)
 {
   /* Then reset the hardware.  Just take the interface down, then back
    * up again.
@@ -2155,9 +2232,9 @@ static inline void stm32_txtimeout_process(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NOINTS
-static void stm32_txtimeout_work(FAR void *arg)
+static void stm32_txtimeout_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   net_lock_t state;
 
   /* Process pending Ethernet interrupts */
@@ -2189,7 +2266,7 @@ static void stm32_txtimeout_work(FAR void *arg)
 
 static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
   nlldbg("Timeout!\n");
 
@@ -2237,9 +2314,9 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv)
+static inline void stm32_poll_process(struct stm32_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev  = &priv->dev;
+  struct net_driver_s *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
    * cannot perform the timer poll if we are unable to accept another packet
@@ -2307,9 +2384,9 @@ static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NOINTS
-static void stm32_poll_work(FAR void *arg)
+static void stm32_poll_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   net_lock_t state;
 
   /* Perform the poll */
@@ -2340,7 +2417,7 @@ static void stm32_poll_work(FAR void *arg)
 
 static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
 #ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
@@ -2388,7 +2465,7 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 
 static int stm32_ifup(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
   int ret;
 
 #ifdef CONFIG_NET_IPv4
@@ -2442,7 +2519,7 @@ static int stm32_ifup(struct net_driver_s *dev)
 
 static int stm32_ifdown(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
   ndbg("Taking the network down\n");
@@ -2488,7 +2565,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv)
+static inline void stm32_txavail_process(struct stm32_ethmac_s *priv)
 {
   nvdbg("ifup: %d\n", priv->ifup);
 
@@ -2521,9 +2598,9 @@ static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NOINTS
-static void stm32_txavail_work(FAR void *arg)
+static void stm32_txavail_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   net_lock_t state;
 
   /* Perform the poll */
@@ -2555,7 +2632,7 @@ static void stm32_txavail_work(FAR void *arg)
 
 static int stm32_txavail(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
 
 #ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
@@ -2651,7 +2728,7 @@ static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2708,7 +2785,7 @@ static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2759,7 +2836,9 @@ static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *   Initializes the DMA TX descriptors in chain mode.
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   priv     - Reference to the driver state structure
+ *   txtable  - List of pre-allocated TX descriptors for the Ethernet
+ *              interface
  *
  * Returned Value:
  *   None
@@ -2768,7 +2847,9 @@ static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
+static void stm32_txdescinit(struct stm32_ethmac_s *priv,
+                             union stm32_txdesc_u *txtable)
+
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -2777,7 +2858,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
    * Set the priv->txhead pointer to the first descriptor in the table.
    */
 
-  priv->txhead = priv->txtable;
+  priv->txhead = &txtable[0].txdesc;
 
   /* priv->txtail will point to the first segment of the oldest pending
    * "in-flight" TX transfer.  NULL means that there are no active TX
@@ -2791,7 +2872,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
 
   for (i = 0; i < CONFIG_STM32F7_ETH_NTXDESC; i++)
     {
-      txdesc = &priv->txtable[i];
+      txdesc = &txtable[i].txdesc;
 
       /* Set Second Address Chained bit */
 
@@ -2817,7 +2898,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
            * address
            */
 
-          txdesc->tdes3 = (uint32_t)&priv->txtable[i+1];
+          txdesc->tdes3 = (uint32_t)&txtable[i+1].txdesc;
         }
       else
         {
@@ -2825,13 +2906,13 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
            * to the first descriptor base address
            */
 
-          txdesc->tdes3 = (uint32_t)priv->txtable;
+          txdesc->tdes3 = (uint32_t)&txtable[0].txdesc;
         }
     }
 
   /* Set Transmit Desciptor List Address Register */
 
-  stm32_putreg((uint32_t)priv->txtable, STM32_ETH_DMATDLAR);
+  stm32_putreg((uint32_t)&txtable[0].txdesc, STM32_ETH_DMATDLAR);
 }
 
 /****************************************************************************
@@ -2842,6 +2923,9 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
+ *   rxtable  - List of pre-allocated RX descriptors for the Ethernet
+ *              interface
+ *   txbuffer - List of pre-allocated DMA buffers for the Ethernet interface
  *
  * Returned Value:
  *   None
@@ -2850,7 +2934,9 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
+static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
+                             union stm32_rxdesc_u *rxtable,
+                             uint8_t *rxbuffer)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -2859,7 +2945,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
    * This will be where we receive the first incomplete frame.
    */
 
-  priv->rxhead = priv->rxtable;
+  priv->rxhead = &rxtable[0].rxdesc;
 
   /* If we accumulate the frame in segments, priv->rxcurr points to the
    * RX descriptor of the first segment in the current TX frame.
@@ -2872,7 +2958,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 
   for (i = 0; i < CONFIG_STM32F7_ETH_NRXDESC; i++)
     {
-      rxdesc = &priv->rxtable[i];
+      rxdesc = &rxtable[i].rxdesc;
 
       /* Set Own bit of the RX descriptor rdes0 */
 
@@ -2882,11 +2968,11 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
        * RX desc receive interrupt
        */
 
-      rxdesc->rdes1 = ETH_RDES1_RCH | (uint32_t)CONFIG_STM32F7_ETH_BUFSIZE;
+      rxdesc->rdes1 = ETH_RDES1_RCH | (uint32_t)ALIGNED_BUFSIZE;
 
       /* Set Buffer1 address pointer */
 
-      rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_STM32F7_ETH_BUFSIZE];
+      rxdesc->rdes2 = (uint32_t)rxbuffer[i * ALIGNED_BUFSIZE];
 
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
@@ -2896,7 +2982,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
            * address
            */
 
-          rxdesc->rdes3 = (uint32_t)&priv->rxtable[i+1];
+          rxdesc->rdes3 = (uint32_t)&rxtable[i+1].rxdesc;
         }
       else
         {
@@ -2904,13 +2990,13 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
            * to the first descriptor base address
            */
 
-          rxdesc->rdes3 = (uint32_t)priv->rxtable;
+          rxdesc->rdes3 = (uint32_t)&rxtable[0].rxdesc;
         }
     }
 
   /* Set Receive Descriptor List Address Register */
 
-  stm32_putreg((uint32_t)priv->rxtable, STM32_ETH_DMARDLAR);
+  stm32_putreg((uint32_t)&rxtable[0].rxdesc, STM32_ETH_DMARDLAR);
 }
 
 /****************************************************************************
@@ -2946,7 +3032,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
 {
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
 #endif
   int ret;
 
@@ -3159,7 +3245,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
  ****************************************************************************/
 
 #ifdef CONFIG_ETH0_PHY_DM9161
-static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
+static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
 {
   uint16_t phyval;
   int ret;
@@ -3222,7 +3308,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
+static int stm32_phyinit(struct stm32_ethmac_s *priv)
 {
   volatile uint32_t timeout;
   uint32_t regval;
@@ -3489,7 +3575,7 @@ static inline void stm32_selectrmii(void)
  *
  ****************************************************************************/
 
-static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
+static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 {
   /* Configure GPIO pins to support Ethernet */
 
@@ -3643,7 +3729,7 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
+static void stm32_ethreset(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3690,7 +3776,7 @@ static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
+static int stm32_macconfig(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3773,9 +3859,9 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
+static void stm32_macaddress(struct stm32_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
   nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -3816,7 +3902,7 @@ static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv)
+static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
 {
   struct net_driver_s *dev;
   uint16_t tmp16;
@@ -3888,7 +3974,7 @@ static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
+static int stm32_macenable(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3974,7 +4060,7 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
+static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 {
   int ret;
 
@@ -4007,15 +4093,18 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Initialize the free buffer list */
 
-  stm32_initbuffer(priv);
+  stm32_initbuffer(priv, &g_txbuffer[priv->intf * TXBUFFER_SIZE]);
 
   /* Initialize TX Descriptors list: Chain Mode */
 
-  stm32_txdescinit(priv);
+  stm32_txdescinit(priv,
+                   &g_txtable[priv->intf * CONFIG_STM32F7_ETH_NTXDESC]);
 
   /* Initialize RX Descriptors list: Chain Mode  */
 
-  stm32_rxdescinit(priv);
+  stm32_rxdescinit(priv,
+                   &g_rxtable[priv->intf * CONFIG_STM32F7_ETH_NRXDESC],
+                   &g_rxbuffer[priv->intf * RXBUFFER_SIZE]);
 
   /* Enable normal MAC operation */
 
@@ -4076,11 +4165,12 @@ int stm32_ethinitialize(int intf)
   priv->dev.d_ioctl   = stm32_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void*)g_stm32ethmac; /* Used to recover private state from dev */
+  priv->intf          = intf;           /* Remember the interface number */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->txpoll       = wd_create();     /* Create periodic poll timer */
+  priv->txtimeout    = wd_create();     /* Create TX timeout timer */
 
   /* Configure GPIO pins to support Ethernet */
 
