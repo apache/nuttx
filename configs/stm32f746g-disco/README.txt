@@ -30,12 +30,20 @@ board (search keyword: stm32f746g-disco)
 Contents
 ========
 
+  - STATUS
   - Development Environment
   - LEDs and Buttons
   - Serial Console
   - FPU
   - STM32F746G-DISCO-specific Configuration Options
   - Configurations
+
+STATUS
+======
+
+  2015-07-19:  The basic NSH configuration is functional using a serial
+    console on USART6 and RS-232 shield.  Very few other drivers are in
+    place yet.
 
 Development Environment
 =======================
@@ -151,11 +159,11 @@ STM32F746G-DISCO-specific Configuration Options
 
     CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_CORTEXM4=y
+       CONFIG_ARCH_CORTEXM7=y
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-       CONFIG_ARCH_CHIP=stm32
+       CONFIG_ARCH_CHIP=stm32f7
 
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
@@ -167,10 +175,10 @@ STM32F746G-DISCO-specific Configuration Options
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the configs/ subdirectory and,
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=STM32F746G-DISCO (for the STM32F746G-DISCO development board)
+       CONFIG_ARCH_BOARD=stm32f746g-disco (for the STM32F746G-DISCO development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
@@ -179,16 +187,24 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
 
-    CONFIG_ENDIAN_BIG - define if big endian (default is little
-       endian)
+    CONFIG_ENDIAN_BIG - should not be defined.
 
     CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
        CONFIG_RAM_SIZE=0x00010000 (64Kb)
 
-    CONFIG_RAM_START - The start address of installed DRAM
+    CONFIG_RAM_START - The start address of installed SRAM (SRAM1)
 
-       CONFIG_RAM_START=0x20000000
+       CONFIG_RAM_START=0x20010000
+       CONFIG_RAM_SIZE=245760
+
+    This configurations use only SRAM1 for data storage.  The heap includes
+    the remainder of SRAM1.  If CONFIG_MM_REGIONS=2, then SRAM2 will be
+    included in the heap.
+
+    DTCM SRAM is never included in the heap because it cannot be used for
+    DMA.  A DTCM allocator is available, however, so that DTCM can be
+    managed with dtcm_malloc(), dtcm_free(), etc.
 
     In order to use FSMC SRAM, the following additional things need to be
     present in the NuttX configuration file:
@@ -218,7 +234,7 @@ STM32F746G-DISCO-specific Configuration Options
 
     CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
        cause a 100 second delay during boot-up.  This 100 second delay
-       serves no purpose other than it allows you to calibratre
+       serves no purpose other than it allows you to calibrate
        CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
        the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
        the delay actually is 100 seconds.
@@ -330,13 +346,6 @@ STM32F746G-DISCO-specific Configuration Options
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
 
-  JTAG Enable settings (by default only SW-DP is enabled):
-
-    CONFIG_STM32F7_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
-    CONFIG_STM32F7_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
-      but without JNTRST.
-    CONFIG_STM32F7_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
-
   STM32F746G-DISCO specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
@@ -416,31 +425,26 @@ STM32F746G-DISCO-specific Configuration Options
 Configurations
 ==============
 
-Each STM32F746G-DISCO configuration is maintained in a sub-directory and
-can be selected as follow:
+  Common Configuration Information
+  --------------------------------
+  Each STM32F746G-DISCO configuration is maintained in a sub-directory and
+  can be selected as follow:
 
     cd tools
     ./configure.sh stm32f746g-disco/<subdir>
     cd -
     . ./setenv.sh
 
-If this is a Windows native build, then configure.bat should be used
-instead of configure.sh:
+  If this is a Windows native build, then configure.bat should be used
+  instead of configure.sh:
 
     configure.bat STM32F746G-DISCO\<subdir>
 
-Where <subdir> is one of the following:
+  Where <subdir> is one of the sub-directories listed below.
 
-  nsh:
-  ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART2.  Support for
-    builtin applications is enabled, but in the base configuration no
-    builtin applications are selected (see NOTES below).
+  NOTES:
 
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
+    1. These configurations use the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
@@ -449,220 +453,45 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. By default, this configuration uses the CodeSourcery toolchain
-       for Windows and builds under Cygwin (or probably MSYS).  That
-       can easily be reconfigured, of course.
+    2. By default, these configurations use the USART6 for the serial
+       console.  Pins are configured to that RX/TX are available at
+       pins D0 and D1 of the Arduion connectors.  This should be compatible
+       with most RS-232 shields.
 
-       CONFIG_HOST_WINDOWS=y                   : Builds under Windows
-       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+    3. All of these configurations are set up to build under Windows using
+       the "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+       (unless stated otherwise in the description of the configuration).
 
-    3. This example supports the PWM test (apps/examples/pwm) but this must
-       be manually enabled by selecting:
+         https://launchpad.net/gcc-arm-embedded
 
-       CONFIG_PWM=y              : Enable the generic PWM infrastructure
-       CONFIG_STM32F7_TIM4=y       : Enable TIM4
-       CONFIG_STM32F7_TIM4_PWM=y   : Use TIM4 to generate PWM output
+       As of this writing (2015-03-11), full support is difficult to find
+       for the Cortex-M&, but is supported by at least this realeasse of
+       the ARM GNU tools:
 
-       See also apps/examples/README.txt
+         https://launchpadlibrarian.net/192228215/release.txt
 
-       Special PWM-only debug options:
+       That toolchain selection can easily be reconfigured using
+       'make menuconfig'.  Here are the relevant current settings:
 
-       CONFIG_DEBUG_PWM
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y               : Window environment
+         CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
-    5. This example supports the Quadrature Encode test (apps/examples/qencoder)
-       but this must be manually enabled by selecting:
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
-       CONFIG_EXAMPLES_QENCODER=y : Enable the apps/examples/qencoder
-       CONFIG_SENSORS=y           : Enable support for sensors
-       CONFIG_QENCODER=y          : Enable the generic Quadrature Encoder infrastructure
-       CONFIG_STM32F7_TIM8=y        : Enable TIM8
-       CONFIG_STM32F7_TIM2=n        : (Or optionally TIM2)
-       CONFIG_STM32F7_TIM8_QE=y     : Use TIM8 as the quadrature encoder
-       CONFIG_STM32F7_TIM2_QE=y     : (Or optionally TIM2)
+       NOTE: As of this writing, there are issues with using this tool at
+       the -Os level of optimization.  This has not been proven to be a
+       compiler issue (as least not one that might not be fixed with a
+       well placed volatile qualifier).  However, in any event, it is
+       recommend that you use not more that -O2 optimization.
 
-       See also apps/examples/README.txt. Special debug options:
+Configuration Directories
+-------------------------
 
-       CONFIG_DEBUG_SENSORS
-
-    6. This example supports the watchdog timer test (apps/examples/watchdog)
-       but this must be manually enabled by selecting:
-
-       CONFIG_EXAMPLES_WATCHDOG=y : Enable the apps/examples/watchdog
-       CONFIG_WATCHDOG=y          : Enables watchdog timer driver support
-       CONFIG_STM32F7_WWDG=y        : Enables the WWDG timer facility, OR
-       CONFIG_STM32F7_IWDG=y        : Enables the IWDG timer facility (but not both)
-
-       The WWDG watchdog is driven off the (fast) 42MHz PCLK1 and, as result,
-       has a maximum timeout value of 49 milliseconds.  for WWDG watchdog, you
-       should also add the fillowing to the configuration file:
-
-       CONFIG_EXAMPLES_WATCHDOG_PINGDELAY=20
-       CONFIG_EXAMPLES_WATCHDOG_TIMEOUT=49
-
-       The IWDG timer has a range of about 35 seconds and should not be an issue.
-
-     7. USB Support (CDC/ACM device)
-
-        CONFIG_STM32F7_OTGFS=y          : STM32 OTG FS support
-        CONFIG_USBDEV=y               : USB device support must be enabled
-        CONFIG_CDCACM=y               : The CDC/ACM driver must be built
-        CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
-        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
-
-     8. Using the USB console.
-
-        The STM32F746G-DISCO NSH configuration can be set up to use a USB CDC/ACM
-        (or PL2303) USB console.  The normal way that you would configure the
-        the USB console would be to change the .config file like this:
-
-        CONFIG_STM32F7_OTGFS=y           : STM32 OTG FS support
-        CONFIG_USART2_SERIAL_CONSOLE=n : Disable the USART2 console
-        CONFIG_DEV_CONSOLE=n           : Inhibit use of /dev/console by other logic
-        CONFIG_USBDEV=y                : USB device support must be enabled
-        CONFIG_CDCACM=y                : The CDC/ACM driver must be built
-        CONFIG_CDCACM_CONSOLE=y        : Enable the CDC/ACM USB console.
-
-        NOTE: When you first start the USB console, you have hit ENTER a few
-        times before NSH starts.  The logic does this to prevent sending USB data
-        before there is anything on the host side listening for USB serial input.
-
-    9.  Here is an alternative USB console configuration.  The following
-        configuration will also create a NSH USB console but this version
-        will use /dev/console.  Instead, it will use the normal /dev/ttyACM0
-        USB serial device for the console:
-
-        CONFIG_STM32F7_OTGFS=y           : STM32 OTG FS support
-        CONFIG_USART2_SERIAL_CONSOLE=y : Keep the USART2 console
-        CONFIG_DEV_CONSOLE=y           : /dev/console exists (but NSH won't use it)
-        CONFIG_USBDEV=y                : USB device support must be enabled
-        CONFIG_CDCACM=y                : The CDC/ACM driver must be built
-        CONFIG_CDCACM_CONSOLE=n        : Don't use the CDC/ACM USB console.
-        CONFIG_NSH_USBCONSOLE=y        : Instead use some other USB device for the console
-
-        The particular USB device that is used is:
-
-        CONFIG_NSH_USBCONDEV="/dev/ttyACM0"
-
-        The advantage of this configuration is only that it is easier to
-        bet working.  This alternative does has some side effects:
-
-        - When any other device other than /dev/console is used for a user
-          interface, linefeeds (\n) will not be expanded to carriage return /
-          linefeeds (\r\n).  You will need to set your terminal program to account
-          for this.
-
-        - /dev/console still exists and still refers to the serial port. So
-          you can still use certain kinds of debug output (see include/debug.h, all
-          of the interfaces based on lowsyslog will work in this configuration).
-
-        - But don't enable USB debug output!  Since USB is console is used for
-          USB debug output and you are using a USB console, there will be
-          infinite loops and deadlocks:  Debug output generates USB debug
-          output which generatates USB debug output, etc.  If you want USB
-          debug output, you should consider enabling USB trace
-          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_SYSTEM_USBMONITOR).
-
-          See the usbnsh configuration below for more information on configuring
-          USB trace output and the USB monitor.
-
-   10. USB OTG FS Host Support.  The following changes will enable support for
-       a USB host on the STM32F746G-DISCO, including support for a mass storage
-       class driver:
-
-       Device Drivers ->
-         CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
-         CONFIG_USBHOST=y         : Enable USB host support
-         CONFIG_USBHOST_ISOC_DISABLE=y
-
-       Device Drivers -> USB Host Driver Support
-         CONFIG_USBHOST_MSC=y     : Enable the mass storage class
-
-       System Type -> STM32 Peripheral Support
-         CONFIG_STM32F7_OTGHS=y     : Enable the STM32 USB OTG FH block (FS mode)
-         CONFIG_STM32F7_SYSCFG=y    : Needed for all USB OTF HS support
-
-       RTOS Features -> Work Queue Support
-         CONFIG_SCHED_WORKQUEUE=y : High priority worker thread support is required
-         CONFIG_SCHED_HPWORK=y    :   for the mass storage class driver.
-
-       File Systems ->
-         CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
-
-       Board Selection ->
-         CONFIG_LIB_BOARDCTL=y    : Needed for CONFIG_NSH_ARCHINIT
-
-       Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
-                                  : is needed for NSH
-
-       With those changes, you can use NSH with a FLASH pen driver as shown
-       belong.  Here NSH is started with nothing in the USB host slot:
-
-       NuttShell (NSH) NuttX-x.yy
-       nsh> ls /dev
-       /dev:
-        console
-        null
-        ttyS0
-
-       After inserting the FLASH drive, the /dev/sda appears and can be
-       mounted like this:
-
-       nsh> ls /dev
-       /dev:
-        console
-        null
-        sda
-        ttyS0
-       nsh> mount -t vfat /dev/sda /mnt/stuff
-       nsh> ls /mnt/stuff
-       /mnt/stuff:
-        -rw-rw-rw-   16236 filea.c
-
-       And files on the FLASH can be manipulated to standard interfaces:
-
-       nsh> echo "This is a test" >/mnt/stuff/atest.txt
-       nsh> ls /mnt/stuff
-       /mnt/stuff:
-        -rw-rw-rw-   16236 filea.c
-        -rw-rw-rw-      16 atest.txt
-       nsh> cat /mnt/stuff/atest.txt
-       This is a test
-       nsh> cp /mnt/stuff/filea.c fileb.c
-       nsh> ls /mnt/stuff
-       /mnt/stuff:
-        -rw-rw-rw-   16236 filea.c
-        -rw-rw-rw-      16 atest.txt
-        -rw-rw-rw-   16236 fileb.c
-
-       To prevent data loss, don't forget to un-mount the FLASH drive
-       before removing it:
-
-       nsh> umount /mnt/stuff
-
-   11. I used this configuration to test the USB hub class.  I did this
-       testing with the following changes to the configuration (in addition
-       to those listed above for base USB host/mass storage class support):
-
-       Drivers -> USB Host Driver Support
-         CONFIG_USBHOST_HUB=y     : Enable the hub class
-         CONFIG_USBHOST_ASYNCH=y  : Asynchonous I/O supported needed for hubs
-
-       Board Selection ->
-         CONFIG_STM32F746GDISCO_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
-
-       RTOS Features -> Work Queue Support
-         CONFIG_SCHED_LPWORK=y     : Low priority queue support is needed
-         CONFIG_SCHED_LPNTHREADS=1
-         CONFIG_SCHED_LPWORKSTACKSIZE=1024
-
-       NOTES:
-
-       1. It is necessary to perform work on the low-priority work queue
-          (vs. the high priority work queue) because deferred hub-related
-          work requires some delays and waiting that is not appropriate on
-          the high priority work queue.
-
-       2. Stack usage make increase when USB hub support is enabled because
-          the nesting depth of certain USB host class logic can increase.
+  nsh:
+  ---
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    Configuration enables the serial interfaces on UART6.  Support for
+    builtin applications is enabled, but in the base configuration no
+    builtin applications are selected.
