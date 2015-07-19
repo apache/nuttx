@@ -264,15 +264,12 @@
 #define LED_PANIC                    3 /* LD1=flashing */
 
 /* Button definitions ***************************************************************/
-/*   Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high
-  value will be sensed when the button is depressed.
-
-/* The STM32F7 Discovery supports one button: */
+/* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
+ * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+ */
 
 #define BUTTON_USER        0
-
 #define NUM_BUTTONS        1
-
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
@@ -293,6 +290,28 @@
 
 #define GPIO_USART6_RX GPIO_USART6_RX_1
 #define GPIO_USART6_TX GPIO_USART6_TX_1
+
+/* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
+ *   STM32 F7 BOARD        LAN8742A
+ *   GPIO     SIGNAL       PIN NAME
+ *   -------- ------------ -------------
+ *   PG11     RMII_TX_EN   TXEN
+ *   PG13     RMII_TXD0    TXD0
+ *   PG14     RMII_TXD1    TXD1
+ *   PC4      RMII_RXD0    RXD0/MODE0
+ *   PC5      RMII_RXD1    RXD1/MODE1
+ *   PG2      RMII_RXER    RXER/PHYAD0
+ *   PA7      RMII_CRS_DV  CRS_DV/MODE2
+ *   PC1      RMII_MDC     MDC
+ *   PA2      RMII_MDIO    MDIO
+ *   N/A      NRST         nRST
+ *   PA1      RMII_REF_CLK nINT/REFCLK0
+ *   N/A      OSC_25M      XTAL1/CLKIN
+ */
+
+#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
+#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
+#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
 
 /************************************************************************************
  * Public Data

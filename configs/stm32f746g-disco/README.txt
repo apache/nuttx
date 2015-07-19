@@ -489,9 +489,20 @@ Configurations
 Configuration Directories
 -------------------------
 
+  netnsh:
+  ------
+    This is a NetShell (NSH) very similar to the nsh configuration described
+    below.  It differs in that it has networking enabled.
+
+    NOTES:
+
+    1. Both IPv4 and IPv6 protocoals are enabled.
+
+    2. UDP, TCIP/IP, ARP, ICMP, and ICMPv6 are also enabled.
+
   nsh:
   ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    Configures the NuttShell (NSH) located at apps/examples/nsh.  The
     Configuration enables the serial interfaces on UART6.  Support for
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected.
