@@ -67,9 +67,10 @@
 #include "up_internal.h"
 
 #include "chip.h"
+#include "chip/stm32_syscfg.h"
+#include "chip/stm32_pinmap.h"
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
-#include "chip/stm32_syscfg.h"
 #include "stm32_ethernet.h"
 
 #include <arch/board/board.h>
@@ -475,7 +476,7 @@
 
 #define DMABMR_CLEAR_MASK \
   (ETH_DMABMR_SR | ETH_DMABMR_DA | ETH_DMABMR_DSL_MASK | ETH_DMABMR_EDFE | \
-   ETH_DMABMR_PBL_MASK | ETH_DMABMR_RTPR_MASK | ETH_DMABMR_FB | ETH_DMABMR_RDP_MASK | \
+   ETH_DMABMR_PBL_MASK | ETH_DMABMR_PM_MASK | ETH_DMABMR_FB | ETH_DMABMR_RDP_MASK | \
    ETH_DMABMR_USP | ETH_DMABMR_FPM | ETH_DMABMR_AAB | ETH_DMABMR_MB)
 
 /* The following bits are set or left zero unconditionally in all modes.
