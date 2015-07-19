@@ -128,6 +128,10 @@ CHIP_CSRCS += stm32_exti_alarm.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32F7_ETHMAC),y)
+CHIP_CSRCS += stm32_ethernet.c
+endif
+
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS += stm32_dumpgpio.c
 endif
