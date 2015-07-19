@@ -339,7 +339,7 @@ static int lib_dns_query(FAR const char *hostname,
   sd = dns_bind();
   if (sd < 0)
     {
-      return sd; 
+      return sd;
     }
 
   /* Perform the query to get the IP address */
