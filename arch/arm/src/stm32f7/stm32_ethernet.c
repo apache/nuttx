@@ -64,9 +64,9 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
+#include "cache.h"
 #include "up_internal.h"
 
-#include "chip.h"
 #include "chip/stm32_syscfg.h"
 #include "chip/stm32_pinmap.h"
 #include "stm32_gpio.h"
@@ -1065,6 +1065,11 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
+  /* Flush the contents of the TX buffer into physical memory */
+
+  arch_clean_dcache((uintptr_t)priv->dev.d_buf,
+                    (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
+
   /* Is the size to be sent greater than the size of the Ethernet buffer? */
 
   DEBUGASSERT(priv->dev.d_len > 0 && priv->dev.d_buf != NULL);
@@ -1130,7 +1135,17 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
           /* Give the descriptor to DMA */
 
           txdesc->tdes0 |= ETH_TDES0_OWN;
-          txdesc         = (struct eth_txdesc_s *)txdesc->tdes3;
+
+          /* Flush the contents of the modified TX descriptor into physical
+           * memory.
+           */
+
+          arch_clean_dcache((uintptr_t)txdesc,
+                            (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+
+          /* Get the next descriptor in the link list */
+
+          txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
         }
     }
   else
@@ -1156,6 +1171,13 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
        */
 
       txdesc->tdes0 |= ETH_TDES0_OWN;
+
+      /* Flush the contents of the modified TX descriptor into physical
+       * memory.
+       */
+
+      arch_clean_dcache((uintptr_t)txdesc,
+                        (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
 
       /* Point to the next available TX descriptor */
 
@@ -1483,12 +1505,26 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
 
   nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
 
-  /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
+  /* Give the freed RX buffers back to the Ethernet MAC to be refilled */
 
   rxdesc = rxfirst;
   for (i = 0; i < segments; i++)
     {
+      /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
+
       rxdesc->rdes0 = ETH_RDES0_OWN;
+
+      /* Make sure that the modified RX descriptor is written to physical
+       * memory.
+       */
+
+      arch_clean_dcache((uintptr_t)rxdesc,
+                        (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+
+      /* Get the next RX descriptor in the chain (cache coherency should not
+       * be an issue because the link address is constant.
+       */
+
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
@@ -1571,6 +1607,11 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
         priv->inflight < CONFIG_STM32F7_ETH_NTXDESC;
        i++)
     {
+      /* Forces the descriptor to be re-read from physical memory */
+
+      arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+
       /* Check if this is the first segment in the frame */
 
       if ((rxdesc->rdes0 & ETH_RDES0_FS) != 0 &&
@@ -1614,7 +1655,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
             {
               struct net_driver_s *dev = &priv->dev;
 
-              /* Get the Frame Length of the received packet: substruct 4
+              /* Get the Frame Length of the received packet: subtract 4
                * bytes of the CRC
                */
 
@@ -1637,15 +1678,31 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               dev->d_buf    = (uint8_t*)rxcurr->rdes2;
               rxcurr->rdes2 = (uint32_t)buffer;
 
-              /* Return success, remebering where we should re-start scanning
-               * and resetting the segment scanning logic
+              /* Make sure that the modified RX descriptor is written to
+               * physical memory.
+               */
+
+              arch_clean_dcache((uintptr_t)rxcurr,
+                                (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+
+              /* Remember where we should re-start scanning and reset the segment
+               * scanning logic
                */
 
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               stm32_freesegment(priv, rxcurr, priv->segments);
 
+              /* Force the completed RX DMA buffer to be re-read from
+               * physical memory.
+               */
+
+              arch_invalidate_dcache((uintptr_t)dev->d_buf,
+                                     (uintptr_t)dev->d_buf + dev->d_len);
+
               nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
                       priv->rxhead, dev->d_buf, dev->d_len);
+
+              /* Return success*/
 
               return OK;
             }
@@ -1721,9 +1778,9 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
         }
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the packet tap */
 
-   pkt_input(&priv->dev);
+       pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1877,6 +1934,11 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
     {
       DEBUGASSERT(priv->inflight > 0);
 
+      /* Force re-reading of the TX descriptor for physical memory */
+
+      arch_invalidate_dcache((uintptr_t)txdesc,
+                             (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+
       for (i = 0; (txdesc->tdes0 & ETH_TDES0_OWN) == 0; i++)
         {
           /* There should be a buffer assigned to all in-flight
@@ -1901,7 +1963,14 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
           txdesc->tdes2 = 0;
 
-          /* Check if this is the last segement of a TX frame */
+          /* Flush the contents of the modified TX descriptor into
+           * physical memory.
+           */
+
+          arch_clean_dcache((uintptr_t)txdesc,
+                            (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+
+          /* Check if this is the last segment of a TX frame */
 
           if ((txdesc->tdes0 & ETH_TDES0_LS) != 0)
             {
@@ -1928,6 +1997,11 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
           /* Try the next descriptor in the TX chain */
 
           txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
+
+          /* Force re-reading of the TX descriptor for physical memory */
+
+          arch_invalidate_dcache((uintptr_t)txdesc,
+                                 (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
