@@ -10737,3 +10737,6 @@
 	  up_netinitialize() from early in initialization (2015-07-17).
 	* arch/arm/src/stm32: Extend STM32 Ethernet operating frequency to
 	  180MHz.  From Sebastien Lorquet (2015-07-17).
+	* STM32 F7 Discovery:  Basic NSH configuration is functional with a
+	  serial console.  I-/D-Caches and DTCM have been enabled.  The delay
+	  loop has been calibrated -- very fast (2015-07-19).

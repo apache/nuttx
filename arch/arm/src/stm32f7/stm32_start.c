@@ -224,9 +224,6 @@ static inline void stm32_tcmenable(void)
   ARM_DSB();
   ARM_ISB();
 
-  /* Assure that GPNVM 7-8 settings are as expected */
-#warning Missing logic
-
   /* Enabled/disabled ITCM */
 
 #ifdef CONFIG_ARMV7M_ITCM
