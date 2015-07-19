@@ -327,6 +327,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDB_DNSCLIENT
 static int lib_dns_query(FAR const char *hostname,
                          FAR struct sockaddr *addr, socklen_t *addrlen)
 {
@@ -350,6 +351,7 @@ static int lib_dns_query(FAR const char *hostname,
   close(sd);
   return ret;
 }
+#endif /* CONFIG_NETDB_DNSCLIENT */
 
 /****************************************************************************
  * Name: lib_dns_lookup

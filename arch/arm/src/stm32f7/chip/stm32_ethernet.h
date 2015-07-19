@@ -245,11 +245,11 @@
 #define ETH_MACMIIAR_MW              (1 << 1)  /* Bit 1: MII write */
 #define ETH_MACMIIAR_CR_SHIFT        (2)       /* Bits 2-4: Clock range */
 #define ETH_MACMIIAR_CR_MASK         (7 << ETH_MACMIIAR_CR_SHIFT)
-#  define ETH_MACMIIAR_CR_60_100     (0 << ETH_MACMIIAR_CR_SHIFT) /* 000 60-100  MHz HCLK/42 */
-#  define ETH_MACMIIAR_CR_100_150    (1 << ETH_MACMIIAR_CR_SHIFT) /* 001 100-150 MHz HCLK/62 */
-#  define ETH_MACMIIAR_CR_20_35      (2 << ETH_MACMIIAR_CR_SHIFT) /* 010 20-35   MHz HCLK/16 */
-#  define ETH_MACMIIAR_CR_35_60      (3 << ETH_MACMIIAR_CR_SHIFT) /* 011 35-60   MHz HCLK/26 */
-#  define ETH_MACMIIAR_CR_150_180    (4 << ETH_MACMIIAR_CR_SHIFT) /* 100 150-180 MHz HCLK/102 */
+#  define ETH_MACMIIAR_CR_DIV42      (0 << ETH_MACMIIAR_CR_SHIFT) /* 60-100  MHz HCLK/42 */
+#  define ETH_MACMIIAR_CR_DIV62      (1 << ETH_MACMIIAR_CR_SHIFT) /* 100-150 MHz HCLK/62 */
+#  define ETH_MACMIIAR_CR_DIV16      (2 << ETH_MACMIIAR_CR_SHIFT) /* 20-35   MHz HCLK/16 */
+#  define ETH_MACMIIAR_CR_DIV26      (3 << ETH_MACMIIAR_CR_SHIFT) /* 35-60   MHz HCLK/26 */
+#  define ETH_MACMIIAR_CR_DIV102     (4 << ETH_MACMIIAR_CR_SHIFT) /* 150-216 MHz HCLK/102 */
 #define ETH_MACMIIAR_MR_SHIFT        (6)       /* Bits 6-10: MII register */
 #define ETH_MACMIIAR_MR_MASK         (31 << ETH_MACMIIAR_MR_SHIFT)
 #  define ETH_MACMIIAR_MR(n)         ((uint32_t)(n) << ETH_MACMIIAR_MR_SHIFT)
