@@ -10740,3 +10740,7 @@
 	* STM32 F7 Discovery:  Basic NSH configuration is functional with a
 	  serial console.  I-/D-Caches and DTCM have been enabled.  The delay
 	  loop has been calibrated -- very fast (2015-07-19).
+	* drivers/sensor and include/nuttx/sensors: Add support to Bosch BMP180
+	  barometer.  From Alan Carvalho de Assis.
+	* configs/stm32f4discovery/: Add support to BMP180 driver on the
+	  STM32F4Discovery.  From Alan Carvalho de Assis.
