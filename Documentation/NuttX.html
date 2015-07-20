@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 30, 2015</p>
+      <p>Last Updated: July 20, 2015</p>
     </td>
   </tr>
 </table>
@@ -1372,7 +1372,7 @@
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (33)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (22)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (1)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (2)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1524,18 +1524,19 @@
       <li><a href="#stm32f107x">STMicro STM32F107x</a> <small>(STM32 F1 &quot;Connectivity Line&quot; family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f205x">STMicro STM32F205x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f207x">STMicro STM32F207x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32302x">STMicro STM32F302x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
     <ul>
-      <li><a href="#stm32302x">STMicro STM32F302x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
       <li><a href="#stm32303x">STMicro STM32F303x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
       <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#stm32f401x">STMicro STM32F401x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f74x">STMicro STM32 F744/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
     </ul>
   <li>Texas Instruments (some formerly Luminary)
     <ul>
@@ -3279,7 +3280,7 @@ nsh>
       <p>
         <b>STATUS:</b>
         There are no K20 boards yet supported.
-        Work is underway on the the PJRC Teensy-3.1 board and that port is expected in NuttX-7.11.
+        Work is underway on the PJRC Teensy-3.1 board and that port is expected in NuttX-7.11.
         Refer to the Teensy-3.1 board <a href="https://bitbucket.org/nuttx/boards/src/master/teensy-3.x/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
@@ -3942,7 +3943,7 @@ Mem:         29232       5920      23312      23312
       <ul>
         <p>
           <b>STATUS:</b>
-          As of this writing, the basic port is code complete and a fully verified configuration exists for the the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+          As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
           The first fully functional SAM4S Xplained port was released in NuttX-6.28.
           Support for the on-board 1MB SRAM was added in NuttX-6.29.
           An RTT driver was Bob Doiron in NuttX-7.3.
@@ -3953,13 +3954,13 @@ Mem:         29232       5920      23312      23312
      </li>
      <li>
       <p>
-        There is also a port to the the Atmel SAM4S Xplained <i>Pro</i> development board.
+        There is also a port to the Atmel SAM4S Xplained <i>Pro</i> development board.
         This board features the ATSAM4S32C MCU running at 120MHz with 2MB of FLASH and 160KB of internal SRAM.
       </p>
       <ul>
         <p>
           <b>STATUS:</b>
-          As of this writing, the basic port is code complete and a fully verified configuration exists for the the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+          As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
           The first fully functional SAM4S Xplained Pro port was released in NuttX-7.2.
           This supported also added HSMCI, RTC, and watchdog and verified support for USB device.
           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/sam4s-xplained-pro/README.txt" target="_blank">README</a> file for further information.
@@ -4032,7 +4033,7 @@ Mem:         29232       5920      23312      23312
       <p>
         <b>STATUS:</b>
         The basic port is complete and there are several different, verified configurations available.
-        All configurations use the the NuttShell (NSH) and a serial console.
+        All configurations use the NuttShell (NSH) and a serial console.
         The first release of the SAMV71-XULT port was available in NuttX-7.9.
         Support for the connect maXTouch Xplained Pro LCD as added in NuttX-7.10.
       </p>
@@ -4057,6 +4058,31 @@ Mem:         29232       5920      23312      23312
       </ul>
       </p>
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/samv71-xult/README.txt" target="_blank">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f74x"><b>STMicro STM32 F744/F746</b>.</a>
+       This port uses the STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash.
+       Refer to the <a href="http://www.st.com/stm32f7-discovery">STMicro web site</a> for further information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The basic port is complete and there are two, verified configurations available.
+        Both configurations use the NuttShell (NSH) and a serial console; one includes Ethernet support.
+        The first release of the STM32F746G_DISCO port was available in NuttX-7.11.
+      </p>
+      </p>
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/stm32f746g-disco/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -4439,7 +4465,7 @@ Mem:         29232       5920      23312      23312
     <p>
       <b>STATUS:</b>
       The basic port is code complete and fully verified in NuttX 6.18.
-      Available configurations include the the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+      Available configurations include the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
       USB has not yet been fully tested but on first pass appears to be functional.
       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/ubw32/README.txt" target="_blank">README</a> file for further information.
     </p>
