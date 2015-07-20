@@ -1601,17 +1601,18 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
    */
 
   rxdesc = priv->rxhead;
+
+  /* Forces the first RX descriptor to be re-read from physical memory */
+
+  arch_invalidate_dcache((uintptr_t)rxdesc,
+                         (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+
   for (i = 0;
        (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 &&
         i < CONFIG_STM32F7_ETH_NRXDESC &&
         priv->inflight < CONFIG_STM32F7_ETH_NTXDESC;
        i++)
     {
-      /* Forces the descriptor to be re-read from physical memory */
-
-      arch_invalidate_dcache((uintptr_t)rxdesc,
-                             (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
-
       /* Check if this is the first segment in the frame */
 
       if ((rxdesc->rdes0 & ETH_RDES0_FS) != 0 &&
@@ -1720,7 +1721,12 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
       /* Try the next descriptor */
 
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
-    }
+
+      /* Force the next RX descriptor to be re-read from physical memory */
+
+      arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+  }
 
   /* We get here after all of the descriptors have been scanned or when rxdesc points
    * to the first descriptor owned by the DMA.  Remember where we left off.
@@ -3051,7 +3057,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 
       /* Set Buffer1 address pointer */
 
-      rxdesc->rdes2 = (uint32_t)rxbuffer[i * ALIGNED_BUFSIZE];
+      rxdesc->rdes2 = (uint32_t)&rxbuffer[i * ALIGNED_BUFSIZE];
 
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
