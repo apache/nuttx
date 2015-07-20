@@ -282,6 +282,19 @@
 void weak_function stm32_spiinitialize(void);
 
 /****************************************************************************
+ * Name: stm32_bmp180initialize
+ *
+ * Description:
+ *   Called to configure an I2C and to register BMP180 for the stm32f4discovery
+ *   board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BMP180
+int stm32_bmp180initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:

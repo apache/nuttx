@@ -274,6 +274,11 @@
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
 
+/* I2C config to use with Nunchuk PB7 (SDA) and PB8 (SCL) */
+
+#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_2
+#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_1
+
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 
 #define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2

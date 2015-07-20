@@ -66,6 +66,10 @@
 
 int board_app_initialize(void)
 {
+#ifdef CONFIG_BMP180
+  stm32_bmp180initialize("/dev/press0");
+#endif
+
 #ifdef CONFIG_BOARD_INITIALIZE
   /* Board initialization already performed by board_initialize() */
 
