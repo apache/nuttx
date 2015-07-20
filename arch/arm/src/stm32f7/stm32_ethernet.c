@@ -2984,7 +2984,13 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
         }
     }
 
-  /* Set Transmit Desciptor List Address Register */
+  /* Flush all of the initialized TX descriptors to physical memory */
+
+  arch_clean_dcache((uintptr_t)txtable,
+                    (uintptr_t)txtable +
+                      TXTABLE_SIZE * sizeof(union stm32_txdesc_u));
+
+  /* Set Transmit Descriptor List Address Register */
 
   stm32_putreg((uint32_t)&txtable[0].txdesc, STM32_ETH_DMATDLAR);
 }
@@ -3067,6 +3073,12 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
           rxdesc->rdes3 = (uint32_t)&rxtable[0].rxdesc;
         }
     }
+
+  /* Flush all of the initialized RX descriptors to physical memory */
+
+  arch_clean_dcache((uintptr_t)rxtable,
+                    (uintptr_t)rxtable +
+                      RXTABLE_SIZE * sizeof(union stm32_rxdesc_u));
 
   /* Set Receive Descriptor List Address Register */
 
