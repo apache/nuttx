@@ -2131,8 +2131,7 @@ static inline void stm32_interrupt_process(struct stm32_ethmac_s *priv)
   /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
 
 #ifdef CONFIG_DEBUG_NET
-
-  /* Check if there are pending "anormal" interrupts */
+  /* Check if there are pending "abnormal" interrupts */
 
   if ((dmasr & ETH_DMAINT_AIS) != 0)
     {
@@ -2543,15 +2542,15 @@ static int stm32_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nvdbg("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  nvdbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the Ethernet interface for DMA operation. */
@@ -2596,7 +2595,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Taking the network down\n");
+  nvdbg("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -3034,7 +3033,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
   priv->rxcurr   = NULL;
   priv->segments = 0;
 
-  /* Initialize each TX descriptor */
+  /* Initialize each RX descriptor */
 
   for (i = 0; i < CONFIG_STM32F7_ETH_NRXDESC; i++)
     {
@@ -3247,8 +3246,8 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
-       phydevaddr, phyregaddr);
+  nvdbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
 }
@@ -3306,8 +3305,8 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
-       phydevaddr, phyregaddr, value);
+  nvdbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
 }
@@ -3343,7 +3342,7 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY ID1: %d\n", ret);
+      ndbg("ERROR: Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -3361,7 +3360,7 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY Register 0x10: %d\n", ret);
+      ndbg("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -3418,7 +3417,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32F7_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      ndbg("Failed to reset the PHY: %d\n", ret);
+      ndbg("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_RESET_DELAY);
@@ -3429,7 +3428,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phy_boardinitialize(0);
   if (ret < 0)
     {
-      ndbg("Failed to initialize the PHY: %d\n", ret);
+      ndbg("ERROR: Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -3454,7 +3453,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          ndbg("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3465,16 +3464,16 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for link status: %04x\n", phyval);
+      ndbg("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
-  /* Enable auto-gegotiation */
+  /* Enable auto-negotiation */
 
   ret = stm32_phywrite(CONFIG_STM32F7_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      ndbg("Failed to enable auto-negotiation: %d\n", ret);
+      ndbg("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3485,7 +3484,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          ndbg("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3496,7 +3495,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for auto-negotiation\n");
+      ndbg("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3505,7 +3504,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, CONFIG_STM32F7_PHYSR, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read PHY status register\n");
+      ndbg("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
@@ -3523,6 +3522,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   switch (phyval & CONFIG_STM32F7_PHYSR_ALTMODE)
     {
       default:
+        ndbg("ERROR: Unrecognized PHY status setting\n");
+
       case CONFIG_STM32F7_PHYSR_10HD:
         priv->fduplex = 0;
         priv->mbps100 = 0;
@@ -3575,9 +3576,10 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32F7_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     ndbg("Failed to write the PHY MCR: %d\n", ret);
+     ndbg("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
+
   up_mdelay(PHY_CONFIG_DELAY);
 
   /* Remember the selected speed and duplex modes */
@@ -3590,9 +3592,9 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 #endif
 #endif
 
-  ndbg("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  nvdbg("Duplex: %s Speed: %d MBps\n",
+        priv->fduplex ? "FULL" : "HALF",
+        priv->mbps100 ? 100 : 10);
 
   return OK;
 }
