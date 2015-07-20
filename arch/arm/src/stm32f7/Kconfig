@@ -90,6 +90,10 @@ config STM32F7_DAC
 	bool
 	default n
 
+config STM32F7_DMA
+	bool
+	default n
+
 config STM32F7_I2C
 	bool
 	default n
@@ -155,11 +159,13 @@ config STM32F7_CRYP
 config STM32F7_DMA1
 	bool "DMA1"
 	default n
+	select STM32F7_DMA
 	select ARCH_DMA
 
 config STM32F7_DMA2
 	bool "DMA2"
 	default n
+	select STM32F7_DMA
 	select ARCH_DMA
 
 config STM32F7_DAC1

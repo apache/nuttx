@@ -70,7 +70,9 @@ typedef FAR void *DMA_HANDLE;
 
 /* Description:
  *   This is the type of the callback that is used to inform the user of the the
- *   completion of the DMA.
+ *   completion of the DMA.  NOTE:  The DMA module does *NOT* perform any cache
+ *   operations.  It is the responsibility of the DMA client to invalidate DMA
+ *   buffers after completion of the DMA RX operations.
  *
  * Input Parameters:
  *   handle - Refers tot he DMA channel or stream
@@ -190,7 +192,9 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  * Name: stm32_dmastart
  *
  * Description:
- *   Start the DMA transfer
+ *   Start the DMA transfer.  NOTE:  The DMA module does *NOT* perform any
+ *   cache operations.  It is the responsibility of the DMA client to clean
+ *   DMA buffers after staring of the DMA TX operations.
  *
  * Assumptions:
  *   - DMA handle allocated by stm32_dmachannel()

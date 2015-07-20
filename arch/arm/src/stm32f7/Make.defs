@@ -118,6 +118,10 @@ CHIP_CSRCS += stm32_procfs_dtcm.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32F7_DMA),y)
+CHIP_CSRCS += stm32_dma.c
+endif
+
 ifeq ($(CONFIG_STM32_PWR),y)
 CHIP_CSRCS += stm32_exti_pwr.c
 endif

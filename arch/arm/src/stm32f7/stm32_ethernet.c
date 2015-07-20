@@ -77,7 +77,7 @@
 
 /* STM32F7_NETHERNET determines the number of physical interfaces that can
  * be supported by the hardware.  CONFIG_STM32F7_ETHMAC will defined if
- * any STM32F7 Ethernet support is enabled in the configuratino.
+ * any STM32F7 Ethernet support is enabled in the configuration.
  */
 
 #if STM32F7_NETHERNET > 0 && defined(CONFIG_STM32F7_ETHMAC)
