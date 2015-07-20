@@ -60,7 +60,7 @@
                          GPIO_OUTPUT_CLEAR | GPIO_PORTI | GPIO_PIN1)
 
 /* Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high value will be sensed when the
- * button is depressed. Ntocie the EXTI interrupts are configured.
+ * button is depressed. Note that the EXTI interrupt is configured.
  */
 
 #define GPIO_BTN_USER   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)

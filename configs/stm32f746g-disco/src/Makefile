@@ -57,7 +57,7 @@ CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_applinitialize.c
+CSRCS += stm32_appinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
