@@ -238,7 +238,7 @@
 #define DMA_ALIGN_UP(n)    (((n) + DMA_BUFFER_MASK) & ~DMA_BUFFER_MASK)
 #define DMA_ALIGN_DOWN(n)  ((n) & ~DMA_BUFFER_MASK)
 
-#ifdef CONFIG_STM32F7_ETH_ENHANCEDDESC
+#ifndef CONFIG_STM32F7_ETH_ENHANCEDDESC
 #  define RXDESC_SIZE       16
 #  define TXDESC_SIZE       16
 #else
