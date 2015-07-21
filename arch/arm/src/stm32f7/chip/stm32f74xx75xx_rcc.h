@@ -64,11 +64,11 @@
 #define STM32_RCC_AHB3ENR_OFFSET     0x0038  /* AHB3 Peripheral Clock enable register */
 #define STM32_RCC_APB1ENR_OFFSET     0x0040  /* APB1 Peripheral Clock enable register */
 #define STM32_RCC_APB2ENR_OFFSET     0x0044  /* APB2 Peripheral Clock enable register */
-#define STM32_RCC_AHB1LPENR_OFFSET   0x0050  /* RCC AHB1 low power modeperipheral clock enable register */
-#define STM32_RCC_AH2BLPENR_OFFSET   0x0054  /* RCC AHB2 low power modeperipheral clock enable register */
-#define STM32_RCC_AH3BLPENR_OFFSET   0x0058  /* RCC AHB3 low power modeperipheral clock enable register */
-#define STM32_RCC_APB1LPENR_OFFSET   0x0060  /* RCC APB1 low power modeperipheral clock enable register */
-#define STM32_RCC_APB2LPENR_OFFSET   0x0064  /* RCC APB2 low power modeperipheral clock enable register */
+#define STM32_RCC_AHB1LPENR_OFFSET   0x0050  /* RCC AHB1 low power mode peripheral clock enable register */
+#define STM32_RCC_AHB2LPENR_OFFSET   0x0054  /* RCC AHB2 low power mode peripheral clock enable register */
+#define STM32_RCC_AHB3LPENR_OFFSET   0x0058  /* RCC AHB3 low power mode peripheral clock enable register */
+#define STM32_RCC_APB1LPENR_OFFSET   0x0060  /* RCC APB1 low power mode peripheral clock enable register */
+#define STM32_RCC_APB2LPENR_OFFSET   0x0064  /* RCC APB2 low power mode peripheral clock enable register */
 #define STM32_RCC_BDCR_OFFSET        0x0070  /* Backup domain control register */
 #define STM32_RCC_CSR_OFFSET         0x0074  /* Control/status register */
 #define STM32_RCC_SSCGR_OFFSET       0x0080  /* Spread spectrum clock generation register */
@@ -94,8 +94,8 @@
 #define STM32_RCC_APB1ENR           (STM32_RCC_BASE+STM32_RCC_APB1ENR_OFFSET)
 #define STM32_RCC_APB2ENR           (STM32_RCC_BASE+STM32_RCC_APB2ENR_OFFSET)
 #define STM32_RCC_AHB1LPENR         (STM32_RCC_BASE+STM32_RCC_AHB1LPENR_OFFSET)
-#define STM32_RCC_AH2BLPENR         (STM32_RCC_BASE+STM32_RCC_AH2BLPENR)
-#define STM32_RCC_AH3BLPENR         (STM32_RCC_BASE+STM32_RCC_AH3BLPENR_OFFSET)
+#define STM32_RCC_AHB2LPENR         (STM32_RCC_BASE+STM32_RCC_AHB2LPENR)
+#define STM32_RCC_AHB3LPENR         (STM32_RCC_BASE+STM32_RCC_AHB3LPENR_OFFSET)
 #define STM32_RCC_APB1LPENR         (STM32_RCC_BASE+STM32_RCC_APB1LPENR_OFFSET)
 #define STM32_RCC_APB2LPENR         (STM32_RCC_BASE+STM32_RCC_APB2LPENR_OFFSET)
 #define STM32_RCC_BDCR              (STM32_RCC_BASE+STM32_RCC_BDCR_OFFSET)
@@ -506,7 +506,7 @@
 #define RCC_APB1LPENR_UART7LPEN      (1 << 30) /* Bit 30: UART 7 clock enable during Sleep mode */
 #define RCC_APB1LPENR_UART8LPEN      (1 << 31) /* Bit 31: UART 8 clock enable during Sleep mode */
 
-/* RCC APB2 low power modeperipheral clock enable register */
+/* RCC APB2 low power mode peripheral clock enable register */
 
 #define RCC_APB2LPENR_TIM1LPEN       (1 << 0)  /* Bit 0:  TIM 1 clock enable during Sleep mode */
 #define RCC_APB2LPENR_TIM8LPEN       (1 << 1)  /* Bit 1:  TIM 8 clock enable during Sleep mode */
@@ -571,10 +571,10 @@
 #define RCC_PLLI2SCFGR_PLLI2SN_SHIFT (6)       /* Bits 6-14: PLLI2S multiplication factor for VCO */
 #define RCC_PLLI2SCFGR_PLLI2SN_MASK  (0x1ff << RCC_PLLI2SCFGR_PLLI2SN_SHIFT)
 #  define RCC_PLLI2SCFGR_PLLI2SN(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SN_SHIFT)
-#define RCC_PLLI2SCFGR_PLLI2SP_SHIFT (6)       /* Bits 16-17: PLLI2S division factor for SPDIFRX clock */
+#define RCC_PLLI2SCFGR_PLLI2SP_SHIFT (16)      /* Bits 16-17: PLLI2S division factor for SPDIFRX clock */
 #define RCC_PLLI2SCFGR_PLLI2SP_MASK  (3 << RCC_PLLI2SCFGR_PLLI2SP_SHIFT)
 #  define RCC_PLLI2SCFGR_PLLI2SP(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SP_SHIFT)
-#define RCC_PLLI2SCFGR_PLLI2SQ_SHIFT (6)       /* Bits 24-27: PLLI2S division factor for SAIs clock */
+#define RCC_PLLI2SCFGR_PLLI2SQ_SHIFT (24)      /* Bits 24-27: PLLI2S division factor for SAIs clock */
 #define RCC_PLLI2SCFGR_PLLI2SQ_MASK  (15 << RCC_PLLI2SCFGR_PLLI2SQ_SHIFT)
 #  define RCC_PLLI2SCFGR_PLLI2SQ(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SQ_SHIFT)
 #define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)      /* Bits 28-30: PLLI2S division factor for I2S clocks */
@@ -586,7 +586,7 @@
 #define RCC_PLLSAICFGR_PLLSAIN_SHIFT (6)       /* Bits 6-14: PLLSAI divider (N) for VCO */
 #define RCC_PLLSAICFGR_PLLSAIN_MASK  (0x1ff << RCC_PLLSAICFGR_PLLSAIN_SHIFT)
 #  define RCC_PLLSAICFGR_PLLSAIN(n)  ((n) << RCC_PLLSAICFGR_PLLSAIN_SHIFT)
-#define RCC_PLLSAICFGR_PLLSAIP_SHIFT (6)       /* Bits 16-17: PLLSAI division factor for 48MHz clock */
+#define RCC_PLLSAICFGR_PLLSAIP_SHIFT (16)      /* Bits 16-17: PLLSAI division factor for 48MHz clock */
 #define RCC_PLLSAICFGR_PLLSAIP_MASK  (3 << RCC_PLLSAICFGR_PLLSAIP_SHIFT)
 #  define RCC_PLLSAICFGR_PLLSAIP(n)  ((n) << RCC_PLLSAICFGR_PLLSAIP_SHIFT)
 #define RCC_PLLSAICFGR_PLLSAIQ_SHIFT (24)      /* Bits 24-27: PLLSAI division factor for SAI clock */
