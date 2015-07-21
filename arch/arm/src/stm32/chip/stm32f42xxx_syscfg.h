@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32/chip/stm32f40xxx_syscfg.h
+ * arch/arm/src/stm32/chip/stm32f42xxx_syscfg.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_SYSCFG_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_SYSCFG_H
 
 /****************************************************************************************************
  * Included Files
@@ -151,4 +151,4 @@
 #define SYSCFG_CMPCR_READY            (1 << 8)  /* Bit 8: Compensation cell ready flag */
 
 #endif /* CONFIG_STM32_STM32F427 || CONFIG_STM32_STM32F429 */
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F42XXX_SYSCFG_H */
