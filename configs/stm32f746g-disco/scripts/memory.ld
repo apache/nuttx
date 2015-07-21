@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/stm32f746g-disco/scripts/flash.ld
+ * configs/stm32f746g-disco/scripts/memory.ld
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *       Modified 11/4/2013 for STM32F429 support
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,83 +63,67 @@
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
  * the 0x0800:0000 address range.
+ *
+ * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
+ * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
+ * should fit into 64KB and, of course, can be optimized as needed (See
+ * also configs/stm32f746g-disco/scripts/kernel-space.ld).  Allowing the
+ * additional does permit addition debug instrumentation to be added to the
+ * kernel space without overflowing the partition.
+ *
+ * Alignment of the user space FLASH partition is also a critical factor:
+ * The user space FLASH partition will be spanned with a single region of
+ * size 2**n bytes.  The alignment of the user-space region must be the same.
+ * As a consequence, as the user-space increases in size, the alignment
+ * requirement also increases.
+ *
+ * This alignment requirement means that the largest user space FLASH region
+ * you can have will be 512KB at it would have to be positioned at
+ * 0x08800000.  If you change this address, don't forget to change the
+ * CONFIG_NUTTX_USERSPACE configuration setting to match and to modify
+ * the check in kernel/userspace.c.
+ *
+ * For the same reasons, the maximum size of the SRAM mapping is limited to
+ * 4KB.  Both of these alignment limitations could be reduced by using
+ * multiple regions to map the FLASH/SDRAM range or perhaps with some
+ * clever use of subregions.
+ *
+ * A detailed memory map for the 112KB SRAM region is as follows:
+ *
+ *   0x20001 0000:  Kernel .data region.  Typical size: 0.1KB
+ *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
+ *   0x20001 0800:  Kernel IDLE thread stack (approximate).  Size is
+ *                  determined by CONFIG_IDLETHREAD_STACKSIZE and
+ *                  adjustments for alignment.  Typical is 1KB.
+ *   ------- ----   Padded to 4KB
+ *   0x20001 1000:  User .data region.  Size is variable.
+ *   ------- ----   User .bss region  Size is variable.
+ *   0x20001 2000:  Beginning of kernel heap.  Size determined by
+ *                  CONFIG_MM_KERNEL_HEAPSIZE.
+ *   ------- ----   Beginning of user heap.  Can vary with other settings.
+ *   0x20004 c000:  End+1 of SRAM1
  */
 
 MEMORY
 {
+	/* ITCM boot address */
+
 	itcm  (rwx) : ORIGIN = 0x00200000, LENGTH = 1024K
-	flash (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K
+
+	/* 1024KB FLASH */
+
+	kflash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+	uflash (rx) : ORIGIN = 0x08020000, LENGTH = 128K
+	xflash (rx) : ORIGIN = 0x08040000, LENGTH = 768K
+
+	/* 240KB of contiguous SRAM1 */
+
+	ksram (rwx) : ORIGIN = 0x20010000, LENGTH = 4K
+	usram (rwx) : ORIGIN = 0x20011000, LENGTH = 4K
+	xsram (rwx) : ORIGIN = 0x20012000, LENGTH = 240K - 8K
+
+    /* DTCM SRAM */
+
 	dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
-	sram1 (rwx) : ORIGIN = 0x20010000, LENGTH = 240K
 	sram2 (rwx) : ORIGIN = 0x2004c000, LENGTH = 16K
-}
-
-OUTPUT_ARCH(arm)
-EXTERN(_vectors)
-ENTRY(_stext)
-SECTIONS
-{
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > flash
-
-	.init_section : {
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > flash
-
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} > flash
-
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} > flash
-	__exidx_end = ABSOLUTE(.);
-
-	_eronly = ABSOLUTE(.);
-
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sram1 AT > flash
-
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sram1
-
-	/* Stabs debugging sections. */
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
 }

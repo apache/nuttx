@@ -49,6 +49,10 @@ STATUS
   2015-07-20:  STM32 F7 Ethernet appears to be functional, but has had
     only light testing.
 
+  2015-07-21:  Added a protected build version of the NSH configuration
+    (called knsh).  That configuration is close:  It boots, but is prone
+    to hard faulting.  It needs a little TLC to be fully usable.
+
 Development Environment
 =======================
 
@@ -114,16 +118,22 @@ Porting STM32 F4 Drivers
 
   The STM32F746 is very similar to the STM32 F429 and many of the drivers
   in the stm32/ directory could be ported here:  ADC, BBSRAM, CAN, DAC,
-  DMA2D, FLASH, I2C, IWDG, LSE, LSI, LTDC, OTGFS, OTGHS, PM, QEncode,
-  RNG, RTCC, SDMMC (was SDIO), Timer/counters, and WWDG.
+  DMA2D, FLASH, I2C, IWDG, LSE, LSI, LTDC, OTGFS, OTGHS, PM, Quadrature
+  Encoder, RNG, RTCC, SDMMC (was SDIO), Timer/counters, and WWDG.
 
   Many of these drivers would be ported very simply; many ports would just
-  be a matter of copying files and some serach-and-replace.  Like:
+  be a matter of copying files and some seach-and-replacement.  Like:
 
-    1. Copy the register definition file from stm32/chip to stm32f7/chip
-       (making name changes as appropriate).
-    2. Copy the C file from stm32/ to stm32f7/ (again with naming changes).
-    3. Update the Make.defs file to include the new C file.
+    1. Compare the two register definitions files; make sure that the STM32
+       F4 peripheral is identical (or nearly identical) to the F7
+       peripheral.  If so then,
+    2. Copy the register definition file from the stm32/chip directory to
+       the stm32f7/chip directory, making name changes as appropriate and
+       updating the driver for any minor register differences.
+    3. Copy the corresponding C  file (and possibly a matching .h file) from
+       the stm32/ directory to the stm32f7/ directory again with naming
+       changes and changes for any register differences.
+    4. Update the Make.defs file to include the new C file in the build.
 
   For other files, particularly those that use DMA, the port will be
   significantly more complex.  That is because the STM32F7 has a D-Cache
@@ -515,6 +525,85 @@ Configurations
 
 Configuration Directories
 -------------------------
+
+  kostest:
+  -------
+    This is identical to the nsh configuration below except that NuttX is
+    built as a kernel-mode, monolithic module and the user applications are
+    built separately.  Is is recommended to use a special make command;
+    not just 'make' but make with the following two arguments:
+
+        make pass1 pass2
+
+    In the normal case (just 'make'), make will attempt to build both user-
+    and kernel-mode blobs more or less interleaved.  This actual works!
+    However, for me it is very confusing so I prefer the above make command:
+    Make the user-space binaries first (pass1), then make the kernel-space
+    binaries (pass2)
+
+    NOTES:
+
+    1. At the end of the build, there will be several files in the top-level
+       NuttX build directory:
+
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
+
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
+
+    2. Combining .hex files.  If you plan to use the STM32 ST-Link Utility to
+       load the .hex files into FLASH, then you need to combine the two hex
+       files into a single .hex file.  Here is how you can do that.
+
+       a. The 'tail' of the nuttx.hex file should look something like this
+          (with my comments added):
+
+            $ tail nuttx.hex
+            # 00, data records
+            ...
+            :10 9DC0 00 01000000000800006400020100001F0004
+            :10 9DD0 00 3B005A0078009700B500D400F300110151
+            :08 9DE0 00 30014E016D0100008D
+            # 05, Start Linear Address Record
+            :04 0000 05 0800 0419 D2
+            # 01, End Of File record
+            :00 0000 01 FF
+
+          Use an editor such as vi to remove the 05 and 01 records.
+
+       b. The 'head' of the nuttx_user.hex file should look something like
+          this (again with my comments added):
+
+            $ head nuttx_user.hex
+            # 04, Extended Linear Address Record
+            :02 0000 04 0801 F1
+            # 00, data records
+            :10 8000 00 BD89 01084C800108C8110208D01102087E
+            :10 8010 00 0010 00201C1000201C1000203C16002026
+            :10 8020 00 4D80 01085D80010869800108ED83010829
+            ...
+
+          Nothing needs to be done here.  The nuttx_user.hex file should
+          be fine.
+
+       c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
+          file to produce a single combined hex file:
+
+          $ cat nuttx.hex nuttx_user.hex >combined.hex
+
+       Then use the combined.hex file with the STM32 ST-Link tool.  The
+       mbed interface does not seem to except .hex files, but you can
+       also convert the .hex file to binary with this command:
+
+         arm-none-eabi-objcopy.exe -I ihex -O binary combined.hex combined.bin
+
+       If you do this a lot, you will probably want to invest a little time
+       to develop a tool to automate these steps.
 
   netnsh:
   ------
