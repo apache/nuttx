@@ -34,6 +34,7 @@ Contents
   - Development Environment
   - LEDs and Buttons
   - Serial Console
+  - Porting STM32 F4 Drivers
   - FPU
   - STM32F746G-DISCO-specific Configuration Options
   - Configurations
@@ -107,6 +108,29 @@ Serial Console
   DO RX    USART6_RX PC7
   D1 TX    USART6_TX PC6
   -- ----- --------- -----
+
+Porting STM32 F4 Drivers
+========================
+
+  The STM32F746 is very similar to the STM32 F429 and many of the drivers
+  in the stm32/ directory could be ported here:  ADC, BBSRAM, CAN, DAC,
+  DMA2D, FLASH, I2C, IWDG, LSE, LSI, LTDC, OTGFS, OTGHS, PM, QEncode,
+  RNG, RTCC, SDMMC (was SDIO), Timer/counters, and WWDG.
+
+  Many of these drivers would be ported very simply; many ports would just
+  be a matter of copying files and some serach-and-replace.  Like:
+
+    1. Copy the register definition file from stm32/chip to stm32f7/chip
+       (making name changes as appropriate).
+    2. Copy the C file from stm32/ to stm32f7/ (again with naming changes).
+    3. Update the Make.defs file to include the new C file.
+
+  For other files, particularly those that use DMA, the port will be
+  significantly more complex.  That is because the STM32F7 has a D-Cache
+  and, as a result, we need to exercise much more care to maintain cache
+  coherency.  There is a Wiki page discussing the issues of porting
+  drivers from the stm32/ to the stm32f7/ directories here:
+  http://www.nuttx.org/doku.php?id=wiki:howtos:port-drivers_stm32f7
 
 FPU
 ===
