@@ -35,8 +35,8 @@
 
 /* This file should never be included directed but, rather, only indirectly through nuttx/irq.h */
 
-#ifndef __ARCH_ARM_INCLUDE_STM32F20XXX_IRQ_H
-#define __ARCH_ARM_INCLUDE_STM32F20XXX_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_STM32_STM32F20XXX_IRQ_H
+#define __ARCH_ARM_INCLUDE_STM32_STM32F20XXX_IRQ_H
 
 /****************************************************************************************************
  * Included Files
@@ -180,5 +180,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_STM32F40XXX_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32_STM32F20XXX_IRQ_H */
 
