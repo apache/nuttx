@@ -10747,4 +10747,5 @@
 	* arch/arm/src/stm32f7:  Add an STM32 F7 Ethernet driver (2015-07-20).
 	* arch/arm/src/stm32f7:  Port the STM32 F4 DMA driver.  Untested on
 	  initial commit (2015-07-20).
-
+	* arch/arm/src/sam34: Correct some problems with SAM3/4 watchdog driver.
+	  Includes some small improvements.  From Max Neklyudov (2015-07-21).
