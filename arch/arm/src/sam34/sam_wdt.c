@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_wdt.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -631,7 +631,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
       else if (mintime < priv->timeout)
         {
           uint32_t window = (((priv->timeout - mintime) * WDT_FCLK) / 1000) - 1;
-          DEBUGASSERT(window < priv->reload);
+          DEBUGASSERT(window <= priv->reload);
           priv->window = window; 
           ret = OK;
         }
@@ -664,6 +664,12 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
 void sam_wdtinitialize(FAR const char *devpath)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_wdgdev;
+  uint32_t mr_val;
+
+  /* Enable watchdog with 5 sec timeout */
+
+  mr_val |= (WDT_MR_WDD((5) * WDT_FCLK) | WDT_MR_WDV((5) * WDT_FCLK) | WDT_MR_WDRSTEN);
+  sam34_putreg(mr_val, SAM_WDT_MR);
 
   wdvdbg("Entry: devpath=%s\n", devpath);
 
@@ -689,6 +695,10 @@ void sam_wdtinitialize(FAR const char *devpath)
 
   sam34_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
                    CONFIG_WDT_TIMEOUT);
+
+  /* Disable minimum time feature for now. */
+
+  priv->window = priv->reload;
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
