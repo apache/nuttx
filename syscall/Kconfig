@@ -51,9 +51,8 @@ config SYS_NNEST
 		system call processing cause a call back into the user space code,
 		and (3) the user space code performs another system call.
 
-		In the current design, this can happen only under one condition:
-		When the kernel calls back into user space in order to allocate user
-		space memory.  So it is expected that the maximum nesting level will
-		be only 2.
+		I don't believe that any nested system calls will occur in the
+		current design so the default maximum nesting level of 2 should be
+		more than sufficient.
 
 endif # LIB_SYSCALL

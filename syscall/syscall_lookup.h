@@ -217,9 +217,11 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #  endif
 
 #  if !defined(CONFIG_DISABLE_MOUNTPOINT)
+#    if defined(CONFIG_FS_READABLE)
+  SYSCALL_LOOKUP(mount,                   5, STUB_mount)
+#    endif
   SYSCALL_LOOKUP(fsync,                   1, STUB_fsync)
   SYSCALL_LOOKUP(mkdir,                   2, STUB_mkdir)
-  SYSCALL_LOOKUP(mount,                   5, STUB_mount)
   SYSCALL_LOOKUP(rename,                  2, STUB_rename)
   SYSCALL_LOOKUP(rmdir,                   1, STUB_rmdir)
   SYSCALL_LOOKUP(umount2,                 2, STUB_umount2)

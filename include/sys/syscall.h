@@ -303,9 +303,11 @@
 #  endif
 
 #  if !defined(CONFIG_DISABLE_MOUNTPOINT)
-#    define SYS_fsync                  (__SYS_mountpoint+0)
-#    define SYS_mkdir                  (__SYS_mountpoint+1)
-#    define SYS_mount                  (__SYS_mountpoint+2)
+#  if defined(CONFIG_FS_READABLE)
+#    define SYS_mount                  (__SYS_mountpoint+0)
+#  endif
+#    define SYS_fsync                  (__SYS_mountpoint+1)
+#    define SYS_mkdir                  (__SYS_mountpoint+2)
 #    define SYS_rename                 (__SYS_mountpoint+3)
 #    define SYS_rmdir                  (__SYS_mountpoint+4)
 #    define SYS_umount2                (__SYS_mountpoint+5)

@@ -48,7 +48,8 @@
 
 #if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
 #  include <arch/armv7-a/syscall.h>
-#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
+#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
+      defined(CONFIG_ARCH_CORTEXM7)
 #  include <arch/armv7-m/syscall.h>
 #elif defined(CONFIG_ARCH_CORTEXM0)
 #  include <arch/armv6-m/syscall.h>
