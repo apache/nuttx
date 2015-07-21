@@ -63,6 +63,13 @@
 #define MPU_RBAR                0xe000ed9c /* MPU Region Base Address Register */
 #define MPU_RASR                0xe000eda0 /* MPU Region Attribute and Size Register */
 
+#define MPU_RBAR_A1             0xe000eda4 /* MPU alias registers */
+#define MPU_RASR_A1             0xe000eda8
+#define MPU_RBAR_A2             0xe000edac
+#define MPU_RASR_A2             0xe000edb0
+#define MPU_RBAR_A3             0xe000edb4
+#define MPU_RASR_A3             0xe000edb8
+
 /* MPU Type Register Bit Definitions */
 
 #define MPU_TYPE_SEPARATE       (1 << 0) /* Bit 0: 0:unified or 1:separate memory maps */
@@ -104,20 +111,22 @@
 #  define MPU_RASR_SRD_5        (0x20 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_6        (0x40 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_7        (0x80 << MPU_RASR_SRD_SHIFT)
-#define MPU_RASR_B              (1 << 16) /* Bit 16: Bufferable */
-#define MPU_RASR_C              (1 << 17) /* Bit 17: Cacheable */
-#define MPU_RASR_S              (1 << 18) /* Bit 18: Shareable */
-#define MPU_RASR_ATTR_SHIFT     (19)      /* Bits 19-21: TEX Address Permisson */
-#define MPU_RASR_ATTR_MASK      (7 << MPU_RASR_ATTR_SHIFT)
-#define MPU_RASR_AP_SHIFT       (24)      /* Bits 24-26: Access permission */
-#define MPU_RASR_AP_MASK        (7 << MPU_RASR_AP_SHIFT)
-#  define MPU_RASR_AP_NONO      (0 << MPU_RASR_AP_SHIFT) /* P:None U:None */
-#  define MPU_RASR_AP_RWNO      (1 << MPU_RASR_AP_SHIFT) /* P:RW   U:None */
-#  define MPU_RASR_AP_RWRO      (2 << MPU_RASR_AP_SHIFT) /* P:RW   U:RO   */
-#  define MPU_RASR_AP_RWRW      (3 << MPU_RASR_AP_SHIFT) /* P:RW   U:RW   */
-#  define MPU_RASR_AP_RONO      (5 << MPU_RASR_AP_SHIFT) /* P:RO   U:None */
-#  define MPU_RASR_AP_RORO      (6 << MPU_RASR_AP_SHIFT) /* P:RO   U:RO   */
-#define MPU_RASR_XN             (1 << 28) /* Bit 28: Instruction access disable */
+#define MPU_RASR_ATTR_SHIFT     (16)      /* Bits 16-31: MPU Region Attribute field */
+#define MPU_RASR_ATTR_MASK      (0xffff << MPU_RASR_ATTR_SHIFT)
+#  define MPU_RASR_B            (1 << 16) /* Bit 16: Bufferable */
+#  define MPU_RASR_C            (1 << 17) /* Bit 17: Cacheable */
+#  define MPU_RASR_S            (1 << 18) /* Bit 18: Shareable */
+#  define MPU_RASR_TEX_SHIFT    (19)      /* Bits 19-21: TEX Address Permisson */
+#  define MPU_RASR_TEX_MASK     (7 << MPU_RASR_TEX_SHIFT)
+#  define MPU_RASR_AP_SHIFT     (24)      /* Bits 24-26: Access permission */
+#  define MPU_RASR_AP_MASK      (7 << MPU_RASR_AP_SHIFT)
+#    define MPU_RASR_AP_NONO    (0 << MPU_RASR_AP_SHIFT) /* P:None U:None */
+#    define MPU_RASR_AP_RWNO    (1 << MPU_RASR_AP_SHIFT) /* P:RW   U:None */
+#    define MPU_RASR_AP_RWRO    (2 << MPU_RASR_AP_SHIFT) /* P:RW   U:RO   */
+#    define MPU_RASR_AP_RWRW    (3 << MPU_RASR_AP_SHIFT) /* P:RW   U:RW   */
+#    define MPU_RASR_AP_RONO    (5 << MPU_RASR_AP_SHIFT) /* P:RO   U:None */
+#    define MPU_RASR_AP_RORO    (6 << MPU_RASR_AP_SHIFT) /* P:RO   U:RO   */
+#  define MPU_RASR_XN           (1 << 28) /* Bit 28: Instruction access disable */
 
 /************************************************************************************
  * Global Function Prototypes
