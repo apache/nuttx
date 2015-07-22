@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 20, 2015</p>
+      <p>Last Updated: July 23, 2015</p>
     </td>
   </tr>
 </table>
@@ -1371,8 +1371,8 @@
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (33)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (22)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (2)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (23)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (3)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1536,7 +1536,9 @@
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
-      <li><a href="#stm32f74x">STMicro STM32 F744/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
+      <li><a href="#stm32f446x">STMicro STM32 F446</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
+      <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
     </ul>
   <li>Texas Instruments (some formerly Luminary)
     <ul>
@@ -3602,6 +3604,20 @@ nsh>
   <td><br></td>
   <td>
     <p>
+      <a name="stm32f446x"><b>STMicro STM32 F446</b>.</a>
+      Architecture-only support is available for the STM32 F446 family (meaning that the parts are supported, but there is not example board supported in the system).
+      This support was contributed by David Sidrane and made available in NuttX-7.11.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <a name="nxplpc43xx"><b>NCP LPC43xx</b>.</a>
       Two board ports are available for this higher end, NXP Cortex-M4F part:
     </p>
@@ -4070,7 +4086,7 @@ Mem:         29232       5920      23312      23312
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f74x"><b>STMicro STM32 F744/F746</b>.</a>
+      <a name="stm32f74x"><b>STMicro STM32 F745/F746</b>.</a>
        This port uses the STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash.
        Refer to the <a href="http://www.st.com/stm32f7-discovery">STMicro web site</a> for further information about this board.
     </p>
@@ -4085,6 +4101,20 @@ Mem:         29232       5920      23312      23312
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/stm32f746g-disco/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f75x"><b>STMicro STM32 F756</b>.</a>
+      Architecture-only support is available for the STM32 F756 family (meaning that the parts are supported, but there is not example board supported in the system).
+      This support was made available in NuttX-7.11.
+    </p>
   </td>
 </tr>
 <tr>
