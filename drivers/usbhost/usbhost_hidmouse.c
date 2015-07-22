@@ -1053,7 +1053,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 #endif
   unsigned int nerrors = 0;
   ssize_t nbytes;
-  int ret;
+  int ret = OK;
 
   uvdbg("Started\n");
 
@@ -1100,7 +1100,9 @@ static int usbhost_mouse_poll(int argc, char *argv[])
            * long time).
            */
 
-          udbg("ERROR: DRVR_TRANSFER returned: %d/%d\n", ret, nerrors);
+          udbg("ERROR: DRVR_TRANSFER returned: %d/%u\n",
+               (int)nbytes, nerrors);
+
           if (nbytes != -EAGAIN)
             {
               if (++nerrors > 200)
@@ -1268,7 +1270,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
     }
 
   irqrestore(flags);
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
