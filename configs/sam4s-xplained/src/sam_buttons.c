@@ -61,7 +61,9 @@
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t g_irqbp2;
+#endif
 
 /****************************************************************************
  * Private Functions
