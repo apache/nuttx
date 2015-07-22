@@ -763,7 +763,6 @@ void fb_uninitialize(void)
   /* Turn off clocking to the LCD. modifyreg32() can do this atomically. */
 
   modifyreg32(LPC17_SYSCON_PCONP, SYSCON_PCONP_PCLCD, 0);
-  return OK;
 }
 
 /************************************************************************************

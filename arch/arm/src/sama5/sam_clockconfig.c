@@ -364,7 +364,7 @@ static void __ramfunc__ sam_mckdivider(void)
  *
  ****************************************************************************/
 
-#ifdef PMC_MCKR_H32MXDIV
+#if defined(PMC_MCKR_H32MXDIV) && defined(NEED_PLLSETUP)
 static void __ramfunc__ sam_h32mxdivider(void)
 {
   uint32_t regval;

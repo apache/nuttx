@@ -751,7 +751,6 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 #ifdef CONFIG_A1X_UART0
 static inline void a1x_uart0config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART0 */
@@ -773,7 +772,6 @@ static inline void a1x_uart0config(void)
 #ifdef CONFIG_A1X_UART1
 static inline void a1x_uart1config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART1 */
@@ -795,7 +793,6 @@ static inline void a1x_uart1config(void)
 #ifdef CONFIG_A1X_UART2
 static inline void a1x_uart2config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART2 */
@@ -817,7 +814,6 @@ static inline void a1x_uart2config(void)
 #ifdef CONFIG_A1X_UART3
 static inline void a1x_uart3config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART3 */
@@ -839,7 +835,6 @@ static inline void a1x_uart3config(void)
 #ifdef CONFIG_A1X_UART4
 static inline void a1x_uart4config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART4 */
@@ -861,7 +856,6 @@ static inline void a1x_uart4config(void)
 #ifdef CONFIG_A1X_UART5
 static inline void a1x_uart5config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART5 */
@@ -883,7 +877,6 @@ static inline void a1x_uart5config(void)
 #ifdef CONFIG_A1X_UART6
 static inline void a1x_uart6config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART6 */
@@ -905,7 +898,6 @@ static inline void a1x_uart6config(void)
 #ifdef CONFIG_A1X_UART7
 static inline void a1x_uart7config(void)
 {
-  uint32_t   regval;
   irqstate_t flags;
 
   /* Step 1: Enable power to UART7 */
