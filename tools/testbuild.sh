@@ -216,27 +216,32 @@ testlist=`cat $testfile`
 #while read -r line || [[ -n $line ]]; do
 for line in $testlist; do
     echo "===================================================================================="
-    echo "Configuration/Tool Config: $line"
+    firstch=${line:0:1}
+    if [ "X$firstch" == "X#" ]; then
+      echo "Skipping: $line"
+    else
+      echo "Configuration/Tool: $line"
 
-    # Parse the next line
+      # Parse the next line
 
-    config=`echo $line | cut -d',' -f1`
+      config=`echo $line | cut -d',' -f1`
 
-    path=$nuttx/configs/$config
-    if [ ! -r "$path/defconfig" ]; then
+      path=$nuttx/configs/$config
+      if [ ! -r "$path/defconfig" ]; then
         echo "ERROR: no configuration found at $path"
         showusage
-    fi
+      fi
 
-    toolchain=`echo $line | cut -d',' -f2`
-    if [ -z "$toolchain" ]; then
+      toolchain=`echo $line | cut -d',' -f2`
+      if [ -z "$toolchain" ]; then
         echo "ERROR no tool configuration"
         showusage
+      fi
+
+      # Perform the build test
+
+      dotest
     fi
-
-    # Perform the build test
-
-    dotest
     cd $WD || { echo "ERROR: Failed to CD to $WD"; exit 1; }
 done # < $testfile
 
