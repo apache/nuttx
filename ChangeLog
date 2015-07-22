@@ -10749,3 +10749,6 @@
 	  initial commit (2015-07-20).
 	* arch/arm/src/sam34: Correct some problems with SAM3/4 watchdog driver.
 	  Includes some small improvements.  From Max Neklyudov (2015-07-21).
+	* arch/arm/src/stm32 and include/stm32:  Add support for the STMicro
+	  STM32 F446.  From David Sidrane (2015-07-22).
+
