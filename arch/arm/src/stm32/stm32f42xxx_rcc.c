@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32f40xxx_rcc.c
+ * arch/arm/src/stm32/stm32f42xxx_rcc.c
  *
  *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -666,7 +666,8 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_APB1ENR);
 
       regval  = getreg32(STM32_PWR_CR);
-      regval |= PWR_CR_VOS;
+      regval &= ~PWR_CR_VOS_MASK;
+      regval |= PWR_CR_VOS_SCALE_1;
       putreg32(regval, STM32_PWR_CR);
 
       /* Set the HCLK source/divider */
@@ -721,6 +722,24 @@ static void stm32_stdclockconfig(void)
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
         {
         }
+
+#if defined(CONFIG_STM32_STM32F429)
+      /* Enable the Over-drive to extend the clock frequency to 180 Mhz */
+
+      regval  = getreg32(STM32_PWR_CR);
+      regval |= PWR_CR_ODEN;
+      putreg32(regval, STM32_PWR_CR);
+      while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODRDY) == 0)
+        {
+        }
+
+      regval = getreg32(STM32_PWR_CR);
+      regval |= PWR_CR_ODSWEN;
+      putreg32(regval, STM32_PWR_CR);
+      while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODSWRDY) == 0)
+        {
+        }
+#endif
 
       /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
 

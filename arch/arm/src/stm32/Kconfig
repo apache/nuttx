@@ -737,6 +737,35 @@ config ARCH_CHIP_STM32F429N
 	select STM32_STM32F429
 	select ARCH_HAVE_FPU
 
+config ARCH_CHIP_STM32F446M
+	bool "STM32F446M"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F446
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F446R
+	bool "STM32F446R"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F446
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F446V
+	bool "STM32F446V"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F446
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F446Z
+	bool "STM32F446Z"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F446
+	select ARCH_HAVE_FPU
+
+
 endchoice
 
 # This is really 15XX/16XX, but we treat the two the same.
@@ -1118,6 +1147,31 @@ config STM32_STM32F429
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
+
+config STM32_STM32F446
+	bool
+	default n
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USART6
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM9
+	select STM32_HAVE_TIM10
+	select STM32_HAVE_TIM11
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_CAN1
+	select STM32_HAVE_CAN2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_SPI4
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -1884,7 +1938,7 @@ endmenu
 config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	depends on STM32_STM32F207 || STM32_STM32F40XX
-	default y if STM32_STM32F427 || STM32_STM32F429
+	default y if STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
 	default n
 	---help---
 	Enable FLASH prefetch and F2 and F4 parts (FLASH pre-fetch is always enabled

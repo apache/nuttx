@@ -54,6 +54,8 @@
 #  include "chip/stm32f20xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  include "chip/stm32f42xxx_dma.h"
+#elif defined(CONFIG_STM32_STM32F446)
+#  include "chip/stm32f44xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_dma.h"
 #else
