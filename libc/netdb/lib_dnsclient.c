@@ -739,7 +739,7 @@ int dns_bind(void)
 int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
               FAR socklen_t *addrlen)
 {
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv4)
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   int noipv4 = false;
   int noipv6 = false;
 #endif
