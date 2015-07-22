@@ -94,7 +94,8 @@
 #define STM32_FLASH_SR_OFFSET      0x000c
 #define STM32_FLASH_CR_OFFSET      0x0010
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
 #  define STM32_FLASH_AR_OFFSET    0x0014
 #  define STM32_FLASH_OBR_OFFSET   0x001c
 #  define STM32_FLASH_WRPR_OFFSET  0x0020
@@ -114,7 +115,8 @@
 #define STM32_FLASH_SR             (STM32_FLASHIF_BASE+STM32_FLASH_SR_OFFSET)
 #define STM32_FLASH_CR             (STM32_FLASHIF_BASE+STM32_FLASH_CR_OFFSET)
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
 #  define STM32_FLASH_AR           (STM32_FLASHIF_BASE+STM32_FLASH_AR_OFFSET)
 #  define STM32_FLASH_OBR          (STM32_FLASHIF_BASE+STM32_FLASH_OBR_OFFSET)
 #  define STM32_FLASH_WRPR         (STM32_FLASHIF_BASE+STM32_FLASH_WRPR_OFFSET)
@@ -147,7 +149,8 @@
 #    define FLASH_ACR_LATENCY_6     (6 << FLASH_ACR_LATENCY_SHIFT)    /* 110: Six wait states */
 #    define FLASH_ACR_LATENCY_7     (7 << FLASH_ACR_LATENCY_SHIFT)    /* 111: Seven wait states */
 
-#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+      defined(CONFIG_STM32_STM32F37XX)
 #    define FLASH_ACR_HLFCYA        (1 << 3)  /* Bit 3: FLASH half cycle access */
 #    define FLASH_ACR_PRTFBE        (1 << 4)  /* Bit 4: FLASH prefetch enable */
 #    if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
@@ -164,7 +167,8 @@
 
 /* Flash Status Register (SR) */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
 #  define FLASH_SR_BSY              (1 << 0)  /* Busy */
 #  define FLASH_SR_PGERR            (1 << 2)  /* Programming Error */
 #  define FLASH_SR_WRPRT_ERR        (1 << 4)  /* Write Protection Error */
@@ -181,7 +185,8 @@
 
 /* Flash Control Register (CR) */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
 #  define FLASH_CR_PG               (1 << 0)  /* Bit 0: Program Page */
 #  define FLASH_CR_PER              (1 << 1)  /* Bit 1: Page Erase */
 #  define FLASH_CR_MER              (1 << 2)  /* Bit 2: Mass Erase */
@@ -248,6 +253,15 @@
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define FLASH_OPTCR1_NWRP_SHIFT    (16)                   /* Bits 16-27: Not write protect (high bank) */
 #  define FLASH_OPTCR1_NWRP_MASK     (0xfff << FLASH_OPTCR_NWRP_SHIFT)
+
+#  define FLASH_OPTCR1_BFB2_SHIFT    (4)                   /* Bits 4: Dual-bank Boot option byte */
+#  define FLASH_OPTCR1_BFB2_MASK     (1 << FLASH_OPTCR_NWRP_SHIFT)
+
+#endif
+
+#if defined(CONFIG_STM32_STM32F446)
+#  define FLASH_OPTCR1_NWRP_SHIFT    (16)                   /* Bits 16-23: Not write protect (high bank) */
+#  define FLASH_OPTCR1_NWRP_MASK     (0xff << FLASH_OPTCR_NWRP_SHIFT)
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H */

@@ -182,6 +182,8 @@ _vectors:
 #  include "chip/stm32f37xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  include "chip/stm32f42xxx_vectors.h"
+#elif defined(CONFIG_STM32_STM32F446)
+#  include "chip/stm32f44xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
@@ -229,6 +231,8 @@ handlers:
 #  include "chip/stm32f37xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  include "chip/stm32f42xxx_vectors.h"
+#elif defined(CONFIG_STM32_STM32F446)
+#  include "chip/stm32f44xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else

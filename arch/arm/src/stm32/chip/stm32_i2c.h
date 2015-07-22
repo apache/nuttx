@@ -51,7 +51,8 @@
 #define STM32_I2C_SR2_OFFSET    0x0018  /* Status register 2 (16-bit) */
 #define STM32_I2C_CCR_OFFSET    0x001c  /* Clock control register (16-bit) */
 #define STM32_I2C_TRISE_OFFSET  0x0020  /* TRISE Register (16-bit) */
-#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F446)
 #  define STM32_I2C_FLTR_OFFSET   0x0024  /* FLTR Register (16-bit) */
 #endif
 
@@ -203,9 +204,9 @@
 /* FLTR Register */
 
 #ifdef STM32_I2C_FLTR_OFFSET
-#  define I2C_FLTR_ANOFF	(1 << 4)  /* Bit 4: Analog noise filter disable */
-#  define I2C_FLTR_DNF_SHIFT	0         /* Bits 0-3: Digital noise filter */
-#  define I2C_FLTR_DNF_MASK	(0xf << I2C_FLTR_DNF_SHIFT)
+#  define I2C_FLTR_ANOFF        (1 << 4)  /* Bit 4: Analog noise filter disable */
+#  define I2C_FLTR_DNF_SHIFT    0         /* Bits 0-3: Digital noise filter */
+#  define I2C_FLTR_DNF_MASK     (0xf << I2C_FLTR_DNF_SHIFT)
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_I2C_H */
