@@ -898,6 +898,7 @@ o Network (net/, drivers/net)
                ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
                C5471          NO                      NO
                STM32          YES                     YES
+               STM32F7        YES                     YES
                TIVA           ----------------------- ------
                  LM3S         NO                      NO
                  TM4C         YES                     YES
