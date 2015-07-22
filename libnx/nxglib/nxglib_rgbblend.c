@@ -70,6 +70,9 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_NX_DISABLE_16BPP) || !defined(CONFIG_NX_DISABLE_24BPP) || \
+    !defined(CONFIG_NX_DISABLE_32BPP)
+
 static uint8_t nxglib_blend_component(uint8_t component1, uint8_t component2,
                                      ub8_t frac1)
 {
@@ -101,6 +104,8 @@ static uint8_t nxglib_blend_component(uint8_t component1, uint8_t component2,
   return (uint8_t)blend;
 }
 
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -131,6 +136,7 @@ static uint8_t nxglib_blend_component(uint8_t component1, uint8_t component2,
  ****************************************************************************/
 
 #if !defined(CONFIG_NX_DISABLE_24BPP) || !defined(CONFIG_NX_DISABLE_32BPP)
+
 uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1)
 {
   uint8_t r;
@@ -177,9 +183,11 @@ uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1)
 
   return RGBTO24(r,g,b) ;   
 }
+
 #endif
 
 #ifndef CONFIG_NX_DISABLE_16BPP
+
 uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1)
 {
   uint8_t r;
@@ -221,4 +229,5 @@ uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1)
 
   return RGBTO24(r,g,b) ;   
 }
+
 #endif
