@@ -486,7 +486,7 @@ struct tcb_s
 #endif
 #ifdef CONFIG_SCHED_SPORADIC
   uint8_t  low_priority;                 /* Sporadic low priority               */
-  uint8_t   max_repl;                    /* Max. replenishments                 */
+  uint8_t  max_repl;                     /* Max. replenishments                 */
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */

@@ -168,10 +168,10 @@ struct pthread_attr_s
 {
   uint8_t priority;            /* Priority of the pthread */
   uint8_t policy;              /* Pthread scheduler policy */
-  uint8_t inheritsched;        /* Inherit parent prio/policy? */
+  uint8_t inheritsched;        /* Inherit parent priority/policy? */
 
 #ifdef CONFIG_SCHED_SPORADIC
-  uint8_t low_priority;        /* Low scheduling priority*/
+  uint8_t low_priority;        /* Low scheduling priority */
   uint8_t max_repl;            /* Maximum pending replenishments */
 #endif
 

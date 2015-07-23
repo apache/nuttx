@@ -103,10 +103,9 @@ struct posix_spawnattr_s
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
-  struct timespec repl_period;  /* Replenishment period */
-  struct timespec budget;       /* Initial budget */
+  struct timespec repl_period;   /* Replenishment period */
+  struct timespec budget;        /* Initial budget */
 #endif
-
 };
 
 typedef struct posix_spawnattr_s posix_spawnattr_t;
