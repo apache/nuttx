@@ -109,18 +109,19 @@ int sched_setscheduler(pid_t pid, int policy,
                        FAR const struct sched_param *param)
 {
   FAR struct tcb_s *tcb;
-#if CONFIG_RR_INTERVAL > 0
   irqstate_t saved_state;
-#endif
   int ret;
 
   /* Check for supported scheduling policy */
 
+  if (policy != SCHED_FIFO
 #if CONFIG_RR_INTERVAL > 0
-  if (policy != SCHED_FIFO && policy != SCHED_RR)
-#else
-  if (policy != SCHED_FIFO)
+      && policy != SCHED_RR
 #endif
+#ifdef CONFIG_SCHED_SPORADIC
+      && policy != SCHED_SPORADIC
+#endif
+    )
     {
       set_errno(EINVAL);
       return ERROR;
