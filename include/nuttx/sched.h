@@ -481,17 +481,25 @@ struct tcb_s
   uint8_t  npend_reprio;                 /* Number of nested reprioritizations  */
   uint8_t  pend_reprios[CONFIG_SEM_NNESTPRIO];
 #endif
-#if defined(CONFIG_PRIORITY_INHERITANCE)
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_SCHED_SPORADIC)
   uint8_t  base_priority;                /* "Normal" priority of the thread     */
+#endif
+#ifdef CONFIG_SCHED_SPORADIC
+  int32_t  low_priority;                 /* Sporadic low priority               */
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 
-#if CONFIG_RR_INTERVAL > 0
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   int32_t  timeslice;                    /* RR timeslice OR Sporadic            */
                                          /* replenishment interval remaining    */
+#endif
+#ifdef CONFIG_SCHED_SPORADIC
+  uint32_t spstart;                      /* Start time of execution budget      */
+  uint32_t replen;                       /* Sporadic replenishment interval     */
+  uint32_t budget;                       /* Sporadic execution budget           */
 #endif
 
   FAR struct wdog_s *waitdog;            /* All timed waits used this wdog      */
