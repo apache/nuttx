@@ -10756,4 +10756,8 @@
 	  planned scheduling policies (2015-07-23).
 	* pthread_create: Fix an (unlikely) error in fallback value in the
 	  event of a failure (which should never occur) (2015-07-23).
-* include/, sched/, and libc/: Add support for sporadic scheduling parameters in struct sched_param, posix_spawnattr_t, and pthread_attr_t. Update all user interfaces to pass sporadic scheduling parameters.  Feature is dependent on EXPERIMENTAL and no changes have yet been made to core scheduling logic (2015-07-23).
+	* include/, sched/, and libc/: Add support for sporadic scheduling
+	  parameters in struct sched_param, posix_spawnattr_t, and pthread_attr_t.
+	  Update all user interfaces to pass sporadic scheduling parameters.
+	  Feature is dependent on EXPERIMENTAL and no changes have yet been
+	  made to core scheduling logic (2015-07-23).
