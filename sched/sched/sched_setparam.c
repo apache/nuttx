@@ -86,14 +86,15 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
+  int errcode;
   int ret;
 
   /* Verify that the requested priority is in the valid range */
 
   if (!param)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      errcode = EINVAL;
+      goto errout_with_errcode;
     }
 
   /* Prohibit modifications to the head of the ready-to-run task
@@ -110,18 +111,17 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       tcb = rtcb;
     }
 
-  /* The pid is not the calling task, we will have to search for it */
+  /* The PID is not the calling task, we will have to search for it */
 
   else
     {
       tcb = sched_gettcb(pid);
       if (!tcb)
         {
-          /* No task with this pid was found */
+          /* No task with this PID was found */
 
-          set_errno(ESRCH);
-          sched_unlock();
-          return ERROR;
+          errcode = ESRCH;
+          goto errout_with_lock;
         }
     }
 
@@ -130,20 +130,34 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
-      int ticks;
+      int repl_ticks;
+      int budget_ticks;
 
       DEBUGASSERT(param->sched_ss_max_repl <= UINT8_MAX);
+
+      /* Convert timespec values to system clock ticks */
+
+      (void)clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
+      (void)clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
+
+      /* The replenishment period must be greater than or equal to the
+       * budget period.
+       */
+
+      if (repl_ticks < budget_ticks)
+        {
+          errcode = EINVAL;
+          goto errout_with_lock;
+        }
+
+      /* Save the sporadic scheduling parameters */
 
       tcb->flags       |= TCB_FLAG_SCHED_SPORADIC;
       tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
       tcb->low_priority = param->sched_ss_low_priority;
       tcb->max_repl     = param->sched_ss_max_repl;
-
-      (void)clock_time2ticks(&param->sched_ss_repl_period, &ticks);
-      tcb->repl_period  = ticks;
-
-      (void)clock_time2ticks(&param->sched_ss_init_budget, &ticks);
-      tcb->budget       = ticks;
+      tcb->repl_period  = repl_ticks;
+      tcb->budget       = budget_ticks;
     }
   else
     {
@@ -154,9 +168,18 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
     }
 #endif
 
- /* Then perform the reprioritization */
+  /* Then perform the reprioritization */
 
- ret = sched_reprioritize(tcb, param->sched_priority);
- sched_unlock();
- return ret;
+  ret = sched_reprioritize(tcb, param->sched_priority);
+  sched_unlock();
+  return ret;
+
+errout_with_lock:
+  set_errno(errcode);
+  sched_unlock();
+  return ERROR;
+
+errout_with_errcode:
+  set_errno(errcode);
+  return ERROR;
 }

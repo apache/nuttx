@@ -166,20 +166,35 @@ int sched_setscheduler(pid_t pid, int policy,
 #ifdef CONFIG_SCHED_SPORADIC
       case SCHED_SPORADIC:
         {
-          int ticks;
+          int repl_ticks;
+          int budget_ticks;
 
           DEBUGASSERT(param->sched_ss_max_repl <= UINT8_MAX);
+
+          /* Convert timespec values to system clock ticks */
+
+          (void)clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
+          (void)clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
+
+          /* The replenishment period must be greater than or equal to the
+           * budget period.
+           */
+
+          if (repl_ticks < budget_ticks)
+            {
+              set_errno(EINVAL);
+              sched_unlock();
+              return ERROR;
+            }
+
+          /* Save the sporadic scheduling parameters */
 
           tcb->flags       |= TCB_FLAG_SCHED_SPORADIC;
           tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
           tcb->low_priority = param->sched_ss_low_priority;
           tcb->max_repl     = param->sched_ss_max_repl;
-
-          (void)clock_time2ticks(&param->sched_ss_repl_period, &ticks);
-          tcb->repl_period  = ticks;
-
-          (void)clock_time2ticks(&param->sched_ss_init_budget, &ticks);
-          tcb->budget       = ticks;
+          tcb->repl_period  = repl_ticks;
+          tcb->budget       = budget_ticks;
         }
         break;
 #endif
@@ -197,13 +212,5 @@ int sched_setscheduler(pid_t pid, int policy,
 
   ret = sched_reprioritize(tcb, param->sched_priority);
   sched_unlock();
-
-  if (ret != OK)
-    {
-      return ERROR;
-    }
-  else
-    {
-      return OK;
-    }
+  return (ret >= 0) ? OK : ERROR;
 }

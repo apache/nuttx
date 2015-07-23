@@ -227,9 +227,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 {
   FAR struct pthread_tcb_s *ptcb;
   FAR struct join_s *pjoin;
-#ifdef CONFIG_SCHED_SPORADIC
-  int ticks;
-#endif
   int priority;
   int policy;
   int errcode;
@@ -308,6 +305,9 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (attr->inheritsched == PTHREAD_INHERIT_SCHED)
     {
       struct sched_param param;
+#ifdef CONFIG_SCHED_SPORADIC
+      int ticks;
+#endif
 
       /* Get the priority (and any other scheduling parameters) for this
        * thread.
@@ -352,16 +352,42 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       policy   = attr->policy;
 
 #ifdef CONFIG_SCHED_SPORADIC
-      /* Save the sporadic scheduling parameters */
+      if (policy == SCHED_SPORADIC)
+        {
+          int repl_ticks;
+          int budget_ticks;
 
-      ptcb->cmn.low_priority = attr->low_priority;
-      ptcb->cmn.max_repl     = attr->max_repl;
+          /* Convert timespec values to system clock ticks */
 
-      (void)clock_time2ticks(&attr->repl_period, &ticks);
-      ptcb->cmn.repl_period  = ticks;
+          (void)clock_time2ticks(&attr->repl_period, &repl_ticks);
+          (void)clock_time2ticks(&attr->budget, &budget_ticks);
 
-      (void)clock_time2ticks(&attr->budget, &ticks);
-      ptcb->cmn.budget       = ticks;
+          /* The replenishment period must be greater than or equal to the
+           * budget period.
+           */
+
+          if (repl_ticks < budget_ticks)
+            {
+              errcode = EINVAL;
+              goto errout_with_join;
+            }
+
+          /* Save the sporadic scheduling parameters */
+
+          ptcb->cmn.low_priority = attr->low_priority;
+          ptcb->cmn.max_repl     = attr->max_repl;
+          ptcb->cmn.repl_period  = repl_ticks;
+          ptcb->cmn.budget       = budget_ticks;
+        }
+      else
+        {
+          /* Ignore sporadic scheduling parameters */
+
+          ptcb->cmn.low_priority = 0;
+          ptcb->cmn.max_repl     = 0;
+          ptcb->cmn.repl_period  = 0;
+          ptcb->cmn.budget       = 0;
+        }
 #endif
     }
 
