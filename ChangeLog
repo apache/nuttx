@@ -10754,3 +10754,5 @@
 	* include/nuttx/sched.h, sched/, and fs/procfs:  Increase the size of
 	  the scheduling policy field from 1 to 2 bits to allow additional,
 	  planned scheduling policies (2015-07-23).
+	* pthread_create: Fix an (unlikely) error in fallback value in the
+	  event of a failure (which should never occur) (2015-07-23).

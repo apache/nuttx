@@ -324,7 +324,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
         }
       else
         {
-          priority = SCHED_FIFO;
+          priority = PTHREAD_DEFAULT_PRIORITY;
         }
 
 #if CONFIG_RR_INTERVAL > 0
