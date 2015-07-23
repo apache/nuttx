@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched/sched_getscheduler.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,9 +100,10 @@
 
 int sched_getscheduler(pid_t pid)
 {
-  struct tcb_s *tcb;
+  FAR struct tcb_s *tcb;
+  int policy;
 
-  /* Verify that the pid corresponds to a real task */
+  /* Verify that the PID corresponds to a real task */
 
   if (!pid)
     {
@@ -118,15 +119,11 @@ int sched_getscheduler(pid_t pid)
       set_errno(ESRCH);
       return ERROR;
     }
-#if CONFIG_RR_INTERVAL > 0
-  else if ((tcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
-    {
-      return SCHED_RR;
-    }
-#endif
-  else
-    {
-      return SCHED_FIFO;
-    }
-}
 
+  /* Return the scheduling policy from the TCB.  NOTE that the user-
+   * interpretable values are 1 based; the TCB values are zero-based.
+   */
+
+  policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
+  return policy + 1;
+}

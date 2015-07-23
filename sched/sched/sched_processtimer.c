@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ static inline void sched_process_timeslice(void)
    * scheduling.
    */
 
-  if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
+  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
       /* Yes, check if decrementing the timeslice counter
        * would cause the timeslice to expire

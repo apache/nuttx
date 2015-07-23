@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/sched.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
 
 #define SCHED_FIFO     1  /* FIFO per priority scheduling policy */
 #define SCHED_RR       2  /* Round robin scheduling policy */
-#define SCHED_SPORADIC 3  /* Not supported */
+#define SCHED_SPORADIC 3  /* Sporadic scheduling policy */
 #define SCHED_OTHER    4  /* Not supported */
 
 /* Pthread definitions **********************************************************/

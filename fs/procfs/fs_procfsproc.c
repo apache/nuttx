@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@
 #define STATUS_LINELEN 32
 
 /****************************************************************************
- * Private Types
+ * Private Type Definitions
  ****************************************************************************/
 /* This enumeration identifies all of the task/thread nodes that can be
  * accessed via the procfs file system.
@@ -128,6 +128,15 @@ struct proc_dir_s
   struct procfs_dir_priv_s  base;     /* Base directory private data */
   FAR const struct proc_node_s *node; /* Directory node description */
   pid_t pid;                       /* ID of task/thread for attributes */
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static FAR const char *g_policy[4] =
+{
+  "SCHED_FIFO", "SCHED_RR", "SCHED_SPORADIC", "SCHED_OTHER"
 };
 
 /****************************************************************************
@@ -351,6 +360,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
                            FAR struct tcb_s *tcb, FAR char *buffer,
                            size_t buflen, off_t offset)
 {
+  FAR const char *policy;
   FAR const char *name;
   size_t remaining;
   size_t linesize;
@@ -431,10 +441,11 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  /* Show the scheduler */
+  /* Show the scheduler policy */
 
+  policy     = g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT];
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n", "Scheduler:",
-                        tcb->flags & TCB_FLAG_ROUND_ROBIN ? "SCHED_RR" : "SCHED_FIFO");
+                        policy);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;

@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/nuttx/sched.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,8 +134,13 @@
 #  define TCB_FLAG_TTYPE_KERNEL    (2 << TCB_FLAG_TTYPE_SHIFT) /* Kernel thread */
 #define TCB_FLAG_NONCANCELABLE     (1 << 2) /* Bit 2: Pthread is non-cancelable */
 #define TCB_FLAG_CANCEL_PENDING    (1 << 3) /* Bit 3: Pthread cancel is pending */
-#define TCB_FLAG_ROUND_ROBIN       (1 << 4) /* Bit 4: Round robin sched enabled */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 5) /* Bit 5: Exitting */
+#define TCB_FLAG_POLICY_SHIFT      (4) /* Bit 4-5: Scheduling policy */
+#define TCB_FLAG_POLICY_MASK       (3 << TCB_FLAG_POLICY_SHIFT)
+#  define TCB_FLAG_SCHED_FIFO      (0 << TCB_FLAG_POLICY_SHIFT) /* FIFO scheding policy */
+#  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT) /* Round robin scheding policy */
+#  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT) /* Sporadic scheding policy */
+#  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT) /* Other scheding policy */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 6) /* Bit 6: Exitting */
 
 /* Values for struct task_group tg_flags */
 
@@ -472,11 +477,11 @@ struct tcb_s
   entry_t  entry;                        /* Entry Point into the thread         */
   uint8_t  sched_priority;               /* Current priority of the thread      */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-#  if CONFIG_SEM_NNESTPRIO > 0
+#if defined(CONFIG_PRIORITY_INHERITANCE) && CONFIG_PRIORITY_INHERITANCE > 0
   uint8_t  npend_reprio;                 /* Number of nested reprioritizations  */
   uint8_t  pend_reprios[CONFIG_SEM_NNESTPRIO];
-#  endif
+#endif
+#if defined(CONFIG_PRIORITY_INHERITANCE)
   uint8_t  base_priority;                /* "Normal" priority of the thread     */
 #endif
 
@@ -485,8 +490,10 @@ struct tcb_s
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 
 #if CONFIG_RR_INTERVAL > 0
-  int      timeslice;                    /* RR timeslice interval remaining     */
+  int32_t  timeslice;                    /* RR timeslice OR Sporadic            */
+                                         /* replenishment interval remaining    */
 #endif
+
   FAR struct wdog_s *waitdog;            /* All timed waits used this wdog      */
 
   /* Stack-Related Fields *******************************************************/

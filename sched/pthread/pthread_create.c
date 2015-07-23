@@ -379,17 +379,36 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   ptcb->joininfo = (FAR void *)pjoin;
 
-#if CONFIG_RR_INTERVAL > 0
-  /* If round robin scheduling is selected, set the appropriate flag
-   * in the TCB.
-   */
+  /* Set the appropriate scheduling policy in the TCB */
 
-  if (policy == SCHED_RR)
+  ptcb->cmn.flags &= TCB_FLAG_POLICY_MASK;
+  switch (policy)
     {
-      ptcb->cmn.flags    |= TCB_FLAG_ROUND_ROBIN;
-      ptcb->cmn.timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-    }
+      default:
+        DEBUGPANIC();
+      case SCHED_FIFO:
+        ptcb->cmn.flags    |= TCB_FLAG_SCHED_FIFO;
+        break;
+
+#if CONFIG_RR_INTERVAL > 0
+      case SCHED_RR:
+        ptcb->cmn.flags    |= TCB_FLAG_SCHED_RR;
+        ptcb->cmn.timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+        break;
 #endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+      case SCHED_SPORADIC:
+        ptcb->cmn.flags    |= TCB_FLAG_SCHED_SPORADIC;
+        break;
+#endif
+
+#if 0 /* Not supported */
+      case SCHED_OTHER:
+        ptcb->cmn.flags    |= TCB_FLAG_SCHED_OTHER;
+        break;
+#endif
+    }
 
   /* Get the assigned pid before we start the task (who knows what
    * could happen to ptcb after this!).  Copy this ID into the join structure

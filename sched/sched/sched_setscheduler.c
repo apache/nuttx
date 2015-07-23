@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_setscheduler.c
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,27 +148,42 @@ int sched_setscheduler(pid_t pid, int policy,
 
   sched_lock();
 
-#if CONFIG_RR_INTERVAL > 0
   /* Further, disable timer interrupts while we set up scheduling policy. */
 
   saved_state = irqsave();
-  if (policy == SCHED_RR)
+  tcb->flags &= TCB_FLAG_POLICY_MASK;
+  switch (policy)
     {
-      /* Set round robin scheduling */
+      default:
+        DEBUGPANIC();
+      case SCHED_FIFO:
+        tcb->flags    |= TCB_FLAG_SCHED_FIFO;
+#if CONFIG_RR_INTERVAL > 0
+        tcb->timeslice = 0;
+#endif
+        break;
 
-      tcb->flags    |= TCB_FLAG_ROUND_ROBIN;
-      tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-    }
-  else
-    {
-      /* Set FIFO scheduling */
+#if CONFIG_RR_INTERVAL > 0
+      case SCHED_RR:
+        tcb->flags    |= TCB_FLAG_SCHED_RR;
+        tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+        break;
+#endif
 
-      tcb->flags    &= ~TCB_FLAG_ROUND_ROBIN;
-      tcb->timeslice = 0;
+#ifdef CONFIG_SCHED_SPORADIC
+      case SCHED_SPORADIC:
+        tcb->flags    |= TCB_FLAG_SCHED_SPORADIC;
+        break;
+#endif
+
+#if 0 /* Not supported */
+      case SCHED_OTHER:
+        tcb->flags    |= TCB_FLAG_SCHED_OTHER;
+        break;
+#endif
     }
 
   irqrestore(saved_state);
-#endif
 
   /* Set the new priority */
 

@@ -252,7 +252,7 @@ sched_process_timeslice(unsigned int ticks, bool noswitches)
    * scheduling.
    */
 
-  if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
+  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
       /* Now much can we decrement the timeslice delay?  If 'ticks'
        * is greater than the timeslice value, then we ignore any
@@ -331,7 +331,7 @@ sched_process_timeslice(unsigned int ticks, bool noswitches)
                    * supports round robin scheduling.
                    */
 
-                  if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
+                  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
                     {
                       /* The new task at the head of the ready to run
                        * list does not support round robin scheduling.
