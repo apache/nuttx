@@ -51,13 +51,27 @@
 
 /* Default pthread attribute initializer */
 
-#define PTHREAD_ATTR_INITIALIZER \
-{ \
-  PTHREAD_STACK_DEFAULT,    /* stacksize */ \
-  PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-  SCHED_RR,                 /* policy */ \
-  PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
-}
+#ifdef CONFIG_SCHED_SPORADIC
+#  define PTHREAD_ATTR_INITIALIZER \
+  { \
+    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+    SCHED_RR,                 /* policy */ \
+    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    0,                        /* low_priority */ \
+    0,                        /* max_repl */ \
+    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    {0, 0},                   /* repl_period */ \
+    {0, 0},                   /* budget */ \
+  }
+#else
+#  define PTHREAD_ATTR_INITIALIZER \
+  { \
+    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+    SCHED_RR,                 /* policy */ \
+    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+  }
+#endif
 
 /****************************************************************************
  * Public Data

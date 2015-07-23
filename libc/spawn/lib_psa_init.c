@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/string/lib_psa_init.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,22 +88,35 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
       return errno;
     }
 
-  attr->priority = param.sched_priority;
+  attr->priority            = param.sched_priority;
 
   /* Set the default scheduler policy to the policy of this task */
 
-  attr->policy = sched_getscheduler(0);
+  attr->policy              = sched_getscheduler(0);
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  /* Empty signal masek */
+  /* Empty signal mask */
 
-  attr->sigmask = 0;
+  attr->sigmask             = 0;
 #endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Sporadic scheduling parameters */
+
+  attr->low_priority        = (uint8_t)param.sched_ss_low_priority;
+  attr->max_repl            = (uint8_t)param.sched_ss_max_repl;
+  attr->repl_period.tv_sec  = param.sched_ss_repl_period.tv_sec;
+  attr->repl_period.tv_nsec = param.sched_ss_repl_period.tv_nsec;
+  attr->budget.tv_sec       = param.sched_ss_init_budget.tv_sec;
+  attr->budget.tv_nsec      = param.sched_ss_init_budget.tv_nsec;
+#endif
+
 
 #ifndef CONFIG_ARCH_ADDRENV
   /* Default stack size */
 
-  attr->stacksize = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
+  attr->stacksize           = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
 #endif
+
   return OK;
 }

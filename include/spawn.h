@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/spawn.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,7 @@
  * because the user will be required to allocate this memory.
  */
 
+struct timespec;
 struct posix_spawnattr_s
 {
   /* Used by posix_spawn, posix_spawnp, and task_spawn */
@@ -85,6 +86,12 @@ struct posix_spawnattr_s
   uint8_t  flags;                /* See POSIX_SPAWN_ definitions */
   uint8_t  priority;             /* Task scheduling priority */
   uint8_t  policy;               /* Task scheduling policy */
+
+#ifdef CONFIG_SCHED_SPORADIC
+  uint8_t  low_priority;         /* Low scheduling priority*/
+  uint8_t  max_repl;             /* Maximum pending replenishments */
+#endif
+
 #ifndef CONFIG_DISABLE_SIGNALS
   sigset_t sigmask;              /* Signals to be masked */
 #endif
@@ -94,6 +101,12 @@ struct posix_spawnattr_s
 
   size_t   stacksize;            /* Task stack size */
 #endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+  struct timespec repl_period;  /* Replenishment period */
+  struct timespec budget;       /* Initial budget */
+#endif
+
 };
 
 typedef struct posix_spawnattr_s posix_spawnattr_t;

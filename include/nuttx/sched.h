@@ -485,7 +485,8 @@ struct tcb_s
   uint8_t  base_priority;                /* "Normal" priority of the thread     */
 #endif
 #ifdef CONFIG_SCHED_SPORADIC
-  int32_t  low_priority;                 /* Sporadic low priority               */
+  uint8_t  low_priority;                 /* Sporadic low priority               */
+  uint8_t   max_repl;                    /* Max. replenishments                 */
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */
@@ -498,7 +499,7 @@ struct tcb_s
 #endif
 #ifdef CONFIG_SCHED_SPORADIC
   uint32_t spstart;                      /* Start time of execution budget      */
-  uint32_t replen;                       /* Sporadic replenishment interval     */
+  uint32_t repl_period;                  /* Sporadic replenishment period       */
   uint32_t budget;                       /* Sporadic execution budget           */
 #endif
 

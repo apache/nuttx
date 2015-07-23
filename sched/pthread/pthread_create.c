@@ -234,10 +234,11 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 {
   FAR struct pthread_tcb_s *ptcb;
   FAR struct join_s *pjoin;
-  int priority;
-#if CONFIG_RR_INTERVAL > 0
-  int policy;
+#ifdef CONFIG_SCHED_SPORADIC
+  int ticks;
 #endif
+  int priority;
+  int policy;
   int errcode;
   pid_t pid;
   int ret;
@@ -315,26 +316,39 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
     {
       struct sched_param param;
 
-      /* Get the priority for this thread. */
+      /* Get the priority (and any other scheduling parameters) for this
+       * thread.
+       */
 
       ret = sched_getparam(0, &param);
-      if (ret == OK)
+      if (ret == ERROR)
         {
-          priority = param.sched_priority;
-        }
-      else
-        {
-          priority = PTHREAD_DEFAULT_PRIORITY;
+          errcode = get_errno();
+          goto errout_with_join;
         }
 
-#if CONFIG_RR_INTERVAL > 0
+      priority = param.sched_priority;
+
       /* Get the scheduler policy for this thread */
 
       policy = sched_getscheduler(0);
       if (policy == ERROR)
         {
-          policy = SCHED_FIFO;
+          errcode = get_errno();
+          goto errout_with_join;
         }
+
+#ifdef CONFIG_SCHED_SPORADIC
+      /* Save the sporadic scheduling parameters */
+
+      ptcb->cmn.low_priority = param.sched_ss_low_priority;
+      ptcb->cmn.max_repl     = param.sched_ss_max_repl;
+
+      (void)clock_time2ticks(&param.sched_ss_repl_period, &ticks);
+      ptcb->cmn.repl_period  = ticks;
+
+      (void)clock_time2ticks(&param.sched_ss_init_budget, &ticks);
+      ptcb->cmn.budget       = ticks;
 #endif
     }
   else
@@ -342,8 +356,19 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       /* Use the priority and scheduler from the attributes */
 
       priority = attr->priority;
-#if CONFIG_RR_INTERVAL > 0
       policy   = attr->policy;
+
+#ifdef CONFIG_SCHED_SPORADIC
+      /* Save the sporadic scheduling parameters */
+
+      ptcb->cmn.low_priority = attr->low_priority;
+      ptcb->cmn.max_repl     = attr->max_repl;
+
+      (void)clock_time2ticks(&attr->repl_period, &ticks);
+      ptcb->cmn.repl_period  = ticks;
+
+      (void)clock_time2ticks(&attr->budget, &ticks);
+      ptcb->cmn.budget       = ticks;
 #endif
     }
 

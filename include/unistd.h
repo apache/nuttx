@@ -68,31 +68,45 @@
 
 /* POSIX feature set macros */
 
-#define  POSIX_VERSION
-#undef  _POSIX_SAVED_IDS
-#undef  _POSIX_JOB_CONTROL
-#define _POSIX_REALTIME_SIGNALS 1
-#define _POSIX_MESSAGE_PASSING 1
-#undef  _POSIX_MAPPED_FILES
-#undef  _POSIX_SHARED_MEMORY_OBJECTS
-#define _POSIX_PRIORITY_SCHEDULING 1
-#define _POSIX_TIMERS 1
-#undef  _POSIX_MEMLOCK
-#undef  _POSIX_MEMLOCK_RANGE
-#undef  _POSIX_FSYNC
-#define _POSIX_SYNCHRONIZED_IO 1
-#undef  _POSIX_ASYNCHRONOUS_IO
-#undef  _POSIX_PRIORITIZED_IO
+#define    POSIX_VERSION
+#undef    _POSIX_SAVED_IDS
+#undef    _POSIX_JOB_CONTROL
+#define   _POSIX_REALTIME_SIGNALS 1
+#define   _POSIX_MESSAGE_PASSING 1
+#undef    _POSIX_MAPPED_FILES
+#undef    _POSIX_SHARED_MEMORY_OBJECTS
+#define   _POSIX_PRIORITY_SCHEDULING 1
+#define   _POSIX_TIMERS 1
+#undef    _POSIX_MEMLOCK
+#undef    _POSIX_MEMLOCK_RANGE
+#undef    _POSIX_FSYNC
+#define   _POSIX_SYNCHRONIZED_IO 1
+
+#ifdef CONFIG_FS_AIO
+#  define _POSIX_ASYNCHRONOUS_IO 1
+#else
+#  undef  _POSIX_ASYNCHRONOUS_IO
+#endif
+
+#undef    _POSIX_PRIORITIZED_IO
+
+#ifdef CONFIG_SCHED_SPORADIC
+#  define _POSIX_SPORADIC_SERVER 1
+#  define _POSIX_THREAD_SPORADIC_SERVER 1
+#else
+#  undef  _POSIX_SPORADIC_SERVER
+#  undef  _POSIX_THREAD_SPORADIC_SERVER
+#endif
 
 /* Execution time constants (not supported) */
 
-#undef  _POSIX_CHOWN_RESTRICTED
-#undef  _POSIX_NO_TRUNC
-#undef  _POSIX_VDISABLE
+#undef    _POSIX_CHOWN_RESTRICTED
+#undef    _POSIX_NO_TRUNC
+#undef    _POSIX_VDISABLE
 
-#define _POSIX_SYNC_IO 1
-#undef  _POSIX_ASYNC_IO
-#undef  _POSIX_PRIO_IO
+#define   _POSIX_SYNC_IO 1
+#undef    _POSIX_ASYNC_IO
+#undef    _POSIX_PRIO_IO
 
 #define fdatasync(f) fsync(f)
 

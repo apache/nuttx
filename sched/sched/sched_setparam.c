@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_setparam.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <nuttx/arch.h>
 
+#include "clock/clock.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -105,7 +106,7 @@
  *
  ****************************************************************************/
 
-int sched_setparam(pid_t pid, const struct sched_param *param)
+int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
@@ -147,6 +148,35 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
           return ERROR;
         }
     }
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Update parameters associated with SCHED_SPORADIC */
+
+  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      int ticks;
+
+      DEBUGASSERT(param->sched_ss_max_repl <= UINT8_MAX);
+
+      tcb->flags       |= TCB_FLAG_SCHED_SPORADIC;
+      tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
+      tcb->low_priority = param->sched_ss_low_priority;
+      tcb->max_repl     = param->sched_ss_max_repl;
+
+      (void)clock_time2ticks(&param->sched_ss_repl_period, &ticks);
+      tcb->repl_period  = ticks;
+
+      (void)clock_time2ticks(&param->sched_ss_init_budget, &ticks);
+      tcb->budget       = ticks;
+    }
+  else
+    {
+      tcb->low_priority = 0;
+      tcb->max_repl     = 0;
+      tcb->repl_period  = 0;
+      tcb->budget       = 0;
+    }
+#endif
 
  /* Then perform the reprioritization */
 

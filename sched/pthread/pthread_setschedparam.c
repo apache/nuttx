@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_setschedparam.c
  *
- *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,8 @@
  *
  ****************************************************************************/
 
-int pthread_setschedparam(pthread_t thread, int policy, FAR const struct sched_param *param)
+int pthread_setschedparam(pthread_t thread, int policy,
+                          FAR const struct sched_param *param)
 {
   int ret;
 

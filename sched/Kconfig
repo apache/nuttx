@@ -310,6 +310,7 @@ config RR_INTERVAL
 config SCHED_SPORADIC
 	bool "Support sporadic scheduling"
 	default n
+	depends on EXPERIMENTAL
 	---help---
 		Build in additional logic to support sporadic scheduling (SCHED_SPORADIC).
 

@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,10 +166,21 @@ typedef pthread_startroutine_t pthread_func_t;
 
 struct pthread_attr_s
 {
-  size_t  stacksize;    /* Size of the stack allocated for the pthread */
-  int16_t priority;     /* Priority of the pthread */
-  uint8_t policy;       /* Pthread scheduler policy */
-  uint8_t inheritsched; /* Inherit parent prio/policy? */
+  uint8_t priority;            /* Priority of the pthread */
+  uint8_t policy;              /* Pthread scheduler policy */
+  uint8_t inheritsched;        /* Inherit parent prio/policy? */
+
+#ifdef CONFIG_SCHED_SPORADIC
+  uint8_t low_priority;        /* Low scheduling priority*/
+  uint8_t max_repl;            /* Maximum pending replenishments */
+#endif
+
+  size_t stacksize;            /* Size of the stack allocated for the pthread */
+
+#ifdef CONFIG_SCHED_SPORADIC
+  struct timespec repl_period; /* Replenishment period */
+  struct timespec budget;      /* Initial budget */
+#endif
 };
 typedef struct pthread_attr_s pthread_attr_t;
 

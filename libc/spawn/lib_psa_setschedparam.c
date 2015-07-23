@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/string/lib_psa_setschedparam.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,16 @@ int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr,
                                   FAR const struct sched_param *param)
 {
   DEBUGASSERT(attr && param && (unsigned)param->sched_priority <= 0xff);
-  attr->priority = (uint8_t)param->sched_priority;
+
+  attr->priority            = (uint8_t)param->sched_priority;
+
+#ifdef CONFIG_SCHED_SPORADIC
+  attr->low_priority        = (uint8_t)param->sched_ss_low_priority;
+  attr->max_repl            = (uint8_t)param->sched_ss_max_repl;
+  attr->repl_period.tv_sec  = param->sched_ss_repl_period.tv_sec;
+  attr->repl_period.tv_nsec = param->sched_ss_repl_period.tv_nsec;
+  attr->budget.tv_sec       = param->sched_ss_init_budget.tv_sec;
+  attr->budget.tv_nsec      = param->sched_ss_init_budget.tv_nsec;
+#endif
   return OK;
 }

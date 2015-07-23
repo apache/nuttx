@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_spawnparms.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,7 @@ static inline int spawn_dup2(FAR struct spawn_dup2_file_action_s *action)
       int errcode = get_errno();
 
       sdbg("ERROR: dup2 failed: %d\n", errcode);
-      return errcode;
+      return -errcode;
     }
 
   return OK;
@@ -202,7 +202,7 @@ void spawn_semtake(FAR sem_t *sem)
  *
  * Returned Value:
  *   Errors are not reported by this function.  This is because errors
- *   cannot occur, but ratther that the new task has already been started
+ *   cannot occur, but rather that the new task has already been started
  *   so there is no graceful way to handle errors detected in this context
  *   (unless we delete the new task and recover).
  *
@@ -229,7 +229,22 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
     {
-      /* Get the priority from the attrributes */
+#ifdef CONFIG_SCHED_SPORADIC
+      int ret;
+
+      /* Get the current sporadic scheduling parameters.  Those will not be
+       * modified.
+       */
+
+      ret = sched_getparam(pid, &param);
+      if (ret < 0)
+        {
+          int errcode = get_errno();
+          return -errcode;
+        }
+#endif
+
+      /* Get the priority from the attributes */
 
       param.sched_priority = attr->priority;
 
@@ -265,6 +280,16 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       svdbg("Setting policy=%d priority=%d for pid=%d\n",
             attr->policy, param.sched_priority, pid);
 
+#ifdef CONFIG_SCHED_SPORADIC
+      /* But take the sporadic scheduler parameters from the attributes */
+
+      param.sched_ss_low_priority        = (int)attr->low_priority;
+      param.sched_ss_max_repl            = (int)attr->max_repl;
+      param.sched_ss_repl_period.tv_sec  = attr->repl_period.tv_sec;
+      param.sched_ss_repl_period.tv_nsec = attr->repl_period.tv_nsec;
+      param.sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
+      param.sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
+#endif
       (void)sched_setscheduler(pid, attr->policy, &param);
     }
 

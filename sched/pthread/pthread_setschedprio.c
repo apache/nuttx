@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_setschedprio.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,20 +102,30 @@ int pthread_setschedprio(pthread_t thread, int prio)
   struct sched_param param;
   int ret;
 
-  /* Set the errno to some non-zero value (failsafe) */
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Get the current sporadic scheduling parameters.  Those will not be
+   * modified.
+   */
 
-  set_errno(EINVAL);
+  ret = sched_getparam((pid_t)thread, &param);
+  if (ret < 0)
+    {
+      goto errout_with_errno;
+    }
+#endif
 
   /* Call sched_setparam() to change the priority */
 
   param.sched_priority = prio;
   ret = sched_setparam((pid_t)thread, &param);
-  if (ret != OK)
+  if (ret >= 0)
     {
-      /* If sched_setparam() fails, return the errno */
-
-      ret = get_errno();
+      return OK;
     }
 
+#ifdef CONFIG_SCHED_SPORADIC
+errout_with_errno:
+#endif
+  ret = get_errno();
   return ret;
 }

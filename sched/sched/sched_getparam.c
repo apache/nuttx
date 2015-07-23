@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched/sched_getparam.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sched.h>
 
+#include "clock/clock.h"
 #include "sched/sched.h"
 
 /************************************************************************
@@ -96,7 +97,7 @@
  *
  ************************************************************************/
 
-int sched_getparam (pid_t pid, struct sched_param * param)
+int sched_getparam (pid_t pid, FAR struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
@@ -136,6 +137,16 @@ int sched_getparam (pid_t pid, struct sched_param * param)
           /* Return the priority of the task */
 
           param->sched_priority = (int)tcb->sched_priority;
+
+#ifdef CONFIG_SCHED_SPORADIC
+          /* Return parameters associated with SCHED_SPORADIC */
+
+          param->sched_ss_low_priority = (int)tcb->low_priority;
+          param->sched_ss_max_repl     = (int)tcb->max_repl;
+
+          clock_ticks2time((int)tcb->repl_period, &param->sched_ss_repl_period);
+          clock_ticks2time((int)tcb->budget, &param->sched_ss_init_budget);
+#endif
         }
 
       sched_unlock();

@@ -49,7 +49,6 @@
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
-
 /* Task Management Definitions **************************************************/
 
 /* POSIX-like scheduling policies */
@@ -71,7 +70,17 @@
 
 struct sched_param
 {
-  int sched_priority;
+  int sched_priority;                   /* Base thread priority */
+
+#ifdef CONFIG_SCHED_SPORADIC
+  int sched_ss_low_priority;            /* Low scheduling priority for sporadic
+                                         * server */
+  struct timespec sched_ss_repl_period; /* Replenishment period for sporadic
+                                         * server. */
+  struct timespec sched_ss_init_budget; /* Initial budget for sporadic server */
+  int sched_ss_max_repl;                /* Maximum pending replenishments for
+                                         * sporadic server. */
+#endif
 };
 
 /********************************************************************************

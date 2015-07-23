@@ -46,26 +46,6 @@
 #include <errno.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -98,13 +78,18 @@ int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
     }
   else
     {
-      param->sched_priority = attr->priority;
+      param->sched_priority               = (int)attr->priority;
+#ifdef CONFIG_SCHED_SPORADIC
+      param->sched_ss_low_priority        = (int)attr->low_priority;
+      param->sched_ss_max_repl            = (int)attr->max_repl;
+      param->sched_ss_repl_period.tv_sec  = attr->repl_period.tv_sec;
+      param->sched_ss_repl_period.tv_nsec = attr->repl_period.tv_nsec;
+      param->sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
+      param->sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
+#endif
       ret = OK;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
-
-
-

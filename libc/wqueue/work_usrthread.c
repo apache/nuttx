@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_usrthread.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -375,7 +375,7 @@ int work_usrstart(void)
     pthread_t usrwork;
     pthread_attr_t attr;
     struct sched_param param;
-    int status;
+    int ret;
 
     /* Set up the work queue lock */
 
@@ -386,13 +386,26 @@ int work_usrstart(void)
     (void)pthread_attr_init(&attr);
     (void)pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
 
++#ifdef CONFIG_SCHED_SPORADIC
+    /* Get the current sporadic scheduling parameters.  Those will not be
+     * modified.
+     */
+
+    ret = set_getparam(pid, &param);
+    if (ret < 0)
+      {
+        int erroode = get_errno();
+        return -errcode;
+      }
+#endif
+
     param.sched_priority = CONFIG_LIB_USRWORKPRIORITY;
     (void)pthread_attr_setschedparam(&attr, &param);
 
-    status = pthread_create(&usrwork, &attr, work_usrthread, NULL);
-    if (status != 0)
+    ret = pthread_create(&usrwork, &attr, work_usrthread, NULL);
+    if (ret != 0)
       {
-        return -status;
+        return -ret;
       }
 
     /* Detach because the return value and completion status will not be

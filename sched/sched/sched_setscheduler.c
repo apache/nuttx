@@ -106,7 +106,7 @@
  ****************************************************************************/
 
 int sched_setscheduler(pid_t pid, int policy,
-                       const struct sched_param *param)
+                       FAR const struct sched_param *param)
 {
   FAR struct tcb_s *tcb;
 #if CONFIG_RR_INTERVAL > 0
@@ -157,22 +157,53 @@ int sched_setscheduler(pid_t pid, int policy,
       default:
         DEBUGPANIC();
       case SCHED_FIFO:
-        tcb->flags    |= TCB_FLAG_SCHED_FIFO;
-#if CONFIG_RR_INTERVAL > 0
-        tcb->timeslice = 0;
+        {
+          tcb->flags       |= TCB_FLAG_SCHED_FIFO;
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+          tcb->timeslice    = 0;
 #endif
+#ifdef CONFIG_SCHED_SPORADIC
+          tcb->low_priority = 0;
+          tcb->max_repl     = 0;
+          tcb->repl_period  = 0;
+          tcb->budget       = 0;
+#endif
+        }
         break;
 
 #if CONFIG_RR_INTERVAL > 0
       case SCHED_RR:
-        tcb->flags    |= TCB_FLAG_SCHED_RR;
-        tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+        {
+          tcb->flags       |= TCB_FLAG_SCHED_RR;
+          tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
+#ifdef CONFIG_SCHED_SPORADIC
+          tcb->low_priority = 0;
+          tcb->max_repl     = 0;
+          tcb->repl_period  = 0;
+          tcb->budget       = 0;
+#endif
+        }
         break;
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
       case SCHED_SPORADIC:
-        tcb->flags    |= TCB_FLAG_SCHED_SPORADIC;
+        {
+          int ticks;
+
+          DEBUGASSERT(param->sched_ss_max_repl <= UINT8_MAX);
+
+          tcb->flags       |= TCB_FLAG_SCHED_SPORADIC;
+          tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
+          tcb->low_priority = param->sched_ss_low_priority;
+          tcb->max_repl     = param->sched_ss_max_repl;
+
+          (void)clock_time2ticks(&param->sched_ss_repl_period, &ticks);
+          tcb->repl_period  = ticks;
+
+          (void)clock_time2ticks(&param->sched_ss_init_budget, &ticks);
+          tcb->budget       = ticks;
+        }
         break;
 #endif
 
@@ -199,4 +230,3 @@ int sched_setscheduler(pid_t pid, int policy,
       return OK;
     }
 }
-
