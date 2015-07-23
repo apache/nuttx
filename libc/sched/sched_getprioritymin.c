@@ -1,7 +1,7 @@
 /************************************************************************
  * libc/sched/sched_getprioritymin.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,31 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/arch.h>
-
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
 
 /************************************************************************
  * Public Functions
@@ -89,12 +67,6 @@
 
 int sched_get_priority_min(int policy)
 {
-  if (policy != SCHED_FIFO && policy != SCHED_RR)
-    {
-      return ERROR;
-    }
-  else
-    {
-      return SCHED_PRIORITY_MIN;
-    }
+  DEBUGASSERT(policy >= SCHED_FIFO && policy <= SCHED_OTHER);
+  return SCHED_PRIORITY_MIN;
 }

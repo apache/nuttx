@@ -50,10 +50,6 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -62,10 +58,6 @@ sem_t g_spawn_parmsem = SEM_INITIALIZER(1);
 sem_t g_spawn_execsem = SEM_INITIALIZER(0);
 #endif
 struct spawn_parms_s g_spawn_parms;
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -310,7 +302,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
  *   file_actions - The attributes to use
  *
  * Returned Value:
- *   0 (OK) on successed; A negated errno value is returned on failure.
+ *   0 (OK) on success; A negated errno value is returned on failure.
  *
  ****************************************************************************/
 

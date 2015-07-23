@@ -58,16 +58,9 @@
 #include "pthread/pthread.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
 /* Default pthread attributes (see include/nuttx/pthread.h).  When configured
  * to build separate kernel- and user-address spaces, this global is
  * duplicated in each address spaced.  This copy can only be shared within
@@ -77,7 +70,7 @@
 const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* This is the name for name-less pthreads */
