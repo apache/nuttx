@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sched/sched_foreach.c
+ * sched/sched/sched_resumescheduler.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,48 +37,63 @@
  * Included Files
  ************************************************************************/
 
-#include <sched.h>
+#include <nuttx/config.h>
+
+#include <assert.h>
+
+#include <nuttx/sched.h>
+#include <nuttx/clock.h>
+
 #include "sched/sched.h"
 
-/************************************************************************
- * Public Functions
- ************************************************************************/
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 
 /************************************************************************
- * Name: sched_foreach
+ * Global Functions
+ ************************************************************************/
+
+/********************************************************************************
+ * Name: sched_resume_scheduler
  *
  * Description:
- *   Enumerate over each task and provide the TCB of each
- *   task to a user callback functions.  Interrupts will be
- *   disabled throughout this enumeration!
+ *   Called by architecture specific implementation of up_unblock_task() in
+ *   order to prepare the scheduler for the thread that is about to be restarted.
  *
- * Parameters:
- *   handler - The function to be called with the TCB of
- *     each task
+ * Input Parameters:
+ *   tcb - The TCB of the thread to be restarted.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
- * Assumptions:
- *
- ************************************************************************/
+ ********************************************************************************/
 
-void sched_foreach(sched_foreach_t handler, FAR void *arg)
+void sched_resume_scheduler(FAR struct tcb_s *tcb)
 {
-  irqstate_t flags = irqsave();
-  int ndx;
-
-  /* Vist each active task */
-
-  for (ndx = 0; ndx < CONFIG_MAX_TASKS; ndx++)
+#if CONFIG_RR_INTERVAL > 0
+#ifdef CONFIG_SCHED_SPORADIC
+  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+#endif
     {
-       if (g_pidhash[ndx].tcb)
-         {
-           handler(g_pidhash[ndx].tcb, arg);
-         }
-    }
+      /* Reset its timeslice.  This is only meaningful for round robin tasks but
+       * it doesn't here to do it for everything (as long as CONFIG_SCHED_SPORADIC
+       * is not defined.
+       */
 
-  irqrestore(flags);
+      tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+    }
+#endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+#if CONFIG_RR_INTERVAL > 0
+  else
+#endif
+  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      /* Reset the replenishment cycle if it is appropriate to do so */
+
+      DEBUGVERIFY(sched_sporadic_resume(tcb));
+    }
+#endif
 }
 
-
+#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC */

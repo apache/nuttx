@@ -728,6 +728,27 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr);
 pid_t task_vforkstart(FAR struct task_tcb_s *child);
 void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
 
+/********************************************************************************
+ * Name: sched_resume_scheduler
+ *
+ * Description:
+ *   Called by architecture specific implementation of up_unblock_task() in
+ *   order to prepare the scheduler for the thread that is about to be restarted.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread to be restarted.
+ *
+ * Returned Value:
+ *   None
+ *
+ ********************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+void sched_resume_scheduler(FAR struct tcb_s *tcb);
+#else
+#  define sched_resume_scheduler(tcb)
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

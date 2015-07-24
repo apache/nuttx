@@ -260,14 +260,17 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 }
 
 /************************************************************************
- * Name: sched_sporadic_replenish_resume
+ * Name: sched_sporadic_resume
  *
  * Description:
  *   Called to start the next replenishment interval.  This function is
  *   called in the following circumstances:
  *
- *     - When a task using the sporadic scheduling policy is resumed
- *       while in the budget interval of the replenishment cycle.
+ *     - From up_unblocktask() via sched_resume_scheduler() when a task
+ *       using the sporadic scheduling policy.
+ *
+ *   This function does nothing if the budget phase as already elapsed or
+ *   the maximum numer of replenishments have already been performed.
  *
  * Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
@@ -282,7 +285,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
  *
  ************************************************************************/
 
-int sched_sporadic_replenish_resume(FAR struct tcb_s *tcb)
+int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb);
 

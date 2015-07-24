@@ -54,6 +54,14 @@ CSRCS += sched_waitid.c sched_wait.c
 endif
 endif
 
+ifneq ($(CONFIG_RR_INTERVAL),0)
+CSRCS += sched_resumescheduler.c
+else
+ifeq ($(CONFIG_SCHED_SPORADIC),y)
+CSRCS += sched_resumescheduler.c
+endif
+endif
+
 ifeq ($(CONFIG_SCHED_SPORADIC),y)
 CSRCS += sched_sporadic.c
 endif
