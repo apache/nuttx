@@ -63,8 +63,6 @@
 #  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#define MSEC20_TICKS MIN(MSEC2TICK(20),1)
-
 /************************************************************************
  * Private Functions
  ************************************************************************/
@@ -81,7 +79,7 @@
  * Parameters:
  *   tcb - TCB of the thread whose priority is being boosted.
  *
- * Return Value:
+ * Returned Value:
  *   Returns zero (OK) on success or a negated errno value on failure.
  *
  ************************************************************************/
@@ -143,7 +141,7 @@ static int sched_sporadic_replenish_start(FAR struct tcb_s *tcb)
  * Parameters:
  *   Standard watchdog parameters
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -184,7 +182,7 @@ static void sched_sporadic_expire(int argc, wdparm_t arg1, ...)
  * Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
  *
- * Return Value:
+ * Returned Value:
  *   Returns zero (OK) on success or a negated errno value on failure.
  *
  * Assumptions:
@@ -226,7 +224,7 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
  * Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
  *
- * Return Value:
+ * Returned Value:
  *   Returns zero (OK) on success or a negated errno value on failure.
  *
  * Assumptions:
@@ -275,7 +273,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
  * Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
  *
- * Return Value:
+ * Returned Value:
  *   Returns zero (OK) on success or a negated errno value on failure.
  *
  * Assumptions:
@@ -317,7 +315,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
  *   ticks - The number of elapsed ticks since the last time this
  *   function was called.
  *
- * Return Value:
+ * Returned Value:
  *   The number if ticks remaining until the budget interval expires.
  *   Zero is returned if we are in the low-prioriy phase of the the
  *   replenishment interval.
@@ -335,14 +333,28 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 
   /* If we are in the low-priority phase of the replenishment interval,
    * then just return zero.
+   *
+   *   > 0: In high priority phase of interval
+   *  == 0: In the low priority phase of the interval
+   *   < 0: Stuck in the high priority phase with pre-emption locked.
    */
 
-  if (tcb->timeslice <= 0)
+  if (tcb->timeslice == 0)
     {
       return 0;
     }
 
-  /* Check if the the budget interval has elapse */
+  /* Check if the the budget interval has elapse  If 'ticks' is greater
+   * than the timeslice value, then we ignore any excess amount.
+   *
+   * 'ticks' should never be greater than the remaining timeslice.  We try
+   * to handle that gracefully but it would be an error in the scheduling
+   * if there ever were the case.
+   *
+   * Notice that in the case where were are stuck in the high priority
+   * phase with scheduler locke, timeslice will by -1 and any value of
+   * ticks will pass this test.
+   */
 
   if (ticks >= tcb->timeslice)
     {
@@ -354,11 +366,12 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
            * time at the higher priority.  Dropping the priority could
            * result in a context switch.
            *
-           * Let then have up to 20 milliseconds (in ticks)
+           * Set the timeslice value to a negative value to indicate this
+           * case.
            */
 
-          tcb->timeslice = MSEC20_TICKS;
-          return MSEC20_TICKS;
+          tcb->timeslice = -1;
+          return 0;
         }
       
       /* We will also suppress context switches if we were called via one of
@@ -374,7 +387,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 
       if (noswitches)
         {
-          tcb->timeslice = 1;
+          tcb->timeslice = -1;
           return 1;
         }
 
@@ -391,37 +404,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 
       /* Otherwise enter the low-priority phase of the replenishment cycle */
 
-      tcb->timeslice = 0;
-
-      /* Start the timer that will terminate the low priority cycle.  This timer
-       * expiration is independent of what else may occur (except that it must
-       * be cancelled if the thread exits.
-       */
-
-      DEBUGVERIFY(wd_start(&tcb->low_dog, tcb->repl_period - tcb->budget,
-                           sched_sporadic_expire, 1, (wdentry_t)tcb));
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      /* If the priority was boosted above the higher priority, than just
-       * reset the base priority.
-       */
-
-      if (tcb->sched_priority > tcb->base_priority)
-        {
-          /* Thread priority was boosted while we were in the high priority
-           * state.
-           */
-
-          tcb->base_priority = tcb->low_priority;
-          return 0;
-        }
-#endif
-
-      /* Otherwise drop the priority of thread, possible causing a context
-       * switch.
-       */
-
-      DEBUGVERIFY(sched_reprioritize(tcb, tcb->low_priority));
+      sched_sporadic_lowpriority(tcb);
       return 0;
     }
 
@@ -434,6 +417,67 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
       tcb->timeslice -= ticks;
       return tcb->timeslice;
     }
+}
+
+/************************************************************************
+ * Name: sched_sporadic_lowpriority
+ *
+ * Description:
+ *   Drop to the lower priority for the duration of the replenishment
+ *   period. Called from:
+ *
+ *   - sched_sporadic_process() when the thread budget expires
+ *   - sched_unlock().  When the budget expires while the thread had the
+ *     scheduler locked.
+ *
+ * Parameters:
+ *   tcb - The TCB of the thread that is entering the low priority phase. 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   - Interrupts are disabled
+ *   - All sporadic scheduling parameters in the TCB are valid
+ *
+ ************************************************************************/
+
+void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
+{
+  DEBUGASSERT(tcb);
+
+  /* Enter the low-priority phase of the replenishment cycle */
+
+  tcb->timeslice = 0;
+
+  /* Start the timer that will terminate the low priority cycle.  This timer
+   * expiration is independent of what else may occur (except that it must
+   * be cancelled if the thread exits.
+   */
+
+  DEBUGVERIFY(wd_start(&tcb->low_dog, tcb->repl_period - tcb->budget,
+                       sched_sporadic_expire, 1, (wdentry_t)tcb));
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  /* If the priority was boosted above the higher priority, than just
+   * reset the base priority.
+   */
+
+  if (tcb->sched_priority > tcb->base_priority)
+    {
+      /* Thread priority was boosted while we were in the high priority
+       * state.
+       */
+
+      tcb->base_priority = tcb->low_priority;
+    }
+#endif
+
+  /* Otherwise drop the priority of thread, possible causing a context
+   * switch.
+   */
+
+  DEBUGVERIFY(sched_reprioritize(tcb, tcb->low_priority));
 }
 
 #endif /* CONFIG_SCHED_SPORADIC */

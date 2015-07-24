@@ -71,8 +71,12 @@
  * switches.
  */
 
-#if CONFIG_RR_INTERVAL > 0
-#  define KEEP_ALIVE_HACK 1
+#define KEEP_ALIVE_HACK 1
+
+#ifdef CONFIG_RR_INTERVAL > 0
+#  define KEEP_ALIVE_TICKS MSEC2TICK(CONFIG_RR_INTERVAL)
+#else
+#  define KEEP_ALIVE_TICKS MSEC2TICK(50)
 #endif
 
 #ifndef MIN
@@ -214,10 +218,11 @@ static void sched_timespec_subtract(FAR const struct timespec *ts1,
 #endif
 
 /************************************************************************
- * Name:  sched_process_timeslice
+ * Name:  sched_process_scheduler
  *
  * Description:
- *   Check if the currently executing task has exceeded its time slice.
+ *   Check for operations specific to scheduling policy of the currently
+ *   active task.
  *
  * Inputs:
  *   ticks - The number of ticks that have elapsed on the interval timer.
@@ -236,129 +241,67 @@ static void sched_timespec_subtract(FAR const struct timespec *ts1,
  *
  ************************************************************************/
 
-#if CONFIG_RR_INTERVAL > 0
-static unsigned int
-sched_process_timeslice(unsigned int ticks, bool noswitches)
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 {
   FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
-#ifdef KEEP_ALIVE_HACK
-  unsigned int ret = MSEC2TICK(CONFIG_RR_INTERVAL);
-#else
-  unsigned int ret = 0;
-#endif
-  int decr;
+  FAR struct tcb_s *ntcb  = (FAR struct tcb_s*)g_readytorun.head;
+  uint32_t ret = 0;
 
-  /* Check if the currently executing task uses round robin
-   * scheduling.
-   */
+#if CONFIG_RR_INTERVAL > 0
+  /* Check if the currently executing task uses round robin scheduling. */
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
-      /* Now much can we decrement the timeslice delay?  If 'ticks'
-       * is greater than the timeslice value, then we ignore any
-       * excess amount.
-       *
-       * 'ticks' should never be greater than the remaining timeslice.
-       * We try to handle that gracefully but it would be an error
-       * in the scheduling if there ever were the case.
+      /* Yes, check if the currently executing task has exceeded its
+       * timeslice.
        */
 
-      DEBUGASSERT(ticks <= rtcb->timeslice);
-      decr = MIN(rtcb->timeslice, ticks);
+      ret = sched_roundrobin_process(rtcb, ticks, noswitches);
+    }
+#endif
 
-      /* Decrement the timeslice counter */
+#if CONFIG_RR_INTERVAL > 0
+  /* Check if the currently executing task uses sporadic scheduling. */
 
-      rtcb->timeslice -= decr;
-
-      /* Did decrementing the timeslice counter cause the timeslice to
-       * expire?
-       *
-       * If the task has pre-emption disabled. Then we will freeze the
-       * timeslice count at the value until pre-emption has been enabled.
+  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      /* Yes, check if the currently executing task has exceeded its
+       * budget.
        */
 
-      ret = rtcb->timeslice;
-      if (rtcb->timeslice <= 0 && rtcb->lockcount == 0)
-        {
-          /* We will also suppress context switches if we were called
-           * via one of the unusual cases handled by sched_timer_reasses().
-           * In that case, we will return a value of one so that the
-           * timer will expire as soon as possible and we can perform
-           * this action in the normal timer expiration context.
-           *
-           * This is kind of kludge, but I am not to concerned because
-           * I hope that the situation is impossible or at least could
-           * only occur on rare corner-cases.
-           */
+      ret = sched_sporadic_process(rtcb, ticks, noswitches);
+    }
+#endif
 
-          if (noswitches)
-            {
-              ret = 1;
-            }
-          else
-            {
-              /* Reset the timeslice. */
-
-              rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-              ret = rtcb->timeslice;
-
-              /* We know we are at the head of the ready to run
-               * prioritized list.  We must be the highest priority
-               * task eligible for execution.  Check the next task
-               * in the ready to run list.  If it is the same
-               * priority, then we need to relinquish the CPU and
-               * give that task a shot.
-               */
-
-              if (rtcb->flink &&
-                  rtcb->flink->sched_priority >= rtcb->sched_priority)
-                {
-                  /* Just resetting the task priority to its current
-                   * value.  This this will cause the task to be
-                   * rescheduled behind any other tasks at the same
-                   * priority.
-                   */
-
-                  up_reprioritize_rtr(rtcb, rtcb->sched_priority);
-
-                  /* We will then need to return timeslice remaining for
-                   * the new task at the head of the ready to run list
-                   */
+  /* If a context switch occurred, then need to return delay remaining for
+   * the new task at the head of the ready to run list.
+   */
   
-                  rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  ntcb = (FAR struct tcb_s*)g_readytorun.head;
 
-                  /* Check if the new task at the head of the ready-to-run
-                   * supports round robin scheduling.
-                   */
+  /* Check if the new task at the head of the ready-to-run has changed. */
 
-                  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
-                    {
-                      /* The new task at the head of the ready to run
-                       * list does not support round robin scheduling.
-                       */
+  if (rtcb != ntcb)
+    {
+       return sched_process_scheduler(0, true)
+    }
+
+  /* Returning zero means that there is no interesting event to be timed */
 
 #ifdef KEEP_ALIVE_HACK
-                      ret = MSEC2TICK(CONFIG_RR_INTERVAL);
-#else
-                      ret = 0;
-#endif
-                    }
-                  else
-                    {
-                      /* Return the time remaining on slice for the new
-                       * task (or at least one for the same reasons as
-                       * discussed above).
-                       */
+  if (ret == 0)
+    {
+      /* Apply the keep alive hack */
 
-                      ret = rtcb->timeslice > 0 ? rtcb->timeslice : 1;
-                    }
-                }
-            }
-        }
+      return KEEP_ALIVE_TICKS
     }
+#else
 
   return ret;
 }
+#else
+#  define sched_process_scheduler(t,n) (0)
 #endif
 
 /****************************************************************************
@@ -379,9 +322,7 @@ sched_process_timeslice(unsigned int ticks, bool noswitches)
 
 static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
 {
-#if CONFIG_RR_INTERVAL > 0
   unsigned int cmptime = UINT_MAX;
-#endif
   unsigned int rettime  = 0;
   unsigned int tmp;
 
@@ -390,23 +331,19 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
   tmp = wd_timer(ticks);
   if (tmp > 0)
     {
-#if CONFIG_RR_INTERVAL > 0
       cmptime = tmp;
-#endif
-      rettime  = tmp;
+      rettime = tmp;
     }
 
-#if CONFIG_RR_INTERVAL > 0
-  /* Check if the currently executing task has exceeded its
-   * timeslice.
-   */
+ /* Check for operations specific to scheduling policy of the currently
+  * active task.
+  */
 
-  tmp = sched_process_timeslice(ticks, noswitches);
+  tmp = sched_process_scheduler(ticks, noswitches);
   if (tmp > 0 && tmp < cmptime)
     {
       rettime  = tmp;
     }
-#endif
 
   return rettime;
 }

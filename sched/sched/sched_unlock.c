@@ -45,30 +45,6 @@
 #include "sched/sched.h"
 
 /************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
  * Public Functions
  ************************************************************************/
 
@@ -148,9 +124,42 @@ int sched_unlock(void)
                 }
 #ifdef CONFIG_SCHED_TICKLESS
               else
-               {
-                 sched_timer_reassess();
-               }
+                {
+                  sched_timer_reassess();
+                }
+#endif
+            }
+#endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+#if CONFIG_RR_INTERVAL > 0
+          else
+#endif
+          /* If (1) the task that was running supported sporadic scheduling
+           * and (2) if its budget slice has already expired, but (3) it
+           * could not slice out because pre-emption was disabled, then we
+           * need to swap the task out now and reassess the interval timer
+           * for the next time slice.
+           */
+
+          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC &&
+              rtcb->timeslice < 0)
+            {
+              /* Yes.. that is the situation.  Force the low-priority state
+               * now
+               */
+
+              sched_sporadic_lowpriority(rtcb);
+
+#ifdef CONFIG_SCHED_TICKLESS
+              /* Make sure that the call to up_release_pending() did not
+               * change the currently active task.
+               */
+
+              if (rtcb = (FAR struct tcb_s*)g_readytorun.head)
+                {
+                  sched_timer_reassess();
+                }
 #endif
             }
 #endif

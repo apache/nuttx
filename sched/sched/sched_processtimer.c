@@ -75,10 +75,11 @@
  ************************************************************************/
 
 /************************************************************************
- * Name:  sched_process_timeslice
+ * Name:  sched_process_scheduler
  *
  * Description:
- *   Check if the currently executing task has exceeded its time slice.
+ *   Check for operations specific to scheduling policy of the currently
+ *   active task.
  *
  * Inputs:
  *   None
@@ -88,66 +89,39 @@
  *
  ************************************************************************/
 
-#if CONFIG_RR_INTERVAL > 0
-static inline void sched_process_timeslice(void)
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static inline void sched_process_scheduler(void)
 {
   FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
 
-  /* Check if the currently executing task uses round robin
-   * scheduling.
-   */
+#if CONFIG_RR_INTERVAL > 0
+  /* Check if the currently executing task uses round robin scheduling. */
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
-      /* Yes, check if decrementing the timeslice counter
-       * would cause the timeslice to expire
+      /* Yes, check if the currently executing task has exceeded its
+       * timeslice.
        */
 
-      if (rtcb->timeslice <= 1)
-        {
-          /* Yes, Now check if the task has pre-emption disabled.
-           * If so, then we will freeze the timeslice count at
-           * the value until the next tick after pre-emption
-           * has been enabled.
-           */
-
-          if (!rtcb->lockcount)
-            {
-              /* Reset the timeslice in any case. */
-
-              rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-
-              /* We know we are at the head of the ready to run
-               * prioritized list.  We must be the highest priority
-               * task eligible for execution.  Check the next task
-               * in the ready to run list.  If it is the same
-               * priority, then we need to relinquish the CPU and
-               * give that task a shot.
-               */
-
-              if (rtcb->flink &&
-                  rtcb->flink->sched_priority >= rtcb->sched_priority)
-                {
-                  /* Just resetting the task priority to its current
-                   * value.  This this will cause the task to be
-                   * rescheduled behind any other tasks at the same
-                   * priority.
-                   */
-
-                  up_reprioritize_rtr(rtcb, rtcb->sched_priority);
-                }
-            }
-        }
-      else
-        {
-          /* Decrement the timeslice counter */
-
-          rtcb->timeslice--;
-        }
+      sched_roundrobin_process(rtcb, 1, false);
     }
+#endif
+
+#if CONFIG_RR_INTERVAL > 0
+  /* Check if the currently executing task uses sporadic scheduling. */
+
+  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      /* Yes, check if the currently executing task has exceeded its
+       * budget.
+       */
+
+      (void)sched_sporadic_process(rtcb, 1, false);
+    }
+#endif
 }
 #else
-#  define sched_process_timeslice()
+#  define sched_process_scheduler()
 #endif
 
 /************************************************************************
@@ -212,5 +186,5 @@ void sched_process_timer(void)
    * timeslice.
    */
 
-  sched_process_timeslice();
+  sched_process_scheduler();
 }
