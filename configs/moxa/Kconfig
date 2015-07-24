@@ -1,0 +1,14 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_MOXA
+
+config MOXA_NP51X0
+	bool "NP51x0"
+	default y
+	---help---
+		Moxa NP51x0 series.
+
+endif

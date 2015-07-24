@@ -1120,6 +1120,11 @@ config ARCH_BOARD_CUSTOM
 		Don't see the board you want?  You must first select the exact MCU part
 		number, then the boards supporting that part will be available for selection.
 
+config ARCH_BOARD_MOXA
+	bool "Moxa board"
+	depends on ARCH_CHIP_MOXART
+	---help---
+		Moxa
 endchoice
 
 if ARCH_BOARD_CUSTOM
@@ -1308,6 +1313,7 @@ config ARCH_BOARD
 	default "zp214xpa"                 if ARCH_BOARD_ZP214XPA
 	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
 	default "sim"                      if ARCH_BOARD_SIM
+	default "moxa"                     if ARCH_BOARD_MOXA
 
 comment "Common Board Options"
 
@@ -1686,6 +1692,9 @@ source "configs/zkit-arm-1769/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
+endif
+if ARCH_BOARD_MOXA
+source "configs/moxa/Kconfig"
 endif
 
 config LIB_BOARDCTL
