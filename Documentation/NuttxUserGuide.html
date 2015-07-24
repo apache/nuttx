@@ -1619,21 +1619,20 @@ int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
 </table>
 
 <p>
-  By default, NuttX performs strict priority scheduling: Tasks of higher
-  priority have exclusive access to the CPU until they become blocked.
+  By default, NuttX performs strict priority scheduling: Tasks of higher priority have exclusive access to the CPU until they become blocked.
   At that time, the CPU is available to tasks of lower priority.
   Tasks of equal priority are scheduled FIFO.
 </p>
 <p>
-  Optionally, a Nuttx task or thread can be configured with round-robin
-  scheduler.  This is similar to priority scheduling <i>except</i> that
-  tasks with equal priority and share CPU time via <i>time-slicing</i>.
+  Optionally, a Nuttx task or thread can be configured with round-robin or <i>sporadic</i> scheduler.
+  The round-roben is similar to priority scheduling <i>except</i> that tasks with equal priority and share CPU time via <i>time-slicing</i>.
   The time-slice interval is a constant determined by the configuration
-  setting <code>CONFIG_RR_INTERVAL</code>.
+  setting <code>CONFIG_RR_INTERVAL</code> to a positive, non-zero value.
+  Sporadic scheduling scheduling is more complex, varying the priority of a thread over a <i>replenishment</i> period.
+  Support for sporadic scheduling is enabled by the configuration option <code>CONFIG_SCHED_SPORADIC</code>.
 </p>
 <p>
-  The OS interfaces described in the following paragraphs provide
-  a POSIX- compliant interface to the NuttX scheduler:
+  The OS interfaces described in the following paragraphs provide a POSIX- compliant interface to the NuttX scheduler:
 </p>
 <ul>
   <li><a href="#schedsetparam">2.2.1 sched_setparam</a></li>
