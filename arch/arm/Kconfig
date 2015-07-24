@@ -223,6 +223,13 @@ config ARCH_CHIP_STR71X
 	---help---
 		STMicro STR71x architectures (ARM7TDMI).
 
+config ARCH_CHIP_MOXART
+	bool "MoxART"
+	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_RESET
+	---help---
+		MoxART family
+
 endchoice
 
 config ARCH_ARM7TDMI
@@ -319,6 +326,7 @@ config ARCH_CHIP
 	default "stm32"		if ARCH_CHIP_STM32
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "str71x"	if ARCH_CHIP_STR71X
+	default "moxart"	if ARCH_CHIP_MOXART
 
 config ARMV7M_USEBASEPRI
 	bool "Use BASEPRI Register"
@@ -528,6 +536,9 @@ source arch/arm/src/stm32f7/Kconfig
 endif
 if ARCH_CHIP_STR71X
 source arch/arm/src/str71x/Kconfig
+endif
+if ARCH_CHIP_MOXART
+source arch/arm/src/moxart/Kconfig
 endif
 
 endif
