@@ -110,7 +110,7 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
    * if there ever were the case.
    */
 
-  DEBUGASSERT(tcb != NULL l&& ticks <= tcb->timeslice);
+  DEBUGASSERT(tcb != NULL && ticks <= tcb->timeslice);
   decr = MIN(tcb->timeslice, ticks);
 
   /* Decrement the timeslice counter */
