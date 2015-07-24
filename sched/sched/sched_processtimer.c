@@ -107,7 +107,7 @@ static inline void sched_process_scheduler(void)
     }
 #endif
 
-#if CONFIG_RR_INTERVAL > 0
+#ifdef CONFIG_SCHED_SPORADIC
   /* Check if the currently executing task uses sporadic scheduling. */
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
