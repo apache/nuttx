@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/sh/src/common/up_unblocktask.c
  *
- *   Copyright (C) 2008-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,13 +93,9 @@ void up_unblock_task(struct tcb_s *tcb)
 
   sched_removeblocked(tcb);
 
-  /* Reset its timeslice.  This is only meaningful for round
-   * robin tasks but it doesn't here to do it for everything
-   */
+  /* Reset scheduler parameters */
 
-#if CONFIG_RR_INTERVAL > 0
-  tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-#endif
+  sched_resume_scheduler(tcb);
 
   /* Add the task in the correct location in the prioritized
    * g_readytorun task list

@@ -330,14 +330,12 @@ void up_unblock_task(struct tcb_s *tcb)
         struct tcb_s *rtcb = current_task;
 
         /* Remove the task from the blocked task list */
+
         sched_removeblocked(tcb);
 
-        /* Reset its timeslice.  This is only meaningful for round
-         * robin tasks but it doesn't here to do it for everything
-         */
-#if CONFIG_RR_INTERVAL > 0
-        tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-#endif
+        /* Reset scheduler parameters */
+
+        sched_resume_scheduler(tcb);
 
         // Add the task in the correct location in the prioritized
         // g_readytorun task list.
