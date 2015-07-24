@@ -156,7 +156,7 @@ int sched_unlock(void)
                * change the currently active task.
                */
 
-              if (rtcb = (FAR struct tcb_s*)g_readytorun.head)
+              if (rtcb == (FAR struct tcb_s*)g_readytorun.head)
                 {
                   sched_timer_reassess();
                 }
