@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -130,6 +131,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
+      irqstate_t flags;
       int repl_ticks;
       int budget_ticks;
 
@@ -150,17 +152,30 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
           goto errout_with_lock;
         }
 
-      /* Save the sporadic scheduling parameters */
+      /* Stop/reset current sporadic scheduling */
 
-      tcb->flags       |= TCB_FLAG_SCHED_SPORADIC;
-      tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
+      flags = irqsave();
+      DEBUGVERIFY(sched_sporadic_stop(tcb));
+
+      /* Save the sporadic scheduling parameters and reset to the beginning
+       * to the replenishment interval.
+       */
+
+      tcb->timeslice    = budget_ticks;
+      tcb->hi_priority  = param->sched_priority;
       tcb->low_priority = param->sched_ss_low_priority;
       tcb->max_repl     = param->sched_ss_max_repl;
       tcb->repl_period  = repl_ticks;
       tcb->budget       = budget_ticks;
+
+      /* And restart at the next replenishment interval */
+
+      DEBUGVERIFY(sched_sporadic_start(tcb));
+      irqrestore(flags);
     }
   else
     {
+      tcb->hi_priority  = 0;
       tcb->low_priority = 0;
       tcb->max_repl     = 0;
       tcb->repl_period  = 0;

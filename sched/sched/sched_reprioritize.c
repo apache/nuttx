@@ -91,12 +91,12 @@
  *
  * Return Value:
  *   On success, sched_setparam() returns 0 (OK). On error, -1
- *  (ERROR) is returned, and errno is set appropriately.
+ *   (ERROR) is returned, and errno is set appropriately.
  *
- *  EINVAL The parameter 'param' is invalid or does not make sense for the
- *         current scheduling policy.
- *  EPERM  The calling task does not have appropriate privileges.
- *  ESRCH  The task whose ID is pid could not be found.
+ *   EINVAL The parameter 'param' is invalid or does not make sense for the
+ *          current scheduling policy.
+ *   EPERM  The calling task does not have appropriate privileges.
+ *   ESRCH  The task whose ID is pid could not be found.
  *
  * Assumptions:
  *
@@ -124,6 +124,7 @@ int sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
        tcb->npend_reprio   = 0;
 #endif
     }
+
   return ret;
 }
 #endif /* CONFIG_PRIORITY_INHERITANCE */

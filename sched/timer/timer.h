@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <signal.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/wdog.h>

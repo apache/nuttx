@@ -52,6 +52,7 @@
 #include <time.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -485,8 +486,10 @@ struct tcb_s
   uint8_t  base_priority;                /* "Normal" priority of the thread     */
 #endif
 #ifdef CONFIG_SCHED_SPORADIC
+  uint8_t  hi_priority;                  /* Sporadic high priority              */
   uint8_t  low_priority;                 /* Sporadic low priority               */
   uint8_t  max_repl;                     /* Max. replenishments                 */
+  uint8_t  nrepl;                        /* Number replenishments remaining     */
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */
@@ -494,16 +497,16 @@ struct tcb_s
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-  int32_t  timeslice;                    /* RR timeslice OR Sporadic            */
-                                         /* replenishment interval remaining    */
+  int32_t  timeslice;                    /* RR timeslice OR Sporadic budget     */
+                                         /* interval remaining                  */
 #endif
 #ifdef CONFIG_SCHED_SPORADIC
-  uint32_t spstart;                      /* Start time of execution budget      */
   uint32_t repl_period;                  /* Sporadic replenishment period       */
   uint32_t budget;                       /* Sporadic execution budget           */
+  struct wdog_s low_dog;                 /* Times low-priority interval         */
 #endif
 
-  FAR struct wdog_s *waitdog;            /* All timed waits used this wdog      */
+  FAR struct wdog_s *waitdog;            /* All timed waits use this wdog       */
 
   /* Stack-Related Fields *******************************************************/
 

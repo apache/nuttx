@@ -63,6 +63,8 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+struct tcb_s; /* Forward reference */
+
 /* Task start-up */
 
 void task_start(void);

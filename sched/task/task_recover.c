@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sched.h>
@@ -46,31 +48,8 @@
 #include "semaphore/semaphore.h"
 #include "wdog/wdog.h"
 #include "mqueue/mqueue.h"
+#include "sched/sched.h"
 #include "task/task.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -111,5 +90,14 @@ void task_recover(FAR struct tcb_s *tcb)
   /* Handle cases where the thread was waiting for a message queue event */
 
   mq_recover(tcb);
+#endif
+
+#ifndef CONFIG_SCHED_SPORADIC
+  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      /* Stop current sporadic scheduling */
+
+      DEBUGVERIFY(sched_sporadic_stop(tcb));
+    }
 #endif
 }

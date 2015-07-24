@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <sched.h>
+#include <queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions

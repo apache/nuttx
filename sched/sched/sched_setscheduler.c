@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -135,15 +136,19 @@ int sched_setscheduler(pid_t pid, int policy,
         DEBUGPANIC();
       case SCHED_FIFO:
         {
+#ifdef CONFIG_SCHED_SPORADIC
+          /* Cancel any on-going sporadic scheduling */
+
+          if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+            {
+              DEBUGVERIFY(sched_sporadic_stop(tcb));
+            }
+#endif
+          /* Save the FIFO scheduling parameters */
+
           tcb->flags       |= TCB_FLAG_SCHED_FIFO;
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
           tcb->timeslice    = 0;
-#endif
-#ifdef CONFIG_SCHED_SPORADIC
-          tcb->low_priority = 0;
-          tcb->max_repl     = 0;
-          tcb->repl_period  = 0;
-          tcb->budget       = 0;
 #endif
         }
         break;
@@ -151,14 +156,18 @@ int sched_setscheduler(pid_t pid, int policy,
 #if CONFIG_RR_INTERVAL > 0
       case SCHED_RR:
         {
+#ifdef CONFIG_SCHED_SPORADIC
+          /* Cancel any on-going sporadic scheduling */
+
+          if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+            {
+              DEBUGVERIFY(sched_sporadic_stop(tcb));
+            }
+#endif
+          /* Save the round robin scheduling parameters */
+
           tcb->flags       |= TCB_FLAG_SCHED_RR;
           tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
-#ifdef CONFIG_SCHED_SPORADIC
-          tcb->low_priority = 0;
-          tcb->max_repl     = 0;
-          tcb->repl_period  = 0;
-          tcb->budget       = 0;
-#endif
         }
         break;
 #endif
@@ -183,18 +192,28 @@ int sched_setscheduler(pid_t pid, int policy,
           if (repl_ticks < budget_ticks)
             {
               set_errno(EINVAL);
+              irqrestore(saved_state);
               sched_unlock();
               return ERROR;
             }
 
-          /* Save the sporadic scheduling parameters */
+          /* Stop/reset current sporadic scheduling */
+
+          DEBUGVERIFY(sched_sporadic_stop(tcb));
+
+          /* Save the sporadic scheduling parameters. */
 
           tcb->flags       |= TCB_FLAG_SCHED_SPORADIC;
-          tcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
+          tcb->timeslice    = budget_ticks;
+          tcb->hi_priority  = param->sched_priority;
           tcb->low_priority = param->sched_ss_low_priority;
           tcb->max_repl     = param->sched_ss_max_repl;
           tcb->repl_period  = repl_ticks;
           tcb->budget       = budget_ticks;
+
+          /* And restart at the next replenishment interval */
+
+          DEBUGVERIFY(sched_sporadic_start(tcb));
         }
         break;
 #endif

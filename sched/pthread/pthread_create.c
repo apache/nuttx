@@ -45,6 +45,7 @@
 #include <pthread.h>
 #include <sched.h>
 #include <debug.h>
+#include <assert.h>
 #include <errno.h>
 #include <queue.h>
 
@@ -334,6 +335,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 #ifdef CONFIG_SCHED_SPORADIC
       /* Save the sporadic scheduling parameters */
 
+      ptcb->cmn.hi_priority  = priority;
       ptcb->cmn.low_priority = param.sched_ss_low_priority;
       ptcb->cmn.max_repl     = param.sched_ss_max_repl;
 
@@ -374,19 +376,15 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
           /* Save the sporadic scheduling parameters */
 
+          ptcb->cmn.hi_priority  = priority;
           ptcb->cmn.low_priority = attr->low_priority;
           ptcb->cmn.max_repl     = attr->max_repl;
           ptcb->cmn.repl_period  = repl_ticks;
           ptcb->cmn.budget       = budget_ticks;
-        }
-      else
-        {
-          /* Ignore sporadic scheduling parameters */
 
-          ptcb->cmn.low_priority = 0;
-          ptcb->cmn.max_repl     = 0;
-          ptcb->cmn.repl_period  = 0;
-          ptcb->cmn.budget       = 0;
+          /* And start the frist replenishment interval */
+
+          DEBUGVERIFY(sched_sporadic_start(&ptcb->cmn));
         }
 #endif
     }

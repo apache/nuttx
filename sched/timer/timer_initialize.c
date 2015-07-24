@@ -45,6 +45,8 @@
 #include <queue.h>
 #include <errno.h>
 
+#include <arch/irq.h>
+
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS

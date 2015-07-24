@@ -230,7 +230,6 @@ int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
      sched_setpriority(tcb,sched_priority)
 #endif
 
-
 #ifdef CONFIG_SCHED_TICKLESS
 unsigned int sched_timer_cancel(void);
 void sched_timer_resume(void);
@@ -239,6 +238,14 @@ void sched_timer_reassess(void);
 #  define sched_timer_cancel() (0)
 #  define sched_timer_resume()
 #  define sched_timer_reassess()
+#endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+int sched_sporadic_start(FAR struct tcb_s *tcb);
+int sched_sporadic_stop(FAR struct tcb_s *tcb);
+int sched_sporadic_resume(FAR struct tcb_s *tcb);
+uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t,
+                                bool noswitches);
 #endif
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)

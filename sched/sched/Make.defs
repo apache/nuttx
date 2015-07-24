@@ -54,6 +54,10 @@ CSRCS += sched_waitid.c sched_wait.c
 endif
 endif
 
+ifeq ($(CONFIG_SCHED_SPORADIC),y)
+CSRCS += sched_sporadic.c
+endif
+
 ifeq ($(CONFIG_SCHED_CPULOAD),y)
 CSRCS += sched_cpuload.c
 endif
