@@ -150,7 +150,7 @@ static inline void ftintc010_mask_irq(int irq)
   putreg32(mask, IRQ_REG(IRQ__MASK));
 }
 
-static inline void ftintc010_unmask_irq(int irq)
+inline void ftintc010_unmask_irq(int irq)
 {
   /*
    * 0: masked
@@ -163,7 +163,7 @@ static inline void ftintc010_unmask_irq(int irq)
   putreg32(mask, IRQ_REG(IRQ__MASK));
 }
 
-static inline void ftintc010_set_trig_mode(int irq, int mode)
+inline void ftintc010_set_trig_mode(int irq, int mode)
 {
   uint32_t irqmode;
 
@@ -181,11 +181,11 @@ static inline void ftintc010_set_trig_mode(int irq, int mode)
   putreg32(irqmode, IRQ_REG(IRQ__MODE));
 }
 
-static inline void ftintc010_set_trig_level(int irq, int level)
+inline void ftintc010_set_trig_level(int irq, int level)
 {
   uint32_t irqlevel;
 
-  irqlevel = getreg32(IRQ_REG(IRQ__MODE));
+  irqlevel = getreg32(IRQ_REG(IRQ__LEVEL));
 
   /*
    * 0: active-high level trigger / rising edge trigger
@@ -196,7 +196,7 @@ static inline void ftintc010_set_trig_level(int irq, int level)
   else
     irqlevel &= ~(1 << irq);
 
-  putreg32(irqlevel, IRQ_REG(IRQ__MODE));
+  putreg32(irqlevel, IRQ_REG(IRQ__LEVEL));
 }
 
 /****************************************************************************
@@ -289,5 +289,4 @@ void up_decodeirq(uint32_t *regs)
   irq_dispatch(num, regs);
 
   current_regs = NULL;
-  up_lowputc('+');
 }
