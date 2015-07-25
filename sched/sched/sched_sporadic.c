@@ -113,7 +113,7 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
 
   tcb->timeslice = budget;
   ret = wd_start(&repl->timer, sporadic->budget, sporadic_budget_expire,
-                 1, (wdentry_t)sporadic);
+                 1, (wdentry_t)repl);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
@@ -147,7 +147,9 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
   ret = sched_reprioritize(tcb, sporadic->hi_priority);
   if (ret < 0)
     {
-      return -get_errno();
+      int errcode = get_errno();
+      slldbg("ERROR: sched_reprioritize failed: %d\n", errcode);
+      return -errcode;
     }
 
   return OK;
@@ -269,7 +271,9 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
   ret = sched_reprioritize(tcb, sporadic->low_priority);
   if (ret < 0)
     {
-      return -get_errno();
+      int errcode = get_errno();
+      slldbg("ERROR: sched_reprioritize failed: %d\n", errcode);
+      return -errcode;
     }
 
   return OK;
@@ -485,7 +489,8 @@ static void sporadic_timer_cancel(FAR struct tcb_s *tcb)
  *   sporadic - The task's sporadic scheduling state.
  *
  * Returned Value:
- *   The allocated replenishment timer structure; NULL is returned on a failure
+ *   The allocated replenishment timer structure; NULL is returned on a
+ *   failure
  *
  ****************************************************************************/
 
@@ -522,7 +527,6 @@ FAR struct replenishment_s *
   return repl;
 }
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -555,6 +559,7 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
    sporadic = (FAR struct sporadic_s *)kmm_zalloc(sizeof(struct sporadic_s));
    if (sporadic == NULL)
      {
+       slldbg("ERROR: Failed to alloate sporadic data structure\n");
        return -ENOMEM;
      }
 
@@ -768,13 +773,19 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
       /* Allocate a new replenishment timer */
 
       repl = sporadic_alloc_repl(sporadic);
-      if (repl)
+      if (repl != NULL)
         {
           budget = tcb->timeslice;
           return sporadic_budget_start(tcb, repl, budget);
         }
 
-      return -ENOMEM;
+      /* We need to return success even on a failure to allocate.  Doing
+       * nothing is our fall-back behavior and that is not a failure from
+       * the standpoint of higher level logic.
+       */
+
+      slldbg("ERROR failed to allocate timer, nrepls=%d\n",
+             sporadic->nrepls);
     }
 
   return OK;
