@@ -91,7 +91,9 @@ static int sched_sporadic_replenish_start(FAR struct tcb_s *tcb)
   /* Start the next replenishment interval */
 
   tcb->timeslice = tcb->budget;
+#ifdef __REVISIT_REPLENISHMENTS
   tcb->nrepl = tcb->max_repl;
+#endif
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
@@ -249,8 +251,10 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 
   tcb->hi_priority  = 0;
   tcb->low_priority = 0;
+#ifdef __REVISIT_REPLENISHMENTS
   tcb->max_repl     = 0;
   tcb->nrepl        = 0;
+#endif
   tcb->timeslice    = 0;
   tcb->repl_period  = 0;
   tcb->budget       = 0;
@@ -287,6 +291,15 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb);
 
+  /* REVISIT: This logic is wrong.  In order to correctly implement
+   * replenishments, we would need to add:  (1) logic to keep more
+   * accurate accounting of the expended budget execution time, and (2)
+   * multiple timers to handle the nested replenishment intervals.
+   *
+   * The logic here works as is but effective max_repl == 1.
+   */
+
+#ifdef __REVISIT_REPLENISHMENTS
   /* Make sure that we are in the budget portion of the replenishment
    * interval.  We know this is the case if the current timeslice is
    * non-zero.  Do not exceed the maximum number of replenishments.
@@ -297,6 +310,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
       tcb->timeslice = tcb->budget;
       tcb->nrepl--;
     }
+#endif
 
   return OK;
 }

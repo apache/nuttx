@@ -135,7 +135,9 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       int repl_ticks;
       int budget_ticks;
 
+#ifdef __REVISIT_REPLENISHMENTS
       DEBUGASSERT(param->sched_ss_max_repl <= UINT8_MAX);
+#endif
 
       /* Convert timespec values to system clock ticks */
 
@@ -164,7 +166,9 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       tcb->timeslice    = budget_ticks;
       tcb->hi_priority  = param->sched_priority;
       tcb->low_priority = param->sched_ss_low_priority;
+#ifdef __REVISIT_REPLENISHMENTS
       tcb->max_repl     = param->sched_ss_max_repl;
+#endif
       tcb->repl_period  = repl_ticks;
       tcb->budget       = budget_ticks;
 
@@ -177,7 +181,9 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
     {
       tcb->hi_priority  = 0;
       tcb->low_priority = 0;
+#ifdef __REVISIT_REPLENISHMENTS
       tcb->max_repl     = 0;
+#endif
       tcb->repl_period  = 0;
       tcb->budget       = 0;
     }

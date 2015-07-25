@@ -284,6 +284,8 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 
   if (rtcb != ntcb)
     {
+       /* Recurse just to get the correct return value */
+
        return sched_process_scheduler(0, true);
     }
 
@@ -657,7 +659,7 @@ void sched_timer_resume(void)
  *
  *   The kludge/work-around is simple to keep the timer running all of the
  *   time with an interval of no more than the timeslice interval.  If we
- *   this, then there is really no need to do anything when on context
+ *   do this, then there is really no need to do anything on context
  *   switches.
  *
  * Input Parameters:

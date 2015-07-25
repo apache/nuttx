@@ -142,7 +142,11 @@ int sched_getparam (pid_t pid, FAR struct sched_param *param)
           /* Return parameters associated with SCHED_SPORADIC */
 
           param->sched_ss_low_priority = (int)tcb->low_priority;
+#ifdef __REVISIT_REPLENISHMENTS
           param->sched_ss_max_repl     = (int)tcb->max_repl;
+#else
+          param->sched_ss_max_repl     = 1;
+#endif
 
           clock_ticks2time((int)tcb->repl_period, &param->sched_ss_repl_period);
           clock_ticks2time((int)tcb->budget, &param->sched_ss_init_budget);

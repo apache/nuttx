@@ -488,8 +488,10 @@ struct tcb_s
 #ifdef CONFIG_SCHED_SPORADIC
   uint8_t  hi_priority;                  /* Sporadic high priority              */
   uint8_t  low_priority;                 /* Sporadic low priority               */
+#ifdef __REVISIT_REPLENISHMENTS
   uint8_t  max_repl;                     /* Max. replenishments                 */
   uint8_t  nrepl;                        /* Number replenishments remaining     */
+#endif
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */
@@ -506,7 +508,7 @@ struct tcb_s
   struct wdog_s low_dog;                 /* Times low-priority interval         */
 #endif
 
-  FAR struct wdog_s *waitdog;            /* All timed waits use this wdog       */
+  FAR struct wdog_s *waitdog;            /* All timed waits use this timer      */
 
   /* Stack-Related Fields *******************************************************/
 

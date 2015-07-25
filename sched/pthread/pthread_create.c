@@ -337,7 +337,9 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       ptcb->cmn.hi_priority  = priority;
       ptcb->cmn.low_priority = param.sched_ss_low_priority;
+#ifdef __REVISIT_REPLENISHMENTS
       ptcb->cmn.max_repl     = param.sched_ss_max_repl;
+#endif
 
       (void)clock_time2ticks(&param.sched_ss_repl_period, &ticks);
       ptcb->cmn.repl_period  = ticks;
@@ -378,7 +380,9 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
           ptcb->cmn.hi_priority  = priority;
           ptcb->cmn.low_priority = attr->low_priority;
+#ifdef __REVISIT_REPLENISHMENTS
           ptcb->cmn.max_repl     = attr->max_repl;
+#endif
           ptcb->cmn.repl_period  = repl_ticks;
           ptcb->cmn.budget       = budget_ticks;
 
