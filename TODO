@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 14, 2015)
+NuttX TODO List (Last updated July 25, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues reated to each board port.
 
 nuttx/
 
- (11)  Task/Scheduler (sched/)
+ (12)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
@@ -212,6 +212,22 @@ o Task/Scheduler (sched/)
                exists.
   Status:      Open
   Priority:    Medium-ish
+
+  Title:       TICKLESS SCHEDULING INACCURACIES
+  Description: Interval timers are set up to determine timing for round-
+               robin and sporadic scheduling policies.  In the timer
+               interrupt mode, the budget remaining for the thread is
+               decremented on each timer interrupt and so is always
+               accurate to within one clock time.  So when the task
+               suspended, the remaining budget is accurate.
+
+               But in tickless mode, the budget is only updated on the
+               expiration of the timer.  So if the task is suspended by an
+               asynchronous event, the budget will fail to decrement and the
+               task will get a larger share of CPU that is deserves in those
+               cases.
+  Status:      Open
+  Priority:    Low.  I am not aware of any real world issues.
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^

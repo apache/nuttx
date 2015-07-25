@@ -246,9 +246,11 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
-int sched_sporadic_start(FAR struct tcb_s *tcb);
-int sched_sporadic_stop(FAR struct tcb_s *tcb);
-int sched_sporadic_resume(FAR struct tcb_s *tcb);
+int  sched_sporadic_initialize(FAR struct tcb_s *tcb);
+int  sched_sporadic_start(FAR struct tcb_s *tcb);
+int  sched_sporadic_stop(FAR struct tcb_s *tcb);
+int  sched_sporadic_reset(FAR struct tcb_s *tcb);
+int  sched_sporadic_resume(FAR struct tcb_s *tcb);
 uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
                                 bool noswitches);
 void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);

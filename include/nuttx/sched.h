@@ -116,6 +116,12 @@
 #  undef HAVE_GROUP_MEMBERS
 #endif
 
+/* Sporadic scheduling */
+
+#ifndef CONFIG_SCHED_SPORADIC_MAXREPL
+#  define CONFIG_SCHED_SPORADIC_MAXREPL 3
+#endif
+
 /* Task Management Definitions **************************************************/
 /* Special task IDS.  Any negative PID is invalid. */
 
@@ -234,10 +240,49 @@ typedef CODE void (*atexitfunc_t)(void);
 typedef CODE void (*onexitfunc_t)(int exitcode, FAR void *arg);
 #endif
 
+/* struct sporadic_s *************************************************************/
+
+#ifdef CONFIG_SCHED_SPORADIC
+
+/* This structure represents oen replenishment interval.  This is what is
+ * received by each timeout handler.
+ */
+
+struct sporadic_s;
+struct replenishment_s
+{
+  FAR struct tcb_s *tcb;            /* The parent TCB structure                 */
+  struct wdog_s timer;              /* Timer dedicated to this interval         */
+  bool active;                      /* True: replenishment instance is busy     */
+};
+
+/* This structure is an allocated "plug-in" to the main TCB structure.  It is
+ * allocated when the sporadic scheduling policy is assigned to a thread.  Thus,
+ * in the context of numerous threads of varying policies, there the overhead
+ * from this significant allocation is only borne by the threads with the
+ * sporadic scheduling policy.
+ */
+
+struct sporadic_s
+{
+  uint8_t  hi_priority;             /* Sporadic high priority                   */
+  uint8_t  low_priority;            /* Sporadic low priority                    */
+  uint8_t  max_repl;                /* Maximum number of replenishments         */
+  uint8_t  nrepls;                  /* Number of active replenishments          */
+  uint32_t repl_period;             /* Sporadic replenishment period            */
+  uint32_t budget;                  /* Sporadic execution budget period         */
+  uint32_t pending;                 /* Unrealized, pending execution time       */
+
+  /* This is the list of replenishment intervals */
+
+  struct replenishment_s replenishments[CONFIG_SCHED_SPORADIC_MAXREPL];
+};
+
+#endif /* CONFIG_SCHED_SPORADIC */
+
 /* struct child_status_s *********************************************************/
-/* This structure is used to maintin information about child tasks.
- * pthreads work differently, they have join information.  This is
- * only for child tasks.
+/* This structure is used to maintain information about child tasks.  pthreads
+ * work differently, they have join information.  This is only for child tasks.
  */
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
@@ -245,9 +290,9 @@ struct child_status_s
 {
   FAR struct child_status_s *flink;
 
-  uint8_t ch_flags;           /* Child status:  See CHILD_FLAG_* definitions */
-  pid_t   ch_pid;             /* Child task ID */
-  int     ch_status;          /* Child exit status */
+  uint8_t ch_flags;                 /* Child status:  See CHILD_FLAG_* defns     */
+  pid_t   ch_pid;                   /* Child task ID                             */
+  int     ch_status;                /* Child exit status                         */
 };
 #endif
 
@@ -478,20 +523,12 @@ struct tcb_s
   entry_t  entry;                        /* Entry Point into the thread         */
   uint8_t  sched_priority;               /* Current priority of the thread      */
 
-#if defined(CONFIG_PRIORITY_INHERITANCE) && CONFIG_PRIORITY_INHERITANCE > 0
+#ifdef CONFIG_PRIORITY_INHERITANCE
+#if CONFIG_SEM_NNESTPRIO > 0
   uint8_t  npend_reprio;                 /* Number of nested reprioritizations  */
   uint8_t  pend_reprios[CONFIG_SEM_NNESTPRIO];
 #endif
-#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_SCHED_SPORADIC)
   uint8_t  base_priority;                /* "Normal" priority of the thread     */
-#endif
-#ifdef CONFIG_SCHED_SPORADIC
-  uint8_t  hi_priority;                  /* Sporadic high priority              */
-  uint8_t  low_priority;                 /* Sporadic low priority               */
-#ifdef __REVISIT_REPLENISHMENTS
-  uint8_t  max_repl;                     /* Max. replenishments                 */
-  uint8_t  nrepl;                        /* Number replenishments remaining     */
-#endif
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */
@@ -503,9 +540,7 @@ struct tcb_s
                                          /* interval remaining                  */
 #endif
 #ifdef CONFIG_SCHED_SPORADIC
-  uint32_t repl_period;                  /* Sporadic replenishment period       */
-  uint32_t budget;                       /* Sporadic execution budget           */
-  struct wdog_s low_dog;                 /* Times low-priority interval         */
+  FAR struct sporadic_s *sporadic;       /* Sporadic scheduling parameters      */
 #endif
 
   FAR struct wdog_s *waitdog;            /* All timed waits use this timer      */

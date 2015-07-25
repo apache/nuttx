@@ -134,22 +134,35 @@ int sched_getparam (pid_t pid, FAR struct sched_param *param)
         }
       else
         {
+#ifdef CONFIG_SCHED_SPORADIC
+#endif
           /* Return the priority of the task */
 
           param->sched_priority = (int)tcb->sched_priority;
 
 #ifdef CONFIG_SCHED_SPORADIC
-          /* Return parameters associated with SCHED_SPORADIC */
+          if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+            {
+              FAR struct sporadic_s *sporadic = tcb->sporadic;
+              DEBUGASSERT(sporadic != NULL);
 
-          param->sched_ss_low_priority = (int)tcb->low_priority;
-#ifdef __REVISIT_REPLENISHMENTS
-          param->sched_ss_max_repl     = (int)tcb->max_repl;
-#else
-          param->sched_ss_max_repl     = 1;
-#endif
+              /* Return parameters associated with SCHED_SPORADIC */
 
-          clock_ticks2time((int)tcb->repl_period, &param->sched_ss_repl_period);
-          clock_ticks2time((int)tcb->budget, &param->sched_ss_init_budget);
+              param->sched_ss_low_priority = (int)sporadic->low_priority;
+              param->sched_ss_max_repl     = (int)sporadic->max_repl;
+
+              clock_ticks2time((int)sporadic->repl_period, &param->sched_ss_repl_period);
+              clock_ticks2time((int)sporadic->budget, &param->sched_ss_init_budget);
+            }
+          else
+            {
+              param->sched_ss_low_priority        = 0;
+              param->sched_ss_max_repl            = 0;
+              param->sched_ss_repl_period.tv_sec  = 0;
+              param->sched_ss_repl_period.tv_nsec = 0;
+              param->sched_ss_init_budget.tv_sec  = 0;
+              param->sched_ss_init_budget.tv_nsec = 0;
+            }
 #endif
         }
 

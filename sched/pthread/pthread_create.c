@@ -228,7 +228,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 {
   FAR struct pthread_tcb_s *ptcb;
   FAR struct join_s *pjoin;
-  int priority;
+  struct sched_param param;
   int policy;
   int errcode;
   pid_t pid;
@@ -298,18 +298,13 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       goto errout_with_join;
     }
 
-  /* Should we use the priority and scheduler specified in the
-   * pthread attributes?  Or should we use the current thread's
-   * priority and scheduler?
+  /* Should we use the priority and scheduler specified in the pthread
+   * attributes?  Or should we use the current thread's priority and
+   * scheduler?
    */
 
   if (attr->inheritsched == PTHREAD_INHERIT_SCHED)
     {
-      struct sched_param param;
-#ifdef CONFIG_SCHED_SPORADIC
-      int ticks;
-#endif
-
       /* Get the priority (and any other scheduling parameters) for this
        * thread.
        */
@@ -321,8 +316,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
           goto errout_with_join;
         }
 
-      priority = param.sched_priority;
-
       /* Get the scheduler policy for this thread */
 
       policy = sched_getscheduler(0);
@@ -331,71 +324,81 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
           errcode = get_errno();
           goto errout_with_join;
         }
-
-#ifdef CONFIG_SCHED_SPORADIC
-      /* Save the sporadic scheduling parameters */
-
-      ptcb->cmn.hi_priority  = priority;
-      ptcb->cmn.low_priority = param.sched_ss_low_priority;
-#ifdef __REVISIT_REPLENISHMENTS
-      ptcb->cmn.max_repl     = param.sched_ss_max_repl;
-#endif
-
-      (void)clock_time2ticks(&param.sched_ss_repl_period, &ticks);
-      ptcb->cmn.repl_period  = ticks;
-
-      (void)clock_time2ticks(&param.sched_ss_init_budget, &ticks);
-      ptcb->cmn.budget       = ticks;
-#endif
     }
   else
     {
-      /* Use the priority and scheduler from the attributes */
+      /* Use the scheduler policy and policy the attributes */
 
-      priority = attr->priority;
-      policy   = attr->policy;
+      policy                             = attr->policy;
+      param.sched_priority               = attr->priority;
 
 #ifdef CONFIG_SCHED_SPORADIC
-      if (policy == SCHED_SPORADIC)
-        {
-          int repl_ticks;
-          int budget_ticks;
-
-          /* Convert timespec values to system clock ticks */
-
-          (void)clock_time2ticks(&attr->repl_period, &repl_ticks);
-          (void)clock_time2ticks(&attr->budget, &budget_ticks);
-
-          /* The replenishment period must be greater than or equal to the
-           * budget period.
-           */
-
-          if (repl_ticks < budget_ticks)
-            {
-              errcode = EINVAL;
-              goto errout_with_join;
-            }
-
-          /* Save the sporadic scheduling parameters */
-
-          ptcb->cmn.hi_priority  = priority;
-          ptcb->cmn.low_priority = attr->low_priority;
-#ifdef __REVISIT_REPLENISHMENTS
-          ptcb->cmn.max_repl     = attr->max_repl;
-#endif
-          ptcb->cmn.repl_period  = repl_ticks;
-          ptcb->cmn.budget       = budget_ticks;
-
-          /* And start the frist replenishment interval */
-
-          DEBUGVERIFY(sched_sporadic_start(&ptcb->cmn));
-        }
+      param.sched_ss_low_priority        = attr->low_priority;
+      param.sched_ss_max_repl            = attr->max_repl;
+      param.sched_ss_repl_period.tv_sec  = attr->repl_period.tv_sec;
+      param.sched_ss_repl_period.tv_nsec = attr->repl_period.tv_nsec;
+      param.sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
+      param.sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
 #endif
     }
 
+#ifdef CONFIG_SCHED_SPORADIC
+  if (policy == SCHED_SPORADIC)
+    {
+      FAR struct sporadic_s *sporadic;
+      int repl_ticks;
+      int budget_ticks;
+
+      /* Convert timespec values to system clock ticks */
+
+      (void)clock_time2ticks(&param.sched_ss_repl_period, &repl_ticks);
+      (void)clock_time2ticks(&param.sched_ss_init_budget, &budget_ticks);
+
+      /* The replenishment period must be greater than or equal to the
+       * budget period.
+       */
+
+      if (repl_ticks < budget_ticks)
+        {
+          errcode = EINVAL;
+          goto errout_with_join;
+        }
+
+      /* Initialize the sporadic policy */
+
+      ret = sched_sporadic_initialize(&ptcb->cmn);
+      if (ret >= 0)
+        {
+          sporadic               = ptcb->cmn.sporadic;
+          DEBUGASSERT(sporadic != NULL);
+
+          /* Save the sporadic scheduling parameters */
+
+          sporadic->hi_priority  = param.sched_priority;
+          sporadic->low_priority = param.sched_ss_low_priority;
+          sporadic->max_repl     = param.sched_ss_max_repl;
+          sporadic->repl_period  = repl_ticks;
+          sporadic->budget       = budget_ticks;
+
+          /* And start the first replenishment interval */
+
+          ret = sched_sporadic_start(&ptcb->cmn);
+        }
+
+      /* Handle any failures */
+
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_join;
+        }
+    }
+#endif
+
   /* Initialize the task control block */
 
-  ret = pthread_schedsetup(ptcb, priority, pthread_start, start_routine);
+  ret = pthread_schedsetup(ptcb, param.sched_priority, pthread_start,
+                           start_routine);
   if (ret != OK)
     {
       errcode = EBUSY;

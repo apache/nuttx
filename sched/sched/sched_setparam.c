@@ -131,18 +131,34 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
+      FAR struct sporadic_s *sporadic;
       irqstate_t flags;
       int repl_ticks;
       int budget_ticks;
 
-#ifdef __REVISIT_REPLENISHMENTS
-      DEBUGASSERT(param->sched_ss_max_repl <= UINT8_MAX);
-#endif
+      if (param->sched_ss_max_repl < 1 ||
+          param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)
+        {
+          errcode = EINVAL;
+          goto errout_with_lock;
+        }
 
       /* Convert timespec values to system clock ticks */
 
       (void)clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
       (void)clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
+
+      /* Avoid zero/negative times */
+
+      if (repl_ticks < 1)
+        {
+          repl_ticks = 1;
+        }
+
+      if (budget_ticks < 1)
+        {
+          budget_ticks = 1;
+        }
 
       /* The replenishment period must be greater than or equal to the
        * budget period.
@@ -157,35 +173,37 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       /* Stop/reset current sporadic scheduling */
 
       flags = irqsave();
-      DEBUGVERIFY(sched_sporadic_stop(tcb));
+      ret = sched_sporadic_reset(tcb);
+      if (ret >= 0)
+        {
+          /* Save the sporadic scheduling parameters and reset to the
+           * beginning to the replenishment interval.
+           */
 
-      /* Save the sporadic scheduling parameters and reset to the beginning
-       * to the replenishment interval.
-       */
+          tcb->timeslice         = budget_ticks;
 
-      tcb->timeslice    = budget_ticks;
-      tcb->hi_priority  = param->sched_priority;
-      tcb->low_priority = param->sched_ss_low_priority;
-#ifdef __REVISIT_REPLENISHMENTS
-      tcb->max_repl     = param->sched_ss_max_repl;
-#endif
-      tcb->repl_period  = repl_ticks;
-      tcb->budget       = budget_ticks;
+          sporadic = rtcb->sporadic;
+          DEBUGASSERT(sporadic != NULL);
 
-      /* And restart at the next replenishment interval */
+          sporadic->hi_priority  = param->sched_priority;
+          sporadic->low_priority = param->sched_ss_low_priority;
+          sporadic->max_repl     = param->sched_ss_max_repl;
+          sporadic->repl_period  = repl_ticks;
+          sporadic->budget       = budget_ticks;
 
-      DEBUGVERIFY(sched_sporadic_start(tcb));
+          /* And restart at the next replenishment interval */
+
+          ret = sched_sporadic_start(tcb);
+        }
+
+      /* Restore interrupts and handler errors */
+
       irqrestore(flags);
-    }
-  else
-    {
-      tcb->hi_priority  = 0;
-      tcb->low_priority = 0;
-#ifdef __REVISIT_REPLENISHMENTS
-      tcb->max_repl     = 0;
-#endif
-      tcb->repl_period  = 0;
-      tcb->budget       = 0;
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_lock;
+        }
     }
 #endif
 

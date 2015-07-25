@@ -311,7 +311,17 @@ config SCHED_SPORADIC
 	bool "Support sporadic scheduling"
 	default n
 	---help---
-		Build in additional logic to support sporadic scheduling (SCHED_SPORADIC).
+		Build in additional logic to support sporadic scheduling
+		(SCHED_SPORADIC).
+
+config SCHED_SPORADIC_MAXREPL
+	int "Maximum number of replenishments"
+	default 3
+	range 1 255
+	depends on SCHED_SPORADIC
+	---help---
+		Controls the size of allocated replenishment structures and, hence,
+		also limits the maximum number of replenishments.
 
 config TASK_NAME_SIZE
 	int "Maximum task name size"
