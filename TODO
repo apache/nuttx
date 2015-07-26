@@ -226,6 +226,16 @@ o Task/Scheduler (sched/)
                asynchronous event, the budget will fail to decrement and the
                task will get a larger share of CPU that is deserves in those
                cases.
+
+               UPDATE: The hook sched_suspend_scheduler() has been added to
+               all locations where a thread is suspended.  This would be
+               the place to assess any partial intervals: You would have to
+               save the current time when the timer is started then when
+               suspended, you would have to assess the elapsed portion of
+               that time and subtract that from the TCB timeslice value.
+
+               The hook is present, but logic has been implemented.
+
   Status:      Open
   Priority:    Low.  I am not aware of any real world issues.
 

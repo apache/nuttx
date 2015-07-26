@@ -111,8 +111,8 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
 
   /* Start the next replenishment interval */
 
-  tcb->timeslice = budget;
-  tcb->current   = budget;
+  tcb->timeslice    = budget;
+  sporadic->current = budget;
 
   ret = wd_start(&repl->timer, budget, sporadic_budget_expire, 1,
                  (wdentry_t)repl);
@@ -311,8 +311,8 @@ static int sporadic_interval_start(FAR struct replenishment_s *repl)
 
   /* Enter the low-priority phase of the replenishment cycle */
 
-  tcb->timeslice = 0;
-  tcb->current   = 0;
+  tcb->timeslice    = 0;
+  sporadic->current = 0;
 
   /* Calculate the remainder of the replenishment interval.  This is
    * permitted to be zero, in which case we just restart the budget
@@ -673,7 +673,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 
   /* The free the container holder the sporadic scheduling parameters */
 
-  kmm_free(tcb->sporadic);
+  sched_kfree(tcb->sporadic);
   tcb->sporadic = NULL;
   return OK;
 }
@@ -873,6 +873,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
     {
       /* Does the thread have the scheduler locked? */
 
+      sporadic = tcb->sporadic;
       if (tcb->lockcount > 0)
         {
           /* Yes... then we have no option but to give the thread more
@@ -912,7 +913,6 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
        * good thing to do, but is certainly permitted.
        */
 
-      sporadic = tcb->sporadic;
       if (sporadic->budget >= sporadic->repl_period)
         {
           tcb->timeslice    = sporadic->budget;
