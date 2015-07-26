@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-a/arm_releasepending.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,18 +48,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -86,9 +74,14 @@ void up_release_pending(void)
   if (sched_mergepending())
     {
       /* The currently active task has changed!  We will need to
-       * switch contexts.  First check if we are operating in
-       * interrupt context:
+       * switch contexts.
        */
+
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
+
+      /* Are we operating in interrupt context? */
 
       if (current_regs)
         {
@@ -103,7 +96,10 @@ void up_release_pending(void)
            */
 
           rtcb = (struct tcb_s*)g_readytorun.head;
-          slldbg("New Active Task TCB=%p\n", rtcb);
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts.  Any necessary address environment
            * changes will be made when the interrupt returns.
@@ -125,7 +121,6 @@ void up_release_pending(void)
            */
 
           rtcb = (struct tcb_s*)g_readytorun.head;
-          slldbg("New Active Task TCB=%p\n", rtcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously
@@ -136,7 +131,11 @@ void up_release_pending(void)
 
           (void)group_addrenv(rtcb);
 #endif
-           /* Then switch contexts */
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
+
+          /* Then switch contexts */
 
           up_fullcontextrestore(rtcb->xcp.regs);
         }

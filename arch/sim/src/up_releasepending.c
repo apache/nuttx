@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_releasepending.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,18 +47,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -84,10 +72,17 @@ void up_release_pending(void)
   /* sched_lock(); */
   if (sched_mergepending())
     {
-      /* The currently active task has changed! Copy the exception context
-       * into the TCB of the task that was currently active. if up_setjmp
-       * returns a non-zero value, then this is really the previously
-       * running task restarting!
+      /* The currently active task has changed!  We will need to switch
+       * contexts.
+       *
+       * Update scheduler parameters.
+       */
+
+      sched_suspend_scheduler(rtcb);
+
+      /* Copy the exception context into the TCB of the task that was
+       * currently active. if up_setjmp returns a non-zero value, then
+       * this is really the previously running task restarting!
        */
 
       if (!up_setjmp(rtcb->xcp.regs))
@@ -111,7 +106,11 @@ void up_release_pending(void)
               rtcb->xcp.sigdeliver = NULL;
             }
 
-           /* Then switch contexts */
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
+
+          /* Then switch contexts */
 
           up_longjmp(rtcb->xcp.regs, 1);
         }

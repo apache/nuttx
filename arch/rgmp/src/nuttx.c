@@ -404,24 +404,38 @@ void up_unblock_task(struct tcb_s *tcb)
 
 void up_release_pending(void)
 {
-    struct tcb_s *rtcb = current_task;
+  struct tcb_s *rtcb = current_task;
 
-    /* Merge the g_pendingtasks list into the g_readytorun task list */
+  /* Merge the g_pendingtasks list into the g_readytorun task list */
 
-    if (sched_mergepending()) {
-        /* The currently active task has changed! */
-        struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+  if (sched_mergepending())
+    {
+      struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+
+      /* The currently active task has changed!  We will need to switch
+       * contexts.
+       *
+       * Update scheduler parameters.
+       */
+
+      sched_suspend_scheduler(rtcb);
+
 #ifdef CONFIG_ARCH_ADDRENV
-        /* Make sure that the address environment for the previously
-         * running task is closed down gracefully (data caches dump,
-         * MMU flushed) and set up the address environment for the new
-         * thread at the head of the ready-to-run list.
-         */
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
 
-        (void)group_addrenv(nexttcb);
+      (void)group_addrenv(nexttcb);
 #endif
-        // context switch
-        up_switchcontext(rtcb, nexttcb);
+      /* Update scheduler parameters */
+
+      sched_resume_scheduler(nexttcb);
+
+      /* context switch */
+
+      up_switchcontext(rtcb, nexttcb);
     }
 }
 

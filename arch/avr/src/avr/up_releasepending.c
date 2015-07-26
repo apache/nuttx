@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/avr/src/avr/up_releasepending.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,18 +47,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -84,10 +72,13 @@ void up_release_pending(void)
   /* sched_lock(); */
   if (sched_mergepending())
     {
-      /* The currently active task has changed!  We will need to
-       * switch contexts.  First check if we are operating in
-       * interrupt context:
+      /* The currently active task has changed!  We will need to switch
+       * contexts.
        */
+
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
 
       if (current_regs)
         {
@@ -102,7 +93,10 @@ void up_release_pending(void)
            */
 
           rtcb = (struct tcb_s*)g_readytorun.head;
-          slldbg("New Active Task TCB=%p\n", rtcb);
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 
@@ -113,11 +107,16 @@ void up_release_pending(void)
 
       else
         {
+          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(nexttcb);
+
           /* Switch context to the context of the task at the head of the
            * ready to run list.
            */
 
-          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
           up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
           /* up_switchcontext forces a context switch to the task at the
