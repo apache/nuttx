@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/sched/sched_resumescheduler.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,16 +48,17 @@
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 
-/************************************************************************
- * Global Functions
- ************************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: sched_resume_scheduler
  *
  * Description:
- *   Called by architecture specific implementation of up_unblock_task() in
- *   order to prepare the scheduler for the thread that is about to be restarted.
+ *   Called by architecture specific implementations that block task
+ *   execution.  This function prepares the scheduler for the thread that is
+ *   about to be restarted.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread to be restarted.
@@ -65,7 +66,7 @@
  * Returned Value:
  *   None
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 void sched_resume_scheduler(FAR struct tcb_s *tcb)
 {

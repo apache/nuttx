@@ -271,7 +271,8 @@ struct sporadic_s
   uint8_t  nrepls;                  /* Number of active replenishments          */
   uint32_t repl_period;             /* Sporadic replenishment period            */
   uint32_t budget;                  /* Sporadic execution budget period         */
-  uint32_t pending;                 /* Unrealized, pending execution time       */
+  uint32_t current;                 /* Unrealized, current budget time          */
+  uint32_t pending;                 /* Unrealized, pending execution budget     */
 
   /* This is the list of replenishment intervals */
 
@@ -769,8 +770,9 @@ void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
  * Name: sched_resume_scheduler
  *
  * Description:
- *   Called by architecture specific implementation of up_unblock_task() in
- *   order to prepare the scheduler for the thread that is about to be restarted.
+ *   Called by architecture specific implementations that block task execution.
+ *   This function prepares the scheduler for the thread that is about to be
+ *   restarted.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread to be restarted.
@@ -785,6 +787,26 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_resume_scheduler(tcb)
 #endif
+
+/********************************************************************************
+ * Name: sched_suspend_scheduler
+ *
+ * Description:
+ *   Called by architecture specific implementations the start task execution.
+ *   This function performs scheduler operations for the thread that is about to
+ *   be suspended.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread to be restarted.
+ *
+ * Returned Value:
+ *   None
+ *
+ ********************************************************************************/
+
+/* Just a place-holder for now */
+
+#define sched_suspend_scheduler(tcb)
 
 #undef EXTERN
 #if defined(__cplusplus)
