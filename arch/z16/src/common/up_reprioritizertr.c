@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_reprioritizertr.c
  *
- *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,18 +49,6 @@
 #include "chip/chip.h"
 #include "sched/sched.h"
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -144,6 +132,10 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
               sched_mergepending();
             }
 
+          /* Update scheduler parameters */
+
+          sched_suspend_scheduler(rtcb);
+
           /* Are we in an interrupt handler? */
 
           if (IN_INTERRUPT)
@@ -159,7 +151,10 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
                */
 
               rtcb = (FAR struct tcb_s*)g_readytorun.head;
-              slldbg("New Active Task TCB=%p\n", rtcb);
+
+              /* Update scheduler parameters */
+
+              sched_resume_scheduler(rtcb);
 
               /* Then setup so that the context will be performed on exit
                * from the interrupt.
@@ -180,7 +175,10 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
                */
 
               rtcb = (FAR struct tcb_s*)g_readytorun.head;
-              slldbg("New Active Task TCB=%p\n", rtcb);
+
+              /* Update scheduler parameters */
+
+              sched_resume_scheduler(rtcb);
 
               /* Then switch contexts */
 

@@ -59,25 +59,28 @@
 
 struct tcb_s *current_task = NULL;
 
-/**
- * This function is called in non-interrupt context
+/* This function is called in non-interrupt context
  * to switch tasks.
  * Assumption: global interrupt is disabled.
  */
+
 static inline void up_switchcontext(struct tcb_s *ctcb, struct tcb_s *ntcb)
 {
-    // do nothing if two tasks are the same
-    if (ctcb == ntcb)
-        return;
+  // do nothing if two tasks are the same
 
-    // this function can not be called in interrupt
-    if (up_interrupt_context()) {
-        panic("%s: try to switch context in interrupt\n", __func__);
-    }
+  if (ctcb == ntcb)
+    return;
 
-    // start switch
-    current_task = ntcb;
-    rgmp_context_switch(ctcb ? &ctcb->xcp.ctx : NULL, &ntcb->xcp.ctx);
+  // this function can not be called in interrupt
+
+  if (up_interrupt_context()) {
+     panic("%s: try to switch context in interrupt\n", __func__);
+  }
+
+  // start switch
+
+  current_task = ntcb;
+  rgmp_context_switch(ctcb ? &ctcb->xcp.ctx : NULL, &ntcb->xcp.ctx);
 }
 
 void up_initialize(void)
@@ -424,66 +427,89 @@ void up_release_pending(void)
 
 void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 {
-    /* Verify that the caller is sane */
+  /* Verify that the caller is sane */
 
-    if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
-        tcb->task_state > LAST_READY_TO_RUN_STATE
+  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
+      tcb->task_state > LAST_READY_TO_RUN_STATE
 #if SCHED_PRIORITY_MIN > UINT8_MIN
-        || priority < SCHED_PRIORITY_MIN
+      || priority < SCHED_PRIORITY_MIN
 #endif
 #if SCHED_PRIORITY_MAX < UINT8_MAX
-        || priority > SCHED_PRIORITY_MAX
+      || priority > SCHED_PRIORITY_MAX
 #endif
-        ) {
-        warn("%s: task sched error\n", __func__);
-        return;
+      )
+    {
+      warn("%s: task sched error\n", __func__);
+      return;
     }
-    else {
-        struct tcb_s *rtcb = current_task;
-        bool switch_needed;
+  else
+    {
+      struct tcb_s *rtcb = current_task;
+      bool switch_needed;
 
-        /* Remove the tcb task from the ready-to-run list.
-         * sched_removereadytorun will return true if we just
-         * remove the head of the ready to run list.
-         */
-        switch_needed = sched_removereadytorun(tcb);
+      /* Remove the tcb task from the ready-to-run list.
+       * sched_removereadytorun will return true if we just
+       * remove the head of the ready to run list.
+       */
 
-        /* Setup up the new task priority */
-        tcb->sched_priority = (uint8_t)priority;
+      switch_needed = sched_removereadytorun(tcb);
 
-        /* Return the task to the specified blocked task list.
-         * sched_addreadytorun will return true if the task was
-         * added to the new list.  We will need to perform a context
-         * switch only if the EXCLUSIVE or of the two calls is non-zero
-         * (i.e., one and only one the calls changes the head of the
-         * ready-to-run list).
-         */
-        switch_needed ^= sched_addreadytorun(tcb);
+      /* Setup up the new task priority */
 
-        /* Now, perform the context switch if one is needed */
-        if (switch_needed && !up_interrupt_context()) {
-            struct tcb_s *nexttcb;
-            // If there are any pending tasks, then add them to the g_readytorun
-            // task list now. It should be the up_realease_pending() called from
-            // sched_unlock() to do this for disable preemption. But it block
-            // itself, so it's OK.
-            if (g_pendingtasks.head) {
-                warn("Disable preemption failed for reprioritize task\n");
-                sched_mergepending();
+      tcb->sched_priority = (uint8_t)priority;
+
+      /* Return the task to the specified blocked task list.
+       * sched_addreadytorun will return true if the task was
+       * added to the new list.  We will need to perform a context
+       * switch only if the EXCLUSIVE or of the two calls is non-zero
+       * (i.e., one and only one the calls changes the head of the
+       * ready-to-run list).
+       */
+
+      switch_needed ^= sched_addreadytorun(tcb);
+
+      /* Now, perform the context switch if one is needed */
+
+      if (switch_needed && !up_interrupt_context())
+        {
+          struct tcb_s *nexttcb;
+
+          /* If there are any pending tasks, then add them to the g_readytorun
+           * task list now. It should be the up_realease_pending() called from
+           * sched_unlock() to do this for disable preemption. But it block
+           * itself, so it's OK.
+           */
+
+          if (g_pendingtasks.head)
+            {
+              warn("Disable preemption failed for reprioritize task\n");
+              sched_mergepending();
             }
 
-            nexttcb = (struct tcb_s*)g_readytorun.head;
-#ifdef CONFIG_ARCH_ADDRENV
-            /* Make sure that the address environment for the previously
-             * running task is closed down gracefully (data caches dump,
-             * MMU flushed) and set up the address environment for the new
-             * thread at the head of the ready-to-run list.
-             */
+          /* Update scheduler parameters */
 
-            (void)group_addrenv(nexttcb);
+          sched_suspend_scheduler(rtcb);
+
+          /* Get the TCB of the new task to run */
+
+          nexttcb = (struct tcb_s*)g_readytorun.head;
+
+#ifdef CONFIG_ARCH_ADDRENV
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
+           */
+
+          (void)group_addrenv(nexttcb);
 #endif
-            // context switch
-            up_switchcontext(rtcb, nexttcb);
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(nexttcb);
+
+          /* context switch */
+
+          up_switchcontext(rtcb, nexttcb);
         }
     }
 }
