@@ -50,18 +50,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -96,10 +84,6 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
   sched_removeblocked(tcb);
 
-  /* Reset scheduler parameters */
-
-  sched_resume_scheduler(tcb);
-
   /* Add the task in the correct location in the prioritized
    * g_readytorun task list
    */
@@ -108,9 +92,13 @@ void up_unblock_task(FAR struct tcb_s *tcb)
     {
       /* The currently active task has changed! We need to do
        * a context switch to the new task.
-       *
-       * Are we in an interrupt handler?
        */
+
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
+
+      /* Are we in an interrupt handler? */
 
       if (IN_INTERRUPT)
         {
@@ -125,7 +113,10 @@ void up_unblock_task(FAR struct tcb_s *tcb)
            */
 
           rtcb = (FAR struct tcb_s*)g_readytorun.head;
-          /* dbg("New Active Task TCB=%p\n", rtcb); */
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then setup so that the context will be performed on exit
            * from the interrupt.
@@ -148,7 +139,10 @@ void up_unblock_task(FAR struct tcb_s *tcb)
            */
 
           rtcb = (FAR struct tcb_s*)g_readytorun.head;
-          /* dbg("New Active Task TCB=%p\n", rtcb); */
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 

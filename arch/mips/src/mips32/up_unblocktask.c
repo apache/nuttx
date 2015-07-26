@@ -51,18 +51,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -95,10 +83,6 @@ void up_unblock_task(struct tcb_s *tcb)
 
   sched_removeblocked(tcb);
 
-  /* Reset scheduler parameters */
-
-  sched_resume_scheduler(tcb);
-
   /* Add the task in the correct location in the prioritized
    * g_readytorun task list
    */
@@ -107,9 +91,13 @@ void up_unblock_task(struct tcb_s *tcb)
     {
       /* The currently active task has changed! We need to do
        * a context switch to the new task.
-       *
-       * Are we in an interrupt handler?
        */
+
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
+
+      /* Are we in an interrupt handler? */
 
       if (current_regs)
         {
@@ -124,6 +112,10 @@ void up_unblock_task(struct tcb_s *tcb)
            */
 
           rtcb = (struct tcb_s*)g_readytorun.head;
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts.  Any necessary address environment
            * changes will be made when the interrupt returns.
@@ -152,6 +144,10 @@ void up_unblock_task(struct tcb_s *tcb)
 
          (void)group_addrenv(nexttcb);
 #endif
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(nexttcb);
+
           /* Then switch contexts */
 
           up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);

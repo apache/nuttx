@@ -342,51 +342,63 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
  *     ready to run taks, executed.
  *
  ****************************************************************************/
+
 void up_unblock_task(struct tcb_s *tcb)
 {
-    /* Verify that the context switch can be performed */
-    if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
-        (tcb->task_state > LAST_BLOCKED_STATE)) {
-        warn("%s: task sched error\n", __func__);
-        return;
+  /* Verify that the context switch can be performed */
+
+  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
+      (tcb->task_state > LAST_BLOCKED_STATE))
+    {
+      warn("%s: task sched error\n", __func__);
+      return;
     }
-    else {
-        struct tcb_s *rtcb = current_task;
+  else
+    {
+      struct tcb_s *rtcb = current_task;
 
-        /* Remove the task from the blocked task list */
+      /* Remove the task from the blocked task list */
 
-        sched_removeblocked(tcb);
+      sched_removeblocked(tcb);
 
-        /* Reset scheduler parameters */
+      /* Add the task in the correct location in the prioritized
+       * g_readytorun task list.
+       */
 
-        sched_resume_scheduler(tcb);
+      if (sched_addreadytorun(tcb) && !up_interrupt_context())
+        {
+          /* The currently active task has changed! */
+          /* Update scheduler parameters */
 
-        // Add the task in the correct location in the prioritized
-        // g_readytorun task list.
-        if (sched_addreadytorun(tcb) && !up_interrupt_context()) {
-            /* The currently active task has changed! */
+          sched_suspend_scheduler(rtcb);
 
-            struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+          /* Are we in an interrupt handler? */
+
+          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
 
 #ifdef CONFIG_ARCH_ADDRENV
-            // Make sure that the address environment for the previously
-            // running task is closed down gracefully (data caches dump,
-            // MMU flushed) and set up the address environment for the new
-            // thread at the head of the ready-to-run list.
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
 
-            (void)group_addrenv(nexttcb);
+          (void)group_addrenv(nexttcb);
 #endif
-            // context switch
+          /* Update scheduler parameters */
 
-            up_switchcontext(rtcb, nexttcb);
+          sched_resume_scheduler(nexttcb);
+
+          /* context switch */
+
+          up_switchcontext(rtcb, nexttcb);
         }
     }
 }
 
-/**
- * This function is called from sched_unlock() which will check not
+/* This function is called from sched_unlock() which will check not
  * in interrupt context and disable interrupt.
  */
+
 void up_release_pending(void)
 {
     struct tcb_s *rtcb = current_task;

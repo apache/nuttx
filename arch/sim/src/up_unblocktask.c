@@ -92,10 +92,14 @@ void up_unblock_task(struct tcb_s *tcb)
 
   if (sched_addreadytorun(tcb))
     {
-      /* The currently active task has changed! Copy the exception context
-       * into the TCB of the task that was previously active.  if
-       * up_setjmp returns a non-zero value, then this is really the
-       * previously running task restarting!
+      /* The currently active task has changed! */
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
+
+      /* Copy the exception context into the TCB of the task that was
+       * previously active.  if up_setjmp returns a non-zero value, then
+       * this is really the previously running task restarting!
        */
 
       if (!up_setjmp(rtcb->xcp.regs))
@@ -119,6 +123,10 @@ void up_unblock_task(struct tcb_s *tcb)
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }
+
+          /* Update scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 
