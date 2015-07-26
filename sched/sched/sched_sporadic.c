@@ -578,7 +578,7 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
    sporadic = (FAR struct sporadic_s *)kmm_zalloc(sizeof(struct sporadic_s));
    if (sporadic == NULL)
      {
-       slldbg("ERROR: Failed to alloate sporadic data structure\n");
+       slldbg("ERROR: Failed to allocate sporadic data structure\n");
        return -ENOMEM;
      }
 
@@ -1052,7 +1052,6 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
  *   Drop to the lower priority for the duration of the replenishment
  *   period. Called from:
  *
- *   - sched_sporadic_process() when the thread budget expires
  *   - sched_unlock().  When the budget expires while the thread had the
  *     scheduler locked.
  *
