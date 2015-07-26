@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_blocktask.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,18 +47,6 @@
 
 #include "sched/sched.h"
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -122,6 +110,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
   if (switch_needed)
     {
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
+
       /* Copy the exception context into the TCB at the (old) head of the
        * g_readytorun Task list. if up_setjmp returns a non-zero
        * value, then this is really the previously running task restarting!
@@ -147,6 +139,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }
+
+          /* Reset scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 

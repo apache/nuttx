@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/common/up_blocktask.c
  *
- *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,18 +48,6 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -120,6 +108,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
   if (switch_needed)
     {
+      /* Update scheduler parameters */
+
+      sched_suspend_scheduler(rtcb);
+
       /* Are we in an interrupt handler? */
 
       if (current_regs)
@@ -135,6 +127,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
            */
 
           rtcb = (struct tcb_s*)g_readytorun.head;
+
+          /* Reset scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
 
           /* Then switch contexts.  Any necessary address environment
            * changes will be made when the interrupt returns.
@@ -165,6 +161,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
          (void)group_addrenv(rtcb);
 #endif
+          /* Reset scheduler parameters */
+
+          sched_resume_scheduler(rtcb);
+
           /* Then switch contexts */
 
           up_fullcontextrestore(rtcb->xcp.regs);
