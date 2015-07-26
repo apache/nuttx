@@ -118,6 +118,12 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
 
 static unsigned int g_timer_interval;
 
+#ifdef CONFIG_SCHED_SPORADIC
+/* This is the time of the last scheduler assessment */
+
+static struct timespec g_sched_time;
+#endif
+
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 /* This is the time that the timer was stopped.  All future times are
  * calculated against this time.  It must be valid at all times when
@@ -130,92 +136,6 @@ static struct timespec g_stop_time;
 /************************************************************************
  * Private Functions
  ************************************************************************/
-/************************************************************************
- * Name:  sched_timespec_add
- *
- * Description:
- *   Add timespec ts1 to to2 and return the result in ts3
- *
- * Inputs:
- *   ts1 and ts2: The two timespecs to be added
- *   t23: The location to return the result (may be ts1 or ts2)
- *
- * Return Value:
- *   None
- *
- ************************************************************************/
-
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-static void sched_timespec_add(FAR const struct timespec *ts1,
-                               FAR const struct timespec *ts2,
-                               FAR struct timespec *ts3)
-{
-  time_t sec = ts1->tv_sec + ts2->tv_sec;
-  long nsec  = ts1->tv_nsec + ts2->tv_nsec;
-
-  if (nsec >= NSEC_PER_SEC)
-    {
-      nsec -= NSEC_PER_SEC;
-      sec++;
-    }
-
-  ts3->tv_sec  = sec;
-  ts3->tv_nsec = nsec;
-}
-#endif
-
-/************************************************************************
- * Name:  sched_timespec_subtract
- *
- * Description:
- *   Subtract timespec ts2 from to1 and return the result in ts3.
- *   Zero is returned if the time difference is negative.
- *
- * Inputs:
- *   ts1 and ts2: The two timespecs to be subtracted (ts1 - ts2)
- *   t23: The location to return the result (may be ts1 or ts2)
- *
- * Return Value:
- *   None
- *
- ************************************************************************/
-
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-static void sched_timespec_subtract(FAR const struct timespec *ts1,
-                                    FAR const struct timespec *ts2,
-                                    FAR struct timespec *ts3)
-{
-  time_t sec;
-  long nsec;
-
-  if (ts1->tv_sec < ts2->tv_sec)
-    {
-      sec  = 0;
-      nsec = 0;
-    }
-  else if (ts1->tv_sec == ts2->tv_sec && ts1->tv_nsec <= ts2->tv_nsec)
-    {
-      sec  = 0;
-      nsec = 0;
-    }
-  else
-    {
-      sec = ts1->tv_sec + ts2->tv_sec;
-      if (ts1->tv_nsec < ts2->tv_nsec)
-        {
-          nsec = (ts1->tv_nsec + NSEC_PER_SEC) - ts2->tv_nsec;
-          sec--;
-        }
-      else
-        {
-          nsec = ts1->tv_nsec - ts2->tv_nsec;
-        }
-    }
-
-  ts3->tv_sec = sec;
-  ts3->tv_nsec = nsec;
-}
-#endif
 
 /************************************************************************
  * Name:  sched_process_scheduler
@@ -261,11 +181,25 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
     }
 #endif
 
-#if CONFIG_RR_INTERVAL > 0
+#ifdef CONFIG_SCHED_SPORADIC
   /* Check if the currently executing task uses sporadic scheduling. */
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
+      FAR struct sporadic_s *sporadic = rtcb->sporadic;
+      DEBUGASSERT(sporadic);
+
+      /* Save the last time that the scheduler ran.  This time was saved
+       * higher in the calling hierarchy but cannot be applied until here.
+       * That is because there are cases that context switches may occur
+       * between then and before we get here.  So we can't positive of
+       * which task TCB to save the time in until we are here and
+       * committed to updating the scheduler for this TCB.
+       */
+
+      sporadic->sched_time.tv_sec  = g_sched_time.tv_sec;
+      sporadic->sched_time.tv_nsec = g_sched_time.tv_nsec;
+
       /* Yes, check if the currently executing task has exceeded its
        * budget.
        */
@@ -417,7 +351,7 @@ static void sched_timer_start(unsigned int ticks)
        * to the time when last stopped the timer).
        */
 
-      sched_timespec_add(&g_stop_time, &ts, &ts);
+      clock_timespec_add(&g_stop_time, &ts, &ts);
       ret = up_alarm_start(&ts);
 
 #else
@@ -471,6 +405,13 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
   g_stop_time.tv_sec  = ts->tv_sec;
   g_stop_time.tv_nsec = ts->tv_nsec;
 
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Save the last time that the scheduler ran */
+
+  g_sched_time.tv_sec  = ts->tv_sec;
+  g_sched_time.tv_nsec = ts->tv_nsec;
+#endif
+
   /* Get the interval associated with last expiration */
 
   elapsed          = g_timer_interval;
@@ -509,6 +450,12 @@ void sched_timer_expiration(void)
 
   elapsed          = g_timer_interval;
   g_timer_interval = 0;
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Save the last time that the scheduler ran */
+
+  (void)up_timer_gettime(&g_sched_time);
+#endif
 
   /* Process the timer ticks and set up the next interval (or not) */
 
@@ -558,9 +505,16 @@ unsigned int sched_timer_cancel(void)
 
   (void)up_alarm_cancel(&g_stop_time);
 
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Save the last time that the scheduler ran */
+
+  g_sched_time.tv_sec  = g_stop_time.tv_sec;
+  g_sched_time.tv_nsec = g_stop_time.tv_nsec;
+#endif
+
   /* Convert this to the elapsed time */
 
-  sched_timespec_subtract(&g_stop_time, &ts, &ts);
+  clock_timespec_subtract(&g_stop_time, &ts, &ts);
 
   /* Convert to ticks */
 
@@ -581,6 +535,13 @@ unsigned int sched_timer_cancel(void)
   /* Get the time remaining on the interval timer and cancel the timer. */
 
   (void)up_timer_cancel(&ts);
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Save the last time that the scheduler ran */
+
+  g_sched_time.tv_sec  = ts.tv_sec;
+  g_sched_time.tv_nsec = ts.tv_nsec;
+#endif
 
   /* Convert to ticks */
 
@@ -627,6 +588,12 @@ unsigned int sched_timer_cancel(void)
 void sched_timer_resume(void)
 {
   unsigned int nexttime;
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Save the last time that the scheduler ran */
+
+  (void)up_timer_gettime(&g_sched_time);
+#endif
 
   /* Reassess the next deadline (by simply processing a zero ticks expired)
    * and set up the next interval (or not).

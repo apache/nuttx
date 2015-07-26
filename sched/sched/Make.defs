@@ -70,6 +70,12 @@ CSRCS += sched_resumescheduler.c
 endif
 endif
 
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+ifeq ($(CONFIG_SCHED_SPORADIC),y)
+CSRCS += sched_suspendscheduler.c
+endif
+endif
+
 ifeq ($(CONFIG_SCHED_CPULOAD),y)
 CSRCS += sched_cpuload.c
 endif

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 25, 2015)
+NuttX TODO List (Last updated July 26, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -212,32 +212,6 @@ o Task/Scheduler (sched/)
                exists.
   Status:      Open
   Priority:    Medium-ish
-
-  Title:       TICKLESS SCHEDULING INACCURACIES
-  Description: Interval timers are set up to determine timing for round-
-               robin and sporadic scheduling policies.  In the timer
-               interrupt mode, the budget remaining for the thread is
-               decremented on each timer interrupt and so is always
-               accurate to within one clock time.  So when the task
-               suspended, the remaining budget is accurate.
-
-               But in tickless mode, the budget is only updated on the
-               expiration of the timer.  So if the task is suspended by an
-               asynchronous event, the budget will fail to decrement and the
-               task will get a larger share of CPU that is deserves in those
-               cases.
-
-               UPDATE: The hook sched_suspend_scheduler() has been added to
-               all locations where a thread is suspended.  This would be
-               the place to assess any partial intervals: You would have to
-               save the current time when the timer is started then when
-               suspended, you would have to assess the elapsed portion of
-               that time and subtract that from the TCB timeslice value.
-
-               The hook is present, but logic has been implemented.
-
-  Status:      Open
-  Priority:    Low.  I am not aware of any real world issues.
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^

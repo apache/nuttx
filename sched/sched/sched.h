@@ -251,6 +251,10 @@ int  sched_sporadic_start(FAR struct tcb_s *tcb);
 int  sched_sporadic_stop(FAR struct tcb_s *tcb);
 int  sched_sporadic_reset(FAR struct tcb_s *tcb);
 int  sched_sporadic_resume(FAR struct tcb_s *tcb);
+#ifdef CONFIG_SCHED_TICKLESS
+int  sched_sporadic_suspend(FAR struct tcb_s *tcb,
+                            FAR const struct timespec *suspend_time);
+#endif
 uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
                                 bool noswitches);
 void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);

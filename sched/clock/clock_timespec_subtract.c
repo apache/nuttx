@@ -1,7 +1,7 @@
 /********************************************************************************
- * sched/clock/clock.h
+ * sched/clock/clock_timespec_subtract.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,6 @@
  *
  ********************************************************************************/
 
-#ifndef __SCHED_CLOCK_CLOCK_H
-#define __SCHED_CLOCK_CLOCK_H
-
 /********************************************************************************
  * Included Files
  ********************************************************************************/
@@ -43,63 +40,61 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <time.h>
 
-#include <nuttx/clock.h>
-#include <nuttx/compiler.h>
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-/* Configuration ************************************************************/
-/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
- * then a 64-bit system time will be used.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_SYSTEM_TIME64
-#endif
+#include "clock/clock.h"
 
 /********************************************************************************
- * Public Type Definitions
+ * Public Functions
  ********************************************************************************/
 
-/********************************************************************************
- * Global Variables
- ********************************************************************************/
+/************************************************************************
+ * Name:  clock_timespec_subtract
+ *
+ * Description:
+ *   Subtract timespec ts2 from to1 and return the result in ts3.
+ *   Zero is returned if the time difference is negative.
+ *
+ * Inputs:
+ *   ts1 and ts2: The two timespecs to be subtracted (ts1 - ts2)
+ *   t23: The location to return the result (may be ts1 or ts2)
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
 
-#if !defined(CONFIG_SCHED_TICKLESS) && !defined(__HAVE_KERNEL_GLOBALS)
-  /* The system clock exists (CONFIG_SCHED_TICKLESS), but it not prototyped
-   * globally in include/nuttx/clock.h.
-   */
-
-#  ifdef CONFIG_SYSTEM_TIME64
-extern volatile uint64_t g_system_timer;
-#  else
-extern volatile uint32_t g_system_timer;
-#  endif
-#endif
-
-extern struct timespec   g_basetime;
-
-/********************************************************************************
- * Public Function Prototypes
- ********************************************************************************/
-
-void weak_function clock_initialize(void);
-#ifndef CONFIG_SCHED_TICKLESS
-void weak_function clock_timer(void);
-#endif
-
-int  clock_abstime2ticks(clockid_t clockid,
-                         FAR const struct timespec *abstime,
-                         FAR int *ticks);
-int  clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks);
-int  clock_ticks2time(int ticks, FAR struct timespec *reltime);
-void clock_timespec_add(FAR const struct timespec *ts1,
-                        FAR const struct timespec *ts2,
-                        FAR struct timespec *ts3);
 void clock_timespec_subtract(FAR const struct timespec *ts1,
                              FAR const struct timespec *ts2,
-                             FAR struct timespec *ts3);
+                             FAR struct timespec *ts3)
+{
+  time_t sec;
+  long nsec;
 
-#endif /* __SCHED_CLOCK_CLOCK_H */
+  if (ts1->tv_sec < ts2->tv_sec)
+    {
+      sec  = 0;
+      nsec = 0;
+    }
+  else if (ts1->tv_sec == ts2->tv_sec && ts1->tv_nsec <= ts2->tv_nsec)
+    {
+      sec  = 0;
+      nsec = 0;
+    }
+  else
+    {
+      sec = ts1->tv_sec + ts2->tv_sec;
+      if (ts1->tv_nsec < ts2->tv_nsec)
+        {
+          nsec = (ts1->tv_nsec + NSEC_PER_SEC) - ts2->tv_nsec;
+          sec--;
+        }
+      else
+        {
+          nsec = ts1->tv_nsec - ts2->tv_nsec;
+        }
+    }
+
+  ts3->tv_sec = sec;
+  ts3->tv_nsec = nsec;
+}

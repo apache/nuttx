@@ -274,6 +274,10 @@ struct sporadic_s
   uint32_t current;                 /* Unrealized, current budget time          */
   uint32_t pending;                 /* Unrealized, pending execution budget     */
 
+#ifdef CONFIG_SCHED_TICKLESS
+  struct timespec sched_time;       /* Time in ticks last processed             */
+#endif
+
   /* This is the list of replenishment intervals */
 
   struct replenishment_s replenishments[CONFIG_SCHED_SPORADIC_MAXREPL];
@@ -804,9 +808,11 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  *
  ********************************************************************************/
 
-/* Just a place-holder for now */
-
-#define sched_suspend_scheduler(tcb)
+#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SCHED_TICKLESS)
+void sched_suspend_scheduler(FAR struct tcb_s *tcb);
+#else
+#  define sched_suspend_scheduler(tcb)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

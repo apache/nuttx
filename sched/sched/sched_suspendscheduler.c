@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_resumescheduler.c
+ * sched/sched/sched_suspendscheduler.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,59 +39,49 @@
 
 #include <nuttx/config.h>
 
+#include <time.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
 
+#include "clock/clock.h"
 #include "sched/sched.h"
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SCHED_TICKLESS)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_resume_scheduler
+ * Name: sched_suspend_scheduler
  *
  * Description:
- *   Called by architecture specific implementations that block task
+ *   Called by architecture specific implementations that starts task
  *   execution.  This function prepares the scheduler for the thread that is
  *   about to be restarted.
  *
  * Input Parameters:
- *   tcb - The TCB of the thread to be restarted.
+ *   tcb - The TCB of the thread that is being suspended.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sched_resume_scheduler(FAR struct tcb_s *tcb)
+void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
-#if CONFIG_RR_INTERVAL > 0
-#ifdef CONFIG_SCHED_SPORADIC
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
-#endif
-    {
-      /* Reset the task's timeslice. */
+  struct timespec suspend_time;
 
-      tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-    }
-#endif
-
-#ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
-  else
-#endif
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
-      /* Reset the replenishment cycle if it is appropriate to do so */
+      /* Get the current time when the thread was suspended */
 
-      DEBUGVERIFY(sched_sporadic_resume(tcb));
+      (void)up_timer_gettime(&suspend_time);
+      DEBUGVERIFY(sched_sporadic_suspend(tcb, &suspend_time));
     }
-#endif
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC */
+#endif /* CONFIG_SCHED_SPORADIC && CONFIG_SCHED_TICKLESS */

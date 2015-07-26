@@ -51,6 +51,7 @@
 
 #include <arch/irq.h>
 
+#include "clock/clock.h"
 #include "sched/sched.h"
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -113,6 +114,14 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
 
   tcb->timeslice    = budget;
   sporadic->current = budget;
+
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Save the time that the replenishment interval started */
+
+  (void)up_timer_gettime(&sporadic->sched_time);
+#endif
+
+  /* And start the timer for the budget interval */
 
   ret = wd_start(&repl->timer, budget, sporadic_budget_expire, 1,
                  (wdentry_t)repl);
@@ -806,8 +815,107 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
       slldbg("Failed to allocate timer, nrepls=%d\n", sporadic->nrepls);
     }
 
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Reset to the resume time */
+
+  (void)up_timer_gettime(&sporadic->sched_time);
+#endif
+
   return OK;
 }
+
+/****************************************************************************
+ * Name: sched_sporadic_suspend
+ *
+ * Description:
+ *   Called to when a thread with sporadic scheduling is suspended in the
+ *   tickless mode.  In this case, there is unaccounted for time from the
+ *   time that the last interval timer was started up until this point.
+ *
+ *   This function calculates the elpased time since then, and adjusts the
+ *   timeslice time accordingly.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that is beginning sporadic scheduling.
+ *   suspend_time - The time that the thread was suspended.
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success or a negated errno value on failure.
+ *
+ * Assumptions:
+ *  - Interrupts are disabled
+ *  - All sporadic scheduling parameters in the TCB are valid
+ *  - The low priority interval timer is not running
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+int sched_sporadic_suspend(FAR struct tcb_s *tcb,
+                           FAR const struct timespec *suspend_time)
+{
+  FAR struct sporadic_s *sporadic;
+  struct timespec elapsed_time;
+  uint32_t elapsed_ticks;
+
+  DEBUGASSERT(tcb && tcb->sporadic);
+  sporadic = tcb->sporadic;
+
+  /* Check if are in the budget portion of the replenishment interval.  We
+   * know this is the case if the current timeslice is non-zero.
+   *
+   * This function could also be called before the budget period has had a
+   * chance to run, i.e., when the value of timeslice has not been decremented
+   * and is still equal to the initial value.
+   *
+   * This latter case could occur if the thread has never had a chance to
+   * run and is also very likely when the thread is just restarted after
+   * raising its priority at the beginning of the budget period.  We would
+   * not want to start a new timer in these cases.
+   */
+
+  if (tcb->timeslice > 0 && tcb->timeslice < sporadic->current)
+    {
+      /* Get the difference in time between the time that the scheduler just
+       * ran and time time that the thread was spuspended.  This difference,
+       * then, is the unaccounted for time between the time that the timer
+       * was started and when the thread was suspended.
+       */
+
+      clock_timespec_subtract(suspend_time, &sporadic->sched_time,
+                              &elapsed_time);
+
+      /* Convert to ticks */
+
+      elapsed_ticks  = SEC2TICK(elapsed_time.tv_sec);
+      elapsed_ticks += NSEC2TICK(elapsed_time.tv_nsec);
+
+      /* One possibility is that the the elapsed time is greater than the
+       * time remaining in the time slice.  This is a a race condition.  It
+       * means that the timer has just expired.
+       *
+       * Ideally, we would need to cancel the budget time and start the low-
+       * priority portion of the interval.  But we are in a precarious
+       * situation here..  The TCB has been removed from the ready to run
+       * list already so we cannot use the normal reprioritization logic.
+       */
+
+      if (elapsed_ticks >= tcb->timeslice)
+        {
+          /* REVISIT: The kludge here is to just set the clock to one tick.
+           * That will cause the interval to expire very quickly.
+           */
+
+          tcb->timeslice = 1;
+        }
+      else
+        {
+          tcb->timeslice -= (int32_t)elapsed_ticks;
+        }
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: sched_sporadic_process
