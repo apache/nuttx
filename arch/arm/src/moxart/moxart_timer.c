@@ -39,9 +39,11 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#include "arm.h"
 #include "up_arch.h"
 
 #define TM1_ADDR	0x98400000
@@ -82,29 +84,22 @@ enum timer_int {
  *
  ************************************************************/
 
-uint32_t inside = 0;
-static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 1000;
+static uint32_t cmp = BOARD_32KOSC_FREQUENCY * 8 / 1000;
 
 int up_timerisr(int irq, uint32_t *regs)
 {
   uint32_t state;
 
-  inside++;
   /* Process timer interrupt */
   state = getreg32(TM1_ADDR + INTR_STATE_TIMER);
   state &= ~0x7;
   putreg32(state, TM1_ADDR + INTR_STATE_TIMER);
 
-//  *(volatile int *)0x98700000 ^= 0x8;
-  *(volatile int *)0x98700000 |= 0x2;
-
   /* Ready for the next interrupt */
-  cmp = BOARD_32KOSC_FREQUENCY / 1000;
   putreg32(cmp, TM1_ADDR + COUNTER_TIMER);
 
   sched_process_timer();
 
-  *(volatile int *)0x98700000 &= ~0x2;
   return 0;
 }
 
