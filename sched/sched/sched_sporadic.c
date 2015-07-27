@@ -198,6 +198,10 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
   DEBUGVERIFY(wd_start(&repl->timer, budget, sporadic_budget_expire, 1,
                        (wdentry_t)repl));
 
+  /* Save the time that the thread was started */
+
+  sporadic->eventtime = clock_systimer();
+
   /* Then reprioritize to the higher priority */
 
   return sporadic_set_hipriority(tcb);
@@ -655,11 +659,6 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
 
-  DEBUGASSERT(sporadic->low_priority <= sporadic->hi_priority);
-  DEBUGASSERT(sporadic->max_repl <= CONFIG_SCHED_SPORADIC_MAXREPL);
-  DEBUGASSERT(sporadic->budget > 0 && sporadic->budget <= sporadic->repl_period);
-  DEBUGASSERT(sporadic->nrepls == 0 && sporadic->active == NULL);
-
   /* Allocate the first replenishment timer (should never fail) */
 
   repl = sporadic_alloc_repl(sporadic);
@@ -769,6 +768,7 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
   sporadic->nrepls       = 0;
   sporadic->repl_period  = 0;
   sporadic->budget       = 0;
+  sporadic->eventtime    = 0;
   sporadic->active       = NULL;
   return OK;
 }
@@ -803,8 +803,9 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
-  uint32_t budget;
+  uint32_t unrealized;
   uint32_t last;
+  uint32_t now;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -821,79 +822,71 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
   if (tcb->timeslice > 0)
     {
-      /* Get the last budgeted time */
+      /* Save the time that the thread was [re-]started */
 
-      DEBUGASSERT(sporadic->active);
-      last = sporadic->active->budget;
+      now = clock_systimer();
 
-#ifdef CONFIG_SCHED_TICKLESS
-      /* Get the difference in time between the time that the scheduler just
-       * ran and time time that the thread was suspended.  This difference,
-       * then, is the unaccounted for time between the time that the timer
-       * was started and when the thread was suspended.
-       */
+      /* Unrealized budget time while the thread was suspended */
 
-      clock_timespec_subtract(suspend_time, &sporadic->sched_time,
-                              &elapsed_time);
+      unrealized = sporadic->eventtime - now;
+      sporadic->eventtime = now;
 
-      /* Convert to ticks */
+      /* Ignore very short pre-emptions that are below our timing resolution. */
 
-      elapsed_ticks  = SEC2TICK(elapsed_time.tv_sec);
-      elapsed_ticks += NSEC2TICK(elapsed_time.tv_nsec);
-
-      /* One possibility is that the the elapsed time is greater than the
-       * time remaining in the time slice.  This is a a race condition.  It
-       * means that the timer has just expired.  the interrupt will occu
-       * soon.
-       */
-
-      if (elapsed_ticks >= tcb->timeslice)
+      if (unrealized > 0)
         {
-          return;
-        }
-
-      /* Otherwise, the unrealized time in this budget is the sum time slice
-       * value minus, the time from the unexpired timer.
-       */
-
-      tcb->timeslice -= (int32_t)elapsed_ticks;
-#endif
-      /* This function could also be called before the budget period has had
-       * a chance to run, i.e., when the value of timeslice has not been
-       * decremented and is still equal to the initial value.
-       *
-       * This latter case could occur if the thread has never had a chance
-       * to run and is also very likely when the thread is just restarted
-       * after raising its priority at the beginning of the budget period.
-       * We would not want to start a new timer in these cases.
-       */
-
-      if (tcb->timeslice < last)
-        {
-          /* Allocate a new replenishment timer.  This will limit us to
-           * to maximum number of replenishments (max_repl).
+          /* Handle any part of the budget that was not utilized.
+           *
+           *   current  = The initial budget at the beginning of the
+           *              interval.
+           *   urealized = The unused part of that budget when the
+           *               thread did  not execute.
            */
 
-          repl = sporadic_alloc_repl(sporadic);
-          if (repl != NULL)
+          if (unrealized >= tcb->timeslice)
             {
-              return sporadic_budget_start(tcb, repl, tcb->timeslice);
+              /* We lost the remainder of the timeslice, (and then some).
+               * No point in starting more timers.
+               */
+
+              return OK;
             }
 
-          /* We need to return success even on a failure to allocate.  Doing
-           * nothing is our fall-back behavior and that is not a failure from
-           * the standpoint of higher level logic.
+         DEBUGASSERT(sporadic->active);
+          tcb->timeslice -= unrealized;
+          sporadic->active->unrealized = unrealized;
+
+          /* Get the last budgeted time */
+
+          last = sporadic->active->budget;
+
+          /* This function could also be called before the budget period
+           * has had a chance to run, i.e., when the value of timeslice
+           * has not been decremented and is still equal to the initial
+           * value.
            */
 
-          slldbg("Failed to allocate timer, nrepls=%d\n", sporadic->nrepls);
+          if (tcb->timeslice < last)
+            {
+              /* Allocate a new replenishment timer.  This will limit us to
+               * to maximum number of replenishments (max_repl).
+               */
+
+              repl = sporadic_alloc_repl(sporadic);
+              if (repl != NULL)
+                {
+                  return sporadic_budget_start(tcb, repl, tcb->timeslice);
+                }
+
+              /* We need to return success even on a failure to allocate.
+               * Doing nothing is our fall-back behavior and that is not a
+               * failure from the standpoint of higher level logic.
+               */
+
+              slldbg("Failed to allocate timer, nrepls=%d\n", sporadic->nrepls);
+            }
         }
     }
-
-#ifdef CONFIG_SCHED_TICKLESS
-  /* Reset to the resume time */
-
-  (void)up_timer_gettime(&sporadic->sched_time);
-#endif
 
   return OK;
 }
@@ -923,14 +916,9 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int sched_sporadic_suspend(FAR struct tcb_s *tcb,
-                           FAR const struct timespec *suspend_time)
+int sched_sporadic_suspend(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
-#ifdef CONFIG_SCHED_TICKLESS
-  struct timespec elapsed_time;
-  uint32_t elapsed_ticks;
-#endif
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -941,65 +929,9 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
   arch_sporadic_suspend(tcb);
 #endif
 
-  /* Check if are in the budget portion of the replenishment interval.  We
-   * know this is the case if the current timeslice is non-zero.
-   *
-   * This function could also be called before the budget period has had a
-   * chance to run, i.e., when the value of timeslice has not been decremented
-   * and is still equal to the initial value.
-   *
-   * This latter case could occur if the thread has never had a chance to
-   * run and is also very likely when the thread is just restarted after
-   * raising its priority at the beginning of the budget period.  We would
-   * not want to start a new timer in these cases.
-   */
+  /* Save the time that the thread was suspended */
 
-  if (tcb->timeslice > 0)
-    {
-#ifdef CONFIG_SCHED_TICKLESS
-      /* Get the difference in time between the time that the scheduler just
-       * ran and time time that the thread was suspended.  This difference,
-       * then, is the unaccounted for time between the time that the timer
-       * was started and when the thread was suspended.
-       */
-
-      clock_timespec_subtract(suspend_time, &sporadic->sched_time,
-                              &elapsed_time);
-
-      /* Convert to ticks */
-
-      elapsed_ticks  = SEC2TICK(elapsed_time.tv_sec);
-      elapsed_ticks += NSEC2TICK(elapsed_time.tv_nsec);
-
-      /* One possibility is that the the elapsed time is greater than the
-       * time remaining in the time slice.  This is a a race condition.  It
-       * means that the timer has just expired.  the interrupt will occu
-       * soon.
-       */
-
-      if (elapsed_ticks >= tcb->timeslice)
-        {
-          return;
-        }
-
-      /* Otherwise, the unrealized time in this budget is the sum time slice
-       * value minus, the time from the unexpired timer.
-       */
-
-      tcb->timeslice -= (int32_t)elapsed_ticks;
-#endif
-
-      /* Handle any part of the budget that was not utilized.
-       *
-       *   current        = The initial budget at the beginning of the interval.
-       *   tcb->timeslice = The unused part of that budget when the thread did
-       *                    not execute.
-       */
-
-      DEBUGASSERT(sporadic->active);
-      sporadic->active->unrealized = tcb->timeslice;
-    }
-
+  sporadic->eventtime = clock_systimer();
   return OK;
 }
 

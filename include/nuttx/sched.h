@@ -273,10 +273,7 @@ struct sporadic_s
   uint8_t  nrepls;                  /* Number of active replenishments          */
   uint32_t repl_period;             /* Sporadic replenishment period            */
   uint32_t budget;                  /* Sporadic execution budget period         */
-
-#ifdef CONFIG_SCHED_TICKLESS
-  struct timespec sched_time;       /* Time in ticks last processed             */
-#endif
+  uint32_t eventtime;               /* Time thread suspended or [re-]started    */
 
   /* This is the last interval timer activated */
 

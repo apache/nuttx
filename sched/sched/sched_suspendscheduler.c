@@ -73,20 +73,9 @@
 
 void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
-  struct timespec suspend_time;
-
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
-#ifdef CONFIG_SCHED_TICKLESS
-    /* Get the current time when the thread was suspended */
-
-      (void)up_timer_gettime(&suspend_time);
-#else
-      suspend_time.tv_sec  = 0;
-      suspend_time.tv_nsec = 0;
-#endif
-
-      DEBUGVERIFY(sched_sporadic_suspend(tcb, &suspend_time));
+      DEBUGVERIFY(sched_sporadic_suspend(tcb));
     }
 }
 
