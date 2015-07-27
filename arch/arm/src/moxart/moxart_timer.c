@@ -84,7 +84,7 @@ enum timer_int {
  *
  ************************************************************/
 
-static uint32_t cmp = BOARD_32KOSC_FREQUENCY * 8 / 1000;
+static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 100;
 
 int up_timerisr(int irq, uint32_t *regs)
 {
