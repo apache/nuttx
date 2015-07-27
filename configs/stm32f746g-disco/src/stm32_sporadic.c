@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sporadic_note_*
+ * Name: arch_sporadic_*
  *
  * Description:
  *   This configuration has been used for evaluating the NuttX sporadic
@@ -64,28 +64,28 @@
  *
  ****************************************************************************/
 
-void sporadic_note_initialize(void)
+void arch_sporadic_initialize(void)
 {
   stm32_configgpio(GPIO_SCHED_HIGHPRI);
   stm32_configgpio(GPIO_SCHED_RUNNING);
 }
 
-void sporadic_note_start(FAR struct tcb_s *tcb)
+void arch_sporadic_start(FAR struct tcb_s *tcb)
 {
   stm32_gpiowrite(GPIO_SCHED_HIGHPRI, true);
 }
 
-void sporadic_note_lowpriority(FAR struct tcb_s *tcb)
+void arch_sporadic_lowpriority(FAR struct tcb_s *tcb)
 {
   stm32_gpiowrite(GPIO_SCHED_HIGHPRI, false);
 }
 
-void sporadic_note_suspend(FAR struct tcb_s *tcb)
+void arch_sporadic_suspend(FAR struct tcb_s *tcb)
 {
   stm32_gpiowrite(GPIO_SCHED_RUNNING, false);
 }
 
-void sporadic_note_resume(FAR struct tcb_s *tcb)
+void arch_sporadic_resume(FAR struct tcb_s *tcb)
 {
   stm32_gpiowrite(GPIO_SCHED_RUNNING, true);
 }

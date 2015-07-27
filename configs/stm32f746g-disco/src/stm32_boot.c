@@ -89,7 +89,7 @@ void stm32_boardinitialize(void)
    * The following caqll initializes the sporadic scheduler monitor.
    */
 
-  sporadic_note_initialize();
+  arch_sporadic_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_LEDS

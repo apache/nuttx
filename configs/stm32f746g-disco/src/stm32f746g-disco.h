@@ -101,7 +101,7 @@
 void weak_function stm32_spiinitialize(void);
 
 /****************************************************************************************************
- * Name: sporadic_note_initialize
+ * Name: arch_sporadic_initialize
  *
  * Description:
  *   This configuration has been used for evaluating the NuttX sporadic scheduler.
@@ -109,7 +109,7 @@ void weak_function stm32_spiinitialize(void);
  ****************************************************************************************************/
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
-void sporadic_note_initialize(void);
+void arch_sporadic_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
