@@ -56,14 +56,29 @@
  * grounded so a high output on PI1 will illuminate the LED.
  */
 
-#define GPIO_LD1        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                         GPIO_OUTPUT_CLEAR | GPIO_PORTI | GPIO_PIN1)
+#define GPIO_LD1           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTI | GPIO_PIN1)
 
 /* Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high value will be sensed when the
  * button is depressed. Note that the EXTI interrupt is configured.
  */
 
-#define GPIO_BTN_USER   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)
+#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)
+
+/* Sporadic scheduler instrumentation. This configuration has been used for evaluating the NuttX
+ * sporadic scheduler.  In this evaluation, two GPIO outputs are used.  One indicating the priority
+ * (high or low) of the sporadic thread and one indicating where the thread is running or not.
+ *
+ * There is nothing special about the pin selections:
+ *
+ *   Arduino D2 PG6 - Indicates priority
+ *   Arduino D4 PG7 - Indicates that the thread is running
+ */
+
+#define GPIO_SCHED_HIGHPRI (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTG | GPIO_PIN6)
+#define GPIO_SCHED_RUNNING (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTG | GPIO_PIN7)
 
 /****************************************************************************************************
  * Public data
@@ -84,6 +99,18 @@
  ****************************************************************************************************/
 
 void weak_function stm32_spiinitialize(void);
+
+/****************************************************************************************************
+ * Name: sporadic_note_initialize
+ *
+ * Description:
+ *   This configuration has been used for evaluating the NuttX sporadic scheduler.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+void sporadic_note_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */

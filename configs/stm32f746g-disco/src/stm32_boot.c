@@ -84,6 +84,14 @@ void stm32_boardinitialize(void)
     }
 #endif
 
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+  /* This configuration has been used for evaluating the NuttX sporadic scheduler.
+   * The following caqll initializes the sporadic scheduler monitor.
+   */
+
+  sporadic_note_initialize();
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
