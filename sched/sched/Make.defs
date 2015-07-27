@@ -60,20 +60,17 @@ endif
 
 ifeq ($(CONFIG_SCHED_SPORADIC),y)
 CSRCS += sched_sporadic.c
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CSRCS += sched_suspendscheduler.c
+else ifeq ($(CONFIG_SPORADIC_INSTRUMENTATION),y)
+CSRCS += sched_suspendscheduler.c
+endif
 endif
 
 ifneq ($(CONFIG_RR_INTERVAL),0)
 CSRCS += sched_resumescheduler.c
-else
-ifeq ($(CONFIG_SCHED_SPORADIC),y)
+else ifeq ($(CONFIG_SCHED_SPORADIC),y)
 CSRCS += sched_resumescheduler.c
-endif
-endif
-
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-ifeq ($(CONFIG_SCHED_SPORADIC),y)
-CSRCS += sched_suspendscheduler.c
-endif
 endif
 
 ifeq ($(CONFIG_SCHED_CPULOAD),y)

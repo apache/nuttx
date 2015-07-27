@@ -1972,6 +1972,29 @@ int up_getc(void);
 
 void up_puts(FAR const char *str);
 
+/********************************************************************************
+ * Name: arch_sporadic_*
+ *
+ * Description:
+ *   Hooks that can be enabled to monitor the behavior of the sporadic
+ *   scheduler.  These are call outs from the OS and must be provided by
+ *   architecture-specific logic.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread to be restarted.
+ *
+ * Returned Value:
+ *   None
+ *
+ ********************************************************************************/
+
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+void arch_sporadic_start(FAR struct tcb_s *tcb);
+void arch_sporadic_lowpriority(FAR struct tcb_s *tcb);
+void arch_sporadic_suspend(FAR struct tcb_s *tcb);
+void arch_sporadic_resume(FAR struct tcb_s *tcb);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

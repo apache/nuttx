@@ -49,7 +49,8 @@
 #include "clock/clock.h"
 #include "sched/sched.h"
 
-#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SCHED_TICKLESS)
+#if defined(CONFIG_SCHED_SPORADIC) && (defined(CONFIG_SCHED_TICKLESS) || \
+    defined(CONFIG_SPORADIC_INSTRUMENTATION))
 
 /****************************************************************************
  * Public Functions
@@ -77,11 +78,17 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
-      /* Get the current time when the thread was suspended */
+#ifdef CONFIG_SCHED_TICKLESS
+    /* Get the current time when the thread was suspended */
 
       (void)up_timer_gettime(&suspend_time);
+#else
+      suspend_time.tv_sec  = 0;
+      suspend_time.tv_nsec = 0;
+#endif
+
       DEBUGVERIFY(sched_sporadic_suspend(tcb, &suspend_time));
     }
 }
 
-#endif /* CONFIG_SCHED_SPORADIC && CONFIG_SCHED_TICKLESS */
+#endif /* CONFIG_SCHED_SPORADIC && (CONFIG_SCHED_TICKLESS || CONFIG_SPORADIC_INSTRUMENTATION) */

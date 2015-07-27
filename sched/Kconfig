@@ -314,14 +314,30 @@ config SCHED_SPORADIC
 		Build in additional logic to support sporadic scheduling
 		(SCHED_SPORADIC).
 
+if SCHED_SPORADIC
+
 config SCHED_SPORADIC_MAXREPL
 	int "Maximum number of replenishments"
 	default 3
 	range 1 255
-	depends on SCHED_SPORADIC
 	---help---
 		Controls the size of allocated replenishment structures and, hence,
 		also limits the maximum number of replenishments.
+
+config SPORADIC_INSTRUMENTATION
+	bool "Sporadic scheduler monitor hooks"
+	default n
+	---help---
+		Enables instrumentation in the sporadic scheduler to monitor
+		scheduler behavior. If enabled, then the board-specific logic must
+		provide the following functions:
+
+		void arch_sporadic_start(FAR struct tcb_s *tcb);
+		void arch_sporadic_lowpriority(FAR struct tcb_s *tcb);
+		void arch_sporadic_suspend(FAR struct tcb_s *tcb);
+		void arch_sporadic_resume(FAR struct tcb_s *tcb);
+
+endif # SCHED_SPORADIC
 
 config TASK_NAME_SIZE
 	int "Maximum task name size"

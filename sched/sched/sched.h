@@ -251,7 +251,7 @@ int  sched_sporadic_start(FAR struct tcb_s *tcb);
 int  sched_sporadic_stop(FAR struct tcb_s *tcb);
 int  sched_sporadic_reset(FAR struct tcb_s *tcb);
 int  sched_sporadic_resume(FAR struct tcb_s *tcb);
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_SPORADIC_INSTRUMENTATION)
 int  sched_sporadic_suspend(FAR struct tcb_s *tcb,
                             FAR const struct timespec *suspend_time);
 #endif

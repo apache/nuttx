@@ -796,7 +796,7 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  * Name: sched_suspend_scheduler
  *
  * Description:
- *   Called by architecture specific implementations the start task execution.
+ *   Called by architecture specific implementations to resume task execution.
  *   This function performs scheduler operations for the thread that is about to
  *   be suspended.
  *
@@ -808,7 +808,8 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  *
  ********************************************************************************/
 
-#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SCHED_TICKLESS)
+#if defined(CONFIG_SCHED_SPORADIC) && (defined(CONFIG_SCHED_TICKLESS) || \
+    defined(CONFIG_SPORADIC_INSTRUMENTATION))
 void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_suspend_scheduler(tcb)

@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 
@@ -109,6 +110,12 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
+
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+  /* Inform the monitor of this event */
+
+  arch_sporadic_start(tcb);
+#endif
 
   /* Start the next replenishment interval */
 
@@ -259,6 +266,12 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
 
   DEBUGASSERT(tcb != NULL && tcb->sporadic != NULL);
   sporadic = tcb->sporadic;
+
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+  /* Inform the monitor of this event */
+
+  arch_sporadic_lowpriority(tcb);
+#endif
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
@@ -782,6 +795,12 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
 
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+  /* Inform the monitor of this event */
+
+  arch_sporadic_resume(tcb);
+#endif
+
   /* Check if are in the budget portion of the replenishment interval.  We
    * know this is the case if the current timeslice is non-zero.
    *
@@ -849,17 +868,27 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_SPORADIC) && (defined(CONFIG_SCHED_TICKLESS) || \
+    defined(CONFIG_SPORADIC_INSTRUMENTATION))
 int sched_sporadic_suspend(FAR struct tcb_s *tcb,
                            FAR const struct timespec *suspend_time)
 {
+#ifdef CONFIG_SCHED_TICKLESS
   FAR struct sporadic_s *sporadic;
   struct timespec elapsed_time;
   uint32_t elapsed_ticks;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
+#endif
 
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+  /* Inform the monitor of this event */
+
+  arch_sporadic_suspend(tcb);
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
   /* Check if are in the budget portion of the replenishment interval.  We
    * know this is the case if the current timeslice is non-zero.
    *
@@ -912,6 +941,7 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
           tcb->timeslice -= (int32_t)elapsed_ticks;
         }
     }
+#endif
 
   return OK;
 }
