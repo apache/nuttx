@@ -1029,6 +1029,14 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
   int next;
   int ndx;
 
+  /* If DNS not initialized, no need to proceed */
+
+  if (!g_dns_initialized)
+    {
+      ndbg("ERROR: DNS not initialized yet\n");
+      return -EAGAIN;
+    }
+
   /* Get exclusive access to the DNS cache */
 
   dns_semtake();
