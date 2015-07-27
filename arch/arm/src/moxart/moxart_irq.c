@@ -47,9 +47,7 @@
 #include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
-#include <arch/calypso/memory.h>
-#include <arch/calypso/clock.h>
+#include <arch/board/board.h>
 
 #include "arm.h"
 #include "up_arch.h"
