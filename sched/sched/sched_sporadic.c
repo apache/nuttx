@@ -176,16 +176,15 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
                                  uint32_t budget)
 {
   FAR struct sporadic_s *sporadic;
-  int ret;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
 
   /* Start the next replenishment interval */
 
-  tcb->timeslice = budget;
-  sporadic->last = budget;
-  repl->budget   = budget;
+  tcb->timeslice   = budget;
+  sporadic->active = repl;
+  repl->budget     = budget;
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Save the time that the replenishment interval started */
@@ -229,13 +228,15 @@ static int sporadic_budget_next(FAR struct replenishment_s *repl)
   sporadic = tcb->sporadic;
   DEBUGASSERT(sporadic != NULL);
 
-  /* The budgeted interval will be the pending budget */
+  /* The budgeted interval will be the unrealized budget (unless the full
+   * budget was used on this timer in the last cycle)
+   */
 
   budget            = sporadic->pending;
   sporadic->pending = 0;
 
-  /* If the budget zero, then all of the pending budget has been utilized.
-   * There are now two possibilities:  (1) There are multiple, active
+  /* If the budget zero, then all of the budget has been utilized.  There
+   * are now two possibilities:  (1) There are multiple, active
    * replenishment threads so this one is no longer needed, or (2) there is
    * only one and we need to restart the budget interval with the full
    * budget.
@@ -253,7 +254,6 @@ static int sporadic_budget_next(FAR struct replenishment_s *repl)
            sporadic->nrepls--;
 
            return sporadic_set_hipriority(tcb);
-           return OK;
          }
        else
          {
@@ -659,6 +659,7 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
   DEBUGASSERT(sporadic->max_repl <= CONFIG_SCHED_SPORADIC_MAXREPL);
   DEBUGASSERT(sporadic->budget > 0 && sporadic->budget <= sporadic->repl_period);
   DEBUGASSERT(sporadic->nrepls == 0 && sporadic->pending == 0);
+  DEBUGASSERT(sporadic->active == NULL);
 
   /* Allocate the first replenishment timer (should never fail) */
 
@@ -768,6 +769,7 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
   sporadic->repl_period  = 0;
   sporadic->budget       = 0;
   sporadic->pending      = 0;
+  sporadic->active       = NULL;
   return OK;
 }
 
@@ -801,6 +803,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
+  uint32_t last;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -813,35 +816,44 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
   /* Check if are in the budget portion of the replenishment interval.  We
    * know this is the case if the current timeslice is non-zero.
-   *
-   * This function could also be called before the budget period has had a
-   * chance to run, i.e., when the value of timeslice has not been decremented
-   * and is still equal to the initial value.
-   *
-   * This latter case could occur if the thread has never had a chance to
-   * run and is also very likely when the thread is just restarted after
-   * raising its priority at the beginning of the budget period.  We would
-   * not want to start a new timer in these cases.
    */
 
-  if (tcb->timeslice > 0 && tcb->timeslice < sporadic->last)
+  if (tcb->timeslice > 0)
     {
-      /* Allocate a new replenishment timer.  This will limit us to
-       * to maximum number of replenishments (max_repl).
+      /* Get the last budgeted time */
+
+      DEBUGASSERT(sporadic->active);
+      last = sporadic->active->budget;
+
+      /* This function could also be called before the budget period has had
+       * a chance to run, i.e., when the value of timeslice has not been
+       * decremented and is still equal to the initial value.
+       *
+       * This latter case could occur if the thread has never had a chance
+       * to run and is also very likely when the thread is just restarted
+       * after raising its priority at the beginning of the budget period.
+       * We would not want to start a new timer in these cases.
        */
 
-      repl = sporadic_alloc_repl(sporadic);
-      if (repl != NULL)
+      if (tcb->timeslice < last)
         {
-          return sporadic_budget_start(tcb, repl, tcb->timeslice);
+          /* Allocate a new replenishment timer.  This will limit us to
+           * to maximum number of replenishments (max_repl).
+           */
+
+          repl = sporadic_alloc_repl(sporadic);
+          if (repl != NULL)
+            {
+              return sporadic_budget_start(tcb, repl, tcb->timeslice);
+            }
+
+          /* We need to return success even on a failure to allocate.  Doing
+           * nothing is our fall-back behavior and that is not a failure from
+           * the standpoint of higher level logic.
+           */
+
+          slldbg("Failed to allocate timer, nrepls=%d\n", sporadic->nrepls);
         }
-
-      /* We need to return success even on a failure to allocate.  Doing
-       * nothing is our fall-back behavior and that is not a failure from
-       * the standpoint of higher level logic.
-       */
-
-      slldbg("Failed to allocate timer, nrepls=%d\n", sporadic->nrepls);
     }
 
 #ifdef CONFIG_SCHED_TICKLESS
@@ -887,6 +899,7 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
   uint32_t elapsed_ticks;
 #endif
   uint32_t pending = tcb->timeslice;
+  uint32_t last;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -945,6 +958,11 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
       tcb->timeslice -= (int32_t)elapsed_ticks;
 #endif
 
+      /* Get the last budgeted time */
+
+      DEBUGASSERT(sporadic->active);
+      last = sporadic->active->budget;
+
       /* Handle any part of the budget that was not utilized.
        *
        *   current        = The initial budget at the beginning of the interval.
@@ -952,8 +970,8 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
        *                    not execute.
        */
 
-      DEBUGASSERT(sporadic->last >= tcb->timeslice);
-      pending = sporadic->last - tcb->timeslice;
+      DEBUGASSERT(last >= tcb->timeslice);
+      pending = last - tcb->timeslice;
       DEBUGASSERT(pending <= sporadic->budget);
     }
 

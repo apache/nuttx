@@ -272,14 +272,17 @@ struct sporadic_s
   uint8_t  nrepls;                  /* Number of active replenishments          */
   uint32_t repl_period;             /* Sporadic replenishment period            */
   uint32_t budget;                  /* Sporadic execution budget period         */
-  uint32_t last;                    /* Last budget time                         */
   uint32_t pending;                 /* Unrealized, pending execution budget     */
 
 #ifdef CONFIG_SCHED_TICKLESS
   struct timespec sched_time;       /* Time in ticks last processed             */
 #endif
 
-  /* This is the list of replenishment intervals */
+  /* This is the last interval timer activated */
+
+  FAR struct replenishment_s *active;
+
+  /* This is the list of replenishment interval timers */
 
   struct replenishment_s replenishments[CONFIG_SCHED_SPORADIC_MAXREPL];
 };
