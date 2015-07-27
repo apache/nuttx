@@ -272,6 +272,7 @@ struct sporadic_s
   uint8_t  nrepls;                  /* Number of active replenishments          */
   uint32_t repl_period;             /* Sporadic replenishment period            */
   uint32_t budget;                  /* Sporadic execution budget period         */
+  uint32_t last;                    /* Last budget time                         */
   uint32_t pending;                 /* Unrealized, pending execution budget     */
 
 #ifdef CONFIG_SCHED_TICKLESS
@@ -808,8 +809,7 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  *
  ********************************************************************************/
 
-#if defined(CONFIG_SCHED_SPORADIC) && (defined(CONFIG_SCHED_TICKLESS) || \
-    defined(CONFIG_SPORADIC_INSTRUMENTATION))
+#ifdef CONFIG_SCHED_SPORADIC
 void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_suspend_scheduler(tcb)

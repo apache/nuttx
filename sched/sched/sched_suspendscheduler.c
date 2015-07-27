@@ -49,8 +49,7 @@
 #include "clock/clock.h"
 #include "sched/sched.h"
 
-#if defined(CONFIG_SCHED_SPORADIC) && (defined(CONFIG_SCHED_TICKLESS) || \
-    defined(CONFIG_SPORADIC_INSTRUMENTATION))
+#ifdef CONFIG_SCHED_SPORADIC
 
 /****************************************************************************
  * Public Functions
@@ -91,4 +90,4 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb)
     }
 }
 
-#endif /* CONFIG_SCHED_SPORADIC && (CONFIG_SCHED_TICKLESS || CONFIG_SPORADIC_INSTRUMENTATION) */
+#endif /* CONFIG_SCHED_SPORADIC */

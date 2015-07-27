@@ -59,12 +59,7 @@ CSRCS += sched_roundrobin.c
 endif
 
 ifeq ($(CONFIG_SCHED_SPORADIC),y)
-CSRCS += sched_sporadic.c
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CSRCS += sched_suspendscheduler.c
-else ifeq ($(CONFIG_SPORADIC_INSTRUMENTATION),y)
-CSRCS += sched_suspendscheduler.c
-endif
+CSRCS += sched_sporadic.c sched_suspendscheduler.c
 endif
 
 ifneq ($(CONFIG_RR_INTERVAL),0)
