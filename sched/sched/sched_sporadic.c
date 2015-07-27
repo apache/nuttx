@@ -185,6 +185,7 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
   tcb->timeslice   = budget;
   sporadic->active = repl;
   repl->budget     = budget;
+  repl->unrealized = 0;
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Save the time that the replenishment interval started */
@@ -232,8 +233,7 @@ static int sporadic_budget_next(FAR struct replenishment_s *repl)
    * budget was used on this timer in the last cycle)
    */
 
-  budget            = sporadic->pending;
-  sporadic->pending = 0;
+  budget = repl->unrealized;
 
   /* If the budget zero, then all of the budget has been utilized.  There
    * are now two possibilities:  (1) There are multiple, active
@@ -658,8 +658,7 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
   DEBUGASSERT(sporadic->low_priority <= sporadic->hi_priority);
   DEBUGASSERT(sporadic->max_repl <= CONFIG_SCHED_SPORADIC_MAXREPL);
   DEBUGASSERT(sporadic->budget > 0 && sporadic->budget <= sporadic->repl_period);
-  DEBUGASSERT(sporadic->nrepls == 0 && sporadic->pending == 0);
-  DEBUGASSERT(sporadic->active == NULL);
+  DEBUGASSERT(sporadic->nrepls == 0 && sporadic->active == NULL);
 
   /* Allocate the first replenishment timer (should never fail) */
 
@@ -668,7 +667,6 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
 
   /* Then start the first interval */
 
-  sporadic->pending = sporadic->budget;
   return sporadic_budget_start(tcb, repl, sporadic->budget);
 }
 
@@ -757,7 +755,10 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
 
       /* Re-initialize replenishment data */
 
-      repl->tcb = tcb;
+      repl->tcb          = tcb;
+      repl->budget       = 0;
+      repl->unrealized   = 0;
+      repl->active       = false;
     }
 
   /* Reset sporadic scheduling parameters and state data */
@@ -768,7 +769,6 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
   sporadic->nrepls       = 0;
   sporadic->repl_period  = 0;
   sporadic->budget       = 0;
-  sporadic->pending      = 0;
   sporadic->active       = NULL;
   return OK;
 }
@@ -803,6 +803,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
+  uint32_t budget;
   uint32_t last;
 
   DEBUGASSERT(tcb && tcb->sporadic);
@@ -825,6 +826,38 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
       DEBUGASSERT(sporadic->active);
       last = sporadic->active->budget;
 
+#ifdef CONFIG_SCHED_TICKLESS
+      /* Get the difference in time between the time that the scheduler just
+       * ran and time time that the thread was suspended.  This difference,
+       * then, is the unaccounted for time between the time that the timer
+       * was started and when the thread was suspended.
+       */
+
+      clock_timespec_subtract(suspend_time, &sporadic->sched_time,
+                              &elapsed_time);
+
+      /* Convert to ticks */
+
+      elapsed_ticks  = SEC2TICK(elapsed_time.tv_sec);
+      elapsed_ticks += NSEC2TICK(elapsed_time.tv_nsec);
+
+      /* One possibility is that the the elapsed time is greater than the
+       * time remaining in the time slice.  This is a a race condition.  It
+       * means that the timer has just expired.  the interrupt will occu
+       * soon.
+       */
+
+      if (elapsed_ticks >= tcb->timeslice)
+        {
+          return;
+        }
+
+      /* Otherwise, the unrealized time in this budget is the sum time slice
+       * value minus, the time from the unexpired timer.
+       */
+
+      tcb->timeslice -= (int32_t)elapsed_ticks;
+#endif
       /* This function could also be called before the budget period has had
        * a chance to run, i.e., when the value of timeslice has not been
        * decremented and is still equal to the initial value.
@@ -873,7 +906,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
  *   tickless mode.  In this case, there is unaccounted for time from the
  *   time that the last interval timer was started up until this point.
  *
- *   This function calculates the elpased time since then, and adjusts the
+ *   This function calculates the elapsed time since then, and adjusts the
  *   timeslice time accordingly.
  *
  * Input Parameters:
@@ -898,8 +931,6 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
   struct timespec elapsed_time;
   uint32_t elapsed_ticks;
 #endif
-  uint32_t pending = tcb->timeslice;
-  uint32_t last;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -951,17 +982,12 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
           return;
         }
 
-      /* Otherwise, the pending time in this budget is the sum time slice
+      /* Otherwise, the unrealized time in this budget is the sum time slice
        * value minus, the time from the unexpired timer.
        */
 
       tcb->timeslice -= (int32_t)elapsed_ticks;
 #endif
-
-      /* Get the last budgeted time */
-
-      DEBUGASSERT(sporadic->active);
-      last = sporadic->active->budget;
 
       /* Handle any part of the budget that was not utilized.
        *
@@ -970,12 +996,10 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb,
        *                    not execute.
        */
 
-      DEBUGASSERT(last >= tcb->timeslice);
-      pending = last - tcb->timeslice;
-      DEBUGASSERT(pending <= sporadic->budget);
+      DEBUGASSERT(sporadic->active);
+      sporadic->active->unrealized = tcb->timeslice;
     }
 
-  sporadic->pending = pending;
   return OK;
 }
 

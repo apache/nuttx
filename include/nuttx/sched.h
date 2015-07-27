@@ -254,6 +254,7 @@ struct replenishment_s
   FAR struct tcb_s *tcb;            /* The parent TCB structure                 */
   struct wdog_s timer;              /* Timer dedicated to this interval         */
   uint32_t budget;                  /* Current budget time                      */
+  uint32_t unrealized;              /* Unrealized time of budget time           */
   bool active;                      /* True: replenishment instance is busy     */
 };
 
@@ -272,7 +273,6 @@ struct sporadic_s
   uint8_t  nrepls;                  /* Number of active replenishments          */
   uint32_t repl_period;             /* Sporadic replenishment period            */
   uint32_t budget;                  /* Sporadic execution budget period         */
-  uint32_t pending;                 /* Unrealized, pending execution budget     */
 
 #ifdef CONFIG_SCHED_TICKLESS
   struct timespec sched_time;       /* Time in ticks last processed             */
