@@ -230,34 +230,13 @@ static int sporadic_budget_next(FAR struct replenishment_s *repl)
 
   budget = repl->unrealized;
 
-  /* If the budget zero, then all of the budget has been utilized.  There
-   * are now two possibilities:  (1) There are multiple, active
-   * replenishment threads so this one is no longer needed, or (2) there is
-   * only one and we need to restart the budget interval with the full
-   * budget.
-   */
+  /* If the budget zero, then all of the budget has been utilized. */
 
-   if (budget == 0)
-     {
-       if (sporadic->nrepls > 1)
-         {
-           /* Release this replenishment timer.  Processing will continue
-            * to be driven by the remaining timers.
-            */
+  if (budget == 0)
+    {
+      /* Restart with the full budget. */
 
-           repl->active = false;
-           sporadic->nrepls--;
-
-           return sporadic_set_hipriority(tcb);
-         }
-       else
-         {
-           /* No, we are the only replenishment timer.  Restart with the
-            * full budget.
-            */
-
-           budget = sporadic->budget;
-         }
+      budget = sporadic->budget;
      }
 
   /* Start the next replenishment interval */
@@ -465,8 +444,32 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
 static void sporadic_interval_expire(int argc, wdparm_t arg1, ...)
 {
   FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg1;
+  FAR struct sporadic_s *sporadic;
+  FAR struct tcb_s *tcb;
 
-  DEBUGASSERT(argc == 1 && repl != NULL);
+  DEBUGASSERT(argc == 1 && repl != NULL && repl->tcb != NULL);
+  tcb      = repl->tcb;
+
+  sporadic = tcb->sporadic;
+  DEBUGASSERT(sporadic != NULL);
+
+  /* If there are multiple replenishment timers and this one has expired
+   * with nothing unrealized, cancel all of the others and continue
+   * processing with only a single timer.
+   *
+   * REVISIT: This is not correct, this does not accomplish what we
+   * really need to do:  We need to extend the budget on this cycle
+   * but without extending the cycle itself.  I am afraid that a
+   * redesign is in order.
+   */
+
+   if (sporadic->nrepls > 1 && repl->unrealized == 0)
+     {
+       sporadic_timer_cancel(tcb);
+       repl = sporadic_alloc_repl(sporadic);
+       DEBUGASSERT(repl != NULL);
+       repl->unrealized = 0;
+     }
 
   /* Start the next replenishment interval */
 
