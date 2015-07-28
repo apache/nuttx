@@ -77,6 +77,7 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb);
 static int sporadic_interval_start(FAR struct replenishment_s *repl);
 static void sporadic_budget_expire(int argc, wdparm_t arg1, ...);
 static void sporadic_interval_expire(int argc, wdparm_t arg1, ...);
+static void sporadic_timer_cancel(FAR struct tcb_s *tcb);
 FAR struct replenishment_s *
   sporadic_alloc_repl(FAR struct sporadic_s *sporadic);
 
@@ -187,20 +188,10 @@ static int sporadic_budget_start(FAR struct tcb_s *tcb,
   repl->budget     = budget;
   repl->unrealized = 0;
 
-#ifdef CONFIG_SCHED_TICKLESS
-  /* Save the time that the replenishment interval started */
-
-  (void)up_timer_gettime(&sporadic->sched_time);
-#endif
-
   /* And start the timer for the budget interval */
 
   DEBUGVERIFY(wd_start(&repl->timer, budget, sporadic_budget_expire, 1,
                        (wdentry_t)repl));
-
-  /* Save the time that the thread was started */
-
-  sporadic->eventtime = clock_systimer();
 
   /* Then reprioritize to the higher priority */
 
@@ -439,12 +430,9 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
 
       tcb->timeslice = -1;
 
-      /* Cancel and free the timer */
+      /* Cancel and free all timers */
 
-      wd_cancel(&repl->timer);
-      repl->budget   = 0;
-      repl->active   = false;
-      sporadic->nrepls--;
+      sporadic_timer_cancel(tcb);
       return;
     }
 
@@ -664,6 +652,11 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
   repl = sporadic_alloc_repl(sporadic);
   DEBUGASSERT(repl != NULL && sporadic->nrepls == 1);
 
+  /* Save the time that the scheduler was started */
+
+  sporadic->eventtime = clock_systimer();
+  sporadic->suspended = true;
+
   /* Then start the first interval */
 
   return sporadic_budget_start(tcb, repl, sporadic->budget);
@@ -762,6 +755,7 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
 
   /* Reset sporadic scheduling parameters and state data */
 
+  sporadic->suspended    = true;
   sporadic->hi_priority  = 0;
   sporadic->low_priority = 0;
   sporadic->max_repl     = 0;
@@ -784,7 +778,7 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
  *       using the sporadic scheduling policy.
  *
  *   This function does nothing if the budget phase as already elapsed or
- *   the maximum numer of replenishments have already been performed.
+ *   the maximum number of replenishments have already been performed.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
@@ -810,11 +804,26 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
 
+  /* If we are resumed more than one, ignore all but the first */
+
+  if (!sporadic->suspended)
+    {
+      return OK;
+    }
+
+  /* This is the first time */
+
+  sporadic->suspended = false;
+
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
   /* Inform the monitor of this event */
 
   arch_sporadic_resume(tcb);
 #endif
+
+  /* Get the time that the thread was [re-]started */
+
+  now = clock_systimer();
 
   /* Check if are in the budget portion of the replenishment interval.  We
    * know this is the case if the current timeslice is non-zero.
@@ -822,14 +831,9 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
   if (tcb->timeslice > 0)
     {
-      /* Save the time that the thread was [re-]started */
-
-      now = clock_systimer();
-
       /* Unrealized budget time while the thread was suspended */
 
-      unrealized = sporadic->eventtime - now;
-      sporadic->eventtime = now;
+      unrealized = now - sporadic->eventtime;
 
       /* Ignore very short pre-emptions that are below our timing resolution. */
 
@@ -837,10 +841,10 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
         {
           /* Handle any part of the budget that was not utilized.
            *
-           *   current  = The initial budget at the beginning of the
-           *              interval.
-           *   urealized = The unused part of that budget when the
-           *               thread did  not execute.
+           *   current    = The initial budget at the beginning of the
+           *                interval.
+           *   unrealized = The unused part of that budget when the
+           *                thread did  not execute.
            */
 
           if (unrealized >= tcb->timeslice)
@@ -848,11 +852,10 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
               /* We lost the remainder of the timeslice, (and then some).
                * No point in starting more timers.
                */
-
               return OK;
             }
 
-         DEBUGASSERT(sporadic->active);
+          DEBUGASSERT(sporadic->active);
           tcb->timeslice -= unrealized;
           sporadic->active->unrealized = unrealized;
 
@@ -888,6 +891,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
         }
     }
 
+  sporadic->eventtime = now;
   return OK;
 }
 
@@ -895,24 +899,16 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
  * Name: sched_sporadic_suspend
  *
  * Description:
- *   Called to when a thread with sporadic scheduling is suspended in the
- *   tickless mode.  In this case, there is unaccounted for time from the
- *   time that the last interval timer was started up until this point.
- *
- *   This function calculates the elapsed time since then, and adjusts the
- *   timeslice time accordingly.
+ *   Called to when a thread with sporadic scheduling is suspended.  In this
+ *   case, there will be unaccounted for time from the time that the last
+ *   when the task is resumed.  All that we need to do here is remember
+ *   that time that we were suspended.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
- *   suspend_time - The time that the thread was suspended.
  *
  * Returned Value:
  *   Returns zero (OK) on success or a negated errno value on failure.
- *
- * Assumptions:
- *  - Interrupts are disabled
- *  - All sporadic scheduling parameters in the TCB are valid
- *  - The low priority interval timer is not running
  *
  ****************************************************************************/
 
@@ -923,15 +919,25 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb)
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-  /* Inform the monitor of this event */
+  /* If we are suspended more than one, ignore all but the first */
 
-  arch_sporadic_suspend(tcb);
+  if (!sporadic->suspended)
+    {
+      /* This is the first time */
+
+      sporadic->suspended = true;
+
+#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+      /* Inform the monitor of this event */
+
+      arch_sporadic_suspend(tcb);
 #endif
 
-  /* Save the time that the thread was suspended */
+      /* Save the time that the thread was suspended */
 
-  sporadic->eventtime = clock_systimer();
+      sporadic->eventtime = clock_systimer();
+    }
+
   return OK;
 }
 
@@ -1028,7 +1034,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 
       if (noswitches)
         {
-          tcb->timeslice    = 1;
+          tcb->timeslice = 1;
           return 1;
         }
 
@@ -1043,9 +1049,10 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
           return sporadic->budget;
         }
 
-      /* Otherwise enter the low-priority phase of the replenishment cycle */
+      /* Otherwise enter the low-priority phase of the replenishment cycle.
+       * Let the timers handle the priority changes.
+       */
 
-      sporadic_set_lowpriority(tcb);
       return 0;
     }
 
@@ -1104,7 +1111,11 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
   DEBUGASSERT(sporadic->nrepls < sporadic->max_repl);
   repl = sporadic_alloc_repl(sporadic);
   DEBUGASSERT(repl != NULL);
-  repl->budget = sporadic->budget;
+
+  tcb->timeslice   = 0;
+  sporadic->active = repl;
+  repl->budget     = sporadic->budget;
+  repl->unrealized = 0;
 
   /* Drop the priority of thread, possible causing a context switch. */
 

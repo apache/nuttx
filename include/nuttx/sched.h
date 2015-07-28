@@ -267,6 +267,7 @@ struct replenishment_s
 
 struct sporadic_s
 {
+  bool     suspended;               /* Thread is currently suspended            */
   uint8_t  hi_priority;             /* Sporadic high priority                   */
   uint8_t  low_priority;            /* Sporadic low priority                    */
   uint8_t  max_repl;                /* Maximum number of replenishments         */
