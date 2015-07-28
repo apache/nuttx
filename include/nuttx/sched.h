@@ -164,6 +164,12 @@
 #  define CHILD_FLAG_TTYPE_KERNEL  (2 << CHILD_FLAG_TTYPE_SHIFT) /* Kernel thread */
 #define CHILD_FLAG_EXITED          (1 << 0) /* Bit 2: The child thread has exit'ed */
 
+/* Sporadic scheduler flags */
+
+#define SPORADIC_FLAG_ALLOCED     (1 << 0)  /* Bit 0: Timer is allocated */
+#define SPORADIC_FLAG_MAIN        (1 << 1)  /* Bit 1: The main timer */
+#define SPORADIC_FLAG_REPLENISH   (1 << 2)  /* Bit 2: Replenishment cycle */
+
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -254,8 +260,7 @@ struct replenishment_s
   FAR struct tcb_s *tcb;            /* The parent TCB structure                 */
   struct wdog_s timer;              /* Timer dedicated to this interval         */
   uint32_t budget;                  /* Current budget time                      */
-  uint32_t unrealized;              /* Unrealized time of budget time           */
-  bool active;                      /* True: replenishment instance is busy     */
+  uint8_t  flags;                   /* See SPORADIC_FLAG_* definitions          */
 };
 
 /* This structure is an allocated "plug-in" to the main TCB structure.  It is
