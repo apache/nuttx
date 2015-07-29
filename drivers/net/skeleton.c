@@ -131,7 +131,7 @@ static struct skel_driver_s g_skel[CONFIG_skeleton_NINTERFACES];
 /* Common TX logic */
 
 static int  skel_transmit(FAR struct skel_driver_s *priv);
-static int  skel_txpoll(struct net_driver_s *dev);
+static int  skel_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -242,7 +242,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
  *
  ****************************************************************************/
 
-static int skel_txpoll(struct net_driver_s *dev)
+static int skel_txpoll(FAR struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
 
@@ -821,7 +821,7 @@ static void skel_poll_expiry(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int skel_ifup(struct net_driver_s *dev)
+static int skel_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
 
@@ -874,7 +874,7 @@ static int skel_ifup(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int skel_ifdown(struct net_driver_s *dev)
+static int skel_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -982,7 +982,7 @@ static void skel_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int skel_txavail(struct net_driver_s *dev)
+static int skel_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
 
@@ -1036,7 +1036,7 @@ static int skel_txavail(struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int skel_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
 
@@ -1065,7 +1065,7 @@ static int skel_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int skel_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
 
@@ -1171,11 +1171,11 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv)
 
 int skel_initialize(int intf)
 {
-  struct skel_driver_s *priv;
+  FAR struct skel_driver_s *priv;
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf < CONFIG_skeleton_NINTERFACES);
+  DEBUGASSERT(intf < CONFIG_skeleton_NINTERFACES);
   priv = &g_skel[intf];
 
   /* Check if a Ethernet chip is recognized at its I/O base */
