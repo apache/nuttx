@@ -67,11 +67,11 @@
  *
  ****************************************************************************/
 #ifdef CONFIG_BOARD_INITIALIZE
-extern int ftmac100_initialize(void);
+extern int ftmac100_initialize(int intf);
 
 void board_initialize(void)
 {
   /* Perform board-specific initialization */
-  ftmac100_initialize();
+  ftmac100_initialize(0);
 }
 #endif
