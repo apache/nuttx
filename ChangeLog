@@ -10765,3 +10765,8 @@
 	  it is symmetric with the sporadic stuff.  Integrate the sporadic
 	  scheduler into the time tick interrupt handling and into the tickless
 	  operation (2015-07-24).
+	* arch/arm/src/moxart/: Add support for MoxaRT SoC found in the most
+	  Moxa serial converters such as NP51x0, NP66xx, UC72xx.  From Anton
+	  D. Kachalov (2015-07-29).
+	* configs/moxa: Moxa NP51x0 series of 2-port advanced RS-232/422/485
+	  serial device servers.  From Anton D. Kachalov (2015-07-29).
