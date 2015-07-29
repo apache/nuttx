@@ -274,19 +274,17 @@ void up_decodeirq(uint32_t *regs)
 
   /* Detect & deliver the IRQ */
   status = getreg32(IRQ_REG(IRQ__STATUS));
-  while (status != 0)
-    {
-      /* Ack IRQ */
-      num = ffs(status) - 1;
-      up_ack_irq(num);
+  if (!status)
+    return;
 
-      DEBUGASSERT(current_regs == NULL);
-      current_regs = regs;
+  /* Ack IRQ */
+  num = ffs(status) - 1;
+  up_ack_irq(num);
 
-      irq_dispatch(num, regs);
+  DEBUGASSERT(current_regs == NULL);
+  current_regs = regs;
 
-      current_regs = NULL;
+  irq_dispatch(num, regs);
 
-      status = getreg32(IRQ_REG(IRQ__STATUS));
-    }
+  current_regs = NULL;
 }
