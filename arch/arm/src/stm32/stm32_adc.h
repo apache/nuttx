@@ -63,7 +63,7 @@
  */
 
 /* For the STM32 F1 line, timers 1-4 may be used.  For STM32 F4 line, timers 1-5 and
- * 8 may be used.
+ * 8 may be used. For the STM32L15XX line, timers 2-4, 6, 7, 9, 10 may be used
  */
 
 #ifndef CONFIG_STM32_TIM1
@@ -104,6 +104,7 @@
 #    undef CONFIG_STM32_TIM8_ADC2
 #    undef CONFIG_STM32_TIM8_ADC3
 #  endif
+#
 #else
 #  undef CONFIG_STM32_TIM5_ADC
 #  undef CONFIG_STM32_TIM5_ADC1
@@ -115,24 +116,60 @@
 #  undef CONFIG_STM32_TIM8_ADC3
 #endif
 
-/* Timers 6, 7, and 10-14 are not used with the ADC by any supported family */
+/* Timers 6, 7, 9, 10 used by STM32L15XX family devices. Though there is only ADC
+ * presented in specification and in device as well, the ADC1 is used here in code.
+ * See definition of the STM32_NADC
+ */
 
-#undef CONFIG_STM32_TIM6_ADC
-#undef CONFIG_STM32_TIM6_ADC1
-#undef CONFIG_STM32_TIM6_ADC2
-#undef CONFIG_STM32_TIM6_ADC3
-#undef CONFIG_STM32_TIM7_ADC
-#undef CONFIG_STM32_TIM7_ADC1
-#undef CONFIG_STM32_TIM7_ADC2
-#undef CONFIG_STM32_TIM7_ADC3
-#undef CONFIG_STM32_TIM9_ADC
-#undef CONFIG_STM32_TIM9_ADC1
-#undef CONFIG_STM32_TIM9_ADC2
-#undef CONFIG_STM32_TIM9_ADC3
-#undef CONFIG_STM32_TIM10_ADC
-#undef CONFIG_STM32_TIM10_ADC1
-#undef CONFIG_STM32_TIM10_ADC2
-#undef CONFIG_STM32_TIM10_ADC3
+#if defined(CONFIG_STM32_STM32L15XX)
+#  ifndef CONFIG_STM32_TIM6
+#    undef CONFIG_STM32_TIM6_ADC
+#    undef CONFIG_STM32_TIM6_ADC1
+#    undef CONFIG_STM32_TIM6_ADC2
+#    undef CONFIG_STM32_TIM6_ADC3
+#  endif
+#  ifndef CONFIG_STM32_TIM7
+#    undef CONFIG_STM32_TIM7_ADC
+#    undef CONFIG_STM32_TIM7_ADC1
+#    undef CONFIG_STM32_TIM7_ADC2
+#    undef CONFIG_STM32_TIM7_ADC3
+#  endif
+#  ifndef CONFIG_STM32_TIM9
+#    undef CONFIG_STM32_TIM9_ADC
+#    undef CONFIG_STM32_TIM9_ADC1
+#    undef CONFIG_STM32_TIM9_ADC2
+#    undef CONFIG_STM32_TIM9_ADC3
+#  endif
+#  ifndef CONFIG_STM32_TIM10
+#    undef CONFIG_STM32_TIM10_ADC
+#    undef CONFIG_STM32_TIM10_ADC1
+#    undef CONFIG_STM32_TIM10_ADC2
+#    undef CONFIG_STM32_TIM10_ADC3
+#  endif
+#
+#else
+#  undef CONFIG_STM32_TIM6_ADC
+#  undef CONFIG_STM32_TIM6_ADC1
+#  undef CONFIG_STM32_TIM6_ADC2
+#  undef CONFIG_STM32_TIM6_ADC3
+#  undef CONFIG_STM32_TIM7_ADC
+#  undef CONFIG_STM32_TIM7_ADC1
+#  undef CONFIG_STM32_TIM7_ADC2
+#  undef CONFIG_STM32_TIM7_ADC3
+#  undef CONFIG_STM32_TIM9_ADC
+#  undef CONFIG_STM32_TIM9_ADC1
+#  undef CONFIG_STM32_TIM9_ADC2
+#  undef CONFIG_STM32_TIM9_ADC3
+#  undef CONFIG_STM32_TIM10_ADC
+#  undef CONFIG_STM32_TIM10_ADC1
+#  undef CONFIG_STM32_TIM10_ADC2
+#  undef CONFIG_STM32_TIM10_ADC3
+#
+#endif
+
+/* Timers 6, 7, and 10-14 are not used with the ADC by any supported family
+ */
+
 #undef CONFIG_STM32_TIM11_ADC
 #undef CONFIG_STM32_TIM11_ADC1
 #undef CONFIG_STM32_TIM11_ADC2
@@ -164,7 +201,8 @@
 #  undef CONFIG_STM32_ADC1
 #endif
 
-#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || \
+    defined(CONFIG_STM32_ADC3)
 
 /* DMA support is not yet implemented for this driver */
 
@@ -172,8 +210,11 @@
 #  warning "DMA is not supported by the current driver"
 #endif
 
-/* Timer configuration:  If a timer trigger is specified, then get information
- * about the timer.
+/* Timer configuration:  If a timer trigger is specified, then get
+ * information about the timer.
+ *
+ * STM32L15XX-family has only one ADC onboard, thus there is no definition
+ * for other 3 ADC's
  */
 
 #if defined(CONFIG_STM32_TIM1_ADC1)
@@ -196,10 +237,26 @@
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32_TIM5_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB1_TIM5_CLKIN
+#elif defined(CONFIG_STM32_TIM6_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM6_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB1_TIM6_CLKIN
+#elif defined(CONFIG_STM32_TIM7_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM7_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB1_TIM7_CLKIN
 #elif defined(CONFIG_STM32_TIM8_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32_TIM8_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
+#elif defined(CONFIG_STM32_TIM9_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM9_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM9_CLKIN
+#elif defined(CONFIG_STM32_TIM10_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM10_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM10_CLKIN
 #else
 #    undef  ADC1_HAVE_TIMER
 #endif
@@ -235,9 +292,9 @@
 #    define ADC2_TIMER_BASE           STM32_TIM5_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32_APB1_TIM5_CLKIN
 #elif defined(CONFIG_STM32_TIM8_ADC2)
-#    define ADC2_HAVE_TIMER           1
-#    define ADC2_TIMER_BASE           STM32_TIM8_BASE
-#    define ADC2_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
 #else
 #    undef  ADC2_HAVE_TIMER
 #endif
@@ -273,9 +330,9 @@
 #    define ADC3_TIMER_BASE           STM32_TIM5_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32_APB1_TIM5_CLKIN
 #elif defined(CONFIG_STM32_TIM8_ADC3)
-#    define ADC3_HAVE_TIMER           1
-#    define ADC3_TIMER_BASE           STM32_TIM8_BASE
-#    define ADC3_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
 #else
 #    undef  ADC3_HAVE_TIMER
 #endif
@@ -300,10 +357,14 @@
 #endif
 
 /* NOTE:  The following assumes that all possible combinations of timers and
- * values are support EXTSEL.  That is not so and it varies from one STM32 to another.
- * But this (wrong) assumptions keeps the logic as simple as possible.  If un
- * unsupported combination is used, an error will show up later during compilation
- * although it may be difficult to track it back to this simplification.
+ * values are support EXTSEL.  That is not so and it varies from one STM32
+ * to another.  But this (wrong) assumptions keeps the logic as simple as
+ * possible.  If unsupported combination is used, an error will show up
+ * later during compilation although it may be difficult to track it back
+ * to this simplification.
+ *
+ * STM32L15XX-family has only one ADC onboard, thus there is no definition
+ * for other 3 ADC's
  */
 
 #if defined(CONFIG_STM32_TIM1_ADC1)
@@ -376,7 +437,63 @@
 #  else
 #    error "CONFIG_STM32_ADC1_TIMTRIG is out of range"
 #  endif
+#elif defined(CONFIG_STM32_TIM6_ADC1)
+#  if CONFIG_STM32_ADC1_TIMTRIG == 0
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC1
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 1
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC2
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 2
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC3
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 3
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC4
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5TRGO
+#  else
+#    error "CONFIG_STM32_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32_TIM7_ADC1)
+#  if CONFIG_STM32_ADC1_TIMTRIG == 0
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC1
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 1
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC2
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 2
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC3
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 3
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5CC4
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T5TRGO
+#  else
+#    error "CONFIG_STM32_ADC1_TIMTRIG is out of range"
+#  endif
 #elif defined(CONFIG_STM32_TIM8_ADC1)
+#  if CONFIG_STM32_ADC1_TIMTRIG == 0
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC1
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 1
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC2
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 2
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC3
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 3
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC4
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8TRGO
+#  else
+#    error "CONFIG_STM32_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32_TIM9_ADC1)
+#  if CONFIG_STM32_ADC1_TIMTRIG == 0
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC1
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 1
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC2
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 2
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC3
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 3
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC4
+#  elif CONFIG_STM32_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8TRGO
+#  else
+#    error "CONFIG_STM32_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32_TIM10_ADC1)
 #  if CONFIG_STM32_ADC1_TIMTRIG == 0
 #    define ADC1_EXTSEL_VALUE ADC_CR2_EXTSEL_T8CC1
 #  elif CONFIG_STM32_ADC1_TIMTRIG == 1
@@ -565,6 +682,61 @@
 #endif
 
 /************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_STM32L15XX
+typedef enum ADC_IO_CMDS
+{
+  IO_ENABLE_TEMPER_VOLT_CH = 0,
+  IO_ENABLE_DISABLE_PDI,
+  IO_ENABLE_DISABLE_PDD,
+  IO_ENABLE_DISABLE_PDD_PDI,
+  IO_ENABLE_DISABLE_AWDIE,
+  IO_ENABLE_DISABLE_EOCIE,
+  IO_ENABLE_DISABLE_JEOCIE,
+  IO_ENABLE_DISABLE_OVRIE = 7,
+  IO_ENABLE_DISABLE_ALL_INTS,
+  IO_START_CONV,
+  IO_STOP_ADC,
+  IO_START_ADC,
+} ADC_IO_CMDS;
+
+/* Channel and sample time pair */
+
+typedef struct adc_channel_s
+{
+  uint8_t channel : 5;
+
+  /* Sampling time individually for each channel
+   * 000: 4 cycles
+   * 001: 9 cycles
+   * 010: 16 cycles
+   * 011: 24 cycles
+   * 100: 48 cycles
+   * 101: 96 cycles
+   * 110: 192 cycles
+   * 111: 384 cycles    - selected for all channels
+   */
+
+  uint8_t sample_time : 3;
+} adc_channel_t;
+
+/* This structure will be used while setting channels to specified by the
+ * "channel-sample time" pairs' values
+ */
+
+struct adc_sample_time_s {
+    adc_channel_t *channel;                /* array of channels */
+    uint8_t channels_nbr:5;                /* number of channels in array */
+    bool all_same:1;                       /* All 32 channels will get the
+                                            * same value of the sample time */
+    uint8_t all_ch_sample_time:3;          /* Sample time for all 32 channels */
+};
+
+#endif
+
+/************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
@@ -594,8 +766,13 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
+struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
                                       int nchannels);
+
+#ifdef CONFIG_STM32_STM32L15XX
+void stm32_adcchange_sample_time(FAR struct adc_dev_s *dev,
+                                 FAR struct adc_sample_time_s *time_samples);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -605,4 +782,3 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
 
 #endif /* CONFIG_STM32_ADC || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_ADC_H */
-
