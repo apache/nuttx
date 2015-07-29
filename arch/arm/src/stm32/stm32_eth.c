@@ -1670,6 +1670,16 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+
+          /* free dropped packet buffer */
+          if (dev->d_buf)
+            {
+              nllvdbg("! dev->d_buf not NULL, %p / %d\n",
+                      dev->d_buf, dev->d_len );
+              stm32_freebuffer(priv, dev->d_buf);
+              dev->d_buf = NULL;
+              dev->d_len = 0;
+            }
           continue;
         }
 
