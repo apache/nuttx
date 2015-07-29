@@ -1217,6 +1217,9 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 
   avdbg("enable: %d\n", (enable ? 1 : 0));
 
+  /* Not all STM32 parts prove the SR ADONS bit */
+
+#ifdef ADC_SR_ADONS
   regval = adc_getreg(priv, STM32_ADC_SR_OFFSET);
 
   if (!(regval & ADC_SR_ADONS) && enable)
@@ -1229,6 +1232,18 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
       regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
       regval &= ~ADC_CR2_ADON;
     }
+
+#else
+  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
+  if (enable)
+    {
+      regval |= ADC_CR2_ADON;
+    }
+  else
+    {
+      regval &= ~ADC_CR2_ADON;
+    }
+#endif
 
   adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
 }
