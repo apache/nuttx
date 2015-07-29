@@ -57,7 +57,7 @@
 #define STM32_RTC_SSR_OFFSET      0x0028 /* RTC sub second register */
 #define STM32_RTC_SHIFTR_OFFSET   0x002c /* RTC shift control register */
 #define STM32_RTC_TSTR_OFFSET     0x0030 /* RTC time stamp time register */
-#define STM32_RTC_TSDR_OFFSET     0x0030 /* RTC time stamp date register */
+#define STM32_RTC_TSDR_OFFSET     0x0034 /* RTC time stamp date register */
 #define STM32_RTC_TSSSR_OFFSET    0x0038 /* RTC timestamp sub second register */
 #define STM32_RTC_CALR_OFFSET     0x003c /* RTC calibration register */
 #define STM32_RTC_TAFCR_OFFSET    0x0040 /* RTC tamper and alternate function configuration register */
@@ -86,6 +86,20 @@
 #  define STM32_RTC_BK17R_OFFSET  0x0094 /* RTC backup register 17 */
 #  define STM32_RTC_BK18R_OFFSET  0x0098 /* RTC backup register 18 */
 #  define STM32_RTC_BK19R_OFFSET  0x009c /* RTC backup register 19 */
+#endif
+#ifdef CONFIG_STM32_STM32L15XX
+#  define STM32_RTC_BK20R_OFFSET  0x00a0 /* RTC backup register 20 */
+#  define STM32_RTC_BK21R_OFFSET  0x00a4 /* RTC backup register 21 */
+#  define STM32_RTC_BK22R_OFFSET  0x00a8 /* RTC backup register 22 */
+#  define STM32_RTC_BK23R_OFFSET  0x00ac /* RTC backup register 23 */
+#  define STM32_RTC_BK24R_OFFSET  0x00b0 /* RTC backup register 24 */
+#  define STM32_RTC_BK25R_OFFSET  0x00b4 /* RTC backup register 25 */
+#  define STM32_RTC_BK26R_OFFSET  0x00b8 /* RTC backup register 26 */
+#  define STM32_RTC_BK27R_OFFSET  0x00bc /* RTC backup register 27 */
+#  define STM32_RTC_BK28R_OFFSET  0x00c0 /* RTC backup register 28 */
+#  define STM32_RTC_BK29R_OFFSET  0x00c4 /* RTC backup register 29 */
+#  define STM32_RTC_BK30R_OFFSET  0x00c8 /* RTC backup register 30 */
+#  define STM32_RTC_BK31R_OFFSET  0x00cc /* RTC backup register 31 */
 #endif
 
 /* Register Addresses ***************************************************************/
@@ -134,6 +148,28 @@
 #  define STM32_RTC_BK17R         (STM32_RTC_BASE+STM32_RTC_BK17R_OFFSET)
 #  define STM32_RTC_BK18R         (STM32_RTC_BASE+STM32_RTC_BK18R_OFFSET)
 #  define STM32_RTC_BK19R         (STM32_RTC_BASE+STM32_RTC_BK19R_OFFSET)
+#endif
+#ifdef CONFIG_STM32_STM32L15XX
+#  define STM32_RTC_BK20R         (STM32_RTC_BASE+STM32_RTC_BK20R_OFFSET)
+#  define STM32_RTC_BK21R         (STM32_RTC_BASE+STM32_RTC_BK21R_OFFSET)
+#  define STM32_RTC_BK22R         (STM32_RTC_BASE+STM32_RTC_BK22R_OFFSET)
+#  define STM32_RTC_BK23R         (STM32_RTC_BASE+STM32_RTC_BK23R_OFFSET)
+#  define STM32_RTC_BK24R         (STM32_RTC_BASE+STM32_RTC_BK24R_OFFSET)
+#  define STM32_RTC_BK25R         (STM32_RTC_BASE+STM32_RTC_BK25R_OFFSET)
+#  define STM32_RTC_BK26R         (STM32_RTC_BASE+STM32_RTC_BK26R_OFFSET)
+#  define STM32_RTC_BK27R         (STM32_RTC_BASE+STM32_RTC_BK27R_OFFSET)
+#  define STM32_RTC_BK28R         (STM32_RTC_BASE+STM32_RTC_BK28R_OFFSET)
+#  define STM32_RTC_BK29R         (STM32_RTC_BASE+STM32_RTC_BK29R_OFFSET)
+#  define STM32_RTC_BK30R         (STM32_RTC_BASE+STM32_RTC_BK30R_OFFSET)
+#  define STM32_RTC_BK31R         (STM32_RTC_BASE+STM32_RTC_BK31R_OFFSET)
+#endif
+
+#ifdef CONFIG_STM32_STM32F30XX
+#  define STM32_RTC_BKCOUNT       16
+#elif defined(CONFIG_STM32_STM32L15XX)
+#  define STM32_RTC_BKCOUNT       32
+#else
+#  define STM32_RTC_BKCOUNT       20
 #endif
 
 /* Register Bitfield Definitions ****************************************************/
@@ -232,6 +268,9 @@
 #define RTC_ISR_TSOVF             (1 << 12) /* Bit 12: Timestamp overflow flag */
 #define RTC_ISR_TAMP1F            (1 << 13) /* Bit 13: Tamper detection flag */
 #define RTC_ISR_TAMP2F            (1 << 14) /* Bit 14: TAMPER2 detection flag */
+#ifdef CONFIG_STM32_STM32L15XX
+#  define RTC_ISR_TAMP3F          (1 << 15) /* Bit 15: TAMPER3 detection flag */
+#endif
 #define RTC_ISR_RECALPF           (1 << 16) /* Bit 16: Recalibration pending Flag */
 #define RTC_ISR_ALLFLAGS          (0x00017fff)
 
@@ -370,9 +409,9 @@
 
 /* RTC alarm A/B sub second register */
 
-#define RTC_ALRMSSR_SS_SHIFT      (0)  /* Bits 0-15: Sub second value */
-#define RTC_ALRMSSR_SS_MASK       (0xffff << RTC_ALRMSSR_SS_SHIFT)
-#define RTC_ALRMSSR_MASKSS_SHIFT  (0)  /* Bits 24-27:  Mask the most-significant bits starting at this bit */
-#define RTC_ALRMSSR_MASKSS_MASK   (0xffff << RTC_ALRMSSR_SS_SHIFT)
+#define RTC_ALRMSSR_SS_SHIFT      (0)   /* Bits 0-14: Sub second value */
+#define RTC_ALRMSSR_SS_MASK       (0x7fff << RTC_ALRMSSR_SS_SHIFT)
+#define RTC_ALRMSSR_MASKSS_SHIFT  (24)  /* Bits 24-27:  Mask the most-significant bits starting at this bit */
+#define RTC_ALRMSSR_MASKSS_MASK   (0xf << RTC_ALRMSSR_MASKSS_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_RTCC_H */

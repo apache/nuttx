@@ -42,7 +42,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* STM32F40XXX Address Blocks *******************************************************/
+/* STM32L15XXX Address Blocks *******************************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */
@@ -56,10 +56,8 @@
 /* Code Base Addresses **************************************************************/
 
 #define STM32_BOOT_BASE      0x00000000     /* 0x00000000-0x07ffffff: Aliased boot memory */
-#define STM32_FLASH_BASE     0x08000000     /* 0x08000000-0x0801ffff: FLASH memory */
-                                            /* 0x08020000-0x807fffff: Reserved */
-#define STM32_EEPROM_BASE    0x08080000     /* 0x10000000-0x1000ffff: 64Kb CCM data RAM */
-                                            /* 0x10010000-0x1ffeffff: Reserved */
+#define STM32_FLASH_BASE     0x08000000     /* 0x08000000-0x0807ffff: Program FLASH memory */
+#define STM32_EEPROM_BASE    0x08080000     /* 0x08080000-0x08083fff: Data FLASH memory */
 #define STM32_SYSMEM_BASE    0x1ff00000     /* 0x1ff00000-0x1ff00fff: System memory */
                                             /* 0x1ff01000-0x1fff7fff: Reserved */
 #define STM32_OPTION_BASE    0x1ff80000     /* 0x1fffc000-0x1ff8001f: Option bytes */
@@ -114,6 +112,7 @@
 #define STM32_TIM9_BASE      0x40010800     /* 0x40010800-0x40010bff TIM9 */
 #define STM32_TIM10_BASE     0x40010c00     /* 0x40010c00-0x40010fff TIM10 */
 #define STM32_ADC_BASE       0x40012400     /* 0x40012400-0x400127ff ADC */
+#define STM32_ADCCMN_BASE    (STM32_ADC_BASE+0x300) /*               ADC Common */
 #define STM32_SDIO_BASE      0x40012c00     /* 0x40012c00-0x40012fff SDIO */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff SPI1 */
 #define STM32_USART1_BASE    0x40013800     /* 0x40013800-0x40013bff USART1 */

@@ -822,7 +822,7 @@
 #define ATIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable */
 #define ATIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
 #  define ATIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  define ATIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
