@@ -19,11 +19,13 @@ config 16550_UART
 	default n
 
 if 16550_UART
+
 config 16550_UART0
 	bool "16550 UART0"
 	default n
 
 if 16550_UART0
+
 config 16550_UART0_BASE
 	hex "16550 UART0 base address"
 
@@ -82,13 +84,14 @@ config 16550_UART0_OFLOWCONTROL
 	---help---
 		Enable 16550 UART0 CTS flow control
 
-endif
+endif # 16550_UART0
 
 config 16550_UART1
 	bool "16550 UART1"
 	default n
 
 if 16550_UART1
+
 config 16550_UART1_BASE
 	hex "16550 UART1 base address"
 
@@ -147,13 +150,14 @@ config 16550_UART1_OFLOWCONTROL
 	---help---
 		Enable 16550 UART1 CTS flow control
 
-endif
+endif # 16550_UART1
 
 config 16550_UART2
 	bool "16550 UART2"
 	default n
 
 if 16550_UART2
+
 config 16550_UART2_BASE
 	hex "16550 UART2 base address"
 
@@ -212,13 +216,14 @@ config 16550_UART2_OFLOWCONTROL
 	---help---
 		Enable 16550 UART2 CTS flow control
 
-endif
+endif # 16550_UART2
 
 config 16550_UART3
 	bool "16550 UART3"
 	default n
 
 if 16550_UART3
+
 config 16550_UART3_BASE
 	hex "16550 UART3 base address"
 
@@ -277,7 +282,7 @@ config 16550_UART3_OFLOWCONTROL
 	---help---
 		Enable 16550 UART3 CTS flow control
 
-endif
+endif # 16550_UART3
 
 choice
 	prompt "16550 Serial Console"
@@ -303,7 +308,7 @@ config 16550_UART3_SERIAL_CONSOLE
 config 16550_NO_SERIAL_CONSOLE
 	bool "No 16550 serial console"
 
-endchoice
+endchoice # 16550 Serial Console
 
 config 16550_SUPRESS_CONFIG
 	bool "Suppress 16550 configuration"
@@ -332,7 +337,18 @@ config 16550_ADDRWIDTH
 	---help---
 		The bit width of registers.  Options are 8, 16, or 32. Default: 8
 
-endif
+config 16550_THRNE
+	bool "Use THRNE"
+	default n if !ARCH_CHIP_MOXART
+	default y if ARCH_CHIP_MOXART
+	---help---
+		The 16550 UART has a bit in the line status register, THRE, that
+		indicates that the Transmit Holding Register (THR) is Empty (N).
+		This bit is inverted in at least one variant (the moxART SoC).
+		In that case, this setting must be included to use this bit as
+		THR *Not* Empty (THRNE).
+
+endif # 16550_UART
 
 #
 # MCU serial peripheral driver?

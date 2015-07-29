@@ -10770,4 +10770,7 @@
 	* configs/moxa: Moxa NP51x0 series of 2-port advanced RS-232/422/485
 	  serial device servers.  From Anton D. Kachalov (2015-07-29).
 	* drivers/net/ and include/nuttx/net: Add support for a Faraday
-	  FTMAC100 Ethernet MAC Driver.  From Anton D. Kachalov (2015-07-29).
+	* FTMAC100 Ethernet MAC Driver.  From Anton D. Kachalov (2015-07-29).
+	* 16550 UART Driver: Add a configuration option to indicate the the
+	  THR empty bit is inverted.  This is the the case for the moxART SoC.
+	  Based comments from Anton D. Kachalov (2015-07-29).
