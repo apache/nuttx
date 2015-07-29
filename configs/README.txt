@@ -349,6 +349,9 @@ configs/moteino-mega
   on the Atmel AVR ATMega1284P MCU.  There is not much there yet and what is
   there is untested due to tool-related issues.
 
+configs/moxa
+  Moxa NP51x0 series of 2-port advanced RS-232/422/485 serial device servers.
+
 configs/mx1ads
   This is a port to the Motorola MX1ADS development board.  That board
   is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.

@@ -1,7 +1,7 @@
 ############################################################################
-# configs/arduino-due/src/Makefile
+# configs/moxa/src/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without

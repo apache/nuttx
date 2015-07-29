@@ -1,8 +1,8 @@
 /****************************************************************************
  * config/moxart/src/moxart_nsh.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -72,8 +72,11 @@
 int board_app_initialize(void)
 {
 #ifndef CONFIG_BOARD_INITIALIZE
+#ifdef CONFIG_NET_FTMAC100
   /* Perform board-specific initialization */
+
   ftmac100_initialize(0);
+#endif
 #endif
   return OK;
 }

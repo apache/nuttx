@@ -1125,6 +1125,7 @@ config ARCH_BOARD_MOXA
 	depends on ARCH_CHIP_MOXART
 	---help---
 		Moxa
+
 endchoice
 
 if ARCH_BOARD_CUSTOM

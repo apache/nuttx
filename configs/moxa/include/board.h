@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/arduino-due/include/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_ARDUINO_DUE_INCLUDE_BOARD_H
-#define __CONFIGS_ARDUINO_DUE_INCLUDE_BOARD_H
+#ifndef __CONFIGS_MOXA_INCLUDE_BOARD_H
+#define __CONFIGS_MOXA_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -45,9 +45,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
-#  ifdef CONFIG_SAM34_GPIO_IRQ
-#    include <arch/irq.h>
-#  endif
 #endif
 
 /************************************************************************************
@@ -55,7 +52,7 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* After power-on reset, the SAM3X device is running on a 4MHz internal RC.  These
+/* After power-on reset, the device is running on a 4MHz internal RC.  These
  * definitions will configure clocking
  *
  *   MAINOSC:  Frequency = 12MHz (crysta)
@@ -144,7 +141,7 @@
 #define BOARD_FWS                  4
 
 /* LED definitions ******************************************************************/
-/*  There are three user-controllable LEDs on board the Arduino Due board:
+/*  There are three user-controllable LEDs on board the Moxa board:
  *
  *     LED              GPIO
  *     ---------------- -----
@@ -198,7 +195,7 @@
  */
 
 /* Button definitions ***************************************************************/
-/*   There are no buttons on the Arduino Due board. */
+/*   There are no buttons on the Moxa board. */
 
 /* GPIO pin configurations **********************************************************/
 
@@ -211,7 +208,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -226,4 +224,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_ARDUINO_DUE_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_MOXA_INCLUDE_BOARD_H */
