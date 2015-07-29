@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/net/ftmac100.h>
 
 /****************************************************************************
  * Pre-processor Definitions
