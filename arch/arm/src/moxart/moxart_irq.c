@@ -135,7 +135,7 @@ void up_irqinitialize(void)
 #endif
 }
 
-static inline void ftintc010_mask_irq(int irq)
+inline void ftintc010_mask_irq(int irq)
 {
   /*
    * 0: masked
@@ -274,17 +274,19 @@ void up_decodeirq(uint32_t *regs)
 
   /* Detect & deliver the IRQ */
   status = getreg32(IRQ_REG(IRQ__STATUS));
-  if (!status)
-    return;
+  while (status != 0)
+    {
+      /* Ack IRQ */
+      num = ffs(status) - 1;
+      up_ack_irq(num);
 
-  /* Ack IRQ */
-  num = ffs(status) - 1;
-  up_ack_irq(num);
+      DEBUGASSERT(current_regs == NULL);
+      current_regs = regs;
 
-  DEBUGASSERT(current_regs == NULL);
-  current_regs = regs;
+      irq_dispatch(num, regs);
 
-  irq_dispatch(num, regs);
+      current_regs = NULL;
 
-  current_regs = NULL;
+      status = getreg32(IRQ_REG(IRQ__STATUS));
+    }
 }
