@@ -10759,8 +10759,7 @@
 	* include/, sched/, and libc/: Add support for sporadic scheduling
 	  parameters in struct sched_param, posix_spawnattr_t, and pthread_attr_t.
 	  Update all user interfaces to pass sporadic scheduling parameters.
-	  Feature is dependent on EXPERIMENTAL and no changes have yet been
-	  made to core scheduling logic (2015-07-23).
+	  (2015-07-23).
 	* sched/: Separate the round-robin logic into a separate file so that
 	  it is symmetric with the sporadic stuff.  Integrate the sporadic
 	  scheduler into the time tick interrupt handling and into the tickless
@@ -10770,3 +10769,5 @@
 	  D. Kachalov (2015-07-29).
 	* configs/moxa: Moxa NP51x0 series of 2-port advanced RS-232/422/485
 	  serial device servers.  From Anton D. Kachalov (2015-07-29).
+	* drivers/net/ and include/nuttx/net: Add support for a Faraday
+	  FTMAC100 Ethernet MAC Driver.  From Anton D. Kachalov (2015-07-29).

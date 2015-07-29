@@ -286,6 +286,36 @@ config NET_SLIP
 	---help---
 		Reference: RFC 1055
 
+config NET_FTMAC100
+	bool "Faraday 10/100 Ethernet"
+	default n
+	---help---
+		Faraday 10/100 Ethernet support.
+
+if NET_FTMAC100
+
+config FTMAC100_BASE
+	hex "FTMAC100 base address"
+	default 0x0
+
+config FTMAC100_IRQ
+	int "FTMAC100 IRQ number"
+	default 0
+
+config FTMAC100_RX_DESC
+	int "Number of RX descriptors"
+	default 64
+
+config FTMAC100_TX_DESC
+	int "Number of TX descriptors"
+	default 32
+
+config FTMAC100_MAC0_ENV_ADDR
+	hex "MAC0 address location"
+	default 0
+
+endif # NET_FTMAC100
+
 config NET_VNET
 	bool "VNET support"
 	default n
