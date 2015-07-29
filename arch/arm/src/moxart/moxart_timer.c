@@ -2,11 +2,8 @@
  * arch/arm/src/moxart/moxart_timer.c
  * MoxaRT internal Timer Driver
  *
- * (C) 2010 by Harald Welte <laforge@gnumonks.org>
- * (C) 2011 by Stefan Richter <ichgeh@l--putt.de>
- *
- * This source code is derivated from Osmocom-BB project and was
- * relicensed as BSD with permission from original authors.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 #include <stdio.h>
 #include <stdint.h>
@@ -46,73 +43,89 @@
 #include "arm.h"
 #include "up_arch.h"
 
-#define TM1_ADDR	0x98400000
+/****************************************************************************
+ * {re-processor Definitions
+ ****************************************************************************/
 
-enum timer_reg {
-	COUNTER_TIMER	= 0x00,
-	CNTL_TIMER	= 0x30,
-	LOAD_TIMER	= 0x04,
-	MATCH1_TIMER	= 0x08,
-	MATCH2_TIMER	= 0x0C,
-	INTR_STATE_TIMER= 0x34,
-	INTR_MASK_TIMER	= 0x38,
+#define TM1_ADDR  0x98400000
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+enum timer_reg
+{
+  COUNTER_TIMER    = 0x00,
+  CNTL_TIMER       = 0x30,
+  LOAD_TIMER       = 0x04,
+  MATCH1_TIMER     = 0x08,
+  MATCH2_TIMER     = 0x0C,
+  INTR_STATE_TIMER = 0x34,
+  INTR_MASK_TIMER  = 0x38,
 };
 
-enum timer_ctl {
-	TM1_ENABLE	= (1 << 0),
-	TM1_CLOCK	= (1 << 1),
-	TM1_OFENABLE	= (1 << 5),
-	TM1_UPDOWN	= (1 << 9),
+enum timer_ctl
+{
+  TM1_ENABLE      = (1 << 0),
+  TM1_CLOCK       = (1 << 1),
+  TM1_OFENABLE    = (1 << 5),
+  TM1_UPDOWN      = (1 << 9),
 };
 
-enum timer_int {
-	TM1_MATCH1	= (1 << 0),
-	TM1_MATCH2	= (1 << 1),
-	TM1_OVERFLOW	= (1 << 2),
+enum timer_int
+{
+  TM1_MATCH1      = (1 << 0),
+  TM1_MATCH2      = (1 << 1),
+  TM1_OVERFLOW    = (1 << 2),
 };
 
-/************************************************************
- * Global Functions
- ************************************************************/
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-/************************************************************
+static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 100;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Function:  up_timerisr
  *
  * Description:
- *   The timer ISR will perform a variety of services for
- *   various portions of the systems.
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
  *
- ************************************************************/
-
-static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 100;
+ ****************************************************************************/
 
 int up_timerisr(int irq, uint32_t *regs)
 {
   uint32_t state;
 
   /* Process timer interrupt */
+
   state = getreg32(TM1_ADDR + INTR_STATE_TIMER);
   state &= ~0x7;
   putreg32(state, TM1_ADDR + INTR_STATE_TIMER);
 
   /* Ready for the next interrupt */
+
   putreg32(cmp, TM1_ADDR + COUNTER_TIMER);
 
   sched_process_timer();
-
   return 0;
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  up_timer_initialize
  *
  * Description:
  *   Setup MoxaRT timer 0 to cause system ticks.
  *
- *   This function is called during start-up to initialize
- *   the timer interrupt.
+ *   This function is called during start-up to initialize the timer
+ *   interrupt.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_timer_initialize(void)
 {
@@ -127,15 +140,18 @@ void up_timer_initialize(void)
   putreg32(0x1ff, TM1_ADDR + INTR_MASK_TIMER);
 
   /* Initialize to a known state */
+
   putreg32(cmp, TM1_ADDR + COUNTER_TIMER);
   putreg32(0, TM1_ADDR + LOAD_TIMER);
   putreg32(0, TM1_ADDR + MATCH1_TIMER);
 
   /* Attach and enable the timer interrupt */
+
   irq_attach(IRQ_SYSTIMER, (xcpt_t)up_timerisr);
   up_enable_irq(IRQ_SYSTIMER);
 
   /* Unmask IRQ */
+
   tmp = getreg32(TM1_ADDR + INTR_MASK_TIMER);
   tmp &= ~TM1_MATCH1;
   putreg32(tmp, TM1_ADDR + INTR_MASK_TIMER);

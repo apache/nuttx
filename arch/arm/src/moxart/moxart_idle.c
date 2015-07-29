@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/common/up_idle.c
+ *  arch/arm/src/common/moxart_idle.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#define BEGIN_IDLE	(*(volatile uint32_t *)0x98700000) &= ~0x10
-#define END_IDLE	(*(volatile uint32_t *)0x98700000) |=  0x10
+
+#define BEGIN_IDLE (*(volatile uint32_t *)0x98700000) &= ~0x10
+#define END_IDLE   (*(volatile uint32_t *)0x98700000) |=  0x10
 
 /****************************************************************************
  * Private Data
@@ -87,9 +88,15 @@ void up_idle(void)
   /* Sleep until an interrupt occurs to save power */
 
   BEGIN_IDLE;
-  //asm("nop\nnop\nmcr p15, 0, r0, c7, c0, 4\n");
-  for (i=0; i<0x40000; i++) asm("nop");
+  for (i = 0; i < 0x40000; i++)
+    {
+      asm("nop");
+    }
+
   END_IDLE;
-  for (i=0; i<0x40000; i++) asm("nop");
+  for (i = 0; i < 0x40000; i++)
+    {
+      asm("nop");
+    }
 #endif
 }

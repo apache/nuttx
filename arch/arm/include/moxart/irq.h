@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/moxart/irq.h
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/irq.h
+/* This file should never be included directed but, rather, only indirectly
+ * through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_MOXART_IRQ_H

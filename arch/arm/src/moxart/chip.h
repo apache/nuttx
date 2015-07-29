@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/moxa/chip.h
+ * arch/arm/src/moxart/chip.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,38 +42,38 @@
 
 #include <nuttx/config.h>
 
-#define UART0_BASE     0x98200000
+#define UART0_BASE           0x98200000
 
-#define UART_THR       0x00
-#define UART_LSR       0x14
-#define UART_LSR_THRE  0x20
+#define UART_THR             0x00
+#define UART_LSR             0x14
+#define UART_LSR_THRE        0x20
 
 /* Common UART Registers.  Expressed as offsets from the BASE address */
 
-#define UART_RHR_OFFS          0x00000000 /* Rcv Holding Register */
-#define UART_THR_OFFS          0x00000000 /* Xmit Holding Register */
-#define UART_FCR_OFFS          0x00000002 /* FIFO Control Register */
-#define UART_RFCR_OFFS         0x00000002 /* Rcv FIFO Control Register */
-#define UART_TFCR_OFFS         0x00000002 /* Xmit FIFO Control Register */
-#define UART_SCR_OFFS          0x00000010 /* Status Control Register */
-#define UART_LCR_OFFS          0x00000003 /* Line Control Register */
-#define UART_LSR_OFFS          0x00000005 /* Line Status Register */
-#define UART_SSR_OFFS          0x00000011 /* Supplementary Status Register */
-#define UART_MCR_OFFS          0x00000004 /* Modem Control Register */
-#define UART_MSR_OFFS          0x00000006 /* Modem Status Register */
-#define UART_IER_OFFS          0x00000001 /* Interrupt Enable Register */
-#define UART_ISR_OFFS          0x00000002 /* Interrupt Status Register */
-#define UART_EFR_OFFS          0x00000002 /* Enhanced Feature Register */
-#define UART_XON1_OFFS         0x00000004 /* XON1 Character Register */
-#define UART_XON2_OFFS         0x00000005 /* XON2 Character Register */
-#define UART_XOFF1_OFFS        0x00000006 /* XOFF1 Character Register */
-#define UART_XOFF2_OFFS        0x00000007 /* XOFF2 Character Register */
-#define UART_SPR_OFFS          0x00000007 /* Scratch-pad Register */
-#define UART_DIV_LOW_OFFS      0x00000000 /* Divisor for baud generation */
-#define UART_DIV_HIGH_OFFS     0x00000001
-#define UART_TCR_OFFS          0x00000006 /* Transmission Control Register */
-#define UART_TLR_OFFS          0x00000007 /* Trigger Level Register */
-#define UART_MDR_OFFS          0x00000008 /* Mode Definition Register */
+#define UART_RHR_OFFS        0x00000000 /* Rcv Holding Register */
+#define UART_THR_OFFS        0x00000000 /* Xmit Holding Register */
+#define UART_FCR_OFFS        0x00000002 /* FIFO Control Register */
+#define UART_RFCR_OFFS       0x00000002 /* Rcv FIFO Control Register */
+#define UART_TFCR_OFFS       0x00000002 /* Xmit FIFO Control Register */
+#define UART_SCR_OFFS        0x00000010 /* Status Control Register */
+#define UART_LCR_OFFS        0x00000003 /* Line Control Register */
+#define UART_LSR_OFFS        0x00000005 /* Line Status Register */
+#define UART_SSR_OFFS        0x00000011 /* Supplementary Status Register */
+#define UART_MCR_OFFS        0x00000004 /* Modem Control Register */
+#define UART_MSR_OFFS        0x00000006 /* Modem Status Register */
+#define UART_IER_OFFS        0x00000001 /* Interrupt Enable Register */
+#define UART_ISR_OFFS        0x00000002 /* Interrupt Status Register */
+#define UART_EFR_OFFS        0x00000002 /* Enhanced Feature Register */
+#define UART_XON1_OFFS       0x00000004 /* XON1 Character Register */
+#define UART_XON2_OFFS       0x00000005 /* XON2 Character Register */
+#define UART_XOFF1_OFFS      0x00000006 /* XOFF1 Character Register */
+#define UART_XOFF2_OFFS      0x00000007 /* XOFF2 Character Register */
+#define UART_SPR_OFFS        0x00000007 /* Scratch-pad Register */
+#define UART_DIV_LOW_OFFS    0x00000000 /* Divisor for baud generation */
+#define UART_DIV_HIGH_OFFS   0x00000001
+#define UART_TCR_OFFS        0x00000006 /* Transmission Control Register */
+#define UART_TLR_OFFS        0x00000007 /* Trigger Level Register */
+#define UART_MDR_OFFS        0x00000008 /* Mode Definition Register */
 
 /* UART Settings ************************************************************/
 

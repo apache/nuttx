@@ -1,5 +1,5 @@
 ############################################################################
-# calypso/Make.defs
+# arch/arm/src/moxart/Make.defs
 #
 #   Copyright (C) 2007, 2013-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,4 +56,3 @@ CHIP_ASRCS  = moxart_lowputc.S
 
 CHIP_CSRCS  = moxart_16550.c moxart_irq.c moxart_timer.c moxart_idle.c
 CHIP_CSRCS += moxart_systemreset.c
-

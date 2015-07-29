@@ -1,9 +1,8 @@
 /****************************************************************************
  * arch/arm/src/moxart/moxart_systemreset.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Darcy Gong
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,9 +45,13 @@
 
 #include "up_arch.h"
 
-#define FTWDT010_LOAD	 0x98500004
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define FTWDT010_LOAD    0x98500004
 #define FTWDT010_RESTART 0x98500008
-#define FTWDT010_CR	 0x9850000C
+#define FTWDT010_CR      0x9850000C
 
 /****************************************************************************
  * Public functions
@@ -75,7 +78,6 @@ void up_systemreset(void)
 
   for (;;);
 }
-
 
 /****************************************************************************
  * Name: board_reset

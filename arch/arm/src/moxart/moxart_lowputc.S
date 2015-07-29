@@ -1,12 +1,8 @@
 /**************************************************************************
  * moxart/moxart_lowputc.S
  *
- *   Copyright (C) 2011 Stefan Richter. All rights reserved.
- *   Author: Stefan Richter <ichgeh@l--putt.de>
- *
- * based on: c5471/c5471_lowputc.S
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -126,4 +122,3 @@ up_lowputc:
 	/* And return */
 
 	mov     pc, lr
-
