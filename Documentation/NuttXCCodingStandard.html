@@ -307,14 +307,14 @@
 <ul><pre>
   struct some_long_struct_name_s
   {
-    /*  The forward link to the next instance of struct
-     * some_long_struct_name_s in a singly linked list
+    /* The forward link to the next instance of struct
+     * some_long_struct_name_s in a singly linked list.
      */
 
     struct some_long_struct_name_s *flink;
-    int short_name1;   /* Short comment 1 */
+    int short_name1;   /* Short comment 1. */
     int short_name2;   /* This is a very long comment describing subtle
-                        * aspects of the short_name2 field */
+                        * aspects of the short_name2 field. */
   };
 
   FAR struct some_medium_name_s *ptr = (FAR struct some_medium_name_s *)
@@ -384,8 +384,8 @@
 
 <p>
   <b>General</b>.
-  Within a comment, the text must be standard English conforming to standard English rules or grammar and spelling (US English spelling).
-  Of course, this is not the place to summarize all English grammar, but as examples:
+  Within a comment, the text must be standard English conforming to standard English rules of grammar and spelling (US English spelling).
+  Of course, this is not the place to summarize all English grammar, but as examples of common grammatic issues in comments:
 </p>
 <ul>
   <li>
@@ -396,6 +396,10 @@
   </li>
   <li>
     The punctuation '.' and ':' is followed by two spaces; the punctuation ',' and ';' is followed by a single space.
+  </li>
+  <li>
+    Text following '.' or ':' begins with an upper-case character;
+    text folowing ',' or ';' begins with a lower-case character.
   </li>
 </ul>
 <p>
@@ -408,9 +412,9 @@
 <tr><td bgcolor="white">
 <p><font color="red"><b>Incorrect</b></p>
 <ul><pre>
-  /* Set a equal to b */
+  /* set a equal to b */
   a = b;
-  /* Set b equal to c */
+  /* set b equal to c */
   b = c;
 </ul></pre></font>
 </td></tr>
@@ -418,11 +422,11 @@
 <p><font color="green"><b>Correct</b></p>
 <ul><pre>
 
-  /* Set a equal to b */
+  /* Set a equal to b. */
 
   a = b;
 
-  /* Set b equal to c */
+  /* Set b equal to c. */
 
   b = c;
 
@@ -453,7 +457,7 @@
 <tr><td bgcolor="white">
 <p><font color="green"><b>Correct</b></p>
 <ul><pre>
-  /* This is a single line comment */
+  /* This is a single line comment. */
 </ul></pre></font>
 </td></tr>
 </table></center>
@@ -509,23 +513,23 @@
 <tr><td bgcolor="white">
 <p><font color="blue"><b>Acceptable</b></p>
 <ul><pre>
-  dog      = cat;     /* Make the dog be a cat */
-  monkey   = oxen;    /* Make the monkey be an oxen */
-  aardvark = macaque; /* Make the aardvark be a macaque */
+  dog      = cat;     /* Make the dog be a cat. */
+  monkey   = oxen;    /* Make the monkey be an oxen. */
+  aardvark = macaque; /* Make the aardvark be a macaque. */
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
 <p><font color="green"><b>Preferred</b></p>
 <ul><pre>
-  /* Make the dog be a cat */
+  /* Make the dog be a cat. */
 
   dog      = cat;
 
-  /* Make the monkey be an oxen */
+  /* Make the monkey be an oxen. */
 
   monkey   = oxen;
 
-  /* Make the aardvark be a macaque */
+  /* Make the aardvark be a macaque. */
 
   aardvark = macaque;
 </ul></pre></font>
@@ -557,12 +561,12 @@ struct animals_s
 <ul><pre>
 struct animals_s
 {
-  int dog;       /* This is a dog */
-  int cat;       /* This is a cat */
-  double monkey; /* This is a monkey */
-  double oxen;   /* This is an oxen */
-  bool aardvark; /* This is an aardvark */
-  bool macaque;  /* This is a macaque */
+  int dog;       /* This is a dog. */
+  int cat;       /* This is a cat. */
+  double monkey; /* This is a monkey. */
+  double oxen;   /* This is an oxen. */
+  bool aardvark; /* This is an aardvark. */
+  bool macaque;  /* This is a macaque. */
 };
 </ul></pre></font>
 </td></tr>
@@ -571,12 +575,12 @@ struct animals_s
 <ul><pre>
 struct animals_s
 {
-  int    dog;      /* This is a dog */
-  int    cat;      /* This is a cat */
-  double monkey;   /* This is a monkey */
-  double oxen;     /* This is an oxen */
-  bool   aardvark; /* This is an aardvark */
-  bool   macaque;  /* This is a macaque */
+  int    dog;      /* This is a dog. */
+  int    cat;      /* This is a cat. */
+  double monkey;   /* This is a monkey. */
+  double oxen;     /* This is an oxen. */
+  bool   aardvark; /* This is an aardvark. */
+  bool   macaque;  /* This is a macaque. */
 };
 </ul></pre></font>
 </td></tr>
@@ -611,16 +615,16 @@ struct animals_s
 <tr><td bgcolor="white">
 <p><font color="green"><b>Correct</b></p>
 <ul><pre>
-/* This is a structure of animals */
+/* This is a structure of animals. */
 
 struct animals_s
 {
-  int    dog;      /* This is a dog */
-  int    cat;      /* This is a cat */
-  double monkey;   /* This is a monkey */
-  double oxen;     /* This is an oxen */
-  bool   aardvark; /* This is an aardvark */
-  bool   macaque;  /* This is a macaque */
+  int    dog;      /* This is a dog. */
+  int    cat;      /* This is a cat. */
+  double monkey;   /* This is a monkey. */
+  double oxen;     /* This is an oxen. */
+  bool   aardvark; /* This is an aardvark. */
+  bool   macaque;  /* This is a macaque. */
 };
 </ul></pre></font>
 </td></tr>
@@ -666,7 +670,7 @@ void some_function(void)
 {
   ... compiled code ...
 
-  /* The following code is disabled because it is no longer needed */
+  /* The following code is disabled because it is no longer needed. */
 
 #if 0
   ... disabled code ..
@@ -1340,9 +1344,9 @@ struct xyz_information
 struct xyz_info_s
 {
   ...
-  int val1; /* Value 1 */
-  int val2; /* Value 2 */
-  int val3; /* Value 3 */
+  int val1; /* Value 1. */
+  int val2; /* Value 2. */
+  int val3; /* Value 3. */
   ...
 };
 </pre>
@@ -1354,9 +1358,9 @@ typdef struct xyz_info_s xzy_info_t;
 struct xyz_info_s
 {
   ...
-  uint8_t bita : 1,  /* Bit A */
-  uint8_t bitb : 1,  /* Bit B */
-  uint8_t bitc : 1,  /* Bit C */
+  uint8_t bita : 1,  /* Bit A. */
+  uint8_t bitb : 1,  /* Bit B. */
+  uint8_t bitc : 1,  /* Bit C. */
   ...
 };
 </ul></pre></font>
@@ -1379,9 +1383,9 @@ struct xyz_info_s
 <ul><pre>
 union xyz_union_u
 {
-  uint8_t  b[4]; /* Byte values */
-  uint16_t h[2]; /* Half word values */
-  uint32_t w;    /* Word Value */
+  uint8_t  b[4]; /* Byte values. */
+  uint16_t h[2]; /* Half word values. */
+  uint32_t w;    /* Word Value. */
 };
 
 struct xyz_info_s
@@ -1389,9 +1393,9 @@ struct xyz_info_s
   ...
   union
   {
-    uint8_t  b[4]; /* Byte values */
-    uint16_t h[2]; /* Half word values */
-    uint32_t w;    /* Word Value */
+    uint8_t  b[4]; /* Byte values. */
+    uint16_t h[2]; /* Half word values. */
+    uint32_t w;    /* Word Value. */
   } u;
   ...
 };
@@ -1445,12 +1449,12 @@ struct xyz_info_s
 <ul><pre>
 enum xyz_state_e
 {
-  XYZ_STATE_UNINITIALIZED = 0, /* Uninitialized state */
-  XYZ_STATE_WAITING,           /* Waiting for input state */
-  XYZ_STATE_BUSY,              /* Busy processing input state */
-  XYZ_STATE_ERROR,             /* Halted due to an error */
-  XYZ_STATE_TERMINATING,       /* Terminating stated */
-  XYZ_STATE_TERMINATED         /* Terminating stated */
+  XYZ_STATE_UNINITIALIZED = 0, /* Uninitialized state. */
+  XYZ_STATE_WAITING,           /* Waiting for input state. */
+  XYZ_STATE_BUSY,              /* Busy processing input state. */
+  XYZ_STATE_ERROR,             /* Halted due to an error. */
+  XYZ_STATE_TERMINATING,       /* Terminating stated. */
+  XYZ_STATE_TERMINATED         /* Terminating stated. */
 };
 </ul></pre></font>
 </td></tr>
@@ -2096,14 +2100,14 @@ x++;
 <ul><pre>
   switch (...)
     {
-      case 1:  /* Example of a comment following a case selector */
+      case 1:  /* Example of a comment following a case selector. */
       ...
 
-      /* Example of a comment preceding a case selector */
+      /* Example of a comment preceding a case selector. */
 
       case 2:
         {
-          /* Example of comment following the case selector */
+          /* Example of comment following the case selector. */
 
           int value;
           ...
