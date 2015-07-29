@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #include "clock/clock.h"
 #include "sched/sched.h"

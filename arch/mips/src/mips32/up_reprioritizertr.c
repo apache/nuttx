@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
