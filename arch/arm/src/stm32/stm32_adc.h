@@ -204,10 +204,40 @@
 #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || \
     defined(CONFIG_STM32_ADC3)
 
-/* DMA support is not yet implemented for this driver */
+/* DMA support */
 
-#ifdef CONFIG_ADC_DMA
-#  warning "DMA is not supported by the current driver"
+#undef ADC_HAVE_DMA
+#if defined(CONFIG_STM32_ADC1_DMA) || defined(CONFIG_STM32_ADC2_DMA) || \
+    defined(CONFIG_STM32_ADC3_DMA) || defined(CONFIG_STM32_ADC4_DMA)
+# if defined(CONFIG_STM32_STM32F40XX)
+#   define ADC_HAVE_DMA        1
+#else
+#    warning DMA is only supported for the stm32f40xx family
+# endif
+#endif
+
+#ifdef CONFIG_STM32_ADC1_DMA
+#  define ADC1_HAVE_DMA 1
+#else
+#  undef  ADC1_HAVE_DMA
+#endif
+
+#ifdef CONFIG_STM32_ADC2_DMA
+#  define ADC2_HAVE_DMA 1
+#else
+#  undef  ADC2_HAVE_DMA
+#endif
+
+#ifdef CONFIG_STM32_ADC3_DMA
+#  define ADC3_HAVE_DMA 1
+#else
+#  undef  ADC3_HAVE_DMA
+#endif
+
+#ifdef CONFIG_STM32_ADC4_DMA
+#  define ADC4_HAVE_DMA 1
+#else
+#  undef  ADC4_HAVE_DMA
 #endif
 
 /* Timer configuration:  If a timer trigger is specified, then get

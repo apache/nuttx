@@ -1294,6 +1294,22 @@ config STM32_HAVE_ADC4
 	bool
 	default n
 
+config STM32_HAVE_ADC1_DMA
+	bool
+	default n
+
+config STM32_HAVE_ADC2_DMA
+	bool
+	default n
+
+config STM32_HAVE_ADC3_DMA
+	bool
+	default n
+
+config STM32_HAVE_ADC4_DMA
+	bool
+	default n
+
 config STM32_HAVE_CAN1
 	bool
 	default n
@@ -1336,24 +1352,29 @@ config STM32_ADC1
 	bool "ADC1"
 	default n
 	select STM32_ADC
+	select STM32_HAVE_ADC1_DMA if STM32_STM32F10XX && STM32_DMA1
+	select STM32_HAVE_ADC1_DMA if !STM32_STM32F10XX && STM32_DMA2
 
 config STM32_ADC2
 	bool "ADC2"
 	default n
 	select STM32_ADC
 	depends on STM32_HAVE_ADC2
+	select STM32_HAVE_ADC2_DMA if STM32_DMA2
 
 config STM32_ADC3
 	bool "ADC3"
 	default n
 	select STM32_ADC
 	depends on STM32_HAVE_ADC3
+	select STM32_HAVE_ADC3_DMA if STM32_DMA2
 
 config STM32_ADC4
 	bool "ADC4"
 	default n
 	select STM32_ADC
 	depends on STM32_HAVE_ADC4
+	select STM32_HAVE_ADC4_DMA if STM32_DMA2
 
 config STM32_COMP
 	bool "COMP"
@@ -3091,6 +3112,47 @@ config STM32_TIM14_DAC2
 		Reserve TIM14 to trigger DAC2
 
 endchoice
+
+menu "ADC Configuration"
+	depends on STM32_ADC1
+
+config STM32_ADC1_DMA
+	bool "ADC1 DMA"
+	depends on STM32_ADC1 && STM32_HAVE_ADC1_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC2_DMA
+	bool "ADC2 DMA"
+	depends on STM32_ADC2 && STM32_HAVE_ADC2_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC3_DMA
+	bool "ADC3 DMA"
+	depends on STM32_ADC3 && STM32_HAVE_ADC3_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC4_DMA
+	bool "ADC4 DMA"
+	depends on STM32_ADC4 && STM32_HAVE_ADC4_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+endmenu
 
 menu "DAC Configuration"
 	depends on STM32_DAC1 || STM32_DAC2
