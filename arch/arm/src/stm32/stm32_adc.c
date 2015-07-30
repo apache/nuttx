@@ -1511,7 +1511,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
    {
       adbg("Error initializing the timers\n");
    }
-#else
+#elif !defined(CONFIG_ADC_NO_STARTUP_CONV)
 
 #ifdef CONFIG_STM32_STM32F10XX
   /* Set ADON (Again) to start the conversion.  Only if Timers are not
@@ -1519,10 +1519,10 @@ static void adc_reset(FAR struct adc_dev_s *dev)
    */
 
   adc_enable(priv, true);
-
-#elif !defined(CONFIG_ADC_NO_STARTUP_CONV)
+#else
   adc_startconv(priv, true);
 #endif /* CONFIG_STM32_STM32F10XX */
+
 #endif /* ADC_HAVE_TIMER */
 
   irqrestore(flags);
@@ -2085,10 +2085,10 @@ static int adc_set_ch_idx(FAR struct adc_dev_s *dev, uint8_t idx)
 }
 
 /****************************************************************************
- * Name: adc_set_channel
+ * Name: adc_set_ch
  *
  * Description:
- *   All ioctl calls will be routed through this method.
+ *   Sets the ADC channel.
  *
  * Input Parameters:
  *   dev - pointer to device structure used by the driver

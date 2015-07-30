@@ -226,7 +226,6 @@ config ARCH_CHIP_STR71X
 config ARCH_CHIP_MOXART
 	bool "MoxART"
 	select ARCH_ARM7TDMI
-	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_RESET
 	---help---
 		MoxART family
