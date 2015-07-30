@@ -10774,3 +10774,6 @@
 	* 16550 UART Driver: Add a configuration option to indicate the the
 	  THR empty bit is inverted.  This is the the case for the moxART SoC.
 	  Based comments from Anton D. Kachalov (2015-07-29).
+	* STM32 F4:  Add DMA support to the ADC driver for STM32 F4.  From
+	  Max Kriegler (2015-07-30).
+
