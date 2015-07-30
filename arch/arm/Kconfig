@@ -225,6 +225,7 @@ config ARCH_CHIP_STR71X
 
 config ARCH_CHIP_MOXART
 	bool "MoxART"
+	select ARCH_ARM7TDMI
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_RESET
 	---help---
@@ -465,7 +466,7 @@ endif
 if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
 source arch/arm/src/armv7-m/Kconfig
 endif
-if ARCH_ARM7TDMI || ARCH_ARM926EJS
+if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
 source arch/arm/src/arm/Kconfig
 endif
 if ARCH_CHIP_A1X
