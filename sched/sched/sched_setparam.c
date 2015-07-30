@@ -163,8 +163,15 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       /* The replenishment period must be greater than or equal to the
        * budget period.
        */
+#if 1
+      /* REVISIT: In the current implementation, the budget cannot exceed
+       * half the duty.
+       */
 
+      if (repl_ticks < (2 * budget_ticks))
+#else
       if (repl_ticks < budget_ticks)
+#endif
         {
           errcode = EINVAL;
           goto errout_with_lock;
