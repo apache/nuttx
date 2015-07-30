@@ -23,6 +23,13 @@ config ADC_FIFOSIZE
 		this is a ring buffer, the actual number of bytes that can be
 		retained in buffer is (ADC_FIFOSIZE - 1).
 
+config ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	depends on ARCH_CHIP_STM32
+	---help---
+		Do not start conversion when opening ADC device.
+
 config ADC_ADS125X
 	bool "TI ADS1255/ADS1256 support"
 	default n
