@@ -76,6 +76,34 @@
 #  define MAX(a,b) ((a > b) ? a : b)
 #endif
 
+/* Clock source *************************************************************/
+
+/* PCK5 is the programmable clock source, common to all MCAN controllers */
+
+#if defined(CONFIG_SAMV7_MCAN_CLKSRC_SLOW)
+#  define SAMV7_MCAN_CLKSRC           PMC_PCK_CSS_SLOW
+#  define SAMV7_MCAN_CLKSRC_FREQUENCY BOARD_SLOWCLK_FREQUENCY
+#elif defined(CONFIG_SAMV7_MCAN_CLKSRC_PLLA)
+#  define SAMV7_MCAN_CLKSRC           PMC_PCK_CSS_PLLA
+#  define SAMV7_MCAN_CLKSRC_FREQUENCY BOARD_PLLA_FREQUENCY
+#elif defined(CONFIG_SAMV7_MCAN_CLKSRC_UPLL)
+#  define SAMV7_MCAN_CLKSRC           PMC_PCK_CSS_UPLL
+#  define SAMV7_MCAN_CLKSRC_FREQUENCY BOARD_UPLL_FREQUENCY
+#elif defined(CONFIG_SAMV7_MCAN_CLKSRC_MCK)
+#  define SAMV7_MCAN_CLKSRC           PMC_PCK_CSS_MCK
+#  define SAMV7_MCAN_CLKSRC_FREQUENCY BOARD_MCK_FREQUENCY
+#else /* if defined(CONFIG_SAMV7_MCAN_CLKSRC_MAIN */
+#  define SAMV7_MCAN_CLKSRC           PMC_PCK_CSS_MAIN
+#  define SAMV7_MCAN_CLKSRC_FREQUENCY BOARD_MAINOSC_FREQUENCY
+#endif
+
+#ifndef CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER
+#  define CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER 1
+#endif
+
+#define SAMV7_MCANCLK_FREQUENCY \
+  (SAMV7_MCAN_CLKSRC_FREQUENCY / CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER)
+
 /* Mailboxes ****************************************************************/
 
 #define SAMV7_MCAN_NRECVMB MAX(CONFIG_SAMV7_MCAN0_NRECVMB, CONFIG_SAMV7_MCAN1_NRECVMB)

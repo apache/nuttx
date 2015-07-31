@@ -1309,6 +1309,32 @@ if SAMV7_MCAN
 
 menu "MCAN device driver options"
 
+choice
+	prompt "MCAN clock source (PCK5)"
+	default SAMV7_MCAN_CLKSRC_MAIN
+
+config SAMV7_MCAN_CLKSRC_SLOW
+	bool "Slow clock"
+
+config SAMV7_MCAN_CLKSRC_MAIN
+	bool "Main clock"
+
+config SAMV7_MCAN_CLKSRC_PLLA
+	bool "PLLA clock"
+
+config SAMV7_MCAN_CLKSRC_UPLL
+	bool "UPLL clock"
+
+config SAMV7_MCAN_CLKSRC_MCK
+	bool "Master clock"
+
+endchoice # MCAN clock source
+
+config SAMV7_MCAN_CLKSRC_PRESCALER
+	int "MCAN clock prescaler"
+	default 1
+	range 1 256
+
 if SAMV7_MCAN0
 
 config SAMV7_MCAN0_BAUD
