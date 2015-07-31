@@ -149,6 +149,8 @@ void up_timer_initialize(void)
 
   irq_attach(IRQ_SYSTIMER, (xcpt_t)up_timerisr);
   up_enable_irq(IRQ_SYSTIMER);
+  ftintc010_set_trig_mode(IRQ_SYSTIMER, 1);
+  ftintc010_set_trig_level(IRQ_SYSTIMER, 0);
 
   /* Unmask IRQ */
 
