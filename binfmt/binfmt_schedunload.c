@@ -268,16 +268,16 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
 {
   struct sigaction act;
   struct sigaction oact;
-  sigset_t sigset;
+  sigset_t set;
   irqstate_t flags;
   int errorcode;
   int ret;
 
   /* Make sure that SIGCHLD is unmasked */
 
-  (void)sigemptyset(&sigset);
-  (void)sigaddset(&sigset, SIGCHLD);
-  ret = sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+  (void)sigemptyset(&set);
+  (void)sigaddset(&set, SIGCHLD);
+  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
   if (ret != OK)
     {
       /* The errno value will get trashed by the following debug output */
