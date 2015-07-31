@@ -65,7 +65,7 @@ config ARCH_CHIP_SAMV71Q
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
-	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1
 	select SAMV7_HAVE_EBI
 	select SAMV7_HAVE_HSMCI0
@@ -82,7 +82,7 @@ config ARCH_CHIP_SAMV71N
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
-	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1
 	select SAMV7_HAVE_HSMCI0
 	select SAMV7_HAVE_SPI0
@@ -102,7 +102,11 @@ config ARCH_CHIP_SAMV71J
 
 # Chip Capabilities
 
-config SAMV7_HAVE_CAN1
+config SAMV7_MCAN
+	bool
+	default n
+
+config SAMV7_HAVE_MCAN1
 	bool
 	default n
 
@@ -207,14 +211,18 @@ config SAMV7_AFEC1
 	bool "Analog Front End 1 (AFEC1)"
 	default n
 
-config SAMV7_CAN0
-	bool "CAN0"
+config SAMV7_MCAN0
+	bool "CAN controller 0 (MCAN0)"
 	default n
+	select CAN
+	select SAMV7_MCAN
 
-config SAMV7_CAN1
-	bool "CAN1"
+config SAMV7_MCAN1
+	bool "CAN controller 1 (MCAN1)"
 	default n
-	depends on SAMV7_HAVE_CAN1
+	depends on SAMV7_HAVE_MCAN1
+	select CAN
+	select SAMV7_MCAN
 
 config SAMV7_DAC0
 	bool "Digital To Analog Converter 0 (DAC0)"
@@ -1296,3 +1304,214 @@ config SAMV7_USBHS_REGDEBUG
 	depends on DEBUG
 
 endmenu # USB High Speed Device Controller driver (DCD) options
+
+if SAMV7_MCAN
+
+menu "MCAN device driver options"
+
+if SAMV7_MCAN0
+
+config SAMV7_MCAN0_BAUD
+	int "CAN0 BAUD"
+	default 250000
+	depends on SAMV7_MCAN0
+	---help---
+		CAN0 BAUD rate.  Required if SAMV7_MCAN0 is defined.
+
+config SAMV7_MCAN0_NRECVMB
+	int "Number of receive mailboxes"
+	default 1
+	range 1 3
+	---help---
+		The SAMV7 CAN0 peripheral supports 8 mailboxes that can be used for
+		sending and receiving messages.  Up the three of these can be set
+		aside statically for message reception.  The remainder can be
+		configured dynamically to send CAN messages.  Multiple receive
+		mailboxes might needed to either (1) receive bursts of messages, or
+		(2) to support multiple groups of messages filtered on message ID.
+
+		NOTE:  The maximum of 3 is a completely arbitrary design decision
+		and can certainly be changed if you need more.
+
+config SAMV7_MCAN0_ADDR0
+	hex "Mailbox 0 address"
+	---help---
+		This setting defines the address for receive mailbox 0.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+config SAMV7_MCAN0_MASK0
+	hex "Mailbox 0 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 0.  And
+		address matching SAMV7_MCAN0_ADDR0 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+config SAMV7_MCAN0_ADDR1
+	hex "Mailbox 1 address"
+	---help---
+		This setting defines the address for receive mailbox 1.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
+
+config SAMV7_MCAN0_MASK1
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 1.  And
+		address matching SAMV7_MCAN0_ADDR1 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
+
+config SAMV7_MCAN0_ADDR2
+	hex "Mailbox 2 address"
+	---help---
+		This setting defines the address for receive mailbox 2.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 3.
+
+config SAMV7_MCAN0_MASK2
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 2.  And
+		address matching SAMV7_MCAN0_ADDR2 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
+
+endif # SAMV7_MCAN0
+
+if SAMV7_MCAN1
+
+config SAMV7_MCAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on SAMV7_MCAN1
+	---help---
+		CAN1 BAUD rate.  Required if SAMV7_MCAN1 is defined.
+
+config SAMV7_MCAN1_NRECVMB
+	int "Number of receive mailboxes"
+	default 1
+	range 1 3
+	---help---
+		The SAMV7 CAN1 peripheral supports 8 mailboxes that can be used for
+		sending and receiving messages.  Up the three of these can be set
+		aside statically for message reception.  The remainder can be
+		configured dynamically to send CAN messages.  Multiple receive
+		mailboxes might needed to either (1) receive bursts of messages, or
+		(2) to support multiple groups of messages filtered on message ID.
+
+		NOTE:  The maximum of 3 is a completely arbitrary design decision
+		and can certainly be changed if you need more.
+
+config SAMV7_MCAN1_ADDR0
+	hex "Mailbox 0 address"
+	---help---
+		This setting defines the address for receive mailbox 0.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+config SAMV7_MCAN1_MASK0
+	hex "Mailbox 0 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 0.  And
+		address matching SAMV7_MCAN1_ADDR0 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+config SAMV7_MCAN1_ADDR1
+	hex "Mailbox 1 address"
+	---help---
+		This setting defines the address for receive mailbox 1.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
+
+config SAMV7_MCAN1_MASK1
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 1.  And
+		address matching SAMV7_MCAN1_ADDR1 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN1_NRECVMB is less than 2.
+
+config SAMV7_MCAN1_ADDR2
+	hex "Mailbox 2 address"
+	---help---
+		This setting defines the address for receive mailbox 2.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN1_NRECVMB is less than 3.
+
+config SAMV7_MCAN1_MASK2
+	hex "Mailbox 2 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 2.  And
+		address matching SAMV7_MCAN1_ADDR2 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMV7_MCAN1_NRECVMB is less than 3.
+
+endif # SAMV7_MCAN1
+
+config SAMV7_MCAN_AUTOBAUD
+	bool "Enable auto-baud"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable the SAMV7 auto-baud feature.  NOTE:  This feature is not yet
+		fully implemented.
+
+config SAMV7_MCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also DEBUG.
+
+endmenu # CAN device driver options
+endif # SAMV7_MCAN

@@ -150,6 +150,10 @@ ifeq ($(CONFIG_SAMV7_EMAC),y)
 CHIP_CSRCS += sam_emac.c sam_ethernet.c
 endif
 
+ifeq ($(CONFIG_SAMV7_MCAN),y)
+CHIP_CSRCS += sam_mcan.c
+endif
+
 ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
 CHIP_CSRCS += sam_usbdevhs.c
 endif
