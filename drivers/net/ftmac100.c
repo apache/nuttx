@@ -626,37 +626,42 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
   FAR struct ftmac100_rxdes_s *rxdes;
   FAR uint8_t *data;
   uint32_t len;
-
-  rxdes = ftmac100_current_rxdes(priv);
-
-  while (!(rxdes->rxdes0 & FTMAC100_RXDES0_RXDMA_OWN))
-    {
-      if (rxdes->rxdes0 & FTMAC100_RXDES0_FRS)
-        goto found_segment;
-
-      /* Clear status bits */
-
-      rxdes->rxdes0 = FTMAC100_RXDES0_RXDMA_OWN;
-
-      priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
-      rxdes = ftmac100_current_rxdes(priv);
-    }
-
-  ndbg("\nNOT FOUND\nCurrent RX %d rxdes0=%08x\n",
-       priv->rx_pointer, rxdes->rxdes0);
-
-  return;
-
-found_segment:
-
-  len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
-  data = (uint8_t *)rxdes->rxdes2;
-
-  ndbg ("RX buffer %d (%08x), %x received (%d)\n",
-        priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
+  int found;
 
   do
     {
+      found = false;
+      rxdes = ftmac100_current_rxdes(priv);
+
+      while (!(rxdes->rxdes0 & FTMAC100_RXDES0_RXDMA_OWN))
+        {
+          if (rxdes->rxdes0 & FTMAC100_RXDES0_FRS)
+            {
+              found = true;
+              break;
+            }
+
+          /* Clear status bits */
+
+          rxdes->rxdes0 = FTMAC100_RXDES0_RXDMA_OWN;
+
+          priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
+          rxdes = ftmac100_current_rxdes(priv);
+        }
+
+      if (!found)
+        {
+          nvdbg("\nNOT FOUND\nCurrent RX %d rxdes0=%08x\n",
+                priv->rx_pointer, rxdes->rxdes0);
+          return;
+        }
+
+      len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
+      data = (uint8_t *)rxdes->rxdes2;
+
+      nvdbg ("RX buffer %d (%08x), %x received (%d)\n",
+             priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
+
       /* Check for errors and update statistics */
 
       /* Check if the packet is a valid size for the uIP buffer configuration */
@@ -671,7 +676,7 @@ found_segment:
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
-       pkt_input(&priv->ft_dev);
+      pkt_input(&priv->ft_dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -768,14 +773,13 @@ found_segment:
             }
         }
 #endif
+      priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
+
+      rxdes->rxdes1 &= FTMAC100_RXDES1_EDORR;
+      rxdes->rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
+      rxdes->rxdes0 |= FTMAC100_RXDES0_RXDMA_OWN;
     }
-  while (0); /* While there are more packets to be processed */
-
-  priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
-
-  rxdes->rxdes1 &= FTMAC100_RXDES1_EDORR;
-  rxdes->rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
-  rxdes->rxdes0 |= FTMAC100_RXDES0_RXDMA_OWN;
+  while (true); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
