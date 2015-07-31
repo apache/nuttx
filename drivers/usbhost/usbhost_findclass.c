@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_findclass.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/usb/usb.h>
