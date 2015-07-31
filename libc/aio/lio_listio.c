@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/aio/lio_listio.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -247,7 +247,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 {
   FAR struct aiocb *aiocbp;
   FAR struct lio_sighand_s *sighand;
-  sigset_t sigset;
+  sigset_t set;
   struct sigaction act;
   int status;
   int i;
@@ -292,9 +292,9 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 
   /* Make sure that SIGPOLL is not blocked */
 
-  (void)sigemptyset(&sigset);
-  (void)sigaddset(&sigset, SIGPOLL);
-  status = sigprocmask(SIG_UNBLOCK, &sigset, &sighand->oprocmask);
+  (void)sigemptyset(&set);
+  (void)sigaddset(&set, SIGPOLL);
+  status = sigprocmask(SIG_UNBLOCK, &set, &sighand->oprocmask);
   if (status != OK)
     {
       int errcode = get_errno();
