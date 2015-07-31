@@ -60,7 +60,7 @@ fi
 
 # This is the location where I installed the ARM "GNU Tools for ARM Embedded Processors"
 # You can this free toolchain here https://launchpad.net/gcc-arm-embedded
-#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2014q4/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2015q2/bin"
 
 # These are the Cygwin paths to the locations where I installed the Atollic
 # toolchain under windows.  You will also have to edit this if you install

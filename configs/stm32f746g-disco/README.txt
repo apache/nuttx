@@ -499,17 +499,22 @@ Configurations
        pins D0 and D1 of the Arduion connectors.  This should be compatible
        with most RS-232 shields.
 
-    3. All of these configurations are set up to build under Windows using
-       the "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+    3. All of these configurations are set up to build under Windows using the
+       "GNU Tools for ARM Embedded Processors" that is maintained by ARM
        (unless stated otherwise in the description of the configuration).
 
          https://launchpad.net/gcc-arm-embedded
 
        As of this writing (2015-03-11), full support is difficult to find
-       for the Cortex-M&, but is supported by at least this realeasse of
+       for the Cortex-M7, but is supported by at least this realeasse of
        the ARM GNU tools:
 
          https://launchpadlibrarian.net/192228215/release.txt
+
+       Current (2105-07-31) setenv.sh file are configured to use this
+       release:
+
+       https://launchpadlibrarian.net/209776344/release.txt
 
        That toolchain selection can easily be reconfigured using
        'make menuconfig'.  Here are the relevant current settings:

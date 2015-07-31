@@ -68,7 +68,7 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_Code
 
 # This is the location where I installed the ARM "GNU Tools for ARM Embedded Processors"
 # You can this free toolchain here https://launchpad.net/gcc-arm-embedded
-#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2014q4/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2015q2/bin"
 
 # This is the path to the location where I installed the devkitARM toolchain
 # You can get this free toolchain from http://devkitpro.org/ or http://sourceforge.net/projects/devkitpro/
