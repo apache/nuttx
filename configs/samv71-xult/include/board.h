@@ -57,7 +57,11 @@
  *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
+ * There are two on-board crystals:
  */
+
+#define BOARD_SLOWCLK_FREQUENCY    (32768)    /* 32.768 KHz slow crystal oscillator */
+#define BOARD_MAINOSC_FREQUENCY    (12000000) /* 12 MHz main oscillator */
 
 /* Main oscillator register settings.
  *
@@ -133,10 +137,10 @@
 
 /* Resulting frequencies */
 
-#define BOARD_MAINOSC_FREQUENCY    (12000000)  /* MAINOSC: 12MHz crystal on-board */
 #define BOARD_PLLA_FREQUENCY       (300000000) /* PLLACK:  25 * 12Mhz / 1 */
 #define BOARD_CPU_FREQUENCY        (300000000) /* CPU:     PLLACK / 1 */
 #define BOARD_MCK_FREQUENCY        (150000000) /* MCK:     PLLACK / 1 / 2 */
+#define BOARD_UPLL_FREQUENCY                   /* To be provided */
 
 /* HSMCI clocking
  *
