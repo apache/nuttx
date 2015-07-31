@@ -174,6 +174,7 @@ static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_ICMPv6
 static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
 #endif
+#endif
 
 /****************************************************************************
  * Private Functions

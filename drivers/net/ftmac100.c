@@ -174,13 +174,6 @@ static struct ftmac100_driver_s g_ftmac100[CONFIG_FTMAC100_NINTERFACES]
  * Private Function Prototypes
  ****************************************************************************/
 
-/* FIXME: import low-level functions for IRQ setup */
-
-extern inline void ftintc010_set_trig_mode(int irq, int mode);
-extern inline void ftintc010_set_trig_level(int irq, int level);
-extern inline void ftintc010_unmask_irq(int irq);
-extern inline void ftintc010_mask_irq(int irq);
-
 /* Common TX logic */
 
 static int  ftmac100_transmit(FAR struct ftmac100_driver_s *priv);
@@ -626,37 +619,42 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
   FAR struct ftmac100_rxdes_s *rxdes;
   FAR uint8_t *data;
   uint32_t len;
-
-  rxdes = ftmac100_current_rxdes(priv);
-
-  while (!(rxdes->rxdes0 & FTMAC100_RXDES0_RXDMA_OWN))
-    {
-      if (rxdes->rxdes0 & FTMAC100_RXDES0_FRS)
-        goto found_segment;
-
-      /* Clear status bits */
-
-      rxdes->rxdes0 = FTMAC100_RXDES0_RXDMA_OWN;
-
-      priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
-      rxdes = ftmac100_current_rxdes(priv);
-    }
-
-  ndbg("\nNOT FOUND\nCurrent RX %d rxdes0=%08x\n",
-       priv->rx_pointer, rxdes->rxdes0);
-
-  return;
-
-found_segment:
-
-  len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
-  data = (uint8_t *)rxdes->rxdes2;
-
-  ndbg ("RX buffer %d (%08x), %x received (%d)\n",
-        priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
+  int found;
 
   do
     {
+      found = false;
+      rxdes = ftmac100_current_rxdes(priv);
+
+      while (!(rxdes->rxdes0 & FTMAC100_RXDES0_RXDMA_OWN))
+        {
+          if (rxdes->rxdes0 & FTMAC100_RXDES0_FRS)
+            {
+              found = true;
+              break;
+            }
+
+          /* Clear status bits */
+
+          rxdes->rxdes0 = FTMAC100_RXDES0_RXDMA_OWN;
+
+          priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
+          rxdes = ftmac100_current_rxdes(priv);
+        }
+
+      if (!found)
+        {
+          nvdbg("\nNOT FOUND\nCurrent RX %d rxdes0=%08x\n",
+                priv->rx_pointer, rxdes->rxdes0);
+          return;
+        }
+
+      len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
+      data = (uint8_t *)rxdes->rxdes2;
+
+      nvdbg ("RX buffer %d (%08x), %x received (%d)\n",
+             priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
+
       /* Check for errors and update statistics */
 
       /* Check if the packet is a valid size for the uIP buffer configuration */
@@ -671,7 +669,7 @@ found_segment:
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
-       pkt_input(&priv->ft_dev);
+      pkt_input(&priv->ft_dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -768,14 +766,13 @@ found_segment:
             }
         }
 #endif
+      priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
+
+      rxdes->rxdes1 &= FTMAC100_RXDES1_EDORR;
+      rxdes->rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
+      rxdes->rxdes0 |= FTMAC100_RXDES0_RXDMA_OWN;
     }
-  while (0); /* While there are more packets to be processed */
-
-  priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
-
-  rxdes->rxdes1 &= FTMAC100_RXDES1_EDORR;
-  rxdes->rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
-  rxdes->rxdes0 |= FTMAC100_RXDES0_RXDMA_OWN;
+  while (true); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
@@ -973,10 +970,7 @@ static void ftmac100_interrupt_work(FAR void *arg)
 
   /* Re-enable Ethernet interrupts */
 
-//  up_enable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_unmask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 0);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 0);
+  up_enable_irq(CONFIG_FTMAC100_IRQ);
 }
 #endif
 
@@ -1014,10 +1008,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
   priv->status = getreg32 (&iobase->isr);
 
-//  up_disable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_mask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 1);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 1);
+  up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   putreg32 (INT_MASK_ALL_DISABLED, &iobase->imr);
 
@@ -1145,10 +1136,7 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
    * condition with interrupt work that is already queued and in progress.
    */
 
-//  up_disable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_mask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 1);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 1);
+  up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   /* Cancel any pending poll or interrupt work.  This will have no effect
    * on work that has already been started.
@@ -1337,10 +1325,7 @@ static int ftmac100_ifup(struct net_driver_s *dev)
   /* Enable the Ethernet interrupt */
 
   priv->ft_bifup = true;
-//  up_enable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_unmask_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 0);
-  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 0);
+  up_enable_irq(CONFIG_FTMAC100_IRQ);
   return OK;
 }
 
@@ -1369,10 +1354,7 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
   /* Disable the Ethernet interrupt */
 
   flags = irqsave();
-//  up_disable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_mask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 1);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 1);
+  up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
