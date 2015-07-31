@@ -75,6 +75,7 @@ void board_initialize(void)
 {
 #ifdef CONFIG_NET_FTMAC100
   /* Perform board-specific initialization */
+
   ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 0);
   ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 0);
 
