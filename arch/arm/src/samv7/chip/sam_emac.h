@@ -36,8 +36,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMAC_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMAC_H
+#ifndef __ARCH_ARM_SRC_SAMV7_CHIP_SAM_EMAC_H
+#define __ARCH_ARM_SRC_SAMV7_CHIP_SAM_EMAC_H
 
 /************************************************************************************
  * Included Files
@@ -1043,4 +1043,4 @@ struct emac_txdesc_s
 };
 
 #endif /* SAMV7_NEMAC > 0 */
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMAC_H */
+#endif /* __ARCH_ARM_SRC_SAMV7_CHIP_SAM_EMAC_H */
