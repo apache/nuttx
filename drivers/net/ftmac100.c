@@ -174,13 +174,6 @@ static struct ftmac100_driver_s g_ftmac100[CONFIG_FTMAC100_NINTERFACES]
  * Private Function Prototypes
  ****************************************************************************/
 
-/* FIXME: import low-level functions for IRQ setup */
-
-extern inline void ftintc010_set_trig_mode(int irq, int mode);
-extern inline void ftintc010_set_trig_level(int irq, int level);
-extern inline void ftintc010_unmask_irq(int irq);
-extern inline void ftintc010_mask_irq(int irq);
-
 /* Common TX logic */
 
 static int  ftmac100_transmit(FAR struct ftmac100_driver_s *priv);
@@ -977,10 +970,7 @@ static void ftmac100_interrupt_work(FAR void *arg)
 
   /* Re-enable Ethernet interrupts */
 
-//  up_enable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_unmask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 0);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 0);
+  up_enable_irq(CONFIG_FTMAC100_IRQ);
 }
 #endif
 
@@ -1018,10 +1008,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
   priv->status = getreg32 (&iobase->isr);
 
-//  up_disable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_mask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 1);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 1);
+  up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   putreg32 (INT_MASK_ALL_DISABLED, &iobase->imr);
 
@@ -1149,10 +1136,7 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
    * condition with interrupt work that is already queued and in progress.
    */
 
-//  up_disable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_mask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 1);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 1);
+  up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   /* Cancel any pending poll or interrupt work.  This will have no effect
    * on work that has already been started.
@@ -1341,10 +1325,7 @@ static int ftmac100_ifup(struct net_driver_s *dev)
   /* Enable the Ethernet interrupt */
 
   priv->ft_bifup = true;
-//  up_enable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_unmask_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 0);
-  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 0);
+  up_enable_irq(CONFIG_FTMAC100_IRQ);
   return OK;
 }
 
@@ -1373,10 +1354,7 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
   /* Disable the Ethernet interrupt */
 
   flags = irqsave();
-//  up_disable_irq(CONFIG_FTMAC100_IRQ);
-  ftintc010_mask_irq(CONFIG_FTMAC100_IRQ);
-//  ftintc010_set_trig_mode(CONFIG_FTMAC100_IRQ, 1);
-//  ftintc010_set_trig_level(CONFIG_FTMAC100_IRQ, 1);
+  up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
