@@ -590,11 +590,11 @@ static int u16550_setup(struct uart_dev_s *dev)
   switch (priv->bits)
     {
       case 5 :
-        lcr |= UART_LCR_WLS_7BIT;
+        lcr |= UART_LCR_WLS_5BIT;
         break;
 
       case 6 :
-        lcr |= UART_LCR_WLS_7BIT;
+        lcr |= UART_LCR_WLS_6BIT;
         break;
 
       case 7 :
@@ -603,7 +603,7 @@ static int u16550_setup(struct uart_dev_s *dev)
 
       default:
       case 8 :
-        lcr |= UART_LCR_WLS_7BIT;
+        lcr |= UART_LCR_WLS_8BIT;
         break;
     }
 
