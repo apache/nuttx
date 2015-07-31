@@ -222,8 +222,6 @@ void up_disable_irq(int irq)
   if ((unsigned)irq < NR_IRQS)
     {
       ftintc010_mask_irq(irq);
-      ftintc010_set_trig_mode(irq, 0);
-      ftintc010_set_trig_level(irq, 1);
     }
 }
 
@@ -240,8 +238,6 @@ void up_enable_irq(int irq)
   if ((unsigned)irq < NR_IRQS)
     {
       ftintc010_unmask_irq(irq);
-      ftintc010_set_trig_mode(irq, 1);
-      ftintc010_set_trig_level(irq, 0);
     }
 }
 
