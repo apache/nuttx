@@ -805,7 +805,9 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
       /* txdes owned by dma */
 
       if (txdes->txdes0 & FTMAC100_TXDES0_TXDMA_OWN)
-        break;
+        {
+          break;
+        }
 
       /* TODO: check for excessive and late collisions */
 
