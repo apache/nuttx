@@ -737,7 +737,7 @@ config SAMV7_SSC0_TX_FSLEN
 	default 1
 	range 0 255
 	---help---
-		This setting define the length of the Transmit Frame Sync signal in
+		This setting defines the length of the Transmit Frame Sync signal in
 		units of transmit clock periods.  A value of zero disables this
 		feature.  In that case the TD line is driven with the default value
 		during the Transmit Frame Sync signal.
@@ -909,7 +909,7 @@ config SAMV7_SSC1_TX_FSLEN
 	default 1
 	range 0 255
 	---help---
-		This setting define the length of the Transmit Frame Sync signal in
+		This setting defines the length of the Transmit Frame Sync signal in
 		units of transmit clock periods.  A value of zero disables this
 		feature.  In that case the TD line is driven with the default value
 		during the Transmit Frame Sync signal.
@@ -1335,193 +1335,506 @@ config SAMV7_MCAN_CLKSRC_PRESCALER
 	default 1
 	range 1 256
 
-if SAMV7_MCAN0
-
-config SAMV7_MCAN0_BAUD
-	int "CAN0 BAUD"
-	default 250000
+menu "MCAN0 device driver options"
 	depends on SAMV7_MCAN0
+
+config SAMV7_MCAN0_BITRATE
+	int "MCAN0 bitrate"
+	default 500000
 	---help---
-		CAN0 BAUD rate.  Required if SAMV7_MCAN0 is defined.
+		MCAN0 bitrate in bits per second.  Required if SAMV7_MCAN0 is defined.
 
-config SAMV7_MCAN0_NRECVMB
-	int "Number of receive mailboxes"
-	default 1
-	range 1 3
+config SAMV7_MCAN0_PROPSEG
+	int "MCAN0 PropSeg"
+	default 2
+	range 1 63
 	---help---
-		The SAMV7 CAN0 peripheral supports 8 mailboxes that can be used for
-		sending and receiving messages.  Up the three of these can be set
-		aside statically for message reception.  The remainder can be
-		configured dynamically to send CAN messages.  Multiple receive
-		mailboxes might needed to either (1) receive bursts of messages, or
-		(2) to support multiple groups of messages filtered on message ID.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		NOTE:  The maximum of 3 is a completely arbitrary design decision
-		and can certainly be changed if you need more.
-
-config SAMV7_MCAN0_ADDR0
-	hex "Mailbox 0 address"
+config SAMV7_MCAN0_PHASESEG1
+	int "MCAN0 PhaseSeg1"
+	default 11
+	range 1 63
 	---help---
-		This setting defines the address for receive mailbox 0.  If CAN_EXTID
-		is defined, this should be a 29-bit extended CAN address; otherwise
-		it should be an 11-bit standard CAN address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-config SAMV7_MCAN0_MASK0
-	hex "Mailbox 0 address mask"
-	default 0x7fff if !CAN_EXTID
-	default 0x1fffffff if CAN_EXTID
+config SAMV7_MCAN0_PHASESEG2
+	int "MCAN0 PhaseSeg2"
+	default 11
+	range 1 63
 	---help---
-		This setting defines the address mask for receive mailbox 0.  And
-		address matching SAMV7_MCAN0_ADDR0 under this mask are accepted.  The
-		default, all ones, forces an exact match.  A value of zero will accept
-		any address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
-		mask; otherwise it should be an 11-bit standard CAN address.
-
-config SAMV7_MCAN0_ADDR1
-	hex "Mailbox 1 address"
+config SAMV7_MCAN0_FSJW
+	int "MCAN0 synchronization jump width"
+	default 4
+	range 1 5
 	---help---
-		This setting defines the address for receive mailbox 1.  If CAN_EXTID
-		is defined, this should be a 29-bit extended CAN address; otherwise
-		it should be an 11-bit standard CAN address.
+		The duration of a synchronization jump is Tcan_clk x FSJW.
 
-		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
-
-config SAMV7_MCAN0_MASK1
-	hex "Mailbox 1 address mask"
-	default 0x7fff if !CAN_EXTID
-	default 0x1fffffff if CAN_EXTID
+config SAMV7_MCAN0_FBITRATE
+	int "MCAN0 fast bitrate"
+	default 2000000
 	---help---
-		This setting defines the address mask for receive mailbox 1.  And
-		address matching SAMV7_MCAN0_ADDR1 under this mask are accepted.  The
-		default, all ones, forces an exact match.  A value of zero will accept
-		any address.
+		MCAN0 bitrate in bits per second.  Required if SAMV7_MCAN0 is
+		defined.
 
-		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
-		mask; otherwise it should be an 11-bit standard CAN address.
-
-		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
-
-config SAMV7_MCAN0_ADDR2
-	hex "Mailbox 2 address"
+config SAMV7_MCAN0_FPROPSEG
+	int "MCAN0 fast PropSeg"
+	default 2
+	range 1 63
 	---help---
-		This setting defines the address for receive mailbox 2.  If CAN_EXTID
-		is defined, this should be a 29-bit extended CAN address; otherwise
-		it should be an 11-bit standard CAN address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 3.
-
-config SAMV7_MCAN0_MASK2
-	hex "Mailbox 1 address mask"
-	default 0x7fff if !CAN_EXTID
-	default 0x1fffffff if CAN_EXTID
+config SAMV7_MCAN0_FPHASESEG1
+	int "MCAN0 fast PhaseSeg1"
+	default 4
+	range 1 63
 	---help---
-		This setting defines the address mask for receive mailbox 2.  And
-		address matching SAMV7_MCAN0_ADDR2 under this mask are accepted.  The
-		default, all ones, forces an exact match.  A value of zero will accept
-		any address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
-		mask; otherwise it should be an 11-bit standard CAN address.
+config SAMV7_MCAN0_FPHASESEG2
+	int "MCAN0 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
+config SAMV7_MCAN0_FFSJW
+	int "MCAN0 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
 
-endif # SAMV7_MCAN0
+config SAMV7_MCAN0_NSTDFILTERS
+	int "MCAN0 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
 
-if SAMV7_MCAN1
+config SAMV7_MCAN0_NEXTFILTERS
+	int "MCAN0 number of extended filters"
+	default 8
+	range 0 64
+	---help---
+		Number of extended message ID filters.
 
-config SAMV7_MCAN1_BAUD
-	int "CAN1 BAUD"
-	default 250000
+choice
+	prompt "MCAN0 RX FIFO0 element size"
+	default SAMV7_MCAN0_RXFIFO0_32BYTES
+
+config SAMV7_MCAN0_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_RXFIFO0_SIZE
+	int "MCAN0 RX FIFO0 size"
+	default 12
+	range 0 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "MCAN0 RX FIFO1 element size"
+	default SAMV7_MCAN0_RXFIFO1_32BYTES
+
+config SAMV7_MCAN0_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_RXFIFO1_SIZE
+	int "MCAN0 RX FIFO1 size"
+	default 0
+	range 0 64
+	---help---
+		Number of receive FIFO 1 elements for MCAN0.  Zero disables FIFO 1.
+
+choice
+	prompt "MCAN0 RX buffer element size"
+	default SAMV7_MCAN0_RXBUFFER_32BYTES
+
+config SAMV7_MCAN0_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
+	int "MCAN0 dedicated RX buffer size"
+	default 16
+	range 0 64
+	---help---
+		Number of dedicated RX buffer elements for MCAN0.
+
+choice
+	prompt "MCAN0 TX buffer element size"
+	default SAMV7_MCAN0_TXBUFFER_32BYTES
+
+config SAMV7_MCAN0_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN0 TX buffer element size
+
+config SAMV7_MCAN0_TXEVENTFIFO_SIZE
+	int "MCAN0 TX event FIFO size"
+	default 0
+	range 0 32
+	---help---
+		Number of TX event FIFO elements for MCAN0.  Zero disables TX event FIFO.
+
+config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
+	int "MCAN0 dedicated TX buffer size"
+	default 4
+	range 0 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN0.
+
+config SAMV7_MCAN0_DEDICATED_TXFIFOQ_SIZE
+	int "MCAN0 dedicated TX FIFO queue"
+	default 4
+	range 0 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN0.
+
+endmenu # MCAN0 device driver options
+
+menu "MCAN1 device driver options"
 	depends on SAMV7_MCAN1
+
+config SAMV7_MCAN1_BITRATE
+	int "MCAN1 bitrate"
+	default 500000
 	---help---
-		CAN1 BAUD rate.  Required if SAMV7_MCAN1 is defined.
+		MCAN1 bitrate in bits per second.  Required if SAMV7_MCAN1 is
+		defined.
 
-config SAMV7_MCAN1_NRECVMB
-	int "Number of receive mailboxes"
-	default 1
-	range 1 3
+config SAMV7_MCAN1_PROPSEG
+	int "MCAN1 PropSeg"
+	default 2
+	range 1 63
 	---help---
-		The SAMV7 CAN1 peripheral supports 8 mailboxes that can be used for
-		sending and receiving messages.  Up the three of these can be set
-		aside statically for message reception.  The remainder can be
-		configured dynamically to send CAN messages.  Multiple receive
-		mailboxes might needed to either (1) receive bursts of messages, or
-		(2) to support multiple groups of messages filtered on message ID.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		NOTE:  The maximum of 3 is a completely arbitrary design decision
-		and can certainly be changed if you need more.
-
-config SAMV7_MCAN1_ADDR0
-	hex "Mailbox 0 address"
+config SAMV7_MCAN1_PHASESEG1
+	int "MCAN1 PhaseSeg1"
+	default 11
+	range 1 63
 	---help---
-		This setting defines the address for receive mailbox 0.  If CAN_EXTID
-		is defined, this should be a 29-bit extended CAN address; otherwise
-		it should be an 11-bit standard CAN address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-config SAMV7_MCAN1_MASK0
-	hex "Mailbox 0 address mask"
-	default 0x7fff if !CAN_EXTID
-	default 0x1fffffff if CAN_EXTID
+config SAMV7_MCAN1_PHASESEG2
+	int "MCAN1 PhaseSeg2"
+	default 11
+	range 1 63
 	---help---
-		This setting defines the address mask for receive mailbox 0.  And
-		address matching SAMV7_MCAN1_ADDR0 under this mask are accepted.  The
-		default, all ones, forces an exact match.  A value of zero will accept
-		any address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
-		mask; otherwise it should be an 11-bit standard CAN address.
-
-config SAMV7_MCAN1_ADDR1
-	hex "Mailbox 1 address"
+config SAMV7_MCAN1_FSJW
+	int "MCAN1 synchronization jump width"
+	default 4
+	range 1 5
 	---help---
-		This setting defines the address for receive mailbox 1.  If CAN_EXTID
-		is defined, this should be a 29-bit extended CAN address; otherwise
-		it should be an 11-bit standard CAN address.
+		The duration of a synchronization jump is Tcan_clk x FSJW.
 
-		This setting is ignored if SAMV7_MCAN0_NRECVMB is less than 2.
-
-config SAMV7_MCAN1_MASK1
-	hex "Mailbox 1 address mask"
-	default 0x7fff if !CAN_EXTID
-	default 0x1fffffff if CAN_EXTID
+config SAMV7_MCAN1_FBITRATE
+	int "MCAN1 fast bitrate"
+	default 2000000
 	---help---
-		This setting defines the address mask for receive mailbox 1.  And
-		address matching SAMV7_MCAN1_ADDR1 under this mask are accepted.  The
-		default, all ones, forces an exact match.  A value of zero will accept
-		any address.
+		MCAN1 bitrate in bits per second.  Required if SAMV7_MCAN1 is
+		defined.
 
-		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
-		mask; otherwise it should be an 11-bit standard CAN address.
-
-		This setting is ignored if SAMV7_MCAN1_NRECVMB is less than 2.
-
-config SAMV7_MCAN1_ADDR2
-	hex "Mailbox 2 address"
+config SAMV7_MCAN1_FPROPSEG
+	int "MCAN1 fast PropSeg"
+	default 2
+	range 1 63
 	---help---
-		This setting defines the address for receive mailbox 2.  If CAN_EXTID
-		is defined, this should be a 29-bit extended CAN address; otherwise
-		it should be an 11-bit standard CAN address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		This setting is ignored if SAMV7_MCAN1_NRECVMB is less than 3.
-
-config SAMV7_MCAN1_MASK2
-	hex "Mailbox 2 address mask"
-	default 0x7fff if !CAN_EXTID
-	default 0x1fffffff if CAN_EXTID
+config SAMV7_MCAN1_FPHASESEG1
+	int "MCAN1 fast PhaseSeg1"
+	default 4
+	range 1 63
 	---help---
-		This setting defines the address mask for receive mailbox 2.  And
-		address matching SAMV7_MCAN1_ADDR2 under this mask are accepted.  The
-		default, all ones, forces an exact match.  A value of zero will accept
-		any address.
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
-		mask; otherwise it should be an 11-bit standard CAN address.
+config SAMV7_MCAN1_FPHASESEG2
+	int "MCAN1 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-		This setting is ignored if SAMV7_MCAN1_NRECVMB is less than 3.
+config SAMV7_MCAN1_FFSJW
+	int "MCAN1 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
 
-endif # SAMV7_MCAN1
+config SAMV7_MCAN1_NSTDFILTERS
+	int "MCAN1 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config SAMV7_MCAN1_NEXTFILTERS
+	int "MCAN1 number of extended filters"
+	default 8
+	range 0 64
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "MCAN1 RX FIFO0 element size"
+	default SAMV7_MCAN1_RXFIFO0_32BYTES
+
+config SAMV7_MCAN1_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_RXFIFO0_SIZE
+	int "MCAN1 RX FIFO0 size"
+	default 0
+	range 0 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "MCAN1 RX FIFO0 element size"
+	default SAMV7_MCAN1_RXFIFO0_32BYTES
+
+config SAMV7_MCAN1_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_RXFIFO1_SIZE
+	int "MCAN1 RX FIFO1 size"
+	default 0
+	range 0 64
+	---help---
+		Number of receive FIFO 1 elements for MCAN1.  Zero disables FIFO 1.
+
+choice
+	prompt "MCAN1 RX buffer element size"
+	default SAMV7_MCAN1_RXBUFFER_32BYTES
+
+config SAMV7_MCAN1_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
+	int "MCAN1 dedicated RX buffer size"
+	default 16
+	range 0 64
+	---help---
+		Number of dedicated RX buffer elements for MCAN1.
+
+choice
+	prompt "MCAN1 TX buffer element size"
+	default SAMV7_MCAN1_TXBUFFER_32BYTES
+
+config SAMV7_MCAN1_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_12BYTES
+	bool "12 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_16BYTES
+	bool "16 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_20BYTES
+	bool "20 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_24BYTES
+	bool "24 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_32BYTES
+	bool "32 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_48BYTES
+	bool "48 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_64BYTES
+	bool "64 bytes"
+
+endchoice # MCAN1 TX buffer element size
+
+config SAMV7_MCAN1_TXEVENTFIFO_SIZE
+	int "MCAN1 TX event FIFO size"
+	default 0
+	range 0 32
+	---help---
+		Number of TX event FIFO elements for MCAN1.  Zero disables TX event FIFO.
+
+config SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
+	int "MCAN1 dedicated TX buffer size"
+	default 4
+	range 0 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN1.
+
+config SAMV7_MCAN1_DEDICATED_TXFIFOQ_SIZE
+	int "MCAN1 dedicated TX FIFO queue"
+	default 4
+	range 0 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN1.
+
+endmenu # MCAN1 device driver options
 
 config SAMV7_MCAN_AUTOBAUD
 	bool "Enable auto-baud"
