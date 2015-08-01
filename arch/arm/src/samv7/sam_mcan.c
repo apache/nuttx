@@ -61,7 +61,7 @@
 #include "sam_pio.h"
 #include "sam_mcan.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_MCAN0) || defined(CONFIG_SAMV7_MCAN1))
+#if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_MCAN)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -104,246 +104,311 @@
 #define SAMV7_MCANCLK_FREQUENCY \
   (SAMV7_MCAN_CLKSRC_FREQUENCY / CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER)
 
-/* FIFOs ********************************************************************/
+/* MCAN0 Configuration ******************************************************/
+
+#ifdef CONFIG_SAMV7_MCAN0
+#  if (CONFIG_SAMV7_MCAN0_NSTDFILTERS > 128)
+#    error Invalid MCAN0 number of Standard Filters
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_NEXTFILTERS > 64)
+#    error Invalid MCAN0 number of Extended Filters
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE > 64)
+#    error Invalid MCAN0 number of RX FIFO0 elements
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE > 64)
+#    error Invalid MCAN0 number of RX FIFO1 elements
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE > 64)
+#    error Invalid MCAN0 number of RX BUFFER elements
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE > 32)
+#    error Invalid MCAN0 number of TX EVENT FIFO elements
+#  endif
+
+#  if ((CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE + \
+        CONFIG_SAMV7_MCAN0_DEDICATED_TXFIFOQ_SIZE)  > 32)
+#    error Invalid MCAN0 number of TX BUFFER elements
+#  endif
+
 /* MCAN0 RX FIFO0 element size */
 
-#if defined(CONFIG_SAMV7_MCAN0_RXFIFO0_8BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_12BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_16BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_20BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_24BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_32BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_48BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_64BYTES)
-#  define MCAN0_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO0_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN0)
-#  error Undefined MCAN0 RX FIFO0 element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN0_RXFIFO0_8BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_12BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_16BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_20BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_24BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_32BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_48BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO0_64BYTES)
+#    define MCAN0_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO0_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN0 RX FIFO0 element size
+#  endif
 
 /* MCAN0 RX FIFO1 element size */
 
-#if defined(CONFIG_SAMV7_MCAN0_RXFIFO1_8BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_12BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_16BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_20BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_24BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_32BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_48BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_64BYTES)
-#  define MCAN0_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN0_RXFIFO1_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN0)
-#  error Undefined MCAN0 RX FIFO1 element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN0_RXFIFO1_8BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_12BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_16BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_20BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_24BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_32BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_48BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN0_RXFIFO1_64BYTES)
+#    define MCAN0_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN0_RXFIFO1_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN0 RX FIFO1 element size
+#  endif
 
 /* MCAN0 RX buffer element size */
 
-#if defined(CONFIG_SAMV7_MCAN0_RXBUFFER_8BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_12BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_16BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_20BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_24BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_32BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_48BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_64BYTES)
-#  define MCAN0_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_RXBUFFER_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN0)
-#  error Undefined MCAN0 RX buffer element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN0_RXBUFFER_8BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_12BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_16BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_20BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_24BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_32BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_48BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN0_RXBUFFER_64BYTES)
+#    define MCAN0_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_RXBUFFER_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN0 RX buffer element size
+#  endif
 
 /* MCAN0 TX buffer element size */
 
-#if defined(CONFIG_SAMV7_MCAN0_TXBUFFER_8BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_12BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_16BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_20BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_24BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_32BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_48BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_64BYTES)
-#  define MCAN0_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN0_TXBUFFER_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN0)
-#  error Undefined MCAN0 TX buffer element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN0_TXBUFFER_8BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_12BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_16BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_20BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_24BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_32BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_48BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN0_TXBUFFER_64BYTES)
+#    define MCAN0_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN0_TXBUFFER_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN0 TX buffer element size
+#  endif
+#endif /* CONFIG_SAMV7_MCAN0 */
+
+/* MCAN1 Configuration ******************************************************/
+
+#ifdef CONFIG_SAMV7_MCAN1
+#  if (CONFIG_SAMV7_MCAN1_NSTDFILTERS > 128)
+#    error Invalid MCAN1 number of Standard Filters
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN1_NEXTFILTERS > 64)
+#    error Invalid MCAN1 number of Extended Filters
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE > 64)
+#    error Invalid MCAN1 number of RX FIFO 0 elements
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE > 64)
+#    error Invalid MCAN1 number of RX FIFO 0 elements
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE > 64)
+#    error Invalid MCAN1 number of RX BUFFER elements
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE > 32)
+#    error Invalid MCAN1 number of TX EVENT FIFO elements
+#  endif
+
+#  if ((CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE + \
+        CONFIG_SAMV7_MCAN1_DEDICATED_TXFIFOQ_SIZE)  > 32)
+#    error Invalid MCAN1 number of TX BUFFER elements
+#  endif
 
 /* MCAN1 RX FIFO0 element size */
 
-#if defined(CONFIG_SAMV7_MCAN1_RXFIFO0_8BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_12BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_16BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_20BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_24BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_32BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_48BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_64BYTES)
-#  define MCAN1_RXFIFO0_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO0_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN1)
-#  error Undefined MCAN1 RX FIFO0 element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN1_RXFIFO0_8BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_12BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_16BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_20BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_24BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_32BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_48BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO0_64BYTES)
+#    define MCAN1_RXFIFO0_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO0_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN1 RX FIFO0 element size
+#  endif
 
 /* MCAN1 RX FIFO1 element size */
 
-#if defined(CONFIG_SAMV7_MCAN1_RXFIFO1_8BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_12BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_16BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_20BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_24BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_32BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_48BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_64BYTES)
-#  define MCAN1_RXFIFO1_ELEMENT_SIZE  8
-#  define MCAN1_RXFIFO1_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN1)
-#  error Undefined MCAN1 RX FIFO1 element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN1_RXFIFO1_8BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_12BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_16BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_20BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_24BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_32BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_48BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN1_RXFIFO1_64BYTES)
+#    define MCAN1_RXFIFO1_ELEMENT_SIZE  8
+#    define MCAN1_RXFIFO1_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN1 RX FIFO1 element size
+#  endif
 
 /* MCAN1 RX buffer element size */
 
-#if defined(CONFIG_SAMV7_MCAN1_RXBUFFER_8BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_12BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_16BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_20BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_24BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_32BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_48BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_64BYTES)
-#  define MCAN1_RXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_RXBUFFER_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN1)
-#  error Undefined MCAN1 RX buffer element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN1_RXBUFFER_8BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_12BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_16BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_20BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_24BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_32BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_48BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN1_RXBUFFER_64BYTES)
+#    define MCAN1_RXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_RXBUFFER_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN1 RX buffer element size
+#  endif
 
 /* MCAN1 TX buffer element size */
 
-#if defined(CONFIG_SAMV7_MCAN1_TXBUFFER_8BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  0
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_12BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  1
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_16BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  2
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_20BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  3
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_24BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  4
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_32BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  5
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_48BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  6
-#elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_64BYTES)
-#  define MCAN1_TXBUFFER_ELEMENT_SIZE  8
-#  define MCAN1_TXBUFFER_ENCODED_SIZE  7
-#elif defiend(CONFIG_SAMV7_MCAN1)
-#  error Undefined MCAN1 TX buffer element size
-#endif
+#  if defined(CONFIG_SAMV7_MCAN1_TXBUFFER_8BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  0
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_12BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  1
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_16BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  2
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_20BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  3
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_24BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  4
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_32BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  5
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_48BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  6
+#  elif defined(CONFIG_SAMV7_MCAN1_TXBUFFER_64BYTES)
+#    define MCAN1_TXBUFFER_ELEMENT_SIZE  8
+#    define MCAN1_TXBUFFER_ENCODED_SIZE  7
+#  else
+#    error Undefined MCAN1 TX buffer element size
+#  endif
+#endif /* CONFIG_SAMV7_MCAN1 */
 
 /* Mailboxes ****************************************************************/
 
@@ -1560,7 +1625,7 @@ static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
   md[0] = mcan_getreg(priv, SAM_CAN_MnDH_OFFSET(mbndx));
   md[1] = mcan_getreg(priv, SAM_CAN_MnDL_OFFSET(mbndx));
 
-  /* Get the ID associated with the newly received message: )nce a new message
+  /* Get the ID associated with the newly received message:)nce a new message
    * is received, its ID is masked with the CAN_MAMx value and compared
    * with the CAN_MIDx value. If accepted, the message ID is copied to the
    * CAN_MIDx register.
@@ -1788,7 +1853,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
  * Name: mcan0_interrupt
  *
  * Description:
- *   CAN0 interrupt handler
+ *   MCAN0 interrupt handler
  *
  * Input Parameters:
  *   irq - The IRQ number of the interrupt.
@@ -1811,7 +1876,7 @@ static int mcan0_interrupt(int irq, void *context)
  * Name: mcan1_interrupt
  *
  * Description:
- *   CAN0 interrupt handler
+ *   MCAN1 interrupt handler
  *
  * Input Parameters:
  *   irq - The IRQ number of the interrupt.
@@ -2071,7 +2136,7 @@ static int mcan_autobaud(struct sam_mcan_s *priv)
 
 #warning Missing logic
     }
-  while ( no errors reported );
+  while (no errors reported);
 
   /* Once no error has been detected, the application disables the Autobaud
    * Mode, clearing the ABM field in the CAN_MR register.  To go back to the
@@ -2222,14 +2287,14 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
   canvdbg("CAN%d\n", port);
 
-  /* NOTE:  Peripherical clocking for CAN0 and/or CAN1 was already provided
+  /* NOTE:  Peripherical clocking for MCAN0 and/or MCAN1 was already provided
    * by sam_clockconfig() early in the reset sequence.
    */
 
 #ifdef CONFIG_SAMV7_MCAN0
   if (port == MCAN0)
     {
-      /* Select the CAN0 device structure */
+      /* Select the MCAN0 device structure */
 
       dev    = &g_mcan0dev;
       priv   = &g_mcan0priv;
@@ -2240,7 +2305,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 #ifdef CONFIG_SAMV7_MCAN1
   if (port == MCAN1)
     {
-      /* Select the CAN1 device structure */
+      /* Select the MCAN1 device structure */
 
       dev    = &g_mcan1dev;
       priv   = &g_mcan1priv;
@@ -2277,4 +2342,4 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
   return dev;
 }
 
-#endif /* CONFIG_CAN && (CONFIG_SAMV7_MCAN0 || CONFIG_SAMV7_MCAN1) */
+#endif /* CONFIG_CAN && CONFIG_SAMV7_MCAN */
