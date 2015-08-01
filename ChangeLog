@@ -10776,4 +10776,7 @@
 	  Based comments from Anton D. Kachalov (2015-07-29).
 	* STM32 F4:  Add DMA support to the ADC driver for STM32 F4.  From
 	  Max Kriegler (2015-07-30).
+	* sem_tickwait():  Added this furnction for internaluse within the
+	  OS.  It is a non-standard but more efficient version of sem_timedwait()
+	  for use in higher performance device drviers (2015-08-01).
 
