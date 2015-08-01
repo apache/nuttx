@@ -138,7 +138,8 @@ int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
   elapsed = clock_systimer() - start;
   if (elapsed >= (UINT32_MAX / 2) || elapsed >= delay)
     {
-      return -ETIMEDOUT;
+      ret = -ETIMEDOUT;
+      goto errout_with_irqdisabled;
     }
 
   delay -= elapsed;
