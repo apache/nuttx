@@ -76,9 +76,8 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb);
 
 /* State changes that initiate timer actions */
 
-static int sporadic_budget_start(FAR struct replenishment_s *repl);
-static int sporadic_interval_start(FAR struct replenishment_s *repl);
-static int sporadic_replenish_resynch(FAR struct replenishment_s *repl);
+static int sporadic_budget_start(FAR struct replenishment_s *mrepl);
+static int sporadic_interval_start(FAR struct replenishment_s *mrepl);
 static int sporadic_replenish_start(FAR struct replenishment_s *repl);
 static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
   uint32_t period, uint32_t replenish);
@@ -236,7 +235,7 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
  *
  * Input Parameters:
  *   tcb    - TCB of the thread whose priority is being boosted.
- *   repl   - The replenishment timer to use
+ *   mrepl  - The main timer
  *   budget - Budgeted execution time
  *
  * Returned Value:
@@ -244,27 +243,31 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-static int sporadic_budget_start(FAR struct replenishment_s *repl)
+static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct tcb_s *tcb;
 
-  DEBUGASSERT(repl->tcb != NULL);
-  tcb              = repl->tcb;
+  DEBUGASSERT(mrepl->tcb != NULL);
+  tcb              = mrepl->tcb;
   sporadic         = tcb->sporadic;
   DEBUGASSERT(sporadic);
 
   /* Start the next replenishment interval */
 
   tcb->timeslice   = sporadic->budget;
-  sporadic->active = repl;
-  repl->budget     = sporadic->budget;
-  repl->flags     &= ~SPORADIC_FLAG_REPLENISH;
+  sporadic->active = mrepl;
+  mrepl->budget    = sporadic->budget;
+  mrepl->flags    &= ~SPORADIC_FLAG_REPLENISH;
+
+  /* Save the time that the budget was started */
+
+  sporadic->eventtime = clock_systimer();
 
   /* And start the timer for the budget interval */
 
-  DEBUGVERIFY(wd_start(&repl->timer, sporadic->budget,
-                       sporadic_budget_expire, 1, (wdentry_t)repl));
+  DEBUGVERIFY(wd_start(&mrepl->timer, sporadic->budget,
+                       sporadic_budget_expire, 1, (wdentry_t)mrepl));
 
   /* Then reprioritize to the higher priority */
 
@@ -279,29 +282,29 @@ static int sporadic_budget_start(FAR struct replenishment_s *repl)
  *   priority of the thread to the low priority.
  *
  * Input Parameters:
- *   repl - Replenishment timer to be used
+ *   mrepl - The main timer
  *
  * Returned Value:
  *   Returns zero (OK) on success or a negated errno value on failure.
  *
  ****************************************************************************/
 
-static int sporadic_interval_start(FAR struct replenishment_s *repl)
+static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct tcb_s *tcb;
   uint32_t remainder;
 
-  DEBUGASSERT(repl != NULL && repl->tcb != NULL);
-  tcb      = repl->tcb;
+  DEBUGASSERT(mrepl != NULL && mrepl->tcb != NULL);
+  tcb      = mrepl->tcb;
   sporadic = tcb->sporadic;
   DEBUGASSERT(sporadic != NULL);
 
   /* Enter the low-priority phase of the replenishment cycle */
 
   tcb->timeslice   = 0;
-  sporadic->active = repl;
-  repl->flags     &= ~SPORADIC_FLAG_REPLENISH;
+  sporadic->active = mrepl;
+  mrepl->flags    &= ~SPORADIC_FLAG_REPLENISH;
 
   /* Calculate the remainder of the replenishment interval.  This is
    * permitted to be zero, in which case we just restart the budget
@@ -314,7 +317,7 @@ static int sporadic_interval_start(FAR struct replenishment_s *repl)
     {
       /* Start the hi-priority portion of the next scheduler cycle */
 
-      return sporadic_budget_start(repl);
+      return sporadic_budget_start(mrepl);
     }
 
   /* Start the timer that will terminate the low priority cycle.  This timer
@@ -322,74 +325,8 @@ static int sporadic_interval_start(FAR struct replenishment_s *repl)
    * be cancelled if the thread exits.
    */
 
-  DEBUGVERIFY(wd_start(&repl->timer, remainder, sporadic_interval_expire,
-              1, (wdentry_t)repl));
-
-  /* Drop the priority of thread, possible causing a context switch. */
-
-  return sporadic_set_lowpriority(tcb);
-}
-
-/****************************************************************************
- * Name: sporadic_replenish_resynch
- *
- * Description:
- *   After completing a replenishment cycle, resynchronize with the
- *   scheduler cycle.
- *
- * Input Parameters:
- *   repl   - The replenishment timer to use
- *
- * Returned Value:
- *   Returns zero (OK) on success or a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int sporadic_replenish_resynch(FAR struct replenishment_s *repl)
-{
-  FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
-  uint32_t remainder;
-
-  DEBUGASSERT(repl != NULL && repl->tcb != NULL);
-  tcb      = repl->tcb;
-  sporadic = tcb->sporadic;
-  DEBUGASSERT(sporadic != NULL);
-
-  sporadic->active = repl;
-  repl->flags     &= ~SPORADIC_FLAG_REPLENISH;
-
-  /* Calculate the remainder of the schedule interval.  A special case
-   * is when the repl_period < 2*budget.  In that case, we have to cut
-   * down the budgeted time.
-   *
-   * REVISIT: Can we recover this with more replenishment logic?
-   */
-
-  remainder = sporadic->budget;
-  if (sporadic->repl_period < 2 * remainder)
-    {
-      remainder = sporadic->repl_period - remainder;
-    }
-
-  /* This remainder is permitted to be zero, in which case we just
-   * restart the scheduler cycle without lowering the priority.
-   */
-
-  if (remainder == 0)
-    {
-      /* Start the hi-priority portion of the next scheduler cycle */
-
-      return sporadic_budget_start(repl);
-    }
-
-  /* Start the timer that will terminate the low priority cycle.  This
-   * timer expiration is independent of what else may occur (except that
-   * it must be cancelled if the thread exits.
-   */
-
-  DEBUGVERIFY(wd_start(&repl->timer, remainder,
-              sporadic_interval_expire, 1, (wdentry_t)repl));
+  DEBUGVERIFY(wd_start(&mrepl->timer, remainder, sporadic_interval_expire,
+              1, (wdentry_t)mrepl));
 
   /* Drop the priority of thread, possible causing a context switch. */
 
@@ -497,15 +434,13 @@ static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
 
 static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
 {
-  FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg1;
+  FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg1;
+  FAR struct replenishment_s *repl;
   FAR struct sporadic_s *sporadic;
   FAR struct tcb_s *tcb;
 
-  DEBUGASSERT(argc == 1 && repl != NULL && repl->tcb != NULL);
-  tcb      = repl->tcb;
-
-  sporadic = tcb->sporadic;
-  DEBUGASSERT(sporadic != NULL);
+  DEBUGASSERT(argc == 1 && mrepl != NULL && mrepl->tcb != NULL);
+  tcb = mrepl->tcb;
 
   /* As a special case, we can do nothing here if scheduler has been locked.
    * We cannot drop the priority because that might cause a context switch,
@@ -519,7 +454,7 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
 
   if (tcb->lockcount > 0)
     {
-      DEBUGASSERT((repl->flags && SPORADIC_FLAG_ALLOCED) != 0 &&
+      DEBUGASSERT((mrepl->flags && SPORADIC_FLAG_ALLOCED) != 0 &&
                   sporadic->nrepls > 0);
 
       /* Set the timeslice to the magic value */
@@ -532,28 +467,56 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
       return;
     }
 
-  /* Were replenishment timers started during the budget time? */
-
-  if (sporadic->nrepls > 1)
-    {
-      /* Start the replenishment delay with the full budget replenishment */
-
-      DEBUGVERIFY(sporadic_replenish_delay(repl, sporadic->repl_period,
-                                           sporadic->budget));
-
-      /* Drop the priority of thread, possible causing a context switch. */
-
-      DEBUGVERIFY(sporadic_set_lowpriority(tcb));
-    }
-
-  /* No, drop the priority of the thread and start the timer for the rest of
-   * the scheduler interval.
+  /* Were we suspended at the end of the budget time?  If so, start a new
+   * replenishment timer for the since we were suspended (which might be
+   * as long as the whole budget interval).
    */
 
-  else
+  sporadic = tcb->sporadic;
+  DEBUGASSERT(sporadic != NULL);
+
+  if (sporadic->suspended)
     {
-      DEBUGVERIFY(sporadic_interval_start(repl));
+      uint32_t unrealized;
+
+      /* The unrealized time is the interval from when the thread as
+       * suspended (or which the budget interval was started in the case
+       * that the thread was delayed for the entire interval).
+       */
+
+      unrealized = sporadic->eventtime - clock_systimer();
+      if (unrealized > 0)
+        {
+          /* Allocate a new replenishment timer.  This will limit us to the
+           * maximum number of replenishments (max_repl).
+           */
+
+          repl = sporadic_alloc_repl(sporadic);
+          if (repl != NULL)
+            {
+              /* The delay is one half of the scheduler cycle relative to
+               * the suspend time. Hence, we subtract the unrealized amount.
+               */
+
+              uint32_t period;
+
+              DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1))
+              period = (sporadic->repl_period >> 1) - unrealized;
+
+              /* Start the delay into the next cycle to perform the
+               * replenishment.
+               */
+
+              DEBUGVERIFY(sporadic_replenish_delay(repl, period, unrealized));
+            }
+        }
     }
+
+  /* Drop the priority of the thread and start the timer for the rest of the
+   * scheduler interval.
+   */
+
+  DEBUGVERIFY(sporadic_interval_start(mrepl));
 }
 
 /****************************************************************************
@@ -577,27 +540,19 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
 
 static void sporadic_interval_expire(int argc, wdparm_t arg1, ...)
 {
-  FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg1;
-  FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
+  FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg1;
 
-  DEBUGASSERT(argc == 1 && repl != NULL && repl->tcb != NULL);
-  tcb      = repl->tcb;
+  DEBUGASSERT(argc == 1 && mrepl != NULL);
 
-  sporadic = tcb->sporadic;
-  DEBUGASSERT(sporadic != NULL);
-
-  /* If we get here, then (1) this should be the main thread, (2) there
-   * should be no active replenishment thread, and (3) there should be
-   * no unrealized budget time.
+  /* If we get here, then (1) this should be the main thread, and (2) there
+   * should be no active replenishment thread.
    */
 
-  DEBUGASSERT((repl->flags & SPORADIC_FLAG_MAIN) != 0 &&
-              sporadic->nrepls == 1);
+  DEBUGASSERT((mrepl->flags & SPORADIC_FLAG_MAIN) != 0);
 
   /* Start the hi-priority portion of the next scheduler cycle */
 
-  DEBUGVERIFY(sporadic_budget_start(repl));
+  DEBUGVERIFY(sporadic_budget_start(mrepl));
 }
 
 /****************************************************************************
@@ -630,6 +585,11 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
   sporadic = tcb->sporadic;
   DEBUGASSERT(sporadic != NULL);
 
+  /* This should not be the main timer */
+
+  DEBUGASSERT((repl->flags & (SPORADIC_FLAG_MAIN | SPORADIC_FLAG_REPLENISH))
+               == SPORADIC_FLAG_REPLENISH);
+
   /* As a special case, we can do nothing here if scheduler has been locked.
    * We cannot drop the priority because that might cause a context switch,
    * violating the lock.
@@ -642,9 +602,6 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
 
   if (tcb->lockcount > 0)
     {
-      DEBUGASSERT((repl->flags && SPORADIC_FLAG_ALLOCED) != 0 &&
-                  sporadic->nrepls > 0);
-
       /* Set the timeslice to the magic value */
 
       tcb->timeslice = -1;
@@ -659,83 +616,14 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
 
   tcb->timeslice = 0;
 
-  /* If this is temporary replenishment timer (i.e, not the main timer), then
-   * release it now.  It has served its purpose.
-   *
-   * It is always the case that the replenishment timers will expire prior
-   * to the main timer.  That is required behavior!
-   */
+  /* Discard the timer. It has served its purpose. */
 
-  if ((repl->flags & SPORADIC_FLAG_MAIN) == 0)
-    {
-      /* Discard the timer */
+  repl->flags = 0;
+  sporadic->nrepls--;
 
-      repl->flags = 0;
-      sporadic->nrepls--;
+  /* Drop the priority of thread, possible causing a context switch. */
 
-      /* Drop the priority of thread, possible causing a context switch. */
-
-      DEBUGVERIFY(sporadic_set_lowpriority(tcb));
-    }
-
-  /* Otherwise, this is the main timer finish the final budget.  We need to
-   * do one of two things:  (1) resume normal scheduling or (2) if there
-   * was any unrealized budget, we need to start another replenishment
-   * cycle.
-   */
-
-  else if (sporadic->nrepls > 1)
-    {
-      uint32_t replenish;
-      uint32_t period;
-
-      /* There are more replenishment threads running.  We have to start
-       * a new replenishment delay interval timer.
-       */
-
-      /* A special case is when the repl_period < 2*budget.  In that
-       * case, we have to cut down the budgeted time.
-       *
-       * REVISIT: Can we recover this with more replenishment logic?
-       */
-
-      replenish = sporadic->budget;
-      if (sporadic->repl_period < 2 * replenish)
-        {
-          replenish = sporadic->repl_period - replenish;
-        }
-
-      /* If the resulting time is zero, then we are already at the
-       * end of the schedule cycle.   We would be in a perverse
-       * situation in that case.  Advice for the wise: Make sure
-       * that the budget time period is less than the replenishment
-       * period (preferably less than half).
-       */
-
-      /* The interval to delay is the full scheduler period (repl_period)
-       * but starting at the beginning of this replenishment.
-       */
-
-      period = sporadic->repl_period - repl->budget;
-
-      /* Start the schedule delay before the replenish (even if
-       * replenish is zero).
-       */
-
-      DEBUGVERIFY(sporadic_replenish_delay(repl, period, replenish));
-
-      /* Drop the priority of thread, possible causing a context switch. */
-
-      DEBUGVERIFY(sporadic_set_lowpriority(tcb));
-    }
-  else
-    {
-      /* We completed with no unrealized budget. Resynchronize to the
-       * normal scheduler cycle.
-       */
-
-      DEBUGVERIFY(sporadic_replenish_resynch(repl));
-    }
+  DEBUGVERIFY(sporadic_set_lowpriority(tcb));
 }
 
 /****************************************************************************
@@ -932,16 +820,16 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
 int sched_sporadic_start(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
-  FAR struct replenishment_s *repl;
+  FAR struct replenishment_s *mrepl;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
 
   /* Allocate the main replenishment timer (should never fail) */
 
-  repl = sporadic_alloc_repl(sporadic);
-  DEBUGASSERT(repl != NULL && sporadic->nrepls == 1);
-  repl->flags |= SPORADIC_FLAG_MAIN;
+  mrepl = sporadic_alloc_repl(sporadic);
+  DEBUGASSERT(mrepl != NULL && sporadic->nrepls == 1);
+  mrepl->flags |= SPORADIC_FLAG_MAIN;
 
   /* Save the time that the scheduler was started */
 
@@ -950,7 +838,7 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
 
   /* Then start the first interval */
 
-  return sporadic_budget_start(repl);
+  return sporadic_budget_start(mrepl);
 }
 
 /****************************************************************************
@@ -1168,30 +1056,15 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
               repl = sporadic_alloc_repl(sporadic);
               if (repl != NULL)
                 {
-                  /* The delay is one scheduler cycle relative to the
-                   * suspend time. Hence, we subtract the unrealized.
+                  /* The delay is one half of the scheduler cycle relative
+                   * to the suspend time. Hence, we subtract the unrealized.
                    * amount.
                    */
 
-                  uint32_t period = sporadic->repl_period - unrealized;
+                  uint32_t period;
 
-                  /* As a further complication, we also need to subtract
-                   * the budget amount if the unrealized time was in the
-                   * deferred budget time.
-                   */
-
-                  uint8_t flags = (SPORADIC_FLAG_MAIN | SPORADIC_FLAG_REPLENISH);
-                  if ((sporadic->active->flags & flags) == flags)
-                    {
-                      if (period > sporadic->budget)
-                        {
-                          period -= sporadic->budget;
-                        }
-                      else
-                        {
-                          period = 0;
-                        }
-                    }
+                  DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1))
+                  period = (sporadic->repl_period >> 1) - unrealized;
 
                   /* Start the delay into the next cycle to perform the
                    * replenishment.
@@ -1413,7 +1286,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
-  FAR struct replenishment_s *repl;
+  FAR struct replenishment_s *mrepl;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -1429,18 +1302,18 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
    */
 
   DEBUGASSERT(sporadic->nrepls < sporadic->max_repl);
-  repl = sporadic_alloc_repl(sporadic);
-  DEBUGASSERT(repl != NULL);
+  mrepl = sporadic_alloc_repl(sporadic);
+  DEBUGASSERT(mrepl != NULL);
 
   tcb->timeslice   = 0;
-  sporadic->active = repl;
+  sporadic->active = mrepl;
 
-  repl->flags     |= SPORADIC_FLAG_MAIN;
-  repl->budget     = sporadic->budget;
+  mrepl->flags    |= SPORADIC_FLAG_MAIN;
+  mrepl->budget    = sporadic->budget;
 
   /* Drop the priority of thread, possible causing a context switch. */
 
-  DEBUGVERIFY(sporadic_interval_start(repl));
+  DEBUGVERIFY(sporadic_interval_start(mrepl));
 }
 
 #endif /* CONFIG_SCHED_SPORADIC */
