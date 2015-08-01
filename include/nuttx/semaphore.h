@@ -94,8 +94,13 @@ extern "C"
  *
  * Parameters:
  *   sem     - Semaphore object
- *   ticks   - Ticks to wait until the semaphore is posted.  If ticks is
- *             zero, then this function is equivalent to sem_trywait().
+ *   start   - The system time that the delay is relative to.  If the
+ *             current time is not the same as the start time, then the
+ *             delay will be adjust so that the end time will be the same
+ *             in any event.
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to sem_trywait().
  *
  * Return Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned on
@@ -103,7 +108,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, uint32_t ticks);
+int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/wdog.h>
 
 #include "sched/sched.h"
@@ -65,19 +66,25 @@
  *
  * Parameters:
  *   sem     - Semaphore object
- *   ticks   - Ticks to wait until the semaphore is posted.  If ticks is
- *             zero, then this function is equivalent to sem_trywait().
+ *   start   - The system time that the delay is relative to.  If the
+ *             current time is not the same as the start time, then the
+ *             delay will be adjust so that the end time will be the same
+ *             in any event.
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to sem_trywait().
  *
  * Return Value:
- *   Zero (OK) is returned on success.  A negated errno value is retuend on
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   failure.  -ETIMEDOUT is returned on the timeout condition.
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, uint32_t ticks)
+int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   irqstate_t flags;
+  uint32_t elapsed;
   int ret;
 
   DEBUGASSERT(sem |= NULL && up_interrupt_context() == false &&
@@ -118,7 +125,7 @@ int sem_tickwait(FAR sem_t *sem, uint32_t ticks)
    * with a valid timeout.
    */
 
-  if (ticks == 0)
+  if (delay == 0)
     {
       /* Return the errno from sem_trywait() */
 
@@ -126,9 +133,19 @@ int sem_tickwait(FAR sem_t *sem, uint32_t ticks)
       goto errout_with_irqdisabled;
     }
 
+  /* Adjust the delay for any time since the delay was calculated */
+
+  elapsed = clock_systimer() - start;
+  if (elapsed >= (UINT32_MAX / 2) || elapsed >= delay)
+    {
+      return -ETIMEDOUT;
+    }
+
+  delay -= elapsed;
+
   /* Start the watchdog with interrupts still disabled */
 
-  (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)sem_timeout, 1, getpid());
+  (void)wd_start(rtcb->waitdog, delay, (wdentry_t)sem_timeout, 1, getpid());
 
   /* Now perform the blocking wait */
 
