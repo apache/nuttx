@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/semaphore.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Type Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
@@ -64,7 +64,6 @@ struct nsem_inode_s
 
   FAR struct inode *ns_inode;       /* Containing inode */
   sem_t ns_sem;                     /* The semaphore */
-
 };
 #endif
 
@@ -85,6 +84,26 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sem_tickwait
+ *
+ * Description:
+ *   This function is a lighter weight version of sem_timedwait().  It is
+ *   non-standard and intended only for use within the RTOS.
+ *
+ * Parameters:
+ *   sem     - Semaphore object
+ *   ticks   - Ticks to wait until the semaphore is posted.  If ticks is
+ *             zero, then this function is equivalent to sem_trywait().
+ *
+ * Return Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   failure.  -ETIMEDOUT is returned on the timeout condition.
+ *
+ ****************************************************************************/
+
+int sem_tickwait(FAR sem_t *sem, uint32_t ticks);
 
 #undef EXTERN
 #ifdef __cplusplus
