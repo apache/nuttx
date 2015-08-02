@@ -746,7 +746,6 @@ static const struct sam_config_s g_mcan0const =
 {
   .rxpinset         = PIO_CAN0_RX,
   .txpinset         = PIO_CAN0_TX,
-  .nrecvmb          = CONFIG_SAMV7_MCAN0_NRECVMB,
   .handler          = mcan0_interrupt,
   .base             = SAM_MCAN0_BASE,
   .baud             = CONFIG_SAMV7_MCAN0_BITRATE,
@@ -784,9 +783,8 @@ static const struct sam_config_s g_mcan1const =
 {
   .rxpinset         = PIO_CAN1_RX,
   .txpinset         = PIO_CAN1_TX,
-  .nrecvmb          = CONFIG_SAMV7_MCAN1_NRECVMB,
   .handler          = mcan1_interrupt,
-  .base             = SAM_CAN1_VBASE,
+  .base             = SAM_MCAN1_BASE,
   .baud             = CONFIG_SAMV7_MCAN1_BITRATE,
   .btp              = MCAN_BTP_BRP(MCAN1_BRP) | MCAN_BTP_TSEG1(MCAN1_TSEG1) |
                       MCAN_BTP_TSEG2(MCAN1_TSEG2) | MCAN_BTP_SJW(MCAN1_SJW),
