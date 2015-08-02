@@ -107,33 +107,41 @@
 /* MCAN0 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN0
-#  if (CONFIG_SAMV7_MCAN0_NSTDFILTERS > 128)
-#    error Invalid MCAN0 number of Standard Filters
+
+/* Bit timing */
+
+#  define MCAN0_TSEG1  (CONFIG_SAMV7_MCAN0_PROPSEG + CONFIG_SAMV7_MCAN0_PHASESEG1)
+#  define MCAN0_TSEG2  CONFIG_SAMV7_MCAN0_PHASESEG2
+#  define MCAN0_BRP    ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+                       ((float)(MCAN0_TSEG1 + MCAN0_TSEG2 + 3) * \
+                        (float)CONFIG_SAMV7_MCAN0_BITRATE)) - 1))
+#  define MCAN0_SJW    (CONFIG_SAMV7_MCAN0_FSJW - 1)
+
+#  if MCAN0_TSEG1 > 63
+#    error Invalid MCAN0 TSEG1
+#  endif
+#  if MCAN0_TSEG2 > 15
+#    error Invalid MCAN0 TSEG2
+#  endif
+#  if MCAN0_SJW > 15
+#    error Invalid MCAN0 SJW
 #  endif
 
-#  if (CONFIG_SAMV7_MCAN0_NEXTFILTERS > 64)
-#    error Invalid MCAN0 number of Extended Filters
-#  endif
+#  define MCAN0_FTSEG1 (CONFIG_SAMV7_MCAN0_FPROPSEG + CONFIG_SAMV7_MCAN0_FPHASESEG1)
+#  define MCAN0_FTSEG2 (CONFIG_SAMV7_MCAN0_FPHASESEG2)
+#  define MCAN0_FBRP   ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+                       ((float)(MCAN0_FTSEG1 + MCAN0_FTSEG2 + 3) * \
+                        (float)CONFIG_SAMV7_MCAN0_FBITRATE)) - 1))
+#  define MCAN0_FSJW   (CONFIG_SAMV7_MCAN0_FFSJW - 1)
 
-#  if (CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE > 64)
-#    error Invalid MCAN0 number of RX FIFO0 elements
+#  if MCAN0_FTSEG1 > 15
+#    error Invalid MCAN0 FTSEG1
 #  endif
-
-#  if (CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE > 64)
-#    error Invalid MCAN0 number of RX FIFO1 elements
+#  if MCAN0_FTSEG2 > 7
+#    error Invalid MCAN0 FTSEG2
 #  endif
-
-#  if (CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE > 64)
-#    error Invalid MCAN0 number of RX BUFFER elements
-#  endif
-
-#  if (CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE > 32)
-#    error Invalid MCAN0 number of TX EVENT FIFO elements
-#  endif
-
-#  if ((CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE + \
-        CONFIG_SAMV7_MCAN0_DEDICATED_TXFIFOQ_SIZE)  > 32)
-#    error Invalid MCAN0 number of TX BUFFER elements
+#  if MCAN0_FSJW > 3
+#    error Invalid MCAN0 FSJW
 #  endif
 
 /* MCAN0 RX FIFO0 element size */
@@ -166,6 +174,13 @@
 #    error Undefined MCAN0 RX FIFO0 element size
 #  endif
 
+#  if CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE > 64
+#    error Invalid MCAN0 number of RX FIFO0 elements
+#  endif
+
+#  define MCAN0_RXFIFO0_WORDS \
+    (CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE * ((MCAN0_RXFIFO0_ELEMENT_SIZE/4) + 2))
+
 /* MCAN0 RX FIFO1 element size */
 
 #  if defined(CONFIG_SAMV7_MCAN0_RXFIFO1_8BYTES)
@@ -195,6 +210,26 @@
 #  else
 #    error Undefined MCAN0 RX FIFO1 element size
 #  endif
+
+#  if CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE > 64
+#    error Invalid MCAN0 number of RX FIFO1 elements
+#  endif
+
+#  define MCAN0_RXFIFO1_WORDS \
+    (CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE * ((MCAN1_RXFIFO1_ELEMENT_SIZE/4) + 2))
+
+/* MCAN0 Filters */
+
+#  if (CONFIG_SAMV7_MCAN0_NSTDFILTERS > 128)
+#    error Invalid MCAN0 number of Standard Filters
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_NEXTFILTERS > 64)
+#    error Invalid MCAN0 number of Extended Filters
+#  endif
+
+#define MCAN0_STDFILTER_WORDS  CONFIG_SAMV7_MCAN0_NSTDFILTERS
+#define MCAN0_EXTFILTER_WORDS  (CONFIG_SAMV7_MCAN0_NEXTFILTERS * 2)
 
 /* MCAN0 RX buffer element size */
 
@@ -226,6 +261,14 @@
 #    error Undefined MCAN0 RX buffer element size
 #  endif
 
+#  if (CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE > 64)
+#    error Invalid MCAN0 number of RX BUFFER elements
+#  endif
+
+#  define MCAN0_DEDICATED_RXBUFFER_WORDS \
+    (CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE * \
+    ((MCAN0_RXBUFFER_ELEMENT_SIZE/4) + 2))
+
 /* MCAN0 TX buffer element size */
 
 #  if defined(CONFIG_SAMV7_MCAN0_TXBUFFER_8BYTES)
@@ -255,39 +298,67 @@
 #  else
 #    error Undefined MCAN0 TX buffer element size
 #  endif
+
+#  if ((CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE + \
+        CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE)  > 32)
+#    error Invalid MCAN0 number of TX BUFFER elements
+#  endif
+
+#  define MCAN0_DEDICATED_TXBUFFER_WORDS \
+    (CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE * \
+    ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+
+/* MCAN0 TX FIFOs */
+
+#  define MCAN0_TXEVENTFIFO_WORDS  (CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE * 2)
+#  define MCAN0_TXFIFIOQ_WORDS \
+    (CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+
+#  if CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE > 32
+#    error Invalid MCAN0 number of TX EVENT FIFO elements
+#  endif
+
+
 #endif /* CONFIG_SAMV7_MCAN0 */
 
 /* MCAN1 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN1
-#  if (CONFIG_SAMV7_MCAN1_NSTDFILTERS > 128)
-#    error Invalid MCAN1 number of Standard Filters
+  /* Bit timing */
+
+#  define MCAN1_TSEG1  (CONFIG_SAMV7_MCAN1_PROPSEG + CONFIG_SAMV7_MCAN1_PHASESEG1)
+#  define MCAN1_TSEG2  CONFIG_SAMV7_MCAN1_PHASESEG2
+#  define MCAN1_BRP    ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+                       ((float)(MCAN1_TSEG1 + MCAN1_TSEG2 + 3) * \
+                        (float)CONFIG_SAMV7_MCAN1_BITRATE)) - 1))
+#  define MCAN1_SJW    (CONFIG_SAMV7_MCAN1_FSJW - 1)
+
+#  if MCAN1_TSEG1 > 63
+#    error Invalid MCAN1 TSEG1
+#  endif
+#  if MCAN1_TSEG2 > 15
+#    error Invalid MCAN1 TSEG2
+#  endif
+#  if MCAN1_SJW > 15
+#    error Invalid MCAN1 SJW
 #  endif
 
-#  if (CONFIG_SAMV7_MCAN1_NEXTFILTERS > 64)
-#    error Invalid MCAN1 number of Extended Filters
-#  endif
+#  define MCAN1_FTSEG1 (CONFIG_SAMV7_MCAN1_FPROPSEG + CONFIG_SAMV7_MCAN1_FPHASESEG1)
+#  define MCAN1_FTSEG2 (CONFIG_SAMV7_MCAN1_FPHASESEG2)
+#  define MCAN1_FBRP   ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+                       ((float)(MCAN1_FTSEG1 + MCAN1_FTSEG2 + 3) * \
+                        (float)CONFIG_SAMV7_MCAN1_FBITRATE)) - 1))
+#  define MCAN1_FSJW   (CONFIG_SAMV7_MCAN1_FFSJW - 1)
 
-#  if (CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE > 64)
-#    error Invalid MCAN1 number of RX FIFO 0 elements
-#  endif
-
-#  if (CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE > 64)
-#    error Invalid MCAN1 number of RX FIFO 0 elements
-#  endif
-
-#  if (CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE > 64)
-#    error Invalid MCAN1 number of RX BUFFER elements
-#  endif
-
-#  if (CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE > 32)
-#    error Invalid MCAN1 number of TX EVENT FIFO elements
-#  endif
-
-#  if ((CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE + \
-        CONFIG_SAMV7_MCAN1_DEDICATED_TXFIFOQ_SIZE)  > 32)
-#    error Invalid MCAN1 number of TX BUFFER elements
-#  endif
+#if MCAN1_FTSEG1 > 15
+#  error Invalid MCAN1 FTSEG1
+#endif
+#if MCAN1_FTSEG2 > 7
+#  error Invalid MCAN1 FTSEG2
+#endif
+#if MCAN1_FSJW > 3
+#  error Invalid MCAN1 FSJW
+#endif
 
 /* MCAN1 RX FIFO0 element size */
 
@@ -319,6 +390,13 @@
 #    error Undefined MCAN1 RX FIFO0 element size
 #  endif
 
+#  if CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE > 64
+#    error Invalid MCAN1 number of RX FIFO 0 elements
+#  endif
+
+#  define MCAN1_RXFIFO0_WORDS \
+     (CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE * ((MCAN1_RXFIFO0_ELEMENT_SIZE/4) + 2))
+
 /* MCAN1 RX FIFO1 element size */
 
 #  if defined(CONFIG_SAMV7_MCAN1_RXFIFO1_8BYTES)
@@ -348,6 +426,26 @@
 #  else
 #    error Undefined MCAN1 RX FIFO1 element size
 #  endif
+
+#  if CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE > 64)
+#    error Invalid MCAN1 number of RX FIFO 0 elements
+#  endif
+
+#  define MCAN1_RXFIFO1_WORDS \
+     (CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE * ((MCAN1_RXFIFO1_ELEMENT_SIZE/4) + 2))
+
+/* MCAN1 Filters */
+
+#  if CONFIG_SAMV7_MCAN1_NSTDFILTERS > 128
+#    error Invalid MCAN1 number of Standard Filters
+#  endif
+
+#  if CONFIG_SAMV7_MCAN1_NEXTFILTERS > 64
+#    error Invalid MCAN1 number of Extended Filters
+#  endif
+
+#  define MCAN1_STDFILTER_WORDS  CONFIG_SAMV7_MCAN1_NSTDFILTERS
+#  define MCAN1_EXTFILTER_WORDS (CONFIG_SAMV7_MCAN1_NEXTFILTERS * 2)
 
 /* MCAN1 RX buffer element size */
 
@@ -379,6 +477,14 @@
 #    error Undefined MCAN1 RX buffer element size
 #  endif
 
+#  if CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE > 64
+#    error Invalid MCAN1 number of RX BUFFER elements
+#  endif
+
+#  define MCAN1_DEDICATED_RXBUFFER_WORDS \
+     (CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE * \
+     ((MCAN1_RXBUFFER_ELEMENT_SIZE/4) + 2))
+
 /* MCAN1 TX buffer element size */
 
 #  if defined(CONFIG_SAMV7_MCAN1_TXBUFFER_8BYTES)
@@ -408,6 +514,26 @@
 #  else
 #    error Undefined MCAN1 TX buffer element size
 #  endif
+
+#  if ((CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE + \
+        CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE)  > 32)
+#    error Invalid MCAN1 number of TX BUFFER elements
+#  endif
+
+#  define MCAN1_DEDICATED_TXBUFFER_WORDS \
+     (CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE * \
+     ((MCAN1_TXBUFFER_ELEMENT_SIZE/4) + 2))
+
+/* MCAN1 TX FIFOs */
+
+#  if CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE > 32
+#    error Invalid MCAN1 number of TX EVENT FIFO elements
+#  endif
+
+#  define MCAN1_TXEVENTFIFO_WORDS (CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE * 2)
+#  define MCAN1_TXFIFIOQ_WORDS \
+     (CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+
 #endif /* CONFIG_SAMV7_MCAN1 */
 
 /* Mailboxes ****************************************************************/
@@ -486,14 +612,31 @@ struct sam_filter_s
 
 struct sam_config_s
 {
-  uint8_t port;             /* CAN port number (1 or 2) */
-  uint8_t pid;              /* CAN periperal ID/IRQ number */
-  uint8_t nrecvmb;          /* Number of receive mailboxes */
-  xcpt_t handler;           /* CAN interrupt handler */
-  uintptr_t base;           /* Base address of the CAN control registers */
-  uint32_t baud;            /* Configured baud */
   pio_pinset_t rxpinset;    /* RX pin configuration */
   pio_pinset_t txpinset;    /* TX pin configuration */
+  xcpt_t handler;           /* MCAN interrupt handler */
+  uintptr_t base;           /* Base address of the CAN control registers */
+  uint32_t baud;            /* Configured baud */
+  uint32_t btp;             /* Bit timing/prescaler register setting */
+  uint32_t fbtp;            /* Fast bit timing/prescaler register setting */
+  uint8_t port;             /* CAN port number (1 or 2) */
+  uint8_t pid;              /* CAN peripheral ID/IRQ number */
+  uint8_t nstdfilters;      /* Number of standard filters (up to 128) */
+  uint8_t nextfilters;      /* Number of extended filters (up to 64) */
+  uint8_t nfifo0;           /* Number of FIFO0 elements (up to 64) */
+  uint8_t nfifo1;           /* Number of FIFO1 elements (up to 64) */
+  uint8_t nrxdedicated;     /* Number of dedicated RX buffers (up to 64) */
+  uint8_t ntxeventfifo;     /* Number of TXevent FIFO elements (up to 32) */
+  uint8_t ntxdedicated;     /* Number of dedicated TX buffers (up to 64) */
+  uint8_t ntxfifoq;         /* Number of TX FIFO queue elements (up to 32) */
+  uint8_t rxfifo0ecode;     /* Encoded RX FIFO0 element size */
+  uint8_t rxfifo0esize;     /* RX FIFO0 element size */
+  uint8_t rxfifo1ecode;     /* Encoded RX FIFO1 element size */
+  uint8_t rxfifo1esize;     /* RX FIFO1 element size */
+  uint8_t rxbufferecode;    /* Encoded RX buffer element size */
+  uint8_t rxbufferesize;    /* RX buffer element size */
+  uint8_t txbufferecode;    /* Encoded TX buffer element size */
+  uint8_t txbufferesize;    /* TX buffer element size */
 
   /* Mailbox filters */
 
@@ -601,32 +744,34 @@ static const struct can_ops_s g_mcanops =
 #ifdef CONFIG_SAMV7_MCAN0
 static const struct sam_config_s g_mcan0const =
 {
-  .port             = 0,
-  .pid              = SAM_PID_CAN0,
-  .nrecvmb          = CONFIG_SAMV7_MCAN0_NRECVMB,
-  .handler          = mcan0_interrupt,
-  .base             = SAM_CAN0_VBASE,
-  .baud             = CONFIG_SAMV7_MCAN0_BITRATE,
   .rxpinset         = PIO_CAN0_RX,
   .txpinset         = PIO_CAN0_TX,
-  .filter           =
-  {
-    {
-      .addr         = CONFIG_SAMV7_MCAN0_ADDR0,
-      .mask         = CONFIG_SAMV7_MCAN0_MASK0,
-    },
-#if CONFIG_SAMV7_MCAN0_NRECVMB > 1
-    {
-      .addr         = CONFIG_SAMV7_MCAN0_ADDR1,
-      .mask         = CONFIG_SAMV7_MCAN0_MASK1,
-    },
-#if CONFIG_SAMV7_MCAN0_NRECVMB > 1
-    {
-      .addr         = CONFIG_SAMV7_MCAN0_ADDR2,
-      .mask         = CONFIG_SAMV7_MCAN0_MASK2,
-    },
-#endif
-#endif
+  .nrecvmb          = CONFIG_SAMV7_MCAN0_NRECVMB,
+  .handler          = mcan0_interrupt,
+  .base             = SAM_MCAN0_BASE,
+  .baud             = CONFIG_SAMV7_MCAN0_BITRATE,
+  .btp              = MCAN_BTP_BRP(MCAN0_BRP) | MCAN_BTP_TSEG1(MCAN0_TSEG1) |
+                      MCAN_BTP_TSEG2(MCAN0_TSEG2) | MCAN_BTP_SJW(MCAN0_SJW),
+  .fbtp             = MCAN_FBTP_FBRP(MCAN0_FBRP) | MCAN_FBTP_FTSEG1(MCAN0_FTSEG1) |
+                      MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) | MCAN_FBTP_FSJW(MCAN0_FSJW),
+  .port             = 0,
+  .pid              = SAM_PID_MCAN00,
+  .nstdfilters      = CONFIG_SAMV7_MCAN0_NSTDFILTERS,
+  .nextfitlers      = CONFIG_SAMV7_MCAN0_NEXTFILTERS,
+  .nfifo0           = CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE,
+  .nfifo1           = CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE,
+  .nrxdedicated     = CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE,
+  .ntxeventfifo     = CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE,
+  .ntxdedicated     = CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE,
+  .ntxfifoq         = CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE,
+  .rxfifo0ecode     = MCAN0_RXFIFO0_ENCODED_SIZE,
+  .rxfifo0esize     = (MCAN0_RXFIFO0_ELEMENT_SIZE / 4) + 2,
+  .rxfifo1ecode     = MCAN0_RXFIFO1_ENCODED_SIZE,
+  .rxfifo1esize     = (MCAN0_RXFIFO1_ELEMENT_SIZE / 4) + 2,
+  .rxbufferecode    = MCAN0_RXBUFFER_ENCODED_SIZE,
+  .rxbufferesize    = (MCAN0_RXBUFFER_ELEMENT_SIZE / 4) + 2,
+  .txbufferecode    = MCAN0_TXBUFFER_ENCODED_SIZE,
+  .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
   },
 };
 
@@ -637,33 +782,34 @@ static struct can_dev_s g_mcan0dev;
 #ifdef CONFIG_SAMV7_MCAN1
 static const struct sam_config_s g_mcan1const =
 {
-  .port             = 1,
-  .pid              = SAM_PID_CAN1,
+  .rxpinset         = PIO_CAN1_RX,
+  .txpinset         = PIO_CAN1_TX,
   .nrecvmb          = CONFIG_SAMV7_MCAN1_NRECVMB,
   .handler          = mcan1_interrupt,
   .base             = SAM_CAN1_VBASE,
   .baud             = CONFIG_SAMV7_MCAN1_BITRATE,
-  .rxpinset         = PIO_CAN1_RX,
-  .txpinset         = PIO_CAN1_TX,
-  .filter           =
-  {
-    {
-      .addr         = CONFIG_SAMV7_MCAN1_ADDR0,
-      .mask         = CONFIG_SAMV7_MCAN1_MASK0,
-    },
-#if CONFIG_SAMV7_MCAN1_NRECVMB > 1
-    {
-      .addr         = CONFIG_SAMV7_MCAN1_ADDR1,
-      .mask         = CONFIG_SAMV7_MCAN1_MASK1,
-    },
-#if CONFIG_SAMV7_MCAN1_NRECVMB > 1
-    {
-      .addr         = CONFIG_SAMV7_MCAN1_ADDR2,
-      .mask         = CONFIG_SAMV7_MCAN1_MASK2,
-    },
-#endif
-#endif
-  },
+  .btp              = MCAN_BTP_BRP(MCAN1_BRP) | MCAN_BTP_TSEG1(MCAN1_TSEG1) |
+                      MCAN_BTP_TSEG2(MCAN1_TSEG2) | MCAN_BTP_SJW(MCAN1_SJW),
+  .fbtp             = MCAN_FBTP_FBRP(MCAN1_FBRP) | MCAN_FBTP_FTSEG1(MCAN1_FTSEG1) |
+                      MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) | MCAN_FBTP_FSJW(MCAN1_FSJW),
+  .port             = 1,
+  .pid              = SAM_PID_MCAN10,
+  .nstdfilters      = CONFIG_SAMV7_MCAN1_NSTDFILTERS,
+  .nextfitlers      = CONFIG_SAMV7_MCAN1_NEXTFILTERS,
+  .nfifo0           = CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE,
+  .nfifo1           = CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE,
+  .nrxdedicated     = CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE,
+  .ntxeventfifo     = CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE,
+  .ntxdedicated     = CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE,
+  .ntxfifoq         = CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE,
+  .rxfifo0ecode     = MCAN1_RXFIFO0_ENCODED_SIZE,
+  .rxfifo0esize     = (MCAN1_RXFIFO0_ELEMENT_SIZE / 4) + 2,
+  .rxfifo1ecode     = MCAN1_RXFIFO1_ENCODED_SIZE,
+  .rxfifo1esize     = (MCAN1_RXFIFO1_ELEMENT_SIZE / 4) + 2,
+  .rxbufferecode    = MCAN1_RXBUFFER_ENCODED_SIZE,
+  .rxbufferesize    = (MCAN1_RXBUFFER_ELEMENT_SIZE / 4) + 2,
+  .txbufferecode    = MCAN1_TXBUFFER_ENCODED_SIZE,
+  .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
 };
 
 static struct sam_mcan_s g_mcan1priv;
