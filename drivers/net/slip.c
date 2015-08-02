@@ -405,8 +405,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  *   callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete, or
- *   2. When the preceding TX packet send times o ]ut and the interface is reset
- *   3. During normal TX polling
+ *   2. During normal periodic polling
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -506,16 +505,22 @@ static void slip_txtask(int argc, FAR char *argv[])
           flags = net_lock();
           priv->dev.d_buf = priv->txbuf;
 
+          /* Has a half second elapsed since the last timer poll? */
+
           msec_now = clock_systimer() * MSEC_PER_TICK;
           hsec = (unsigned int)(msec_now - msec_start) / (MSEC_PER_SEC / 2);
           if (hsec)
             {
+              /* Yes, perform the timer poll */
+
               (void)devif_timer(&priv->dev, slip_txpoll, hsec);
               msec_start += hsec * (MSEC_PER_SEC / 2);
             }
           else
             {
-              (void)devif_poll(&priv->dev, slip_uiptxpoll);
+              /* No, perform the normal TX poll */
+
+              (void)devif_poll(&priv->dev, slip_txpoll);
             }
 
           net_unlock(flags);
