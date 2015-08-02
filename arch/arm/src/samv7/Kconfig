@@ -1338,6 +1338,33 @@ config SAMV7_MCAN_CLKSRC_PRESCALER
 menu "MCAN0 device driver options"
 	depends on SAMV7_MCAN0
 
+choice
+	prompt "MCAN0 mode"
+	default SAMV7_MCAN0_ISO11899_1
+
+config SAMV7_MCAN0_ISO11899_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 mode
+
+config SAMV7_MCAN0_FD
+	bool "FD"
+	---help---
+		Enable FD mode
+
+config SAMV7_MCAN0_FD_BSW
+	bool "FD with fast bit rate switching"
+	---help---
+		Enable FD mode with fast bit rate switching mode.
+
+endchoice # MCAN0 mode
+
+config SAMV7_MCAN0_LOOPBACK
+	bool "Enable MCAN0 loopback mode"
+	default n
+	---help---
+		Enable the MCAN0 local loopback mode for testing purposes.
+
 config SAMV7_MCAN0_BITRATE
 	int "MCAN0 bitrate"
 	default 500000
@@ -1588,6 +1615,33 @@ endmenu # MCAN0 device driver options
 menu "MCAN1 device driver options"
 	depends on SAMV7_MCAN1
 
+choice
+	prompt "MCAN1 mode"
+	default SAMV7_MCAN1_ISO11899_1
+
+config SAMV7_MCAN1_ISO11899_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 mode
+
+config SAMV7_MCAN1_FD
+	bool "FD"
+	---help---
+		Enable FD mode
+
+config SAMV7_MCAN1_FD_BSW
+	bool "FD with fast bit rate switching"
+	---help---
+		Enable FD mode with fast bit rate switching mode.
+
+endchoice # MCAN0 mode
+
+config SAMV7_MCAN1_LOOPBACK
+	bool "Enable MCAN1 loopback mode"
+	default n
+	---help---
+		Enable the MCAN1 local loopback mode for testing purposes.
+
 config SAMV7_MCAN1_BITRATE
 	int "MCAN1 bitrate"
 	default 500000
@@ -1835,12 +1889,6 @@ config SAMV7_MCAN1_DEDICATED_TXFIFOQ_SIZE
 		Number of dedicated TX buffer elements for MCAN1.
 
 endmenu # MCAN1 device driver options
-
-config SAMV7_MCAN_LOOPBACK
-	bool "Enable loopback mode"
-	default n
-	---help---
-		Enable the MCAN local loopback mode for testing purposes.
 
 config SAMV7_MCAN_REGDEBUG
 	bool "CAN Register level debug"

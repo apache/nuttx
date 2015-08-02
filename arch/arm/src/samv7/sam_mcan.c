@@ -336,6 +336,13 @@
 
 #endif /* CONFIG_SAMV7_MCAN0 */
 
+/* Loopback mode */
+
+#undef SAMV7_MCAN_LOOPBACK
+#if defined(CONFIG_SAMV7_MCAN0_LOOPBACK) || defined(CONFIG_SAMV7_MCAN1_LOOPBACK)
+#  define SAMV7_MCAN_LOOPBACK 1
+#endif
+
 /* MCAN1 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN1
@@ -587,6 +594,15 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* CAN mode of operation */
+
+enum sam_canmode_e
+{
+  MCAN_ISO11898_1_MODE = 0, /* CAN operation according to ISO11898-1 */
+  MCAN_FD_MODE         = 1, /* CAN FD operation */
+  MCAN_FD_BSW_MODE     = 2, /* CAN FD operation with bit rate switching */
+};
+
 /* This structure describes the MCAN message RAM layout */
 
 struct sam_msgram_s
@@ -615,6 +631,7 @@ struct sam_config_s
   uint8_t port;             /* MCAN port number (1 or 2) */
   uint8_t pid;              /* MCAN peripheral ID */
   uint8_t irq;              /* MCAN peripheral IRQ number */
+  uint8_t mode;             /* See enum sam_canmode_e */
   uint8_t nstdfilters;      /* Number of standard filters (up to 128) */
   uint8_t nextfilters;      /* Number of extended filters (up to 64) */
   uint8_t nfifo0;           /* Number of FIFO0 elements (up to 64) */
@@ -631,6 +648,9 @@ struct sam_config_s
   uint8_t rxbufferesize;    /* RX buffer element size */
   uint8_t txbufferecode;    /* Encoded TX buffer element size */
   uint8_t txbufferesize;    /* TX buffer element size */
+#ifdef SAMV7_MCAN_LOOPBACK
+  bool loopback;            /* True: Loopback mode */
+#endif
 
   /* MCAN message RAM layout */
 
@@ -753,6 +773,13 @@ static const struct sam_config_s g_mcan0const =
   .port             = 0,
   .pid              = SAM_PID_MCAN00,
   .irq              = SAM_IRQ_MCAN00,
+#if defined(CONFIG_SAMV7_MCAN0_ISO11899_1)
+  .mode             = MCAN_ISO11898_1_MODE,
+#if defined(CONFIG_SAMV7_MCAN0_FD)
+  .mode             = MCAN_FD_MODE,
+#else /* if defined(CONFIG_SAMV7_MCAN0_FD_BSW) */
+  .mode             = MCAN_FD_BSW_MODE,
+#endif
   .nstdfilters      = CONFIG_SAMV7_MCAN0_NSTDFILTERS,
   .nextfitlers      = CONFIG_SAMV7_MCAN0_NEXTFILTERS,
   .nfifo0           = CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE,
@@ -769,6 +796,10 @@ static const struct sam_config_s g_mcan0const =
   .rxbufferesize    = (MCAN0_RXBUFFER_ELEMENT_SIZE / 4) + 2,
   .txbufferecode    = MCAN0_TXBUFFER_ENCODED_SIZE,
   .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
+
+#ifdef CONFIG_SAMV7_MCAN0_LOOPBACK
+  .loopback         = true,
+#endif
 
   /* MCAN0 Message RAM */
 
@@ -812,6 +843,13 @@ static const struct sam_config_s g_mcan1const =
   .port             = 1,
   .pid              = SAM_PID_MCAN10,
   .irq              = SAM_IRQ_MCAN10,
+#if defined(CONFIG_SAMV7_MCAN1_ISO11899_1)
+  .mode             = MCAN_ISO11898_1_MODE,
+#if defined(CONFIG_SAMV7_MCAN1_FD)
+  .mode             = MCAN_FD_MODE,
+#else /* if defined(CONFIG_SAMV7_MCAN1_FD_BSW) */
+  .mode             = MCAN_FD_BSW_MODE,
+#endif
   .nstdfilters      = CONFIG_SAMV7_MCAN1_NSTDFILTERS,
   .nextfitlers      = CONFIG_SAMV7_MCAN1_NEXTFILTERS,
   .nfifo0           = CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE,
@@ -829,6 +867,9 @@ static const struct sam_config_s g_mcan1const =
   .txbufferecode    = MCAN1_TXBUFFER_ENCODED_SIZE,
   .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
 
+#ifdef CONFIG_SAMV7_MCAN1_LOOPBACK
+  .loopback         = true,
+#endif
   /* MCAN0 Message RAM */
 
   .msgram =
@@ -2289,6 +2330,7 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
   sam_configpio(config->rxpinset);
   sam_configpio(config->txpinset);
 
+#if 0 // REVISIT -- may apply only to SAMA5
   /* Determine the maximum CAN peripheral clock frequency */
 
   mck = BOARD_MCK_FREQUENCY;
@@ -2322,11 +2364,13 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
 
   regval |= PMC_PCR_PID(config->pid) | PMC_PCR_CMD | PMC_PCR_EN;
   mcan_putreg(priv, SAM_PMC_PCR, regval);
+#endif
 
   /* Enable peripheral clocking */
 
   sam_enableperiph1(config->pid);
 
+#if 0 // REVISIT -- may apply only to SAMA5
   /* Disable all CAN interrupts */
 
   mcan_putreg(priv, SAM_CAN_IDR_OFFSET, CAN_INT_ALL);
@@ -2339,23 +2383,63 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
       candbg("ERROR: Failed to set bit timing: %d\n", ret);
       return ret;
     }
+#endif
+# error Missing SAMV71 MCAN initialization logic
 
-  /* The CAN controller is enabled by setting the CANEN flag in the CAN_MR
-   * register. At this stage, the internal CAN controller state machine is
-   * reset, error counters are reset to 0, error flags are reset to 0.
-   */
+  /* Select FD mode with or without fast bit rate switching */
 
-  regval  = mcan_getreg(priv, SAM_CAN_MR_OFFSET);
-  regval |= CAN_MR_CANEN;
-  mcan_putreg(priv, SAM_CAN_MR_OFFSET, regval);
+  regval  = sam_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+  regval &= ~MCAN_CCCR_CME_MASK;
 
-  /* Once the CAN controller is enabled, bus synchronization is done
-   * automatically by scanning eleven recessive bits. The WAKEUP bit in
-   * the CAN_SR register is automatically set to 1 when the CAN controller
-   * is synchronized (WAKEUP and SLEEP are stuck at 0 after a reset).
-   */
+  switch (priv->mode)
+    {
+    default:
+    case CONFIG_MCAN_ISO11898_1_MODE:
+      regval |= MCAN_CCCR_CME_ISO11898_1;
+      break;
 
-  while ((mcan_getreg(priv, SAM_CAN_SR_OFFSET) & CAN_INT_WAKEUP) == 0);
+    case CONFIG_MCAN_FD_MODE:
+      regval |= MCAN_CCCR_CME_FD;
+      break;
+
+    case CONFIG_MCAN_FD_BSW_MODE:
+      regval |= MCAN_CCCR_CME_FD_BSW;
+      break;
+    }
+
+  sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+  /* Enable FIFO/Queue mode */
+
+  regval  = sam_getreg(priv, SAM_MCAN_TXBC_OFFSET);
+  regval |= MCAN_TXBC_TFQM;
+  sam_putreg(priv, SAM_MCAN_TXBC_OFFSET, regval);
+
+#ifdef SAMV7_MCAN_LOOPBACK
+  /* Is loopback mode selected for this peripheral? */
+
+  if (config->loopback)
+    {
+     /* MCAN_CCCR_TEST  - Test mode enable
+      * MCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
+      * MCAN_TEST_LBCK  - Loopback mode
+      */
+
+      regval = sam_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval |= (MCAN_CCCR_TEST | MCAN_CCCR_MON);
+      sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+      regval = sam_getreg(priv, SAM_MCAN_TEST_OFFSET);
+      regval |= MCAN_TEST_LBCK;
+      sam_putreg(priv, SAM_MCAN_TEST_OFFSET, regval);
+    }
+#endif
+
+  /* Disable initialization mode to enable normal operation */
+
+  regval  = sam_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+  regval &= ~MCAN_CCCR_INIT;
+  sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
   return OK;
 }
 
