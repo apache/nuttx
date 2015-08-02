@@ -612,8 +612,9 @@ struct sam_config_s
   uint32_t baud;            /* Configured baud */
   uint32_t btp;             /* Bit timing/prescaler register setting */
   uint32_t fbtp;            /* Fast bit timing/prescaler register setting */
-  uint8_t port;             /* CAN port number (1 or 2) */
-  uint8_t pid;              /* CAN peripheral ID/IRQ number */
+  uint8_t port;             /* MCAN port number (1 or 2) */
+  uint8_t pid;              /* MCAN peripheral ID */
+  uint8_t irq;              /* MCAN peripheral IRQ number */
   uint8_t nstdfilters;      /* Number of standard filters (up to 128) */
   uint8_t nextfilters;      /* Number of extended filters (up to 64) */
   uint8_t nfifo0;           /* Number of FIFO0 elements (up to 64) */
@@ -751,6 +752,7 @@ static const struct sam_config_s g_mcan0const =
                       MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) | MCAN_FBTP_FSJW(MCAN0_FSJW),
   .port             = 0,
   .pid              = SAM_PID_MCAN00,
+  .irq              = SAM_IRQ_MCAN00,
   .nstdfilters      = CONFIG_SAMV7_MCAN0_NSTDFILTERS,
   .nextfitlers      = CONFIG_SAMV7_MCAN0_NEXTFILTERS,
   .nfifo0           = CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE,
@@ -809,6 +811,7 @@ static const struct sam_config_s g_mcan1const =
                       MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) | MCAN_FBTP_FSJW(MCAN1_FSJW),
   .port             = 1,
   .pid              = SAM_PID_MCAN10,
+  .irq              = SAM_IRQ_MCAN10,
   .nstdfilters      = CONFIG_SAMV7_MCAN1_NSTDFILTERS,
   .nextfitlers      = CONFIG_SAMV7_MCAN1_NEXTFILTERS,
   .nfifo0           = CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE,
@@ -1373,10 +1376,10 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Attach the CAN interrupt handler */
 
-  ret = irq_attach(config->pid, config->handler);
+  ret = irq_attach(config->irq, config->handler);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
+      canlldbg("Failed to attach CAN%d IRQ (%d)", config->port, config->irq);
       return ret;
     }
 
@@ -1400,7 +1403,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Enable the interrupts at the AIC. */
 
-  up_enable_irq(config->pid);
+  up_enable_irq(config->irq);
   mcan_semgive(priv);
   return OK;
 }
@@ -1439,11 +1442,11 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
 
   /* Disable the CAN interrupts */
 
-  up_disable_irq(config->pid);
+  up_disable_irq(config->irq);
 
   /* Detach the CAN interrupt handler */
 
-  irq_detach(config->pid);
+  irq_detach(config->irq);
 
   /* And reset the hardware */
 
@@ -2380,12 +2383,22 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
   FAR struct can_dev_s *dev;
   FAR struct sam_mcan_s *priv;
   FAR const struct sam_config_s *config;
+  uint32_t regval;
 
-  canvdbg("CAN%d\n", port);
+  canvdbg("MCAN%d\n", port);
 
-  /* NOTE:  Peripherical clocking for MCAN0 and/or MCAN1 was already provided
-   * by sam_clockconfig() early in the reset sequence.
+  /* Select PCK5 clock source and pre-scaler value.  Both MCAN controllers
+   * use PCK5 to derive bit rate.
    */
+
+  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER) | SAMV7_MCAN_CLKSRC;
+  putreg32(regval, SAM_PMC_PCK5);
+
+  /* Enable PCK5 */
+
+  putreg32(PMC_PCK5, SAM_PMC_SCER);
+
+  /* Select MCAN peripheral to be initialized */
 
 #ifdef CONFIG_SAMV7_MCAN0
   if (port == MCAN0)
@@ -2395,6 +2408,13 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
       dev    = &g_mcan0dev;
       priv   = &g_mcan0priv;
       config = &g_mcan0const;
+
+      /* Configure MCAN0 Message RAM Base Address */
+
+      regval  = getreg32(SAM_MATRIX_CAN0);
+      regval &= MATRIX_CAN0_RESERVED;
+      regval |= (uint32_t)priv->msgram.stdfilters & MATRIX_CAN0_CAN0DMABA_MASK;
+      putreg32(regval, SAM_MATRIX_CAN0);
     }
   else
 #endif
@@ -2406,6 +2426,13 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
       dev    = &g_mcan1dev;
       priv   = &g_mcan1priv;
       config = &g_mcan1const;
+
+      /* Configure MCAN1 Message RAM Base Address */
+
+      regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
+      regval &= ~MATRIX_CCFG_CAN1DMABA_MASK;
+      regval |= (uint32_t)priv->msgram.stdfilters & MATRIX_CCFG_CAN1DMABA_MASK;
+      putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
     }
   else
 #endif
@@ -2422,7 +2449,6 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
       memset(priv, 0, sizeof(struct sam_mcan_s));
       priv->config      = config;
-      priv->freemb      = CAN_ALL_MAILBOXES;
       priv->initialized = true;
 
       sem_init(&priv->exclsem, 0, 1);
@@ -2430,7 +2456,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
       dev->cd_ops       = &g_mcanops;
       dev->cd_priv      = (FAR void *)priv;
 
-      /* And put the hardware in the intial state */
+      /* And put the hardware in the initial state */
 
       mcan_reset(dev);
     }
