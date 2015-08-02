@@ -711,9 +711,6 @@ static int  mcan1_interrupt(int irq, void *context);
 /* Hardware initialization */
 
 static int  mcan_bittiming(FAR struct sam_mcan_s *priv);
-#ifdef CONFIG_SAMV7_MCAN_AUTOBAUD
-static int  mcan_autobaud(FAR struct sam_mcan_s *priv);
-#endif
 static int  mcan_hwinitialize(FAR struct sam_mcan_s *priv);
 
 /****************************************************************************
@@ -2262,76 +2259,6 @@ static int mcan_bittiming(struct sam_mcan_s *priv)
 }
 
 /****************************************************************************
- * Name: mcan_autobaud
- *
- * Description:
- *   Use the SAMV7 auto-baud feature to correct the initial timing
- *
- * Input Parameter:
- *   priv - A pointer to the private data structure for this CAN block
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_MCAN_AUTOBAUD
-static int mcan_autobaud(struct sam_mcan_s *priv)
-{
-  volatile uint32_t timeout;
-  uint32_t regval;
-  int ret;
-
-  canllvdbg("CAN%d\n", config->port);
-
-  /* The CAN controller can start listening to the network in Autobaud Mode.
-   * In this case, the error counters are locked and a mailbox may be
-   * configured in Receive Mode. By scanning error flags, the CAN_BR
-   * register values synchronized with the network.
-   */
-
-  /* Configure a Mailbox in Reception Mode */
-#warning Missing Logic
-
-  /* Loop, adjusting bit rate parameters until no errors are reported in
-   * either CAR_SR or the CAN_MSRx registers.
-   */
-
-  do
-    {
-      /* Adjust baud rate setting */
-#warning Missing Logic
-
-      /* Autobaud Mode. The autobaud feature is enabled by setting the ABM
-       * field in the CAN_MR register. In this mode, the CAN controller is only
-       * listening to the line without acknowledging the received messages. It
-       * can not send any message. The errors flags are updated. The bit timing
-       * can be adjusted until no error occurs (good configuration found). In
-       * this mode, the error counters are frozen.
-       */
-
-      regval  = mcan_getreg(priv, SAM_CAN_MR_OFFSET);
-      regval |= (CAN_MR_CANEN | CAN_MR_ABM);
-      mcan_putreg(priv, SAM_CAN_MR_OFFSET, regval);
-
-#warning Missing logic
-    }
-  while (no errors reported);
-
-  /* Once no error has been detected, the application disables the Autobaud
-   * Mode, clearing the ABM field in the CAN_MR register.  To go back to the
-   * standard mode, the ABM bit must be cleared in the CAN_MR register.
-   */
-
-  regval  = mcan_getreg(priv, SAM_CAN_MR_OFFSET);
-  regval &= ~(CAN_MR_CANEN | CAN_MR_ABM);
-  mcan_putreg(priv, SAM_CAN_MR_OFFSET, regval);
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
  * Name: mcan_hwinitialize
  *
  * Description:
@@ -2409,17 +2336,6 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
       candbg("ERROR: Failed to set bit timing: %d\n", ret);
       return ret;
     }
-
-#ifdef CONFIG_SAMV7_MCAN_AUTOBAUD
-  /* Optimize/correct bit timing */
-
-  ret = mcan_autobaud(priv);
-  if (ret < 0)
-    {
-      candbg("ERROR: mcan_autobaud failed: %d\n", ret);
-      return ret;
-    }
-#endif
 
   /* The CAN controller is enabled by setting the CANEN flag in the CAN_MR
    * register. At this stage, the internal CAN controller state machine is

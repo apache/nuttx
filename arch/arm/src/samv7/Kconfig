@@ -1836,13 +1836,11 @@ config SAMV7_MCAN1_DEDICATED_TXFIFOQ_SIZE
 
 endmenu # MCAN1 device driver options
 
-config SAMV7_MCAN_AUTOBAUD
-	bool "Enable auto-baud"
+config SAMV7_MCAN_LOOPBACK
+	bool "Enable loopback mode"
 	default n
-	depends on EXPERIMENTAL
 	---help---
-		Enable the SAMV7 auto-baud feature.  NOTE:  This feature is not yet
-		fully implemented.
+		Enable the MCAN local loopback mode for testing purposes.
 
 config SAMV7_MCAN_REGDEBUG
 	bool "CAN Register level debug"
