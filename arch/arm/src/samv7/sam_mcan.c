@@ -743,8 +743,8 @@ static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS];
 
 static const struct sam_config_s g_mcan0const =
 {
-  .rxpinset         = PIO_CAN0_RX,
-  .txpinset         = PIO_CAN0_TX,
+  .rxpinset         = GPIO_MCAN0_RX,
+  .txpinset         = GPIO_MCAN0_TX,
   .handler          = mcan0_interrupt,
   .base             = SAM_MCAN0_BASE,
   .baud             = CONFIG_SAMV7_MCAN0_BITRATE,
@@ -801,8 +801,8 @@ static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS];
 
 static const struct sam_config_s g_mcan1const =
 {
-  .rxpinset         = PIO_CAN1_RX,
-  .txpinset         = PIO_CAN1_TX,
+  .rxpinset         = GPIO_MCAN1_RX,
+  .txpinset         = GPIO_MCAN1_TX,
   .handler          = mcan1_interrupt,
   .base             = SAM_MCAN1_BASE,
   .baud             = CONFIG_SAMV7_MCAN1_BITRATE,
