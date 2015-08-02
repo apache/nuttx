@@ -4,6 +4,10 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *   SAMV7D3 Series Data Sheet
+ *   Atmel sample code
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -318,6 +322,17 @@
 #    error Invalid MCAN0 number of TX EVENT FIFO elements
 #  endif
 
+/* MCAN0 Message RAM */
+
+#  define MCAN0_STDFILTER_INDEX   0
+#  define MCAN0_EXTFILTERS_INDEX  (MCAN0_STDFILTER_INDEX + MCAN0_STDFILTER_WORDS)
+#  define MCAN0_RXFIFO0_INDEX     (MCAN0_EXTFILTERS_INDEX + MCAN0_EXTFILTER_WORDS)
+#  define MCAN0_RXFIFO1_INDEX     (MCAN0_RXFIFO0_INDEX + MCAN0_RXFIFO0_WORDS)
+#  define MCAN0_RXDEDICATED_INDEX (MCAN0_RXFIFO1_INDEX + MCAN0_RXFIFO1_WORDS)
+#  define MCAN0_TXEVENTFIFO_INDEX (MCAN0_RXDEDICATED_INDEX + MCAN0_DEDICATED_RXBUFFER_WORDS)
+#  define MCAN0_TXDEDICATED_INDEX (MCAN0_TXEVENTFIFO_INDEX + MCAN0_TXEVENTFIFO_WORDS)
+#  define MCAN0_TXFIFOQ_INDEX     (MCAN0_TXDEDICATED_INDEX + MCAN0_DEDICATED_TXBUFFER_WORDS)
+#  define MCAN0_MSGRAM_WORDS      (MCAN0_TXFIFOQ_INDEX + MCAN0_TXFIFIOQ_WORDS)
 
 #endif /* CONFIG_SAMV7_MCAN0 */
 
@@ -534,44 +549,21 @@
 #  define MCAN1_TXFIFIOQ_WORDS \
      (CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
 
+/* MCAN1 Message RAM */
+
+#  define MCAN1_STDFILTER_INDEX   0
+#  define MCAN1_EXTFILTERS_INDEX  (MCAN1_STDFILTER_INDEX + MCAN1_STDFILTER_WORDS)
+#  define MCAN1_RXFIFO0_INDEX     (MCAN1_EXTFILTERS_INDEX + MCAN1_EXTFILTER_WORDS)
+#  define MCAN1_RXFIFO1_INDEX     (MCAN1_RXFIFO0_INDEX + MCAN1_RXFIFO0_WORDS)
+#  define MCAN1_RXDEDICATED_INDEX (MCAN1_RXFIFO1_INDEX + MCAN1_RXFIFO1_WORDS)
+#  define MCAN1_TXEVENTFIFO_INDEX (MCAN1_RXDEDICATED_INDEX + MCAN1_DEDICATED_RXBUFFER_WORDS)
+#  define MCAN1_TXDEDICATED_INDEX (MCAN1_TXEVENTFIFO_INDEX + MCAN1_TXEVENTFIFO_WORDS)
+#  define MCAN1_TXFIFOQ_INDEX     (MCAN1_TXDEDICATED_INDEX + MCAN1_DEDICATED_TXBUFFER_WORDS)
+#  define MCAN1_MSGRAM_WORDS      (MCAN1_TXFIFOQ_INDEX + MCAN1_TXFIFIOQ_WORDS)
+
 #endif /* CONFIG_SAMV7_MCAN1 */
 
-/* Mailboxes ****************************************************************/
-
-#define SAMV7_MCAN_NRECVMB MAX(CONFIG_SAMV7_MCAN0_NRECVMB, CONFIG_SAMV7_MCAN1_NRECVMB)
-
-/* The set of all mailboxes */
-
-#if SAM_CAN_NMAILBOXES == 8
-#  define CAN_ALL_MAILBOXES 0xff /* 8 mailboxes */
-#else
-#  error Unsupport/undefined number of mailboxes
-#endif
-
 /* Interrupts ***************************************************************/
-/* If debug is enabled, then print some diagnostic info if any of these
- * events occur:
- *
- * CAN_INT_ERRA      YES    Bit 16: Error Active Mode
- * CAN_INT_WARN      YES    Bit 17: Warning Limit
- * CAN_INT_ERRP      NO     Bit 18: Error Passive Mode
- * CAN_INT_BOFF      NO     Bit 19: Bus Off Mode
- *
- * CAN_INT_SLEEP     NO     Bit 20: CAN Controller in Low-power Mode
- * CAN_INT_WAKEUP    NO     Bit 21: Wake-up Interrupt
- * CAN_INT_TOVF      NO     Bit 22: Timer Overflow
- * CAN_INT_TSTP      NO     Bit 23: Timestamp
- *
- * CAN_INT_CERR      YES    Bit 24: Mailbox CRC Error
- * CAN_INT_SERR      YES    Bit 25: Mailbox Stuffing Error
- * CAN_INT_AERR      NO     Bit 26: Acknowledgment Error (uusally means no CAN bus)
- * CAN_INT_FERR      YES    Bit 27: Form Error
- *
- * CAN_INT_BERR      YES    Bit 28: Bit Error
- */
-
-#define CAN_DEBUG_INTS (CAN_INT_ERRA | CAN_INT_WARN | CAN_INT_CERR | \
-                        CAN_INT_SERR | CAN_INT_FERR | CAN_INT_BERR)
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
@@ -595,17 +587,18 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure describes receive mailbox filtering */
+/* This structure describes the MCAN message RAM layout */
 
-struct sam_filter_s
+struct sam_msgram_s
 {
-#ifdef CONFIG_CAN_EXTID
-  uint32_t addr;            /* 29-bit address to match */
-  uint32_t mask;            /* 29-bit address mask */
-#else
-  uint16_t addr;            /* 11-bit address to match */
-  uint16_t mask;            /* 11-bit address mask */
-#endif
+  uint32_t *stdfilters;    /* Standard filters */
+  uint32_t *extfilters;    /* Extended filters */
+  uint32_t *rxfifo0;       /* RX FIFO0 */
+  uint32_t *rxfifo1;       /* RX FIFO1 */
+  uint32_t *rxdedicated;   /* RX dedicated buffers */
+  uint32_t *txeventfifo;   /* TX event FIFO */
+  uint32_t *txdedicated;   /* TX dedicated buffers */
+  uint32_t *txfifoq;       /* TX FIFO queue */
 };
 
 /* This structure provides the constant configuration of a CAN peripheral */
@@ -638,9 +631,9 @@ struct sam_config_s
   uint8_t txbufferecode;    /* Encoded TX buffer element size */
   uint8_t txbufferesize;    /* TX buffer element size */
 
-  /* Mailbox filters */
+  /* MCAN message RAM layout */
 
-  struct sam_filter_s filter[SAMV7_MCAN_NRECVMB];
+  struct sam_msgram_s msgram;
 };
 
 /* This structure provides the current state of a CAN peripheral */
@@ -742,6 +735,12 @@ static const struct can_ops_s g_mcanops =
 };
 
 #ifdef CONFIG_SAMV7_MCAN0
+/* Message RAM allocation */
+
+static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS];
+
+/* Constant configuration */
+
 static const struct sam_config_s g_mcan0const =
 {
   .rxpinset         = PIO_CAN0_RX,
@@ -771,14 +770,35 @@ static const struct sam_config_s g_mcan0const =
   .rxbufferesize    = (MCAN0_RXBUFFER_ELEMENT_SIZE / 4) + 2,
   .txbufferecode    = MCAN0_TXBUFFER_ENCODED_SIZE,
   .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
-  },
+
+  /* MCAN0 Message RAM */
+
+  .msgram =
+  {
+     &g_mcan0_msgram[MCAN0_STDFILTER_INDEX],
+     &g_mcan0_msgram[MCAN0_EXTFILTERS_INDEX],
+     &g_mcan0_msgram[MCAN0_RXFIFO0_INDEX],
+     &g_mcan0_msgram[MCAN0_RXFIFO1_INDEX],
+     &g_mcan0_msgram[MCAN0_RXDEDICATED_INDEX],
+     &g_mcan0_msgram[MCAN0_TXEVENTFIFO_INDEX],
+     &g_mcan0_msgram[MCAN0_TXDEDICATED_INDEX],
+     &g_mcan0_msgram[MCAN0_TXFIFOQ_INDEX]
+  }
 };
+
+/* MCAN0 variable driver state */
 
 static struct sam_mcan_s g_mcan0priv;
 static struct can_dev_s g_mcan0dev;
 #endif
 
 #ifdef CONFIG_SAMV7_MCAN1
+/* MCAN1 message RAM allocation */
+
+static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS];
+
+/* MCAN1 constant configuration */
+
 static const struct sam_config_s g_mcan1const =
 {
   .rxpinset         = PIO_CAN1_RX,
@@ -808,7 +828,23 @@ static const struct sam_config_s g_mcan1const =
   .rxbufferesize    = (MCAN1_RXBUFFER_ELEMENT_SIZE / 4) + 2,
   .txbufferecode    = MCAN1_TXBUFFER_ENCODED_SIZE,
   .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
+
+  /* MCAN0 Message RAM */
+
+  .msgram =
+  {
+     &g_mcan1_msgram[MCAN1_STDFILTER_INDEX],
+     &g_mcan1_msgram[MCAN1_EXTFILTERS_INDEX],
+     &g_mcan1_msgram[MCAN1_RXFIFO0_INDEX],
+     &g_mcan1_msgram[MCAN1_RXFIFO1_INDEX],
+     &g_mcan1_msgram[MCAN1_RXDEDICATED_INDEX],
+     &g_mcan1_msgram[MCAN1_TXEVENTFIFO_INDEX],
+     &g_mcan1_msgram[MCAN1_TXDEDICATED_INDEX],
+     &g_mcan1_msgram[MCAN1_TXFIFOQ_INDEX]
+  }
 };
+
+/* MCAN0 variable driver state */
 
 static struct sam_mcan_s g_mcan1priv;
 static struct can_dev_s g_mcan1dev;
