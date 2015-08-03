@@ -318,6 +318,10 @@ config 16550_SUPRESS_CONFIG
 		that configures the 16550_UART.  In that case, you may want to
 		just leave the existing console configuration in place.  Default: n
 
+config SERIAL_UART_ARCH_IOCTL
+	bool "Platform has own custom IOCTL"
+	default n
+
 config 16550_REGINCR
 	int "Address increment between 16550 registers"
 	default 1
