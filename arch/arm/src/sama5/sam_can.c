@@ -1183,7 +1183,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   regval = CAN_MCR_MDLC(msg->cm_hdr.ch_dlc) | CAN_MCR_MTCR;
   can_putreg(priv, SAM_CAN_MnCR_OFFSET(mbndx), regval);
 
-  /* If we have not been asked to suppress TX interrupts, then dnable
+  /* If we have not been asked to suppress TX interrupts, then enable
    * interrupts from this mailbox now.
    */
 
