@@ -4,3 +4,6 @@
 #
 
 comment "MoxART Configuration Options"
+
+config UART_MOXA_MODE_REG
+	hex "16550 UART mode register address"
