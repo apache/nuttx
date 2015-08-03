@@ -688,11 +688,9 @@ struct sam_mcan_s
 static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset);
 static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval);
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_dumpctrlregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
-static void mcan_dumpmbregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
+static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 #else
-#  define mcan_dumpctrlregs(priv,msg)
-#  define mcan_dumpmbregs(priv,msg)
+#  define mcan_dumpregs(priv,msg)
 #endif
 
 /* Semaphore helpers */
@@ -1016,7 +1014,7 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 #endif
 
 /****************************************************************************
- * Name: mcan_dumpctrlregs
+ * Name: mcan_dumpregs
  *
  * Description:
  *   Dump the contents of all CAN control registers
@@ -1030,86 +1028,79 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_dumpctrlregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
+static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 {
   FAR const struct sam_config_s *config = priv->config;
+  unsigned long addr;
 
-  if (msg)
-    {
-      canlldbg("Control Registers: %s\n", msg);
-    }
-  else
-    {
-      canlldbg("Control Registers:\n");
-    }
+  lldbg("MCAN%d Registers: %s\n", config->port, msg);
+  lldbg("  Base: %08x\n", config->base);
 
-  /* CAN control and status registers */
+  lldbg("   CUST: %08x  FBTP: %08x TEST: %08x    RWD: %08x\n",
+        getreg32(config->base + SAM_MCAN_CUST_OFFSET),
+        getreg32(config->base + SAM_MCAN_FBTP_OFFSET),
+        getreg32(config->base + SAM_MCAN_TEST_OFFSET),
+        getreg32(config->base + SAM_MCAN_RWD_OFFSET));
 
-  lldbg("   MR: %08x      IMR: %08x      SR: %08x\n",
-        getreg32(config->base + SAM_CAN_MR_OFFSET),
-        getreg32(config->base + SAM_CAN_IMR_OFFSET),
-        getreg32(config->base + SAM_CAN_SR_OFFSET));
+  lldbg("  CCCR: %08x   BTP: %08x  TSCC: %08x   TSCV: %08x\n",
+        getreg32(config->base + SAM_MCAN_CCCR_OFFSET),
+        getreg32(config->base + SAM_MCAN_BTP_OFFSET),
+        getreg32(config->base + SAM_MCAN_TSCC_OFFSET),
+        getreg32(config->base + SAM_MCAN_TSCV_OFFSET));
 
-  lldbg("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
-        getreg32(config->base + SAM_CAN_BR_OFFSET),
-        getreg32(config->base + SAM_CAN_TIM_OFFSET),
-        getreg32(config->base + SAM_CAN_TIMESTP_OFFSET));
+  lldbg("  TOCC: %08x  TOCV: %08x   ECR: %08x    PSR: %08x\n",
+        getreg32(config->base + SAM_MCAN_TOCC_OFFSET),
+        getreg32(config->base + SAM_MCAN_TOCV_OFFSET),
+        getreg32(config->base + SAM_MCAN_ECR_OFFSET),
+        getreg32(config->base + SAM_MCAN_PSR_OFFSET));
 
-  lldbg("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
-        getreg32(config->base + SAM_CAN_ECR_OFFSET),
-        getreg32(config->base + SAM_CAN_TCR_OFFSET),
-        getreg32(config->base + SAM_CAN_ACR_OFFSET));
-}
-#endif
+  lldbg("    IR: %08x    IE: %08x   ILS: %08x    ILE: %08x\n",
+        getreg32(config->base + SAM_MCAN_IR_OFFSET),
+        getreg32(config->base + SAM_MCAN_IE_OFFSET),
+        getreg32(config->base + SAM_MCAN_ILS_OFFSET),
+        getreg32(config->base + SAM_MCAN_ILE_OFFSET));
 
-/****************************************************************************
- * Name: mcan_dumpmbregs
- *
- * Description:
- *   Dump the contents of all CAN mailbox registers
- *
- * Input Parameters:
- *   priv - A reference to the CAN peripheral state
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  lldbg("   GFC: %08x SIDFC: %08x XIDFC: %08x  XIDAM: %08x\n",
+        getreg32(config->base + SAM_MCAN_GFC_OFFSET),
+        getreg32(config->base + SAM_MCAN_SIDFC_OFFSET),
+        getreg32(config->base + SAM_MCAN_XIDFC_OFFSET),
+        getreg32(config->base + SAM_MCAN_XIDAM_OFFSET));
 
-#ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_dumpmbregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
-{
-  FAR const struct sam_config_s *config = priv->config;
-  uintptr_t mbbase;
-  int i;
+  lldbg("  HPMS: %08x NDAT1: %08x NDAT2: %08x  RXF0C: %08x\n",
+        getreg32(config->base + SAM_MCAN_HPMS_OFFSET),
+        getreg32(config->base + SAM_MCAN_NDAT1_OFFSET),
+        getreg32(config->base + SAM_MCAN_NDAT2_OFFSET),
+        getreg32(config->base + SAM_MCAN_RXF0C_OFFSET));
 
-  if (msg)
-    {
-      canlldbg("Mailbox Registers: %s\n", msg);
-    }
-  else
-    {
-      canlldbg("Mailbox Registers:\n");
-    }
+  lldbg(" RXF0S: %08x FXF0A: %08x  RXBC: %08x  RXF1C: %08x\n",
+        getreg32(config->base + SAM_MCAN_RXF0S_OFFSET),
+        getreg32(config->base + SAM_MCAN_RXF0A_OFFSET),
+        getreg32(config->base + SAM_MCAN_RXBC_OFFSET),
+        getreg32(config->base + SAM_MCAN_RXF1C_OFFSET));
 
-  for (i = 0; i < SAM_CAN_NMAILBOXES; i++)
-    {
-      mbbase = config->base + SAM_CAN_MBn_OFFSET(i);
-      lldbg("  MB%d:\n", i);
+  lldbg(" RXF1S: %08x FXF1A: %08x RXESC: %08x   TXBC: %08x\n",
+        getreg32(config->base + SAM_MCAN_RXF1S_OFFSET),
+        getreg32(config->base + SAM_MCAN_RXF1A_OFFSET),
+        getreg32(config->base + SAM_MCAN_RXESC_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXBC_OFFSET));
 
-      /* CAN mailbox registers */
+  lldbg(" TXFQS: %08x TXESC: %08x TXBRP: %08x  TXBAR: %08x\n",
+        getreg32(config->base + SAM_MCAN_TXFQS_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXESC_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXBRP_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXBAR_OFFSET));
 
-      lldbg("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
-            getreg32(mbbase + SAM_CAN_MMR_OFFSET),
-            getreg32(mbbase + SAM_CAN_MAM_OFFSET),
-            getreg32(mbbase + SAM_CAN_MID_OFFSET),
-            getreg32(mbbase + SAM_CAN_MFID_OFFSET));
+  lldbg(" TXBCR: %08x TXBTO: %08x TXBCF: %08x TXBTIE: %08x\n",
+        getreg32(config->base + SAM_MCAN_TXBCR_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXBTO_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXBCF_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXBTIE_OFFSET));
 
-      lldbg("    MSR: %08x MDL: %08x MDH: %08x\n",
-            getreg32(mbbase + SAM_CAN_MSR_OFFSET),
-            getreg32(mbbase + SAM_CAN_MDL_OFFSET),
-            getreg32(mbbase + SAM_CAN_MDH_OFFSET));
-    }
+  lldbg("TXBCIE: %08x TXEFC: %08x TXEFS: %08x  TXEFA: %08x\n",
+        getreg32(config->base + SAM_MCAN_TXBCIE_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXEFC_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXEFS_OFFSET),
+        getreg32(config->base + SAM_MCAN_TXEFA_OFFSET));
 }
 #endif
 
@@ -1414,8 +1405,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  mcan_dumpctrlregs(priv, "After hardware initialization");
-  mcan_dumpmbregs(priv, NULL);
+  mcan_dumpregs(priv, "After hardware initialization");
 
   /* Attach the CAN interrupt handler */
 
@@ -1441,8 +1431,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   mcan_putreg(priv, SAM_CAN_IER_OFFSET, CAN_DEBUG_INTS);
 #endif
 
-  mcan_dumpctrlregs(priv, "After receive setup");
-  mcan_dumpmbregs(priv, NULL);
+  mcan_dumpregs(priv, "After receive setup");
 
   /* Enable the interrupts at the NVIC (they are still disabled at the MCAN
    * peripheral). */
@@ -1740,7 +1729,6 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       mcan_putreg(priv, SAM_CAN_IER_OFFSET, CAN_INT_MB(mbndx));
     }
 
-  mcan_dumpmbregs(priv, "After send");
   mcan_semgive(priv);
   return OK;
 }
