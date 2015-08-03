@@ -1603,7 +1603,7 @@ config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
 	---help---
 		Number of dedicated TX buffer elements for MCAN0.
 
-config SAMV7_MCAN0_DEDICATED_TXFIFOQ_SIZE
+config SAMV7_MCAN0_TXFIFOQ_SIZE
 	int "MCAN0 dedicated TX FIFO queue"
 	default 4
 	range 0 32
@@ -1764,31 +1764,31 @@ config SAMV7_MCAN1_RXFIFO0_SIZE
 		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
 
 choice
-	prompt "MCAN1 RX FIFO0 element size"
-	default SAMV7_MCAN1_RXFIFO0_32BYTES
+	prompt "MCAN1 RX FIFO1 element size"
+	default SAMV7_MCAN1_RXFIFO1_32BYTES
 
-config SAMV7_MCAN1_RXFIFO0_8BYTES
+config SAMV7_MCAN1_RXFIFO1_8BYTES
 	bool "8 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_12BYTES
+config SAMV7_MCAN1_RXFIFO1_12BYTES
 	bool "12 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_16BYTES
+config SAMV7_MCAN1_RXFIFO1_16BYTES
 	bool "16 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_20BYTES
+config SAMV7_MCAN1_RXFIFO1_20BYTES
 	bool "20 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_24BYTES
+config SAMV7_MCAN1_RXFIFO1_24BYTES
 	bool "24 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_32BYTES
+config SAMV7_MCAN1_RXFIFO1_32BYTES
 	bool "32 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_48BYTES
+config SAMV7_MCAN1_RXFIFO1_48BYTES
 	bool "48 bytes"
 
-config SAMV7_MCAN1_RXFIFO0_64BYTES
+config SAMV7_MCAN1_RXFIFO1_64BYTES
 	bool "64 bytes"
 
 endchoice # MCAN1 RX buffer element size
@@ -1881,7 +1881,7 @@ config SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
 	---help---
 		Number of dedicated TX buffer elements for MCAN1.
 
-config SAMV7_MCAN1_DEDICATED_TXFIFOQ_SIZE
+config SAMV7_MCAN1_TXFIFOQ_SIZE
 	int "MCAN1 dedicated TX FIFO queue"
 	default 4
 	range 0 32

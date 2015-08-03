@@ -47,55 +47,12 @@
 
 #include <nuttx/can.h>
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_CAN0) || \
-    defined(CONFIG_SAMV7_CAN1))
+#if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_MCAN0) || \
+    defined(CONFIG_SAMV7_MCAN1))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* CAN BAUD */
-
-#if defined(CONFIG_SAMV7_CAN0) && !defined(CONFIG_SAMV7_CAN0_BAUD)
-#  error "CONFIG_SAMV7_CAN0_BAUD is not defined"
-#endif
-
-#if defined(CONFIG_SAMV7_CAN1) && !defined(CONFIG_SAMV7_CAN1_BAUD)
-#  error "CONFIG_SAMV7_CAN1_BAUD is not defined"
-#endif
-
-/* There must be at least one but not more than three receive mailboxes */
-
-#ifdef CONFIG_SAMV7_CAN0
-#  if !defined(CONFIG_SAMV7_CAN0_NRECVMB) || CONFIG_SAMV7_CAN0_NRECVMB < 1
-#    undef  CONFIG_SAMV7_CAN0_NRECVMB
-#    define CONFIG_SAMV7_CAN0_NRECVMB 1
-#  endif
-#  if CONFIG_SAMV7_CAN0_NRECVMB > 3
-#    warning Current implementation only supports up to three receive mailboxes
-#    undef  CONFIG_SAMV7_CAN0_NRECVMB
-#    define CONFIG_SAMV7_CAN0_NRECVMB 3
-#  endif
-#else
-#  undef  CONFIG_SAMV7_CAN0_NRECVMB
-#  define CONFIG_SAMV7_CAN0_NRECVMB 0
-#endif
-
-#ifdef CONFIG_SAMV7_CAN1
-#  if !defined(CONFIG_SAMV7_CAN1_NRECVMB) || CONFIG_SAMV7_CAN1_NRECVMB < 1
-#    undef  CONFIG_SAMV7_CAN1_NRECVMB
-#    define CONFIG_SAMV7_CAN1_NRECVMB 1
-#  endif
-#  if CONFIG_SAMV7_CAN1_NRECVMB > 3
-#    warning Current implementation only supports up to three receive mailboxes
-#    undef  CONFIG_SAMV7_CAN1_NRECVMB
-#    define CONFIG_SAMV7_CAN1_NRECVMB 3
-#  endif
-#else
-#  undef  CONFIG_SAMV7_CAN1_NRECVMB
-#  define CONFIG_SAMV7_CAN1_NRECVMB 0
-#endif
 
 /* Port numbers for use with sam_mcan_initialize() */
 
@@ -149,5 +106,5 @@ FAR struct can_dev_s *sam_mcan_initialize(int port);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_CAN && (CONFIG_SAMV7_CAN0 || CONFIG_SAMV7_CAN1) */
+#endif /* CONFIG_CAN && (CONFIG_SAMV7_MCAN0 || CONFIG_SAMV7_MCAN1) */
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_MCAN_H */

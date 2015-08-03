@@ -214,7 +214,7 @@
 #define MCAN_FBTP_FBRP_SHIFT       (16)      /* Bits 16-20: Fast Baud Rate Prescaler */
 #define MCAN_FBTP_FBRP_MASK        (31 << MCAN_FBTP_FBRP_SHIFT)
 #  define MCAN_FBTP_FBRP(n)        ((uint32_t)(n) << MCAN_FBTP_FBRP_SHIFT)
-#define MCAN_FBTP_TDCO             (1 << 23) /* Bit: 23: Transceiver Delay Compensation */
+#define MCAN_FBTP_TDC              (1 << 23) /* Bit: 23: Transceiver Delay Compensation */
 #define MCAN_FBTP_TDCO_SHIFT       (24)      /* Bits 24-28: Transceiver Delay Compensation Offset */
 #define MCAN_FBTP_TDCO_MASK        (31 << MCAN_FBTP_TDC_SHIFT)
 #  define MCAN_FBTP_TDCO(n)        ((uint32_t)(n) << MCAN_FBTP_TDC_SHIFT)
@@ -370,7 +370,7 @@
 #define MCAN_INT_RF1W              (1 << 5)  /* Bit 5:  Receive FIFO 1 Watermark Reached */
 #define MCAN_INT_RF1F              (1 << 6)  /* Bit 6:  Receive FIFO 1 Full */
 #define MCAN_INT_RF1L              (1 << 7)  /* Bit 7:  Receive FIFO 1 Message Lost */
-#define MCAN_INT_HPM               (1 << 8)  /* Bit 8:  High Priority Message */
+#define MCAN_INT_HPM               (1 << 8)  /* Bit 8:  High Priority Message Received */
 #define MCAN_INT_TC                (1 << 9)  /* Bit 9:  Transmission Completed */
 #define MCAN_INT_TCF               (1 << 10) /* Bit 10: Transmission Cancellation Finished */
 #define MCAN_INT_TFE               (1 << 11) /* Bit 11: Tx FIFO Empty */
@@ -387,7 +387,7 @@
 #define MCAN_INT_EW                (1 << 24) /* Bit 24: Warning Status */
 #define MCAN_INT_BO                (1 << 25) /* Bit 25: Bus_Off Status */
 #define MCAN_INT_WDI               (1 << 26) /* Bit 26: Watchdog Interrupt */
-#define MCAN_INT_CRCE              (1 << 27) /* Bit 27: CRC Error */
+#define MCAN_INT_CRCE              (1 << 27) /* Bit 27: Receive CRC Error */
 #define MCAN_INT_BE                (1 << 28) /* Bit 28: Bit Error */
 #define MCAN_INT_ACKE              (1 << 29) /* Bit 29: Acknowledge Error */
 #define MCAN_INT_FOE               (1 << 30) /* Bit 30: Format Error */
@@ -444,10 +444,10 @@
 #  define MCAN_HPMS_BIDX(n)        ((uint32_t)(n) << MCAN_HPMS_BIDX_SHIFT)
 #define MCAN_HPMS_MSI_SHIFT        (6)       /* Bits 6-7: Message Storage Indicator */
 #define MCAN_HPMS_MSI_MASK         (3 << MCAN_HPMS_MSI_SHIFT)
-#  define MCAN_HPMS_MSI_ NOFIFO    (0 << MCAN_HPMS_MSI_SHIFT) /* No FIFO selected. */
-#  define MCAN_HPMS_MSI_ LOST      (1 << MCAN_HPMS_MSI_SHIFT) /* FIFO message. */
-#  define MCAN_HPMS_MSI_ FIFO0     (2 << MCAN_HPMS_MSI_SHIFT) /* Message stored in FIFO 0. */
-#  define MCAN_HPMS_MSI_ FIFO1     (3 << MCAN_HPMS_MSI_SHIFT) /* Message stored in FIFO 1. */
+#  define MCAN_HPMS_MSI_NOFIFO     (0 << MCAN_HPMS_MSI_SHIFT) /* No FIFO selected. */
+#  define MCAN_HPMS_MSI_LOST       (1 << MCAN_HPMS_MSI_SHIFT) /* FIFO message. */
+#  define MCAN_HPMS_MSI_FIFO0      (2 << MCAN_HPMS_MSI_SHIFT) /* Message stored in FIFO 0. */
+#  define MCAN_HPMS_MSI_FIFO1      (3 << MCAN_HPMS_MSI_SHIFT) /* Message stored in FIFO 1. */
 #define MCAN_HPMS_FIDX_SHIFT       (8)       /* Bits 8-14: Filter Index */
 #define MCAN_HPMS_FIDX_MASK        (0x7f << MCAN_HPMS_FIDX_SHIFT)
 #  define MCAN_HPMS_FIDX(n)        ((uint32_t)(n) << MCAN_HPMS_FIDX_SHIFT)
