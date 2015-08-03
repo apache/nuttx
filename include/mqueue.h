@@ -51,7 +51,7 @@
 #define MQ_NONBLOCK O_NONBLOCK
 
 /********************************************************************************
- * Global Type Declarations
+ * Public Type Declarations
  ********************************************************************************/
 
 /* Message queue attributes */

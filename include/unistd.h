@@ -113,7 +113,7 @@
 #define HOST_NAME_MAX 32
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -133,7 +133,7 @@ extern "C"
 #ifndef __NXFLAT__
 EXTERN FAR char *optarg; /* Optional argument following option */
 EXTERN int       optind; /* Index into argv */
-EXTERN int       optopt; /* unrecognized option character */
+EXTERN int       optopt; /* Unrecognized option character */
 #else
 #  define optarg  (*(getoptargp()))
 #  define optind  (*(getoptindp()))
@@ -141,7 +141,7 @@ EXTERN int       optopt; /* unrecognized option character */
 #endif
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 /* Task Control Interfaces */
@@ -205,7 +205,7 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 
 FAR char **getoptargp(void); /* Optional argument following option */
 int       *getoptindp(void); /* Index into argv */
-int       *getoptoptp(void); /* unrecognized option character */
+int       *getoptoptp(void); /* Unrecognized option character */
 
 #ifdef CONFIG_NET
 int     gethostname(FAR char *name, size_t size);

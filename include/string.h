@@ -56,7 +56,7 @@
 #define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN

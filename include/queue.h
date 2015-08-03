@@ -60,7 +60,7 @@
 #define dq_peek(q)  ((q)->head)
 
 /****************************************************************************
- * Global Type Declarations
+ * Public Type Definitions
  ****************************************************************************/
 
 struct sq_entry_s
@@ -91,7 +91,7 @@ struct dq_queue_s
 typedef struct dq_queue_s dq_queue_t;
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus

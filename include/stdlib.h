@@ -49,9 +49,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The C standard specifies two constants, EXIT_SUCCESS and
- * EXIT_FAILURE, that may be passed to exit() to indicate
- * successful or unsucessful termination, respectively.
+/* The C standard specifies two constants, EXIT_SUCCESS and EXIT_FAILURE,
+ * that may be passed to exit() to indicate successful or unsuccessful
+ * termination, respectively.
  */
 
 #define EXIT_SUCCESS 0
@@ -71,9 +71,8 @@
 
 #define MB_CUR_MAX 1
 
-/* The environ variable, normally 'extern char **environ;' is
- * not implemented as a function call.  However, get_environ_ptr()
- * can be used in its place.
+/* The environ variable, normally 'char **environ;' is not implemented as a
+ * function call.  However, get_environ_ptr() can be used in its place.
  */
 
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -81,7 +80,7 @@
 #endif
 
 /****************************************************************************
- * Global Type Definitions
+ * Public Type Definitions
  ****************************************************************************/
 
 struct mallinfo
@@ -97,11 +96,7 @@ struct mallinfo
 };
 
 /****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
