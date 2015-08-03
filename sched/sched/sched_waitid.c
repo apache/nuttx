@@ -159,7 +159,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   FAR struct child_status_s *child;
   bool retains;
 #endif
-  sigset_t sigset;
+  sigset_t set;
   int err;
   int ret;
 
@@ -184,8 +184,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
   /* Create a signal set that contains only SIGCHLD */
 
-  (void)sigemptyset(&sigset);
-  (void)sigaddset(&sigset, SIGCHLD);
+  (void)sigemptyset(&set);
+  (void)sigaddset(&set, SIGCHLD);
 
   /* Disable pre-emption so that nothing changes while the loop executes */
 
@@ -352,7 +352,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = sigwaitinfo(&sigset, info);
+      ret = sigwaitinfo(&set, info);
       if (ret < 0)
         {
           goto errout;

@@ -298,7 +298,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   bool retains;
 #endif
   FAR struct siginfo info;
-  sigset_t sigset;
+  sigset_t set;
   int err;
   int ret;
 
@@ -316,8 +316,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Create a signal set that contains only SIGCHLD */
 
-  (void)sigemptyset(&sigset);
-  (void)sigaddset(&sigset, SIGCHLD);
+  (void)sigemptyset(&set);
+  (void)sigaddset(&set, SIGCHLD);
 
   /* Disable pre-emption so that nothing changes while the loop executes */
 
@@ -498,7 +498,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = sigwaitinfo(&sigset, &info);
+      ret = sigwaitinfo(&set, &info);
       if (ret < 0)
         {
           goto errout_with_lock;
