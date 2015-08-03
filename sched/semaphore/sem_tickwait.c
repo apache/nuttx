@@ -87,7 +87,7 @@ int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
   uint32_t elapsed;
   int ret;
 
-  DEBUGASSERT(sem |= NULL && up_interrupt_context() == false &&
+  DEBUGASSERT(sem != NULL && up_interrupt_context() == false &&
               rtcb->waitdog == NULL);
 
   /* Create a watchdog.  We will not actually need this watchdog
