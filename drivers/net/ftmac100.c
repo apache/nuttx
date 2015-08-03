@@ -49,6 +49,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <crc32.h>
 
 #include <arpa/inet.h>
 
@@ -107,14 +108,26 @@
 
 #define ETH_ZLEN 60
 
-#define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
-                          FTMAC100_MACCR_RCV_EN  | \
-                          FTMAC100_MACCR_XDMA_EN | \
-                          FTMAC100_MACCR_RDMA_EN | \
-                          FTMAC100_MACCR_CRC_APD | \
-                          FTMAC100_MACCR_FULLDUP | \
-                          FTMAC100_MACCR_RX_RUNT | \
-                          FTMAC100_MACCR_RX_BROADPKT)
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+# define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
+                           FTMAC100_MACCR_RCV_EN  | \
+                           FTMAC100_MACCR_XDMA_EN | \
+                           FTMAC100_MACCR_RDMA_EN | \
+                           FTMAC100_MACCR_CRC_APD | \
+                           FTMAC100_MACCR_FULLDUP | \
+                           FTMAC100_MACCR_RX_RUNT | \
+                           FTMAC100_MACCR_HT_MULTI_EN | \
+                           FTMAC100_MACCR_RX_BROADPKT)
+#else
+# define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
+                           FTMAC100_MACCR_RCV_EN  | \
+                           FTMAC100_MACCR_XDMA_EN | \
+                           FTMAC100_MACCR_RDMA_EN | \
+                           FTMAC100_MACCR_CRC_APD | \
+                           FTMAC100_MACCR_FULLDUP | \
+                           FTMAC100_MACCR_RX_RUNT | \
+                           FTMAC100_MACCR_RX_BROADPKT)
+#endif
 
 #define MACCR_DISABLE_ALL 0
 
@@ -919,21 +932,21 @@ static inline void ftmac100_interrupt_process(FAR struct ftmac100_driver_s *priv
 
 #if 0
 #define REG(x) (*(volatile uint32_t *)(x))
-  ndbg("\n=============================================================\n");
-  ndbg("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
-       REG(0x98400030), REG(0x98400034), REG(0x98400038), REG(0x98400004),
-       REG(0x98400000), REG(0x98400008));
-  ndbg("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
-       REG(0x98800014), REG(0x98800004), REG(0x9880000C), REG(0x98800010));
-  ndbg("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n", REG(0x98800034),
-       REG(0x98800024), REG(0x9880002C), REG(0x98800020));
-  ndbg("=============================================================\n");
+  nvdbg("\n=============================================================\n");
+  nvdbg("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
+        REG(0x98400030), REG(0x98400034), REG(0x98400038), REG(0x98400004),
+        REG(0x98400000), REG(0x98400008));
+  nvdbg("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
+        REG(0x98800014), REG(0x98800004), REG(0x9880000C), REG(0x98800010));
+  nvdbg("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n", REG(0x98800034),
+        REG(0x98800024), REG(0x9880002C), REG(0x98800020));
+  nvdbg("=============================================================\n");
 #endif
 
 out:
   putreg32 (INT_MASK_ALL_ENABLED, &iobase->imr);
 
-  ndbg("ISR-done\n");
+  nvdbg("ISR-done\n");
 }
 
 /****************************************************************************
@@ -1515,8 +1528,34 @@ static int ftmac100_txavail(struct net_driver_s *dev)
 static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  uint32_t hash_value, hash_reg, hash_bit;
+  uint32_t mta;
+
+  /* Calculate Ethernet CRC32 for MAC */
+
+  hash_value = crc32part(mac, 6, ~0L);
+
+  /*
+   * The HASH Table  is a register array of 2 32-bit registers.
+   * It is treated like an array of 64 bits.  We want to set
+   * bit BitArray[hash_value]. So we figure out what register
+   * the bit is in, read it, OR in the new bit, then write
+   * back the new value.  The register is determined by the
+   * upper 7 bits of the hash value and the bit within that
+   * register are determined by the lower 5 bits of the value.
+   */
+
+  hash_reg = (hash_value >> 31) & 0x1;
+  hash_bit = (hash_value >> 26) & 0x1f;
 
   /* Add the MAC address to the hardware multicast routing table */
+
+  mta = getreg32(&iobase->maht0 + hash_reg);
+
+  mta |= (1 << hash_bit);
+
+  putreg32(mta, &iobase->maht0 + hash_reg);
 
   return OK;
 }
@@ -1544,8 +1583,24 @@ static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 static int ftmac100_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  uint32_t hash_value, hash_reg, hash_bit;
+  uint32_t mta;
 
-  /* Add the MAC address to the hardware multicast routing table */
+  /* Calculate Ethernet CRC32 for MAC */
+
+  hash_value = crc32part(mac, 6, ~0L);
+
+  hash_reg = (hash_value >> 31) & 0x1;
+  hash_bit = (hash_value >> 26) & 0x1f;
+
+  /* Remove the MAC address to the hardware multicast routing table */
+
+  mta = getreg32(&iobase->maht0 + hash_reg);
+
+  mta &= ~(1 << hash_bit);
+
+  putreg32(mta, &iobase->maht0 + hash_reg);
 
   return OK;
 }
