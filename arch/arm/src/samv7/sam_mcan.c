@@ -570,7 +570,9 @@
 
 #endif /* CONFIG_SAMV7_MCAN1 */
 
-/* Interrupts ***************************************************************/
+/* MCAN helpers *************************************************************/
+
+#define MAILBOX_ADDRESS(a)        ((uint32_t)(a) & 0x0000fffc)
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
@@ -1247,7 +1249,7 @@ static void mcan_mbfree(FAR struct sam_mcan_s *priv, int mbndx)
  *
  * Assumptions:
  *   Caller has exclusive access to the CAN data structures
- *   CAN interrupts are disabled at the AIC
+ *   CAN interrupts are disabled at the NVIC
  *
  ****************************************************************************/
 
@@ -1442,7 +1444,8 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   mcan_dumpctrlregs(priv, "After receive setup");
   mcan_dumpmbregs(priv, NULL);
 
-  /* Enable the interrupts at the AIC. */
+  /* Enable the interrupts at the NVIC (they are still disabled at the MCAN
+   * peripheral). */
 
   up_enable_irq(config->irq);
   mcan_semgive(priv);
@@ -2319,8 +2322,10 @@ static int mcan_bittiming(struct sam_mcan_s *priv)
 static int mcan_hwinitialize(struct sam_mcan_s *priv)
 {
   FAR const struct sam_config_s *config = priv->config;
+  FAR uint32_t *msgram;
   uint32_t regval;
-  uint32_t mck;
+  uint32_t cntr;
+  uint32_t cmr;
   int ret;
 
   canllvdbg("CAN%d\n", config->port);
@@ -2370,44 +2375,166 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
 
   sam_enableperiph1(config->pid);
 
-#if 0 // REVISIT -- may apply only to SAMA5
-  /* Disable all CAN interrupts */
+  /* Enable the Initialization state */
 
-  mcan_putreg(priv, SAM_CAN_IDR_OFFSET, CAN_INT_ALL);
+  regval  = sam_getreg(priv, SAM_MCAN_CCCR_OFFSET)
+  regval |= MCAN_CCCR_INIT;
+  sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
 
-  /* Configure bit timing. */
+  /* Wait for initialization mode to take effect */
 
-  ret = mcan_bittiming(priv);
-  if (ret < 0)
+  while ((sam_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+
+  /* Enable writing to configuration registers */
+
+  regval  = sam_getreg(priv, SAM_MCAN_CCCR_OFFSET)
+  regval |= MCAN_CCCR_INIT | MCAN_CCCR_CCE;
+  sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+  /* Global Filter Configuration: Reject remote frames, reject non-matching
+   * frames.
+   */
+
+  regval = MCAN_GFC_RRFE | MCAN_GFC_RRFS | MCAN_GFC_ANFE_REJECTED |
+           MCAN_GFC_ANFS_REJECTED;
+  sam_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+
+  /* Extended ID Filter AND mask  */
+
+  sam_putreg(priv, SAM_MCAN_XIDAM_OFFSET, 0x1fffffff);
+
+  /* Disable all interrupts  */
+
+  sam_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
+  sam_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
+
+  /* All interrupts directed to Line 0.  But disable bot interrupt line 0
+   * and 1 for now.
+   */
+
+  sam_putreg(priv, SAM_MCAN_ILS_OFFSET, 0);
+  sam_putreg(priv, SAM_MCAN_ILE_OFFSET, 0);
+
+  /* Clear all pending interrupts. */
+
+  sam_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_ALL);
+
+  /* Configure MCAN bit timing */
+
+  sam_putreg(priv, SAM_MCAN_BTP_OFFSET, config->btp);
+  sam_putreg(priv, SAM_MCAN_FBTP_OFFSET, config->fbtp);
+
+  /* Configure message RAM starting addresses and sizes. */
+
+  regval = MAILBOX_ADDRESS(config->msgram.stdfilters) |
+           MCAN_SIDFC_LSS(config->nstdfilters);
+  sam_putreg(priv, SAM_MCAN_SIDFC_OFFSET, regval);
+
+  regval = MAILBOX_ADDRESS(config->msgram.extfilters) |
+           MCAN_XIDFC_LSE(config->nextfilters);
+  sam_putreg(priv, SAM_MCAN_XIDFC_OFFSET, regval);
+
+  /* Configure RX FIFOs */
+
+  regval = MAILBOX_ADDRESS(config->msgram.rxfifo0) |
+           MCAN_RXF0C_F0S(config->nfifo0);
+  sam_putreg(priv, SAM_MCAN_RXF0C_OFFSET, regval);
+
+  regval = MAILBOX_ADDRESS(config->msgram.rxfifo1) |
+           MCAN_RXF1C_F1S(config->nfifo1);
+  sam_putreg(priv, SAM_MCAN_RXF1C_OFFSET, regval);
+
+  /* Watermark interrupt off, blocking mode */
+
+  regval = MAILBOX_ADDRESS(config->msgram.rxdedicated);
+  sam_putreg(priv, SAM_MCAN_RXBC_OFFSET, regval);
+
+  regval = MAILBOX_ADDRESS(config->msgram.txeventfifo) |
+           MCAN_TXEFC_EFS(config->ntxeventfifo);
+  sam_putreg(priv, SAM_MCAN_TXEFC_OFFSET, regval);
+
+  /* Watermark interrupt off */
+
+  regval = MAILBOX_ADDRESS(config->msgram.txdedicated) |
+           MCAN_TXBC_NDTB(config->ntxdedicated) |
+           MCAN_TXBC_TFQS(config->ntxfifoq);
+  sam_putreg(priv, SAM_MCAN_TXBC_OFFSET, regval);
+
+  regval = MCAN_RXESC_RBDS(config->rxbufferecode) |
+           MCAN_RXESC_F1DS(config->rxfifo1ecode) |
+           MCAN_RXESC_F0DS(config->rxfifo0ecode)
+  sam_putreg(priv, SAM_MCAN_RXESC_OFFSET, regval);
+
+  regval = MCAN_TXESC_TBDS(config->txbufferesize);
+  sam_putreg(priv, SAM_MCAN_TXESC_OFFSET, regval);
+
+  /* Configure Message Filters */
+  /* Disable all standard filters */
+
+  msgram = config->msgram.stdfilters;
+  cntr   = config->nstdfilters;
+  while (cntr > 0)
     {
-      candbg("ERROR: Failed to set bit timing: %d\n", ret);
-      return ret;
+      *msgram++ = STDFILTER_S0_SFEC_DISABLE;
+      cntr--;
     }
-#endif
-# error Missing SAMV71 MCAN initialization logic
 
-  /* Select FD mode with or without fast bit rate switching */
+  /* Disable all extended filters */
+
+  msgram = config->msgram.extfilters;
+  cntr = config->nextfilters;
+  while (cntr > 0)
+    {
+      *msgram = EXTFILTER_F0_EFEC_DISABLE;
+      msgram = msgram + 2;
+      cntr--;
+    }
+
+  /* Clear new RX data flags */
+
+  sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, 0xffffffff);
+  sam_putreg(priv, SAM_MCAN_NDAT2_OFFSET, 0xffffffff);
+
+  /* Select ISO11898-1 mode or FD mode with or without fast bit rate
+   * switching
+   */
 
   regval  = sam_getreg(priv, SAM_MCAN_CCCR_OFFSET);
-  regval &= ~MCAN_CCCR_CME_MASK;
+  regval &= ~(MCAN_CCCR_CME_MASK | MCAN_CCCR_CMR_MASK);
 
   switch (priv->mode)
     {
     default:
     case CONFIG_MCAN_ISO11898_1_MODE:
       regval |= MCAN_CCCR_CME_ISO11898_1;
+      cmr     = MCAN_CCCR_CMR_ISO11898_1;
       break;
 
     case CONFIG_MCAN_FD_MODE:
       regval |= MCAN_CCCR_CME_FD;
+      cmr     = MCAN_CCCR_CMR_FD;
       break;
 
     case CONFIG_MCAN_FD_BSW_MODE:
       regval |= MCAN_CCCR_CME_FD_BSW;
+      cmr     = MCAN_CCCR_CMR_FD_BSW;
       break;
     }
 
+  /* Set the initial CAN mode */
+
   sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+  /* Request the mode change */
+
+  regval |= cmr;
+  sam_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+#if 0 /* Not necessary in initialization mode */
+  /* Wait for the mode to take effect */
+
+  while ((sam_getreg(priv, SAM_MCAN_CCCR_OFFSET) & (MCAN_CCCR_FDBS | MCAN_CCCR_FDO)) != 0);
+#endif
 
   /* Enable FIFO/Queue mode */
 
