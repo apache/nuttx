@@ -1030,11 +1030,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
 static bool u16550_txready(struct uart_dev_s *dev)
 {
   struct u16550_s *priv = (struct u16550_s*)dev->priv;
-#ifdef CONFIG_16550_THRNE
-  return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRNE) == 0);
-#else
   return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
-#endif
 }
 
 /****************************************************************************
@@ -1048,11 +1044,7 @@ static bool u16550_txready(struct uart_dev_s *dev)
 static bool u16550_txempty(struct uart_dev_s *dev)
 {
   struct u16550_s *priv = (struct u16550_s*)dev->priv;
-#ifdef CONFIG_16550_THRNE
-  return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRNE) == 0);
-#else
   return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
-#endif
 }
 
 /****************************************************************************
