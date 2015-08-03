@@ -299,11 +299,7 @@
 #define UART_LSR_PE                  (1 << 2)  /* Bit 2:  Parity Error */
 #define UART_LSR_FE                  (1 << 3)  /* Bit 3:  Framing Error */
 #define UART_LSR_BI                  (1 << 4)  /* Bit 4:  Break Interrupt */
-#ifdef CONFIG_16550_THRNE
-#  define UART_LSR_THRNE             (1 << 5)  /* Bit 5:  Transmitter Holding Register Not Empty */
-#else
-#  define UART_LSR_THRE              (1 << 5)  /* Bit 5:  Transmitter Holding Register Empty */
-#endif
+#define UART_LSR_THRE                (1 << 5)  /* Bit 5:  Transmitter Holding Register Empty */
 #define UART_LSR_TEMT                (1 << 6)  /* Bit 6:  Transmitter Empty */
 #define UART_LSR_RXFE                (1 << 7)  /* Bit 7:  Error in RX FIFO (RXFE) */
 

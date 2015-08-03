@@ -337,18 +337,7 @@ config 16550_ADDRWIDTH
 	---help---
 		The bit width of registers.  Options are 8, 16, or 32. Default: 8
 
-config 16550_THRNE
-	bool "Use THRNE"
-	default n if !ARCH_CHIP_MOXART
-	default y if ARCH_CHIP_MOXART
-	---help---
-		The 16550 UART has a bit in the line status register, THRE, that
-		indicates that the Transmit Holding Register (THR) is Empty (N).
-		This bit is inverted in at least one variant (the moxART SoC).
-		In that case, this setting must be included to use this bit as
-		THR *Not* Empty (THRNE).
-
-endif # 16550_UART
+endif
 
 #
 # MCU serial peripheral driver?
