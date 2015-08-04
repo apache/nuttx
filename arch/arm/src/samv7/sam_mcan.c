@@ -179,6 +179,10 @@
 #    error Undefined MCAN0 RX FIFO0 element size
 #  endif
 
+#  ifndef CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE
+#    define CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE 0
+#  endif
+
 #  if CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE > 64
 #    error Invalid MCAN0 number of RX FIFO0 elements
 #  endif
@@ -216,6 +220,10 @@
 #    error Undefined MCAN0 RX FIFO1 element size
 #  endif
 
+#  ifndef CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE
+#    define CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE 0
+#  endif
+
 #  if CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE > 64
 #    error Invalid MCAN0 number of RX FIFO1 elements
 #  endif
@@ -225,8 +233,16 @@
 
 /* MCAN0 Filters */
 
+#  ifndef CONFIG_SAMV7_MCAN0_NSTDFILTERS
+#    define CONFIG_SAMV7_MCAN0_NSTDFILTERS 0
+#  endif
+
 #  if (CONFIG_SAMV7_MCAN0_NSTDFILTERS > 128)
 #    error Invalid MCAN0 number of Standard Filters
+#  endif
+
+#  ifndef CONFIG_SAMV7_MCAN0_NEXTFILTERS
+#    define CONFIG_SAMV7_MCAN0_NEXTFILTERS 0
 #  endif
 
 #  if (CONFIG_SAMV7_MCAN0_NEXTFILTERS > 64)
@@ -266,7 +282,11 @@
 #    error Undefined MCAN0 RX buffer element size
 #  endif
 
-#  if (CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE > 64)
+#  ifndef CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
+#    define CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE 0
+#  endif
+
+#  if CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE > 64
 #    error Invalid MCAN0 number of RX BUFFER elements
 #  endif
 
@@ -304,9 +324,8 @@
 #    error Undefined MCAN0 TX buffer element size
 #  endif
 
-#  if ((CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE + \
-        CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE)  > 32)
-#    error Invalid MCAN0 number of TX BUFFER elements
+#  ifndef CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
+#    define CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE 0
 #  endif
 
 #  define MCAN0_DEDICATED_TXBUFFER_WORDS \
@@ -315,13 +334,26 @@
 
 /* MCAN0 TX FIFOs */
 
-#  define MCAN0_TXEVENTFIFO_WORDS  (CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE * 2)
-#  define MCAN0_TXFIFIOQ_WORDS \
-    (CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+#  ifndef CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE
+#    define CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE 0
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE + \
+       CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE) > 32
+#    error Invalid MCAN0 number of TX BUFFER elements
+#  endif
+
+#  ifndef CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE
+#    define CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE 0
+#  endif
 
 #  if CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE > 32
 #    error Invalid MCAN0 number of TX EVENT FIFO elements
 #  endif
+
+#  define MCAN0_TXEVENTFIFO_WORDS  (CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE * 2)
+#  define MCAN0_TXFIFIOQ_WORDS \
+    (CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
 
 /* MCAN0 Message RAM */
 
@@ -413,6 +445,10 @@
 #    error Undefined MCAN1 RX FIFO0 element size
 #  endif
 
+#  ifndef CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE
+#    define CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE 0
+#  endif
+
 #  if CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE > 64
 #    error Invalid MCAN1 number of RX FIFO 0 elements
 #  endif
@@ -450,6 +486,10 @@
 #    error Undefined MCAN1 RX FIFO1 element size
 #  endif
 
+#  ifndef CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE
+#    define CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE 0
+#  endif
+
 #  if CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE > 64
 #    error Invalid MCAN1 number of RX FIFO 0 elements
 #  endif
@@ -459,8 +499,16 @@
 
 /* MCAN1 Filters */
 
+#  ifndef CONFIG_SAMV7_MCAN1_NSTDFILTERS
+#    define CONFIG_SAMV7_MCAN1_NSTDFILTERS 0
+#  endif
+
 #  if CONFIG_SAMV7_MCAN1_NSTDFILTERS > 128
 #    error Invalid MCAN1 number of Standard Filters
+#  endif
+
+#  ifndef CONFIG_SAMV7_MCAN1_NEXTFILTERS
+#    define CONFIG_SAMV7_MCAN1_NEXTFILTERS 0
 #  endif
 
 #  if CONFIG_SAMV7_MCAN1_NEXTFILTERS > 64
@@ -498,6 +546,10 @@
 #    define MCAN1_RXBUFFER_ENCODED_SIZE  7
 #  else
 #    error Undefined MCAN1 RX buffer element size
+#  endif
+
+#  ifndef CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
+#    define CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE 0
 #  endif
 
 #  if CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE > 64
@@ -538,9 +590,8 @@
 #    error Undefined MCAN1 TX buffer element size
 #  endif
 
-#  if ((CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE + \
-        CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE)  > 32)
-#    error Invalid MCAN1 number of TX BUFFER elements
+#  ifndef CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
+#    define CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE 0
 #  endif
 
 #  define MCAN1_DEDICATED_TXBUFFER_WORDS \
@@ -548,6 +599,19 @@
      ((MCAN1_TXBUFFER_ELEMENT_SIZE/4) + 2))
 
 /* MCAN1 TX FIFOs */
+
+#  ifndef CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE
+#    define CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE 0
+#  endif
+
+#  if (CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE + \
+       CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE) > 32
+#    error Invalid MCAN1 number of TX BUFFER elements
+#  endif
+
+#  ifndef CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE
+#    define CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE 0
+#  endif
 
 #  if CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE > 32
 #    error Invalid MCAN1 number of TX EVENT FIFO elements
@@ -733,9 +797,8 @@ static bool mcan_txempty(FAR struct can_dev_s *dev);
 
 /* CAN interrupt handling */
 
-static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
-                                    uint32_t msr);
-static inline void mcan_txinterrupt(FAR struct can_dev_s *dev, int mbndx);
+static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, uint32_t msr);
+static inline void mcan_txinterrupt(FAR struct can_dev_s *dev);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
 #ifdef CONFIG_SAMV7_MCAN0
 static int  mcan0_interrupt(int irq, void *context);
@@ -1606,7 +1669,6 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  *
  * Input Parameters:
  *   priv - CAN-specific private data
- *   mbndx - The index of the mailbox that generated the interrupt
  *   msr - Applicable value from the mailbox status register
  *
  * Returned Value:
@@ -1614,8 +1676,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
-                                    uint32_t msr)
+static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, uint32_t msr)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   struct can_hdr_s hdr;
@@ -1632,14 +1693,13 @@ static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
  *
  * Input Parameters:
  *   priv - CAN-specific private data
- *   mbndx - The index of the mailbox that generated the interrupt
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void mcan_txinterrupt(FAR struct can_dev_s *dev, int mbndx)
+static inline void mcan_txinterrupt(FAR struct can_dev_s *dev)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
 
