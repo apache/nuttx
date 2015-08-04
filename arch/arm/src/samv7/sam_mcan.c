@@ -640,20 +640,84 @@
 #define MAILBOX_ADDRESS(a)        ((uint32_t)(a) & 0x0000fffc)
 
 /* Interrupts ***************************************************************/
-/* Common interrupts */
-
-#define MCAN_COMMON_INTS          (0) /* To be provided */
-
-/* Mode-independent RX-related interrupts */
-
-#define MCAN_RXINTS               (0) /* To be provided */
-
-/* Mode-independent TX-related interrupts
+/* Common interrupts
  *
- * MCAN_INT_TC -  Transmission Completed
+ *   MCAN_INT_TSW  - Timestamp Wraparound
+ *   MCAN_INT_MRAF - Message RAM Access Failure
+ *   MCAN_INT_TOO  - Timeout Occurred
+ *   MCAN_INT_ELO  - Error Logging Overflow
+ *   MCAN_INT_EP   - Error Passive
+ *   MCAN_INT_EW   - Warning Status
+ *   MCAN_INT_BO   - Bus_Off Status
+ *   MCAN_INT_WDI  - Watchdog Interrupt
  */
 
-#define MCAN_TXINTERRUPTS         MCAN_INT_TC
+#define MCAN_CMNERR_INTS   (MCAN_INT_MRAF | MCAN_INT_TOO | MCAN_INT_EP | \
+                            MCAN_INT_BO | MCAN_INT_WDI)
+#define MCAN_COMMON_INTS   MCAN_CMNERR_INTS
+
+/* RXFIFO mode interrupts
+ *
+ *   MCAN_INT_RF0N - Receive FIFO 0 New Message
+ *   MCAN_INT_RF0W - Receive FIFO 0 Watermark Reached
+ *   MCAN_INT_RF0F - Receive FIFO 0 Full
+ *   MCAN_INT_RF0L - Receive FIFO 0 Message Lost
+ *   MCAN_INT_RF1N - Receive FIFO 1 New Message
+ *   MCAN_INT_RF1W - Receive FIFO 1 Watermark Reached
+ *   MCAN_INT_RF1F - Receive FIFO 1 Full
+ *   MCAN_INT_RF1L - Receive FIFO 1 Message Lost
+ *   MCAN_INT_HPM  - High Priority Message Received
+ *
+ * Dedicated RX Buffer mode interrupts
+ *
+ *   MCAN_INT_DRX  - Message stored to Dedicated Receive Buffer
+ *
+ * Mode-independent RX-related interrupts
+ *
+ *   MCAN_INT_CRCE - Receive CRC Error
+ *   MCAN_INT_FOE  - Format Error
+ *   MCAN_INT_STE  - Stuff Error
+ */
+
+#define MCAN_RXCOMMON_INTS (MCAN_INT_CRCE | MCAN_INT_FOE | MCAN_INT_STE)
+#define MCAN_RXFIFO0_INTS  (MCAN_INT_RF0N | MCAN_INT_RF0W | MCAN_INT_RF0L | \
+                            MCAN_INT_RF0L)
+#define MCAN_RXFIFO1_INTS  (MCAN_INT_RF1N | MCAN_INT_RF1W | MCAN_INT_RF1L | \
+                            MCAN_INT_RF1L)
+#define MCAN_RXFIFO_INTS   (MCAN_RXFIFO0_INTS | MCAN_RXFIFO1_INTS | \
+                            MCAN_INT_HPM | MCAN_RXCOMMON_INTS)
+#define MCAN_RXDEDBUF_INTS (MCAN_INT_DRX | MCAN_RXCOMMON_INTS)
+
+#define MCAN_RXERR_INTS    (MCAN_INT_RF0L | MCAN_INT_RF1L | MCAN_INT_CRCE | \
+                            MCAN_INT_FOE | MCAN_INT_STE)
+
+/* TX FIFOQ mode interrupts
+ *
+ *   MCAN_INT_TFE  - Tx FIFO Empty
+ *
+ * TX Event FIFO interrupts
+ *
+ *   MCAN_INT_TEFN - Tx Event FIFO New Entry
+ *   MCAN_INT_TEFW - Tx Event FIFO Watermark Reached
+ *   MCAN_INT_TEFF - Tx Event FIFO Full
+ *   MCAN_INT_TEFL - Tx Event FIFO Element Lost
+ *
+ * Mode-independent TX-related interrupts
+ *
+ *   MCAN_INT_TC   - Transmission Completed
+ *   MCAN_INT_TCF  - Transmission Cancellation Finished
+ *   MCAN_INT_BE   - Bit Error
+ *   MCAN_INT_ACKE - Acknowledge Error
+ */
+
+#define MCAN_TXCOMMON_INTS (MCAN_INT_TC | MCAN_INT_TCF | MCAN_INT_BE | \
+                            MCAN_INT_ACKE)
+#define MCAN_TXFIFOQ_INTS  (MCAN_INT_TFE | MCAN_TXCOMMON_INTS)
+#define MCAN_TXEVFIFO_INTS (MCAN_INT_TEFN | MCAN_INT_TEFW | MCAN_INT_TEFF | \
+                            MCAN_INT_TEFL)
+#define MCAN_TXDEDBUG_INTS MCAN_TXCOMMON_INTS
+
+#define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_BE | MCAN_INT_ACKE)
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing MCAN */
@@ -807,8 +871,8 @@ static bool mcan_txempty(FAR struct can_dev_s *dev);
 static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
               int bufndx);
 #endif
-static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, uint32_t msr);
-static inline void mcan_txinterrupt(FAR struct can_dev_s *dev);
+static void mcan_receive(FAR struct can_dev_s *dev,
+              FAR uint32_t *rxbuffer, unsigned long nbytes);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
 #ifdef CONFIG_SAMV7_MCAN0
 static int  mcan0_interrupt(int irq, void *context);
@@ -1736,8 +1800,8 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     {
       flags   = irqsave();
       regval  = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
-      regval |= MCAN_TXINTERRUPTS;
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_TXINTERRUPTS);
+      regval |= priv->txints;
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->txints);
       irqrestore(flags);
     }
 
@@ -1822,7 +1886,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  *   True: Data is available
  *
  ***************************************************************************/
- 
+
 #if 0 /* Not Used */
 bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
 {
@@ -1842,48 +1906,79 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
 #endif
 
 /****************************************************************************
- * Name: mcan_rxinterrupt
+ * Name: mcan_receive
  *
  * Description:
- *   MCAN receive interrupt handler
+ *   Receive an MCAN messages
  *
  * Input Parameters:
- *   priv - MCAN-specific private data
- *   msr - Applicable value from the mailbox status register
+ *   dev - CAN-common state data
+ *   rxbuffer - The RX buffer containing the received messages
+ *   nbytes   - The length of the received message
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, uint32_t msr)
+static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
+                         unsigned long nbytes)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   struct can_hdr_s hdr;
+  uint32_t regval;
   int ret;
 
-#warning Missing logic
-}
+  /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
 
-/****************************************************************************
- * Name: mcan_txinterrupt
- *
- * Description:
- *   MCAN TX interrupt handler
- *
- * Input Parameters:
- *   priv - MCAN-specific private data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  arch_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
 
-static inline void mcan_txinterrupt(FAR struct can_dev_s *dev)
-{
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  /* Format the CAN header */
+  /* Work R0 contains the CAN ID */
 
-#warning Missing logic
+  regval        = *rxbuffer++;
+
+  hdr.ch_rtr    = 0;
+#ifdef CONFIG_CAN_EXTID
+  hdr.ch_unused = 0;
+
+  if ((regval & BUFFER_R0_XTD) != 0)
+    {
+      /* Save the extended ID of the newly received message */
+
+      hdr.ch_id     = (regval & BUFFER_R0_EXTID_MASK) >> BUFFER_R0_EXTID_SHIFT;
+      hdr.ch_extid  = true;
+    }
+  else
+    {
+      hdr.ch_id     = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
+      hdr.ch_extid  = false;
+    }
+#else
+  if ((regval & BUFFER_R0_XTD) != 0)
+    {
+      /* Drop any messages with extended IDs */
+
+      return;
+    }
+
+  /* Save the standard ID of the newly received message */
+
+  hdr.ch_id  = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
+#endif
+
+  /* Word R1 contains the DLC and timestamp */
+
+  regval     = *rxbuffer++;
+  hdr.ch_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
+
+  /* And provide the CAN message to the upper half logic */
+
+  ret = can_receive(dev, &hdr, (FAR uint8_t *)rxbuffer);
+  if (ret < 0)
+    {
+      canlldbg("ERROR: can_receive failed: %d\n", ret);
+    }
 }
 
 /****************************************************************************
@@ -1893,7 +1988,7 @@ static inline void mcan_txinterrupt(FAR struct can_dev_s *dev)
  *   Common MCAN interrupt handler
  *
  * Input Parameters:
- *   priv - MCAN-specific private data
+ *   dev - CAN-common state data
  *
  * Returned Value:
  *   None
@@ -1903,12 +1998,16 @@ static inline void mcan_txinterrupt(FAR struct can_dev_s *dev)
 static void mcan_interrupt(FAR struct can_dev_s *dev)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
+  FAR const struct sam_config_s *config;
   uint32_t ir;
   uint32_t ie;
   uint32_t pending;
-  int i;
+  uint32_t regval;
+  unsigned int nelem;
+  unsigned int ndx;
 
   DEBUGASSERT(priv && priv->config);
+  config = priv->config;
 
   /* Get the set of pending interrupts. */
 
@@ -1917,19 +2016,40 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
   pending = (ir & ie);
 
+  /* Check for common errors */
+
+  if ((pending & MCAN_CMNERR_INTS) != 0)
+    {
+      canlldbg("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
+
+      /* Clear the error indications */
+
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_CMNERR_INTS);
+    }
+
   /* Check for transmission errors */
-#warning Missing logic
+
+  if ((pending & MCAN_TXERR_INTS) != 0)
+    {
+      canlldbg("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
+
+      /* Clear the error indications */
+
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_TXERR_INTS);
+    }
 
   /* Check for successful completion of a transmission */
 
   if ((pending & MCAN_INT_TC) != 0)
     {
-      /* Clear the pending TX completion interrupt */
+      /* Clear the pending TX completion interrupt (and all
+       * other TX-related interrupts)
+       */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_INT_TC);
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->txints);
 
       /* Indicate that there is one more buffer free in the TX FIFOQ by
-       * "relasing" it.  This may have the effect of waking up a thread
+       * "releasing" it.  This may have the effect of waking up a thread
        * that has been waiting for a free TX FIFOQ buffer.
        *
        * REVISIT: TX dedicated buffers are not supported.
@@ -1938,15 +2058,20 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
       mcan_buffer_release(priv);
       DEBUGASSERT(priv->txfsem.semcount <= priv->ntxfifoq);
     }
+  else if ((pending & priv->txints) != 0)
+    {
+      /* Clear unhandled TX events */
 
-  /* Check for reception errors */
-#warning Missing logic
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->txints);
+    }
 
 #if 0 /* Not used */
   /* Check if a message has been stored to the dedicated RX buffer (DRX) */
 
   if ((pending & MCAN_INT_DRX) != 0))
     {
+      int i;
+
       /* Clear the pending DRX interrupt */
 
       mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_DRX);
@@ -1974,9 +2099,103 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
     }
 #endif
 
-  /* Check for successful reception of a message in an RXFIFO */
-#warning Missing logic
+  /* Check for reception errors */
 
+  if ((pending & MCAN_RXERR_INTS) != 0)
+    {
+      canlldbg("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
+
+      /* Clear the error indications */
+
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_RXERR_INTS);
+    }
+
+  /* Check for successful reception of a new message in RX FIFO0 */
+
+  if ((pending & MCAN_INT_RF0N) != 0)
+    {
+      DEBUGASSERT(priv->txfsem.semcount <= priv->nrxfifo0);
+
+      /* Clear the RX FIFO0 interrupt (and all other FIFO0-related
+       * interrupts)
+       */
+
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_RXFIFO0_INTS);
+      pending &= ~MCAN_RXFIFO0_INTS;
+
+      /* Handle the newly received message in FIFO0 */
+
+      regval = mcan_getreg(priv, SAM_MCAN_RXF0S_OFFSET);
+
+      if ((regval & MCAN_RXF0S_RF0L) != 0)
+        {
+          canlldbg("ERROR: Message lost: %08x\n", regval);
+        }
+      else
+        {
+          ndx    = (regval & MCAN_RXF0S_F0GI_MASK) >> MCAN_RXF0S_F0GI_SHIFT;
+          nelem  = (regval & MCAN_RXF0S_F0FL_MASK) >> MCAN_RXF0S_F0FL_SHIFT;
+
+          if (nelem > 0)
+            {
+              mcan_receive(dev,
+                           config->msgram.rxfifo0 +
+                             (ndx * priv->config->rxfifo0esize),
+                           nelem * priv->config->rxfifo0esize);
+            }
+        }
+
+      /* Acknowledge reading the FIFO entry */
+
+      mcan_putreg(priv, SAM_MCAN_RXF0A_OFFSET, ndx);
+    }
+
+  /* Check for successful reception of a new message in RX FIFO1 */
+
+  if ((pending & MCAN_INT_RF1N) != 0)
+    {
+      DEBUGASSERT(priv->txfsem.semcount <= priv->nrxfifo1);
+
+      /* Clear the RX FIFO1 interrupt (and all other FIFO1-related
+       * interrupts)
+       */
+
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_RXFIFO1_INTS);
+      pending &= ~MCAN_RXFIFO1_INTS;
+
+      /* Handle the newly received message in FIFO1 */
+
+      regval = mcan_getreg(priv, SAM_MCAN_RXF1S_OFFSET);
+
+      if ((regval & MCAN_RXF0S_RF0L) != 0)
+        {
+          canlldbg("ERROR: Message lost: %08x\n", regval);
+        }
+      else
+        {
+          ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
+          nelem  = (regval & MCAN_RXF1S_F1FL_MASK) >> MCAN_RXF1S_F1FL_SHIFT;
+
+          if (nelem > 0)
+            {
+              mcan_receive(dev,
+                           config->msgram.rxfifo1 +
+                             (ndx * priv->config->rxfifo1esize),
+                           nelem * priv->config->rxfifo1esize);
+            }
+        }
+
+      /* Acknowledge reading the FIFO entry */
+
+      mcan_putreg(priv, SAM_MCAN_RXF1A_OFFSET, ndx);
+    }
+
+  /* Clear unhandled RX interrupts */
+
+  if ((pending & priv->rxints) != 0)
+    {
+      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->rxints);
+    }
 }
 
 /****************************************************************************
@@ -2046,9 +2265,9 @@ static void mcan_configure_interrupts(FAR struct sam_mcan_s *priv)
   /* Select RX-related interrupts */
 
 #if 0 /* Dedicated RX buffers are not used by this driver */
-  priv->rxints = MCAN_INT_DRX | MCAN_COMMON_INTS;
+  priv->rxints = MCAN_RXDEDBUF_INTS | MCAN_COMMON_INTS;
 #else
-#  warning Missing Logic
+  priv->rxints = MCAN_RXFIFO_INTS | MCAN_COMMON_INTS;
 #endif
 
   /* Select RX-related interrupts */
