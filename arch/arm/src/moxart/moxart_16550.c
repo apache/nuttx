@@ -109,9 +109,11 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
           /* Update mode register with requested mode */
 
           vmode = getreg32(CONFIG_UART_MOXA_MODE_REG);
-          putreg32(CONFIG_UART_MOXA_MODE_REG, (vmode & ~(OP_MODE_MASK << 2 * bitm_off)) | ((opmode << 2 * bitm_off) & 0xffff));
+          vmode = (vmode & ~(OP_MODE_MASK << 2 * bitm_off)) | ((opmode << 2 * bitm_off) & 0xffff);
+          putreg32(vmode, CONFIG_UART_MOXA_MODE_REG);
 
           irqrestore(flags);
+          ret = OK;
           break;
         }
 
@@ -126,6 +128,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           irqrestore(flags);
           *(unsigned long *)arg = opmode;
+          ret = OK;
           break;
         }
     }
