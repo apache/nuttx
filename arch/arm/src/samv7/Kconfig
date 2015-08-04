@@ -1554,10 +1554,13 @@ endchoice # MCAN0 RX buffer element size
 
 config SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
 	int "MCAN0 dedicated RX buffer size"
-	default 16
+	default 0
 	range 0 64
+	depends on EXPERIMENTAL
 	---help---
 		Number of dedicated RX buffer elements for MCAN0.
+
+		NOTE: Dedicated RX buffers are not used in the current MCAN design.
 
 choice
 	prompt "MCAN0 TX buffer element size"
@@ -1598,10 +1601,13 @@ config SAMV7_MCAN0_TXEVENTFIFO_SIZE
 
 config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
 	int "MCAN0 dedicated TX buffer size"
-	default 4
+	default 0
 	range 0 32
+	depends on EXPERIMENTAL
 	---help---
 		Number of dedicated TX buffer elements for MCAN0.
+
+		NOTE: Dedicated TX buffers are not used in the current MCAN design.
 
 config SAMV7_MCAN0_TXFIFOQ_SIZE
 	int "MCAN0 dedicated TX FIFO queue"
@@ -1832,10 +1838,13 @@ endchoice # MCAN1 RX buffer element size
 
 config SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
 	int "MCAN1 dedicated RX buffer size"
-	default 16
+	default 0
 	range 0 64
+	depends on EXPERIMENTAL
 	---help---
 		Number of dedicated RX buffer elements for MCAN1.
+
+		NOTE: Dedicated RX buffers are not used in the current MCAN design.
 
 choice
 	prompt "MCAN1 TX buffer element size"
@@ -1876,10 +1885,13 @@ config SAMV7_MCAN1_TXEVENTFIFO_SIZE
 
 config SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
 	int "MCAN1 dedicated TX buffer size"
-	default 4
+	default 0
 	range 0 32
+	depends on EXPERIMENTAL
 	---help---
 		Number of dedicated TX buffer elements for MCAN1.
+
+		NOTE: Dedicated TX buffers are not used in the current MCAN design.
 
 config SAMV7_MCAN1_TXFIFOQ_SIZE
 	int "MCAN1 dedicated TX FIFO queue"

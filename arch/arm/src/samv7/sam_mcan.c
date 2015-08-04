@@ -56,9 +56,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/can.h>
 
+#include "cache.h"
 #include "up_internal.h"
 #include "up_arch.h"
-
 
 #include "chip/sam_matrix.h"
 #include "chip/sam_pinmap.h"
@@ -640,23 +640,23 @@
 #define MAILBOX_ADDRESS(a)        ((uint32_t)(a) & 0x0000fffc)
 
 /* Interrupts ***************************************************************/
+/* Common interrupts */
 
-/* RX related interrupts.
- *
- *
- */
+#define MCAN_COMMON_INTS          (0) /* To be provided */
 
-#define MCAN_RXINTERRUPTS 0 // To be provided
+/* Mode-independent RX-related interrupts */
 
-/* TX related interrupts.
+#define MCAN_RXINTS               (0) /* To be provided */
+
+/* Mode-independent TX-related interrupts
  *
  * MCAN_INT_TC -  Transmission Completed
  */
 
-#define MCAN_TXINTERRUPTS MCAN_INT_TC
+#define MCAN_TXINTERRUPTS         MCAN_INT_TC
 
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
+/* Non-standard debug that may be enabled just for testing MCAN */
 
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
@@ -700,20 +700,21 @@ struct sam_msgram_s
   uint32_t *txfifoq;       /* TX FIFO queue */
 };
 
-/* This structure provides the constant configuration of a CAN peripheral */
+/* This structure provides the constant configuration of a MCAN peripheral */
 
 struct sam_config_s
 {
   gpio_pinset_t rxpinset;   /* RX pin configuration */
   gpio_pinset_t txpinset;   /* TX pin configuration */
-  xcpt_t handler;           /* MCAN interrupt handler */
-  uintptr_t base;           /* Base address of the CAN control registers */
+  xcpt_t handler;           /* MCAN common interrupt handler */
+  uintptr_t base;           /* Base address of the MCAN registers */
   uint32_t baud;            /* Configured baud */
   uint32_t btp;             /* Bit timing/prescaler register setting */
   uint32_t fbtp;            /* Fast bit timing/prescaler register setting */
   uint8_t port;             /* MCAN port number (1 or 2) */
   uint8_t pid;              /* MCAN peripheral ID */
-  uint8_t irq;              /* MCAN peripheral IRQ number */
+  uint8_t irq0;             /* MCAN peripheral IRQ number for interrupt line 0 */
+  uint8_t irq1;             /* MCAN peripheral IRQ number for interrupt line 1 */
   uint8_t mode;             /* See enum sam_canmode_e */
   uint8_t nstdfilters;      /* Number of standard filters (up to 128) */
   uint8_t nextfilters;      /* Number of extended filters (up to 64) */
@@ -740,17 +741,17 @@ struct sam_config_s
   struct sam_msgram_s msgram;
 };
 
-/* This structure provides the current state of a CAN peripheral */
+/* This structure provides the current state of a MCAN peripheral */
 
 struct sam_mcan_s
 {
   const struct sam_config_s *config; /* The constant configuration */
   bool initialized;         /* True: Device has been initialized */
   bool  txenabled;          /* True: TX interrupts have been enabled */
-  sem_t exclsem;            /* Enforces mutually exclusive access */
-#if 0 // REVISIT -- may apply only to SAMA5
-  uint32_t frequency;       /* CAN clock frequency */
-#endif
+  sem_t locksem;            /* Enforces mutually exclusive access */
+  sem_t txfsem;             /* Used to wait for TX FIFO availability */
+  uint32_t rxints;          /* Configured RX interrupts */
+  uint32_t txints;          /* Configured TX interrupts */
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
@@ -766,7 +767,8 @@ struct sam_mcan_s
 /* MCAN Register access */
 
 static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset);
-static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval);
+static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
+              uint32_t regval);
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
 static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 #else
@@ -775,8 +777,11 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 
 /* Semaphore helpers */
 
-static void mcan_semtake(FAR struct sam_mcan_s *priv);
-#define mcan_semgive(priv) sem_post(&priv->exclsem)
+static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
+#define mcan_dev_unlock(priv) sem_post(&priv->locksem)
+
+static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
+#define mcan_buffer_release(priv) sem_post(&priv->txfsem)
 
 /* Mailboxes */
 
@@ -789,14 +794,19 @@ static int  mcan_setup(FAR struct can_dev_s *dev);
 static void mcan_shutdown(FAR struct can_dev_s *dev);
 static void mcan_rxint(FAR struct can_dev_s *dev, bool enable);
 static void mcan_txint(FAR struct can_dev_s *dev, bool enable);
-static int  mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
+static int  mcan_ioctl(FAR struct can_dev_s *dev, int cmd,
+              unsigned long arg);
 static int  mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
 static int  mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
 static bool mcan_txready(FAR struct can_dev_s *dev);
 static bool mcan_txempty(FAR struct can_dev_s *dev);
 
-/* CAN interrupt handling */
+/* MCAN interrupt handling */
 
+#if 0 /* Not Used */
+static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
+              int bufndx);
+#endif
 static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, uint32_t msr);
 static inline void mcan_txinterrupt(FAR struct can_dev_s *dev);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
@@ -809,7 +819,8 @@ static int  mcan1_interrupt(int irq, void *context);
 
 /* Hardware initialization */
 
-static int  mcan_hwinitialize(FAR struct sam_mcan_s *priv);
+static void mcan_configure_interrupts(FAR struct sam_mcan_s *priv);
+static int  mcan_hw_initialize(FAR struct sam_mcan_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -849,7 +860,7 @@ static const struct sam_config_s g_mcan0const =
                       MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) | MCAN_FBTP_FSJW(MCAN0_FSJW),
   .port             = 0,
   .pid              = SAM_PID_MCAN00,
-  .irq              = SAM_IRQ_MCAN00,
+  .irq0             = SAM_IRQ_MCAN01,
 #if defined(CONFIG_SAMV7_MCAN0_ISO11899_1)
   .mode             = MCAN_ISO11898_1_MODE,
 #elif defined(CONFIG_SAMV7_MCAN0_FD)
@@ -920,7 +931,7 @@ static const struct sam_config_s g_mcan1const =
                       MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) | MCAN_FBTP_FSJW(MCAN1_FSJW),
   .port             = 1,
   .pid              = SAM_PID_MCAN10,
-  .irq              = SAM_IRQ_MCAN10,
+  .irq0             = SAM_IRQ_MCAN11,
 #if defined(CONFIG_SAMV7_MCAN1_ISO11899_1)
   .mode             = MCAN_ISO11898_1_MODE,
 #elif defined(CONFIG_SAMV7_MCAN1_FD)
@@ -978,10 +989,10 @@ static struct can_dev_s g_mcan1dev;
  * Name: mcan_getreg
  *
  * Description:
- *   Read the value of a CAN register.
+ *   Read the value of a MCAN register.
  *
  * Input Parameters:
- *   priv - A reference to the CAN peripheral state
+ *   priv - A reference to the MCAN peripheral state
  *   offset - The offset to the register to read
  *
  * Returned Value:
@@ -1056,10 +1067,10 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
  * Name: mcan_putreg
  *
  * Description:
- *   Set the value of a CAN register.
+ *   Set the value of a MCAN register.
  *
  * Input Parameters:
- *   priv - A reference to the CAN peripheral state
+ *   priv - A reference to the MCAN peripheral state
  *   offset - The offset to the register to write
  *   regval - The value to write to the register
  *
@@ -1096,10 +1107,10 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
  * Name: mcan_dumpregs
  *
  * Description:
- *   Dump the contents of all CAN control registers
+ *   Dump the contents of all MCAN control registers
  *
  * Input Parameters:
- *   priv - A reference to the CAN peripheral state
+ *   priv - A reference to the MCAN peripheral state
  *
  * Returned Value:
  *   None
@@ -1184,20 +1195,21 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 #endif
 
 /****************************************************************************
- * Name: mcan_semtake
+ * Name: mcan_dev_lock
  *
  * Description:
- *   Take a semaphore handling any exceptional conditions
+ *   Take the semaphore that enforces mutually exclusive access to device
+ *   structures, handling any exceptional conditions
  *
  * Input Parameters:
- *   priv - A reference to the CAN peripheral state
+ *   priv - A reference to the MCAN peripheral state
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-static void mcan_semtake(FAR struct sam_mcan_s *priv)
+static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
 {
   int ret;
 
@@ -1208,7 +1220,39 @@ static void mcan_semtake(FAR struct sam_mcan_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
+      ret = sem_wait(&priv->locksem);
+      DEBUGASSERT(ret == 0 || errno == EINTR);
+    }
+  while (ret < 0);
+}
+
+/****************************************************************************
+ * Name: mcan_buffer_reserve
+ *
+ * Description:
+ *   Take the semaphore that indicates the availability of a TX FIFOQ
+ *   buffer, handling any exceptional conditions
+ *
+ * Input Parameters:
+ *   priv - A reference to the MCAN peripheral state
+ *
+ * Returned Value:
+ *  None
+ *
+ ****************************************************************************/
+
+static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
+{
+  int ret;
+
+  /* Wait until we successfully get the semaphore.  EINTR is the only
+   * expected 'failure' (meaning that the wait for the semaphore was
+   * interrupted by a signal.
+   */
+
+  do
+    {
+      ret = sem_wait(&priv->txfsem);
       DEBUGASSERT(ret == 0 || errno == EINTR);
     }
   while (ret < 0);
@@ -1221,14 +1265,14 @@ static void mcan_semtake(FAR struct sam_mcan_s *priv)
  *   Configure and enable mailbox(es) for reception
  *
  * Input Parameter:
- *   priv - A pointer to the private data structure for this CAN peripheral
+ *   priv - A pointer to the private data structure for this MCAN peripheral
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  * Assumptions:
- *   Caller has exclusive access to the CAN data structures
- *   CAN interrupts are disabled at the NVIC
+ *   Caller has exclusive access to the MCAN data structures
+ *   MCAN interrupts are disabled at the NVIC
  *
  ****************************************************************************/
 
@@ -1244,7 +1288,7 @@ static int mcan_recvsetup(FAR struct sam_mcan_s *priv)
  * Name: mcan_reset
  *
  * Description:
- *   Reset the CAN device.  Called early to initialize the hardware. This
+ *   Reset the MCAN device.  Called early to initialize the hardware. This
  *   function is called, before mcan_setup() and on error conditions.
  *
  * Input Parameters:
@@ -1266,31 +1310,31 @@ static void mcan_reset(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("CAN%d\n", config->port);
+  canllvdbg("MCAN%d\n", config->port);
   UNUSED(config);
 
-  /* Get exclusive access to the CAN peripheral */
+  /* Get exclusive access to the MCAN peripheral */
 
-  mcan_semtake(priv);
+  mcan_dev_lock(priv);
 
   /* Disable all interrupts */
 
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
   mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
 
-  /* Disable the CAN controller */
+  /* Disable the MCAN controller */
 #warning Missing logic
-  mcan_semgive(priv);
+  mcan_dev_unlock(priv);
 }
 
 /****************************************************************************
  * Name: mcan_setup
  *
  * Description:
- *   Configure the CAN. This method is called the first time that the CAN
+ *   Configure the MCAN. This method is called the first time that the MCAN
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching CAN interrupts.
- *   All CAN interrupts are disabled upon return.
+ *   This setup includes configuring and attaching MCAN interrupts.
+ *   All MCAN interrupts are disabled upon return.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -1312,29 +1356,38 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("CAN%d pid: %d\n", config->port, config->pid);
+  canllvdbg("MCAN%d pid: %d\n", config->port, config->pid);
 
-  /* Get exclusive access to the CAN peripheral */
+  /* Get exclusive access to the MCAN peripheral */
 
-  mcan_semtake(priv);
+  mcan_dev_lock(priv);
 
-  /* CAN hardware initialization */
+  /* MCAN hardware initialization */
 
-  ret = mcan_hwinitialize(priv);
+  ret = mcan_hw_initialize(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d H/W initialization failed: %d\n", config->port, ret);
+      canlldbg("MCAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
   mcan_dumpregs(priv, "After hardware initialization");
 
-  /* Attach the CAN interrupt handler */
+  /* Attach the MCAN interrupt handlers */
 
-  ret = irq_attach(config->irq, config->handler);
+  ret = irq_attach(config->irq0, config->handler);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d IRQ (%d)", config->port, config->irq);
+      canlldbg("Failed to attach MCAN%d line 0 IRQ (%d)",
+      config->port, config->irq0);
+      return ret;
+    }
+
+  ret = irq_attach(config->irq1, config->handler);
+  if (ret < 0)
+    {
+      canlldbg("Failed to attach MCAN%d line 1 IRQ (%d)",
+      config->port, config->irq1);
       return ret;
     }
 
@@ -1343,7 +1396,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = mcan_recvsetup(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d H/W initialization failed: %d\n", config->port, ret);
+      canlldbg("MCAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -1352,8 +1405,9 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   /* Enable the interrupts at the NVIC (they are still disabled at the MCAN
    * peripheral). */
 
-  up_enable_irq(config->irq);
-  mcan_semgive(priv);
+  up_enable_irq(config->irq0);
+  up_enable_irq(config->irq1);
+  mcan_dev_unlock(priv);
   return OK;
 }
 
@@ -1361,7 +1415,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
  * Name: mcan_shutdown
  *
  * Description:
- *   Disable the CAN.  This method is called when the CAN device is closed.
+ *   Disable the MCAN.  This method is called when the MCAN device is closed.
  *   This method reverses the operation the setup method.
  *
  * Input Parameters:
@@ -1383,24 +1437,26 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("CAN%d\n", config->port);
+  canllvdbg("MCAN%d\n", config->port);
 
-  /* Get exclusive access to the CAN peripheral */
+  /* Get exclusive access to the MCAN peripheral */
 
-  mcan_semtake(priv);
+  mcan_dev_lock(priv);
 
-  /* Disable the CAN interrupts */
+  /* Disable the MCAN interrupts */
 
-  up_disable_irq(config->irq);
+  up_disable_irq(config->irq0);
+  up_disable_irq(config->irq1);
 
-  /* Detach the CAN interrupt handler */
+  /* Detach the MCAN interrupt handler */
 
-  irq_detach(config->irq);
+  irq_detach(config->irq0);
+  irq_detach(config->irq1);
 
   /* And reset the hardware */
 
   mcan_reset(dev);
-  mcan_semgive(priv);
+  mcan_dev_unlock(priv);
 }
 
 /****************************************************************************
@@ -1425,7 +1481,7 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("CAN%d enable: %d\n", priv->config->port, enable);
+  canllvdbg("MCAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the receive interrupts */
 
@@ -1434,11 +1490,11 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
 
   if (enable)
     {
-      regval |= MCAN_RXINTERRUPTS;
+      regval |= priv->rxints | MCAN_COMMON_INTS;
     }
   else
     {
-      regval &= ~MCAN_RXINTERRUPTS;
+      regval &= ~priv->rxints;
     }
 
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, regval);
@@ -1467,7 +1523,7 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("CAN%d enable: %d\n", priv->config->port, enable);
+  canllvdbg("MCAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the receive interrupts */
 
@@ -1476,12 +1532,12 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
 
   if (enable)
     {
-      regval |= MCAN_TXINTERRUPTS;
+      regval |= priv->txints | MCAN_COMMON_INTS;
       priv->txenabled = true;
     }
   else
     {
-      regval &= ~MCAN_TXINTERRUPTS;
+      regval &= ~priv->txints;
       priv->txenabled = false;
     }
 
@@ -1542,7 +1598,7 @@ static int mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  *    Byte 0:      Bits 0-7: Bits 3-10 of the 11-bit CAN identifier
  *    Byte 1:      Bits 5-7: Bits 0-2 of the 11-bit CAN identifier
- *                 Bit 4:    Remote Tranmission Request (RTR)
+ *                 Bit 4:    Remote Transmission Request (RTR)
  *                 Bits 0-3: Data Length Code (DLC)
  *    Bytes 2-10: CAN data
  *
@@ -1557,30 +1613,120 @@ static int mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 {
   FAR struct sam_mcan_s *priv;
+  FAR const struct sam_config_s *config = priv->config;
+  FAR uint32_t *txbuffer = 0;
+  FAR const uint8_t *src;
+  FAR uint8_t *dest;
   irqstate_t flags;
   uint32_t regval;
+  unsigned int msglen;
+  unsigned int ndx;
+  unsigned int i;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
+  config = priv->config;
 
-  canllvdbg("CAN%d\n", priv->config->port);
-  canllvdbg("CAN%d ID: %d DLC: %d\n",
-            priv->config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  canllvdbg("MCAN%d\n", config->port);
+  canllvdbg("MCAN%d ID: %d DLC: %d\n",
+            config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+
+  /* That that FIFO elements were configured.
+   *
+   * REVISIT: Dedicated TX buffers are not used by this driver.
+   */
+
+  DEBUGASSERT(config->ntxfifoq > 0);
+
+  /* Reserve a buffer for the transmission, waiting if necessary.  When
+   * mcan_buffer_reserve() returns, we are guaranteed the the TX FIFOQ is
+   * not full and cannot become full at least until we add our packet to
+   * the FIFO.
+   *
+   * REVISIT: This needs to be extended in order to handler case where
+   * the MCAN device was opened O_NONBLOCK.
+   */
+
+  mcan_buffer_reserve(priv);
+
+  /* Get exclusive access to the MCAN peripheral */
+
+  mcan_dev_lock(priv);
+
+  /* Get our reserved Tx FIFO/queue put index */
+
+  regval = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+  DEBUGASSERT((regval & MCAN_TXFQS_TFQF) == 0);
+
+  ndx = (regval & MCAN_TXFQS_TFQPI_MASK) >> MCAN_TXFQS_TFQPI_SHIFT;
+
+  /* And the TX buffer corresponding to this index */
+
+  txbuffer = config->msgram.txdedicated + ndx * config->txbufferesize;
+
+  /* Format the TX FIFOQ entry
+   *
+   * Format word T1:
+   *   Transfer message ID (ID)          - Value from message structure
+   *   Remote Transmission Request (RTR) - Value from message structure
+   *   Extended Identifier (XTD)         - Depends on configuration.
+   */
 
 #ifdef CONFIG_CAN_EXTID
   DEBUGASSERT(msg->cm_hdr.ch_extid);
   DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 29));
+
+  regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
 #else
   DEBUGASSERT(!msg->cm_hdr.ch_extid);
   DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 11));
+
+  regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
 #endif
 
-  /* Get exclusive access to the CAN peripheral */
+  if (msg->cm_hdr.ch_rtr)
+    {
+      regval |= BUFFER_R0_RTR;
+    }
 
-  mcan_semtake(priv);
+  txbuffer[0] = regval;
 
-#warning Missing logic
+  /* Format word T1:
+   *   Data Length Code (DLC)            - Value from message structure
+   *   Event FIFO Control (EFC)          - Do not store events.
+   *   Message Marker (MM)               - Always zero
+   */
+
+  txbuffer[1] = BUFFER_R1_DLC(msg->cm_hdr.ch_dlc);
+
+  /* Followed by the amount of data corresponding to the DLC (T2..) */
+
+  dest = (FAR uint8_t*)&txbuffer[2];
+  src  = msg->cm_data;
+
+  for (i = 0; i < msg->cm_hdr.ch_dlc; i++)
+    {
+      /* Little endian is assumed */
+
+      *dest++ = *src++;
+    }
+
+  /* Flush the D-Cache to memory before initiating the tranfer */
+
+  msglen = 2 * sizeof(uint32_t) + msg->cm_hdr.ch_dlc;
+  arch_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + msglen);
+  UNUSED(msglen);
+
+  /* Enable transmit interrupts from the TX FIFOQ buffer by setting TC
+   * interrupt bit in IR (also requires that the TC interrupt is enabled)
+   */
+
+  mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, (1 << ndx));
+
+  /* And request to send the packet */
+
+  mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
 
   /* If we have not been asked to suppress TX interrupts, then enable
    * TX interrupts now.
@@ -1595,7 +1741,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       irqrestore(flags);
     }
 
-  mcan_semgive(priv);
+  mcan_dev_unlock(priv);
   return OK;
 }
 
@@ -1603,13 +1749,13 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
  * Name: mcan_txready
  *
  * Description:
- *   Return true if the CAN hardware can accept another TX message.
+ *   Return true if the MCAN hardware can accept another TX message.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
  *
  * Returned Value:
- *   True if the CAN hardware is ready to accept another TX message.
+ *   True if the MCAN hardware is ready to accept another TX message.
  *
  ****************************************************************************/
 
@@ -1618,13 +1764,13 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   bool txready;
 
-  /* Get exclusive access to the CAN peripheral */
+  /* Get exclusive access to the MCAN peripheral */
 
-  mcan_semtake(priv);
+  mcan_dev_lock(priv);
 
 #warning Missing logic
 
-  mcan_semgive(priv);
+  mcan_dev_unlock(priv);
   return txready;
 }
 
@@ -1632,7 +1778,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
  * Name: mcan_txempty
  *
  * Description:
- *   Return true if all message have been sent.  If for example, the CAN
+ *   Return true if all message have been sent.  If for example, the MCAN
  *   hardware implements FIFOs, then this would mean the transmit FIFO is
  *   empty.  This method is called when the driver needs to make sure that
  *   all characters are "drained" from the TX hardware before calling
@@ -1642,7 +1788,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
  *   dev - An instance of the "upper half" can driver state structure.
  *
  * Returned Value:
- *   True if there are no pending TX transfers in the CAN hardware.
+ *   True if there are no pending TX transfers in the MCAN hardware.
  *
  ****************************************************************************/
 
@@ -1651,24 +1797,58 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   bool txempty;
 
-  /* Get exclusive access to the CAN peripheral */
+  /* Get exclusive access to the MCAN peripheral */
 
-  mcan_semtake(priv);
+  mcan_dev_lock(priv);
 
 #warning Missing logic
 
-  mcan_semgive(priv);
+  mcan_dev_unlock(priv);
   return txempty;
 }
+
+/****************************************************************************
+ * Name: mcan_dedicated_rxbuffer_available
+ *
+ * Description:
+ *   Check if data is available in a dedicated RX buffer.
+ *
+ * Input Parameters:
+ *   priv   - MCAN-specific private data
+ *   bufndx - Buffer index
+ *
+ *   None
+ * Returned Value:
+ *   True: Data is available
+ *
+ ***************************************************************************/
+ 
+#if 0 /* Not Used */
+bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
+{
+  if (bufndx < 32)
+    {
+      return (bool)(mcan->MCAN_NDAT1 & (1 << bufndx));
+    }
+  else if (bufndx < 64)
+    {
+      return (bool)(mcan->MCAN_NDAT1 & (1 << (bufndx - 32)));
+    }
+  else
+    {
+      return false;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: mcan_rxinterrupt
  *
  * Description:
- *   CAN RX mailbox interrupt handler
+ *   MCAN receive interrupt handler
  *
  * Input Parameters:
- *   priv - CAN-specific private data
+ *   priv - MCAN-specific private data
  *   msr - Applicable value from the mailbox status register
  *
  * Returned Value:
@@ -1689,10 +1869,10 @@ static inline void mcan_rxinterrupt(FAR struct can_dev_s *dev, uint32_t msr)
  * Name: mcan_txinterrupt
  *
  * Description:
- *   CAN TX mailbox interrupt handler
+ *   MCAN TX interrupt handler
  *
  * Input Parameters:
- *   priv - CAN-specific private data
+ *   priv - MCAN-specific private data
  *
  * Returned Value:
  *   None
@@ -1710,10 +1890,10 @@ static inline void mcan_txinterrupt(FAR struct can_dev_s *dev)
  * Name: mcan_interrupt
  *
  * Description:
- *   Common CAN interrupt handler
+ *   Common MCAN interrupt handler
  *
  * Input Parameters:
- *   priv - CAN-specific private data
+ *   priv - MCAN-specific private data
  *
  * Returned Value:
  *   None
@@ -1726,6 +1906,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
   uint32_t ir;
   uint32_t ie;
   uint32_t pending;
+  int i;
 
   DEBUGASSERT(priv && priv->config);
 
@@ -1746,12 +1927,54 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
       /* Clear the pending TX completion interrupt */
 
       mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_INT_TC);
+
+      /* Indicate that there is one more buffer free in the TX FIFOQ by
+       * "relasing" it.  This may have the effect of waking up a thread
+       * that has been waiting for a free TX FIFOQ buffer.
+       *
+       * REVISIT: TX dedicated buffers are not supported.
+       */
+
+      mcan_buffer_release(priv);
+      DEBUGASSERT(priv->txfsem.semcount <= priv->ntxfifoq);
     }
 
   /* Check for reception errors */
 #warning Missing logic
 
-  /* Check for successful reception of a message */
+#if 0 /* Not used */
+  /* Check if a message has been stored to the dedicated RX buffer (DRX) */
+
+  if ((pending & MCAN_INT_DRX) != 0))
+    {
+      /* Clear the pending DRX interrupt */
+
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_DRX);
+
+      /* Process each dedicated RX buffer */
+
+      for (i = 0; i < config->nrxdedicated; i++)
+        {
+          uint32_t *rxdedicated = &config->rxdedicated[i];
+
+          /* Check if datat is available in this dedicated RX buffer */
+
+          if (mcan_dedicated_rxbuffer_available(priv, i))
+            {
+              /* Yes.. Invalidate the D-Cache to that data will be re-
+               * fetched from RAM.
+               *
+               * REVISIT:  This will require 32-byte alignment.
+               */
+
+              arch_invalidata_dcache();
+              mcan_dedicated_rxbuffer_receive(priv);
+            }
+        }
+    }
+#endif
+
+  /* Check for successful reception of a message in an RXFIFO */
 #warning Missing logic
 
 }
@@ -1763,7 +1986,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
  *   MCAN0 interrupt handler
  *
  * Input Parameters:
- *   irq - The IRQ number of the interrupt.
+ *   irq     - The IRQ number of the interrupt.
  *   context - The register state save array at the time of the interrupt.
  *
  * Returned Value:
@@ -1786,7 +2009,7 @@ static int mcan0_interrupt(int irq, void *context)
  *   MCAN1 interrupt handler
  *
  * Input Parameters:
- *   irq - The IRQ number of the interrupt.
+ *   irq     - The IRQ number of the interrupt.
  *   context - The register state save array at the time of the interrupt.
  *
  * Returned Value:
@@ -1803,70 +2026,85 @@ static int mcan1_interrupt(int irq, void *context)
 #endif
 
 /****************************************************************************
- * Name: mcan_hwinitialize
+ * Name: mcan_configure_interrupts
  *
  * Description:
- *   CAN cell initialization
+ *   Configure interrupt lines.
  *
  * Input Parameter:
- *   priv - A pointer to the private data structure for this CAN peripheral
+ *   priv - A pointer to the private data structure for this MCAN peripheral
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static int mcan_hwinitialize(struct sam_mcan_s *priv)
+static void mcan_configure_interrupts(FAR struct sam_mcan_s *priv)
+{
+  uint32_t regval;
+
+  /* Select RX-related interrupts */
+
+#if 0 /* Dedicated RX buffers are not used by this driver */
+  priv->rxints = MCAN_INT_DRX | MCAN_COMMON_INTS;
+#else
+#  warning Missing Logic
+#endif
+
+  /* Select RX-related interrupts */
+
+#if 0 /* Dedicated RX buffers are not used by this driver */
+#else
+#  warning Missing Logic
+#endif
+
+  /* Direct to Line 0.
+   * REVISIT: Only interrupt line 0 is used by this driver.
+   */
+
+  regval  = mcan_getreg(priv, SAM_MCAN_ILS_OFFSET);
+  regval |= (priv->rxints | priv->txints | MCAN_COMMON_INTS);
+  mcan_putreg(priv, SAM_MCAN_ILS_OFFSET, regval);
+
+  /* Make sure that interrupt line 0 is enabled. */
+
+  regval  = mcan_getreg(priv, SAM_MCAN_ILE_OFFSET);
+  regval |= MCAN_ILE_EINT0;
+  mcan_putreg(priv, SAM_MCAN_ILE_OFFSET, regval);
+
+  /* Clear any pending interrupts but do not yet enable a interrupt */
+
+  mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_INT_ALL);
+}
+
+/****************************************************************************
+ * Name: mcan_hw_initialize
+ *
+ * Description:
+ *   MCAN hardware initialization
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this MCAN peripheral
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int mcan_hw_initialize(struct sam_mcan_s *priv)
 {
   FAR const struct sam_config_s *config = priv->config;
   FAR uint32_t *msgram;
   uint32_t regval;
   uint32_t cntr;
   uint32_t cmr;
-  int ret;
 
-  canllvdbg("CAN%d\n", config->port);
+  canllvdbg("MCAN%d\n", config->port);
 
-  /* Configure CAN pins */
+  /* Configure MCAN pins */
 
   sam_configgpio(config->rxpinset);
   sam_configgpio(config->txpinset);
-
-#if 0 // REVISIT -- may apply only to SAMA5
-  /* Determine the maximum CAN peripheral clock frequency */
-
-  mck = BOARD_MCK_FREQUENCY;
-  if (mck <= SAM_MCAN_MAXPERCLK)
-    {
-      priv->frequency = mck;
-      regval          = PMC_PCR_DIV1;
-    }
-  else if ((mck >> 1) <= SAM_MCAN_MAXPERCLK)
-    {
-      priv->frequency = (mck >> 1);
-      regval          = PMC_PCR_DIV2;
-    }
-  else if ((mck >> 2) <= SAM_MCAN_MAXPERCLK)
-    {
-      priv->frequency = (mck >> 2);
-      regval          = PMC_PCR_DIV4;
-    }
-  else if ((mck >> 3) <= SAM_MCAN_MAXPERCLK)
-    {
-      priv->frequency = (mck >> 3);
-      regval          = PMC_PCR_DIV8;
-    }
-  else
-    {
-      candbg("ERROR: Cannot realize CAN input frequency\n");
-      return -EINVAL;
-    }
-
-  /* Set the maximum CAN peripheral clock frequency */
-
-  regval |= PMC_PCR_PID(config->pid) | PMC_PCR_CMD | PMC_PCR_EN;
-  mcan_putreg(priv, SAM_PMC_PCR, regval);
-#endif
 
   /* Enable peripheral clocking */
 
@@ -1905,8 +2143,10 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
   mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
 
-  /* All interrupts directed to Line 0.  But disable bot interrupt line 0
+  /* All interrupts directed to Line 0.  But disable both interrupt lines 0
    * and 1 for now.
+   *
+   * REVISIT: Only interrupt line 0 is used by this driver.
    */
 
   mcan_putreg(priv, SAM_MCAN_ILS_OFFSET, 0);
@@ -2033,7 +2273,10 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
   while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & (MCAN_CCCR_FDBS | MCAN_CCCR_FDO)) != 0);
 #endif
 
-  /* Enable FIFO/Queue mode */
+  /* Enable FIFO/Queue mode
+   *
+   * REVISIT: Dedicated TX buffers are not used.
+   */
 
   regval  = mcan_getreg(priv, SAM_MCAN_TXBC_OFFSET);
   regval |= MCAN_TXBC_TFQM;
@@ -2059,6 +2302,10 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
     }
 #endif
 
+  /* Configure interrupt lines */
+
+  mcan_configure_interrupts(priv);
+
   /* Disable initialization mode to enable normal operation */
 
   regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
@@ -2078,8 +2325,8 @@ static int mcan_hwinitialize(struct sam_mcan_s *priv)
  *   Initialize the selected MCAN port
  *
  * Input Parameter:
- *   port - Port number (for hardware that has multiple CAN interfaces),
- *          0=MCAN0, 1=NCAN1
+ *   port - Port number (for hardware that has multiple MCAN interfaces),
+ *          0=MCAN0, 1=MCAN1
  *
  * Returned Value:
  *   Valid CAN device structure reference on success; a NULL on failure
@@ -2159,7 +2406,8 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
       priv->config      = config;
       priv->initialized = true;
 
-      sem_init(&priv->exclsem, 0, 1);
+      sem_init(&priv->locksem, 0, 1);
+      sem_init(&priv->txfsem, 0, config->ntxfifoq);
 
       dev->cd_ops       = &g_mcanops;
       dev->cd_priv      = (FAR void *)priv;
