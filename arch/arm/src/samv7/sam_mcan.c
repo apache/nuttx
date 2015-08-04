@@ -2093,7 +2093,18 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
                */
 
               arch_invalidata_dcache();
-              mcan_dedicated_rxbuffer_receive(priv);
+              mcan_receive(priv, rxdedicated, config->rxbufferesize);
+
+              /* Clear the new data flag for the buffer */
+
+              if (i < 32)
+                {
+                  sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << i);
+                }
+              else
+                {
+                  sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << (i - 32));
+                }
             }
         }
     }
@@ -2141,7 +2152,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
               mcan_receive(dev,
                            config->msgram.rxfifo0 +
                              (ndx * priv->config->rxfifo0esize),
-                           nelem * priv->config->rxfifo0esize);
+                           priv->config->rxfifo0esize);
             }
         }
 
@@ -2181,7 +2192,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
               mcan_receive(dev,
                            config->msgram.rxfifo1 +
                              (ndx * priv->config->rxfifo1esize),
-                           nelem * priv->config->rxfifo1esize);
+                           priv->config->rxfifo1esize);
             }
         }
 
