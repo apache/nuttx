@@ -715,7 +715,7 @@
 #define MCAN_TXFIFOQ_INTS  (MCAN_INT_TFE | MCAN_TXCOMMON_INTS)
 #define MCAN_TXEVFIFO_INTS (MCAN_INT_TEFN | MCAN_INT_TEFW | MCAN_INT_TEFF | \
                             MCAN_INT_TEFL)
-#define MCAN_TXDEDBUG_INTS MCAN_TXCOMMON_INTS
+#define MCAN_TXDEDBUF_INTS MCAN_TXCOMMON_INTS
 
 #define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_BE | MCAN_INT_ACKE)
 
@@ -847,9 +847,12 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
 #define mcan_buffer_release(priv) sem_post(&priv->txfsem)
 
-/* Mailboxes */
+/* MCAN helpers */
 
-static int  mcan_recvsetup(FAR struct sam_mcan_s *priv);
+static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc);
+#if 0 /* Not used */
+static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
+#endif
 
 /* CAN driver methods */
 
@@ -1323,30 +1326,99 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 }
 
 /****************************************************************************
- * Name: mcan_recvsetup
+ * Name: mcan_dlc2bytes and mcan_bytes2dlc
  *
  * Description:
- *   Configure and enable mailbox(es) for reception
+ *   In the CAN FD format, the coding of the DLC differs from the standard
+ *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
+ *   CAN, the codes 9 to 15, which in standard CAN all code a data field of
+ *   8 bytes, are encoded.
  *
  * Input Parameter:
- *   priv - A pointer to the private data structure for this MCAN peripheral
+ *   priv   - A pointer to the private data structure for this MCAN peripheral
+ *   dlc    - the DLC to convert to a byte count
+ *   nbytes - the byte count to convert to a DLC
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- * Assumptions:
- *   Caller has exclusive access to the MCAN data structures
- *   MCAN interrupts are disabled at the NVIC
+ *   The converted value
  *
  ****************************************************************************/
 
-static int mcan_recvsetup(FAR struct sam_mcan_s *priv)
+static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
 {
-  FAR const struct sam_config_s *config = priv->config;
+  if (dlc > 8)
+    {
+      if (priv->config->mode == MCAN_ISO11898_1_MODE)
+        {
+          return 8;
+        }
+      else
+        {
+          switch (dlc)
+            {
+              case 9:
+                return 12;
+              case 10:
+                return 16;
+              case 11:
+                return 20;
+              case 12:
+                return 24;
+              case 13:
+                return 32;
+              case 14:
+                return 48;
+              default:
+              case 15:
+                return 64;
+            }
+        }
+    }
 
-#warning Missing logic
-  return OK;
+  return dlc;
 }
+
+#if 0 /* Not used */
+static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
+{
+  if (nbytes <= 8)
+    {
+      return nbytes;
+    }
+  else if (priv->mode == MCAN_ISO11898_1_MODE)
+    {
+      return 8;
+    }
+  else if (nbytes <= 12)
+    {
+      return 9;
+    }
+  else if (nbytes <= 16)
+    {
+      return 10;
+    }
+  else if (nbytes <= 20)
+    {
+      return 11;
+    }
+  else if (nbytes <= 24)
+    {
+      return 12;
+    }
+  else if (nbytes <= 32)
+    {
+      return 13;
+    }
+  else if (nbytes <= 48)
+    {
+      return 14;
+    }
+  else /* if (nbytes <= 64) */
+    {
+      return 15;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: mcan_reset
@@ -1455,14 +1527,9 @@ static int mcan_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  /* Setup receive mailbox(es) (enabling receive interrupts) */
+  /* Enable receive interrupts */
 
-  ret = mcan_recvsetup(priv);
-  if (ret < 0)
-    {
-      canlldbg("MCAN%d H/W initialization failed: %d\n", config->port, ret);
-      return ret;
-    }
+  mcan_rxint(dev, true);
 
   mcan_dumpregs(priv, "After receive setup");
 
@@ -1685,6 +1752,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   uint32_t regval;
   unsigned int msglen;
   unsigned int ndx;
+  unsigned int nbytes;
   unsigned int i;
 
   DEBUGASSERT(dev);
@@ -1766,19 +1834,20 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
-  dest = (FAR uint8_t*)&txbuffer[2];
-  src  = msg->cm_data;
+  dest   = (FAR uint8_t*)&txbuffer[2];
+  src    = msg->cm_data;
+  nbytes = mcan_dlc2bytes(priv, msg->cm_hdr.ch_dlc);
 
-  for (i = 0; i < msg->cm_hdr.ch_dlc; i++)
+  for (i = 0; i < nbytes; i++)
     {
       /* Little endian is assumed */
 
       *dest++ = *src++;
     }
 
-  /* Flush the D-Cache to memory before initiating the tranfer */
+  /* Flush the D-Cache to memory before initiating the transfer */
 
-  msglen = 2 * sizeof(uint32_t) + msg->cm_hdr.ch_dlc;
+  msglen = 2 * sizeof(uint32_t) + nbytes;
   arch_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + msglen);
   UNUSED(msglen);
 
@@ -1826,16 +1895,23 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 static bool mcan_txready(FAR struct can_dev_s *dev)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
-  bool txready;
+  uint32_t regval;
+  bool notfull;
 
   /* Get exclusive access to the MCAN peripheral */
 
   mcan_dev_lock(priv);
 
-#warning Missing logic
+  /* Return the state of the TX FIFOQ
+   *
+   * REVISIT: Dedicated TX buffers are not supported.
+   */
+
+  regval = mcan_getreg(priv, SAM_MCAN_IR_OFFSET);
+  notfull = ((regval & MCAN_INT_TEFF) == 0);
 
   mcan_dev_unlock(priv);
-  return txready;
+  return notfull;
 }
 
 /****************************************************************************
@@ -1859,13 +1935,20 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
 static bool mcan_txempty(FAR struct can_dev_s *dev)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
+  uint32_t regval;
   bool txempty;
 
   /* Get exclusive access to the MCAN peripheral */
 
   mcan_dev_lock(priv);
 
-#warning Missing logic
+  /* Return the state of the TX FIFOQ
+   *
+   * REVISIT: Dedicated TX buffers are not supported.
+   */
+
+  regval = mcan_getreg(priv, SAM_MCAN_IR_OFFSET);
+  txempty = ((regval & MCAN_INT_TFE) != 0);
 
   mcan_dev_unlock(priv);
   return txempty;
@@ -1914,7 +1997,7 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
  * Input Parameters:
  *   dev - CAN-common state data
  *   rxbuffer - The RX buffer containing the received messages
- *   nbytes   - The length of the received message
+ *   nbytes   - The length of the RX buffer (element size).
  *
  * Returned Value:
  *   None
@@ -1954,6 +2037,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
       hdr.ch_id     = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
       hdr.ch_extid  = false;
     }
+
 #else
   if ((regval & BUFFER_R0_XTD) != 0)
     {
@@ -2276,16 +2360,17 @@ static void mcan_configure_interrupts(FAR struct sam_mcan_s *priv)
   /* Select RX-related interrupts */
 
 #if 0 /* Dedicated RX buffers are not used by this driver */
-  priv->rxints = MCAN_RXDEDBUF_INTS | MCAN_COMMON_INTS;
+  priv->rxints = MCAN_RXDEDBUF_INTS;
 #else
-  priv->rxints = MCAN_RXFIFO_INTS | MCAN_COMMON_INTS;
+  priv->rxints = MCAN_RXFIFO_INTS;
 #endif
 
   /* Select RX-related interrupts */
 
-#if 0 /* Dedicated RX buffers are not used by this driver */
+#if 0 /* Dedicated TX buffers are not used by this driver */
+  priv->txints = MCAN_TXDEDBUF_INTS;
 #else
-#  warning Missing Logic
+  priv->txints = MCAN_TXFIFOQ_INTS;
 #endif
 
   /* Direct to Line 0.
