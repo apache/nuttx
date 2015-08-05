@@ -866,6 +866,12 @@ struct sam_mcan_s
   uint32_t rxints;          /* Configured RX interrupts */
   uint32_t txints;          /* Configured TX interrupts */
 
+#ifdef CONFIG_CAN_EXTID
+  uint32_t extfilters[2];   /* Extended filter bit allocator.  2*32=64 */
+#else
+  uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
+#endif
+
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
   uint32_t regval;          /* Last value read from the register */
@@ -903,6 +909,14 @@ static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc);
 static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
 #endif
 
+#ifdef CONFIG_CAN_EXTID
+static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
+              uint32_t mask);
+static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx);
+#else
+static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id);
+static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx);
+#endif
 /* CAN driver methods */
 
 static void mcan_reset(FAR struct can_dev_s *dev);
@@ -1481,6 +1495,239 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
 #endif
 
 /****************************************************************************
+ * Name: mcan_add_extfilter
+ *
+ * Description:
+ *   Add an address filter for a extended 28 bit address.
+ *
+ * Input Parameters:
+ *   priv - An instance of the MCAN driver state structure.
+ *   id   - The 28-bit extended address to filter
+ *   mask - A 28-bit extended address mask
+ *
+ * Returned Value:
+ *   A non-negative filter ID is returned on success.  Otherwise a negated
+ *   errno value is returned to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_EXTID
+static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
+                              uint32_t mask)
+{
+  FAR const struct sam_config_s *config;
+  FAR uint32_t *extfilter;
+  uint32_t regval;
+  int word;
+  int bit;
+  int ndx;
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL &&
+              id < (1 << 28) && mask < (1 << 28));
+  config = priv->config;
+
+  /* Get exclusive excess to the MCAN hardware */
+
+  mcan_dev_lock(priv);
+
+  /* Find an unused standard filter */
+
+  for (ndx = 0; ndx <  config->nextfilters; ndx++)
+    {
+      /* Is this filter assigned? */
+
+      word = ndx >> 5;
+      bit  = ndx & 0x1f;
+
+      if ((priv->extfilters[word] & (1 << bit)) == 0)
+        {
+          /* No, then this is the one that we will use */
+
+          extfilter = config->msgram.extfilters + (ndx << 1);
+
+          /* REVISIT: Here we use only FIFO0. */
+
+          extfilter[0] = EXTFILTER_F0_EFEC_FIFO0 |  EXTFILTER_F0_EFID1(id);
+          extfilter[1] = EXTFILTER_F1_EFT_CLASSIC | mask;
+
+          /* Flush the filter entry into physical RAM */
+
+          arch_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
+          mcan_dev_unlock(priv);
+          return ndx;
+        }
+    }
+
+  mcan_dev_unlock(priv);
+  return -EAGAIN;
+}
+#endif
+
+/****************************************************************************
+ * Name: mcan_del_extfilter
+ *
+ * Description:
+ *   Remove an address filter for a standard 28 bit address.
+ *
+ * Input Parameters:
+ *   priv - An instance of the MCAN driver state structure.
+ *   ndx  - The filter index previously returned by the mcan_add_extfilter().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_EXTID
+static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
+{
+  FAR const struct sam_config_s *config;
+  FAR uint32_t *extfilter;
+  int word;
+  int bit;
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
+  config = priv->config;
+  DEBUGASSERT(ndx < config->nextfilters);
+
+  /* Get exclusive excess to the MCAN hardware */
+
+  mcan_dev_lock(priv);
+
+  /* Deactivate the filter */
+
+  extfilter    = config->msgram.extfilters + (ndx << 1);
+  *extfilter++ = 0;
+  *extfilter   = 0;
+
+  /* Release the filter */
+
+  word = ndx >> 5;
+  bit  = ndx & 0x1f;
+  priv->extfilters[word] &= ~(1 << bit);
+
+  mcan_dev_unlock(priv);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: mcan_add_stdfilter
+ *
+ * Description:
+ *   Add an address filter for a standard 11 bit address.
+ *
+ * Input Parameters:
+ *   priv - An instance of the MCAN driver state structure.
+ *   id   - The 11-bit extended address to filter
+ *
+ * Returned Value:
+ *   A non-negative filter ID is returned on success.  Otherwise a negated
+ *   errno value is returned to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CAN_EXTID
+static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
+{
+  FAR const struct sam_config_s *config;
+  FAR uint32_t *stdfilter;
+  uint32_t regval;
+  int word;
+  int bit;
+  int ndx;
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL && id < (1 << 11));
+  config = priv->config;
+
+  /* Get exclusive excess to the MCAN hardware */
+
+  mcan_dev_lock(priv);
+
+  /* Find an unused standard filter */
+
+  for (ndx = 0; ndx <  config->nstdfilters; ndx++)
+    {
+      /* Is this filter assigned? */
+
+      word = ndx >> 5;
+      bit  = ndx & 0x1f;
+
+      if ((priv->stdfilters[word] & (1 << bit)) == 0)
+        {
+          /* No, then this is the one that we will use */
+
+          stdfilter = config->msgram.stdfilters + ndx;
+          regval    = STDFILTER_S0_SFT_CLASSIC |  STDFILTER_S0_SFID1(id);
+
+          /* REVISIT: Here we use only FIFO0. */
+
+          regval |= STDFILTER_S0_SFEC_FIFO0;
+          *stdfilter = regval;
+
+          /* Flush the filter entry into physical RAM */
+
+          arch_clean_dcache((uintptr_t)stdfilter, (uintptr_t)stdfilter + 4);
+          mcan_dev_unlock(priv);
+          return ndx;
+        }
+    }
+
+  mcan_dev_unlock(priv);
+  return -EAGAIN;
+}
+#endif
+
+/****************************************************************************
+ * Name: mcan_del_stdfilter
+ *
+ * Description:
+ *   Remove an address filter for a standard 28 bit address.
+ *
+ * Input Parameters:
+ *   priv - An instance of the MCAN driver state structure.
+ *   ndx  - The filter index previously returned by the mcan_add_stdfilter().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CAN_EXTID
+static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
+{
+  FAR const struct sam_config_s *config;
+  FAR uint32_t *stdfilter;
+  int word;
+  int bit;
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
+  config = priv->config;
+  DEBUGASSERT(ndx < config->nstdfilters);
+
+  /* Get exclusive excess to the MCAN hardware */
+
+  mcan_dev_lock(priv);
+
+  /* Deactivate the filter */
+
+  stdfilter  = config->msgram.stdfilters + ndx;
+  *stdfilter = 0;
+
+  /* Release the filter */
+
+  word = ndx >> 5;
+  bit  = ndx & 0x1f;
+  priv->stdfilters[word] &= ~(1 << bit);
+
+  mcan_dev_unlock(priv);
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: mcan_reset
  *
  * Description:
@@ -1753,9 +2000,99 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
 
 static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 {
+  FAR struct sam_mcan_s *priv;
+  int ret = -ENOTTY;
+
+  canvdbg("cmd=%04x arg=%lu\n", cmd, arg);
+
+  DEBUGASSERT(dev && dev->cd_priv);
+  priv = dev->cd_priv;
+
+  /* Handle the command */
+
+  switch (cmd)
+    {
+#ifdef CONFIG_CAN_EXTID
+      /* CANIOC_ADD_EXTFILTER:
+       *   Description:    Add an address filter for a extended 28 bit
+       *                   address.
+       *   Argument:       A reference to struct canioc_extfilter_s
+       *   Returned Value: A non-negative filter ID is returned on success.
+       *                   Otherwise -1 (ERROR) is returned with the errno
+       *                   variable set to indicate the nature of the error.
+       */
+
+      case CANIOC_ADD_EXTFILTER:
+        {
+          FAR struct canioc_extfilter_s *extfilter =
+            (FAR struct canioc_extfilter_s *)arg;
+
+          ret = mcan_add_extfilter(priv, extfilter->xf_id, extfilter->xf_mask);
+        }
+        break;
+
+      /* CANIOC_DEL_EXTFILTER:
+       *   Description:    Remove an address filter for a standard 28 bit address.
+       *   Argument:       The filter index previously returned by the
+       *                   CANIOC_ADD_EXTFILTER command
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+       *                   is returned with the errno variable set to indicate the
+       *                   nature of the error.
+       */
+
+      case CANIOC_DEL_EXTFILTER:
+        {
+          DEBUGASSERT(arg <= priv->config->nextfilters);
+          ret = mcan_del_extfilter(priv, (int)arg);
+        }
+        break;
+
+#else
+      /* CANIOC_ADD_STDFILTER:
+       *   Description:    Add an address filter for a standard 11 bit
+       *                   address.
+       *   Argument:       A reference to struct canioc_stdfilter_s
+       *   Returned Value: A non-negative filter ID is returned on success.
+       *                   Otherwise -1 (ERROR) is returned with the errno
+       *                   variable set to indicate the nature of the error.
+       */
+
+      case CANIOC_ADD_STDFILTER:
+        {
+          FAR struct canioc_stdfilter_s *stdfilter =
+            (FAR struct canioc_stdfilter_s *)arg;
+
+          ret = mcan_add_stdfilter(priv, stdfilter->sf_id);
+        }
+        break;
+
+      /* CANIOC_DEL_STDFILTER:
+       *   Description:    Remove an address filter for a standard 11 bit address.
+       *   Argument:       The filter index previously returned by the
+       *                   CANIOC_ADD_STDFILTER command
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+       *                   is returned with the errno variable set to indicate the
+       *                   nature of the error.
+       */
+
+      case CANIOC_DEL_STDFILTER:
+        {
+          DEBUGASSERT(arg <= priv->config->nstdfilters);
+          ret = mcan_del_stdfilter(priv, (int)arg);
+        }
+        break;
+#endif
+
+      /* Unsupported/unrecognized command */
+
+      default:
+        candbg("ERROR: Unrecognized command: %04x\n", cmd);
+        break;
+    }
+
   /* No CAN ioctls are supported */
 
-  return -ENOTTY;
+  return ret;
 }
 
 /****************************************************************************

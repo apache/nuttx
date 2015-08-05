@@ -756,7 +756,7 @@
 #  define STDFILTER_S0_SFEC_PRIORITY  (4 << STDFILTER_S0_SFEC_SHIFT) /* Set priority ion match */
 #  define STDFILTER_S0_SFEC_PRIOFIFO0 (5 << STDFILTER_S0_SFEC_SHIFT) /* Set priority and store in FIFO 0 on match */
 #  define STDFILTER_S0_SFEC_PRIOFIFO1 (6 << STDFILTER_S0_SFEC_SHIFT) /* Set priority and store in FIFO 1 on match */
-#  define STDFILTER_S0_SFEC_BUFFER    (7 << STDFILTER_S0_SFEC_SHIFT) /*  Store into Rx Buffer or as debug message */
+#  define STDFILTER_S0_SFEC_BUFFER    (7 << STDFILTER_S0_SFEC_SHIFT) /* Store into Rx Buffer or as debug message */
 #define STDFILTER_S0_SFT_SHIFT     (30)      /* Bits 30-31: Standard Filter Type */
 #define STDFILTER_S0_SFT_MASK      (3 << STDFILTER_S0_SFT_SHIFT)
 #  define STDFILTER_S0_SFT_RANGE   (0 << STDFILTER_S0_SFT_SHIFT) /* Range filter from SF1ID to SF2ID */
