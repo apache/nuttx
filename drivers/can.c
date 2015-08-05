@@ -97,7 +97,7 @@ static int            can_xmit(FAR struct can_dev_s *dev);
 static ssize_t        can_write(FAR struct file *filep,
                          FAR const char *buffer, size_t buflen);
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                         FAR struct canioctl_rtr_s *rtr);
+                         FAR struct canioc_rtr_s *rtr);
 static int            can_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
 
@@ -604,7 +604,7 @@ return_with_irqdisabled:
  ****************************************************************************/
 
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                                  FAR struct canioctl_rtr_s *rtr)
+                                  FAR struct canioc_rtr_s *rtr)
 {
   FAR struct can_rtrwait_s *wait = NULL;
   irqstate_t                flags;
@@ -663,19 +663,19 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* CANIOCTL_RTR: Send the remote transmission request and wait for the
-       * response.  Argument is a reference to struct canioctl_rtr_s
+      /* CANIOC_RTR: Send the remote transmission request and wait for the
+       * response.  Argument is a reference to struct canioc_rtr_s
        * (casting to uintptr_t first eliminates complaints on some
        * architectures where the sizeof long is different from the size of
        * a pointer).
        */
 
-      case CANIOCTL_RTR:
-        ret = can_rtrread(dev, (struct canioctl_rtr_s*)((uintptr_t)arg));
+      case CANIOC_RTR:
+        ret = can_rtrread(dev, (struct canioc_rtr_s*)((uintptr_t)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this
-       * device driver.
+       * lower-half, device driver.
        */
 
       default:

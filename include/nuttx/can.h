@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/can.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <semaphore.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_CAN
 
@@ -109,18 +110,56 @@
 
 #define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
 
-/* Built-in ioctl commands
+/* Built-in ioctl commands support by the upper half driver.
  *
- * CANIOCTL_RTR: Send the remote transmission request and wait for the response.
+ * CANIOC_RTR:
+ *   Description:  Send the remote transmission request and wait for the response.
+ *   Argument:     A reference to struct canioc_rtr_s
+ *
+ * Ioctl commands that may or may not be supported by the lower half driver.
+ *
+ * CANIOC_ADD_STDFILTER:
+ *   Description:    Add an address filter for a standard 11 bit address.
+ *   Argument:       A reference to struct canioc_stdfilter_s
+ *   Returned Value: A non-negative filter ID is returned on success.
+ *                   Otherwise -1 (ERROR) is returned with the errno
+ *                   variable set to indicate the nature of the error.
+ *
+ * CANIOC_ADD_EXTFILTER:
+ *   Description:    Add an address filter for a extended 28 bit address.
+ *   Argument:       A reference to struct canioc_extfilter_s
+ *   Returned Value: A non-negative filter ID is returned on success.
+ *                   Otherwise -1 (ERROR) is returned with the errno
+ *                   variable set to indicate the nature of the error.
+ *
+ * CANIOC_DEL_STDFILTER:
+ *   Description:    Remove an address filter for a standard 11 bit address.
+ *   Argument:       The filter index previously returned by the
+ *                   CANIOC_ADD_STDFILTER command
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *
+ * CANIOC_DEL_EXTFILTER:
+ *   Description:    Remove an address filter for a standard 28 bit address.
+ *   Argument:       The filter index previously returned by the
+ *                   CANIOC_ADD_EXTFILTER command
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
  */
 
-#define CANIOCTL_RTR              1 /* Argument is a reference to struct canioctl_rtr_s */
+#define CANIOC_RTR                _CANIOC(1)
+#define CANIOC_ADD_STDFILTER      _CANIOC(2)
+#define CANIOC_ADD_EXTFILTER      _CANIOC(3)
+#define CANIOC_DEL_STDFILTER      _CANIOC(4)
+#define CANIOC_DEL_EXTFILTER      _CANIOC(5)
 
-/* CANIOCTL_USER: Device specific ioctl calls can be supported with cmds greater
+/* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
  * than this value
  */
 
-#define CANIOCTL_USER             2
+#define CANIOC_USER               _CANIOC(6)
 
 /************************************************************************************
  * Public Types
@@ -158,7 +197,7 @@
 #ifdef CONFIG_CAN_EXTID
 struct can_hdr_s
 {
-  uint32_t     ch_id;         /* 11- or 29-bit ID (3-bits unsed) */
+  uint32_t     ch_id;         /* 11- or 29-bit ID (3-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC */
   uint8_t      ch_rtr    : 1; /* RTR indication */
   uint8_t      ch_extid  : 1; /* Extended ID indication */
@@ -296,11 +335,25 @@ struct can_dev_s
 
 /* Structures used with ioctl calls */
 
-struct canioctl_rtr_s
+struct canioc_rtr_s
 {
   uint16_t              ci_id;           /* The 11-bit ID to use in the RTR message */
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
+
+#ifdef CONFIG_CAN_EXTID
+struct canioc_extfilter_s
+{
+  uint32_t              xf_id;           /* 28-bit ID (4-bits unused) */
+  uint32_t              xf_mask;         /* 28-bit address mask (4-bits unused) */
+};
+#else
+struct canioc_stdfilter_s
+{
+  uint16_t              sf_id;           /* 11-bit ID (5-bits unused) */
+  uint16_t              sf_mask;         /* 11-bit address mask (5-bits unused) */
+};
+#endif
 
 /************************************************************************************
  * Public Data
