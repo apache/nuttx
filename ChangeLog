@@ -10780,3 +10780,8 @@
 	  OS.  It is a non-standard but more efficient version of sem_timedwait()
 	  for use in higher performance device drivers (2015-08-01).
 	* drivers/net/slip.c:  Fix another compilation error (2015-08-02).
+	* drivers/can.c include/nuttx/can.h, and fs/fs.h:  Add CAN IOCTL command
+	  definitions to manage CAN message filtering (2015-08-05)
+	* drivers/Kconfig and can.c:  Add configuration to support DLC to byte
+	  conversions needed for CAN FD mode (2015-08-05).
+

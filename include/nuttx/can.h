@@ -61,6 +61,8 @@
  *   CONFIG_STM32_CAN2 must also be defined)
  * CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
  *   Standard 11-bit IDs.
+ * CONFIG_CAN_FD - Enable support for CAN FD mode.  For the upper half driver, this
+ *   just means handling encoded DLC values (for values of DLC > 9).
  * CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
  *   Default: 8
  * CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
@@ -110,13 +112,13 @@
 
 #define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
 
-/* Built-in ioctl commands support by the upper half driver.
+/* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
  *   Description:  Send the remote transmission request and wait for the response.
  *   Argument:     A reference to struct canioc_rtr_s
  *
- * Ioctl commands that may or may not be supported by the lower half driver.
+ * Ioctl commands that may or may not be supported by the lower half CAN driver.
  *
  * CANIOC_ADD_STDFILTER:
  *   Description:    Add an address filter for a standard 11 bit address.
@@ -124,6 +126,7 @@
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
  *                   variable set to indicate the nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
  *
  * CANIOC_ADD_EXTFILTER:
  *   Description:    Add an address filter for a extended 28 bit address.
@@ -131,6 +134,7 @@
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
  *                   variable set to indicate the nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID=y
  *
  * CANIOC_DEL_STDFILTER:
  *   Description:    Remove an address filter for a standard 11 bit address.
@@ -139,6 +143,7 @@
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
  *
  * CANIOC_DEL_EXTFILTER:
  *   Description:    Remove an address filter for a standard 28 bit address.
@@ -147,6 +152,7 @@
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID=y
  */
 
 #define CANIOC_RTR                _CANIOC(1)
