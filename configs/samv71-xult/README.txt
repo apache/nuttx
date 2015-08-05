@@ -1061,8 +1061,10 @@ MCAN1 Loopback Test
       CONFIG_DEBUG=y                           # Enables general debug features
       CONFIG_DEBUG_VERBOSE=y                   # Enables verbose output
       CONFIG_DEBUG_CAN=y                       # Enables debug output from CAN
+
       CONFIG_STACK_COLORATION=y                # Monitor stack usage
       CONFIG_DEBUG_SYMBOLS=y                   # Needed only for use with a debugger
+      CONFIG_DEBUG_NOOPT=y                     # Disables optimization
 
     System Type -> MCAN device driver options
      CONFIG_SAMV7_MCAN_REGDEBUG=y              # Super low level register debug output
