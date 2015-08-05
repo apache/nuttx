@@ -1804,7 +1804,7 @@ static int mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 {
   FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config = priv->config;
+  FAR const struct sam_config_s *config;
   FAR uint32_t *txbuffer = 0;
   FAR const uint8_t *src;
   FAR uint8_t *dest;
@@ -2280,6 +2280,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
       /* Handle the newly received message in FIFO0 */
 
       regval = mcan_getreg(priv, SAM_MCAN_RXF0S_OFFSET);
+      ndx    = (regval & MCAN_RXF0S_F0GI_MASK) >> MCAN_RXF0S_F0GI_SHIFT;
 
       if ((regval & MCAN_RXF0S_RF0L) != 0)
         {
@@ -2287,9 +2288,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
         }
       else
         {
-          ndx    = (regval & MCAN_RXF0S_F0GI_MASK) >> MCAN_RXF0S_F0GI_SHIFT;
-          nelem  = (regval & MCAN_RXF0S_F0FL_MASK) >> MCAN_RXF0S_F0FL_SHIFT;
-
+          nelem = (regval & MCAN_RXF0S_F0FL_MASK) >> MCAN_RXF0S_F0FL_SHIFT;
           if (nelem > 0)
             {
               mcan_receive(dev,
@@ -2320,6 +2319,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
       /* Handle the newly received message in FIFO1 */
 
       regval = mcan_getreg(priv, SAM_MCAN_RXF1S_OFFSET);
+      ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
 
       if ((regval & MCAN_RXF0S_RF0L) != 0)
         {
@@ -2327,9 +2327,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
         }
       else
         {
-          ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
-          nelem  = (regval & MCAN_RXF1S_F1FL_MASK) >> MCAN_RXF1S_F1FL_SHIFT;
-
+          nelem = (regval & MCAN_RXF1S_F1FL_MASK) >> MCAN_RXF1S_F1FL_SHIFT;
           if (nelem > 0)
             {
               mcan_receive(dev,
