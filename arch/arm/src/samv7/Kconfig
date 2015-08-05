@@ -1616,13 +1616,6 @@ config SAMV7_MCAN0_TXBUFFER_64BYTES
 
 endchoice # MCAN0 TX buffer element size
 
-config SAMV7_MCAN0_TXEVENTFIFO_SIZE
-	int "MCAN0 TX event FIFO size"
-	default 0
-	range 0 32
-	---help---
-		Number of TX event FIFO elements for MCAN0.  Zero disables TX event FIFO.
-
 config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
 	int "MCAN0 dedicated TX buffer size"
 	default 0
@@ -1634,11 +1627,18 @@ config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
 		NOTE: Dedicated TX buffers are not used in the current MCAN design.
 
 config SAMV7_MCAN0_TXFIFOQ_SIZE
-	int "MCAN0 dedicated TX FIFO queue"
+	int "MCAN0 TX FIFO queue size"
 	default 4
 	range 0 32
 	---help---
 		Number of dedicated TX buffer elements for MCAN0.
+
+config SAMV7_MCAN0_TXEVENTFIFO_SIZE
+	int "MCAN0 TX event FIFO size"
+	default 0
+	range 0 32
+	---help---
+		Number of TX event FIFO elements for MCAN0.  Zero disables TX event FIFO.
 
 endmenu # MCAN0 device driver options
 

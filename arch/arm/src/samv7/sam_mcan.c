@@ -668,7 +668,7 @@
 
 #  define MCAN1_TXEVENTFIFO_WORDS (CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE * 2)
 #  define MCAN1_TXFIFIOQ_WORDS \
-     (CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+     (CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE * ((MCAN1_TXBUFFER_ELEMENT_SIZE/4) + 2))
 
 /* MCAN1 Message RAM */
 
@@ -1069,7 +1069,7 @@ static const struct sam_config_s g_mcan1const =
   .nextfilters      = CONFIG_SAMV7_MCAN1_NEXTFILTERS,
   .nfifo0           = CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE,
   .nfifo1           = CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE,
-  .nrxdedicated     = CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE,
+  .nrxdedicated     = CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE,
   .ntxeventfifo     = CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE,
   .ntxdedicated     = CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE,
   .ntxfifoq         = CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE,
@@ -1080,7 +1080,7 @@ static const struct sam_config_s g_mcan1const =
   .rxbufferecode    = MCAN1_RXBUFFER_ENCODED_SIZE,
   .rxbufferesize    = (MCAN1_RXBUFFER_ELEMENT_SIZE / 4) + 2,
   .txbufferecode    = MCAN1_TXBUFFER_ENCODED_SIZE,
-  .txbufferesize    = (MCAN0_TXBUFFER_ELEMENT_SIZE / 4) + 2,
+  .txbufferesize    = (MCAN1_TXBUFFER_ELEMENT_SIZE / 4) + 2,
 
 #ifdef CONFIG_SAMV7_MCAN1_LOOPBACK
   .loopback         = true,
