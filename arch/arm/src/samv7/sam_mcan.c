@@ -1400,7 +1400,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 }
 
 /****************************************************************************
- * Name: mcan_dlc2bytes and mcan_bytes2dlc
+ * Name: mcan_dlc2bytes
  *
  * Description:
  *   In the CAN FD format, the coding of the DLC differs from the standard
@@ -1410,12 +1410,10 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
  *   in the range 12 to 64.
  *
  * Input Parameter:
- *   priv   - A pointer to the private data structure for this MCAN peripheral
- *   dlc    - the DLC to convert to a byte count, OR
- *   nbytes - the byte count to convert to a DLC
+ *   dlc    - the DLC value to convert to a byte count
  *
  * Returned Value:
- *   The converted value
+ *   The number of bytes corresponding to the DLC value.
  *
  ****************************************************************************/
 
@@ -1456,6 +1454,24 @@ static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
 
   return dlc;
 }
+
+/****************************************************************************
+ * Name: mcan_bytes2dlc
+ *
+ * Description:
+ *   In the CAN FD format, the coding of the DLC differs from the standard
+ *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
+ *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
+ *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
+ *   in the range 12 to 64.
+ *
+ * Input Parameter:
+ *   nbytes - the byte count to convert to a DLC value
+ *
+ * Returned Value:
+ *   The encoded DLC value corresponding to at least that number of bytes.
+ *
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
