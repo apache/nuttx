@@ -1022,7 +1022,7 @@ MCAN1 Loopback Test
     System Type -> SAMV7 Peripheral Selections
        CONFIG_SAMV7_MCAN1=y                    # Enable MCAN1 as the lower-half
 
-    System Type ->MCAN device driver options
+    System Type -> MCAN device driver options
        CONFIG_SAMV7_MCAN_CLKSRC_MAIN=y         # Use the MAIN clock as the source
        CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER=1
 
@@ -1057,6 +1057,15 @@ MCAN1 Loopback Test
 
     Enabling CAN Debug Output
     -------------------------
+    Build Setup -> Debug Options
+      CONFIG_DEBUG=y                           # Enables general debug features
+      CONFIG_DEBUG_VERBOSE=y                   # Enables verbose output
+      CONFIG_DEBUG_CAN=y                       # Enables debug output from CAN
+      CONFIG_STACK_COLORATION=y                # Monitor stack usage
+      CONFIG_DEBUG_SYMBOLS=y                   # Needed only for use with a debugger
+
+    System Type -> MCAN device driver options
+     CONFIG_SAMV7_MCAN_REGDEBUG=y              # Super low level register debug output
 
 Debugging
 =========
