@@ -99,12 +99,19 @@ menuconfig CAN
 		See include/nuttx/can.h for further CAN driver information.
 
 if CAN
+
 config CAN_EXTID
 	bool "CAN extended IDs"
 	default n
 	---help---
-		Enables support for the 29-bit extended ID.  Default Standard 11-bit
+		Enables support for the 28-bit extended ID.  Default Standard 11-bit
 		IDs.
+
+config CAN_FD
+	bool "CAN FD"
+	default n
+	---help---
+		Enables support for the CAN_FD mode.
 
 config CAN_FIFOSIZE
 	int "CAN driver I/O buffer size"
