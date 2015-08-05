@@ -90,6 +90,10 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif
 
+ifeq ($(CONFIG_SAMV7_MCAN),y)
+CSRCS += sam_mcan.c
+endif
+
 ifeq ($(CONFIG_AUDIO_WM8904),y)
 ifeq ($(CONFIG_SAMV7_TWIHS0),y)
 ifeq ($(CONFIG_SAMV7_SSC0),y)

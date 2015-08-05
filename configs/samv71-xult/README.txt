@@ -20,6 +20,7 @@ Contents
   - Networking
   - Audio Interface
   - maXTouch Xplained Pro
+  - MCAN1 Loopback Test
   - Debugging
   - Configurations
 
@@ -951,8 +952,8 @@ MXT Configuration Options
 ILI9488 Configuration Options
 -----------------------------
 
-Currently only the parallel mode is supported.  This means that the LCD can
-only be used in connected in the LCD (EXT4) connection.
+  Currently only the parallel mode is supported.  This means that the LCD can
+  only be used in connected in the LCD (EXT4) connection.
 
   System Type -> SAMV7 Peripheral Support
     CONFIG_SAMV7_SMC=y                    : Needed by the ILI9466 driver controller
@@ -990,27 +991,94 @@ only be used in connected in the LCD (EXT4) connection.
     CONFIG_EXAMPLES_NXLINES_VPLANE=0
     CONFIG_EXAMPLES_NXLINES_DEVNO=0
 
+MCAN1 Loopback Test
+===================
+
+  MCAN1
+  -----
+  SAM V71 Xplained Ultra has two MCAN modules that performs communication according
+  to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch CAN FD
+  specification V1.0.  MCAN1 is connected to an on-board ATA6561 CAN physical-layer
+  transceiver.
+
+    ------- -------- -------- -------------
+    SAM V71 FUNCTION ATA6561  SHARED
+    PIN              FUNCTION FUNCTIONALITY
+    ------- -------- -------- -------------
+    PC14    CANTX1   TXD      Shield
+    PC12    CANRX1   RXD      Shield
+    ------- -------- -------- -------------
+
+  Enabling MCAN1
+  --------------
+  These modifications may be applied to the samv71-xult/nsh configuration in order
+  to enable MCAN1:
+
+    Device Drivers -> CAN Driver support
+       CONFIG_CAN=y                            # Enable the upper-half CAN driver
+       CONFIG_CAN_FIFOSIZE=8
+       CONFIG_CAN_NPENDINGRTR=4
+
+    System Type -> SAMV7 Peripheral Selections
+       CONFIG_SAMV7_MCAN1=y                    # Enable MCAN1 as the lower-half
+
+    System Type ->MCAN device driver options
+       CONFIG_SAMV7_MCAN_CLKSRC_MAIN=y         # Use the MAIN clock as the source
+       CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER=1
+
+    System Type ->MCAN device driver options -> MCAN1 device driver options
+       CONFIG_SAMV7_MCAN1_ISO11899_1=y         # Loopback test only support ISO11899-1
+       CONFIG_SAMV7_MCAN1_LOOPBACK=y           # Needed for loopback test
+       CONFIG_SAMV7_MCAN1_BITRATE=500000       # Not critical for loopback test
+       CONFIG_SAMV7_MCAN1_PROPSEG=2            # Bit timing setup
+       CONFIG_SAMV7_MCAN1_PHASESEG1=11         # " " "    " "   "
+       CONFIG_SAMV7_MCAN1_PHASESEG2=11         # " " "    " "   "
+       CONFIG_SAMV7_MCAN1_FSJW=4               # " " "    " "   "
+       CONFIG_SAMV7_MCAN1_FBITRATE=2000000     # CAN_FD BTW mode is not used
+       CONFIG_SAMV7_MCAN1_FPROPSEG=2           # "    " " " "  " "" " " "  "
+       CONFIG_SAMV7_MCAN1_FPHASESEG1=4         # "    " " " "  " "" " " "  "
+       CONFIG_SAMV7_MCAN1_FPHASESEG2=4         # "    " " " "  " "" " " "  "
+       CONFIG_SAMV7_MCAN1_FFSJW=2              # "    " " " "  " "" " " "  "
+       CONFIG_SAMV7_MCAN1_NSTDFILTERS=0        # Filters are not used in the loopback test
+       CONFIG_SAMV7_MCAN1_NEXTFILTERS=0        # "     " " " " " "  " "" " " "      " "  "
+       CONFIG_SAMV7_MCAN1_RXFIFO0_32BYTES=y    # Each RX FIFO0 element is 32 bytes
+       CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE=8       # There are 8 queue elements
+       CONFIG_SAMV7_MCAN1_RXFIFO0_32BYTES=y    # Each RX FIFO1 element is 32 bytes
+       CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE=8       # There are 8 queue elements
+       CONFIG_SAMV7_MCAN1_RXBUFFER_32BYTES=y   # Each RX BUFFER is 32 bytes
+       CONFIG_SAMV7_MCAN1_TXBUFFER_32BYTES=y   # Each TX BUFFER is 32 bytes
+       CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE=8       # There are 8 queue elements
+       CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE=0   # The event FIFO is not used
+
+    Enabling the CAN Loopback Test
+    ------------------------------
+    Application Configuration -> Examples -> CAN Example
+      CONFIG_EXAMPLES_CAN=y                    # Enables the CAN test
+
+    Enabling CAN Debug Output
+    -------------------------
+
 Debugging
 =========
 
-The on-board EDBG appears to work only with Atmel Studio.  You can however,
-simply connect a SAM-ICE or J-Link to the JTAG/SWD connector on the board
-and that works great.  The only tricky thing is getting the correct
-orientation of the JTAG connection.
+  The on-board EDBG appears to work only with Atmel Studio.  You can however,
+  simply connect a SAM-ICE or J-Link to the JTAG/SWD connector on the board
+  and that works great.  The only tricky thing is getting the correct
+  orientation of the JTAG connection.
 
-I have been using Atmel Studio to write code to flash then I use the Segger
-J-Link GDB server to debug.  I have been using the 'Device Programming' I
-available under the Atmel Studio 'Tool' menu.  I have to disconnect the
-SAM-ICE while programming with the EDBG.  I am sure that you could come up
-with a GDB server-only solution if you wanted.
+  I have been using Atmel Studio to write code to flash then I use the Segger
+  J-Link GDB server to debug.  I have been using the 'Device Programming' I
+  available under the Atmel Studio 'Tool' menu.  I have to disconnect the
+  SAM-ICE while programming with the EDBG.  I am sure that you could come up
+  with a GDB server-only solution if you wanted.
 
-I run GDB like this from the directory containing the NuttX ELF file:
+  I run GDB like this from the directory containing the NuttX ELF file:
 
-  arm-none-eabi-gdb
-  (gdb) target remote localhost:2331
-  (gdb) mon reset
-  (gdb) file nuttx
-  (gdb) ... start debugging ...
+    arm-none-eabi-gdb
+    (gdb) target remote localhost:2331
+    (gdb) mon reset
+    (gdb) file nuttx
+    (gdb) ... start debugging ...
 
 Configurations
 ==============

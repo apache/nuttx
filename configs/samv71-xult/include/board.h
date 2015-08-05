@@ -503,6 +503,25 @@
 #  endif
 #endif /* CONFIG_SAMV71XULT_MXTXPLND */
 
+/* MCAN1
+ *
+ * SAM V71 Xplained Ultra has two MCAN modules that performs communication according
+ * to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch CAN FD
+ * specification V1.0.  MCAN1 is connected to an on-board ATA6561 CAN physical-layer
+ * transceiver.
+ *
+ *   ------- -------- -------- -------------
+ *   SAM V71 FUNCTION ATA6561  SHARED
+ *   PIN              FUNCTION FUNCTIONALITY
+ *   ------- -------- -------- -------------
+ *   PC14    CANTX1   TXD      Shield
+ *   PC12    CANRX1   RXD      Shield
+ *   ------- -------- -------- -------------
+ */
+
+#define GPIO_MCAN1_TX         GPIO_MCAN1_TX_2
+#define GPIO_MCAN1_RX         GPIO_MCAN1_RX_2
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
