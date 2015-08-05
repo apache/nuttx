@@ -40,11 +40,15 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <nuttx/arch.h>
 
+#include <nuttx/serial/serial.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/uart_16550.h>
+#include <nuttx/serial/mxser.h>
 
 #include "arm.h"
 #include "up_arch.h"
@@ -62,3 +66,70 @@ void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t va
 {
   *((volatile uart_addrwidth_t *)base + offset) = value;
 }
+
+#ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
+int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
+{
+  struct inode      *inode = filep->f_inode;
+  struct uart_dev_s *dev   = inode->i_private;
+  struct u16550_s   *priv  = (struct u16550_s*)dev->priv;
+  int                ret   = -ENOTTY;
+  uint32_t           vmode;
+  unsigned int       opmode;
+  int                bitm_off;
+
+  /*
+   * TODO: calculate bit offset from UART_BASE address.
+   *  E.g.:
+   *       0x9820_0000 -> 0
+   *       0x9820_0020 -> 1
+   *       0x9820_0040 -> 2
+   */
+
+  /* HARD: coded value for UART1 */
+  bitm_off = 1;
+
+  switch (cmd)
+    {
+      case MOXA_SET_OP_MODE:
+        {
+          irqstate_t flags;
+          opmode = *(unsigned long *)arg;
+
+          /* Check for input data */
+
+          if (opmode & ~OP_MODE_MASK)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          flags = irqsave();
+
+          /* Update mode register with requested mode */
+
+          vmode = getreg32(CONFIG_UART_MOXA_MODE_REG);
+          putreg32(CONFIG_UART_MOXA_MODE_REG, (vmode & ~(OP_MODE_MASK << 2 * bitm_off)) | ((opmode << 2 * bitm_off) & 0xffff));
+
+          irqrestore(flags);
+          break;
+        }
+
+      case MOXA_GET_OP_MODE:
+        {
+          irqstate_t flags;
+          flags = irqsave();
+
+          /* Read from mode register */
+
+          opmode = (getreg32(CONFIG_UART_MOXA_MODE_REG) >> 2 * bitm_off) & OP_MODE_MASK;
+
+          irqrestore(flags);
+          *(unsigned long *)arg = opmode;
+          break;
+        }
+    }
+
+  return ret;
+}
+#endif
