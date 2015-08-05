@@ -167,7 +167,7 @@ struct can_hdr_s
 #else
 struct can_hdr_s
 {
-  uint16_t      ch_dlc   : 4;  /* 4-bit DLC */
+  uint16_t      ch_dlc   : 4;  /* 4-bit DLC.  May be encoded in CAN_FD mode. */
   uint16_t      ch_rtr   : 1;  /* RTR indication */
   uint16_t      ch_id    : 11; /* 11-bit standard ID */
 } packed_struct;

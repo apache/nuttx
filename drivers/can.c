@@ -811,7 +811,15 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
   if (nexttail != fifo->rx_head)
     {
-      /* Add the new, decoded CAN message at the tail of the FIFO */
+      /* Add the new, decoded CAN message at the tail of the FIFO.
+       *
+       * REVISIT:  In the CAN FD format, the coding of the DLC differs from
+       * the standard CAN format. The DLC codes 0 to 8 have the same coding
+       * as in standard CAN, the codes 9 to 15, which in standard CAN all
+       * code a data field of 8 bytes, are encoded:
+       *
+       *   9->12, 10->16, 11->20, 12->24, 13->32, 14->48, 15->64
+       */
 
       memcpy(&fifo->rx_buffer[fifo->rx_tail].cm_hdr, hdr, sizeof(struct can_hdr_s));
       for (i = 0, dest = fifo->rx_buffer[fifo->rx_tail].cm_data; i < hdr->ch_dlc; i++)
