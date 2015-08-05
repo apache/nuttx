@@ -1405,12 +1405,13 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
  * Description:
  *   In the CAN FD format, the coding of the DLC differs from the standard
  *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN, the codes 9 to 15, which in standard CAN all code a data field of
- *   8 bytes, are encoded.
+ *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
+ *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
+ *   in the range 12 to 64.
  *
  * Input Parameter:
  *   priv   - A pointer to the private data structure for this MCAN peripheral
- *   dlc    - the DLC to convert to a byte count
+ *   dlc    - the DLC to convert to a byte count, OR
  *   nbytes - the byte count to convert to a DLC
  *
  * Returned Value:
@@ -1422,6 +1423,7 @@ static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
 {
   if (dlc > 8)
     {
+#ifdef CONFIG_CAN_FD
       if (priv->config->mode == MCAN_ISO11898_1_MODE)
         {
           return 8;
@@ -1447,6 +1449,9 @@ static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
                 return 64;
             }
         }
+#else
+      return 8;
+#endif
     }
 
   return dlc;
@@ -1459,6 +1464,7 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
     {
       return nbytes;
     }
+#ifdef CONFIG_CAN_FD
   else if (priv->mode == MCAN_ISO11898_1_MODE)
     {
       return 8;
@@ -1491,6 +1497,12 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
     {
       return 15;
     }
+#else
+  else
+    {
+      return 8;
+    }
+#endif
 }
 #endif
 
@@ -2956,6 +2968,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
       cmr     = MCAN_CCCR_CMR_ISO11898_1;
       break;
 
+#ifdef CONFIG_CAN_FD
     case MCAN_FD_MODE:
       regval |= MCAN_CCCR_CME_FD;
       cmr     = MCAN_CCCR_CMR_FD;
@@ -2965,6 +2978,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
       regval |= MCAN_CCCR_CME_FD_BSW;
       cmr     = MCAN_CCCR_CMR_FD_BSW;
       break;
+#endif
     }
 
   /* Set the initial CAN mode */
