@@ -981,7 +981,8 @@ static const struct sam_config_s g_mcan0const =
                       MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) | MCAN_FBTP_FSJW(MCAN0_FSJW),
   .port             = 0,
   .pid              = SAM_PID_MCAN00,
-  .irq0             = SAM_IRQ_MCAN01,
+  .irq0             = SAM_IRQ_MCAN00,
+  .irq1             = SAM_IRQ_MCAN01,
 #if defined(CONFIG_SAMV7_MCAN0_ISO11899_1)
   .mode             = MCAN_ISO11898_1_MODE,
 #elif defined(CONFIG_SAMV7_MCAN0_FD)
@@ -1057,7 +1058,8 @@ static const struct sam_config_s g_mcan1const =
                       MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) | MCAN_FBTP_FSJW(MCAN1_FSJW),
   .port             = 1,
   .pid              = SAM_PID_MCAN10,
-  .irq0             = SAM_IRQ_MCAN11,
+  .irq0             = SAM_IRQ_MCAN10,
+  .irq1             = SAM_IRQ_MCAN11,
 #if defined(CONFIG_SAMV7_MCAN1_ISO11899_1)
   .mode             = MCAN_ISO11898_1_MODE,
 #elif defined(CONFIG_SAMV7_MCAN1_FD)
