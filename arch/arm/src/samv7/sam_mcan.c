@@ -831,8 +831,8 @@ struct sam_config_s
   uint8_t mode;             /* See enum sam_canmode_e */
   uint8_t nstdfilters;      /* Number of standard filters (up to 128) */
   uint8_t nextfilters;      /* Number of extended filters (up to 64) */
-  uint8_t nfifo0;           /* Number of FIFO0 elements (up to 64) */
-  uint8_t nfifo1;           /* Number of FIFO1 elements (up to 64) */
+  uint8_t nrxfifo0;         /* Number of RX FIFO0 elements (up to 64) */
+  uint8_t nrxfifo1;         /* Number of RX FIFO1 elements (up to 64) */
   uint8_t nrxdedicated;     /* Number of dedicated RX buffers (up to 64) */
   uint8_t ntxeventfifo;     /* Number of TXevent FIFO elements (up to 32) */
   uint8_t ntxdedicated;     /* Number of dedicated TX buffers (up to 64) */
@@ -991,8 +991,8 @@ static const struct sam_config_s g_mcan0const =
 #endif
   .nstdfilters      = CONFIG_SAMV7_MCAN0_NSTDFILTERS,
   .nextfilters      = CONFIG_SAMV7_MCAN0_NEXTFILTERS,
-  .nfifo0           = CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE,
-  .nfifo1           = CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE,
+  .nrxfifo0         = CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE,
+  .nrxfifo1         = CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE,
   .nrxdedicated     = CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE,
   .ntxeventfifo     = CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE,
   .ntxdedicated     = CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE,
@@ -1067,8 +1067,8 @@ static const struct sam_config_s g_mcan1const =
 #endif
   .nstdfilters      = CONFIG_SAMV7_MCAN1_NSTDFILTERS,
   .nextfilters      = CONFIG_SAMV7_MCAN1_NEXTFILTERS,
-  .nfifo0           = CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE,
-  .nfifo1           = CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE,
+  .nrxfifo0         = CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE,
+  .nrxfifo1         = CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE,
   .nrxdedicated     = CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE,
   .ntxeventfifo     = CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE,
   .ntxdedicated     = CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE,
@@ -1247,7 +1247,6 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 {
   FAR const struct sam_config_s *config = priv->config;
-  unsigned long addr;
 
   lldbg("MCAN%d Registers: %s\n", config->port, msg);
   lldbg("   Base: %08x\n", config->base);
@@ -1871,7 +1870,6 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
 #else
-  DEBUGASSERT(!msg->cm_hdr.ch_extid);
   DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 11));
 
   regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
@@ -2199,7 +2197,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
        */
 
       mcan_buffer_release(priv);
-      DEBUGASSERT(priv->txfsem.semcount <= priv->ntxfifoq);
+      DEBUGASSERT(priv->txfsem.semcount <= config->ntxfifoq);
     }
   else if ((pending & priv->txints) != 0)
     {
@@ -2268,7 +2266,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
   if ((pending & MCAN_INT_RF0N) != 0)
     {
-      DEBUGASSERT(priv->txfsem.semcount <= priv->nrxfifo0);
+      DEBUGASSERT(priv->txfsem.semcount <= config->nrxfifo0);
 
       /* Clear the RX FIFO0 interrupt (and all other FIFO0-related
        * interrupts)
@@ -2307,7 +2305,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
   if ((pending & MCAN_INT_RF1N) != 0)
     {
-      DEBUGASSERT(priv->txfsem.semcount <= priv->nrxfifo1);
+      DEBUGASSERT(priv->txfsem.semcount <= config->nrxfifo1);
 
       /* Clear the RX FIFO1 interrupt (and all other FIFO1-related
        * interrupts)
@@ -2546,11 +2544,11 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
   /* Configure RX FIFOs */
 
   regval = MAILBOX_ADDRESS(config->msgram.rxfifo0) |
-           MCAN_RXF0C_F0S(config->nfifo0);
+           MCAN_RXF0C_F0S(config->nrxfifo0);
   mcan_putreg(priv, SAM_MCAN_RXF0C_OFFSET, regval);
 
   regval = MAILBOX_ADDRESS(config->msgram.rxfifo1) |
-           MCAN_RXF1C_F1S(config->nfifo1);
+           MCAN_RXF1C_F1S(config->nrxfifo1);
   mcan_putreg(priv, SAM_MCAN_RXF1C_OFFSET, regval);
 
   /* Watermark interrupt off, blocking mode */
