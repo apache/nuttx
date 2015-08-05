@@ -1454,24 +1454,30 @@ choice
 
 config SAMV7_MCAN0_RXFIFO0_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN0_RXFIFO0_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_64BYTES
 	bool "64 bytes"
@@ -1491,24 +1497,30 @@ choice
 
 config SAMV7_MCAN0_RXFIFO1_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN0_RXFIFO1_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_64BYTES
 	bool "64 bytes"
@@ -1528,24 +1540,30 @@ choice
 
 config SAMV7_MCAN0_RXBUFFER_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN0_RXBUFFER_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_64BYTES
 	bool "64 bytes"
@@ -1568,24 +1586,30 @@ choice
 
 config SAMV7_MCAN0_TXBUFFER_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN0_TXBUFFER_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_64BYTES
 	bool "64 bytes"
@@ -1738,24 +1762,30 @@ choice
 
 config SAMV7_MCAN1_RXFIFO0_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN1_RXFIFO0_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_64BYTES
 	bool "64 bytes"
@@ -1775,24 +1805,30 @@ choice
 
 config SAMV7_MCAN1_RXFIFO1_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN1_RXFIFO1_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_64BYTES
 	bool "64 bytes"
@@ -1812,24 +1848,30 @@ choice
 
 config SAMV7_MCAN1_RXBUFFER_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN1_RXBUFFER_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_64BYTES
 	bool "64 bytes"
@@ -1852,24 +1894,30 @@ choice
 
 config SAMV7_MCAN1_TXBUFFER_8BYTES
 	bool "8 bytes"
+	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_12BYTES
 	bool "12 bytes"
+	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_16BYTES
 	bool "16 bytes"
+	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_20BYTES
 	bool "20 bytes"
+	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_24BYTES
 	bool "24 bytes"
+	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_32BYTES
 	bool "32 bytes"
 
 config SAMV7_MCAN1_TXBUFFER_48BYTES
 	bool "48 bytes"
+	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_64BYTES
 	bool "64 bytes"
