@@ -59,11 +59,11 @@
  * SLIP Configuration:
  *
  *   CONFIG_NET_SLIP - Enables building of the SLIP driver
- *   CONFIG_SLIP_STACKSIZE - Provides the stack size for SLIP RX and TX
+ *   CONFIG_NET_SLIP_STACKSIZE - Provides the stack size for SLIP RX and TX
  *     threads.  Default: 2048
- *   CONFIG_SLIP_DEFPRIO - Provides the priority for SLIP RX and TX threads.
- *     Default 128.
- *   CONFIG_NET_SLIP_MTU - Provides the size of the SLIP packet buffers.
+ *   CONFIG_NET_SLIP_DEFPRIO - Provides the priority for SLIP RX and TX
+ *     threads.  Default 128.
+ *   CONFIG_NET_NET_SLIP_MTU - Provides the size of the SLIP packet buffers.
  *     Default 296
  *
  *     The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
@@ -74,10 +74,10 @@
  *     uses a MTU of 296 and window of 256, but actually only sends 168 bytes
  *     of data: 40 + 128.  I believe that is to allow for the 2x worst cast
  *     packet expansion.  Ideally we would like to advertise the 256 MSS,
- *     but restrict transfers to 128 bytes (possibly by modifying the tcp_mss()
- *     macro).
+ *     but restrict transfers to 128 bytes (possibly by modifying the
+ *     tcp_mss() macro).
  *
- *   CONFIG_SLIP_NINTERFACES determines the number of physical interfaces
+ *   CONFIG_NET_SLIP_NINTERFACES determines the number of physical interfaces
  *   that will be supported.
  */
 

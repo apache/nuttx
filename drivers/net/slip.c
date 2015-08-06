@@ -108,12 +108,12 @@
 #  warning "CONFIG_NET_SLIP_MTU == 296 is optimal"
 #endif
 
-/* CONFIG_SLIP_NINTERFACES determines the number of physical interfaces
+/* CONFIG_NET_SLIP_NINTERFACES determines the number of physical interfaces
  * that will be supported.
  */
 
-#ifndef CONFIG_SLIP_NINTERFACES
-# define CONFIG_SLIP_NINTERFACES 1
+#ifndef CONFIG_NET_SLIP_NINTERFACES
+# define CONFIG_NET_SLIP_NINTERFACES 1
 #endif
 
 /*  SLIP special character codes *******************************************/
@@ -183,11 +183,11 @@ struct slip_driver_s
  * Private Data
  ****************************************************************************/
 
- /* We really should get rid of CONFIG_SLIP_NINTERFACES and, instead,
+ /* We really should get rid of CONFIG_NET_SLIP_NINTERFACES and, instead,
   * kmm_malloc() new interface instances as needed.
   */
 
-static struct slip_driver_s g_slip[CONFIG_SLIP_NINTERFACES];
+static struct slip_driver_s g_slip[CONFIG_NET_SLIP_NINTERFACES];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -462,7 +462,7 @@ static void slip_txtask(int argc, FAR char *argv[])
   unsigned int hsec;
 
   ndbg("index: %d\n", index);
-  DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
+  DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
    * initialization logic.
@@ -685,7 +685,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
   int ch;
 
   ndbg("index: %d\n", index);
-  DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
+  DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
    * initialization logic.
@@ -959,7 +959,7 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(intf < CONFIG_SLIP_NINTERFACES);
+  DEBUGASSERT(intf < CONFIG_NET_SLIP_NINTERFACES);
   priv = &g_slip[intf];
 
   /* Initialize the driver structure */

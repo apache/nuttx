@@ -319,7 +319,7 @@ config NET_SLIP_MTU
 		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
 		the tcp_mss() macro).
 
-config SLIP_NINTERFACES
+config NET_SLIP_NINTERFACES
 	int "Number of SLIP interfaces"
 	default 1
 	---help---
