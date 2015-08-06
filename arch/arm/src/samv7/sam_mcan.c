@@ -767,22 +767,30 @@
 #define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_BE | MCAN_INT_ACKE)
 
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing MCAN */
+/* Debug configurations that may be enabled just for testing MCAN */
+
+#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
+#  undef CONFIG_SAMV7_MCAN_REGDEBUG
+#endif
 
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
 #  define canvdbg   vdbg
 #  define canlldbg  lldbg
 #  define canllvdbg llvdbg
+
+#  ifdef CONFIG_SAMV7_MCAN_REGDEBUG
+#    define canregdbg lldbg
+#  else
+#    define canregdb(x...)
+#  endif
+
 #else
 #  define candbg(x...)
 #  define canvdbg(x...)
 #  define canlldbg(x...)
 #  define canllvdbg(x...)
-#endif
-
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
-#  undef CONFIG_SAMV7_MCAN_REGDEBUG
+#  define canregdb(x...)
 #endif
 
 /****************************************************************************
@@ -836,13 +844,13 @@ struct sam_config_s
   uint8_t ntxdedicated;     /* Number of dedicated TX buffers (up to 64) */
   uint8_t ntxfifoq;         /* Number of TX FIFO queue elements (up to 32) */
   uint8_t rxfifo0ecode;     /* Encoded RX FIFO0 element size */
-  uint8_t rxfifo0esize;     /* RX FIFO0 element size */
+  uint8_t rxfifo0esize;     /* RX FIFO0 element size (words) */
   uint8_t rxfifo1ecode;     /* Encoded RX FIFO1 element size */
-  uint8_t rxfifo1esize;     /* RX FIFO1 element size */
+  uint8_t rxfifo1esize;     /* RX FIFO1 element size (words) */
   uint8_t rxbufferecode;    /* Encoded RX buffer element size */
-  uint8_t rxbufferesize;    /* RX buffer element size */
+  uint8_t rxbufferesize;    /* RX buffer element size (words) */
   uint8_t txbufferecode;    /* Encoded TX buffer element size */
-  uint8_t txbufferesize;    /* TX buffer element size */
+  uint8_t txbufferesize;    /* TX buffer element size (words) */
 #ifdef SAMV7_MCAN_LOOPBACK
   bool loopback;            /* True: Loopback mode */
 #endif
@@ -940,7 +948,7 @@ static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
               int bufndx);
 #endif
 static void mcan_receive(FAR struct can_dev_s *dev,
-              FAR uint32_t *rxbuffer, unsigned long nbytes);
+              FAR uint32_t *rxbuffer, unsigned long nwords);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
 #ifdef CONFIG_SAMV7_MCAN0
 static int  mcan0_interrupt(int irq, void *context);
@@ -2334,6 +2342,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
 
   txbuffer[0] = regval;
+  canregdb("T0: %08x\n", regval);
 
   /* Format word T1:
    *   Data Length Code (DLC)            - Value from message structure
@@ -2342,6 +2351,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
   txbuffer[1] = BUFFER_R1_DLC(msg->cm_hdr.ch_dlc);
+  canregdb("T1: %08x\n", txbuffer[1]);
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
@@ -2527,9 +2537,9 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
  *   Receive an MCAN messages
  *
  * Input Parameters:
- *   dev - CAN-common state data
+ *   dev      - CAN-common state data
  *   rxbuffer - The RX buffer containing the received messages
- *   nbytes   - The length of the RX buffer (element size).
+ *   nwords   - The length of the RX buffer (element size in words).
  *
  * Returned Value:
  *   None
@@ -2537,20 +2547,23 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
  ****************************************************************************/
 
 static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
-                         unsigned long nbytes)
+                         unsigned long nwords)
 {
   struct can_hdr_s hdr;
   uint32_t regval;
+  unsigned int nbytes;
   int ret;
 
   /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
 
+  nbytes = (nwords << 2);
   arch_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
 
   /* Format the CAN header */
   /* Work R0 contains the CAN ID */
 
-  regval        = *rxbuffer++;
+  regval = *rxbuffer++;
+  canregdb("R0: %08x\n", regval);
 
   hdr.ch_rtr    = 0;
 #ifdef CONFIG_CAN_EXTID
@@ -2579,12 +2592,14 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
 
   /* Save the standard ID of the newly received message */
 
-  hdr.ch_id  = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
+  hdr.ch_id = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
 #endif
 
   /* Word R1 contains the DLC and timestamp */
 
-  regval     = *rxbuffer++;
+  regval = *rxbuffer++;
+  canregdb("R1: %08x\n", regval);
+
   hdr.ch_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
 
   /* And provide the CAN message to the upper half logic */
