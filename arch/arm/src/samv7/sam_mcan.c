@@ -729,10 +729,8 @@
  */
 
 #define MCAN_RXCOMMON_INTS (MCAN_INT_CRCE | MCAN_INT_FOE | MCAN_INT_STE)
-#define MCAN_RXFIFO0_INTS  (MCAN_INT_RF0N | MCAN_INT_RF0W | MCAN_INT_RF0L | \
-                            MCAN_INT_RF0L)
-#define MCAN_RXFIFO1_INTS  (MCAN_INT_RF1N | MCAN_INT_RF1W | MCAN_INT_RF1L | \
-                            MCAN_INT_RF1L)
+#define MCAN_RXFIFO0_INTS  (MCAN_INT_RF0N | MCAN_INT_RF0W | MCAN_INT_RF0L)
+#define MCAN_RXFIFO1_INTS  (MCAN_INT_RF1N | MCAN_INT_RF1W | MCAN_INT_RF1L)
 #define MCAN_RXFIFO_INTS   (MCAN_RXFIFO0_INTS | MCAN_RXFIFO1_INTS | \
                             MCAN_INT_HPM | MCAN_RXCOMMON_INTS)
 #define MCAN_RXDEDBUF_INTS (MCAN_INT_DRX | MCAN_RXCOMMON_INTS)
@@ -860,7 +858,6 @@ struct sam_mcan_s
 {
   const struct sam_config_s *config; /* The constant configuration */
   bool initialized;         /* True: Device has been initialized */
-  bool  txenabled;          /* True: TX interrupts have been enabled */
   sem_t locksem;            /* Enforces mutually exclusive access */
   sem_t txfsem;             /* Used to wait for TX FIFO availability */
   uint32_t rxints;          /* Configured RX interrupts */
@@ -949,7 +946,6 @@ static int  mcan1_interrupt(int irq, void *context);
 
 /* Hardware initialization */
 
-static void mcan_configure_interrupts(FAR struct sam_mcan_s *priv);
 static int  mcan_hw_initialize(FAR struct sam_mcan_s *priv);
 
 /****************************************************************************
@@ -2000,12 +1996,10 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
   if (enable)
     {
       regval |= priv->txints | MCAN_COMMON_INTS;
-      priv->txenabled = true;
     }
   else
     {
       regval &= ~priv->txints;
-      priv->txenabled = false;
     }
 
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, regval);
@@ -2174,7 +2168,6 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   FAR uint32_t *txbuffer = 0;
   FAR const uint8_t *src;
   FAR uint8_t *dest;
-  irqstate_t flags;
   uint32_t regval;
   unsigned int msglen;
   unsigned int ndx;
@@ -2286,19 +2279,6 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
 
-  /* If we have not been asked to suppress TX interrupts, then enable
-   * TX interrupts now.
-   */
-
-  if (priv->txenabled)
-    {
-      flags   = irqsave();
-      regval  = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
-      regval |= priv->txints;
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->txints);
-      irqrestore(flags);
-    }
-
   mcan_dev_unlock(priv);
   return OK;
 }
@@ -2322,18 +2302,32 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   uint32_t regval;
   bool notfull;
+#ifdef CONFIG_DEBUG
+  int sval;
+#endif
 
   /* Get exclusive access to the MCAN peripheral */
 
   mcan_dev_lock(priv);
 
-  /* Return the state of the TX FIFOQ
+  /* Return the state of the TX FIFOQ.  Return TRUE if the TX FIFO/Queue is
+   * not full.
    *
    * REVISIT: Dedicated TX buffers are not supported.
    */
 
-  regval = mcan_getreg(priv, SAM_MCAN_IR_OFFSET);
-  notfull = ((regval & MCAN_INT_TEFF) == 0);
+  regval  = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+  notfull = ((regval & MCAN_TXFQS_TFQF) == 0);
+
+#ifdef CONFIG_DEBUG
+  /* As a sanity check, the txfsem should also track the number of elements
+   * the TX FIFO/queue.  Make sure that they are consistent.
+   */
+
+  (void)sem_getvalue(&priv->txfsem, &sval);
+  DEBUGASSERT(((notfull && sval > 0) || (!notfull && sval <= 0)) &&
+              (sval <= priv->config->ntxfifoq));
+#endif
 
   mcan_dev_unlock(priv);
   return notfull;
@@ -2361,22 +2355,42 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   uint32_t regval;
-  bool txempty;
+  int sval;
+  bool empty;
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
 
   /* Get exclusive access to the MCAN peripheral */
 
   mcan_dev_lock(priv);
 
-  /* Return the state of the TX FIFOQ
+  /* Return the state of the TX FIFOQ.  Return TRUE if the TX FIFO/Queue is
+   * empty.  We don't have a reliable indication that the FIFO is empty, so
+   * we have to use some heuristics.
    *
    * REVISIT: Dedicated TX buffers are not supported.
    */
 
-  regval = mcan_getreg(priv, SAM_MCAN_IR_OFFSET);
-  txempty = ((regval & MCAN_INT_TFE) != 0);
+  regval = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+  if (((regval & MCAN_TXFQS_TFQF) != 0))
+    {
+      return false;
+    }
 
+  /* The TX FIFO/Queue is not full, but is it empty?  The txfsem should
+   * track the number of elements the TX FIFO/queue in use.
+   *
+   * Since the FIFO is not full, the semaphore count should be greater
+   * than zero.  If it is equal to the full count of TX FIFO/Queue
+   * elements, then there is no transfer in progress.
+   */
+
+  (void)sem_getvalue(&priv->txfsem, &sval);
+  DEBUGASSERT(sval > 0 && sval <= priv->config->ntxfifoq);
+
+  empty = (sval ==  priv->config->ntxfifoq);
   mcan_dev_unlock(priv);
-  return txempty;
+  return empty;
 }
 
 /****************************************************************************
@@ -2513,6 +2527,9 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
   uint32_t regval;
   unsigned int nelem;
   unsigned int ndx;
+#ifdef CONFIG_DEBUG
+  int sval;
+#endif
 
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
@@ -2532,7 +2549,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
       /* Clear the error indications */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_CMNERR_INTS);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_CMNERR_INTS);
     }
 
   /* Check for transmission errors */
@@ -2543,7 +2560,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
       /* Clear the error indications */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_TXERR_INTS);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
     }
 
   /* Check for successful completion of a transmission */
@@ -2554,7 +2571,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
        * other TX-related interrupts)
        */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->txints);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->txints);
 
       /* Indicate that there is one more buffer free in the TX FIFOQ by
        * "releasing" it.  This may have the effect of waking up a thread
@@ -2564,13 +2581,21 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
        */
 
       mcan_buffer_release(priv);
-      DEBUGASSERT(priv->txfsem.semcount <= config->ntxfifoq);
+
+#ifdef CONFIG_DEBUG
+      (void)sem_getvalue(&priv->txfsem, &sval);
+      DEBUGASSERT(sval <= config->ntxfifoq);
+#endif
+
+      /* Report that the TX transfer is complete to the upper half logic */
+
+      can_txdone(dev);
     }
   else if ((pending & priv->txints) != 0)
     {
       /* Clear unhandled TX events */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->txints);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->txints);
     }
 
 #if 0 /* Not used */
@@ -2626,20 +2651,18 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
       /* Clear the error indications */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_RXERR_INTS);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXERR_INTS);
     }
 
   /* Check for successful reception of a new message in RX FIFO0 */
 
   if ((pending & MCAN_INT_RF0N) != 0)
     {
-      DEBUGASSERT(priv->txfsem.semcount <= config->nrxfifo0);
-
       /* Clear the RX FIFO0 interrupt (and all other FIFO0-related
        * interrupts)
        */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_RXFIFO0_INTS);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXFIFO0_INTS);
       pending &= ~MCAN_RXFIFO0_INTS;
 
       /* Handle the newly received message in FIFO0 */
@@ -2672,13 +2695,11 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
   if ((pending & MCAN_INT_RF1N) != 0)
     {
-      DEBUGASSERT(priv->txfsem.semcount <= config->nrxfifo1);
-
       /* Clear the RX FIFO1 interrupt (and all other FIFO1-related
        * interrupts)
        */
 
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_RXFIFO1_INTS);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXFIFO1_INTS);
       pending &= ~MCAN_RXFIFO1_INTS;
 
       /* Handle the newly received message in FIFO1 */
@@ -2711,7 +2732,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
   if ((pending & priv->rxints) != 0)
     {
-      mcan_putreg(priv, SAM_MCAN_IE_OFFSET, priv->rxints);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->rxints);
     }
 }
 
@@ -2760,59 +2781,6 @@ static int mcan1_interrupt(int irq, void *context)
   return OK;
 }
 #endif
-
-/****************************************************************************
- * Name: mcan_configure_interrupts
- *
- * Description:
- *   Configure interrupt lines.
- *
- * Input Parameter:
- *   priv - A pointer to the private data structure for this MCAN peripheral
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static void mcan_configure_interrupts(FAR struct sam_mcan_s *priv)
-{
-  uint32_t regval;
-
-  /* Select RX-related interrupts */
-
-#if 0 /* Dedicated RX buffers are not used by this driver */
-  priv->rxints = MCAN_RXDEDBUF_INTS;
-#else
-  priv->rxints = MCAN_RXFIFO_INTS;
-#endif
-
-  /* Select RX-related interrupts */
-
-#if 0 /* Dedicated TX buffers are not used by this driver */
-  priv->txints = MCAN_TXDEDBUF_INTS;
-#else
-  priv->txints = MCAN_TXFIFOQ_INTS;
-#endif
-
-  /* Direct to Line 0.
-   * REVISIT: Only interrupt line 0 is used by this driver.
-   */
-
-  regval  = mcan_getreg(priv, SAM_MCAN_ILS_OFFSET);
-  regval |= (priv->rxints | priv->txints | MCAN_COMMON_INTS);
-  mcan_putreg(priv, SAM_MCAN_ILS_OFFSET, regval);
-
-  /* Make sure that interrupt line 0 is enabled. */
-
-  regval  = mcan_getreg(priv, SAM_MCAN_ILE_OFFSET);
-  regval |= MCAN_ILE_EINT0;
-  mcan_putreg(priv, SAM_MCAN_ILE_OFFSET, regval);
-
-  /* Clear any pending interrupts but do not yet enable a interrupt */
-
-  mcan_putreg(priv, SAM_MCAN_IE_OFFSET, MCAN_INT_ALL);
-}
 
 /****************************************************************************
  * Name: mcan_hw_initialize
@@ -2939,7 +2907,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
            MCAN_RXESC_F0DS(config->rxfifo0ecode);
   mcan_putreg(priv, SAM_MCAN_RXESC_OFFSET, regval);
 
-  regval = MCAN_TXESC_TBDS(config->txbufferesize);
+  regval = MCAN_TXESC_TBDS(config->txbufferecode);
   mcan_putreg(priv, SAM_MCAN_TXESC_OFFSET, regval);
 
   /* Configure Message Filters */
@@ -3042,8 +3010,35 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 #endif
 
   /* Configure interrupt lines */
+  /* Select RX-related interrupts */
 
-  mcan_configure_interrupts(priv);
+#if 0 /* Dedicated RX buffers are not used by this driver */
+  priv->rxints = MCAN_RXDEDBUF_INTS;
+#else
+  priv->rxints = MCAN_RXFIFO_INTS;
+#endif
+
+  /* Select TX-related interrupts */
+
+#if 0 /* Dedicated TX buffers are not used by this driver */
+  priv->txints = MCAN_TXDEDBUF_INTS;
+#else
+  priv->txints = MCAN_TXFIFOQ_INTS;
+#endif
+
+  /* Direct all interrupts to Line 0.
+   *
+   * Bits in the ILS register correspond to each MCAN interrupt; A bit
+   * set to '1' is directed to interrupt line 1; a bit cleared to '0'
+   * is directed interrupt line 0.
+   *
+   * REVISIT: Nothing is done here.  Only interrupt line 0 is used by
+   * this driver and ILS was already cleared above.
+   */
+
+  /* Enable only interrupt line 0. */
+
+  mcan_putreg(priv, SAM_MCAN_ILE_OFFSET, MCAN_ILE_EINT0);
 
   /* Disable initialization mode to enable normal operation */
 
