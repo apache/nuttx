@@ -939,8 +939,7 @@ static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   intf - In the case where there are multiple SLIP interfaces, this value
- *          identifies which is to be initialized.  The network name will be,
- *          for example, "/dev/slip5" for intf == 5
+ *          identifies which is to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
