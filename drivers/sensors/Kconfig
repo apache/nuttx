@@ -80,11 +80,11 @@ config LM75
 		the TI TMP100/101.
 
 config LM92
-  bool "TI LM92 Temperature Sensor support"
-  default n
-  select I2C
-  ---help---
-    Enable driver support for the TI LM92 Temperature Sensor.
+	bool "TI LM92 Temperature Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the TI LM92 Temperature Sensor.
 
 config QENCODER
 	bool "Qencoder"
