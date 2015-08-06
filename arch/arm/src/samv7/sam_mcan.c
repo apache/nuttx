@@ -782,7 +782,7 @@
 #  ifdef CONFIG_SAMV7_MCAN_REGDEBUG
 #    define canregdbg lldbg
 #  else
-#    define canregdb(x...)
+#    define canregdbg(x...)
 #  endif
 
 #else
@@ -790,7 +790,7 @@
 #  define canvdbg(x...)
 #  define canlldbg(x...)
 #  define canllvdbg(x...)
-#  define canregdb(x...)
+#  define canregdbg(x...)
 #endif
 
 /****************************************************************************
@@ -2342,7 +2342,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
 
   txbuffer[0] = regval;
-  canregdb("T0: %08x\n", regval);
+  canregdbg("T0: %08x\n", regval);
 
   /* Format word T1:
    *   Data Length Code (DLC)            - Value from message structure
@@ -2351,7 +2351,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
   txbuffer[1] = BUFFER_R1_DLC(msg->cm_hdr.ch_dlc);
-  canregdb("T1: %08x\n", txbuffer[1]);
+  canregdbg("T1: %08x\n", txbuffer[1]);
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
@@ -2563,7 +2563,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Work R0 contains the CAN ID */
 
   regval = *rxbuffer++;
-  canregdb("R0: %08x\n", regval);
+  canregdbg("R0: %08x\n", regval);
 
   hdr.ch_rtr    = 0;
 #ifdef CONFIG_CAN_EXTID
@@ -2598,7 +2598,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Word R1 contains the DLC and timestamp */
 
   regval = *rxbuffer++;
-  canregdb("R1: %08x\n", regval);
+  canregdbg("R1: %08x\n", regval);
 
   hdr.ch_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
 
