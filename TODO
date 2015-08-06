@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 26, 2015)
+NuttX TODO List (Last updated August 6, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -20,7 +20,7 @@ nuttx/
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (7)  Graphics subsystem (graphics/)
+  (8)  Graphics subsystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -1536,6 +1536,15 @@ o Graphics subsystem (graphics/)
   Status:      Open
   Priority:    Low, of mostly strategic value.
 
+  Title:       VERTICAL ANTI-ALIASING
+  Description: Anti-aliasing is implemented along the horizontal raster line
+               with fractional pixels at the ends of each line.  There is no
+               accounting for fractional pixels in the vertical direction.
+               As a result lines closer to vertical receive better anti-
+               aliasing than lines closer to horizontal.
+  Status:      Open
+  Priority:    Low, not a serious issue but worth noting.  There is no plan
+               to change this behavior.
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
