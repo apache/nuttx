@@ -858,6 +858,11 @@ struct sam_mcan_s
 {
   const struct sam_config_s *config; /* The constant configuration */
   bool initialized;         /* True: Device has been initialized */
+#ifdef CONFIG_CAN_EXTID
+  uint8_t  nextalloc;       /* Number of allocated extended filters */
+#else
+  uint8_t  nstdalloc;       /* Number of allocated standard filters */
+#endif
   sem_t locksem;            /* Enforces mutually exclusive access */
   sem_t txfsem;             /* Used to wait for TX FIFO availability */
   uint32_t rxints;          /* Configured RX interrupts */
@@ -1522,12 +1527,12 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
  * Name: mcan_add_extfilter
  *
  * Description:
- *   Add an address filter for a extended 28 bit address.
+ *   Add an address filter for a extended 29 bit address.
  *
  * Input Parameters:
  *   priv - An instance of the MCAN driver state structure.
- *   id   - The 28-bit extended address to filter
- *   mask - A 28-bit extended address mask
+ *   id   - The 29-bit extended address to filter
+ *   mask - A 29-bit extended address mask
  *
  * Returned Value:
  *   A non-negative filter ID is returned on success.  Otherwise a negated
@@ -1547,7 +1552,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
   int ndx;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL &&
-              id < (1 << 28) && mask < (1 << 28));
+              id < (1 << 29) && mask < (1 << 29));
   config = priv->config;
 
   /* Get exclusive excess to the MCAN hardware */
@@ -1565,7 +1570,11 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
 
       if ((priv->extfilters[word] & (1 << bit)) == 0)
         {
-          /* No, then this is the one that we will use */
+          /* No, assign the filter */
+
+          DEBUGASSERT(priv->nextalloc < priv->config->nstdfilters);
+          priv->extfilters[word] |= (1 << bit);
+          priv->nextalloc++;
 
           extfilter = config->msgram.extfilters + (ndx << 1);
 
@@ -1577,11 +1586,30 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
           /* Flush the filter entry into physical RAM */
 
           arch_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
+
+          /* Is this the first extended filter? */
+
+          if (priv->nextalloc == 1)
+            {
+             /* Update the Global Filter Configuration so that received
+              * messages are rejected if they do not match the acceptance
+              * filter.
+              *
+              *   ANFE=2: Discard all rejected frames
+              */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
+              regval &= ~MCAN_GFC_ANFE_MASK;
+              regval |= MCAN_GFC_ANFE_REJECTED;
+              mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+            }
+
           mcan_dev_unlock(priv);
           return ndx;
         }
     }
 
+  DEBUGASSERT(priv->nextalloc == priv->config->nextfilters);
   mcan_dev_unlock(priv);
   return -EAGAIN;
 }
@@ -1591,7 +1619,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
  * Name: mcan_del_extfilter
  *
  * Description:
- *   Remove an address filter for a standard 28 bit address.
+ *   Remove an address filter for a standard 29 bit address.
  *
  * Input Parameters:
  *   priv - An instance of the MCAN driver state structure.
@@ -1608,6 +1636,7 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 {
   FAR const struct sam_config_s *config;
   FAR uint32_t *extfilter;
+  uint32_t regval;
   int word;
   int bit;
 
@@ -1619,17 +1648,37 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   mcan_dev_lock(priv);
 
-  /* Deactivate the filter */
-
-  extfilter    = config->msgram.extfilters + (ndx << 1);
-  *extfilter++ = 0;
-  *extfilter   = 0;
-
   /* Release the filter */
 
   word = ndx >> 5;
   bit  = ndx & 0x1f;
   priv->extfilters[word] &= ~(1 << bit);
+
+  DEBUGASSERT(priv->nextalloc > 0);
+  priv->nextalloc--;
+
+  /* Was that the last extended filter? */
+
+  if (priv->nextalloc == 0)
+    {
+      /* If there are no extended filters, then modify Global Filter
+       * Configuration so that all rejected messages are places in RX
+       * FIFO0.
+       *
+       *   ANFE=0: Store all rejected extended frame in RX FIFO0
+       */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
+      regval &= ~MCAN_GFC_ANFE_MASK;
+      regval |= MCAN_GFC_ANFE_RX_FIFO0;
+      mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+    }
+
+  /* Deactivate the filter last so that no messages are lost. */
+
+  extfilter    = config->msgram.extfilters + (ndx << 1);
+  *extfilter++ = 0;
+  *extfilter   = 0;
 
   mcan_dev_unlock(priv);
   return OK;
@@ -1671,7 +1720,7 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
 
   /* Find an unused standard filter */
 
-  for (ndx = 0; ndx <  config->nstdfilters; ndx++)
+  for (ndx = 0; ndx < config->nstdfilters; ndx++)
     {
       /* Is this filter assigned? */
 
@@ -1680,7 +1729,11 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
 
       if ((priv->stdfilters[word] & (1 << bit)) == 0)
         {
-          /* No, then this is the one that we will use */
+          /* No, assign the filter */
+
+          DEBUGASSERT(priv->nstdalloc < priv->config->nstdfilters);
+          priv->stdfilters[word] |= (1 << bit);
+          priv->nstdalloc++;
 
           stdfilter = config->msgram.stdfilters + ndx;
           regval    = STDFILTER_S0_SFT_CLASSIC |  STDFILTER_S0_SFID1(id);
@@ -1693,11 +1746,30 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
           /* Flush the filter entry into physical RAM */
 
           arch_clean_dcache((uintptr_t)stdfilter, (uintptr_t)stdfilter + 4);
+
+          /* Is this the first standard filter? */
+
+          if (priv->nstdalloc == 1)
+            {
+             /* Update the Global Filter Configuration so that received
+              * messages are rejected if they do not match the acceptance
+              * filter.
+              *
+              *   ANFS=2: Discard all rejected frames
+              */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
+              regval &= ~MCAN_GFC_ANFS_MASK;
+              regval |= MCAN_GFC_ANFS_REJECTED;
+              mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+            }
+
           mcan_dev_unlock(priv);
           return ndx;
         }
     }
 
+  DEBUGASSERT(priv->nstdalloc == priv->config->nstdfilters);
   mcan_dev_unlock(priv);
   return -EAGAIN;
 }
@@ -1707,7 +1779,7 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
  * Name: mcan_del_stdfilter
  *
  * Description:
- *   Remove an address filter for a standard 28 bit address.
+ *   Remove an address filter for a standard 29 bit address.
  *
  * Input Parameters:
  *   priv - An instance of the MCAN driver state structure.
@@ -1724,6 +1796,7 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 {
   FAR const struct sam_config_s *config;
   FAR uint32_t *stdfilter;
+  uint32_t regval;
   int word;
   int bit;
 
@@ -1735,16 +1808,36 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   mcan_dev_lock(priv);
 
-  /* Deactivate the filter */
-
-  stdfilter  = config->msgram.stdfilters + ndx;
-  *stdfilter = 0;
-
   /* Release the filter */
 
   word = ndx >> 5;
   bit  = ndx & 0x1f;
   priv->stdfilters[word] &= ~(1 << bit);
+
+  DEBUGASSERT(priv->nstdalloc > 0);
+  priv->nstdalloc--;
+
+  /* Was that the last standard filter? */
+
+  if (priv->nstdalloc == 0)
+    {
+      /* If there are no standard filters, then modify Global Filter
+       * Configuration so that all rejected messages are places in RX
+       * FIFO0.
+       *
+       *   ANFS=0: Store all rejected extended frame in RX FIFO0
+       */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
+      regval &= ~MCAN_GFC_ANFS_MASK;
+      regval |= MCAN_GFC_ANFS_RX_FIFO0;
+      mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+    }
+
+  /* Deactivate the filter last so that no messages are lost. */
+
+  stdfilter  = config->msgram.stdfilters + ndx;
+  *stdfilter = 0;
 
   mcan_dev_unlock(priv);
   return OK;
@@ -2036,7 +2129,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
     {
 #ifdef CONFIG_CAN_EXTID
       /* CANIOC_ADD_EXTFILTER:
-       *   Description:    Add an address filter for a extended 28 bit
+       *   Description:    Add an address filter for a extended 29 bit
        *                   address.
        *   Argument:       A reference to struct canioc_extfilter_s
        *   Returned Value: A non-negative filter ID is returned on success.
@@ -2054,7 +2147,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
         break;
 
       /* CANIOC_DEL_EXTFILTER:
-       *   Description:    Remove an address filter for a standard 28 bit address.
+       *   Description:    Remove an address filter for a standard 29 bit address.
        *   Argument:       The filter index previously returned by the
        *                   CANIOC_ADD_EXTFILTER command
        *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
@@ -2831,12 +2924,16 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
   regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
   mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
 
-  /* Global Filter Configuration: Reject remote frames, reject non-matching
-   * frames.
+  /* Global Filter Configuration:
+   *
+   *   ANFS=0: Store all rejected extended frame in RX FIFO0
+   *   ANFE=0: Store all rejected extended frame in RX FIFO0
+   *   FFSE=1: Reject all remote frames with 11-bit standard IDs.
+   *   RRFE=1: Reject all remote frames with 29-bit extended IDs.
    */
 
-  regval = MCAN_GFC_RRFE | MCAN_GFC_RRFS | MCAN_GFC_ANFE_REJECTED |
-           MCAN_GFC_ANFS_REJECTED;
+  regval = MCAN_GFC_RRFE | MCAN_GFC_RRFS | MCAN_GFC_ANFE_RX_FIFO0 |
+           MCAN_GFC_ANFS_RX_FIFO0;
   mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
 
   /* Extended ID Filter AND mask  */
