@@ -52,7 +52,7 @@ config NET_DUMPPACKET
 
 comment "External Ethernet MAC Device Support"
 
-config NET_DM90x0
+menuconfig NET_DM90x0
 	bool "Davicom dm9000/dm9010 support"
 	default n
 	---help---
@@ -132,7 +132,7 @@ config NET_CS89x0
 	---help---
 	Under construction -- do not use
 
-config ENC28J60
+menuconfig ENC28J60
 	bool "Microchip ENC28J60 support"
 	default n
 	select SPI
@@ -142,6 +142,7 @@ config ENC28J60
 		DS39662C, 2008 Microchip Technology Inc.
 
 if ENC28J60
+
 config ENC28J60_NINTERFACES
 	int "Number of physical ENC28J60"
 	default 1
@@ -192,9 +193,9 @@ config ENC28J60_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG and DEBUG_NET.
 
-endif
+endif # ENC28J60
 
-config ENCX24J600
+menuconfig ENCX24J600
 	bool "Microchip ENCX24J600 support"
 	default n
 	select SPI
@@ -205,6 +206,7 @@ config ENCX24J600
 		with SPI or Parallel Interface DS39935B, 2009 Microchip Technology Inc.
 
 if ENCX24J600
+
 config ENC28J60_NINTERFACES
 	int "Number of physical ENCX24J600"
 	default 1
@@ -258,9 +260,9 @@ config ENCX24J600_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG and DEBUG_NET.
 
-endif
+endif # ENCX24J600
 
-config NET_E1000
+menuconfig NET_E1000
 	bool "E1000 support"
 	default n
 
@@ -280,13 +282,52 @@ config E1000_BUFF_SIZE
 
 endif # NET_E1000
 
-config NET_SLIP
+menuconfig NET_SLIP
 	bool "SLIP (serial line) support"
 	default n
 	---help---
 		Reference: RFC 1055
 
-config NET_FTMAC100
+if NET_SLIP
+
+config NET_SLIP_STACKSIZE
+	int "Daemon stack size"
+	default 2048
+	---help---
+		Provides the stack size for SLIP RX and TX.
+
+config NET_SLIP_DEFPRIO
+	int "Daemon priority"
+	default 128
+	---help---
+		Provides the priority for SLIP RX and TX threads.
+
+config NET_SLIP_MTU
+	int "Packet size (MTU)"
+	default 296
+	---help---
+		Provides the size of the SLIP packet buffers.
+
+		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
+		the IP+TPC headers plus 256 bytes of data).  So you might as well
+		set CONFIG_NET_SLIP_MTU to 296 as well.
+
+		There may be an issue with this setting, however.  I see that Linux
+		uses a MTU of 296 and window of 256, but actually only sends 168
+		bytes of data: 40 + 128.  I believe that is to allow for the 2x
+		worst cast packet expansion.  Ideally we would like to advertise the
+		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
+		the tcp_mss() macro).
+
+config SLIP_NINTERFACES
+	int "Number of SLIP interfaces"
+	default 1
+	---help---
+		Determines the number of physical interfaces that will be supported.
+
+endif
+
+menuconfig NET_FTMAC100
 	bool "Faraday 10/100 Ethernet"
 	default n
 	---help---
@@ -316,7 +357,7 @@ config FTMAC100_MAC0_ENV_ADDR
 
 endif # NET_FTMAC100
 
-config NET_VNET
+menuconfig NET_VNET
 	bool "VNET support"
 	default n
 
