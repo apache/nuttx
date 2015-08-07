@@ -45,6 +45,10 @@ endif
 
 ifeq ($(CONFIG_I2C),y)
 
+ifeq ($(CONFIG_AS5048B),y)
+  CSRCS += as5048b.c
+endif
+
 ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
