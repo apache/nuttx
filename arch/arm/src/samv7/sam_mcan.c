@@ -194,10 +194,6 @@
 #    error Undefined MCAN0 RX FIFO0 element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && (MCAN0_RXFIFO0_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error RXFIFO0 element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE
 #    define CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE 0
 #  endif
@@ -206,8 +202,10 @@
 #    error Invalid MCAN0 number of RX FIFO0 elements
 #  endif
 
-#  define MCAN0_RXFIFO0_WORDS \
-    (CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE * ((MCAN0_RXFIFO0_ELEMENT_SIZE/4) + 2))
+#  define MCAN0_RXFIFO0_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE * \
+                   MCAN0_RXFIFO0_ELEMENT_SIZE + 8)
+#  define MCAN0_RXFIFO0_WORDS (MCAN0_RXFIFO0_BYTES >> 2)
 
 /* MCAN0 RX FIFO1 element size */
 
@@ -239,10 +237,6 @@
 #    error Undefined MCAN0 RX FIFO1 element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && (MCAN0_RXFIFO1_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error RXFIFO1 element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE
 #    define CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE 0
 #  endif
@@ -251,8 +245,10 @@
 #    error Invalid MCAN0 number of RX FIFO1 elements
 #  endif
 
-#  define MCAN0_RXFIFO1_WORDS \
-    (CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE * ((MCAN1_RXFIFO1_ELEMENT_SIZE/4) + 2))
+#  define MCAN0_RXFIFO1_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE * \
+                   MCAN1_RXFIFO1_ELEMENT_SIZE + 8)
+#  define MCAN0_RXFIFO1_WORDS (MCAN0_RXFIFO1_BYTES >> 2)
 
 /* MCAN0 Filters */
 
@@ -272,8 +268,13 @@
 #    error Invalid MCAN0 number of Extended Filters
 #  endif
 
-#define MCAN0_STDFILTER_WORDS  CONFIG_SAMV7_MCAN0_NSTDFILTERS
-#define MCAN0_EXTFILTER_WORDS  (CONFIG_SAMV7_MCAN0_NEXTFILTERS * 2)
+#  define MCAN0_STDFILTER_BYTES \
+      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_NSTDFILTERS << 2)
+#  define MCAN0_STDFILTER_WORDS (MCAN0_STDFILTER_BYTES >> 2)
+
+#  define MCAN0_EXTFILTER_BYTES \
+      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_NEXTFILTERS << 3)
+#  define MCAN0_EXTFILTER_WORDS (MCAN0_EXTFILTER_BYTES >> 2)
 
 /* MCAN0 RX buffer element size */
 
@@ -305,10 +306,6 @@
 #    error Undefined MCAN0 RX buffer element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && (MCAN0_RXBUFFER_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error RXBUFFER element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
 #    define CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE 0
 #  endif
@@ -317,9 +314,11 @@
 #    error Invalid MCAN0 number of RX BUFFER elements
 #  endif
 
+#  define MCAN0_DEDICATED_RXBUFFER_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE * \
+                   MCAN0_RXBUFFER_ELEMENT_SIZE + 8)
 #  define MCAN0_DEDICATED_RXBUFFER_WORDS \
-    (CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE * \
-    ((MCAN0_RXBUFFER_ELEMENT_SIZE/4) + 2))
+     (MCAN0_DEDICATED_RXBUFFER_BYTES >> 2)
 
 /* MCAN0 TX buffer element size */
 
@@ -351,18 +350,15 @@
 #    error Undefined MCAN0 TX buffer element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH) && \
-    (MCAN0_TXBUFFER_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error TXBUFFER element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
 #    define CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE 0
 #  endif
 
+#  define MCAN0_DEDICATED_TXBUFFER_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE * \
+                   MCAN0_TXBUFFER_ELEMENT_SIZE + 8)
 #  define MCAN0_DEDICATED_TXBUFFER_WORDS \
-    (CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE * \
-    ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+     (MCAN0_DEDICATED_TXBUFFER_BYTES >> 2)
 
 /* MCAN0 TX FIFOs */
 
@@ -383,9 +379,15 @@
 #    error Invalid MCAN0 number of TX EVENT FIFO elements
 #  endif
 
-#  define MCAN0_TXEVENTFIFO_WORDS  (CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE * 2)
-#  define MCAN0_TXFIFIOQ_WORDS \
-    (CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE * ((MCAN0_TXBUFFER_ELEMENT_SIZE/4) + 2))
+#  define MCAN0_TXEVENTFIFO_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_TXEVENTFIFO_SIZE << 3)
+#  define MCAN0_TXEVENTFIFO_WORDS \
+     (MCAN0_TXEVENTFIFO_BYTES >> 2)
+
+#  define MCAN0_TXFIFIOQ_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE *  \
+                   MCAN0_TXBUFFER_ELEMENT_SIZE + 8)
+#  define MCAN0_TXFIFIOQ_WORDS (MCAN0_TXFIFIOQ_BYTES >> 2)
 
 /* MCAN0 Message RAM */
 
@@ -477,10 +479,6 @@
 #    error Undefined MCAN1 RX FIFO0 element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && (MCAN1_RXFIFO0_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error RXFIFO0 element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE
 #    define CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE 0
 #  endif
@@ -489,8 +487,10 @@
 #    error Invalid MCAN1 number of RX FIFO 0 elements
 #  endif
 
-#  define MCAN1_RXFIFO0_WORDS \
-     (CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE * ((MCAN1_RXFIFO0_ELEMENT_SIZE/4) + 2))
+#  define MCAN1_RXFIFO0_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE * \
+                   MCAN1_RXFIFO0_ELEMENT_SIZE + 8)
+#  define MCAN1_RXFIFO0_WORDS (MCAN1_RXFIFO0_BYTES >> 2)
 
 /* MCAN1 RX FIFO1 element size */
 
@@ -522,10 +522,6 @@
 #    error Undefined MCAN1 RX FIFO1 element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && (MCAN1_RXFIFO1_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error RXFIFO1 element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE
 #    define CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE 0
 #  endif
@@ -534,8 +530,10 @@
 #    error Invalid MCAN1 number of RX FIFO 0 elements
 #  endif
 
-#  define MCAN1_RXFIFO1_WORDS \
-     (CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE * ((MCAN1_RXFIFO1_ELEMENT_SIZE/4) + 2))
+#  define MCAN1_RXFIFO1_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE * \
+                   MCAN1_RXFIFO1_ELEMENT_SIZE + 8)
+#  define MCAN1_RXFIFO1_WORDS (MCAN1_RXFIFO1_BYTES >> 2)
 
 /* MCAN1 Filters */
 
@@ -555,8 +553,13 @@
 #    error Invalid MCAN1 number of Extended Filters
 #  endif
 
-#  define MCAN1_STDFILTER_WORDS  CONFIG_SAMV7_MCAN1_NSTDFILTERS
-#  define MCAN1_EXTFILTER_WORDS (CONFIG_SAMV7_MCAN1_NEXTFILTERS * 2)
+#  define MCAN1_STDFILTER_BYTES \
+      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_NSTDFILTERS << 2)
+#  define MCAN1_STDFILTER_WORDS (MCAN1_STDFILTER_BYTES >> 2)
+
+#  define MCAN1_EXTFILTER_BYTES \
+      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_NEXTFILTERS << 3)
+#  define MCAN1_EXTFILTER_WORDS (MCAN1_EXTFILTER_BYTES >> 2)
 
 /* MCAN1 RX buffer element size */
 
@@ -588,10 +591,6 @@
 #    error Undefined MCAN1 RX buffer element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && (MCAN1_RXBUFFER_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error RXBUFFER element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
 #    define CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE 0
 #  endif
@@ -600,9 +599,11 @@
 #    error Invalid MCAN1 number of RX BUFFER elements
 #  endif
 
+#  define MCAN1_DEDICATED_RXBUFFER_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE * \
+                   MCAN1_RXBUFFER_ELEMENT_SIZE + 8)
 #  define MCAN1_DEDICATED_RXBUFFER_WORDS \
-     (CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE * \
-     ((MCAN1_RXBUFFER_ELEMENT_SIZE/4) + 2))
+     (MCAN1_DEDICATED_RXBUFFER_BYTES >> 2)
 
 /* MCAN1 TX buffer element size */
 
@@ -634,18 +635,15 @@
 #    error Undefined MCAN1 TX buffer element size
 #  endif
 
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH) && \
-    (MCAN1_TXBUFFER_ELEMENT_SIZE & MCAN_ALIGN_MASK) != 0
-#  error TXBUFFER element size must be a multiple of the D-Cache line size
-#endif
-
 #  ifndef CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
 #    define CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE 0
 #  endif
 
+#  define MCAN1_DEDICATED_TXBUFFER_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE * \
+                   MCAN1_TXBUFFER_ELEMENT_SIZE + 8)
 #  define MCAN1_DEDICATED_TXBUFFER_WORDS \
-     (CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE * \
-     ((MCAN1_TXBUFFER_ELEMENT_SIZE/4) + 2))
+     (MCAN1_DEDICATED_TXBUFFER_BYTES >> 2)
 
 /* MCAN1 TX FIFOs */
 
@@ -666,9 +664,15 @@
 #    error Invalid MCAN1 number of TX EVENT FIFO elements
 #  endif
 
-#  define MCAN1_TXEVENTFIFO_WORDS (CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE * 2)
-#  define MCAN1_TXFIFIOQ_WORDS \
-     (CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE * ((MCAN1_TXBUFFER_ELEMENT_SIZE/4) + 2))
+#  define MCAN1_TXEVENTFIFO_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE << 3)
+#  define MCAN1_TXEVENTFIFO_WORDS \
+     (MCAN1_TXEVENTFIFO_BYTES >> 2)
+
+#  define MCAN1_TXFIFIOQ_BYTES \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE *  \
+                   MCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+#  define MCAN1_TXFIFIOQ_WORDS (MCAN1_TXFIFIOQ_BYTES >> 2)
 
 /* MCAN1 Message RAM */
 
@@ -2695,210 +2699,240 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 #ifdef CONFIG_DEBUG
   int sval;
 #endif
+  bool handled;
 
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
-  /* Get the set of pending interrupts. */
+  /* Loop while there are pending interrupt events */
 
-  ir = mcan_getreg(priv, SAM_MCAN_IR_OFFSET);
-  ie = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
-
-  pending = (ir & ie);
-
-  /* Check for common errors */
-
-  if ((pending & MCAN_CMNERR_INTS) != 0)
+  do
     {
-      canlldbg("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
+      /* Get the set of pending interrupts. */
 
-      /* Clear the error indications */
+      ir = mcan_getreg(priv, SAM_MCAN_IR_OFFSET);
+      ie = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
 
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_CMNERR_INTS);
-    }
+      pending = (ir & ie);
+      handled = false;
 
-  /* Check for transmission errors */
+      /* Check for common errors */
 
-  if ((pending & MCAN_TXERR_INTS) != 0)
-    {
-      canlldbg("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
+      if ((pending & MCAN_CMNERR_INTS) != 0)
+        {
+          canlldbg("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
 
-      /* Clear the error indications */
+          /* Clear the error indications */
 
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
-    }
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_CMNERR_INTS);
+          handled = true;
+        }
 
-  /* Check for successful completion of a transmission */
+      /* Check for transmission errors */
 
-  if ((pending & MCAN_INT_TC) != 0)
-    {
-      /* Clear the pending TX completion interrupt (and all
-       * other TX-related interrupts)
-       */
+      if ((pending & MCAN_TXERR_INTS) != 0)
+        {
+          canlldbg("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
 
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->txints);
+          /* Clear the error indications */
 
-      /* Indicate that there is one more buffer free in the TX FIFOQ by
-       * "releasing" it.  This may have the effect of waking up a thread
-       * that has been waiting for a free TX FIFOQ buffer.
-       *
-       * REVISIT: TX dedicated buffers are not supported.
-       */
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
 
-      mcan_buffer_release(priv);
+          /* REVISIT:  Will MCAN_INT_TC also be set in the event of
+           * a transmission error?  Each write must conclude with a
+           * call to can_txdone(), whether or not the write was
+           * successful.
+           */
+
+          handled = true;
+        }
+
+      /* Check for successful completion of a transmission */
+
+      if ((pending & MCAN_INT_TC) != 0)
+        {
+          /* Clear the pending TX completion interrupt (and all
+           * other TX-related interrupts)
+           */
+
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->txints);
+
+          /* Indicate that there is one more buffer free in the TX FIFOQ by
+           * "releasing" it.  This may have the effect of waking up a thread
+           * that has been waiting for a free TX FIFOQ buffer.
+           *
+           * REVISIT: TX dedicated buffers are not supported.
+           */
+
+          mcan_buffer_release(priv);
 
 #ifdef CONFIG_DEBUG
-      (void)sem_getvalue(&priv->txfsem, &sval);
-      DEBUGASSERT(sval <= config->ntxfifoq);
+          (void)sem_getvalue(&priv->txfsem, &sval);
+          DEBUGASSERT(sval <= config->ntxfifoq);
 #endif
 
-      /* Report that the TX transfer is complete to the upper half logic */
+          /* Report that the TX transfer is complete to the upper half logic */
 
-      can_txdone(dev);
-    }
-  else if ((pending & priv->txints) != 0)
-    {
-      /* Clear unhandled TX events */
+          can_txdone(dev);
+          handled = true;
+        }
+      else if ((pending & priv->txints) != 0)
+        {
+          /* Clear unhandled TX events */
 
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->txints);
-    }
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->txints);
+          handled = true;
+        }
 
 #if 0 /* Not used */
-  /* Check if a message has been stored to the dedicated RX buffer (DRX) */
+      /* Check if a message has been stored to the dedicated RX buffer (DRX) */
 
-  if ((pending & MCAN_INT_DRX) != 0))
-    {
-      int i;
-
-      /* Clear the pending DRX interrupt */
-
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_DRX);
-
-      /* Process each dedicated RX buffer */
-
-      for (i = 0; i < config->nrxdedicated; i++)
+      if ((pending & MCAN_INT_DRX) != 0))
         {
-          uint32_t *rxdedicated = &config->rxdedicated[i];
+          int i;
 
-          /* Check if datat is available in this dedicated RX buffer */
+          /* Clear the pending DRX interrupt */
 
-          if (mcan_dedicated_rxbuffer_available(priv, i))
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_DRX);
+
+          /* Process each dedicated RX buffer */
+
+          for (i = 0; i < config->nrxdedicated; i++)
             {
-              /* Yes.. Invalidate the D-Cache to that data will be re-
-               * fetched from RAM.
-               *
-               * REVISIT:  This will require 32-byte alignment.
-               */
+              uint32_t *rxdedicated = &config->rxdedicated[i];
 
-              arch_invalidata_dcache();
-              mcan_receive(priv, rxdedicated, config->rxbufferesize);
+              /* Check if datat is available in this dedicated RX buffer */
 
-              /* Clear the new data flag for the buffer */
-
-              if (i < 32)
+              if (mcan_dedicated_rxbuffer_available(priv, i))
                 {
-                  sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << i);
-                }
-              else
-                {
-                  sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << (i - 32));
+                  /* Yes.. Invalidate the D-Cache to that data will be re-
+                   * fetched from RAM.
+                   *
+                   * REVISIT:  This will require 32-byte alignment.
+                   */
+
+                  arch_invalidata_dcache();
+                  mcan_receive(priv, rxdedicated, config->rxbufferesize);
+
+                  /* Clear the new data flag for the buffer */
+
+                  if (i < 32)
+                    {
+                      sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << i);
+                    }
+                  else
+                    {
+                      sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << (i - 32));
+                    }
                 }
             }
+
+          handled = true;
         }
-    }
 #endif
 
-  /* Check for reception errors */
+      /* Check for reception errors */
 
-  if ((pending & MCAN_RXERR_INTS) != 0)
-    {
-      canlldbg("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
+      if ((pending & MCAN_RXERR_INTS) != 0)
+        {
+          canlldbg("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
 
-      /* Clear the error indications */
+          /* Clear the error indications */
 
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXERR_INTS);
-    }
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXERR_INTS);
+        }
 
-  /* Check for successful reception of a new message in RX FIFO0 */
+      /* Clear the RX FIFO1 new message interrupt */
 
-  if ((pending & MCAN_INT_RF0N) != 0)
-    {
-      /* Clear the RX FIFO0 interrupt (and all other FIFO0-related
-       * interrupts)
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_RF1N);
+      pending &= ~MCAN_INT_RF1N;
+
+      /* We treat RX FIFO1 as the "high priority" queue:  We will process
+       * all messages in RX FIFO1 before processing any message from RX
+       * FIFO0.
        */
 
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXFIFO0_INTS);
-      pending &= ~MCAN_RXFIFO0_INTS;
-
-      /* Handle the newly received message in FIFO0 */
-
-      regval = mcan_getreg(priv, SAM_MCAN_RXF0S_OFFSET);
-      ndx    = (regval & MCAN_RXF0S_F0GI_MASK) >> MCAN_RXF0S_F0GI_SHIFT;
-
-      if ((regval & MCAN_RXF0S_RF0L) != 0)
+      for (;;)
         {
-          canlldbg("ERROR: Message lost: %08x\n", regval);
-        }
-      else
-        {
-          nelem = (regval & MCAN_RXF0S_F0FL_MASK) >> MCAN_RXF0S_F0FL_SHIFT;
-          if (nelem > 0)
+          /* Check if there is anything in RX FIFO1 */
+
+          regval = mcan_getreg(priv, SAM_MCAN_RXF1S_OFFSET);
+          nelem  = (regval & MCAN_RXF0S_F0FL_MASK) >> MCAN_RXF0S_F0FL_SHIFT;
+          if (nelem == 0)
             {
-              mcan_receive(dev,
-                           config->msgram.rxfifo0 +
-                             (ndx * priv->config->rxfifo0esize),
-                           priv->config->rxfifo0esize);
+              /* Break out of the loop if RX FIFO1 is empty */
+
+              break;
             }
-        }
 
-      /* Acknowledge reading the FIFO entry */
+          /* Clear the RX FIFO1 interrupt (and all other FIFO1-related
+           * interrupts)
+           */
 
-      mcan_putreg(priv, SAM_MCAN_RXF0A_OFFSET, ndx);
-    }
+          /* Handle the newly received message in FIFO1 */
 
-  /* Check for successful reception of a new message in RX FIFO1 */
+          ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
 
-  if ((pending & MCAN_INT_RF1N) != 0)
-    {
-      /* Clear the RX FIFO1 interrupt (and all other FIFO1-related
-       * interrupts)
-       */
-
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXFIFO1_INTS);
-      pending &= ~MCAN_RXFIFO1_INTS;
-
-      /* Handle the newly received message in FIFO1 */
-
-      regval = mcan_getreg(priv, SAM_MCAN_RXF1S_OFFSET);
-      ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
-
-      if ((regval & MCAN_RXF0S_RF0L) != 0)
-        {
-          canlldbg("ERROR: Message lost: %08x\n", regval);
-        }
-      else
-        {
-          nelem = (regval & MCAN_RXF1S_F1FL_MASK) >> MCAN_RXF1S_F1FL_SHIFT;
-          if (nelem > 0)
+          if ((regval & MCAN_RXF0S_RF0L) != 0)
+            {
+              canlldbg("ERROR: Message lost: %08x\n", regval);
+            }
+          else
             {
               mcan_receive(dev,
                            config->msgram.rxfifo1 +
                              (ndx * priv->config->rxfifo1esize),
                            priv->config->rxfifo1esize);
             }
+
+          /* Acknowledge reading the FIFO entry */
+
+          mcan_putreg(priv, SAM_MCAN_RXF1A_OFFSET, ndx);
+          handled = true;
         }
 
-      /* Acknowledge reading the FIFO entry */
+      /* Check for successful reception of a new message in RX FIFO0 */
+      /* Clear the RX FIFO0 new message interrupt */
 
-      mcan_putreg(priv, SAM_MCAN_RXF1A_OFFSET, ndx);
+      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_RF0N);
+      pending &= ~MCAN_INT_RF0N;
+
+      /* Check if there is anything in RX FIFO0 */
+
+      regval = mcan_getreg(priv, SAM_MCAN_RXF0S_OFFSET);
+      nelem  = (regval & MCAN_RXF0S_F0FL_MASK) >> MCAN_RXF0S_F0FL_SHIFT;
+      if (nelem > 0)
+        {
+          /* Handle the newly received message in FIFO0 */
+
+          ndx = (regval & MCAN_RXF0S_F0GI_MASK) >> MCAN_RXF0S_F0GI_SHIFT;
+
+          if ((regval & MCAN_RXF0S_RF0L) != 0)
+            {
+              canlldbg("ERROR: Message lost: %08x\n", regval);
+            }
+          else
+            {
+              mcan_receive(dev,
+                           config->msgram.rxfifo0 +
+                             (ndx * priv->config->rxfifo0esize),
+                           priv->config->rxfifo0esize);
+            }
+
+          /* Acknowledge reading the FIFO entry */
+
+          mcan_putreg(priv, SAM_MCAN_RXF0A_OFFSET, ndx);
+          handled = true;
+        }
+
+      /* Clear unhandled RX interrupts */
+
+      if ((pending & priv->rxints) != 0)
+        {
+          mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->rxints);
+        }
     }
-
-  /* Clear unhandled RX interrupts */
-
-  if ((pending & priv->rxints) != 0)
-    {
-      mcan_putreg(priv, SAM_MCAN_IR_OFFSET, priv->rxints);
-    }
+  while (handled);
 }
 
 /****************************************************************************

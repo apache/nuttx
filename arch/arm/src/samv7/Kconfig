@@ -1452,37 +1452,38 @@ config SAMV7_MCAN0_NEXTFILTERS
 
 choice
 	prompt "MCAN0 RX FIFO0 element size"
-	default SAMV7_MCAN0_RXFIFO0_32BYTES
+	default SAMV7_MCAN0_RXFIFO0_8BYTES
 
 config SAMV7_MCAN0_RXFIFO0_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO0_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO0_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO0_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO0_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO0_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO0_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO0_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
 
 endchoice # MCAN0 RX buffer element size
 
@@ -1495,37 +1496,38 @@ config SAMV7_MCAN0_RXFIFO0_SIZE
 
 choice
 	prompt "MCAN0 RX FIFO1 element size"
-	default SAMV7_MCAN0_RXFIFO1_32BYTES
+	default SAMV7_MCAN0_RXFIFO1_8BYTES
 
 config SAMV7_MCAN0_RXFIFO1_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXFIFO1_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO1_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO1_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO1_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO1_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO1_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXFIFO1_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
 
 endchoice # MCAN0 RX buffer element size
 
@@ -1538,37 +1540,38 @@ config SAMV7_MCAN0_RXFIFO1_SIZE
 
 choice
 	prompt "MCAN0 RX buffer element size"
-	default SAMV7_MCAN0_RXBUFFER_32BYTES
+	default SAMV7_MCAN0_RXBUFFER_8BYTES
 
 config SAMV7_MCAN0_RXBUFFER_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE
 
 config SAMV7_MCAN0_RXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXBUFFER_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_RXBUFFER_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
 
 endchoice # MCAN0 RX buffer element size
 
@@ -1584,37 +1587,38 @@ config SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
 
 choice
 	prompt "MCAN0 TX buffer element size"
-	default SAMV7_MCAN0_TXBUFFER_32BYTES
+	default SAMV7_MCAN0_TXBUFFER_8BYTES
 
 config SAMV7_MCAN0_TXBUFFER_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN0_TXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_TXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_TXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_TXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_TXBUFFER_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_TXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN0_FD
 
 config SAMV7_MCAN0_TXBUFFER_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
 
 endchoice # MCAN0 TX buffer element size
 
@@ -1762,37 +1766,38 @@ config SAMV7_MCAN1_NEXTFILTERS
 
 choice
 	prompt "MCAN1 RX FIFO0 element size"
-	default SAMV7_MCAN1_RXFIFO0_32BYTES
+	default SAMV7_MCAN1_RXFIFO0_8BYTES
 
 config SAMV7_MCAN1_RXFIFO0_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO0_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO0_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO0_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO0_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO0_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO0_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO0_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
 
 endchoice # MCAN1 RX buffer element size
 
@@ -1805,37 +1810,38 @@ config SAMV7_MCAN1_RXFIFO0_SIZE
 
 choice
 	prompt "MCAN1 RX FIFO1 element size"
-	default SAMV7_MCAN1_RXFIFO1_32BYTES
+	default SAMV7_MCAN1_RXFIFO1_8BYTES
 
 config SAMV7_MCAN1_RXFIFO1_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXFIFO1_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO1_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO1_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO1_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO1_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO1_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXFIFO1_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
 
 endchoice # MCAN1 RX buffer element size
 
@@ -1848,37 +1854,38 @@ config SAMV7_MCAN1_RXFIFO1_SIZE
 
 choice
 	prompt "MCAN1 RX buffer element size"
-	default SAMV7_MCAN1_RXBUFFER_32BYTES
+	default SAMV7_MCAN1_RXBUFFER_8BYTES
 
 config SAMV7_MCAN1_RXBUFFER_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE 
 
 config SAMV7_MCAN1_RXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXBUFFER_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE 
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_RXBUFFER_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
 
 endchoice # MCAN1 RX buffer element size
 
@@ -1894,37 +1901,38 @@ config SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
 
 choice
 	prompt "MCAN1 TX buffer element size"
-	default SAMV7_MCAN1_TXBUFFER_32BYTES
+	default SAMV7_MCAN1_TXBUFFER_8BYTES
 
 config SAMV7_MCAN1_TXBUFFER_8BYTES
 	bool "8 bytes"
-	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
 
 config SAMV7_MCAN1_TXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_TXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_TXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_TXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_TXBUFFER_32BYTES
 	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_TXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on !ARMV7M_DCACHE  || ARMV7M_DCACHE_WRITETHROUGH
+	depends on SAMV7_MCAN1_FD
 
 config SAMV7_MCAN1_TXBUFFER_64BYTES
 	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
 
 endchoice # MCAN1 TX buffer element size
 
