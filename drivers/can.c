@@ -911,10 +911,14 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           if (msg && hdr->ch_id == rtr->cr_id)
             {
+              int nbytes;
+
               /* We have the response... copy the data to the user's buffer */
 
               memcpy(&msg->cm_hdr, hdr, sizeof(struct can_hdr_s));
-              for (i = 0, dest = msg->cm_data; i < hdr->ch_dlc; i++)
+
+              nbytes = can_dlc2bytes(hdr->ch_dlc);
+              for (i = 0, dest = msg->cm_data; i < nbytes; i++)
                 {
                   *dest++ = *data++;
                 }
@@ -935,6 +939,8 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
   if (nexttail != fifo->rx_head)
     {
+      int nbytes;
+
       /* Add the new, decoded CAN message at the tail of the FIFO.
        *
        * REVISIT:  In the CAN FD format, the coding of the DLC differs from
@@ -946,7 +952,9 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
        */
 
       memcpy(&fifo->rx_buffer[fifo->rx_tail].cm_hdr, hdr, sizeof(struct can_hdr_s));
-      for (i = 0, dest = fifo->rx_buffer[fifo->rx_tail].cm_data; i < hdr->ch_dlc; i++)
+
+      nbytes = can_dlc2bytes(hdr->ch_dlc);
+      for (i = 0, dest = fifo->rx_buffer[fifo->rx_tail].cm_data; i < nbytes; i++)
         {
           *dest++ = *data++;
         }
