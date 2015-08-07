@@ -83,12 +83,12 @@
 #  warning "CONFIG_NET_MULTIBUFFER must be set"
 #endif
 
-#ifndef CONFIG_SLIP_STACKSIZE
-#  define CONFIG_SLIP_STACKSIZE 2048
+#ifndef CONFIG_NET_SLIP_STACKSIZE
+#  define CONFIG_NET_SLIP_STACKSIZE 2048
 #endif
 
-#ifndef CONFIG_SLIP_DEFPRIO
-#  define CONFIG_SLIP_DEFPRIO 128
+#ifndef CONFIG_NET_SLIP_DEFPRIO
+#  define CONFIG_NET_SLIP_DEFPRIO 128
 #endif
 
 /* The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
@@ -99,7 +99,7 @@
  * a MTU of 296 and window of 256, but actually only sends 168 bytes of data:
  * 40 + 128.  I believe that is to allow for the 2x worst cast packet
  * expansion.  Ideally we would like to advertise the 256 MSS, but restrict
- * uIP to 128 bytes (possibly by modifying the tcp_mss() macro).
+ * transfers to 128 bytes (possibly by modifying the tcp_mss() macro).
  */
 
 #if CONFIG_NET_SLIP_MTU < 296
@@ -108,12 +108,12 @@
 #  warning "CONFIG_NET_SLIP_MTU == 296 is optimal"
 #endif
 
-/* CONFIG_SLIP_NINTERFACES determines the number of physical interfaces
+/* CONFIG_NET_SLIP_NINTERFACES determines the number of physical interfaces
  * that will be supported.
  */
 
-#ifndef CONFIG_SLIP_NINTERFACES
-# define CONFIG_SLIP_NINTERFACES 1
+#ifndef CONFIG_NET_SLIP_NINTERFACES
+# define CONFIG_NET_SLIP_NINTERFACES 1
 #endif
 
 /*  SLIP special character codes *******************************************/
@@ -183,11 +183,11 @@ struct slip_driver_s
  * Private Data
  ****************************************************************************/
 
- /* We really should get rid of CONFIG_SLIP_NINTERFACES and, instead,
+ /* We really should get rid of CONFIG_NET_SLIP_NINTERFACES and, instead,
   * kmm_malloc() new interface instances as needed.
   */
 
-static struct slip_driver_s g_slip[CONFIG_SLIP_NINTERFACES];
+static struct slip_driver_s g_slip[CONFIG_NET_SLIP_NINTERFACES];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -250,7 +250,7 @@ static void slip_semtake(FAR struct slip_driver_s *priv)
  * Description:
  *   Just an inline wrapper around fwrite with error checking.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *   buffer - Buffer data to send
  *   len - Buffer length in bytes
@@ -274,7 +274,7 @@ static inline void slip_write(FAR struct slip_driver_s *priv,
  * Description:
  *   Just an inline wrapper around putc with error checking.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *   ch - The character to send
  *
@@ -293,7 +293,7 @@ static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -407,7 +407,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  *   1. When the preceding TX packet send is complete, or
  *   2. During normal periodic polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -444,7 +444,7 @@ static int slip_txpoll(FAR struct net_driver_s *dev)
  * Description:
  *   Polling and transmission is performed on tx thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -462,7 +462,7 @@ static void slip_txtask(int argc, FAR char *argv[])
   unsigned int hsec;
 
   ndbg("index: %d\n", index);
-  DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
+  DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
    * initialization logic.
@@ -535,7 +535,7 @@ static void slip_txtask(int argc, FAR char *argv[])
  * Description:
  *   Get one byte from the serial input.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -561,7 +561,7 @@ static inline int slip_getc(FAR struct slip_driver_s *priv)
  * Description:
  *   Read a packet from the serial input
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -666,7 +666,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
  * Description:
  *   Wait for incoming data.
  *
- * Parameters:
+ * Input Parameters:
  *   argc
  *   argv
  *
@@ -685,7 +685,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
   int ch;
 
   ndbg("index: %d\n", index);
-  DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
+  DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
    * initialization logic.
@@ -786,7 +786,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -816,7 +816,7 @@ static int slip_ifup(FAR struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -844,7 +844,7 @@ static int slip_ifdown(FAR struct net_driver_s *dev)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -876,7 +876,7 @@ static int slip_txavail(FAR struct net_driver_s *dev)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -905,7 +905,7 @@ static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -937,10 +937,12 @@ static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Description:
  *   Instantiate a SLIP network interface.
  *
- * Parameters:
- *   intf - In the case where there are multiple SLIP interfaces, this value
- *          identifies which is to be initialized.  The network name will be,
- *          for example, "/dev/slip5" for intf == 5
+ * Input Parameters:
+ *   intf    - In the case where there are multiple SLIP interfaces, this
+ *             value identifies which is to be initialized. The number of
+ *             possible SLIP interfaces is determined by
+ *   devname - This is the path to the serial device that will support SLIP.
+ *             For example, this might be "/dev/ttyS1"
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -957,7 +959,7 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(intf < CONFIG_SLIP_NINTERFACES);
+  DEBUGASSERT(intf < CONFIG_NET_SLIP_NINTERFACES);
   priv = &g_slip[intf];
 
   /* Initialize the driver structure */
@@ -997,9 +999,9 @@ int slip_initialize(int intf, FAR const char *devname)
   argv[0] = buffer;
   argv[1] = NULL;
 
-  priv->rxpid = task_create("rxslip", CONFIG_SLIP_DEFPRIO,
-                          CONFIG_SLIP_STACKSIZE, (main_t)slip_rxtask,
-                          (FAR char * const *)argv);
+  priv->rxpid = task_create("rxslip", CONFIG_NET_SLIP_DEFPRIO,
+                            CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_rxtask,
+                            (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
       ndbg("ERROR: Failed to start receiver task\n");
@@ -1012,8 +1014,8 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Start the SLIP transmitter task */
 
-  priv->txpid = task_create("txslip", CONFIG_SLIP_DEFPRIO,
-                            CONFIG_SLIP_STACKSIZE, (main_t)slip_txtask,
+  priv->txpid = task_create("txslip", CONFIG_NET_SLIP_DEFPRIO,
+                            CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_txtask,
                             (FAR char * const *)argv);
   if (priv->txpid < 0)
     {

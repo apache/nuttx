@@ -129,7 +129,7 @@
  *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
  *
  * CANIOC_ADD_EXTFILTER:
- *   Description:    Add an address filter for a extended 28 bit address.
+ *   Description:    Add an address filter for a extended 29 bit address.
  *   Argument:       A reference to struct canioc_extfilter_s
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
@@ -146,7 +146,7 @@
  *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
  *
  * CANIOC_DEL_EXTFILTER:
- *   Description:    Remove an address filter for a standard 28 bit address.
+ *   Description:    Remove an address filter for a standard 29 bit address.
  *   Argument:       The filter index previously returned by the
  *                   CANIOC_ADD_EXTFILTER command
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
@@ -350,8 +350,8 @@ struct canioc_rtr_s
 #ifdef CONFIG_CAN_EXTID
 struct canioc_extfilter_s
 {
-  uint32_t              xf_id;           /* 28-bit ID (4-bits unused) */
-  uint32_t              xf_mask;         /* 28-bit address mask (4-bits unused) */
+  uint32_t              xf_id;           /* 29-bit ID (3-bits unused) */
+  uint32_t              xf_mask;         /* 29-bit address mask (3-bits unused) */
 };
 #else
 struct canioc_stdfilter_s

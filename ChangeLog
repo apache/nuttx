@@ -10784,4 +10784,8 @@
 	  definitions to manage CAN message filtering (2015-08-05)
 	* drivers/Kconfig and can.c:  Add configuration to support DLC to byte
 	  conversions needed for CAN FD mode (2015-08-05).
-
+	* arch/arm/src/samv7:  Add an MCAN driver for the SAMV7 platform
+	  (2015-08-06).
+	* drivers/sensors/lm92.c and include/nuttx/sensors/lm92.h:  Add a driver
+	  for the LM92 temperature sensor.  Contributed by Paul Patience
+	  (2015-08-06).
