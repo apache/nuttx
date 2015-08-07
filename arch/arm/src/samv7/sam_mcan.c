@@ -920,11 +920,12 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
 #endif
 
 #ifdef CONFIG_CAN_EXTID
-static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
-              uint32_t mask);
+static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
+              FAR struct canioc_stdfilter_s *extconfig);
 static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx);
 #else
-static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id);
+static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
+              FAR struct canioc_stdfilter_s *stdconfig);
 static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx);
 #endif
 /* CAN driver methods */
@@ -1538,9 +1539,8 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
  *   Add an address filter for a extended 29 bit address.
  *
  * Input Parameters:
- *   priv - An instance of the MCAN driver state structure.
- *   id   - The 29-bit extended address to filter
- *   mask - A 29-bit extended address mask
+ *   priv      - An instance of the MCAN driver state structure.
+ *   extconfig - The configuration of the extended filter
  *
  * Returned Value:
  *   A non-negative filter ID is returned on success.  Otherwise a negated
@@ -1549,8 +1549,8 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_EXTID
-static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
-                              uint32_t mask)
+static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
+                              FAR struct canioc_stdfilter_s *extconfig)
 {
   FAR const struct sam_config_s *config;
   FAR uint32_t *extfilter;
@@ -1559,8 +1559,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
   int bit;
   int ndx;
 
-  DEBUGASSERT(priv != NULL && priv->config != NULL &&
-              id < (1 << 29) && mask < (1 << 29));
+  DEBUGASSERT(priv != NULL && priv->config != NULL && extconfig != NULL);
   config = priv->config;
 
   /* Get exclusive excess to the MCAN hardware */
@@ -1586,10 +1585,43 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv, uint32_t id,
 
           extfilter = config->msgram.extfilters + (ndx << 1);
 
-          /* REVISIT: Here we use only FIFO0. */
+          /* Format and write filter word F0 */
 
-          extfilter[0] = EXTFILTER_F0_EFEC_FIFO0 |  EXTFILTER_F0_EFID1(id);
-          extfilter[1] = EXTFILTER_F1_EFT_CLASSIC | mask;
+          DEBUGASSERT(extconfig->xf_id1 < (1 << 29));
+          regval = EXTFILTER_F0_EFID1(extconfig->xf_id1);
+
+          if (extconfig->xf_prio == 0)
+            {
+              regval |= EXTFILTER_F0_EFEC_FIFO0;
+            }
+          else
+            {
+              regval |= EXTFILTER_F0_EFEC_FIFO0;
+            }
+
+          extfilter[0] = regval;
+
+          /* Format and write filter word F1 */
+
+          DEBUGASSERT(extconfig->xf_id2 < (1 << 29));
+          regval = EXTFILTER_F1_EFID2(extconfig->xf_id2);
+
+          switch (extconfig->xf_type)
+            {
+              default:
+              case CAN_FILTER_DUAL:
+                regval |= EXTFILTER_F1_EFT_DUAL;
+                break;
+
+              case CAN_FILTER_MASK:
+                regval |= EXTFILTER_F1_EFT_CLASSIC;
+                break;
+              case CAN_FILTER_RANGE:
+                regval |= EXTFILTER_F1_EFT_RANGE;
+                break;
+            }
+
+          extfilter[1] = regval;
 
           /* Flush the filter entry into physical RAM */
 
@@ -1700,8 +1732,8 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
  *   Add an address filter for a standard 11 bit address.
  *
  * Input Parameters:
- *   priv - An instance of the MCAN driver state structure.
- *   id   - The 11-bit extended address to filter
+ *   priv      - An instance of the MCAN driver state structure.
+ *   stdconfig - The configuration of the standard filter
  *
  * Returned Value:
  *   A non-negative filter ID is returned on success.  Otherwise a negated
@@ -1710,7 +1742,8 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
  ****************************************************************************/
 
 #ifndef CONFIG_CAN_EXTID
-static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
+static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
+                              FAR struct canioc_stdfilter_s *stdconfig)
 {
   FAR const struct sam_config_s *config;
   FAR uint32_t *stdfilter;
@@ -1719,7 +1752,7 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
   int bit;
   int ndx;
 
-  DEBUGASSERT(priv != NULL && priv->config != NULL && id < (1 << 11));
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
 
   /* Get exclusive excess to the MCAN hardware */
@@ -1743,12 +1776,40 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv, uint16_t id)
           priv->stdfilters[word] |= (1 << bit);
           priv->nstdalloc++;
 
+          /* Format and write filter word S0 */
+
           stdfilter = config->msgram.stdfilters + ndx;
-          regval    = STDFILTER_S0_SFT_CLASSIC |  STDFILTER_S0_SFID1(id);
 
-          /* REVISIT: Here we use only FIFO0. */
+          DEBUGASSERT(stdconfig->sf_id1 < (1 << 29));
+          regval = STDFILTER_S0_SFID1(stdconfig->sf_id1);
 
-          regval |= STDFILTER_S0_SFEC_FIFO0;
+          DEBUGASSERT(stdconfig->sf_id2 < (1 << 29));
+          regval |= STDFILTER_S0_SFID2(stdconfig->sf_id2);
+
+          if (stdconfig->sf_prio == 0)
+            {
+              regval |= STDFILTER_S0_SFEC_FIFO0;
+            }
+          else
+            {
+              regval |= STDFILTER_S0_SFEC_FIFO1;
+            }
+
+          switch (stdconfig->sf_type)
+            {
+              default:
+              case CAN_FILTER_DUAL:
+                regval |= STDFILTER_S0_SFT_DUAL;
+                break;
+
+              case CAN_FILTER_MASK:
+                regval |= STDFILTER_S0_SFT_CLASSIC;
+                break;
+              case CAN_FILTER_RANGE:
+                regval |= STDFILTER_S0_SFT_RANGE;
+                break;
+            }
+
           *stdfilter = regval;
 
           /* Flush the filter entry into physical RAM */
@@ -2147,10 +2208,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
       case CANIOC_ADD_EXTFILTER:
         {
-          FAR struct canioc_extfilter_s *extfilter =
-            (FAR struct canioc_extfilter_s *)arg;
-
-          ret = mcan_add_extfilter(priv, extfilter->xf_id, extfilter->xf_mask);
+          DEBUGASSERT(arg != 0);
+          ret = mcan_add_extfilter(priv, (FAR struct canioc_extfilter_s *)arg);
         }
         break;
 
@@ -2182,10 +2241,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
       case CANIOC_ADD_STDFILTER:
         {
-          FAR struct canioc_stdfilter_s *stdfilter =
-            (FAR struct canioc_stdfilter_s *)arg;
-
-          ret = mcan_add_stdfilter(priv, stdfilter->sf_id);
+          DEBUGASSERT(arg != 0);
+          ret = mcan_add_stdfilter(priv, (FAR struct canioc_stdfilter_s *)arg);
         }
         break;
 

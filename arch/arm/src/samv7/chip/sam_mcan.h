@@ -776,7 +776,7 @@
 #  define EXTFILTER_F0_EFEC_REJECT     (3 << EXTFILTER_F0_EFEC_SHIFT) /* Reject ID on match */
 #  define EXTFILTER_F0_EFEC_PRIORITY   (4 << EXTFILTER_F0_EFEC_SHIFT) /* Set priority on match */
 #  define EXTFILTER_F0_EFEC_PRIOFIFO0  (5 << EXTFILTER_F0_EFEC_SHIFT) /* Set priority and store in FIFO 0 on match */
-#  define  EXTFILTER_F0_EFEC_PRIOFIFO1 (6 << EXTFILTER_F0_EFEC_SHIFT) /* Set priority and store in FIFO 1 on match */
+#  define EXTFILTER_F0_EFEC_PRIOFIFO1  (6 << EXTFILTER_F0_EFEC_SHIFT) /* Set priority and store in FIFO 1 on match */
 #  define EXTFILTER_F0_EFEC_BUFFER     (7 << EXTFILTER_F0_EFEC_SHIFT) /* Store into Rx Buffer or as debug message */
 
 #define EXTFILTER_F1_EFID2_SHIFT   (0)       /* Bits 0-28: Extended Filter ID 2 */
