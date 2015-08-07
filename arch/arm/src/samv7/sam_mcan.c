@@ -1587,7 +1587,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
           /* Format and write filter word F0 */
 
-          DEBUGASSERT(extconfig->xf_id1 < (1 << 29));
+          DEBUGASSERT(extconfig->xf_id1 <= CAN_MAX_EXTMSGID);
           regval = EXTFILTER_F0_EFID1(extconfig->xf_id1);
 
           if (extconfig->xf_prio == 0)
@@ -1603,7 +1603,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
           /* Format and write filter word F1 */
 
-          DEBUGASSERT(extconfig->xf_id2 < (1 << 29));
+          DEBUGASSERT(extconfig->xf_id2 <= CAN_MAX_EXTMSGID);
           regval = EXTFILTER_F1_EFID2(extconfig->xf_id2);
 
           switch (extconfig->xf_type)
@@ -1780,10 +1780,10 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
 
           stdfilter = config->msgram.stdfilters + ndx;
 
-          DEBUGASSERT(stdconfig->sf_id1 < (1 << 29));
+          DEBUGASSERT(stdconfig->sf_id1 <= CAN_MAX_STDMSGID);
           regval = STDFILTER_S0_SFID1(stdconfig->sf_id1);
 
-          DEBUGASSERT(stdconfig->sf_id2 < (1 << 29));
+          DEBUGASSERT(stdconfig->sf_id2 <= CAN_MAX_STDMSGID);
           regval |= STDFILTER_S0_SFID2(stdconfig->sf_id2);
 
           if (stdconfig->sf_prio == 0)
@@ -2384,11 +2384,11 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
 #ifdef CONFIG_CAN_EXTID
   DEBUGASSERT(msg->cm_hdr.ch_extid);
-  DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 29));
+  DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_EXTMSGID);
 
   regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
 #else
-  DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 11));
+  DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_STDMSGID);
 
   regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
 #endif
