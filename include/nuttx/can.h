@@ -106,7 +106,12 @@
 
 /* CAN message support */
 
-#define CAN_MAXDATALEN            8
+#ifdef CONFIG_CAN_FD
+#  define CAN_MAXDATALEN          64
+#else
+#  define CAN_MAXDATALEN          8
+#endif
+
 #define CAN_MAX_MSGID             0x07ff
 #define CAN_MAX_EXTMSGID          0x1fffffff
 
@@ -166,6 +171,20 @@
  */
 
 #define CANIOC_USER               _CANIOC(6)
+
+/* Some CAN hardware supports a notion of prioritizing messages that match filters.
+ * Only two priority levels are currently supported and are encoded as defined
+ * below:
+ */
+
+#define CAN_MSGPRIO_LOW           0
+#define CAN_MSGPRIO_HIGH          1
+
+/* Filter type */
+
+#define CAN_FILTER_DUAL           0  /* Dual address match */
+#define CAN_FILTER_MASK           1  /* Address match under a mask */
+#define CAN_FILTER_RANGE          2  /* Match a range of addresses */
 
 /************************************************************************************
  * Public Types
@@ -350,14 +369,22 @@ struct canioc_rtr_s
 #ifdef CONFIG_CAN_EXTID
 struct canioc_extfilter_s
 {
-  uint32_t              xf_id;           /* 29-bit ID (3-bits unused) */
-  uint32_t              xf_mask;         /* 29-bit address mask (3-bits unused) */
+  uint32_t              xf_id1;          /* 29-bit ID.  For dual match or for the
+                                          * lower address in a range of addresses  */
+  uint32_t              xf_id2;          /* 29-bit ID.  For dual match, address mask
+                                          * or for upper address in address range  */
+  uint8_t               xf_type;         /* See CAN_FILTER_* definitions */
+  uint8_t               xf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
 #else
 struct canioc_stdfilter_s
 {
-  uint16_t              sf_id;           /* 11-bit ID (5-bits unused) */
-  uint16_t              sf_mask;         /* 11-bit address mask (5-bits unused) */
+  uint16_t              sf_id1;          /* 11-bit ID.  For dual match or for the
+                                          * lower address in a range of addresses  */
+  uint16_t              sf_id2;          /* 11-bit ID.  For dual match, address mask
+                                          * or for upper address in address range  */
+  uint8_t               sf_type;         /* See CAN_FILTER_* definitions */
+  uint8_t               sf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
 #endif
 
