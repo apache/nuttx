@@ -10789,3 +10789,7 @@
 	* drivers/sensors/lm92.c and include/nuttx/sensors/lm92.h:  Add a driver
 	  for the LM92 temperature sensor.  Contributed by Paul Patience
 	  (2015-08-06).
+	* drivers/sensors/as5048b.c and include/nuttx/sensors/as5048b.h: Add
+	  support for an AS5048B rotary magnetic sensor.  From Paul Patience
+	  (2015-08-06).
+
