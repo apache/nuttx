@@ -10792,4 +10792,6 @@
 	* drivers/sensors/as5048b.c and include/nuttx/sensors/as5048b.h: Add
 	  support for an AS5048B rotary magnetic sensor.  From Paul Patience
 	  (2015-08-06).
+	* include/nuttx/spi/slave.h:  Add a definition of an SPI slave
+	  interface (2015-08-08).
 
