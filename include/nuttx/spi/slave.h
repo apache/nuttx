@@ -100,7 +100,7 @@
 #define SPI_SCTRLR_UNBIND(c) ((c)->unbind(c))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_SET_CMD/SPI_SCTRLR_SET_DATA
+ * Name: SPI_SCTRLR_SETDATA
  *
  * Description:
  *   Set the next value to be shifted out from the interface.  This primes
@@ -109,17 +109,16 @@
  *
  * Input Parameters:
  *   sctrlr - SPI slave controller interface instance
- *   cmd    - Command/data mode data value to be shifted out.  The width of
- *   data     the data must be the same as the nbits parameter previously
- *            provided to the bind() methos.
+ *   data   - Command/data mode data value to be shifted out.  The width of
+ *            the data must be the same as the nbits parameter previously
+ *            provided to the bind() methods.
  *
  * Returned Value:
  *   none
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_SET_CMD(c,v)  ((c)->set_cmd(c,v))
-#define SPI_SCTRLR_SET_DATA(c,v) ((c)->set_data(c,v))
+#define SPI_SCTRLR_SETDATA(c,v)  ((c)->setdata(c,v))
 
 /****************************************************************************
  * Name: SPI_SDEV_SELECTED
@@ -140,7 +139,31 @@
 #define SPI_SDEV_SELECTED(d,i) ((c)->selected(d,i))
 
 /****************************************************************************
- * Name: SPI_SDEV_GET_CMD/SPI_SDEV_GET_DATA
+ * Name: SPI_SDEV_CMDDATA
+ *
+ * Description:
+ *   This is a SPI device callback that used when the SPI device controller
+ *   driver detects any change command/data condition.
+ *
+ *   Normally only LCD devices distinguish command and data.   For devices
+ *   that do not distinguish between command and data, this method may be
+ *   a stub.; For devices that do make that distinction, they should treat
+ *   all subsequent calls to getdata() or exchange() appropriately for the
+ *   current command/data selection.
+ *
+ * Input Parameters:
+ *   sdev   - SPI device interface instance
+ *   isdata - True: Data is selected
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+#define SPI_SDEV_CMDDATA(d,i) ((c)->cmddata(d,i))
+
+/****************************************************************************
+ * Name: SPI_SDEV_GETDATA
  *
  * Description:
  *   This is a SPI device callback that used when the SPI device controller
@@ -149,11 +172,8 @@
  *   can keep pace with the shifted-in data.
  *
  *   The SPI controller driver will prime for both command and data
- *   transfers.  Normally only LCD devices distinguish command and data.
- *   For devices that do not distinguish between command and data, only
- *   the get_cmd() method is meaningful.  In that case the same function
- *   may be provided for get_cmd() and get_data().  Or get_data() may be
- *   only a stub that returns zero (it should never be called).
+ *   transfers as determined by a preceding call to the device cmddata()
+ *   method.  Normally only LCD devices distinguish command and data.
  *
  * Input Parameters:
  *   sdev - SPI device interface instance
@@ -163,38 +183,28 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_GET_CMD(d,v)  ((d)->get_cmd(d,v))
-#define SPI_SDEV_GET_DATA(d,v) ((d)->get_data(d,v))
+#define SPI_SDEV_GETDATA(d,v)  ((d)->getdata(d,v))
 
 /****************************************************************************
- * Name: SPI_SDEV_EXCHANGE_CMD/SPI_SDEV_EXCHANGE_DATA
+ * Name: SPI_SDEV_EXCHANGE
  *
  * Description:
  *   This is a SPI device callback that used when the SPI device controller
- *   receives a new value shifted and requires the next value to be shifted-
- *   out.  Notice that these values my be out of synchronization by as much
- *   as two words:  The value to be shifted out may be two words beyond the
- *   value that was just shifted in.
- *
- *   Normally only LCD devices distinguish command and data.  For devices
- *   that do not distinguish between command and data, only the
- *   exchange_cmd() method is meaningful.  In that case the same function
- *   may be provided for exchange_cmd() and exchange_data().  Or
- *   exchange_data() may be simply a stub that discards the shifted in
- *   value returns zero (it should never be called).
+ *   receives a new value shifted in and requires the next value to be
+ *   shifted out.  Notice that these values my be out of synchronization by
+ *   as much as two words:  The value to be shifted out may be two words
+ *   beyond the value that was just shifted in.
  *
  * Input Parameters:
  *   sdev - SPI device interface instance
- *   cmd  - The last command/data value that was shifted in
- *   data
+ *   data - The last command/data value that was shifted in
  *
  * Returned Value:
  *   The next data value to be shifted out
  *
  ****************************************************************************/
 
-#define SPI_SDEV_EXCHANGE_CMD(d,v)  ((d)->exchange_cmd(d,v))
-#define SPI_SDEV_EXCHANGE_DATA(d,v)  ((d)->exchange_data(d,v))
+#define SPI_SDEV_EXCHANGE(d,v)  ((d)->exchange(d,v))
 
 /****************************************************************************
  * Public Types
@@ -212,7 +222,7 @@
  *
  * 2) struct spi_sdev_s - Defines the second center between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
- *    is implemented by the SPI slave device.  The slave devices passes this
+ *    is implemented by the SPI slave device.  The slave device passes this
  *    interface to the struct spi_sctrlr_s during initialization
  *    be calling the bind() method of the struct spi_sctrlr_s
  *    interface.
@@ -227,14 +237,14 @@
  * 3) The SPI slave device driver creates and initializes an instance of
  *    struct spi_sdev_s; it passes this instance to the bind() method of
  *    of the SPI slave controller interface.
- * 4) The SPI slave controller will call the slave devices get_cmd() and
- *    get_data() methods to get the value that will be shifted out when
- *    the required for the first to be word shifted out (normally all
- *    '0' or all '1').  The get_data() method may be the same function
- *    that implements the get_cmd() method if the device does not
- *    distinguish command and data transfers (normally only LCDs do that).
- *    The driver can change the next word to be shifted out at any time
- *    by calling the SPI slave controller's set_cmd() and set_data() method.
+ * 4) The SPI slave controller will (1) call the slaved device's cmddata()
+ *    method to indicate the initial state of any command/data selection,
+ *    then (2) call the slave device's getdata() method to get the value
+ *    that will be shifted out the SPI clock is detected.  The kind of
+ *    data returned the getdata() method may be contingent on the current
+ *    command/data setting previous reported the device cmddata() method.
+ *    driver can change the next word to be shifted out at any time by
+ *    The calling the SPI slave controller's setdata() method.
  * 5) Upon return from the bind method, the SPI slave controller will be
  *    fully "armed" and ready to begin normal SPI data transfers.
  *
@@ -244,32 +254,31 @@
  *    has gone low, selecting this device for data transfer.  If the SPI
  *    slave device's select method is non-NULL, the SPI slave controller
  *    will notify the slave device by called its selected() method.
- * 2) Similarly, the SPI device driver may make a distinction between
- *    command and data transfer based on internal logic that is beyond
- *    the scope of these interface description.
- * 3) As the first word is shifted in, the command or data word word
- *    will be shifted out.  As soon as the clock is detected, the SPI
- *    controller driver will call the get_cmd() or get_data() method
- *    again to get the second word to be shifted out.  NOTE: the SPI
- *    slave device has only one word in bit times to provide this value!
+ * 2) If a change in the command/data status changes any time before,
+ *    during, or after the chip is selected, that new command state state
+ *    will reported to the device driver via the cmddata() method.
+ * 3) As the first word is shifted in, the command or data word will be
+ *    shifted out.  As soon as the clock is detected, the SPI controller
+ *    driver will call the getdata() method again to get the second word
+ *    to be shifted out.  NOTE: the SPI slave device has only one word in
+ *    bit times to provide this value!
  * 4) When the first word is shifted in, the SPI controller driver will
- *    call the device's exchange_data() or exchange_cmd() method to both
- *    provide the master command that was just shifted in as well to
- *    obtain the next value to shift out.  If the SPI device responds
- *    with this value before clocking begins for the next word, that
- *    that value will be used (and the backup value obtained in 3) will
- *    be discarded).
+ *    call the device's exchange() method to both provide the master
+ *    command that was just shifted in as well to obtain the next value
+ *    to shift out.  If the SPI device responds with this value before
+ *    clocking begins for the next word, that that value will be used
+ *    (and the backup value obtained in 3) will be discarded).
  * 5) The SPI device's echange_cmd/data() will will be called in a similar
  *    way after each subsequent word is clocked in.  The only difference
- *    is that word returned from the previous call to exchange_cmd/data()
+ *    is that word returned from the previous call to exchange/cmddata()
  *    will not be discard.
  * 6) The activity of 5) will continue until the master raises the chip
- *    select signal.  In that case, the SPI slave controll driver will
+ *    select signal.  In that case, the SPI slave controller driver will
  *    again call the SPI device's selected().  At this point, the SPI
  *    controller driver may have two words buffered.  If will discard the
  *    last and retain only the current word prepared to be shifted out.
  *    That value can be changed by the  SPI device driver by calling the
- *    set_cmd/data() method.
+ *    setdata() method.
  *
  * A typical DMA data transfer processes as follows:
  * To be provided
@@ -292,12 +301,11 @@ struct spi_slaveops_s
   CODE void     (*bind)(FAR struct spi_sctrlr_s *sctrlr, 
                    FAR spi_sdev_s *sdev, enum spi_mode_e mode, int nbits);
   CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);
-  CODE void     (*set_cmd)(FAR struct spi_sctrlr_s *sctrlr, uint16_t cmd);
-  CODE void     (*set_data)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
+  CODE void     (*setdata)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
 };
 
 /* SPI private data.  This structure only defines the initial fields of the
- * structure visible to the SPI device drvier.  The specific implementation
+ * structure visible to the SPI device driver.  The specific implementation
  * may add additional, device specific fields after the vtable structure
  * pointer
  */
@@ -314,10 +322,9 @@ struct spi_sctrlr_s
 struct spi_sdevops_s
 {
   CODE void     (*selected)(FAR struct spi_sdev_s *sdev, bool isselected);
-  CODE uint16_t (*get_cmd)(FAR struct spi_sdev_s *sdev);
-  CODE uint16_t (*exchange_cmd)(FAR struct spi_sdev_s *sdev), uint16_t cmd);
-  CODE uint16_t (*get_data)(FAR struct spi_sdev_s *sdev);
-  CODE uint16_t (*exchange_data)(FAR struct spi_sdev_s *sdev, uint16_t data));
+  CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool isdata);
+  CODE uint16_t (*getdata)(FAR struct spi_sdev_s *sdev);
+  CODE uint16_t (*exchange)(FAR struct spi_sdev_s *sdev), uint16_t cmd);
 };
 
 struct spi_sdev_s
