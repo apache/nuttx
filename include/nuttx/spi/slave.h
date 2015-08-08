@@ -62,7 +62,9 @@
  *
  * Description:
  *   Bind the SPI slave device interface to the SPI slave controller
- *   interface and configure the SPI interface.  Upon return, the 
+ *   interface and configure the SPI interface.  Upon return, the SPI
+ *   slave controller driver is fully operational and ready to perform
+ *   transfers.
  *
  * Input Parameters:
  *   sctrlr - SPI slave controller interface instance
@@ -78,6 +80,24 @@
  ****************************************************************************/
 
 #define SPI_SCTRLR_BIND(c,d,m,n) ((c)->bind(c,d,m,n))
+
+/****************************************************************************
+ * Name: SPI_SCTRLR_UNBIND
+ *
+ * Description:
+ *   Un-bind the SPI slave device interface from the SPI slave controller
+ *   interface.  Reset the SPI interface and restore the SPI slave
+ *   controller driver to its initial state,
+ *
+ * Input Parameters:
+ *   sctrlr - SPI slave controller interface instance
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+#define SPI_SCTRLR_UNBIND(c) ((c)->unbind(c))
 
 /****************************************************************************
  * Name: SPI_SCTRLR_SET_CMD/SPI_SCTRLR_SET_DATA
@@ -271,6 +291,7 @@ struct spi_slaveops_s
 {
   CODE void     (*bind)(FAR struct spi_sctrlr_s *sctrlr, 
                    FAR spi_sdev_s *sdev, enum spi_mode_e mode, int nbits);
+  CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);
   CODE void     (*set_cmd)(FAR struct spi_sctrlr_s *sctrlr, uint16_t cmd);
   CODE void     (*set_data)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
 };
