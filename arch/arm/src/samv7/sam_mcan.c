@@ -122,6 +122,10 @@
 #  define MCAN_ALIGN        ARMV7M_DCACHE_LINESIZE
 #  define MCAN_ALIGN_MASK   (MCAN_ALIGN-1)
 #  define MCAN_ALIGN_UP(n)  (((n) + MCAN_ALIGN_MASK) & ~MCAN_ALIGN_MASK)
+
+#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+#    warning !!! This driver will not workCONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!
+#  endif
 #endif
 
 /* MCAN0 Configuration ******************************************************/
@@ -914,7 +918,7 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
 #define mcan_dev_unlock(priv) sem_post(&priv->locksem)
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
-#define mcan_buffer_release(priv) sem_post(&priv->txfsem)
+static void mcan_buffer_release(FAR struct sam_mcan_s *priv);
 
 /* MCAN helpers */
 
@@ -1385,8 +1389,9 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
  * Name: mcan_buffer_reserve
  *
  * Description:
- *   Take the semaphore that indicates the availability of a TX FIFOQ
- *   buffer, handling any exceptional conditions
+ *   Take the semaphore, decrementing the semaphore count to indicate that
+ *   one fewer TX FIFOQ buffer is available.  Handles any exceptional
+ *   conditions.
  *
  * Input Parameters:
  *   priv - A reference to the MCAN peripheral state
@@ -1394,10 +1399,18 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
  * Returned Value:
  *  None
  *
+ * Assumptions:
+ *  Called only non-interrupt logic via mcan_write.  We do not have exclusive
+ *  access to the MCAN hardware and interrupts are not disabled.
+ *
  ****************************************************************************/
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 {
+  irqstate_t flags;
+  uint32_t txfqs1;
+  uint32_t txfqs2;
+  int sval;
   int ret;
 
   /* Wait until we successfully get the semaphore.  EINTR is the only
@@ -1407,10 +1420,139 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
   do
     {
+      /* We take some extra precautions here because it is possible that on
+       * certain error conditions, the semaphore count could get out of
+       * phase with the actual count of elements in the TX FIFO (I have
+       * never seen this happen, however.  My paranoia).
+       *
+       * An missed TX interrupt could cause the semaphore count to fail to
+       * be incremented and, hence, to be too low.
+       */
+
+      for(;;)
+        {
+          /* Get the current queue status and semaphore count. */
+
+          flags = irqsave();
+          txfqs1 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+          (void)sem_getvalue(&priv->txfsem, &sval);
+          txfqs2 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+
+          /* If the semaphore count and the TXFQS samples are in
+           * sync, then break out of the look with interrupts
+           * disabled.
+           */
+
+          if (txfqs1 == txfqs2)
+            {
+              break;
+            }
+
+          /* Otherwise, re-enable interrupts to interrupts that may
+           * resynchronize, the semaphore count and try again.
+           */
+
+          irqrestore(flags);
+        }
+
+      /* We only have one useful bit of information in the TXFQS:
+       * Is the TX FIFOQ full or not?  We can only do limited checks
+       * with that single bit of information.
+       */
+
+      if ((txfqs1 & MCAN_TXFQS_TFQF) != 0)
+        {
+          /* The TX FIFOQ is full.  The semaphore count should then be
+           * less than or equal to zero.  If it is greater than zero,
+           * then reinitialize it to 0.
+           */
+
+          if (sval > 0)
+            {
+              candbg("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
+              sem_init(&priv->txfsem, 0, 0);
+            }
+        }
+
+      /* The FIFO is not full so the semaphore count should be greater
+       * than zero.  If it is not, then we have missed a call to
+       * mcan_buffer_release(0).
+       */
+
+      else if (sval <= 0)
+        {
+          candbg("ERROR: TX FIFOQ not full but txfsem is %d\n", sval);
+
+          /* Less than zero means that another thread is waiting */
+
+          if (sval < 0)
+            {
+              /* Bump up the count by one and try again */
+
+              sem_post(&priv->txfsem);
+              irqrestore(flags);
+              continue;
+            }
+
+          /* Exactly zero but the FIFO is not full.  Just return without
+           * decrementing the count.
+           */
+
+          irqrestore(flags);
+          return;
+        }
+
+      /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
+
       ret = sem_wait(&priv->txfsem);
+      irqrestore(flags);
       DEBUGASSERT(ret == 0 || errno == EINTR);
     }
   while (ret < 0);
+}
+
+/****************************************************************************
+ * Name: mcan_buffer_reserve
+ *
+ * Description:
+ *   Release the semaphore, increment the semaphore count to indicate that
+ *   one more TX FIFOQ buffer is available.
+ *
+ * Input Parameters:
+ *   priv - A reference to the MCAN peripheral state
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
+ *  This function is called only from the interrupt level in reponse to the
+ *  complete of a transmission.
+ *
+ ****************************************************************************/
+
+static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
+{
+  int sval;
+
+  /* We take some extra precautions here because it is possible that on
+   * certain error conditions, the semaphore count could get out of phase
+   * with the actual count of elements in the TX FIFO (I have never seen
+   * this happen, however.  My paranoia).
+   *
+   * An extra TC interrupt could cause the count to be incremented too
+   * many times.
+   */
+
+  (void)sem_getvalue(&priv->txfsem, &sval);
+  if (sval < priv->config->ntxfifoq)
+    {
+      sem_post(&priv->txfsem);
+    }
+  else
+    {
+      candbg("ERROR: txfsem would increment beyond %d\n",
+              priv->config->ntxfifoq);
+    }
 }
 
 /****************************************************************************
@@ -2443,6 +2585,17 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
 
+  /* Report that the TX transfer is complete to the upper half logic.  Of
+   * course, the transfer is not complete, but this early notification
+   * allows the upper half logic to free resources sooner.
+   *
+   * REVISTI:  Should we disable interrupts?  can_txdone() was designed to
+   * be called from and interrupt handler and, hence, may be unsafe when
+   * called from the tasking level.
+   */
+
+  can_txdone(dev);
+
   mcan_dev_unlock(priv);
   return OK;
 }
@@ -2696,9 +2849,6 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
   uint32_t regval;
   unsigned int nelem;
   unsigned int ndx;
-#ifdef CONFIG_DEBUG
-  int sval;
-#endif
   bool handled;
 
   DEBUGASSERT(priv && priv->config);
@@ -2740,11 +2890,16 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           /* REVISIT:  Will MCAN_INT_TC also be set in the event of
            * a transmission error?  Each write must conclude with a
-           * call to can_txdone(), whether or not the write was
-           * successful.
+           * call to man_buffer_release(), whether or not the write
+           * was successful.
+           *
+           * Here we force transmit complete processing just in case.
+           * This could have the side effect of pushing the semaphore
+           * count up to high.
            */
 
-          handled = true;
+          pending |= MCAN_INT_TC;
+          handled  = true;
         }
 
       /* Check for successful completion of a transmission */
@@ -2765,15 +2920,6 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            */
 
           mcan_buffer_release(priv);
-
-#ifdef CONFIG_DEBUG
-          (void)sem_getvalue(&priv->txfsem, &sval);
-          DEBUGASSERT(sval <= config->ntxfifoq);
-#endif
-
-          /* Report that the TX transfer is complete to the upper half logic */
-
-          can_txdone(dev);
           handled = true;
         }
       else if ((pending & priv->txints) != 0)
@@ -2871,7 +3017,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           /* Handle the newly received message in FIFO1 */
 
-          ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
+          ndx = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
