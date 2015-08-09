@@ -608,6 +608,18 @@ config SAMV7_SPI_DMADEBUG
 
 endif # SAMV7_SPI_MASTER
 
+if SAMV7_SPI_SLAVE
+comment "SPI Master Configuration"
+
+config SAMV7_SPI_SLAVE_QSIZE
+	int "Output queue size"
+	default 8
+	---help---
+		The number of words that an be retained in the controller driver's
+		output queue.
+
+endif # SAMV7_SPI_SLAVE
+
 config SAMV7_SPI_REGDEBUG
 	bool "SPI Register level debug"
 	depends on DEBUG
