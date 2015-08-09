@@ -79,7 +79,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_BIND(c,d,m,n) ((c)->bind(c,d,m,n))
+#define SPI_SCTRLR_BIND(c,d,m,n) ((c)->ops->bind(c,d,m,n))
 
 /****************************************************************************
  * Name: SPI_SCTRLR_UNBIND
@@ -97,15 +97,15 @@
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_UNBIND(c) ((c)->unbind(c))
+#define SPI_SCTRLR_UNBIND(c) ((c)->ops->unbind(c))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_SETDATA
+ * Name: SPI_SCTRLR_ENQUEUE
  *
  * Description:
- *   Set the next value to be shifted out from the interface.  This primes
- *   the controller driver for the next transfer but has no effect on any
- *   in-process or currently "committed" transfers
+ *   Enqueue the next value to be shifted out from the interface.  This adds
+ *   the word the controller driver for a subsequent transfer but has no
+ *   effect on any in-process or currently "committed" transfers
  *
  * Input Parameters:
  *   sctrlr - SPI slave controller interface instance
@@ -114,11 +114,48 @@
  *            provided to the bind() methods.
  *
  * Returned Value:
- *   none
+ *   Zero if the word was successfully queue; A negated errno valid is
+ *   returned on any failure to enqueue the word (such as if the queue is
+ *   full).
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_SETDATA(c,v)  ((c)->setdata(c,v))
+#define SPI_SCTRLR_ENQUEUE(c,v)  ((c)->ops->enqueue(c,v))
+
+/****************************************************************************
+ * Name: SPI_SCTRLR_QFULL
+ *
+ * Description:
+ *   Return true if the queue is full or false if there is space to add an
+ *   additional word to the queue.
+ *
+ * Input Parameters:
+ *   sctrlr - SPI slave controller interface instance
+ *
+ * Returned Value:
+ *   true if the output wueue is full
+ *
+ ****************************************************************************/
+
+#define SPI_SCTRLR_QFULL(c)  ((c)->ops->qfull(c))
+
+/****************************************************************************
+ * Name: SPI_SCTRLR_QFLUSH
+ *
+ * Description:
+ *   Discard all saved values in the output queue.  On return from this
+ *   function the output queue will be empty.  Any in-progress or otherwise
+ *   "committed" output values may not be flushed.
+ *
+ * Input Parameters:
+ *   sctrlr - SPI slave controller interface instance
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SPI_SCTRLR_QFLUSH(c)  ((c)->ops->qflush(c))
 
 /****************************************************************************
  * Name: SPI_SDEV_SELECTED
@@ -134,9 +171,12 @@
  * Returned Value:
  *   none
  *
+ * Assumptions:
+ *   May be called from an interrupt handler.
+ *
  ****************************************************************************/
 
-#define SPI_SDEV_SELECTED(d,i) ((c)->selected(d,i))
+#define SPI_SDEV_SELECTED(d,i) ((c)->ops->selected(d,i))
 
 /****************************************************************************
  * Name: SPI_SDEV_CMDDATA
@@ -148,7 +188,7 @@
  *   Normally only LCD devices distinguish command and data.   For devices
  *   that do not distinguish between command and data, this method may be
  *   a stub.; For devices that do make that distinction, they should treat
- *   all subsequent calls to getdata() or exchange() appropriately for the
+ *   all subsequent calls to enqueue() or rece() appropriately for the
  *   current command/data selection.
  *
  * Input Parameters:
@@ -158,9 +198,12 @@
  * Returned Value:
  *   none
  *
+ * Assumptions:
+ *   May be called from an interrupt handler.
+ *
  ****************************************************************************/
 
-#define SPI_SDEV_CMDDATA(d,i) ((c)->cmddata(d,i))
+#define SPI_SDEV_CMDDATA(d,i) ((d)->ops->cmddata(d,i))
 
 /****************************************************************************
  * Name: SPI_SDEV_GETDATA
@@ -181,46 +224,53 @@
  * Returned Value:
  *   The next data value to be shifted out
  *
+ * Assumptions:
+ *   May be called from an interrupt handler.
+ *
  ****************************************************************************/
 
-#define SPI_SDEV_GETDATA(d,v)  ((d)->getdata(d,v))
+#define SPI_SDEV_GETDATA(d)  ((d)->ops->getdata(d))
 
 /****************************************************************************
- * Name: SPI_SDEV_EXCHANGE
+ * Name: SPI_SDEV_RECEIVE
  *
  * Description:
  *   This is a SPI device callback that used when the SPI device controller
  *   receives a new value shifted in and requires the next value to be
  *   shifted out.  Notice that these values my be out of synchronization by
- *   as much as two words:  The value to be shifted out may be two words
- *   beyond the value that was just shifted in.
+ *   several words.
  *
  * Input Parameters:
  *   sdev - SPI device interface instance
  *   data - The last command/data value that was shifted in
  *
  * Returned Value:
- *   The next data value to be shifted out
+ *   None
+ *
+ * Assumptions:
+ *   May be called from an interrupt handler.
  *
  ****************************************************************************/
 
-#define SPI_SDEV_EXCHANGE(d,v)  ((d)->exchange(d,v))
+#define SPI_SDEV_RECEIVE(d,v)  ((d)->ops->receive(d,v))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 /* There are two interfaces defined for the implementation of SPI slave:
  *
- * 1) struct spi_sctrlr_s - Defines one interface between the SPI
+ * 1) struct spi_sctrlr_s:   Defines one interface between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
  *    is implemented by the SPI slave device controller lower-half driver
  *    and is provided to the the SPI slave device driver when that driver
- *    is initialization.  That SPI slave device initialization function might
- *    look like:
+ *    is initialized.  That SPI slave device initialization function might
+ *    look something like:
  *
  *      int xyz_dev_initialize(FAR struct spi_sctrlr_s *sctrlr);
  *
- * 2) struct spi_sdev_s - Defines the second center between the SPI
+ *    where xyz is replaced with the SPI device name.
+ *
+ * 2) struct spi_sdev_s:  Defines the second interface between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
  *    is implemented by the SPI slave device.  The slave device passes this
  *    interface to the struct spi_sctrlr_s during initialization
@@ -231,54 +281,70 @@
  *
  * 1) Board-specific logic calls board- or chip-specific logic to create an
  *    instance of the SPI slave controller interface, struct spi_sctrlr_s.
+ *
  * 2) Board-specific logic then calls xyz_dev_initialize() to initialize
  *    the SPI slave device.  The board-specific logic passes the instance
  *    of struct spi_sctrlr_s to support the initialization.
+ *
  * 3) The SPI slave device driver creates and initializes an instance of
  *    struct spi_sdev_s; it passes this instance to the bind() method of
  *    of the SPI slave controller interface.
+ *
  * 4) The SPI slave controller will (1) call the slaved device's cmddata()
  *    method to indicate the initial state of any command/data selection,
  *    then (2) call the slave device's getdata() method to get the value
  *    that will be shifted out the SPI clock is detected.  The kind of
  *    data returned the getdata() method may be contingent on the current
- *    command/data setting previous reported the device cmddata() method.
- *    driver can change the next word to be shifted out at any time by
- *    The calling the SPI slave controller's setdata() method.
+ *    command/data setting reported the device cmddata() method.  The
+ *    driver may enqueue additional words to be shifted out at any time by
+ *    The calling the SPI slave controller's enqueue() method.
+ *
  * 5) Upon return from the bind method, the SPI slave controller will be
  *    fully "armed" and ready to begin normal SPI data transfers.
  *
  * A typical (non-DMA) data transfer proceeds as follows:
  *
  * 1) Internally, the SPI slave driver detects that the SPI chip select
- *    has gone low, selecting this device for data transfer.  If the SPI
- *    slave device's select method is non-NULL, the SPI slave controller
- *    will notify the slave device by called its selected() method.
- * 2) If a change in the command/data status changes any time before,
- *    during, or after the chip is selected, that new command state state
+ *    has gone low, selecting this device for data transfer.  The SPI
+ *    slave controller will notify the slave device by called its
+ *    selected() method.
+ *
+ * 2) If a change in the command/data state changes any time before,
+ *    during, or after the chip is selected, that new command/data state
  *    will reported to the device driver via the cmddata() method.
- * 3) As the first word is shifted in, the command or data word will be
- *    shifted out.  As soon as the clock is detected, the SPI controller
- *    driver will call the getdata() method again to get the second word
- *    to be shifted out.  NOTE: the SPI slave device has only one word in
- *    bit times to provide this value!
- * 4) When the first word is shifted in, the SPI controller driver will
- *    call the device's exchange() method to both provide the master
- *    command that was just shifted in as well to obtain the next value
- *    to shift out.  If the SPI device responds with this value before
- *    clocking begins for the next word, that that value will be used
- *    (and the backup value obtained in 3) will be discarded).
- * 5) The SPI device's echange_cmd/data() will will be called in a similar
- *    way after each subsequent word is clocked in.  The only difference
- *    is that word returned from the previous call to exchange/cmddata()
- *    will not be discard.
+ *
+ * 3) As the first word is shifted in, the command or data word obtained
+ *    by the initial call to getdata() will be shifted out.  As soon as
+ *    the clock is detected, the SPI controller driver will call the
+ *    getdata() method again to get a default second word to be shifted
+ *    out.  NOTES: (1) the SPI slave device has only one word in bit
+ *    times to provide this value! (2) The SPI device probably cannot
+ *    really output anything meaning until it receives a decodes the
+ *    first word received from the master.
+ *
+ * 4) When the first word from the master is shifted in, the SPI
+ *    controller driver will call the device's receive() method to
+ *    provide the master with the command word that was just shifted
+ *    in.  In response to this, the SPI device driver should call
+ *    the enqueue() method to provide the next value to shift out.
+ *    If the SPI device responds with this value before clocking begins
+ *    for the next word, that that value will be used.  Otherwise,
+ *    the value obtained from getdata() in step 3 will be shifted out.
+ *
+ * 5) The SPI device's receive() method will be called in a similar
+ *    way after each subsequent word is clocked in.  The SPI device
+ *    driver can call the enqueue() methods as it has new data to
+ *    be shifted out.
+ *
+ *    The SPI device driver can detect if there is space to enqueue
+ *    additional data by calling the qfull() method.
+ *
  * 6) The activity of 5) will continue until the master raises the chip
  *    select signal.  In that case, the SPI slave controller driver will
- *    again call the SPI device's selected().  At this point, the SPI
- *    controller driver may have two words buffered.  If will discard the
- *    last and retain only the current word prepared to be shifted out.
- *    That value can be changed by the  SPI device driver by calling the
- *    setdata() method.
+ *    again call the SPI device's selected() metho.  At this point, the SPI
+ *    controller driver may have several words enqueued.  It will not
+ *    discard these unless the SPI device driver calls the qflush()
+ *    method.
  *
  * A typical DMA data transfer processes as follows:
  * To be provided
@@ -303,7 +369,9 @@ struct spi_sctrlrops_s
                    FAR struct spi_sdev_s *sdev, enum spi_smode_e mode,
                    int nbits);
   CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);
-  CODE void     (*setdata)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
+  CODE int      (*enqueue)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
+  CODE bool     (*qfull)(FAR struct spi_sctrlr_s *sctrlr);
+  CODE void     (*qflush)(FAR struct spi_sctrlr_s *sctrlr);
 };
 
 /* SPI slave controller private data.  This structure only defines the
@@ -326,7 +394,7 @@ struct spi_sdevops_s
   CODE void     (*selected)(FAR struct spi_sdev_s *sdev, bool isselected);
   CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool isdata);
   CODE uint16_t (*getdata)(FAR struct spi_sdev_s *sdev);
-  CODE uint16_t (*exchange)(FAR struct spi_sdev_s *sdev, uint16_t cmd);
+  CODE void     (*receive)(FAR struct spi_sdev_s *sdev, uint16_t cmd);
 };
 
 /* SPI slave device private data.  This structure only defines the initial
