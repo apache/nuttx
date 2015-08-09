@@ -290,14 +290,15 @@
  *    struct spi_sdev_s; it passes this instance to the bind() method of
  *    of the SPI slave controller interface.
  *
- * 4) The SPI slave controller will (1) call the slaved device's cmddata()
- *    method to indicate the initial state of any command/data selection,
- *    then (2) call the slave device's getdata() method to get the value
- *    that will be shifted out the SPI clock is detected.  The kind of
- *    data returned the getdata() method may be contingent on the current
- *    command/data setting reported the device cmddata() method.  The
- *    driver may enqueue additional words to be shifted out at any time by
- *    The calling the SPI slave controller's enqueue() method.
+ * 4) The SPI slave controller will (1) call the slaved device's select()
+ *    and cmddata() methods to indicate the initial state of the chip select
+ *    and any command/data selection, then (2) call the slave device's
+ *    getdata() method to get the value that will be shifted out the SPI
+ *    clock is detected.  The kind of data returned the getdata() method
+ *    may be contingent on the current command/data setting reported the
+ *    device cmddata() method.  The driver may enqueue additional words
+ *    to be shifted out at any time by The calling the SPI slave
+ *    controller's enqueue() method.
  *
  * 5) Upon return from the bind method, the SPI slave controller will be
  *    fully "armed" and ready to begin normal SPI data transfers.
@@ -325,23 +326,35 @@
  * 4) When the first word from the master is shifted in, the SPI
  *    controller driver will call the device's receive() method to
  *    provide the master with the command word that was just shifted
- *    in.  In response to this, the SPI device driver should call
- *    the enqueue() method to provide the next value to shift out.
- *    If the SPI device responds with this value before clocking begins
- *    for the next word, that that value will be used.  Otherwise,
- *    the value obtained from getdata() in step 3 will be shifted out.
+ *    in.
+ *
+ *    For the case of bi-directional data transfer or of a transfer of
+ *    data from the SPI device to the master, the SPI device driver
+ *    should call the controller's enqueue() method to provide the next
+ *    value(s) to be shifted out. If the SPI device responds with this
+ *    value before clocking begins for the next word, that that value
+ *    will be used.  Otherwise, the value obtained from getdata() in
+ *    step 3 will be shifted out.
  *
  * 5) The SPI device's receive() method will be called in a similar
- *    way after each subsequent word is clocked in.  The SPI device
- *    driver can call the enqueue() methods as it has new data to
- *    be shifted out.  The goal of the SPI device driver is to supply
- *    valid output data at such a rate that data underruns do not
+ *    way after each subsequent word is clocked in.
+ *
+ *    For the case of bi-directional data transfer or of a uni-directional
+ *    transfer of data from the SPI device to the master, the SPI device
+ *    driver can call the enqueue() methods as it has new data to be shifted
+ *    out.  The goal of the SPI device driver for this kind of transfer is
+ *    to supply valid output data at such a rate that data underruns do not
  *    occur.  In the event of a data underrun, the SPI slave controller
- *    driver will fallback to the default output value obtained from
- *    the last getdata() call.
+ *    driver will fallback to the default output value obtained from the
+ *    last getdata() call.
  *
  *    The SPI device driver can detect if there is space to enqueue
  *    additional data by calling the qfull() method.
+ *
+ *    For the case of uni-directional transfer of data from the master to
+ *    the SPI device, there is no need to call the enqueue() method at all;
+ *    the value that is shifted out is not important that fallback behavior
+ *    is suficient.
  *
  * 6) The activity of 5) will continue until the master raises the chip
  *    select signal.  In that case, the SPI slave controller driver will
@@ -349,6 +362,11 @@
  *    controller driver may have several words enqueued.  It will not
  *    discard these unless the SPI device driver calls the qflush()
  *    method.
+ *
+ *    Some master side implementations may simply tie the chip select signal
+ *    to ground if there are no other devices on the SPI bus.  In that case,
+ *    the initial indication of chip selected will be the only call to the
+ *    select() method that is made.
  *
  * A typical DMA data transfer processes as follows:
  * To be provided
