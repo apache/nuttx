@@ -788,6 +788,10 @@ static void spi_bind(FAR struct spi_sctrlr_s *sctrlr,
   spi_setbits(spics, spidev, nbits);
 
 #warning Missing Logic
+
+  /* Enable SPI interrupts (already enabled at the NVIC) */
+#warning Missing Logic
+
   spi_semgive(spidev);
 }
 
@@ -822,10 +826,16 @@ static void spi_unbind(FAR struct spi_sctrlr_s *sctrlr)
 
   spi_semtake(spidev);
 
+  /* Disable SPI interrupts (still enabled at the NVIC) */
+#warning Missing Logic
+
   /* Unbind the SPI slave interface */
 
-  /* Reset and disabled the SPI device */
+  spics->sdev = NULL;
+
+  /* Reset and disable the SPI device */
 #warning Missing Logic
+
   spi_semgive(spidev);
 }
 
@@ -1000,7 +1010,7 @@ static void spi_qflush(FAR struct spi_sctrlr_s *sctrlr)
  *
  * Input Parameter:
  *   port - Chip select number identifying the "logical" SPI port.  Includes
- *          incoded port and chip select inforomation.
+ *          encoded port and chip select information.
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
