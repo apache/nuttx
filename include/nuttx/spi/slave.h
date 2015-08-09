@@ -292,7 +292,7 @@ enum spi_smode_e
   SPISLAVE_MODE3          /* CPOL=1 CHPHA=1 */
 };
 
-/* The SPI slave vtable */
+/* The SPI slave controller driver vtable */
 
 struct spi_sctrlr_s;
 struct spi_sdev_s;
@@ -304,10 +304,10 @@ struct spi_slaveops_s
   CODE void     (*setdata)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
 };
 
-/* SPI private data.  This structure only defines the initial fields of the
- * structure visible to the SPI device driver.  The specific implementation
- * may add additional, device specific fields after the vtable structure
- * pointer
+/* SPI slave controller private data.  This structure only defines the
+ * initial fields of the structure visible to the SPI device driver.  The
+ * specific implementation may add additional, device specific fields after
+ * the vtable structure pointer.
  */
 
 struct spi_sctrlr_s
@@ -317,7 +317,7 @@ struct spi_sctrlr_s
   /* Private SPI slave controller driver data may follow */
 };
 
-/* The SPI slave vtable */
+/* The SPI slave device driver vtable */
 
 struct spi_sdevops_s
 {
@@ -326,6 +326,12 @@ struct spi_sdevops_s
   CODE uint16_t (*getdata)(FAR struct spi_sdev_s *sdev);
   CODE uint16_t (*exchange)(FAR struct spi_sdev_s *sdev), uint16_t cmd);
 };
+
+/* SPI slave device private data.  This structure only defines the initial
+ * fields of the structure visible to the SPI slave controller driver.  The
+ * specific implementation may add additional, device specific fields after
+ * the vtable structure pointer.
+ */
 
 struct spi_sdev_s
 {
