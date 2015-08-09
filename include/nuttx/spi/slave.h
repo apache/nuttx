@@ -263,12 +263,13 @@
  *    slave device and the SPI slave controller hardware.  This interface
  *    is implemented by the SPI slave device controller lower-half driver
  *    and is provided to the the SPI slave device driver when that driver
- *    is initialized.  That SPI slave device initialization function might
- *    look something like:
+ *    is initialized.  That SPI slave device initialization function has
+ *    the prototype:
  *
- *      int xyz_dev_initialize(FAR struct spi_sctrlr_s *sctrlr);
+ *      FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
  *
- *    where xyz is replaced with the SPI device name.
+ *    Given an SPI port number, this function returns an instance of the
+ *    SPI slave controller interface.
  *
  * 2) struct spi_sdev_s:  Defines the second interface between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
@@ -282,7 +283,7 @@
  * 1) Board-specific logic calls board- or chip-specific logic to create an
  *    instance of the SPI slave controller interface, struct spi_sctrlr_s.
  *
- * 2) Board-specific logic then calls xyz_dev_initialize() to initialize
+ * 2) Board-specific logic then calls up_dev_initialize() to initialize
  *    the SPI slave device.  The board-specific logic passes the instance
  *    of struct spi_sctrlr_s to support the initialization.
  *
@@ -448,6 +449,23 @@ extern "C"
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_spi_slave_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port in slave mode.
+ *
+ * Input Parameter:
+ *   port - Chip select number identifying the "logical" SPI port.  Includes
+ *          encoded port and chip select information.
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

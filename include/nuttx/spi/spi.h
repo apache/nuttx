@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/spi/spi.h
  *
- *   Copyright(C) 2008-2013 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -437,7 +437,7 @@ extern "C"
  * Name: up_spiinitialize
  *
  * Description:
- *   Initialize the selected SPI port.
+ *   Initialize the selected SPI port in master mode.
  *
  *   This is a generic prototype for the SPI initialize logic.  Specific
  *   architectures may support different SPI initialization functions if,
