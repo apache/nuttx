@@ -294,12 +294,14 @@ enum spi_smode_e
 
 /* The SPI slave controller driver vtable */
 
-struct spi_sctrlr_s;
-struct spi_sdev_s;
-struct spi_slaveops_s
+struct spi_sctrlr_s; /* Forward reference */
+struct spi_sdev_s;   /* Forward reference */
+
+struct spi_sctrlrops_s
 {
   CODE void     (*bind)(FAR struct spi_sctrlr_s *sctrlr, 
-                   FAR spi_sdev_s *sdev, enum spi_mode_e mode, int nbits);
+                   FAR struct spi_sdev_s *sdev, enum spi_smode_e mode,
+                   int nbits);
   CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);
   CODE void     (*setdata)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
 };
@@ -312,7 +314,7 @@ struct spi_slaveops_s
 
 struct spi_sctrlr_s
 {
-  FAR const struct spi_slaveops_s *ops;
+  FAR const struct spi_sctrlrops_s *ops;
 
   /* Private SPI slave controller driver data may follow */
 };
@@ -324,7 +326,7 @@ struct spi_sdevops_s
   CODE void     (*selected)(FAR struct spi_sdev_s *sdev, bool isselected);
   CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool isdata);
   CODE uint16_t (*getdata)(FAR struct spi_sdev_s *sdev);
-  CODE uint16_t (*exchange)(FAR struct spi_sdev_s *sdev), uint16_t cmd);
+  CODE uint16_t (*exchange)(FAR struct spi_sdev_s *sdev, uint16_t cmd);
 };
 
 /* SPI slave device private data.  This structure only defines the initial

@@ -10794,4 +10794,6 @@
 	  (2015-08-06).
 	* include/nuttx/spi/slave.h:  Add a definition of an SPI slave
 	  interface (2015-08-08).
+	* arch/arm/src/samv7: Add the framework for an SPI slave drvier.  This
+	  driver has a lot of missing logic on initial commit (2015-08-09).
 
