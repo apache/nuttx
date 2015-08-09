@@ -158,15 +158,15 @@
 #define SPI_SCTRLR_QFLUSH(c)  ((c)->ops->qflush(c))
 
 /****************************************************************************
- * Name: SPI_SDEV_SELECTED
+ * Name: SPI_SDEV_SELECT
  *
  * Description:
  *   This is a SPI device callback that used when the SPI device controller
  *   driver detects any change in the chip select pin.
  *
  * Input Parameters:
- *   sdev       - SPI device interface instance
- *   isselected - True: chip select is low (selected);
+ *   sdev     - SPI device interface instance
+ *   selected - True: chip select is low (selected);
  *
  * Returned Value:
  *   none
@@ -176,7 +176,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_SELECTED(d,i) ((c)->ops->selected(d,i))
+#define SPI_SDEV_SELECT(d,s) ((c)->ops->select(d,s))
 
 /****************************************************************************
  * Name: SPI_SDEV_CMDDATA
@@ -192,8 +192,8 @@
  *   current command/data selection.
  *
  * Input Parameters:
- *   sdev   - SPI device interface instance
- *   isdata - True: Data is selected
+ *   sdev - SPI device interface instance
+ *   data - True: Data is selected
  *
  * Returned Value:
  *   none
@@ -307,7 +307,7 @@
  * 1) Internally, the SPI slave driver detects that the SPI chip select
  *    has gone low, selecting this device for data transfer.  The SPI
  *    slave controller will notify the slave device by called its
- *    selected() method.
+ *    select() method.
  *
  * 2) If a change in the command/data state changes any time before,
  *    during, or after the chip is selected, that new command/data state
@@ -334,14 +334,18 @@
  * 5) The SPI device's receive() method will be called in a similar
  *    way after each subsequent word is clocked in.  The SPI device
  *    driver can call the enqueue() methods as it has new data to
- *    be shifted out.
+ *    be shifted out.  The goal of the SPI device driver is to supply
+ *    valid output data at such a rate that data underruns do not
+ *    occur.  In the event of a data underrun, the SPI slave controller
+ *    driver will fallback to the default output value obtained from
+ *    the last getdata() call.
  *
  *    The SPI device driver can detect if there is space to enqueue
  *    additional data by calling the qfull() method.
  *
  * 6) The activity of 5) will continue until the master raises the chip
  *    select signal.  In that case, the SPI slave controller driver will
- *    again call the SPI device's selected() metho.  At this point, the SPI
+ *    again call the SPI device's select() method.  At this point, the SPI
  *    controller driver may have several words enqueued.  It will not
  *    discard these unless the SPI device driver calls the qflush()
  *    method.
@@ -391,8 +395,8 @@ struct spi_sctrlr_s
 
 struct spi_sdevops_s
 {
-  CODE void     (*selected)(FAR struct spi_sdev_s *sdev, bool isselected);
-  CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool isdata);
+  CODE void     (*select)(FAR struct spi_sdev_s *sdev, bool selected);
+  CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool data);
   CODE uint16_t (*getdata)(FAR struct spi_sdev_s *sdev);
   CODE void     (*receive)(FAR struct spi_sdev_s *sdev, uint16_t cmd);
 };
