@@ -1003,7 +1003,7 @@ static void spi_qflush(FAR struct spi_sctrlr_s *sctrlr)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spi_slave_initialize
+ * Name: sam_spi_slave_initialize
  *
  * Description:
  *   Initialize the selected SPI port in slave mode.
@@ -1017,7 +1017,7 @@ static void spi_qflush(FAR struct spi_sctrlr_s *sctrlr)
  *
  ****************************************************************************/
 
-struct spi_sctrlr_s *up_spi_slave_initialize(int port)
+FAR struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 {
   struct sam_spidev_s *spidev;
   struct sam_spics_s *spics;

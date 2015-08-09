@@ -1726,7 +1726,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  * Name: up_spiinitialize
  *
  * Description:
- *   Initialize the selected SPI port
+ *   Initialize the selected SPI port in master mode
  *
  * Input Parameter:
  *   cs - Chip select number (identifying the "logical" SPI port)
@@ -1736,10 +1736,10 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  *
  ****************************************************************************/
 
-struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *up_spiinitialize(int port)
 {
-  struct sam_spidev_s *spi;
-  struct sam_spics_s *spics;
+  FAR struct sam_spidev_s *spi;
+  FAR struct sam_spics_s *spics;
   int csno  = (port & __SPI_CS_MASK) >> __SPI_CS_SHIFT;
   int spino = (port & __SPI_SPI_MASK) >> __SPI_SPI_SHIFT;
   irqstate_t flags;

@@ -48,6 +48,8 @@
 #include "chip.h"
 #include "sam_config.h"
 
+#ifdef CONFIG_SAMV7_SPI
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -110,13 +112,50 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_spiinitialize
+ *
+ * Description:
+ *   Initialize the selected SPI port in master mode
+ *
+ * Input Parameter:
+ *   cs - Chip select number (identifying the "logical" SPI port)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+#if 0 /* Prototyped in include/nuttx/spi/spi.h */
+FAR struct spi_dev_s *up_spiinitialize(int port)
+#endif
+
+/****************************************************************************
+ * Name: up_spi_slave_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port in slave mode.
+ *
+ * Input Parameter:
+ *   port - Chip select number identifying the "logical" SPI port.  Includes
+ *          encoded port and chip select information.
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+#if 0 /* Prototyped in include/nuttx/spi/slave.h */
+FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
+#endif
+
+/****************************************************************************
  * Name:  sam_spi[0|1]select, sam_spi[0|1]status, and sam_spi[0|1]cmddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.
  *   They include:
  *
- *   o sam_spi[0|1]select is a functions tomanage the board-specific chip
+ *   o sam_spi[0|1]select is a functions to manage the board-specific chip
  *     selects
  *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the
  *     status and cmddata methods of the SPI interface defined by struct
@@ -143,9 +182,8 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_SPI0
-struct spi_dev_s;
-enum spi_dev_e;
+struct spi_dev_s; /* Forward reference */
+enum spi_dev_e;   /* Forward reference */
 
 /****************************************************************************
  * Name: sam_spi[0|1]select
@@ -173,10 +211,10 @@ enum spi_dev_e;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_SPI0
+#ifdef CONFIG_SAMV7_SPI0_MASTER
 void sam_spi0select(enum spi_dev_e devid, bool selected);
 #endif
-#ifdef CONFIG_SAMV7_SPI1
+#ifdef CONFIG_SAMV7_SPI1_MASTER
 void sam_spi1select(enum spi_dev_e devid, bool selected);
 #endif
 
@@ -227,14 +265,13 @@ uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_SAMV7_SPI0
+#ifdef CONFIG_SAMV7_SPI0_MASTER
 int sam_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
-#ifdef CONFIG_SAMV7_SPI1
+#ifdef CONFIG_SAMV7_SPI1_MASTER
 int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
-#endif
-#endif /* CONFIG_SAMV7_SPI0 */
+#endif /* CONFIG_SPI_CMDDATA */
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -242,4 +279,5 @@ int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_SAMV7_SPI */
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_SPI_H */
