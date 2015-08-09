@@ -84,7 +84,7 @@ void sam_boardinitialize(void)
 #ifdef CONFIG_SAMV7_SPI
   /* Configure SPI chip selects if SPI has been enabled */
 
-  sam_spiinitialize();
+  sam_spi_initialize();
 #endif
 
 #ifdef HAVE_USB

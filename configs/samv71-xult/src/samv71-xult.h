@@ -449,14 +449,16 @@ int sam_bringup(void);
 #endif
 
 /************************************************************************************
- * Name: sam_spiinitialize
+ * Name: sam_spi_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM4E-EK board.
+ *   Called to configure SPI chip select GPIO pins for the SAMV71-XULT board.
  *
  ************************************************************************************/
 
-void sam_spiinitialize(void);
+#ifdef CONFIG_SAMV7_SPI
+void sam_spi_initialize(void);
+#endif
 
 /************************************************************************************
  * Name: sam_hsmci_initialize
