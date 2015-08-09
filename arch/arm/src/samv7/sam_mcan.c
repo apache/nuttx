@@ -1400,8 +1400,9 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
  *  None
  *
  * Assumptions:
- *  Called only non-interrupt logic via mcan_write.  We do not have exclusive
- *  access to the MCAN hardware and interrupts are not disabled.
+ *  Called only non-interrupt logic via mcan_write().  We do not have
+ *  exclusive access to the MCAN hardware and interrupts are not disabled.
+ *  mcan_write() does lock the scheduler for reasons noted below.
  *
  ****************************************************************************/
 
@@ -1477,6 +1478,12 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
       /* The FIFO is not full so the semaphore count should be greater
        * than zero.  If it is not, then we have missed a call to
        * mcan_buffer_release(0).
+       *
+       * NOTE: Since there is no mutual exclusion, it might be possible
+       * that mcan_write() could be re-entered AFTER taking the semaphore
+       * and dropping the count to zero, but BEFORE adding the message
+       * to the TX FIFOQ.  That corner case is handled in mcan_write() by
+       * locking the scheduler.
        */
 
       else if (sval <= 0)
@@ -1512,7 +1519,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 }
 
 /****************************************************************************
- * Name: mcan_buffer_reserve
+ * Name: mcan_buffer_release
  *
  * Description:
  *   Release the semaphore, increment the semaphore count to indicate that
@@ -1525,7 +1532,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
  *  None
  *
  * Assumptions:
- *  This function is called only from the interrupt level in reponse to the
+ *  This function is called only from the interrupt level in response to the
  *  complete of a transmission.
  *
  ****************************************************************************/
@@ -2499,15 +2506,22 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * not full and cannot become full at least until we add our packet to
    * the FIFO.
    *
+   * We can't get exclusive access to MAN resource here because that
+   * lock the MCAN while we wait for a free buffer.  Instead, the
+   * scheduler is locked here momentarily.  See discussion in
+   * mcan_buffer_reserve() for an explanation.
+   *
    * REVISIT: This needs to be extended in order to handler case where
    * the MCAN device was opened O_NONBLOCK.
    */
 
+  sched_lock();
   mcan_buffer_reserve(priv);
 
   /* Get exclusive access to the MCAN peripheral */
 
   mcan_dev_lock(priv);
+  sched_unlock();
 
   /* Get our reserved Tx FIFO/queue put index */
 
