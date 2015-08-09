@@ -86,13 +86,13 @@
 
 #ifdef CONFIG_SAMV7_SPI_DMA
 
-#  if defined(CONFIG_SAMV7_SPI0) && defined(CONFIG_SAMV7_DMAC0)
+#  if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_DMAC0)
 #    define SAMV7_SPI0_DMA true
 #  else
 #    define SAMV7_SPI0_DMA false
 #  endif
 
-#  if defined(CONFIG_SAMV7_SPI1) && defined(CONFIG_SAMV7_DMAC1)
+#  if defined(CONFIG_SAMV7_SPI1_MASTER) && defined(CONFIG_SAMV7_DMAC1)
 #    define SAMV7_SPI1_DMA true
 #  else
 #    define SAMV7_SPI1_DMA false
@@ -170,7 +170,7 @@ struct sam_spics_s
 #endif
   uint8_t nbits;               /* Width of word in bits (8 to 16) */
 
-#if defined(CONFIG_SAMV7_SPI0) || defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) || defined(CONFIG_SAMV7_SPI1_MASTER)
   uint8_t spino;               /* SPI controller number (0 or 1) */
 #endif
   uint8_t cs;                  /* Chip select number */
@@ -196,7 +196,7 @@ struct sam_spics_s
 
 typedef void (*select_t)(enum spi_dev_e devid, bool selected);
 
-/* Chip select register offsetrs */
+/* Chip select register offsets */
 
 /* The overall state of one SPI controller */
 
@@ -309,7 +309,7 @@ static const uint8_t g_csroffset[4] =
   SAM_SPI_CSR2_OFFSET, SAM_SPI_CSR3_OFFSET
 };
 
-#ifdef CONFIG_SAMV7_SPI0
+#ifdef CONFIG_SAMV7_SPI0_MASTER
 /* SPI0 driver operations */
 
 static const struct spi_ops_s g_spi0ops =
@@ -348,7 +348,7 @@ static struct sam_spidev_s g_spi0dev =
 };
 #endif
 
-#ifdef CONFIG_SAMV7_SPI1
+#ifdef CONFIG_SAMV7_SPI1_MASTER
 /* SPI1 driver operations */
 
 static const struct spi_ops_s g_spi1ops =
@@ -541,9 +541,9 @@ static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg)
 
 static inline struct sam_spidev_s *spi_device(struct sam_spics_s *spics)
 {
-#if defined(CONFIG_SAMV7_SPI0) && defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
   return spics->spino ? &g_spi1dev : &g_spi0dev;
-#elif defined(CONFIG_SAMV7_SPI0)
+#elif defined(CONFIG_SAMV7_SPI0_MASTER)
   return &g_spi0dev;
 #else
   return &g_spi1dev;
@@ -1753,9 +1753,9 @@ struct spi_dev_s *up_spiinitialize(int port)
   spivdbg("port: %d csno: %d spino: %d\n", port, csno, spino);
   DEBUGASSERT(csno >= 0 && csno <= SAM_SPI_NCS);
 
-#if defined(CONFIG_SAMV7_SPI0) && defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
   DEBUGASSERT(spino >= 0 && spino <= 1);
-#elif defined(CONFIG_SAMV7_SPI0)
+#elif defined(CONFIG_SAMV7_SPI0_MASTER)
   DEBUGASSERT(spino == 0);
 #else
   DEBUGASSERT(spino == 1);
@@ -1812,9 +1812,9 @@ struct spi_dev_s *up_spiinitialize(int port)
 
    /* Select the SPI operations */
 
-#if defined(CONFIG_SAMV7_SPI0) && defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
   spics->spidev.ops = spino ? &g_spi1ops : &g_spi0ops;
-#elif defined(CONFIG_SAMV7_SPI0)
+#elif defined(CONFIG_SAMV7_SPI0_MASTER)
   spics->spidev.ops = &g_spi0ops;
 #else
   spics->spidev.ops = &g_spi1ops;
@@ -1823,7 +1823,7 @@ struct spi_dev_s *up_spiinitialize(int port)
   /* Save the chip select and SPI controller numbers */
 
   spics->cs    = csno;
-#if defined(CONFIG_SAMV7_SPI0) || defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) || defined(CONFIG_SAMV7_SPI1_MASTER)
   spics->spino = spino;
 #endif
 
@@ -1838,10 +1838,10 @@ struct spi_dev_s *up_spiinitialize(int port)
       /* Enable clocking to the SPI block */
 
       flags = irqsave();
-#if defined(CONFIG_SAMV7_SPI0) && defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
       if (spino == 0)
 #endif
-#if defined(CONFIG_SAMV7_SPI0)
+#if defined(CONFIG_SAMV7_SPI0_MASTER)
         {
           sam_spi0_enableclk();
 
@@ -1854,10 +1854,10 @@ struct spi_dev_s *up_spiinitialize(int port)
           sam_configgpio(GPIO_SPI0_SPCK);
         }
 #endif
-#if defined(CONFIG_SAMV7_SPI0) && defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
       else
 #endif
-#if defined(CONFIG_SAMV7_SPI1)
+#if defined(CONFIG_SAMV7_SPI1_MASTER)
         {
           sam_spi1_enableclk();
 

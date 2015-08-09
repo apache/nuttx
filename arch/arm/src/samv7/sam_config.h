@@ -255,14 +255,14 @@
 /* SPI ******************************************************************************/
 /* Don't enable SPI peripherals not supported by the chip. */
 
-#if CHIP_NSPI < 1
+#if SAMV7_NSPI < 1
 #  undef CONFIG_SAMV7_SPI0
 #  undef CONFIG_SAMV7_SPI0_MASTER
 #  undef CONFIG_SAMV7_SPI0_SLAVE
 #  undef CONFIG_SAMV7_SPI1
 #  undef CONFIG_SAMV7_SPI1_MASTER
 #  undef CONFIG_SAMV7_SPI1_SLAVE
-#elif CHIP_NSPI < 2
+#elif SAMV7_NSPI < 2
 #  undef CONFIG_SAMV7_SPI1
 #  undef CONFIG_SAMV7_SPI1_MASTER
 #  undef CONFIG_SAMV7_SPI1_SLAVE
