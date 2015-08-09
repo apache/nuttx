@@ -124,10 +124,12 @@ ifeq ($(CONFIG_SAMV7_XDMAC),y)
 CHIP_CSRCS += sam_xdmac.c
 endif
 
-ifeq ($(CONFIG_SAMV7_SPI0),y)
+ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
 CHIP_CSRCS += sam_spi.c
-else ifeq ($(CONFIG_SAMV7_SPI1),y)
-CHIP_CSRCS += sam_spi.c
+endif
+
+ifeq ($(CONFIG_SAMV7_SPI_SLAVE),y)
+CHIP_CSRCS += sam_spi_slave.c
 endif
 
 ifeq ($(CONFIG_SAMV7_TWIHS0),y)

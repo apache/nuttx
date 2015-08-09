@@ -69,7 +69,7 @@
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
 
-#if defined(CONFIG_SAMV7_SPI0) || defined(CONFIG_SAMV7_SPI1)
+#ifdef CONFIG_SAMV7_SPI_MASTER
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -118,7 +118,7 @@
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
-/* Check if SPI debut is enabled (non-standard.. no support in
+/* Check if SPI debug is enabled (non-standard.. no support in
  * include/debug.h
  */
 
@@ -273,7 +273,7 @@ static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
                   unsigned int offset);
 #endif
 
-/* SPI methods */
+/* SPI master methods */
 
 #ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(struct spi_dev_s *dev, bool lock);
@@ -1938,4 +1938,4 @@ struct spi_dev_s *up_spiinitialize(int port)
 
   return &spics->spidev;
 }
-#endif /* CONFIG_SAMV7_SPI0 || CONFIG_SAMV7_SPI1 */
+#endif /* CONFIG_SAMV7_SPI_MASTER */

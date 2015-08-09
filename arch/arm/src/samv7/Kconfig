@@ -147,10 +147,6 @@ config SAMV7_HAVE_SDRAMC
 	bool
 	default n
 
-config SAMV7_HAVE_SPI
-	bool
-	default n
-
 config SAMV7_HAVE_SPI0
 	bool
 	default n
@@ -188,6 +184,18 @@ config SAMV7_HAVE_USART1
 	default n
 
 config SAMV7_HAVE_USART2
+	bool
+	default n
+
+config SAMV7_SPI
+	bool
+	default n
+
+config SAMV7_SPI_MASTER
+	bool
+	default n
+
+config SAMV7_SPI_SLAVE
 	bool
 	default n
 
@@ -299,14 +307,14 @@ config SAMV7_SPI0
 	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
 	depends on SAMV7_HAVE_SPI0
-	select SAMV7_HAVE_SPI
+	select SAMV7_SPI
 	select SPI
 
 config SAMV7_SPI1
 	bool "Serial Peripheral Interface 1 (SPI1)"
 	default n
 	depends on SAMV7_HAVE_SPI1
-	select SAMV7_HAVE_SPI
+	select SAMV7_SPI
 	select SPI
 
 config SAMV7_SSC0
@@ -526,8 +534,51 @@ config SAMV7_SDRAMHEAP
 
 endmenu # SDRAM Configuration
 
-menu "SAMV7 SPI device driver options"
-	depends on AMV7_SPI0 || SAMV7_SPI1
+menu "SPI Device Driver Configuration"
+	depends on SAMV7_SPI
+
+choice
+	prompt "SPI0 Configuration"
+	default SAMV7_SPI0_MASTER
+	depends on SAMV7_SPI0
+
+config SAMV7_SPI0_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI0 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI0_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI0 as an SPI slave driver.  Default: Master
+
+endchoice # SPI0 Configuration
+
+choice
+	prompt "SPI1 Configuration"
+	default SAMV7_SPI1_MASTER
+	depends on SAMV7_SPI1
+
+config SAMV7_SPI1_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI1 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI1_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI1 as an SPI slave driver.  Default: Master
+
+endchoice # SPI1 Configuration
+
+if SAMV7_SPI_MASTER
+comment "SPI Master Configuration"
 
 config SAMV7_SPI_DMA
 	bool "SPI DMA"
@@ -554,6 +605,8 @@ config SAMV7_SPI_DMADEBUG
 		This logic is as non-invasive as possible:  It samples DMA
 		registers at key points in the data transfer and then dumps all of
 		the registers at the end of the transfer.
+
+endif # SAMV7_SPI_MASTER
 
 config SAMV7_SPI_REGDEBUG
 	bool "SPI Register level debug"
