@@ -171,7 +171,9 @@
 #define SPI_INT_NSSR              (1 << 8)  /* Bit 8:  NSS Rising Interrupt */
 #define SPI_INT_TXEMPTY           (1 << 9)  /* Bit 9:  Transmission Registers Empty Interrupt */
 #define SPI_INT_UNDES             (1 << 10) /* Bit 10: Underrun Error Status Interrupt (slave) */
-#define SPI_SR_SPIENS             (1 << 16) /* Bit 16:  SPI Enable Status (SR only) */
+#define SPI_SR_SPIENS             (1 << 16) /* Bit 16: SPI Enable Status (SR only) */
+
+#define SPI_INT_ALL               (0x0000070f)
 
 /* SPI Chip Select Registers 0-3 */
 
