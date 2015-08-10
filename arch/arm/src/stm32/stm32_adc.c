@@ -1596,7 +1596,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       DEBUGASSERT(priv->nchannels <= ADC_MAX_CHANNELS_NODMA);
     }
 
-  regval |= (((uint32_t)priv->nchannels-1) << ADC_SQR1_L_SHIFT);
+  regval |= (((uint32_t)priv->nchannels - 1) << ADC_SQR1_L_SHIFT);
   adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
 
   /* Set the channel index of the first conversion */
@@ -2284,6 +2284,7 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
       }
 
 #else
+      priv->nchannels = priv->cchannels;
       regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
       for (i = 0, offset = 0; i < priv->nchannels && i < 6; i++, offset += 5)
         {
@@ -2320,10 +2321,11 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
                   break;
                 }
 
-              regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
+              regval  = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
               regval &= ~(ADC_SQR1_L_MASK);
               adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
-              priv->current = i;
+
+              priv->current   = i;
               priv->nchannels = 1;
               return ret;
             }
@@ -2761,7 +2763,7 @@ void stm32_adcchange_sample_time(FAR struct adc_dev_s *dev,
  * Input Parameters:
  *   intf      - Could be {1,2,3} for ADC1, ADC2, or ADC3
  *   chanlist  - The list of channels
- *   nchannels - Number of channels
+ *   cchannels - Number of channels
  *
  * Returned Value:
  *   Valid ADC device structure reference on succcess; a NULL on failure
@@ -2774,7 +2776,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
   FAR struct adc_dev_s   *dev;
   FAR struct stm32_dev_s *priv;
 
-  allvdbg("intf: %d nchannels: %d\n", intf, cchannels);
+  allvdbg("intf: %d cchannels: %d\n", intf, cchannels);
 
 #ifdef CONFIG_STM32_ADC1
   if (intf == 1)

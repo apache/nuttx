@@ -278,7 +278,8 @@
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOC_IRQ
-#  define SAM_IRQ_GPIOC_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + SAM_NGPIOBIRQS)
+#  define SAM_IRQ_GPIOC_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + \
+                               SAM_NGPIOBIRQS)
 #  define SAM_IRQ_PC0         (SAM_IRQ_GPIOC_PINS+0)          /* GPIOC, PIN 0 */
 #  define SAM_IRQ_PC1         (SAM_IRQ_GPIOC_PINS+1)          /* GPIOC, PIN 1 */
 #  define SAM_IRQ_PC2         (SAM_IRQ_GPIOC_PINS+2)          /* GPIOC, PIN 2 */
@@ -317,7 +318,8 @@
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOD_IRQ
-#  define SAM_IRQ_GPIOD_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + SAM_NGPIOBIRQS)
+#  define SAM_IRQ_GPIOD_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + \
+                               SAM_NGPIOBIRQS + SAM_NGPIOCIRQS)
 #  define SAM_IRQ_PD0         (SAM_IRQ_GPIOD_PINS+0)          /* GPIOD, PIN 0 */
 #  define SAM_IRQ_PD1         (SAM_IRQ_GPIOD_PINS+1)          /* GPIOD, PIN 1 */
 #  define SAM_IRQ_PD2         (SAM_IRQ_GPIOD_PINS+2)          /* GPIOD, PIN 2 */
@@ -356,7 +358,8 @@
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOE_IRQ
-#  define SAM_IRQ_GPIOE_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + SAM_NGPIOBIRQS)
+#  define SAM_IRQ_GPIOE_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + \
+                               SAM_NGPIOBIRQS + SAM_NGPIOCIRQS + SAM_NGPIODIRQS)
 #  define SAM_IRQ_PE0         (SAM_IRQ_GPIOE_PINS+0)          /* GPIOE, PIN 0 */
 #  define SAM_IRQ_PE1         (SAM_IRQ_GPIOE_PINS+1)          /* GPIOE, PIN 1 */
 #  define SAM_IRQ_PE2         (SAM_IRQ_GPIOE_PINS+2)          /* GPIOE, PIN 2 */

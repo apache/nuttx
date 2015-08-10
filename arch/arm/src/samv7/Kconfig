@@ -65,7 +65,7 @@ config ARCH_CHIP_SAMV71Q
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
-	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1
 	select SAMV7_HAVE_EBI
 	select SAMV7_HAVE_HSMCI0
@@ -82,7 +82,7 @@ config ARCH_CHIP_SAMV71N
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
-	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1
 	select SAMV7_HAVE_HSMCI0
 	select SAMV7_HAVE_SPI0
@@ -102,7 +102,11 @@ config ARCH_CHIP_SAMV71J
 
 # Chip Capabilities
 
-config SAMV7_HAVE_CAN1
+config SAMV7_MCAN
+	bool
+	default n
+
+config SAMV7_HAVE_MCAN1
 	bool
 	default n
 
@@ -140,10 +144,6 @@ config SAMV7_HAVE_ISI8
 	default n
 
 config SAMV7_HAVE_SDRAMC
-	bool
-	default n
-
-config SAMV7_HAVE_SPI
 	bool
 	default n
 
@@ -187,6 +187,18 @@ config SAMV7_HAVE_USART2
 	bool
 	default n
 
+config SAMV7_SPI
+	bool
+	default n
+
+config SAMV7_SPI_MASTER
+	bool
+	default n
+
+config SAMV7_SPI_SLAVE
+	bool
+	default n
+
 # Peripheral Selection
 
 menu "SAMV7 Peripheral Selection"
@@ -207,14 +219,18 @@ config SAMV7_AFEC1
 	bool "Analog Front End 1 (AFEC1)"
 	default n
 
-config SAMV7_CAN0
-	bool "CAN0"
+config SAMV7_MCAN0
+	bool "CAN controller 0 (MCAN0)"
 	default n
+	select CAN
+	select SAMV7_MCAN
 
-config SAMV7_CAN1
-	bool "CAN1"
+config SAMV7_MCAN1
+	bool "CAN controller 1 (MCAN1)"
 	default n
-	depends on SAMV7_HAVE_CAN1
+	depends on SAMV7_HAVE_MCAN1
+	select CAN
+	select SAMV7_MCAN
 
 config SAMV7_DAC0
 	bool "Digital To Analog Converter 0 (DAC0)"
@@ -291,14 +307,14 @@ config SAMV7_SPI0
 	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
 	depends on SAMV7_HAVE_SPI0
-	select SAMV7_HAVE_SPI
+	select SAMV7_SPI
 	select SPI
 
 config SAMV7_SPI1
 	bool "Serial Peripheral Interface 1 (SPI1)"
 	default n
 	depends on SAMV7_HAVE_SPI1
-	select SAMV7_HAVE_SPI
+	select SAMV7_SPI
 	select SPI
 
 config SAMV7_SSC0
@@ -518,8 +534,51 @@ config SAMV7_SDRAMHEAP
 
 endmenu # SDRAM Configuration
 
-menu "SAMV7 SPI device driver options"
-	depends on AMV7_SPI0 || SAMV7_SPI1
+menu "SPI Device Driver Configuration"
+	depends on SAMV7_SPI
+
+choice
+	prompt "SPI0 Configuration"
+	default SAMV7_SPI0_MASTER
+	depends on SAMV7_SPI0
+
+config SAMV7_SPI0_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI0 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI0_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI0 as an SPI slave driver.  Default: Master
+
+endchoice # SPI0 Configuration
+
+choice
+	prompt "SPI1 Configuration"
+	default SAMV7_SPI1_MASTER
+	depends on SAMV7_SPI1
+
+config SAMV7_SPI1_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI1 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI1_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI1 as an SPI slave driver.  Default: Master
+
+endchoice # SPI1 Configuration
+
+if SAMV7_SPI_MASTER
+comment "SPI Master Configuration"
 
 config SAMV7_SPI_DMA
 	bool "SPI DMA"
@@ -546,6 +605,20 @@ config SAMV7_SPI_DMADEBUG
 		This logic is as non-invasive as possible:  It samples DMA
 		registers at key points in the data transfer and then dumps all of
 		the registers at the end of the transfer.
+
+endif # SAMV7_SPI_MASTER
+
+if SAMV7_SPI_SLAVE
+comment "SPI Slave Configuration"
+
+config SAMV7_SPI_SLAVE_QSIZE
+	int "Output queue size"
+	default 8
+	---help---
+		The number of words that an be retained in the controller driver's
+		output queue.
+
+endif # SAMV7_SPI_SLAVE
 
 config SAMV7_SPI_REGDEBUG
 	bool "SPI Register level debug"
@@ -729,7 +802,7 @@ config SAMV7_SSC0_TX_FSLEN
 	default 1
 	range 0 255
 	---help---
-		This setting define the length of the Transmit Frame Sync signal in
+		This setting defines the length of the Transmit Frame Sync signal in
 		units of transmit clock periods.  A value of zero disables this
 		feature.  In that case the TD line is driven with the default value
 		during the Transmit Frame Sync signal.
@@ -901,7 +974,7 @@ config SAMV7_SSC1_TX_FSLEN
 	default 1
 	range 0 255
 	---help---
-		This setting define the length of the Transmit Frame Sync signal in
+		This setting defines the length of the Transmit Frame Sync signal in
 		units of transmit clock periods.  A value of zero disables this
 		feature.  In that case the TD line is driven with the default value
 		during the Transmit Frame Sync signal.
@@ -1296,3 +1369,671 @@ config SAMV7_USBHS_REGDEBUG
 	depends on DEBUG
 
 endmenu # USB High Speed Device Controller driver (DCD) options
+
+if SAMV7_MCAN
+
+menu "MCAN device driver options"
+
+choice
+	prompt "MCAN clock source (PCK5)"
+	default SAMV7_MCAN_CLKSRC_MAIN
+
+config SAMV7_MCAN_CLKSRC_SLOW
+	bool "Slow clock"
+
+config SAMV7_MCAN_CLKSRC_MAIN
+	bool "Main clock"
+
+config SAMV7_MCAN_CLKSRC_PLLA
+	bool "PLLA clock"
+
+config SAMV7_MCAN_CLKSRC_UPLL
+	bool "UPLL clock"
+
+config SAMV7_MCAN_CLKSRC_MCK
+	bool "Master clock"
+
+endchoice # MCAN clock source
+
+config SAMV7_MCAN_CLKSRC_PRESCALER
+	int "MCAN clock prescaler"
+	default 1
+	range 1 256
+
+menu "MCAN0 device driver options"
+	depends on SAMV7_MCAN0
+
+choice
+	prompt "MCAN0 mode"
+	default SAMV7_MCAN0_ISO11899_1
+
+config SAMV7_MCAN0_ISO11899_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 mode
+
+config SAMV7_MCAN0_FD
+	bool "FD"
+	depends on CAN_FD
+	---help---
+		Enable FD mode
+
+config SAMV7_MCAN0_FD_BSW
+	bool "FD with fast bit rate switching"
+	depends on CAN_FD
+	---help---
+		Enable FD mode with fast bit rate switching mode.
+
+endchoice # MCAN0 mode
+
+config SAMV7_MCAN0_LOOPBACK
+	bool "Enable MCAN0 loopback mode"
+	default n
+	---help---
+		Enable the MCAN0 local loopback mode for testing purposes.
+
+config SAMV7_MCAN0_BITRATE
+	int "MCAN0 bitrate"
+	default 500000
+	---help---
+		MCAN0 bitrate in bits per second.  Required if SAMV7_MCAN0 is defined.
+
+config SAMV7_MCAN0_PROPSEG
+	int "MCAN0 PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_PHASESEG1
+	int "MCAN0 PhaseSeg1"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_PHASESEG2
+	int "MCAN0 PhaseSeg2"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FSJW
+	int "MCAN0 synchronization jump width"
+	default 4
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN0_FBITRATE
+	int "MCAN0 fast bitrate"
+	default 2000000
+	---help---
+		MCAN0 bitrate in bits per second.  Required if SAMV7_MCAN0 is
+		defined.
+
+config SAMV7_MCAN0_FPROPSEG
+	int "MCAN0 fast PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FPHASESEG1
+	int "MCAN0 fast PhaseSeg1"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FPHASESEG2
+	int "MCAN0 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FFSJW
+	int "MCAN0 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN0_NSTDFILTERS
+	int "MCAN0 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config SAMV7_MCAN0_NEXTFILTERS
+	int "MCAN0 number of extended filters"
+	default 8
+	range 0 64
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "MCAN0 RX FIFO0 element size"
+	default SAMV7_MCAN0_RXFIFO0_8BYTES
+
+config SAMV7_MCAN0_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_RXFIFO0_SIZE
+	int "MCAN0 RX FIFO0 size"
+	default 12
+	range 0 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "MCAN0 RX FIFO1 element size"
+	default SAMV7_MCAN0_RXFIFO1_8BYTES
+
+config SAMV7_MCAN0_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_RXFIFO1_SIZE
+	int "MCAN0 RX FIFO1 size"
+	default 0
+	range 0 64
+	---help---
+		Number of receive FIFO 1 elements for MCAN0.  Zero disables FIFO 1.
+
+choice
+	prompt "MCAN0 RX buffer element size"
+	default SAMV7_MCAN0_RXBUFFER_8BYTES
+
+config SAMV7_MCAN0_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
+	int "MCAN0 dedicated RX buffer size"
+	default 0
+	range 0 64
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated RX buffer elements for MCAN0.
+
+		NOTE: Dedicated RX buffers are not used in the current MCAN design.
+
+choice
+	prompt "MCAN0 TX buffer element size"
+	default SAMV7_MCAN0_TXBUFFER_8BYTES
+
+config SAMV7_MCAN0_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 TX buffer element size
+
+config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
+	int "MCAN0 dedicated TX buffer size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated TX buffer elements for MCAN0.
+
+		NOTE: Dedicated TX buffers are not used in the current MCAN design.
+
+config SAMV7_MCAN0_TXFIFOQ_SIZE
+	int "MCAN0 TX FIFO queue size"
+	default 4
+	range 0 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN0.
+
+config SAMV7_MCAN0_TXEVENTFIFO_SIZE
+	int "MCAN0 TX event FIFO size"
+	default 0
+	range 0 32
+	---help---
+		Number of TX event FIFO elements for MCAN0.  Zero disables TX event FIFO.
+
+endmenu # MCAN0 device driver options
+
+menu "MCAN1 device driver options"
+	depends on SAMV7_MCAN1
+
+choice
+	prompt "MCAN1 mode"
+	default SAMV7_MCAN1_ISO11899_1
+
+config SAMV7_MCAN1_ISO11899_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 mode
+
+config SAMV7_MCAN1_FD
+	bool "FD"
+	depends on CAN_FD
+	---help---
+		Enable FD mode
+
+config SAMV7_MCAN1_FD_BSW
+	bool "FD with fast bit rate switching"
+	depends on CAN_FD
+	---help---
+		Enable FD mode with fast bit rate switching mode.
+
+endchoice # MCAN0 mode
+
+config SAMV7_MCAN1_LOOPBACK
+	bool "Enable MCAN1 loopback mode"
+	default n
+	---help---
+		Enable the MCAN1 local loopback mode for testing purposes.
+
+config SAMV7_MCAN1_BITRATE
+	int "MCAN1 bitrate"
+	default 500000
+	---help---
+		MCAN1 bitrate in bits per second.  Required if SAMV7_MCAN1 is
+		defined.
+
+config SAMV7_MCAN1_PROPSEG
+	int "MCAN1 PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_PHASESEG1
+	int "MCAN1 PhaseSeg1"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_PHASESEG2
+	int "MCAN1 PhaseSeg2"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FSJW
+	int "MCAN1 synchronization jump width"
+	default 4
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN1_FBITRATE
+	int "MCAN1 fast bitrate"
+	default 2000000
+	---help---
+		MCAN1 bitrate in bits per second.  Required if SAMV7_MCAN1 is
+		defined.
+
+config SAMV7_MCAN1_FPROPSEG
+	int "MCAN1 fast PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FPHASESEG1
+	int "MCAN1 fast PhaseSeg1"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FPHASESEG2
+	int "MCAN1 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FFSJW
+	int "MCAN1 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN1_NSTDFILTERS
+	int "MCAN1 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config SAMV7_MCAN1_NEXTFILTERS
+	int "MCAN1 number of extended filters"
+	default 8
+	range 0 64
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "MCAN1 RX FIFO0 element size"
+	default SAMV7_MCAN1_RXFIFO0_8BYTES
+
+config SAMV7_MCAN1_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_RXFIFO0_SIZE
+	int "MCAN1 RX FIFO0 size"
+	default 0
+	range 0 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "MCAN1 RX FIFO1 element size"
+	default SAMV7_MCAN1_RXFIFO1_8BYTES
+
+config SAMV7_MCAN1_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXFIFO1_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_RXFIFO1_SIZE
+	int "MCAN1 RX FIFO1 size"
+	default 0
+	range 0 64
+	---help---
+		Number of receive FIFO 1 elements for MCAN1.  Zero disables FIFO 1.
+
+choice
+	prompt "MCAN1 RX buffer element size"
+	default SAMV7_MCAN1_RXBUFFER_8BYTES
+
+config SAMV7_MCAN1_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
+	int "MCAN1 dedicated RX buffer size"
+	default 0
+	range 0 64
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated RX buffer elements for MCAN1.
+
+		NOTE: Dedicated RX buffers are not used in the current MCAN design.
+
+choice
+	prompt "MCAN1 TX buffer element size"
+	default SAMV7_MCAN1_TXBUFFER_8BYTES
+
+config SAMV7_MCAN1_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 TX buffer element size
+
+config SAMV7_MCAN1_TXEVENTFIFO_SIZE
+	int "MCAN1 TX event FIFO size"
+	default 0
+	range 0 32
+	---help---
+		Number of TX event FIFO elements for MCAN1.  Zero disables TX event FIFO.
+
+config SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
+	int "MCAN1 dedicated TX buffer size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated TX buffer elements for MCAN1.
+
+		NOTE: Dedicated TX buffers are not used in the current MCAN design.
+
+config SAMV7_MCAN1_TXFIFOQ_SIZE
+	int "MCAN1 dedicated TX FIFO queue"
+	default 4
+	range 0 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN1.
+
+endmenu # MCAN1 device driver options
+
+config SAMV7_MCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also DEBUG.
+
+endmenu # CAN device driver options
+endif # SAMV7_MCAN

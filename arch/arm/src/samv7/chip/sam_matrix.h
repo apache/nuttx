@@ -258,6 +258,7 @@
 
 /* CAN0 Configuration Register */
 
+#define MATRIX_CAN0_RESERVED             0x000001ff /* Bits 0-9: Reserved */
 #define MATRIX_CAN0_CAN0DMABA_MASK       0xffff0000 /* Bits 16-31: CAN0 DMA Base Address */
 
 /* System I/O and CAN1 Configuration Register */
@@ -268,7 +269,7 @@
 #  define MATRIX_CCFG_SYSIO_SYSIO6       (1 << 6)  /* Bit 6:  PB6 or TMS/SWDIO Assignment */
 #  define MATRIX_CCFG_SYSIO_SYSIO7       (1 << 7)  /* Bit 7:  PB7 or TCK/SWCLK Assignment */
 #  define MATRIX_CCFG_SYSIO_SYSIO12      (1 << 12) /* Bit 12: PB12 or ERASE Assignment */
-#define MATRIX_CAN0_CAN1DMABA_MASK       0xffff0000 /* Bits 16-31: CAN1 DMA Base Address */
+#define MATRIX_CCFG_CAN1DMABA_MASK       0xffff0000 /* Bits 16-31: CAN1 DMA Base Address */
 
 /* SMC Chip Select NAND Flash Assignment Register */
 

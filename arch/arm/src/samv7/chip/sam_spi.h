@@ -120,7 +120,8 @@
 
 /* SPI Mode Register */
 
-#define SPI_MR_MSTR               (1 << 0)  /* Bit 0:  Master/Slave Mode */
+#define SPI_MR_MSTR               (1 << 0)  /* Bit 0:  1=Master Mode */
+#  define SPI_MR_SLAVE            (0)       /*         0=Slave Mode */
 #define SPI_MR_PS                 (1 << 1)  /* Bit 1:  Peripheral Select */
 #define SPI_MR_PCSDEC             (1 << 2)  /* Bit 2:  Chip Select Decode */
 #define SPI_MR_MODFDIS            (1 << 4)  /* Bit 4:  Mode Fault Detection */

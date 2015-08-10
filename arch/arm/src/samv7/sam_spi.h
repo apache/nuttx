@@ -46,6 +46,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
+#include "sam_config.h"
 
 /****************************************************************************
  * Pre-processor Definitions

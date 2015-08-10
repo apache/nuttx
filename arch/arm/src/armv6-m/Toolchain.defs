@@ -108,7 +108,7 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),ATOLLIC)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # NuttX buildroot under Linux or Cygwin
@@ -124,7 +124,7 @@ endif
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODEREDL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # Code Red RedSuite under Windows
@@ -135,7 +135,7 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODEREDW)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # CodeSourcery under Linux
@@ -143,7 +143,7 @@ endif
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODESOURCERYL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # CodeSourcery under Windows
@@ -154,7 +154,7 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODESOURCERYW)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # devkitARM under Windows
@@ -165,7 +165,7 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),DEVKITARM)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
@@ -173,7 +173,7 @@ endif
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIW)
@@ -182,7 +182,7 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIW)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 
 # Individual tools may limit the optimizatin level but, by default, the

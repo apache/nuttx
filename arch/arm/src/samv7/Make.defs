@@ -124,10 +124,12 @@ ifeq ($(CONFIG_SAMV7_XDMAC),y)
 CHIP_CSRCS += sam_xdmac.c
 endif
 
-ifeq ($(CONFIG_SAMV7_SPI0),y)
+ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
 CHIP_CSRCS += sam_spi.c
-else ifeq ($(CONFIG_SAMV7_SPI1),y)
-CHIP_CSRCS += sam_spi.c
+endif
+
+ifeq ($(CONFIG_SAMV7_SPI_SLAVE),y)
+CHIP_CSRCS += sam_spi_slave.c
 endif
 
 ifeq ($(CONFIG_SAMV7_TWIHS0),y)
@@ -148,6 +150,10 @@ endif
 
 ifeq ($(CONFIG_SAMV7_EMAC),y)
 CHIP_CSRCS += sam_emac.c sam_ethernet.c
+endif
+
+ifeq ($(CONFIG_SAMV7_MCAN),y)
+CHIP_CSRCS += sam_mcan.c
 endif
 
 ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
