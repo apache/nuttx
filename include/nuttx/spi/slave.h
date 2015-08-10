@@ -133,7 +133,7 @@
  *   sctrlr - SPI slave controller interface instance
  *
  * Returned Value:
- *   true if the output wueue is full
+ *   true if the output queue is full
  *
  ****************************************************************************/
 
@@ -172,11 +172,12 @@
  *   none
  *
  * Assumptions:
- *   May be called from an interrupt handler.
+ *   May be called from an interrupt handler.  Processing should be as
+ *   brief as possible.
  *
  ****************************************************************************/
 
-#define SPI_SDEV_SELECT(d,s) ((c)->ops->select(d,s))
+#define SPI_SDEV_SELECT(d,s) ((d)->ops->select(d,s))
 
 /****************************************************************************
  * Name: SPI_SDEV_CMDDATA
@@ -199,7 +200,8 @@
  *   none
  *
  * Assumptions:
- *   May be called from an interrupt handler.
+ *   May be called from an interrupt handler.  Processing should be as
+ *   brief as possible.
  *
  ****************************************************************************/
 
@@ -225,7 +227,8 @@
  *   The next data value to be shifted out
  *
  * Assumptions:
- *   May be called from an interrupt handler.
+ *   May be called from an interrupt handler and the response is usually
+ *   time critical.
  *
  ****************************************************************************/
 
@@ -248,7 +251,10 @@
  *   None
  *
  * Assumptions:
- *   May be called from an interrupt handler.
+ *   May be called from an interrupt handler and in time-critical
+ *   circumstances.  A good implementation might just add the newly
+ *   received word to a queue, post a processing task, and return as
+ *   quickly as possible to avoid any data overrun problems.
  *
  ****************************************************************************/
 
@@ -355,7 +361,12 @@
  *    For the case of uni-directional transfer of data from the master to
  *    the SPI device, there is no need to call the enqueue() method at all;
  *    the value that is shifted out is not important that fallback behavior
- *    is suficient.
+ *    is sufficient.
+ *
+ *    The SPI slave controller driver, of course, has no sense of the
+ *    directionality of a data transfer; its role is only to exchange the
+ *    data shifted in from the master with new data to be shifted out from
+ *    the SPI device driver.
  *
  * 6) The activity of 5) will continue until the master raises the chip
  *    select signal.  In that case, the SPI slave controller driver will
@@ -368,6 +379,12 @@
  *    to ground if there are no other devices on the SPI bus.  In that case,
  *    the initial indication of chip selected will be the only call to the
  *    select() method that is made.
+ *
+ *    Other SPI peripherals (such as Atmel) do not make the state of the
+ *    chip select pin available (only the final rising edge transitions).
+ *    So the SPI device driver implementation may use the chip select
+ *    reports to optimize performance, but the design should never depend
+ *    upon it.
  *
  * A typical DMA data transfer processes as follows:
  * To be provided
