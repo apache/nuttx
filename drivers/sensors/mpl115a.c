@@ -212,8 +212,6 @@ static void mpl115a_updatecaldata(FAR struct mpl115a_dev_s *priv)
 
 static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
 {
-  uint16_t pressure;
-
   /* Start a new conversion */
 
   mpl115a_getreg8(priv, (MPL115A_CONVERT << 1));

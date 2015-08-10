@@ -7,6 +7,7 @@ config AS5048B
 	bool "AMS AS5048B Magnetic Rotary Encoder support"
 	default n
 	select I2C
+	select QENCODER
 	---help---
 		Enable driver support for the AMS AS5048B magnetic rotary encoder.
 
@@ -21,6 +22,7 @@ config LIS331DL
 	bool "ST LIS331DL device support"
 	default n
 	select I2C
+	select I2C_TRANSFER
 
 config MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"

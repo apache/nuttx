@@ -103,10 +103,10 @@ static const struct file_operations g_lm75fops =
   lm75_close,
   lm75_read,
   lm75_write,
-  0,
+  NULL,
   lm75_ioctl
 #ifndef CONFIG_DISABLE_POLL
-  , 0
+  , NULL
 #endif
 };
 
@@ -377,6 +377,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READCONF:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm75_readconf(priv, ptr);
           sndbg("conf: %02x ret: %d\n", *ptr, ret);
         }
@@ -438,6 +439,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHYS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_THYS_REG, ptr);
           sndbg("THYS: %08x ret: %d\n", *ptr, ret);
         }
@@ -455,6 +457,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTOS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_TOS_REG, ptr);
           sndbg("TOS: %08x ret: %d\n", *ptr, ret);
         }
@@ -462,7 +465,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Write TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t value */
 
-      case SNIOC_WRITRETOS:
+      case SNIOC_WRITETOS:
         ret = lm75_writeb16(priv, LM75_TOS_REG, (b16_t)arg);
         sndbg("TOS: %08x ret: %d\n", (b16_t)arg, ret);
         break;
@@ -503,10 +506,18 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c, uint8_t ad
   FAR struct lm75_dev_s *priv;
   int ret;
 
+  /* Sanity check */
+
+  DEBUGASSERT(i2c != NULL);
+  DEBUGASSERT(addr == CONFIG_LM75_ADDR0 || addr == CONFIG_LM75_ADDR1 ||
+              addr == CONFIG_LM75_ADDR2 || addr == CONFIG_LM75_ADDR3 ||
+              addr == CONFIG_LM75_ADDR4 || addr == CONFIG_LM75_ADDR5 ||
+              addr == CONFIG_LM75_ADDR6 || addr == CONFIG_LM75_ADDR7);
+
   /* Initialize the LM-75 device structure */
 
   priv = (FAR struct lm75_dev_s *)kmm_malloc(sizeof(struct lm75_dev_s));
-  if (!priv)
+  if (priv == NULL)
     {
       sndbg("Failed to allocate instance\n");
       return -ENOMEM;

@@ -41,8 +41,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
-#include <nuttx/i2c.h>
 #include <nuttx/sensors/qencoder.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_AS5048B)
@@ -96,6 +94,12 @@
 #define AS5048B_DIAG_COF      (1 << 1) /* Cordic Overflow */
 #define AS5048B_DIAG_COMPLOW  (1 << 2) /* High Magnetic Field */
 #define AS5048B_DIAG_COMPHIGH (1 << 3) /* Low Magnetic Field */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct i2c_dev_s;
 
 /****************************************************************************
  * Public Function Prototypes
