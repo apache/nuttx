@@ -91,27 +91,7 @@
 #  define CONFIG_CAN_NPENDINGRTR 255
 #endif
 
-/* Convenience macros */
-
-#define dev_reset(dev)            dev->cd_ops->co_reset(dev)
-#define dev_setup(dev)            dev->cd_ops->co_setup(dev)
-#define dev_shutdown(dev)         dev->cd_ops->co_shutdown(dev)
-#define dev_txint(dev,enable)     dev->cd_ops->co_txint(dev,enable)
-#define dev_rxint(dev,enable)     dev->cd_ops->co_rxint(dev,enable)
-#define dev_ioctl(dev,cmd,arg)    dev->cd_ops->co_ioctl(dev,cmd,arg)
-#define dev_remoterequest(dev,id) dev->cd_ops->co_remoterequest(dev,id)
-#define dev_send(dev,m)           dev->cd_ops->co_send(dev,m)
-#define dev_txready(dev)          dev->cd_ops->co_txready(dev)
-#define dev_txempty(dev)          dev->cd_ops->co_txempty(dev)
-
-/* CAN message support */
-
-#define CAN_MAXDATALEN            8
-#define CAN_MAX_MSGID             0x07ff
-#define CAN_MAX_EXTMSGID          0x1fffffff
-
-#define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
-
+/* Ioctl Commands *******************************************************************/
 /* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
@@ -167,29 +147,70 @@
 
 #define CANIOC_USER               _CANIOC(6)
 
+/* Convenience macros ***************************************************************/
+
+#define dev_reset(dev)            dev->cd_ops->co_reset(dev)
+#define dev_setup(dev)            dev->cd_ops->co_setup(dev)
+#define dev_shutdown(dev)         dev->cd_ops->co_shutdown(dev)
+#define dev_txint(dev,enable)     dev->cd_ops->co_txint(dev,enable)
+#define dev_rxint(dev,enable)     dev->cd_ops->co_rxint(dev,enable)
+#define dev_ioctl(dev,cmd,arg)    dev->cd_ops->co_ioctl(dev,cmd,arg)
+#define dev_remoterequest(dev,id) dev->cd_ops->co_remoterequest(dev,id)
+#define dev_send(dev,m)           dev->cd_ops->co_send(dev,m)
+#define dev_txready(dev)          dev->cd_ops->co_txready(dev)
+#define dev_txempty(dev)          dev->cd_ops->co_txempty(dev)
+
+/* CAN message support **************************************************************/
+
+#ifdef CONFIG_CAN_FD
+#  define CAN_MAXDATALEN          64
+#else
+#  define CAN_MAXDATALEN          8
+#endif
+
+#define CAN_MAX_STDMSGID          0x07ff
+#define CAN_MAX_EXTMSGID          0x1fffffff
+
+#define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
+
+/* CAN filter support ***************************************************************/
+/* Some CAN hardware supports a notion of prioritizing messages that match filters.
+ * Only two priority levels are currently supported and are encoded as defined
+ * below:
+ */
+
+#define CAN_MSGPRIO_LOW           0
+#define CAN_MSGPRIO_HIGH          1
+
+/* Filter type.  Not all CAN hardware will support all filter types. */
+
+#define CAN_FILTER_MASK           0  /* Address match under a mask */
+#define CAN_FILTER_DUAL           1  /* Dual address match */
+#define CAN_FILTER_RANGE          2  /* Match a range of addresses */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
-/* CAN-message Format (without Extended ID suppport)
+/* CAN-message Format (without Extended ID support)
  *
  *   One based CAN-message is represented with a maximum of 10 bytes.  A message is
  *   composed of at least the first 2 bytes (when there are no data bytes present).
  *
  *   Bytes 0-1:  Hold a 16-bit value in host byte order
  *               Bits 0-3:  Data Length Code (DLC)
- *               Bit  4:    Remote Tranmission Request (RTR)
+ *               Bit  4:    Remote Transmission Request (RTR)
  *               Bits 5-15: The 11-bit CAN identifier
  *
  *   Bytes 2-9:  CAN data
  *
- * CAN-message Format (with Extended ID suppport)
+ * CAN-message Format (with Extended ID support)
  *
  *   One CAN-message consists of a maximum of 13 bytes.  A message is composed of at
  *   least the first 5 bytes (when there are no data bytes).
  *
  *   Bytes 0-3:  Hold 11- or 29-bit CAN ID in host byte order
  *   Byte 4:     Bits 0-3: Data Length Code (DLC)
- *               Bit 4:    Remote Tranmission Request (RTR)
+ *               Bit 4:    Remote Transmission Request (RTR)
  *               Bit 5:    Extended ID indication
  *               Bits 6-7: Unused
  *   Bytes 5-12: CAN data
@@ -350,14 +371,22 @@ struct canioc_rtr_s
 #ifdef CONFIG_CAN_EXTID
 struct canioc_extfilter_s
 {
-  uint32_t              xf_id;           /* 29-bit ID (3-bits unused) */
-  uint32_t              xf_mask;         /* 29-bit address mask (3-bits unused) */
+  uint32_t              xf_id1;          /* 29-bit ID.  For dual match or for the
+                                          * lower address in a range of addresses  */
+  uint32_t              xf_id2;          /* 29-bit ID.  For dual match, address mask
+                                          * or for upper address in address range  */
+  uint8_t               xf_type;         /* See CAN_FILTER_* definitions */
+  uint8_t               xf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
 #else
 struct canioc_stdfilter_s
 {
-  uint16_t              sf_id;           /* 11-bit ID (5-bits unused) */
-  uint16_t              sf_mask;         /* 11-bit address mask (5-bits unused) */
+  uint16_t              sf_id1;          /* 11-bit ID.  For dual match or for the
+                                          * lower address in a range of addresses  */
+  uint16_t              sf_id2;          /* 11-bit ID.  For dual match, address mask
+                                          * or for upper address in address range  */
+  uint8_t               sf_type;         /* See CAN_FILTER_* definitions */
+  uint8_t               sf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
 #endif
 
