@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/i2c.h>
 #include <nuttx/sensors/adxl345.h>
 
 #include "adxl345.h"

@@ -107,10 +107,10 @@ static const struct file_operations g_lm92fops =
   lm92_close,
   lm92_read,
   lm92_write,
-  0,
+  NULL,
   lm92_ioctl
 #ifndef CONFIG_DISABLE_POLL
-  , 0
+  , NULL
 #endif
 };
 
@@ -423,6 +423,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READCONF:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm92_readconf(priv, ptr);
           sndbg("conf: %02x ret: %d\n", *ptr, ret);
         }
@@ -484,6 +485,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHYS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_THYS_REG, ptr);
           sndbg("THYS: %08x ret: %d\n", *ptr, ret);
         }
@@ -501,6 +503,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTCRIT:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_TCRIT_REG, ptr);
           sndbg("TCRIT: %08x ret: %d\n", *ptr, ret);
         }
@@ -518,6 +521,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTLOW:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_TLOW_REG, ptr);
           sndbg("TLOW: %08x ret: %d\n", *ptr, ret);
         }
@@ -535,6 +539,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHIGH:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_THIGH_REG, ptr);
           sndbg("THIGH: %08x ret: %d\n", *ptr, ret);
         }
@@ -552,6 +557,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READID:
         {
           FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm92_readid(priv, ptr);
           sndbg("id: %04x ret: %d\n", *ptr, ret);
         }
@@ -595,10 +601,16 @@ int lm92_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
   FAR struct lm92_dev_s *priv;
   int ret;
 
+  /* Sanity check */
+
+  DEBUGASSERT(i2c != NULL);
+  DEBUGASSERT(addr == CONFIG_LM92_ADDR0 || addr == CONFIG_LM92_ADDR1 ||
+              addr == CONFIG_LM92_ADDR2 || addr == CONFIG_LM92_ADDR3);
+
   /* Initialize the LM92 device structure */
 
   priv = (FAR struct lm92_dev_s *)kmm_malloc(sizeof(struct lm92_dev_s));
-  if (!priv)
+  if (priv == NULL)
     {
       sndbg("Failed to allocate instance\n");
       return -ENOMEM;

@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -52,6 +54,14 @@
  */
 
 #define CONFIG_LM75_BASEADDR 0x48
+#define CONFIG_LM75_ADDR0 (CONFIG_LM75_BASEADDR + 0)
+#define CONFIG_LM75_ADDR1 (CONFIG_LM75_BASEADDR + 1)
+#define CONFIG_LM75_ADDR2 (CONFIG_LM75_BASEADDR + 2)
+#define CONFIG_LM75_ADDR3 (CONFIG_LM75_BASEADDR + 3)
+#define CONFIG_LM75_ADDR4 (CONFIG_LM75_BASEADDR + 4)
+#define CONFIG_LM75_ADDR5 (CONFIG_LM75_BASEADDR + 5)
+#define CONFIG_LM75_ADDR6 (CONFIG_LM75_BASEADDR + 6)
+#define CONFIG_LM75_ADDR7 (CONFIG_LM75_BASEADDR + 7)
 
 /* IOCTL Commands ***********************************************************/
 
@@ -86,12 +96,10 @@
  */
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+struct i2c_dev_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -131,4 +139,5 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
 }
 #endif
 
+#endif /* CONFIG_I2C && CONFIG_I2C_LM75 */
 #endif /* __INCLUDE_NUTTX_SENSORS_LM75_H */

@@ -38,8 +38,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 #define __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 
-#include <nuttx/i2c.h>
+#include <nuttx/config.h>
 #include <stdbool.h>
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_TRANSFER) && defined(CONFIG_LIS331DL)
 
 /************************************************************************************
  * Pre-Processor Declarations
@@ -68,6 +70,8 @@ struct lis331dl_vector_s
   int8_t y;
   int8_t z;
 };
+
+struct i2c_dev_s;
 
 /************************************************************************************
  * Public Function Prototypes
@@ -204,4 +208,5 @@ FAR const struct lis331dl_vector_s *
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_I2C && CONFIG_I2C_TRANSFER && CONFIG_LIS331DL */
 #endif /* __INCLUDE_NUTTX_SENSORS_LIS331DL_H */

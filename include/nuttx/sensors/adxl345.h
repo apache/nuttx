@@ -41,10 +41,6 @@
  ********************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <nuttx/i2c.h>
-#include <nuttx/spi/spi.h>
-
 #include <nuttx/irq.h>
 
 #if defined(CONFIG_SENSORS_ADXL345)
@@ -328,6 +324,9 @@ struct adxl345_config_s
 };
 
 typedef FAR void *ADXL345_HANDLE;
+
+struct i2c_dev_s;
+struct spi_dev_s;
 
 /********************************************************************************************
  * Public Function Prototypes

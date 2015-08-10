@@ -46,7 +46,10 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/i2c.h>
 #include <nuttx/sensors/lis331dl.h>
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_TRANSFER) && defined(CONFIG_LIS331DL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -373,3 +376,5 @@ lis331dl_getreadings(FAR struct lis331dl_dev_s * dev)
 
   return NULL;
 }
+
+#endif /* CONFIG_I2C && CONFIG_I2C_TRANSFER && CONFIG_LIS331DL */
