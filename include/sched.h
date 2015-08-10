@@ -53,10 +53,14 @@
 
 /* POSIX-like scheduling policies */
 
-#define SCHED_FIFO     1  /* FIFO per priority scheduling policy */
-#define SCHED_RR       2  /* Round robin scheduling policy */
-#define SCHED_SPORADIC 3  /* Sporadic scheduling policy */
-#define SCHED_OTHER    4  /* Not supported */
+#define SCHED_FIFO       1  /* FIFO priority scheduling policy */
+#define SCHED_RR         2  /* Round robin scheduling policy */
+#define SCHED_SPORADIC   3  /* Sporadic scheduling policy */
+#define SCHED_OTHER      4  /* Not supported */
+
+/* Maximum number of SCHED_SPORADIC replenishments */
+
+#define SS_REPL_MAX      CONFIG_SCHED_SPORADIC_MAXREPL
 
 /* Pthread definitions **********************************************************/
 

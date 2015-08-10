@@ -48,8 +48,38 @@
 #ifdef CONFIG_NET_SLIP
 
 /****************************************************************************
- * Public Type Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ***********************************************************/
+/* Dependencies:
+ *
+ *   CONFIG_NET_NOINTS - Required.
+ *   CONFIG_NET_MULTIBUFFER - Required.
+ *
+ * SLIP Configuration:
+ *
+ *   CONFIG_NET_SLIP - Enables building of the SLIP driver
+ *   CONFIG_NET_SLIP_STACKSIZE - Provides the stack size for SLIP RX and TX
+ *     threads.  Default: 2048
+ *   CONFIG_NET_SLIP_DEFPRIO - Provides the priority for SLIP RX and TX
+ *     threads.  Default 128.
+ *   CONFIG_NET_NET_SLIP_MTU - Provides the size of the SLIP packet buffers.
+ *     Default 296
+ *
+ *     The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
+ *     IP+TPC headers plus 256 bytes of data).  So you might as well set
+ *     CONFIG_NET_SLIP_MTU to 296 as well.
+ *
+ *     There may be an issue with this setting, however.  I see that Linux
+ *     uses a MTU of 296 and window of 256, but actually only sends 168 bytes
+ *     of data: 40 + 128.  I believe that is to allow for the 2x worst cast
+ *     packet expansion.  Ideally we would like to advertise the 256 MSS,
+ *     but restrict transfers to 128 bytes (possibly by modifying the
+ *     tcp_mss() macro).
+ *
+ *   CONFIG_NET_SLIP_NINTERFACES determines the number of physical interfaces
+ *   that will be supported.
+ */
 
 /****************************************************************************
  * Public Data
@@ -73,10 +103,12 @@ extern "C"
  * Description:
  *   Instantiate a SLIP network interface.
  *
- * Parameters:
- *   intf - In the case where there are multiple SLIP interfaces, this value
- *          identifies which is to be initialized.  The network name will be,
- *          for example, "/dev/slip5" for intf == 5
+ * Input Parameters:
+ *   intf    - In the case where there are multiple SLIP interfaces, this
+ *             value identifies which is to be initialized. The number of
+ *             possible SLIP interfaces is determined by
+ *   devname - This is the path to the serial device that will support SLIP.
+ *             For example, this might be "/dev/ttyS1"
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.

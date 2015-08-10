@@ -3,6 +3,13 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config AS5048B
+	bool "AMS AS5048B Magnetic Rotary Encoder support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the AMS AS5048B magnetic rotary encoder.
+
 config BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n
@@ -78,6 +85,13 @@ config LM75
 		Enable driver support for the STMicro LM-75 temperature sensor.
 		This should also work with compatible temperature sensors such as
 		the TI TMP100/101.
+
+config LM92
+	bool "TI LM92 Temperature Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the TI LM92 Temperature Sensor.
 
 config QENCODER
 	bool "Qencoder"

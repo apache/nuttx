@@ -89,6 +89,15 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+/* CAN helpers */
+
+static uint8_t        can_dlc2bytes(uint8_t dlc);
+#if 0 /* Not used */
+static uint8_t        can_bytes2dlc(uint8_t nbytes);
+#endif
+
+/* Character driver methods */
+
 static int            can_open(FAR struct file *filep);
 static int            can_close(FAR struct file *filep);
 static ssize_t        can_read(FAR struct file *filep, FAR char *buffer,
@@ -97,7 +106,7 @@ static int            can_xmit(FAR struct can_dev_s *dev);
 static ssize_t        can_write(FAR struct file *filep,
                          FAR const char *buffer, size_t buflen);
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                         FAR struct canioctl_rtr_s *rtr);
+                         FAR struct canioc_rtr_s *rtr);
 static int            can_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
 
@@ -124,6 +133,118 @@ static const struct file_operations g_canops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_dlc2bytes
+ *
+ * Description:
+ *   In the CAN FD format, the coding of the DLC differs from the standard
+ *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
+ *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
+ *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
+ *   in the range 12 to 64.
+ *
+ * Input Parameter:
+ *   dlc    - the DLC value to convert to a byte count
+ *
+ * Returned Value:
+ *   The number of bytes corresponding to the DLC value.
+ *
+ ****************************************************************************/
+
+static uint8_t can_dlc2bytes(uint8_t dlc)
+{
+  if (dlc > 8)
+    {
+#ifdef CONFIG_CAN_FD
+      switch (dlc)
+        {
+          case 9:
+            return 12;
+          case 10:
+            return 16;
+          case 11:
+            return 20;
+          case 12:
+            return 24;
+          case 13:
+            return 32;
+          case 14:
+            return 48;
+          default:
+          case 15:
+            return 64;
+        }
+#else
+      return 8;
+#endif
+    }
+
+  return dlc;
+}
+
+/****************************************************************************
+ * Name: can_bytes2dlc
+ *
+ * Description:
+ *   In the CAN FD format, the coding of the DLC differs from the standard
+ *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
+ *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
+ *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
+ *   in the range 12 to 64.
+ *
+ * Input Parameter:
+ *   nbytes - the byte count to convert to a DLC value
+ *
+ * Returned Value:
+ *   The encoded DLC value corresponding to at least that number of bytes.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static uint8_t can_bytes2dlc(FAR struct sam_can_s *priv, uint8_t nbytes)
+{
+  if (nbytes <= 8)
+    {
+      return nbytes;
+    }
+#ifdef CONFIG_CAN_FD
+  else if (nbytes <= 12)
+    {
+      return 9;
+    }
+  else if (nbytes <= 16)
+    {
+      return 10;
+    }
+  else if (nbytes <= 20)
+    {
+      return 11;
+    }
+  else if (nbytes <= 24)
+    {
+      return 12;
+    }
+  else if (nbytes <= 32)
+    {
+      return 13;
+    }
+  else if (nbytes <= 48)
+    {
+      return 14;
+    }
+  else /* if (nbytes <= 64) */
+    {
+      return 15;
+    }
+#else
+  else
+    {
+      return 8;
+    }
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: can_open
@@ -351,7 +472,8 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
           /* Will the next message in the FIFO fit into the user buffer? */
 
           FAR struct can_msg_s *msg = &dev->cd_recv.rx_buffer[dev->cd_recv.rx_head];
-          int msglen = CAN_MSGLEN(msg->cm_hdr.ch_dlc);
+          int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+          int msglen = CAN_MSGLEN(nbytes);
 
           if (nread + msglen > buflen)
             {
@@ -472,6 +594,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
   ssize_t                  nsent = 0;
   irqstate_t               flags;
   int                      nexttail;
+  int                      nbytes;
   int                      msglen;
   int                      ret   = 0;
 
@@ -562,7 +685,8 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
        */
 
       msg    = (FAR struct can_msg_s *)&buffer[nsent];
-      msglen = CAN_MSGLEN(msg->cm_hdr.ch_dlc);
+      nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+      msglen = CAN_MSGLEN(nbytes);
       memcpy(&fifo->tx_buffer[fifo->tx_tail], msg, msglen);
 
       /* Increment the tail of the circular buffer */
@@ -604,7 +728,7 @@ return_with_irqdisabled:
  ****************************************************************************/
 
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                                  FAR struct canioctl_rtr_s *rtr)
+                                  FAR struct canioc_rtr_s *rtr)
 {
   FAR struct can_rtrwait_s *wait = NULL;
   irqstate_t                flags;
@@ -663,19 +787,19 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* CANIOCTL_RTR: Send the remote transmission request and wait for the
-       * response.  Argument is a reference to struct canioctl_rtr_s
+      /* CANIOC_RTR: Send the remote transmission request and wait for the
+       * response.  Argument is a reference to struct canioc_rtr_s
        * (casting to uintptr_t first eliminates complaints on some
        * architectures where the sizeof long is different from the size of
        * a pointer).
        */
 
-      case CANIOCTL_RTR:
-        ret = can_rtrread(dev, (struct canioctl_rtr_s*)((uintptr_t)arg));
+      case CANIOC_RTR:
+        ret = can_rtrread(dev, (struct canioc_rtr_s*)((uintptr_t)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this
-       * device driver.
+       * lower-half, device driver.
        */
 
       default:
@@ -787,10 +911,14 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           if (msg && hdr->ch_id == rtr->cr_id)
             {
+              int nbytes;
+
               /* We have the response... copy the data to the user's buffer */
 
               memcpy(&msg->cm_hdr, hdr, sizeof(struct can_hdr_s));
-              for (i = 0, dest = msg->cm_data; i < hdr->ch_dlc; i++)
+
+              nbytes = can_dlc2bytes(hdr->ch_dlc);
+              for (i = 0, dest = msg->cm_data; i < nbytes; i++)
                 {
                   *dest++ = *data++;
                 }
@@ -811,10 +939,22 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
   if (nexttail != fifo->rx_head)
     {
-      /* Add the new, decoded CAN message at the tail of the FIFO */
+      int nbytes;
+
+      /* Add the new, decoded CAN message at the tail of the FIFO.
+       *
+       * REVISIT:  In the CAN FD format, the coding of the DLC differs from
+       * the standard CAN format. The DLC codes 0 to 8 have the same coding
+       * as in standard CAN, the codes 9 to 15, which in standard CAN all
+       * code a data field of 8 bytes, are encoded:
+       *
+       *   9->12, 10->16, 11->20, 12->24, 13->32, 14->48, 15->64
+       */
 
       memcpy(&fifo->rx_buffer[fifo->rx_tail].cm_hdr, hdr, sizeof(struct can_hdr_s));
-      for (i = 0, dest = fifo->rx_buffer[fifo->rx_tail].cm_data; i < hdr->ch_dlc; i++)
+
+      nbytes = can_dlc2bytes(hdr->ch_dlc);
+      for (i = 0, dest = fifo->rx_buffer[fifo->rx_tail].cm_data; i < nbytes; i++)
         {
           *dest++ = *data++;
         }

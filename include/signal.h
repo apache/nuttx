@@ -183,7 +183,7 @@
 #endif
 
 /********************************************************************************
- * Global Type Declarations
+ * Public Type Definitions
  ********************************************************************************/
 
 /* This defines a set of 32 signals (numbered 0 through 31). */
@@ -251,11 +251,11 @@ struct sigaction
 #define sa_sigaction sa_u._sa_sigaction
 
 /********************************************************************************
- * Global Variables
+ * Public Data
  ********************************************************************************/
 
 /********************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ********************************************************************************/
 
 #ifdef __cplusplus
@@ -297,4 +297,3 @@ int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
 
 #endif /* __INCLUDE_SIGNAL_H */
-

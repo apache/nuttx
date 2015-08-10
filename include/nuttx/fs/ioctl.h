@@ -76,7 +76,8 @@
 #define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
 #define _RTCBASE        (0x1800) /* RTC ioctl commands */
 #define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
-#define _BOARDBASE      (0x1a00) /* boardctl commands */
+#define _CANBASE        (0x1a00) /* CAN ioctl commands */
+#define _BOARDBASE      (0x1b00) /* boardctl ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -347,6 +348,12 @@
 
 #define _RELAYIOCVALID(c)   (_IOC_TYPE(c)==_RELAYBASE)
 #define _RELAYIOC(nr)       _IOC(_RELAYBASE,nr)
+
+/* CAN driver ioctl definitions *********************************************/
+/* (see nuttx/can.h */
+
+#define _CANIOCVALID(c)     (_IOC_TYPE(c)==_CANBASE)
+#define _CANIOC(nr)         _IOC(_CANBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

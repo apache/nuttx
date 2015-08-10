@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/spi/spi.h
  *
- *   Copyright(C) 2008-2013 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -271,7 +271,7 @@
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-
  *            per-word selected for the SPI interface.  If nbits <= 8, the
@@ -298,7 +298,7 @@
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
@@ -324,7 +324,7 @@
  *
  * Input Parameters:
  *   dev -      Device-specific state data
- *   callback - The funtion to call on the media change
+ *   callback - The function to call on the media change
  *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:
@@ -367,7 +367,7 @@ enum spi_dev_e
   SPIDEV_USER           /* Board-specific values start here */
 };
 
-/* Certain SPI devices may required differnt clocking modes */
+/* Certain SPI devices may required different clocking modes */
 
 enum spi_mode_e
 {
@@ -383,29 +383,31 @@ struct spi_dev_s;
 struct spi_ops_s
 {
 #ifndef CONFIG_SPI_OWNBUS
-  int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
+  CODE int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
 #endif
-  void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                     bool selected);
-  uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
-  void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-  void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
-  uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+  CODE void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                  bool selected);
+  CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
+  CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+  CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
+  CODE uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-  int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid
+                  bool cmd);
 #endif
-  uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
+  CODE uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-  void     (*exchange)(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                       FAR void *rxbuffer, size_t nwords);
+  CODE void     (*exchange)(FAR struct spi_dev_s *dev,
+                  FAR const void *txbuffer, FAR void *rxbuffer,
+                  size_t nwords);
 #else
-  void     (*sndblock)(FAR struct spi_dev_s *dev, FAR const void *buffer,
-                       size_t nwords);
-  void     (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer,
-                        size_t nwords);
+  CODE void     (*sndblock)(FAR struct spi_dev_s *dev,
+                  FAR const void *buffer, size_t nwords);
+  CODE void     (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer,
+                  size_t nwords);
 #endif
-  int     (*registercallback)(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                              void *arg);
+  CODE int      (*registercallback)(FAR struct spi_dev_s *dev,
+                  spi_mediachange_t callback, void *arg);
 };
 
 /* SPI private data.  This structure only defines the initial fields of the
@@ -435,7 +437,7 @@ extern "C"
  * Name: up_spiinitialize
  *
  * Description:
- *   Initialize the selected SPI port.
+ *   Initialize the selected SPI port in master mode.
  *
  *   This is a generic prototype for the SPI initialize logic.  Specific
  *   architectures may support different SPI initialization functions if,
@@ -454,14 +456,14 @@ extern "C"
  *
  *   Another example would be the STM32 families that support both SPI
  *   blocks as well as USARTs that can be configured to perform the SPI
- *   function as well (the STM32 USARTs do not suppor SPI as of this
+ *   function as well (the STM32 USARTs do not support SPI as of this
  *   writing).
  *
  * Input Parameter:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

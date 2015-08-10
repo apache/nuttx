@@ -148,7 +148,7 @@
   prctl((int)PR_GET_NAME, (char*)name, (int)thread)
 
 /********************************************************************************
- * Global Type Declarations
+ * Public Type Definitions
  ********************************************************************************/
 
 #ifdef __cplusplus
@@ -241,11 +241,11 @@ typedef bool pthread_once_t;
 struct sched_param; /* Defined in sched.h */
 
 /********************************************************************************
- * Global Variables
+ * Public Data
  ********************************************************************************/
 
 /********************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ********************************************************************************/
 
 /* Initializes a thread attributes object (attr) with default values for all of
@@ -414,4 +414,3 @@ int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 #endif
 
 #endif /* __INCLUDE_PTHREAD_H */
-

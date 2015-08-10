@@ -10780,3 +10780,20 @@
 	  OS.  It is a non-standard but more efficient version of sem_timedwait()
 	  for use in higher performance device drivers (2015-08-01).
 	* drivers/net/slip.c:  Fix another compilation error (2015-08-02).
+	* drivers/can.c include/nuttx/can.h, and fs/fs.h:  Add CAN IOCTL command
+	  definitions to manage CAN message filtering (2015-08-05)
+	* drivers/Kconfig and can.c:  Add configuration to support DLC to byte
+	  conversions needed for CAN FD mode (2015-08-05).
+	* arch/arm/src/samv7:  Add an MCAN driver for the SAMV7 platform
+	  (2015-08-06).
+	* drivers/sensors/lm92.c and include/nuttx/sensors/lm92.h:  Add a driver
+	  for the LM92 temperature sensor.  Contributed by Paul Patience
+	  (2015-08-06).
+	* drivers/sensors/as5048b.c and include/nuttx/sensors/as5048b.h: Add
+	  support for an AS5048B rotary magnetic sensor.  From Paul Patience
+	  (2015-08-06).
+	* include/nuttx/spi/slave.h:  Add a definition of an SPI slave
+	  interface (2015-08-08).
+	* arch/arm/src/samv7: Add the framework for an SPI slave drvier.  This
+	  driver has a lot of missing logic on initial commit (2015-08-09).
+

@@ -5,6 +5,23 @@
 
 if SPI
 
+config SPI_SLAVE
+	bool "SPI slave"
+	default n
+	---help---
+		Enable support for SPI slave features
+
+if SPI_SLAVE
+
+config SPI_SLAVE_DMA
+	bool "SPI slave DMA"
+	default n
+	depends on ARCH_DMA && EXPERIMENTAL
+	---help---
+		Enable support for DMA data transfers (not yet implemented).
+
+endif
+
 config SPI_OWNBUS
 	bool "SPI single device"
 	default n

@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/can.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <semaphore.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_CAN
 
@@ -60,6 +61,8 @@
  *   CONFIG_STM32_CAN2 must also be defined)
  * CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
  *   Standard 11-bit IDs.
+ * CONFIG_CAN_FD - Enable support for CAN FD mode.  For the upper half driver, this
+ *   just means handling encoded DLC values (for values of DLC > 9).
  * CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
  *   Default: 8
  * CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
@@ -88,7 +91,63 @@
 #  define CONFIG_CAN_NPENDINGRTR 255
 #endif
 
-/* Convenience macros */
+/* Ioctl Commands *******************************************************************/
+/* Ioctl commands supported by the upper half CAN driver.
+ *
+ * CANIOC_RTR:
+ *   Description:  Send the remote transmission request and wait for the response.
+ *   Argument:     A reference to struct canioc_rtr_s
+ *
+ * Ioctl commands that may or may not be supported by the lower half CAN driver.
+ *
+ * CANIOC_ADD_STDFILTER:
+ *   Description:    Add an address filter for a standard 11 bit address.
+ *   Argument:       A reference to struct canioc_stdfilter_s
+ *   Returned Value: A non-negative filter ID is returned on success.
+ *                   Otherwise -1 (ERROR) is returned with the errno
+ *                   variable set to indicate the nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
+ *
+ * CANIOC_ADD_EXTFILTER:
+ *   Description:    Add an address filter for a extended 29 bit address.
+ *   Argument:       A reference to struct canioc_extfilter_s
+ *   Returned Value: A non-negative filter ID is returned on success.
+ *                   Otherwise -1 (ERROR) is returned with the errno
+ *                   variable set to indicate the nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID=y
+ *
+ * CANIOC_DEL_STDFILTER:
+ *   Description:    Remove an address filter for a standard 11 bit address.
+ *   Argument:       The filter index previously returned by the
+ *                   CANIOC_ADD_STDFILTER command
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
+ *
+ * CANIOC_DEL_EXTFILTER:
+ *   Description:    Remove an address filter for a standard 29 bit address.
+ *   Argument:       The filter index previously returned by the
+ *                   CANIOC_ADD_EXTFILTER command
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   Requires CONFIG_CAN_EXID=y
+ */
+
+#define CANIOC_RTR                _CANIOC(1)
+#define CANIOC_ADD_STDFILTER      _CANIOC(2)
+#define CANIOC_ADD_EXTFILTER      _CANIOC(3)
+#define CANIOC_DEL_STDFILTER      _CANIOC(4)
+#define CANIOC_DEL_EXTFILTER      _CANIOC(5)
+
+/* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
+ * than this value
+ */
+
+#define CANIOC_USER               _CANIOC(6)
+
+/* Convenience macros ***************************************************************/
 
 #define dev_reset(dev)            dev->cd_ops->co_reset(dev)
 #define dev_setup(dev)            dev->cd_ops->co_setup(dev)
@@ -101,50 +160,57 @@
 #define dev_txready(dev)          dev->cd_ops->co_txready(dev)
 #define dev_txempty(dev)          dev->cd_ops->co_txempty(dev)
 
-/* CAN message support */
+/* CAN message support **************************************************************/
 
-#define CAN_MAXDATALEN            8
-#define CAN_MAX_MSGID             0x07ff
+#ifdef CONFIG_CAN_FD
+#  define CAN_MAXDATALEN          64
+#else
+#  define CAN_MAXDATALEN          8
+#endif
+
+#define CAN_MAX_STDMSGID          0x07ff
 #define CAN_MAX_EXTMSGID          0x1fffffff
 
 #define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
 
-/* Built-in ioctl commands
- *
- * CANIOCTL_RTR: Send the remote transmission request and wait for the response.
+/* CAN filter support ***************************************************************/
+/* Some CAN hardware supports a notion of prioritizing messages that match filters.
+ * Only two priority levels are currently supported and are encoded as defined
+ * below:
  */
 
-#define CANIOCTL_RTR              1 /* Argument is a reference to struct canioctl_rtr_s */
+#define CAN_MSGPRIO_LOW           0
+#define CAN_MSGPRIO_HIGH          1
 
-/* CANIOCTL_USER: Device specific ioctl calls can be supported with cmds greater
- * than this value
- */
+/* Filter type.  Not all CAN hardware will support all filter types. */
 
-#define CANIOCTL_USER             2
+#define CAN_FILTER_MASK           0  /* Address match under a mask */
+#define CAN_FILTER_DUAL           1  /* Dual address match */
+#define CAN_FILTER_RANGE          2  /* Match a range of addresses */
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
-/* CAN-message Format (without Extended ID suppport)
+/* CAN-message Format (without Extended ID support)
  *
  *   One based CAN-message is represented with a maximum of 10 bytes.  A message is
  *   composed of at least the first 2 bytes (when there are no data bytes present).
  *
  *   Bytes 0-1:  Hold a 16-bit value in host byte order
  *               Bits 0-3:  Data Length Code (DLC)
- *               Bit  4:    Remote Tranmission Request (RTR)
+ *               Bit  4:    Remote Transmission Request (RTR)
  *               Bits 5-15: The 11-bit CAN identifier
  *
  *   Bytes 2-9:  CAN data
  *
- * CAN-message Format (with Extended ID suppport)
+ * CAN-message Format (with Extended ID support)
  *
  *   One CAN-message consists of a maximum of 13 bytes.  A message is composed of at
  *   least the first 5 bytes (when there are no data bytes).
  *
  *   Bytes 0-3:  Hold 11- or 29-bit CAN ID in host byte order
  *   Byte 4:     Bits 0-3: Data Length Code (DLC)
- *               Bit 4:    Remote Tranmission Request (RTR)
+ *               Bit 4:    Remote Transmission Request (RTR)
  *               Bit 5:    Extended ID indication
  *               Bits 6-7: Unused
  *   Bytes 5-12: CAN data
@@ -158,7 +224,7 @@
 #ifdef CONFIG_CAN_EXTID
 struct can_hdr_s
 {
-  uint32_t     ch_id;         /* 11- or 29-bit ID (3-bits unsed) */
+  uint32_t     ch_id;         /* 11- or 29-bit ID (3-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC */
   uint8_t      ch_rtr    : 1; /* RTR indication */
   uint8_t      ch_extid  : 1; /* Extended ID indication */
@@ -167,7 +233,7 @@ struct can_hdr_s
 #else
 struct can_hdr_s
 {
-  uint16_t      ch_dlc   : 4;  /* 4-bit DLC */
+  uint16_t      ch_dlc   : 4;  /* 4-bit DLC.  May be encoded in CAN_FD mode. */
   uint16_t      ch_rtr   : 1;  /* RTR indication */
   uint16_t      ch_id    : 11; /* 11-bit standard ID */
 } packed_struct;
@@ -296,11 +362,33 @@ struct can_dev_s
 
 /* Structures used with ioctl calls */
 
-struct canioctl_rtr_s
+struct canioc_rtr_s
 {
   uint16_t              ci_id;           /* The 11-bit ID to use in the RTR message */
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
+
+#ifdef CONFIG_CAN_EXTID
+struct canioc_extfilter_s
+{
+  uint32_t              xf_id1;          /* 29-bit ID.  For dual match or for the
+                                          * lower address in a range of addresses  */
+  uint32_t              xf_id2;          /* 29-bit ID.  For dual match, address mask
+                                          * or for upper address in address range  */
+  uint8_t               xf_type;         /* See CAN_FILTER_* definitions */
+  uint8_t               xf_prio;         /* See CAN_MSGPRIO_* definitions */
+};
+#else
+struct canioc_stdfilter_s
+{
+  uint16_t              sf_id1;          /* 11-bit ID.  For dual match or for the
+                                          * lower address in a range of addresses  */
+  uint16_t              sf_id2;          /* 11-bit ID.  For dual match, address mask
+                                          * or for upper address in address range  */
+  uint8_t               sf_type;         /* See CAN_FILTER_* definitions */
+  uint8_t               sf_prio;         /* See CAN_MSGPRIO_* definitions */
+};
+#endif
 
 /************************************************************************************
  * Public Data
