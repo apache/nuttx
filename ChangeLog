@@ -10787,11 +10787,11 @@
 	* arch/arm/src/samv7:  Add an MCAN driver for the SAMV7 platform
 	  (2015-08-06).
 	* drivers/sensors/lm92.c and include/nuttx/sensors/lm92.h:  Add a driver
-	  for the LM92 temperature sensor.  Contributed by Paul Patience
+	  for the LM92 temperature sensor.  Contributed by Paul Alexander Patience
 	  (2015-08-06).
 	* drivers/sensors/as5048b.c and include/nuttx/sensors/as5048b.h: Add
-	  support for an AS5048B rotary magnetic sensor.  From Paul Patience
-	  (2015-08-06).
+	  support for an AS5048B rotary magnetic sensor.  From Paul Alexander
+	  Patience (2015-08-07).
 	* include/nuttx/spi/slave.h:  Add a definition of an SPI slave
 	  interface (2015-08-08).
 	* arch/arm/src/samv7: Add the framework for an SPI slave drvier.  This
