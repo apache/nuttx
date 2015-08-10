@@ -10801,3 +10801,6 @@
 	* fs/vfs/epoll.c and include/sys/epoll.h: Add a very simple epoll layer
 	  just around poll calls. To satisfy build app requirements.  From Anton
 	  D. Kachalov.
+	* drivers/mtd/ramtron.c:  Update to include supportf for newer
+	  RAMTRON parts.  From David Sidrane.
+
