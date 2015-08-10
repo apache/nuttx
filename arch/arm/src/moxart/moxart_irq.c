@@ -98,6 +98,7 @@ void up_irqinitialize(void)
   *(volatile int *)0x98700000 |= 0x3f;
 
   /* PMU setup */
+
   (*(volatile uint32_t *)0x98100008) &= ~0x9;
 
   while (!((*(volatile uint32_t *)0x98100008) & 0x2)) { ; }
@@ -127,6 +128,7 @@ void up_irqinitialize(void)
   current_regs = NULL;
 
   /* Setup UART shared interrupt */
+
   irq_attach(CONFIG_UART_MOXA_SHARED_IRQ, uart_decodeirq);
   up_enable_irq(CONFIG_UART_MOXA_SHARED_IRQ);
 
