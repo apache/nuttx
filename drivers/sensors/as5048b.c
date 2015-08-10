@@ -49,7 +49,7 @@
 #include <nuttx/i2c.h>
 #include <nuttx/sensors/as5048b.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_AS5048B)
+#if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_AS5048B)
 
 /****************************************************************************
  * Private Types
@@ -57,8 +57,9 @@
 
 struct as5048b_dev_s
 {
-  FAR struct i2c_dev_s *i2c; /* I2C interface */
-  uint8_t addr;              /* I2C address */
+  struct qe_lowerhalf_s  lower; /* AS5048B quadrature encoder lower half */
+  FAR struct i2c_dev_s  *i2c;   /* I2C interface */
+  uint8_t                addr;  /* I2C address */
 };
 
 /****************************************************************************
@@ -66,13 +67,13 @@ struct as5048b_dev_s
  ****************************************************************************/
 /* I2C Helpers */
 
-static int as5048b_readb8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
+static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
                           FAR uint8_t *regval);
-static int as5048b_readb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
+static int as5048b_readu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
                            uint8_t regaddrlo, FAR uint16_t *regval);
-static int as5048b_writeb8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
+static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
                            uint8_t regval);
-static int as5048b_writeb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
+static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
                             uint8_t regaddrlo, uint16_t regval);
 static int as5048b_readzero(FAR struct as5048b_dev_s *priv,
                             FAR uint16_t *zero);
@@ -85,33 +86,24 @@ static int as5048b_readang(FAR struct as5048b_dev_s *priv, FAR uint16_t *ang);
 
 /* Character Driver Methods */
 
-static int     as5048b_open(FAR struct file *filep);
-static int     as5048b_close(FAR struct file *filep);
-static ssize_t as5048b_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen);
-static ssize_t as5048b_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
-static int     as5048b_ioctl(FAR struct file *filep, int cmd,
-                             unsigned long arg);
+static int as5048b_setup(FAR struct qe_lowerhalf_s *lower);
+static int as5048b_shutdown(FAR struct qe_lowerhalf_s *lower);
+static int as5048b_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos);
+static int as5048b_reset(FAR struct qe_lowerhalf_s *lower);
+static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+                         unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_as5048bfops =
+static const struct qe_ops_s g_qeops =
 {
-  as5048b_open,
-  as5048b_close,
-  as5048b_read,
-  as5048b_write,
-  NULL,
+  as5048b_setup,
+  as5048b_shutdown,
+  as5048b_position,
+  as5048b_reset,
   as5048b_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
-#endif
 };
 
 /****************************************************************************
@@ -119,17 +111,16 @@ static const struct file_operations g_as5048bfops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: as5048b_readb8
+ * Name: as5048b_readu8
  *
  * Description:
  *   Read from an 8-bit register
  *
  ****************************************************************************/
 
-static int as5048b_readb8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
+static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
                           FAR uint8_t *regval)
 {
-  uint8_t buffer;
   int ret;
 
   /* Write the register address */
@@ -144,27 +135,26 @@ static int as5048b_readb8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
 
   /* Restart and read 8 bits from the register */
 
-  ret = I2C_READ(priv->i2c, &buffer, sizeof(buffer));
+  ret = I2C_READ(priv->i2c, regval, sizeof(*regval));
   if (ret < 0)
     {
       sndbg("I2C_READ failed: %d\n", ret);
       return ret;
     }
 
-  *regval = buffer;
   sndbg("addr: %02x value: %02x ret: %d\n", regaddr, *regval, ret);
   return ret;
 }
 
 /****************************************************************************
- * Name: as5048b_readb16
+ * Name: as5048b_readu16
  *
  * Description:
  *   Read from two 8-bit registers
  *
  ****************************************************************************/
 
-static int as5048b_readb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
+static int as5048b_readu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
                            uint8_t regaddrlo, FAR uint16_t *regval)
 {
   uint8_t hi, lo;
@@ -172,19 +162,19 @@ static int as5048b_readb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
 
   /* Read the high 8 bits of the 13-bit value */
 
-  ret = as5048b_readb8(priv, regaddrhi, &hi);
+  ret = as5048b_readu8(priv, regaddrhi, &hi);
   if (ret < 0)
     {
-      sndbg("as5048b_readb8 failed: %d\n", ret);
+      sndbg("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
   /* Read the low 5 bits of the 13-bit value */
 
-  ret = as5048b_readb8(priv, regaddrlo, &lo);
+  ret = as5048b_readu8(priv, regaddrlo, &lo);
   if (ret < 0)
     {
-      sndbg("as5048b_readb8 failed: %d\n", ret);
+      sndbg("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
@@ -195,14 +185,14 @@ static int as5048b_readb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
 }
 
 /****************************************************************************
- * Name: as5048b_writeb8
+ * Name: as5048b_writeu8
  *
  * Description:
  *   Write from an 8-bit register
  *
  ****************************************************************************/
 
-static int as5048b_writeb8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
+static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
                            uint8_t regval)
 {
   uint8_t buffer[2];
@@ -228,14 +218,14 @@ static int as5048b_writeb8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
 }
 
 /****************************************************************************
- * Name: as5048b_writeb16
+ * Name: as5048b_writeu16
  *
  * Description:
  *   Write to two 8-bit registers
  *
  ****************************************************************************/
 
-static int as5048b_writeb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
+static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
                             uint8_t regaddrlo, uint16_t regval)
 {
   int ret;
@@ -245,19 +235,19 @@ static int as5048b_writeb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
 
   /* Write the high 8 bits of the 13-bit value */
 
-  ret = as5048b_writeb8(priv, regaddrhi, (uint8_t)(regval >> 6));
+  ret = as5048b_writeu8(priv, regaddrhi, (uint8_t)(regval >> 6));
   if (ret < 0)
     {
-      sndbg("as5048b_writeb8 failed: %d\n", ret);
+      sndbg("as5048b_writeu8 failed: %d\n", ret);
       return ret;
     }
 
   /* Write the low 5 bits of the 13-bit value */
 
-  ret = as5048b_writeb8(priv, regaddrhi, (uint8_t)regval);
+  ret = as5048b_writeu8(priv, regaddrhi, (uint8_t)regval);
   if (ret < 0)
     {
-      sndbg("as5048b_writeb8 failed: %d\n", ret);
+      sndbg("as5048b_writeu8 failed: %d\n", ret);
     }
 
   return ret;
@@ -274,18 +264,15 @@ static int as5048b_writeb16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
 static int as5048b_readzero(FAR struct as5048b_dev_s *priv,
                             FAR uint16_t *zero)
 {
-  uint16_t buffer;
   int ret;
 
-  ret = as5048b_readb16(priv, AS5048B_ZEROHI_REG, AS5048B_ZEROLO_REG,
-                        &buffer);
+  ret = as5048b_readu16(priv, AS5048B_ZEROHI_REG, AS5048B_ZEROLO_REG, zero);
   if (ret < 0)
     {
-      sndbg("as5048b_readb16 failed: %d\n", ret);
+      sndbg("as5048b_readu16 failed: %d\n", ret);
       return ret;
     }
 
-  *zero = buffer;
   sndbg("zero: %04x ret: %d\n", *zero, ret);
   return ret;
 }
@@ -304,10 +291,10 @@ static int as5048b_writezero(FAR struct as5048b_dev_s *priv, uint16_t zero)
 
   sndbg("zero: %04x\n", zero);
 
-  ret = as5048b_writeb16(priv, AS5048B_ZEROHI_REG, AS5048B_ZEROLO_REG, zero);
+  ret = as5048b_writeu16(priv, AS5048B_ZEROHI_REG, AS5048B_ZEROLO_REG, zero);
   if (ret < 0)
     {
-      sndbg("as5048b_writeb16 failed: %d\n", ret);
+      sndbg("as5048b_writeu16 failed: %d\n", ret);
     }
 
   return ret;
@@ -323,17 +310,15 @@ static int as5048b_writezero(FAR struct as5048b_dev_s *priv, uint16_t zero)
 
 static int as5048b_readagc(FAR struct as5048b_dev_s *priv, FAR uint8_t *agc)
 {
-  uint8_t buffer;
   int ret;
 
-  ret = as5048b_readb8(priv, AS5048B_AGC_REG, &buffer);
+  ret = as5048b_readu8(priv, AS5048B_AGC_REG, agc);
   if (ret < 0)
     {
-      sndbg("as5048b_readb8 failed: %d\n", ret);
+      sndbg("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
-  *agc = buffer;
   sndbg("agc: %02x ret: %d\n", *agc, ret);
   return ret;
 }
@@ -348,17 +333,15 @@ static int as5048b_readagc(FAR struct as5048b_dev_s *priv, FAR uint8_t *agc)
 
 static int as5048b_readdiag(FAR struct as5048b_dev_s *priv, FAR uint8_t *diag)
 {
-  uint8_t buffer;
   int ret;
 
-  ret = as5048b_readb8(priv, AS5048B_DIAG_REG, &buffer);
+  ret = as5048b_readu8(priv, AS5048B_DIAG_REG, diag);
   if (ret < 0)
     {
-      sndbg("as5048b_readb8 failed: %d\n", ret);
+      sndbg("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
-  *diag = buffer;
   sndbg("diag: %02x ret: %d\n", *diag, ret);
   return ret;
 }
@@ -373,17 +356,15 @@ static int as5048b_readdiag(FAR struct as5048b_dev_s *priv, FAR uint8_t *diag)
 
 static int as5048b_readmag(FAR struct as5048b_dev_s *priv, FAR uint16_t *mag)
 {
-  uint16_t buffer;
   int ret;
 
-  ret = as5048b_readb16(priv, AS5048B_MAGHI_REG, AS5048B_MAGLO_REG, &buffer);
+  ret = as5048b_readu16(priv, AS5048B_MAGHI_REG, AS5048B_MAGLO_REG, mag);
   if (ret < 0)
     {
-      sndbg("as5048b_readb16 failed: %d\n", ret);
+      sndbg("as5048b_readu16 failed: %d\n", ret);
       return ret;
     }
 
-  *mag = buffer;
   sndbg("mag: %04x ret: %d\n", *mag, ret);
   return ret;
 }
@@ -398,135 +379,141 @@ static int as5048b_readmag(FAR struct as5048b_dev_s *priv, FAR uint16_t *mag)
 
 static int as5048b_readang(FAR struct as5048b_dev_s *priv, FAR uint16_t *ang)
 {
-  uint16_t buffer;
   int ret;
 
-  ret = as5048b_readb16(priv, AS5048B_ANGHI_REG, AS5048B_ANGLO_REG, &buffer);
+  ret = as5048b_readu16(priv, AS5048B_ANGHI_REG, AS5048B_ANGLO_REG, ang);
   if (ret < 0)
     {
-      sndbg("as5048b_readb16 failed: %d\n", ret);
+      sndbg("as5048b_readu16 failed: %d\n", ret);
       return ret;
     }
 
-  *ang = buffer;
   sndbg("ang: %04x ret: %d\n", *ang, ret);
   return ret;
 }
 
 /****************************************************************************
- * Name: as5048b_open
+ * Name: as5048b_setup
  *
  * Description:
- *   This function is called whenever the device is opened
+ *   This method is called when the driver is opened
  *
  ****************************************************************************/
 
-static int as5048b_open(FAR struct file *filep)
+static int as5048b_setup(FAR struct qe_lowerhalf_s *lower)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: as5048b_close
+ * Name: as5048b_shutdown
  *
  * Description:
- *   This function is called whenever the device is closed
+ *   This method is called when the driver is closed
  *
  ****************************************************************************/
 
-static int as5048b_close(FAR struct file *filep)
+static int as5048b_shutdown(FAR struct qe_lowerhalf_s *lower)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: as5048b_read
+ * Name: as5048b_position
+ *
+ * Description:
+ *   Return the current position measurement
+ *
  ****************************************************************************/
 
-static ssize_t as5048b_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen)
+static int as5048b_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos)
 {
-  FAR struct inode         *inode = filep->f_inode;
-  FAR struct as5048b_dev_s *priv  = inode->i_private;
-  FAR uint16_t             *ptr;
-  ssize_t                   nsamples;
-  ssize_t                   i;
-  int                       ret;
+  FAR struct as5048b_dev_s *priv = (FAR struct as5048b_dev_s *)lower;
+  uint16_t ang;
+  int ret;
 
-  /* How many samples were requested? */
-
-  ptr      = (FAR uint16_t *)buffer;
-  nsamples = buflen / sizeof(*ptr);
-
-  sndbg("buflen: %u nsamples: %d\n", buflen, nsamples);
-
-  /* Get the requested number of samples */
-
-  for (i = 0; i < nsamples; i++)
+  ret = as5048b_readang(priv, &ang);
+  if (ret < 0)
     {
-      uint16_t ang = 0;
-
-      /* Read the next uint16_t angle value */
-
-      ret = as5048b_readang(priv, &ang);
-      if (ret < 0)
-        {
-          sndbg("as5048b_readang failed: %d\n", ret);
-          return (ssize_t)ret;
-        }
-
-      /* Save the angle value in the user buffer */
-
-      *ptr++ = ang;
+      sndbg("as5048b_readang failed: %d\n", ret);
+      return ret;
     }
 
-    return nsamples * sizeof(*ptr);
+  *pos = (int32_t)ang;
+  return ret;
 }
 
 /****************************************************************************
- * Name: as5048b_write
+ * Name: as5048b_reset
+ *
+ * Description:
+ *   Reset the position measurement to zero
+ *
  ****************************************************************************/
 
-static ssize_t as5048b_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen)
+static int as5048b_reset(FAR struct qe_lowerhalf_s *lower)
 {
-  return -ENOSYS;
+  FAR struct as5048b_dev_s *priv = (FAR struct as5048b_dev_s *)lower;
+  uint16_t ang;
+  int ret;
+
+  ret = as5048b_writezero(priv, 0);
+  if (ret < 0)
+    {
+      sndbg("as5048b_writezero failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = as5048b_readang(priv, &ang);
+  if (ret < 0)
+    {
+      sndbg("as5048b_readang failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = as5048b_writezero(priv, ang);
+  if (ret < 0)
+    {
+      sndbg("as5048b_writezero failed: %d\n", ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
  * Name: as5048b_ioctl
  ****************************************************************************/
 
-static int as5048b_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+                         unsigned long arg)
 {
-  FAR struct inode         *inode = filep->f_inode;
-  FAR struct as5048b_dev_s *priv  = inode->i_private;
-  int                       ret   = OK;
+  FAR struct as5048b_dev_s *priv = (FAR struct as5048b_dev_s *)lower;
+  int                       ret  = OK;
 
   switch (cmd)
     {
-      /* Read from the zero position registers. Arg: uint16_t* pointer. */
+      /* Read from the zero position registers. Arg: int32_t* pointer. */
 
-      case SNIOC_READZERO:
+      case QEIOC_ZEROPOSITION:
         {
-          FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
-          ret = as5048b_readzero(priv, ptr);
+          FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
+          uint16_t zero;
+          DEBUGASSERT(ptr != NULL);
+          ret = as5048b_readzero(priv, &zero);
+          if (ret == OK)
+            {
+              *ptr = (int32_t)zero;
+            }
           sndbg("zero: %04x ret: %d\n", *ptr, ret);
         }
         break;
 
-      /* Write to the zero position registers. Arg: uint16_t value. */
-
-      case SNIOC_WRITEZERO:
-        ret = as5048b_writezero(priv, (uint16_t)arg);
-        sndbg("zero: %04x ret: %d\n", *(uint16_t *)arg, ret);
-        break;
-
       /* Read from the automatic gain control register. Arg: uint8_t* pointer. */
 
-      case SNIOC_READAGC:
+      case QEIOC_AUTOGAINCTL:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = as5048b_readagc(priv, ptr);
           sndbg("agc: %02x ret: %d\n", *ptr, ret);
         }
@@ -534,26 +521,33 @@ static int as5048b_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Read from the diagnostics register. Arg: uint8_t* pointer. */
 
-      case SNIOC_READDIAG:
+      case QEIOC_DIAGNOSTICS:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = as5048b_readdiag(priv, ptr);
           sndbg("diag: %02x ret: %d\n", *ptr, ret);
         }
         break;
 
-      /* Read from the magnitude registers. Arg: uint16_t* pointer. */
+      /* Read from the magnitude registers. Arg: int32_t* pointer. */
 
-      case SNIOC_READMAG:
+      case QEIOC_MAGNITUDE:
         {
-          FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
-          ret = as5048b_readmag(priv, ptr);
+          FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
+          uint16_t mag;
+          DEBUGASSERT(ptr != NULL);
+          ret = as5048b_readmag(priv, &mag);
+          if (ret == OK)
+            {
+              *ptr = (int32_t)mag;
+            }
           sndbg("mag: %04x ret: %d\n", *ptr, ret);
         }
         break;
 
       default:
-        sndbg("Unrecognized cmd: %d\n", cmd);
+        sndbg("Unrecognized cmd: %d arg: %ld\n", cmd, arg);
         ret = -ENOTTY;
         break;
     }
@@ -566,28 +560,27 @@ static int as5048b_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: as5048b_register
+ * Name: as5048b_initialize
  *
  * Description:
- *   Register the AS5048B character device as 'devpath'.
+ *   Initialize the AS5048B device.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register,
- *             for example "/dev/angle0".
- *   i2c     - An instance of the I2C interface to use to communicate
- *             with the AS5048B.
- *   addr    - The I2C address of the AS5048B.
+ *   i2c  - An I2C driver instance.
+ *   addr - The I2C address of the AS5048B.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   A new lower half quadrature encoder interface for the AS5048B on success;
+ *   NULL on failure.
  *
  ****************************************************************************/
 
-int as5048b_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
-                     uint8_t addr)
+FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_dev_s *i2c,
+                                              uint8_t addr)
 {
   FAR struct as5048b_dev_s *priv;
-  int ret;
+
+  DEBUGASSERT(i2c != NULL);
 
   /* Initialize the device's structure */
 
@@ -595,22 +588,14 @@ int as5048b_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
   if (priv == NULL)
     {
       sndbg("Failed to allocate instance\n");
-      return -ENOMEM;
+      return NULL;
     }
 
-  priv->i2c  = i2c;
-  priv->addr = addr;
+  priv->lower.ops = &g_qeops;
+  priv->i2c       = i2c;
+  priv->addr      = addr;
 
-  /* Register the character driver */
-
-  ret = register_driver(devpath, &g_as5048bfops, 0666, priv);
-  if (ret < 0)
-    {
-      sndbg("Failed to register driver: %d\n", ret);
-      kmm_free(priv);
-    }
-
-  return ret;
+  return &priv->lower;
 }
 
-#endif /* CONFIG_I2C && CONFIG_AS5048B */
+#endif /* CONFIG_I2C && CONFIG_QENCODER && CONFIG_AS5048B */

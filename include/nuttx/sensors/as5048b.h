@@ -41,8 +41,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/i2c.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/i2c.h>
+#include <nuttx/sensors/qencoder.h>
+
+#if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_AS5048B)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,11 +61,10 @@
 
 /* IOCTL Commands ***********************************************************/
 
-#define SNIOC_READZERO        _SNIOC(0x0001) /* Arg: uint16_t* pointer */
-#define SNIOC_WRITEZERO       _SNIOC(0x0002) /* Arg: uint16_t value */
-#define SNIOC_READAGC         _SNIOC(0x0004) /* Arg: uint8_t* pointer */
-#define SNIOC_READDIAG        _SNIOC(0x0005) /* Arg: uint8_t* pointer */
-#define SNIOC_READMAG         _SNIOC(0x0006) /* Arg: uint16_t* pointer */
+#define QEIOC_ZEROPOSITION    _QEIOC(QEIOC_USER+0) /* Arg: int32_t* pointer */
+#define QEIOC_AUTOGAINCTL     _QEIOC(QEIOC_USER+1) /* Arg: uint8_t* pointer */
+#define QEIOC_DIAGNOSTICS     _QEIOC(QEIOC_USER+2) /* Arg: uint8_t* pointer */
+#define QEIOC_MAGNITUDE       _QEIOC(QEIOC_USER+3) /* Arg: int32_t* pointer */
 
 /* Resolution ***************************************************************/
 
@@ -108,29 +110,28 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: as5048b_register
+ * Name: as5048b_initialize
  *
  * Description:
- *   Register the AS5048B character device as 'devpath'.
+ *   Initialize the AS5048B device.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register,
- *             for example "/dev/angle0".
- *   i2c     - An instance of the I2C interface to use to communicate
- *             with the AS5048B.
- *   addr    - The I2C address of the AS5048B.
+ *   i2c  - An I2C driver instance.
+ *   addr - The I2C address of the AS5048B.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   A new lower half quadrature encoder interface for the AS5048B on success;
+ *   NULL on failure.
  *
  ****************************************************************************/
 
-int as5048b_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
-                     uint8_t addr);
+FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_dev_s *i2c,
+                                              uint8_t addr);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
+#endif /* CONFIG_I2C && CONFIG_QENCODER && CONFIG_AS5048B */
 #endif /* __INCLUDE_NUTTX_SENSORS_AS5048B */
