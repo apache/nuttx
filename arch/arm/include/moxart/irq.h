@@ -81,7 +81,8 @@ extern "C"
 
 #define IRQ_SYSTIMER 19
 
-#define NR_IRQS   32
+#define VIRQ_START   32
+
+#define NR_IRQS     (VIRQ_START+2)
 
 #endif /* __ARCH_ARM_INCLUDE_MOXART_IRQ_H */
-
