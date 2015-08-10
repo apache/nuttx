@@ -462,7 +462,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Write TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t value */
 
-      case SNIOC_WRITRETOS:
+      case SNIOC_WRITETOS:
         ret = lm75_writeb16(priv, LM75_TOS_REG, (b16_t)arg);
         sndbg("TOS: %08x ret: %d\n", (b16_t)arg, ret);
         break;

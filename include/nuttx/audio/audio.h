@@ -130,7 +130,7 @@
  */
 
 #define AUDIO_TYPE_QUERY            0x00
-#define AUDIO_TYPE_INPUT            0x02
+#define AUDIO_TYPE_INPUT            0x01
 #define AUDIO_TYPE_OUTPUT           0x02
 #define AUDIO_TYPE_MIXER            0x04
 #define AUDIO_TYPE_SELECTOR         0x08

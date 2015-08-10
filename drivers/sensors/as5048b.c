@@ -88,7 +88,8 @@ static int as5048b_readang(FAR struct as5048b_dev_s *priv, FAR uint16_t *ang);
 
 static int as5048b_setup(FAR struct qe_lowerhalf_s *lower);
 static int as5048b_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int as5048b_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos);
+static int as5048b_position(FAR struct qe_lowerhalf_s *lower,
+                            FAR int32_t *pos);
 static int as5048b_reset(FAR struct qe_lowerhalf_s *lower);
 static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
                          unsigned long arg);
@@ -426,7 +427,8 @@ static int as5048b_shutdown(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int as5048b_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos)
+static int as5048b_position(FAR struct qe_lowerhalf_s *lower,
+                            FAR int32_t *pos)
 {
   FAR struct as5048b_dev_s *priv = (FAR struct as5048b_dev_s *)lower;
   uint16_t ang;
