@@ -67,6 +67,30 @@ void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t va
   *((volatile uart_addrwidth_t *)base + offset) = value;
 }
 
+void uart_decodeirq(int irq, FAR void *context)
+{
+  int i;
+  uint32_t status;
+  static int os = 0;
+
+  status =  *((volatile uart_addrwidth_t *)CONFIG_UART_MOXA_IRQ_STATUS_REG);
+
+  if ((status & 0x3f) == 0x3f)
+    {
+      return;
+    }
+
+  i = 0;
+  do
+    {
+      if (!(status & 0x1)) {
+        irq_dispatch(VIRQ_START + i, context);
+      }
+      status >>= 1;
+    }
+  while (++i <= 4);
+}
+
 #ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
 int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
@@ -109,9 +133,12 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
           /* Update mode register with requested mode */
 
           vmode = getreg32(CONFIG_UART_MOXA_MODE_REG);
-          putreg32(CONFIG_UART_MOXA_MODE_REG, (vmode & ~(OP_MODE_MASK << 2 * bitm_off)) | ((opmode << 2 * bitm_off) & 0xffff));
+          putreg32(vmode & ~(OP_MODE_MASK << 2 * bitm_off), CONFIG_UART_MOXA_MODE_REG);
+          vmode = opmode << 2 * bitm_off;
+          putreg32(getreg32(CONFIG_UART_MOXA_MODE_REG) | vmode, CONFIG_UART_MOXA_MODE_REG);
 
           irqrestore(flags);
+          ret = OK;
           break;
         }
 
@@ -126,6 +153,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           irqrestore(flags);
           *(unsigned long *)arg = opmode;
+          ret = OK;
           break;
         }
     }

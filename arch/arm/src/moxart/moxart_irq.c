@@ -81,6 +81,8 @@ volatile uint32_t *current_regs;
  * Public Functions
  ****************************************************************************/
 
+extern void uart_decodeirq(int irq, uint32_t *regs);
+
 /****************************************************************************
  * Name: up_irqinitialize
  *
@@ -93,6 +95,9 @@ void up_irqinitialize(void)
 {
   /* Prepare hardware */
 
+  *(volatile int *)0x98700000 |= 0x3f;
+
+  /* PMU setup */
   (*(volatile uint32_t *)0x98100008) &= ~0x9;
 
   while (!((*(volatile uint32_t *)0x98100008) & 0x2)) { ; }
@@ -100,6 +105,8 @@ void up_irqinitialize(void)
   (*(volatile uint32_t *)0x98100008) |= 0x4;
 
   (*(volatile uint32_t *)0x98800100) = 0xDFF8003F;
+
+  /* Check board type */
 
   /* Mask all interrupts off */
 
@@ -118,6 +125,10 @@ void up_irqinitialize(void)
   /* currents_regs is non-NULL only while processing an interrupt */
 
   current_regs = NULL;
+
+  /* Setup UART shared interrupt */
+  irq_attach(CONFIG_UART_MOXA_SHARED_IRQ, uart_decodeirq);
+  up_enable_irq(CONFIG_UART_MOXA_SHARED_IRQ);
 
   /* And finally, enable interrupts */
 
