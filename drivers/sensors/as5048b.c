@@ -2,8 +2,8 @@
  * drivers/sensors/as5048b.c
  * Character driver for the AMS AS5048B Magnetic Rotary Encoder
  *
- *   Copyright (C) 2015 Alexandru Duru. All rights reserved.
- *   Author: Alexandru Duru <alexandruduru@gmail.com>
+ *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
+ *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

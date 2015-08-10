@@ -3,9 +3,9 @@
  * Character driver for the TI LM92 Temperature Sensor
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 Alexandru Duru. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alexandru Duru <alexandruduru@gmail.com>
+ *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
