@@ -1,7 +1,7 @@
 ############################################################################
 # fs/vfs/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -66,9 +66,9 @@ else
 # Common file/socket descriptor support
 
 CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c fs_dupfd.c fs_dupfd2.c
-CSRCS += fs_getfilep.c fs_ioctl.c fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c 
-CSRCS += fs_read.c fs_rename.c fs_rmdir.c fs_stat.c fs_statfs.c fs_select.c
-CSRCS += fs_unlink.c fs_write.c
+CSRCS += fs_epoll.c fs_getfilep.c fs_ioctl.c fs_lseek.c fs_mkdir.c fs_open.c
+CSRCS += fs_poll.c  fs_read.c fs_rename.c fs_rmdir.c fs_stat.c fs_statfs.c
+CSRCS += fs_select.c fs_unlink.c fs_write.c
 
 # Certain interfaces are not available if there is no mountpoint support
 
