@@ -21,6 +21,7 @@ Contents
   - Audio Interface
   - maXTouch Xplained Pro
   - MCAN1 Loopback Test
+  - SPI Slave
   - Debugging
   - Configurations
 
@@ -132,8 +133,9 @@ for additional issues specific to a particular configuration.
      does not work if the D-Cache is configured in write-back mode; write-
      through mode is required.
 
-  8. And SPI slave driver as added on 2015-08-09 but has not been verified
-     as of this writing.
+  8. An SPI slave driver as added on 2015-08-09 but has not been verified
+     as of this writing. See discussion in include/nuttx/spi/slave.h and
+     in the section entitle "SPI Slave" below.
 
 Serial Console
 ==============
@@ -1076,6 +1078,89 @@ MCAN1 Loopback Test
 
     System Type -> MCAN device driver options
      CONFIG_SAMV7_MCAN_REGDEBUG=y              # Super low level register debug output
+
+SPI Slave
+=========
+
+  An interrutp driven SPI slave driver as added on 2015-08-09 but has not
+  been verified as of this writing. See discussion in include/nuttx/spi/slave.h
+  and below.
+
+  I do not yet have a design that supports SPI slave DMA.  And, under
+  certain, very limited conditions, I think it can be done.  Those
+  certain conditions are:
+
+  a) The master does not tie the chip select to ground.  The master must
+     raise chip select at the end of the transfer.  Then I do not need to
+     know the length of the transfer; I can cancel the DMA when the chip
+     is de-selected.
+
+  b) The protocol includes a dummy read after sending the command.  This
+     is very common in SPI device and should not be an issue if it is
+     specified.   This dummy read time provides time to set up the DMA.
+     So the protocol would be:
+
+     i)   Master drops the chip select.
+     ii)  Master sends the command which will indicate whether the master
+          is reading, writing, or exchanging data.  The master discards
+          the garbage return value.
+     iii) Slave is interrupted when the command word is received.  The
+          SPI device then decodes the command word and setups up the
+          subsequent DMA.
+     iv)  Master sends a dummy word and discards the return value.
+          During the bit times to shift the dummy word, the slave has time
+          to set up the DMA.
+     v)   Master then reads or writes (or exchanges) the data  If the DMA
+          is in place, the transfer should continue normally.
+     vi)  At the end of the data transfer the master raises the chip
+     select.
+
+   c) There are limitations in the word time, i.e., the time between the
+      interrupt for each word shifted in from the master.
+
+  The controller driver will get events after the receipt of each word in
+  ii), iv), and v).  The time between each word will be:
+
+    word-time = nbits * bit time + inter-word-gap
+
+  So for an 8 bit interface at 20MHz, the words will be received from the
+  master a 8 * 50nsec = 400 nsec + inter-word-gap.  That is the time
+  during which the dummy word would be shifted and during which we
+  receive the interrupt for the command word, interpret the command word,
+  and to set up the DMA for the remaining word transfer.  I don't think
+  that is possible, at least not at 20 MHz.
+
+  That is far too fast even for the interrupt driven solution that I have
+  in place now.  It could not work at 20MHz.  If we suppose that interrupt
+  processing is around 1 usec, then an 8 bit interface could not have bit
+  times more than 125 nsec or 8 KHz.  Interrupt handling should be faster
+  than 1 usec, but not a lot faster.  I have not benchmarked it.  NuttX
+  also supports special, zero latency interrupts that could bring the
+  interrupt time down even more.
+
+  Note that we would also have a little more processing time if you used
+  16-bit SPI word size.
+
+  Note also that the interrupt driven approach would have this same basic
+  performance limitation with the additional disadvantage that:
+
+  a) The driver will receive two interrupts per word exchanged:
+
+     i)  One interrupt will be received when the word is shifted in from
+         the master (at the end of 8-bit times).  This is a data received
+         interrupt.
+
+     ii) And another interrupt when the next words moved to the shift-out
+         register, freeing up the transmit holding register.  This is the
+         data sent interrupt.
+
+     The ii) event should be very soon after the i) event.
+
+     Without DMA, the only way to reduce the interrupt rate would be to add
+     interrupt-level polling to detect the when transmit holding register
+     is available.  That is not really a good idea.
+
+  b) It will hog all of the CPU for the duration of the transfer).
 
 Debugging
 =========
