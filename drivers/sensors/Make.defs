@@ -69,6 +69,10 @@ ifeq ($(CONFIG_LM92),y)
   CSRCS += lm92.c
 endif
 
+ifeq ($(CONFIG_MB7040),y)
+  CSRCS += mb7040.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support

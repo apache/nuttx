@@ -24,6 +24,13 @@ config LIS331DL
 	select I2C
 	select I2C_TRANSFER
 
+config MB7040
+	bool "MaxBotix MB7040 Sonar support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MaxBotix MB7040 sonar.
+
 config MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"
 	default n
