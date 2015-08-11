@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 6, 2015)
+NuttX TODO List (Last updated August 11, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,7 +16,7 @@ nuttx/
   (0)  Message Queues (sched/mqueue)
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -989,6 +989,22 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low.  I don't know of any issues now, but I am sure that
                someone will encounter this in the future.
+
+  Title:       USING send() WITH UDP CONNECTIONS.
+  Description: Currently send is not implemented unless TCP is enabled.  If
+               TCP is enabled and send() is called with a UDP socket, send()
+               will fail with EDESTADDRREQ.  According to OpenGroup.org:
+
+                 "The send() function shall initiate transmission of a message
+                  from the specified socket to its peer. The send() function
+                  shall send a message only when the socket is connected
+                  (including when the peer of a connectionless socket has been
+                  set via connect()).
+
+               This means that, internally, send() should detect the "connected"
+               UDP socket and automatically call sendto().
+  Status:      Open
+  Priority:    Low, there is always the work-around of just calling sendto().
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
