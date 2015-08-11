@@ -398,8 +398,10 @@
  *    the first word send is a command to read or write something following
  *    by a sequence of transfers to implement the write.  So you have very,
  *    very limited time window to setup the correct DMA to respond to the
- *    command.  DMA setup time can be longer.  And I am not sure it I can
- *    make it reliable.
+ *    command.  I am not certain that it can be done reliably.
+ *
+ *    Inserting dummy words into the protocol between the first command word
+ *    and the remaining data transfer could allow time to set up the DMA.
  *
  * 3) I mentioned that you do not know the size of the transfer in advance.
  *    If you set up the DMA to terminate to soon, then you lose the last part
