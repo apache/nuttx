@@ -73,7 +73,7 @@ void uart_decodeirq(int irq, FAR void *context)
   uint32_t status;
   static int os = 0;
 
-  status =  *((volatile uart_addrwidth_t *)CONFIG_UART_MOXA_IRQ_STATUS_REG);
+  status = *((volatile uart_addrwidth_t *)CONFIG_UART_MOXA_IRQ_STATUS_REG);
 
   if ((status & 0x3f) == 0x3f)
     {
