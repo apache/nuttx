@@ -1,7 +1,7 @@
 ############################################################################
 # Makefile.unix
 #
-#   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -473,19 +473,19 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # README.txt file in the NuttX tools GIT repository for additional information.
 
-config:
+config: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig
 
-oldconfig:
+oldconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --oldconfig Kconfig
 
-menuconfig:
+menuconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-mconf Kconfig
 
-qconfig:
+qconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-qconf Kconfig
 
-gconfig:
+gconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-gconf Kconfig
 
 # export
@@ -556,10 +556,16 @@ endif
 # as a convenience, the following targets are included to support housekeeping
 # functions in the user application directory from the NuttX build directory.
 #
+# apps_preconfig: Prepare applications to be configured
 # apps_clean:     Perform the clean operation only in the user application
 #                 directory
 # apps_distclean: Perform the distclean operation only in the user application
 #                 directory.
+
+apps_preconfig:
+ifneq ($(APPDIR),)
+	$(Q) $(MAKE) -C "$(TOPDIR)/$(APPDIR)" TOPDIR="$(TOPDIR)" preconfig
+endif
 
 apps_clean:
 ifneq ($(APPDIR),)
