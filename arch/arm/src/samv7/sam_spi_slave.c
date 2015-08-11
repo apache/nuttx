@@ -419,132 +419,152 @@ static int spi_interrupt(struct sam_spidev_s *priv)
   uint32_t pending;
   uint32_t regval;
 
-  /* Get the current set of pending/enabled interrupts */
-
-  sr      = spi_getreg(priv, SAM_SPI_SR_OFFSET);
-  imr     = spi_getreg(priv, SAM_SPI_IMR_OFFSET);
-  pending = sr & imr;
-
-  /* TThe SPI waits until NSS goes active before receiving the serial clock
-   * from an external master. When NSS falls, the clock is validated and the
-   * data is loaded in the SPI_RDR depending on the BITS field configured in
-   * the SPI_CSR0.  These bits are processed following a phase and a polarity
-   * defined respectively by the NCPHA and CPOL bits in the SPI_CSR0.
-   *
-   * When all bits are processed, the received data is transferred in the
-   * SPI_RDR and the RDRF bit rises. If the SPI_RDR has not been read before
-   * new data is received, the Overrun Error Status (OVRES) bit in the SPI_SR
-   * is set. As long as this flag is set, data is loaded in the SPI_RDR. The
-   * user must read SPI_SR to clear the OVRES bit.
+  /* We loop because the TDRE interrupt will probably immediately follow the
+   * RDRF interrupt and we might be able to catch it in this handler
+   * execution.
    */
 
-#ifdef CONFIG_DEBUG_SPI
-  /* Check the RX data overflow condition */
-
-  if ((pending & SPI_INT_OVRES) != 0)
+  for (;;)
     {
-      /* If debug is enabled, report any overrun errors */
+      /* Get the current set of pending/enabled interrupts */
 
-      spidbg("Error: Overrun (OVRES): %08x\n", pending);
+      sr      = spi_getreg(priv, SAM_SPI_SR_OFFSET);
+      imr     = spi_getreg(priv, SAM_SPI_IMR_OFFSET);
+      pending = sr & imr;
 
-      /* OVRES was cleared by the status read. */
-    }
-#endif
-
-  /* Check for the availability of RX data */
-
-  if ((pending & SPI_INT_RDRF) != 0)
-    {
-      uint16_t data;
-
-      /* We get no indication of the falling edge of NSS.  But if we are
-       * here then it must have fallen.
+      /* Return from the interrupt handler when all pending interrupts have
+       * been processed.
        */
 
-      if (priv->nss)
+      if (pending == 0)
         {
-          priv->nss = false;
-          SPI_SDEV_SELECT(priv->sdev, true);
+          return OK;
         }
 
-      /* Read the RDR to get the data and to clear the pending RDRF
-       * interrupt.
+      /* TThe SPI waits until NSS goes active before receiving the serial
+       * clock from an external master. When NSS falls, the clock is
+       * validated and the data is loaded in the SPI_RDR depending on the
+       * BITS field configured in the SPI_CSR0.  These bits are processed
+       * following a phase and a polarity defined respectively by the NCPHA
+       * and CPOL bits in the SPI_CSR0.
+       *
+       * When all bits are processed, the received data is transferred in
+       * the SPI_RDR and the RDRF bit rises. If the SPI_RDR has not been
+       * read before new data is received, the Overrun Error Status (OVRES)
+       * bit in the SPI_SR is set. As long as this flag is set, data is
+       * loaded in the SPI_RDR. The user must read SPI_SR to clear the OVRES
+       * bit.
        */
-
-      regval = spi_getreg(priv, SAM_SPI_RDR_OFFSET);
-      data   = (uint16_t)((regval & SPI_RDR_RD_MASK) >> SPI_RDR_RD_SHIFT);
-
-      /* Enable TXDR/OVRE interrupts */
-
-      regval = (SPI_INT_TDRE | SPI_INT_UNDES);
-      spi_putreg(priv, regval, SAM_SPI_IER_OFFSET);
-
-      /* Report the receipt of data to the SPI device driver */
-
-      SPI_SDEV_RECEIVE(priv->sdev, data);
-    }
-
-  /* When a transfer starts, the data shifted out is the data present in the
-   * Shift register. If no data has been written in the SPI_TDR, the last
-   * data received is transferred. If no data has been received since the last
-   * reset, all bits are transmitted low, as the Shift register resets to 0.
-   *
-   * When a first data is written in the SPI_TDR, it is transferred immediately
-   * in the Shift register and the TDRE flag rises. If new data is written, it
-   * remains in the SPI_TDR until a transfer occurs, i.e., NSS falls and there
-   * is a valid clock on the SPCK pin. When the transfer occurs, the last data
-   * written in the SPI_TDR is transferred in the Shift register and the TDRE
-   * flag rises. This enables frequent updates of critical variables with single
-   * transfers.
-   *
-   * Then, new data is loaded in the Shift register from the SPI_TDR. If no
-   * character is ready to be transmitted, i.e., no character has been written in
-   * the SPI_TDR since the last load from the SPI_TDR to the Shift register, the
-   * SPI_TDR is retransmitted. In this case the Underrun Error Status Flag
-   * (UNDES) is set in the SPI_SR.
-   */
 
 #ifdef CONFIG_DEBUG_SPI
-  /* Check the TX data underflow condition */
+      /* Check the RX data overflow condition */
 
-  if ((pending & SPI_INT_UNDES) != 0)
-    {
-      /* If debug is enabled, report any overrun errors */
+      if ((pending & SPI_INT_OVRES) != 0)
+        {
+          /* If debug is enabled, report any overrun errors */
 
-      spidbg("Error: Underrun (UNDEX): %08x\n", pending);
+          spidbg("Error: Overrun (OVRES): %08x\n", pending);
 
-      /* UNDES was cleared by the status read. */
-    }
+          /* OVRES was cleared by the status read. */
+        }
 #endif
 
-  /* Output the next TX data */
+      /* Check for the availability of RX data */
 
-  if ((pending & SPI_INT_TDRE) != 0)
-    {
-      /* Get the next output value and write it to the TDR
-       * The TDRE interrupt is cleared by writing to the from RDR.
+      if ((pending & SPI_INT_RDRF) != 0)
+        {
+          uint16_t data;
+
+          /* We get no indication of the falling edge of NSS.  But if we are
+           * here then it must have fallen.
+           */
+
+          if (priv->nss)
+            {
+              priv->nss = false;
+              SPI_SDEV_SELECT(priv->sdev, true);
+            }
+
+          /* Read the RDR to get the data and to clear the pending RDRF
+           * interrupt.
+           */
+
+          regval = spi_getreg(priv, SAM_SPI_RDR_OFFSET);
+          data   = (uint16_t)((regval & SPI_RDR_RD_MASK) >> SPI_RDR_RD_SHIFT);
+
+          /* Enable TXDR/OVRE interrupts */
+
+          regval = (SPI_INT_TDRE | SPI_INT_UNDES);
+          spi_putreg(priv, regval, SAM_SPI_IER_OFFSET);
+
+          /* Report the receipt of data to the SPI device driver */
+
+          SPI_SDEV_RECEIVE(priv->sdev, data);
+        }
+
+      /* When a transfer starts, the data shifted out is the data present
+       * in the Shift register. If no data has been written in the SPI_TDR,
+       * the last data received is transferred. If no data has been received
+       * since the last reset, all bits are transmitted low, as the Shift
+       * register resets to 0.
+       *
+       * When a first data is written in the SPI_TDR, it is transferred
+       * immediately in the Shift register and the TDRE flag rises. If new
+       * data is written, it remains in the SPI_TDR until a transfer occurs,
+       * i.e., NSS falls and there is a valid clock on the SPCK pin. When
+       * the transfer occurs, the last data written in the SPI_TDR is
+       * transferred in the Shift register and the TDRE flag rises. This
+       * enables frequent updates of critical variables with single transfers.
+       *
+       * Then, new data is loaded in the Shift register from the SPI_TDR. If
+       * no character is ready to be transmitted, i.e., no character has been
+       * written in the SPI_TDR since the last load from the SPI_TDR to the
+       * Shift register, the SPI_TDR is retransmitted. In this case the
+       * Underrun Error Status Flag (UNDES) is set in the SPI_SR.
        */
 
-      regval = spi_dequeue(priv);
-      spi_putreg(priv, regval, SAM_SPI_TDR_OFFSET);
-    }
+#ifdef CONFIG_DEBUG_SPI
+      /* Check the TX data underflow condition */
 
-  /* The SPI slave hardware provides only an event when NSS rises
-   * which may or many not happen at the end of a transfer.  NSSR was
-   * cleared by the status read.
-   */
+      if ((pending & SPI_INT_UNDES) != 0)
+        {
+          /* If debug is enabled, report any overrun errors */
 
-  if ((pending & SPI_INT_NSSR) != 0)
-    {
-      /* Disable further TXDR/OVRE interrupts */
+          spidbg("Error: Underrun (UNDEX): %08x\n", pending);
 
-      regval = (SPI_INT_TDRE | SPI_INT_UNDES);
-      spi_putreg(priv, regval, SAM_SPI_IDR_OFFSET);
+          /* UNDES was cleared by the status read. */
+        }
+#endif
 
-      /* Report the state change to the SPI device driver */
+      /* Output the next TX data */
 
-      priv->nss = true;
-      SPI_SDEV_SELECT(priv->sdev, false);
+      if ((pending & SPI_INT_TDRE) != 0)
+        {
+          /* Get the next output value and write it to the TDR
+           * The TDRE interrupt is cleared by writing to the from RDR.
+           */
+
+          regval = spi_dequeue(priv);
+          spi_putreg(priv, regval, SAM_SPI_TDR_OFFSET);
+        }
+
+      /* The SPI slave hardware provides only an event when NSS rises
+       * which may or many not happen at the end of a transfer.  NSSR was
+       * cleared by the status read.
+       */
+
+      if ((pending & SPI_INT_NSSR) != 0)
+        {
+          /* Disable further TXDR/OVRE interrupts */
+
+          regval = (SPI_INT_TDRE | SPI_INT_UNDES);
+          spi_putreg(priv, regval, SAM_SPI_IDR_OFFSET);
+
+          /* Report the state change to the SPI device driver */
+
+          priv->nss = true;
+          SPI_SDEV_SELECT(priv->sdev, false);
+        }
     }
 
   return OK;
