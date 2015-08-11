@@ -144,7 +144,7 @@ winnative=`grep CONFIG_WINDOWS_NATIVE= "${src_config}" | cut -d'=' -f2`
 defappdir=y
 if [ -z "${appdir}" ]; then
   quoted=`grep "^CONFIG_APPS_DIR=" "${src_config}" | cut -d'=' -f2`
-  if [ ! -z "${appdir}" ]; then
+  if [ ! -z "${quoted}" ]; then
     appdir=`echo ${quoted} | sed -e "s/\"//g"`
     defappdir=n
   fi
@@ -165,7 +165,6 @@ if [ -z "${appdir}" ]; then
 
   if [ -d "${TOPDIR}/../apps" ]; then
     appdir="../apps"
-
   else
     # Check for a versioned apps/ directory
 

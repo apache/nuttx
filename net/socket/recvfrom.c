@@ -101,7 +101,7 @@ struct recvfrom_s
   uint8_t                 *rf_buffer;    /* Pointer to receive buffer */
   FAR struct sockaddr     *rf_from;      /* Address of sender */
   FAR socklen_t           *rf_fromlen;   /* Number of bytes allocated for address of sender */
-  size_t                   rf_recvlen;   /* The received length */
+  ssize_t                  rf_recvlen;   /* The received length */
   int                      rf_result;    /* Success:OK, failure:negated errno */
 };
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
@@ -404,8 +404,9 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
    * buffer.
    */
 
-  if ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
-          pstate->rf_buflen > 0)
+  pstate->rf_recvlen = -1;
+
+  if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
     {
       FAR struct iob_s *tmp;
       uint8_t src_addr_size;
@@ -445,16 +446,23 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
             }
         }
 
-      recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
-                            src_addr_size + sizeof(uint8_t));
+      if (pstate->rf_buflen > 0)
+        {
+          recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
+                                src_addr_size + sizeof(uint8_t));
 
-      nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+          nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
-      /* Update the accumulated size of the data read */
+          /* Update the accumulated size of the data read */
 
-      pstate->rf_recvlen += recvlen;
-      pstate->rf_buffer  += recvlen;
-      pstate->rf_buflen  -= recvlen;
+          pstate->rf_recvlen  = recvlen;
+          pstate->rf_buffer  += recvlen;
+          pstate->rf_buflen  -= recvlen;
+        }
+      else
+        {
+          pstate->rf_recvlen = 0;
+        }
 
 out:
       /* Remove the I/O buffer chain from the head of the read-ahead
@@ -1482,7 +1490,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
        * something was received (already in 'ret'); EAGAIN if not.
        */
 
-      if (ret <= 0)
+      if (ret < 0)
         {
           /* Nothing was received */
 
