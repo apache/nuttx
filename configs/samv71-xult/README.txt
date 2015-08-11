@@ -58,8 +58,8 @@ See the Atmel website for further information about this board:
 
   - http://www.atmel.com/tools/atsamv71-xult.aspx
 
-tatus/Open Issues
-=================
+Status/Open Issues
+==================
 
 I would characterize the general port as very mature and stable.  However,
 there are a number of issues, caveats, and unfinished drivers as detailed in
@@ -126,6 +126,14 @@ for additional issues specific to a particular configuration.
      WM8904 interface was taken directly from the SAMA5D4-EK and may well
      need modification due to differences with the physical WM8904
      interface.
+
+  7. An MCAN driver as added and verified on 2015-08-08 using the loopback
+     test at apps/examples/can.  Like the Ethernet driver, the MCAN driver
+     does not work if the D-Cache is configured in write-back mode; write-
+     through mode is required.
+
+  8. And SPI slave driver as added on 2015-08-09 but has not been verified
+     as of this writing.
 
 Serial Console
 ==============
