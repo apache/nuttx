@@ -10797,10 +10797,11 @@
 	* arch/arm/src/samv7: Add the framework for an SPI slave drvier.  This
 	  driver has a lot of missing logic on initial commit (2015-08-09).
 	* arch/arm/src/samv7: Basic, no-DMA SPI slave driver is in place
-	  (2015-080=-10).
+	  (2015-08-10).
 	* fs/vfs/epoll.c and include/sys/epoll.h: Add a very simple epoll layer
 	  just around poll calls. To satisfy build app requirements.  From Anton
-	  D. Kachalov.
+	  D. Kachalov (2015-08-10).
 	* drivers/mtd/ramtron.c:  Update to include supportf for newer
-	  RAMTRON parts.  From David Sidrane.
-
+	  RAMTRON parts.  From David Sidrane (2015-08-10).
+	* Networking:  Allow receipt of empty UDP packets.  From Max Neklyudov
+	  (2015-08-11).

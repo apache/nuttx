@@ -101,6 +101,12 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
     {
       offset -= iob->io_len;
       iob     = iob->io_flink;
+      if (iob == NULL)
+        {
+          /* We have no requested data in iob chain */
+
+          return 0;
+        }
     }
 
   /* Then loop until all of the I/O data is copied to the user buffer */
