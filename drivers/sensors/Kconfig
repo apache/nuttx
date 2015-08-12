@@ -31,6 +31,13 @@ config MB7040
 	---help---
 		Enable driver support for the MaxBotix MB7040 sonar.
 
+config MS5805
+	bool "MEAS MS5805 Altimeter support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MEAS MS5805 altimeter.
+
 config MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"
 	default n
