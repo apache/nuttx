@@ -746,6 +746,9 @@
 #define USBHS_CTRL_RDERRE                  (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt Enable */
 #define USBHS_CTRL_FRZCLK                  (1 << 14)         /* Bit 14: Freeze USB Clock */
 #define USBHS_CTRL_USBE                    (1 << 15)         /* Bit 15: USBHS Enable */
+#define USBHS_CTRL_UIDE                    (1 << 24)         /* Bit 24: UOTGID Pin Enable */
+#  define USBHS_CTRL_UIDE_UIMOD            (0 << 24)         /*   0=USB mode selected UIMOD bit. */
+#  define USBHS_CTRL_UIDE_UOTGID           (1 << 24)         /*   1=USB mode selected by UOTGID */
 #define USBHS_CTRL_UIMOD_MASK              (1 << 25)         /* Bit 25: USBHS Mode */
 #  define USBHS_CTRL_UIMOD_HOST            (0 << 25)         /*   0=Host mode */
 #  define USBHS_CTRL_UIMOD_DEVICE          (1 << 25)         /*   1=Device mode */

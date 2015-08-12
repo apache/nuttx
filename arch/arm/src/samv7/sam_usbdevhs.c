@@ -4154,7 +4154,9 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
       regval &= ~USBHS_CTRL_FRZCLK;
       sam_putreg(regval, SAM_USBHS_CTRL);
 
-      /* DETACH=0: USBHS is attached.  Pulls up the DP line */
+      /* DETACH=0: USBHS is attached.  ARMs the USBHS to pull up the DP line
+       * when the USBHS is no longer suspended.
+       */
 
       regval = sam_getreg(SAM_USBHS_DEVCTRL);
       regval &= ~USBHS_DEVCTRL_DETACH;
@@ -4162,49 +4164,97 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
 
       priv->usbdev.speed = USB_SPEED_FULL;
 
-      /* The next event that we expect to see is a reset from the connected
-       * host.  When a USB reset is detected on the USB line, the following
-       * operations are performed by the controller:
+      /* There are several possibilities:
        *
-       *   - All endpoints are disabled, except the default control endpoint.
-       *   - The default control endpoint is reset
-       *   - The data toggle sequence of the default control endpoint is cleared.
-       *   - At the end of the reset process, the End of Reset (USBHS_DEVISR.EORST)
-       *     bit is set.
-       *
-       * The class implementation should not call this method with
-       * enable == true until is is fully initialized and ready to accept
-       * connections.
-       *
-       * If there is no host connected (no bus activity), then we might
-       * get a SUSPend interrupt instead of a End of Reset.  In the case, we
-       * would like to keep the clock frozen until the host is connected.
-       *
-       * The strategy here was taken from the SAMV7 sample code:   It will
-       * force a SUSPend event.  Then disable clocking.  We will take the
-       * SUSPend interrupt (because it is already pending), but after the
-       * clock is frozen, only a WAKEUP interrupt can be received.
+       * 1. The device may not be plugged into a host.  In that case, the
+       *    hardware will be in a suspended state.  When an idle USB bus state
+       *    has been detected for 3 ms , the controller sets the Suspend
+       *    (USBHS_DEVISR.SUSP) interrupt bit.
+       * 2. We may have been suspended but a WAKEUP event has already occurred.
+       *    The USBHS_DEVISR.WAKEUP interrupt bit is set when a non-idle event
+       *    is detected, it can occur whether the controller is in the Suspend
+       *    mode or not. The USBHS_DEVISR.SUSP and USBHS_DEVISR.WAKEUP interrupts
+       *    are thus independent, except that one bit is cleared when the other is set.
+       * 3. Because we have already enabled the pull-up, that event may have already
+       *    have been reset by the host.
        */
 
-      /* Enable expected interrupts */
+      regval = sam_getreg(SAM_USBHS_DEVISR);
+      if ((regval & USBHS_DEVINT_SUSPD) != 0)
+        {
+          /* If the USBHS detects activity on the BUS, then it will not be
+           * suspended.  In that case, next event that we expect to see is a
+           * reset from the connected host.  When a USB reset is detected on
+           * the USB line, the following operations are performed by the
+           * controller:
+           *
+           *   - All endpoints are disabled, except the default control
+           *     endpoint.
+           *   - The default control endpoint is reset
+           *   - The data toggle sequence of the default control endpoint is
+           *     cleared.
+           *   - At the end of the reset process, the End of Reset
+           *     (USBHS_DEVISR.EORST) bit is set.
+           *   - During a reset, the USBHS automatically switches to High-
+           *     speed mode if the host is High-speed-capable (the reset is
+           *     called High-speed reset). The user should observe the
+           *     USBHS_SR.SPEED field to know the speed running at the end
+           *     of the reset (USBHS_DEVISR.EORST = 1).
+           *
+           * The class implementation should not call this method with
+           * enable == true until is is fully initialized and ready to
+           * accept connections.
+           */
 
-      sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD,
-                 SAM_USBHS_DEVIER);
+          /* Enable expected interrupts */
 
-      /* Clear pending interrupt interrupts */
+          sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_EORSM |
+                     USBHS_DEVINT_SUSPD,
+                     SAM_USBHS_DEVIER);
 
-      sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD, SAM_USBHS_DEVICR);
+          /* Leave the clock unfrozen */
+        }
+      else
+        {
+          /* If there is no host connected (no bus activity), then we
+           * might get a SUSPend interrupt instead of a End of Reset.  In
+           * the case, we would like to keep the clock frozen until the
+           * host is connected.
+           *
+           * The strategy here was taken from the SAMV7 sample code:   It
+           * will force a SUSPend event.  Then disable clocking.  We will
+           * take the SUSPend interrupt (because it is already pending),
+           * but after the clock is frozen, only a WAKEUP interrupt can be
+           * received.
+           */
 
-      /* Force the first suspend event */
+          /* Enable wakeup interrupts */
 
-      sam_putreg(USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIFR);
-      sam_putreg(USBHS_DEVINT_WAKEUP, SAM_USBHS_DEVICR);
+          sam_putreg(USBHS_DEVINT_WAKEUP | USBHS_DEVINT_EORSM,
+                     SAM_USBHS_DEVIER);
 
-      /* Refreeze the clock and wait for the wakeup event */
+          /* Enable expected interrupts */
 
-      regval  = sam_getreg(SAM_USBHS_CTRL);
-      regval |= USBHS_CTRL_FRZCLK;
-      sam_putreg(regval, SAM_USBHS_CTRL);
+          sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_WAKEUP |
+                     USBHS_DEVINT_SUSPD,
+                     SAM_USBHS_DEVIER);
+
+          /* Clear pending interrupts */
+
+          sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD,
+                     SAM_USBHS_DEVICR);
+
+          /* Force the first suspend event */
+
+          sam_putreg(USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIFR);
+          sam_putreg(USBHS_DEVINT_WAKEUP, SAM_USBHS_DEVICR);
+
+          /* Refreeze the clock and wait for the wakeup event */
+
+          regval  = sam_getreg(SAM_USBHS_CTRL);
+          regval |= USBHS_CTRL_FRZCLK;
+          sam_putreg(regval, SAM_USBHS_CTRL);
+        }
     }
   else
     {
@@ -4366,6 +4416,9 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   sam_putreg(regval, SAM_USBHS_CTRL);
 
   regval |= USBHS_CTRL_USBE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  regval &= ~USBHS_CTRL_UIDE;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
   regval &= ~USBHS_CTRL_FRZCLK;
