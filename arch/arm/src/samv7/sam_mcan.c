@@ -929,7 +929,7 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
 
 #ifdef CONFIG_CAN_EXTID
 static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
-              FAR struct canioc_stdfilter_s *extconfig);
+              FAR struct canioc_extfilter_s *extconfig);
 static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx);
 #else
 static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
@@ -1703,7 +1703,7 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
 
 #ifdef CONFIG_CAN_EXTID
 static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
-                              FAR struct canioc_stdfilter_s *extconfig)
+                              FAR struct canioc_extfilter_s *extconfig)
 {
   FAR const struct sam_config_s *config;
   FAR uint32_t *extfilter;
