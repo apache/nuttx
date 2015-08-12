@@ -274,7 +274,7 @@ static int ms5805_readadc(FAR struct ms5805_dev_s *priv, FAR uint32_t *adc)
 
 static int ms5805_setosr(FAR struct ms5805_dev_s *priv, uint16_t osr)
 {
-	int ret = OK;
+  int ret = OK;
 
   sndbg("osr: %04x\n", osr);
 
@@ -378,7 +378,7 @@ static int ms5805_readprom(FAR struct ms5805_dev_s *priv)
 static int ms5805_reset(FAR struct ms5805_dev_s *priv)
 {
   uint8_t regaddr;
-	int ret;
+  int ret;
 
   regaddr = MS5805_RESET_REG;
   sndbg("addr: %02x\n", regaddr);
@@ -415,7 +415,7 @@ static int ms5805_reset(FAR struct ms5805_dev_s *priv)
 static int ms5805_convert(FAR struct ms5805_dev_s *priv, uint8_t regaddr,
                           FAR uint32_t *regval)
 {
-	int ret;
+  int ret;
 
   regaddr |= priv->osr;
   sndbg("addr: %02x\n", regaddr);
@@ -462,7 +462,7 @@ static int ms5805_measure(FAR struct ms5805_dev_s *priv)
   int64_t off;
   int64_t sens;
   int32_t press;
-	int ret;
+  int ret;
 
   ret = ms5805_convert(priv, MS5805_PRESS_REG, &rawpress);
   if (ret < 0)

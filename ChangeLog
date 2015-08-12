@@ -10809,4 +10809,6 @@
 	  support Added MB7040 sonar.  From Paul Alexander Patience (2015-08-11).
 	* net/udp:  Add support for send() for connected UDP sockets
 	  (2015-08-11).
-
+	* drivers/sensors/ms5805.c and include/nuttx/sensors/ms5805.h: Add
+	  support for an MS5805 altimeter.  From Paul Alexander Patience
+	  (2015-08-07).
