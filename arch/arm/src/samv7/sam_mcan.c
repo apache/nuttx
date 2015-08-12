@@ -3443,7 +3443,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
    * use PCK5 to derive bit rate.
    */
 
-  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER) | SAMV7_MCAN_CLKSRC;
+  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER - 1) | SAMV7_MCAN_CLKSRC;
   putreg32(regval, SAM_PMC_PCK5);
 
   /* Enable PCK5 */
