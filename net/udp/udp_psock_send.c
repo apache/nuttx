@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/udp/udp_send.c
+ * net/udp/udp_psock_send.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
