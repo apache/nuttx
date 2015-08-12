@@ -95,7 +95,7 @@ ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
 
   if (!_SS_ISCONNECTED(psock->s_flags))
     {
-      /* Now, then it is not legal to call send */
+      /* No, then it is not legal to call send() with this socket. */
 
       return -ENOTCONN;
     }
@@ -104,26 +104,26 @@ ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-      if (conn->domain == PF_INET)
+  if (conn->domain == PF_INET)
 #endif
-        {
-          tolen               = sizeof(struct sockaddr_in);
-          to.addr4.sin_family = AF_INET;
-          to.addr4.sin_port   = conn->rport;
-          net_ipv4addr_copy(to.addr4.sin_addr.s_addr, conn->u.ipv4.raddr);
-        }
+    {
+      tolen               = sizeof(struct sockaddr_in);
+      to.addr4.sin_family = AF_INET;
+      to.addr4.sin_port   = conn->rport;
+      net_ipv4addr_copy(to.addr4.sin_addr.s_addr, conn->u.ipv4.raddr);
+    }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-      else
+  else
 #endif
-        {
-          tolen               = sizeof(struct sockaddr_in6);
-          to.addr6.sin6_family = AF_INET6;
-          to.addr6.sin6_port   = conn->rport;
-          net_ipv6addr_copy(to.addr6.sin6_addr.s6_addr, conn->u.ipv6.raddr);
-        }
+    {
+      tolen               = sizeof(struct sockaddr_in6);
+      to.addr6.sin6_family = AF_INET6;
+      to.addr6.sin6_port   = conn->rport;
+      net_ipv6addr_copy(to.addr6.sin6_addr.s6_addr, conn->u.ipv6.raddr);
+    }
 #endif /* CONFIG_NET_IPv6 */
 
   return psock_udp_sendto(psock, buf, len, 0, &to.addr, tolen);
