@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/udp/udp_sendto.c
+ * net/udp/udp_psock_sendto.c
  *
  *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

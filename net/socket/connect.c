@@ -621,6 +621,14 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif
             {
               ret = udp_connect(psock->s_conn, addr);
+              if (ret < 0 || addr == NULL)
+                {
+                  psock->s_flags &= ~_SF_CONNECTED;
+                }
+              else
+                {
+                  psock->s_flags |= _SF_CONNECTED;
+                }
             }
 #endif /* CONFIG_NET_UDP */
 

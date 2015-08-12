@@ -1,7 +1,7 @@
 ############################################################################
 # net/socket/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,21 +35,19 @@
 
 # Include socket source files
 
-SOCK_CSRCS += bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
-SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dupsd.c net_dupsd2.c
-SOCK_CSRCS += net_clone.c net_poll.c net_vfcntl.c
+SOCK_CSRCS += bind.c connect.c getsockname.c recv.c recvfrom.c send.c
+SOCK_CSRCS += sendto.c socket.c net_sockets.c net_close.c net_dupsd.c
+SOCK_CSRCS += net_dupsd2.c net_clone.c net_poll.c net_vfcntl.c
 
 # TCP/IP support
 
 ifeq ($(CONFIG_NET_TCP),y)
-SOCK_CSRCS += send.c listen.c accept.c net_monitor.c
-else
+SOCK_CSRCS += listen.c accept.c net_monitor.c
 
 # Local Unix domain support
 
-ifeq ($(CONFIG_NET_LOCAL_STREAM),y)
-SOCK_CSRCS += send.c listen.c accept.c
-endif
+else ifeq ($(CONFIG_NET_LOCAL_STREAM),y)
+SOCK_CSRCS += listen.c accept.c
 endif
 
 # Socket options

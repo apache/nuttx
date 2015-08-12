@@ -10806,4 +10806,7 @@
 	* Networking:  Allow receipt of empty UDP packets.  From Max Neklyudov
 	  (2015-08-11).
 	* drivers/sensors/mb7040.c and include/nuttx/sensors/mb7040.h: Add
-	  support Added MB7040 sonar.  From Paul Alexander Patience (2015-08-07).
+	  support Added MB7040 sonar.  From Paul Alexander Patience (2015-08-11).
+	* net/udp:  Add support for send() for connected UDP sockets
+	  (2015-08-11).
+
