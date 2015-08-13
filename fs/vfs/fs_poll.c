@@ -176,6 +176,9 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
                   (void)poll_fdsetup(fds[j].fd, &fds[j], false);
                 }
 
+              /* Indicate an error on the file discriptor */
+
+              fds[i].revents |= POLLERR;
               return ret;
             }
         }
