@@ -10559,7 +10559,7 @@
 	* arch/arm/src/sama5/sam_can.c: Fix SAMA5 CAN frame construction.  From
 	  Max Holtzberg (2015-06-07).
 
-7.11 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.11 2015-08-13 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/efm32/efm32_spi.c: Correct write to incorrect register in
 	  EFM32 SPI driver.  From Pierre-noel Bouteville (2015-06-09).
@@ -10600,7 +10600,7 @@
 	* arch/arm/include/samdl and arch/arm/src/samdl:  Add architecture support
 	  for the SAMD21 family (2015-06-19).
 	* configs/samd21-xplained:  Board configuration for the SAMD21 Xplained
-	  bord (2015-06-21).
+	  board (2015-06-21).
 	* arch/arm/src/sam34/sam_lowputc.c: Back out an error introduced with
 	  commit 02c33f66c5a8be774034cd40e4125e9323c7b4d8.  Causes an infinite
 	  loop in up_lowputc().  From Max Neklyudov (2015-06-22).
@@ -10618,8 +10618,8 @@
 	* SAM3/4:  Add a TWI driver for the SAM4CM.  From  Max Neklyudov
 	  (2015-06-22).
 	* SAMV7 Xplained: In clock configuration, divider was set to 25 to get
-	  25*12MHz=300MHz CPU clock.  The correct multiplier is 24 becaue the
-	  calculatin if (24+1)*12MHz.  So the board was running at 312MHz.
+	  25*12MHz=300MHz CPU clock.  The correct multiplier is 24 because the
+	  calculation if (24+1)*12MHz.  So the board was running at 312MHz.
 	  From Efim Monjak (2015-06-26).
 	* NFS client: Fix prototype of unbind method.  The function prototype
 	  was not updated for NFS after a recent change to the file system
@@ -10729,7 +10729,7 @@
 	  for the STMicro STM32 F7 (2015-07-15).
 	* drivers/can.c:  Fix an issue in the CAN driver where the rx_sem
 	  count can grow beyond bounds (2015-07-15).
-	* configs/stm32f762g-disco/:  Add initialize support for the STMicor
+	* configs/stm32f762g-disco/:  Add initialize support for the STMicro
 	  STM32 F7 Discovery board.  This is a work in progress and will be a
 	  while before it is fully functional (2015-07-16).
 	* arch/../up_etherstub.c, arch/../up_initialize, and other files: Add
@@ -10794,7 +10794,7 @@
 	  Patience (2015-08-07).
 	* include/nuttx/spi/slave.h:  Add a definition of an SPI slave
 	  interface (2015-08-08).
-	* arch/arm/src/samv7: Add the framework for an SPI slave drvier.  This
+	* arch/arm/src/samv7: Add the framework for an SPI slave driver.  This
 	  driver has a lot of missing logic on initial commit (2015-08-09).
 	* arch/arm/src/samv7: Basic, no-DMA SPI slave driver is in place
 	  (2015-08-10).
@@ -10806,9 +10806,11 @@
 	* Networking:  Allow receipt of empty UDP packets.  From Max Neklyudov
 	  (2015-08-11).
 	* drivers/sensors/mb7040.c and include/nuttx/sensors/mb7040.h: Add
-	  support Added MB7040 sonar.  From Paul Alexander Patience (2015-08-11).
+	  support for a MB7040 sonar driver.  From Paul Alexander Patience (2015-08-11).
 	* net/udp:  Add support for send() for connected UDP sockets
 	  (2015-08-11).
 	* drivers/sensors/ms5805.c and include/nuttx/sensors/ms5805.h: Add
 	  support for an MS5805 altimeter.  From Paul Alexander Patience
 	  (2015-08-07).
+
+7.12 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
