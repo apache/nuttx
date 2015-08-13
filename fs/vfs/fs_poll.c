@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_poll.c
  *
- *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <poll.h>
-#include <errno.h>
+#include <time.h>
+#include <semaphore.h>
 #include <assert.h>
-#include <debug.h>
+#include <errno.h>
 
-#include <nuttx/sched.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
 
 #include <arch/irq.h>
 
@@ -341,36 +341,15 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
         }
       else if (timeout > 0)
         {
-          time_t   sec;
-          uint32_t nsec;
-
           /* Either wait for either a poll event(s), for a signal to occur,
            * or for the specified timeout to elapse with no event.
            *
            * NOTE: If a poll event is pending (i.e., the semaphore has already
-           * been incremented), sem_timedwait() will not wait, but will return
+           * been incremented), sem_tickwait() will not wait, but will return
            * immediately.
            */
 
-           sec  = timeout / MSEC_PER_SEC;
-           nsec = (timeout - MSEC_PER_SEC * sec) * NSEC_PER_MSEC;
-
-           /* Make sure that the following are atomic by disabling interrupts.
-            * Interrupts will be re-enabled while we are waiting.
-            */
-
-           flags = irqsave();
-           (void)clock_gettime(CLOCK_REALTIME, &abstime);
-
-           abstime.tv_sec  += sec;
-           abstime.tv_nsec += nsec;
-           if (abstime.tv_nsec >= NSEC_PER_SEC)
-             {
-               abstime.tv_sec++;
-               abstime.tv_nsec -= NSEC_PER_SEC;
-             }
-
-           ret = sem_timedwait(&sem, &abstime);
+           ret = sem_tickwait(&sem, clock_systimer(), MSEC2TICK(timeout));
            if (ret < 0)
              {
                int err = get_errno();
@@ -388,8 +367,6 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
                    ret = -err;
                  }
              }
-
-           irqrestore(flags);
         }
       else
         {
