@@ -380,7 +380,7 @@ bool sam_portread(port_pinset_t pinset);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-void sam_dumpport(port_pinset_t pinset, const char *msg);
+int sam_dumpport(port_pinset_t pinset, const char *msg);
 #else
 #  define sam_dumpport(p,m)
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_port.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -94,7 +94,7 @@ static inline uintptr_t sam_portbase(port_pinset_t pinset)
  * Name: sam_portpin
  *
  * Description:
- *   Returun the base address of the PORT register set
+ *   Return the bit associated with the pin
  *
  ****************************************************************************/
 
@@ -330,7 +330,7 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
       regval |= PORT_WRCONFIG_INEN;
     }
 
-  if (pin > 16)
+  if (pin >= 16)
     {
        /* Select the upper half word and adjust the bit setting */
 
@@ -538,15 +538,15 @@ int sam_dumpport(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  pin  = sam_portpin(pinset);
+  pin  = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
   port = (pinset & PORT_MASK) >> PORT_SHIFT;
   base = SAM_PORTN_BASE(port);
 
   /* The following requires exclusive access to the PORT registers */
 
   flags = irqsave();
-  lldbg("PORT%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
+  lldbg("PORT%c pin: %d pinset: %08x base: %08x -- %s\n",
+        g_portchar[port], pin, pinset, base, msg);
   lldbg("  DIR: %08x OUT: %08x IN: %08x\n",
         getreg32(base + SAM_PORT_DIR_OFFSET),
         getreg32(base + SAM_PORT_OUT_OFFSET),
