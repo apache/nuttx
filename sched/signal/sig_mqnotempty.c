@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_mqnotempty.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,6 +112,7 @@ int sig_mqnotempty(int pid, int signo, void *sival_ptr)
 
   info.si_signo           = signo;
   info.si_code            = SI_MESGQ;
+  info.si_errno           = OK;
 #ifdef CONFIG_CAN_PASS_STRUCTS
   info.si_value           = value;
 #else

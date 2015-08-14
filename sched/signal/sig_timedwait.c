@@ -115,6 +115,7 @@ static void sig_timeout(int argc, wdparm_t itcb)
     {
       u.wtcb->sigunbinfo.si_signo           = SIG_WAIT_TIMEOUT;
       u.wtcb->sigunbinfo.si_code            = SI_TIMER;
+      u.wtcb->sigunbinfo.si_errno           = ETIMEDOUT;
       u.wtcb->sigunbinfo.si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       u.wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */

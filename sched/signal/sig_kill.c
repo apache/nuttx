@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/signal/sig_kill.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,6 +114,7 @@ int kill(pid_t pid, int signo)
 
   info.si_signo           = signo;
   info.si_code            = SI_USER;
+  info.si_errno           = EINTR;
   info.si_value.sival_ptr = NULL;
 #ifdef CONFIG_SCHED_HAVE_PARENT
   info.si_pid             = rtcb->pid;

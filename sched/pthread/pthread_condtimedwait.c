@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_condtimedwait.c
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,6 +119,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 
       info.si_signo           = signo;
       info.si_code            = SI_QUEUE;
+      info.si_errno           = ETIMEDOUT;
       info.si_value.sival_ptr = NULL;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       info.si_pid             = (pid_t)pid;

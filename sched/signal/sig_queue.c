@@ -135,6 +135,7 @@ int sigqueue(int pid, int signo, void *sival_ptr)
 
   info.si_signo           = signo;
   info.si_code            = SI_QUEUE;
+  info.si_errno           = OK;
 #ifdef CONFIG_CAN_PASS_STRUCTS
   info.si_value           = value;
 #else

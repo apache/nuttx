@@ -68,11 +68,12 @@ static void exited_child(FAR struct tcb_s *rtcb, FAR struct child_status_s *chil
                           FAR siginfo_t *info)
 {
   /* The child has exited. Return the saved exit status (and some fudged
-   * information.
+   * information).
    */
 
   info->si_signo           = SIGCHLD;
   info->si_code            = CLD_EXITED;
+  info->si_errno           = OK;
   info->si_value.sival_ptr = NULL;
   info->si_pid             = child->ch_pid;
   info->si_status          = child->ch_status;

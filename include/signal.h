@@ -216,6 +216,7 @@ struct siginfo
 {
   uint8_t      si_signo;     /* Identifies signal */
   uint8_t      si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
+  uint8_t      si_errno;     /* Zero or errno value associated with signal */
   union sigval si_value;     /* Data passed with signal */
 #ifdef CONFIG_SCHED_HAVE_PARENT
   pid_t        si_pid;       /* Sending task ID */
