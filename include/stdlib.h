@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,16 @@ struct mallinfo
                  * by free (not in use) chunks.*/
 };
 
+/* Structure type returned by the div() function. */
+
+struct div_s
+{
+  int quot;     /* Quotient */
+  int rem;      /* Remainder */
+};
+
+typedef struct div_s div_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -170,13 +180,19 @@ FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
 
-/* Misc */
+/* Arithmetic */
 
 int      abs(int j);
+#ifdef CONFIG_CAN_PASS_STRUCTS
+div_t    div(int numer, int denom);
+#endif
 long int labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
 #endif
+
+/* Temporary files */
+
 int      mktemp(FAR char *path_template);
 int      mkstemp(FAR char *path_template);
 
