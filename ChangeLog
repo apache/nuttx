@@ -10820,4 +10820,8 @@
 	  From Macs Neklyudov (2015-08-13).
 	* fs/vfs/fs_poll.c:  If we fail to setup the poll for any file
 	  descriptor, for any reason, set the POLLERR bit (2015-08-13).
-
+	* libc/stdlib: Add support for div() to the C library.  From
+	  OrbitalFox (2015-08-14).
+	* libc/stdlib:  Might as well add ldiv() and lldiv() to since
+	  these are equivalent to div() with long and long long types,
+	  respectively, instead of int (2015-08-14).

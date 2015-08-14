@@ -105,6 +105,26 @@ struct div_s
 
 typedef struct div_s div_t;
 
+/* Structure type returned by the ldiv() function. */
+
+struct ldiv_s
+{
+  long quot;    /* Quotient */
+  long rem;     /* Remainder */
+};
+
+typedef struct ldiv_s ldiv_t;
+
+/* Structure type returned by the lldiv() function. */
+
+struct lldiv_s
+{
+  long quot;    /* Quotient */
+  long rem;     /* Remainder */
+};
+
+typedef struct lldiv_s lldiv_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -185,6 +205,10 @@ FAR void *calloc(size_t, size_t);
 int      abs(int j);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 div_t    div(int numer, int denom);
+ldiv_t   ldiv(long numer, long denom);
+#ifdef CONFIG_HAVE_LONG_LONG
+lldiv_t  lldiv(long long numer, long long denom);
+#endif
 #endif
 long int labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
