@@ -10825,3 +10825,6 @@
 	* libc/stdlib:  Might as well add ldiv() and lldiv() to since
 	  these are equivalent to div() with long and long long types,
 	  respectively, instead of int (2015-08-14).
+	* include/signal.h and files that include it:  Add si_errno to
+	  siginfo_t (2015-08-14).
+
