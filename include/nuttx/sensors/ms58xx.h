@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/ms5805.h
+ * include/nuttx/sensors/ms58xx.h
  *
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_MS5805
-#define __INCLUDE_NUTTX_SENSORS_MS5805
+#ifndef __INCLUDE_NUTTX_SENSORS_MS58XX
+#define __INCLUDE_NUTTX_SENSORS_MS58XX
 
 /****************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MS5805)
+#if defined(CONFIG_I2C) && defined(CONFIG_MS58XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,8 +53,9 @@
  *
  * CONFIG_I2C
  *   Enables support for I2C drivers
- * CONFIG_MS5805
- *   Enables support for the MS5805 driver
+ * CONFIG_MS58XX
+ *   Enables support for the MS58XX driver
+ * CONFIG_MS58XX_VDD
  */
 
 /* IOCTL Commands ***********************************************************/
@@ -65,9 +66,26 @@
 #define SNIOC_RESET        _SNIOC(0x0004) /* Arg: None */
 #define SNIOC_OVERSAMPLING _SNIOC(0x0005) /* Arg: uint16_t value */
 
+/* I2C Address **************************************************************/
+
+#define MS58XX_ADDR0       0x76
+#define MS58XX_ADDR1       0x77
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+enum ms58xx_model_e
+{
+  MS58XX_MODEL_MS5803_02 = 0,
+  MS58XX_MODEL_MS5803_05 = 1,
+  MS58XX_MODEL_MS5803_07 = 2,
+  MS58XX_MODEL_MS5803_14 = 3,
+  MS58XX_MODEL_MS5803_30 = 4,
+  MS58XX_MODEL_MS5805_02 = 5,
+  MS58XX_MODEL_MS5806_02 = 6,
+  MS58XX_MODEL_MS5837_30 = 7
+};
 
 struct i2c_dev_s;
 
@@ -84,28 +102,30 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: ms5805_register
+ * Name: ms58xx_register
  *
  * Description:
- *   Register the MS5805 character device as 'devpath'.
+ *   Register the MS58XX character device as 'devpath'.
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register, e.g., "/dev/press0".
  *   i2c     - An I2C driver instance.
+ *   addr    - The I2C address of the MS58XX.
  *   osr     - The oversampling ratio.
+ *   model   - The MS58XX model.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int ms5805_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
-                    uint16_t osr);
+int ms58xx_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+                    uint8_t addr, uint16_t osr, enum ms58xx_model_e model);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_MS5805 */
-#endif /* __INCLUDE_NUTTX_SENSORS_MS5805 */
+#endif /* CONFIG_I2C && CONFIG_MS58XX */
+#endif /* __INCLUDE_NUTTX_SENSORS_MS58XX */
