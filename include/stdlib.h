@@ -203,16 +203,17 @@ FAR void *calloc(size_t, size_t);
 /* Arithmetic */
 
 int      abs(int j);
+long int labs(long int j);
+#ifdef CONFIG_HAVE_LONG_LONG
+long long int llabs(long long int j);
+#endif
+
 #ifdef CONFIG_CAN_PASS_STRUCTS
 div_t    div(int numer, int denom);
 ldiv_t   ldiv(long numer, long denom);
 #ifdef CONFIG_HAVE_LONG_LONG
 lldiv_t  lldiv(long long numer, long long denom);
 #endif
-#endif
-long int labs(long int j);
-#ifdef CONFIG_HAVE_LONG_LONG
-long long int llabs(long long int j);
 #endif
 
 /* Temporary files */
