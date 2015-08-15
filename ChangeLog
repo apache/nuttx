@@ -10827,4 +10827,8 @@
 	  respectively, instead of int (2015-08-14).
 	* include/signal.h and files that include it:  Add si_errno to
 	  siginfo_t (2015-08-14).
+	* drivers/sensors/mx58xx.c and include/nuttx/sensors/ms58xx.h:
+	  General the MS5805 altimeter driver to support other family
+	  members and rename to ms58xx. From Paul Alexander Patience
+	  (2015-08-14).
 
