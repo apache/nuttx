@@ -818,7 +818,7 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 
   lldbg("Global Register:\n");
   lldbg("  CTRL:    %08x\n", sam_getreg(SAM_USBHS_DEVCTRL));
-  lldbg("  IISR:    %08x\n", sam_getreg(SAM_USBHS_DEVISR));
+  lldbg("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVISR));
   lldbg("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVIMR));
   lldbg("  EPT:     %08x\n", sam_getreg(SAM_USBHS_DEVEPT));
   lldbg("  FNUM:    %08x\n", sam_getreg(SAM_USBHS_DEVFNUM));
@@ -1217,12 +1217,6 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
 
   epno = USB_EPNO(privep->ep.eplog);
 
-  /* Write access to the FIFO is not possible if FIFOCON is clear (meaning
-   * that a write is already in progress.
-   */
-
-  DEBUGASSERT((sam_getreg(SAM_USBHS_DEVEPTISR(epno)) & USBHS_DEVEPTINT_FIFOCONI) != 0);
-
   /* Get the number of bytes remaining to be sent. */
 
   DEBUGASSERT(privreq->req.xfrd < privreq->req.len);
@@ -1411,8 +1405,8 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           /* If we get here, then we sent the last of the data on the
            * previous pass and we need to send the zero length packet now.
            *
-           * A Zero Length Packet can be sent by clearing just the FIFOCON flag
-           * in the USBHS_DEVTEPTIDRx register
+           * A Zero Length Packet can be sent by clearing just the FIFOCON
+           * flag in the USBHS_DEVTEPTIDRx register
            */
 
           privep->epstate   = USBHS_EPSTATE_SENDING;
@@ -1701,6 +1695,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
 static void sam_req_cancel(struct sam_ep_s *privep, int16_t result)
 {
+  uint32_t regval;
   uint8_t epno;
 
   /* Disable endpoint interrupts if not endpoint 0 */
@@ -1708,7 +1703,8 @@ static void sam_req_cancel(struct sam_ep_s *privep, int16_t result)
   epno = USB_EPNO(privep->ep.eplog);
   if (epno != 0)
     {
-      sam_putreg(USBHS_DEVINT_DMA(epno), SAM_USBHS_DEVIDR);
+      regval = USBHS_DEVINT_DMA(epno) | USBHS_DEVINT_PEP(epno);
+      sam_putreg(regval, SAM_USBHS_DEVIDR);
     }
 
   /* Then complete every queued request with the specified status */

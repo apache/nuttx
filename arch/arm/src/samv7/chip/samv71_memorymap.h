@@ -55,7 +55,7 @@
 #define SAM_MEMORY_BASE        0x60000000 /* 0x60000000-0x7fffffff: Memories */
 #define SAM_QSPIMEM_BASE       0x80000000 /* 0x80000000-0x9fffffff: QSPI memory */
 #define SAM_AXIMX_BASE         0xa0000000 /* 0xa0000000-0x9fffffff: AXIMX */
-#define SAM_USBHSRAM_BASE      0xa0010000 /* 0xa0100000-0xa01fffff: USBHS RAM */
+#define SAM_USBHSRAM_BASE      0xa0100000 /* 0xa0100000-0xa01fffff: USBHS RAM */
                                           /* 0xa0200000-0xdfffffff: Reserved */
 #define SAM_SYSTEM_BASE        0xe0000000 /* 0xe0000000-0xffffffff: System */
 
