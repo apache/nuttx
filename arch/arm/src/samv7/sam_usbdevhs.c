@@ -3081,7 +3081,7 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
 
   sam_putreg(USBHS_DEVINT_PEP(epno), SAM_USBHS_DEVIDR);
 
-  /* Cancel any queued requests.  Since they are canceled with status
+  /* Cancel any queued requests.  Since they are cancelled with status
    * -ESHUTDOWN, then will not be requeued until the configuration is reset.
    * NOTE:  This should not be necessary... the CLASS_DISCONNECT above
    * should result in the class implementation calling sam_ep_disable
@@ -3326,8 +3326,14 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   if (eptype == USB_EP_ATTR_XFER_CONTROL)
     {
-     sam_putreg(USBHS_DEVINT_PEP(epno), SAM_USBHS_DEVIDR);
+      sam_putreg(USBHS_DEVINT_PEP(epno), SAM_USBHS_DEVIDR);
     }
+
+  /* Enable the endpoint */
+
+  regval  = sam_getreg(SAM_USBHS_DEVEPT);
+  regval |= USBHS_DEVEPT_EPEN(epno);
+  sam_putreg(regval, SAM_USBHS_DEVEPT);
 
   /* Configure the endpoint */
 
@@ -3410,12 +3416,6 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
       regval = USBHS_DEVEPTINT_KILLBKI | USBHS_DEVEPTINT_RXSTPI;
       sam_putreg(regval, SAM_USBHS_DEVEPTIER(epno));
     }
-
-  /* Enable the endpoint */
-
-  regval  = sam_getreg(SAM_USBHS_DEVEPT);
-  regval |= USBHS_DEVEPT_EPEN(epno);
-  sam_putreg(regval, SAM_USBHS_DEVEPT);
 
   /* If this is EP0, enable interrupts now */
 
@@ -4180,7 +4180,7 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
        */
 
       regval = sam_getreg(SAM_USBHS_DEVISR);
-      if ((regval & USBHS_DEVINT_SUSPD) != 0)
+      if ((regval & USBHS_DEVINT_SUSPD) == 0)
         {
           /* If the USBHS detects activity on the BUS, then it will not be
            * suspended.  In that case, next event that we expect to see is a
@@ -4319,7 +4319,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
   priv->devstate  = USBHS_DEVSTATE_DEFAULT;
 
-  /* Reset and disable all endpoints other.  Then re-configure EP0 */
+  /* Reset and disable all endpoints.  Then re-configure EP0 */
 
   sam_epset_reset(priv, SAM_EPSET_ALL);
   sam_ep0_configure(priv);
