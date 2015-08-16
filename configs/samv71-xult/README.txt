@@ -18,6 +18,7 @@ Contents
   - LEDs and Buttons
   - AT24MAC402 Serial EEPROM
   - Networking
+  - USBHS Device Controller Driver
   - Audio Interface
   - maXTouch Xplained Pro
   - MCAN1 Loopback Test
@@ -726,6 +727,66 @@ additional settings.
     CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
     CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
     CONFIG_NSH_NETINIT_SIGNO=18
+
+USBHS Device Controller Driver
+==============================
+The USBHS device controller driver is enabled with he following configuration
+settings:
+
+  Device Drivers -> USB Device Driver Support
+    CONFIG_USBDEV=y                           : Enable USB device support
+    CONFIG_USBDEV_DUALSPEED=y                 : Enable High speed support
+    CONFIG_USBDEV_DMA=y                       : Enable DMA methods
+    CONFIG_USBDEV_MAXPOWER=100                : Maximum power consumption
+    CONFIG_USBDEV_SELFPOWERED=y               : Self-powered device
+
+  System Type -> SAMV7 Peripheral Selection
+    CONFIG_SAMV7_USBDEVHS=y
+
+  System Type -> SAMV7 USB High Sppeed Device Controller (DCD options
+    CONFIG_SAMV7_USBHS_NDTDS=8                : Number of DMA transfer descriptors
+    CONFIG_SAMV7_USBHS_PREALLOCATE=y          : Pre-allocate descriptors
+
+In order to be usable, you must all enabled some class driver(s) for the
+USBHS device controller.  Here, for example, is how to configure the CDC/ACM
+serial device class:
+
+  Device Drivers -> USB Device Driver Support
+    CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
+    CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+    CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
+    CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
+    CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size
+    CONFIG_CDCACM_EPBULKOUT=3                 : Bulk OUT endpoint number
+    CONFIG_CDCACM_EPBULKOUT_FSSIZE=64         : Full speed packet size
+    CONFIG_CDCACM_EPBULKOUT_HSSIZE=512        : High speed packet size
+    CONFIG_CDCACM_EPBULKIN=2                  : Bulk IN endpoint number
+    CONFIG_CDCACM_EPBULKIN_FSSIZE=64          : Full speed packet size
+    CONFIG_CDCACM_EPBULKIN_HSSIZE=512         : High speed packet size
+    CONFIG_CDCACM_NRDREQS=4                   : Number of read requests
+    CONFIG_CDCACM_NWRREQS=4                   : Number of write requests
+    CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer
+    CONFIG_CDCACM_RXBUFSIZE=256               : Serial read buffer size
+    CONFIG_CDCACM_TXBUFSIZE=256               : Serial transmit buffer size
+    CONFIG_CDCACM_VENDORID=0x0525             : Vendor ID
+    CONFIG_CDCACM_PRODUCTID=0xa4a7            : Product ID
+    CONFIG_CDCACM_VENDORSTR="NuttX"           : Vendor string
+    CONFIG_CDCACM_PRODUCTSTR="CDC/ACM Serial" : Product string
+
+  Device Drivers -> Serial Driver Support
+    CONFIG_SERIAL_REMOVABLE=y                 : Support for removable serial device
+
+The CDC/ACM application provides commands to connect and disconnect the
+CDC/ACM serial device:
+
+    CONFIG_SYSTEM_CDCACM=y                     : Enable connect/disconnect support
+    CONFIG_SYSTEM_CDCACM_DEVMINOR=0            : Use device /dev/ttyACM0
+
+If you include this CDC/ACM application, then you can connect the CDC/ACM
+serial device to the host by entering the command 'sercon' and you detach
+the serial device with the command 'serdis'.  If you do no use this
+application, they you will have to write logic in your board initialization
+code to initialize and attach the USB device.
 
 Audio Interface
 ===============

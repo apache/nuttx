@@ -2,7 +2,7 @@ z80sim README
 ^^^^^^^^^^^^^
 
 This port uses a primitive, emulated Z80 and the SDCC toolchain.
-This port uses an instructino set simulator called z80sim.
+This port uses an instruction set simulator called z80sim.
 
 The SDCC toolchain is available from http://sdcc.sourceforge.net/.  All
 testing has been performed using version 2.6.0 of the SDCC toolchain.
