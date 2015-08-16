@@ -2355,7 +2355,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       xdmach->callback = callback;
       xdmach->arg      = arg;
 
-      /* Is this a single block transfer?  Or a multiple block tranfer? */
+      /* Is this a single block transfer?  Or a multiple block transfer? */
 
       if (xdmach->llhead == xdmach->lltail)
         {

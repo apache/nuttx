@@ -1225,7 +1225,7 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
    * Additionally, the CTRLA DONE bit is asserted when the buffer transfer has completed.
    *
    * The DMAC transfer continues until the CTRLB register disables the descriptor
-   * (DSCR bits) registers at the final buffer tranfer.
+   * (DSCR bits) registers at the final buffer transfer.
    *
    * Enable error, buffer complete and transfer complete interrupts.  We
    * don't really need the buffer complete interrupts, but we will take them

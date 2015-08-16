@@ -571,14 +571,14 @@ static const struct usb_epdesc_s g_ep0desc =
 
 #ifdef CONFIG_SAMV7_USBDEVHS_SCATTERGATHER
 #ifdef CONFIG_SAMV7_USBDEVHS_PREALLOCATE
-/* This is a properly aligned pool of preallocated DMA transfer desciptors */
+/* This is a properly aligned pool of preallocated DMA transfer descriptors */
 
 static struct sam_dtd_s g_dtdpool[CONFIG_SAMV7_USBDEVHS_NDTDS]
                         __attribute__ ((aligned(16)));
 #endif
 #endif
 
-/* Device error strings that may be enabled for more desciptive USB trace
+/* Device error strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -619,7 +619,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 };
 #endif
 
-/* Interrupt event strings that may be enabled for more desciptive USB trace
+/* Interrupt event strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -1287,7 +1287,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
  *     When a request is queued, the request 'len' is the number of bytes
  *     to transfer and 'xfrd' and 'inflight' must be zero.
  *
- *     When this function starts a tranfer it will update the request
+ *     When this function starts a transfer it will update the request
  *     'inflight' field to indicate the size of the transfer.
  *
  *     When the transfer completes, the the 'inflight' field must hold the
@@ -1544,7 +1544,7 @@ static void sam_req_rddisable(uint8_t epno)
  *   - When receiving data via DMA, then data has already been transferred
  *     and this function is called on the terminating event.  The transfer
  *     is complete and we just need to check for end of request events and
- *     if we need to setup the tranfer for the next request.
+ *     if we need to setup the transfer for the next request.
  *   - When receiving via the FIFO, the transfer is not complete.  The
  *     data is in the FIFO and must be transferred from the FIFO to the
  *     request buffer.  No setup is needed for the next transfer other than

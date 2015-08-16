@@ -2103,7 +2103,7 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
- *   quid - Index of the tranfer queue that generated the interrupt
+ *   quid - Index of the transfer queue that generated the interrupt
  *
  * Returned Value:
  *   None
@@ -2230,7 +2230,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
- *   quid - Index of the tranfer queue that generated the interrupt
+ *   quid - Index of the transfer queue that generated the interrupt
  *
  * Returned Value:
  *   None

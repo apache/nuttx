@@ -2422,7 +2422,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
   dmadesc->size = (uint32_t)packet;
 #endif
 
-  /* Enable DMA tranfer for this endpoint */
+  /* Enable DMA transfer for this endpoint */
 
   putreq32(1 << epphy, LPC214X_USBDEV_EPDMAEN);
 
