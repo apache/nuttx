@@ -1128,8 +1128,8 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
    * access performance. The page size alloc will restrict
    * this bad effect only within the memory we alloc here.
    *
-   * NEED FIX: the memalign may alloc memory continous in
-   * virtual address but dis-continous in physical address
+   * NEED FIX: the memalign may alloc memory continuous in
+   * virtual address but dis-continuous in physical address
    * due to RGMP memory setup.
    */
 

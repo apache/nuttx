@@ -2281,7 +2281,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
       xfrd            = req->xfrd;
       priv->nreqbytes = xfrd;
 
-      /* Now loop until all of the data in the read request has been tranferred
+      /* Now loop until all of the data in the read request has been transferred
        * to the block driver OR all of the request data has been transferred.
        */
 
