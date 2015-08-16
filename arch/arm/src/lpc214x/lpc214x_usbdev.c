@@ -212,7 +212,7 @@
 
 /* USB RAM  ********************************************************************
  *
- * UBS_UDCA is is list of 32 pointers to DMA desciptors located at the
+ * UBS_UDCA is is list of 32 pointers to DMA descriptors located at the
  * beginning of USB RAM.  Each pointer points to a DMA descriptor with
  * assocated DMA buffer.
  */

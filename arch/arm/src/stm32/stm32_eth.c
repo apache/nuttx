@@ -1915,7 +1915,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
 
-  /* Scan the TX desciptor change, returning buffers to free list */
+  /* Scan the TX descriptor change, returning buffers to free list */
 
   stm32_freeframe(priv);
 

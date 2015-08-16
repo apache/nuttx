@@ -191,14 +191,14 @@ struct kinetis_driver_s
 #endif
 
   /* The DMA descriptors.  A unaligned uint8_t is used to allocate the
-   * memory; 16 is added to assure that we can meet the desciptor alignment
+   * memory; 16 is added to assure that we can meet the descriptor alignment
    * requirements.
    */
 
  uint8_t desc[NENET_NBUFFERS * sizeof(struct enet_desc_s) + 16];
 
   /* The DMA buffers.  Again, A unaligned uint8_t is used to allocate the
-   * memory; 16 is added to assure that we can meet the desciptor alignment
+   * memory; 16 is added to assure that we can meet the descriptor alignment
    * requirements.
    */
 

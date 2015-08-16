@@ -555,7 +555,7 @@ static const struct usb_epdesc_s g_ep0desc =
 
 #ifdef CONFIG_SAMA5_UDPHS_SCATTERGATHER
 #ifdef CONFIG_SAMA5_UDPHS_PREALLOCATE
-/* This is a properly aligned pool of preallocated DMA transfer desciptors */
+/* This is a properly aligned pool of preallocated DMA transfer descriptors */
 
 static struct sam_dtd_s g_dtdpool[CONFIG_SAMA5_UDPHS_NDTDS]
                         __attribute__ ((aligned(16)));
@@ -563,7 +563,7 @@ static struct sam_dtd_s g_dtdpool[CONFIG_SAMA5_UDPHS_NDTDS]
 #endif
 
 
-/* Device error strings that may be enabled for more desciptive USB trace
+/* Device error strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -604,7 +604,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 };
 #endif
 
-/* Interrupt event strings that may be enabled for more desciptive USB trace
+/* Interrupt event strings that may be enabled for more descriptive USB trace
  * output.
  */
 
