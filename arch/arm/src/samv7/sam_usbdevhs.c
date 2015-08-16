@@ -192,32 +192,34 @@
 #define SAM_TRACEINTID_DMAEOB             0x0007
 #define SAM_TRACEINTID_DMAEOC             0x0008
 #define SAM_TRACEINTID_ENDRESET           0x0009
-#define SAM_TRACEINTID_EP                 0x0001
+#define SAM_TRACEINTID_EP                 0x000a
 #define SAM_TRACEINTID_EP0SETUPIN         0x000b
 #define SAM_TRACEINTID_EP0SETUPOUT        0x000c
 #define SAM_TRACEINTID_EP0SETUPSETADDRESS 0x000d
-#define SAM_TRACEINTID_EPGETSTATUS        0x000e
-#define SAM_TRACEINTID_EPINQEMPTY         0x000f
-#define SAM_TRACEINTID_EPOUTQEMPTY        0x0010
-#define SAM_TRACEINTID_GETCONFIG          0x0011
-#define SAM_TRACEINTID_GETSETDESC         0x0012
-#define SAM_TRACEINTID_GETSETIF           0x0013
-#define SAM_TRACEINTID_GETSTATUS          0x0014
-#define SAM_TRACEINTID_IFGETSTATUS        0x0015
-#define SAM_TRACEINTID_INTERRUPT          0x0016
-#define SAM_TRACEINTID_INTSOF             0x0017
-#define SAM_TRACEINTID_INTMSOF            0x0018
-#define SAM_TRACEINTID_NOSTDREQ           0x0019
-#define SAM_TRACEINTID_PENDING            0x001a
-#define SAM_TRACEINTID_RXRDY              0x001b
-#define SAM_TRACEINTID_RXSETUP            0x001c
-#define SAM_TRACEINTID_SETCONFIG          0x001d
-#define SAM_TRACEINTID_SETFEATURE         0x001e
-#define SAM_TRACEINTID_STALLSNT           0x001f
-#define SAM_TRACEINTID_SYNCHFRAME         0x0020
-#define SAM_TRACEINTID_TXINI              0x0021
-#define SAM_TRACEINTID_UPSTRRES           0x0022
-#define SAM_TRACEINTID_WAKEUP             0x0023
+#define SAM_TRACEINTID_EPDMAINT           0x000e
+#define SAM_TRACEINTID_EPGETSTATUS        0x000f
+#define SAM_TRACEINTID_EPINQEMPTY         0x0010
+#define SAM_TRACEINTID_EPINT              0x0011
+#define SAM_TRACEINTID_EPOUTQEMPTY        0x0012
+#define SAM_TRACEINTID_GETCONFIG          0x0013
+#define SAM_TRACEINTID_GETSETDESC         0x0014
+#define SAM_TRACEINTID_GETSETIF           0x0015
+#define SAM_TRACEINTID_GETSTATUS          0x0016
+#define SAM_TRACEINTID_IFGETSTATUS        0x0017
+#define SAM_TRACEINTID_INTERRUPT          0x0018
+#define SAM_TRACEINTID_INTSOF             0x0019
+#define SAM_TRACEINTID_INTMSOF            0x001a
+#define SAM_TRACEINTID_NOSTDREQ           0x001b
+#define SAM_TRACEINTID_PENDING            0x001c
+#define SAM_TRACEINTID_RXRDY              0x001d
+#define SAM_TRACEINTID_RXSETUP            0x001e
+#define SAM_TRACEINTID_SETCONFIG          0x001f
+#define SAM_TRACEINTID_SETFEATURE         0x0020
+#define SAM_TRACEINTID_STALLSNT           0x0021
+#define SAM_TRACEINTID_SYNCHFRAME         0x0022
+#define SAM_TRACEINTID_TXINI              0x0023
+#define SAM_TRACEINTID_UPSTRRES           0x0024
+#define SAM_TRACEINTID_WAKEUP             0x0025
 
 /* Ever-present MIN and MAX macros */
 
@@ -2356,7 +2358,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
   /* Get the result of the DMA operation */
 
   dmastatus = sam_getreg(SAM_USBHS_DEVDMASTA(epno));
-  uvdbg("DMA%d DMASTATUS: %08x\n", epno, dmastatus);
+  usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPDMAINT), dmastatus);
 
   /* Disable DMA interrupt to avoid receiving 2 (B_EN and TR_EN) */
 
@@ -2527,6 +2529,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
   /* Get the endpoint status */
 
   eptisr = sam_getreg(SAM_USBHS_DEVEPTISR(epno));
+  usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPINT), eptisr);
 
   /* Get the endpoint type */
 
@@ -2535,7 +2538,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
   /* IN packet sent */
 
-  if ((eptisr & USBHS_DEVEPTINT_TXINI) == 0 &&
+  if ((eptisr & USBHS_DEVEPTINT_TXINI) != 0 &&
       (sam_getreg(SAM_USBHS_DEVEPTIMR(epno)) & USBHS_DEVEPTINT_TXINI) != 0)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_TXINI), (uint16_t)eptisr);
@@ -2931,14 +2934,24 @@ static int sam_usbhs_interrupt(int irq, void *context)
         }
 
 #ifdef CONFIG_USBDEV_DMA
-      /* DMA interrupts */
+      /* Endpoint DMA interrupts */
 
       else if ((pending & USBHS_DEVINT_DMA_MASK) != 0)
         {
+          /* Each endpoint DMA ineterrupt is cleared when the
+           * USBHS_DEVDMASTATUSx interrupt source is cleared.
+           */
+
+          /* Process each pending endpoint DMA interrupt */
+
           for (i = 1; i <= SAM_USBHS_NDMACHANNELS; i++)
             {
+              /* Is there a DMA interrupt pending for endpoint i? */
+
               if ((pending & USBHS_DEVINT_DMA(i)) != 0)
                 {
+                  /* Yes.. process the endpoint i DMA interrupt */
+
                   usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_DMA), (uint16_t)i);
                   sam_dma_interrupt(priv, i);
                 }
@@ -2950,10 +2963,20 @@ static int sam_usbhs_interrupt(int irq, void *context)
 
       else if ((pending & USBHS_DEVINT_PEP_MASK) != 0)
         {
+          /* Each endpoint interrupt is cleared when the interrupt source
+           * is serviced.
+           */
+
+          /* Process each pending endpoint interrupt */
+
           for (i = 0; i < SAM_USBHS_NENDPOINTS; i++)
             {
+              /* Is there an interrupt pending for endpoint i? */
+
               if ((pending & USBHS_DEVINT_PEP(i)) != 0)
                 {
+                  /* Yes.. process the endpoint i interrupt */
+
                   usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP), (uint16_t)i);
                   sam_ep_interrupt(priv, i);
                 }
