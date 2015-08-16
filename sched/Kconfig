@@ -606,7 +606,7 @@ config SDCLONE_DISABLE
 	default n
 	---help---
 	Disable cloning of all socket
-	desciptors by task_create() when a new task is started. If
+	descriptors by task_create() when a new task is started. If
 	set, all sockets will appear to be closed in the new task.
 
 config NFILE_DESCRIPTORS

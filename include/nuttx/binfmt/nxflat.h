@@ -56,7 +56,7 @@
  * Public Types
  ****************************************************************************/
 
-/* This struct provides a desciption of the currently loaded instantiation
+/* This struct provides a description of the currently loaded instantiation
  * of an nxflat binary.
  */
 

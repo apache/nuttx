@@ -68,7 +68,7 @@
  *
  * Description:
  *   Setup streams data structures that may be used for standard C buffered
- *   I/O with underlying socket or file desciptors
+ *   I/O with underlying socket or file descriptors
  *
  ****************************************************************************/
 
