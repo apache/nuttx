@@ -2215,19 +2215,24 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
 
   mcan_dev_lock(priv);
 
-  /* Disable the MCAN interrupts */
+  /* Disable MCAN interrupts at the NVIC */
 
   up_disable_irq(config->irq0);
   up_disable_irq(config->irq1);
+
+  /* Disable all interrupts from the MCAN peripheral */
+
+  mcan_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
+  mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
 
   /* Detach the MCAN interrupt handler */
 
   irq_detach(config->irq0);
   irq_detach(config->irq1);
 
-  /* And reset the hardware */
+  /* Disable peripheral clocking to the MCAN controller */
 
-  mcan_reset(dev);
+  sam_disableperiph1(priv->config->pid);
   mcan_dev_unlock(priv);
 }
 
