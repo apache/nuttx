@@ -1376,7 +1376,7 @@ menu "MCAN device driver options"
 
 choice
 	prompt "MCAN clock source (PCK5)"
-	default SAMV7_MCAN_CLKSRC_MAIN
+	default SAMV7_MCAN_CLKSRC_MCK
 
 config SAMV7_MCAN_CLKSRC_SLOW
 	bool "Slow clock"
