@@ -876,9 +876,8 @@ struct sam_mcan_s
   bool initialized;         /* True: Device has been initialized */
 #ifdef CONFIG_CAN_EXTID
   uint8_t  nextalloc;       /* Number of allocated extended filters */
-#else
-  uint8_t  nstdalloc;       /* Number of allocated standard filters */
 #endif
+  uint8_t  nstdalloc;       /* Number of allocated standard filters */
   sem_t locksem;            /* Enforces mutually exclusive access */
   sem_t txfsem;             /* Used to wait for TX FIFO availability */
   uint32_t rxints;          /* Configured RX interrupts */
@@ -886,9 +885,8 @@ struct sam_mcan_s
 
 #ifdef CONFIG_CAN_EXTID
   uint32_t extfilters[2];   /* Extended filter bit allocator.  2*32=64 */
-#else
-  uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
 #endif
+  uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
@@ -931,11 +929,11 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
 static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
               FAR struct canioc_extfilter_s *extconfig);
 static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx);
-#else
+#endif
 static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
               FAR struct canioc_stdfilter_s *stdconfig);
 static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx);
-#endif
+
 /* CAN driver methods */
 
 static void mcan_reset(FAR struct can_dev_s *dev);
@@ -1894,7 +1892,6 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CAN_EXTID
 static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
                               FAR struct canioc_stdfilter_s *stdconfig)
 {
@@ -1995,7 +1992,6 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
   mcan_dev_unlock(priv);
   return -EAGAIN;
 }
-#endif
 
 /****************************************************************************
  * Name: mcan_del_stdfilter
@@ -2013,7 +2009,6 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CAN_EXTID
 static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 {
   FAR const struct sam_config_s *config;
@@ -2064,7 +2059,6 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
   mcan_dev_unlock(priv);
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: mcan_reset
@@ -2381,8 +2375,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           ret = mcan_del_extfilter(priv, (int)arg);
         }
         break;
+#endif
 
-#else
       /* CANIOC_ADD_STDFILTER:
        *   Description:    Add an address filter for a standard 11 bit
        *                   address.
@@ -2414,7 +2408,6 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           ret = mcan_del_stdfilter(priv, (int)arg);
         }
         break;
-#endif
 
       /* Unsupported/unrecognized command */
 
@@ -2543,15 +2536,19 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
 #ifdef CONFIG_CAN_EXTID
-  DEBUGASSERT(msg->cm_hdr.ch_extid);
-  DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_EXTMSGID);
+  if (msg->cm_hdr.ch_extid)
+    {
+      DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_EXTMSGID);
 
-  regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
-#else
-  DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_STDMSGID);
-
-  regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
+      regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
+    }
+  else
 #endif
+    {
+      DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_STDMSGID);
+
+      regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
+    }
 
   if (msg->cm_hdr.ch_rtr)
     {
