@@ -378,7 +378,8 @@ struct canioc_extfilter_s
   uint8_t               xf_type;         /* See CAN_FILTER_* definitions */
   uint8_t               xf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
-#else
+#endif
+
 struct canioc_stdfilter_s
 {
   uint16_t              sf_id1;          /* 11-bit ID.  For dual match or for the
@@ -388,7 +389,6 @@ struct canioc_stdfilter_s
   uint8_t               sf_type;         /* See CAN_FILTER_* definitions */
   uint8_t               sf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
-#endif
 
 /************************************************************************************
  * Public Data
