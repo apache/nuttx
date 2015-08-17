@@ -378,6 +378,7 @@ static int tun_txpoll(struct net_driver_s *dev)
     {
       /* Send the packet */
 
+      priv->read_d_len = priv->dev.d_len;
       tun_transmit(priv);
 
       return 1;
@@ -511,7 +512,6 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 
   priv->dev.d_buf = priv->read_buf;
   (void)devif_poll(&priv->dev, tun_txpoll);
-  priv->read_d_len = priv->dev.d_len;
 }
 
 /****************************************************************************
@@ -537,14 +537,13 @@ static void tun_poll_process(FAR struct tun_device_s *priv)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
-   */
+  if (priv->read_d_len == 0)
+    {
+      /* If so, poll uIP for new XMIT data. */
 
-  priv->dev.d_buf = priv->read_buf;
-  (void)devif_timer(&priv->dev, tun_txpoll, TUN_POLLHSEC);
-  priv->read_d_len = priv->dev.d_len;
+      priv->dev.d_buf = priv->read_buf;
+      (void)devif_timer(&priv->dev, tun_txpoll, TUN_POLLHSEC);
+    }
 
   /* Setup the watchdog poll timer again */
 
@@ -576,9 +575,13 @@ static void tun_poll_work(FAR void *arg)
 
   /* Perform the poll */
 
+  tun_lock(priv);
   state = net_lock();
+
   tun_poll_process(priv);
+
   net_unlock(state);
+  tun_unlock(priv);
 }
 #endif
 
@@ -757,7 +760,6 @@ static int tun_txavail(struct net_driver_s *dev)
 
       priv->dev.d_buf = priv->read_buf;
       (void)devif_poll(&priv->dev, tun_txpoll);
-      priv->read_d_len = priv->dev.d_len;
     }
 
   net_unlock(state);

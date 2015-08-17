@@ -56,7 +56,9 @@
 
 /* TUNSETIFF ifr flags */
 
-#define IFF_TUN          0x0001
+#define IFF_TUN          0x01
+#define IFF_TAP          0x02
+#define IFF_NO_PI        0x80
 
 /****************************************************************************
  * Public Type Definitions

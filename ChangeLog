@@ -10831,4 +10831,5 @@
 	  General the MS5805 altimeter driver to support other family
 	  members and rename to ms58xx. From Paul Alexander Patience
 	  (2015-08-14).
-
+	* Network drivers. Fix bug in tun interface driver.  From Max
+	  Neklyudov (2015-08-17).

@@ -9243,11 +9243,16 @@ detailed bugfix information):
 NuttX-7.11 Release Notes
 ------------------------
 
-The 111th release of NuttX, Version 7.11, was made on June 9, 2015,
+The 111th release of NuttX, Version 7.11, was made on August 13 2015,
 and is available for download from the Bitbucket.org website.  Note
 that release consists of two tarballs:  nuttx-7.11.tar.gz and
-apps-7.11.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
-file for build information).
+apps-7.11.tar.gz.  These are available from:
+
+    https://bitbucket.org/patacongo/nuttx/downloads
+    https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
 
 Additional new features and extended functionality:
 
