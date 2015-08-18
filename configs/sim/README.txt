@@ -14,6 +14,7 @@ Contents
     - Stack Size Issues
     - Networking Issues
     - X11 Issues
+    - Cygwin64 Issues
   o BASIC
   o Configurations
 
@@ -97,7 +98,7 @@ contemporary x86_64 compilers).
 
 There are other 64-bit issues as well.  For example, addresses are retained in
 32-bit unsigned integer types in a few places.  On a 64-bit machine, the 32-bit
-address storage may correcupt 64-bit addressing.  NOTE:  This is really a bug --
+address storage may corrupt 64-bit addressing.  NOTE:  This is really a bug --
 addresses should not be retained in uint32_t types but rather in uintptr_t types
 to avoid issues just like this.
 
@@ -168,11 +169,27 @@ XOpenDisplay() aborted the program.  UPDATE:  This was caused by the small stack
 size and can be fixed by increasing the size of the NuttX stack that calls into
 X11.  See the discussion "Stack Size Issues" above.
 
+Cygwin64 Issues
+---------------
+Since using Cygwin64, I have been unable to use the simulator.  When I try
+to run nutt.exe from the command line, it exists silently.  Running with GDB
+I get following (before hitting a breakpoint at main()):
+
+  (gdb) r
+  Starting program: /cygdrive/c/Users/Gregory/Documents/projects/nuttx/master/nuttx/nuttx.exe
+  [New Thread 6512.0xda8]
+  [New Thread 6512.0x998]
+        1 [main] nuttx 6512 C:\Users\Gregory\Documents\projects\nuttx\master\nuttx\nuttx.exe: *** fatal error - Internal error: Out of memory for new path buf.
+      736 [main] nuttx 6512 cygwin_exception::open_stackdumpfile: Dumping stack trace to nuttx.exe.stackdump
+  [Thread 6512.0x998 exited with code 256]
+  [Inferior 1 (process 6512) exited with code 0400]
+
+Still clueless on this one.  The simulator used to work great with an older,
+32-bit Cygwin version.  I currently use only Linux to test with the Simulator.
+
 BASIC
 ^^^^^
 
-BASIC
-=====
   I have used the sim/nsh configuration to test Michael Haardt's BASIC interpreter
   that you can find at apps/interpreters/bas.
 
