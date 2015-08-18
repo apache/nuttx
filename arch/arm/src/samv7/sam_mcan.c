@@ -813,6 +813,15 @@ enum sam_canmode_e
   MCAN_FD_BSW_MODE     = 2  /* CAN FD operation with bit rate switching */
 };
 
+/* CAN driver state */
+
+enum can_state_s
+{
+  MCAN_STATE_UNINIT = 0,    /* Not yet initialized */
+  MCAN_STATE_RESET,         /* Initialized, reset state */
+  MCAN_STATE_SETUP,         /* can_setup() has been called */
+};
+
 /* This structure describes the MCAN message RAM layout */
 
 struct sam_msgram_s
@@ -873,13 +882,15 @@ struct sam_config_s
 struct sam_mcan_s
 {
   const struct sam_config_s *config; /* The constant configuration */
-  bool initialized;         /* True: Device has been initialized */
+  uint8_t state;            /* See enum can_state_s */
 #ifdef CONFIG_CAN_EXTID
-  uint8_t  nextalloc;       /* Number of allocated extended filters */
+  uint8_t nextalloc;        /* Number of allocated extended filters */
 #endif
-  uint8_t  nstdalloc;       /* Number of allocated standard filters */
+  uint8_t nstdalloc;        /* Number of allocated standard filters */
   sem_t locksem;            /* Enforces mutually exclusive access */
   sem_t txfsem;             /* Used to wait for TX FIFO availability */
+  uint32_t btp;             /* Current bit timing */
+  uint32_t fbtp;            /* Current fast bit timing */
   uint32_t rxints;          /* Configured RX interrupts */
   uint32_t txints;          /* Configured TX interrupts */
 
@@ -2102,6 +2113,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
   /* Disable peripheral clocking to the MCAN controller */
 
   sam_disableperiph1(priv->config->pid);
+  priv->state = MCAN_STATE_RESET;
   mcan_dev_unlock(priv);
 }
 
@@ -2171,6 +2183,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Enable receive interrupts */
 
+  priv->state = MCAN_STATE_SETUP;
   mcan_rxint(dev, true);
 
   mcan_dumpregs(priv, "After receive setup");
@@ -2349,6 +2362,116 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+      /* CANIOC_GET_BITTIMING:
+       *   Description:    Return the current bit timing settings
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_bittiming_s in which current bit timing values
+       *                   will be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+       *                   is returned with the errno variable set to indicate the
+       *                   nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_BITTIMING:
+        {
+          FAR struct canioc_bittiming_s *bt =
+            (FAR struct canioc_bittiming_s *)arg;
+          uint32_t regval;
+          uint32_t brp;
+
+          DEBUGASSERT(bt != NULL);
+
+          regval       = mcan_getreg(priv, SAM_MCAN_BTP_OFFSET);
+          bt->bt_sjw   = ((regval & MCAN_BTP_SJW_MASK) >> MCAN_BTP_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & MCAN_BTP_TSEG1_MASK) >> MCAN_BTP_TSEG1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & MCAN_BTP_TSEG2_MASK) >> MCAN_BTP_TSEG2_SHIFT) + 1;
+
+          brp          = ((regval & MCAN_BTP_BRP_MASK) >> MCAN_BTP_BRP_SHIFT) + 1;
+          bt->bt_baud  = SAMV7_MCANCLK_FREQUENCY / brp /
+                         (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+          ret = OK;
+        }
+        break;
+
+      /* CANIOC_SET_BITTIMING:
+       *   Description:    Set new current bit timing values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_bittiming_s in which the new bit timing values
+       *                   are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+       *                   is returned with the errno variable set to indicate the
+       *                   nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_SET_BITTIMING:
+        {
+          FAR const struct canioc_bittiming_s *bt =
+            (FAR const struct canioc_bittiming_s *)arg;
+          irqstate_t flags;
+          uint32_t brp;
+          uint32_t tseg1;
+          uint32_t tseg2;
+          uint32_t sjw;
+          uint32_t ie;
+          uint8_t  state;
+
+          DEBUGASSERT(bt != NULL);
+          DEBUGASSERT(bt->bt_baud < SAMV7_MCANCLK_FREQUENCY);
+          DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 16);
+          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
+          DEBUGASSERT(bt->bt_tseg2 > 1 && bt->bt_tseg2 <= 64);
+
+          /* Extract bit timing data */
+
+          tseg1 = bt->bt_tseg1 - 1;
+          tseg2 = bt->bt_tseg2 - 1;
+          sjw   = bt->bt_sjw   - 1;
+
+          brp = (uint32_t)
+            (((float) SAMV7_MCANCLK_FREQUENCY /
+             ((float)(tseg1 + tseg2 + 3) * (float)bt->bt_baud)) - 1);
+
+          /* Save the value of the new bit timing register */
+
+          flags = irqsave();
+          priv->btp = MCAN_BTP_BRP(brp) | MCAN_BTP_TSEG1(tseg1) |
+                      MCAN_BTP_TSEG2(tseg2) | MCAN_BTP_SJW(sjw);
+
+          /* We need to reset to instantiate the new timing.  Save
+           * current state information so that recover to this
+           * state.
+           */
+
+          ie    = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
+          state = priv->state;
+
+          /* Reset the MCAN */
+
+          mcan_reset(dev);
+          ret = OK;
+
+          /* If we have previously been setup, then setup again */
+
+          if (state == MCAN_STATE_SETUP)
+            {
+              ret = mcan_setup(dev);
+            }
+
+          /* We we have successfully re-initialized, then restore the
+           * interrupt state.
+           */
+
+          if (ret == OK)
+            {
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+            }
+
+          irqrestore(flags);
+        }
+        break;
+
 #ifdef CONFIG_CAN_EXTID
       /* CANIOC_ADD_EXTFILTER:
        *   Description:    Add an address filter for a extended 29 bit
@@ -3345,8 +3468,8 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   /* Configure MCAN bit timing */
 
-  mcan_putreg(priv, SAM_MCAN_BTP_OFFSET, config->btp);
-  mcan_putreg(priv, SAM_MCAN_FBTP_OFFSET, config->fbtp);
+  mcan_putreg(priv, SAM_MCAN_BTP_OFFSET, priv->btp);
+  mcan_putreg(priv, SAM_MCAN_FBTP_OFFSET, priv->fbtp);
 
   /* Configure message RAM starting addresses and sizes. */
 
@@ -3614,19 +3737,27 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
   /* Is this the first time that we have handed out this device? */
 
-  if (!priv->initialized)
+  if (priv->state == MCAN_STATE_UNINIT)
     {
       /* Yes, then perform one time data initialization */
 
       memset(priv, 0, sizeof(struct sam_mcan_s));
-      priv->config      = config;
-      priv->initialized = true;
+      priv->config = config;
+
+      /* Set the initial bit timing.  This might change subsequently
+       * due to IOCTL command processing.
+       */
+
+      priv->btp    = config->btp;
+      priv->fbtp   = config->fbtp;
+
+      /* Initialize semaphores */
 
       sem_init(&priv->locksem, 0, 1);
       sem_init(&priv->txfsem, 0, config->ntxfifoq);
 
-      dev->cd_ops       = &g_mcanops;
-      dev->cd_priv      = (FAR void *)priv;
+      dev->cd_ops  = &g_mcanops;
+      dev->cd_priv = (FAR void *)priv;
 
       /* And put the hardware in the initial state */
 

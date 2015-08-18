@@ -1398,7 +1398,11 @@ endchoice # MCAN clock source
 config SAMV7_MCAN_CLKSRC_PRESCALER
 	int "MCAN clock prescaler"
 	default 1
-	range 1 256
+	range 1 1024
+	---help---
+		The frequency associated with time quanta is derived by dividing
+		down the input frequency. This setting provides prescaler/divider
+		must lie the range of 1 to 1024.
 
 menu "MCAN0 device driver options"
 	depends on SAMV7_MCAN0
