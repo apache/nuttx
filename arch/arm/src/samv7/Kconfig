@@ -1512,6 +1512,7 @@ config SAMV7_MCAN0_NEXTFILTERS
 	int "MCAN0 number of extended filters"
 	default 8
 	range 0 64
+	depends on CAN_EXTID
 	---help---
 		Number of extended message ID filters.
 
@@ -1827,6 +1828,7 @@ config SAMV7_MCAN1_NEXTFILTERS
 	int "MCAN1 number of extended filters"
 	default 8
 	range 0 64
+	depends on CAN_EXTID
 	---help---
 		Number of extended message ID filters.
 

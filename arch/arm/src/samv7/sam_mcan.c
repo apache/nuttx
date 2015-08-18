@@ -2796,9 +2796,10 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   canregdbg("R0: %08x\n", regval);
 
   hdr.ch_rtr    = 0;
-#ifdef CONFIG_CAN_EXTID
+  hdr.ch_error  = 0;
   hdr.ch_unused = 0;
 
+#ifdef CONFIG_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
     {
       /* Save the extended ID of the newly received message */

@@ -733,7 +733,10 @@ static int can_recvsetup(FAR struct sam_can_s *priv)
       canvdbg("CAN%d Mailbox %d: Index=%d rxmbset=%02x\n",
               config->port, mbno, mbndx, priv->rxmbset);
 
-      /* Set up the message ID and filter mask */
+      /* Set up the message ID and filter mask
+       * REVISIT: This logic should be capable of setting up standard
+       * filters when CONFIG_CAN_EXTID is selected.
+       */
 
 #ifdef CONFIG_CAN_EXTID
       can_putreg(priv, SAM_CAN_MnID_OFFSET(mbndx),
@@ -1125,14 +1128,16 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   canvdbg("Mailbox Index=%d txmbset=%02x\n", mbndx, priv->txmbset);
 
-  /* Set up the ID and mask, standard 11-bit or extended 29-bit. */
+  /* Set up the ID and mask, standard 11-bit or extended 29-bit.
+   * REVISIT: This logic should be capable of sending standard messages
+   * when CONFIG_CAN_EXTID is selected.
+   */
 
 #ifdef CONFIG_CAN_EXTID
   DEBUGASSERT(msg->cm_hdr.ch_extid);
   DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 29));
   can_putreg(priv, SAM_CAN_MnID_OFFSET(mbndx), CAN_MID_EXTID(msg->cm_hdr.ch_id));
 #else
-  DEBUGASSERT(!msg->cm_hdr.ch_extid);
   DEBUGASSERT(msg->cm_hdr.ch_id < (1 << 11));
   can_putreg(priv, SAM_CAN_MnID_OFFSET(mbndx), CAN_MID_STDID(msg->cm_hdr.ch_id));
 #endif
@@ -1309,23 +1314,26 @@ static inline void can_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
 
   mid = can_getreg(priv, SAM_CAN_MnID_OFFSET(mbndx));
 
-  /* Format the CAN header */
+  /* Format the CAN header.
+   * REVISIT: This logic should be capable of receiving standard messages
+   * when CONFIG_CAN_EXTID is selected.
+   */
 
 #ifdef CONFIG_CAN_EXTID
   /* Save the extended ID of the newly received message */
 
   hdr.ch_id     = (mid & CAN_MAM_EXTID_MASK) >> CAN_MAM_EXTID_SHIFT;
-  hdr.ch_dlc    = (msr & CAN_MSR_MDLC_MASK) >> CAN_MSR_MDLC_SHIFT;
-  hdr.ch_rtr    = 0;
   hdr.ch_extid  = true;
-  hdr.ch_unused = 0;
 #else
   /* Save the standard ID of the newly received message */
 
-  hdr.ch_dlc    = (msr & CAN_MSR_MDLC_MASK) >> CAN_MSR_MDLC_SHIFT;
-  hdr.ch_rtr    = 0;
   hdr.ch_id     = (mid & CAN_MAM_STDID_MASK) >> CAN_MAM_STDID_SHIFT;
 #endif
+
+  hdr.ch_dlc    = (msr & CAN_MSR_MDLC_MASK) >> CAN_MSR_MDLC_SHIFT;
+  hdr.ch_rtr    = 0;
+  hdr.ch_error  = 0;
+  hdr.ch_unused = 0;
 
   /* And provide the CAN message to the upper half logic */
 

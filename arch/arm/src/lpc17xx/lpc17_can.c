@@ -750,7 +750,8 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   irqstate_t flags;
   int ret = OK;
 
-  canvdbg("CAN%d ID: %d DLC: %d\n", priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  canvdbg("CAN%d ID: %d DLC: %d\n",
+          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   if (msg->cm_hdr.ch_rtr)
     {
@@ -971,12 +972,15 @@ static void can_interrupt(FAR struct can_dev_s *dev)
 
       /* Construct the CAN header */
 
-      hdr.ch_id    = rid;
-      hdr.ch_rtr   = ((rfs & CAN_RFS_RTR) != 0);
-      hdr.ch_dlc   = (rfs & CAN_RFS_DLC_MASK) >> CAN_RFS_DLC_SHIFT;
+      hdr.ch_id     = rid;
+      hdr.ch_rtr    = ((rfs & CAN_RFS_RTR) != 0);
+      hdr.ch_dlc    = (rfs & CAN_RFS_DLC_MASK) >> CAN_RFS_DLC_SHIFT;
+      hdr.ch_error  = 0;
 #ifdef CONFIG_CAN_EXTID
-      hdr.ch_extid = ((rfs & CAN_RFS_FF) != 0);
+      hdr.ch_extid  = ((rfs & CAN_RFS_FF) != 0);
 #else
+      hdr.ch_unused = 0;
+
       if ((rfs & CAN_RFS_FF) != 0)
         {
           canlldbg("ERROR: Received message with extended identifier.  Dropped\n");
