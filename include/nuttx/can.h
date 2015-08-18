@@ -196,24 +196,34 @@
  *   One based CAN-message is represented with a maximum of 10 bytes.  A message is
  *   composed of at least the first 2 bytes (when there are no data bytes present).
  *
- *   Bytes 0-1:  Hold a 16-bit value in host byte order
- *               Bits 0-3:  Data Length Code (DLC)
- *               Bit  4:    Remote Transmission Request (RTR)
- *               Bits 5-15: The 11-bit CAN identifier
- *
- *   Bytes 2-9:  CAN data
+ *   Bytes 0-1:  Bits 0-3:   Data Length Code (DLC)
+ *               Bit  4:     Remote Transmission Request (RTR)
+ *               Bit  5:     1=Message ID is a bit-encoded error report (See NOTE)
+ *               Bits 6-7:   Unused
+ *   Bytes 1-2:  Bits 0-10:  The 11-bit CAN identifier  This message ID is a bit
+ *                           encoded error set if ch_error is set (See NOTE).
+ *               Bits 11-15: Unused
+ *   Bytes 3-10: CAN data
  *
  * CAN-message Format (with Extended ID support)
  *
  *   One CAN-message consists of a maximum of 13 bytes.  A message is composed of at
  *   least the first 5 bytes (when there are no data bytes).
  *
- *   Bytes 0-3:  Hold 11- or 29-bit CAN ID in host byte order
- *   Byte 4:     Bits 0-3: Data Length Code (DLC)
- *               Bit 4:    Remote Transmission Request (RTR)
- *               Bit 5:    Extended ID indication
- *               Bits 6-7: Unused
- *   Bytes 5-12: CAN data
+ *   Bytes 0-3:  Bits 0-28:  Hold 11- or 29-bit CAN ID in host byte order.  This
+ *                           message ID is a bit encoded error set if ch_error
+ *                           is set (See NOTE).
+ *               Bits 29-31: Unused
+ *   Byte 4:     Bits 0-3:   Data Length Code (DLC)
+ *               Bit 4:      Remote Transmission Request (RTR)
+ *               Bit 5:      1=Message ID is a bit-encoded error report (See NOTE)
+ *               Bit 6:      Extended ID indication
+ *               Bit 7:      Unused
+ *   Bytes 5-12: CAN data    Size determined by DLC
+ *
+ * NOTE: The error indication if valid only on message reports received from the
+ * CAN driver; it is ignored on transmission.  When the error bit is set, the
+ * message ID is an encoded set of error indications (see CAN_ERROR_* definitions).
  *
  * The struct can_msg_s holds this information in a user-friendly, unpacked form.
  * This is the form that is used at the read() and write() driver interfaces.  The
@@ -224,18 +234,21 @@
 #ifdef CONFIG_CAN_EXTID
 struct can_hdr_s
 {
-  uint32_t     ch_id;         /* 11- or 29-bit ID (3-bits unused) */
+  uint32_t     ch_id;         /* 11- or 29-bit ID (20- or 3-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC */
   uint8_t      ch_rtr    : 1; /* RTR indication */
+  uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
   uint8_t      ch_extid  : 1; /* Extended ID indication */
-  uint8_t      ch_unused : 2; /* Unused */
+  uint8_t      ch_unused : 1; /* Unused */
 } packed_struct;
 #else
 struct can_hdr_s
 {
-  uint16_t      ch_dlc   : 4;  /* 4-bit DLC.  May be encoded in CAN_FD mode. */
-  uint16_t      ch_rtr   : 1;  /* RTR indication */
-  uint16_t      ch_id    : 11; /* 11-bit standard ID */
+  uint16_t     ch_id;         /* 11-bit standard ID (5-bits unused) */
+  uint8_t      ch_dlc    : 4; /* 4-bit DLC.  May be encoded in CAN_FD mode. */
+  uint8_t      ch_rtr    : 1; /* RTR indication */
+  uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
+  uint8_t      ch_unused : 2; /* Unused */
 } packed_struct;
 #endif
 

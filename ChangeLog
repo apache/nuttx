@@ -10833,3 +10833,10 @@
 	  (2015-08-14).
 	* Network drivers. Fix bug in tun interface driver.  From Max
 	  Neklyudov (2015-08-17).
+	* STM32:  Added definitions for STM32F303K6, STM32F303K8, STM32F303C6,
+	  STM32F303C8, STM32F303RD, and STM32F303RE devices.  From Paul
+	  Alexander Patience (2015-08-17).
+	* include/nuttx/can.h and all CAN drivers: Add an error indication
+	  bit to the CAN message report.  This indication must then be cleared
+	  in all existing drivers.  More to come (2015-08-18).
+
