@@ -205,8 +205,8 @@ int board_reset(int status);
  *   application-level touchscreen testing logic (perhaps by
  *   apps/examples/touchscreen).  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_TSCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_TSCTEST_SETUP command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_TSCTEST_SETUP
+ *   command.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -231,8 +231,8 @@ int board_tsc_setup(int minor);
  *   application-level touchscreen testing logic (perhaps by
  *   apps/examples/touchscreen).  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_TSCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_TSCTEST_TEARDOWN command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_TSCTEST_TEARDOWN
+ *   command.
  *
  * Input Parameters:
  *   None
@@ -254,8 +254,8 @@ void board_tsc_teardown(void);
  *   This is an internal OS interface but may be invoked indirectly from
  *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_ADCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_ADCTEST_SETUP command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_ADCTEST_SETUP
+ *   command.
  *
  ****************************************************************************/
 
@@ -288,8 +288,8 @@ int board_pwm_setup(void);
  *   This is an internal OS interface but may be invoked indirectly from
  *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_GRAPHICS=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_GRAPHICS_SETUP command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_GRAPHICS_SETUP
+ *   command.
  *
  ****************************************************************************/
 
@@ -299,6 +299,25 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
 #else
 struct fb_vtable_s;
 FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
+#endif
+
+/*****************************************************************************
+ * Name: board_can_initialize
+ *
+ * Description:
+ *   Perform one-time CAN initialization.  This is currently only needed for
+ *   apps/examples/can.
+ *
+ *   This is an internal OS interface but may be invoked indirectly from
+ *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
+ *   CONFIG_BOARDCTL_CANINIT=y, then this functions will be invoked via the
+ *   (non-standard) boardctl() interface using the BOARDIOC_CAN_INITIALIZE
+ *   command.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_CANINIT
+int board_can_initialize(void);
 #endif
 
 /****************************************************************************
