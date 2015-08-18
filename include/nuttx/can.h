@@ -173,6 +173,22 @@
 
 #define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
 
+/* CAN Error Indications ************************************************************/
+
+#define CAN_ERROR_SYSTEM          (1 << 0)  /* Bit 0:  Driver internal error */
+#define CAN_ERROR_RXLOST          (1 << 1)  /* Bit 1:  RX Message Lost */
+#define CAN_ERROR_TXLOST          (1 << 2)  /* Bit 2:  TX Message Lost */
+#define CAN_ERROR_ACCESS          (1 << 3)  /* Bit 3:  RAM Access Failure */
+#define CAN_ERROR_TIMEOUT         (1 << 4)  /* Bit 4:  Timeout Occurred */
+#define CAN_ERROR_PASSIVE         (1 << 5)  /* Bit 5:  Error Passive */
+#define CAN_ERROR_CRC             (1 << 6)  /* Bit 6:  RX CRC Error */
+#define CAN_ERROR_BIT             (1 << 7)  /* Bit 7:  Bit Error */
+#define CAN_ERROR_ACK             (1 << 8)  /* Bit 8:  Acknowledge Error */
+#define CAN_ERROR_FORMAT          (1 << 9)  /* Bit 9:  Format Error */
+#define CAN_ERROR_STUFF           (1 << 10) /* Bit 10: Stuff Error */
+
+#define CAN_ERROR_ALL             (0x07ff)
+
 /* CAN filter support ***************************************************************/
 /* Some CAN hardware supports a notion of prioritizing messages that match filters.
  * Only two priority levels are currently supported and are encoded as defined
