@@ -2110,6 +2110,15 @@ static void mcan_reset(FAR struct can_dev_s *dev)
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
   mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
 
+  /* Make sure that all buffers are released.
+   *
+   * REVISIT: What if a thread is waiting for a buffer?  The following
+   * will not wake up any waiting threads.
+   */
+
+  sem_destroy(&priv->txfsem);
+  sem_init(&priv->txfsem, 0, config->ntxfifoq);
+
   /* Disable peripheral clocking to the MCAN controller */
 
   sam_disableperiph1(priv->config->pid);
@@ -2403,6 +2412,12 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
        *                   is returned with the errno variable set to indicate the
        *                   nature of the error.
        *   Dependencies:   None
+       *
+       * REVISIT: There is probably a limitation here:  If there are multiple
+       * threads trying to send CAN packets, when one of these threads reconfigures
+       * the bitrate, the MCAN hardware will be reset and the context of operation
+       * will be lost.  Hence, this IOCTL can only safely be executed in quiescent
+       * time periods.
        */
 
       case CANIOC_SET_BITTIMING:
@@ -2415,7 +2430,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           uint32_t tseg2;
           uint32_t sjw;
           uint32_t ie;
-          uint8_t  state;
+          uint8_t state;
 
           DEBUGASSERT(bt != NULL);
           DEBUGASSERT(bt->bt_baud < SAMV7_MCANCLK_FREQUENCY);
@@ -2461,11 +2476,14 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
           /* We we have successfully re-initialized, then restore the
            * interrupt state.
+           *
+           * REVISIT: Since the hardware was reset, any pending TX
+           * activity was lost.  Should we disable TX interrupts?
            */
 
           if (ret == OK)
             {
-              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie & ~priv->txints);
             }
 
           irqrestore(flags);
