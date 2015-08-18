@@ -106,7 +106,7 @@
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
  *                   variable set to indicate the nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
+ *   Dependencies:   None
  *
  * CANIOC_ADD_EXTFILTER:
  *   Description:    Add an address filter for a extended 29 bit address.
@@ -114,7 +114,7 @@
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
  *                   variable set to indicate the nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID=y
+ *   Dependencies:   Requires CONFIG_CAN_EXTID=y
  *
  * CANIOC_DEL_STDFILTER:
  *   Description:    Remove an address filter for a standard 11 bit address.
@@ -123,7 +123,7 @@
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
+ *   Dependencies:   None
  *
  * CANIOC_DEL_EXTFILTER:
  *   Description:    Remove an address filter for a standard 29 bit address.
@@ -132,20 +132,42 @@
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID=y
+ *   Dependencies:   Requires CONFIG_CAN_EXTID=y
+ *
+ * CANIOC_GET_BITTIMING:
+ *   Description:    Return the current bit timing settings
+ *   Argument:       A pointer to a write-able instance of struct
+ *                   canioc_bittiming_s in which current bit timing values
+ *                   will be returned.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_SET_BITTIMING:
+ *   Description:    Set new current bit timing values
+ *   Argument:       A pointer to a read-able instance of struct
+ *                   canioc_bittiming_s in which the new bit timing values
+ *                   are provided.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
-#define CANIOC_ADD_STDFILTER      _CANIOC(2)
-#define CANIOC_ADD_EXTFILTER      _CANIOC(3)
-#define CANIOC_DEL_STDFILTER      _CANIOC(4)
-#define CANIOC_DEL_EXTFILTER      _CANIOC(5)
+#define CANIOC_GET_BITTIMING      _CANIOC(2)
+#define CANIOC_SET_BITTIMING      _CANIOC(3)
+#define CANIOC_ADD_STDFILTER      _CANIOC(4)
+#define CANIOC_ADD_EXTFILTER      _CANIOC(5)
+#define CANIOC_DEL_STDFILTER      _CANIOC(6)
+#define CANIOC_DEL_EXTFILTER      _CANIOC(7)
 
 /* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
  * than this value
  */
 
-#define CANIOC_USER               _CANIOC(6)
+#define CANIOC_USER               _CANIOC(8)
 
 /* Convenience macros ***************************************************************/
 
@@ -390,6 +412,7 @@ struct can_dev_s
 };
 
 /* Structures used with ioctl calls */
+/* CANIOC_RTR: */
 
 struct canioc_rtr_s
 {
@@ -397,7 +420,25 @@ struct canioc_rtr_s
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
 
+/* CANIOC_GET_BITTIMING/CANIOC_SET_BITTIMING: */
+/* Bit time = Tquanta * (Sync_Seg + Prop_Seq + Phase_Seg1 + Phase_Seg2)
+ *          = Tquanta * (TSEG1 + TSEG2 + 1)
+ * Where
+ *   TSEG1 = Prop_Seq + Phase_Seg1
+ *   TSEG2 = Phase_Seg2
+ */
+
+struct canioc_bittiming_s
+{
+  uint32_t              bt_baud;         /* Bit rate = 1 / bit time */
+  uint8_t               bt_tseg1;        /* TSEG1 in time quanta */
+  uint8_t               bt_tseg2;        /* TSEG2 in time quanta */
+  uint8_t               bt_sjw;          /* Synchronization Jump Width in time quanta */
+};
+
 #ifdef CONFIG_CAN_EXTID
+/* CANIOC_ADD_EXTFILTER: */
+
 struct canioc_extfilter_s
 {
   uint32_t              xf_id1;          /* 29-bit ID.  For dual match or for the
@@ -408,6 +449,8 @@ struct canioc_extfilter_s
   uint8_t               xf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
 #endif
+
+/* CANIOC_ADD_STDFILTER: */
 
 struct canioc_stdfilter_s
 {
