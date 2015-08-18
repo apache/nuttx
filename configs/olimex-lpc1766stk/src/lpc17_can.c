@@ -97,7 +97,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: can_devinit
+ * Name: board_can_initialize
  *
  * Description:
  *   All LPC17 architectures must provide the following interface to work with
@@ -105,7 +105,7 @@
  *
  ************************************************************************************/
 
-int can_devinit(void)
+int board_can_initialize(void)
 {
   static bool initialized = false;
   struct can_dev_s *can;

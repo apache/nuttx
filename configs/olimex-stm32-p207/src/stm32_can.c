@@ -89,7 +89,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: can_devinit
+ * Name: board_can_initialize
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
@@ -97,7 +97,7 @@
  *
  ************************************************************************************/
 
-int can_devinit(void)
+int board_can_initialize(void)
 {
   return stm32_can_initialize();
 }

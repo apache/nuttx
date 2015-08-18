@@ -1750,6 +1750,15 @@ config BOARDCTL_PWMTEST
 		Architecture specific logic must provide board_pwm_setup()
 		interface.
 
+config BOARDCTL_CANINIT
+	bool "Enable CAN initialize interface"
+	default n
+	depends on CAN
+	---help---
+		Enables support for the BOARDIOC_CAN_INITIALIZE boardctl() command.
+		Architecture specific logic must provide board_can_initialize()
+		interface.
+
 config BOARDCTL_GRAPHICS
 	bool "Enable custom graphics initialization interfaces"
 	default n
