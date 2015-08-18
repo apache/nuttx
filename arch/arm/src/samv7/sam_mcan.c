@@ -954,6 +954,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev);
 static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
               int bufndx);
 #endif
+static void mcan_error(FAR struct can_dev_s *dev, uint32_t status);
 static void mcan_receive(FAR struct can_dev_s *dev,
               FAR uint32_t *rxbuffer, unsigned long nwords);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
@@ -2761,6 +2762,108 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
 #endif
 
 /****************************************************************************
+ * Name: mcan_error
+ *
+ * Description:
+ *   Report a CAN error
+ *
+ * Input Parameters:
+ *   dev     - CAN-common state data
+ *   status  - Interrupt status with error bits set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
+{
+  struct can_hdr_s hdr;
+  uint16_t errbits;
+  int ret;
+
+  /* Encode error bits */
+
+  errbits = 0;
+  if ((status & (MCAN_INT_ELO | MCAN_INT_EW)) != 0)
+    {
+      errbits |= CAN_ERROR_SYSTEM;
+    }
+
+  if ((status & (MCAN_INT_RF0L | MCAN_INT_RF1L)) != 0)
+    {
+      errbits |= CAN_ERROR_RXLOST;
+    }
+
+  if ((status & MCAN_INT_TEFL) != 0)
+    {
+      errbits |= CAN_ERROR_TXLOST;
+    }
+
+  if ((status & (MCAN_INT_MRAF | MCAN_INT_BO)) != 0)
+    {
+      errbits |= CAN_ERROR_ACCESS;
+    }
+
+  if ((status & MCAN_INT_TOO) != 0)
+    {
+      errbits |= CAN_ERROR_TIMEOUT;
+    }
+
+  if ((status & MCAN_INT_EP) != 0)
+    {
+      errbits |= CAN_ERROR_PASSIVE;
+    }
+
+  if ((status & MCAN_INT_CRCE) != 0)
+    {
+      errbits |= CAN_ERROR_CRC;
+    }
+
+  if ((status & MCAN_INT_BE) != 0)
+    {
+      errbits |= CAN_ERROR_BIT;
+    }
+
+  if ((status & MCAN_INT_ACKE) != 0)
+    {
+      errbits |= CAN_ERROR_ACK;
+    }
+
+  if ((status & MCAN_INT_FOE) != 0)
+    {
+      errbits |= CAN_ERROR_FORMAT;
+    }
+
+  if ((status & MCAN_INT_STE) != 0)
+    {
+      errbits |= CAN_ERROR_STUFF;
+    }
+
+  if (errbits != 0)
+    {
+      /* Format the CAN header for the error report. */
+
+      hdr.ch_id     = errbits;
+      hdr.ch_dlc    = 0;
+      hdr.ch_rtr    = 0;
+      hdr.ch_error  = 1;
+#ifdef CONFIG_CAN_EXTID
+      hdr.ch_extid  = 0;
+#endif
+      hdr.ch_unused = 0;
+
+      /* And provide the error report to the upper half logic */
+
+      ret = can_receive(dev, &hdr, NULL);
+      if (ret < 0)
+        {
+          canlldbg("ERROR: can_receive failed: %d\n", ret);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: mcan_receive
  *
  * Description:
@@ -2892,6 +2995,10 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
           /* Clear the error indications */
 
           mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_CMNERR_INTS);
+
+          /* Report errors */
+
+          mcan_error(dev, pending & MCAN_CMNERR_INTS);
           handled = true;
         }
 
@@ -2904,6 +3011,10 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
           /* Clear the error indications */
 
           mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
+
+          /* Report errors */
+
+          mcan_error(dev, pending & MCAN_TXERR_INTS);
 
           /* REVISIT:  Will MCAN_INT_TC also be set in the event of
            * a transmission error?  Each write must conclude with a
@@ -3003,6 +3114,11 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
           /* Clear the error indications */
 
           mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXERR_INTS);
+
+          /* Report errors */
+
+          mcan_error(dev, pending & MCAN_TXERR_INTS);
+          handled = true;
         }
 
       /* Clear the RX FIFO1 new message interrupt */
