@@ -214,7 +214,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_GRAPHICS_SETUP:
         {
-          FAR struct boardioc_graphics_s *setup = 
+          FAR struct boardioc_graphics_s *setup =
             ( FAR struct boardioc_graphics_s *)arg;
 
           setup->dev = board_graphics_setup(setup->devno);
