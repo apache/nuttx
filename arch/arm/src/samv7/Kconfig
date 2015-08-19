@@ -1329,7 +1329,6 @@ menu "USB High Speed Device Controller driver (DCD) options"
 config SAMV7_USBDEVHS_LOWPOWER
 	bool "Low-power mode"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		The USBHS can work in two modes:
 
