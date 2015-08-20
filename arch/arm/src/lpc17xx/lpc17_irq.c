@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17/lpc17_irq.c
  *
- *   Copyright (C) 2010-2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,9 +78,9 @@
 
 volatile uint32_t *current_regs;
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* This is the address of the vector table */
+
+extern unsigned _vectors[];
 
 /****************************************************************************
  * Private Functions
@@ -313,8 +313,21 @@ void up_irqinitialize(void)
       putreg32(0, regaddr);
     }
 
+  /* Make sure that we are using the correct vector table.  The default
+   * vector address is 0x0000:0000 but if we are executing code that is
+   * positioned in SRAM or in external FLASH, then we may need to reset
+   * the interrupt vector so that it refers to the table in SRAM or in
+   * external FLASH.
+   */
+
+  putreg32((uint32_t)_vectors & ~3, NVIC_VECTAB);
+
   /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
    * vector table that requires special initialization.
+   *
+   * But even in this case NVIC_VECTAB has to point to the initial table
+   * because up_ramvec_initialize() initializes RAM table from table
+   * pointed by NVIC_VECTAB register.
    */
 
 #ifdef CONFIG_ARCH_RAMVECTORS
