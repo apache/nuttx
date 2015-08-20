@@ -78,14 +78,20 @@
 
 /* Set up for 32-bit SDRAM at CS0 */
 
-#define CONFIG_LPC17_SDRAM_32BIT
+#ifdef CONFIG_LPC17_EXTDRAMSIZE
+#  define SDRAM_SIZE CONFIG_LPC17_EXTDRAMSIZE
+#endif
 
 #ifdef CONFIG_LPC17_SDRAM_16BIT
-#  define SDRAM_SIZE        0x02000000 /* 256Mbit */
+#  ifndef SDRAM_SIZE
+#    define SDRAM_SIZE      0x02000000 /* 256Mbit */
+#  endif
 #else /* if defined(CONFIG_LPC17_SDRAM_32BIT) */
 #  undef CONFIG_LPC17_SDRAM_32BIT
 #  define CONFIG_LPC17_SDRAM_32BIT 1
-#  define SDRAM_SIZE        0x04000000 /* 512Mbit */
+#  ifndef SDRAM_SIZE
+#    define SDRAM_SIZE      0x04000000 /* 512Mbit */
+#  endif
 #endif
 
 #define SDRAM_BASE          0xa0000000 /* CS0 */
