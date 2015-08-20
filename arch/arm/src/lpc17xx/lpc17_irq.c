@@ -320,7 +320,7 @@ void up_irqinitialize(void)
    * external FLASH.
    */
 
-  putreg32((uint32_t)_vectors & ~3, NVIC_VECTAB);
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 
   /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
    * vector table that requires special initialization.
