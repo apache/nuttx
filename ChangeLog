@@ -10842,3 +10842,15 @@
 	* arch/arm/src/lpc17/lpc17_irq.c: Set NVIC vector address so that
 	  code can execute with a bootloader or can execute from RAM.  From
 	  Pavel Pisa (2015-08-20).
+	* All ARMV7-M IRQ setup:  Always set the NVIC vector table address
+	  unconditionally.  This is needed in cases where the code is running
+	  with a bootload and when the code is running from RAM.  It is also
+	  needed by the logic of up_ramvec_initialize() which gets the vector
+	  base address from the NVIC.  Suggested by Pavel Pisa (2015-08-21).
+	* SAMV7 USBHS DCD: The device controller driver is (finally) functional
+	  (2015-08-21).
+	* recvfrom(): Correct wait for new data when NET_UDP_READAHEAD is
+	  enabled.  Fix size accounting when recvfrom_udpreadahead() sets
+	  state.rf_recvlen == -1.  I have not checked if data are accumulated
+	  to the right position in the buffer however. From Pavel Pisa
+	  (2015-08-15).

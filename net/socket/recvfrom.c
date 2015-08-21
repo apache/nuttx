@@ -111,6 +111,39 @@ struct recvfrom_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: recvfrom_add_recvlen
+ *
+ * Description:
+ *   Update information about space available for new data and update size
+ *   of data in buffer,  This logic accounts for the case where
+ *   recvfrom_udpreadahead() sets state.rf_recvlen == -1 .
+ *
+ * Parameters:
+ *   pstate   recvfrom state structure
+ *   recvlen  size of new data appended to buffer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
+
+static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
+                                        size_t recvlen)
+{
+  if (pstate->rf_recvlen < 0)
+    {
+      pstate->rf_recvlen = 0;
+    }
+
+  pstate->rf_recvlen += recvlen;
+  pstate->rf_buffer  += recvlen;
+  pstate->rf_buflen  -= recvlen;
+}
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP || CONFIG_NET_PKT */
+
+/****************************************************************************
  * Function: recvfrom_newdata
  *
  * Description:
@@ -152,9 +185,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Update the accumulated size of the data read */
 
-  pstate->rf_recvlen += recvlen;
-  pstate->rf_buffer  += recvlen;
-  pstate->rf_buflen  -= recvlen;
+  recvfrom_add_recvlen(pstate, recvlen);
 
   return recvlen;
 }
@@ -200,9 +231,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
 
   /* Update the accumulated size of the data read */
 
-  pstate->rf_recvlen += recvlen;
-  pstate->rf_buffer  += recvlen;
-  pstate->rf_buffer  -= recvlen;
+  recvfrom_add_recvlen(pstate, recvlen);
 }
 #endif /* CONFIG_NET_PKT */
 
@@ -353,9 +382,7 @@ static inline void recvfrom_tcpreadahead(struct recvfrom_s *pstate)
 
       /* Update the accumulated size of the data read */
 
-      pstate->rf_recvlen += recvlen;
-      pstate->rf_buffer  += recvlen;
-      pstate->rf_buflen  -= recvlen;
+      recvfrom_add_recvlen(pstate, recvlen);
 
       /* If we took all of the ata from the I/O buffer chain is empty, then
        * release it.  If there is still data available in the I/O buffer
@@ -1501,9 +1528,11 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* It is okay to block if we need to.  If there is space to receive anything
    * more, then we will wait to receive the data.  Otherwise return the number
    * of bytes read from the read-ahead buffer (already in 'ret').
+   *
+   * NOTE: that recvfrom_udpreadahead() may set state.rf_recvlen == -1.
    */
 
-  else if (state.rf_recvlen == 0)
+  else if (state.rf_recvlen <= 0)
 #endif
     {
       /* Get the device that will handle the packet transfers.  This may be
