@@ -110,19 +110,12 @@ for additional issues specific to a particular configuration.
        Setting write through mode eliminates the need for cleaning the D-Cache.
        If only reloading and invalidating are done, then there is no problem.
 
-  5. The USBHS device controller driver (DCD) is complete but non-functional.
-     At this point, work has stopped because I am stuck.  The problem is that
-     bus events are not occurring:  Nothing is detected by the USBHS when the
-     host is connected; no activity is seen on the bus by a USB analyzer when
-     the host is connected.  Possibilities: (1) the pull-ups on DM and DP are
-     not working.  This would prevent the host from detecting the presence of
-     the device.  The DETACH bit is, however, being correctly cleared and the
-     USB is in the suspend sate.  Or (2) some issue with clocking or
-     configuration of the UTMI.  I see nothing wrong in this case.   I have
-     done extensive comparison of the Atmel sample code and study of the data
-     sheet, but I have not found the key to
-     solving this.
+  5. The USBHS device controller driver (DCD) is also fully functional.  It
+     has only be tested with the CDC/ACM driver as described below. Like
+     the Ethernet driver:
 
+     - This driver does not work reliably with the write back D-Cache.  The
+       write-through D-Cache must be enabled.
   6. The full port for audio support is code complete:  WM8904 driver,
      SSC/I2C driver, and CS2100-CP driver.  But this code is untested.  The
      WM8904 interface was taken directly from the SAMA5D4-EK and may well
@@ -1864,3 +1857,4 @@ Configuration sub-directories
 
       - Line spacing in the NxTerm window is too much.  This is probably
         a font-related issue too.
+
