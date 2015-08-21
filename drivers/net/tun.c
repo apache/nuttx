@@ -1178,8 +1178,8 @@ errout:
 
 static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode      = filep->f_inode;
-  FAR struct tun_driver_s *tun = inode->i_private;
+  FAR struct inode *inode       = filep->f_inode;
+  FAR struct tun_driver_s *tun  = inode->i_private;
   FAR struct tun_device_s *priv = filep->f_priv;
   int ret = OK;
 
@@ -1189,7 +1189,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       int intf;
       FAR struct ifreq *ifr = (FAR struct ifreq*)arg;
 
-      if (!ifr || ifr->ifr_flags != IFF_TUN)
+      if (!ifr || (ifr->ifr_flags & IFF_MASK) != IFF_TUN)
         {
           return -EINVAL;
         }
@@ -1220,7 +1220,6 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       priv = filep->f_priv;
       strncpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
-      lldbg("--- %s\n", priv->dev.d_ifname);
 
       tundev_unlock(tun);
 
