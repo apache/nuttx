@@ -916,11 +916,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
           /* Report an error only if no data has been received. (If
            * CONFIG_NET_TCP_RECVDELAY then rf_recvlen should always be
-           * zero).
+           * less than or equal to zero).
            */
 
 #if CONFIG_NET_TCP_RECVDELAY > 0
-          if (pstate->rf_recvlen == 0)
+          if (pstate->rf_recvlen <= 0)
 #endif
             {
               /* Report the timeout error */

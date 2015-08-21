@@ -10854,3 +10854,7 @@
 	  state.rf_recvlen == -1.  I have not checked if data are accumulated
 	  to the right position in the buffer however. From Pavel Pisa
 	  (2015-08-15).
+	* sched/wdog/wd_create.c:  Correct a counting error in the number
+	  of available watchdog timers.  When the number of free timers is
+	  low, the counter could be incremented below zero (2015-08-15).
+

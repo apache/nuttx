@@ -109,24 +109,34 @@ WDOG_ID wd_create (void)
 
   if (g_wdnfree > CONFIG_WDOG_INTRESERVE || up_interrupt_context())
     {
-      /* Remove the watchdog timer from the free list and decrement the
-       * count of free timers all with interrupts disabled.
-       */
+      /* Remove the watchdog timer from the free list */
 
       wdog = (FAR struct wdog_s *)sq_remfirst(&g_wdfreelist);
-      DEBUGASSERT(g_wdnfree > 0);
-      g_wdnfree--;
-      irqrestore(state);
 
       /* Did we get one? */
 
       if (wdog)
         {
-          /* Yes.. Clear the forward link and all flags */
+          /* Yes.. decrement the count of free, pre-allocated timers (all
+           * with interrupts disabled).
+           */
+
+          DEBUGASSERT(g_wdnfree > 0 && wdog != NULL);
+          g_wdnfree--;
+
+          /* Clear the forward link and all flags */
 
           wdog->next = NULL;
           wdog->flags = 0;
         }
+      else
+        {
+          /* We didn't get one... The count should then be exactly zero */
+
+          DEBUGASSERT(g_wdnfree == 0);
+        }
+
+      irqrestore(state);
     }
 
   /* We are in a normal tasking context AND there are not enough unreserved,
