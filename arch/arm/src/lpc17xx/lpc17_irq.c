@@ -76,11 +76,17 @@
  * Public Data
  ****************************************************************************/
 
+/* This is the address of current interrupt saved state data.  Used for
+ * context switching.  Only value during interrupt handling.
+ */
+
 volatile uint32_t *current_regs;
 
-/* This is the address of the vector table */
+/* This is the address of the  exception vector table (determined by the
+ * linker script).
+ */
 
-extern unsigned _vectors[];
+extern uint32_t _vectors[];
 
 /****************************************************************************
  * Private Functions
