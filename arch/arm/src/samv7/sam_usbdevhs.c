@@ -72,6 +72,7 @@
 #include "up_internal.h"
 #include "cache.h"
 
+#include "chip.h"
 #include "sam_periphclks.h"
 #include "chip/sam_usbhs.h"
 #include "sam_clockconfig.h"
@@ -145,6 +146,36 @@
 
 #define sam_rqempty(q)        ((q)->head == NULL)
 #define sam_rqpeek(q)         ((q)->head)
+
+/* Buffer Alignment *********************************************************
+ *
+ * DMA buffers be aligned the 8-byte (2 word boundaries).  However, if the
+ * data cache is enabled the a higher level of alignment is required.  That
+ * is because the data will need to be invalidated and that cache
+ * invalidation will occur in multiples of full cache lines.
+ */
+
+#ifdef CONFIG_ARMV7M_DCACHE
+/* Align to the cache line size which we assume is >= 8 */
+
+#  define USBHS_ALIGN         ARMV7M_DCACHE_LINESIZE
+#  define USBHS_ALIGN_MASK    (USBHS_ALIGN-1)
+#  define USBHS_ALIGN_DOWN(n) ((n) & ~USBHS_ALIGN_MASK)
+#  define USBHS_ALIGN_UP(n)   (((n) + USBHS_ALIGN_MASK) & ~USBHS_ALIGN_MASK)
+
+#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+#    warning !!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!
+#  endif
+
+#else
+/* Use the minimum alignment requirement */
+
+#  define USBHS_ALIGN         8
+#  define USBHS_ALIGN_MASK    7
+#  define USBHS_ALIGN_DOWN(n) ((n) & ~7)
+#  define USBHS_ALIGN_UP(n)   (((n) + 7) & ~7)
+
+#endif
 
 /* USB trace ****************************************************************/
 /* Trace error codes */
@@ -1635,10 +1666,17 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
           if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
             {
-              /* Set up the next DMA */
+              /* Set up the next DMA.  We will come through this logic path
+               * again with xrfd != 0 when the DMA completes.
+               */
 
               sam_dma_rdsetup(priv, privep, privreq);
             }
+
+          /* No DMA for this endpoint and we have an available, empty read
+           * request.  We need to wait for data to become avaialable.
+           */
+
           else
             {
               /* Enable endpoint RXRDY_TXTK interrupts */
@@ -3686,9 +3724,9 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 #ifdef CONFIG_USBDEV_DMA
 static void *sam_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes)
 {
-  /* There is not special buffer allocation requirement */
+  /* Allocate properly aligned memory */
 
-  return kumm_malloc(nbytes);
+  return kmm_memalign(USBHS_ALIGN, USBHS_ALIGN_UP(nbytes));
 }
 #endif
 
@@ -3703,7 +3741,7 @@ static void *sam_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes)
 #ifdef CONFIG_USBDEV_DMA
 static void sam_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
 {
-  /* There is not special buffer allocation requirement */
+  /* There is no special buffer requirement to free aligned DMA buffers */
 
   kumm_free(buf);
 }
