@@ -132,6 +132,10 @@ ifeq ($(CONFIG_SAMV7_SPI_SLAVE),y)
 CHIP_CSRCS += sam_spi_slave.c
 endif
 
+ifeq ($(CONFIG_SAMV7_QSPI),y)
+CHIP_CSRCS += sam_qspi.c
+endif
+
 ifeq ($(CONFIG_SAMV7_TWIHS0),y)
 CHIP_CSRCS += sam_twihs.c
 else ifeq ($(CONFIG_SAMV7_TWIHS1),y)

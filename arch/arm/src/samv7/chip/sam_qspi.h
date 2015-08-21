@@ -51,7 +51,12 @@
 /****************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************/
-/* QSPI register offsets *****************************************************************/
+/* General Characteristics **************************************************************/
+
+#define SAM_QSPI_MINBITS           8      /* Minimum word width */
+#define SAM_QSPI_MAXBITS           16     /* Maximum word width */
+
+/* QSPI register offsets ****************************************************************/
 
 #define SAM_QSPI_CR_OFFSET         0x0000 /* Control Register */
 #define SAM_QSPI_MR_OFFSET         0x0004 /* Mode Register */
@@ -73,7 +78,7 @@
 #define SAM_QSPI_WPSR_OFFSET       0x00e8 /* Write Protection Status Register */
                                          /* 0xec-0xfc: Reserved */
 
-/* QSPI register addresses ***************************************************************/
+/* QSPI register addresses **************************************************************/
 
 #define SAM_QSPI0_CR               (SAM_QSPI0_BASE+SAM_QSPI_CR_OFFSET)   /* Control Register */
 #define SAM_QSPI0_MR               (SAM_QSPI0_BASE+SAM_QSPI_MR_OFFSET)   /* Mode Register */
@@ -111,7 +116,7 @@
 #  define SAM_QSPI1_WPSR           (SAM_QSPI1_BASE+SAM_QSPI_WPSR_OFFSET) /* Write Protection Status Register */
 #endif
 
-/* QSPI register bit definitions *********************************************************/
+/* QSPI register bit definitions ********************************************************/
 
 /* QSPI Control Register */
 
@@ -132,7 +137,7 @@
 #  define QSPI_MR_CSMODE_SYSTEM    (2 << QSPI_MR_PCS_SHIFT) /* CS deasserted after each transfer */
 #define QSPI_MR_NBBITS_SHIFT       (8)       /* Bits 8-11: Number Of Bits Per Transfer */
 #define QSPI_MR_NBBITS_MASK        (15 << QSPI_MR_NBBITS_SHIFT)
-#  define QSPI_MR_NBBITS(n)        ((uint32_t)((n)-8) << QSPI_MR_NBBITS_SHIFT)
+#  define QSPI_MR_NBBITS(n)        ((uint32_t)((n)-SAM_QSPI_MINBITS) << QSPI_MR_NBBITS_SHIFT)
 #  define QSPI_MR_NBBITS_8BIT      (0 << QSPI_MR_NBBITS_SHIFT) /* 8 bits for transfer */
 #  define QSPI_MR_NBBITS_9BIT      (1 << QSPI_MR_NBBITS_SHIFT) /* 9 bits for transfer */
 #  define QSPI_MR_NBBITS_10BIT     (2 << QSPI_MR_NBBITS_SHIFT) /* 10 bits for transfer */
@@ -175,8 +180,6 @@
 #define QSPI_INT_ALL               (0x0000070f)
 
 /* Serial Clock Register */
-
-#define QSPI_SCR_
 
 #define QSPI_SCR_CPOL              (1 << 0)  /* Bit 0:  Clock Polarity */
 #define QSPI_SCR_NCPHA             (1 << 1)  /* Bit 1:  Clock Phase */
