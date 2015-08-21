@@ -115,18 +115,18 @@ WDOG_ID wd_create (void)
 
       /* Did we get one? */
 
-      if (wdog)
+      if (wdog != NULL)
         {
           /* Yes.. decrement the count of free, pre-allocated timers (all
            * with interrupts disabled).
            */
 
-          DEBUGASSERT(g_wdnfree > 0 && wdog != NULL);
+          DEBUGASSERT(g_wdnfree > 0);
           g_wdnfree--;
 
           /* Clear the forward link and all flags */
 
-          wdog->next = NULL;
+          wdog->next  = NULL;
           wdog->flags = 0;
         }
       else
