@@ -241,7 +241,8 @@ static inline void sam_pmcsetup(void)
    * - Normal mode where High speed, Full speed and Low speed are available.
    * - Low-power mode where only Full speed and Low speed are available.
    *
-   * Only the Low-power mode is mode is supported by this logic.
+   * Only the Low-power mode is mode is supported by the logic here.  Normal
+   * mode logic is handled in the function sam_usbclock().
    */
 
   /* UTMI Low-power mode, Full/Low Speed mode
@@ -411,7 +412,8 @@ void sam_usbclock(void)
    * - Normal mode where High speed, Full speed and Low speed are available.
    * - Low-power mode where only Full speed and Low speed are available.
    *
-   * Only the normal mode is supported by this logic.
+   * Only the normal mode is supported by this logic of this function.  Low-
+   * power mode was handled in the sam_clockconfig().
    */
 
   /* UTMI normal mode, High/Full/Low Speed

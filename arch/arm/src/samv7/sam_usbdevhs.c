@@ -205,11 +205,10 @@
 #define SAM_TRACEERR_EPRESERVE            0x0017
 #define SAM_TRACEERR_NCFGOK               0x0018
 #define SAM_TRACEERR_INVALIDCTRLREQ       0x0019
-#define SAM_TRACEERR_INVALIDPARMS         0x001a
-#define SAM_TRACEERR_IRQREGISTRATION      0x001b
-#define SAM_TRACEERR_NOTCONFIGURED        0x001c
-#define SAM_TRACEERR_REQABORTED           0x001d
-#define SAM_TRACEERR_TXINERR              0x001e
+#define SAM_TRACEERR_IRQREGISTRATION      0x001a
+#define SAM_TRACEERR_NOTCONFIGURED        0x001b
+#define SAM_TRACEERR_REQABORTED           0x001c
+#define SAM_TRACEERR_TXINERR              0x001d
 
 /* Trace interrupt codes */
 
@@ -245,11 +244,12 @@
 #define SAM_TRACEINTID_RXSETUP            0x001e
 #define SAM_TRACEINTID_SETCONFIG          0x001f
 #define SAM_TRACEINTID_SETFEATURE         0x0020
-#define SAM_TRACEINTID_STALLSNT           0x0021
-#define SAM_TRACEINTID_SYNCHFRAME         0x0022
-#define SAM_TRACEINTID_TXINI              0x0023
-#define SAM_TRACEINTID_UPSTRRES           0x0024
-#define SAM_TRACEINTID_WAKEUP             0x0025
+#define SAM_TRACEINTID_SPEED              0x0021
+#define SAM_TRACEINTID_STALLSNT           0x0022
+#define SAM_TRACEINTID_SYNCHFRAME         0x0023
+#define SAM_TRACEINTID_TXINI              0x0024
+#define SAM_TRACEINTID_UPSTRRES           0x0025
+#define SAM_TRACEINTID_WAKEUP             0x0026
 
 /* Ever-present MIN and MAX macros */
 
@@ -641,7 +641,6 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
   TRACE_STR(SAM_TRACEERR_EPRESERVE),
   TRACE_STR(SAM_TRACEERR_NCFGOK),
   TRACE_STR(SAM_TRACEERR_INVALIDCTRLREQ),
-  TRACE_STR(SAM_TRACEERR_INVALIDPARMS),
   TRACE_STR(SAM_TRACEERR_IRQREGISTRATION),
   TRACE_STR(SAM_TRACEERR_NOTCONFIGURED),
   TRACE_STR(SAM_TRACEERR_REQABORTED),
@@ -670,8 +669,10 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_EP0SETUPIN),
   TRACE_STR(SAM_TRACEINTID_EP0SETUPOUT),
   TRACE_STR(SAM_TRACEINTID_EP0SETUPSETADDRESS),
+  TRACE_STR(SAM_TRACEINTID_EPDMAINT),
   TRACE_STR(SAM_TRACEINTID_EPGETSTATUS),
   TRACE_STR(SAM_TRACEINTID_EPINQEMPTY),
+  TRACE_STR(SAM_TRACEINTID_EPINT),
   TRACE_STR(SAM_TRACEINTID_EPOUTQEMPTY),
   TRACE_STR(SAM_TRACEINTID_GETCONFIG),
   TRACE_STR(SAM_TRACEINTID_GETSETDESC),
@@ -687,6 +688,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_RXSETUP),
   TRACE_STR(SAM_TRACEINTID_SETCONFIG),
   TRACE_STR(SAM_TRACEINTID_SETFEATURE),
+  TRACE_STR(SAM_TRACEINTID_SPEED),
   TRACE_STR(SAM_TRACEINTID_STALLSNT),
   TRACE_STR(SAM_TRACEINTID_SYNCHFRAME),
   TRACE_STR(SAM_TRACEINTID_TXINI),
@@ -2994,26 +2996,55 @@ static int sam_usbhs_interrupt(int irq, void *context)
        *   - The data toggle sequence of the default control endpoint is cleared.
        *   - At the end of the reset process, the End of Reset (USBHS_DEVISR.EORST)
        *     bit is set.
+       *   - During a reset, the USBHS automatically switches to High-speed mode
+       *     if the host is High-speed-capable (the reset is called High-speed
+       *     reset). The user should observe the USBHS_SR.SPEED field to know
+       *     the speed running at the end of the reset (USBHS_DEVISR.EORST = 1).
        */
 
       if ((pending & USBHS_DEVINT_EORST) != 0)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET), (uint16_t)pending);
+          /* Sample the USBHS SR register at the time of the EORST event. */
 
-          /* Acknowledge the interrupt, clear pednding wakeup and suspend
+          regval = sam_getreg(SAM_USBHS_SR);
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET), regval);
+
+          /* Acknowledge the interrupt, clear pending wakeup and suspend
            * status as we..
            */
 
-          sam_putreg(USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD | USBHS_DEVINT_EORST,
+          sam_putreg(USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD |
+                     USBHS_DEVINT_EORST,
                      SAM_USBHS_DEVICR);
 
           /* Enable suspend interrupts */
 
           sam_putreg(USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIER);
 
-          /* Handle the reset */
+          /* Handle the reset (will select full speed mode) */
 
           sam_reset(priv);
+
+          /* Get the correct speed mode reported by the hardware */
+
+          switch (regval & USBHS_SR_SPEED_MASK)
+            {
+              default:
+              case USBHS_SR_SPEED_FULL:
+                priv->usbdev.speed = USB_SPEED_FULL;
+                break;
+
+              case USBHS_SR_SPEED_HIGH:
+                priv->usbdev.speed = USB_SPEED_HIGH;
+                break;
+
+              case USBHS_SR_SPEED_LOW:
+                priv->usbdev.speed = USB_SPEED_LOW;
+                break;
+            }
+
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SPEED),
+                   priv->usbdev.speed);
         }
 
       /* Upstream resume */
@@ -3632,14 +3663,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   irqstate_t flags;
   uint8_t epno;
 
-#ifdef CONFIG_DEBUG
-  if (!ep)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p\n", ep);
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(ep != NULL);
 
   epno = USB_EPNO(ep->eplog);
   usbtrace(TRACE_EPDISABLE, epno);
@@ -3669,13 +3693,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 {
   struct sam_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
-  if (!ep)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return NULL;
-    }
-#endif
+  DEBUGASSERT(ep != NULL);
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
   privreq = (struct sam_req_s *)kmm_malloc(sizeof(struct sam_req_s));
@@ -3701,13 +3719,7 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct sam_req_s *privreq = (struct sam_req_s*)req;
 
-#ifdef CONFIG_DEBUG
-  if (!ep || !req)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return;
-    }
-#endif
+  DEBUGASSERT(ep != NULL && req != NULL);
   usbtrace(TRACE_EPFREEREQ, USB_EPNO(ep->eplog));
 
   kmm_free(privreq);
@@ -3764,26 +3776,10 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   uint8_t epno;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
-  if (!req || !req->callback || !req->buf || !ep)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
-      return -EINVAL;
-    }
-#endif
-
+  DEBUGASSERT(ep != NULL && req != NULL && req->callback != NULL && req->buf != NULL);
   usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
   priv = privep->dev;
-
-#ifdef CONFIG_DEBUG
-  if (!priv->driver)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ulldbg("ERROR: driver=%p\n", priv->driver);
-      return -ESHUTDOWN;
-    }
-#endif
+  DEBUGASSERT(priv->driver != NULL);
 
   /* Handle the request from the class driver */
 
@@ -3856,13 +3852,7 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
-  if (!ep || !req)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(ep != NULL && req != NULL);
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
   flags = irqsave();
@@ -3884,13 +3874,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
   uint32_t regval;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
-  if (!ep)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(ep != NULL);
 
   /* Check that endpoint is in Idle state */
 
@@ -4048,13 +4032,7 @@ static struct usbdev_ep_s *sam_allocep(struct usbdev_s *dev, uint8_t epno,
   uint16_t epset = SAM_EPSET_NOTEP0;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)epno);
-#ifdef CONFIG_DEBUG
-  if (!dev)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return NULL;
-    }
-#endif
+  DEBUGASSERT(dev != NULL);
 
   /* Ignore any direction bits in the logical address */
 
@@ -4110,13 +4088,8 @@ static void sam_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   struct sam_usbdev_s *priv;
   struct sam_ep_s *privep;
 
-#ifdef CONFIG_DEBUG
-  if (!dev || !ep)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return;
-    }
-#endif
+  DEBUGASSERT(dev != NULL && ep != NULL);
+
   priv   = (struct sam_usbdev_s *)dev;
   privep = (struct sam_ep_s *)ep;
   usbtrace(TRACE_DEVFREEEP, (uint16_t)USB_EPNO(ep->eplog));
@@ -4142,13 +4115,7 @@ static int sam_getframe(struct usbdev_s *dev)
   uint32_t regval;
   uint16_t frameno;
 
-#ifdef CONFIG_DEBUG
-  if (!dev)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(dev != NULL);
 
   /* Return the last frame number detected by the hardware */
 
@@ -4174,13 +4141,7 @@ static int sam_wakeup(struct usbdev_s *dev)
   uint32_t regval;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
-#ifdef CONFIG_DEBUG
-  if (!dev)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(dev != NULL);
 
   /* Resume normal operation */
 
@@ -4219,14 +4180,7 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
   struct sam_usbdev_s *priv = (struct sam_usbdev_s *)dev;
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
-
-#ifdef CONFIG_DEBUG
-  if (!dev)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -ENODEV;
-    }
-#endif
+  DEBUGASSERT(dev != NULL);
 
   priv->selfpowered = selfpowered;
   return OK;
@@ -4493,7 +4447,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   sam_putreg(regval, SAM_USBHS_CTRL);
 
   /* Configure USBHS pins.  Nothing needs to be done:  HDM and HDP are the
-   * primary pin functions and there are not alternatives.
+   * primary pin functions and there are no alternatives.
    */
 
   /* Enable clocking to the USBHS peripheral.
@@ -4870,21 +4824,12 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   int ret;
 
   usbtrace(TRACE_DEVREGISTER, 0);
-
-#ifdef CONFIG_DEBUG
-  if (!driver || !driver->ops->bind || !driver->ops->unbind ||
-      !driver->ops->disconnect || !driver->ops->setup)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
-    }
-
-  if (priv->driver)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_DRIVER), 0);
-      return -EBUSY;
-    }
-#endif
+  DEBUGASSERT(driver != NULL &&
+              driver->ops->bind != NULL &&
+              driver->ops->unbind != NULL &&
+              driver->ops->disconnect != NULL &&
+              driver->ops->setup != NULL);
+  DEBUGASSERT(priv->driver == NULL);
 
   /* First hook up the driver */
 
@@ -4924,14 +4869,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   irqstate_t flags;
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
-
-#ifdef CONFIG_DEBUG
-  if (driver != priv->driver)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(driver == priv->driver);
 
   /* Reset the hardware and cancel all requests.  All requests must be
    * canceled while the class driver is still bound.
