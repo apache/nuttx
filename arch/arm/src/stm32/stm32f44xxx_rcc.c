@@ -698,6 +698,10 @@ static void stm32_stdclockconfig(void)
       /* Configure PLLSAI */
 
       regval = getreg32(STM32_RCC_PLLSAICFGR);
+      regval &= ~(RCC_PLLSAICFGR_PLLSAIM_MASK |
+                  RCC_PLLSAICFGR_PLLSAIN_MASK |
+                  RCC_PLLSAICFGR_PLLSAIP_MASK |
+                  RCC_PLLSAICFGR_PLLSAIQ_MASK);
       regval |= (STM32_RCC_PLLSAICFGR_PLLSAIM
                  | STM32_RCC_PLLSAICFGR_PLLSAIN
                  | STM32_RCC_PLLSAICFGR_PLLSAIP
@@ -705,6 +709,13 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_PLLSAICFGR);
 
       regval = getreg32(STM32_RCC_DCKCFGR);
+      regval &= ~(RCC_DCKCFGR_PLLI2SDIVQ_MASK |
+                  RCC_DCKCFGR_PLLSAIDIVQ_MASK |
+                  RCC_DCKCFGR_SAI1SRC_MASK    |
+                  RCC_DCKCFGR_SAI2SRC_MASK    |
+                  RCC_DCKCFGR_I2S1SRC_MASK    |
+                  RCC_DCKCFGR_I2S2SRC_MASK);
+
       regval |= (STM32_RCC_DCKCFGR_PLLI2SDIVQ
                  | STM32_RCC_DCKCFGR_PLLSAIDIVQ
                  | STM32_RCC_DCKCFGR_SAI1SRC
@@ -733,6 +744,10 @@ static void stm32_stdclockconfig(void)
       /* Configure PLLI2S */
 
       regval = getreg32(STM32_RCC_PLLI2SCFGR);
+      regval &= ~(RCC_PLLI2SCFGR_PLLI2SM_MASK |
+                  RCC_PLLI2SCFGR_PLLI2SN_MASK |
+                  RCC_PLLI2SCFGR_PLLI2SP_MASK |
+                  RCC_PLLI2SCFGR_PLLI2SQ_MASK);
       regval |= (STM32_RCC_PLLI2SCFGR_PLLI2SM
                  | STM32_RCC_PLLI2SCFGR_PLLI2SN
                  | STM32_RCC_PLLI2SCFGR_PLLI2SP
@@ -741,6 +756,11 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_PLLI2SCFGR);
 
       regval = getreg32(STM32_RCC_DCKCFGR2);
+      regval &= ~(RCC_DCKCFGR2_FMPI2C1SEL_MASK |
+                  RCC_DCKCFGR2_CECSEL_MASK     |
+                  RCC_DCKCFGR2_CK48MSEL_MASK   |
+                  RCC_DCKCFGR2_SDIOCSEL_MASK   |
+                  RCC_DCKCFGR2_SPDIFRXEL_MASK);
       regval |= (STM32_RCC_DCKCFGR2_FMPI2C1SEL
                  | STM32_RCC_DCKCFGR2_CECSEL
                  | STM32_RCC_DCKCFGR2_CK48MSEL
