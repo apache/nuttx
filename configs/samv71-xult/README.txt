@@ -116,6 +116,13 @@ for additional issues specific to a particular configuration.
 
      - This driver does not work reliably with the write back D-Cache.  The
        write-through D-Cache must be enabled.
+
+     - As of this writing (2015-08-22), the USBHS only works in full speed
+       mode (aka, USBHS Low-Power mode).  When configured in normal mode,
+       SETUP packets are no longer received or responded to; the firmware
+       only detects bus reset events.  This is probably some issue with
+       480MHZ high speed clock setup, but I have not yet found the issue.
+
   6. The full port for audio support is code complete:  WM8904 driver,
      SSC/I2C driver, and CS2100-CP driver.  But this code is untested.  The
      WM8904 interface was taken directly from the SAMA5D4-EK and may well
@@ -728,6 +735,9 @@ settings:
 
   Device Drivers -> USB Device Driver Support
     CONFIG_USBDEV=y                           : Enable USB device support
+  For full-speed/low-power mode:
+    CONFIG_USBDEV_DUALSPEED=n                 : Disable High speed support
+  For high-speed/normal mode:
     CONFIG_USBDEV_DUALSPEED=y                 : Enable High speed support
     CONFIG_USBDEV_DMA=y                       : Enable DMA methods
     CONFIG_USBDEV_MAXPOWER=100                : Maximum power consumption
@@ -737,7 +747,11 @@ settings:
     CONFIG_SAMV7_USBDEVHS=y
 
   System Type -> SAMV7 USB High Sppeed Device Controller (DCD options
-    CONFIG_SAMV7_USBHS_NDTDS=8                : Number of DMA transfer descriptors
+  For full-speed/low-power mode:
+    CONFIG_SAMV7_USBDEVHS_LOWPOWER=y          : Select low power mode
+  For high-speed/normal mode:
+    CONFIG_SAMV7_USBDEVHS_LOWPOWER=n          : Don't select low power mode
+    CONFIG_SAMV7_USBHS_NDTDS=32               : Number of DMA transfer descriptors
     CONFIG_SAMV7_USBHS_PREALLOCATE=y          : Pre-allocate descriptors
 
 In order to be usable, you must all enabled some class driver(s) for the
@@ -756,8 +770,8 @@ serial device class:
     CONFIG_CDCACM_EPBULKIN=2                  : Bulk IN endpoint number
     CONFIG_CDCACM_EPBULKIN_FSSIZE=64          : Full speed packet size
     CONFIG_CDCACM_EPBULKIN_HSSIZE=512         : High speed packet size
-    CONFIG_CDCACM_NRDREQS=4                   : Number of read requests
     CONFIG_CDCACM_NWRREQS=4                   : Number of write requests
+    CONFIG_CDCACM_NRDREQS=8                   : Number of read requests
     CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer
     CONFIG_CDCACM_RXBUFSIZE=256               : Serial read buffer size
     CONFIG_CDCACM_TXBUFSIZE=256               : Serial transmit buffer size
@@ -774,6 +788,7 @@ CDC/ACM serial device:
 
     CONFIG_SYSTEM_CDCACM=y                     : Enable connect/disconnect support
     CONFIG_SYSTEM_CDCACM_DEVMINOR=0            : Use device /dev/ttyACM0
+    CONFIG_CDCACM_RXBUFSIZE=???                : A large RX may be needed
 
 If you include this CDC/ACM application, then you can connect the CDC/ACM
 serial device to the host by entering the command 'sercon' and you detach
