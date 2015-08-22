@@ -5200,7 +5200,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
    * need to force the B session valid
    */
 
-#if defined(NOT_CONFIG_STM32_STM32F446)
+#if defined(CONFIG_STM32_STM32F446)
 # ifndef CONFIG_USBDEV_VBUSSENSING
   regval  =  stm32_getreg(STM32_OTGFS_GOTGCTL);
   regval |= (OTGFS_GOTGCTL_BVALOEN | OTGFS_GOTGCTL_BVALOVAL);
