@@ -1336,7 +1336,9 @@ config SAMV7_USBDEVHS_LOWPOWER
 		  available.
 		- Low-power mode where only Full speed and Low speed are available.
 
-		This options selects the low-power mode.
+		This options selects the low-power mode.  In order to use high speed
+		mode, this option must be disabled and USBDEV_DUALSPEED must be
+		enabled.
 
 config SAMV7_USBHS_SCATTERGATHER
 	bool
