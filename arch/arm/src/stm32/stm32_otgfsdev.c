@@ -5169,7 +5169,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   /* Deactivate the power down */
 
-#if defined(NOT_CONFIG_STM32_STM32F446)
+#if defined(CONFIG_STM32_STM32F446)
   /* In the case of the STM32F446 the meaning of the bit has changed to VBUS
    * Detection Enable when set
    */
