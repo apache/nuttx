@@ -672,21 +672,21 @@ static void stm32_stdclockconfig(void)
 
       /* Set the HCLK source/divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_HPRE_MASK;
       regval |= STM32_RCC_CFGR_HPRE;
       putreg32(regval, STM32_RCC_CFGR);
 
       /* Set the PCLK2 divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_PPRE2_MASK;
       regval |= STM32_RCC_CFGR_PPRE2;
       putreg32(regval, STM32_RCC_CFGR);
 
       /* Set the PCLK1 divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_PPRE1_MASK;
       regval |= STM32_RCC_CFGR_PPRE1;
       putreg32(regval, STM32_RCC_CFGR);
@@ -694,7 +694,7 @@ static void stm32_stdclockconfig(void)
 #ifdef CONFIG_RTC_HSECLOCK
       /* Set the RTC clock divisor */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_RTCPRE_MASK;
       regval |= RCC_CFGR_RTCPRE(HSE_DIVISOR);
       putreg32(regval, STM32_RCC_CFGR);
@@ -713,7 +713,7 @@ static void stm32_stdclockconfig(void)
 
       /* Enable the main PLL */
 
-      regval = getreg32(STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLLON;
       putreg32(regval, STM32_RCC_CR);
 
@@ -766,19 +766,19 @@ static void stm32_stdclockconfig(void)
 #ifdef CONFIG_STM32_LTDC
       /* Configure PLLSAI */
 
-      regval = getreg32(STM32_RCC_PLLSAICFGR);
+      regval  = getreg32(STM32_RCC_PLLSAICFGR);
       regval |= (STM32_RCC_PLLSAICFGR_PLLSAIN
                 | STM32_RCC_PLLSAICFGR_PLLSAIR
                 | STM32_RCC_PLLSAICFGR_PLLSAIQ);
       putreg32(regval, STM32_RCC_PLLSAICFGR);
 
-      regval = getreg32(STM32_RCC_DCKCFGR);
+      regval  = getreg32(STM32_RCC_DCKCFGR);
       regval |= STM32_RCC_DCKCFGR_PLLSAIDIVR;
       putreg32(regval, STM32_RCC_DCKCFGR);
 
       /* Enable PLLSAI */
 
-      regval = getreg32(STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLLSAION;
       putreg32(regval, STM32_RCC_CR);
 

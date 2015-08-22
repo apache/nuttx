@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/stm32/chip/stm32f44xxx_otgfs.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
