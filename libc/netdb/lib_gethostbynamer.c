@@ -236,6 +236,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   FAR char *ptr;
+  FAR void *addrdata;
   socklen_t addrlen;
   int addrtype;
   int namelen;
@@ -280,6 +281,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
       addrlen  = sizeof(struct sockaddr_in);
       addrtype = AF_INET;
+      addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
     }
 #endif
 
@@ -291,12 +293,13 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
       addrlen  = sizeof(struct sockaddr_in6);
       addrtype = AF_INET6;
+      addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin_addr;
     }
 #endif
 
   /* Yes.. Return the address that we obtained from the DNS cache. */
 
-  info->hi_addrlist[0] = ptr;
+  info->hi_addrlist[0] = addrdata;
   host->h_addr_list    = info->hi_addrlist;
   host->h_addrtype     = addrtype;
   host->h_length       = addrlen;
@@ -377,6 +380,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   FAR char *ptr;
+  FAR void *addrdata;
   socklen_t addrlen;
   int addrtype;
   int namelen;
@@ -419,6 +423,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
           DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
           addrlen  = sizeof(struct sockaddr_in);
           addrtype = AF_INET;
+          addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
         }
 #endif
 
@@ -430,12 +435,13 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
           DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
           addrlen  = sizeof(struct sockaddr_in6);
           addrtype = AF_INET6;
+          addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin_addr;
         }
 #endif
 
       /* Yes.. Return the address that we obtained from the DNS name server. */
 
-      info->hi_addrlist[0] = ptr;
+      info->hi_addrlist[0] = addrdata;
       host->h_addr_list    = info->hi_addrlist;
       host->h_addrtype     = addrtype;
       host->h_length       = addrlen;

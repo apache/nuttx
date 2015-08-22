@@ -10857,4 +10857,7 @@
 	* sched/wdog/wd_create.c:  Correct a counting error in the number
 	  of available watchdog timers.  When the number of free timers is
 	  low, the counter could be incremented below zero (2015-08-15).
+	* arch/arm/src/stm32: Add OTG support for STM32F44x.  From David
+	  Sidrane (2015-08-15).
+
 
