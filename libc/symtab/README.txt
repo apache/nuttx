@@ -33,6 +33,10 @@ directory by using the following commands:
   cat syscall/syscall.csv libc/libc.csv | sort >libc/symtab/canned_symtab.csv
   tools/mksymtab libc/symtab/canned_symtab.csv libc/symtab/canned_symtab.inc
 
+You may want omit syscall/syscall.csv in the above command in the protected
+mode.  It is optional since the system calls are provided through system
+call traps.
+
 Your board-level start up code code then needs to select the canned symbol
 table by calling the OS internal function canned_symtab_initialize() in the
 board-specfic board_apps_initialize() logic:
