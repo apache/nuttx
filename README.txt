@@ -1513,6 +1513,8 @@ nuttx/
  |- lib/
  |   `- README.txt
  |- libc/
+ |   |- symtab/
+ |   |   `- README.txt
  |   `- README.txt
  |- libnx/
  |   `- README.txt
