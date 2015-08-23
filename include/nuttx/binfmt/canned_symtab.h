@@ -64,6 +64,18 @@
  *    fixed size arrays completely defined at compilation or link time.
  */
 
+/* In order to full describe a symbol table, a vector containing the address
+ * of the symbol table and the number of elements in the symbol table is
+ * required.
+ */
+
+struct symtab_s; /* Forward reference */
+struct symtab_desc_s
+{
+  FAR struct symtab_s *symtab;
+  int nsymbols;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -81,7 +93,9 @@ extern "C"
  * Name: canned_symtab_initialize
  *
  * Description:
- *   Setup system provided canned symbol table.
+ *   Setup system provided canned symbol table.  NOTE that this a user-space
+ *   interface only.  It is not generally available to to kernel mode code
+ *   in protected or kernel builds.
  *
  * Input Parameters:
  *   None
@@ -91,7 +105,36 @@ extern "C"
  *
  ****************************************************************************/
 
+#if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 void canned_symtab_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: canned_symtab_select
+ *
+ * Description:
+ *   Setup system provided canned symbol table.  This function only exists
+ *   the kernel portion of a protected or kernel build.  It is called only
+ *   by boardctl().  I this case:
+ *
+ *   - canned_symbtab_initialize() and g_symtab() lie in the user space.
+ *   - boardctl(), canned_symtabl_select(), and exec_setsymtab() reside in
+ *     kernel space.
+ *
+ *   Access to boardctl() is provided in user space through a call gate.
+ *
+ * Input Parameters:
+ *   symtab - The symbol table to be used
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+      defined(__KERNEL__)
+int canned_symtab_select(FAR const struct symtab_desc_s *symdesc);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

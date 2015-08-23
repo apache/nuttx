@@ -70,6 +70,13 @@
  * CONFIGURATION: CONFIG_BOARDCTL_RESET
  * DEPENDENCIES:  Board logic must provide board_reset
  *
+ * CMD:           BOARDIOC_SYMTAB
+ * DESCRIPTION:   Select a symbol table
+ * ARG:           A pointer to an instance of struct symtab_desc_s
+ *                (See include/nuttx/binfmt/canned_symtab.h).
+ * CONFIGURATION: CONFIG_LIBC_SYMTAB
+ * DEPENDENCIES:  None
+ *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
  * ARG:           Touch controller device minor number
@@ -111,12 +118,13 @@
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
 #define BOARDIOC_RESET             _BOARDIOC(0x0003)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0004)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0005)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0006)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0007)
-#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x0008)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0009)
+#define BOARDIOC_SYMTAB            _BOARDIOC(0x0004)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0005)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0006)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0007)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0008)
+#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x0009)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000a)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -125,7 +133,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000a)
+#define BOARDIOC_USER              _BOARDIOC(0x000b)
 
 /****************************************************************************
  * Public Type Definitions

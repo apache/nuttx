@@ -6,7 +6,8 @@
 config LIBC_SYMTAB
 	bool "Include canned symtab for applications and shell"
 	default n
-	depends on EXECFUNCS_HAVE_SYMTAB
+	depends on EXECFUNCS_HAVE_SYMTAB && !BUILD_KERNEL
+	select LIB_BOARDCTL if !BUILD_FLAT
 	---help---
 		Build and include default symbol table in the NuttX library.
 		The symbol table is selected by call canned_symtab_initialize().
