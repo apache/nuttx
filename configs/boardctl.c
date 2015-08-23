@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
-#include <nuttx/binfmt/canned_symtab.h>
+#include <nuttx/binfmt/symtab.h>
 
 #ifdef CONFIG_LIB_BOARDCTL
 
@@ -130,22 +130,22 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_LIBC_SYMTAB
+#ifdef CONFIG_BOARDCTL_SYMTAB
       /* CMD:           BOARDIOC_SYMTAB
        * DESCRIPTION:   Select a symbol table
-       * ARG:           A pointer to an instance of struct symtab_desc_s
-       *                (See include/nuttx/binfmt/canned_symtab.h).
-       * CONFIGURATION: CONFIG_LIBC_SYMTAB
+       * ARG:           A pointer to an instance of struct boardioc_symtab_s
+       * CONFIGURATION: CONFIG_BOARDCTL_SYMTAB
        * DEPENDENCIES:  None
        */
 
       case BOARDIOC_SYMTAB:
         {
-          FAR const struct symtab_desc_s *symdesc =
-            (FAR const struct symtab_desc_s *)arg;
+          FAR const struct boardioc_symtab_s *symdesc =
+            (FAR const struct boardioc_symtab_s *)arg;
 
          DEBUGASSERT(symdesc != NULL);
-         ret = canned_symtab_select(symdesc);
+         exec_setsymtab(symdesc->symtab, symdesc->nsymbols);
+         ret = OK;
         }
         break;
 #endif

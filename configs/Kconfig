@@ -1725,6 +1725,13 @@ config BOARDCTL_RESET
 		Architecture specific logic must provide the board_reset()
 		interface.
 
+config BOARDCTL_SYMTAB
+	bool "Enable symbol table interfaces"
+	default n
+	depends on EXECFUNCS_HAVE_SYMTAB
+	---help---
+		Enables support for the BOARDIOC_SYMTAB boardctl() command.
+
 config BOARDCTL_TSCTEST
 	bool "Enable touchscreen test interfaces"
 	default n
