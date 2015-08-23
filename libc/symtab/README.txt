@@ -17,3 +17,12 @@ Next code selectes canned symtab from application:
   #include <nuttx/binfmt/canned_symtab.h>
   ...
     canned_symtab_initialize();
+
+The option can have substantial effect on system image size, mainly
+code/text.  That is because the instructions to generate canned_symtab.inc
+above will cause EVERY interface in the NuttX RTOS and the C library to be
+included into build.  Add to that the size of a huge symbol table.
+
+In order to reduce the code/text size, you may want to manually prune the
+auto-generated canned_symtab.inc file to remove all interfaces that you do
+not wish to include into the base FLASH image.

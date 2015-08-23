@@ -10875,3 +10875,6 @@
 	  substantial effect on system image size. Mainly code/text. If
 	  loading of applications at runtime is not planned do not select
 	  this.  From Pavel Pisa (2015-08-23).
+	* libc/libc.csv and syscalls/syscalls.csv:  Define some symbol
+	  export conditions, correct errno and add sleep and usleep. From
+	  Pavel Pisa (2015-08-23).
