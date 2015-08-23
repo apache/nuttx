@@ -195,8 +195,6 @@ config EXECFUNCS_NSYMBOLS
 		symbols in that table.  This selection provides the number of
 		symbols in the symbol table.
 
-source libc/symtab/Kconfig
-
 endif # EXECFUNCS_HAVE_SYMTAB
 endif # LIBC_EXECFUNCS
 

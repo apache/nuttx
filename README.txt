@@ -1513,8 +1513,6 @@ nuttx/
  |- lib/
  |   `- README.txt
  |- libc/
- |   |- symtab/
- |   |   `- README.txt
  |   `- README.txt
  |- libnx/
  |   `- README.txt
@@ -1575,6 +1573,8 @@ apps/
  |   |  `- README.txt
  |   |- nxplayer
  |   |  `- README.txt
+ |   |- symtab/
+ |   |   `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
  |   |- zmodem

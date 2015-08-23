@@ -72,9 +72,8 @@
  *
  * CMD:           BOARDIOC_SYMTAB
  * DESCRIPTION:   Select a symbol table
- * ARG:           A pointer to an instance of struct symtab_desc_s
- *                (See include/nuttx/binfmt/canned_symtab.h).
- * CONFIGURATION: CONFIG_LIBC_SYMTAB
+ * ARG:           A pointer to an instance of struct boardioc_symtab_s
+ * CONFIGURATION: CONFIG_BOARDCTL_SYMTAB
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_TSCTEST_SETUP
@@ -157,6 +156,18 @@ struct boardioc_graphics_s
 #else
   FAR struct fb_vtable_s *dev;   /* OUT: Framebuffer driver instance */
 #endif
+};
+
+/* In order to full describe a symbol table, a vector containing the address
+ * of the symbol table and the number of elements in the symbol table is
+ * required.
+ */
+
+struct symtab_s; /* Forward reference */
+struct boardioc_symtab_s
+{
+  FAR struct symtab_s *symtab;
+  int nsymbols;
 };
 
 /****************************************************************************

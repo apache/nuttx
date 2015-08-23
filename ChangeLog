@@ -10868,13 +10868,6 @@
 	  whole sockaddr_in or sockaddr_in6.  From Pavel Pisa  (2015-08-21).
 	* tools/mksymtab: declare g_symtab array as conts to occupy RO
 	  section (Flash).  From Pavel Pisa (2015-08-23).
-	* libc/symtab: Optional canned symtab inclusion to the build. When
-	  option CONFIG_LIBC_SYMTAB is selected and symbol table file
-	  libc/symtab/canned_symtab.inc is prepared then application can
-	  use system provided complete symbol table. The option has
-	  substantial effect on system image size. Mainly code/text. If
-	  loading of applications at runtime is not planned do not select
-	  this.  From Pavel Pisa (2015-08-23).
 	* libc/libc.csv and syscalls/syscalls.csv:  Define some symbol
 	  export conditions, correct errno and add sleep and usleep. From
 	  Pavel Pisa (2015-08-23).
