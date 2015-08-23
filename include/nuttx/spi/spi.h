@@ -392,7 +392,7 @@ struct spi_ops_s
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
   CODE uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid
+  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool cmd);
 #endif
   CODE uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
