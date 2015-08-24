@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,5 +68,5 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* CONFIG_NETDEV_LOOPBACK */
+#endif /* CONFIG_NET_LOOPBACK */
 #endif /* __NET_LOOPBACK_LOOBACK_H */

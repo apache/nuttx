@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NETDEV_LOOPBACK),y)
+ifeq ($(CONFIG_NET_LOOPBACK),y)
 
 # Local loopback support
 

@@ -62,6 +62,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* IP Version Mask (bits 0-3 of first byte) */
+
+#define IP_VERSION_MASK  0x70
+#define IPv4_VERSION     0x40
+#define IPv6_VERSION     0x60
+
 /* Values for the IP protocol field */
 
 #define IP_PROTO_ICMP     1

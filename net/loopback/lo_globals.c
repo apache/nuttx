@@ -43,7 +43,7 @@
 
 #include "loopback/loopback.h"
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 
 /****************************************************************************
  * Public Data
@@ -67,4 +67,4 @@ const net_ipv6addr_t g_lo_ipv6addr   =
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_NETDEV_LOOPBACK */
+#endif /* CONFIG_NET_LOOPBACK */

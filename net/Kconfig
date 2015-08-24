@@ -85,12 +85,25 @@ config NET_SLIP_MTU
 	depends on NET_SLIP
 	range 296 1518
 	---help---
-		Packet buffer size.  This size includes the TCP/UDP payload plus the
-		size of TCP/UDP header and the IP header.  This value is normally
-		referred to as the MTU (Maximum Transmission Unit); the payload
-		payload is the MSS (Maximum Segment Size).  SLIP is required to
-		support at lest 256+20+20 = 296.  Values other than 296 are not
-		recommended.
+		Provides the size of the SLIP packet buffers.  This size includes
+		the TCP/UDP payload plus the size of TCP/UDP header and the IP header.
+		This value is normally referred to as the MTU (Maximum Transmission Unit);
+		the payload payload is the MSS (Maximum Segment Size).
+
+		SLIP is required to support at lest 256+20+20 = 296.  Values other than
+		296 are not recommended.
+
+		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
+		the IP+TPC headers plus 256 bytes of data).  So you might as well
+		set CONFIG_NET_SLIP_MTU to 296 as well.
+
+		There may be an issue with this setting, however.  I see that Linux
+		uses a MTU of 296 and window of 256, but actually only sends 168
+		bytes of data: 40 + 128.  I believe that is to allow for the 2x
+		worst cast packet expansion.  Ideally we would like to advertise the
+		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
+		the tcp_mss() macro).
+
 
 config NET_SLIP_TCP_RECVWNDO
 	int "SLIP TCP receive window size"
@@ -149,6 +162,15 @@ config NET_ETHERNET
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
+
+config NET_LOOPBACK
+	bool "Local loopback"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Add support for the local network loopback device, lo.  Any additional
+		networking devices that are enabled must be compatible with
+		CONFIG_NET_NOINTS.
 
 config NET_SLIP
 	bool "SLIP support"

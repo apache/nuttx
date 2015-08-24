@@ -149,13 +149,13 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_txtimeout_work(FAR void *arg);
 #endif
-static void skel_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static inline void skel_poll_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_poll_work(FAR void *arg);
 #endif
-static void skel_poll_expiry(int argc, uint32_t arg, ...);
+static void skel_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -216,7 +216,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   (void)wd_start(priv->sk_txtimeout, skeleton_TXTIMEOUT,
-                 skel_txtimeout_expiry, 1, (uint32_t)priv);
+                 skel_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -666,7 +666,7 @@ static void skel_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void skel_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
@@ -726,7 +726,8 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, priv);
+  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
+                 (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -778,7 +779,7 @@ static void skel_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void skel_poll_expiry(int argc, uint32_t arg, ...)
+static void skel_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
@@ -854,7 +855,8 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
+                 (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

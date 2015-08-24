@@ -231,7 +231,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 static int lib_localhost(FAR const char *name, FAR struct hostent *host,
                                FAR char *buf, size_t buflen)
 {
@@ -740,7 +740,7 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
       return OK;
     }
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
   /* Check for the local loopback host name */
 
   if (lib_localhost(name, host, buf, buflen) == 0)

@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NETDEV_LOOBACK)
+#if defined(CONFIG_NET) && defined(CONFIG_NETDEV_LOOPBACK)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -81,7 +81,8 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->lo_dev.d_buf)
+#define IPv4BUF ((FAR struct ipv4_hdr_s *)priv->lo_dev.d_buf)
+#define IPv6BUF ((FAR struct ipv6_hdr_s *)priv->lo_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -121,7 +122,7 @@ static void lo_loopback(FAR struct lo_driver_s *priv);
 static int  lo_txpoll(FAR struct net_driver_s *dev);
 static inline void lo_poll(FAR struct lo_driver_s *priv);
 static void lo_poll_work(FAR void *arg);
-static void lo_poll_expiry(int argc, uint32_t arg, ...);
+static void lo_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -169,7 +170,7 @@ static void lo_loopback(FAR struct lo_driver_s *priv)
   /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-  if (BUF->type == HTONS(ETHTYPE_IP))
+  if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
     {
       nllvdbg("IPv4 frame\n");
       ipv4_input(&priv->lo_dev);
@@ -190,7 +191,7 @@ static void lo_loopback(FAR struct lo_driver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
+  if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv46VERSION)
     {
       nllvdbg("Iv6 frame\n");
       ipv6_input(&priv->lo_dev);
@@ -211,7 +212,7 @@ static void lo_loopback(FAR struct lo_driver_s *priv)
   else
 #endif
     {
-      ndbg("WARNING: Unrecognized packet type dropped: %04x\n", BUF->type);
+      ndbg("WARNING: Unrecognized packet type dropped: %04x\n", IPv4BUF->type);
     }
 }
 
@@ -331,7 +332,7 @@ static void lo_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lo_poll_expiry(int argc, uint32_t arg, ...)
+static void lo_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
 
@@ -390,7 +391,7 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
   return OK;
@@ -615,7 +616,7 @@ int localhost_initialize(void)
   priv->lo_dev.d_addmac  = lo_addmac;   /* Add multicast MAC address */
   priv->lo_dev.d_rmmac   = lo_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->lo_dev.d_private = (void*)g_loopback; /* Used to recover private state from dev */
+  priv->lo_dev.d_private = (void*)priv; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
@@ -630,18 +631,18 @@ int localhost_initialize(void)
   /* Set the local loopback IP address */
 
 #ifdef CONFIG_NET_IPv4
-  net_ipv4addr_copy(dev->d_ipaddr, g_lo_ipv4addr);
-  net_ipv4addr_copy(dev->d_draddr, g_lo_ipv4addr);
-  net_ipv4addr_copy(dev->d_netmask, g_lo_ipv4mask);
+  net_ipv4addr_copy(priv->lo_dev.d_ipaddr, g_lo_ipv4addr);
+  net_ipv4addr_copy(priv->lo_dev.d_draddr, g_lo_ipv4addr);
+  net_ipv4addr_copy(priv->lo_dev.d_netmask, g_lo_ipv4mask);
 #endif
 #ifdef CONFIG_NET_IPv6
- net_ipv6addr_hdrcopy(dev->d_ipv6addr, g_lo_ipv6addr)
- net_ipv6addr_hdrcopy(dev->d_ipv6draddr, g_lo_ipv6addr)
- net_ipv6addr_hdrcopy(dev->d_ipv6netmask, g_ipv6_allzeroaddr)
+ net_ipv6addr_copy(priv->lo_dev.d_ipv6addr, g_lo_ipv6addr)
+ net_ipv6addr_copy(priv->lo_dev.d_ipv6draddr, g_lo_ipv6addr)
+ net_ipv6addr_copy(priv->lo_dev.d_ipv6netmask, g_ipv6_allzeroaddr)
 #endif
   /* Put the network in the UP state */
 
   return lo_ifup(&priv->lo_dev);
 }
 
-#endif /* CONFIG_NET && CONFIG_NETDEV_LOOBACK */
+#endif /* CONFIG_NET && CONFIG_NETDEV_LOOPBACK */

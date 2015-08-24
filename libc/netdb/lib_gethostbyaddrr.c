@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
 {
   FAR struct in_addr *ipv4addr;
@@ -108,7 +108,7 @@ static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
 {
   FAR struct in_addr6 *ipv6addr;
@@ -146,7 +146,7 @@ static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 static int lib_localhost(FAR const void *addr, socklen_t len, int type,
                          FAR struct hostent *host, FAR char *buf,
                          size_t buflen, int *h_errnop)
@@ -395,7 +395,7 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
       *h_errnop = 0;
     }
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
   /* Check for the local loopback address */
 
   if (lib_localhost(addr, len, type, host, but, buflen, h_errnop) == 0)

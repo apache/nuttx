@@ -68,8 +68,10 @@
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
-#else /* if defined(CONFIG_NET_ETHERNET) */
+#elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
+#else /* if defined(CONFIG_NET_LOOPBACK) */
+#  define NETDEV_DEFAULT_FORMAT NETDEV_LO_FORMAT
 #endif
 
 /****************************************************************************
@@ -191,7 +193,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       switch (lltype)
         {
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
           case NET_LL_LOOPBACK:  /* Local loopback */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = NET_LO_MTU;

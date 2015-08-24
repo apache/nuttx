@@ -136,6 +136,10 @@
 #  define MIN_NET_DEV_MTU  _MIN_SLIP_MTU
 #  define MAX_NET_DEV_MTU  _MAX_SLIP_MTU
 
+/* For the loopback device, we will use the largest representable MTU */
+
+#  define NET_LO_MTU        UINT16_MAX
+
 #elif defined(CONFIG_NET_SLIP)
    /* There is no link layer header with SLIP */
 
@@ -156,6 +160,20 @@
 #  define MIN_NET_DEV_MTU   CONFIG_NET_ETH_MTU
 #  define MAX_NET_DEV_MTU   CONFIG_NET_ETH_MTU
 
+#elif defined(CONFIG_NET_LOOPBACK)
+  /* Force the loopback MTU to some reasonable size.  We could do something smarter, but
+   * The case where the local loopback device is the only device is very unusal.
+   */
+
+#  define NET_LO_MTU        1518
+
+   /* Assume standard Ethernet link layer header */
+
+#  define NET_LL_HDRLEN(d)  0
+#  define NET_DEV_MTU(d)    NET_LO_MTU
+#  define MIN_NET_DEV_MTU   NET_LO_MTU
+#  define MAX_NET_DEV_MTU   NET_LO_MTU
+
 #else
   /* Perhaps only Unix domain sockets of the loopback device */
 
@@ -165,10 +183,6 @@
 #  define MAX_NET_DEV_MTU   0
 
 #endif /* MULTILINK or SLIP or ETHERNET */
-
-/* For the loopback device, we will use the largest representable MTU */
-
-#define NET_LO_MTU          UINT16_MAX
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -230,9 +244,12 @@
 
 /* If Ethernet is supported, then it will have the smaller MSS */
 
-#ifdef CONFIG_NET_SLIP
+#if defined(CONFIG_NET_SLIP)
 #  define SLIP_UDP_MSS(h)    (CONFIG_NET_SLIP_MTU - (h))
 #  define __MIN_UDP_MSS(h)   SLIP_UDP_MSS(h)
+#elif defined(CONFIG_NET_LOOPBACK)
+#  define LO_UDP_MSS(h)      (NET_LO_MTU - (h))
+#  define __MIN_UDP_MSS(h)   LO_UDP_MSS(h)
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
@@ -354,9 +371,12 @@
 
 /* If Ethernet is supported, then it will have the smaller MSS */
 
-#ifdef CONFIG_NET_SLIP
+#if defined(CONFIG_NET_SLIP)
 #  define SLIP_TCP_MSS(h)   (CONFIG_NET_SLIP_MTU - (h))
 #  define __MIN_TCP_MSS(h)  SLIP_TCP_MSS(h)
+#elif defined(CONFIG_NET_LOOPBACK)
+#  define LO_TCP_MSS(h)      (NET_LO_MTU - (h))
+#  define __MIN_TCP_MSS(h)   LO_TCP_MSS(h)
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
@@ -433,10 +453,15 @@
 
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_SLIP_TCP_RECVWNDO
 
-#else /* if defined(CONFIG_NET_ETHERNET) */
+#elif defined(CONFIG_NET_ETHERNET)
    /* Only Ethernet.. use the configured SLIP receive window size */
 
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_ETH_TCP_RECVWNDO
+
+#else /* if defined(CONFIG_NET_LOOPBACK) */
+   /* Only loal loopback.. use the fixed loopback receive window size */
+
+#  define NET_DEV_RCVWNDO(d)  NET_LO_TCP_RECVWNDO
 
 #endif /* MULTILINK or SLIP or ETHERNET */
 

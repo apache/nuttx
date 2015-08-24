@@ -6,8 +6,9 @@
 comment "General Ethernet MAC Driver Options"
 
 config NETDEV_LOOPBACK
-	bool "Local loopback support"
-	default n
+	bool
+	default n if !NET_LOOPBACK
+	default y if NET_LOOPBACK
 	select NET_NOINTS
 	depends on EXPERIMENTAL
 	---help---
@@ -314,23 +315,6 @@ config NET_SLIP_DEFPRIO
 	default 128
 	---help---
 		Provides the priority for SLIP RX and TX threads.
-
-config NET_SLIP_MTU
-	int "Packet size (MTU)"
-	default 296
-	---help---
-		Provides the size of the SLIP packet buffers.
-
-		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
-		the IP+TPC headers plus 256 bytes of data).  So you might as well
-		set CONFIG_NET_SLIP_MTU to 296 as well.
-
-		There may be an issue with this setting, however.  I see that Linux
-		uses a MTU of 296 and window of 256, but actually only sends 168
-		bytes of data: 40 + 128.  I believe that is to allow for the 2x
-		worst cast packet expansion.  Ideally we would like to advertise the
-		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
-		the tcp_mss() macro).
 
 config NET_SLIP_NINTERFACES
 	int "Number of SLIP interfaces"

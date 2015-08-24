@@ -49,7 +49,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/ip.h>
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 
 /****************************************************************************
  * Public Type Definitions
@@ -90,10 +90,31 @@ EXTERN const net_ipv6addr_t g_lo_ipv6addr;
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Function: localhost_initialize
+ *
+ * Description:
+ *   Initialize the Ethernet controller and driver
+ *
+ * Parameters:
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+int localhost_initialize(void);
+#endif /* CONFIG_NETDEV_LOOPBACK */
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_NETDEV_LOOPBACK */
+#endif /* CONFIG_NET_LOOPBACK */
 #endif /* __INCLUDE_NUTTX_NET_LOOPBACK_H */
