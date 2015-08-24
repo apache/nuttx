@@ -195,8 +195,7 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
  *
  * Assumptions:
  *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   the network is locked.
  *
  ****************************************************************************/
 
@@ -240,8 +239,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
  *
  * Assumptions:
  *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   the network is locked.
  *
  ****************************************************************************/
 
@@ -306,7 +304,7 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -441,7 +439,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -474,7 +472,7 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -509,7 +507,7 @@ static inline void skel_interrupt_process(FAR struct skel_driver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -629,7 +627,7 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -743,7 +741,7 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 

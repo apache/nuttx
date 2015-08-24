@@ -113,10 +113,6 @@ static struct lo_driver_s g_loopback;
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Loop back logic */
-
-static void lo_loopback(FAR struct lo_driver_s *priv);
-
 /* Polling logic */
 
 static int  lo_txpoll(FAR struct net_driver_s *dev);
@@ -127,7 +123,6 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...);
 
 static int lo_ifup(FAR struct net_driver_s *dev);
 static int lo_ifdown(FAR struct net_driver_s *dev);
-static inline void lo_txavail_process(FAR struct lo_driver_s *priv);
 static void lo_txavail_work(FAR void *arg);
 static int lo_txavail(FAR struct net_driver_s *dev);
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
@@ -142,24 +137,29 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: lo_loopback
+ * Function: lo_txpoll
  *
  * Description:
- *   An interrupt was received indicating the availability of a new RX packet
+ *   Check if the network has any outgoing packets ready to send.  This is
+ *   a callback from devif_poll().  devif_poll() will be called only during
+ *   normal TX polling.
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
- *   None
+ *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   the network is locked.
  *
  ****************************************************************************/
 
-static void lo_loopback(FAR struct lo_driver_s *priv)
+static int lo_txpoll(FAR struct net_driver_s *dev)
 {
+  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
+
   /* Loop while there is data "sent", i.e., while d_len > 0.  That should be
    * the case upon entry here and while the processing of the IPv4/6 packet
    * generates a new packet to be sent.  Sending, of course, just means
@@ -197,43 +197,6 @@ static void lo_loopback(FAR struct lo_driver_s *priv)
           priv->lo_dev.d_len = 0;
         }
     }
-}
-
-/****************************************************************************
- * Function: lo_txpoll
- *
- * Description:
- *   Check if the network has any outgoing packets ready to send.  This is
- *   a callback from devif_poll().  devif_poll() will be called only during
- *   normal TX polling.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
- ****************************************************************************/
-
-static int lo_txpoll(FAR struct net_driver_s *dev)
-{
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
-
-  /* Check if the polling resulted in data that should be sent, i.e., tht
-   * the field d_len is set to a value > 0.
-   */
-
-  if (priv->lo_dev.d_len > 0)
-    {
-      /* Loop the packet back to the host */
-
-      lo_loopback(priv);
-    }
 
   return 0;
 }
@@ -251,7 +214,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -285,7 +248,7 @@ static void lo_poll_work(FAR void *arg)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -385,35 +348,6 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lo_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void lo_txavail_process(FAR struct lo_driver_s *priv)
-{
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->lo_bifup)
-    {
-      /* If so, then poll the network for new XMIT data */
-
-      (void)devif_poll(&priv->lo_dev, lo_txpoll);
-    }
-}
-
-/****************************************************************************
  * Function: lo_txavail_work
  *
  * Description:
@@ -435,10 +369,16 @@ static void lo_txavail_work(FAR void *arg)
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
   net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
   state = net_lock();
-  lo_txavail_process(priv);
+  if (priv->lo_bifup)
+    {
+      /* If so, then poll the network for new XMIT data */
+
+      (void)devif_poll(&priv->lo_dev, lo_txpoll);
+    }
+
   net_unlock(state);
 }
 
