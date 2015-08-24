@@ -1670,6 +1670,16 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+
+          /* Free dropped packet buffer */
+
+          if (dev->d_buf)
+            {
+              stm32_freebuffer(priv, dev->d_buf);
+              dev->d_buf = NULL;
+              dev->d_len = 0;
+            }
+
           continue;
         }
 
@@ -1915,7 +1925,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
 
-  /* Scan the TX desciptor change, returning buffers to free list */
+  /* Scan the TX descriptor change, returning buffers to free list */
 
   stm32_freeframe(priv);
 

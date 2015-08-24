@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43/lpc43_irq.c
  *
- *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,11 +77,17 @@
  * Public Data
  ****************************************************************************/
 
+/* This is the address of current interrupt saved state data.  Used for
+ * context switching.  Only value during interrupt handling.
+ */
+
 volatile uint32_t *current_regs;
 
-/* This is the address of the vector table */
+/* This is the address of the  exception vector table (determined by the
+ * linker script).
+ */
 
-extern unsigned _vectors[];
+extern uint32_t _vectors[];
 
 /****************************************************************************
  * Private Data
@@ -316,15 +322,16 @@ void up_irqinitialize(void)
    * positioned in SRAM or in external FLASH, then we may need to reset
    * the interrupt vector so that it refers to the table in SRAM or in
    * external FLASH.
-   *
-   * If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
+   */
+
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
+
+#ifdef CONFIG_ARCH_RAMVECTORS
+  /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
    * vector table that requires special initialization.
    */
 
-#ifdef CONFIG_ARCH_RAMVECTORS
   up_ramvec_initialize();
-#else
-  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

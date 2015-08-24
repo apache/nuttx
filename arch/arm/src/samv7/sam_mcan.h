@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/moxart/irq.h
+ * arch/arm/src/samv7/sam_mcan.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,39 +33,44 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_MOXART_IRQ_H
-#define __ARCH_ARM_INCLUDE_MOXART_IRQ_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_MCAN_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_MCAN_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include "chip.h"
+#include "chip/sam_mcan.h"
+
+#include <nuttx/can.h>
+
+#if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_MCAN0) || \
+    defined(CONFIG_SAMV7_MCAN1))
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
+/* Port numbers for use with sam_mcan_initialize() */
+
+#define MCAN0 0
+#define MCAN1 1
+
+/***************************************************************************
  * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+ ***************************************************************************/
 
 #ifndef __ASSEMBLY__
-#ifdef __cplusplus
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
@@ -73,16 +78,33 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/***************************************************************************
+ * Public Functions
+ ***************************************************************************/
+
+/****************************************************************************
+ * Name: sam_mcan_initialize
+ *
+ * Description:
+ *   Initialize the selected MCAN port
+ *
+ * Input Parameter:
+ *   port - Port number (for hardware that has multiple CAN interfaces),
+ *          0=MCAN0, 1=NCAN1
+ *
+ * Returned Value:
+ *   Valid CAN device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct can_dev_s;
+FAR struct can_dev_s *sam_mcan_initialize(int port);
+
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
-#endif
 
-#define IRQ_SYSTIMER 19
-
-#define VIRQ_START   32
-
-#define NR_IRQS     (VIRQ_START+2)
-
-#endif /* __ARCH_ARM_INCLUDE_MOXART_IRQ_H */
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_CAN && (CONFIG_SAMV7_MCAN0 || CONFIG_SAMV7_MCAN1) */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_MCAN_H */

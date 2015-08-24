@@ -356,7 +356,7 @@
 #  define GCR_REGWRPROT_2        (0x16)
 #  define GCR_REGWRPROT_3        (0x88)
                                            /* Read: */
-#define GCR_REGWRPROT_DIS        (1 << 0)  /* Bit 0: Register write protectino disable index */
+#define GCR_REGWRPROT_DIS        (1 << 0)  /* Bit 0: Register write protection disable index */
 
 /********************************************************************************************
  * Public Types

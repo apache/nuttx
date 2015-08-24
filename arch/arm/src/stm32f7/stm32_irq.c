@@ -80,7 +80,16 @@
  * Public Data
  ****************************************************************************/
 
+/* This is the address of current interrupt saved state data.  Used for
+ * context switching.  Only value during interrupt handling.
+ */
+
 volatile uint32_t *current_regs;
+
+/* This is the address of the  exception vector table (determined by the
+ * linker script).
+ */
+
 extern uint32_t _vectors[];
 
 /****************************************************************************
@@ -412,16 +421,21 @@ void up_irqinitialize(void)
   }
 #endif
 
-  /* Set up the vector table address.
-   *
-   * If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
+  /* Make sure that we are using the correct vector table.  The default
+   * vector address is 0x0000:0000 but if we are executing code that is
+   * positioned in SRAM or in external FLASH, then we may need to reset
+   * the interrupt vector so that it refers to the table in SRAM or in
+   * external FLASH.
+   */
+
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
+
+#ifdef CONFIG_ARCH_RAMVECTORS
+  /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
    * vector table that requires special initialization.
    */
 
-#if defined(CONFIG_ARCH_RAMVECTORS)
   up_ramvec_initialize();
-#elif defined(CONFIG_STM32F7_BOOTLOADER)
-  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

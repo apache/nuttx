@@ -224,45 +224,33 @@ static inline void sam_pmcsetup(void)
   putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
   sam_pmcwait(PMC_INT_LOCKA);
 
-#ifdef CONFIG_USBDEV
+#ifdef CONFIG_SAMV7_USBDEVHS
   /* UTMI configuration: Enable port0, select 12/16 MHz MAINOSC crystal source */
-
-#if 0 /* REVISIT:  Does this apply only to OHCI? */
-  putreg32(UTMI_OHCIICR_RES0, SAM_UTMI_OHCIICR);
-#endif
 
 #if BOARD_MAINOSC_FREQUENCY == 12000000
   putreg32(UTMI_CKTRIM_FREQ_XTAL12, SAM_UTMI_CKTRIM);
-#elif BOARD_MAINOSC_FREQUENCY == 12000000
+#elif BOARD_MAINOSC_FREQUENCY == 16000000
   putreg32(UTMI_CKTRIM_FREQ_XTAL16, SAM_UTMI_CKTRIM);
 #else
 #  error ERROR: Unrecognized MAINSOSC frequency
 #endif
 
+#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
   /* Enable UTMI Clocking. The USBHS can work in two modes:
    *
    * - Normal mode where High speed, Full speed and Low speed are available.
    * - Low-power mode where only Full speed and Low speed are available.
    *
-   * Only the normal mode is supported by this logic.
+   * Only the Low-power mode is mode is supported by the logic here.  Normal
+   * mode logic is handled in the function sam_usbclock().
    */
 
-#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
   /* UTMI Low-power mode, Full/Low Speed mode
    *
    * Enable the 48MHz FS Clock.
    */
 
   putreg32(PMC_USBCLK, SAM_PMC_SCER);
-
-#else
-  /* UTMI normal mode, High/Full/Low Speed
-   *
-   * Disable the 48MHz USB FS Clock.  It is not used in this configuration
-   */
-
-  putreg32(PMC_USBCLK, SAM_PMC_SCDR);
-#endif
 
   /* Select the UTMI PLL as the USB PLL clock input (480MHz) with divider
    * to get to 48MHz.  UPLL output frequency is determined only by the
@@ -271,7 +259,6 @@ static inline void sam_pmcsetup(void)
 
   regval = PMC_USB_USBS_UPLL;
 
-#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
   if ((getreg32(SAM_PMC_MCKR) & PMC_MCKR_PLLADIV2) != 0)
     {
       /* Divider = 480 Mhz / 2 / 48 Mhz = 5 */
@@ -284,7 +271,6 @@ static inline void sam_pmcsetup(void)
 
       regval |=  PMC_USB_USBDIV(9);
     }
-#endif
 
   putreg32(regval, SAM_PMC_USB);
 
@@ -296,7 +282,9 @@ static inline void sam_pmcsetup(void)
   /* Wait for LOCKU */
 
   sam_pmcwait(PMC_INT_LOCKU);
-#endif
+
+#endif /* CONFIG_SAMV7_USBDEVHS_LOWPOWER */
+#endif /* CONFIG_SAMV7_USBDEVHS */
 
   /* Switch to the fast clock and wait for MCKRDY */
 
@@ -405,3 +393,51 @@ void sam_clockconfig(void)
 
   sam_enabledefaultmaster();
 }
+
+/****************************************************************************
+ * Name: sam_usbclock
+ *
+ * Description:
+ *   Enable USBHS clocking.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMV7_USBDEVHS) && !defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
+void sam_usbclock(void)
+{
+  uint32_t regval;
+
+  /* Enable UTMI Clocking. The USBHS can work in two modes:
+   *
+   * - Normal mode where High speed, Full speed and Low speed are available.
+   * - Low-power mode where only Full speed and Low speed are available.
+   *
+   * Only the normal mode is supported by this logic of this function.  Low-
+   * power mode was handled in the sam_clockconfig().
+   */
+
+  /* UTMI normal mode, High/Full/Low Speed
+   *
+   * Disable the 48MHz USB FS Clock.  It is not used in this configuration
+   */
+
+  putreg32(PMC_USBCLK, SAM_PMC_SCDR);
+
+  /* Select the UTMI PLL as the USB PLL clock input (480MHz) with a divider
+   * of 1.  UPLL output frequency is determined only by the 12/16MHz crystal
+   * selection set in sam_clockconfig().
+   */
+
+  putreg32(PMC_USB_USBS_UPLL, SAM_PMC_USB);
+
+  /* Enable the UTMI PLL with the maximum start-up time */
+
+  regval = PMC_CKGR_UCKR_UPLLEN | PMC_CKGR_UCKR_UPLLCOUNT_MAX;
+  putreg32(regval, SAM_PMC_CKGR_UCKR);
+
+  /* Wait for LOCKU */
+
+  sam_pmcwait(PMC_INT_LOCKU);
+}
+
+#endif /* CONFIG_SAMV7_USBDEVHS && !CONFIG_SAMV7_USBDEVHS_LOWPOWER */

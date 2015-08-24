@@ -296,6 +296,9 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
 #ifdef SAMDL_HAVE_USART
 int sam_usart_internal(const struct sam_usart_config_s * const config)
 {
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+  int channel;
+#endif
   int ret;
 
   /* Enable clocking to the SERCOM module */
@@ -306,10 +309,20 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
   sercom_coreclk_configure(config->sercom, config->gclkgen, false);
+
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-  sam_gclk_chan_enable(config->sercom + GCLK_CHAN_SERCOM0_CORE,
-                       config->gclkgen);
+  if (config->sercom == 5)
+    {
+      channel = GCLK_CHAN_SERCOM5_CORE;
+    }
+  else
+    {
+      channel = config->sercom + GCLK_CHAN_SERCOM0_CORE;
+    }
+
+  sam_gclk_chan_enable(channel, config->gclkgen);
 #endif
+
   sercom_slowclk_configure(config->sercom, config->slowgen);
 
   /* Set USART configuration according to the board configuration */

@@ -1070,6 +1070,7 @@ static int can_rx0interrupt(int irq, void *context)
   /* Get the CAN identifier. */
 
   regval = can_getreg(priv, STM32_CAN_RI0R_OFFSET);
+
 #ifdef CONFIG_CAN_EXTID
   if ((regval & CAN_RIR_IDE) != 0)
     {
@@ -1089,17 +1090,22 @@ static int can_rx0interrupt(int irq, void *context)
       goto errout;
     }
 
-  hdr.ch_id    = (regval & CAN_RIR_STID_MASK) >> CAN_RIR_STID_SHIFT;
+  hdr.ch_id = (regval & CAN_RIR_STID_MASK) >> CAN_RIR_STID_SHIFT;
 #endif
+
+  /* Clear the error indication and unused bits */
+
+  hdr.ch_error  = 0;
+  hdr.ch_unused = 0;
 
   /* Extract the RTR bit */
 
-  hdr.ch_rtr   = (regval & CAN_RIR_RTR) != 0 ? true : false;
+  hdr.ch_rtr = (regval & CAN_RIR_RTR) != 0 ? true : false;
 
   /* Get the DLC */
 
-  regval       = can_getreg(priv, STM32_CAN_RDT0R_OFFSET);
-  hdr.ch_dlc   = (regval & CAN_RDTR_DLC_MASK) >> CAN_RDTR_DLC_SHIFT;
+  regval     = can_getreg(priv, STM32_CAN_RDT0R_OFFSET);
+  hdr.ch_dlc = (regval & CAN_RDTR_DLC_MASK) >> CAN_RDTR_DLC_SHIFT;
 
   /* Save the message data */
 

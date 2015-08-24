@@ -350,7 +350,7 @@
  * the 8-byte (2 word boundaries).  However, if the data cache is enabled
  * the a higher level of alignment is required.  That is because the data
  * will need to be invalidated and that cache invalidation will occur in
- * multiples of full change lines.
+ * multiples of full cache lines.
  *
  * In addition, padding may be required at the ends of the descriptors and
  * buffers to protect data after the end of from invalidation.
@@ -2103,7 +2103,7 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
- *   quid - Index of the tranfer queue that generated the interrupt
+ *   quid - Index of the transfer queue that generated the interrupt
  *
  * Returned Value:
  *   None
@@ -2230,7 +2230,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
- *   quid - Index of the tranfer queue that generated the interrupt
+ *   quid - Index of the transfer queue that generated the interrupt
  *
  * Returned Value:
  *   None

@@ -106,7 +106,7 @@
 #  define EIC_NVMICTRL_NMISENSE_HIGH (4 << EIC_NVMICTRL_NMISENSE_SHIFT) /* High level detection */
 #  define EIC_NVMICTRL_NMISENSE_LOW  (5 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Low level detection */
 #define EIC_NVMICTRL_NMIFLTEN        (1 << 3)  /* Bit 3: Non-maskable interrupt filter enable */
-#define EIC_NVMICTRL_ASYNC           (1 << 4)  /* Bit 4: Asynchronous edge detectino mode */
+#define EIC_NVMICTRL_ASYNC           (1 << 4)  /* Bit 4: Asynchronous edge detection mode */
 
 /* Non-maskable interrupt flas status and clear register */
 

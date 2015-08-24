@@ -1467,6 +1467,9 @@ struct spi_dev_s *up_spiinitialize(int port)
   struct sam_spidev_s *priv;
   irqstate_t flags;
   uint32_t regval;
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+  int channel;
+#endif
 #if 0 /* Not used */
   int ret;
 #endif
@@ -1534,7 +1537,22 @@ struct spi_dev_s *up_spiinitialize(int port)
 
   /* Configure the GCLKs for the SERCOM module */
 
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
   sercom_coreclk_configure(priv->sercom, priv->gclkgen, false);
+
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+  if (priv->sercom == 5)
+    {
+      channel = GCLK_CHAN_SERCOM5_CORE;
+    }
+  else
+    {
+      channel = priv->sercom + GCLK_CHAN_SERCOM0_CORE;
+    }
+
+  sam_gclk_chan_enable(channel, config->gclkgen);
+#endif
+
   sercom_slowclk_configure(priv->sercom, priv->slowgen);
 
   /* Set the SERCOM in SPI master mode (no address) */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/moxart/irq.h
+ * arch/arm/src/samv7/sam_qspi.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,16 +33,22 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_MOXART_IRQ_H
-#define __ARCH_ARM_INCLUDE_MOXART_IRQ_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_QSPI_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_QSPI_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "chip.h"
+#include "sam_config.h"
+
+#ifdef CONFIG_SAMV7_QSPI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,19 +59,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#ifdef __cplusplus
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
@@ -73,16 +77,31 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_qspi_initialize
+ *
+ * Description:
+ *   Initialize the selected QSPI port in master mode
+ *
+ * Input Parameter:
+ *   intf - Interface number(must be zero)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *sam_qspi_initialize(int intf);
+
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
-#endif
 
-#define IRQ_SYSTIMER 19
-
-#define VIRQ_START   32
-
-#define NR_IRQS     (VIRQ_START+2)
-
-#endif /* __ARCH_ARM_INCLUDE_MOXART_IRQ_H */
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_SAMV7_QSPI */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_QSPI_H */

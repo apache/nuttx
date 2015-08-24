@@ -604,21 +604,21 @@ static void stm32_stdclockconfig(void)
 
       /* Set the HCLK source/divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_HPRE_MASK;
       regval |= STM32_RCC_CFGR_HPRE;
       putreg32(regval, STM32_RCC_CFGR);
 
       /* Set the PCLK2 divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_PPRE2_MASK;
       regval |= STM32_RCC_CFGR_PPRE2;
       putreg32(regval, STM32_RCC_CFGR);
 
       /* Set the PCLK1 divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_PPRE1_MASK;
       regval |= STM32_RCC_CFGR_PPRE1;
       putreg32(regval, STM32_RCC_CFGR);
@@ -626,7 +626,7 @@ static void stm32_stdclockconfig(void)
 #ifdef CONFIG_RTC_HSECLOCK
       /* Set the RTC clock divisor */
 
-      regval = getreg32(STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_RTCPRE_MASK;
       regval |= RCC_CFGR_RTCPRE(HSE_DIVISOR);
       putreg32(regval, STM32_RCC_CFGR);
@@ -645,7 +645,7 @@ static void stm32_stdclockconfig(void)
 
       /* Enable the main PLL */
 
-      regval = getreg32(STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLLON;
       putreg32(regval, STM32_RCC_CR);
 
@@ -664,7 +664,7 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-      regval = getreg32(STM32_PWR_CR);
+      regval  = getreg32(STM32_PWR_CR);
       regval |= PWR_CR_ODSWEN;
       putreg32(regval, STM32_PWR_CR);
       while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODSWRDY) == 0)
@@ -697,14 +697,25 @@ static void stm32_stdclockconfig(void)
 
       /* Configure PLLSAI */
 
-      regval = getreg32(STM32_RCC_PLLSAICFGR);
+      regval  = getreg32(STM32_RCC_PLLSAICFGR);
+      regval &= ~(RCC_PLLSAICFGR_PLLSAIM_MASK |
+                  RCC_PLLSAICFGR_PLLSAIN_MASK |
+                  RCC_PLLSAICFGR_PLLSAIP_MASK |
+                  RCC_PLLSAICFGR_PLLSAIQ_MASK);
       regval |= (STM32_RCC_PLLSAICFGR_PLLSAIM
                  | STM32_RCC_PLLSAICFGR_PLLSAIN
                  | STM32_RCC_PLLSAICFGR_PLLSAIP
                  | STM32_RCC_PLLSAICFGR_PLLSAIQ);
       putreg32(regval, STM32_RCC_PLLSAICFGR);
 
-      regval = getreg32(STM32_RCC_DCKCFGR);
+      regval  = getreg32(STM32_RCC_DCKCFGR);
+      regval &= ~(RCC_DCKCFGR_PLLI2SDIVQ_MASK |
+                  RCC_DCKCFGR_PLLSAIDIVQ_MASK |
+                  RCC_DCKCFGR_SAI1SRC_MASK    |
+                  RCC_DCKCFGR_SAI2SRC_MASK    |
+                  RCC_DCKCFGR_I2S1SRC_MASK    |
+                  RCC_DCKCFGR_I2S2SRC_MASK);
+
       regval |= (STM32_RCC_DCKCFGR_PLLI2SDIVQ
                  | STM32_RCC_DCKCFGR_PLLSAIDIVQ
                  | STM32_RCC_DCKCFGR_SAI1SRC
@@ -717,7 +728,7 @@ static void stm32_stdclockconfig(void)
 
       /* Enable PLLSAI */
 
-      regval = getreg32(STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLLSAION;
       putreg32(regval, STM32_RCC_CR);
 
@@ -732,7 +743,11 @@ static void stm32_stdclockconfig(void)
 
       /* Configure PLLI2S */
 
-      regval = getreg32(STM32_RCC_PLLI2SCFGR);
+      regval  = getreg32(STM32_RCC_PLLI2SCFGR);
+      regval &= ~(RCC_PLLI2SCFGR_PLLI2SM_MASK |
+                  RCC_PLLI2SCFGR_PLLI2SN_MASK |
+                  RCC_PLLI2SCFGR_PLLI2SP_MASK |
+                  RCC_PLLI2SCFGR_PLLI2SQ_MASK);
       regval |= (STM32_RCC_PLLI2SCFGR_PLLI2SM
                  | STM32_RCC_PLLI2SCFGR_PLLI2SN
                  | STM32_RCC_PLLI2SCFGR_PLLI2SP
@@ -740,7 +755,12 @@ static void stm32_stdclockconfig(void)
                  | STM32_RCC_PLLI2SCFGR_PLLI2SR);
       putreg32(regval, STM32_RCC_PLLI2SCFGR);
 
-      regval = getreg32(STM32_RCC_DCKCFGR2);
+      regval  = getreg32(STM32_RCC_DCKCFGR2);
+      regval &= ~(RCC_DCKCFGR2_FMPI2C1SEL_MASK |
+                  RCC_DCKCFGR2_CECSEL_MASK     |
+                  RCC_DCKCFGR2_CK48MSEL_MASK   |
+                  RCC_DCKCFGR2_SDIOCSEL_MASK   |
+                  RCC_DCKCFGR2_SPDIFRXEL_MASK);
       regval |= (STM32_RCC_DCKCFGR2_FMPI2C1SEL
                  | STM32_RCC_DCKCFGR2_CECSEL
                  | STM32_RCC_DCKCFGR2_CK48MSEL
@@ -751,7 +771,7 @@ static void stm32_stdclockconfig(void)
 
       /* Enable PLLI2S */
 
-      regval = getreg32(STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLLI2SON;
       putreg32(regval, STM32_RCC_CR);
 
@@ -761,8 +781,6 @@ static void stm32_stdclockconfig(void)
         {
         }
 #endif
-
-
 
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
