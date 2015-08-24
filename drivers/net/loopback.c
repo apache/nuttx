@@ -213,7 +213,6 @@ static void lo_loopback(FAR struct lo_driver_s *priv)
     {
       ndbg("WARNING: Unrecognized packet type dropped: %04x\n", BUF->type);
     }
-#endif
 }
 
 /****************************************************************************

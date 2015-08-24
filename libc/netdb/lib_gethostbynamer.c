@@ -51,6 +51,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/net/dns.h>
+#include <nuttx/net/loopback.h>
 
 #include "lib_internal.h"
 #include "netdb/lib_dns.h"
@@ -236,10 +237,9 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   socklen_t addrlen;
-  FAR const uint8_t *src;
-  FAR uint8_t *dest;
+  FAR const char *src;
+  FAR char *dest;
   int namelen;
-  int ret;
 
   if (strcmp(name, "localhost") == 0)
     {
@@ -249,14 +249,14 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
       /* Setup to transfer the IPv4 address */
 
       addrlen          = sizeof(struct in_addr);
-      src              = (FAR uint8_t *)&g_lo_ipv4addr;
+      src              = (FAR const char *)&g_lo_ipv4addr;
       host->h_addrtype = AF_INET;
 
 #else /* CONFIG_NET_IPv6 */
       /* Setup to transfer the IPv6 address */
 
       addrlen          = sizeof(struct in6_addr);
-      src              = (FAR uint8_t *)&g_lo_ipv6addr;
+      src              = (FAR const char *)&g_lo_ipv6addr;
       host->h_addrtype = AF_INET6;
 #endif
 
@@ -270,7 +270,7 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
         }
 
       info             = (FAR struct hostent_info_s *)buf;
-      dest             = (FAR uint8_t *)info->hi_data;
+      dest             = info->hi_data;
       buflen          -= (sizeof(struct hostent_info_s) - 1);
 
       memset(host, 0, sizeof(struct hostent));
@@ -281,7 +281,7 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
       host->h_addr_list    = info->hi_addrlist;
       host->h_length       = addrlen;
 
-      ptr                 += addrlen;
+      dest                += addrlen;
       buflen              -= addrlen;
 
       /* And copy name */
@@ -292,7 +292,7 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
           return -ERANGE;
         }
 
-      strncpy(ptr, name, buflen);
+      strncpy(dest, name, buflen);
       return 0;
     }
 

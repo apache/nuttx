@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <arpa/inet.h>
+#include <nuttx/net/loopback.h>
 
 #include "lib_internal.h"
 #include "netdb/lib_netdb.h"
@@ -153,11 +154,10 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
   FAR struct hostent_info_s *info;
   socklen_t addrlen;
   FAR const uint8_t *src;
-  FAR uint8_t *dest;
+  FAR char *dest;
   bool match;
   int herrnocode;
   int namelen;
-  int ret;
 
   if (lib_lo_ipv4match(addr, len, type))
     {
@@ -193,7 +193,7 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
 
 
       info             = (FAR struct hostent_info_s *)buf;
-      dest             = (FAR uint8_t *)info->hi_data;
+      dest             = info->hi_data;
       buflen          -= (sizeof(struct hostent_info_s) - 1);
 
       memset(host, 0, sizeof(struct hostent));
@@ -204,7 +204,7 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
       host->h_addr_list    = info->hi_addrlist;
       host->h_length       = addrlen;
 
-      ptr                 += addrlen;
+      dest                += addrlen;
       buflen              -= addrlen;
 
       /* And copy localhost host name */
@@ -216,7 +216,7 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
           goto errorout_with_herrnocode;
         }
 
-      strncpy(ptr, g_lo_hostname, buflen);
+      strncpy(dest, g_lo_hostname, buflen);
       return 0;
     }
 

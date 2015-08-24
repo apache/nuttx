@@ -9,6 +9,7 @@ config NETDEV_LOOPBACK
 	bool "Local loopback support"
 	default n
 	select NET_NOINTS
+	depends on EXPERIMENTAL
 	---help---
 		Add support for the local network loopback device, lo.  Any additional
 		networking devices that are enabled must be compatible with

@@ -47,6 +47,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NETDEV_LOOPBACK
 
