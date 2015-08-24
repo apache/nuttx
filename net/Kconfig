@@ -166,7 +166,6 @@ config NET_ETHERNET
 config NET_LOOPBACK
 	bool "Local loopback"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Add support for the local network loopback device, lo.  Any additional
 		networking devices that are enabled must be compatible with
