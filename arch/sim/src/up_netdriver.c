@@ -44,7 +44,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_NET_ETHERNET
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -325,5 +325,5 @@ int netdriver_setmacaddr(unsigned char *macaddr)
   return 0;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET_ETHERNET */
 
