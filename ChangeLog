@@ -10871,3 +10871,6 @@
 	* libc/libc.csv and syscalls/syscalls.csv:  Define some symbol
 	  export conditions, correct errno and add sleep and usleep. From
 	  Pavel Pisa (2015-08-23).
+	* net/ ande include/nuttx/net:  Remove references to PPP as a
+	  link layer protocol (2015-08-24).
+

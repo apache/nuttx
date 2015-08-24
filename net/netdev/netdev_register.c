@@ -159,7 +159,7 @@ static int find_devnum(FAR const char *devfmt)
  *
  * Parameters:
  *   dev    - The device driver structure to be registered.
- *   lltype - Link level protocol used by the driver (Ethernet, SLIP, PPP, ...
+ *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
  *              ...
  *
  * Returned Value:
@@ -220,17 +220,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_recvwndo = CONFIG_NET_TUN_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_TUN_FORMAT;
-            break;
-#endif
-
-#if 0                            /* REVISIT: Not yet supported */
-          case NET_LL_PPP:       /* Point-to-Point Protocol (PPP) */
-            dev->d_llhdrlen = 0;
-            dev->d_mtu      = CONFIG_NET_PPP_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_PPP_TCP_RECVWNDO;
-#endif
-            devfmt          = NETDEV_PPP_FORMAT;
             break;
 #endif
 
