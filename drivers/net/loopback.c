@@ -120,7 +120,6 @@ static void lo_loopback(FAR struct lo_driver_s *priv);
 /* Polling logic */
 
 static int  lo_txpoll(FAR struct net_driver_s *dev);
-static inline void lo_poll(FAR struct lo_driver_s *priv);
 static void lo_poll_work(FAR void *arg);
 static void lo_poll_expiry(int argc, wdparm_t arg, ...);
 
@@ -178,23 +177,25 @@ static void lo_loopback(FAR struct lo_driver_s *priv)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-  if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
-    {
-      nllvdbg("IPv4 frame\n");
-      ipv4_input(&priv->lo_dev);
-    }
-  else
+      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
+        {
+          nllvdbg("IPv4 frame\n");
+          ipv4_input(&priv->lo_dev);
+        }
+      else
 #endif
 #ifdef CONFIG_NET_IPv6
-  if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
-    {
-      nllvdbg("Iv6 frame\n");
-      ipv6_input(&priv->lo_dev);
-    }
-  else
+      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
+        {
+          nllvdbg("Iv6 frame\n");
+          ipv6_input(&priv->lo_dev);
+        }
+      else
 #endif
-    {
-      ndbg("WARNING: Unrecognized packet type dropped: %04x\n", IPv4BUF->type);
+        {
+          ndbg("WARNING: Unrecognized packet type dropped: %04x\n", IPv4BUF->type);
+          priv->lo_dev.d_len = 0;
+        }
     }
 }
 
@@ -238,34 +239,6 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lo_poll
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void lo_poll(FAR struct lo_driver_s *priv)
-{
-  /* Perform the poll */
-
-  (void)devif_timer(&priv->lo_dev, lo_txpoll, LO_POLLHSEC);
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
-}
-
-/****************************************************************************
  * Function: lo_poll_work
  *
  * Description:
@@ -282,7 +255,6 @@ static inline void lo_poll(FAR struct lo_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void lo_poll_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
@@ -291,10 +263,13 @@ static void lo_poll_work(FAR void *arg)
   /* Perform the poll */
 
   state = net_lock();
-  lo_poll(priv);
+  (void)devif_timer(&priv->lo_dev, lo_txpoll, LO_POLLHSEC);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
   net_unlock(state);
 }
-#endif
 
 /****************************************************************************
  * Function: lo_poll_expiry
