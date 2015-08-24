@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 11, 2015)
+NuttX TODO List (Last updated August 24, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues reated to each board port.
 
 nuttx/
 
- (12)  Task/Scheduler (sched/)
+ (13)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
@@ -212,6 +212,31 @@ o Task/Scheduler (sched/)
                exists.
   Status:      Open
   Priority:    Medium-ish
+
+  Title:       SCALABILITY
+  Description: Task control information is retained in simple lists.  This
+               is completely appropriate for small embedded systems where
+               the number of tasks, N, is relatively small.  Most list
+               operations are O(N).  This could become as issue if N gets
+               very large.
+
+               In that case, these simple lists should be replaced with
+               something more performant such as a balanced tree in the
+               case of ordered lists.  Fortunately, most internal lists are
+               hidden behind simple accessor functions and so the internal
+               data structures can be changed if need with very little impact.
+
+               The only area are the list structure is not well contained is
+               in the sequence of code that finds the current running task:
+
+                 FAR struct tcb_s *rtcb = (FAT struc tcb_s *)g_readytorun.head;
+
+               That needs to be hidden behind a macro (it would also be a problem
+               for any SMP implementation).
+
+  Status:      Open
+  Priority:    Low.  Things are just the way that we want them for the way
+               that NuttX is used today.
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
