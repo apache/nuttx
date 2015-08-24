@@ -78,7 +78,6 @@ enum net_lltype_e
   NET_LL_ETHERNET = 0, /* Ethernet */
   NET_LL_LOOPBACK,     /* Local loopback */
   NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
-  NET_LL_PPP,          /* Point-to-Point Protocol (PPP) */
   NET_LL_TUN,          /* TUN Virtual Network Device */
 };
 
@@ -1079,7 +1078,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  *
  * Parameters:
  *   dev    - The device driver structure to be registered.
- *   lltype - Link level protocol used by the driver (Ethernet, SLIP, PPP, ...
+ *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
  *
  * Returned Value:
  *   0:Success; negated errno on failure

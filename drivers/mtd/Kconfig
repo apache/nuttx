@@ -387,6 +387,27 @@ config M25P_SUBSECTOR_ERASE
 
 endif
 
+config MTD_ST25FL1
+	bool "QuadSPI-based ST25FL1 FLASH"
+	default n
+	select SPI
+
+if MTD_ST25FL1
+
+config ST25FL1_SPIMODE
+	int "ST25FL1 SPI Mode"
+	default 0
+
+config ST25FL1_SPIFREQUENCY
+	int "ST25FL1 SPI Frequency"
+	default 20000000
+
+config ST25FL1_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
+endif
+
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default n
