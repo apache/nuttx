@@ -85,7 +85,7 @@ struct hostent_info_s
  *   name into the h_name field and its struct in_addr equivalent into the
  *   h_addr_list[0] field of the returned hostent structure.
  *
- * Input paramters:
+ * Input Parameters:
  *   stream - File stream of the opened hosts file with the file pointer
  *     positioned at the beginning of the next host entry.
  *   host - Caller provided location to return the host data.
@@ -210,6 +210,95 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
   strncpy(ptr, name, buflen);
   return 0;
 }
+
+/****************************************************************************
+ * Name: lib_localhost
+ *
+ * Description:
+ *   Check if the name is the reserved name for the local loopback device.
+ *
+ * Input Parameters:
+ *   stream - File stream of the opened hosts file with the file pointer
+ *     positioned at the beginning of the next host entry.
+ *   host - Caller provided location to return the host data.
+ *   buf - Caller provided buffer to hold string data associated with the
+ *     host data.
+ *   buflen - The size of the caller-provided buffer
+ *
+ * Returned Value:
+ *   Zero (0) is returned if the name is an numeric IP address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+static int lib_localhost(FAR const char *name, FAR struct hostent *host,
+                               FAR char *buf, size_t buflen)
+{
+  FAR struct hostent_info_s *info;
+  socklen_t addrlen;
+  FAR const uint8_t *src;
+  FAR uint8_t *dest;
+  int namelen;
+  int ret;
+
+  if (strcmp(name, "localhost") == 0)
+    {
+      /* Yes.. it is the localhost */
+
+#ifdef CONFIG_NET_IPv4
+      /* Setup to transfer the IPv4 address */
+
+      addrlen          = sizeof(struct in_addr);
+      src              = (FAR uint8_t *)&g_lo_ipv4addr;
+      host->h_addrtype = AF_INET;
+
+#else /* CONFIG_NET_IPv6 */
+      /* Setup to transfer the IPv6 address */
+
+      addrlen          = sizeof(struct in6_addr);
+      src              = (FAR uint8_t *)&g_lo_ipv6addr;
+      host->h_addrtype = AF_INET6;
+#endif
+
+      /* Make sure that space remains to hold the hostent structure and
+       * the IP address.
+       */
+
+      if (buflen <= (sizeof(struct hostent_info_s) + addrlen))
+        {
+          return -ERANGE;
+        }
+
+      info             = (FAR struct hostent_info_s *)buf;
+      dest             = (FAR uint8_t *)info->hi_data;
+      buflen          -= (sizeof(struct hostent_info_s) - 1);
+
+      memset(host, 0, sizeof(struct hostent));
+      memset(info, 0, sizeof(struct hostent_info_s));
+      memcpy(dest, src, addrlen);
+
+      info->hi_addrlist[0] = dest;
+      host->h_addr_list    = info->hi_addrlist;
+      host->h_length       = addrlen;
+
+      ptr                 += addrlen;
+      buflen              -= addrlen;
+
+      /* And copy name */
+
+      namelen = strlen(name);
+      if (addrlen + namelen + 1 > buflen)
+        {
+          return -ERANGE;
+        }
+
+      strncpy(ptr, name, buflen);
+      return 0;
+    }
+
+  return 1;
+}
+#endif
 
 /****************************************************************************
  * Name: lib_find_answer
@@ -471,7 +560,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
  * Description:
  *   Try to look-up the host name from the network host file
  *
- * Input paramters:
+ * Input Parameters:
  *   name - The name of the host to find.
  *   host - Caller provided location to return the host data.
  *   buf - Caller provided buffer to hold string data associated with the
@@ -650,6 +739,17 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
 
       return OK;
     }
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+  /* Check for the local loopback host name */
+
+  if (lib_localhost(name, host, buf, buflen) == 0)
+    {
+      /* Yes.. we are done */
+
+      return OK;
+    }
+#endif
 
   /* Try to find the name in the HOSTALIASES environment variable */
   /* REVISIT: Not implemented */

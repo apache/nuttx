@@ -53,21 +53,81 @@
 #ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gethostbyaddr_r
+ * Name: lib_lo_ipv4match
  *
  * Description:
- *   The gethostbyaddr_r() function returns a structure of type hostent for
- *   the given host address addr of length len and address type type. Valid
- *   address types are AF_INET and AF_INET6. The host address argument is a
- *   pointer to a struct of a type depending on the address type, for example
- *   a struct in_addr *  for address type AF_INET.
- * 
- *   gethostbyaddr_r() is *not* POSIX but is similar to a Glibc extension and is
- *   used internally by NuttX to implement the POSIX gethostbyaddr().
+ *   Check if the address is the reserved IPv4 address for the local
+ *   loopback device.
+ *
+ * Input Parameters:
+ *   addr - The address of the host to find.
+ *   len - The length of the address
+ *   type - The type of the address
+ *
+ * Returned Value:
+ *  True if the address is the IPv4 local loopback address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
+{
+  FAR struct in_addr *ipv4addr;
+
+  if (type == AF_INET && len >= sizeof(struct in_addr))
+    {
+      ipv4addr = (FAR struct in_addr *)addr;
+      return net_ipv4addr_maskcmp(ipv4addr->sin_addr.s_addr,
+                                  g_lo_ipv4addr->s_addr,
+                                  g_lo_ipv4addr->s_addr);
+    }
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: lib_lo_ipv6match
+ *
+ * Description:
+ *   Check if the address is the reserved IPv6 address for the local
+ *   loopback device.
+ *
+ * Input Parameters:
+ *   addr - The address of the host to find.
+ *   len - The length of the address
+ *   type - The type of the address
+ *
+ * Returned Value:
+ *  True if the address is the IPv4 local loopback address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
+{
+  FAR struct in_addr6 *ipv6addr;
+
+  if (type == AF_INE6T && len >= sizeof(struct in_addr6))
+    {
+      ipv6addr = (FAR struct in_addr6 *)addr;
+      return net_ipv6addr_cmp(ipv6addr->sin6_addr.s6_addr16, g_lo_ipv6addr);
+    }
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: lib_localhost
+ *
+ * Description:
+ *   Check if the address is the reserved address for the local loopback
+ *   device.
  *
  * Input Parameters:
  *   addr - The address of the host to find.
@@ -85,23 +145,122 @@
  *
  ****************************************************************************/
 
-int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
-                    FAR struct hostent *host, FAR char *buf,
-                    size_t buflen, int *h_errnop)
+#ifdef CONFIG_NETDEV_LOOPBACK
+static int lib_localhost(FAR const void *addr, socklen_t len, int type,
+                         FAR struct hostent *host, FAR char *buf,
+                         size_t buflen, int *h_errnop)
+{
+  FAR struct hostent_info_s *info;
+  socklen_t addrlen;
+  FAR const uint8_t *src;
+  FAR uint8_t *dest;
+  bool match;
+  int herrnocode;
+  int namelen;
+  int ret;
+
+  if (lib_lo_ipv4match(addr, len, type))
+    {
+      /* Setup to transfer the IPv4 address */
+
+      addrlen          = sizeof(struct in_addr);
+      src              = (FAR uint8_t *)&g_lo_ipv4addr;
+      host->h_addrtype = AF_INET;
+    }
+  else if (lib_lo_ipv4match(addr, len, type))
+    {
+      /* Setup to transfer the IPv6 address */
+
+      addrlen          = sizeof(struct in6_addr);
+      src              = (FAR uint8_t *)&g_lo_ipv6addr;
+      host->h_addrtype = AF_INET6;
+    }
+  else
+    {
+      /* Return 1 meaning that we have no errors but no match either */
+
+      return 1;
+    }
+
+  /* Make sure that space remains to hold the hostent structure and
+   * the IP address.
+   */
+
+  if (buflen <= (sizeof(struct hostent_info_s) + addrlen))
+    {
+      return -ERANGE;
+    }
+
+
+      info             = (FAR struct hostent_info_s *)buf;
+      dest             = (FAR uint8_t *)info->hi_data;
+      buflen          -= (sizeof(struct hostent_info_s) - 1);
+
+      memset(host, 0, sizeof(struct hostent));
+      memset(info, 0, sizeof(struct hostent_info_s));
+      memcpy(dest, src, addrlen);
+
+      info->hi_addrlist[0] = dest;
+      host->h_addr_list    = info->hi_addrlist;
+      host->h_length       = addrlen;
+
+      ptr                 += addrlen;
+      buflen              -= addrlen;
+
+      /* And copy localhost host name */
+
+      namelen = strlen(g_lo_hostname);
+      if (addrlen + namelen + 1 > buflen)
+        {
+          herrnocode = ERANGE;
+          goto errorout_with_herrnocode;
+        }
+
+      strncpy(ptr, g_lo_hostname, buflen);
+      return 0;
+    }
+
+  return 1;
+
+errorout_with_herrnocode:
+  if (h_errnop)
+    {
+      *h_errnop = herrnocode;
+    }
+
+ return ERROR;
+}
+#endif
+
+/****************************************************************************
+ * Name: lib_hostfile_lookup
+ *
+ * Description:
+ *   Try to look-up the host name from the network host file
+ *
+ * Input Parameters:
+ *   addr - The address of the host to find.
+ *   len - The length of the address
+ *   type - The type of the address
+ *   host - Caller provided location to return the host data.
+ *   buf - Caller provided buffer to hold string data associated with the
+ *     host data.
+ *   buflen - The size of the caller-provided buffer
+ *   h_errnop - There h_errno value returned in the event of a failure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, -1 (ERROR) is returned on a failure
+ *   with the returned h_errno value provided the reason for the failure.
+ *
+ ****************************************************************************/
+
+int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
+                        FAR struct hostent *host, FAR char *buf,
+                        size_t buflen, int *h_errnop)
 {
   FAR FILE *stream;
   int herrnocode;
   int nread;
-
-  DEBUGASSERT(addr != NULL && host != NULL && buf != NULL);
-  DEBUGASSERT(type == AF_INET || type == AF_INET6);
-
-  /* Make sure that the h_errno has a non-error code */
-
-  if (h_errnop)
-    {
-      *h_errnop = 0;
-    }
 
   /* Search the hosts file for a match */
 
@@ -183,6 +342,73 @@ errorout_with_herrnocode:
     }
 
  return ERROR;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gethostbyaddr_r
+ *
+ * Description:
+ *   The gethostbyaddr_r() function returns a structure of type hostent for
+ *   the given host address addr of length len and address type type. Valid
+ *   address types are AF_INET and AF_INET6. The host address argument is a
+ *   pointer to a struct of a type depending on the address type, for example
+ *   a struct in_addr *  for address type AF_INET.
+ *
+ *   gethostbyaddr_r() is *not* POSIX but is similar to a Glibc extension and is
+ *   used internally by NuttX to implement the POSIX gethostbyaddr().
+ *
+ * Input Parameters:
+ *   addr - The address of the host to find.
+ *   len - The length of the address
+ *   type - The type of the address
+ *   host - Caller provided location to return the host data.
+ *   buf - Caller provided buffer to hold string data associated with the
+ *     host data.
+ *   buflen - The size of the caller-provided buffer
+ *   h_errnop - There h_errno value returned in the event of a failure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, -1 (ERROR) is returned on a failure
+ *   with the returned h_errno value provided the reason for the failure.
+ *
+ ****************************************************************************/
+
+int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
+                    FAR struct hostent *host, FAR char *buf,
+                    size_t buflen, int *h_errnop)
+{
+  FAR FILE *stream;
+  int herrnocode;
+  int nread;
+
+  DEBUGASSERT(addr != NULL && host != NULL && buf != NULL);
+  DEBUGASSERT(type == AF_INET || type == AF_INET6);
+
+  /* Make sure that the h_errno has a non-error code */
+
+  if (h_errnop)
+    {
+      *h_errnop = 0;
+    }
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+  /* Check for the local loopback address */
+
+  if (lib_localhost(addr, len, type, host, but, buflen, h_errnop) == 0)
+    {
+      /* Yes.. we are done */
+
+      return OK;
+    }
+#endif
+
+  /* Search the hosts file for a match */
+
+  return lib_hostfile_lookup(addr, len, type, host, but, buflen, h_errnop);
 }
 
 #endif /* CONFIG_NETDB_HOSTFILE */

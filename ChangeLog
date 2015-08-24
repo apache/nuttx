@@ -10873,4 +10873,7 @@
 	  Pavel Pisa (2015-08-23).
 	* net/ ande include/nuttx/net:  Remove references to PPP as a
 	  link layer protocol (2015-08-24).
-
+	* net/, drivers/net, and include/net:  Add definitions to support
+	  a local loopback device and link layer (2015-08-24).
+	* libc/netdb, net/loopback, include/nuttx/net:  Add NetDB support
+	  for the local loopback device (2015-08-24).
