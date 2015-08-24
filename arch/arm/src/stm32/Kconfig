@@ -779,6 +779,8 @@ config ARCH_CHIP_STM32F446M
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
 
 config ARCH_CHIP_STM32F446R
 	bool "STM32F446R"
@@ -786,6 +788,8 @@ config ARCH_CHIP_STM32F446R
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
 
 config ARCH_CHIP_STM32F446V
 	bool "STM32F446V"
@@ -793,6 +797,8 @@ config ARCH_CHIP_STM32F446V
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
 
 config ARCH_CHIP_STM32F446Z
 	bool "STM32F446Z"
@@ -800,7 +806,8 @@ config ARCH_CHIP_STM32F446Z
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
-
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
 
 endchoice
 
@@ -1381,6 +1388,14 @@ config STM32_HAVE_SPI5
 config STM32_HAVE_SPI6
 	bool
 	default n
+
+config STM32_HAVE_SAIPLL
+  bool
+  default n
+
+config STM32_HAVE_I2SPLL
+  bool
+  default n
 
 # These are the peripheral selections proper
 
@@ -2044,6 +2059,24 @@ config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
+
+config STM32_SAIPLL
+	bool "SAIPLL"
+	default n
+	depends on STM32_HAVE_SAIPLL
+	---help---
+		The STM32F446 has a separate PLL for the SAI block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32_I2SPLL
+	bool "I2SPLL"
+	default n
+	depends on STM32_HAVE_I2SPLL
+	---help---
+		The STM32F446 has a separate PLL for the I2S block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
 
 config STM32_CCMEXCLUDE
 	bool "Exclude CCM SRAM from the heap"

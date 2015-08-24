@@ -693,7 +693,7 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-#ifdef CONFIG_STM32_USE_PLLSAI
+#if defined(CONFIG_STM32_SAIPLL)
 
       /* Configure PLLSAI */
 
@@ -739,7 +739,7 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-#ifdef CONFIG_STM32_USE_PLLI2S
+#if defined(CONFIG_STM32_I2SPLL)
 
       /* Configure PLLI2S */
 
