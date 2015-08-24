@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/net/loopback.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
 
@@ -196,6 +197,12 @@ void up_initialize(void)
   /* Initialize the network */
 
   up_netinitialize();
+#endif
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+  /* Initialize the local loopback device */
+
+  (void)localhost_initialize();
 #endif
 
   board_led_on(LED_IRQSENABLED);

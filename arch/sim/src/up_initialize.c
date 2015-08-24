@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/net/loopback.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
@@ -163,6 +164,12 @@ void up_initialize(void)
 
 #ifdef CONFIG_NET_ETHERNET
   netdriver_init();         /* Our "real" network driver */
+#endif
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+  /* Initialize the local loopback device */
+
+  (void)localhost_initialize();
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_SIM_SPIFLASH)

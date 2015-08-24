@@ -42,7 +42,6 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/net/loopback.h>
 
 /***************************************************************************
  * Public Functions
@@ -61,19 +60,6 @@
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(void)
 {
-#ifdef CONFIG_NETDEV_LOOPBACK
-  int ret;
-
-  /* Initialize the local loopback device */
-
-  ret = localhost_initialize();
-  if (ret < 0)
-    {
-      ndbg("ERROR: localhost_initialize() failed: %d\n", ret);
-    }
-
-#endif /* CONFIG_NETDEV_LOOPBACK */
-
   return 0;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
