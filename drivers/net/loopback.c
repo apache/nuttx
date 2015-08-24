@@ -161,53 +161,35 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 
 static void lo_loopback(FAR struct lo_driver_s *priv)
 {
-#ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* Loop while there is data "sent", i.e., while d_len > 0.  That should be
+   * the case upon entry here and while the processing of the IPv4/6 packet
+   * generates a new packet to be sent.  Sending, of course, just means
+   * relaying back through the network for this driver.
+   */
 
-   pkt_input(&priv->lo_dev);
+  while (priv->lo_dev.d_len > 0)
+    {
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&priv->lo_dev);
 #endif
 
-  /* We only accept IP packets of the configured type and ARP packets */
+      /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
   if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
     {
       nllvdbg("IPv4 frame\n");
       ipv4_input(&priv->lo_dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
-
-      if (priv->lo_dev.d_len > 0)
-        {
-          /* Loop the packet back to the network.
-           * REVISIST:  The must be a limit to the depth of recursion.
-           */
-
-          lo_loopback(priv);
-        }
     }
   else
 #endif
 #ifdef CONFIG_NET_IPv6
-  if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv46VERSION)
+  if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
     {
       nllvdbg("Iv6 frame\n");
       ipv6_input(&priv->lo_dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
-
-      if (priv->lo_dev.d_len > 0)
-        {
-          /* Loop the packet back to the netork
-           * REVISIST:  The must be a limit to the depth of recursion.
-           */
-
-          lo_loopback(priv);
-        }
     }
   else
 #endif
