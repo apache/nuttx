@@ -61,8 +61,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NETDEV_SLIP_FORMAT      "sl%d"
 #define NETDEV_ETH_FORMAT       "eth%d"
+#define NETDEV_LO_FORMAT        "lo"
+#define NETDEV_SLIP_FORMAT      "sl%d"
 #define NETDEV_TUN_FORMAT       "tun%d"
 
 #if defined(CONFIG_NET_SLIP)
@@ -190,6 +191,17 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       switch (lltype)
         {
+#ifdef CONFIG_NETDEV_LOOPBACK
+          case NET_LL_LOOPBACK:  /* Local loopback */
+            dev->d_llhdrlen = 0;
+            dev->d_mtu      = NET_LO_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = NET_LO_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_LO_FORMAT;
+            break;
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
           case NET_LL_ETHERNET:  /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;

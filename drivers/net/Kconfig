@@ -5,12 +5,21 @@
 
 comment "General Ethernet MAC Driver Options"
 
-config NETDEV_MULTINIC
-	bool "Multiple network interface support"
+config NETDEV_LOOPBACK
+	bool "Local loopback support"
 	default n
 	---help---
+		Add support for the local network loopback device, lo.
+
+config NETDEV_MULTINIC
+	bool "Multiple network interface support"
+	default n if !NETDEV_LOOPBACK
+	default y if NETDEV_LOOPBACK
+	---help---
 		Select this option if you board and/or MCU are capable of supporting
-		multiple Ethernet MAC drivers.
+		multiple link layer drivers.  NOTE that the local loopback device
+		is considered to be a a link layer driver so if local loopback
+		support is used you probably need to select this option.
 
 config NETDEV_LATEINIT
 	bool "Late driver initialization"

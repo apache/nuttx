@@ -157,7 +157,7 @@
 #  define MAX_NET_DEV_MTU   CONFIG_NET_ETH_MTU
 
 #else
-  /* Perhaps only Unix domain sockets */
+  /* Perhaps only Unix domain sockets of the loopback device */
 
 #  define NET_LL_HDRLEN(d)  0
 #  define NET_DEV_MTU(d)    0
@@ -165,6 +165,10 @@
 #  define MAX_NET_DEV_MTU   0
 
 #endif /* MULTILINK or SLIP or ETHERNET */
+
+/* For the loopback device, we will use the largest representable MTU */
+
+#define NET_LO_MTU          UINT16_MAX
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -346,6 +350,7 @@
  */
 
 #define TCP_MSS(d,h)        (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - TCP_HDRLEN - (h))
+#define LO_TCP_MSS(h)       (NET_LO_MTU - (h))
 
 /* If Ethernet is supported, then it will have the smaller MSS */
 
@@ -402,15 +407,17 @@
  * See the note above regarding the TCP MSS and CONFIG_NET_MULTILINK.
  */
 
+#define NET_LO_TCP_RECVWNDO LO_TCP_MSS(0)
+
 #ifdef CONFIG_NET_SLIP
 #  ifndef CONFIG_NET_SLIP_TCP_RECVWNDO
-#    define CONFIG_NET_SLIP_TCP_RECVWNDO SLIP_TCP_MSS
+#    define CONFIG_NET_SLIP_TCP_RECVWNDO SLIP_TCP_MSS(0)
 #  endif
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
 #  ifndef CONFIG_NET_ETH_TCP_RECVWNDO
-#    define CONFIG_NET_ETH_TCP_RECVWNDO ETH_TCP_MSS
+#    define CONFIG_NET_ETH_TCP_RECVWNDO ETH_TCP_MSS(0)
 #  endif
 #endif
 
