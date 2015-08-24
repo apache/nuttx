@@ -10877,3 +10877,5 @@
 	  a local loopback device and link layer (2015-08-24).
 	* libc/netdb, net/loopback, include/nuttx/net:  Add NetDB support
 	  for the local loopback device (2015-08-24).
+	* drivers/net/loopback.c:  Add basic prototype of a local loopback
+	  device (2015-08-24).

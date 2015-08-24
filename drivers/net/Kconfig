@@ -8,8 +8,11 @@ comment "General Ethernet MAC Driver Options"
 config NETDEV_LOOPBACK
 	bool "Local loopback support"
 	default n
+	select NET_NOINTS
 	---help---
-		Add support for the local network loopback device, lo.
+		Add support for the local network loopback device, lo.  Any additional
+		networking devices that are enabled must be compatible with
+		CONFIG_NET_NOINTS.
 
 config NETDEV_MULTINIC
 	bool "Multiple network interface support"
