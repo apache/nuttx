@@ -406,6 +406,15 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
     }
 #endif
 
+  /* TODO:
+   *
+   * 1. Look in the DNS cache to see if we have the address mapping already
+   *    in place.  If not,
+   * 2. Perform a reverse DNS lookup.  And if that fails as well, then
+   *    finally
+   * 3. Search the hosts file for a match.
+   */
+
   /* Search the hosts file for a match */
 
   return lib_hostfile_lookup(addr, len, type, host, but, buflen, h_errnop);
