@@ -10879,3 +10879,6 @@
 	  for the local loopback device (2015-08-24).
 	* drivers/net/loopback.c:  Add basic prototype of a local loopback
 	  device (2015-08-24).
+	* networking:  Correct return value from psock_tcp_accept().  From
+	  SaeHie Park (2015-08-25).
+

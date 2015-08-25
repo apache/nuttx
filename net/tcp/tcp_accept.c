@@ -238,7 +238,6 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct tcp_conn_s *conn;
   struct accept_s state;
-  int err = OK;
   int ret;
 
   DEBUGASSERT(psock && newconn);
@@ -267,8 +266,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   else if (_SS_ISNONBLOCK(psock->s_flags))
     {
-      err = EAGAIN;
-      goto errout;
+      return -EAGAIN;
     }
   else
 #endif
@@ -314,7 +312,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
            * altered by intervening operations.
            */
 
-          err = get_errno();
+          ret = -get_errno();
+          DEBUGASSERT(ret < 0);
         }
 
       /* Make sure that no further interrupts are processed */
@@ -334,27 +333,23 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       if (state.acpt_result != 0)
         {
-          err = state.acpt_result;
-          goto errout;
+          DEBUGASSERT(state.acpt_result > 0);
+          return -state.acpt_result;
         }
 
       /* If net_lockedwait failed, then we were probably reawakened by a
-       * signal. In this case, logic above will have set 'err' to the
+       * signal. In this case, logic above will have set 'ret' to the
        * errno value returned by net_lockedwait().
        */
 
       if (ret < 0)
         {
-          goto errout;
+          return ret;
         }
     }
 
   *newconn = (FAR void *)state.acpt_newconn;
   return OK;
-
-errout:
-  set_errno(err);
-  return ERROR;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_TCP */
