@@ -92,6 +92,10 @@ ifeq ($(CONFIG_MTD_AT25),y)
 CSRCS += at25.c
 endif
 
+ifeq ($(CONFIG_MTD_ST25FL1),y)
+CSRCS += st25fl1.c
+endif
+
 ifeq ($(CONFIG_MTD_SMART),y)
 ifeq ($(CONFIG_FS_SMARTFS),y)
 CSRCS += smart.c

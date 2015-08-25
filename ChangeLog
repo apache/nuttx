@@ -10881,4 +10881,6 @@
 	  device (2015-08-24).
 	* networking:  Correct return value from psock_tcp_accept().  From
 	  SaeHie Park (2015-08-25).
+	* drivers/mtd/st25fl1.c: Add a driver for ST25L1*K QuadSPI parts
+	  (2015-08-15).
 
