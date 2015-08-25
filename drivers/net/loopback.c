@@ -193,7 +193,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
       else
 #endif
         {
-          ndbg("WARNING: Unrecognized packet type dropped: %04x\n", IPv4BUF->type);
+          ndbg("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
           priv->lo_dev.d_len = 0;
         }
     }
