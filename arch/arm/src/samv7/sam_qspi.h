@@ -95,7 +95,8 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *sam_qspi_initialize(int intf);
+struct qspi_dev_s;
+FAR struct qspi_dev_s *sam_qspi_initialize(int intf);
 
 #undef EXTERN
 #if defined(__cplusplus)

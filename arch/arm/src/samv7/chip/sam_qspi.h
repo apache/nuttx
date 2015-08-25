@@ -174,7 +174,7 @@
 #define QSPI_INT_OVRES             (1 << 3)  /* Bit 3:  Overrun Error Interrupt */
 #define QSPI_INT_CSR               (1 << 8)  /* Bit 8:  Chip Select Rise Interrupt */
 #define QSPI_SR_CSS                (1 << 9)  /* Bit 9:  Chip Select Status Interrupt */
-#define QSPI_SR_INTSTRE            (1 << 10) /* Bit 10: Instruction End Status Interrupt */
+#define QSPI_SR_INSTRE             (1 << 10) /* Bit 10: Instruction End Status Interrupt */
 #define QSPI_SR_QSPIENS            (1 << 24) /* Bit 24: QSPI Enable Status (SR only) */
 
 #define QSPI_INT_ALL               (0x0000070f)
