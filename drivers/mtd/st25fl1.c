@@ -53,7 +53,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/spi/spi.h>
+#include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
 
 /************************************************************************************
@@ -62,14 +62,14 @@
 /* Configuration ********************************************************************/
 /* QuadSPI Mode */
 
-#ifndef CONFIG_ST25FL1_SPIMODE
-#  define CONFIG_ST25FL1_SPIMODE SPIDEV_MODE0
+#ifndef CONFIG_ST25FL1_QSPIMODE
+#  define CONFIG_ST25FL1_QSPIMODE QSPIDEV_MODE0
 #endif
 
 /* QuadSPI Frequency.  May be up to 25MHz. */
 
-#ifndef CONFIG_ST25FL1_SPIFREQUENCY
-#  define CONFIG_ST25FL1_SPIFREQUENCY 20000000
+#ifndef CONFIG_ST25FL1_QSPIFREQUENCY
+#  define CONFIG_ST25FL1_QSPIFREQUENCY 20000000
 #endif
 
 /* ST25FL1 Commands *****************************************************************/
@@ -276,7 +276,7 @@
 struct st25fl1_dev_s
 {
   struct mtd_dev_s      mtd;         /* MTD interface */
-  FAR struct spi_dev_s *spi;         /* Saved QuadSPI interface instance */
+  FAR struct spi_dev_s *qspi;        /* Saved QuadSPI interface instance */
   uint16_t              nsectors;    /* Number of erase sectors */
 
 #ifdef CONFIG_ST25FL1_SECTOR512
@@ -292,8 +292,8 @@ struct st25fl1_dev_s
 
 /* Helpers */
 
-static void st25fl1_lock(FAR struct spi_dev_s *spi);
-static inline void st25fl1_unlock(FAR struct spi_dev_s *spi);
+static void st25fl1_lock(FAR struct spi_dev_s *qspi);
+static inline void st25fl1_unlock(FAR struct spi_dev_s *qspi);
 static inline int st25fl1_readid(FAR struct st25fl1_dev_s *priv);
 static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv);
 static uint8_t st25fl1_waitwritecomplete(FAR struct st25fl1_dev_s *priv);
@@ -336,7 +336,7 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
  * Name: st25fl1_lock
  ************************************************************************************/
 
-static void st25fl1_lock(FAR struct spi_dev_s *spi)
+static void st25fl1_lock(FAR struct spi_dev_s *qspi)
 {
   /* On QuadSPI busses where there are multiple devices, it will be necessary to
    * lock QuadSPI to have exclusive access to the busses for a sequence of
@@ -346,7 +346,7 @@ static void st25fl1_lock(FAR struct spi_dev_s *spi)
    * the QuadSPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(spi, true);
+  (void)QSPI_LOCK(qspi, true);
 
   /* After locking the QuadSPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the QuadSPI is properly configured for the device.
@@ -354,18 +354,18 @@ static void st25fl1_lock(FAR struct spi_dev_s *spi)
    * state.
    */
 
-  SPI_SETMODE(spi, CONFIG_ST25FL1_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_ST25FL1_SPIFREQUENCY);
+  QSPI_SETMODE(qspi, CONFIG_ST25FL1_QSPIMODE);
+  QSPI_SETBITS(qspi, 8);
+  (void)QSPI_SETFREQUENCY(qspi, CONFIG_ST25FL1_QSPIFREQUENCY);
 }
 
 /************************************************************************************
  * Name: st25fl1_unlock
  ************************************************************************************/
 
-static inline void st25fl1_unlock(FAR struct spi_dev_s *spi)
+static inline void st25fl1_unlock(FAR struct spi_dev_s *qspi)
 {
-  (void)SPI_LOCK(spi, false);
+  (void)QSPI_LOCK(qspi, false);
 }
 
 /************************************************************************************
@@ -380,17 +380,15 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 
   fvdbg("priv: %p\n", priv);
 
-  /* Lock the QuadSPI bus, configure the bus, and select this FLASH part. */
+  /* Lock the QuadSPI bus and configure the bus. */
 
-  st25fl1_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  st25fl1_lock(priv->qspi);
 
 #warning Missing Logic
 
-  /* Deselect the FLASH and unlock the bus */
+  /* Unlock the bus */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
-  st25fl1_unlock(priv->spi);
+  st25fl1_unlock(priv->qspi);
 
   fvdbg("manufacturer: %02x memory: %02x capacity: %02x\n",
         manufacturer, memory, capacity);
@@ -420,35 +418,13 @@ static uint8_t st25fl1_waitwritecomplete(struct st25fl1_dev_s *priv)
 {
   uint8_t status;
 
-  /* Are we the only device on the bus? */
-
-#ifdef CONFIG_SPI_OWNBUS
-
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
-#warning Missing Logic
-
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
-
-#else
-
   /* Loop as long as the memory is busy with a write cycle */
 
   do
     {
-      /* Select this FLASH part */
-
-      SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
 #warning Missing Logic
-      /* Deselect the FLASH */
-
-      SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
     }
   while ((status & ST25FL1_SR_BUSY) != 0);
-#endif
 
   return status;
 }
@@ -459,13 +435,7 @@ static uint8_t st25fl1_waitwritecomplete(struct st25fl1_dev_s *priv)
 
 static inline void st25fl1_wren(struct st25fl1_dev_s *priv)
 {
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
 #warning Missing Logic
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 }
 
 /************************************************************************************
@@ -474,13 +444,7 @@ static inline void st25fl1_wren(struct st25fl1_dev_s *priv)
 
 static inline void st25fl1_wrdi(struct st25fl1_dev_s *priv)
 {
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
 #warning Missing Logic
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 }
 
 /************************************************************************************
@@ -745,7 +709,7 @@ static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_
 
   /* Lock the QuadSPI bus and write all of the pages to FLASH */
 
-  st25fl1_lock(priv->spi);
+  st25fl1_lock(priv->qspi);
 
 #if defined(CONFIG_ST25FL1_SECTOR512)
   st25fl1_cachewrite(priv, buffer, startblock, nblocks);
@@ -753,7 +717,7 @@ static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_
   st25fl1_pagewrite(priv, buffer, startblock << ST25FL1_SECTOR_SHIFT,
                   nblocks << ST25FL1_SECTOR_SHIFT);
 #endif
-  st25fl1_unlock(priv->spi);
+  st25fl1_unlock(priv->qspi);
 
   return nblocks;
 }
@@ -771,9 +735,9 @@ static ssize_t st25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
   /* Lock the QuadSPI bus and select this FLASH part */
 
-  st25fl1_lock(priv->spi);
+  st25fl1_lock(priv->qspi);
   st25fl1_byteread(priv, buffer, offset, nbytes);
-  st25fl1_unlock(priv->spi);
+  st25fl1_unlock(priv->qspi);
 
   fvdbg("return nbytes: %d\n", (int)nbytes);
   return nbytes;
@@ -827,9 +791,9 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
             /* Erase the entire device */
 
-            st25fl1_lock(priv->spi);
+            st25fl1_lock(priv->qspi);
             ret = st25fl1_chiperase(priv);
-            st25fl1_unlock(priv->spi);
+            st25fl1_unlock(priv->qspi);
         }
         break;
 
@@ -857,17 +821,17 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ************************************************************************************/
 
-FAR struct mtd_dev_s *st25fl1_initialize(FAR struct spi_dev_s *spi)
+FAR struct mtd_dev_s *st25fl1_initialize(FAR struct spi_dev_s *qspi)
 {
   FAR struct st25fl1_dev_s *priv;
   int ret;
 
-  fvdbg("spi: %p\n", spi);
+  fvdbg("qspi: %p\n", qspi);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per QuadSPI
-   * device (only because of the SPIDEV_FLASH definition) and so would have
+   * device (only because of the QSPIDEV_FLASH definition) and so would have
    * to be extended to handle multiple FLASH parts on the same QuadSPI bus.
    */
 
@@ -883,11 +847,7 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct spi_dev_s *spi)
       priv->mtd.bwrite = st25fl1_bwrite;
       priv->mtd.read   = st25fl1_read;
       priv->mtd.ioctl  = st25fl1_ioctl;
-      priv->spi        = spi;
-
-      /* Deselect the FLASH */
-
-      SPI_SELECT(spi, SPIDEV_FLASH, false);
+      priv->qspi       = qspi;
 
       /* Identify the FLASH chip and get its capacity */
 
