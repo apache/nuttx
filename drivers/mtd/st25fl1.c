@@ -882,9 +882,9 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct spi_dev_s *qspi)
         }
     }
 
+#ifdef CONFIG_MTD_REGISTRATION
   /* Register the MTD with the procfs system if enabled */
 
-#ifdef CONFIG_MTD_REGISTRATION
   mtd_register(&priv->mtd, "st25fl1");
 #endif
 
