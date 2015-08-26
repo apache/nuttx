@@ -49,6 +49,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/irq.h>
 
@@ -326,8 +327,6 @@ int file_poll(int fd, FAR struct pollfd *fds, bool setup)
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
-  struct timespec abstime;
-  irqstate_t flags;
   sem_t sem;
   int count = 0;
   int ret;

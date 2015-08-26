@@ -96,7 +96,7 @@ static void rwb_semtake(sem_t *sem)
 
   while (sem_wait(sem) != 0)
     {
-      /* The only case that an error should occr here is if
+      /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
@@ -117,8 +117,8 @@ static void rwb_semtake(sem_t *sem)
 static inline bool rwb_overlap(off_t blockstart1, size_t nblocks1,
                                off_t blockstart2, size_t nblocks2)
 {
-  off_t blockend1 = blockstart1 + nblocks1;
-  off_t blockend2 = blockstart2 + nblocks2;
+  off_t blockend1 = blockstart1 + nblocks1 - 1;
+  off_t blockend2 = blockstart2 + nblocks2 - 1;
 
   /* If the buffer 1 is wholly outside of buffer 2, return false */
 
@@ -257,7 +257,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 
       /* Flush the write buffer */
 
-      ret = rwb->wrflush(rwb, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
+      ret = rwb->wrflush(rwb->dev, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
       if (ret < 0)
         {
           fdbg("ERROR: Error writing multiple from cache: %d\n", -ret);
@@ -842,7 +842,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
        * the user buffer.
        */
 
-      ret = rwb->rhreload(rwb->dev, startblock, nblocks, rdbuffer);
+      ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
     }
 #endif
 

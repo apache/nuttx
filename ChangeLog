@@ -10882,9 +10882,11 @@
 	* networking:  Correct return value from psock_tcp_accept().  From
 	  SaeHie Park (2015-08-25).
 	* drivers/mtd/st25fl1.c: Add a driver for ST25L1*K QuadSPI parts
-	  (2015-08-15).
+	  (2015-08-25).
 	* include/nuttx/spi/qspi.h:  Develop a new interface for QSPI, at
 	  least the way that QSPI is implemented on the SAMV71.  Originally
 	  planned to use the SPI interface, but it is just now compatible
-	  with the SAMV71 QSPI hardware (2015-08-15).
+	  with the SAMV71 QSPI hardware (2015-08-25).
+	* drivers/rwbuffer.c: Fix some logic errors.  From Dmitry Nikolaev
+	  via Juha Niskanen (2015-08-26).
 

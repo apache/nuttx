@@ -172,7 +172,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   else
     {
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      DEBUGASSERT(dev->d_sndlen >= 0 && dev->d_sndlen <= conn->mss);
+      DEBUGASSERT(dev->d_sndlen <= conn->mss);
 #else
       /* If d_sndlen > 0, the application has data to be sent. */
 
