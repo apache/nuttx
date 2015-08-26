@@ -62,6 +62,14 @@
  * Public Type Definitions
  ****************************************************************************/
 
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 /* Layer 2 Configuration Options ********************************************/
 
 /* The default data link layer for uIP is Ethernet.  If CONFIG_NET_SLIP is
@@ -125,20 +133,28 @@
 #    define _MAX_ETH_MTU   0
 #  endif
 
-#  ifdef CONFIG_NET_SLIP
-#    define _MIN_SLIP_MTU  MIN(_MIN_ETH_MTU,CONFIG_NET_SLIP_MTU)
-#    define _MAX_SLIP_MTU  MAX(_MAX_ETH_MTU,CONFIG_NET_SLIP_MTU)
+#  ifdef CONFIG_NET_LOOPBACK
+#    define _MIN_LO_MTU    MIN(_MIN_ETH_MTU,1518)
+#    define _MAX_LO_MTU    MAX(_MAX_ETH_MTU,574)
 #  else
-#    define _MIN_SLIP_MTU  _MIN_ETH_MTU
-#    define _MAX_SLIP_MTU  _MAX_ETH_MTU
+#    define _MIN_LO_MTU   _MIN_ETH_MTU
+#    define _MAX_LO_MTU   _MAX_ETH_MTU
+#  endif
+
+#  ifdef CONFIG_NET_SLIP
+#    define _MIN_SLIP_MTU  MIN(_MIN_LO_MTU,CONFIG_NET_SLIP_MTU)
+#    define _MAX_SLIP_MTU  MAX(_MAX_LO_MTU,CONFIG_NET_SLIP_MTU)
+#  else
+#    define _MIN_SLIP_MTU  _MIN_LO_MTU
+#    define _MAX_SLIP_MTU  _MAX_LO_MTU
 #  endif
 
 #  define MIN_NET_DEV_MTU  _MIN_SLIP_MTU
 #  define MAX_NET_DEV_MTU  _MAX_SLIP_MTU
 
-/* For the loopback device, we will use the largest representable MTU */
+/* For the loopback device, we will use the largest MTU */
 
-#  define NET_LO_MTU        UINT16_MAX
+#  define NET_LO_MTU        MAX_NET_DEV_MTU
 
 #elif defined(CONFIG_NET_SLIP)
    /* There is no link layer header with SLIP */
