@@ -46,8 +46,9 @@ CONFIG_RAW_BINARY=y
 # Debug Options
 #
 # CONFIG_DEBUG is not set
-CONFIG_ARCH_HAVE_STACKCHECK=y
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
+CONFIG_ARCH_HAVE_STACKCHECK=y
+# CONFIG_STACK_COLORATION is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 CONFIG_ARCH_HAVE_CUSTOMOPT=y
 # CONFIG_DEBUG_NOOPT is not set
@@ -82,6 +83,7 @@ CONFIG_ARCH="arm"
 # CONFIG_ARCH_CHIP_KL is not set
 CONFIG_ARCH_CHIP_LM=y
 # CONFIG_ARCH_CHIP_TIVA is not set
+# CONFIG_ARCH_CHIP_LPC11XX is not set
 # CONFIG_ARCH_CHIP_LPC17XX is not set
 # CONFIG_ARCH_CHIP_LPC214X is not set
 # CONFIG_ARCH_CHIP_LPC2378 is not set
@@ -90,15 +92,20 @@ CONFIG_ARCH_CHIP_LM=y
 # CONFIG_ARCH_CHIP_NUC1XX is not set
 # CONFIG_ARCH_CHIP_SAMA5 is not set
 # CONFIG_ARCH_CHIP_SAMD is not set
+# CONFIG_ARCH_CHIP_SAML is not set
 # CONFIG_ARCH_CHIP_SAM34 is not set
+# CONFIG_ARCH_CHIP_SAMV7 is not set
 # CONFIG_ARCH_CHIP_STM32 is not set
+# CONFIG_ARCH_CHIP_STM32F7 is not set
 # CONFIG_ARCH_CHIP_STR71X is not set
+# CONFIG_ARCH_CHIP_MOXART is not set
 # CONFIG_ARCH_ARM7TDMI is not set
 # CONFIG_ARCH_ARM926EJS is not set
 # CONFIG_ARCH_ARM920T is not set
 # CONFIG_ARCH_CORTEXM0 is not set
 CONFIG_ARCH_CORTEXM3=y
 # CONFIG_ARCH_CORTEXM4 is not set
+# CONFIG_ARCH_CORTEXM7 is not set
 # CONFIG_ARCH_CORTEXA5 is not set
 # CONFIG_ARCH_CORTEXA8 is not set
 CONFIG_ARCH_FAMILY="armv7-m"
@@ -106,12 +113,18 @@ CONFIG_ARCH_CHIP="tiva"
 # CONFIG_ARMV7M_USEBASEPRI is not set
 CONFIG_ARCH_HAVE_CMNVECTOR=y
 # CONFIG_ARMV7M_CMNVECTOR is not set
+# CONFIG_ARMV7M_LAZYFPU is not set
 # CONFIG_ARCH_HAVE_FPU is not set
+# CONFIG_ARCH_HAVE_DPFPU is not set
 # CONFIG_ARMV7M_MPU is not set
 
 #
 # ARMV7M Configuration Options
 #
+# CONFIG_ARMV7M_HAVE_ICACHE is not set
+# CONFIG_ARMV7M_HAVE_DCACHE is not set
+# CONFIG_ARMV7M_HAVE_ITCM is not set
+# CONFIG_ARMV7M_HAVE_DTCM is not set
 # CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC is not set
 # CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT is not set
 # CONFIG_ARMV7M_TOOLCHAIN_CODEREDW is not set
@@ -120,6 +133,7 @@ CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL is not set
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW is not set
 # CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE is not set
+# CONFIG_ARMV7M_HAVE_STACKCHECK is not set
 # CONFIG_ARMV7M_ITMSYSLOG is not set
 
 #
@@ -138,6 +152,9 @@ CONFIG_ARCH_CHIP_LM3S=y
 #
 # Tiva/Stellaris Peripheral Support
 #
+# CONFIG_TIVA_ADC is not set
+# CONFIG_TIVA_HAVE_ADC0 is not set
+# CONFIG_TIVA_HAVE_ADC1 is not set
 # CONFIG_TIVA_I2C is not set
 CONFIG_TIVA_HAVE_I2C1=y
 # CONFIG_TIVA_HAVE_I2C2 is not set
@@ -157,7 +174,18 @@ CONFIG_TIVA_HAVE_SSI0=y
 CONFIG_TIVA_HAVE_SSI1=y
 # CONFIG_TIVA_HAVE_SSI2 is not set
 # CONFIG_TIVA_HAVE_SSI3 is not set
+CONFIG_TIVA_HAVE_ETHERNET=y
 CONFIG_TIVA_SSI=y
+# CONFIG_TIVA_TIMER is not set
+# CONFIG_TIVA_HAVE_TIMER0 is not set
+# CONFIG_TIVA_HAVE_TIMER1 is not set
+# CONFIG_TIVA_HAVE_TIMER2 is not set
+CONFIG_TIVA_HAVE_TIMER3=y
+# CONFIG_TIVA_HAVE_TIMER4 is not set
+# CONFIG_TIVA_HAVE_TIMER5 is not set
+# CONFIG_TIVA_HAVE_TIMER6 is not set
+# CONFIG_TIVA_HAVE_TIMER7 is not set
+# CONFIG_TIVA_ADC0 is not set
 # CONFIG_TIVA_I2C0 is not set
 # CONFIG_TIVA_I2C1 is not set
 CONFIG_TIVA_UART0=y
@@ -165,6 +193,7 @@ CONFIG_TIVA_UART0=y
 # CONFIG_TIVA_UART2 is not set
 CONFIG_TIVA_SSI0=y
 # CONFIG_TIVA_SSI1 is not set
+# CONFIG_TIVA_TIMER3 is not set
 CONFIG_TIVA_ETHERNET=y
 # CONFIG_TIVA_FLASH is not set
 
@@ -199,10 +228,9 @@ CONFIG_TIVA_GPIOF_IRQS=y
 CONFIG_TIVA_GPIOG_IRQS=y
 
 #
-# Tiva/Stellaris Ethernet Configuration
+# Stellaris Ethernet Configuration
 #
 # CONFIG_TIVA_ETHLEDS is not set
-CONFIG_TIVA_BOARDMAC=y
 # CONFIG_TIVA_ETHHDUPLEX is not set
 # CONFIG_TIVA_ETHNOAUTOCRC is not set
 # CONFIG_TIVA_ETHNOPAD is not set
@@ -210,7 +238,8 @@ CONFIG_TIVA_BOARDMAC=y
 # CONFIG_TIVA_PROMISCUOUS is not set
 # CONFIG_TIVA_TIMESTAMP is not set
 # CONFIG_TIVA_BADCRC is not set
-# CONFIG_M3S_DUMPPACKET is not set
+# CONFIG_TIVA_DUMPPACKET is not set
+CONFIG_TIVA_BOARDMAC=y
 
 #
 # Tiva/Stellaris SSI Configuration
@@ -235,6 +264,8 @@ CONFIG_ARCH_HAVE_VFORK=y
 CONFIG_ARCH_HAVE_MPU=y
 # CONFIG_ARCH_NAND_HWECC is not set
 # CONFIG_ARCH_HAVE_EXTCLK is not set
+# CONFIG_ARCH_HAVE_POWEROFF is not set
+CONFIG_ARCH_HAVE_RESET=y
 # CONFIG_ARCH_USE_MPU is not set
 # CONFIG_ARCH_IRQPRIO is not set
 CONFIG_ARCH_STACKDUMP=y
@@ -290,6 +321,7 @@ CONFIG_ARCH_LEDS=y
 #
 # Board-Specific Options
 #
+# CONFIG_LIB_BOARDCTL is not set
 
 #
 # RTOS Features
@@ -324,6 +356,7 @@ CONFIG_INIT_ENTRYPOINT=y
 # CONFIG_INIT_FILEPATH is not set
 CONFIG_USER_ENTRYPOINT="nettest_main"
 CONFIG_RR_INTERVAL=200
+# CONFIG_SCHED_SPORADIC is not set
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_MAX_TASKS=8
 # CONFIG_SCHED_HAVE_PARENT is not set
@@ -399,14 +432,19 @@ CONFIG_DEV_NULL=y
 # CONFIG_I2C is not set
 # CONFIG_SPI is not set
 # CONFIG_I2S is not set
+
+#
+# Timer Driver Support
+#
+# CONFIG_TIMER is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
-# CONFIG_TIMER is not set
 # CONFIG_ANALOG is not set
 # CONFIG_AUDIO_DEVICES is not set
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
+# CONFIG_IOEXPANDER is not set
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set
@@ -416,7 +454,9 @@ CONFIG_NETDEVICES=y
 #
 # General Ethernet MAC Driver Options
 #
+# CONFIG_NETDEV_LOOPBACK is not set
 # CONFIG_NETDEV_MULTINIC is not set
+# CONFIG_NETDEV_LATEINIT is not set
 
 #
 # External Ethernet MAC Device Support
@@ -426,6 +466,7 @@ CONFIG_NETDEVICES=y
 # CONFIG_ENCX24J600 is not set
 # CONFIG_NET_E1000 is not set
 # CONFIG_NET_SLIP is not set
+# CONFIG_NET_FTMAC100 is not set
 # CONFIG_NET_VNET is not set
 # CONFIG_PIPES is not set
 # CONFIG_PM is not set
@@ -492,6 +533,7 @@ CONFIG_UART0_2STOP=0
 # System Logging
 #
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_CONSOLE is not set
 
 #
 # Networking Support
@@ -505,7 +547,6 @@ CONFIG_NET=y
 #
 # Driver buffer configuration
 #
-CONFIG_NET_IPv4=y
 # CONFIG_NET_MULTIBUFFER is not set
 CONFIG_NET_ETH_MTU=590
 CONFIG_NET_ETH_TCP_RECVWNDO=536
@@ -516,6 +557,19 @@ CONFIG_NET_GUARDSIZE=2
 #
 # CONFIG_NET_MULTILINK is not set
 CONFIG_NET_ETHERNET=y
+# CONFIG_NET_LOOPBACK is not set
+# CONFIG_NET_TUN is not set
+
+#
+# Network Device Operations
+#
+# CONFIG_NETDEV_PHY_IOCTL is not set
+
+#
+# Internet Protocol Selection
+#
+CONFIG_NET_IPv4=y
+# CONFIG_NET_IPv6 is not set
 
 #
 # Socket Support
@@ -526,14 +580,14 @@ CONFIG_NET_SOCKOPTS=y
 # CONFIG_NET_SOLINGER is not set
 
 #
-# Network Device Operations
-#
-# CONFIG_NETDEV_PHY_IOCTL is not set
-
-#
 # Raw Socket Support
 #
 # CONFIG_NET_PKT is not set
+
+#
+# Unix Domain Socket Support
+#
+# CONFIG_NET_LOCAL is not set
 
 #
 # TCP/IP Networking
@@ -590,6 +644,7 @@ CONFIG_IOB_NCHAINS=8
 # Routing Table Configuration
 #
 # CONFIG_NET_ROUTE is not set
+CONFIG_NET_HOSTNAME=""
 
 #
 # Crypto API
@@ -610,6 +665,7 @@ CONFIG_DISABLE_MOUNTPOINT=y
 # CONFIG_FS_NAMED_SEMAPHORES is not set
 # CONFIG_FS_RAMMAP is not set
 # CONFIG_FS_PROCFS is not set
+# CONFIG_FS_UNIONFS is not set
 
 #
 # System Logging
@@ -671,9 +727,11 @@ CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
 # CONFIG_LIBC_STRERROR is not set
 # CONFIG_LIBC_PERROR_STDOUT is not set
 CONFIG_ARCH_LOWPUTC=y
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
+# CONFIG_LIBC_NETDB is not set
 
 #
 # Non-standard Library Support
@@ -692,14 +750,9 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 
 #
-# Built-In Applications
-#
-
-#
 # Examples
 #
 # CONFIG_EXAMPLES_BUTTONS is not set
-# CONFIG_EXAMPLES_CAN is not set
 # CONFIG_EXAMPLES_CONFIGDATA is not set
 # CONFIG_EXAMPLES_CPUHOG is not set
 # CONFIG_EXAMPLES_DHCPD is not set
@@ -718,7 +771,13 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 CONFIG_EXAMPLES_NETTEST=y
 # CONFIG_EXAMPLES_NETTEST_SERVER is not set
 # CONFIG_EXAMPLES_NETTEST_PERFORMANCE is not set
+CONFIG_EXAMPLES_NETTEST_IPv4=y
+CONFIG_EXAMPLES_NETTEST_INIT=y
 # CONFIG_EXAMPLES_NETTEST_NOMAC is not set
+
+#
+# IPv4 addresses
+#
 CONFIG_EXAMPLES_NETTEST_IPADDR=0x0a000002
 CONFIG_EXAMPLES_NETTEST_DRIPADDR=0x0a000001
 CONFIG_EXAMPLES_NETTEST_NETMASK=0xffffff00
@@ -729,7 +788,6 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0x0a000001
 # CONFIG_EXAMPLES_NX is not set
 # CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXFFS is not set
-# CONFIG_EXAMPLES_NXFLAT is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
 # CONFIG_EXAMPLES_NXIMAGE is not set
 # CONFIG_EXAMPLES_NXLINES is not set
@@ -737,10 +795,10 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0x0a000001
 # CONFIG_EXAMPLES_OSTEST is not set
 # CONFIG_EXAMPLES_PIPE is not set
 # CONFIG_EXAMPLES_POLL is not set
+# CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
 # CONFIG_EXAMPLES_QENCODER is not set
 # CONFIG_EXAMPLES_RGMP is not set
-# CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set
@@ -749,10 +807,8 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0x0a000001
 # CONFIG_EXAMPLES_SMART is not set
 # CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
-# CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
-# CONFIG_EXAMPLES_UDP is not set
 # CONFIG_EXAMPLES_WEBSERVER is not set
 # CONFIG_EXAMPLES_USBSERIAL is not set
 # CONFIG_EXAMPLES_USBTERM is not set
@@ -770,32 +826,25 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0x0a000001
 #
 # CONFIG_INTERPRETERS_FICL is not set
 # CONFIG_INTERPRETERS_PCODE is not set
-
-#
-# Network Utilities
-#
-
-#
-# Networking Utilities
-#
-# CONFIG_NETUTILS_CODECS is not set
-# CONFIG_NETUTILS_DHCPD is not set
-# CONFIG_NETUTILS_FTPC is not set
-# CONFIG_NETUTILS_FTPD is not set
-# CONFIG_NETUTILS_JSON is not set
-# CONFIG_NETUTILS_SMTP is not set
-# CONFIG_NETUTILS_TELNETD is not set
-# CONFIG_NETUTILS_TFTPC is not set
-# CONFIG_NETUTILS_THTTPD is not set
-CONFIG_NETUTILS_NETLIB=y
-# CONFIG_NETUTILS_WEBCLIENT is not set
-# CONFIG_NETUTILS_WEBSERVER is not set
-# CONFIG_NETUTILS_XMLRPC is not set
+# CONFIG_INTERPRETERS_MICROPYTHON is not set
 
 #
 # FreeModBus
 #
 # CONFIG_MODBUS is not set
+
+#
+# Network Utilities
+#
+# CONFIG_NETUTILS_CODECS is not set
+# CONFIG_NETUTILS_FTPC is not set
+# CONFIG_NETUTILS_JSON is not set
+# CONFIG_NETUTILS_SMTP is not set
+# CONFIG_NETUTILS_TELNETD is not set
+CONFIG_NETUTILS_NETLIB=y
+# CONFIG_NETUTILS_WEBCLIENT is not set
+# CONFIG_NETUTILS_WEBSERVER is not set
+# CONFIG_NETUTILS_XMLRPC is not set
 
 #
 # NSH Library
@@ -814,117 +863,17 @@ CONFIG_NETUTILS_NETLIB=y
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
 # CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# CU Minimal Terminal
-#
 # CONFIG_SYSTEM_CUTERM is not set
-
-#
-# FLASH Program Installation
-#
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
-
-#
-# Intel HEX to binary conversion
-#
 # CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
-
-#
-# INI File Parser
-#
 # CONFIG_SYSTEM_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
+# CONFIG_READLINE_HAVE_EXTMATCH is not set
 # CONFIG_SYSTEM_READLINE is not set
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
-# CONFIG_SYSTEM_POWEROFF is not set
-
-#
-# RAMTRON
-#
 # CONFIG_SYSTEM_RAMTRON is not set
-
-#
-# SD Card
-#
 # CONFIG_SYSTEM_SDCARD is not set
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
-
-#
-# VI Work-Alike Editor
-#
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set

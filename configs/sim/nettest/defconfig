@@ -91,6 +91,8 @@ CONFIG_HOST_X86_64=y
 # CONFIG_ARCH_HAVE_MPU is not set
 # CONFIG_ARCH_NAND_HWECC is not set
 # CONFIG_ARCH_HAVE_EXTCLK is not set
+CONFIG_ARCH_HAVE_POWEROFF=y
+# CONFIG_ARCH_HAVE_RESET is not set
 # CONFIG_ARCH_STACKDUMP is not set
 # CONFIG_ENDIAN_BIG is not set
 # CONFIG_ARCH_IDLE_CUSTOM is not set
@@ -139,6 +141,7 @@ CONFIG_ARCH_BOARD="sim"
 #
 # Board-Specific Options
 #
+# CONFIG_LIB_BOARDCTL is not set
 
 #
 # RTOS Features
@@ -175,6 +178,7 @@ CONFIG_INIT_ENTRYPOINT=y
 # CONFIG_INIT_FILEPATH is not set
 CONFIG_USER_ENTRYPOINT="nettest_main"
 CONFIG_RR_INTERVAL=0
+# CONFIG_SCHED_SPORADIC is not set
 CONFIG_TASK_NAME_SIZE=31
 CONFIG_MAX_TASKS=64
 # CONFIG_SCHED_HAVE_PARENT is not set
@@ -263,14 +267,19 @@ CONFIG_DEV_NULL=y
 # CONFIG_I2C is not set
 # CONFIG_SPI is not set
 # CONFIG_I2S is not set
+
+#
+# Timer Driver Support
+#
+# CONFIG_TIMER is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
-# CONFIG_TIMER is not set
 # CONFIG_ANALOG is not set
 # CONFIG_AUDIO_DEVICES is not set
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
+# CONFIG_IOEXPANDER is not set
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set
@@ -328,6 +337,7 @@ CONFIG_SERIAL=y
 # System Logging
 #
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_CONSOLE is not set
 
 #
 # Networking Support
@@ -351,6 +361,8 @@ CONFIG_NET_GUARDSIZE=2
 #
 # CONFIG_NET_MULTILINK is not set
 CONFIG_NET_ETHERNET=y
+# CONFIG_NET_LOOPBACK is not set
+# CONFIG_NET_TUN is not set
 
 #
 # Network Device Operations
@@ -436,6 +448,7 @@ CONFIG_NET_STATISTICS=y
 # Routing Table Configuration
 #
 # CONFIG_NET_ROUTE is not set
+CONFIG_NET_HOSTNAME=""
 
 #
 # Crypto API
@@ -462,11 +475,11 @@ CONFIG_FS_FAT=y
 # CONFIG_FAT_LFN is not set
 # CONFIG_FS_FATTIME is not set
 # CONFIG_FAT_DMAMEMORY is not set
-# CONFIG_NFS is not set
 # CONFIG_FS_NXFFS is not set
 # CONFIG_FS_ROMFS is not set
 # CONFIG_FS_SMARTFS is not set
 # CONFIG_FS_PROCFS is not set
+# CONFIG_FS_UNIONFS is not set
 
 #
 # System Logging
@@ -533,9 +546,12 @@ CONFIG_LIBC_TMPDIR="/tmp"
 CONFIG_LIBC_MAX_TMPFILE=32
 CONFIG_ARCH_LOWPUTC=y
 # CONFIG_LIBC_LOCALTIME is not set
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
+# CONFIG_LIBC_NETDB is not set
+# CONFIG_NETDB_HOSTFILE is not set
 
 #
 # Non-standard Library Support
@@ -554,14 +570,9 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 
 #
-# Built-In Applications
-#
-
-#
 # Examples
 #
 # CONFIG_EXAMPLES_BUTTONS is not set
-# CONFIG_EXAMPLES_CAN is not set
 # CONFIG_EXAMPLES_CONFIGDATA is not set
 # CONFIG_EXAMPLES_CPUHOG is not set
 # CONFIG_EXAMPLES_DHCPD is not set
@@ -580,8 +591,9 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 CONFIG_EXAMPLES_NETTEST=y
 # CONFIG_EXAMPLES_NETTEST_SERVER is not set
 # CONFIG_EXAMPLES_NETTEST_PERFORMANCE is not set
-# CONFIG_EXAMPLES_NETTEST_NOMAC is not set
 CONFIG_EXAMPLES_NETTEST_IPv4=y
+CONFIG_EXAMPLES_NETTEST_INIT=y
+# CONFIG_EXAMPLES_NETTEST_NOMAC is not set
 
 #
 # IPv4 addresses
@@ -596,7 +608,6 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0xc0a8006a
 # CONFIG_EXAMPLES_NX is not set
 # CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXFFS is not set
-# CONFIG_EXAMPLES_NXFLAT is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
 # CONFIG_EXAMPLES_NXIMAGE is not set
 # CONFIG_EXAMPLES_NXLINES is not set
@@ -604,10 +615,10 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0xc0a8006a
 # CONFIG_EXAMPLES_OSTEST is not set
 # CONFIG_EXAMPLES_PIPE is not set
 # CONFIG_EXAMPLES_POLL is not set
+# CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
 # CONFIG_EXAMPLES_QENCODER is not set
 # CONFIG_EXAMPLES_RGMP is not set
-# CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set
@@ -616,7 +627,6 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0xc0a8006a
 # CONFIG_EXAMPLES_SMART is not set
 # CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
-# CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
 # CONFIG_EXAMPLES_WEBSERVER is not set
@@ -640,30 +650,22 @@ CONFIG_EXAMPLES_NETTEST_CLIENTIP=0xc0a8006a
 # CONFIG_INTERPRETERS_MICROPYTHON is not set
 
 #
-# Network Utilities
+# FreeModBus
 #
+# CONFIG_MODBUS is not set
 
 #
-# Networking Utilities
+# Network Utilities
 #
 # CONFIG_NETUTILS_CODECS is not set
-# CONFIG_NETUTILS_DHCPD is not set
 # CONFIG_NETUTILS_FTPC is not set
-# CONFIG_NETUTILS_FTPD is not set
 # CONFIG_NETUTILS_JSON is not set
 # CONFIG_NETUTILS_SMTP is not set
 # CONFIG_NETUTILS_TELNETD is not set
-# CONFIG_NETUTILS_TFTPC is not set
-# CONFIG_NETUTILS_THTTPD is not set
 CONFIG_NETUTILS_NETLIB=y
 # CONFIG_NETUTILS_WEBCLIENT is not set
 # CONFIG_NETUTILS_WEBSERVER is not set
 # CONFIG_NETUTILS_XMLRPC is not set
-
-#
-# FreeModBus
-#
-# CONFIG_MODBUS is not set
 
 #
 # NSH Library
@@ -682,121 +684,17 @@ CONFIG_NETUTILS_NETLIB=y
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
 # CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# CU Minimal Terminal
-#
 # CONFIG_SYSTEM_CUTERM is not set
-
-#
-# FLASH Program Installation
-#
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
-
-#
-# Intel HEX to binary conversion
-#
 # CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
-
-#
-# INI File Parser
-#
 # CONFIG_SYSTEM_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
+# CONFIG_READLINE_HAVE_EXTMATCH is not set
 # CONFIG_SYSTEM_READLINE is not set
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
-# CONFIG_SYSTEM_POWEROFF is not set
-
-#
-# RAMTRON
-#
 # CONFIG_SYSTEM_RAMTRON is not set
-
-#
-# SD Card
-#
 # CONFIG_SYSTEM_SDCARD is not set
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
-
-#
-# Temperature
-#
-
-#
-# VI Work-Alike Editor
-#
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set
