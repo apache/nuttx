@@ -110,6 +110,10 @@ struct lo_driver_s
 
 static struct lo_driver_s g_loopback;
 
+#ifdef CONFIG_NET_MULTIBUFFER
+static uint8_t g_iobuffer[[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -507,18 +511,21 @@ int localhost_initialize(void)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct lo_driver_s));
-  priv->lo_dev.d_ifup    = lo_ifup;     /* I/F up (new IP address) callback */
-  priv->lo_dev.d_ifdown  = lo_ifdown;   /* I/F down callback */
-  priv->lo_dev.d_txavail = lo_txavail;  /* New TX data callback */
+  priv->lo_dev.d_ifup    = lo_ifup;      /* I/F up (new IP address) callback */
+  priv->lo_dev.d_ifdown  = lo_ifdown;    /* I/F down callback */
+  priv->lo_dev.d_txavail = lo_txavail;   /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  priv->lo_dev.d_addmac  = lo_addmac;   /* Add multicast MAC address */
-  priv->lo_dev.d_rmmac   = lo_rmmac;    /* Remove multicast MAC address */
+  priv->lo_dev.d_addmac  = lo_addmac;    /* Add multicast MAC address */
+  priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif
-  priv->lo_dev.d_private = (void*)priv; /* Used to recover private state from dev */
+#ifdef CONFIG_NET_MULTIBUFFER
+  priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
+#endif
+  priv->lo_dev.d_private = (void*)priv;  /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
-  priv->lo_polldog       = wd_create();   /* Create periodic poll timer */
+  priv->lo_polldog       = wd_create();  /* Create periodic poll timer */
 
   /* Register the loopabck device with the OS so that socket IOCTLs can b
    * performed.
