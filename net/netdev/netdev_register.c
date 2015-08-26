@@ -257,16 +257,35 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       dev->d_conncb = NULL;
       dev->d_devcb = NULL;
 
-      /* Get the next available device number and sssign a device name to
+      /* Get the next available device number and assign a device name to
        * the interface
        */
 
       save = net_lock();
+
 #ifdef CONFIG_NET_MULTILINK
-      devnum = find_devnum(devfmt);
+#  ifdef CONFIG_NET_LOOPBACK
+      /* The local loopback device is a special case:  There can be only one
+       * local loopback device so it is unnumbered.
+       */
+
+      if (lltype == NET_LL_LOOPBACK)
+        {
+          devnum = 0;
+        }
+      else
+#  endif
+        {
+          devnum = find_devnum(devfmt);
+        }
 #else
+      /* There is only a single link type.  Finding the next network device
+       * number is simple.
+       */
+
       devnum = g_next_devnum++;
 #endif
+
 #ifdef CONFIG_NET_USER_DEVFMT
       if (*dev->d_ifname)
         {
