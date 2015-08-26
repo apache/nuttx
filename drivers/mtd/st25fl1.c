@@ -174,11 +174,19 @@
 
 /* Flash Manufacturer JEDEC IDs */
 
+#define ST25FL1_JEDEC_ID_SPANSION  0x01
 #define ST25FL1_JEDEC_ID_ATMEL     0x1f
 #define ST25FL1_JEDEC_ID_ST        0x20
 #define ST25FL1_JEDEC_ID_SST       0xbf
 #define ST25FL1_JEDEC_ID_MACRONIX  0xc2
 #define ST25FL1_JEDEC_ID_WINBOND   0xef
+
+/* ST25FL1 JEDIC IDs */
+
+#define ST25FL1_JEDEC_DEVICE_TYPE  0x40  /* ST25FL1 memory devuce type */
+#define S25FL116K_JEDEC_CAPACITY   0x15  /* S25FL116K memory capacity */
+#define S25FL132K_JEDEC_CAPACITY   0x16  /* S25FL132K memory capacity */
+#define S25FL164K_JEDEC_CAPACITY   0x17  /* S25FL164K memory capacity */
 
 /* ST25FL1 Registers ****************************************************************/
 /* Status register bit definitions                                                  */
@@ -198,7 +206,7 @@
 #  define STATUS1_TB_BOTTOM        (1 << 5) /*   1 = BP2-BP0 protect Bottom up      */
 #define STATUS1_SEC_MASK           (1 << 6) /* Bit 6: Sector / Block Protect        */
 #  define STATUS1_SEC_BLOCK        (0 << 6) /*   0 = BP2-BP0 protect 64-kB blocks   */
-#  define STATUS1_SEC_BLOCK        (1 << 6) /*   1 = BP2-BP0 protect 4-kB sectors   */
+#  define STATUS1_SEC_SECTOR       (1 << 6) /*   1 = BP2-BP0 protect 4-kB sectors   */
 #define STATUS1_SRP0_MASK          (1 << 7) /* Bit 7: Status register protect 0     */
 #  define STATUS1_SRP0_UNLOCKED    (0 << 7) /*   0 = WP# no effect / PS Lock Down   */
 #  define STATUS1_SRP0_LOCKED      (1 << 7) /*   1 = WP# protect / OTP Lock Down    */
@@ -238,12 +246,15 @@
 /* All members of the family support uniform 4K-byte sectors  */
 
 #define S25FL116K_SECTOR_SIZE      (4*1024)
+#define S25FL116K_SECTOR_SHIFT     (12)
 #define S25FL116K_SECTOR_COUNT     (512)
 
 #define S25FL132K_SECTOR_SIZE      (4*1024)
+#define S25FL163K_SECTOR_SHIFT     (12)
 #define S25FL132K_SECTOR_COUNT     (1024)
 
 #define S25FL164K_SECTOR_SIZE      (4*1024)
+#define S25FL164K_SECTOR_SHIFT     (12)
 #define S25FL164K_SECTOR_COUNT     (2048)
 
 /* Cache flags **********************************************************************/
@@ -276,8 +287,9 @@
 struct st25fl1_dev_s
 {
   struct mtd_dev_s      mtd;         /* MTD interface */
-  FAR struct spi_dev_s *qspi;        /* Saved QuadSPI interface instance */
+  FAR struct qspi_dev_s *qspi;       /* Saved QuadSPI interface instance */
   uint16_t              nsectors;    /* Number of erase sectors */
+  uint8_t               sectorshift; /* Log2 of sector size */
 
 #ifdef CONFIG_ST25FL1_SECTOR512
   uint8_t               flags;       /* Buffered sector flags */
@@ -290,39 +302,54 @@ struct st25fl1_dev_s
  * Private Function Prototypes
  ************************************************************************************/
 
-/* Helpers */
+/* Locking */
 
-static void st25fl1_lock(FAR struct spi_dev_s *qspi);
-static inline void st25fl1_unlock(FAR struct spi_dev_s *qspi);
-static inline int st25fl1_readid(FAR struct st25fl1_dev_s *priv);
+static void st25fl1_lock(FAR struct qspi_dev_s *qspi);
+static inline void st25fl1_unlock(FAR struct qspi_dev_s *qspi);
+
+/* Low-level message helpers */
+
+static int  st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd);
+static int  st25fl1_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
+              off_t address);
+static int  st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
+              FAR void *buffer, size_t buflen);
+static int  st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
+              FAR const void *buffer, size_t buflen);
+static uint8_t sf25fl1_read_status1(FAR struct qspi_dev_s *qspi);
+static uint8_t sf25fl1_read_status2(FAR struct qspi_dev_s *qspi);
+static uint8_t sf25fl1_read_status3(FAR struct qspi_dev_s *qspi);
+static void st25fl1_write_enable(FAR struct qspi_dev_s *qspi);
+static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi);
+
+static int  st25fl1_readid(FAR struct st25fl1_dev_s *priv);
 static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv);
 static uint8_t st25fl1_waitwritecomplete(FAR struct st25fl1_dev_s *priv);
-static inline void st25fl1_wren(FAR struct st25fl1_dev_s *priv);
-static inline void st25fl1_wrdi(FAR struct st25fl1_dev_s *priv);
-static void st25fl1_sectorerase(FAR struct st25fl1_dev_s *priv, off_t offset);
-static inline int st25fl1_chiperase(FAR struct st25fl1_dev_s *priv);
-static void st25fl1_byteread(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
-                             off_t address, size_t nbytes);
-static void st25fl1_pagewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
-                              off_t address, size_t nbytes);
+static int  st25fl1_erase_sector(FAR struct st25fl1_dev_s *priv, off_t offset);
+static int  st25fl1_erase_chip(FAR struct st25fl1_dev_s *priv);
+static void st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
+              off_t address, size_t nbytes);
+static void st25fl1_write_page(FAR struct st25fl1_dev_s *priv,
+              FAR const uint8_t *buffer, off_t address, size_t nbytes);
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_cacheflush(struct st25fl1_dev_s *priv);
-static FAR uint8_t *st25fl1_cacheread(struct st25fl1_dev_s *priv, off_t sector);
-static void st25fl1_cacheerase(struct st25fl1_dev_s *priv, off_t sector);
-static void st25fl1_cachewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
-                               off_t sector, size_t nsectors);
+static void st25fl1_flush_cache(struct st25fl1_dev_s *priv);
+static FAR uint8_t *st25fl1_read_cache(struct st25fl1_dev_s *priv, off_t sector);
+static void st25fl1_erase_cache(struct st25fl1_dev_s *priv, off_t sector);
+static void st25fl1_write_cache(FAR struct st25fl1_dev_s *priv,
+              FAR const uint8_t *buffer,  off_t sector, size_t nsectors);
 #endif
 
 /* MTD driver methods */
 
-static int st25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
+static int  st25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+              size_t nblocks);
 static ssize_t st25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                             size_t nblocks, FAR uint8_t *buf);
+              size_t nblocks, FAR uint8_t *buf);
 static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                              size_t nblocks, FAR const uint8_t *buf);
+              size_t nblocks, FAR const uint8_t *buf);
 static ssize_t st25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                            FAR uint8_t *buffer);
-static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+              FAR uint8_t *buffer);
+static int  st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
  * Private Data
@@ -336,7 +363,7 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
  * Name: st25fl1_lock
  ************************************************************************************/
 
-static void st25fl1_lock(FAR struct spi_dev_s *qspi)
+static void st25fl1_lock(FAR struct qspi_dev_s *qspi)
 {
   /* On QuadSPI busses where there are multiple devices, it will be necessary to
    * lock QuadSPI to have exclusive access to the busses for a sequence of
@@ -363,9 +390,129 @@ static void st25fl1_lock(FAR struct spi_dev_s *qspi)
  * Name: st25fl1_unlock
  ************************************************************************************/
 
-static inline void st25fl1_unlock(FAR struct spi_dev_s *qspi)
+static inline void st25fl1_unlock(FAR struct qspi_dev_s *qspi)
 {
   (void)QSPI_LOCK(qspi, false);
+}
+
+/************************************************************************************
+ * Name: st25fl1_command
+ ************************************************************************************/
+
+static int st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
+{
+  /* This function just allows us to insert debug output */
+
+  fvdbg("CMD: %02x\n", cmd);
+  return QSPI_COMMAND(qspi, (uint16_t)cmd);
+}
+
+/************************************************************************************
+ * Name: st25fl1_command_read
+ ************************************************************************************/
+
+static int st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
+                                FAR void *buffer, size_t buflen)
+{
+  /* This function just allows us to insert debug output */
+
+  fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
+  return QSPI_COMMAND_READ(qspi, (uint16_t)cmd, buffer, buflen);
+}
+
+/************************************************************************************
+ * Name: st25fl1_command_write
+ ************************************************************************************/
+
+static int st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
+                                 FAR const void *buffer, size_t buflen)
+{
+  /* This function just allows us to insert debug output */
+
+  fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
+  return QSPI_COMMAND_WRITE(qspi, (uint16_t)cmd, buffer, buflen);
+}
+
+/************************************************************************************
+ * Name: sf25fl1_read_status1
+ ************************************************************************************/
+
+static uint8_t sf25fl1_read_status1(FAR struct qspi_dev_s *qspi)
+{
+  uint8_t status;
+
+  DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS1,
+                                   (FAR void *)&status, 1));
+  return status;
+}
+
+/************************************************************************************
+ * Name: sf25fl1_read_status2
+ ************************************************************************************/
+
+static uint8_t sf25fl1_read_status2(FAR struct qspi_dev_s *qspi)
+{
+  uint8_t status;
+
+  DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS2,
+                                   (FAR void *)&status, 1));
+  return status;
+}
+
+/************************************************************************************
+ * Name: sf25fl1_read_status3
+ ************************************************************************************/
+
+static uint8_t sf25fl1_read_status3(FAR struct qspi_dev_s *qspi)
+{
+  uint8_t status;
+
+  DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS3,
+                                   (FAR void *)&status, 1));
+  return status;
+}
+
+/************************************************************************************
+ * Name:  st25fl1_write_enable
+ ************************************************************************************/
+
+static void st25fl1_write_enable(FAR struct qspi_dev_s *qspi)
+{
+  uint8_t status;
+
+  do
+    {
+      st25fl1_command(qspi, ST25FL1_WRITE_ENABLE);
+      status = sf25fl1_read_status1(qspi);
+    }
+  while ((status & STATUS1_WEL_MASK) != STATUS1_WEL_ENABLED);
+}
+
+/************************************************************************************
+ * Name:  st25fl1_write_disable
+ ************************************************************************************/
+
+static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi)
+{
+  uint8_t status;
+
+  do
+    {
+      st25fl1_command(qspi, ST25FL1_WRITE_DISABLE);
+      status = sf25fl1_read_status1(qspi);
+    }
+  while ((status & STATUS1_WEL_MASK) != STATUS1_WEL_DISABLED);
+}
+
+/************************************************************************************
+ * Name:  st25fl1_write_status
+ ************************************************************************************/
+
+static void st25fl1_write_status(FAR struct qspi_dev_s *qspi, uint8_t status[3])
+{
+  st25fl1_write_enable(qspi);
+  st25fl1_command_write(qspi, ST25FL1_WRITE_STATUS, (FAR const void *)status, 3);
+  st25fl1_write_disable(qspi);
 }
 
 /************************************************************************************
@@ -374,31 +521,58 @@ static inline void st25fl1_unlock(FAR struct spi_dev_s *qspi)
 
 static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 {
-  uint16_t manufacturer;
-  uint16_t memory;
-  uint16_t capacity;
-
-  fvdbg("priv: %p\n", priv);
+  uint8_t jedecid[3];
 
   /* Lock the QuadSPI bus and configure the bus. */
 
   st25fl1_lock(priv->qspi);
 
-#warning Missing Logic
+  /* Read the JEDEC ID */
+
+  st25fl1_command_read(priv->qspi, ST25FL1_JEDEC_ID, jedecid, 3);
 
   /* Unlock the bus */
 
   st25fl1_unlock(priv->qspi);
 
-  fvdbg("manufacturer: %02x memory: %02x capacity: %02x\n",
-        manufacturer, memory, capacity);
+  fvdbg("Manufacturer: %02x Device Type %02x, Capacity: %02x",
+        jedecid[0], jedecid[1], jedecid[2]);
 
-  /* Check for a valid manufacturer and memory type */
-#warning Missing Logic
+  /* Check for a recognized memory device type */
 
-  /* We don't understand the manufacturer or the memory type */
+  if (jedecid[1] != ST25FL1_JEDEC_DEVICE_TYPE)
+    {
+      fdbg("ERROR: Unrecognized device type: %02x\n", jedecid[1]);
+      return -ENODEV;
+    }
 
-  return -ENODEV;
+  /* Check for a supported capacity */
+
+  switch (jedecid[2])
+    {
+      case S25FL116K_JEDEC_CAPACITY:
+        priv->sectorshift = S25FL116K_SECTOR_SHIFT;
+        priv->nsectors    = S25FL116K_SECTOR_COUNT;
+        break;
+
+      case S25FL132K_JEDEC_CAPACITY:
+        priv->sectorshift = S25FL163K_SECTOR_SHIFT;
+        priv->nsectors    = S25FL132K_SECTOR_COUNT;
+        break;
+
+      case S25FL164K_JEDEC_CAPACITY:
+        priv->sectorshift = S25FL164K_SECTOR_SHIFT;
+        priv->nsectors    = S25FL164K_SECTOR_COUNT;
+        break;
+
+      /* Support for this part is not implemented yet */
+
+      default:
+        fdbg("ERROR: Unsupported memory capacity: %02x\n", jedecid[2]);
+        return -ENODEV;
+   }
+
+ return OK;
 }
 
 /************************************************************************************
@@ -424,54 +598,93 @@ static uint8_t st25fl1_waitwritecomplete(struct st25fl1_dev_s *priv)
     {
 #warning Missing Logic
     }
-  while ((status & ST25FL1_SR_BUSY) != 0);
+  while ((status & STATUS1_BUSY_MASK) == STATUS1_BUSY);
 
   return status;
 }
 
 /************************************************************************************
- * Name:  st25fl1_wren
+ * Name:  st25fl1_erase_sector
  ************************************************************************************/
 
-static inline void st25fl1_wren(struct st25fl1_dev_s *priv)
+static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
 {
-#warning Missing Logic
+#ifdef CONFIG_DEBUG
+  uint8_t status;
+#endif
+
+  fvdbg("sector: %08lx\n", (unsigned long)sector);
+
+#ifdef CONFIG_DEBUG
+  /* Check that the flash is ready and unprotected */
+
+  status = sf25fl1_read_status1(priv->qspi);
+  if ((status & STATUS1_BUSY_MASK) != STATUS1_READY)
+    {
+      fdbg("ERROR: Flash busy: %02x", status);
+      return -EBUSY;
+    }
+
+  if ((status & STATUS1_BP_MASK) != 0)
+    {
+      fdbg("ERROR: Flash protected: %02x", status);
+      /* REVISIT: Should check if this particular sector is protected */
+      //return -EACCES;
+    }
+#endif
+
+  /* Send the sector erase command */
+
+  st25fl1_write_enable(priv->qspi);
+  st25fl1_command_address(priv->qspi, ST25FL1_SECTOR_ERASE, sector);
+
+  /* Wait for erasure to finish */
+
+  while ((sf25fl1_read_status1(priv->qspi) & STATUS1_BUSY_MASK) != 0);
+  return OK;
 }
 
 /************************************************************************************
- * Name:  st25fl1_wrdi
+ * Name:  st25fl1_erase_chip
  ************************************************************************************/
 
-static inline void st25fl1_wrdi(struct st25fl1_dev_s *priv)
+static int st25fl1_erase_chip(struct st25fl1_dev_s *priv)
 {
-#warning Missing Logic
+  uint8_t status;
+
+#ifdef CONFIG_DEBUG
+  /* Check if the FLASH is protected */
+
+  status = sf25fl1_read_status1(priv->qspi);
+  if ((status & STATUS1_BP_MASK) != 0)
+    {
+      fdbg("ERROR: FLASH is Protected: %02x", status);
+      return -EACCES;
+    }
+#endif
+
+  /* Erase the whole chip */
+
+  st25fl1_write_enable(priv->qspi);
+  st25fl1_command(priv->qspi, ST25FL1_CHIP_ERASE_2);
+
+  /* Wait for the erasure to complete */
+
+  status = sf25fl1_read_status1(priv->qspi);
+  while ((status & STATUS1_BUSY_MASK) != 0)
+    {
+      usleep(200*1000);
+      status = sf25fl1_read_status1(priv->qspi);
+    }
+
+  return OK;
 }
 
 /************************************************************************************
- * Name:  st25fl1_sectorerase
+ * Name: st25fl1_read_byte
  ************************************************************************************/
 
-static void st25fl1_sectorerase(struct st25fl1_dev_s *priv, off_t sector)
-{
-  fvdbg("sector: %08lx\n", (long)sector);
-#warning Missing Logic
-}
-
-/************************************************************************************
- * Name:  st25fl1_chiperase
- ************************************************************************************/
-
-static inline int st25fl1_chiperase(struct st25fl1_dev_s *priv)
-{
-  fvdbg("priv: %p\n", priv);
-#warning Missing Logic
-}
-
-/************************************************************************************
- * Name: st25fl1_byteread
- ************************************************************************************/
-
-static void st25fl1_byteread(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
+static void st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
                            off_t address, size_t nbytes)
 {
   fvdbg("address: %08lx nbytes: %d\n", (long)address, (int)nbytes);
@@ -479,10 +692,10 @@ static void st25fl1_byteread(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer
 }
 
 /************************************************************************************
- * Name:  st25fl1_pagewrite
+ * Name:  st25fl1_write_page
  ************************************************************************************/
 
-static void st25fl1_pagewrite(struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
+static void st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
                           off_t address, size_t nbytes)
 {
   fvdbg("address: %08lx nwords: %d\n", (long)address, (int)nbytes);
@@ -490,11 +703,11 @@ static void st25fl1_pagewrite(struct st25fl1_dev_s *priv, FAR const uint8_t *buf
 }
 
 /************************************************************************************
- * Name: st25fl1_cacheflush
+ * Name: st25fl1_flush_cache
  ************************************************************************************/
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_cacheflush(struct st25fl1_dev_s *priv)
+static void st25fl1_flush_cache(struct st25fl1_dev_s *priv)
 {
   /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
    * or was erased (with the cache containing the correct FLASH contents), then write
@@ -515,11 +728,11 @@ static void st25fl1_cacheflush(struct st25fl1_dev_s *priv)
 #endif
 
 /************************************************************************************
- * Name: st25fl1_cacheread
+ * Name: st25fl1_read_cache
  ************************************************************************************/
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-static FAR uint8_t *st25fl1_cacheread(struct st25fl1_dev_s *priv, off_t sector)
+static FAR uint8_t *st25fl1_read_cache(struct st25fl1_dev_s *priv, off_t sector)
 {
   off_t esectno;
   int   shift;
@@ -530,7 +743,7 @@ static FAR uint8_t *st25fl1_cacheread(struct st25fl1_dev_s *priv, off_t sector)
    * shift to the right by 3 to get the sector number in 4096 increments.
    */
 
-  shift    = ST25FL1_SECTOR_SHIFT - ST25FL1_SECTOR512_SHIFT;
+  shift    = priv->sectorshift - ST25FL1_SECTOR512_SHIFT;
   esectno  = sector >> shift;
   fvdbg("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
 
@@ -540,11 +753,12 @@ static FAR uint8_t *st25fl1_cacheread(struct st25fl1_dev_s *priv, off_t sector)
     {
       /* No.. Flush any dirty erase block currently in the cache */
 
-      st25fl1_cacheflush(priv);
+      st25fl1_flush_cache(priv);
 
       /* Read the erase block into the cache */
 
-      st25fl1_byteread(priv, priv->sector, (esectno << ST25FL1_SECTOR_SHIFT), ST25FL1_SECTOR_SIZE);
+      st25fl1_read_byte(priv, priv->sector, (esectno << priv->sectorshift)
+                        (1 << priv->sectorshift));
 
       /* Mark the sector as cached */
 
@@ -566,11 +780,11 @@ static FAR uint8_t *st25fl1_cacheread(struct st25fl1_dev_s *priv, off_t sector)
 #endif
 
 /************************************************************************************
- * Name: st25fl1_cacheerase
+ * Name: st25fl1_erase_cache
  ************************************************************************************/
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_cacheerase(struct st25fl1_dev_s *priv, off_t sector)
+static void st25fl1_erase_cache(struct st25fl1_dev_s *priv, off_t sector)
 {
   FAR uint8_t *dest;
 
@@ -578,7 +792,7 @@ static void st25fl1_cacheerase(struct st25fl1_dev_s *priv, off_t sector)
    * the cache.
    */
 
-  dest = st25fl1_cacheread(priv, sector);
+  dest = st25fl1_read_cache(priv, sector);
 
   /* Erase the block containing this sector if it is not already erased.
    * The erased indicated will be cleared when the data from the erase sector
@@ -587,10 +801,10 @@ static void st25fl1_cacheerase(struct st25fl1_dev_s *priv, off_t sector)
 
   if (!IS_ERASED(priv))
     {
-      off_t esectno  = sector >> (ST25FL1_SECTOR_SHIFT - ST25FL1_SECTOR512_SHIFT);
+      off_t esectno  = sector >> (priv->sectorshift - ST25FL1_SECTOR512_SHIFT);
       fvdbg("sector: %ld esectno: %d\n", sector, esectno);
 
-      st25fl1_sectorerase(priv, esectno);
+      DEBUGVERIFY(st25fl1_erase_sector(priv, esectno));
       SET_ERASED(priv);
     }
 
@@ -605,11 +819,11 @@ static void st25fl1_cacheerase(struct st25fl1_dev_s *priv, off_t sector)
 #endif
 
 /************************************************************************************
- * Name: st25fl1_cachewrite
+ * Name: st25fl1_write_cache
  ************************************************************************************/
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_cachewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
+static void st25fl1_write_cache(FAR struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
                             off_t sector, size_t nsectors)
 {
   FAR uint8_t *dest;
@@ -620,7 +834,7 @@ static void st25fl1_cachewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t
        * memory.
        */
 
-      dest = st25fl1_cacheread(priv, sector);
+      dest = st25fl1_read_cache(priv, sector);
 
       /* Erase the block containing this sector if it is not already erased.
        * The erased indicated will be cleared when the data from the erase sector
@@ -629,10 +843,10 @@ static void st25fl1_cachewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t
 
       if (!IS_ERASED(priv))
         {
-          off_t esectno  = sector >> (ST25FL1_SECTOR_SHIFT - ST25FL1_SECTOR512_SHIFT);
+          off_t esectno  = sector >> (priv->sectorshift - ST25FL1_SECTOR512_SHIFT);
           fvdbg("sector: %ld esectno: %d\n", sector, esectno);
 
-          st25fl1_sectorerase(priv, esectno);
+          DEBUGVERIFY(st25fl1_erase_sector(priv, esectno));
           SET_ERASED(priv);
         }
 
@@ -649,7 +863,7 @@ static void st25fl1_cachewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t
 
   /* Flush the last erase block left in the cache */
 
-  st25fl1_cacheflush(priv);
+  st25fl1_flush_cache(priv);
 }
 #endif
 
@@ -660,19 +874,44 @@ static void st25fl1_cachewrite(FAR struct st25fl1_dev_s *priv, FAR const uint8_t
 static int st25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 {
   FAR struct st25fl1_dev_s *priv = (FAR struct st25fl1_dev_s *)dev;
+  size_t blocksleft = nblocks;
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
-#warning Missing Logic
 
+  /* Lock access to the SPI bus until we complete the erase */
+
+  st25fl1_lock(priv->qspi);
+
+  while (blocksleft-- > 0)
+    {
+      /* Erase each sector */
+
+#ifdef CONFIG_S25FL1_SECTOR512
+      st25fl1_erase_cache(priv, startblock);
+#else
+      st25fl1_erase_sector(priv, startblock);
+#endif
+      startblock++;
+    }
+
+#ifdef CONFIG_S25FL1_SECTOR512
+  /* Flush the last erase block left in the cache */
+
+  st25fl1_flush_cache(priv);
+#endif
+
+  st25fl1_unlock(priv->qspi);
+  return (int)nblocks;
 }
 
 /************************************************************************************
  * Name: st25fl1_bread
  ************************************************************************************/
 
-static ssize_t st25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR uint8_t *buffer)
+static ssize_t st25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                             size_t nblocks, FAR uint8_t *buffer)
 {
+  FAR struct st25fl1_dev_s *priv = (FAR struct st25fl1_dev_s *)dev;
   ssize_t nbytes;
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
@@ -680,16 +919,18 @@ static ssize_t st25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t
   /* On this device, we can handle the block read just like the byte-oriented read */
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-  nbytes = st25fl1_read(dev, startblock << ST25FL1_SECTOR512_SHIFT, nblocks << ST25FL1_SECTOR512_SHIFT, buffer);
+  nbytes = st25fl1_read(dev, startblock << ST25FL1_SECTOR512_SHIFT,
+                        nblocks << ST25FL1_SECTOR512_SHIFT, buffer);
   if (nbytes > 0)
     {
       nbytes >>= ST25FL1_SECTOR512_SHIFT;
     }
 #else
-  nbytes = st25fl1_read(dev, startblock << ST25FL1_SECTOR_SHIFT, nblocks << ST25FL1_SECTOR_SHIFT, buffer);
+  nbytes = st25fl1_read(dev, startblock << priv->sectorshift,
+                        nblocks << priv->sectorshift, buffer);
   if (nbytes > 0)
     {
-      nbytes >>= ST25FL1_SECTOR_SHIFT;
+      nbytes >>= priv->sectorshift;
     }
 #endif
 
@@ -700,8 +941,8 @@ static ssize_t st25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t
  * Name: st25fl1_bwrite
  ************************************************************************************/
 
-static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                            FAR const uint8_t *buffer)
+static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                              size_t nblocks, FAR const uint8_t *buffer)
 {
   FAR struct st25fl1_dev_s *priv = (FAR struct st25fl1_dev_s *)dev;
 
@@ -712,10 +953,10 @@ static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_
   st25fl1_lock(priv->qspi);
 
 #if defined(CONFIG_ST25FL1_SECTOR512)
-  st25fl1_cachewrite(priv, buffer, startblock, nblocks);
+  st25fl1_write_cache(priv, buffer, startblock, nblocks);
 #else
-  st25fl1_pagewrite(priv, buffer, startblock << ST25FL1_SECTOR_SHIFT,
-                  nblocks << ST25FL1_SECTOR_SHIFT);
+  st25fl1_write_page(priv, buffer, startblock << priv->sectorshift,
+                  nblocks << priv->sectorshift);
 #endif
   st25fl1_unlock(priv->qspi);
 
@@ -736,7 +977,7 @@ static ssize_t st25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   /* Lock the QuadSPI bus and select this FLASH part */
 
   st25fl1_lock(priv->qspi);
-  st25fl1_byteread(priv, buffer, offset, nbytes);
+  st25fl1_read_byte(priv, buffer, offset, nbytes);
   st25fl1_unlock(priv->qspi);
 
   fvdbg("return nbytes: %d\n", (int)nbytes);
@@ -758,7 +999,9 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+            (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -773,10 +1016,10 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_ST25FL1_SECTOR512
               geo->blocksize    = (1 << ST25FL1_SECTOR512_SHIFT);
               geo->erasesize    = (1 << ST25FL1_SECTOR512_SHIFT);
-              geo->neraseblocks = priv->nsectors << (ST25FL1_SECTOR_SHIFT - ST25FL1_SECTOR512_SHIFT);
+              geo->neraseblocks = priv->nsectors << (priv->sectorshift - ST25FL1_SECTOR512_SHIFT);
 #else
-              geo->blocksize    = ST25FL1_SECTOR_SIZE;
-              geo->erasesize    = ST25FL1_SECTOR_SIZE;
+              geo->blocksize    = (1 << priv->sectorshift);
+              geo->erasesize    = (1 << priv->sectorshift);
               geo->neraseblocks = priv->nsectors;
 #endif
               ret               = OK;
@@ -789,11 +1032,11 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
-            /* Erase the entire device */
+          /* Erase the entire device */
 
-            st25fl1_lock(priv->qspi);
-            ret = st25fl1_chiperase(priv);
-            st25fl1_unlock(priv->qspi);
+          st25fl1_lock(priv->qspi);
+          ret = st25fl1_erase_chip(priv);
+          st25fl1_unlock(priv->qspi);
         }
         break;
 
@@ -821,9 +1064,10 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ************************************************************************************/
 
-FAR struct mtd_dev_s *st25fl1_initialize(FAR struct spi_dev_s *qspi)
+FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
 {
   FAR struct st25fl1_dev_s *priv;
+  uint8_t status[3];
   int ret;
 
   fvdbg("qspi: %p\n", qspi);
@@ -856,30 +1100,42 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct spi_dev_s *qspi)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("Unrecognized\n");
+          fdbg("ERROR Unrecognized QSPI device\n");
           kmm_free(priv);
-          priv = NULL;
+          return NULL;
         }
-      else
-        {
-          /* Make sure that the FLASH is unprotected so that we can write into it */
 
-          st25fl1_unprotect(priv);
+      /* Enable quad mode */
+
+      status[0] = sf25fl1_read_status1(priv->qspi);
+      status[1] = sf25fl1_read_status2(priv->qspi);
+      status[2] = sf25fl1_read_status3(priv->qspi);
+
+      while ((status[1] & STATUS2_QUAD_ENABLE_MASK) == 0)
+        {
+          status[1] |= STATUS2_QUAD_ENABLE;
+          st25fl1_write_status(priv->qspi, status);
+          status[1] = sf25fl1_read_status2(priv->qspi);
+          usleep(50*1000);
+        }
+
+      /* Make sure that the FLASH is unprotected so that we can write into it */
+
+      st25fl1_unprotect(priv);
 
 #ifdef CONFIG_ST25FL1_SECTOR512        /* Simulate a 512 byte sector */
-          /* Allocate a buffer for the erase block cache */
+      /* Allocate a buffer for the erase block cache */
 
-          priv->sector = (FAR uint8_t *)kmm_malloc(ST25FL1_SECTOR_SIZE);
-          if (!priv->sector)
-            {
-              /* Allocation failed! Discard all of that work we just did and return NULL */
+      priv->sector = (FAR uint8_t *)kmm_malloc((1 << priv->sectorshift));
+      if (!priv->sector)
+        {
+          /* Allocation failed! Discard all of that work we just did and return NULL */
 
-              fdbg("Allocation failed\n");
-              kmm_free(priv);
-              priv = NULL;
-            }
-#endif
+          fdbg("ERROR: Allocation failed\n");
+          kmm_free(priv);
+          return NULL;
         }
+#endif
     }
 
 #ifdef CONFIG_MTD_REGISTRATION
