@@ -131,10 +131,10 @@
 #define QSPI_MR_LLB                (1 << 1)  /* Bit 1:  Local Loopback Enable */
 #define QSPI_MR_WDRBT              (1 << 2)  /* Bit 2:  Wait Data Read Before Transfer */
 #define QSPI_MR_CSMODE_SHIFT       (4)       /* Bits 4-5: Chip Select Mode */
-#define QSPI_MR_CSMODE_MASK        (3 << QSPI_MR_PCS_SHIFT)
-#  define QSPI_MR_CSMODE_NRELOAD   (0 << QSPI_MR_PCS_SHIFT) /* CS deasserted if TD not reloaded */
-#  define QSPI_MR_CSMODE_LASTXFER  (1 << QSPI_MR_PCS_SHIFT) /* CS deasserted when LASTXFER transferred */
-#  define QSPI_MR_CSMODE_SYSTEM    (2 << QSPI_MR_PCS_SHIFT) /* CS deasserted after each transfer */
+#define QSPI_MR_CSMODE_MASK        (3 << QSPI_MR_CSMODE_SHIFT)
+#  define QSPI_MR_CSMODE_NRELOAD   (0 << QSPI_MR_CSMODE_SHIFT) /* CS deasserted if TD not reloaded */
+#  define QSPI_MR_CSMODE_LASTXFER  (1 << QSPI_MR_CSMODE_SHIFT) /* CS deasserted when LASTXFER transferred */
+#  define QSPI_MR_CSMODE_SYSTEM    (2 << QSPI_MR_CSMODE_SHIFT) /* CS deasserted after each transfer */
 #define QSPI_MR_NBBITS_SHIFT       (8)       /* Bits 8-11: Number Of Bits Per Transfer */
 #define QSPI_MR_NBBITS_MASK        (15 << QSPI_MR_NBBITS_SHIFT)
 #  define QSPI_MR_NBBITS(n)        ((uint32_t)((n)-SAM_QSPI_MINBITS) << QSPI_MR_NBBITS_SHIFT)

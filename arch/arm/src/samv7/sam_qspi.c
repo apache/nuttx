@@ -152,18 +152,23 @@
  * Private Types
  ****************************************************************************/
 
-/* The state of the QSPI controller */
+/* The state of the QSPI controller.
+ *
+ * NOTE: Currently the SAMV7 supports only a single QSPI peripheral.  Logic
+ * here is designed to support multiple QSPI peripherals.
+ */
 
 struct sam_qspidev_s
 {
   struct qspi_dev_s qspi;      /* Externally visible part of the QSPI interface */
-
+  xcpt_t handler;              /* Interrupt handler */
   uint32_t base;               /* QSPI controller register base address */
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
   uint8_t mode;                /* Mode 0,1,2,3 */
   uint8_t nbits;               /* Width of word in bits (8 to 16) */
   uint8_t intf;                /* QSPI controller number (0) */
+  uint8_t irq;                 /* Interrupt number */
   bool initialized;            /* TRUE: Controller has been initialized */
   sem_t exclsem;               /* Assures mutually exclusive access to QSPI */
 
@@ -246,6 +251,13 @@ static inline uintptr_t qspi_regaddr(struct sam_qspidev_s *priv,
                   unsigned int offset);
 #endif
 
+/* Interrupts */
+
+static int     qspi_interrupt(struct sam_qspidev_s *priv);
+#ifdef CONFIG_SAMV7_QSPI
+static int     qspi0_interrupt(int irq, void *context);
+#endif
+
 /* QSPI methods */
 
 static int      qspi_lock(struct qspi_dev_s *dev, bool lock);
@@ -257,6 +269,10 @@ static int      qspi_command_write(struct qspi_dev_s *dev, uint16_t cmd,
                    const void *buffer, size_t buflen);
 static int      qspi_command_read(struct qspi_dev_s *dev, uint16_t cmd,
                    void *buffer, size_t buflen);
+
+/* Initialization */
+
+static int      qspi_hw_initialize(struct sam_qspidev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -285,9 +301,11 @@ static struct sam_qspidev_s g_qspi0dev =
     .ops             = &g_qspi0ops,
   },
   .base              = SAM_QSPI_BASE,
+  .handler           = qspi0_interrupt,
   .intf              = 0,
+  .irq               = SAM_IRQ_QSPI,
 #ifdef CONFIG_SAMV7_QSPI_DMA
-  .candma            = SAMV7_QSPI_DMA,
+  .candma            = SAMV7_QSPI0_DMA,
   .rxintf            = XDMACH_QSPI_RX,
   .txintf            = XDMACH_QSPI_TX,
 #endif
@@ -1210,6 +1228,82 @@ static int qspi_command_read(struct qspi_dev_s *dev, uint16_t cmd,
 }
 
 /****************************************************************************
+ * Name: qspi_hw_initialize
+ *
+ * Description:
+ *   Initialize the QSPI peripheral from hardware reset.
+ *
+ * Input Parameters:
+ *   priv - Device state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on SUCCESS, a negated errno on value of failure
+ *
+ ****************************************************************************/
+
+static int qspi_hw_initialize(struct sam_qspidev_s *priv)
+{
+  uint32_t regval;
+
+  /* Disable the QSPI */
+
+  qspi_putreg(priv, QSPI_CR_QSPIDIS, SAM_QSPI_CR_OFFSET);
+  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_QSPIENS) != 0);
+
+  /* Reset the QSPI (twice) */
+
+  qspi_putreg(priv, QSPI_CR_SWRST, SAM_QSPI_CR_OFFSET);
+  qspi_putreg(priv, QSPI_CR_SWRST, SAM_QSPI_CR_OFFSET);
+
+  /* Configure the QSPI
+   *
+   *   QSPI_MR_SMM             - Serial Memory Mode
+   *   QSPI_MR_CSMODE_LASTXFER - CS de-asserted when LASTXFER transferred
+   */
+
+  regval = QSPI_MR_SMM;
+  qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
+
+  regval |= QSPI_MR_CSMODE_LASTXFER;
+  qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
+
+  /* Set up the initial QSPI clock mode:
+   *
+   * Mode 0:  CPOL=0; NCPHA=1
+   */
+
+  regval  = qspi_getreg(priv, SAM_QSPI_SCR_OFFSET);
+  regval &= ~QSPI_SCR_CPOL;
+  regval |= QSPI_SCR_NCPHA;
+  qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
+
+  regval |= QSPI_SCR_SCBR(1);
+  qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
+
+  /* 8-bit mode */
+
+  regval  = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
+  regval &= ~QSPI_MR_NBBITS_MASK;
+  regval |= QSPI_MR_NBBITS_8BIT;
+  qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
+
+  priv->nbits = 8;
+
+  /* Enable QSPI */
+
+  qspi_putreg(priv, QSPI_CR_QSPIEN, SAM_QSPI_CR_OFFSET);
+  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_QSPIENS) == 0);
+
+  /* Flush any pending transfers */
+
+  (void)qspi_getreg(priv, SAM_QSPI_SR_OFFSET);
+  (void)qspi_getreg(priv, SAM_QSPI_RDR_OFFSET);
+
+  qspi_dumpregs(priv, "After initialization");
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1230,8 +1324,7 @@ static int qspi_command_read(struct qspi_dev_s *dev, uint16_t cmd,
 FAR struct qspi_dev_s *sam_qspi_initialize(int intf)
 {
   FAR struct sam_qspidev_s *priv;
-  irqstate_t flags;
-  uint32_t regval;
+  int ret;
 
   /* The support SAM parts have only a single QSPI port */
 
@@ -1243,6 +1336,10 @@ FAR struct qspi_dev_s *sam_qspi_initialize(int intf)
 #ifdef CONFIG_SAMV7_QSPI
   if (intf == 0)
     {
+      /* If this function is called multiple times, the following operatinos
+       * will be performed multiple times.
+       */
+
       /* Select QSPI0 */
 
       priv = &g_qspi0dev;
@@ -1267,76 +1364,42 @@ FAR struct qspi_dev_s *sam_qspi_initialize(int intf)
       return NULL;
     }
 
-#ifdef CONFIG_SAMV7_QSPI_DMA
-  /* Pre-allocate DMA channels.  These allocations exploit that fact that
-   * QSPI0 is managed by DMAC0 and QSPI1 is managed by DMAC1.  Hence,
-   * the QSPI number (intf) is the same as the DMAC number.
-   */
-
-  if (priv->candma)
-    {
-      priv->rxdma = sam_dmachannel(0);
-      if (!priv->rxdma)
-        {
-          spidbg("ERROR: Failed to allocate the RX DMA channel\n");
-          priv->candma = false;
-        }
-    }
-
-  if (priv->candma)
-    {
-      priv->txdma = sam_dmachannel(0);
-      if (!priv->txdma)
-        {
-          spidbg("ERROR: Failed to allocate the TX DMA channel\n");
-          sam_dmafree(priv->rxdma);
-          priv->rxdma  = NULL;
-          priv->candma = false;
-        }
-    }
-#endif
-
   /* Has the QSPI hardware been initialized? */
 
   if (!priv->initialized)
     {
-      /* Enable clocking to the QSPI block */
-
-      flags = irqsave();
-#if defined(CONFIG_SAMV7_QSPI) && defined(CONFIG_SAMV7_QSPI1_MASTER)
-      if (intf == 0)
-#endif
-      /* Disable QSPI clocking */
-
-      qspi_putreg(priv, QSPI_CR_QSPIDIS, SAM_QSPI_CR_OFFSET);
-
-      /* Execute a software reset of the QSPI (twice) */
-
-      qspi_putreg(priv, QSPI_CR_SWRST, SAM_QSPI_CR_OFFSET);
-      qspi_putreg(priv, QSPI_CR_SWRST, SAM_QSPI_CR_OFFSET);
-      irqrestore(flags);
-
-      /* Configure the QSPI mode register */
-#warning Missing Logic
-
-      /* And enable the QSPI */
-
-      qspi_putreg(priv, QSPI_CR_QSPIEN, SAM_QSPI_CR_OFFSET);
-      up_mdelay(20);
-
-      /* Flush any pending transfers */
-
-      (void)qspi_getreg(priv, SAM_QSPI_SR_OFFSET);
-      (void)qspi_getreg(priv, SAM_QSPI_RDR_OFFSET);
-
+      /* No perform one time initialization */
       /* Initialize the QSPI semaphore that enforces mutually exclusive
        * access to the QSPI registers.
        */
 
       sem_init(&priv->exclsem, 0, 1);
-      priv->initialized = true;
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
+      /* Pre-allocate DMA channels. */
+
+      if (priv->candma)
+        {
+          priv->rxdma = sam_dmachannel(0);
+          if (!priv->rxdma)
+            {
+              spidbg("ERROR: Failed to allocate the RX DMA channel\n");
+              priv->candma = false;
+            }
+        }
+
+      if (priv->candma)
+        {
+          priv->txdma = sam_dmachannel(0);
+          if (!priv->txdma)
+            {
+              spidbg("ERROR: Failed to allocate the TX DMA channel\n");
+              sam_dmafree(priv->rxdma);
+              priv->rxdma  = NULL;
+              priv->candma = false;
+            }
+        }
+
       /* Initialize the QSPI semaphore that is used to wake up the waiting
        * thread when the DMA transfer completes.
        */
@@ -1346,29 +1409,65 @@ FAR struct qspi_dev_s *sam_qspi_initialize(int intf)
       /* Create a watchdog time to catch DMA timeouts */
 
       priv->dmadog = wd_create();
-      DEBUGASSERT(priv->dmadog);
+      if (priv->dmadog == NULL)
+        {
+          spidbg("ERROR: Failed to create wdog\n");
+          goto errout_with_dmahandles;
+        }
 #endif
 
-      qspi_dumpregs(priv, "After initialization");
+      /* Attach the interrupt handler */
+
+      ret = irq_attach(priv->irq, priv->handler);
+      if (ret < 0)
+        {
+          spidbg("ERROR: Failed to attach irq %d\n", priv->irq);
+          goto errout_with_dmadog;
+        }
+
+      /* Perform hardware initialization.  Puts the QSPI into an active
+       * state.
+       */
+
+      ret = qspi_hw_initialize(priv);
+      if (ret < 0)
+        {
+          spidbg("ERROR: Failed to initialize QSPI hardware\n");
+          goto errout_with_irq;
+        }
+
+      /* Enable interrupts at the NVIC */
+
+      priv->initialized = true;
+      up_enable_irq(priv->irq);
     }
 
-  /* Set to mode=0 and nbits=8 and impossible frequency in order to
-   * force an update.
-   */
-
-  regval = qspi_getreg(priv, SAM_QSPI_SCR_OFFSET);
-  regval &= ~QSPI_SCR_CPOL;
-  regval |= QSPI_SCR_NCPHA;
-  qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
-
-  regval = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
-  regval &= ~QSPI_MR_NBBITS_MASK;
-  regval |= QSPI_MR_NBBITS_8BIT;
-  qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
-
-  priv->nbits = 8;
-  spivdbg("SCR=%08x\n", regval);
-
   return &priv->qspi;
+
+errout_with_irq:
+  irq_detach(priv->irq);
+
+errout_with_dmadog:
+#ifdef CONFIG_SAMV7_QSPI_DMA
+  wd_delete(priv->dmadog);
+
+errout_with_dmahandles:
+  sem_destroy(&priv->dmawait);
+
+  if (priv->rxdma)
+    {
+      sam_dmafree(priv->rxdma);
+      priv->rxdma = NULL;
+    }
+
+  if (priv->txdma)
+    {
+      sam_dmafree(priv->txdma);
+      priv->txdma = NULL;
+    }
+#endif
+
+  sem_destroy(&priv->exclsem);
+  return NULL;
 }
 #endif /* CONFIG_SAMV7_QSPI */
