@@ -1238,8 +1238,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       goto errout_with_lock;
     }
 
-  /* Set up the local address (laddr) and the remote address (raddr) that describes the TCP connection.
-       */
+  /* Set up the local address (laddr) and the remote address (raddr) that
+   * describes the TCP connection.
+   */
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
