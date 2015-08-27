@@ -311,7 +311,7 @@ static inline void st25fl1_unlock(FAR struct qspi_dev_s *qspi);
 
 static int  st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd);
 static int  st25fl1_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
-              off_t address);
+              off_t addr, uint8_t addrlen);
 static int  st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
               FAR void *buffer, size_t buflen);
 static int  st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
@@ -324,7 +324,6 @@ static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi);
 
 static int  st25fl1_readid(FAR struct st25fl1_dev_s *priv);
 static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv);
-static uint8_t st25fl1_waitwritecomplete(FAR struct st25fl1_dev_s *priv);
 static int  st25fl1_erase_sector(FAR struct st25fl1_dev_s *priv, off_t offset);
 static int  st25fl1_erase_chip(FAR struct st25fl1_dev_s *priv);
 static void st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
@@ -401,10 +400,39 @@ static inline void st25fl1_unlock(FAR struct qspi_dev_s *qspi)
 
 static int st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
 {
-  /* This function just allows us to insert debug output */
+  struct qspi_xfrinfo_s xfrinfo;
 
   fvdbg("CMD: %02x\n", cmd);
-  return QSPI_COMMAND(qspi, (uint16_t)cmd);
+
+  xfrinfo.flags   = 0;
+  xfrinfo.addrlen = 0;
+  xfrinfo.cmd     = cmd;
+  xfrinfo.buflen  = 0;
+  xfrinfo.addr    = 0;
+  xfrinfo.buffer  = NULL;
+
+  return QSPI_COMMAND(qspi, &xfrinfo);
+}
+
+/************************************************************************************
+ * Name: st25fl1_command_address
+ ************************************************************************************/
+
+static int st25fl1_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
+                                   off_t addr, uint8_t addrlen)
+{
+  struct qspi_xfrinfo_s xfrinfo;
+
+  fvdbg("CMD: %02x Address: %04lx addrlen=%d\n", cmd, (unsigned long)addr, addrlen);
+
+  xfrinfo.flags   = QSPIXFR_ADDRESS;
+  xfrinfo.addrlen = addrlen;
+  xfrinfo.cmd     = cmd;
+  xfrinfo.buflen  = 0;
+  xfrinfo.addr    = addr;
+  xfrinfo.buffer  = NULL;
+
+  return QSPI_COMMAND(qspi, &xfrinfo);
 }
 
 /************************************************************************************
@@ -414,10 +442,18 @@ static int st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
 static int st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                 FAR void *buffer, size_t buflen)
 {
-  /* This function just allows us to insert debug output */
+  struct qspi_xfrinfo_s xfrinfo;
 
   fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
-  return QSPI_COMMAND_READ(qspi, (uint16_t)cmd, buffer, buflen);
+
+  xfrinfo.flags   = QSPIXFR_READDATA;
+  xfrinfo.addrlen = 0;
+  xfrinfo.cmd     = cmd;
+  xfrinfo.buflen  = buflen;
+  xfrinfo.addr    = 0;
+  xfrinfo.buffer  = buffer;
+
+  return QSPI_COMMAND(qspi, &xfrinfo);
 }
 
 /************************************************************************************
@@ -427,10 +463,18 @@ static int st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 static int st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                  FAR const void *buffer, size_t buflen)
 {
-  /* This function just allows us to insert debug output */
+  struct qspi_xfrinfo_s xfrinfo;
 
   fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
-  return QSPI_COMMAND_WRITE(qspi, (uint16_t)cmd, buffer, buflen);
+
+  xfrinfo.flags   = QSPIXFR_WRITEDATA;
+  xfrinfo.addrlen = 0;
+  xfrinfo.cmd     = cmd;
+  xfrinfo.buflen  = buflen;
+  xfrinfo.addr    = 0;
+  xfrinfo.buffer  = (FAR void *)buffer;
+
+  return QSPI_COMMAND(qspi, &xfrinfo);
 }
 
 /************************************************************************************
@@ -585,30 +629,12 @@ static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv)
 }
 
 /************************************************************************************
- * Name: st25fl1_waitwritecomplete
- ************************************************************************************/
-
-static uint8_t st25fl1_waitwritecomplete(struct st25fl1_dev_s *priv)
-{
-  uint8_t status;
-
-  /* Loop as long as the memory is busy with a write cycle */
-
-  do
-    {
-#warning Missing Logic
-    }
-  while ((status & STATUS1_BUSY_MASK) == STATUS1_BUSY);
-
-  return status;
-}
-
-/************************************************************************************
  * Name:  st25fl1_erase_sector
  ************************************************************************************/
 
 static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
 {
+  off_t address;
 #ifdef CONFIG_DEBUG
   uint8_t status;
 #endif
@@ -635,8 +661,10 @@ static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
 
   /* Send the sector erase command */
 
+  address = (off_t)sector << priv->sectorshift;
+
   st25fl1_write_enable(priv->qspi);
-  st25fl1_command_address(priv->qspi, ST25FL1_SECTOR_ERASE, sector);
+  st25fl1_command_address(priv->qspi, ST25FL1_SECTOR_ERASE, address, 3);
 
   /* Wait for erasure to finish */
 

@@ -131,67 +131,29 @@
  * Name: QSPI_COMMAND
  *
  * Description:
- *   Send a command to the QSPI device
+ *   Perform one QSPI command transfer
  *
  * Input Parameters:
- *   dev - Device-specific state data
- *   cmd - The command to send.  the size of the data is determined by the
- *         number of bits selected for the QSPI interface.
+ *   dev     - Device-specific state data
+ *   xfrinfo - Describes the command transfer to be performed.
  *
  * Returned Value:
  *   Zero (OK) on SUCCESS, a negated errno on value of failure
  *
  ****************************************************************************/
 
-#define QSPI_COMMAND(d,c) ((d)->ops->command(d,(uint16_t)c))
+#define QSPI_COMMAND(d,x) (d)->ops->command(d,x)
 
-/****************************************************************************
- * Name: QSPI_COMMAND_WRITE
- *
- * Description:
- *   Send a command then send a block of data.
- *
- * Input Parameters:
- *   dev    - Device-specific state data
- *   cmd    - The command to send.  the size of the data is determined by
- *            the number of bits selected for the QSPI interface.
- *   buffer - A pointer to the buffer of data to be sent
- *   buflen - the length of data to send from the buffer in number of words.
- *            The wordsize is determined by the number of bits-per-word
- *            selected for the QSPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into
- *            uint16_t's
- *
- * Returned Value:
- *   Zero (OK) on SUCCESS, a negated errno on value of failure
- *
- ****************************************************************************/
+/* QSPI Transfer Flags */
 
-#define QSPI_COMMAND_WRITE(d,c,b,l) ((d)->ops->command_write(d,c,b,l))
+#define QSPIXFR_ADDRESS      (1 << 0)  /* Enable address transfer */
+#define QSPIXFR_READDATA     (1 << 1)  /* Enable read data transfer */
+#define QSPIXFR_WRITEDATA    (1 << 2)  /* Enable write data transfer */
 
-/****************************************************************************
- * Name: QSPI_COMMAND_READ
- *
- * Description:
- *   Receive a block of data from QSPI. Required.
- *
- * Input Parameters:
- *   dev    - Device-specific state data
- *   cmd    - The command to send.  the size of the data is determined by
- *            the number of bits selected for the QSPI interface.
- *   buffer - A pointer to the buffer in which to receive data
- *   buflen - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-
- *            per-word selected for the QSPI interface.  If nbits <= 8, the
- *            data is packed into uint8_t's; if nbits >8, the data is packed
- *            into uint16_t's
- *
- * Returned Value:
- *   Zero (OK) on SUCCESS, a negated errno on value of failure
- *
- ****************************************************************************/
-
-#define QSPI_COMMAND_READ(d,c,b,l) ((d)->ops->command_read(d,c,b,l))
+#define QSPIXFR_ISADDRESS(f) (((f) & QSPIXFR_ADDRESS) != 0)
+#define QSPIXFR_ISDATA(f)    (((f) & (QSPIXFR_READDATA | QSPIXFR_WRITEDATA)) != 0)
+#define QSPIXFR_ISREAD(f)    (((f) & QSPIXFR_READDATA) != 0)
+#define QSPIXFR_ISWRITE(f)   (((f) & QSPIXFR_WRITEDATA) != 0)
 
 /****************************************************************************
  * Public Types
@@ -207,6 +169,18 @@ enum qspi_mode_e
   QSPIDEV_MODE3          /* CPOL=1 CHPHA=1 */
 };
 
+/* This structure describes one transfer */
+
+struct qspi_xfrinfo_s
+{
+  uint8_t  flags;        /* See QSPIXFR_* definitions */
+  uint8_t  addrlen;      /* Address length in bytes (if QSPIXFR_ADDRESS) */
+  uint16_t cmd;          /* Command */
+  uint16_t buflen;       /* Data buffer length in bytes (if QSPIXFR_DATA) */
+  uint32_t addr;         /* Address (if QSPIXFR_ADDRESS) */
+  FAR void *buffer;      /* Data buffer (if QSPIXFR_DATA) */
+};
+
 /* The QSPI vtable */
 
 struct qspi_dev_s;
@@ -216,11 +190,8 @@ struct qspi_ops_s
   CODE uint32_t (*setfrequency)(FAR struct qspi_dev_s *dev, uint32_t frequency);
   CODE void     (*setmode)(FAR struct qspi_dev_s *dev, enum qspi_mode_e mode);
   CODE void     (*setbits)(FAR struct qspi_dev_s *dev, int nbits);
-  CODE int      (*command)(FAR struct qspi_dev_s *dev, uint16_t command);
-  CODE int      (*command_write)(FAR struct qspi_dev_s *dev, uint16_t cmd,
-                  FAR const void *buffer, size_t buflen);
-  CODE int      (*command_read)(FAR struct qspi_dev_s *dev, uint16_t cmd,
-                  FAR void *buffer, size_t buflen);
+  CODE int      (*command)(FAR struct qspi_dev_s *dev,
+                   FAR struct qspi_xfrinfo_s *xfrinfo);
 };
 
 /* QSPI private data.  This structure only defines the initial fields of the
