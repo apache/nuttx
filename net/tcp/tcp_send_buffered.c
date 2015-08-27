@@ -338,6 +338,18 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+#endif
+
   nllvdbg("flags: %04x\n", flags);
 
   /* If this packet contains an acknowledgement, then update the count of
@@ -697,9 +709,9 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
            */
 
           sndlen = WRB_PKTLEN(wrb) - WRB_SENT(wrb);
-          if (sndlen > tcp_mss(conn))
+          if (sndlen > conn->mss)
             {
-              sndlen = tcp_mss(conn);
+              sndlen = conn->mss;
             }
 
           if (sndlen > conn->winsize)

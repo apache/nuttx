@@ -102,7 +102,7 @@ config NET_SLIP_MTU
 		bytes of data: 40 + 128.  I believe that is to allow for the 2x
 		worst cast packet expansion.  Ideally we would like to advertise the
 		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
-		the tcp_mss() macro).
+		the MSS value in the TCP connection structure).
 
 
 config NET_SLIP_TCP_RECVWNDO

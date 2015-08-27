@@ -163,6 +163,24 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_CONNECTED) != 0)
         {
+#if 0 /* REVISIT: Assertion fires.  Why? */
+#ifdef CONFIG_NETDEV_MULTINIC
+          FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
+          /* Make sure that this is the device bound to the connection */
+
+          DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+          conn->dev = dev;
+#endif
+#endif
+
+          /* If there is no local address assigned to the socket (perhaps
+           * because it was INADDR_ANY), then assign it the address of the
+           * connecting device.
+           *
+           * TODO: Implement this.
+           */
+
           /* Indicate that the socket is now connected */
 
           psock->s_flags |= _SF_CONNECTED;

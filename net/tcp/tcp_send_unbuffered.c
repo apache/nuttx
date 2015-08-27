@@ -290,6 +290,18 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+#endif
+
   nllvdbg("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
 
@@ -442,12 +454,12 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       if (sndlen >= CONFIG_NET_TCP_SPLIT_SIZE)
         {
           /* sndlen is the number of bytes remaining to be sent.
-           * tcp_mss(conn) will return the number of bytes that can sent
+           * conn->mss will provide the number of bytes that can sent
            * in one packet.  The difference, then, is the number of bytes
            * that would be sent in the next packet after this one.
            */
 
-          int32_t next_sndlen = sndlen - tcp_mss(conn);
+          int32_t next_sndlen = sndlen - conn->mss;
 
           /*  Is this the even packet in the packet pair transaction? */
 
@@ -474,13 +486,13 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
             {
               /* Will there be another (even) packet afer this one?
                * (next_sndlen > 0)  Will the split condition occur on that
-               * next, even packet? ((next_sndlen - tcp_mss(conn)) < 0) If
+               * next, even packet? ((next_sndlen - conn->mss) < 0) If
                * so, then perform the split now to avoid the case where the
                * byte count is less than CONFIG_NET_TCP_SPLIT_SIZE on the
                * next pair.
                */
 
-              if (next_sndlen > 0 && (next_sndlen - tcp_mss(conn)) < 0)
+              if (next_sndlen > 0 && (next_sndlen - conn->mss) < 0)
                 {
                   /* Here, we know that sndlen must be MSS < sndlen <= 2*MSS
                    * and so (sndlen / 2) is <= MSS.
@@ -497,9 +509,9 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
 #endif /* CONFIG_NET_TCP_SPLIT */
 
-      if (sndlen > tcp_mss(conn))
+      if (sndlen > conn->mss)
         {
-          sndlen = tcp_mss(conn);
+          sndlen = conn->mss;
         }
 
       /* Check if we have "space" in the window */

@@ -101,12 +101,6 @@
     devif_conn_callback_free(g_netdevices, cb, NULL)
 #endif
 
-/* Get the current maximum segment size that can be sent on the current
- * TCP connection.
- */
-
-#define tcp_mss(conn)              ((conn)->mss)
-
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
 

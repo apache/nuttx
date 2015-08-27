@@ -79,7 +79,7 @@
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that the
- *  application waits for RX data.
+ *   application waits for RX data.
  *
  * Parameters:
  *   lipaddr - The local board IPv6 address of the socket

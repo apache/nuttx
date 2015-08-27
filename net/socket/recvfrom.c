@@ -157,7 +157,7 @@ static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
  *   The number of bytes taken from the packet.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -205,7 +205,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
  *   None.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -249,7 +249,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
  *   None.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -321,7 +321,7 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
  *   None.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -353,7 +353,7 @@ static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -520,7 +520,7 @@ out:
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -616,7 +616,7 @@ static inline void recvfrom_pktsender(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_PKT
 static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
-                                      FAR void *conn, FAR void *pvpriv,
+                                      FAR void *pvconn, FAR void *pvpriv,
                                       uint16_t flags)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
@@ -744,23 +744,39 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
- *   conn     The connection structure associated with the socket
+ *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
 static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
-                                      FAR void *conn, FAR void *pvpriv,
+                                      FAR void *pvconn, FAR void *pvpriv,
                                       uint16_t flags)
 {
   FAR struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
+
+#if 0 /* REVISIT: The assertion fires.  Why? */
+#ifdef CONFIG_NETDEV_MULTINIC
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+  if (conn->dev != NULL && conn->dev != dev)
+    {
+      return flags;
+    }
+#endif
+#endif
 
   nllvdbg("flags: %04x\n", flags);
 
@@ -956,7 +972,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1049,7 +1065,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
  *   Terminate the UDP transfer.
  *
  * Parameters:
- *   conn     The connection structure associated with the socket
+ *   pstate - The recvfrom state structure
+ *   result - The result of the operation
  *
  * Returned Value:
  *   None
@@ -1086,14 +1103,14 @@ static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
- *   conn     The connection structure associated with the socket
+ *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
