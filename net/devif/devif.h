@@ -423,8 +423,8 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
  * The amount of data that actually is sent out after a call to this
  * function is determined by the maximum amount of data TCP allows. uIP
  * will automatically crop the data so that only the appropriate
- * amount of data is sent. The function tcp_mss() can be used to query
- * uIP for the amount of data that actually will be sent.
+ * amount of data is sent. The mss field of the TCP connection structure
+ * can be used to determine the amount of data that actually will be sent.
  *
  * Note:  This function does not guarantee that the sent data will
  * arrive at the destination.  If the data is lost in the network, the

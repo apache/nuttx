@@ -354,9 +354,9 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
       uint32_t sndlen = pstate->snd_flen - pstate->snd_sent;
 
-      if (sndlen > tcp_mss(conn))
+      if (sndlen > conn->mss)
         {
-          sndlen = tcp_mss(conn);
+          sndlen = conn->mss;
         }
 
       /* Check if we have "space" in the window */

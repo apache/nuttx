@@ -697,9 +697,9 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
            */
 
           sndlen = WRB_PKTLEN(wrb) - WRB_SENT(wrb);
-          if (sndlen > tcp_mss(conn))
+          if (sndlen > conn->mss)
             {
-              sndlen = tcp_mss(conn);
+              sndlen = conn->mss;
             }
 
           if (sndlen > conn->winsize)
