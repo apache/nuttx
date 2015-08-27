@@ -278,22 +278,32 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (pstate->tc_conn->domain == PF_INET)
+      if (pstate->tc_conn->domain == PF_INET)
 #endif
-    {
-      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
-    }
+        {
+          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+        }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else
+      else
 #endif
-    {
-      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
-    }
+        {
+          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+        }
 #endif /* CONFIG_NET_IPv6 */
 
+#ifdef CONFIG_NETDEV_MULTINIC
+      /* We now have to filter all outgoing transfers so that they use only
+       * the MSS of this device.
+       */
+
+      DEBUGASSERT(pstate->tc_conn->dev == NULL ||
+                  pstate->tc_conn->dev == dev);
+      pstate->tc_conn->dev = dev;
+
+#endif /* CONFIG_NETDEV_MULTINIC */
 #endif /* CONFIG_NET_MULTILINK */
 
       /* Wake up the waiting thread */

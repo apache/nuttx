@@ -1003,6 +1003,13 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
           net_ipv6addr_copy(conn->u.ipv6.raddr, ip->srcipaddr);
 #ifdef CONFIG_NETDEV_MULTINIC
           net_ipv6addr_copy(conn->u.ipv6.laddr, ip->destipaddr);
+
+          /* We now have to filter all outgoing transfers so that they use
+           * only the MSS of this device.
+           */
+
+          DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+          conn->dev = dev;
 #endif
 
           /* Find the device that can receive packets on the network
@@ -1028,6 +1035,13 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NETDEV_MULTINIC
           net_ipv4addr_copy(conn->u.ipv4.laddr,
                             net_ip4addr_conv32(ip->destipaddr));
+
+          /* We now have to filter all outgoing transfers so that they use
+           * only the MSS of this device.
+           */
+
+          DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+          conn->dev = dev;
 #endif
 
           /* Find the device that can receive packets on the network

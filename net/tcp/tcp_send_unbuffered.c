@@ -290,6 +290,18 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+#endif
+
   nllvdbg("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
 

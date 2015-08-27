@@ -324,6 +324,18 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
   int ret;
 
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+#endif
+
   nllvdbg("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
 

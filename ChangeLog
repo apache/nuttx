@@ -10883,4 +10883,13 @@
 	  SaeHie Park (2015-08-25).
 	* drivers/rwbuffer.c: Fix some logic errors.  From Dmitry Nikolaev
 	  via Juha Niskanen (2015-08-26).
+	* net/socket and net/tcp: Fix a problem in whent there are multiple
+	  network devices.  Polls were being sent to all TCP sockets before.
+	  This is not good because it means that packets may sometimes be
+	  sent out on the wrong device.  That is inefficient because it
+	  will cause retransmissions and bad performance.  But, worse, when
+	  one of the devices is not Ethernet, it will have a different MSS
+	  and, as a result, incorrect data transfers can cause crashes.
+	  The fix is to lock into a single device once the MSS is locked
+	  locked down (2015-08-27).
 
