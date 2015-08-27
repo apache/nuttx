@@ -96,6 +96,7 @@
 struct lo_driver_s
 {
   bool lo_bifup;               /* true:ifup false:ifdown */
+  bool lo_txdone;              /* One RX packet was looped back */
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring work to the work queue */
 
@@ -146,8 +147,8 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
  *
  * Description:
  *   Check if the network has any outgoing packets ready to send.  This is
- *   a callback from devif_poll().  devif_poll() will be called only during
- *   normal TX polling.
+ *   a callback from devif_poll() or devif_timer().  devif_poll() will be
+ *   called only during normal TX polling.
  *
  * Parameters:
  *   dev - Reference to the NuttX driver state structure
@@ -201,6 +202,8 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
           ndbg("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
           priv->lo_dev.d_len = 0;
         }
+
+      priv->lo_txdone = true;
     }
 
   return 0;
@@ -231,7 +234,18 @@ static void lo_poll_work(FAR void *arg)
   /* Perform the poll */
 
   state = net_lock();
+  priv->lo_txdone = false;
   (void)devif_timer(&priv->lo_dev, lo_txpoll, LO_POLLHSEC);
+
+  /* Was something received and looped back? */
+
+  while (priv->lo_txdone)
+    {
+      /* Yes, poll again for more TX data */
+
+      priv->lo_txdone = false;
+      (void)devif_poll(&priv->lo_dev, lo_txpoll);
+    }
 
   /* Setup the watchdog poll timer again */
 
@@ -379,9 +393,14 @@ static void lo_txavail_work(FAR void *arg)
   state = net_lock();
   if (priv->lo_bifup)
     {
-      /* If so, then poll the network for new XMIT data */
+      do
+        {
+          /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->lo_dev, lo_txpoll);
+          priv->lo_txdone = false;
+          (void)devif_poll(&priv->lo_dev, lo_txpoll);
+        }
+      while (priv->lo_txdone);
     }
 
   net_unlock(state);
