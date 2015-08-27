@@ -264,11 +264,8 @@ static int      qspi_lock(struct qspi_dev_s *dev, bool lock);
 static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency);
 static void     qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode);
 static void     qspi_setbits(struct qspi_dev_s *dev, int nbits);
-static int      qspi_command(struct qspi_dev_s *dev, uint16_t cmd);
-static int      qspi_command_write(struct qspi_dev_s *dev, uint16_t cmd,
-                   const void *buffer, size_t buflen);
-static int      qspi_command_read(struct qspi_dev_s *dev, uint16_t cmd,
-                   void *buffer, size_t buflen);
+static int      qspi_command(struct qspi_dev_s *dev,
+                  struct qspi_xfrinfo_s *xfrinfo);
 
 /* Initialization */
 
@@ -288,8 +285,6 @@ static const struct qspi_ops_s g_qspi0ops =
   .setmode           = qspi_setmode,
   .setbits           = qspi_setbits,
   .command           = qspi_command,
-  .command_write     = qspi_command_write,
-  .command_read      = qspi_command_read,
 };
 
 /* This is the overall state of the QSPI0 controller */
@@ -1004,224 +999,165 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
  * Name: qspi_command
  *
  * Description:
- *   Send a command to the QSPI device
+ *   Perform one QSPI data transfer
  *
  * Input Parameters:
- *   dev - Device-specific state data
- *   cmd - The command to send.  the size of the data is determined by the
- *         number of bits selected for the QSPI interface.
+ *   dev     - Device-specific state data
+ *   xfrinfo - Describes the transfer to be performed.
  *
  * Returned Value:
  *   Zero (OK) on SUCCESS, a negated errno on value of failure
  *
  ****************************************************************************/
 
-static int qspi_command(struct qspi_dev_s *dev, uint16_t cmd)
+static int qspi_command(struct qspi_dev_s *dev,
+                        struct qspi_xfrinfo_s *xfrinfo)
 {
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t regval;
+  uint32_t ifr;
 
-  spivdbg("cmd: %04x\n");
-  DEBUGASSERT(priv != NULL && cmd < 256);
+  DEBUGASSERT(priv != NULL && xfrinfo != NULL);
 
-  /* Write the the Instruction code register:
+#ifdef CONFIG_DEBUG_SPI
+  spivdbg("Transfer:\n");
+  spivdbg("  flags: %02x\n", xfrinfo->flags);
+  spivdbg("  cmd: %04x\n", xfrinfo->cmd);
+  if (QSPIXFR_ISADDRESS(xfrinfo->flags))
+    {
+      spivdbg("  address/length: %08lx %d\n",
+              (unsigned long)xfrinfo->addr, xfrinfo->addrlen);
+    }
+
+  if (QSPIXFR_ISDATA(xfrinfo->flags))
+    {
+      spivdbg("  %s Data:\n", QSPIXFR_ISWRITE(xfrinfo->flags) ? "Write" : "Read");
+      spivdbg("    buffer/length: %p %d\n", xfrinfo->buffer, xfrinfo->buflen);
+    }
+#endif
+
+  DEBUGASSERT(xfrinfo->cmd < 256);
+
+  /* Write the instruction address register */
+
+  ifr = 0;
+  if (QSPIXFR_ISADDRESS(xfrinfo->flags))
+    {
+      DEBUGASSERT(xfrinfo->addrlen == 3 || xfrinfo->addrlen == 4);
+
+      qspi_putreg(priv, xfrinfo->addr, SAM_QSPI_IFR_OFFSET);
+      ifr |= QSPI_IFR_ADDREN;
+
+      if (xfrinfo->addrlen == 3)
+        {
+          ifr |= QSPI_IFR_ADDRL_24BIT;
+        }
+      else if (xfrinfo->addrlen == 4)
+        {
+          ifr |= QSPI_IFR_ADDRL_32BIT;
+        }
+      else
+        {
+          return -EINVAL;
+        }
+    }
+
+  /* Write the Instruction code register:
    *
    *  QSPI_ICR_INST(cmd)  8-bit command
    *  QSPI_ICR_OPT(0)     No option
    */
 
-  regval =  QSPI_ICR_INST(cmd) | QSPI_ICR_OPT(0);
+  regval =  QSPI_ICR_INST(xfrinfo->cmd) | QSPI_ICR_OPT(0);
   qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
 
-  /* Write Instruction Frame Register:
-   *
-   *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
-   *   QSPI_IFR_INSTEN=1      Instruction Enable
-   *   QSPI_IFR_ADDREN=0      Address Disable
-   *   QSPI_IFR_OPTEN=0       Option Disable
-   *   QSPI_IFR_DATAEN=0      Data Disable
-   *   QSPI_IFR_OPTL_*        Not used (zero)
-   *   QSPI_IFR_ADDRL=0       Not used (zero)
-   *   QSPI_IFR_TFRTYP_READ   Shouldn't matter
-   *   QSPI_IFR_CRM=0         Not continuous read
-   *   QSPI_IFR_NBDUM(0)      No dummy cycles
-   */
+  if (QSPIXFR_ISDATA(xfrinfo->flags))
+    {
+      uint16_t buflen;
 
-  regval = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_TFRTYP_READ |
-           QSPI_IFR_NBDUM(0);
-  qspi_putreg(priv, regval, SAM_QSPI_IFR_OFFSET);
+      DEBUGASSERT(xfrinfo->buffer != NULL && xfrinfo->buflen > 0);
 
-  MEMORY_SYNC();
+      /* Make sure that the length is an even multiple of 32-bit words. */
+
+      DEBUGASSERT((xfrinfo->buflen & 3) == 0);
+      buflen = (xfrinfo->buflen + 3) & ~3;
+
+      /* Write Instruction Frame Register:
+       *
+       *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
+       *   QSPI_IFR_INSTEN=1      Instruction Enable
+       *   QSPI_IFR_ADDREN=?      (See logic above)
+       *   QSPI_IFR_OPTEN=0       Option Disable
+       *   QSPI_IFR_DATAEN=1      Data Enable
+       *   QSPI_IFR_OPTL_*        Not used (zero)
+       *   QSPI_IFR_ADDRL=0       Not used (zero)
+       *   QSPI_IFR_TFRTYP_WRITE  Write transfer into serial memory, OR
+       *   QSPI_IFR_TFRTYP_READ   Read transfer from serial memory
+       *   QSPI_IFR_CRM=0         Not continuous read
+       *   QSPI_IFR_NBDUM(0)      No dummy cycles
+       */
+
+      ifr |= QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_DATAEN |
+             QSPI_IFR_NBDUM(0);
+
+      if (QSPIXFR_ISWRITE(xfrinfo->flags))
+        {
+          ifr |= QSPI_IFR_TFRTYP_WRITE;
+          qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
+
+          (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
+
+          /* Copy the data to write to QSPI_RAM */
+
+          memcpy((void *)SAM_QSPIMEM_BASE, xfrinfo->buffer, buflen);
+        }
+      else
+        {
+          ifr |= QSPI_IFR_TFRTYP_READ;
+          qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
+
+          (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
+
+          /* Copy the data from QSPI memory into the user buffer */
+
+          memcpy(xfrinfo->buffer, (const void *)SAM_QSPIMEM_BASE, buflen);
+        }
+
+      MEMORY_SYNC();
+
+      /* Indicate the end of the transfer as soon as the transmission
+       * registers are empty.
+       */
+
+      while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_INT_TXEMPTY) == 0);
+      qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
+    }
+  else
+    {
+      /* Write Instruction Frame Register:
+       *
+       *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
+       *   QSPI_IFR_INSTEN=1      Instruction Enable
+       *   QSPI_IFR_ADDREN=?      (See logic above)
+       *   QSPI_IFR_OPTEN=0       Option Disable
+       *   QSPI_IFR_DATAEN=0      Data Disable
+       *   QSPI_IFR_OPTL_*        Not used (zero)
+       *   QSPI_IFR_ADDRL=0       Not used (zero)
+       *   QSPI_IFR_TFRTYP_READ   Shouldn't matter
+       *   QSPI_IFR_CRM=0         Not continuous read
+       *   QSPI_IFR_NBDUM(0)      No dummy cycles
+       */
+
+      ifr = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_TFRTYP_READ |
+               QSPI_IFR_NBDUM(0);
+      qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
+
+      MEMORY_SYNC();
+  }
 
   /* When the command has been sent, Instruction End Status (INTRE) will be
    * set in the QSPI status register.
    */
-
-  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
-  return OK;
-}
-
-/****************************************************************************
- * Name: qspi_command_write
- *
- * Description:
- *   Send a command then send a block of data.
- *
- * Input Parameters:
- *   dev    - Device-specific state data
- *   cmd    - The command to send.  the size of the data is determined by
- *            the number of bits selected for the QSPI interface.
- *   buffer - A pointer to the buffer of data to be sent
- *   buflen - the length of data to send from the buffer in number of words.
- *            The wordsize is determined by the number of bits-per-word
- *            selected for the QSPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into
- *            uint16_t's
- *
- * Returned Value:
- *   Zero (OK) on SUCCESS, a negated errno on value of failure
- *
- ****************************************************************************/
-
-static int qspi_command_write(struct qspi_dev_s *dev, uint16_t cmd,
-                              const void *buffer, size_t buflen)
-{
-  struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
-  uint32_t regval;
-
-  spivdbg("cmd: %04x buflen: %lu\n", cmd, (unsigned long)buflen);
-  DEBUGASSERT(priv != NULL && cmd < 256 && buffer != NULL;);
-
-  /* Make sure that the length is an even multiple of 32-bit words. */
-
-  DEBUGASSERT((buflen & 3) == 0);
-  buflen = (buflen + 3) & ~3;
-
-  /* Write the the Instruction code register:
-   *
-   *  QSPI_ICR_INST(cmd)  8-bit command
-   *  QSPI_ICR_OPT(0)     No option
-   */
-
-  regval =  QSPI_ICR_INST(cmd) | QSPI_ICR_OPT(0);
-  qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
-
-  /* Write Instruction Frame Register:
-   *
-   *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
-   *   QSPI_IFR_INSTEN=1      Instruction Enable
-   *   QSPI_IFR_ADDREN=0      Address Disable
-   *   QSPI_IFR_OPTEN=0       Option Disable
-   *   QSPI_IFR_DATAEN=1      Data Enable
-   *   QSPI_IFR_OPTL_*        Not used (zero)
-   *   QSPI_IFR_ADDRL=0       Not used (zero)
-   *   QSPI_IFR_TFRTYP_WRITE  Write transfer into serial memory
-   *   QSPI_IFR_CRM=0         Not continuous read
-   *   QSPI_IFR_NBDUM(0)      No dummy cycles
-   */
-
-  regval = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_DATAEN |
-           QSPI_IFR_TFRTYP_WRITE | QSPI_IFR_NBDUM(0);
-  qspi_putreg(priv, regval, SAM_QSPI_IFR_OFFSET);
-
-  (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
-
-  /* Copy the data to write to QSPI_RAM */
-
-  memcpy((void *)SAM_QSPIMEM_BASE, buffer, buflen);
-  MEMORY_SYNC();
-
-  /* Indicate the end of the transfer as soon as the transmission
-   * registers are empty.
-   */
-
-  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_INT_TXEMPTY) == 0);
-  qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
-
-  /* Wait for the end of the transfer */
-
-  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
-  return OK;
-}
-
-/****************************************************************************
- * Name: qspi_command_read
- *
- * Description:
- *   Receive a block of data from QSPI. Required.
- *
- * Input Parameters:
- *   dev    - Device-specific state data
- *   cmd    - The command to send.  the size of the data is determined by
- *            the number of bits selected for the QSPI interface.
- *   buffer - A pointer to the buffer in which to receive data
- *   buflen - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-
- *            per-word selected for the QSPI interface.  If nbits <= 8, the
- *            data is packed into uint8_t's; if nbits >8, the data is packed
- *            into uint16_t's
- *
- * Returned Value:
- *   Zero (OK) on SUCCESS, a negated errno on value of failure
- *
- ****************************************************************************/
-
-static int qspi_command_read(struct qspi_dev_s *dev, uint16_t cmd,
-                             void *buffer, size_t buflen)
-{
-  struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
-  uint32_t regval;
-
-  spivdbg("cmd: %04x buflen: %lu\n", cmd, (unsigned long)buflen);
-  DEBUGASSERT(priv != NULL && cmd < 256 && buffer != NULL;);
-
-  /* Make sure that the length is an even multiple of 32-bit words. */
-
-  DEBUGASSERT((buflen & 3) == 0);
-  buflen = (buflen + 3) & ~3;
-
-  /* Write the the Instruction code register:
-   *
-   *  QSPI_ICR_INST(cmd)  8-bit command
-   *  QSPI_ICR_OPT(0)     No option
-   */
-
-  regval =  QSPI_ICR_INST(cmd) | QSPI_ICR_OPT(0);
-  qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
-
-  /* Write Instruction Frame Register:
-   *
-   *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
-   *   QSPI_IFR_INSTEN=1      Instruction Enable
-   *   QSPI_IFR_ADDREN=0      Address Disable
-   *   QSPI_IFR_OPTEN=0       Option Disable
-   *   QSPI_IFR_DATAEN=1      Data Enable
-   *   QSPI_IFR_OPTL_*        Not used (zero)
-   *   QSPI_IFR_ADDRL=0       Not used (zero)
-   *   QSPI_IFR_TFRTYP_READ   Read transfer from serial memory
-   *   QSPI_IFR_CRM=0         Not continuous read
-   *   QSPI_IFR_NBDUM(0)      No dummy cycles
-   */
-
-  regval = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_DATAEN |
-           QSPI_IFR_TFRTYP_READ | QSPI_IFR_NBDUM(0);
-  qspi_putreg(priv, regval, SAM_QSPI_IFR_OFFSET);
-
-  (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
-
-  /* Copy the data from QSPI memory into the user buffer */
-
-  memcpy(buffer, (const void *)SAM_QSPIMEM_BASE, buflen);
-  MEMORY_SYNC();
-
-  /* Indicate the end of the transfer as soon as the transmission
-   * registers are empty.
-   */
-
-  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_INT_TXEMPTY) == 0);
-  qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
-
-  /* Wait for the end of the transfer */
 
   while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
   return OK;
@@ -1321,9 +1257,9 @@ static int qspi_hw_initialize(struct sam_qspidev_s *priv)
  *
  ****************************************************************************/
 
-FAR struct qspi_dev_s *sam_qspi_initialize(int intf)
+struct qspi_dev_s *sam_qspi_initialize(int intf)
 {
-  FAR struct sam_qspidev_s *priv;
+  struct sam_qspidev_s *priv;
   int ret;
 
   /* The support SAM parts have only a single QSPI port */

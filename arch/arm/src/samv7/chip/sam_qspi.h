@@ -225,6 +225,8 @@
 #  define QSPI_IFR_OPTL_4BIT       (2 << QSPI_IFR_OPTL_SHIFT) /* Option is 4 bits */
 #  define QSPI_IFR_OPTL_8BIT       (3 << QSPI_IFR_OPTL_SHIFT) /* Option is 8 bits */
 #define QSPI_IFR_ADDRL             (1 << 10) /* Bit 10: Address Length */
+#  define QSPI_IFR_ADDRL_24BIT     (0 << 10) /*   0=24-bit */
+#  define QSPI_IFR_ADDRL_32BIT     (1 << 10) /*   1=32-bit */
 #define QSPI_IFR_TFRTYP_SHIFT      (12)      /* Bits 12-13: Data Transfer Type */
 #define QSPI_IFR_TFRTYP_MASK       (3 << QSPI_IFR_TFRTYP_SHIFT)
 #  define QSPI_IFR_TFRTYP_READ     (0 << QSPI_IFR_TFRTYP_SHIFT) /* Read transfer from serial memory */
