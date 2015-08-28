@@ -174,16 +174,13 @@ struct sam_qspidev_s
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
   bool candma;                 /* DMA is supported */
+  uint8_t rxintf;              /* RX hardware interface number */
+  uint8_t txintf;              /* TX hardware interface number */
   sem_t dmawait;               /* Used to wait for DMA completion */
   WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
   int result;                  /* DMA result */
   DMA_HANDLE rxdma;            /* QSPI RX DMA handle */
   DMA_HANDLE txdma;            /* QSPI TX DMA handle */
-#endif
-
-#ifdef CONFIG_SAMV7_QSPI_DMA
-  uint8_t rxintf;              /* RX hardware interface number */
-  uint8_t txintf;              /* TX hardware interface number */
 #endif
 
   /* Debug stuff */
@@ -230,7 +227,6 @@ static inline void qspi_flush(struct sam_qspidev_s *priv);
 /* DMA support */
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
-
 #ifdef CONFIG_SAMV7_QSPI_DMADEBUG
 #  define qspi_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
 #  define qspi_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
@@ -251,6 +247,16 @@ static inline uintptr_t qspi_regaddr(struct sam_qspidev_s *priv,
                   unsigned int offset);
 #endif
 
+static int      qspi_memory_enable(struct sam_qspidev_s *priv,
+                  struct qspi_meminfo_s *meminfo);
+#ifdef CONFIG_SAMV7_QSPI_DMA
+static int      qspi_memory_dma(struct sam_qspidev_s *priv,
+                  struct qspi_meminfo_s *meminfo);
+#endif
+
+static int      qspi_memory_nodma(struct sam_qspidev_s *priv,
+                  struct qspi_meminfo_s *meminfo);
+
 /* Interrupts */
 
 static int     qspi_interrupt(struct sam_qspidev_s *priv);
@@ -265,7 +271,9 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency);
 static void     qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode);
 static void     qspi_setbits(struct qspi_dev_s *dev, int nbits);
 static int      qspi_command(struct qspi_dev_s *dev,
-                  struct qspi_xfrinfo_s *xfrinfo);
+                  struct qspi_cmdinfo_s *cmdinfo);
+static int      qspi_memory(struct qspi_dev_s *dev,
+                  struct qspi_meminfo_s *meminfo);
 
 /* Initialization */
 
@@ -285,6 +293,7 @@ static const struct qspi_ops_s g_qspi0ops =
   .setmode           = qspi_setmode,
   .setbits           = qspi_setbits,
   .command           = qspi_command,
+  .memory            = qspi_memory,
 };
 
 /* This is the overall state of the QSPI0 controller */
@@ -727,6 +736,184 @@ static inline uintptr_t qspi_regaddr(struct sam_qspidev_s *priv,
 #endif
 
 /****************************************************************************
+ * Name: qspi_memory_enable
+ *
+ * Description:
+ *   Enable the QSPI memory transfer
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   meminfo - Describes the memory transfer to be performed.
+ *
+ * Returned Value:
+ *   Zero (OK) on SUCCESS, a negated errno on value of failure
+ *
+ ****************************************************************************/
+
+static int qspi_memory_enable(struct sam_qspidev_s *priv,
+                              struct qspi_meminfo_s *meminfo)
+{
+  uint32_t regval;
+
+  /* Write the Instruction code register:
+   *
+   *  QSPI_ICR_INST(cmd)  8-bit command
+   *  QSPI_ICR_OPT(0)     No option
+   */
+
+  regval =  QSPI_ICR_INST(meminfo->cmd) | QSPI_ICR_OPT(0);
+  qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
+
+  /* Is memory data scrambled? */
+
+  if (QSPIMEM_ISSCRAMBLE(meminfo->flags))
+    {
+      /* Yes.. set the scramble key */
+
+      qspi_putreg(priv, meminfo->key, SAM_QSPI_SKR_OFFSET);
+
+      /* Enable the scrambler and enable/disable the random value in the
+       * key.
+       */
+
+      regval  = QSPI_SMR_SCREN;
+      if (!QSPIMEM_ISRANDOM(meminfo->flags))
+        {
+          /* Disable random value in key */
+
+          regval |= QSPI_SMR_RVDIS;
+        }
+
+      qspi_putreg(priv, 0, SAM_QSPI_SMR_OFFSET);
+    }
+  else
+    {
+      /* Disable the scrambler */
+
+      qspi_putreg(priv, 0, SAM_QSPI_SKR_OFFSET);
+      qspi_putreg(priv, 0, SAM_QSPI_SMR_OFFSET);
+    }
+
+  /* Write Instruction Frame Register:
+   *
+   *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
+   *   QSPI_IFR_INSTEN=1        Instruction Enable
+   *   QSPI_IFR_ADDREN=1        Address Enable
+   *   QSPI_IFR_OPTEN=0         Option Disable
+   *   QSPI_IFR_DATAEN=1        Data Enable
+   *   QSPI_IFR_OPTL_*          Not used (zero)
+   *   QSPI_IFR_ADDRL=0/1       Depends on meminfo->addrlen;
+   *   QSPI_IFR_TFRTYP_RD/WRMEM Depends on meminfo->flags
+   *   QSPI_IFR_CRM=0           Not continuous read
+   *   QSPI_IFR_NBDUM(0)        No dummy cycles
+   */
+
+  regval = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_ADDREN |
+           QSPI_IFR_DATAEN;
+
+  if (QSPIMEM_ISWRITE(meminfo->flags))
+    {
+      regval |= QSPI_IFR_TFRTYP_WRMEM;
+    }
+  else
+    {
+      regval |= QSPI_IFR_TFRTYP_RDMEM;
+    }
+
+  if (meminfo->addrlen == 3)
+    {
+      regval |= QSPI_IFR_ADDRL_24BIT;
+    }
+  else if (meminfo->addrlen == 4)
+    {
+      regval |= QSPI_IFR_ADDRL_32BIT;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  /* Write the instruction frame value */
+
+  qspi_putreg(priv, regval, SAM_QSPI_IFR_OFFSET);
+  (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: qspi_memory_dma
+ *
+ * Description:
+ *   Perform one QSPI memory transfer using DMA
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   meminfo - Describes the memory transfer to be performed.
+ *
+ * Returned Value:
+ *   Zero (OK) on SUCCESS, a negated errno on value of failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_QSPI_DMA
+static int qspi_memory_dma(struct sam_qspidev_s *priv,
+                           struct qspi_meminfo_s *meminfo)
+{
+#warning Missing Logic
+}
+#endif
+
+/****************************************************************************
+ * Name: qspi_memory_nodma
+ *
+ * Description:
+ *   Perform one QSPI memory transfer without using DMA
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   meminfo - Describes the memory transfer to be performed.
+ *
+ * Returned Value:
+ *   Zero (OK) on SUCCESS, a negated errno on value of failure
+ *
+ ****************************************************************************/
+
+static int qspi_memory_nodma(struct sam_qspidev_s *priv,
+                             struct qspi_meminfo_s *meminfo)
+{
+  uintptr_t memaddr = SAM_QSPIMEM_BASE + meminfo->addr;
+
+  /* Enable the memory transfer */
+
+  qspi_memory_enable(priv, meminfo);
+
+  /* Transfer data to/from QSPI memory */
+
+  if (QSPICMD_ISWRITE(meminfo->flags))
+    {
+      memcpy((void *)memaddr, meminfo->buffer, meminfo->buflen);
+    }
+  else
+    {
+      memcpy(meminfo->buffer, (void *)memaddr, meminfo->buflen);
+    }
+
+  MEMORY_SYNC();
+
+  /* Indicate the end of the transfer as soon as the transmission
+   * registers are empty.
+   */
+
+  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_INT_TXEMPTY) == 0);
+  qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
+
+  /* Wait for the end of the transfer */
+
+  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
+  return OK;
+}
+
+/****************************************************************************
  * Name: qspi_lock
  *
  * Description:
@@ -1003,7 +1190,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
  *
  * Input Parameters:
  *   dev     - Device-specific state data
- *   xfrinfo - Describes the transfer to be performed.
+ *   cmdinfo - Describes the command transfer to be performed.
  *
  * Returned Value:
  *   Zero (OK) on SUCCESS, a negated errno on value of failure
@@ -1011,48 +1198,48 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
  ****************************************************************************/
 
 static int qspi_command(struct qspi_dev_s *dev,
-                        struct qspi_xfrinfo_s *xfrinfo)
+                        struct qspi_cmdinfo_s *cmdinfo)
 {
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t regval;
   uint32_t ifr;
 
-  DEBUGASSERT(priv != NULL && xfrinfo != NULL);
+  DEBUGASSERT(priv != NULL && cmdinfo != NULL);
 
 #ifdef CONFIG_DEBUG_SPI
   spivdbg("Transfer:\n");
-  spivdbg("  flags: %02x\n", xfrinfo->flags);
-  spivdbg("  cmd: %04x\n", xfrinfo->cmd);
-  if (QSPIXFR_ISADDRESS(xfrinfo->flags))
+  spivdbg("  flags: %02x\n", cmdinfo->flags);
+  spivdbg("  cmd: %04x\n", cmdinfo->cmd);
+  if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
       spivdbg("  address/length: %08lx %d\n",
-              (unsigned long)xfrinfo->addr, xfrinfo->addrlen);
+              (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
-  if (QSPIXFR_ISDATA(xfrinfo->flags))
+  if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      spivdbg("  %s Data:\n", QSPIXFR_ISWRITE(xfrinfo->flags) ? "Write" : "Read");
-      spivdbg("    buffer/length: %p %d\n", xfrinfo->buffer, xfrinfo->buflen);
+      spivdbg("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
+      spivdbg("    buffer/length: %p %d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
-  DEBUGASSERT(xfrinfo->cmd < 256);
+  DEBUGASSERT(cmdinfo->cmd < 256);
 
   /* Write the instruction address register */
 
   ifr = 0;
-  if (QSPIXFR_ISADDRESS(xfrinfo->flags))
+  if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      DEBUGASSERT(xfrinfo->addrlen == 3 || xfrinfo->addrlen == 4);
+      DEBUGASSERT(cmdinfo->addrlen == 3 || cmdinfo->addrlen == 4);
 
-      qspi_putreg(priv, xfrinfo->addr, SAM_QSPI_IFR_OFFSET);
+      qspi_putreg(priv, cmdinfo->addr, SAM_QSPI_IFR_OFFSET);
       ifr |= QSPI_IFR_ADDREN;
 
-      if (xfrinfo->addrlen == 3)
+      if (cmdinfo->addrlen == 3)
         {
           ifr |= QSPI_IFR_ADDRL_24BIT;
         }
-      else if (xfrinfo->addrlen == 4)
+      else if (cmdinfo->addrlen == 4)
         {
           ifr |= QSPI_IFR_ADDRL_32BIT;
         }
@@ -1068,19 +1255,21 @@ static int qspi_command(struct qspi_dev_s *dev,
    *  QSPI_ICR_OPT(0)     No option
    */
 
-  regval =  QSPI_ICR_INST(xfrinfo->cmd) | QSPI_ICR_OPT(0);
+  regval =  QSPI_ICR_INST(cmdinfo->cmd) | QSPI_ICR_OPT(0);
   qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
 
-  if (QSPIXFR_ISDATA(xfrinfo->flags))
+  /* Does data accompany the command? */
+
+  if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       uint16_t buflen;
 
-      DEBUGASSERT(xfrinfo->buffer != NULL && xfrinfo->buflen > 0);
+      DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
 
       /* Make sure that the length is an even multiple of 32-bit words. */
 
-      DEBUGASSERT((xfrinfo->buflen & 3) == 0);
-      buflen = (xfrinfo->buflen + 3) & ~3;
+      DEBUGASSERT((cmdinfo->buflen & 3) == 0);
+      buflen = (cmdinfo->buflen + 3) & ~3;
 
       /* Write Instruction Frame Register:
        *
@@ -1100,7 +1289,7 @@ static int qspi_command(struct qspi_dev_s *dev,
       ifr |= QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_DATAEN |
              QSPI_IFR_NBDUM(0);
 
-      if (QSPIXFR_ISWRITE(xfrinfo->flags))
+      if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
           ifr |= QSPI_IFR_TFRTYP_WRITE;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
@@ -1109,7 +1298,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
           /* Copy the data to write to QSPI_RAM */
 
-          memcpy((void *)SAM_QSPIMEM_BASE, xfrinfo->buffer, buflen);
+          memcpy((void *)SAM_QSPIMEM_BASE, cmdinfo->buffer, buflen);
         }
       else
         {
@@ -1120,7 +1309,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
           /* Copy the data from QSPI memory into the user buffer */
 
-          memcpy(xfrinfo->buffer, (const void *)SAM_QSPIMEM_BASE, buflen);
+          memcpy(cmdinfo->buffer, (const void *)SAM_QSPIMEM_BASE, buflen);
         }
 
       MEMORY_SYNC();
@@ -1161,6 +1350,42 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
   return OK;
+}
+
+/****************************************************************************
+ * Name: qspi_memory
+ *
+ * Description:
+ *   Perform one QSPI memory transfer
+ *
+ * Input Parameters:
+ *   dev     - Device-specific state data
+ *   meminfo - Describes the memory transfer to be performed.
+ *
+ * Returned Value:
+ *   Zero (OK) on SUCCESS, a negated errno on value of failure
+ *
+ ****************************************************************************/
+
+static int qspi_memory(struct qspi_dev_s *dev,
+                       struct qspi_meminfo_s *meminfo)
+{
+  struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
+
+  DEBUGASSERT(priv != NULL && meminfo != NULL);
+
+#ifdef CONFIG_SAMV7_QSPI_DMA
+  /* Can we perform DMA?  Should we perform DMA? */
+
+  if (priv->candma && meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD)
+    {
+      return qspi_memory_dma(priv, meminfo);
+    }
+  else
+#endif
+    {
+      return qspi_memory_nodma(priv, meminfo);
+    }
 }
 
 /****************************************************************************
