@@ -796,7 +796,7 @@ static int qspi_memory_enable(struct sam_qspidev_s *priv,
 
   /* Write Instruction Frame Register:
    *
-   *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
+   *   QSPI_IFR_WIDTH_?         Instruction=single bit/Data depends on meminfo->flags
    *   QSPI_IFR_INSTEN=1        Instruction Enable
    *   QSPI_IFR_ADDREN=1        Address Enable
    *   QSPI_IFR_OPTEN=0         Option Disable
@@ -805,19 +805,30 @@ static int qspi_memory_enable(struct sam_qspidev_s *priv,
    *   QSPI_IFR_ADDRL=0/1       Depends on meminfo->addrlen;
    *   QSPI_IFR_TFRTYP_RD/WRMEM Depends on meminfo->flags
    *   QSPI_IFR_CRM=0           Not continuous read
-   *   QSPI_IFR_NBDUM(0)        No dummy cycles
+   *   QSPI_IFR_NBDUM           Depends on meminfo->dummies
    */
 
-  regval = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_ADDREN |
-           QSPI_IFR_DATAEN;
+  regval = QSPI_IFR_INSTEN | QSPI_IFR_ADDREN | QSPI_IFR_DATAEN |
+           QSPI_IFR_NBDUM(meminfo->dummies);
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      regval |= QSPI_IFR_TFRTYP_WRMEM;
+      regval |= QSPI_IFR_TFRTYP_WRMEM | QSPI_IFR_WIDTH_SINGLE;
     }
   else
     {
-      regval |= QSPI_IFR_TFRTYP_RDMEM;
+      if (QSPIMEM_ISQUADIO(meminfo->flags))
+        {
+          regval |= QSPI_IFR_TFRTYP_RDMEM | QSPI_IFR_WIDTH_QUADIO;
+        }
+      else if (QSPIMEM_ISDUALIO(meminfo->flags))
+        {
+          regval |= QSPI_IFR_TFRTYP_RDMEM | QSPI_IFR_WIDTH_DUALIO;
+        }
+      else
+        {
+          regval |= QSPI_IFR_TFRTYP_RDMEM | QSPI_IFR_WIDTH_SINGLE;
+        }
     }
 
   if (meminfo->addrlen == 3)
@@ -1273,7 +1284,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
       /* Write Instruction Frame Register:
        *
-       *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
+       *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit/Data single bit
        *   QSPI_IFR_INSTEN=1      Instruction Enable
        *   QSPI_IFR_ADDREN=?      (See logic above)
        *   QSPI_IFR_OPTEN=0       Option Disable
@@ -1325,7 +1336,7 @@ static int qspi_command(struct qspi_dev_s *dev,
     {
       /* Write Instruction Frame Register:
        *
-       *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit
+       *   QSPI_IFR_WIDTH_SINGLE  Instruction=single bit/Data single bit
        *   QSPI_IFR_INSTEN=1      Instruction Enable
        *   QSPI_IFR_ADDREN=?      (See logic above)
        *   QSPI_IFR_OPTEN=0       Option Disable
@@ -1338,7 +1349,7 @@ static int qspi_command(struct qspi_dev_s *dev,
        */
 
       ifr = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_TFRTYP_READ |
-               QSPI_IFR_NBDUM(0);
+            QSPI_IFR_NBDUM(0);
       qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
       MEMORY_SYNC();
