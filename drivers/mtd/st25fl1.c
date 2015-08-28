@@ -248,14 +248,20 @@
 #define S25FL116K_SECTOR_SIZE      (4*1024)
 #define S25FL116K_SECTOR_SHIFT     (12)
 #define S25FL116K_SECTOR_COUNT     (512)
+#define S25FL116K_PAGE_SIZE        (256)
+#define S25FL116K_PAGE_SHIFT       (8)
 
 #define S25FL132K_SECTOR_SIZE      (4*1024)
-#define S25FL163K_SECTOR_SHIFT     (12)
+#define S25FL132K_SECTOR_SHIFT     (12)
 #define S25FL132K_SECTOR_COUNT     (1024)
+#define S25FL132K_PAGE_SIZE        (256)
+#define S25FL132K_PAGE_SHIFT       (8)
 
 #define S25FL164K_SECTOR_SIZE      (4*1024)
 #define S25FL164K_SECTOR_SHIFT     (12)
 #define S25FL164K_SECTOR_COUNT     (2048)
+#define S25FL164K_PAGE_SIZE        (256)
+#define S25FL164K_PAGE_SHIFT       (8)
 
 /* Cache flags **********************************************************************/
 
@@ -290,6 +296,7 @@ struct st25fl1_dev_s
   FAR struct qspi_dev_s *qspi;       /* Saved QuadSPI interface instance */
   uint16_t              nsectors;    /* Number of erase sectors */
   uint8_t               sectorshift; /* Log2 of sector size */
+  uint8_t               pageshift;   /* Log2 of page size */
 
 #ifdef CONFIG_ST25FL1_SECTOR512
   uint8_t               flags;       /* Buffered sector flags */
@@ -400,18 +407,18 @@ static inline void st25fl1_unlock(FAR struct qspi_dev_s *qspi)
 
 static int st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
 {
-  struct qspi_xfrinfo_s xfrinfo;
+  struct qspi_cmdinfo_s cmdinfo;
 
   fvdbg("CMD: %02x\n", cmd);
 
-  xfrinfo.flags   = 0;
-  xfrinfo.addrlen = 0;
-  xfrinfo.cmd     = cmd;
-  xfrinfo.buflen  = 0;
-  xfrinfo.addr    = 0;
-  xfrinfo.buffer  = NULL;
+  cmdinfo.flags   = 0;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = cmd;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = NULL;
 
-  return QSPI_COMMAND(qspi, &xfrinfo);
+  return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
 /************************************************************************************
@@ -421,18 +428,18 @@ static int st25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
 static int st25fl1_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                    off_t addr, uint8_t addrlen)
 {
-  struct qspi_xfrinfo_s xfrinfo;
+  struct qspi_cmdinfo_s cmdinfo;
 
   fvdbg("CMD: %02x Address: %04lx addrlen=%d\n", cmd, (unsigned long)addr, addrlen);
 
-  xfrinfo.flags   = QSPIXFR_ADDRESS;
-  xfrinfo.addrlen = addrlen;
-  xfrinfo.cmd     = cmd;
-  xfrinfo.buflen  = 0;
-  xfrinfo.addr    = addr;
-  xfrinfo.buffer  = NULL;
+  cmdinfo.flags   = QSPICMD_ADDRESS;
+  cmdinfo.addrlen = addrlen;
+  cmdinfo.cmd     = cmd;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = addr;
+  cmdinfo.buffer  = NULL;
 
-  return QSPI_COMMAND(qspi, &xfrinfo);
+  return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
 /************************************************************************************
@@ -442,18 +449,18 @@ static int st25fl1_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 static int st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                 FAR void *buffer, size_t buflen)
 {
-  struct qspi_xfrinfo_s xfrinfo;
+  struct qspi_cmdinfo_s cmdinfo;
 
   fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
 
-  xfrinfo.flags   = QSPIXFR_READDATA;
-  xfrinfo.addrlen = 0;
-  xfrinfo.cmd     = cmd;
-  xfrinfo.buflen  = buflen;
-  xfrinfo.addr    = 0;
-  xfrinfo.buffer  = buffer;
+  cmdinfo.flags   = QSPICMD_READDATA;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = cmd;
+  cmdinfo.buflen  = buflen;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = buffer;
 
-  return QSPI_COMMAND(qspi, &xfrinfo);
+  return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
 /************************************************************************************
@@ -463,18 +470,18 @@ static int st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 static int st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                  FAR const void *buffer, size_t buflen)
 {
-  struct qspi_xfrinfo_s xfrinfo;
+  struct qspi_cmdinfo_s cmdinfo;
 
   fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
 
-  xfrinfo.flags   = QSPIXFR_WRITEDATA;
-  xfrinfo.addrlen = 0;
-  xfrinfo.cmd     = cmd;
-  xfrinfo.buflen  = buflen;
-  xfrinfo.addr    = 0;
-  xfrinfo.buffer  = (FAR void *)buffer;
+  cmdinfo.flags   = QSPICMD_WRITEDATA;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = cmd;
+  cmdinfo.buflen  = buflen;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = (FAR void *)buffer;
 
-  return QSPI_COMMAND(qspi, &xfrinfo);
+  return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
 /************************************************************************************
@@ -596,16 +603,19 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
     {
       case S25FL116K_JEDEC_CAPACITY:
         priv->sectorshift = S25FL116K_SECTOR_SHIFT;
+        priv->pageshift   = S25FL116K_PAGE_SHIFT;
         priv->nsectors    = S25FL116K_SECTOR_COUNT;
         break;
 
       case S25FL132K_JEDEC_CAPACITY:
-        priv->sectorshift = S25FL163K_SECTOR_SHIFT;
+        priv->sectorshift = S25FL132K_SECTOR_SHIFT;
+        priv->pageshift   = S25FL116K_PAGE_SHIFT;
         priv->nsectors    = S25FL132K_SECTOR_COUNT;
         break;
 
       case S25FL164K_JEDEC_CAPACITY:
         priv->sectorshift = S25FL164K_SECTOR_SHIFT;
+        priv->pageshift   = S25FL116K_PAGE_SHIFT;
         priv->nsectors    = S25FL164K_SECTOR_COUNT;
         break;
 
