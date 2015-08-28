@@ -174,12 +174,17 @@
 
 /* QSPI Memory Transfer Flags */
 
-#define QSPIMEM_WRITE         (1 << 2)  /* Bit 2: Memory write data transfer */
-#define QSPIMEM_SCRAMBLE      (1 << 3)  /* Bit 3: Memory write data transfer */
-#define QSPIMEM_RANDOM        (1 << 3)  /* Bit 4: Use random key in scrambler */
+#define QSPIMEM_READ          (0)       /* Bit 2: 0=Memory read data transfer */
+#define QSPIMEM_WRITE         (1 << 2)  /* Bit 2: 1=Memory write data transfer */
+#define QSPIMEM_DUALIO        (1 << 3)  /* Bit 3: Use Dual I/O (READ only) */
+#define QSPIMEM_QUADIO        (1 << 4)  /* Bit 4: Use Quad I/O (READ only) */
+#define QSPIMEM_SCRAMBLE      (1 << 5)  /* Bit 5: Scramble data */
+#define QSPIMEM_RANDOM        (1 << 6)  /* Bit 6: Use random key in scrambler */
 
 #define QSPIMEM_ISREAD(f)     (((f) & QSPIMEM_WRITE) == 0)
 #define QSPIMEM_ISWRITE(f)    (((f) & QSPIMEM_WRITE) != 0)
+#define QSPIMEM_ISDUALIO(f)   (((f) & QSPIMEM_DUALIO) != 0)
+#define QSPIMEM_ISQUADIO(f)   (((f) & QSPIMEM_QUADIO) != 0)
 #define QSPIMEM_ISSCRAMBLE(f) (((f) & QSPIMEM_SCRAMBLE) != 0)
 
 #define QSPIMEM_ISRANDOM(f) \
@@ -218,6 +223,7 @@ struct qspi_meminfo_s
 {
   uint8_t   flags;       /* See QSPMEM_* definitions */
   uint8_t   addrlen;     /* Address length in bytes */
+  uint8_t   dummies;     /* Number of dummy read cycles (READ only) */
   uint16_t  buflen;      /* Data buffer length in bytes */
   uint16_t  cmd;         /* Memory access command */
   uint32_t  addr;        /* Memory Address */
