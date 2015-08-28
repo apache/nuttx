@@ -135,25 +135,56 @@
  *
  * Input Parameters:
  *   dev     - Device-specific state data
- *   xfrinfo - Describes the command transfer to be performed.
+ *   cmdinfo - Describes the command transfer to be performed.
  *
  * Returned Value:
  *   Zero (OK) on SUCCESS, a negated errno on value of failure
  *
  ****************************************************************************/
 
-#define QSPI_COMMAND(d,x) (d)->ops->command(d,x)
+#define QSPI_COMMAND(d,c) (d)->ops->command(d,c)
 
-/* QSPI Transfer Flags */
+/* QSPI Command Transfer Flags */
 
-#define QSPIXFR_ADDRESS      (1 << 0)  /* Enable address transfer */
-#define QSPIXFR_READDATA     (1 << 1)  /* Enable read data transfer */
-#define QSPIXFR_WRITEDATA    (1 << 2)  /* Enable write data transfer */
+#define QSPICMD_ADDRESS       (1 << 0)  /* Bit 0: Enable address transfer */
+#define QSPICMD_READDATA      (1 << 1)  /* Bit 1: Enable read data transfer */
+#define QSPICMD_WRITEDATA     (1 << 2)  /* Bit 2: Enable write data transfer */
 
-#define QSPIXFR_ISADDRESS(f) (((f) & QSPIXFR_ADDRESS) != 0)
-#define QSPIXFR_ISDATA(f)    (((f) & (QSPIXFR_READDATA | QSPIXFR_WRITEDATA)) != 0)
-#define QSPIXFR_ISREAD(f)    (((f) & QSPIXFR_READDATA) != 0)
-#define QSPIXFR_ISWRITE(f)   (((f) & QSPIXFR_WRITEDATA) != 0)
+#define QSPICMD_ISADDRESS(f)  (((f) & QSPICMD_ADDRESS) != 0)
+#define QSPICMD_ISDATA(f)     (((f) & (QSPICMD_READDATA | QSPICMD_WRITEDATA)) != 0)
+#define QSPICMD_ISREAD(f)     (((f) & QSPICMD_READDATA) != 0)
+#define QSPICMD_ISWRITE(f)    (((f) & QSPICMD_WRITEDATA) != 0)
+
+/****************************************************************************
+ * Name: QSPI_MEMORY
+ *
+ * Description:
+ *   Perform one QSPI memory transfer
+ *
+ * Input Parameters:
+ *   dev     - Device-specific state data
+ *   meminfo - Describes the memory transfer to be performed.
+ *
+ * Returned Value:
+ *   Zero (OK) on SUCCESS, a negated errno on value of failure
+ *
+ ****************************************************************************/
+
+#define QSPI_MEMORY(d,m) (d)->ops->memory(d,m)
+
+/* QSPI Memory Transfer Flags */
+
+#define QSPIMEM_WRITE         (1 << 2)  /* Bit 2: Memory write data transfer */
+#define QSPIMEM_SCRAMBLE      (1 << 3)  /* Bit 3: Memory write data transfer */
+#define QSPIMEM_RANDOM        (1 << 3)  /* Bit 4: Use random key in scrambler */
+
+#define QSPIMEM_ISREAD(f)     (((f) & QSPIMEM_WRITE) == 0)
+#define QSPIMEM_ISWRITE(f)    (((f) & QSPIMEM_WRITE) != 0)
+#define QSPIMEM_ISSCRAMBLE(f) (((f) & QSPIMEM_SCRAMBLE) != 0)
+
+#define QSPIMEM_ISRANDOM(f) \
+  (((f) & (QSPIMEM_SCRAMBLE|QSPIMEM_RANDOM)) == \
+          (QSPIMEM_SCRAMBLE|QSPIMEM_RANDOM))
 
 /****************************************************************************
  * Public Types
@@ -169,16 +200,29 @@ enum qspi_mode_e
   QSPIDEV_MODE3          /* CPOL=1 CHPHA=1 */
 };
 
-/* This structure describes one transfer */
+/* This structure describes one command transfer */
 
-struct qspi_xfrinfo_s
+struct qspi_cmdinfo_s
 {
-  uint8_t  flags;        /* See QSPIXFR_* definitions */
-  uint8_t  addrlen;      /* Address length in bytes (if QSPIXFR_ADDRESS) */
-  uint16_t cmd;          /* Command */
-  uint16_t buflen;       /* Data buffer length in bytes (if QSPIXFR_DATA) */
-  uint32_t addr;         /* Address (if QSPIXFR_ADDRESS) */
-  FAR void *buffer;      /* Data buffer (if QSPIXFR_DATA) */
+  uint8_t   flags;       /* See QSPICMD_* definitions */
+  uint8_t   addrlen;     /* Address length in bytes (if QSPICMD_ADDRESS) */
+  uint16_t  cmd;         /* Command */
+  uint16_t  buflen;      /* Data buffer length in bytes (if QSPICMD_DATA) */
+  uint32_t  addr;        /* Address (if QSPICMD_ADDRESS) */
+  FAR void *buffer;      /* Data buffer (if QSPICMD_DATA) */
+};
+
+/* This structure describes one memory transfer */
+
+struct qspi_meminfo_s
+{
+  uint8_t   flags;       /* See QSPMEM_* definitions */
+  uint8_t   addrlen;     /* Address length in bytes */
+  uint16_t  buflen;      /* Data buffer length in bytes */
+  uint16_t  cmd;         /* Memory access command */
+  uint32_t  addr;        /* Memory Address */
+  uint32_t  key;         /* Scrambler key */
+  FAR void *buffer;      /* Data buffer */
 };
 
 /* The QSPI vtable */
@@ -191,7 +235,9 @@ struct qspi_ops_s
   CODE void     (*setmode)(FAR struct qspi_dev_s *dev, enum qspi_mode_e mode);
   CODE void     (*setbits)(FAR struct qspi_dev_s *dev, int nbits);
   CODE int      (*command)(FAR struct qspi_dev_s *dev,
-                   FAR struct qspi_xfrinfo_s *xfrinfo);
+                   FAR struct qspi_cmdinfo_s *cmdinfo);
+  CODE int      (*memory)(FAR struct qspi_dev_s *dev,
+                   FAR struct qspi_meminfo_s *meminfo);
 };
 
 /* QSPI private data.  This structure only defines the initial fields of the
