@@ -405,6 +405,17 @@ config ST25FL1_SECTOR512
 	bool "Simulate 512 byte Erase Blocks"
 	default n
 
+config ST25FL1_SCRAMBLE
+	bool "Scramble data"
+	default n
+	---help---
+		Requires drviver support for data scrambling/descrambling.
+
+config ST25FL1_SCRAMBLE_KEY
+	hex "Scramble key"
+	default 0x0baddead
+	depends on ST25FL1_SCRAMBLE
+
 endif
 
 config MTD_SMART

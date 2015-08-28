@@ -333,15 +333,15 @@ static int  st25fl1_readid(FAR struct st25fl1_dev_s *priv);
 static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv);
 static int  st25fl1_erase_sector(FAR struct st25fl1_dev_s *priv, off_t offset);
 static int  st25fl1_erase_chip(FAR struct st25fl1_dev_s *priv);
-static void st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
+static int  st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
               off_t address, size_t nbytes);
-static void st25fl1_write_page(FAR struct st25fl1_dev_s *priv,
+static int  st25fl1_write_page(FAR struct st25fl1_dev_s *priv,
               FAR const uint8_t *buffer, off_t address, size_t nbytes);
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_flush_cache(struct st25fl1_dev_s *priv);
+static int  st25fl1_flush_cache(struct st25fl1_dev_s *priv);
 static FAR uint8_t *st25fl1_read_cache(struct st25fl1_dev_s *priv, off_t sector);
 static void st25fl1_erase_cache(struct st25fl1_dev_s *priv, off_t sector);
-static void st25fl1_write_cache(FAR struct st25fl1_dev_s *priv,
+static int  st25fl1_write_cache(FAR struct st25fl1_dev_s *priv,
               FAR const uint8_t *buffer,  off_t sector, size_t nsectors);
 #endif
 
@@ -722,22 +722,98 @@ static int st25fl1_erase_chip(struct st25fl1_dev_s *priv)
  * Name: st25fl1_read_byte
  ************************************************************************************/
 
-static void st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
-                           off_t address, size_t nbytes)
+static int st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
+                             off_t address, size_t buflen)
 {
+  struct qspi_meminfo_s meminfo;
+
   fvdbg("address: %08lx nbytes: %d\n", (long)address, (int)nbytes);
-#warning Missing Logic
+
+#ifdef CONFIG_ST25FL1_SCRAMBLE
+  meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO | QSPIMEM_SCRAMBLE;
+#else
+  meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
+#endif
+  meminfo.addrlen = 3;
+  meminfo.dummies = 6;
+  meminfo.buflen  = buflen;
+  meminfo.cmd     = ST25FL1_FAST_READ_QUADIO;
+  meminfo.addr    = address;
+#ifdef CONFIG_ST25FL1_SCRAMBLE
+  meminfo.key     = CONFIG_ST25FL1_SCRAMBLE_KEY;
+#endif
+  meminfo.buffer  = buffer;
+
+  return QSPI_MEMORY(priv->qspi, &meminfo);
 }
 
 /************************************************************************************
  * Name:  st25fl1_write_page
  ************************************************************************************/
 
-static void st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
-                          off_t address, size_t nbytes)
+static int st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
+                              off_t address, size_t buflen)
 {
-  fvdbg("address: %08lx nwords: %d\n", (long)address, (int)nbytes);
-#warning Missing Logic
+  struct qspi_meminfo_s meminfo;
+  unsigned int pagesize;
+  unsigned int npages;
+  int ret;
+  int i;
+
+  fvdbg("address: %08lx buflen: %u\n", (unsigned long)address, (unsigned)buflen);
+
+  npages   = (buflen >> priv->pageshift);
+  pagesize = (1 << priv->pageshift);
+
+  /* Set up non-varying parts of transfer description */
+
+#ifdef CONFIG_ST25FL1_SCRAMBLE
+  meminfo.flags   = QSPIMEM_WRITE | QSPIMEM_SCRAMBLE;
+#else
+  meminfo.flags   = QSPIMEM_WRITE;
+#endif
+  meminfo.cmd     = ST25FL1_PAGE_PROGRAM;
+  meminfo.addrlen = 3;
+  meminfo.buflen  = pagesize;
+#ifdef CONFIG_ST25FL1_SCRAMBLE
+  meminfo.key     = CONFIG_ST25FL1_SCRAMBLE_KEY;
+#endif
+  meminfo.dummies = 0;
+
+  /* Then write each page */
+
+  for (i = 0; i < npages; i++)
+    {
+      /* Set up varying parts of the transfer description */
+
+      meminfo.addr   = address;
+      meminfo.buffer = (void *)buffer;
+
+      /* Write one page */
+
+      st25fl1_write_enable(priv->qspi);
+      ret = QSPI_MEMORY(priv->qspi, &meminfo);
+      if (ret < 0)
+        {
+          fdbg("ERROR: QSPI_MEMORY failed writing address=%06x\n",
+               address)
+          return ret;
+        }
+
+      /* Update for the next time through the loop */
+
+      buffer  += pagesize;
+      address += pagesize;
+      buflen  -= pagesize;
+    }
+
+  /* The transfer should always be an even number of sectors and hence also
+   * pages.  There should be no remainder.
+   */
+
+  DEBUGASSERT(buflen == 0);
+  st25fl1_write_disable(priv->qspi);
+  return OK;
 }
 
 /************************************************************************************
@@ -745,7 +821,7 @@ static void st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *bu
  ************************************************************************************/
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_flush_cache(struct st25fl1_dev_s *priv)
+static int st25fl1_flush_cache(struct st25fl1_dev_s *priv)
 {
   /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
    * or was erased (with the cache containing the correct FLASH contents), then write
@@ -762,6 +838,8 @@ static void st25fl1_flush_cache(struct st25fl1_dev_s *priv)
       CLR_DIRTY(priv);
       CLR_ERASED(priv);
     }
+
+  return OK;
 }
 #endif
 
@@ -775,6 +853,7 @@ static FAR uint8_t *st25fl1_read_cache(struct st25fl1_dev_s *priv, off_t sector)
   off_t esectno;
   int   shift;
   int   index;
+  int   ret;
 
   /* Convert from the 512 byte sector to the erase sector size of the device.  For
    * exmample, if the actual erase sector size if 4Kb (1 << 12), then we first
@@ -791,12 +870,23 @@ static FAR uint8_t *st25fl1_read_cache(struct st25fl1_dev_s *priv, off_t sector)
     {
       /* No.. Flush any dirty erase block currently in the cache */
 
-      st25fl1_flush_cache(priv);
+      ret = st25fl1_flush_cache(priv);
+      if (ret < 0)
+        {
+          fdbg("ERROR: st25fl1_flush_cache failed: %d\n", ret);
+          return NULL;
+        }
 
       /* Read the erase block into the cache */
 
-      st25fl1_read_byte(priv, priv->sector, (esectno << priv->sectorshift)
-                        (1 << priv->sectorshift));
+      ret = st25fl1_read_byte(priv, priv->sector,
+                              (esectno << priv->sectorshift)
+                              (1 << priv->sectorshift));
+      if (ret < 0)
+        {
+          fdbg("ERROR: st25fl1_read_byte failed: %d\n", ret);
+          return NULL;
+        }
 
       /* Mark the sector as cached */
 
@@ -861,10 +951,12 @@ static void st25fl1_erase_cache(struct st25fl1_dev_s *priv, off_t sector)
  ************************************************************************************/
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-static void st25fl1_write_cache(FAR struct st25fl1_dev_s *priv, FAR const uint8_t *buffer,
-                            off_t sector, size_t nsectors)
+static int st25fl1_write_cache(FAR struct st25fl1_dev_s *priv,
+                               FAR const uint8_t *buffer, off_t sector,
+                               size_t nsectors)
 {
   FAR uint8_t *dest;
+  int ret;
 
   for (; nsectors > 0; nsectors--)
     {
@@ -884,7 +976,13 @@ static void st25fl1_write_cache(FAR struct st25fl1_dev_s *priv, FAR const uint8_
           off_t esectno  = sector >> (priv->sectorshift - ST25FL1_SECTOR512_SHIFT);
           fvdbg("sector: %ld esectno: %d\n", sector, esectno);
 
-          DEBUGVERIFY(st25fl1_erase_sector(priv, esectno));
+          ret = st25fl1_erase_sector(priv, esectno);
+          if (ret < 0)
+            {
+              fdbg("ERROR: st25fl1_erase_sector failed: %d\n", ret);
+              return ret;
+            }
+
           SET_ERASED(priv);
         }
 
@@ -901,7 +999,7 @@ static void st25fl1_write_cache(FAR struct st25fl1_dev_s *priv, FAR const uint8_
 
   /* Flush the last erase block left in the cache */
 
-  st25fl1_flush_cache(priv);
+  return st25fl1_flush_cache(priv);
 }
 #endif
 
@@ -935,7 +1033,11 @@ static int st25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
 #ifdef CONFIG_S25FL1_SECTOR512
   /* Flush the last erase block left in the cache */
 
-  st25fl1_flush_cache(priv);
+  ret = st25fl1_flush_cache(priv);
+  if (ret < 0)
+    {
+      nblocks = ret;
+    }
 #endif
 
   st25fl1_unlock(priv->qspi);
@@ -983,6 +1085,7 @@ static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buffer)
 {
   FAR struct st25fl1_dev_s *priv = (FAR struct st25fl1_dev_s *)dev;
+  int ret = (int)nblocks;
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -991,14 +1094,24 @@ static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   st25fl1_lock(priv->qspi);
 
 #if defined(CONFIG_ST25FL1_SECTOR512)
-  st25fl1_write_cache(priv, buffer, startblock, nblocks);
+  ret = st25fl1_write_cache(priv, buffer, startblock, nblocks);
+  if (ret < 0)
+    {
+      fdbg("ERROR: st25fl1_write_cache failed: %d\n", ret);
+    }
+
 #else
-  st25fl1_write_page(priv, buffer, startblock << priv->sectorshift,
-                  nblocks << priv->sectorshift);
+  ret = st25fl1_write_page(priv, buffer, startblock << priv->sectorshift,
+                           nblocks << priv->sectorshift);
+  if (ret < 0)
+    {
+      fdbg("ERROR: st25fl1_write_page failed: %d\n", ret);
+    }
 #endif
+
   st25fl1_unlock(priv->qspi);
 
-  return nblocks;
+  return ret;
 }
 
 /************************************************************************************
@@ -1009,17 +1122,24 @@ static ssize_t st25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
                           FAR uint8_t *buffer)
 {
   FAR struct st25fl1_dev_s *priv = (FAR struct st25fl1_dev_s *)dev;
+  int ret;
 
   fvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* Lock the QuadSPI bus and select this FLASH part */
 
   st25fl1_lock(priv->qspi);
-  st25fl1_read_byte(priv, buffer, offset, nbytes);
+  ret = st25fl1_read_byte(priv, buffer, offset, nbytes);
   st25fl1_unlock(priv->qspi);
 
+  if (ret < 0)
+    {
+      fdbg("ERROR: st25fl1_read_byte returned: %d\n", ret);
+      return (ssize_t)ret;
+    }
+
   fvdbg("return nbytes: %d\n", (int)nbytes);
-  return nbytes;
+  return (ssize_t)nbytes;
 }
 
 /************************************************************************************
