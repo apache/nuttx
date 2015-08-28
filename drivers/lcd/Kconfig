@@ -366,6 +366,177 @@ config SSD1306_I2CFREQ
 
 endif # LCD_SSD1306_I2C
 
+config LCD_SSD1351
+	bool "SSD1351 OLED Display Module"
+	default n
+	---help---
+		OLED Display Module, SSD1351, Solomon Systech.
+
+if LCD_SSD1351
+
+choice
+	prompt "Interface"
+	default SSD1351_SPI4WIRE
+
+config SSD1351_SPI3WIRE
+	bool "3-wire SPI Interface"
+	select SPI
+	---help---
+		Enables support for the 3-wire SPI interface.
+
+config SSD1351_SPI4WIRE
+	bool "4-wire SPI Interface"
+	select SPI
+	select SPI_CMDDATA
+	---help---
+		Enables support for the 4-wire SPI interface.
+
+endchoice
+
+config SSD1351_SPIMODE
+	int "SPI Mode"
+	default 0
+	range 0 3
+	---help---
+		Specifies the SPI mode.
+
+config SSD1351_SPIFREQ
+	int "SPI Frequency"
+	default 1000000
+	---help---
+		Specifies the SPI frequency.
+
+config SSD1351_NINTERFACES
+	int "Number of SSD1351 Devices"
+	default 1
+	range 1 1
+	---help---
+		Specifies the number of physical SSD1351 devices that will
+		be supported.
+
+config SSD1351_XRES
+	int "X Resolution"
+	default 128
+	range 1 128
+	---help---
+		Specifies the X resolution of the display.
+
+config SSD1351_YRES
+	int "Y Resolution"
+	default 128
+	range 1 128
+	---help---
+		Specifies the Y resolution of the display.
+
+config SSD1351_MIRRORX
+	bool "Mirror X"
+	default n
+	---help---
+		Mirrors the display along the X axis.
+
+config SSD1351_MIRRORY
+	bool "Mirror Y"
+	default n
+	---help---
+		Mirrors the display along the Y axis.
+
+config SSD1351_INVERT
+	bool "Invert Display"
+	default n
+	---help---
+		Inverts the display.
+
+config SSD1351_VDDEXT
+	bool "External VDD"
+	default n
+	---help---
+		Specifies that VDD is external.
+
+config SSD1351_TRST
+	int "Reset Period"
+	default 5
+	range 5 31
+	---help---
+		Specifies the reset period in DCLKs.
+
+config SSD1351_TPRECHG1
+	int "First Pre-charge Period"
+	default 8
+	range 3 15
+	---help---
+		Specifies the first pre-charge period in DCLKs.
+
+config SSD1351_PERFENHANCE
+	bool "Enhance Display Performance"
+	default n
+	---help---
+		Enhances the display performance.
+
+config SSD1351_CLKDIV
+	int "Clock Divider"
+	default 0
+	range 0 10
+	---help---
+		Specifies the clock divider.
+
+config SSD1351_OSCFREQ
+	int "Oscillator Frequency"
+	default 15
+	range 0 15
+	---help---
+		Specifies the oscillator frequency.
+
+config SSD1351_TPRECHG2
+	int "Second Pre-charge Period"
+	default 8
+	range 1 15
+	---help---
+		Specifies the second pre-charge period in DCLKs.
+
+config SSD1351_VPRECHG
+	int "Voltage Pre-charge Level"
+	default 50
+	range 20 60
+	---help---
+		Specifies the pre-charge voltage level as a percentage of VCC.
+
+config SSD1351_VCOMH
+	int "COM Deselect Voltage Level"
+	default 82
+	range 72 86
+	---help---
+		Specifies the COM deselect voltage level as a percentage of VCC.
+
+config SSD1351_CONTRASTA
+	int "Color A Contrast"
+	default 138
+	range 0 255
+	---help---
+		Specifies the contrast of color A.
+
+config SSD1351_CONTRASTB
+	int "Color B Contrast"
+	default 81
+	range 0 255
+	---help---
+		Specifies the contrast of color B.
+
+config SSD1351_CONTRASTC
+	int "Color C Contrast"
+	default 138
+	range 0 255
+	---help---
+		Specifies the contrast of color C.
+
+config SSD1351_MSTRCONTRAST
+	int "Master Contrast Ratio"
+	default 16
+	range 1 16
+	---help---
+		Specifies the master contrast ratio in sixteenths.
+
+endif
+
 config LCD_ST7565
 	bool "ST7565 LCD Display Module"
 	default n
