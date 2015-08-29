@@ -795,7 +795,7 @@ static int qspi_memory_enable(struct sam_qspidev_s *priv,
 static int qspi_memory_dma(struct sam_qspidev_s *priv,
                            struct qspi_meminfo_s *meminfo)
 {
-  uintptr_t paddr = SAM_QSPIMEM_BASE + meminfo->addr;
+  uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
   uint32_t dmaflags;
   int ret;
 
@@ -821,7 +821,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
       /* Setup the TX DMA (peripheral-to-memory) */
 
-      ret = sam_dmatxsetup(priv->dmach, paddr, (uint32_t)meminfo->buffer,
+      ret = sam_dmatxsetup(priv->dmach, qspimem, (uint32_t)meminfo->buffer,
                            meminfo->buflen);
     }
   else
@@ -834,7 +834,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
       /* Setup the RX DMA (memory-to-peripheral) */
 
-      ret = sam_dmarxsetup(priv->dmach, paddr, (uint32_t)meminfo->buffer,
+      ret = sam_dmarxsetup(priv->dmach, qspimem, (uint32_t)meminfo->buffer,
                            meminfo->buflen);
     }
 
@@ -952,7 +952,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                              struct qspi_meminfo_s *meminfo)
 {
- uintptr_t paddr = SAM_QSPIMEM_BASE + meminfo->addr;
+ uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
 
   /* Enable the memory transfer */
 
@@ -962,11 +962,11 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      memcpy((void *)paddr, meminfo->buffer, meminfo->buflen);
+      memcpy((void *)qspimem, meminfo->buffer, meminfo->buflen);
     }
   else
     {
-      memcpy(meminfo->buffer, (void *)paddr, meminfo->buflen);
+      memcpy(meminfo->buffer, (void *)qspimem, meminfo->buflen);
     }
 
   MEMORY_SYNC();
