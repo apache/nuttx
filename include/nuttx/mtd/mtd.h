@@ -49,6 +49,34 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Ioctl commands */
+
+#define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
+                                           *      mtd_geometry_s in which to receive
+                                           *      receive geometry data (see mtd.h)
+                                           * OUT: Geometry structure is populated
+                                           *      with data for the MTD */
+#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
+                                           *      which to received the XIP base.
+                                           * OUT: If media is directly accessible,
+                                           *      return (void*) base address
+                                           *      of device memory */
+#define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
+                                           * OUT: None */
+#define MTDIOC_PROTECT    _MTDIOC(0x0004) /* IN:  Pointer to read-able struct
+                                           *      mtd_protects_s that provides
+                                           *      the region to protect.
+                                           * OUT: None */
+#define MTDIOC_UNPROTECT  _MTDIOC(0x0005) /* IN:  Pointer to read-able struct
+                                           *      mtd_protects_s that provides
+                                           *      the region to un-protect.
+                                           * OUT: None */
+#define MTDIOC_SETSPEED   _MTDIOC(0x0006) /* IN:  New bus speed in Hz
+                                           * OUT: None */
+#define MTDIOC_EXTENDED   _MTDIOC(0x0007) /* IN:  unsigned long
+                                           *      0=Use normal memory region
+                                           *      1=Use alternate/extended memory
+                                           * OUT: None */
 
 /* Macros to hide implementation */
 
@@ -88,6 +116,16 @@ struct mtd_geometry_s
   uint32_t erasesize;     /* Size of one erase blocks -- must be a multiple
                            * of blocksize.*/
   uint32_t neraseblocks;  /* Number of erase blocks */
+};
+
+/* This structure describes a range of sectors to be protected or
+ * unprotected.
+ */
+
+struct mtd_protect_s
+{
+  off_t  startblock;      /* First block to be [un-]protected */
+  size_t nblocks;         /* Number of blocks to [un-]protect */
 };
 
 /* The following defines the information for writing bytes to a sector

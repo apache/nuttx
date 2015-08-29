@@ -217,25 +217,6 @@
 #define _MTDIOCVALID(c)   (_IOC_TYPE(c)==_MTDIOCBASE)
 #define _MTDIOC(nr)       _IOC(_MTDIOCBASE,nr)
 
-#define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
-                                           *      mtd_geometry_s in which to receive
-                                           *      receive geometry data (see mtd.h)
-                                           * OUT: Geometry structure is populated
-                                           *      with data for the MTD */
-#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
-                                           *      which to received the XIP base.
-                                           * OUT: If media is directly accessible,
-                                           *      return (void*) base address
-                                           *      of device memory */
-#define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
-                                           * OUT: None */
-#define MTDIOC_SETSPEED   _MTDIOC(0x0004) /* IN:  New bus speed in Hz
-                                           * OUT: None */
-#define MTDIOC_EXTENDED   _MTDIOC(0x0005) /* IN:  unsigned long
-                                           *      0=Use normal memory region
-                                           *      1=Use alternate/extended memory
-                                           * OUT: None */
-
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 
 #define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPIOCBASE)
