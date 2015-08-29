@@ -330,7 +330,12 @@ static void st25fl1_write_enable(FAR struct qspi_dev_s *qspi);
 static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi);
 
 static int  st25fl1_readid(FAR struct st25fl1_dev_s *priv);
-static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv);
+static int  st25fl1_protect(FAR struct st25fl1_dev_s *priv,
+              off_t startblock, size_t nblocks);
+static int  st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
+              off_t startblock, size_t nblocks);
+static bool st25fl1_isprotected(FAR struct st25fl1_dev_s *priv,
+              uint8_t status, off_t address);
 static int  st25fl1_erase_sector(FAR struct st25fl1_dev_s *priv, off_t offset);
 static int  st25fl1_erase_chip(FAR struct st25fl1_dev_s *priv);
 static int  st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer,
@@ -630,12 +635,170 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 }
 
 /************************************************************************************
+ * Name: st25fl1_protect
+ ************************************************************************************/
+
+static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
+                            off_t startblock, size_t nblocks)
+{
+  unsigned char status[3];
+
+  /* Get the status register value to check the current protection */
+
+  status[0] = sf25fl1_read_status1(priv->qspi);
+  status[1] = sf25fl1_read_status2(priv->qspi);
+  status[2] = sf25fl1_read_status3(priv->qspi);
+
+  if ((status[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
+    {
+      /* Protection already disabled */
+
+      return 0;
+    }
+
+  /* Check if sector protection registers are locked */
+
+  if ((status[0] & STATUS1_SRP0_MASK) == STATUS1_SRP0_LOCKED)
+    {
+      /* Yes.. unprotect section protection registers */
+
+      status[0] &= ~STATUS1_SRP0_MASK;
+      st25fl1_write_status(priv->qspi, status);
+    }
+
+  /* Set the protection mask to zero.
+   * REVISIT:  This logic should really just set the BP bits as
+   * necessary to protect the range of sectors.
+   */
+
+  status[0] |= STATUS1_BP_MASK;
+  st25fl1_write_status(priv->qspi, status);
+
+  /* Check the new status */
+
+  status[0] = sf25fl1_read_status1(priv->qspi);
+  if ((status[0] & STATUS1_BP_MASK) != STATUS1_BP_MASK)
+    {
+      return -EACCES;
+    }
+
+  return OK;
+}
+
+/************************************************************************************
  * Name: st25fl1_unprotect
  ************************************************************************************/
 
-static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv)
+static int st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
+                              off_t startblock, size_t nblocks)
 {
-#warning Missing Logic
+  unsigned char status[3];
+
+  /* Get the status register value to check the current protection */
+
+  status[0] = sf25fl1_read_status1(priv->qspi);
+  status[1] = sf25fl1_read_status2(priv->qspi);
+  status[2] = sf25fl1_read_status3(priv->qspi);
+
+  if ((status[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
+    {
+      /* Protection already disabled */
+
+      return 0;
+    }
+
+  /* Check if sector protection registers are locked */
+
+  if ((status[0] & STATUS1_SRP0_MASK) == STATUS1_SRP0_LOCKED)
+    {
+      /* Yes.. unprotect section protection registers */
+
+      status[0] &= ~STATUS1_SRP0_MASK;
+      st25fl1_write_status(priv->qspi, status);
+    }
+
+  /* Set the protection mask to zero.
+   * REVISIT:  This logic should really just re-write the BP bits as
+   * necessary to unprotect the range of sectors.
+   */
+
+  status[0] &= ~STATUS1_BP_MASK;
+    st25fl1_write_status(priv->qspi, status);
+
+  /* Check the new status */
+
+  status[0] = sf25fl1_read_status1(priv->qspi);
+  if ((status[0] & (STATUS1_SRP0_MASK | STATUS1_BP_MASK)) != 0)
+    {
+      return -EACCES;
+    }
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: st25fl1_isprotected
+ ************************************************************************************/
+
+static bool st25fl1_isprotected(FAR struct st25fl1_dev_s *priv, uint8_t status,
+                                off_t address)
+{
+  off_t protstart;
+  off_t protend;
+  off_t protsize;
+  unsigned int bp;
+
+  /* What is protected? 64 Kb blocks?  Or 4Kb sectors? */
+
+  if ((status & STATUS1_SEC_MASK) == STATUS1_SEC_BLOCK)
+    {
+      /* 64 Kb block */
+
+      protsize = 0x00010000;
+    }
+  else
+    {
+      /* 4 Kb sector */
+
+      protsize = 0x00001000;
+    }
+
+  /* The BP field is the essentially a multiplier on this protection size */
+
+  bp = (status & STATUS1_BP_MASK) >> STATUS1_BP_SHIFT;
+  switch (bp)
+    {
+      case 0:
+        return false;
+
+      case 1:
+        break;
+
+      case 6:
+      case 7:
+        return true;
+
+       default:
+        protsize <<= (protsize << (bp - 1));
+        break;
+    }
+
+  /* The final protection range then depends on if the protection region is
+   * configured top-down or bottom up  (assuming CMP=0).
+   */
+
+  if ((status & STATUS1_TB_MASK) != 0)
+    {
+      protstart = 0x00000000;
+      protend   = protstart + protsize;
+    }
+  else
+    {
+      protend   = 0x00200000;
+      protstart = protend - protsize;
+    }
+
+  return (address >= protstart && address < protend);
 }
 
 /************************************************************************************
@@ -645,13 +808,10 @@ static void st25fl1_unprotect(FAR struct st25fl1_dev_s *priv)
 static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
 {
   off_t address;
-#ifdef CONFIG_DEBUG
   uint8_t status;
-#endif
 
   fvdbg("sector: %08lx\n", (unsigned long)sector);
 
-#ifdef CONFIG_DEBUG
   /* Check that the flash is ready and unprotected */
 
   status = sf25fl1_read_status1(priv->qspi);
@@ -661,17 +821,18 @@ static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
       return -EBUSY;
     }
 
-  if ((status & STATUS1_BP_MASK) != 0)
-    {
-      fdbg("ERROR: Flash protected: %02x", status);
-      /* REVISIT: Should check if this particular sector is protected */
-      //return -EACCES;
-    }
-#endif
-
-  /* Send the sector erase command */
+  /* Get the address associated with the sector */
 
   address = (off_t)sector << priv->sectorshift;
+
+  if ((status & STATUS1_BP_MASK) != 0 &&
+      st25fl1_isprotected(priv, status, address))
+    {
+      fdbg("ERROR: Flash protected: %02x", status);
+      return -EACCES;
+    }
+
+  /* Send the sector erase command */
 
   st25fl1_write_enable(priv->qspi);
   st25fl1_command_address(priv->qspi, ST25FL1_SECTOR_ERASE, address, 3);
@@ -690,7 +851,6 @@ static int st25fl1_erase_chip(struct st25fl1_dev_s *priv)
 {
   uint8_t status;
 
-#ifdef CONFIG_DEBUG
   /* Check if the FLASH is protected */
 
   status = sf25fl1_read_status1(priv->qspi);
@@ -699,7 +859,6 @@ static int st25fl1_erase_chip(struct st25fl1_dev_s *priv)
       fdbg("ERROR: FLASH is Protected: %02x", status);
       return -EACCES;
     }
-#endif
 
   /* Erase the whole chip */
 
@@ -823,6 +982,8 @@ static int st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buf
 #ifdef CONFIG_ST25FL1_SECTOR512
 static int st25fl1_flush_cache(struct st25fl1_dev_s *priv)
 {
+  int ret = OK;
+
   /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
    * or was erased (with the cache containing the correct FLASH contents), then write
    * the cached erase block to FLASH.
@@ -831,7 +992,12 @@ static int st25fl1_flush_cache(struct st25fl1_dev_s *priv)
   if (IS_DIRTY(priv) || IS_ERASED(priv))
     {
       /* Write entire erase block to FLASH */
-#warning Missing Logic
+
+      ret = st25fl1_write_page(priv, priv->sector, 1 << priv->sectorshift);
+      if (ret < 0)
+        {
+          fdbg("ERROR: st25fl1_write_page failed: %d\n", ret);
+        }
 
       /* The case is no long dirty and the FLASH is no longer erased */
 
@@ -839,7 +1005,7 @@ static int st25fl1_flush_cache(struct st25fl1_dev_s *priv)
       CLR_ERASED(priv);
     }
 
-  return OK;
+  return ret;
 }
 #endif
 
@@ -1198,9 +1364,28 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
+      case MTDIOC_PROTECT:
+        {
+          FAR const struct mtd_protect_s *prot =
+            (FAR const struct mtd_protect_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(prot);
+          ret = st25fl1_protect(priv, prot->startblock, prot->nblocks);
+        }
+        break;
+
+      case MTDIOC_UNPROTECT:
+        {
+          FAR const struct mtd_protect_s *prot =
+            (FAR const struct mtd_protect_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(prot);
+          ret = st25fl1_unprotect(priv, prot->startblock, prot->nblocks);
+        }
+        break;
+
       default:
-        ret = -ENOTTY; /* Bad command */
+        ret = -ENOTTY; /* Bad/unsupported command */
         break;
     }
 
@@ -1276,10 +1461,6 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
           status[1] = sf25fl1_read_status2(priv->qspi);
           usleep(50*1000);
         }
-
-      /* Make sure that the FLASH is unprotected so that we can write into it */
-
-      st25fl1_unprotect(priv);
 
 #ifdef CONFIG_ST25FL1_SECTOR512        /* Simulate a 512 byte sector */
       /* Allocate a buffer for the erase block cache */

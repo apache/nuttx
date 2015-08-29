@@ -10900,4 +10900,6 @@
 	  locked down (2015-08-27).
 	* drivers/lcd and include/nuttx/lcd:  Add SSD1351 OLED controller
 	  support.  Contributed by Paul Alexander Patience (2015-08-28).
- 
+	* include/nuttx/mtd/mtd.h:  Move MTD ioctl command definitions from
+	  include/nuttx/fs/fs.h to include/nuttx/mtd.h.  Add ioctl commands
+	  to protect and unprotect memory (2015-08-29).
