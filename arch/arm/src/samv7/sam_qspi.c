@@ -912,6 +912,14 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
     }
   while (priv->result == -EBUSY);
 
+  /* Wait until the transmission registers are empty. */
+
+  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_INT_TXEMPTY) == 0);
+  qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
+
+  while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
+  MEMORY_SYNC();
+
   /* Dump the sampled DMA registers */
 
   qspi_dma_sampledone(priv);
@@ -1676,9 +1684,9 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 errout_with_irq:
 #ifdef QSPI_USE_INTERRUPTS
   irq_detach(priv->irq);
-#endif
 
 errout_with_dmadog:
+#endif
 #ifdef CONFIG_SAMV7_QSPI_DMA
   wd_delete(priv->dmadog);
 
