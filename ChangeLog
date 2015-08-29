@@ -10898,4 +10898,6 @@
 	  and, as a result, incorrect data transfers can cause crashes.
 	  The fix is to lock into a single device once the MSS is locked
 	  locked down (2015-08-27).
-
+	* drivers/lcd and include/nuttx/lcd:  Add SSD1351 OLED controller
+	  support.  Contributed by Paul Alexander Patience (2015-08-28).
+ 
