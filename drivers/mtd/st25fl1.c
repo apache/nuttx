@@ -60,16 +60,38 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* QuadSPI Mode */
+/* QuadSPI Mode.  Per data sheet, either Mode 0 or Mode 3 may be used. */
 
 #ifndef CONFIG_ST25FL1_QSPIMODE
 #  define CONFIG_ST25FL1_QSPIMODE QSPIDEV_MODE0
 #endif
 
-/* QuadSPI Frequency.  May be up to 25MHz. */
+/* QuadSPI Frequency per data sheet::
+ *
+ * – Normal Read (Serial):
+ *   50 MHz clock rate (-40°C to +85°C/105°C)
+ *   45 MHz clock rate (-40°C to +125°C)
+ * – Fast Read (Serial):
+ *   108 MHz clock rate (-40°C to +85°C/105°C)
+ *   97 MHz clock rate (-40°C to +125°C)
+ * – Dual Read:
+ *   108 MHz clock rate (-40°C to +85°C/105°C)
+ *   97 MHz clock rate (-40°C to +125°C)
+ * – Quad Read:
+ *   108 MHz clock rate (-40°C to +85°C/105°C)
+ *   97 MHz clock rate for S25FL164K (-40°C to +125°C)
+ *
+ * Table 5.8:
+ * - Clock frequency for all SPI commands except for Read Data
+ *   command (0x03) and Fast Read command (0x0b): 108 MHz
+ * - Clock frequency for Read Data command (0x03): 50 MHz
+ * - Clock frequency for all Fast Read commands SIO and MIO: 108 MHz
+ *
+ * In this implementation, only "Quad" reads are performed.
+ */
 
-#ifndef CONFIG_ST25FL1_QSPIFREQUENCY
-#  define CONFIG_ST25FL1_QSPIFREQUENCY 20000000
+#ifndef CONFIG_ST25FL1_QSPI_FREQUENCY
+#  define CONFIG_ST25FL1_QSPI_FREQUENCY 108000000
 #endif
 
 /* ST25FL1 Commands *****************************************************************/
@@ -394,7 +416,7 @@ static void st25fl1_lock(FAR struct qspi_dev_s *qspi)
 
   QSPI_SETMODE(qspi, CONFIG_ST25FL1_QSPIMODE);
   QSPI_SETBITS(qspi, 8);
-  (void)QSPI_SETFREQUENCY(qspi, CONFIG_ST25FL1_QSPIFREQUENCY);
+  (void)QSPI_SETFREQUENCY(qspi, CONFIG_ST25FL1_QSPI_FREQUENCY);
 }
 
 /************************************************************************************

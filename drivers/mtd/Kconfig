@@ -397,9 +397,30 @@ config ST25FL1_QSPIMODE
 	int "ST25FL1 QuadSPI Mode"
 	default 0
 
-config ST25FL1_QSPIFREQUENCY
+config ST25FL1_QSPI_FREQUENCY
 	int "ST25FL1 QuadSPI Frequency"
-	default 20000000
+	default 108000000
+	---help---
+		Per data sheet:
+		– Normal Read (Serial):
+			– 50 MHz clock rate (-40°C to +85°C/105°C)
+			– 45 MHz clock rate (-40°C to +125°C)
+		– Fast Read (Serial):
+			– 108 MHz clock rate (-40°C to +85°C/105°C)
+			– 97 MHz clock rate (-40°C to +125°C)
+		– Dual Read:
+			– 108 MHz clock rate (-40°C to +85°C/105°C)
+			– 97 MHz clock rate (-40°C to +125°C)
+		– Quad Read:
+			– 108 MHz clock rate (-40°C to +85°C/105°C)
+			– 97 MHz clock rate for S25FL164K (-40°C to +125°C)
+
+		- Clock frequency for all SPI commands except for Read Data
+		  command (0x03) and Fast Read command (0x0b): 108 MHz
+		- Clock frequency for Read Data command (0x03): 50 MHz
+		- Clock frequency for all Fast Read commands SIO and MIO: 108 MHz
+
+		In this implementation, only "Quad" reads are performed.
 
 config ST25FL1_SECTOR512
 	bool "Simulate 512 byte Erase Blocks"
