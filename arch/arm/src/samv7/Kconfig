@@ -632,6 +632,14 @@ endmenu # SPI device driver options
 menu "QSPI Device Driver Configuration"
 	depends on SAMV7_QSPI && !SAMV7_QSPI_IS_SPI
 
+config SAMV7_QSPI_DLYBS
+	int "Delay Before QSCK (uS)"
+	default 2
+
+config SAMV7_QSPI_DLYBCT
+	int "Delay Between Consecutive Transfers (uS)"
+	default 5
+
 config SAMV7_QSPI_DMA
 	bool "QSPI DMA"
 	default n

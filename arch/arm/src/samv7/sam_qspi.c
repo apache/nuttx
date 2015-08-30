@@ -75,6 +75,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+
+#ifndef CONFIG_SAMV7_QSPI_DLYBS
+#  define CONFIG_SAMV7_QSPI_DLYBS 2
+#endif
+
+#ifndef CONFIG_SAMV7_QSPI_DLYBCT
+#  define CONFIG_SAMV7_QSPI_DLYBCT 5
+#endif
+
 /* When QSPI DMA is enabled, small DMA transfers will still be performed by
  * polling logic.  But we need a threshold value to determine what is small.
  * That value is provided by CONFIG_SAMV7_QSPI_DMATHRESHOLD.
@@ -1082,41 +1091,44 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 
   /* Configure QSPI to a frequency as close as possible to the requested frequency.
    *
-   *   SPCK frequency = QSPI_CLK / SCBR, or SCBR = QSPI_CLK / frequency
+   *   QSCK frequency = QSPI_CLK / SCBR, or SCBR = QSPI_CLK / frequency
+   *
+   * Where SCBR can have the range 1 to 256 and register holds SCBR - 1
    */
 
   scbr = SAM_QSPI_CLOCK / frequency;
 
-  if (scbr < 8)
+  /* Make sure that the divider is within range */
+
+  if (scbr < 1)
     {
-      scbr = 8;
+      scbr = 1;
     }
-  else if (scbr > 254)
+  else if (scbr > 256)
     {
-      scbr = 254;
+      scbr = 256;
     }
 
-  scbr = (scbr + 1) & ~1;
-
-  /* Save the new SCBR value */
+  /* Save the new SCBR value (minus one) */
 
   regval  = qspi_getreg(priv, SAM_QSPI_SCR_OFFSET);
   regval &= ~(QSPI_SCR_SCBR_MASK | QSPI_SCR_DLYBS_MASK);
-  regval |= scbr << QSPI_SCR_SCBR_SHIFT;
+  regval |= (scbr - 1) << QSPI_SCR_SCBR_SHIFT;
 
-  /* DLYBS: Delay Before SPCK.  This field defines the delay from NPCS valid to the
-   * first valid SPCK transition. When DLYBS equals zero, the NPCS valid to SPCK
-   * transition is 1/2 the SPCK clock period. Otherwise, the following equations
+  /* DLYBS: Delay Before QSCK.  This field defines the delay from NPCS valid to the
+   * first valid QSCK transition. When DLYBS equals zero, the NPCS valid to QSCK
+   * transition is 1/2 the QSCK clock period. Otherwise, the following equations
    * determine the delay:
    *
-   *   Delay Before SPCK = DLYBS / QSPI_CLK
+   *   Delay Before QSCK = DLYBS / QSPI_CLK
    *
    * For a 2uS delay
    *
-   *   DLYBS = QSPI_CLK * 0.000002 = QSPI_CLK / 500000
+   *   DLYBS == 2 * QSPI_CLK / 1000000
    */
 
-  dlybs   = SAM_QSPI_CLOCK / 500000;
+  dlybs   = (CONFIG_SAMV7_QSPI_DLYBS * SAM_QSPI_CLOCK) / 1000000;
+
   regval |= dlybs << QSPI_SCR_DLYBS_SHIFT;
   qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
 
@@ -1129,10 +1141,10 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    *
    * For a 5uS delay:
    *
-   *  DLYBCT = QSPI_CLK * 0.000005 / 32 = QSPI_CLK / 200000 / 32
+   *  DLYBCT = 5 * QSPI_CLK * 1000000 / 32
    */
 
-  dlybct  = SAM_QSPI_CLOCK / 200000 / 32;
+  dlybct  = (CONFIG_SAMV7_QSPI_DLYBCT * SAM_QSPI_CLOCK) / 1000000 / 32;
 
   regval  = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
   regval &= ~QSPI_MR_DLYBCT_MASK;
