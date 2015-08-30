@@ -116,6 +116,7 @@ static int builtin_loadbinary(struct binary_s *binp)
     {
       int errval = get_errno();
       bdbg("ERROR: FIOC_FILENAME ioctl failed: %d\n", errval);
+      close(fd);
       return -errval;
     }
 
@@ -128,6 +129,7 @@ static int builtin_loadbinary(struct binary_s *binp)
     {
       int errval = get_errno();
       bdbg("ERROR: %s is not a builtin application\n", filename);
+      close(fd);
       return -errval;
 
     }
@@ -140,6 +142,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   binp->entrypt   = b->main;
   binp->stacksize = b->stacksize;
   binp->priority  = b->priority;
+  close(fd);
   return OK;
 }
 

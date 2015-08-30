@@ -10903,3 +10903,6 @@
 	* include/nuttx/mtd/mtd.h:  Move MTD ioctl command definitions from
 	  include/nuttx/fs/fs.h to include/nuttx/mtd.h.  Add ioctl commands
 	  to protect and unprotect memory (2015-08-29).
+	* binfmt/builtin.c:  Fix a memory leak: File was not being closed.
+	  From Bruno Herrera (2015-08-30).
+
