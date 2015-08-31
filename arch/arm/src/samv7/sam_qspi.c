@@ -462,15 +462,16 @@ static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
 static void qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg)
 {
   qspivdbg("%s:\n", msg);
-  qspivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",
+  qspivdbg("    MR:%08x   SR:%08x  IMR:%08x  SCR:%08x\n",
           getreg32(priv->base + SAM_QSPI_MR_OFFSET),
           getreg32(priv->base + SAM_QSPI_SR_OFFSET),
           getreg32(priv->base + SAM_QSPI_IMR_OFFSET));
-  qspivdbg("  SCR0:%08x SCR1:%08x SCR2:%08x SCR3:%08x\n",
-          getreg32(priv->base + SAM_QSPI_SCR0_OFFSET),
-          getreg32(priv->base + SAM_QSPI_SCR1_OFFSET),
-          getreg32(priv->base + SAM_QSPI_SCR2_OFFSET),
-          getreg32(priv->base + SAM_QSPI_SCR3_OFFSET));
+          getreg32(priv->base + SAM_QSPI_SCR_OFFSET),
+  qspivdbg("   IAR:%08x  ICR:%08x  IFR:%08x  SMR:%08x\n",
+          getreg32(priv->base + SAM_QSPI_IAR_OFFSET),
+          getreg32(priv->base + SAM_QSPI_ICR_OFFSET),
+          getreg32(priv->base + SAM_QSPI_IFR_OFFSET),
+          getreg32(priv->base + SAM_QSPI_SMR_OFFSET));
   qspivdbg("  WPCR:%08x WPSR:%08x\n",
           getreg32(priv->base + SAM_QSPI_WPCR_OFFSET),
           getreg32(priv->base + SAM_QSPI_WPSR_OFFSET));
