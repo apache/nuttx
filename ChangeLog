@@ -10905,4 +10905,6 @@
 	  to protect and unprotect memory (2015-08-29).
 	* binfmt/builtin.c:  Fix a memory leak: File was not being closed.
 	  From Bruno Herrera (2015-08-30).
-
+	* fs/romfs: One allocation was not being freed if there was a
+	  subsequent failure to allocation I/O buffers resulting in a memory
+	  leak on certain error conditions.  From Bruno Herrera (2015-08-30).

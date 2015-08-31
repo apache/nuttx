@@ -656,6 +656,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   ret = romfs_fileconfigure(rm, newrf);
   if (ret < 0)
     {
+      kmm_free(newrf);
       fdbg("Failed configure buffering: %d\n", ret);
       goto errout_with_semaphore;
     }
