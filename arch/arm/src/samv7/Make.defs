@@ -77,6 +77,8 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
 ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CMN_CSRCS += up_copyarmstate.c
+else ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_CSRCS += up_copyarmstate.c
 endif
 endif
 

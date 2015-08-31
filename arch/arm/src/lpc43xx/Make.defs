@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/lpc43xx/Make.defs
 #
-#   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -83,6 +83,8 @@ endif
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
 ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CMN_CSRCS += up_copyarmstate.c
+else ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_CSRCS += up_copyarmstate.c
 endif
 endif
