@@ -586,7 +586,7 @@ static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi)
  * Name:  st25fl1_write_status
  ************************************************************************************/
 
-static void st25fl1_write_status(FAR struct qspi_dev_s *qspi, uint8_t status[3])
+static void st25fl1_write_status(FAR struct qspi_dev_s *qspi, uint8_t status[4])
 {
   st25fl1_write_enable(qspi);
   st25fl1_command_write(qspi, ST25FL1_WRITE_STATUS, (FAR const void *)status, 3);
@@ -599,7 +599,7 @@ static void st25fl1_write_status(FAR struct qspi_dev_s *qspi, uint8_t status[3])
 
 static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 {
-  uint8_t jedecid[3];
+  uint8_t jedecid[4];
 
   /* Lock the QuadSPI bus and configure the bus. */
 
@@ -663,7 +663,7 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
                             off_t startblock, size_t nblocks)
 {
-  unsigned char status[3];
+  unsigned char status[4];
 
   /* Get the status register value to check the current protection */
 
@@ -714,7 +714,7 @@ static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
 static int st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
                               off_t startblock, size_t nblocks)
 {
-  unsigned char status[3];
+  unsigned char status[4];
 
   /* Get the status register value to check the current protection */
 
@@ -1435,7 +1435,7 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
 {
   FAR struct st25fl1_dev_s *priv;
-  uint8_t status[3];
+  uint8_t status[4];
   int ret;
 
   fvdbg("qspi: %p\n", qspi);
