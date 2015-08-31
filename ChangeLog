@@ -10908,3 +10908,9 @@
 	* fs/romfs: One allocation was not being freed if there was a
 	  subsequent failure to allocation I/O buffers resulting in a memory
 	  leak on certain error conditions.  From Bruno Herrera (2015-08-30).
+	* arch/arm/src/up_iternal.h and several ARM Make.defs files:  In the
+	  original implementation, !defined(CONFIG_ARMV7M_CMNVECTOR) was a
+	  sufficient test to determine if lazy floating point register saving
+	  was being used.  But recents changes added common lazy register as
+	  well so now that test must be (!defined(CONFIG_ARMV7M_CMNVECTOR) ||
+	  defined(CONFIG_ARMV7M_LAZYFPU)) (2015-08-31).
