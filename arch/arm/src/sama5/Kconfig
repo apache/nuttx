@@ -73,6 +73,10 @@ config SAMA5_HAVE_HSMCI2
 	bool
 	default n
 
+config SAMA5_HAVE_PIOE
+	bool
+	default n
+
 config SAMA5_HAVE_SAIC
 	bool
 	default n
@@ -115,10 +119,31 @@ config SAMA5_HAVE_VDEC
 
 # Chip Selection
 
+config ARCH_CHIP_SAMA5D2
+	bool
+	default n
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_AESB
+	select ARCH_NAND_HWECC
+	select SAMA5_HAVE_EMACB
+	select SAMA5_HAVE_ICM
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_USART4
+	select SAMA5_HAVE_QSPI
+	select SAMA5_HAVE_XDMA
+	select SAMA5_HAVE_SAIC
+	select SAMA5_HAVE_SFC
+	select SAMA5_HAVE_SPI2
+	select SAMA5_HAVE_TC1
+	select SAMA5_HAVE_TRUSTZONE
+
 config ARCH_CHIP_SAMA5D3
 	bool
 	default n
 	select SAMA5_HAVE_DMA
+	select SAMA5_HAVE_PIOE
 
 config ARCH_CHIP_SAMA5D4
 	bool
@@ -134,6 +159,7 @@ config ARCH_CHIP_SAMA5D4
 	select SAMA5_HAVE_UART1
 	select SAMA5_HAVE_USART4
 	select SAMA5_HAVE_XDMA
+	select SAMA5_HAVE_PIOE
 	select SAMA5_HAVE_SAIC
 	select SAMA5_HAVE_SBM
 	select SAMA5_HAVE_SFC
@@ -146,6 +172,46 @@ config ARCH_CHIP_SAMA5D4
 choice
 	prompt "Atmel AT91SAMA5 Chip Selection"
 	default ARCH_CHIP_ATSAMA5D33
+
+config ARCH_CHIP_ATSAMA5D21
+	bool "Atmel ATSAMA5D21"
+	select ARCH_CHIP_SAMA5D2
+
+config ARCH_CHIP_ATSAMA5D22
+	bool "Atmel ATSAMA5D22"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+
+config ARCH_CHIP_ATSAMA5D23
+	bool "Atmel ATSAMA5D23"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+
+config ARCH_CHIP_ATSAMA5D24
+	bool "Atmel ATSAMA5D24"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D26
+	bool "Atmel ATSAMA5D26"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D27
+	bool "Atmel ATSAMA5D27"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D28
+	bool "Atmel ATSAMA5D28"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_DDR32
+
+config SAMA5_HAVE_CAN1
 
 config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
@@ -572,6 +638,7 @@ config SAMA5_PIOD_IRQ
 config SAMA5_PIOE_IRQ
 	bool "PIOE interrupts"
 	default n
+	depends on SAMA5_HAVE_PIOE
 
 endif # PIO_IRQ
 

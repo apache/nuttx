@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/include/sama5/sama5d4_irq.h
+ * arch/arm/include/sama5/sama5d2_irq.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4_IRQ_H
-#define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H
+#define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H
 
 /****************************************************************************************
  * Included Files
@@ -51,154 +51,179 @@
 /* SAMA5D3 Peripheral Identifiers */
 
 #define SAM_PID_FIQ            (0)  /* Advanced Interrupt Controller FIQ */
-#define SAM_PID_SYS            (1)  /* System Controller Interrupt PMC */
+                                    /* 2 Reserved */
 #define SAM_PID_ARM            (2)  /* Performance Monitor Unit */
 #define SAM_PID_PIT            (3)  /* Periodic Interval Timer Interrupt */
 #define SAM_PID_WDT            (4)  /* Watchdog timer Interrupt */
-#define SAM_PID_PIOD           (5)  /* Parallel I/O Controller D */
-#define SAM_PID_USART0         (6)  /* USART 0 */
-#define SAM_PID_USART1         (7)  /* USART 1 */
-#define SAM_PID_XDMAC0         (8)  /* DMA Controller 0 */
-#define SAM_PID_ICM            (9)  /* Integrity Check Monitor */
+#define SAM_PID_EMAC0          (5)  /* Ethernet MAC 0 */
+#define SAM_PID_XDMAC0         (6)  /* DMA Controller 0 */
+#define SAM_PID_XDMAC1         (7)  /* DMA Controller 1 */
+#define SAM_PID_ICM            (8)  /* Integrity Check Monitor */
+#define SAM_PID_AES            (9)  /* Advanced Encryption Standard */
 
-#define SAM_PID_CPKCC          (10) /* Classic Public Key Crypto Controller */
-                                    /* 11 Undefined */
-#define SAM_PID_AES            (12) /* Advanced Encryption Standard */
-#define SAM_PID_AESB           (13) /* AES bridge */
-#define SAM_PID_TDES           (14) /* Triple Data Encryption Standard */
-#define SAM_PID_SHA            (15) /* Secure Hash Algorithm */
-#define SAM_PID_MPDDRC         (16) /* MPDDR controller */
-#define SAM_PID_MATRIX1        (17) /* H32MX, 32-bit AHB Matrix */
-#define SAM_PID_MATRIX0        (18) /* H64MX, 64-bit AHB Matrix */
-#define SAM_PID_VDEC           (19) /* Video Decoder */
+#define SAM_PID_AESB           (10) /* AES bridge */
+#define SAM_PID_TDES           (11) /* Triple Data Encryption Standard */
+#define SAM_PID_SHA            (12) /* Secure Hash Algorithm */
+#define SAM_PID_MPDDRC         (13) /* MPDDR controller */
+#define SAM_PID_MATRIX1        (14) /* H32MX, 32-bit AHB Matrix */
+#define SAM_PID_MATRIX0        (15) /* H64MX, 64-bit AHB Matrix */
+#define SAM_PID_SECUMOD        (16) /* Secure Module */
+#define SAM_PID_HSMC           (17) /* Multi-bit ECC Interrupt */
+#define SAM_PID_PIOA           (18) /* Parallel I/O Controller A */
+#define SAM_PID_FLEXCOM0       (19) /* FLEXCOM 0 */
 
-#define SAM_PID_SBM            (20) /* Secure Box Module */
-                                    /* 21 Undefined */
-#define SAM_PID_HSMC           (22) /* Multi-bit ECC Interrupt */
-#define SAM_PID_PIOA           (23) /* Parallel I/O Controller A */
-#define SAM_PID_PIOB           (24) /* Parallel I/O Controller B */
-#define SAM_PID_PIOC           (25) /* Parallel I/O Controller C */
-#define SAM_PID_PIOE           (26) /* Parallel I/O Controller E */
-#define SAM_PID_UART0          (27) /* UART 0 */
-#define SAM_PID_UART1          (28) /* UART 1 */
-#define SAM_PID_USART2         (29) /* USART 2 */
+#define SAM_PID_FLEXCOM1       (20) /* FLEXCOM 1 */
+#define SAM_PID_FLEXCOM2       (21) /* FLEXCOM 2 */
+#define SAM_PID_FLEXCOM3       (22) /* FLEXCOM 3 */
+#define SAM_PID_FLEXCOM4       (23) /* FLEXCOM 4 */
+#define SAM_PID_UART0          (24) /* UART 0 */
+#define SAM_PID_UART1          (25) /* UART 1 */
+#define SAM_PID_UART2          (26) /* UART 2 */
+#define SAM_PID_UART3          (27) /* UART 3 */
+#define SAM_PID_UART4          (28) /* UART 4 */
+#define SAM_PID_TWI0           (29) /* Two-Wire Interface 0 */
 
-#define SAM_PID_USART3         (30) /* USART 3 */
-#define SAM_PID_USART4         (31) /* USART 4 */
-#define SAM_PID_TWI0           (32) /* Two-Wire Interface 0 */
-#define SAM_PID_TWI1           (33) /* Two-Wire Interface 1 */
-#define SAM_PID_TWI2           (34) /* Two-Wire Interface 2 */
-#define SAM_PID_HSMCI0         (35) /* High Speed Multimedia Card Interface 0 */
-#define SAM_PID_HSMCI1         (36) /* High Speed Multimedia Card Interface 1 */
-#define SAM_PID_SPI0           (37) /* Serial Peripheral Interface 0 */
-#define SAM_PID_SPI1           (38) /* Serial Peripheral Interface 1 */
-#define SAM_PID_SPI2           (39) /* Serial Peripheral Interface 2 */
+#define SAM_PID_TWI1           (30) /* Two-Wire Interface 1 */
+#define SAM_PID_SDMMC0         (31) /* Secure Data Memory Card Controller 0 */
+#define SAM_PID_SDMMC1         (32) /* Secure Data Memory Card Controller 1 */
+#define SAM_PID_SPI0           (33) /* Serial Peripheral Interface 0 */
+#define SAM_PID_SPI1           (34) /* Serial Peripheral Interface 1 */
+#define SAM_PID_TC0            (35) /* Timer Counter 0 (ch. 0, 1, 2) */
+#define SAM_PID_TC1            (36) /* Timer Counter 1 (ch. 3, 4, 5) */
+                                    /* 37 Reserved */
+#define SAM_PID_PWM            (38) /* Pulse Width Modulation Controller */
+                                    /* 39 Reserved */
 
-#define SAM_PID_TC0            (40) /* Timer Counter 0 (ch. 0, 1, 2) */
-#define SAM_PID_TC1            (41) /* Timer Counter 1 (ch. 3, 4, 5) */
-#define SAM_PID_TC2            (42) /* Timer Counter 2 (ch. 6, 7, 8) */
-#define SAM_PID_PWM            (43) /* Pulse Width Modulation Controller */
-#define SAM_PID_ADC            (44) /* Touch Screen ADC Controller */
-#define SAM_PID_DBGU           (45) /* Debug Unit Interrupt */
-#define SAM_PID_UHPHS          (46) /* USB Host High Speed */
-#define SAM_PID_UDPHS          (47) /* USB Device High Speed */
-#define SAM_PID_SSC0           (48) /* Synchronous Serial Controller 0 */
-#define SAM_PID_SSC1           (49) /* Synchronous Serial Controller 1 */
+#define SAM_PID_ADC            (40) /* Touch Screen ADC Controller */
+#define SAM_PID_UHPHS          (41) /* USB Host High Speed */
+#define SAM_PID_UDPHS          (42) /* USB Device High Speed */
+#define SAM_PID_SSC0           (43) /* Synchronous Serial Controller 0 */
+#define SAM_PID_SSC1           (44) /* Synchronous Serial Controller 1 */
+#define SAM_PID_LCDC           (45) /* LCD Controller */
+#define SAM_PID_ISC            (46) /* Image Sensor Controller */
+#define SAM_PID_TRNG           (47) /* True Random Number Generator */
+#define SAM_PID_PDMIC          (48) /* Pulse Density Modulation Interface Controller */
+#define SAM_PID_IRQID          (49) /* IRQ Interrupt ID */
 
-#define SAM_PID_XDMAC1         (50) /* DMA Controller 1 */
-#define SAM_PID_LCDC           (51) /* LCD Controller */
-#define SAM_PID_ISI            (52) /* Image Sensor Interface */
-#define SAM_PID_TRNG           (53) /* True Random Number Generator */
-#define SAM_PID_EMAC0          (54) /* Ethernet MAC 0 */
-#define SAM_PID_EMAC1          (55) /* Ethernet MAC 1 */
-#define SAM_PID_AICID          (56) /* IRQ Interrupt ID */
-#define SAM_PID_SFC            (57) /* Fuse Controller */
+#define SAM_PID_SFC            (50) /* Fuse Controller */
+#define SAM_PID_SECURAM        (51) /* Secured RAM */
+#define SAM_PID_QSPI0          (52) /* QuadSPI 0 */
+#define SAM_PID_QSPI1          (53) /* QuadSPI 1 */
+#define SAM_PID_I2SC0          (54) /* Inter-IC Sound Controller 0 */
+#define SAM_PID_I2SC1          (55) /* Inter-IC Sound Controller 1 */
+#define SAM_PID_MCAN00         (56) /* MCAN controller 0, Interrupt 0 */
+#define SAM_PID_MCAN10         (57) /* MCAN controller 1, Interrupt 0 */
                                     /* 58 Reserved */
-#define SAM_PID_SECURAM        (59) /* Secured RAM */
+#define SAM_PID_CLASSD         (59) /* Audio Class D Amplifier */
 
-                                    /* 60 Undefined */
-#define SAM_PID_SMD            (61) /* SMD Soft Modem */
-#define SAM_PID_TWI3           (62) /* Two-Wire Interface 3 */
-#define SAM_PID_CATB           (63) /* Capacitive Touch Module */
-#define SAM_PID_SFR            (64) /* Special Function Register */
-#define SAM_PID_AIC            (65) /* Advanced Interrupt Controller */
-#define SAM_PID_SAIC           (66) /* Secured Advanced Interrupt Controller */
-#define SAM_PID_L2CC           (67) /* L2 Cache Controller */
+#define SAM_PID_SFR            (60) /* Special Function Register */
+#define SAM_PID_SAIC           (61) /* Secured Advanced Interrupt Controller */
+#define SAM_PID_AIC            (62) /* Advanced Interrupt Controller */
+#define SAM_PID_L2CC           (63) /* L2 Cache Controller */
+#define SAM_PID_MCAN01         (64) /* MCAN controller 0, Interrupt 1 */
+#define SAM_PID_MCAN11         (65) /* MCAN controller 1, Interrupt 1 */
+#define SAM_PID_EMACQ1         (66) /* EMAC Queue 1 Interrupt */
+#define SAM_PID_EMACQ2         (67) /* EMAC Queue 2 Interrupt */
+#define SAM_PID_PIOB           (68) /* Parallel I/O Controller B */
+#define SAM_PID_PIOC           (69) /* Parallel I/O Controller C */
+
+#define SAM_PID_PIOD           (70) /* Parallel I/O Controller D */
+#define SAM_PID_SDMMC0T        (71) /* Secure Data Memory Card Controller 0 */
+#define SAM_PID_SDMMC1T        (72) /* Secure Data Memory Card Controller 1 */
+                                    /* 73 Reserved */
+#define SAM_PID_SYS            (74) /* System Controller Interrupt PMC, RTC, RSTC */
+#define SAM_PID_ACC            (75) /* Analog Comparator */
+#define SAM_PID_RXLP           (76) /* UART Low-Power */
+#define SAM_PID_SFRBU          (77) /* Special Function Register BackUp */
+#define SAM_PID_CHIPID         (78) /* Chip ID */
+
+#define SAM_NPIDS              (79)
 
 /* External interrupts vectors numbers (same as peripheral ID) */
 
-#define SAM_IRQ_FIQ            SAM_PID_FIQ     /* Advanced Interrupt Controller FIQ */
-#define SAM_IRQ_SYS            SAM_PID_SYS     /* System Controller Interrupt PMC */
-#define SAM_IRQ_ARM            SAM_PID_ARM     /* Performance Monitor Unit */
-#define SAM_IRQ_PIT            SAM_PID_PIT     /* Periodic Interval Timer Interrupt */
-#define SAM_IRQ_WDT            SAM_PID_WDT     /* Watchdog timer Interrupt */
-#define SAM_IRQ_PIOD           SAM_PID_PIOD    /* Parallel I/O Controller D */
-#define SAM_IRQ_USART0         SAM_PID_USART0  /* USART 0 */
-#define SAM_IRQ_USART1         SAM_PID_USART1  /* USART 1 */
-#define SAM_IRQ_XDMAC0         SAM_PID_XDMAC0  /* DMA Controller 0 */
-#define SAM_IRQ_ICM            SAM_PID_ICM     /* Integrity Check Monitor */
+#define SAM_IRQ_FIQ            SAM_PID_FIQ       /* Advanced Interrupt Controller FIQ */
+#define SAM_IRQ_ARM            SAM_PID_ARM       /* Performance Monitor Unit */
+#define SAM_IRQ_PIT            SAM_PID_PIT       /* Periodic Interval Timer Interrupt */
+#define SAM_IRQ_WDT            SAM_PID_WDT       /* Watchdog timer Interrupt */
+#define SAM_IRQ_EMAC0          SAM_PID_EMAC0     /* Ethernet MAC 0 */
+#define SAM_IRQ_XDMAC0         SAM_PID_XDMAC0    /* DMA Controller 0 */
+#define SAM_IRQ_XDMAC1         SAM_PID_XDMAC1    /* DMA Controller 1 */
+#define SAM_IRQ_ICM            SAM_PID_ICM       /* Integrity Check Monitor */
+#define SAM_IRQ_AES            SAM_PID_AES       /* Advanced Encryption Standard */
 
-#define SAM_IRQ_CPKCC          SAM_PID_CPKCC   /* Classic Public Key Crypto Controller */
-#define SAM_IRQ_AES            SAM_PID_AES     /* Advanced Encryption Standard */
-#define SAM_IRQ_AESB           SAM_PID_AESB    /* AES bridge */
-#define SAM_IRQ_TDES           SAM_PID_TDES    /* Triple Data Encryption Standard */
-#define SAM_IRQ_SHA            SAM_PID_SHA     /* Secure Hash Algorithm */
-#define SAM_IRQ_MPDDRC         SAM_PID_MPDDRC  /* MPDDR controller */
-#define SAM_IRQ_MATRIX1        SAM_PID_MATRIX1 /* H32MX, 32-bit AHB Matrix */
-#define SAM_IRQ_MATRIX0        SAM_PID_MATRIX0 /* H64MX, 64-bit AHB Matrix */
-#define SAM_IRQ_VDEC           SAM_PID_VDEC    /* Video Decoder */
+#define SAM_IRQ_AESB           SAM_PID_AESB      /* AES bridge */
+#define SAM_IRQ_TDES           SAM_PID_TDES      /* Triple Data Encryption Standard */
+#define SAM_IRQ_SHA            SAM_PID_SHA       /* Secure Hash Algorithm */
+#define SAM_IRQ_MPDDRC         SAM_PID_MPDDRC    /* MPDDR controller */
+#define SAM_IRQ_MATRIX1        SAM_PID_MATRIX1   /* H32MX, 32-bit AHB Matrix */
+#define SAM_IRQ_MATRIX0        SAM_PID_MATRIX0   /* H64MX, 64-bit AHB Matrix */
+#define SAM_IRQ_SECUMOD        SAM_PID_SECUMOD   /* Secure Module */
+#define SAM_IRQ_HSMC           SAM_PID_HSMC      /* Multi-bit ECC Interrupt */
+#define SAM_IRQ_PIOA           SAM_PID_PIOA      /* Parallel I/O Controller A */
+#define SAM_IRQ_FLEXCOM0       SAM_PID_FLEXCOM0  /* FLEXCOM 0 */
 
-#define SAM_IRQ_SBM            SAM_PID_SBM     /* Secure Box Module */
-#define SAM_IRQ_HSMC           SAM_PID_HSMC    /* Multi-bit ECC Interrupt */
-#define SAM_IRQ_PIOA           SAM_PID_PIOA    /* Parallel I/O Controller A */
-#define SAM_IRQ_PIOB           SAM_PID_PIOB    /* Parallel I/O Controller B */
-#define SAM_IRQ_PIOC           SAM_PID_PIOC    /* Parallel I/O Controller C */
-#define SAM_IRQ_PIOE           SAM_PID_PIOE    /* Parallel I/O Controller E */
-#define SAM_IRQ_UART0          SAM_PID_UART0   /* UART 0 */
-#define SAM_IRQ_UART1          SAM_PID_UART1   /* UART 1 */
-#define SAM_IRQ_USART2         SAM_PID_USART2  /* USART 2 */
+#define SAM_IRQ_FLEXCOM1       SAM_PID_FLEXCOM1  /* FLEXCOM 1 */
+#define SAM_IRQ_FLEXCOM2       SAM_PID_FLEXCOM2  /* FLEXCOM 2 */
+#define SAM_IRQ_FLEXCOM3       SAM_PID_FLEXCOM3  /* FLEXCOM 3 */
+#define SAM_IRQ_FLEXCOM4       SAM_PID_FLEXCOM4  /* FLEXCOM 4 */
+#define SAM_IRQ_UART0          SAM_PID_UART0     /* UART 0 */
+#define SAM_IRQ_UART1          SAM_PID_UART1     /* UART 1 */
+#define SAM_IRQ_UART2          SAM_PID_UART2     /* UART 2 */
+#define SAM_IRQ_UART3          SAM_PID_UART3     /* UART 3 */
+#define SAM_IRQ_UART4          SAM_PID_UART4     /* UART 4 */
+#define SAM_IRQ_TWI0           SAM_PID_TWI0      /* Two-Wire Interface 0 */
 
-#define SAM_IRQ_USART3         SAM_PID_USART3  /* USART 3 */
-#define SAM_IRQ_USART4         SAM_PID_USART4  /* USART 4 */
-#define SAM_IRQ_TWI0           SAM_PID_TWI0    /* Two-Wire Interface 0 */
-#define SAM_IRQ_TWI1           SAM_PID_TWI1    /* Two-Wire Interface 1 */
-#define SAM_IRQ_TWI2           SAM_PID_TWI2    /* Two-Wire Interface 2 */
-#define SAM_IRQ_HSMCI0         SAM_PID_HSMCI0  /* High Speed Multimedia Card Interface 0 */
-#define SAM_IRQ_HSMCI1         SAM_PID_HSMCI1  /* High Speed Multimedia Card Interface 1 */
-#define SAM_IRQ_SPI0           SAM_PID_SPI0    /* Serial Peripheral Interface 0 */
-#define SAM_IRQ_SPI1           SAM_PID_SPI1    /* Serial Peripheral Interface 1 */
-#define SAM_IRQ_SPI2           SAM_PID_SPI2    /* Serial Peripheral Interface 2 */
+#define SAM_IRQ_TWI1           SAM_PID_TWI1      /* Two-Wire Interface 1 */
+#define SAM_IRQ_SDMMC0         SAM_PID_SDMMC0    /* Secure Data Memory Card Controller 0 */
+#define SAM_IRQ_SDMMC1         SAM_PID_SDMMC1    /* Secure Data Memory Card Controller 1 */
+#define SAM_IRQ_SPI0           SAM_PID_SPI0      /* Serial Peripheral Interface 0 */
+#define SAM_IRQ_SPI1           SAM_PID_SPI1      /* Serial Peripheral Interface 1 */
+#define SAM_IRQ_TC0            SAM_PID_TC0       /* Timer Counter 0 (ch. 0, 1, 2) */
+#define SAM_IRQ_TC1            SAM_PID_TC1       /* Timer Counter 1 (ch. 3, 4, 5) */
+#define SAM_IRQ_PWM            SAM_PID_PWM       /* Pulse Width Modulation Controller */
 
-#define SAM_IRQ_TC0            SAM_PID_TC0     /* Timer Counter 0 (ch. 0, 1, 2) */
-#define SAM_IRQ_TC1            SAM_PID_TC1     /* Timer Counter 1 (ch. 3, 4, 5) */
-#define SAM_IRQ_TC2            SAM_PID_TC2     /* Timer Counter 2 (ch. 6, 7, 8) */
-#define SAM_IRQ_PWM            SAM_PID_PWM     /* Pulse Width Modulation Controller */
-#define SAM_IRQ_ADC            SAM_PID_ADC     /* Touch Screen ADC Controller */
-#define SAM_IRQ_DBGU           SAM_PID_DBGU    /* Debug Unit Interrupt */
-#define SAM_IRQ_UHPHS          SAM_PID_UHPHS   /* USB Host High Speed */
-#define SAM_IRQ_UDPHS          SAM_PID_UDPHS   /* USB Device High Speed */
-#define SAM_IRQ_SSC0           SAM_PID_SSC0    /* Synchronous Serial Controller 0 */
-#define SAM_IRQ_SSC1           SAM_PID_SSC1    /* Synchronous Serial Controller 1 */
+#define SAM_IRQ_ADC            SAM_PID_ADC       /* Touch Screen ADC Controller */
+#define SAM_IRQ_UHPHS          SAM_PID_UHPHS     /* USB Host High Speed */
+#define SAM_IRQ_UDPHS          SAM_PID_UDPHS     /* USB Device High Speed */
+#define SAM_IRQ_SSC0           SAM_PID_SSC0      /* Synchronous Serial Controller 0 */
+#define SAM_IRQ_SSC1           SAM_PID_SSC1      /* Synchronous Serial Controller 1 */
+#define SAM_IRQ_LCDC           SAM_PID_LCDC      /* LCD Controller */
+#define SAM_IRQ_ISC            SAM_PID_ISC       /* Image Sensor Controller */
+#define SAM_IRQ_TRNG           SAM_PID_TRNG      /* True Random Number Generator */
+#define SAM_IRQ_PDMIC          SAM_PID_PDMIC     /* Pulse Density Modulation Interface Controller */
+#define SAM_IRQ_IRQID          SAM_PID_IRQID     /* IRQ Interrupt ID */
 
-#define SAM_IRQ_XDMAC1         SAM_PID_XDMAC1  /* DMA Controller 1 */
-#define SAM_IRQ_LCDC           SAM_PID_LCDC    /* LCD Controller */
-#define SAM_IRQ_ISI            SAM_PID_ISI     /* Image Sensor Interface */
-#define SAM_IRQ_TRNG           SAM_PID_TRNG    /* True Random Number Generator */
-#define SAM_IRQ_EMAC0          SAM_PID_EMAC0   /* Ethernet MAC 0 */
-#define SAM_IRQ_EMAC1          SAM_PID_EMAC1   /* Ethernet MAC 1 */
-#define SAM_IRQ_AICID          SAM_PID_AICID   /* IRQ Interrupt ID */
-#define SAM_IRQ_SFC            SAM_PID_SFC     /* Fuse Controller */
-#define SAM_IRQ_SECURAM        SAM_PID_SECURAM /* Secured RAM */
+#define SAM_IRQ_SFC            SAM_PID_SFC       /* Fuse Controller */
+#define SAM_IRQ_SECURAM        SAM_PID_SECURAM   /* Secured RAM */
+#define SAM_IRQ_QSPI0          SAM_PID_QSPI0     /* QuadSPI 0 */
+#define SAM_IRQ_QSPI1          SAM_PID_QSPI1     /* QuadSPI 1 */
+#define SAM_IRQ_I2SC0          SAM_PID_I2SC0     /* Inter-IC Sound Controller 0 */
+#define SAM_IRQ_I2SC1          SAM_PID_I2SC1     /* Inter-IC Sound Controller 1 */
+#define SAM_IRQ_MCAN00         SAM_PID_MCAN00    /* MCAN controller 0, Interrupt 0 */
+#define SAM_IRQ_MCAN10         SAM_PID_MCAN10    /* MCAN controller 1, Interrupt 0 */
+#define SAM_IRQ_CLASSD         SAM_PID_CLASSD    /* Audio Class D Amplifier */
 
-#define SAM_IRQ_SMD            SAM_PID_SMD     /* SMD Soft Modem */
-#define SAM_IRQ_TWI3           SAM_PID_TWI3    /* Two-Wire Interface 3 */
-#define SAM_IRQ_CATB           SAM_PID_CATB    /* Capacitive Touch Module */
-#define SAM_IRQ_SFR            SAM_PID_SFR     /* Special Function Register */
-#define SAM_IRQ_AIC            SAM_PID_AIC     /* Advanced Interrupt Controller */
-#define SAM_IRQ_SAIC           SAM_PID_SAIC    /* Secured Advanced Interrupt Controller */
-#define SAM_IRQ_L2CC           SAM_PID_L2CC    /* L2 Cache Controller */
+                                                 /* Special Function Register (no interrupt) */
+                                                 /* Secured Advanced Interrupt Controller (no interrupt) */
+                                                 /* Advanced Interrupt Controller (no interrupt) */
+#define SAM_IRQ_L2CC           SAM_PID_L2CC      /* L2 Cache Controller */
+#define SAM_IRQ_MCAN01         SAM_PID_MCAN01    /* MCAN controller 0, Interrupt 1 */
+#define SAM_IRQ_MCAN11         SAM_PID_MCAN11    /* MCAN controller 1, Interrupt 1 */
+#define SAM_IRQ_EMACQ1         SAM_PID_EMACQ1    /* EMAC Queue 1 Interrupt */
+#define SAM_IRQ_EMACQ2         SAM_PID_EMACQ2    /* EMAC Queue 2 Interrupt */
+#define SAM_IRQ_PIOB           SAM_PID_PIOB      /* Parallel I/O Controller B */
+#define SAM_IRQ_PIOC           SAM_PID_PIOC      /* Parallel I/O Controller C */
 
-#define SAM_IRQ_NINT           (SAM_PID_L2CC + 1)
+#define SAM_IRQ_PIOD           SAM_PID_PIOD      /* Parallel I/O Controller D */
+#define SAM_IRQ_SDMMC0T        SAM_PID_SDMMC0T   /* Secure Data Memory Card Controller 0 */
+#define SAM_IRQ_SDMMC1T        SAM_PID_SDMMC1T   /* Secure Data Memory Card Controller 1 */
+#define SAM_IRQ_SYS            SAM_PID_SYS       /* System Controller Interrupt PMC, RTC, RSTC */
+#define SAM_IRQ_ACC            SAM_PID_ACC       /* Analog Comparator */
+#define SAM_IRQ_RXLP           SAM_PID_RXLP      /* UART Low-Power */
+                                                 /* Special Function Register BackUp (no interrupt) */
+                                                 /* Chip ID (no interrupt) */
+
+#define SAM_IRQ_NINT           (SAM_PID_RXLP + 1)
 
 /* PIO interrupts (derived from SAM_IRQ_PIOA/B/C/D/E/F) */
 
@@ -359,51 +384,11 @@
 #  define SAM_NPIODIRQS        0
 #endif
 
-#ifdef CONFIG_SAMA5_PIOE_IRQ
-#  define SAM_IRQ_PIOE_PINS    (SAM_IRQ_NINT + SAM_NPIOAIRQS + \
-                                SAM_NPIOBIRQS + SAM_NPIOCIRQS + SAM_NPIODIRQS)
-#  define SAM_IRQ_PE0          (SAM_IRQ_PIOE_PINS+0)  /* PIOE, PIN 0 */
-#  define SAM_IRQ_PE1          (SAM_IRQ_PIOE_PINS+1)  /* PIOE, PIN 1 */
-#  define SAM_IRQ_PE2          (SAM_IRQ_PIOE_PINS+2)  /* PIOE, PIN 2 */
-#  define SAM_IRQ_PE3          (SAM_IRQ_PIOE_PINS+3)  /* PIOE, PIN 3 */
-#  define SAM_IRQ_PE4          (SAM_IRQ_PIOE_PINS+4)  /* PIOE, PIN 4 */
-#  define SAM_IRQ_PE5          (SAM_IRQ_PIOE_PINS+5)  /* PIOE, PIN 5 */
-#  define SAM_IRQ_PE6          (SAM_IRQ_PIOE_PINS+6)  /* PIOE, PIN 6 */
-#  define SAM_IRQ_PE7          (SAM_IRQ_PIOE_PINS+7)  /* PIOE, PIN 7 */
-#  define SAM_IRQ_PE8          (SAM_IRQ_PIOE_PINS+8)  /* PIOE, PIN 8 */
-#  define SAM_IRQ_PE9          (SAM_IRQ_PIOE_PINS+9)  /* PIOE, PIN 9 */
-#  define SAM_IRQ_PE10         (SAM_IRQ_PIOE_PINS+10) /* PIOE, PIN 10 */
-#  define SAM_IRQ_PE11         (SAM_IRQ_PIOE_PINS+11) /* PIOE, PIN 11 */
-#  define SAM_IRQ_PE12         (SAM_IRQ_PIOE_PINS+12) /* PIOE, PIN 12 */
-#  define SAM_IRQ_PE13         (SAM_IRQ_PIOE_PINS+13) /* PIOE, PIN 13 */
-#  define SAM_IRQ_PE14         (SAM_IRQ_PIOE_PINS+14) /* PIOE, PIN 14 */
-#  define SAM_IRQ_PE15         (SAM_IRQ_PIOE_PINS+15) /* PIOE, PIN 15 */
-#  define SAM_IRQ_PE16         (SAM_IRQ_PIOE_PINS+16) /* PIOE, PIN 16 */
-#  define SAM_IRQ_PE17         (SAM_IRQ_PIOE_PINS+17) /* PIOE, PIN 17 */
-#  define SAM_IRQ_PE18         (SAM_IRQ_PIOE_PINS+18) /* PIOE, PIN 18 */
-#  define SAM_IRQ_PE19         (SAM_IRQ_PIOE_PINS+19) /* PIOE, PIN 19 */
-#  define SAM_IRQ_PE20         (SAM_IRQ_PIOE_PINS+20) /* PIOE, PIN 20 */
-#  define SAM_IRQ_PE21         (SAM_IRQ_PIOE_PINS+21) /* PIOE, PIN 21 */
-#  define SAM_IRQ_PE22         (SAM_IRQ_PIOE_PINS+22) /* PIOE, PIN 22 */
-#  define SAM_IRQ_PE23         (SAM_IRQ_PIOE_PINS+23) /* PIOE, PIN 23 */
-#  define SAM_IRQ_PE24         (SAM_IRQ_PIOE_PINS+24) /* PIOE, PIN 24 */
-#  define SAM_IRQ_PE25         (SAM_IRQ_PIOE_PINS+25) /* PIOE, PIN 25 */
-#  define SAM_IRQ_PE26         (SAM_IRQ_PIOE_PINS+26) /* PIOE, PIN 26 */
-#  define SAM_IRQ_PE27         (SAM_IRQ_PIOE_PINS+27) /* PIOE, PIN 27 */
-#  define SAM_IRQ_PE28         (SAM_IRQ_PIOE_PINS+28) /* PIOE, PIN 28 */
-#  define SAM_IRQ_PE29         (SAM_IRQ_PIOE_PINS+29) /* PIOE, PIN 29 */
-#  define SAM_IRQ_PE30         (SAM_IRQ_PIOE_PINS+30) /* PIOE, PIN 30 */
-#  define SAM_IRQ_PE31         (SAM_IRQ_PIOE_PINS+31) /* PIOE, PIN 31 */
-#  define SAM_NPIOEIRQS        32
-#else
-#  define SAM_NPIOEIRQS        0
-#endif
-
 /* Total number of IRQ numbers */
 
 #define NR_IRQS               (SAM_IRQ_NINT + \
                                SAM_NPIOAIRQS + SAM_NPIOBIRQS + SAM_NPIOCIRQS + \
-                               SAM_NPIODIRQS + SAM_NPIOEIRQS )
+                               SAM_NPIODIRQS)
 
 /****************************************************************************************
  * Public Types
@@ -436,4 +421,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H */

@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/include/sama5/chip.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,49 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+/* SAMA5D2 Family
+ *
+ *                           SAMA5D21  SAMA5D22  SAMA5D23  SAMA5D24  SAMA5D26  SAMA5D27  SAMA5D28
+ * ------------------------- --------- --------- --------- --------- --------- --------- ---------
+ * Pin Count                 196       196       196       256       289       289       289
+ * Max. Operating Frequency  500 MHz   500 MHz   500 MHz   500 MHz   500 MHz   500 MHz   500 MHz
+ * CPU                       Cortex-A5 Cortex-A5 Cortex-A5 Cortex-A5 Cortex-A5 Cortex-A5 Cortex-A5
+ * Max I/O Pins              72        72        72        105       128       128       128
+ * USB Transceiver           1         1         1         1         1         1         1
+ * USB Speed                 Hi-Speed  Hi-Speed  Hi-Speed  Hi-Speed  Hi-Speed  Hi-Speed  Hi-Speed
+ * USB Interface             2         2         2         3         3         3         3
+ * SPI                       6         6         6         7         7         7         7
+ * QuadSPI                   2         2         2         2         2         2         2
+ * TWIHS (I2C)               6         6         6         7         7         7         7
+ * UART                      9         9         9         10        10        10        10
+ * CAN                       -         1         1         -         -         2         2
+ * SDIO/SD/MMC               1         1         1         2         2         2         2
+ * I2SC                      2         2         2         2         2         2         2
+ * SSC                       2         2         2         2         2         2         2
+ * Class D                   1         1         1         2         2         2         2
+ * PDMIC                     1         1         1         2         2         2         2
+ * Camera Interface          1         1         1         1         1         1         1
+ * ADC Inputs                5         5         5         12        12        12        12
+ * AESB                      -         1         1         1         -         1         1
+ * SRAM (Kbytes)             128       128       128       128       128       128       128
+ * DDR Bus                   16-bit    16-bit    16-bit    16/32-bit 16/32-bit 16/32-bit 16/32-bit
+ * Timers                    6         6         6         6         6         6         6
+ * Tamper pins               6         6         6         2         8         8         8
+ * Packages                  BGA196    BGA196    BGA196    BGA256    BGA289    BGA289    BGA289
+ */
+
+#if defined(CONFIG_ARCH_CHIP_ATSAMA5D21) || defined(CONFIG_ARCH_CHIP_ATSAMA5D22) || \
+    defined(CONFIG_ARCH_CHIP_ATSAMA5D22) || defined(CONFIG_ARCH_CHIP_ATSAMA5D23) || \
+    defined(CONFIG_ARCH_CHIP_ATSAMA5D24) || defined(CONFIG_ARCH_CHIP_ATSAMA5D26) || \
+    defined(CONFIG_ARCH_CHIP_ATSAMA5D27) || defined(CONFIG_ARCH_CHIP_ATSAMA5D28)
+#  define ATSAMA5D2        1         /* SAMA5D2 family */
+#  undef  ATSAMA5D3                  /* Not SAMA5D3 family */
+#  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
+#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
+#  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_NDMAC        2         /* (2) XDMA controllers */
+#  define SAM_NDMACHAN     16        /* (16) DMA channels per XDMA controller */
+
 /* SAMA5D3 Family
  *
  *                           ATSAMA5D31    ATSAMA5D33    ATSAMA5D34    ATSAMA5D35    ATSAMA5D36
@@ -91,7 +134,8 @@
  * Packages                  LFBGA324_A    LFBGA324_A    LFBGA324_A    LFBGA324_A    LFBGA324_A
  */
 
-#if defined(CONFIG_ARCH_CHIP_ATSAMA5D31)
+#elif defined(CONFIG_ARCH_CHIP_ATSAMA5D31)
+#  undef  ATSAMA5D2                  /* Not SAMA5D2 family */
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
@@ -99,6 +143,7 @@
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D33)
+#  undef  ATSAMA5D2                  /* Not SAMA5D2 family */
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
@@ -106,6 +151,7 @@
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D34)
+#  undef  ATSAMA5D2                  /* Not SAMA5D2 family */
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
@@ -113,6 +159,7 @@
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D35)
+#  undef  ATSAMA5D2                  /* Not SAMA5D2 family */
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
@@ -120,6 +167,7 @@
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D36)
+#  undef  ATSAMA5D2                  /* Not SAMA5D2 family */
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
@@ -141,6 +189,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D41) || defined(CONFIG_ARCH_CHIP_ATSAMA5D42) || \
       defined(CONFIG_ARCH_CHIP_ATSAMA5D43) || defined(CONFIG_ARCH_CHIP_ATSAMA5D44)
+#  undef  ATSAMA5D2                  /* Not SAMA5D2 family */
 #  undef  ATSAMA5D3                  /* Not SAMA5D3 family */
 #  define ATSAMA5D4        1         /* SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
