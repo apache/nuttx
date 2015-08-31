@@ -908,7 +908,7 @@ static int st25fl1_read_byte(FAR struct st25fl1_dev_s *priv, FAR uint8_t *buffer
 {
   struct qspi_meminfo_s meminfo;
 
-  fvdbg("address: %08lx nbytes: %d\n", (long)address, (int)nbytes);
+  fvdbg("address: %08lx nbytes: %d\n", (long)address, (int)buflen);
 
 #ifdef CONFIG_ST25FL1_SCRAMBLE
   meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO | QSPIMEM_SCRAMBLE;
@@ -977,7 +977,7 @@ static int st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buf
       if (ret < 0)
         {
           fdbg("ERROR: QSPI_MEMORY failed writing address=%06x\n",
-               address)
+               address);
           return ret;
         }
 
@@ -1423,9 +1423,12 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  * Name: st25fl1_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Create an initialize MTD device instance for the QuadSPI-based ST24FL1
+ *   FLASH part.
+ *
+ *   MTD devices are not registered in the file system, but are created as instances
+ *   that can be bound to other functions (such as a block or character driver front
+ *   end).
  *
  ************************************************************************************/
 
