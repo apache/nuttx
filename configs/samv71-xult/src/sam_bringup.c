@@ -55,6 +55,12 @@
 
 #include "samv71-xult.h"
 
+#ifdef HAVE_ST25FL1
+#include <nuttx/spi/qspi.h>
+#include <nuttx/mtd/mtd.h>
+#include "sam_qspi.h"
+#endif
+
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
 #endif
@@ -89,6 +95,10 @@
 
 int sam_bringup(void)
 {
+#ifdef HAVE_ST25FL1
+  FAR struct qspi_dev_s *qspi;
+  FAR struct mtd_dev_s *mtd;
+#endif
   int ret;
 
 #ifdef HAVE_MACADDR
@@ -175,6 +185,31 @@ int sam_bringup(void)
                  CONFIG_SAMV71XULT_ROMFS_ROMDISK_DEVNAME,
                  CONFIG_SAMV71XULT_ROMFS_MOUNT_MOUNTPOINT, errno);
         }
+    }
+#endif
+
+#ifdef HAVE_ST25FL1
+  /* Create an instance of the SAMV71 QSPI device driver */
+
+  qspi = sam_qspi_initialize(0);
+  if (!qspi)
+    {
+      SYSLOG("ERROR: sam_qspi_initialize failed\n");
+    }
+  else
+    {
+      /* Use the QSPI device instance to initialize the
+       * ST25FL1 device.
+       */
+
+      mtd = st25fl1_initialize(qspi);
+      if (!mtd)
+        {
+          SYSLOG("ERROR: st25fl1_initialize failed\n");
+        }
+
+      /* And now do what with the ST25FL1 MTD device? */
+#warning Missing Logic
     }
 #endif
 
