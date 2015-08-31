@@ -182,7 +182,7 @@
 /* Serial Clock Register */
 
 #define QSPI_SCR_CPOL              (1 << 0)  /* Bit 0:  Clock Polarity */
-#define QSPI_SCR_NCPHA             (1 << 1)  /* Bit 1:  Clock Phase */
+#define QSPI_SCR_CPHA              (1 << 1)  /* Bit 1:  Clock Phase */
 #define QSPI_SCR_SCBR_SHIFT        (8)       /* Bits 8-15: Serial Clock Baud Rate */
 #define QSPI_SCR_SCBR_MASK         (0xff << QSPI_SCR_SCBR_SHIFT)
 #  define QSPI_SCR_SCBR(n)         ((uint32_t)(n) << QSPI_SCR_SCBR_SHIFT)

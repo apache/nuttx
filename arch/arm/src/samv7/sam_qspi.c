@@ -1155,7 +1155,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = SAM_QSPI_CLOCK / scbr;
-  qspivdbg("SCR=%08x actual=%d\n", regval, actual);
+  qspivdbg("SCBR=%d actual=%d\n", scbr, actual);
 
   /* Save the frequency setting */
 
@@ -1194,32 +1194,32 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
     {
       /* Yes... Set the mode appropriately:
        *
-       * QSPI  CPOL NCPHA
+       * QSPI  CPOL CPHA
        * MODE
-       *  0    0    1
-       *  1    0    0
-       *  2    1    1
-       *  3    1    0
+       *  0    0    0
+       *  1    0    1
+       *  2    1    0
+       *  3    1    1
        */
 
       regval  = qspi_getreg(priv, SAM_QSPI_SCR_OFFSET);
-      regval &= ~(QSPI_SCR_CPOL | QSPI_SCR_NCPHA);
+      regval &= ~(QSPI_SCR_CPOL | QSPI_SCR_CPHA);
 
       switch (mode)
         {
-        case QSPIDEV_MODE0: /* CPOL=0; NCPHA=1 */
-          regval |= QSPI_SCR_NCPHA;
+        case QSPIDEV_MODE0: /* CPOL=0; CPHA=0 */
           break;
 
-        case QSPIDEV_MODE1: /* CPOL=0; NCPHA=0 */
+        case QSPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+          regval |= QSPI_SCR_CPHA;
           break;
 
-        case QSPIDEV_MODE2: /* CPOL=1; NCPHA=1 */
-          regval |= (QSPI_SCR_CPOL | QSPI_SCR_NCPHA);
-          break;
-
-        case QSPIDEV_MODE3: /* CPOL=1; NCPHA=0 */
+        case QSPIDEV_MODE2: /* CPOL=1; CPHA=0 */
           regval |= QSPI_SCR_CPOL;
+          break;
+
+        case QSPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+          regval |= (QSPI_SCR_CPOL | QSPI_SCR_CPHA);
           break;
 
         default:
@@ -1527,12 +1527,11 @@ static int qspi_hw_initialize(struct sam_qspidev_s *priv)
 
   /* Set up the initial QSPI clock mode:
    *
-   * Mode 0:  CPOL=0; NCPHA=1
+   * Mode 0:  CPOL=0; CPHA=0
    */
 
   regval  = qspi_getreg(priv, SAM_QSPI_SCR_OFFSET);
-  regval &= ~QSPI_SCR_CPOL;
-  regval |= QSPI_SCR_NCPHA;
+  regval &= ~(QSPI_SCR_CPOL | QSPI_SCR_CPHA);
   qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
 
   regval |= QSPI_SCR_SCBR(1);
