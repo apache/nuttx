@@ -1094,10 +1094,12 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    *
    *   QSCK frequency = QSPI_CLK / SCBR, or SCBR = QSPI_CLK / frequency
    *
-   * Where SCBR can have the range 1 to 256 and register holds SCBR - 1
+   * Where SCBR can have the range 1 to 256 and register holds SCBR - 1.  NOTE
+   * that a "ceiling" type of calculation is performed.  'frequency' is treated
+   * as a not-to-exceed value.
    */
 
-  scbr = SAM_QSPI_CLOCK / frequency;
+  scbr = (frequency + SAM_QSPI_CLOCK - 1) / frequency;
 
   /* Make sure that the divider is within range */
 
@@ -1363,9 +1365,11 @@ static int qspi_command(struct qspi_dev_s *dev,
 
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
 
-      /* Make sure that the length is an even multiple of 32-bit words. */
+      /* Make sure that the length is an even multiple of 32-bit words.
+       * REVISIT: This could cause access past the end of an allocated
+       * buffer.
+       */
 
-      DEBUGASSERT((cmdinfo->buflen & 3) == 0);
       buflen = (cmdinfo->buflen + 3) & ~3;
 
       /* Write Instruction Frame Register:
