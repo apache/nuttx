@@ -10914,3 +10914,7 @@
 	  was being used.  But recents changes added common lazy register as
 	  well so now that test must be (!defined(CONFIG_ARMV7M_CMNVECTOR) ||
 	  defined(CONFIG_ARMV7M_LAZYFPU)) (2015-08-31).
+	* arch/arm/include/sama5 and src/sama5:  Add basic chip description,
+	  configuration support and interrupt definitions for the SAMA5D2
+	  (2015-08-31).
+
