@@ -104,7 +104,7 @@ int fgetpos(FAR FILE *stream, FAR fpos_t *pos)
 {
   long position;
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!stream || !pos)
     {
       set_errno(EINVAL);

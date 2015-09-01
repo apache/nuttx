@@ -954,7 +954,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Some sanity checking */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !fds)
     {
       return -ENODEV;

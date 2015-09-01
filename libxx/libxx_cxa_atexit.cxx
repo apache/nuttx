@@ -83,7 +83,7 @@ extern "C"
   //
   //*************************************************************************
 
-#if CONFIG_SCHED_ONEXIT
+#ifdef CONFIG_SCHED_ONEXIT
   static void __cxa_callback(int exitcode, FAR void *arg)
   {
     FAR struct __cxa_atexit_s *alloc = (FAR struct __cxa_atexit_s *)arg;
@@ -118,7 +118,7 @@ extern "C"
 
   int __cxa_atexit(__cxa_exitfunc_t func, FAR void *arg, FAR void *dso_handle)
     {
-#if CONFIG_SCHED_ONEXIT
+#ifdef CONFIG_SCHED_ONEXIT
       // Allocate memory to hold the marshaled __cxa_exitfunc_t call
       // information.
 

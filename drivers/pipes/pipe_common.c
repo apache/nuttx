@@ -55,7 +55,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
 #  include <nuttx/arch.h>
 #endif
 

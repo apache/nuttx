@@ -934,7 +934,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   int i;
   int ret = 0;
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SETCONFIGINVALIDARGS), 0);

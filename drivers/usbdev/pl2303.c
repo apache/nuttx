@@ -1046,7 +1046,7 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
   int i;
   int ret = 0;
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2016,7 +2016,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
   /* Sanity check */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2057,7 +2057,7 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
 
   /* Sanity check */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2119,7 +2119,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Sanity check */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2210,7 +2210,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Sanity checks */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2253,7 +2253,7 @@ static bool usbser_txempty(FAR struct uart_dev_s *dev)
 
   usbtrace(PL2303_CLASSAPI_TXEMPTY, 0);
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);

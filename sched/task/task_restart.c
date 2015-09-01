@@ -151,7 +151,7 @@ int task_restart(pid_t pid)
 
       /* Kill any children of this thread */
 
-#if HAVE_GROUP_MEMBERS
+#ifdef HAVE_GROUP_MEMBERS
       (void)group_killchildren(tcb);
 #endif
 

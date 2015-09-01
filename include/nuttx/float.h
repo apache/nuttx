@@ -61,7 +61,7 @@
 
 #define FLT_MANT_DIG 24
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MANT_DIG 53
 #else
 #  define DBL_MANT_DIG FLT_MANT_DIG
@@ -88,7 +88,7 @@
 
 #define FLT_DIG 6
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_DIG 15  /* 10 */
 #else
 #  define DBL_DIG FLT_DIG
@@ -106,7 +106,7 @@
 
 #define FLT_MIN_EXP (-125)
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MIN_EXP (-1021)
 #else
 #  define DBL_MIN_EXP FLT_MIN_EXP
@@ -124,7 +124,7 @@
 
 #define FLT_MIN_10_EXP (-37)
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MIN_10_EXP (-307)  /* -37 */
 #else
 #  define DBL_MIN_10_EXP FLT_MIN_10_EXP
@@ -142,7 +142,7 @@
 
 #define FLT_MAX_EXP 128
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MAX_EXP 1024
 #else
 #  define DBL_MAX_EXP FLT_MAX_EXP
@@ -160,7 +160,7 @@
 
 #define FLT_MAX_10_EXP 38  /* 37 */
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MAX_10_EXP 308  /* 37 */
 #else
 #  define DBL_MAX_10_EXP FLT_MAX_10_EXP
@@ -176,7 +176,7 @@
 
 #define FLT_MAX 3.40282347e+38F  /* 1E+37 */
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MAX 1.7976931348623157e+308  /* 1E+37 */
 #else
 #  define DBL_MAX FLT_MAX
@@ -194,7 +194,7 @@
 
 #define FLT_EPSILON 1.1920929e-07F  /* 1E-5 */
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_EPSILON 2.2204460492503131e-16  /* 1E-9 */
 #else
 #  define DBL_EPSILON FLT_EPSILON
@@ -210,7 +210,7 @@
 
 #define FLT_MIN 1.17549435e-38F  /* 1E-37 */
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
 #define DBL_MIN 2.2250738585072014e-308  /* 1E-37 */
 #else
 #  define DBL_MIN FLT_MIN

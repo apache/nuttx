@@ -811,7 +811,7 @@ static int ovr2640_chipid(FAR struct i2c_dev_s *i2c)
 {
   uint8_t pidl;
   uint8_t pidh;
-#if CONFIG_DEBUG_GRAPHICS
+#ifdef CONFIG_DEBUG_GRAPHICS
   uint8_t midh;
   uint8_t midl;
 #endif
@@ -829,7 +829,7 @@ static int ovr2640_chipid(FAR struct i2c_dev_s *i2c)
   pidl = ov2640_getreg(i2c, 0x0a);      /* Product ID (MS) */
   pidh = ov2640_getreg(i2c, 0x0b);      /* Product ID (LS) */
 
-#if CONFIG_DEBUG_GRAPHICS
+#ifdef CONFIG_DEBUG_GRAPHICS
   midh = ov2640_getreg(i2c, 0x1c); /* Manufacturer ID (high) = 0x7f */
   midl = ov2640_getreg(i2c, 0x1d); /* Manufacturer ID (low) = 0xa2 */
 #endif

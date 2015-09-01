@@ -317,7 +317,7 @@ static void sched_timer_start(unsigned int ticks)
     {
       struct timespec ts;
 
-#if CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
       if (ticks > g_oneshot_maxticks)
         {
           ticks = g_oneshot_maxticks;

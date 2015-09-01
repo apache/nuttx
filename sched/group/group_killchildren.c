@@ -43,7 +43,7 @@
 
 #include "group/group.h"
 
-#if HAVE_GROUP_MEMBERS
+#ifdef HAVE_GROUP_MEMBERS
 
 /****************************************************************************
  * Private Functions
