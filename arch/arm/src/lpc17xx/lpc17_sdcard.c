@@ -67,7 +67,7 @@
 #include "chip/lpc17_syscon.h"
 #include "chip/lpc17_pinconfig.h"
 
-#if CONFIG_LPC17_SDCARD
+#ifdef CONFIG_LPC17_SDCARD
 
 /****************************************************************************
  * Pre-processor Definitions

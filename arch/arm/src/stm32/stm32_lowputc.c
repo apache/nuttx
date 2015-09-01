@@ -406,7 +406,7 @@ void up_lowputc(char ch)
   /* Wait until the TX data register is empty */
 
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TXE) == 0);
-#if STM32_CONSOLE_RS485_DIR
+#ifdef STM32_CONSOLE_RS485_DIR
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
@@ -414,7 +414,7 @@ void up_lowputc(char ch)
 
   putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_TDR_OFFSET);
 
-#if STM32_CONSOLE_RS485_DIR
+#ifdef STM32_CONSOLE_RS485_DIR
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TC) == 0);
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
@@ -519,7 +519,7 @@ void stm32_lowsetup(void)
   stm32_configgpio(STM32_CONSOLE_RX);
 #endif
 
-#if STM32_CONSOLE_RS485_DIR
+#ifdef STM32_CONSOLE_RS485_DIR
   stm32_configgpio(STM32_CONSOLE_RS485_DIR);
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
@@ -591,7 +591,7 @@ void stm32_lowsetup(void)
   stm32_configgpio(STM32_CONSOLE_RX);
 #endif
 
-#if STM32_CONSOLE_RS485_DIR
+#ifdef STM32_CONSOLE_RS485_DIR
   stm32_configgpio(STM32_CONSOLE_RS485_DIR);
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif

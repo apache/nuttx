@@ -230,7 +230,7 @@ static inline void up_enablepll0(void)
 
   /* Select PLL0/1 oscillator */
 
-#if AVR32_CLOCK_PLL_OSC1
+#ifdef AVR32_CLOCK_PLL0_OSC1
   regval |= PM_PLL_PLLOSC;
 #endif
 
@@ -280,7 +280,7 @@ static inline void up_enablepll1(void)
 
   /* Select PLL0/1 oscillator */
 
-#if AVR32_CLOCK_PLL_OSC1
+#ifdef AVR32_CLOCK_PLL1_OSC1
   regval |= PM_PLL_PLLOSC;
 #endif
 

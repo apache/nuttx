@@ -250,7 +250,7 @@ static int rtc_resume(void)
  *
  ************************************************************************************/
 
-#if CONFIG_RTC_ALARM
+#ifdef CONFIG_RTC_ALARM
 static int rtc_interrupt(int irq, void *context)
 {
 #warning "Missing logic"
@@ -285,7 +285,7 @@ int up_rtcinitialize(void)
 
   /* Attach the RTC interrupt handler */
 
-#if CONFIG_RTC_ALARM
+#ifdef CONFIG_RTC_ALARM
   ret = irq_attach(LPC17_IRQ_RTC, rtc_interrupt);
   if (ret == OK)
     {

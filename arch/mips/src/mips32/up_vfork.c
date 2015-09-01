@@ -117,7 +117,7 @@ pid_t up_vfork(const struct vfork_s *context)
   struct task_tcb_s *child;
   size_t stacksize;
   uint32_t newsp;
-#if CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_MIPS32_FRAMEPOINTER
   uint32_t newfp;
 #endif
   uint32_t stackutil;
@@ -125,7 +125,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   svdbg("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
         context->s0, context->s1, context->s2, context->s3, context->s4);
-#if CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_MIPS32_FRAMEPOINTER
   svdbg("s5:%08x s6:%08x s7:%08x\n",
         context->s5, context->s6, context->s7);
 #ifdef MIPS32_SAVE_GP
@@ -199,7 +199,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Was there a frame pointer in place before? */
 
-#if CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_MIPS32_FRAMEPOINTER
   if (context->fp <= (uint32_t)parent->adj_stack_ptr &&
       context->fp >= (uint32_t)parent->adj_stack_ptr - stacksize)
     {
@@ -237,13 +237,13 @@ pid_t up_vfork(const struct vfork_s *context)
   child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
   child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
   child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
-#if CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_MIPS32_FRAMEPOINTER
   child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
 #else
   child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
 #endif
   child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
-#if MIPS32_SAVE_GP
+#ifdef MIPS32_SAVE_GP
   child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
 #endif
 

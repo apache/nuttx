@@ -960,7 +960,7 @@ static void adc_startconv(struct stm32_dev_s *priv, bool enable)
 
   if (enable)
     {
-#if CONFIG_ADC_CONTINUOUS
+#ifdef CONFIG_ADC_CONTINUOUS
 
       /* Set continuous mode */
 
@@ -974,7 +974,7 @@ static void adc_startconv(struct stm32_dev_s *priv, bool enable)
     }
   else
     {
-#if CONFIG_ADC_CONTINUOUS
+#ifdef CONFIG_ADC_CONTINUOUS
 
       /* Disable the continuous conversion */
 
@@ -1761,10 +1761,9 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
-#if CONFIG_STM32_STM32L15XX
+#ifdef CONFIG_STM32_STM32L15XX
   adc_enable(priv, false);
-#  if defined(CONFIG_STM32_STM32L15XX) && ((STM32_CFGR_PLLSRC != 0) || \
-      (STM32_SYSCLK_SW != RCC_CFGR_SW_HSI))
+#  if (STM32_CFGR_PLLSRC != 0) || (STM32_SYSCLK_SW != RCC_CFGR_SW_HSI)
      adc_enable_hsi(false);
 #  endif
 #endif

@@ -580,7 +580,7 @@ static void rtc_resume(void)
  *
  ************************************************************************************/
 
-#if CONFIG_RTC_ALARM
+#ifdef CONFIG_RTC_ALARM
 static int rtc_interrupt(int irq, void *context)
 {
 #warning "Missing logic"

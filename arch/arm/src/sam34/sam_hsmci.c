@@ -80,7 +80,7 @@
 #  include "chip/sam_pdc.h"
 #endif
 
-#if CONFIG_SAM34_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
 
 /****************************************************************************
  * Pre-processor Definitions

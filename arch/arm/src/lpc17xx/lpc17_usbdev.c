@@ -2088,7 +2088,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_INT_ERRINT) != 0)

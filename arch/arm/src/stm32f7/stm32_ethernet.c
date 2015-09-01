@@ -482,7 +482,7 @@
  * checksum is OK the DMA can handle the frame otherwise the frame is dropped
  */
 
-#if CONFIG_STM32F7_ETH_HWCHECKSUM
+#ifdef CONFIG_STM32F7_ETH_HWCHECKSUM
 #  define DMAOMR_SET_MASK \
     (ETH_DMAOMR_OSF | ETH_DMAOMR_RTC_64 | ETH_DMAOMR_TTC_64 | \
      ETH_DMAOMR_TSF | ETH_DMAOMR_RSF)

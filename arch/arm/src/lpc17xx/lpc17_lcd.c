@@ -565,7 +565,7 @@ int up_fbinitialize(void)
 
   /* TFT panel */
 
-#if CONFIG_LPC17_LCD_TFTPANEL
+#ifdef CONFIG_LPC17_LCD_TFTPANEL
   regval |= LCD_CTRL_LCDTFT;
 #endif
 

@@ -327,35 +327,35 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#if CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
         vectorno = STM32_IRQ_TIM2;
         break;
 #endif
-#if CONFIG_STM32_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
         vectorno = STM32_IRQ_TIM3;
         break;
 #endif
-#if CONFIG_STM32_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
         vectorno = STM32_IRQ_TIM4;
         break;
 #endif
-#if CONFIG_STM32_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
         vectorno = STM32_IRQ_TIM5;
         break;
 #endif
 #if STM32_NBTIM > 0
-#if CONFIG_STM32_TIM6
+#ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
         vectorno = STM32_IRQ_TIM6;
         break;
 #endif
 #endif
 #if STM32_NBTIM > 1
-#if CONFIG_STM32_TIM7
+#ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
         vectorno = STM32_IRQ_TIM7;
         break;
@@ -364,12 +364,12 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 #if STM32_NATIM > 0
       /* TODO: add support for multiple sources and callbacks */
 
-#if CONFIG_STM32_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
         vectorno = STM32_IRQ_TIM1UP;
         break;
 #endif
-#if CONFIG_STM32_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
         vectorno = STM32_IRQ_TIM8UP;
         break;
@@ -570,7 +570,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#if CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
         switch (channel)
           {
@@ -599,7 +599,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
           }
         break;
 #endif
-#if CONFIG_STM32_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
         switch (channel)
           {
@@ -628,7 +628,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
           }
         break;
 #endif
-#if CONFIG_STM32_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
         switch (channel)
           {
@@ -656,7 +656,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
           }
         break;
 #endif
-#if CONFIG_STM32_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
         switch (channel)
           {
@@ -686,7 +686,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 
 #if STM32_NATIM > 0
-#if CONFIG_STM32_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
         switch (channel)
           {
@@ -710,7 +710,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
           }
         break;
 #endif
-#if CONFIG_STM32_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
         switch (channel)
           {
@@ -811,7 +811,7 @@ struct stm32_tim_ops_s stm32_tim_ops =
   .ackint         = &stm32_tim_ackint
 };
 
-#if CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2
 struct stm32_tim_priv_s stm32_tim2_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -820,7 +820,7 @@ struct stm32_tim_priv_s stm32_tim2_priv =
 };
 #endif
 
-#if CONFIG_STM32_TIM3
+#ifdef CONFIG_STM32_TIM3
 struct stm32_tim_priv_s stm32_tim3_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -829,7 +829,7 @@ struct stm32_tim_priv_s stm32_tim3_priv =
 };
 #endif
 
-#if CONFIG_STM32_TIM4
+#ifdef CONFIG_STM32_TIM4
 struct stm32_tim_priv_s stm32_tim4_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -838,7 +838,7 @@ struct stm32_tim_priv_s stm32_tim4_priv =
 };
 #endif
 
-#if CONFIG_STM32_TIM5
+#ifdef CONFIG_STM32_TIM5
 struct stm32_tim_priv_s stm32_tim5_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -848,7 +848,7 @@ struct stm32_tim_priv_s stm32_tim5_priv =
 #endif
 
 #if STM32_NBTIM > 0
-#if CONFIG_STM32_TIM6
+#ifdef CONFIG_STM32_TIM6
 struct stm32_tim_priv_s stm32_tim6_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -859,7 +859,7 @@ struct stm32_tim_priv_s stm32_tim6_priv =
 #endif
 
 #if STM32_NBTIM > 1
-#if CONFIG_STM32_TIM7
+#ifdef CONFIG_STM32_TIM7
 struct stm32_tim_priv_s stm32_tim7_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -871,7 +871,7 @@ struct stm32_tim_priv_s stm32_tim7_priv =
 
 #if STM32_NATIM > 0
 
-#if CONFIG_STM32_TIM1
+#ifdef CONFIG_STM32_TIM1
 struct stm32_tim_priv_s stm32_tim1_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -880,7 +880,7 @@ struct stm32_tim_priv_s stm32_tim1_priv =
 };
 #endif
 
-#if CONFIG_STM32_TIM8
+#ifdef CONFIG_STM32_TIM8
 struct stm32_tim_priv_s stm32_tim8_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -903,25 +903,25 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer)
 
   switch (timer)
     {
-#if CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         dev = (struct stm32_tim_dev_s *)&stm32_tim2_priv;
         modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM2EN);
         break;
 #endif
-#if CONFIG_STM32_TIM3
+#ifdef CONFIG_STM32_TIM3
       case 3:
         dev = (struct stm32_tim_dev_s *)&stm32_tim3_priv;
         modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM3EN);
         break;
 #endif
-#if CONFIG_STM32_TIM4
+#ifdef CONFIG_STM32_TIM4
       case 4:
         dev = (struct stm32_tim_dev_s *)&stm32_tim4_priv;
         modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM4EN);
         break;
 #endif
-#if CONFIG_STM32_TIM5
+#ifdef CONFIG_STM32_TIM5
       case 5:
         dev = (struct stm32_tim_dev_s *)&stm32_tim5_priv;
         modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM5EN);
@@ -929,7 +929,7 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer)
 #endif
 
 #if STM32_NBTIM > 0
-#if CONFIG_STM32_TIM6
+#ifdef CONFIG_STM32_TIM6
       case 6:
         dev = (struct stm32_tim_dev_s *)&stm32_tim6_priv;
         modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM6EN);
@@ -937,7 +937,7 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer)
 #endif
 #endif
 #if STM32_NBTIM > 1
-#if CONFIG_STM32_TIM7
+#ifdef CONFIG_STM32_TIM7
       case 7:
         dev = (struct stm32_tim_dev_s *)&stm32_tim7_priv;
         modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM7EN);
@@ -946,13 +946,13 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer)
 #endif
 
 #if STM32_NATIM > 0
-#if CONFIG_STM32_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         dev = (struct stm32_tim_dev_s *)&stm32_tim1_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM1EN);
         break;
 #endif
-#if CONFIG_STM32_TIM8
+#ifdef CONFIG_STM32_TIM8
       case 8:
         dev = (struct stm32_tim_dev_s *)&stm32_tim8_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM8EN);
@@ -985,35 +985,35 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev)
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#if CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
         modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM2EN, 0);
         break;
 #endif
-#if CONFIG_STM32_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
         modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM3EN, 0);
         break;
 #endif
-#if CONFIG_STM32_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
         modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM4EN, 0);
         break;
 #endif
-#if CONFIG_STM32_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
         modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM5EN, 0);
         break;
 #endif
 #if STM32_NBTIM > 0
-#if CONFIG_STM32_TIM6
+#ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
         modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM6EN, 0);
         break;
 #endif
 #endif
 #if STM32_NBTIM > 1
-#if CONFIG_STM32_TIM7
+#ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
         modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM7EN, 0);
         break;
@@ -1021,12 +1021,12 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev)
 #endif
 
 #if STM32_NATIM > 0
-#if CONFIG_STM32_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
         break;
 #endif
-#if CONFIG_STM32_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM8EN, 0);
         break;

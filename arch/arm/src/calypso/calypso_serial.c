@@ -377,7 +377,7 @@ static inline void up_setrate(struct up_dev_s *priv, unsigned int rate)
       break;
     }
 
-#if UART_DIV_BIT_RATE_OFFS
+#ifdef UART_DIV_BIT_RATE_OFFS
   up_serialout(priv, UART_DIV_BIT_RATE_OFFS, div_bit_rate);
 #else
   up_serialout(priv, UART_DIV_LOW_OFFS, div_bit_rate);

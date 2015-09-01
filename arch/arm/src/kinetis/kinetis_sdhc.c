@@ -65,7 +65,7 @@
 #include "kinetis_sim.h"
 #include "kinetis_sdhc.h"
 
-#if CONFIG_KINETIS_SDHC
+#ifdef CONFIG_KINETIS_SDHC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -102,7 +102,7 @@
  * and divider values.
  */
 
-#if CONFIG_KINETIS_SDHC_ABSFREQ
+#ifdef CONFIG_KINETIS_SDHC_ABSFREQ
 #  ifndef CONFIG_KINETIS_IDMODE_FREQ
 #    define CONFIG_KINETIS_IDMODE_FREQ 400000    /* 400 KHz, ID mode */
 #  endif
@@ -287,7 +287,7 @@ static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock);
 static void kinetis_reset(FAR struct sdio_dev_s *dev);
 static uint8_t kinetis_status(FAR struct sdio_dev_s *dev);
 static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool enable);
-#if CONFIG_KINETIS_SDHC_ABSFREQ
+#ifdef CONFIG_KINETIS_SDHC_ABSFREQ
 static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency);
 #endif
 static void kinetis_clock(FAR struct sdio_dev_s *dev,
@@ -1387,7 +1387,7 @@ static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool wide)
  *
  ****************************************************************************/
 
-#if CONFIG_KINETIS_SDHC_ABSFREQ
+#ifdef CONFIG_KINETIS_SDHC_ABSFREQ
 static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
 {
   uint32_t sdclkfs;
@@ -1523,7 +1523,7 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-#if CONFIG_KINETIS_SDHC_ABSFREQ
+#ifdef CONFIG_KINETIS_SDHC_ABSFREQ
 static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint32_t frequency;

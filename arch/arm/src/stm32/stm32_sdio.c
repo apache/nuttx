@@ -64,7 +64,7 @@
 #include "stm32_dma.h"
 #include "stm32_sdio.h"
 
-#if CONFIG_STM32_SDIO
+#ifdef CONFIG_STM32_SDIO
 
 /****************************************************************************
  * Pre-processor Definitions

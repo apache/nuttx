@@ -1338,7 +1338,7 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
    * configuration and the auto negotiation results.
    */
 
-#if CONFIG_ENET_USEMII
+#ifdef CONFIG_ENET_USEMII
   rcr = ENET_RCR_MII_MODE | ENET_RCR_CRCFWD |
         CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT;
 #else
@@ -1527,7 +1527,7 @@ int kinetis_netinitialize(int intf)
 
   /* Configure all ENET/MII pins */
 
-#if CONFIG_ENET_USEMII
+#ifdef CONFIG_ENET_USEMII
   kinetis_pinconfig(PIN_MII0_MDIO);
   kinetis_pinconfig(PIN_MII0_MDC);
   kinetis_pinconfig(PIN_MII0_RXDV);
