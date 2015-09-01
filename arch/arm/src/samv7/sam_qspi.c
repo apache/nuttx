@@ -1074,8 +1074,12 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t actual;
   uint32_t scbr;
+#if CONFIG_SAMV7_QSPI_DLYBS > 0
   uint32_t dlybs;
+#endif
+#if CONFIG_SAMV7_QSPI_DLYBCT > 0
   uint32_t dlybct;
+#endif
   uint32_t regval;
 
   qspivdbg("frequency=%d\n", frequency);
@@ -1417,7 +1421,6 @@ static int qspi_command(struct qspi_dev_s *dev,
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
 
           /* Copy the data from QSPI memory into the user buffer */
-
           memcpy(cmdinfo->buffer, (const void *)SAM_QSPIMEM_BASE, buflen);
         }
 
