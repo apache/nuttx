@@ -98,8 +98,8 @@ endif
 
 ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX = -Wall -Wshadow
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
@@ -132,6 +132,6 @@ EXEEXT =
 
 HOSTCC = gcc
 HOSTINCLUDES = -I.
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 

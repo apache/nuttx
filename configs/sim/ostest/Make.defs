@@ -49,8 +49,8 @@ endif
 ARCHCPUFLAGS = -fno-builtin
 ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fno-rtti
 ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX = -Wall -Wshadow
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
 ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
 ARCHINCLUDESXX = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx

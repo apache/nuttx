@@ -244,7 +244,7 @@ endif
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   HOSTCC = mingw32-gcc.exe
   HOSTINCLUDES = -I.
-  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
   HOSTLDFLAGS =
   HOSTEXEEXT = .exe
 
@@ -257,7 +257,7 @@ else
 
   HOSTCC = gcc
   HOSTINCLUDES = -I.
-  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
   HOSTLDFLAGS =
 
   # This is the tool to use for dependencies (i.e., none)

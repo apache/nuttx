@@ -75,8 +75,8 @@ endif
 
 ARCHCFLAGS = -fno-builtin -muse-rodata-section
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX = -Wall -Wshadow
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
 ARCHNOPICFLAGS = -fno-pic
 ARCHPICFLAGS = -fpic
@@ -101,6 +101,6 @@ endif
 
 HOSTCC = gcc
 HOSTINCLUDES = -I.
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 
