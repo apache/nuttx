@@ -111,7 +111,7 @@
  * RTC upper half driver is built.
  */
 
-#if CONFIG_RTC_DRIVER
+#ifdef CONFIG_RTC_DRIVER
 
 /* IOCTL Commands ***********************************************************/
 /* RTC driver IOCTL commands.  These are Linux compatible command names, not

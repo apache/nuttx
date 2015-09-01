@@ -125,7 +125,7 @@ static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
       return ERROR;
     }
 
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
   ret = nxbe_colormap(dev);
   if (ret < 0)
     {

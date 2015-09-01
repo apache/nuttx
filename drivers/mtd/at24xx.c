@@ -356,7 +356,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
   while (blocksleft-- > 0)
     {
-#if AT24XX_ADDRSIZE
+#if AT24XX_ADDRSIZE == 2
       uint16_t offset = startblock * priv->pagesize;
       buf[1] = offset & 0xff;
       buf[0] = (offset >> 8) & 0xff;

@@ -104,7 +104,7 @@
 
 int fsetpos(FAR FILE *stream, FAR fpos_t *pos)
 {
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!stream || !pos)
     {
       set_errno(EINVAL);

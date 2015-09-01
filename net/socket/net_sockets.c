@@ -217,7 +217,7 @@ int sockfd_allocate(int minsd)
 
 void sock_release(FAR struct socket *psock)
 {
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (psock)
 #endif
     {

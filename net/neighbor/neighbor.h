@@ -70,7 +70,7 @@
 
 struct neighbor_addr_s
 {
-#if CONFIG_NET_IPv6_NEIGHBOR_ADDRTYPE
+#ifdef CONFIG_NET_IPv6_NEIGHBOR_ADDRTYPE
   CONFIG_NET_IPv6_NEIGHBOR_ADDRTYPE na_addr;
 #else
   struct ether_addr na_addr;
