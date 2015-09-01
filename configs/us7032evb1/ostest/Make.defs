@@ -46,7 +46,7 @@ endif
 
 ARCHCPUFLAGS		= -m1 -fno-builtin
 ARCHPICFLAGS		= -fpic
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
 ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
@@ -78,6 +78,6 @@ MKDEP			= $(TOPDIR)/tools/mkdeps.sh
 
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS		=
 

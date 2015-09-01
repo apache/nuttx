@@ -52,8 +52,8 @@ ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ARCHCFLAGS		= -fno-builtin
 ARCHCXXFLAGS		= -fno-builtin -fno-exceptions
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX		= -Wall -Wshadow
+ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX		= -Wall -Wshadow -Wundef
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION	= -g
@@ -103,6 +103,6 @@ MKDEP			= $(TOPDIR)/tools/mkdeps.sh
 
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS		=
 

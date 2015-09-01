@@ -53,7 +53,7 @@ endif
 ARCHCPUFLAGS		= -fno-builtin -nostdinc -fno-stack-protector -fno-omit-frame-pointer \
                           -marm -march=armv7-a
 ARCHPICFLAGS		= -fpic
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include -I$(RGMPINCDIR) \
 			  -I$(TOPDIR)/configs/rgmp/include -I$(TOPDIR)/arch/rgmp/include/arm
