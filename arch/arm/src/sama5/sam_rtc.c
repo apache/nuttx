@@ -245,7 +245,7 @@ static int rtc_bcd2bin(uint32_t value)
  *
  ************************************************************************************/
 
-#if CONFIG_RTC_ALARM
+#ifdef CONFIG_RTC_ALARM
 static void rtc_worker(FAR void *arg)
 {
   /* Sample once (atomically) */
@@ -278,7 +278,7 @@ static void rtc_worker(FAR void *arg)
  *
  ************************************************************************************/
 
-#if CONFIG_RTC_ALARM
+#ifdef CONFIG_RTC_ALARM
 static int rtc_interrupt(int irq, void *context)
 {
   int ret;

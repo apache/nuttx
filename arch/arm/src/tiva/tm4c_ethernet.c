@@ -479,7 +479,7 @@
  * checksum is OK the DMA can handle the frame otherwise the frame is dropped
  */
 
-#if CONFIG_TIVA_EMAC_HWCHECKSUM
+#ifdef CONFIG_TIVA_EMAC_HWCHECKSUM
 #  define DMAOPMODE_SET_MASK \
     (EMAC_DMAOPMODE_OSF | EMAC_DMAOPMODE_RTC_64 | EMAC_DMAOPMODE_TTC_64 | \
      EMAC_DMAOPMODE_TSF | EMAC_DMAOPMODE_RSF)
@@ -748,7 +748,7 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv);
 
 /* PHY Initialization */
 
-#if CONFIG_TIVA_PHY_INTERRUPTS
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
 static void tiva_phy_intenable(bool enable);
 #endif
 static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);

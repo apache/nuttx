@@ -71,7 +71,7 @@
 #undef CONFIG_STM32_SYSTICK_HCLKd8 /* Power up default is HCLK, not HCLK/8 */
                                    /* And I don't know now to re-configure it yet */
 
-#if CONFIG_STM32_SYSTICK_HCLKd8
+#ifdef CONFIG_STM32_SYSTICK_HCLKd8
 #  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
 #else
 #  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
@@ -138,7 +138,7 @@ void up_timer_initialize(void)
 
 #if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
   regval = getreg32(NVIC_SYSTICK_CTRL);
-#if CONFIG_STM32_SYSTICK_HCLKd8
+#ifdef CONFIG_STM32_SYSTICK_HCLKd8
   regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
 #else
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;

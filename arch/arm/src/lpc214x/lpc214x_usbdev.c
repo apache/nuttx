@@ -2052,7 +2052,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_DEVINT_EPRINT))

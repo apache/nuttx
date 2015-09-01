@@ -53,7 +53,7 @@
 
 /* UC3 B0 (64-pin) / B1 (48-pin, no USB host) Series */
 
-#if CONFIG_ARCH_CHIP_AT32UC3B064
+#ifdef CONFIG_ARCH_CHIP_AT32UC3B064
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B0 1            /* UC3 B0 (64-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (64*1024)    /* Size of on-chip FLASH (bytes) */
@@ -71,7 +71,7 @@
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B0128
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B0128)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B0 1            /* UC3 B0 (64-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (128*1024)   /* Size of on-chip FLASH (bytes) */
@@ -89,7 +89,7 @@
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B0256
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B0256)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B0 1            /* UC3 B0 (64-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (256*1024)   /* Size of on-chip FLASH (bytes) */
@@ -107,7 +107,7 @@
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B0512
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B0512)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B0 1            /* UC3 B0 (64-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (512*1024)   /* Size of on-chip FLASH (bytes) */
@@ -125,7 +125,7 @@
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B164
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B164)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B1 1            /* UC3 B0 (48-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (64*1024)    /* Size of on-chip FLASH (bytes) */
@@ -143,7 +143,7 @@
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B1128
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B1128)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B1 1            /* UC3 B0 (48-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (128*1024)   /* Size of on-chip FLASH (bytes) */
@@ -161,7 +161,7 @@
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B1256
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B1256)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B1 1            /* UC3 B0 (48-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (256*1024)   /* Size of on-chip FLASH (bytes) */
@@ -179,7 +179,7 @@
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
 #  define AVR32_NDMAC                7            /* Number of DMA channels */
-#elif CONFIG_ARCH_CHIP_AT32UC3B1512
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B1512)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B1 1            /* UC3 B0 (48-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (512*1024)   /* Size of on-chip FLASH (bytes) */

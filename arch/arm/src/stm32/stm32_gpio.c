@@ -208,9 +208,9 @@ static inline void stm32_gpioremap(void)
 
 #ifdef CONFIG_STM32_JTAG_FULL_ENABLE
   /* The reset default */
-#elif CONFIG_STM32_JTAG_NOJNTRST_ENABLE
+#elif defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE)
   val |= AFIO_MAPR_SWJ;       /* enabled but without JNTRST */
-#elif CONFIG_STM32_JTAG_SW_ENABLE
+#elif defined(CONFIG_STM32_JTAG_SW_ENABLE)
   val |= AFIO_MAPR_SWDP;      /* set JTAG-DP disabled and SW-DP enabled */
 #else
   val |= AFIO_MAPR_DISAB;     /* set JTAG-DP and SW-DP Disabled */

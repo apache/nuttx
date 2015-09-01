@@ -159,7 +159,7 @@
 /* Simulated Heap Definitions **********************************************/
 /* Size of the simulated heap */
 
-#if CONFIG_MM_SMALL
+#ifdef CONFIG_MM_SMALL
 #  define SIM_HEAP_SIZE (64*1024)
 #else
 #  define SIM_HEAP_SIZE (4*1024*1024)

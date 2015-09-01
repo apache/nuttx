@@ -1552,7 +1552,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
 
   sam_adc_getreg(priv->adc, SAM_ADC_XPOSR);
   sam_adc_getreg(priv->adc, SAM_ADC_YPOSR);
-#if CONFIG_SAMA5_TSD_4WIRE
+#ifdef CONFIG_SAMA5_TSD_4WIRE
   sam_adc_getreg(priv->adc, SAM_ADC_PRESSR);
 #endif
 

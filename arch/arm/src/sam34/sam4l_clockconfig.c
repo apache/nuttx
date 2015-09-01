@@ -1293,7 +1293,7 @@ void sam_clockconfig(void)
    * OSC32: Might be source clock for DFLL0
    */
 
-#if NEED_OSC0
+#ifdef NEED_OSC0
   /* Enable OSC0 using the settings in board.h */
 
   sam_enableosc0();
