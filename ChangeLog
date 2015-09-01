@@ -10917,4 +10917,15 @@
 	* arch/arm/include/sama5 and src/sama5:  Add basic chip description,
 	  configuration support and interrupt definitions for the SAMA5D2
 	  (2015-08-31).
-
+	* LPC43xx: Fix NVIC_SYSH_PRIORITY_STEP define.  From Ilya Averyanov
+	  (2015-09-01).
+	* LPC43xx: Fix missing #define in eeprom.  From Ilya Averyanov
+	  (2015-09-01).
+	* libc/math/lib_asin.c: The function did not convert for some input
+	  values.  Asin did not convert for values which do not belong to the
+	  domain of the function. But aside of that the function also did not
+	  convert for sine allowed values.  I achieved a conversion of the
+	  function by reducing the DBL_EPSION and by checking if the input
+	  value is in the domain of the function. This is a fix for the
+	  problem but the function should always terminate after a given
+	  number of iterations.  From Stefan Kolb (2015-09-01).

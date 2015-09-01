@@ -1318,12 +1318,16 @@ o Libraries (libc/)
                it does not return at all as the loop in it does not
                converge, hanging your app.
 
-               "There are likely many other issues like these as the Rhombs
+               "There are likely many other issues like these as the Rhombus
                OS code has not been tested or used that much. Sorry for not
                providing patches, but we found it easier just to switch the
                math library."
 
                Ref: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/7805
+
+               UPDATE: 2015-09-01: A fix for the noted problems with asin()
+               has been applied.
+
 Status:        Open
 Priority:      Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
