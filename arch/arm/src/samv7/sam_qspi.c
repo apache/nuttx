@@ -77,11 +77,11 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAMV7_QSPI_DLYBS
-#  define CONFIG_SAMV7_QSPI_DLYBS 2
+#  define CONFIG_SAMV7_QSPI_DLYBS 0
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI_DLYBCT
-#  define CONFIG_SAMV7_QSPI_DLYBCT 5
+#  define CONFIG_SAMV7_QSPI_DLYBCT 0
 #endif
 
 /* When QSPI DMA is enabled, small DMA transfers will still be performed by
@@ -465,8 +465,8 @@ static void qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg)
   qspivdbg("    MR:%08x   SR:%08x  IMR:%08x  SCR:%08x\n",
           getreg32(priv->base + SAM_QSPI_MR_OFFSET),
           getreg32(priv->base + SAM_QSPI_SR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_IMR_OFFSET));
-          getreg32(priv->base + SAM_QSPI_SCR_OFFSET),
+          getreg32(priv->base + SAM_QSPI_IMR_OFFSET),
+          getreg32(priv->base + SAM_QSPI_SCR_OFFSET));
   qspivdbg("   IAR:%08x  ICR:%08x  IFR:%08x  SMR:%08x\n",
           getreg32(priv->base + SAM_QSPI_IAR_OFFSET),
           getreg32(priv->base + SAM_QSPI_ICR_OFFSET),
@@ -1125,14 +1125,17 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    *
    *   Delay Before QSCK = DLYBS / QSPI_CLK
    *
-   * For a 2uS delay
+   * For a 100 nsec delay (assumes QSPI_CLK is an even multiple of MHz):
    *
-   *   DLYBS == 2 * QSPI_CLK / 1000000
+   *   DLYBS == 100 * QSPI_CLK / 1000000000
+   *         == (100 * (QSPI_CLK / 1000000)) / 1000
    */
 
-  dlybs   = (CONFIG_SAMV7_QSPI_DLYBS * SAM_QSPI_CLOCK) / 1000000;
-
+#if CONFIG_SAMV7_QSPI_DLYBS > 0
+  dlybs   = (CONFIG_SAMV7_QSPI_DLYBS * (SAM_QSPI_CLOCK / 1000000)) / 1000;
   regval |= dlybs << QSPI_SCR_DLYBS_SHIFT;
+#endif
+
   qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
 
   /* DLYBCT: Delay Between Consecutive Transfers.  This field defines the delay
@@ -1142,16 +1145,20 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    *
    *  Delay Between Consecutive Transfers = (32 x DLYBCT) / QSPI_CLK
    *
-   * For a 5uS delay:
+   * For a 500 nsec delay  (assumes QSPI_CLK is an even multiple of MHz):
    *
-   *  DLYBCT = 5 * QSPI_CLK * 1000000 / 32
+   *  DLYBCT = 500 * QSPI_CLK / 1000000000 / 32
+   *         = (500 * (QSPI_CLK / 1000000) / 1000 / 32
    */
-
-  dlybct  = (CONFIG_SAMV7_QSPI_DLYBCT * SAM_QSPI_CLOCK) / 1000000 / 32;
 
   regval  = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
   regval &= ~QSPI_MR_DLYBCT_MASK;
+
+#if CONFIG_SAMV7_QSPI_DLYBCT > 0
+  dlybct  = ((CONFIG_SAMV7_QSPI_DLYBCT * (SAM_QSPI_CLOCK /1000000)) / 1000 / 32;
   regval |= dlybct << QSPI_MR_DLYBCT_SHIFT;
+#endif
+
   qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
 
   /* Calculate the new actual frequency */
@@ -1309,6 +1316,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   qspivdbg("Transfer:\n");
   qspivdbg("  flags: %02x\n", cmdinfo->flags);
   qspivdbg("  cmd: %04x\n", cmdinfo->cmd);
+
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
       qspivdbg("  address/length: %08lx %d\n",
@@ -1420,7 +1428,10 @@ static int qspi_command(struct qspi_dev_s *dev,
        */
 
       while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_INT_TXEMPTY) == 0);
+
       qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
+
+      /* Fall through to INSTRE wait */
     }
   else
     {
@@ -1443,13 +1454,16 @@ static int qspi_command(struct qspi_dev_s *dev,
       qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
       MEMORY_SYNC();
-  }
+
+      /* Fall through to INSTRE wait */
+    }
 
   /* When the command has been sent, Instruction End Status (INTRE) will be
    * set in the QSPI status register.
    */
 
   while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
+
   return OK;
 }
 
