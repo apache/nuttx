@@ -127,7 +127,7 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
           eventset |= (POLLERR | POLLHUP);
         }
 
-      /* Awaken the caller of poll() is requested event occurred. */
+      /* Awaken the caller of poll() if requested event occurred. */
 
       if (eventset)
         {
