@@ -680,7 +680,6 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...);
 
 static int  stm32_ifup(struct net_driver_s *dev);
 static int  stm32_ifdown(struct net_driver_s *dev);
-static int  stm32_ifdown(struct net_driver_s *dev);
 static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void stm32_txavail_work(FAR void *arg);
