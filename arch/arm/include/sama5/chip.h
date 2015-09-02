@@ -83,8 +83,12 @@
 #  define ATSAMA5D2        1         /* SAMA5D2 family */
 #  undef  ATSAMA5D3                  /* Not SAMA5D3 family */
 #  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
-#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
-#  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_ISRAM0_SIZE (128*1024) /* SRAM0: 128KB */
+#ifdef CONFIG_ARMV7A_L2CC_PL310
+#  define SAM_ISRAM1_SIZE (0)        /* (SRAM1 used for L2 cache )*/
+#else
+#  define SAM_ISRAM0_SIZE (64*1024)  /* SRAM1: 128KB */
+#endif
 #  define SAM_NDMAC        2         /* (2) XDMA controllers */
 #  define SAM_NDMACHAN     16        /* (16) DMA channels per XDMA controller */
 
