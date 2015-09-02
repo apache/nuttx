@@ -92,7 +92,6 @@
  * use the CCLK undivided to get the SPI_CLOCK.
  */
 
-#define SPI_PCLKSET_DIV    SYSCON_PCLKSEL_CCLK
 #define SPI_CLOCK          LPC43_CCLK
 
 /****************************************************************************
