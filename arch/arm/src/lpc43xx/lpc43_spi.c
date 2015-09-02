@@ -54,8 +54,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "lpc43_syscon.h"
-#include "lpc43_pinconn.h"
+#include "lpc43_pinconfig.h"
 #include "lpc43_spi.h"
 
 #ifdef CONFIG_LPC43_SPI
@@ -545,36 +544,19 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 FAR struct spi_dev_s *lpc43_spiinitialize(int port)
 {
   FAR struct lpc43_spidev_s *priv = &g_spidev;
-  irqstate_t flags;
-  uint32_t regval;
 
   /* Configure multiplexed pins as connected on the board.  Chip select
    * pins must be configured by board-specific logic.  All SPI pins and
-   * one SPI1 pin (SCK) have multiple, alternative pin selection.
+   * one SPI1 pin (SCK) have multiple, alternative pin selections.
    * Definitions in the board.h file must be provided to resolve the
    * board-specific pin configuration like:
    *
-   * #define GPIO_SPI_SCK GPIO_SPI_SCK_1
+   * #define PINCONF_SPI_SCK PINCONF_SPI_SCK_1
    */
 
-  flags = irqsave();
-  lpc43_configgpio(GPIO_SPI_SCK);
-  lpc43_configgpio(GPIO_SPI_MISO);
-  lpc43_configgpio(GPIO_SPI_MOSI);
-
-  /* Configure clocking */
-
-  regval  = getreg32(LPC43_SYSCON_PCLKSEL0);
-  regval &= ~SYSCON_PCLKSEL0_SPI_MASK;
-  regval |= (SPI_PCLKSET_DIV << SYSCON_PCLKSEL0_SPI_SHIFT);
-  putreg32(regval, LPC43_SYSCON_PCLKSEL0);
-
-  /* Enable peripheral clocking to SPI and SPI1 */
-
-  regval  = getreg32(LPC43_SYSCON_PCONP);
-  regval |= SYSCON_PCONP_PCSPI;
-  putreg32(regval, LPC43_SYSCON_PCONP);
-  irqrestore(flags);
+  lpc43_pin_config(PINCONF_SPI_SCK);
+  lpc43_pin_config(PINCONF_SPI_MISO);
+  lpc43_pin_config(PINCONF_SPI_MOSI);
 
   /* Configure 8-bit SPI mode and master mode */
 
