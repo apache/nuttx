@@ -163,6 +163,151 @@ config LPC43_ETHERNET
 	bool "Ethernet"
 	default n
 
+if LPC43_ETHERNET
+menu "Ethernet MAC configuration"
+
+config LPC43_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config LPC43_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		LPC43_PHYINIT is defined in the configuration then the board specific logic must
+		provide lpc43_phyinitialize();  The LPC43 Ethernet driver will call this function
+		one time before it first uses the PHY.
+
+config LPC43_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+config LPC43_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config LPC43_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !LPC43_AUTONEG
+	---help---
+		If LPC43_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config LPC43_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !LPC43_AUTONEG
+	---help---
+		If LPC43_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config LPC43_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on LPC43_AUTONEG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config LPC43_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on LPC43_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config LPC43_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config LPC43_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config LPC43_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config LPC43_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config LPC43_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config LPC43_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config LPC43_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config LPC43_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config LPC43_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config LPC43_RMII
+	bool
+	default y if !LPC43_MII
+
+
+config LPC43_ETHERNET_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu
+endif
+
 config LPC43_EVNTMNTR
 	bool "Event Monitor"
 	default n
