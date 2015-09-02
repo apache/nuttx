@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_memorymap.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,9 @@
 #include <nuttx/config.h>
 #include <arch/sama5/chip.h>
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D2)
+#  include "chip/sama5d2x_memorymap.h"
+#elif defined(ATSAMA5D3)
 #  include "chip/sama5d3x_memorymap.h"
 #elif defined(ATSAMA5D4)
 #  include "chip/sama5d4x_memorymap.h"
