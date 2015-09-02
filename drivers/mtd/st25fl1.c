@@ -263,7 +263,6 @@
 #  define STATUS3_W56_63BYTE        (3 << STATUS3_W56_SHIFT)
                                             /* Bit 7: Reserved                      */
 
-
 /* Chip Geometries ******************************************************************/
 /* All members of the family support uniform 4K-byte sectors  */
 
@@ -302,6 +301,15 @@
 #define CLR_VALID(p)               do { (p)->flags &= ~ST25FL1_CACHE_VALID; } while (0)
 #define CLR_DIRTY(p)               do { (p)->flags &= ~ST25FL1_CACHE_DIRTY; } while (0)
 #define CLR_ERASED(p)              do { (p)->flags &= ~ST25FL1_CACHE_DIRTY; } while (0)
+
+/* Misc. ****************************************************************************/
+/* The SAMV7x QSPI driver insists that transfers be performed in multiples of 32-
+ * bits.  Other QSPI drivers could have other requirements but, so far, there seems
+ * to be no harm in making this unconditional.
+ */
+
+#define ALIGN_MASK                 3
+#define ALIGN_UP(n)                (((n)+ALIGN_MASK) & ~ALIGN_MASK)
 
 /************************************************************************************
  * Private Types
@@ -517,11 +525,11 @@ static int st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 
 static uint8_t sf25fl1_read_status1(FAR struct qspi_dev_s *qspi)
 {
-  uint8_t status;
+  uint8_t status[ALIGN_UP(1)];
 
   DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS1,
-                                   (FAR void *)&status, 1));
-  return status;
+                                   (FAR void *)&status[0], 1));
+  return status[0];
 }
 
 /************************************************************************************
@@ -530,11 +538,11 @@ static uint8_t sf25fl1_read_status1(FAR struct qspi_dev_s *qspi)
 
 static uint8_t sf25fl1_read_status2(FAR struct qspi_dev_s *qspi)
 {
-  uint8_t status;
+  uint8_t status[ALIGN_UP(1)];
 
   DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS2,
-                                   (FAR void *)&status, 1));
-  return status;
+                                   (FAR void *)&status[0], 1));
+  return status[0];
 }
 
 /************************************************************************************
@@ -543,11 +551,11 @@ static uint8_t sf25fl1_read_status2(FAR struct qspi_dev_s *qspi)
 
 static uint8_t sf25fl1_read_status3(FAR struct qspi_dev_s *qspi)
 {
-  uint8_t status;
+  uint8_t status[ALIGN_UP(1)];
 
   DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS3,
-                                   (FAR void *)&status, 1));
-  return status;
+                                   (FAR void *)&status[0], 1));
+  return status[0];
 }
 
 /************************************************************************************
@@ -586,7 +594,8 @@ static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi)
  * Name:  st25fl1_write_status
  ************************************************************************************/
 
-static void st25fl1_write_status(FAR struct qspi_dev_s *qspi, uint8_t status[4])
+static void st25fl1_write_status(FAR struct qspi_dev_s *qspi,
+                                 uint8_t status[ALIGN_UP(3)])
 {
   st25fl1_write_enable(qspi);
   st25fl1_command_write(qspi, ST25FL1_WRITE_STATUS, (FAR const void *)status, 3);
@@ -599,7 +608,7 @@ static void st25fl1_write_status(FAR struct qspi_dev_s *qspi, uint8_t status[4])
 
 static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 {
-  uint8_t jedecid[4];
+  uint8_t jedecid[ALIGN_UP(3)];
 
   /* Lock the QuadSPI bus and configure the bus. */
 
@@ -663,7 +672,7 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
                             off_t startblock, size_t nblocks)
 {
-  unsigned char status[4];
+  unsigned char status[ALIGN_UP(3)];
 
   /* Get the status register value to check the current protection */
 
@@ -714,7 +723,7 @@ static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
 static int st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
                               off_t startblock, size_t nblocks)
 {
-  unsigned char status[4];
+  unsigned char status[ALIGN_UP(3)];
 
   /* Get the status register value to check the current protection */
 
@@ -1435,7 +1444,7 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
 {
   FAR struct st25fl1_dev_s *priv;
-  uint8_t status[4];
+  uint8_t status[ALIGN_UP(3)];
   int ret;
 
   fvdbg("qspi: %p\n", qspi);

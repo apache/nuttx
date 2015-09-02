@@ -10929,3 +10929,7 @@
 	  value is in the domain of the function. This is a fix for the
 	  problem but the function should always terminate after a given
 	  number of iterations.  From Stefan Kolb (2015-09-01).
+	* arch/arm/src/lpc43xx/lpc43_spi.c: Fix SPI driver.  From Ilya
+	  Averyanov (2015-09-02).
+	* arch/arm/src/lpc43xx/lpc43_ethernet.c: Add Ethernet support.  From
+	  Ilya Averyanov (2015-09-02).
