@@ -69,7 +69,7 @@
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned
- *   on failure.  -ENODEV is the only expected error value.
+ *   on failure.  -ENETUNREACH is the only expected error value.
  *
  ****************************************************************************/
 
@@ -190,7 +190,7 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn, const net_ipv6addr_
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned
- *   on failure.  -ENODEV is the only expected error value.
+ *   on failure.  -ENETUNREACH is the only expected error value.
  *
  ****************************************************************************/
 
@@ -218,7 +218,7 @@ int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned
- *   on failure.  -ENODEV is the only expected error value.
+ *   on failure.  -ENETUNREACH is the only expected error value.
  *
  ****************************************************************************/
 
