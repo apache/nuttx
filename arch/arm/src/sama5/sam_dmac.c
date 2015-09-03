@@ -1721,7 +1721,7 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
    * buffer transfer has completed.
    *
    * The DMAC transfer continues until the CTRLB register disables the
-   * descriptor (DSCR bits) registers at the final buffer tranfer.
+   * descriptor (DSCR bits) registers at the final buffer transfer.
    *
    * Enable error, buffer complete and transfer complete interrupts.  We
    * don't really need the buffer complete interrupts, but we will take them
@@ -2309,7 +2309,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       dmach->callback = callback;
       dmach->arg      = arg;
 
-      /* Is this a single block transfer?  Or a multiple block tranfer? */
+      /* Is this a single block transfer?  Or a multiple block transfer? */
 
       if (dmach->llhead == dmach->lltail)
         {

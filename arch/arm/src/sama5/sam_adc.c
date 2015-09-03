@@ -1577,10 +1577,10 @@ static void sam_adc_offset(struct sam_adc_s *priv)
    * used for all channel.
    */
 
-#if CONFIG_SAMA5_ADC_OFFSET
+#ifdef CONFIG_SAMA5_ADC_OFFSET
   regval |= ADC_COR_OFF0;
 #endif
-#if CONFIG_SAMA5_ADC_DIFFMODE
+#ifdef CONFIG_SAMA5_ADC_DIFFMODE
   regval |= ADC_COR_DIFF0;
 #endif
 #endif

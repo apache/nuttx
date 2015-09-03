@@ -192,23 +192,18 @@ void up_lowputc(char ch)
  *   as possible.
  *
  *   The USART0/2/3 and UART1 peripherals are configured using the following registers:
- *   1. Power: In the PCONP register, set bits PCUSART0/1/2/3.
- *      On reset, USART0 and UART 1 are enabled (PCUSART0 = 1 and PCUART1 = 1)
- *      and USART2/3 are disabled (PCUART1 = 0 and PCUSART3 = 0).
- *   2. Peripheral clock: In the PCLKSEL0 register, select PCLK_USART0 and
- *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_USART2 and PCLK_USART3.
- *   3. Baud rate: In the LCR register, set bit DLAB = 1. This enables access
+ *   1. Baud rate: In the LCR register, set bit DLAB = 1. This enables access
  *      to registers DLL and DLM for setting the baud rate. Also, if needed,
  *      set the fractional baud rate in the fractional divider
- *   4. UART FIFO: Use bit FIFO enable (bit 0) in FCR register to
+ *   2. UART FIFO: Use bit FIFO enable (bit 0) in FCR register to
  *      enable FIFO.
- *   5. Pins: Select UART pins through the PINSEL registers and pin modes
+ *   3. Pins: Select UART pins through the PINSEL registers and pin modes
  *      through the PINMODE registers. UART receive pins should not have
  *      pull-down resistors enabled.
- *   6. Interrupts: To enable UART interrupts set bit DLAB = 0 in the LCRF
+ *   4. Interrupts: To enable UART interrupts set bit DLAB = 0 in the LCRF
  *      register. This enables access to IER. Interrupts are enabled
  *      in the NVIC using the appropriate Interrupt Set Enable register.
- *   7. DMA: UART transmit and receive functions can operate with the
+ *   5. DMA: UART transmit and receive functions can operate with the
  *      GPDMA controller.
  *
  **************************************************************************/

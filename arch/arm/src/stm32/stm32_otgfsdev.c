@@ -5169,15 +5169,44 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   /* Deactivate the power down */
 
+#if defined(CONFIG_STM32_STM32F446)
+  /* In the case of the STM32F446 the meaning of the bit has changed to VBUS
+   * Detection Enable when set
+   */
+
+  regval  = OTGFS_GCCFG_PWRDWN;
+
+# ifdef CONFIG_USBDEV_VBUSSENSING
+  regval |= OTGFS_GCCFG_VBDEN;
+# endif
+
+#else
+  /* In the case of the the all others the meaning of the bit is No VBUS
+   * Sense when Set
+   */
+
   regval  = (OTGFS_GCCFG_PWRDWN | OTGFS_GCCFG_VBUSASEN | OTGFS_GCCFG_VBUSBSEN);
-#ifndef CONFIG_USBDEV_VBUSSENSING
+# ifndef CONFIG_USBDEV_VBUSSENSING
   regval |= OTGFS_GCCFG_NOVBUSSENS;
-#endif
-#ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
+# endif
+# ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
   regval |= OTGFS_GCCFG_SOFOUTEN;
+# endif
 #endif
   stm32_putreg(regval, STM32_OTGFS_GCCFG);
   up_mdelay(20);
+
+  /* For the new OTG controller in the F446 when VBUS sensing is not used we
+   * need to force the B session valid
+   */
+
+#if defined(CONFIG_STM32_STM32F446)
+# ifndef CONFIG_USBDEV_VBUSSENSING
+  regval  =  stm32_getreg(STM32_OTGFS_GOTGCTL);
+  regval |= (OTGFS_GOTGCTL_BVALOEN | OTGFS_GOTGCTL_BVALOVAL);
+  stm32_putreg(regval, STM32_OTGFS_GOTGCTL);
+# endif
+#endif
 
   /* Force Device Mode */
 

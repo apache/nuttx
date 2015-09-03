@@ -53,7 +53,9 @@
 
 /* Chip-Specific External interrupts */
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D2)
+#  include <arch/sama5/sama5d2_irq.h>
+#elif defined(ATSAMA5D3)
 #  include <arch/sama5/sama5d3_irq.h>
 #elif defined(ATSAMA5D4)
 #  include <arch/sama5/sama5d4_irq.h>

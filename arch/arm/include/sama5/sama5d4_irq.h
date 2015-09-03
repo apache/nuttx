@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/include/sama5/sama5d4x_irq.h
+ * arch/arm/include/sama5/sama5d4_irq.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  * nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4X_IRQ_H
-#define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4X_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4_IRQ_H
+#define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4_IRQ_H
 
 /****************************************************************************************
  * Included Files
@@ -436,4 +436,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4X_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_SAMA5_SAMA5D4_IRQ_H */

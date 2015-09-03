@@ -255,22 +255,60 @@
 /* SPI ******************************************************************************/
 /* Don't enable SPI peripherals not supported by the chip. */
 
-#if CHIP_NSPI < 1
+#if SAMV7_NSPI < 1
 #  undef CONFIG_SAMV7_SPI0
+#  undef CONFIG_SAMV7_SPI0_MASTER
+#  undef CONFIG_SAMV7_SPI0_SLAVE
 #  undef CONFIG_SAMV7_SPI1
-#elif CHIP_NSPI < 2
+#  undef CONFIG_SAMV7_SPI1_MASTER
+#  undef CONFIG_SAMV7_SPI1_SLAVE
+#elif SAMV7_NSPI < 2
 #  undef CONFIG_SAMV7_SPI1
+#  undef CONFIG_SAMV7_SPI1_MASTER
+#  undef CONFIG_SAMV7_SPI1_SLAVE
 #endif
 
-#ifndef CONFIG_SAMV7_HAVE_SPI
+#ifndef CONFIG_SAMV7_SPI
 #  undef CONFIG_SAMV7_SPI0
+#  undef CONFIG_SAMV7_SPI0_MASTER
+#  undef CONFIG_SAMV7_SPI0_SLAVE
 #  undef CONFIG_SAMV7_SPI1
+#  undef CONFIG_SAMV7_SPI1_MASTER
+#  undef CONFIG_SAMV7_SPI1_SLAVE
 #endif
 
 /* Are any SPI peripherals enabled? */
 
 #if !defined(CONFIG_SAMV7_SPI0) && !defined(CONFIG_SAMV7_SPI0)
-#  undef CONFIG_SAMV7_HAVE_SPI
+#  undef CONFIG_SAMV7_SPI
+#  undef CONFIG_SAMV7_SPI_MASTER
+#  undef CONFIG_SAMV7_SPI_SLAVE
+#endif
+
+/* Each SPI peripheral must be enabled as a MASTER or as a SLAVE */
+
+#ifndef CONFIG_SAMV7_SPI_MASTER
+#  undef CONFIG_SAMV7_SPI0_MASTER
+#  undef CONFIG_SAMV7_SPI1_MASTER
+#endif
+
+#if !defined(CONFIG_SAMV7_SPI0_MASTER) && !defined(CONFIG_SAMV7_SPI1_MASTER)
+#  undef CONFIG_SAMV7_SPI_MASTER
+#endif
+
+#ifndef CONFIG_SAMV7_SPI_SLAVE
+#  undef CONFIG_SAMV7_SPI0_SLAVE
+#  undef CONFIG_SAMV7_SPI1_SLAVE
+#endif
+
+#if !defined(CONFIG_SAMV7_SPI0_SLAVE) && !defined(CONFIG_SAMV7_SPI1_SLAVE)
+#  undef CONFIG_SAMV7_SPI_SLAVE
+#endif
+
+#if !defined(CONFIG_SAMV7_SPI_MASTER) && !defined(CONFIG_SAMV7_SPI_SLAVE)
+#  undef CONFIG_SAMV7_SPI
+#  undef CONFIG_SAMV7_SPI0
+#  undef CONFIG_SAMV7_SPI1
 #endif
 
 /****************************************************************************

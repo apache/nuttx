@@ -1023,7 +1023,7 @@ static struct pic32mz_rxdesc_s *pic32mz_rxdesc(struct pic32mz_driver_s *priv)
       rxdesc = &priv->pd_rxdesc[i];
       if ((rxdesc->status & RXDESC_STATUS_EOWN) == 0)
         {
-          /* Yes.. return a pointer to the desciptor */
+          /* Yes.. return a pointer to the descriptor */
 
           return rxdesc;
         }

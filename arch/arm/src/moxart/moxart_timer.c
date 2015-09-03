@@ -132,9 +132,6 @@ void up_timer_initialize(void)
   uint32_t tmp;
 
 //  up_disable_irq(IRQ_SYSTIMER);
-
-  *(volatile int *)0x98700000 = 0x3f;
-
   putreg32(0, TM1_ADDR + CNTL_TIMER);
   putreg32(0, TM1_ADDR + INTR_STATE_TIMER);
   putreg32(0x1ff, TM1_ADDR + INTR_MASK_TIMER);

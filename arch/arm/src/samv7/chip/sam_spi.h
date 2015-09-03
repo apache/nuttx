@@ -120,7 +120,8 @@
 
 /* SPI Mode Register */
 
-#define SPI_MR_MSTR               (1 << 0)  /* Bit 0:  Master/Slave Mode */
+#define SPI_MR_MSTR               (1 << 0)  /* Bit 0:  1=Master Mode */
+#  define SPI_MR_SLAVE            (0)       /*         0=Slave Mode */
 #define SPI_MR_PS                 (1 << 1)  /* Bit 1:  Peripheral Select */
 #define SPI_MR_PCSDEC             (1 << 2)  /* Bit 2:  Chip Select Decode */
 #define SPI_MR_MODFDIS            (1 << 4)  /* Bit 4:  Mode Fault Detection */
@@ -170,7 +171,9 @@
 #define SPI_INT_NSSR              (1 << 8)  /* Bit 8:  NSS Rising Interrupt */
 #define SPI_INT_TXEMPTY           (1 << 9)  /* Bit 9:  Transmission Registers Empty Interrupt */
 #define SPI_INT_UNDES             (1 << 10) /* Bit 10: Underrun Error Status Interrupt (slave) */
-#define SPI_SR_SPIENS             (1 << 16) /* Bit 16:  SPI Enable Status (SR only) */
+#define SPI_SR_SPIENS             (1 << 16) /* Bit 16: SPI Enable Status (SR only) */
+
+#define SPI_INT_ALL               (0x0000070f)
 
 /* SPI Chip Select Registers 0-3 */
 

@@ -63,6 +63,7 @@
 
 #include <nuttx/init.h>
 #include <arch/board/board.h>
+#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "up_internal.h"

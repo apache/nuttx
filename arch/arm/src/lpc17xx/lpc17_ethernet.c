@@ -1564,7 +1564,7 @@ static void lpc17_poll_process(FAR struct lpc17_driver_s *priv)
 
   if (considx != prodidx)
     {
-#if CONFIG_NET_NOINTS
+#ifdef CONFIG_NET_NOINTS
       work_queue(HPWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
                  priv, 0);
 

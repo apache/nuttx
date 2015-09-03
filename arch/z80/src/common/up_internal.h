@@ -145,7 +145,7 @@ void up_sigdeliver(void);
 
 /* Defined in CPU-specific logic (only for Z180) */
 
-#if CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_mmuinit(void);
 #endif
 

@@ -122,6 +122,10 @@
 #  define MCAN_ALIGN        ARMV7M_DCACHE_LINESIZE
 #  define MCAN_ALIGN_MASK   (MCAN_ALIGN-1)
 #  define MCAN_ALIGN_UP(n)  (((n) + MCAN_ALIGN_MASK) & ~MCAN_ALIGN_MASK)
+
+#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+#    warning !!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!
+#  endif
 #endif
 
 /* MCAN0 Configuration ******************************************************/
@@ -809,6 +813,15 @@ enum sam_canmode_e
   MCAN_FD_BSW_MODE     = 2  /* CAN FD operation with bit rate switching */
 };
 
+/* CAN driver state */
+
+enum can_state_s
+{
+  MCAN_STATE_UNINIT = 0,    /* Not yet initialized */
+  MCAN_STATE_RESET,         /* Initialized, reset state */
+  MCAN_STATE_SETUP,         /* can_setup() has been called */
+};
+
 /* This structure describes the MCAN message RAM layout */
 
 struct sam_msgram_s
@@ -869,22 +882,22 @@ struct sam_config_s
 struct sam_mcan_s
 {
   const struct sam_config_s *config; /* The constant configuration */
-  bool initialized;         /* True: Device has been initialized */
+  uint8_t state;            /* See enum can_state_s */
 #ifdef CONFIG_CAN_EXTID
-  uint8_t  nextalloc;       /* Number of allocated extended filters */
-#else
-  uint8_t  nstdalloc;       /* Number of allocated standard filters */
+  uint8_t nextalloc;        /* Number of allocated extended filters */
 #endif
+  uint8_t nstdalloc;        /* Number of allocated standard filters */
   sem_t locksem;            /* Enforces mutually exclusive access */
   sem_t txfsem;             /* Used to wait for TX FIFO availability */
+  uint32_t btp;             /* Current bit timing */
+  uint32_t fbtp;            /* Current fast bit timing */
   uint32_t rxints;          /* Configured RX interrupts */
   uint32_t txints;          /* Configured TX interrupts */
 
 #ifdef CONFIG_CAN_EXTID
   uint32_t extfilters[2];   /* Extended filter bit allocator.  2*32=64 */
-#else
-  uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
 #endif
+  uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
@@ -914,7 +927,7 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
 #define mcan_dev_unlock(priv) sem_post(&priv->locksem)
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
-#define mcan_buffer_release(priv) sem_post(&priv->txfsem)
+static void mcan_buffer_release(FAR struct sam_mcan_s *priv);
 
 /* MCAN helpers */
 
@@ -925,13 +938,13 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
 
 #ifdef CONFIG_CAN_EXTID
 static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
-              FAR struct canioc_stdfilter_s *extconfig);
+              FAR struct canioc_extfilter_s *extconfig);
 static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx);
-#else
+#endif
 static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
               FAR struct canioc_stdfilter_s *stdconfig);
 static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx);
-#endif
+
 /* CAN driver methods */
 
 static void mcan_reset(FAR struct can_dev_s *dev);
@@ -952,6 +965,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev);
 static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
               int bufndx);
 #endif
+static void mcan_error(FAR struct can_dev_s *dev, uint32_t status);
 static void mcan_receive(FAR struct can_dev_s *dev,
               FAR uint32_t *rxbuffer, unsigned long nwords);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
@@ -1385,8 +1399,9 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
  * Name: mcan_buffer_reserve
  *
  * Description:
- *   Take the semaphore that indicates the availability of a TX FIFOQ
- *   buffer, handling any exceptional conditions
+ *   Take the semaphore, decrementing the semaphore count to indicate that
+ *   one fewer TX FIFOQ buffer is available.  Handles any exceptional
+ *   conditions.
  *
  * Input Parameters:
  *   priv - A reference to the MCAN peripheral state
@@ -1394,10 +1409,19 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
  * Returned Value:
  *  None
  *
+ * Assumptions:
+ *  Called only non-interrupt logic via mcan_write().  We do not have
+ *  exclusive access to the MCAN hardware and interrupts are not disabled.
+ *  mcan_write() does lock the scheduler for reasons noted below.
+ *
  ****************************************************************************/
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 {
+  irqstate_t flags;
+  uint32_t txfqs1;
+  uint32_t txfqs2;
+  int sval;
   int ret;
 
   /* Wait until we successfully get the semaphore.  EINTR is the only
@@ -1407,10 +1431,145 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
   do
     {
+      /* We take some extra precautions here because it is possible that on
+       * certain error conditions, the semaphore count could get out of
+       * phase with the actual count of elements in the TX FIFO (I have
+       * never seen this happen, however.  My paranoia).
+       *
+       * An missed TX interrupt could cause the semaphore count to fail to
+       * be incremented and, hence, to be too low.
+       */
+
+      for(;;)
+        {
+          /* Get the current queue status and semaphore count. */
+
+          flags = irqsave();
+          txfqs1 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+          (void)sem_getvalue(&priv->txfsem, &sval);
+          txfqs2 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
+
+          /* If the semaphore count and the TXFQS samples are in
+           * sync, then break out of the look with interrupts
+           * disabled.
+           */
+
+          if (txfqs1 == txfqs2)
+            {
+              break;
+            }
+
+          /* Otherwise, re-enable interrupts to interrupts that may
+           * resynchronize, the semaphore count and try again.
+           */
+
+          irqrestore(flags);
+        }
+
+      /* We only have one useful bit of information in the TXFQS:
+       * Is the TX FIFOQ full or not?  We can only do limited checks
+       * with that single bit of information.
+       */
+
+      if ((txfqs1 & MCAN_TXFQS_TFQF) != 0)
+        {
+          /* The TX FIFOQ is full.  The semaphore count should then be
+           * less than or equal to zero.  If it is greater than zero,
+           * then reinitialize it to 0.
+           */
+
+          if (sval > 0)
+            {
+              candbg("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
+              sem_init(&priv->txfsem, 0, 0);
+            }
+        }
+
+      /* The FIFO is not full so the semaphore count should be greater
+       * than zero.  If it is not, then we have missed a call to
+       * mcan_buffer_release(0).
+       *
+       * NOTE: Since there is no mutual exclusion, it might be possible
+       * that mcan_write() could be re-entered AFTER taking the semaphore
+       * and dropping the count to zero, but BEFORE adding the message
+       * to the TX FIFOQ.  That corner case is handled in mcan_write() by
+       * locking the scheduler.
+       */
+
+      else if (sval <= 0)
+        {
+          candbg("ERROR: TX FIFOQ not full but txfsem is %d\n", sval);
+
+          /* Less than zero means that another thread is waiting */
+
+          if (sval < 0)
+            {
+              /* Bump up the count by one and try again */
+
+              sem_post(&priv->txfsem);
+              irqrestore(flags);
+              continue;
+            }
+
+          /* Exactly zero but the FIFO is not full.  Just return without
+           * decrementing the count.
+           */
+
+          irqrestore(flags);
+          return;
+        }
+
+      /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
+
       ret = sem_wait(&priv->txfsem);
+      irqrestore(flags);
       DEBUGASSERT(ret == 0 || errno == EINTR);
     }
   while (ret < 0);
+}
+
+/****************************************************************************
+ * Name: mcan_buffer_release
+ *
+ * Description:
+ *   Release the semaphore, increment the semaphore count to indicate that
+ *   one more TX FIFOQ buffer is available.
+ *
+ * Input Parameters:
+ *   priv - A reference to the MCAN peripheral state
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
+ *  This function is called only from the interrupt level in response to the
+ *  complete of a transmission.
+ *
+ ****************************************************************************/
+
+static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
+{
+  int sval;
+
+  /* We take some extra precautions here because it is possible that on
+   * certain error conditions, the semaphore count could get out of phase
+   * with the actual count of elements in the TX FIFO (I have never seen
+   * this happen, however.  My paranoia).
+   *
+   * An extra TC interrupt could cause the count to be incremented too
+   * many times.
+   */
+
+  (void)sem_getvalue(&priv->txfsem, &sval);
+  if (sval < priv->config->ntxfifoq)
+    {
+      sem_post(&priv->txfsem);
+    }
+  else
+    {
+      candbg("ERROR: txfsem would increment beyond %d\n",
+              priv->config->ntxfifoq);
+    }
 }
 
 /****************************************************************************
@@ -1554,7 +1713,7 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
 
 #ifdef CONFIG_CAN_EXTID
 static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
-                              FAR struct canioc_stdfilter_s *extconfig)
+                              FAR struct canioc_extfilter_s *extconfig)
 {
   FAR const struct sam_config_s *config;
   FAR uint32_t *extfilter;
@@ -1745,7 +1904,6 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CAN_EXTID
 static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
                               FAR struct canioc_stdfilter_s *stdconfig)
 {
@@ -1846,7 +2004,6 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
   mcan_dev_unlock(priv);
   return -EAGAIN;
 }
-#endif
 
 /****************************************************************************
  * Name: mcan_del_stdfilter
@@ -1864,7 +2021,6 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CAN_EXTID
 static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 {
   FAR const struct sam_config_s *config;
@@ -1915,7 +2071,6 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
   mcan_dev_unlock(priv);
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: mcan_reset
@@ -1955,9 +2110,19 @@ static void mcan_reset(FAR struct can_dev_s *dev)
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
   mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
 
+  /* Make sure that all buffers are released.
+   *
+   * REVISIT: What if a thread is waiting for a buffer?  The following
+   * will not wake up any waiting threads.
+   */
+
+  sem_destroy(&priv->txfsem);
+  sem_init(&priv->txfsem, 0, config->ntxfifoq);
+
   /* Disable peripheral clocking to the MCAN controller */
 
   sam_disableperiph1(priv->config->pid);
+  priv->state = MCAN_STATE_RESET;
   mcan_dev_unlock(priv);
 }
 
@@ -2027,6 +2192,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Enable receive interrupts */
 
+  priv->state = MCAN_STATE_SETUP;
   mcan_rxint(dev, true);
 
   mcan_dumpregs(priv, "After receive setup");
@@ -2072,19 +2238,24 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
 
   mcan_dev_lock(priv);
 
-  /* Disable the MCAN interrupts */
+  /* Disable MCAN interrupts at the NVIC */
 
   up_disable_irq(config->irq0);
   up_disable_irq(config->irq1);
+
+  /* Disable all interrupts from the MCAN peripheral */
+
+  mcan_putreg(priv, SAM_MCAN_IE_OFFSET, 0);
+  mcan_putreg(priv, SAM_MCAN_TXBTIE_OFFSET, 0);
 
   /* Detach the MCAN interrupt handler */
 
   irq_detach(config->irq0);
   irq_detach(config->irq1);
 
-  /* And reset the hardware */
+  /* Disable peripheral clocking to the MCAN controller */
 
-  mcan_reset(dev);
+  sam_disableperiph1(priv->config->pid);
   mcan_dev_unlock(priv);
 }
 
@@ -2200,6 +2371,125 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+      /* CANIOC_GET_BITTIMING:
+       *   Description:    Return the current bit timing settings
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_bittiming_s in which current bit timing values
+       *                   will be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+       *                   is returned with the errno variable set to indicate the
+       *                   nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_BITTIMING:
+        {
+          FAR struct canioc_bittiming_s *bt =
+            (FAR struct canioc_bittiming_s *)arg;
+          uint32_t regval;
+          uint32_t brp;
+
+          DEBUGASSERT(bt != NULL);
+
+          regval       = mcan_getreg(priv, SAM_MCAN_BTP_OFFSET);
+          bt->bt_sjw   = ((regval & MCAN_BTP_SJW_MASK) >> MCAN_BTP_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & MCAN_BTP_TSEG1_MASK) >> MCAN_BTP_TSEG1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & MCAN_BTP_TSEG2_MASK) >> MCAN_BTP_TSEG2_SHIFT) + 1;
+
+          brp          = ((regval & MCAN_BTP_BRP_MASK) >> MCAN_BTP_BRP_SHIFT) + 1;
+          bt->bt_baud  = SAMV7_MCANCLK_FREQUENCY / brp /
+                         (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+          ret = OK;
+        }
+        break;
+
+      /* CANIOC_SET_BITTIMING:
+       *   Description:    Set new current bit timing values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_bittiming_s in which the new bit timing values
+       *                   are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+       *                   is returned with the errno variable set to indicate the
+       *                   nature of the error.
+       *   Dependencies:   None
+       *
+       * REVISIT: There is probably a limitation here:  If there are multiple
+       * threads trying to send CAN packets, when one of these threads reconfigures
+       * the bitrate, the MCAN hardware will be reset and the context of operation
+       * will be lost.  Hence, this IOCTL can only safely be executed in quiescent
+       * time periods.
+       */
+
+      case CANIOC_SET_BITTIMING:
+        {
+          FAR const struct canioc_bittiming_s *bt =
+            (FAR const struct canioc_bittiming_s *)arg;
+          irqstate_t flags;
+          uint32_t brp;
+          uint32_t tseg1;
+          uint32_t tseg2;
+          uint32_t sjw;
+          uint32_t ie;
+          uint8_t state;
+
+          DEBUGASSERT(bt != NULL);
+          DEBUGASSERT(bt->bt_baud < SAMV7_MCANCLK_FREQUENCY);
+          DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 16);
+          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
+          DEBUGASSERT(bt->bt_tseg2 > 1 && bt->bt_tseg2 <= 64);
+
+          /* Extract bit timing data */
+
+          tseg1 = bt->bt_tseg1 - 1;
+          tseg2 = bt->bt_tseg2 - 1;
+          sjw   = bt->bt_sjw   - 1;
+
+          brp = (uint32_t)
+            (((float) SAMV7_MCANCLK_FREQUENCY /
+             ((float)(tseg1 + tseg2 + 3) * (float)bt->bt_baud)) - 1);
+
+          /* Save the value of the new bit timing register */
+
+          flags = irqsave();
+          priv->btp = MCAN_BTP_BRP(brp) | MCAN_BTP_TSEG1(tseg1) |
+                      MCAN_BTP_TSEG2(tseg2) | MCAN_BTP_SJW(sjw);
+
+          /* We need to reset to instantiate the new timing.  Save
+           * current state information so that recover to this
+           * state.
+           */
+
+          ie    = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
+          state = priv->state;
+
+          /* Reset the MCAN */
+
+          mcan_reset(dev);
+          ret = OK;
+
+          /* If we have previously been setup, then setup again */
+
+          if (state == MCAN_STATE_SETUP)
+            {
+              ret = mcan_setup(dev);
+            }
+
+          /* We we have successfully re-initialized, then restore the
+           * interrupt state.
+           *
+           * REVISIT: Since the hardware was reset, any pending TX
+           * activity was lost.  Should we disable TX interrupts?
+           */
+
+          if (ret == OK)
+            {
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie & ~priv->txints);
+            }
+
+          irqrestore(flags);
+        }
+        break;
+
 #ifdef CONFIG_CAN_EXTID
       /* CANIOC_ADD_EXTFILTER:
        *   Description:    Add an address filter for a extended 29 bit
@@ -2232,8 +2522,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           ret = mcan_del_extfilter(priv, (int)arg);
         }
         break;
+#endif
 
-#else
       /* CANIOC_ADD_STDFILTER:
        *   Description:    Add an address filter for a standard 11 bit
        *                   address.
@@ -2265,7 +2555,6 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           ret = mcan_del_stdfilter(priv, (int)arg);
         }
         break;
-#endif
 
       /* Unsupported/unrecognized command */
 
@@ -2357,15 +2646,22 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * not full and cannot become full at least until we add our packet to
    * the FIFO.
    *
+   * We can't get exclusive access to MAN resource here because that
+   * lock the MCAN while we wait for a free buffer.  Instead, the
+   * scheduler is locked here momentarily.  See discussion in
+   * mcan_buffer_reserve() for an explanation.
+   *
    * REVISIT: This needs to be extended in order to handler case where
    * the MCAN device was opened O_NONBLOCK.
    */
 
+  sched_lock();
   mcan_buffer_reserve(priv);
 
   /* Get exclusive access to the MCAN peripheral */
 
   mcan_dev_lock(priv);
+  sched_unlock();
 
   /* Get our reserved Tx FIFO/queue put index */
 
@@ -2387,15 +2683,19 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
 #ifdef CONFIG_CAN_EXTID
-  DEBUGASSERT(msg->cm_hdr.ch_extid);
-  DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_EXTMSGID);
+  if (msg->cm_hdr.ch_extid)
+    {
+      DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_EXTMSGID);
 
-  regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
-#else
-  DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_STDMSGID);
-
-  regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
+      regval = BUFFER_R0_EXTID(msg->cm_hdr.ch_id) | BUFFER_R0_XTD;
+    }
+  else
 #endif
+    {
+      DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_STDMSGID);
+
+      regval = BUFFER_R0_STDID(msg->cm_hdr.ch_id);
+    }
 
   if (msg->cm_hdr.ch_rtr)
     {
@@ -2442,6 +2742,17 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* And request to send the packet */
 
   mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
+
+  /* Report that the TX transfer is complete to the upper half logic.  Of
+   * course, the transfer is not complete, but this early notification
+   * allows the upper half logic to free resources sooner.
+   *
+   * REVISTI:  Should we disable interrupts?  can_txdone() was designed to
+   * be called from and interrupt handler and, hence, may be unsafe when
+   * called from the tasking level.
+   */
+
+  can_txdone(dev);
 
   mcan_dev_unlock(priv);
   return OK;
@@ -2592,6 +2903,108 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
 #endif
 
 /****************************************************************************
+ * Name: mcan_error
+ *
+ * Description:
+ *   Report a CAN error
+ *
+ * Input Parameters:
+ *   dev     - CAN-common state data
+ *   status  - Interrupt status with error bits set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
+{
+  struct can_hdr_s hdr;
+  uint16_t errbits;
+  int ret;
+
+  /* Encode error bits */
+
+  errbits = 0;
+  if ((status & (MCAN_INT_ELO | MCAN_INT_EW)) != 0)
+    {
+      errbits |= CAN_ERROR_SYSTEM;
+    }
+
+  if ((status & (MCAN_INT_RF0L | MCAN_INT_RF1L)) != 0)
+    {
+      errbits |= CAN_ERROR_RXLOST;
+    }
+
+  if ((status & MCAN_INT_TEFL) != 0)
+    {
+      errbits |= CAN_ERROR_TXLOST;
+    }
+
+  if ((status & (MCAN_INT_MRAF | MCAN_INT_BO)) != 0)
+    {
+      errbits |= CAN_ERROR_ACCESS;
+    }
+
+  if ((status & MCAN_INT_TOO) != 0)
+    {
+      errbits |= CAN_ERROR_TIMEOUT;
+    }
+
+  if ((status & MCAN_INT_EP) != 0)
+    {
+      errbits |= CAN_ERROR_PASSIVE;
+    }
+
+  if ((status & MCAN_INT_CRCE) != 0)
+    {
+      errbits |= CAN_ERROR_CRC;
+    }
+
+  if ((status & MCAN_INT_BE) != 0)
+    {
+      errbits |= CAN_ERROR_BIT;
+    }
+
+  if ((status & MCAN_INT_ACKE) != 0)
+    {
+      errbits |= CAN_ERROR_ACK;
+    }
+
+  if ((status & MCAN_INT_FOE) != 0)
+    {
+      errbits |= CAN_ERROR_FORMAT;
+    }
+
+  if ((status & MCAN_INT_STE) != 0)
+    {
+      errbits |= CAN_ERROR_STUFF;
+    }
+
+  if (errbits != 0)
+    {
+      /* Format the CAN header for the error report. */
+
+      hdr.ch_id     = errbits;
+      hdr.ch_dlc    = 0;
+      hdr.ch_rtr    = 0;
+      hdr.ch_error  = 1;
+#ifdef CONFIG_CAN_EXTID
+      hdr.ch_extid  = 0;
+#endif
+      hdr.ch_unused = 0;
+
+      /* And provide the error report to the upper half logic */
+
+      ret = can_receive(dev, &hdr, NULL);
+      if (ret < 0)
+        {
+          canlldbg("ERROR: can_receive failed: %d\n", ret);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: mcan_receive
  *
  * Description:
@@ -2627,9 +3040,10 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   canregdbg("R0: %08x\n", regval);
 
   hdr.ch_rtr    = 0;
-#ifdef CONFIG_CAN_EXTID
+  hdr.ch_error  = 0;
   hdr.ch_unused = 0;
 
+#ifdef CONFIG_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
     {
       /* Save the extended ID of the newly received message */
@@ -2696,9 +3110,6 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
   uint32_t regval;
   unsigned int nelem;
   unsigned int ndx;
-#ifdef CONFIG_DEBUG
-  int sval;
-#endif
   bool handled;
 
   DEBUGASSERT(priv && priv->config);
@@ -2725,6 +3136,10 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
           /* Clear the error indications */
 
           mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_CMNERR_INTS);
+
+          /* Report errors */
+
+          mcan_error(dev, pending & MCAN_CMNERR_INTS);
           handled = true;
         }
 
@@ -2738,13 +3153,22 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
 
+          /* Report errors */
+
+          mcan_error(dev, pending & MCAN_TXERR_INTS);
+
           /* REVISIT:  Will MCAN_INT_TC also be set in the event of
            * a transmission error?  Each write must conclude with a
-           * call to can_txdone(), whether or not the write was
-           * successful.
+           * call to man_buffer_release(), whether or not the write
+           * was successful.
+           *
+           * Here we force transmit complete processing just in case.
+           * This could have the side effect of pushing the semaphore
+           * count up to high.
            */
 
-          handled = true;
+          pending |= MCAN_INT_TC;
+          handled  = true;
         }
 
       /* Check for successful completion of a transmission */
@@ -2765,15 +3189,6 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            */
 
           mcan_buffer_release(priv);
-
-#ifdef CONFIG_DEBUG
-          (void)sem_getvalue(&priv->txfsem, &sval);
-          DEBUGASSERT(sval <= config->ntxfifoq);
-#endif
-
-          /* Report that the TX transfer is complete to the upper half logic */
-
-          can_txdone(dev);
           handled = true;
         }
       else if ((pending & priv->txints) != 0)
@@ -2840,6 +3255,11 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
           /* Clear the error indications */
 
           mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXERR_INTS);
+
+          /* Report errors */
+
+          mcan_error(dev, pending & MCAN_TXERR_INTS);
+          handled = true;
         }
 
       /* Clear the RX FIFO1 new message interrupt */
@@ -2871,7 +3291,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           /* Handle the newly received message in FIFO1 */
 
-          ndx    = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
+          ndx = (regval & MCAN_RXF1S_F1GI_MASK) >> MCAN_RXF1S_F1GI_SHIFT;
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
@@ -3066,8 +3486,8 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   /* Configure MCAN bit timing */
 
-  mcan_putreg(priv, SAM_MCAN_BTP_OFFSET, config->btp);
-  mcan_putreg(priv, SAM_MCAN_FBTP_OFFSET, config->fbtp);
+  mcan_putreg(priv, SAM_MCAN_BTP_OFFSET, priv->btp);
+  mcan_putreg(priv, SAM_MCAN_FBTP_OFFSET, priv->fbtp);
 
   /* Configure message RAM starting addresses and sizes. */
 
@@ -3335,19 +3755,27 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
   /* Is this the first time that we have handed out this device? */
 
-  if (!priv->initialized)
+  if (priv->state == MCAN_STATE_UNINIT)
     {
       /* Yes, then perform one time data initialization */
 
       memset(priv, 0, sizeof(struct sam_mcan_s));
-      priv->config      = config;
-      priv->initialized = true;
+      priv->config = config;
+
+      /* Set the initial bit timing.  This might change subsequently
+       * due to IOCTL command processing.
+       */
+
+      priv->btp    = config->btp;
+      priv->fbtp   = config->fbtp;
+
+      /* Initialize semaphores */
 
       sem_init(&priv->locksem, 0, 1);
       sem_init(&priv->txfsem, 0, config->ntxfifoq);
 
-      dev->cd_ops       = &g_mcanops;
-      dev->cd_priv      = (FAR void *)priv;
+      dev->cd_ops  = &g_mcanops;
+      dev->cd_priv = (FAR void *)priv;
 
       /* And put the hardware in the initial state */
 

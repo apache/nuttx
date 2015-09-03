@@ -147,10 +147,6 @@ config SAMV7_HAVE_SDRAMC
 	bool
 	default n
 
-config SAMV7_HAVE_SPI
-	bool
-	default n
-
 config SAMV7_HAVE_SPI0
 	bool
 	default n
@@ -188,6 +184,18 @@ config SAMV7_HAVE_USART1
 	default n
 
 config SAMV7_HAVE_USART2
+	bool
+	default n
+
+config SAMV7_SPI
+	bool
+	default n
+
+config SAMV7_SPI_MASTER
+	bool
+	default n
+
+config SAMV7_SPI_SLAVE
 	bool
 	default n
 
@@ -299,14 +307,14 @@ config SAMV7_SPI0
 	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
 	depends on SAMV7_HAVE_SPI0
-	select SAMV7_HAVE_SPI
+	select SAMV7_SPI
 	select SPI
 
 config SAMV7_SPI1
 	bool "Serial Peripheral Interface 1 (SPI1)"
 	default n
 	depends on SAMV7_HAVE_SPI1
-	select SAMV7_HAVE_SPI
+	select SAMV7_SPI
 	select SPI
 
 config SAMV7_SSC0
@@ -504,7 +512,6 @@ config SAMV7_GPIOE_IRQ
 	default n
 
 endif # SAMV7_GPIO_IRQ
-endif # ARCH_CHIP_SAMV7
 
 menu "SDRAM Configuration"
 	depends on SAMV7_SDRAMC
@@ -526,8 +533,51 @@ config SAMV7_SDRAMHEAP
 
 endmenu # SDRAM Configuration
 
-menu "SAMV7 SPI device driver options"
-	depends on AMV7_SPI0 || SAMV7_SPI1
+menu "SPI Device Driver Configuration"
+	depends on SAMV7_SPI
+
+choice
+	prompt "SPI0 Configuration"
+	default SAMV7_SPI0_MASTER
+	depends on SAMV7_SPI0
+
+config SAMV7_SPI0_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI0 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI0_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI0 as an SPI slave driver.  Default: Master
+
+endchoice # SPI0 Configuration
+
+choice
+	prompt "SPI1 Configuration"
+	default SAMV7_SPI1_MASTER
+	depends on SAMV7_SPI1
+
+config SAMV7_SPI1_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI1 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI1_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI1 as an SPI slave driver.  Default: Master
+
+endchoice # SPI1 Configuration
+
+if SAMV7_SPI_MASTER
+comment "SPI Master Configuration"
 
 config SAMV7_SPI_DMA
 	bool "SPI DMA"
@@ -555,6 +605,20 @@ config SAMV7_SPI_DMADEBUG
 		registers at key points in the data transfer and then dumps all of
 		the registers at the end of the transfer.
 
+endif # SAMV7_SPI_MASTER
+
+if SAMV7_SPI_SLAVE
+comment "SPI Slave Configuration"
+
+config SAMV7_SPI_SLAVE_QSIZE
+	int "Output queue size"
+	default 8
+	---help---
+		The number of words that an be retained in the controller driver's
+		output queue.
+
+endif # SAMV7_SPI_SLAVE
+
 config SAMV7_SPI_REGDEBUG
 	bool "SPI Register level debug"
 	depends on DEBUG
@@ -563,7 +627,54 @@ config SAMV7_SPI_REGDEBUG
 		Output detailed register-level SPI device debug information.
 		Requires also DEBUG.
 
-endmenu # SAMV7 SPI device driver options
+endmenu # SPI device driver options
+
+menu "QSPI Device Driver Configuration"
+	depends on SAMV7_QSPI && !SAMV7_QSPI_IS_SPI
+
+config SAMV7_QSPI_DLYBS
+	int "Delay Before QSCK (nsec)"
+	default 0
+
+config SAMV7_QSPI_DLYBCT
+	int "Delay Between Consecutive Transfers (nsec)"
+	default 0
+
+config SAMV7_QSPI_DMA
+	bool "QSPI DMA"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMV7_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	default 4
+	depends on SAMV7_QSPI_DMA
+	---help---
+		When ASPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMV7_QSPI_DMATHRESHOLD.
+
+config SAMV7_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on SAMV7_QSPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMV7_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also DEBUG.
+
+endmenu # QSPI device driver options
 
 menu "TWIHS device driver options"
 	depends on SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
@@ -1264,7 +1375,6 @@ menu "USB High Speed Device Controller driver (DCD) options"
 config SAMV7_USBDEVHS_LOWPOWER
 	bool "Low-power mode"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		The USBHS can work in two modes:
 
@@ -1272,7 +1382,9 @@ config SAMV7_USBDEVHS_LOWPOWER
 		  available.
 		- Low-power mode where only Full speed and Low speed are available.
 
-		This options selects the low-power mode.
+		This options selects the low-power mode.  In order to use high speed
+		mode, this option must be disabled and USBDEV_DUALSPEED must be
+		enabled.
 
 config SAMV7_USBHS_SCATTERGATHER
 	bool
@@ -1311,7 +1423,7 @@ menu "MCAN device driver options"
 
 choice
 	prompt "MCAN clock source (PCK5)"
-	default SAMV7_MCAN_CLKSRC_MAIN
+	default SAMV7_MCAN_CLKSRC_MCK
 
 config SAMV7_MCAN_CLKSRC_SLOW
 	bool "Slow clock"
@@ -1333,7 +1445,11 @@ endchoice # MCAN clock source
 config SAMV7_MCAN_CLKSRC_PRESCALER
 	int "MCAN clock prescaler"
 	default 1
-	range 1 256
+	range 1 1024
+	---help---
+		The frequency associated with time quanta is derived by dividing
+		down the input frequency. This setting provides prescaler/divider
+		must lie the range of 1 to 1024.
 
 menu "MCAN0 device driver options"
 	depends on SAMV7_MCAN0
@@ -1447,6 +1563,7 @@ config SAMV7_MCAN0_NEXTFILTERS
 	int "MCAN0 number of extended filters"
 	default 8
 	range 0 64
+	depends on CAN_EXTID
 	---help---
 		Number of extended message ID filters.
 
@@ -1489,8 +1606,8 @@ endchoice # MCAN0 RX buffer element size
 
 config SAMV7_MCAN0_RXFIFO0_SIZE
 	int "MCAN0 RX FIFO0 size"
-	default 12
-	range 0 64
+	default 8
+	range 1 64
 	---help---
 		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
 
@@ -1533,8 +1650,8 @@ endchoice # MCAN0 RX buffer element size
 
 config SAMV7_MCAN0_RXFIFO1_SIZE
 	int "MCAN0 RX FIFO1 size"
-	default 0
-	range 0 64
+	default 4
+	range 1 64
 	---help---
 		Number of receive FIFO 1 elements for MCAN0.  Zero disables FIFO 1.
 
@@ -1635,7 +1752,7 @@ config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
 config SAMV7_MCAN0_TXFIFOQ_SIZE
 	int "MCAN0 TX FIFO queue size"
 	default 4
-	range 0 32
+	range 1 32
 	---help---
 		Number of dedicated TX buffer elements for MCAN0.
 
@@ -1643,6 +1760,7 @@ config SAMV7_MCAN0_TXEVENTFIFO_SIZE
 	int "MCAN0 TX event FIFO size"
 	default 0
 	range 0 32
+	depends on EXPERIMENTAL
 	---help---
 		Number of TX event FIFO elements for MCAN0.  Zero disables TX event FIFO.
 
@@ -1761,6 +1879,7 @@ config SAMV7_MCAN1_NEXTFILTERS
 	int "MCAN1 number of extended filters"
 	default 8
 	range 0 64
+	depends on CAN_EXTID
 	---help---
 		Number of extended message ID filters.
 
@@ -1803,8 +1922,8 @@ endchoice # MCAN1 RX buffer element size
 
 config SAMV7_MCAN1_RXFIFO0_SIZE
 	int "MCAN1 RX FIFO0 size"
-	default 0
-	range 0 64
+	default 8
+	range 1 64
 	---help---
 		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
 
@@ -1847,8 +1966,8 @@ endchoice # MCAN1 RX buffer element size
 
 config SAMV7_MCAN1_RXFIFO1_SIZE
 	int "MCAN1 RX FIFO1 size"
-	default 0
-	range 0 64
+	default 4
+	range 1 64
 	---help---
 		Number of receive FIFO 1 elements for MCAN1.  Zero disables FIFO 1.
 
@@ -1940,6 +2059,7 @@ config SAMV7_MCAN1_TXEVENTFIFO_SIZE
 	int "MCAN1 TX event FIFO size"
 	default 0
 	range 0 32
+	depends on EXPERIMENTAL
 	---help---
 		Number of TX event FIFO elements for MCAN1.  Zero disables TX event FIFO.
 
@@ -1954,9 +2074,9 @@ config SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
 		NOTE: Dedicated TX buffers are not used in the current MCAN design.
 
 config SAMV7_MCAN1_TXFIFOQ_SIZE
-	int "MCAN1 dedicated TX FIFO queue"
+	int "MCAN1 TX FIFO queue"
 	default 4
-	range 0 32
+	range 1 32
 	---help---
 		Number of dedicated TX buffer elements for MCAN1.
 
@@ -1972,3 +2092,4 @@ config SAMV7_MCAN_REGDEBUG
 
 endmenu # CAN device driver options
 endif # SAMV7_MCAN
+endif # ARCH_CHIP_SAMV7

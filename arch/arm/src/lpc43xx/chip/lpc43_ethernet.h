@@ -181,7 +181,8 @@
 /* MAC frame filter register */
 
 #define ETH_MACFFLT_PR               (1 << 0)  /* Bit 0: Promiscuous mode */
-                                               /* Bits 1-2: Reserved */
+#define ETH_MACFFLT_HUC              (1 << 1)  /* Bit 1: Hash Unicast */
+#define ETH_MACFFLT_HMC              (1 << 2)  /* Bit 2: Hash Multicast */
 #define ETH_MACFFLT_DAIF             (1 << 3)  /* Bit 3: Destination address inverse filtering */
 #define ETH_MACFFLT_PM               (1 << 4)  /* Bit 4: Pass all multicast */
 #define ETH_MACFFLT_DBF              (1 << 5)  /* Bit 5: Disable Broadcast Frames */
@@ -191,9 +192,9 @@
 #  define ETH_MACFFLT_PCF_PAUSE      (1 << ETH_MACFFLT_PCF_SHIFT) /* Prevents all except Pause control frames */
 #  define ETH_MACFFLT_PCF_ALL        (2 << ETH_MACFFLT_PCF_SHIFT) /* Forwards all control frames */
 #  define ETH_MACFFLT_PCF_FILTER     (3 << ETH_MACFFLT_PCF_SHIFT) /* Forwards all that pass address filter */
-#define ETH_MACFFLT_SAIF             (1 << 8)  /* Bit 8: Source address inverse filtering */
-#define ETH_MACFFLT_SAF              (1 << 9)  /* Bit 9: Source address filter */
-                                               /* Bits 10-30: Reserved */
+											   /* Bit 8-9: Reserved */
+#define ETH_MACFFLT_HPF              (1 << 10) /* Bit 10: Hash or perfect filter */
+                                               /* Bits 11-30: Reserved */
 #define ETH_MACFFLT_RA               (1 << 31) /* Bit 31: Receive all */
 
 /* MAC hash table high/low register (32-bit values) */
@@ -208,7 +209,7 @@
 #  define ETH_MACMIIA_CR_100_150     (1 << ETH_MACMIIA_CR_SHIFT)  /* 100-150 MHz CLK_M4_ETHERNET/62 */
 #  define ETH_MACMIIA_CR_20_35       (2 << ETH_MACMIIA_CR_SHIFT)  /* 20-35   MHz CLK_M4_ETHERNET/16 */
 #  define ETH_MACMIIA_CR_35_60       (3 << ETH_MACMIIA_CR_SHIFT)  /* 35-60   MHz CLK_M4_ETHERNET/26 */
-#  define ETH_MACMIIA_CR_150_168     (4 << ETH_MACMIIA_CR_SHIFT)  /* 150-168 MHz CLK_M4_ETHERNET/102 */
+#  define ETH_MACMIIA_CR_150_250     (4 << ETH_MACMIIA_CR_SHIFT)  /* 150-250 MHz CLK_M4_ETHERNET/102 */
 #  define ETH_MACMIIA_CR_250_300     (5 << ETH_MACMIIA_CR_SHIFT)  /* 250-300 MHz CLK_M4_ETHERNET/124 */
 #  define ETH_MACMIIA_CR_DIV42       (8 << ETH_MACMIIA_CR_SHIFT)  /* 60-100  MHz CLK_M4_ETHERNET/42 */
 #  define ETH_MACMIIA_CR_DIV62       (9 << ETH_MACMIIA_CR_SHIFT)  /* 100-150 MHz CLK_M4_ETHERNET/62 */
@@ -314,7 +315,7 @@
                                                /* Bits 4-8: Reserved */
 #define ETH_MACIM_TSIM               (1 << 9)  /* Bit 9: Time stamp interrupt mask */
                                                /* Bits 10-31: Reserved */
-#define ETH_MACIM_ALLINTS            (ETH_MACIM_PMTIM|ETH_MACIM_TSTIM)
+#define ETH_MACIM_ALLINTS            (ETH_MACIM_PMTIM|ETH_MACIM_TSIM)
 
 /* MAC address 0 high register */
 
@@ -499,9 +500,9 @@
 #define ETH_TDES0_CC_MASK            (15 << ETH_TDES0_CC_SHIFT)
 #define ETH_TDES0_VF                 (1 << 7)  /* Bit 7:  VLAN frame */
 #define ETH_TDES0_EC                 (1 << 8)  /* Bit 8:  Excessive collision */
-#define ETH_TDES0_LC                 (1 << 9)  /* Bit 9:  Late collision */
+#define ETH_TDES0_LCL                (1 << 9)  /* Bit 9:  Late collision */
 #define ETH_TDES0_NC                 (1 << 10) /* Bit 10: No carrier */
-#define ETH_TDES0_LC                 (1 << 11) /* Bit 11: Loss of carrier */
+#define ETH_TDES0_LCR                (1 << 11) /* Bit 11: Loss of carrier */
 #define ETH_TDES0_IPE                (1 << 12) /* Bit 12: IP payload error */
 #define ETH_TDES0_FF                 (1 << 13) /* Bit 13: Frame flushed */
 #define ETH_TDES0_JT                 (1 << 14) /* Bit 14: Jabber timeout */
@@ -536,7 +537,7 @@
 
 #define ETH_RDES0_ESA                (1 << 0)  /* Bit 0:  Extended status available */
 #define ETH_RDES0_CE                 (1 << 1)  /* Bit 1:  CRC error */
-#define ETH_RDES0_DE                 (1 << 2)  /* Bit 2:  Dribble bit error */
+#define ETH_RDES0_DRE                (1 << 2)  /* Bit 2:  Dribble bit error */
 #define ETH_RDES0_RE                 (1 << 3)  /* Bit 3:  Receive error */
 #define ETH_RDES0_RWT                (1 << 4)  /* Bit 4:  Receive watchdog timeout */
 #define ETH_RDES0_FT                 (1 << 5)  /* Bit 5:  Frame type */
@@ -548,7 +549,7 @@
 #define ETH_RDES0_OE                 (1 << 11) /* Bit 11: Overflow error */
 #define ETH_RDES0_LE                 (1 << 12) /* Bit 12: Length error */
 #define ETH_RDES0_SAF                (1 << 13) /* Bit 13: Source address filter fail */
-#define ETH_RDES0_DE                 (1 << 14) /* Bit 14: Descriptor error */
+#define ETH_RDES0_DS                 (1 << 14) /* Bit 14: Descriptor error */
 #define ETH_RDES0_ES                 (1 << 15) /* Bit 15: Error summary */
 #define ETH_RDES0_FL_SHIFT           (16)      /* Bits 16-29: Frame length */
 #define ETH_RDES0_FL_MASK            (0x3fff << ETH_RDES0_FL_SHIFT)
@@ -584,12 +585,12 @@
                                                                  * transparent clock) */
 #  define ETH_RDES4_MT_PDELREQMM     (6 << ETH_RDES4_MT_SHIFT)  /* Pdelay_Resp (in peer-to-peer
                                                                  * transparent clock) */
-#  define ETH_RDES4_MT_PDELREQFUS    (7 << ETH_RDES4_MT_SHIFT)  /* Pdelay_Resp_Follow_Up (in
+#  define ETH_RDES4_MT_PDELRESFUS    (7 << ETH_RDES4_MT_SHIFT)  /* Pdelay_Resp_Follow_Up (in
                                                                  * peer-to-peer transparent clock) */
-#  define ETH_RDES4_MT_PDELREQFUS    (8 << ETH_RDES4_MT_SHIFT)  /* Announce */
-#  define ETH_RDES4_MT_PDELREQFUS    (9 << ETH_RDES4_MT_SHIFT)  /* Management */
-#  define ETH_RDES4_MT_PDELREQFUS    (10 << ETH_RDES4_MT_SHIFT) /* Signaling */
-#  define ETH_RDES4_MT_PDELREQFUS    (15 << ETH_RDES4_MT_SHIFT) /* PTP packet with Reserved message type */
+#  define ETH_RDES4_MT_ANNOUNCE      (8 << ETH_RDES4_MT_SHIFT)  /* Announce */
+#  define ETH_RDES4_MT_MANAGEMENT    (9 << ETH_RDES4_MT_SHIFT)  /* Management */
+#  define ETH_RDES4_MT_SIGNALING     (10 << ETH_RDES4_MT_SHIFT) /* Signaling */
+#  define ETH_RDES4_MT_PTP		     (15 << ETH_RDES4_MT_SHIFT) /* PTP packet with Reserved message type */
 #define ETH_RDES4_PTPTYPE            (1 << 12) /* Bit 12: PTP frame type */
 #define ETH_RDES4_PTPVERSION         (1 << 13) /* Bit 13: PTP version */
                                                /* Bits 14-31:  Reserved */
@@ -662,6 +663,5 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* LPC43_NETHERNET > 0 */
 #endif /* __ARCH_ARM_SRC_LPC43XX_CHIP_LPC43_ETHERNET_H */
 

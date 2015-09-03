@@ -1093,7 +1093,7 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
   fvdbg("   blksize: %08x\n", priv->blksize);
   fvdbg("   nblocks: %d\n", priv->nblocks);
 
-#if CONFIG_SPIFI_SECTOR512
+#ifdef CONFIG_SPIFI_SECTOR512
   DEBUGASSERT(log2 > 9);
 #endif
 

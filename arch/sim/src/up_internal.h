@@ -159,7 +159,7 @@
 /* Simulated Heap Definitions **********************************************/
 /* Size of the simulated heap */
 
-#if CONFIG_MM_SMALL
+#ifdef CONFIG_MM_SMALL
 #  define SIM_HEAP_SIZE (64*1024)
 #else
 #  define SIM_HEAP_SIZE (4*1024*1024)
@@ -280,7 +280,7 @@ int sim_ajoy_initialize(void);
 
 /* up_tapdev.c ************************************************************/
 
-#if defined(CONFIG_NET) && !defined(__CYGWIN__)
+#if defined(CONFIG_NET_ETHERNET) && !defined(__CYGWIN__)
 void tapdev_init(void);
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 void tapdev_send(unsigned char *buf, unsigned int buflen);
@@ -292,7 +292,7 @@ void tapdev_send(unsigned char *buf, unsigned int buflen);
 
 /* up_wpcap.c *************************************************************/
 
-#if defined(CONFIG_NET) && defined(__CYGWIN__)
+#if defined(CONFIG_NET_ETHERNET) && defined(__CYGWIN__)
 void wpcap_init(void);
 unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
@@ -304,7 +304,7 @@ void wpcap_send(unsigned char *buf, unsigned int buflen);
 
 /* up_netdriver.c *********************************************************/
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_NET_ETHERNET
 int netdriver_init(void);
 int netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_loop(void);

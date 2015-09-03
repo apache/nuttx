@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/net/loopback.h>
 
 #include <arch/board/board.h>
 
@@ -139,7 +140,7 @@ void up_initialize(void)
    * needs to be done before any tasks are created).
    */
 
-#if CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   (void)up_mmuinit();
 #endif
 
@@ -179,6 +180,12 @@ void up_initialize(void)
   /* Initialize the network */
 
   up_netinitialize();
+#endif
+
+#ifdef CONFIG_NETDEV_LOOPBACK
+  /* Initialize the local loopback device */
+
+  (void)localhost_initialize();
 #endif
 
   board_led_on(LED_IRQSENABLED);

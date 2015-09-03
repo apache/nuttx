@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_irq.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,17 @@
  * Public Data
  ****************************************************************************/
 
+/* This is the address of current interrupt saved state data.  Used for
+ * context switching.  Only value during interrupt handling.
+ */
+
 volatile uint32_t *current_regs;
+
+/* This is the address of the  exception vector table (determined by the
+ * linker script).
+ */
+
+extern uint32_t _vectors[];
 
 /****************************************************************************
  * Private Data
@@ -362,6 +372,15 @@ void up_irqinitialize(void)
                    intstack_size);
   }
 #endif
+
+  /* Make sure that we are using the correct vector table.  The default
+   * vector address is 0x0000:0000 but if we are executing code that is
+   * positioned in SRAM or in external FLASH, then we may need to reset
+   * the interrupt vector so that it refers to the table in SRAM or in
+   * external FLASH.
+   */
+
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 
 #ifdef CONFIG_ARCH_RAMVECTORS
   /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based

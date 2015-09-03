@@ -60,7 +60,7 @@ typedef FAR void *DMA_HANDLE;
  * function is called at the completion of the DMA transfer.  'arg' is the
  * same 'arg' value that was provided when lpc17_dmastart() was called and
  * result indicates the result of the transfer:  Zero indicates a successful
- * tranfers.  On failure, a negated errno is returned indicating the general
+ * transfers.  On failure, a negated errno is returned indicating the general
  * nature of the DMA faiure.
  */
 

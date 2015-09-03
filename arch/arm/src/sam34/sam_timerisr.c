@@ -85,7 +85,7 @@
 
 #undef CONFIG_SAM34_SYSTICK_HCLKd8 /* Power up default is MCK, not MCK/8 */
 
-#if CONFIG_SAM34_SYSTICK_HCLKd8
+#ifdef CONFIG_SAM34_SYSTICK_HCLKd8
 #  define SYSTICK_RELOAD ((SAM_SYSTICK_CLOCK / 8 / CLK_TCK) - 1)
 #else
 #  define SYSTICK_RELOAD ((SAM_SYSTICK_CLOCK / CLK_TCK) - 1)
@@ -152,7 +152,7 @@ void up_timer_initialize(void)
 
 #if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
   regval = getreg32(NVIC_SYSTICK_CTRL);
-#if CONFIG_SAM34_SYSTICK_HCLKd8
+#ifdef CONFIG_SAM34_SYSTICK_HCLKd8
   regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
 #else
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;

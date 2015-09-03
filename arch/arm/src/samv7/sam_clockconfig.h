@@ -85,6 +85,20 @@ extern "C"
 
 void sam_clockconfig(void);
 
+/****************************************************************************
+ * Name: sam_usbclock
+ *
+ * Description:
+ *   Enable USBHS clocking.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMV7_USBDEVHS) && !defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
+void sam_usbclock(void);
+#else
+#  define sam_usbclock()
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

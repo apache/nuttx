@@ -227,6 +227,7 @@ config ARCH_CHIP_MOXART
 	bool "MoxART"
 	select ARCH_ARM7TDMI
 	select ARCH_HAVE_RESET
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		MoxART family
 

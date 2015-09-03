@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_irq.c
  * arch/arm/src/chip/stm32_irq.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,17 @@
  * Public Data
  ****************************************************************************/
 
+/* This is the address of current interrupt saved state data.  Used for
+ * context switching.  Only value during interrupt handling.
+ */
+
 volatile uint32_t *current_regs;
+
+/* This is the address of the  exception vector table (determined by the
+ * linker script).
+ */
+
+extern uint32_t _vectors[];
 
 /****************************************************************************
  * Private Data
@@ -320,15 +330,16 @@ void up_irqinitialize(void)
    * at address 0x0800:0000.  If we are using the STMicro DFU bootloader, then
    * the vector table will be offset to a different location in FLASH and we
    * will need to set the NVIC vector location to this alternative location.
-   *
-   * If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
+   */
+
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
+
+#ifdef CONFIG_ARCH_RAMVECTORS
+  /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
    * vector table that requires special initialization.
    */
 
-#if defined(CONFIG_ARCH_RAMVECTORS)
   up_ramvec_initialize();
-#elif defined(CONFIG_STM32_DFU)
-  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

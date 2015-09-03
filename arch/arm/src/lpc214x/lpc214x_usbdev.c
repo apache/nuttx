@@ -212,7 +212,7 @@
 
 /* USB RAM  ********************************************************************
  *
- * UBS_UDCA is is list of 32 pointers to DMA desciptors located at the
+ * UBS_UDCA is is list of 32 pointers to DMA descriptors located at the
  * beginning of USB RAM.  Each pointer points to a DMA descriptor with
  * assocated DMA buffer.
  */
@@ -2052,7 +2052,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_DEVINT_EPRINT))
@@ -2422,7 +2422,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
   dmadesc->size = (uint32_t)packet;
 #endif
 
-  /* Enable DMA tranfer for this endpoint */
+  /* Enable DMA transfer for this endpoint */
 
   putreq32(1 << epphy, LPC214X_USBDEV_EPDMAEN);
 

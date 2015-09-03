@@ -2088,7 +2088,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_INT_ERRINT) != 0)
@@ -2457,7 +2457,7 @@ static int lpc17_dmasetup(struct lpc17_usbdev_s *priv, uint8_t epphy,
   dmadesc->size = (uint32_t)packet;
 #endif
 
-  /* Enable DMA tranfer for this endpoint */
+  /* Enable DMA transfer for this endpoint */
 
   putreq32(1 << epphy, LPC17_USBDEV_EPDMAEN);
 

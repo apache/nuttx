@@ -270,7 +270,7 @@
 
 #ifdef CONFIG_STM32_STM32F10XX
 #  define ADC_CR2_CAL                (1 << 2)  /* Bit 2: A/D Calibration */
-#elif CONFIG_STM32_STM32L15XX
+#elif defined(CONFIG_STM32_STM32L15XX)
 #  define ADC_CR2_CFG                (1 << 2)  /* Bit 2 : ADC configuration. This bit must be modified only when no
                                                 * conversion is on going.  This bit is available in high and medium+
                                                 * density devices only.

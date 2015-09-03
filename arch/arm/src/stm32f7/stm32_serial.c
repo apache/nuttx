@@ -86,7 +86,7 @@
  * have also been selected.
  */
 
-#if SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_DMA
 
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
@@ -1400,7 +1400,7 @@ static int up_setup(struct uart_dev_s *dev)
    }
 #endif
 
-#if HAVE_RS485
+#ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
       stm32_configgpio(priv->rs485_dir_gpio);
@@ -1603,7 +1603,7 @@ static void up_shutdown(struct uart_dev_s *dev)
     }
 #endif
 
-#if HAVE_RS485
+#ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
       stm32_unconfiggpio(priv->rs485_dir_gpio);
@@ -2642,7 +2642,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
  *
  ****************************************************************************/
 
-#if USE_EARLYSERIALINIT
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
 #ifdef HAVE_UART

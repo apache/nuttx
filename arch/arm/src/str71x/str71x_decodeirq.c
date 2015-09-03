@@ -132,7 +132,7 @@ void up_decodeirq(uint32_t *regs)
 
       current_regs = savestate;
     }
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   else
     {
       PANIC(); /* Normally never happens */

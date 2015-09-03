@@ -2876,7 +2876,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
               usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_TRNCS), regval);
 
-              /* Handle the endpoint tranfer complete event. */
+              /* Handle the endpoint transfer complete event. */
 
               epno = (regval & USB_STAT_ENDPT_MASK) >> USB_STAT_ENDPT_SHIFT;
               if (epno == 0)

@@ -56,6 +56,21 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Alignment ****************************************************************/
+/* Per the ARMv7M Architecture reference manual, the NVIC vector table
+ * requires 7-bit address alignment (i.e, bits 0-6 of the address of the
+ * vector table must be zero).  In this case alignment to a 128 byte address
+ * boundary is sufficient.
+ *
+ * Some parts, such as the LPC17xx family, require alignment to a 256 byte
+ * address boundary.  Any other unusual alignment requirements for the vector
+ * can be specified for a given architecture be redefining
+ * NVIC_VECTAB_TBLOFF_MASK in the chip-specific chip.h header file for the
+ * appropriate mask.
+ */
+
+#define RAMVEC_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
+
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the interrupt
  * config.  NOTE: that only lldbg types are used so that the output is
@@ -91,7 +106,7 @@
  */
 
 up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  __attribute__ ((section (".ram_vectors"), aligned (128)));
+  __attribute__ ((section (".ram_vectors"), aligned (RAMVEC_ALIGN)));
 
 /****************************************************************************
  * Private Variables

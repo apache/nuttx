@@ -124,10 +124,11 @@
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.  This only
    * applies if "lazy" floating point register save/restore is used
-   * (i.e., not CONFIG_ARMV7M_CMNVECTOR).
+   * (i.e., not CONFIG_ARMV7M_CMNVECTOR=y with CONFIG_ARMV7M_LAZYFPU=n).
    */
 
-#  if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_ARMV7M_CMNVECTOR)
+#  if defined(CONFIG_ARCH_FPU) && (!defined(CONFIG_ARMV7M_CMNVECTOR) || \
+      defined(CONFIG_ARMV7M_LAZYFPU))
 #    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)current_regs)
 #  else
 #    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)

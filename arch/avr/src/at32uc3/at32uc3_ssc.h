@@ -114,7 +114,7 @@
 #define SSC_RCMR_CKI              (1 << 5)  /* Bit 5:  Receive Clock Inversion */
 #define SSC_RCMR_CKG_SHIFT        (6)       /* Bits 6-7: Receive Clock Gating Selection */
 #define SSC_RCMR_CKG_MASK         (3 << SSC_RCMR_CKG_SHIFT)
-#  define SSC_RCMR_CKG_NONE       (0 << SSC_RCMR_CKG_SHIFT) /* None, continous clock */
+#  define SSC_RCMR_CKG_NONE       (0 << SSC_RCMR_CKG_SHIFT) /* None, continuous clock */
 #  define SSC_RCMR_CKG_LOW        (1 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC low */
 #  define SSC_RCMR_CKG_HIGH       (2 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC high */
 #define SSC_RCMR_START_SHIFT      (8)       /* Bits 8-11: Receive Start Selection */
@@ -171,7 +171,7 @@
 #define SSC_TCMR_CKI              (1 << 5)  /* Bit 5:  Transmit Clock Inversion */
 #define SSC_TCMR_CKG_SHIFT        (6)      /* Bits 6-7: Transmit Clock Gating Selection */
 #define SSC_TCMR_CKG_MASK         (3 << SSC_TCMR_CKG_SHIFT)
-#  define SSC_TCMR_CKG_NONE       (0 << SSC_TCMR_CKG_SHIFT) /* None, continous clock */
+#  define SSC_TCMR_CKG_NONE       (0 << SSC_TCMR_CKG_SHIFT) /* None, continuous clock */
 #  define SSC_TCMR_CKG_LOW        (1 << SSC_TCMR_CKG_SHIFT) /* Enable if TX_FRAME_SYNC low */
 #  define SSC_TCMR_CKG_HIGH       (2 << SSC_TCMR_CKG_SHIFT) /* Enable if TX_FRAME_SYNC high */
 #define SSC_TCMR_START_SHIFT      (8)      /* Bits 8-11: Transmit Start Selection */
