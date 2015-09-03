@@ -132,7 +132,8 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn, const net_ipv6addr_t addr)
+static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
+                                const net_ipv6addr_t addr)
 {
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Do nothing if a device is already bound to the connection */
