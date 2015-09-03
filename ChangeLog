@@ -10933,3 +10933,11 @@
 	  Averyanov (2015-09-02).
 	* arch/arm/src/lpc43xx/lpc43_ethernet.c: Add Ethernet support.  From
 	  Ilya Averyanov (2015-09-02).
+	* net/tcp:  The logic that binds a specific networkd device to
+	  a connection was faulty for the case of multiple network
+	  devices.  On bind(), the local address should be used to associate
+	  a device with the connection (if the local address is not INADDR_ANY);
+	  On connect(), the remote address should be used (in case the local
+	  address is INADDR_ANY).  On accept(), it does not matter but the
+	  remote address is the one guarenteed to be availalbe (2015-09-02).
+
