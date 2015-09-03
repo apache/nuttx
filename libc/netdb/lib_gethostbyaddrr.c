@@ -398,7 +398,7 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
 #ifdef CONFIG_NET_LOOPBACK
   /* Check for the local loopback address */
 
-  if (lib_localhost(addr, len, type, host, but, buflen, h_errnop) == 0)
+  if (lib_localhost(addr, len, type, host, buf, buflen, h_errnop) == 0)
     {
       /* Yes.. we are done */
 
@@ -417,7 +417,7 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
 
   /* Search the hosts file for a match */
 
-  return lib_hostfile_lookup(addr, len, type, host, but, buflen, h_errnop);
+  return lib_hostfile_lookup(addr, len, type, host, buf, buflen, h_errnop);
 }
 
 #endif /* CONFIG_NETDB_HOSTFILE */
