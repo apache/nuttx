@@ -96,6 +96,7 @@ NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) $(NXFLATLDSCRIPT) -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
+ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT =

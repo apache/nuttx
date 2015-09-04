@@ -35,12 +35,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CFLAGS += -I$(TOPDIR)/sched
-CFLAGS += -I$(TOPDIR)/arch/sim/src
-
 ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-
 CSRCS =
 
 ifeq ($(CONFIG_BOARD_INITIALIZE),y)
@@ -56,37 +51,4 @@ ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
 endif
 endif
 
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(Q) $(AR) $@ # Create an empty archive
-ifneq ($(OBJS),)
-	$(call ARCHIVE, $@, $(OBJS))
-endif
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+include $(TOPDIR)/configs/Board.mk

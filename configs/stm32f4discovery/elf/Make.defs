@@ -109,6 +109,7 @@ endif
 
 # File extensions
 
+ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT =

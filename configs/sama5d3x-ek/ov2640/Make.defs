@@ -127,6 +127,7 @@ else
   LDELFFLAGS += -T $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
 endif
 
+ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT =

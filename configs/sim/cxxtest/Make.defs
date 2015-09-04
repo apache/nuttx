@@ -96,6 +96,7 @@ else
 endif
 
 
+ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
 
