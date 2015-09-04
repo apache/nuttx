@@ -60,6 +60,11 @@
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined (CONFIG_STM32_STM32F40XX)
 
+#if defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT) && \
+    (defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX))
+#  warning "Default Flash Configuration Used - See Override Flash Size Designator"
+#endif
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -79,6 +84,9 @@
  * Private Functions
  ************************************************************************************/
 
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
 void stm32_flash_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
@@ -100,9 +108,6 @@ void stm32_flash_lock(void)
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
@@ -142,17 +147,7 @@ size_t up_progmem_getaddress(size_t page)
 
 size_t up_progmem_pagesize(size_t page)
 {
-  static const size_t page_sizes[STM32_FLASH_NPAGES] =
-    {
-      16 * 1024,
-      16 * 1024,
-      16 * 1024,
-      16 * 1024,
-      64 * 1024,
-      128 * 1024,
-      128 * 1024,
-      128 * 1024,
-    };
+  static const size_t page_sizes[STM32_FLASH_NPAGES] = STM32_FLASH_SIZES;
 
   if (page >= sizeof(page_sizes) / sizeof(*page_sizes))
     {
