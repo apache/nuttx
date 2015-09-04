@@ -1,9 +1,9 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_flash.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *          David Sidrane <david_s5@uas.net>
+ *           David Sidrane <david_s5@uas.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@
  ************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H
-#  define __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -43,7 +43,7 @@
 
 #define _K(x) ((x)*1024)
 
-#  if !defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT) && \
+#if !defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_4) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_6) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_8) && \
@@ -54,11 +54,11 @@
     !defined(CONFIG_STM32_FLASH_CONFIG_F) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_G) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_I)
-#    define CONFIG_STM32_FLASH_CONFIG_DEFAULT
-#  endif
+#  define CONFIG_STM32_FLASH_CONFIG_DEFAULT
+#endif
 
-#  if defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT)
-#    if defined(CONFIG_STM32_STM32L15XX)
+#if defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT)
+#  if defined(CONFIG_STM32_STM32L15XX)
 
 /* The STM32 L15xx/L16xx can support up to 384KB of FLASH.  (In reality, supported
  * L15xx parts have no more than 128KB). The program memory block is divided into
@@ -66,141 +66,142 @@
  * 256 bytes each. The sector is the write protection granularity. In total, the
  * program memory block contains 1536 pages.
  */
-#      define STM32_FLASH_NPAGES        1536
-#      define STM32_FLASH_PAGESIZE      256
 
-#    elif defined(CONFIG_STM32_LOWDENSITY)
-#      define STM32_FLASH_NPAGES        32
-#      define STM32_FLASH_PAGESIZE      1024
+#    define STM32_FLASH_NPAGES        1536
+#    define STM32_FLASH_PAGESIZE      256
 
-#    elif  defined(CONFIG_STM32_MEDIUMDENSITY)
-#      define STM32_FLASH_NPAGES        128
-#      define STM32_FLASH_PAGESIZE      1024
+#  elif defined(CONFIG_STM32_LOWDENSITY)
+#    define STM32_FLASH_NPAGES        32
+#    define STM32_FLASH_PAGESIZE      1024
 
-#    elif  defined(CONFIG_STM32_CONNECTIVITYLINE)
-#      define STM32_FLASH_NPAGES        128
-#      define STM32_FLASH_PAGESIZE      2048
+#  elif  defined(CONFIG_STM32_MEDIUMDENSITY)
+#    define STM32_FLASH_NPAGES        128
+#    define STM32_FLASH_PAGESIZE      1024
 
-#    elif defined(CONFIG_STM32_HIGHDENSITY)
-#      define STM32_FLASH_NPAGES        256
-#      define STM32_FLASH_PAGESIZE      2048
+#  elif  defined(CONFIG_STM32_CONNECTIVITYLINE)
+#    define STM32_FLASH_NPAGES        128
+#    define STM32_FLASH_PAGESIZE      2048
 
-#    elif defined(CONFIG_STM32_STM32F30XX)
-#      define STM32_FLASH_NPAGES        128
-#      define STM32_FLASH_PAGESIZE      2048
+#  elif defined(CONFIG_STM32_HIGHDENSITY)
+#    define STM32_FLASH_NPAGES        256
+#    define STM32_FLASH_PAGESIZE      2048
 
-#    elif defined(CONFIG_STM32_STM32F37XX)
-#      define STM32_FLASH_NPAGES        128
-#      define STM32_FLASH_PAGESIZE      2048
+#  elif defined(CONFIG_STM32_STM32F30XX)
+#    define STM32_FLASH_NPAGES        128
+#    define STM32_FLASH_PAGESIZE      2048
 
-#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#        define STM32_FLASH_NPAGES        8
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (3 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16), \
-                                          _K(64),_K(128), _K(128), _K(128)}
+#  elif defined(CONFIG_STM32_STM32F37XX)
+#    define STM32_FLASH_NPAGES        128
+#    define STM32_FLASH_PAGESIZE      2048
 
-      /* STM32F4 has mixed page size */
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#      define STM32_FLASH_NPAGES      8
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (3 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
+                                      _K(64),_K(128), _K(128), _K(128)}
 
-#      undef STM32_FLASH_PAGESIZE
-#    endif
-#  endif                               /* CONFIG_STM32_FLASH_CONFIG_DEFAULT */
+  /* STM32F4 has mixed page size */
+
+#    undef STM32_FLASH_PAGESIZE
+#  endif
+#endif /* CONFIG_STM32_FLASH_CONFIG_DEFAULT */
 
 /* Override of the Flash Has been Chosen */
 
-#  if !defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT)
+#if !defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT)
 
 /* Define the Valid Configuration the F2 and F4  */
 
-#    if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 
-#      if defined(CONFIG_STM32_FLASH_CONFIG_B)
-#        define STM32_FLASH_NPAGES        5
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16), \
-                                          _K(64)}
+#    if defined(CONFIG_STM32_FLASH_CONFIG_B)
+#      define STM32_FLASH_NPAGES      5
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
+                                      _K(64)}
 
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_C)
-#        define STM32_FLASH_NPAGES        6
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (1 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16), \
-                                           _K(64), _K(128)}
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_C)
+#      define STM32_FLASH_NPAGES      6
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (1 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
+                                       _K(64), _K(128)}
 
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_D) && defined(CONFIG_STM32_STM32F40XX)
-#        define STM32_FLASH_NPAGES        7
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (2 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16), \
-                                          _K(64), _K(128), _K(128)}
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_D) && defined(CONFIG_STM32_STM32F40XX)
+#      define STM32_FLASH_NPAGES      7
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (2 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
+                                      _K(64), _K(128), _K(128)}
 
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_E)
-#        define STM32_FLASH_NPAGES        8
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (3 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16),  \
-                                          _K(64), _K(128), _K(128), _K(128)}
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_E)
+#      define STM32_FLASH_NPAGES      8
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (3 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16),  \
+                                      _K(64), _K(128), _K(128), _K(128)}
 
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_F) &&  defined(CONFIG_STM32_STM32F20XX)
-#        define STM32_FLASH_NPAGES        9
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (4 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16),   \
-                                          _K(64), _K(128), _K(128), _K(128), \
-                                          _K(128)}
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_F) &&  defined(CONFIG_STM32_STM32F20XX)
+#      define STM32_FLASH_NPAGES      9
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (4 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16),   \
+                                      _K(64), _K(128), _K(128), _K(128), \
+                                      _K(128)}
 
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_G)
-#        define STM32_FLASH_NPAGES        12
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (7 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16),    \
-                                          _K(64), _K(128), _K(128), _K(128),  \
-                                          _K(128), _K(128), _K(128), _K(128)}
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_G)
+#      define STM32_FLASH_NPAGES      12
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (7 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16),    \
+                                      _K(64), _K(128), _K(128), _K(128),  \
+                                      _K(128), _K(128), _K(128), _K(128)}
 
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_I) && defined(CONFIG_STM32_STM32F40XX)
-#        define STM32_FLASH_NPAGES        24
-#        define STM32_FLASH_SIZE          _K((4 * 16) + (1 * 64) + (7 * 128)) + \
-                                          _K((4 * 16) + (1 * 64) + (7 * 128))
-#        define STM32_FLASH_SIZES         {_K(16), _K(16), _K(16), _K(16),       \
-                                          _K(64), _K(128), _K(128), _K(128),     \
-                                          _K(128), _K(128), _K(128), _K(128),    \
-                                          _K(16), _K(16), _K(16), _K(16),        \
-                                          _K(64), _K(128), _K(128), _K(128),     \
-                                          _K(128), _K(128), _K(128), _K(128)}
-#      endif
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_I) && defined(CONFIG_STM32_STM32F40XX)
+#      define STM32_FLASH_NPAGES      24
+#      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (7 * 128)) + \
+                                      _K((4 * 16) + (1 * 64) + (7 * 128))
+#      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16),      \
+                                      _K(64), _K(128), _K(128), _K(128),    \
+                                      _K(128), _K(128), _K(128), _K(128),   \
+                                      _K(16), _K(16), _K(16), _K(16),       \
+                                      _K(64), _K(128), _K(128), _K(128),    \
+                                      _K(128), _K(128), _K(128), _K(128)}
+#    endif
 
 /* Define the Valid Configuration the F1 and F3  */
 
-#    else
-#      if defined(CONFIG_STM32_FLASH_CONFIG_4)
-#        define STM32_FLASH_NPAGES        16
-#        define STM32_FLASH_PAGESIZE      1024
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_6)
-#        define STM32_FLASH_NPAGES        32
-#        define STM32_FLASH_PAGESIZE      1024
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_8)
-#        define STM32_FLASH_NPAGES        64
-#        define STM32_FLASH_PAGESIZE      1024
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_B)
-#        define STM32_FLASH_NPAGES        128
-#        define STM32_FLASH_PAGESIZE      1024
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_C)
-#        define STM32_FLASH_NPAGES        128
-#        define STM32_FLASH_PAGESIZE      2048
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_D)
-#        define STM32_FLASH_NPAGES        192
-#        define STM32_FLASH_PAGESIZE      2048
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_E)
-#        define STM32_FLASH_NPAGES        256
-#        define STM32_FLASH_PAGESIZE      2048
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_F)
-#        define STM32_FLASH_NPAGES        384
-#        define STM32_FLASH_PAGESIZE      2048
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_G)
-#        define STM32_FLASH_NPAGES        512
-#        define STM32_FLASH_PAGESIZE      2048
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_I)
-#      endif
+#  else
+#    if defined(CONFIG_STM32_FLASH_CONFIG_4)
+#      define STM32_FLASH_NPAGES      16
+#      define STM32_FLASH_PAGESIZE    1024
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_6)
+#      define STM32_FLASH_NPAGES      32
+#      define STM32_FLASH_PAGESIZE    1024
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_8)
+#      define STM32_FLASH_NPAGES      64
+#      define STM32_FLASH_PAGESIZE    1024
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_B)
+#      define STM32_FLASH_NPAGES      128
+#      define STM32_FLASH_PAGESIZE    1024
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_C)
+#      define STM32_FLASH_NPAGES      128
+#      define STM32_FLASH_PAGESIZE    2048
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_D)
+#      define STM32_FLASH_NPAGES      192
+#      define STM32_FLASH_PAGESIZE    2048
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_E)
+#      define STM32_FLASH_NPAGES      256
+#      define STM32_FLASH_PAGESIZE    2048
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_F)
+#      define STM32_FLASH_NPAGES      384
+#      define STM32_FLASH_PAGESIZE    2048
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_G)
+#      define STM32_FLASH_NPAGES      512
+#      define STM32_FLASH_PAGESIZE    2048
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_I)
 #    endif
 #  endif
+#endif
 
-#  ifdef STM32_FLASH_PAGESIZE
-#    define STM32_FLASH_SIZE            (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
-#  endif                               /* def STM32_FLASH_PAGESIZE */
+#ifdef STM32_FLASH_PAGESIZE
+#  define STM32_FLASH_SIZE            (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
+#endif /* def STM32_FLASH_PAGESIZE */
 
 /* Register Offsets *****************************************************************/
 
@@ -388,4 +389,3 @@ void stm32_flash_lock(void);
 void stm32_flash_unlock(void);
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H */
-
