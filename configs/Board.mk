@@ -2,7 +2,9 @@
 # configs/Board.mk
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
+#           Paul Alexander Patience <paul-a.patience@polymtl.ca>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
