@@ -79,6 +79,10 @@ Installing Cygwin
      the answer to that and so will continue to recommend installing
      EVERYTHING.
 
+     You should certainly be able to omit "Science", "Math", and
+     "Pubishing".  You can try omitting KDE, Gnome, GTK, and other
+     graphics packages if you don't plan to use them.
+
   After installing Cygwin, you will get lots of links for installed
   tools and shells.  I use the RXVT native shell.  It is fast and reliable
   and does not require you to run the Cygwin X server (which is neither
