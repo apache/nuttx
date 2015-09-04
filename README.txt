@@ -80,7 +80,7 @@ Installing Cygwin
      EVERYTHING.
 
      You should certainly be able to omit "Science", "Math", and
-     "Pubishing".  You can try omitting KDE, Gnome, GTK, and other
+     "Publishing".  You can try omitting KDE, Gnome, GTK, and other
      graphics packages if you don't plan to use them.
 
   After installing Cygwin, you will get lots of links for installed

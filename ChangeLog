@@ -10939,7 +10939,7 @@
 	  a device with the connection (if the local address is not INADDR_ANY);
 	  On connect(), the remote address should be used (in case the local
 	  address is INADDR_ANY).  On accept(), it does not matter but the
-	  remote address is the one guarenteed to be available (2015-09-02).
-	* configs/board.mk and configs/*/src/Makefile: Simplify configs/
-	  Makefiles by combining common longic into a new board.mk Makefile
-	  fragment.  For Paul Alexander Patience (2015-09-04).
+	  remote address is the one guaranteed to be available (2015-09-02).
+	* configs/Board.mk and configs/*/src/Makefile: Simplify configs/
+	  Makefiles by combining common logic into a new Board.mk Makefile
+	  fragment.  From Paul Alexander Patience (2015-09-04).
