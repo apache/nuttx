@@ -32,16 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
+/* A single button, PB_USER (PB6), is available on the SAMA5D2-XULT
  *
- * ------------------------------ ------------------- ----------------------
- * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- ----------------------
- * PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
- * ------------------------------ ------------------- ----------------------
+ *  ------------------------------ ------------------- ----------------------
+ *  SAMA5D2 PIO                    SIGNAL              USAGE
+ *  ------------------------------ ------------------- ----------------------
+ *  PB6                            USER_PB_PB6         PB_USER push button
+ *  ------------------------------ ------------------- ----------------------
  *
- * Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak
- * pull-up, and 2) when PB2 is pressed, a low value will be senses.
+ *  Closing PB_USER will bring PB6 to ground so 1) PB6 should have a weak
+ *  pull-up,  and 2) when PB_USER is pressed, a low value will be senses.
  */
 
 /****************************************************************************
@@ -72,7 +72,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_SAMA5_PIOB_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t g_irquser1;
 #endif
 
@@ -127,12 +127,12 @@ uint8_t board_buttons(void)
  *
  * Configuration Notes:
  *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
- *   overall PIO IRQ feature and CONFIG_SAMA5_PIOE_IRQ must be enabled to
+ *   overall PIO IRQ feature and CONFIG_SAMA5_PIOB_IRQ must be enabled to
  *   select PIOs to support interrupts on PIOE.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_SAMA5_PIOB_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;

@@ -82,21 +82,21 @@
                        PIO_PORT_PIOE | PIO_PIN9)
 
 /* Buttons **************************************************************************/
-/* A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
+/* A single button, PB_USER (PB6), is available on the SAMA5D2-XULT
  *
- * ------------------------------ ------------------- -------------------------
- * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
- * PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
- * ------------------------------ ------------------- -------------------------
+ *  ------------------------------ ------------------- -------------------------
+ *  SAMA5D2 PIO                    SIGNAL              USAGE
+ *  ------------------------------ ------------------- -------------------------
+ *  PB6                            USER_PB_PB6         PB_USER push button
+ *  ------------------------------ ------------------- -------------------------
  *
- * Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak pull-up,
- * and 2) when PB2 is pressed, a low value will be senses.
+ *  Closing PB_USER will bring PB6 to ground so 1) PB6 should have a weak pull-up,
+ *  and 2) when PB_USER is pressed, a low value will be senses.
  */
 
 #define PIO_BTN_USER (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN13)
-#define IRQ_BTN_USER  SAM_IRQ_PE13
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOB | PIO_PIN6)
+#define IRQ_BTN_USER  SAM_IRQ_PB6
 
 
 /************************************************************************************

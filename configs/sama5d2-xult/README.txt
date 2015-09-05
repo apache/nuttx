@@ -579,16 +579,16 @@ Buttons and LEDs
 
   Buttons
   -------
-  A single button, PB_USER1 (PB2), is available on the SAMA5D2-XULT
+  A single button, PB_USER1 (PB6), is available on the SAMA5D2-XULT
 
   ------------------------------ ------------------- -------------------------
   SAMA5D2 PIO                    SIGNAL              USAGE
   ------------------------------ ------------------- -------------------------
-  PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
+  PB6                            USER_PB_PB6         PB_USER push button
   ------------------------------ ------------------- -------------------------
 
-  Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak pull-up,
-  and 2) when PB2 is pressed, a low value will be senses.
+  Closing PB_USER will bring PB6 to ground so 1) PB6 should have a weak pull-up,
+  and 2) when PB_USER is pressed, a low value will be senses.
 
   Support for pollable buttons is enabled with:
 
