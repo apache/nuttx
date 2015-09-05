@@ -217,7 +217,7 @@
 
 /* SLCD_CHAR4_MASK  COM0-3 0xffcff3ff .... .... ..44 .... .... 44.. .... .... */
 
- #define SLCD_CHAR4_MASK0      0xffcff3ff
+#define SLCD_CHAR4_MASK0      0xffcff3ff
 #define SLCD_CHAR4_MASK1      SLCD_CHAR4_MASK0
 #define SLCD_CHAR4_MASK2      SLCD_CHAR4_MASK0
 #define SLCD_CHAR4_MASK3      SLCD_CHAR4_MASK0

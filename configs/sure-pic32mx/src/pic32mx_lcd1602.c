@@ -179,7 +179,7 @@ struct lcd1602_2
  ****************************************************************************/
 /* Debug */
 
- #if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
 static void lcd_dumpstate(FAR const char *msg);
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream);

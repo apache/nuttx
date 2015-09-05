@@ -336,7 +336,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *
  ****************************************************************************/
 
- #ifdef CONFIG_SPI_CMDDATA
+#ifdef CONFIG_SPI_CMDDATA
 static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
 #  error "spi_cmddata not implemented"
