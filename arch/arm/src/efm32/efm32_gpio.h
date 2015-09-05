@@ -141,15 +141,15 @@
  */
 
 #define GPIO_DRIVE_SHIFT           (9)         /* Bits 9-10: Output drive strength */
-#define GPIO_DRIVE_MASK            (3 << GPIO_MODE_SHIFT)
+#define GPIO_DRIVE_MASK            (3 << GPIO_DRIVE_SHIFT)
 #  define _GPIO_DRIVE_STANDARD     (0)         /* 6 mA drive current */
 #  define _GPIO_DRIVE_LOWEST       (1)         /* 0.5 mA drive current */
 #  define _GPIO_DRIVE_HIGH         (2)         /* 20 mA drive current */
 #  define _GPIO_DRIVE_LOW          (3)         /* 2 mA drive current */
-#  define GPIO_DRIVE_STANDARD      (_GPIO_DRIVE_STANDARD << GPIO_MODE_SHIFT)
-#  define GPIO_DRIVE_LOWEST        (_GPIO_DRIVE_LOWEST << GPIO_MODE_SHIFT)
-#  define GPIO_DRIVE_HIGH          (_GPIO_DRIVE_HIGH << GPIO_MODE_SHIFT)
-#  define GPIO_DRIVE_LOW           (_GPIO_DRIVE_LOW << GPIO_MODE_SHIFT)
+#  define GPIO_DRIVE_STANDARD      (_GPIO_DRIVE_STANDARD << GPIO_DRIVE_SHIFT)
+#  define GPIO_DRIVE_LOWEST        (_GPIO_DRIVE_LOWEST << GPIO_DRIVE_SHIFT)
+#  define GPIO_DRIVE_HIGH          (_GPIO_DRIVE_HIGH << GPIO_DRIVE_SHIFT)
+#  define GPIO_DRIVE_LOW           (_GPIO_DRIVE_LOW << GPIO_DRIVE_SHIFT)
 
 /* Interrupt Mode (Input only):
  *
