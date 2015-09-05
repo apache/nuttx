@@ -212,7 +212,7 @@ struct efm32_trace_s
   uint32_t i2c_reg_state;     /* I2C register I2Cx_STATES */
   uint32_t i2c_reg_if;        /* I2C register I2Cx_IF */
   uint32_t count;             /* Interrupt count when status change */
-  int      dcnt;               /* Interrupt count when status change */
+  int      dcnt;              /* Interrupt count when status change */
   uint32_t time;              /* First of event or first status */
 };
 
@@ -273,7 +273,7 @@ struct efm32_i2c_priv_s
 struct efm32_i2c_inst_s
 {
   const struct i2c_ops_s *ops;        /* Standard I2C operations */
-  struct efm32_i2c_priv_s *priv;      /* Common driver private data structure 
+  struct efm32_i2c_priv_s *priv;      /* Common driver private data structure
                                        */
 
   uint32_t frequency;         /* Frequency used in this instantiation */
@@ -626,7 +626,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
       if (ret != OK && errno != EINTR)
         {
-          /* Break out of the loop on irrecoverable errors.  This would include 
+          /* Break out of the loop on irrecoverable errors.  This would include
            * timeouts and mystery errors reported by sem_timedwait. NOTE that
            * we try again if we are awakened by a signal (EINTR).
            */
@@ -834,8 +834,8 @@ static void efm32_i2c_tracedump(FAR struct efm32_i2c_priv_s *priv)
       syslog(LOG_DEBUG,
              "%2d. I2Cx_STATE: %08x I2Cx_PENDING: %08x dcnt %3d COUNT: %3d "
              "STATE: %s(%2d) TIME: %d\n",
-             i + 1, trace->i2c_reg_state, trace->i2c_reg_if, trace->dcnt, 
-             trace->count, efm32_i2c_state_str(trace->i2c_state), 
+             i + 1, trace->i2c_reg_state, trace->i2c_reg_if, trace->dcnt,
+             trace->count, efm32_i2c_state_str(trace->i2c_state),
              trace->i2c_state, trace->time - priv->start_time);
     }
 }
@@ -921,7 +921,7 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
           if (priv->i2c_reg_if & I2C_IF_ARBLOST)
             {
               /* If arbitration fault, it indicates either a slave device not
-               * responding as expected, or other master which is not supported 
+               * responding as expected, or other master which is not supported
                * by this SW. */
 
               priv->result = I2CRESULT_ARBLOST;
@@ -936,7 +936,7 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
             }
 
           /* If error situation occurred, it is difficult to know exact cause
-           * and how to resolve. It will be up to a wrapper to determine how to 
+           * and how to resolve. It will be up to a wrapper to determine how to
            * handle a fault/recovery if possible.
            */
 
@@ -1194,7 +1194,7 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
         /*********************************************************
          * Wait for ACK/NACK from slave after sending data to it
          */
-                 
+
         case I2CSTATE_DATAWFACKNACK:
           if (priv->i2c_reg_if & I2C_IF_NACK)
             {
@@ -1248,14 +1248,13 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
 
                   if (priv->dcnt == 1)
                     {
-                      /* If there is more than one byte to receive and this is 
-                       * the next to last byte we need to transmit the NACK 
-                       * now, before receiving the last byte. 
+                      /* If there is more than one byte to receive and this is
+                       * the next to last byte we need to transmit the NACK
+                       * now, before receiving the last byte.
                        */
 
                       efm32_i2c_putreg(priv,EFM32_I2C_CMD_OFFSET,I2C_CMD_NACK);
                     }
-
                 }
             }
           goto done;
@@ -1603,16 +1602,13 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
       /* Abort */
 
       efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_ABORT);
-
     }
   else
     {
-
       /* Check for error status conditions */
 
       switch(priv->result)
         {
-
             /* Arbitration lost during transfer. */
 
           case I2CRESULT_ARBLOST:
@@ -1638,7 +1634,7 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
               break;
 
               /* Bus error during transfer (misplaced START/STOP).
-               * I2C Bus is for some reason busy 
+               * I2C Bus is for some reason busy
                */
 
           case I2CRESULT_BUSERR:
@@ -1652,7 +1648,7 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
   efm32_i2c_tracedump(priv);
 
   /* Ensure that any ISR happening after we finish can't overwrite any user
-   * data 
+   * data
    */
 
   priv->result = I2CRESULT_NONE;
@@ -1769,7 +1765,7 @@ static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
 
 FAR struct i2c_dev_s *up_i2cinitialize(int port)
 {
-  struct efm32_i2c_priv_s *priv = NULL; /* Private data of device with multiple 
+  struct efm32_i2c_priv_s *priv = NULL; /* Private data of device with multiple
                                          * instances */
   struct efm32_i2c_inst_s *inst = NULL; /* Device, single instance */
   irqstate_t irqs;

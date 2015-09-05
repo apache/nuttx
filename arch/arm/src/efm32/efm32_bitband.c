@@ -49,11 +49,11 @@
 
 #if defined(CONFIG_EFM32_BITBAND)
 
-#ifndef EFM32_BITBAND_PER_BASE 
+#ifndef EFM32_BITBAND_PER_BASE
 #   error "EFM32_BITBAND_PER_BASE not declared bitband may be not supported?"
 #endif
 
-#ifndef EFM32_BITBAND_RAM_BASE 
+#ifndef EFM32_BITBAND_RAM_BASE
 #   error "EFM32_BITBAND_RAM_BASE not declared bitband may be not supported?"
 #endif
 
@@ -73,39 +73,40 @@
  * Private Functions
  ****************************************************************************/
 
-
 /******************************************************************************
  * Name: bitband_set_peripheral
+ *
+ * Description:
  *   Perform bit-band write operation on peripheral memory location.
  *
- * Description
  *   Bit-banding provides atomic read-modify-write cycle for single bit
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
- * 
- * Parameters
- * addr     Peripheral address location to modify bit in.
- * bit      Bit position to modify, 0-31.
- * val      Value to set bit to, 0 or 1.
+ *
+ * Input Parmeters:
+ *   addr     Peripheral address location to modify bit in.
+ *   bit      Bit position to modify, 0-31.
+ *   val      Value to set bit to, 0 or 1.
  *
  ******************************************************************************/
+
 inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val)
 {
-  uint32_t regval; 
+  uint32_t regval;
   regval = EFM32_BITBAND_PER_BASE + ((addr-EFM32_PER_MEM_BASE)*32) + (bit*4);
 
   *((volatile uint32_t *)regval) = (uint32_t)val;
 }
 
-
 /******************************************************************************
  * Name: bitband_get_peripheral
+ *
+ * Description:
  *   Perform bit-band operation on peripheral memory location.
  *
- * Description
  *   This function reads a single bit from the peripheral bit-band alias region.
  *   Bit-banding provides atomic read-modify-write cycle for single bit
  *   modification. Please refer to the reference manual for further details
@@ -113,14 +114,16 @@ inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val)
  *
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
- * 
- * Parameters
- * addr     Peripheral address location to read.
- * bit      Bit position to modify, 0-31.
  *
- * Return bit value read, 0 or 1.
+ * Input Parmeters:
+ *   addr     Peripheral address location to read.
+ *   bit      Bit position to modify, 0-31.
+ *
+ * Returned Value:
+ *   Return bit value read, 0 or 1.
  *
  ******************************************************************************/
+
 inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit)
 {
   uint32_t regval;
@@ -129,25 +132,26 @@ inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit)
   return *((volatile uint32_t *)regval);
 }
 
-
 /******************************************************************************
  * Name: bitband_set_sram
+ *
+ * Description:
  *   Perform bit-band write operation on SRAM memory location.
  *
- * Description
  *   Bit-banding provides atomic read-modify-write cycle for single bit
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
- * 
- * Parameters
- * addr     SRAM address location to modify bit in.
- * bit      Bit position to modify, 0-31.
- * val      Value to set bit to, 0 or 1.
+ *
+ * Input Parmeters:
+ *   addr     SRAM address location to modify bit in.
+ *   bit      Bit position to modify, 0-31.
+ *   val      Value to set bit to, 0 or 1.
  *
  ******************************************************************************/
+
 inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
 {
   uint32_t regval;
@@ -156,12 +160,12 @@ inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
   *((volatile uint32_t *)regval) = (uint32_t)val;
 }
 
-
 /******************************************************************************
  * Name: bitband_get_sram
+ *
+ * Description::
  *   Perform bit-band operation on SRAM memory location.
  *
- * Description
  *   This function reads a single bit from the RAM bit-band alias region.
  *   Bit-banding provides atomic read-modify-write cycle for single bit
  *   modification. Please refer to the reference manual for further details
@@ -169,14 +173,16 @@ inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
  *
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
- * 
- * Parameters
- * addr     Peripheral address location to read.
- * bit      Bit position to modify, 0-31.
  *
- * Return bit value read, 0 or 1.
+ * Input Parmeters:
+ *   addr     Peripheral address location to read.
+ *   bit      Bit position to modify, 0-31.
+ *
+ * Returned Value:
+ *   Return bit value read, 0 or 1.
  *
  ******************************************************************************/
+
 inline uint32_t bitband_get_sram(uint32_t addr, uint32_t bit)
 {
   uint32_t regval;
@@ -184,6 +190,4 @@ inline uint32_t bitband_get_sram(uint32_t addr, uint32_t bit)
 
   return *((volatile uint32_t *)regval);
 }
-#endif 
-
-
+#endif

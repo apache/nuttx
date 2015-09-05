@@ -80,83 +80,83 @@ typedef struct
 static efm32_reset_cause_list_t efm32_reset_cause_list[] =
 {
   {
-    0x0001, //0bXXXX XXXX XXXX XXX1
-    0x0001, //0bXXXX XXXX XXXX XXX1
+    0x0001, /* 0bXXXX XXXX XXXX XXX1 */
+    0x0001, /* 0bXXXX XXXX XXXX XXX1 */
     "A Power-on Reset has been performed. X bits are don't care."
   },
   {
-    0x0002, //0bXXXX XXXX 0XXX XX10
-    0x0003, //0bXXXX XXXX 1XXX XX11
+    0x0002, /* 0bXXXX XXXX 0XXX XX10 */
+    0x0003, /* 0bXXXX XXXX 1XXX XX11 */
     "A Brown-out has been detected on the unregulated power."
   },
   {
-    0x0004, //0bXXXX XXXX XXX0 0100
-    0x001F, //0bXXXX XXXX XXX1 1111
+    0x0004, /* 0bXXXX XXXX XXX0 0100 */
+    0x001F, /* 0bXXXX XXXX XXX1 1111 */
     "A Brown-out has been detected on the regulated power."
   },
   {
-    0x0008, //0bXXXX XXXX XXXX 1X00
-    0x000B, //0bXXXX XXXX XXXX 1X11
+    0x0008, /* 0bXXXX XXXX XXXX 1X00 */
+    0x000B, /* 0bXXXX XXXX XXXX 1X11 */
     "An external reset has been applied."
   },
   {
-    0x0010, //0bXXXX XXXX XXX1 XX00
-    0x0013, //0bXXXX XXXX XXX1 XX11
+    0x0010, /* 0bXXXX XXXX XXX1 XX00 */
+    0x0013, /* 0bXXXX XXXX XXX1 XX11 */
     "A watchdog reset has occurred."
   },
   {
-    0x0020, //0bXXXX X000 0010 0000
-    0x07FF, //0bXXXX X111 1111 1111
+    0x0020, /* 0bXXXX X000 0010 0000 */
+    0x07FF, /* 0bXXXX X111 1111 1111 */
     "A lockup reset has occurred."
   },
   {
-    0x0040, //0bXXXX X000 01X0 0000
-    0x07DF, //0bXXXX X111 11X1 1111
+    0x0040, /* 0bXXXX X000 01X0 0000 */
+    0x07DF, /* 0bXXXX X111 11X1 1111 */
     "A system request reset has occurred."
   },
   {
-    0x0080, //0bXXXX X000 1XX0 0XX0
-    0x0799, //0bXXXX X111 1XX1 1XX1
+    0x0080, /* 0bXXXX X000 1XX0 0XX0 */
+    0x0799, /* 0bXXXX X111 1XX1 1XX1 */
     "The system has woken up from EM4."
   },
   {
-    0x0180, //0bXXXX X001 1XX0 0XX0
-    0x0799, //0bXXXX X111 1XX1 1XX1
+    0x0180, /* 0bXXXX X001 1XX0 0XX0 */
+    0x0799, /* 0bXXXX X111 1XX1 1XX1 */
     "The system has woken up from EM4 on an EM4 wakeup reset request from pin."
   },
   {
-    0x0200, //0bXXXX X01X XXX0 0000
-    0x061F, //0bXXXX X11X XXX1 1111
+    0x0200, /* 0bXXXX X01X XXX0 0000 */
+    0x061F, /* 0bXXXX X11X XXX1 1111 */
     "A Brown-out has been detected on Analog Power Domain 0 (AVDD0)."
   },
   {
-    0x0400, //0bXXXX X10X XXX0 0000
-    0x061F, //0bXXXX X11X XXX1 1111
+    0x0400, /* 0bXXXX X10X XXX0 0000 */
+    0x061F, /* 0bXXXX X11X XXX1 1111 */
     "A Brown-out has been detected on Analog Power Domain 1 (AVDD1)."
   },
   {
-    0x0800, //0bXXXX 1XXX XXXX 0XX0
-    0x0809, //0bXXXX 1XXX XXXX 1XX1
+    0x0800, /* 0bXXXX 1XXX XXXX 0XX0 */
+    0x0809, /* 0bXXXX 1XXX XXXX 1XX1 */
     "A Brown-out has been detected by the Backup BOD on VDD_DREG."
   },
   {
-    0x1000, //0bXXX1 XXXX XXXX 0XX0
-    0x1009, //0bXXX1 XXXX XXXX 1XX1
+    0x1000, /* 0bXXX1 XXXX XXXX 0XX0 */
+    0x1009, /* 0bXXX1 XXXX XXXX 1XX1 */
     "A Brown-out has been detected by the Backup BOD on BU_VIN."
   },
   {
-    0x2000, //0bXX1X XXXX XXXX 0XX0
-    0x2009, //0bXX1X XXXX XXXX 1XX1
+    0x2000, /* 0bXX1X XXXX XXXX 0XX0 */
+    0x2009, /* 0bXX1X XXXX XXXX 1XX1 */
     "A Brown-out has been detected by the Backup BOD on unregulated power"
   },
   {
-    0x4000, //0bX1XX XXXX XXXX 0XX0
-    0x4009, //0bX1XX XXXX XXXX 1XX1
+    0x4000, /* 0bX1XX XXXX XXXX 0XX0 */
+    0x4009, /* 0bX1XX XXXX XXXX 1XX1 */
     "A Brown-out has been detected by the Backup BOD on regulated power."
   },
   {
-    0x8000, //0b1XXX XXXX XXXX XXX0
-    0x8001, //0b1XXX XXXX XXXX XXX1
+    0x8000, /* 0b1XXX XXXX XXXX XXX0 */
+    0x8001, /* 0b1XXX XXXX XXXX XXX1 */
     "The system has been in Backup mode."
   }
 };

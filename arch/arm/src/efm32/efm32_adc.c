@@ -68,11 +68,11 @@
 
 /* Some ADC peripheral must be enabled */
 
-#if defined(CONFIG_EFM32_ADC1) 
+#if defined(CONFIG_EFM32_ADC1)
 
-/* This implementation is for the EFM32 F1, F2, and F4 only */
+/* This implementation is for the EFM32GG Only */
 
-#if defined(CONFIG_EFM32_EFM32GG) 
+#if defined(CONFIG_EFM32_EFM32GG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,7 +135,7 @@ static void adc_timstart(FAR struct efm32_dev_s *priv, bool enable);
 static int  adc_timinit(FAR struct efm32_dev_s *priv);
 #endif
 
-#if defined(CONFIG_EFM32_EFM32GG) 
+#if defined(CONFIG_EFM32_EFM32GG)
 static void adc_startconv(FAR struct efm32_dev_s *priv, bool enable);
 #endif
 
@@ -1280,6 +1280,6 @@ struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
   return dev;
 }
 
-#endif /* CONFIG_EFM32_EFM32F10XX || CONFIG_EFM32_EFM32F20XX || CONFIG_EFM32_EFM32F40XX */
-#endif /* CONFIG_EFM32_ADC || CONFIG_EFM32_ADC2 || CONFIG_EFM32_ADC3 */
+#endif /* CONFIG_EFM32_EFM32GG */
+#endif /* CONFIG_EFM32_ADC1 */
 #endif /* CONFIG_ADC */

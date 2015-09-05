@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/efm32/efm32_gpioirq.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -276,7 +276,7 @@ void efm32_gpioirqenable(int irq)
     {
       /* Enable the interrupt associated with the pin */
 
-#ifndef CONFIG_EFM32_BITBAND 
+#ifndef CONFIG_EFM32_BITBAND
       irqstate_t flags;
       uint32_t regval;
       uint32_t bit;
@@ -302,15 +302,15 @@ void efm32_gpioirqenable(int irq)
 
 void efm32_gpioirqdisable(int irq)
 {
-
   if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
     {
       /* Enable the interrupt associated with the pin */
 
-#ifndef CONFIG_EFM32_BITBAND 
+#ifndef CONFIG_EFM32_BITBAND
       irqstate_t flags;
       uint32_t regval;
       uint32_t bit;
+
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
       flags   = irqsave();
       regval  = getreg32(EFM32_GPIO_IEN);
@@ -333,12 +333,11 @@ void efm32_gpioirqdisable(int irq)
 
 void efm32_gpioirqclear(int irq)
 {
-
   if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
     {
       /* Enable the interrupt associated with the pin */
 
-#ifndef CONFIG_EFM32_BITBAND 
+#ifndef CONFIG_EFM32_BITBAND
       irqstate_t flags;
       uint32_t regval;
       uint32_t bit;
