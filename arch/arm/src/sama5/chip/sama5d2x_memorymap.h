@@ -212,11 +212,6 @@
 #define SAM_AXIMX_SIZE           (4)             /* 0x00600000-0x006fffff: AXI Matrix */
 #define SAM_DAP_SIZE             (1*1024*1024)   /* 0x00700000-0x007fffff: DAP */
 #define SAM_L2CC_SIZE            (1*1024*1024)   /* 0x00a00000-0x00bfffff: L2CC */
-
-QSPI0AES
-QSPI1AES
-SDMMC0
-SDMMC1
 #define SAM_NFCCR_SIZE           (256*1024*1024) /* 0xc0000000-0xcfffffff: NFC Command Registers */
                                                  /* 0xf0000000-0xffffffff: Internal Peripherals */
 #define SAM_PERIPHA_SIZE         (192*1024)      /* 0xf0000000-0xf002ffff: Internal Peripherals A */
@@ -237,7 +232,6 @@ SDMMC1
 #define SAMA5_SDMMC1_SIZE        MKULONG(CONFIG_SAMA5_SDMMC1_SIZE)
 #define SAMA5_QSPI0_SIZE         MKULONG(CONFIG_SAMA5_QSPI0_SIZE)
 #define SAMA5_QSPI1_SIZE         MKULONG(CONFIG_SAMA5_QSPI1_SIZE)
-
 
 #define SAMA5_EBICS0_HEAP_OFFSET   MKULONG(CONFIG_SAMA5_EBICS0_HEAP_OFFSET)
 #define SAMA5_DDRCS_HEAP_OFFSET    MKULONG(CONFIG_SAMA5_DDRCS_HEAP_OFFSET)
@@ -602,7 +596,7 @@ SDMMC1
 #  define NUTTX_TEXT_PEND        ((CONFIG_FLASH_END + 0x000fffff) & 0xfff00000)
 #  define NUTTX_TEXT_SIZE        (NUTTX_TEXT_PEND - NUTTX_TEXT_PADDR)
 
-  /* In the default configuration, the primary RAM use for .bss and .data
+  /* In the default configuration, the primary RAM used for .bss and .data
    * is the internal SRAM.
    */
 
