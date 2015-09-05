@@ -70,7 +70,7 @@
 
 #if defined(CONFIG_EFM32_ADC1) 
 
-/* This implementation is for the STM32 F1, F2, and F4 only */
+/* This implementation is for the EFM32 F1, F2, and F4 only */
 
 #if defined(CONFIG_EFM32_EFM32GG) 
 
@@ -113,9 +113,9 @@ struct efm32_dev_s
 
 /* ADC Register access */
 
-static uint32_t adc_getreg( struct stm32_dev_s *priv, int offset);
-static void     adc_putreg( struct stm32_dev_s *priv, int offset, uint32_t value);
-static void     adc_hw_reset(struct stm32_dev_s *priv, bool reset);
+static uint32_t adc_getreg( struct efm32_dev_s *priv, int offset);
+static void     adc_putreg( struct efm32_dev_s *priv, int offset, uint32_t value);
+static void     adc_hw_reset(struct efm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
 
@@ -128,15 +128,15 @@ static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static void adc_enable(FAR struct stm32_dev_s *priv, bool enable);
+static void adc_enable(FAR struct efm32_dev_s *priv, bool enable);
 
 #ifdef ADC_HAVE_TIMER
-static void adc_timstart(FAR struct stm32_dev_s *priv, bool enable);
-static int  adc_timinit(FAR struct stm32_dev_s *priv);
+static void adc_timstart(FAR struct efm32_dev_s *priv, bool enable);
+static int  adc_timinit(FAR struct efm32_dev_s *priv);
 #endif
 
 #if defined(CONFIG_EFM32_EFM32GG) 
-static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable);
+static void adc_startconv(FAR struct efm32_dev_s *priv, bool enable);
 #endif
 
 /****************************************************************************
@@ -161,7 +161,7 @@ static struct efm32_dev_s g_adcpriv1 =
 {
   .irq         = EFM32_IRQ_ADC0,
   .isr         = adc_interrupt,
-  .base        = STM32_ADC1_BASE,
+  .base        = EFM32_ADC1_BASE,
 };
 
 static struct adc_dev_s g_adcdev1 =
@@ -170,7 +170,6 @@ static struct adc_dev_s g_adcdev1 =
   .ad_priv= &g_adcpriv1,
 };
 #endif
-
 
 /****************************************************************************
  * Private Functions
@@ -190,7 +189,7 @@ static struct adc_dev_s g_adcdev1 =
  *
  ****************************************************************************/
 
-static uint32_t adc_getreg(struct stm32_dev_s *priv, int offset)
+static uint32_t adc_getreg(struct efm32_dev_s *priv, int offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -209,37 +208,39 @@ static uint32_t adc_getreg(struct stm32_dev_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void adc_putreg(struct stm32_dev_s *priv, int offset, uint32_t value)
+static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-
 /***************************************************************************//**
- * @brief
+ * Name: ADC_CalibrateLoadScan
+ *
+ * Description:
  *   Load SCAN calibrate register with predefined values for a certain
  *   reference.
  *
- * @details
  *   During production, calibration values are made and stored in the device
  *   information page for known references. Notice that for external references,
  *   calibration values must be determined explicitly, and this function
  *   will not modify the calibration register.
  *
- * @param[in] adc
- *   Pointer to ADC peripheral register block.
- *
- * @param[in] ref
- *   Reference to load calibrated values for. No values are loaded for
+ * Input Parameters:
+ *   adc - Pointer to ADC peripheral register block.
+ *   ref - Reference to load calibrated values for. No values are loaded for
  *   external references.
+ *
  ******************************************************************************/
+
 static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 {
   uint32_t cal;
 
-  /* Load proper calibration data depending on selected reference */
-  /* NOTE: We use ...SCAN... defines below, they are the same as */
-  /* similar ...SINGLE... defines. */
+  /* Load proper calibration data depending on selected reference
+   * NOTE: We use ...SCAN... defines below, they are the same as
+   * similar ...SINGLE... defines.
+   */
+
   switch (ref)
   {
   case adcRef1V25:
@@ -280,44 +281,50 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 
   case adcRef2xVDD:
     /* Gain value not of relevance for this reference, leave as is */
+
     cal  = adc->CAL & ~_ADC_CAL_SCANOFFSET_MASK;
     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
             _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
-  /* For external references, the calibration must be determined for the */
-  /* specific application and set explicitly. */
+  /* For external references, the calibration must be determined for the
+   * specific application and set explicitly.
+   */
+
   default:
     break;
   }
 }
 
 /***************************************************************************//**
- * @brief
+ * Name: ADC_CalibrateLoadSingle
+ *
+ * Description:
  *   Load SINGLE calibrate register with predefined values for a certain
  *   reference.
  *
- * @details
  *   During production, calibration values are made and stored in the device
  *   information page for known references. Notice that for external references,
  *   calibration values must be determined explicitly, and this function
  *   will not modify the calibration register.
  *
- * @param[in] adc
- *   Pointer to ADC peripheral register block.
+ * Input Parameters:
+ *   adc - Pointer to ADC peripheral register block.
+ *   ref - Reference to load calibrated values for. No values are loaded for
+ *         external references.
  *
- * @param[in] ref
- *   Reference to load calibrated values for. No values are loaded for
- *   external references.
  ******************************************************************************/
+
 static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 {
   uint32_t cal;
 
-  /* Load proper calibration data depending on selected reference */
-  /* NOTE: We use ...SCAN... defines below, they are the same as */
-  /* similar ...SINGLE... defines. */
+  /* Load proper calibration data depending on selected reference
+   * NOTE: We use ...SCAN... defines below, they are the same as
+   * similar ...SINGLE... defines.
+   */
+
   switch (ref)
   {
   case adcRef1V25:
@@ -358,43 +365,43 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 
   case adcRef2xVDD:
     /* Gain value not of relevance for this reference, leave as is */
+
     cal  = adc->CAL & ~_ADC_CAL_SINGLEOFFSET_MASK;
     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
             _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
-  /* For external references, the calibration must be determined for the */
-  /* specific application and set explicitly. */
+  /* For external references, the calibration must be determined for the
+   * specific application and set explicitly.
+   */
+
   default:
     break;
   }
 }
 
-/** @endcond */
-
 /*******************************************************************************
- **************************   GLOBAL FUNCTIONS   *******************************
+ * Global Functions
  ******************************************************************************/
 
 /***************************************************************************//**
- * @brief
+ * Name: ADC_Init
  *   Initialize ADC.
  *
- * @details
+ * Description:
  *   Initializes common parts for both single conversion and scan sequence.
  *   In addition, single and/or scan control configuration must be done, please
  *   refer to ADC_InitSingle() and ADC_InitScan() respectively.
  *
- * @note
- *   This function will stop any ongoing conversion.
+ *   NOTE: This function will stop any ongoing conversion.
  *
- * @param[in] adc
- *   Pointer to ADC peripheral register block.
+ * Input Parameters:
+ *   adc- Pointer to ADC peripheral register block.
+ *   int - Pointer to ADC initialization structure.
  *
- * @param[in] init
- *   Pointer to ADC initialization structure.
  ******************************************************************************/
+
 void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
 {
   uint32_t tmp;
@@ -402,6 +409,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
   EFM_ASSERT(ADC_REF_VALID(adc));
 
   /* Make sure conversion is not in progress */
+
   adc->CMD = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
 
   tmp = ((uint32_t)(init->ovsRateSel) << _ADC_CTRL_OVSRSEL_SHIFT) |
@@ -411,34 +419,33 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
         ((uint32_t)(init->warmUpMode) << _ADC_CTRL_WARMUPMODE_SHIFT);
 
   if (init->tailgate)
-  {
-    tmp |= ADC_CTRL_TAILGATE;
-  }
+    {
+      tmp |= ADC_CTRL_TAILGATE;
+    }
 
   adc->CTRL = tmp;
 }
 
-
 /***************************************************************************//**
- * @brief
+ * Name: ADC_InitScan
+ *
+ * Description:
  *   Initialize ADC scan sequence.
  *
- * @details
  *   Please refer to ADC_Start() for starting scan sequence.
  *
  *   When selecting an external reference, the gain and offset calibration
  *   must be set explicitly (CAL register). For other references, the
  *   calibration is updated with values defined during manufacturing.
  *
- * @note
- *   This function will stop any ongoing scan sequence.
+ *   NOTE: This function will stop any ongoing scan sequence.
  *
- * @param[in] adc
- *   Pointer to ADC peripheral register block.
+ * Input Parameters:
+ *   adc - Pointer to ADC peripheral register block.
+ *   init - Pointer to ADC initialization structure.
  *
- * @param[in] init
- *   Pointer to ADC initialization structure.
  ******************************************************************************/
+
 void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
 {
   uint32_t tmp;
@@ -446,9 +453,11 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
   EFM_ASSERT(ADC_REF_VALID(adc));
 
   /* Make sure scan sequence is not in progress */
+
   adc->CMD = ADC_CMD_SCANSTOP;
 
   /* Load proper calibration data depending on selected reference */
+
   ADC_CalibrateLoadScan(adc, init->reference);
 
   tmp = ((uint32_t)(init->prsSel) << _ADC_SCANCTRL_PRSSEL_SHIFT) |
@@ -458,49 +467,48 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
         ((uint32_t)(init->resolution) << _ADC_SCANCTRL_RES_SHIFT);
 
   if (init->prsEnable)
-  {
-    tmp |= ADC_SCANCTRL_PRSEN;
-  }
+    {
+      tmp |= ADC_SCANCTRL_PRSEN;
+    }
 
   if (init->leftAdjust)
-  {
-    tmp |= ADC_SCANCTRL_ADJ_LEFT;
-  }
+    {
+      tmp |= ADC_SCANCTRL_ADJ_LEFT;
+    }
 
   if (init->diff)
-  {
-    tmp |= ADC_SCANCTRL_DIFF;
-  }
+    {
+      tmp |= ADC_SCANCTRL_DIFF;
+    }
 
   if (init->rep)
-  {
-    tmp |= ADC_SCANCTRL_REP;
-  }
+    {
+      tmp |= ADC_SCANCTRL_REP;
+    }
 
   adc->SCANCTRL = tmp;
 }
 
-
 /***************************************************************************//**
- * @brief
+ * Name: ADC_InitSingle
+ *
+ * Description:
  *   Initialize single ADC sample conversion.
  *
- * @details
  *   Please refer to ADC_Start() for starting single conversion.
  *
  *   When selecting an external reference, the gain and offset calibration
  *   must be set explicitly (CAL register). For other references, the
  *   calibration is updated with values defined during manufacturing.
  *
- * @note
- *   This function will stop any ongoing single conversion.
+ *   NOTE: This function will stop any ongoing single conversion.
  *
- * @param[in] adc
- *   Pointer to ADC peripheral register block.
+ * Input Parameters:
+ *   adc - Pointer to ADC peripheral register block.
+ *   init - Pointer to ADC initialization structure.
  *
- * @param[in] init
- *   Pointer to ADC initialization structure.
  ******************************************************************************/
+
 void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
 {
   uint32_t tmp;
@@ -508,9 +516,11 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
   EFM_ASSERT(ADC_REF_VALID(adc));
 
   /* Make sure single conversion is not in progress */
+
   adc->CMD = ADC_CMD_SINGLESTOP;
 
   /* Load proper calibration data depending on selected reference */
+
   ADC_CalibrateLoadSingle(adc, init->reference);
 
   tmp = ((uint32_t)(init->prsSel) << _ADC_SINGLECTRL_PRSSEL_SHIFT) |
@@ -520,90 +530,98 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
         ((uint32_t)(init->resolution) << _ADC_SINGLECTRL_RES_SHIFT);
 
   if (init->prsEnable)
-  {
-    tmp |= ADC_SINGLECTRL_PRSEN;
-  }
+    {
+      tmp |= ADC_SINGLECTRL_PRSEN;
+    }
 
   if (init->leftAdjust)
-  {
-    tmp |= ADC_SINGLECTRL_ADJ_LEFT;
-  }
+    {
+      tmp |= ADC_SINGLECTRL_ADJ_LEFT;
+    }
 
   if (init->diff)
-  {
-    tmp |= ADC_SINGLECTRL_DIFF;
-  }
+    {
+      tmp |= ADC_SINGLECTRL_DIFF;
+    }
 
   if (init->rep)
-  {
-    tmp |= ADC_SINGLECTRL_REP;
-  }
+    {
+      tmp |= ADC_SINGLECTRL_REP;
+    }
 
   adc->SINGLECTRL = tmp;
 }
 
-
 /***************************************************************************//**
- * @brief
+ * Name: ADC_PrescaleCalc
+ *
+ * Description:
  *   Calculate prescaler value used to determine ADC clock.
  *
- * @details
  *   The ADC clock is given by: HFPERCLK / (prescale + 1).
  *
- * @param[in] adcFreq ADC frequency wanted. The frequency will automatically
- *   be adjusted to be within valid range according to reference manual.
+ * Input Parameters:
+ *   adcFreq  ADC frequency wanted. The frequency will automatically
+ *            be adjusted to be within valid range according to reference manual.
+ *  hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
+ *            use currently defined HFPER clock setting.
  *
- * @param[in] hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
- *   use currently defined HFPER clock setting.
- *
- * @return
+ * Returned Value:
  *   Prescaler value to use for ADC in order to achieve a clock value
  *   <= @p adcFreq.
+ *
  ******************************************************************************/
+
 uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
 {
   uint32_t ret;
 
   /* Make sure selected ADC clock is within valid range */
+
   if (adcFreq > ADC_MAX_CLOCK)
-  {
-    adcFreq = ADC_MAX_CLOCK;
-  }
+    {
+      adcFreq = ADC_MAX_CLOCK;
+    }
   else if (adcFreq < ADC_MIN_CLOCK)
-  {
-    adcFreq = ADC_MIN_CLOCK;
-  }
+    {
+      adcFreq = ADC_MIN_CLOCK;
+    }
 
   /* Use current HFPER frequency? */
+
   if (!hfperFreq)
-  {
-    hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
-  }
+    {
+      hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+    }
 
   ret = (hfperFreq + adcFreq - 1) / adcFreq;
   if (ret)
-  {
-    ret--;
-  }
+    {
+      ret--;
+    }
 
   return (uint8_t)ret;
 }
 
-
 /***************************************************************************//**
- * @brief
+ * Name: ADC_Reset
+ *
+ * Description:
  *   Reset ADC to same state as after a HW reset.
  *
  * @note
  *   The ROUTE register is NOT reset by this function, in order to allow for
  *   centralized setup of this feature.
  *
- * @param[in] adc
- *   Pointer to ADC peripheral register block.
+ * Input Parameters:
+ *   adc - Pointer to ADC peripheral register block.
+ *
  ******************************************************************************/
+
 void ADC_Reset(ADC_TypeDef *adc)
 {
   /* Stop conversions, before resetting other registers. */
+
   adc->CMD        = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
   adc->SINGLECTRL = _ADC_SINGLECTRL_RESETVALUE;
   adc->SCANCTRL   = _ADC_SCANCTRL_RESETVALUE;
@@ -613,58 +631,66 @@ void ADC_Reset(ADC_TypeDef *adc)
   adc->BIASPROG   = _ADC_BIASPROG_RESETVALUE;
 
   /* Load calibration values for the 1V25 internal reference. */
+
   ADC_CalibrateLoadSingle(adc, adcRef1V25);
   ADC_CalibrateLoadScan(adc, adcRef1V25);
 
   /* Do not reset route register, setting should be done independently */
 }
 
-
 /***************************************************************************//**
- * @brief
+ * Name: ADC_TimebaseCalc
+ *
+ * Description:
  *   Calculate timebase value in order to get a timebase providing at least 1us.
  *
- * @param[in] hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
- *   use currently defined HFPER clock setting.
+ * Input Parameters:
+ *   hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
+ *              use currently defined HFPER clock setting.
  *
- * @return
+ * Returned Value:
  *   Timebase value to use for ADC in order to achieve at least 1 us.
+ *
  ******************************************************************************/
+
 uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
 {
   if (!hfperFreq)
-  {
-    hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
-
-    /* Just in case, make sure we get non-zero freq for below calculation */
-    if (!hfperFreq)
     {
-      hfperFreq = 1;
+      hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+
+      /* Just in case, make sure we get non-zero freq for below calculation */
+
+      if (!hfperFreq)
+      {
+        hfperFreq = 1;
+      }
     }
-  }
+
 #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-  /* Handle errata on Giant Gecko, max TIMEBASE is 5 bits wide or max 0x1F */
-  /* cycles. This will give a warmp up time of e.g. 0.645us, not the       */
-  /* required 1us when operating at 48MHz. One must also increase acqTime  */
-  /* to compensate for the missing clock cycles, adding up to 1us in total.*/
-  /* See reference manual for details. */
-  if( hfperFreq > 32000000 )
-  {
-    hfperFreq = 32000000;
-  }
+  /* Handle errata on Giant Gecko, max TIMEBASE is 5 bits wide or max 0x1F
+   * cycles. This will give a warmp up time of e.g. 0.645us, not the
+   * required 1us when operating at 48MHz. One must also increase acqTime
+   * to compensate for the missing clock cycles, adding up to 1us in total.
+   * See reference manual for details.
+   */
+
+  if (hfperFreq > 32000000 )
+    {
+      hfperFreq = 32000000;
+    }
 #endif
+
   /* Determine number of HFPERCLK cycle >= 1us */
+
   hfperFreq += 999999;
   hfperFreq /= 1000000;
 
   /* Return timebase value (N+1 format) */
+
   return (uint8_t)(hfperFreq - 1);
 }
-
-
-/** @} (end addtogroup ADC) */
-/** @} (end addtogroup EM_Library) */
-#endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
+endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
 
 /****************************************************************************
  * Name: adc_tim_dumpregs
@@ -681,48 +707,47 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
  ****************************************************************************/
 
 #ifdef ADC_HAVE_TIMER
-static void adc_tim_dumpregs(struct stm32_dev_s *priv, FAR const char *msg)
+static void adc_tim_dumpregs(struct efm32_dev_s *priv, FAR const char *msg)
 {
 #if defined(CONFIG_DEBUG_ANALOG) && defined(CONFIG_DEBUG_VERBOSE)
   avdbg("%s:\n", msg);
   avdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-        tim_getreg(priv, STM32_GTIM_CR1_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CR2_OFFSET),
-        tim_getreg(priv, STM32_GTIM_SMCR_OFFSET),
-        tim_getreg(priv, STM32_GTIM_DIER_OFFSET));
+        tim_getreg(priv, EFM32_GTIM_CR1_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CR2_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_SMCR_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_DIER_OFFSET));
   avdbg("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
-        tim_getreg(priv, STM32_GTIM_SR_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
+        tim_getreg(priv, EFM32_GTIM_SR_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CCMR1_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CCMR2_OFFSET));
   avdbg(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
-        tim_getreg(priv, STM32_GTIM_CCER_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CNT_OFFSET),
-        tim_getreg(priv, STM32_GTIM_PSC_OFFSET),
-        tim_getreg(priv, STM32_GTIM_ARR_OFFSET));
+        tim_getreg(priv, EFM32_GTIM_CCER_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CNT_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_PSC_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_ARR_OFFSET));
   avdbg(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-        tim_getreg(priv, STM32_GTIM_CCR1_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CCR2_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CCR3_OFFSET),
-        tim_getreg(priv, STM32_GTIM_CCR4_OFFSET));
+        tim_getreg(priv, EFM32_GTIM_CCR1_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CCR2_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CCR3_OFFSET),
+        tim_getreg(priv, EFM32_GTIM_CCR4_OFFSET));
 
-  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
+  if (priv->tbase == EFM32_TIM1_BASE || priv->tbase == EFM32_TIM8_BASE)
     {
       avdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-            tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
-            tim_getreg(priv, STM32_ATIM_BDTR_OFFSET),
-            tim_getreg(priv, STM32_ATIM_DCR_OFFSET),
-            tim_getreg(priv, STM32_ATIM_DMAR_OFFSET));
+            tim_getreg(priv, EFM32_ATIM_RCR_OFFSET),
+            tim_getreg(priv, EFM32_ATIM_BDTR_OFFSET),
+            tim_getreg(priv, EFM32_ATIM_DCR_OFFSET),
+            tim_getreg(priv, EFM32_ATIM_DMAR_OFFSET));
     }
   else
     {
       avdbg("  DCR: %04x DMAR: %04x\n",
-            tim_getreg(priv, STM32_GTIM_DCR_OFFSET),
-            tim_getreg(priv, STM32_GTIM_DMAR_OFFSET));
+            tim_getreg(priv, EFM32_GTIM_DCR_OFFSET),
+            tim_getreg(priv, EFM32_GTIM_DMAR_OFFSET));
     }
 #endif
 }
 #endif
-
 
 /****************************************************************************
  * Name: adc_startconv
@@ -739,13 +764,13 @@ static void adc_tim_dumpregs(struct stm32_dev_s *priv, FAR const char *msg)
  ****************************************************************************/
 
 #if defined(CONFIG_EFM32_EFM32GG)
-static void adc_startconv(struct stm32_dev_s *priv, bool enable)
+static void adc_startconv(struct efm32_dev_s *priv, bool enable)
 {
   uint32_t regval;
 
   avdbg("enable: %d\n", enable);
 
-  regval = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
+  regval = adc_getreg(priv, EFM32_ADC_CR2_OFFSET);
   if (enable)
     {
       /* Start conversion of regular channles */
@@ -758,7 +783,8 @@ static void adc_startconv(struct stm32_dev_s *priv, bool enable)
 
       regval &= ~ADC_CR2_SWSTART;
     }
-  adc_putreg(priv, STM32_ADC_CR2_OFFSET,regval);
+
+  adc_putreg(priv, EFM32_ADC_CR2_OFFSET,regval);
 }
 #endif
 
@@ -777,14 +803,13 @@ static void adc_startconv(struct stm32_dev_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void adc_hw_reset(struct stm32_dev_s *priv, bool reset)
+static void adc_hw_reset(struct efm32_dev_s *priv, bool reset)
 {
   irqstate_t flags;
   uint32_t regval;
   uint32_t adcbit;
 
   /* Pick the appropriate bit in the APB2 reset register */
-
 
   /* Disable interrupts.  This is necessary because the APB2RTSR register
    * is used by several different drivers.
@@ -794,7 +819,7 @@ static void adc_hw_reset(struct stm32_dev_s *priv, bool reset)
 
   /* Set or clear the selected bit in the APB2 reset register */
 
-  regval = getreg32(STM32_RCC_APB2RSTR);
+  regval = getreg32(EFM32_RCC_APB2RSTR);
   if (reset)
     {
       /* Enable  ADC reset state */
@@ -807,7 +832,8 @@ static void adc_hw_reset(struct stm32_dev_s *priv, bool reset)
 
       regval &= ~adcbit;
     }
-  putreg32(regval, STM32_RCC_APB2RSTR);
+
+  putreg32(regval, EFM32_RCC_APB2RSTR);
   irqrestore(flags);
 }
 
@@ -827,13 +853,13 @@ static void adc_hw_reset(struct stm32_dev_s *priv, bool reset)
  *
  *******************************************************************************/
 
-static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
+static void adc_enable(FAR struct efm32_dev_s *priv, bool enable)
 {
   uint32_t regval;
 
   avdbg("enable: %d\n", enable);
 
-  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
+  regval  = adc_getreg(priv, EFM32_ADC_CR2_OFFSET);
   if (enable)
     {
       regval |= ADC_CR2_ADON;
@@ -842,7 +868,8 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
     {
       regval &= ~ADC_CR2_ADON;
     }
-  adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+
+  adc_putreg(priv, EFM32_ADC_CR2_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -860,7 +887,7 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   irqstate_t flags;
   uint32_t regval;
   int offset;
@@ -884,11 +911,11 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* Initialize the watchdog high threshold register */
 
-  adc_putreg(priv, STM32_ADC_HTR_OFFSET, 0x00000fff);
+  adc_putreg(priv, EFM32_ADC_HTR_OFFSET, 0x00000fff);
 
   /* Initialize the watchdog low threshold register */
 
-  adc_putreg(priv, STM32_ADC_LTR_OFFSET, 0x00000000);
+  adc_putreg(priv, EFM32_ADC_LTR_OFFSET, 0x00000000);
 
   /* Initialize the same sample time for each ADC 55.5 cycles
    *
@@ -904,12 +931,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
    *   111: 239.5 cycles
    */
 
-  adc_putreg(priv, STM32_ADC_SMPR1_OFFSET, 0x00b6db6d);
-  adc_putreg(priv, STM32_ADC_SMPR2_OFFSET, 0x00b6db6d);
+  adc_putreg(priv, EFM32_ADC_SMPR1_OFFSET, 0x00b6db6d);
+  adc_putreg(priv, EFM32_ADC_SMPR2_OFFSET, 0x00b6db6d);
 
   /* ADC CR1 Configuration */
 
-  regval  = adc_getreg(priv, STM32_ADC_CR1_OFFSET);
+  regval  = adc_getreg(priv, EFM32_ADC_CR1_OFFSET);
 
   /* Initialize the Analog watchdog enable */
 
@@ -920,11 +947,11 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   regval |= ADC_CR1_ALLINTS;
 
-  adc_putreg(priv, STM32_ADC_CR1_OFFSET, regval);
+  adc_putreg(priv, EFM32_ADC_CR1_OFFSET, regval);
 
   /* ADC CR2 Configuration */
 
-  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
+  regval  = adc_getreg(priv, EFM32_ADC_CR2_OFFSET);
 
   /* Clear CONT, continuous mode disable */
 
@@ -934,25 +961,27 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   regval &= ~ADC_CR2_ALIGN;
 
-  adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+  adc_putreg(priv, EFM32_ADC_CR2_OFFSET, regval);
 
   /* Configuration of the channel conversions */
 
-  regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
+  regval = adc_getreg(priv, EFM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
   for (i = 0, offset = 0; i < priv->nchannels && i < 6; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i] << offset;
     }
-  adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
 
-  regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ADC_SQR2_RESERVED;
+  adc_putreg(priv, EFM32_ADC_SQR3_OFFSET, regval);
+
+  regval = adc_getreg(priv, EFM32_ADC_SQR2_OFFSET) & ADC_SQR2_RESERVED;
   for (i = 6, offset = 0; i < priv->nchannels && i < 12; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i] << offset;
     }
-  adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
 
-  regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
+  adc_putreg(priv, EFM32_ADC_SQR2_OFFSET, regval);
+
+  regval = adc_getreg(priv, EFM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
   for (i = 12, offset = 0; i < priv->nchannels && i < 16; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i] << offset;
@@ -960,18 +989,18 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* ADC CCR configuration */
 
-  regval  = getreg32(STM32_ADC_CCR);
+  regval  = getreg32(EFM32_ADC_CCR);
   regval &= ~(ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS | ADC_CCR_DMA_MASK |
               ADC_CCR_ADCPRE_MASK | ADC_CCR_VBATE | ADC_CCR_TSVREFE);
   regval |=  (ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED | ADC_CCR_ADCPRE_DIV2);
-  putreg32(regval, STM32_ADC_CCR);
+  putreg32(regval, EFM32_ADC_CCR);
 
   /* Set the number of conversions */
 
   DEBUGASSERT(priv->nchannels <= ADC_MAX_SAMPLES);
 
   regval |= (((uint32_t)priv->nchannels-1) << ADC_SQR1_L_SHIFT);
-  adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
+  adc_putreg(priv, EFM32_ADC_SQR1_OFFSET, regval);
 
   /* Set the channel index of the first conversion */
 
@@ -986,13 +1015,13 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   irqrestore(flags);
 
   avdbg("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
-        adc_getreg(priv, STM32_ADC_SR_OFFSET),
-        adc_getreg(priv, STM32_ADC_CR1_OFFSET),
-        adc_getreg(priv, STM32_ADC_CR2_OFFSET));
+        adc_getreg(priv, EFM32_ADC_SR_OFFSET),
+        adc_getreg(priv, EFM32_ADC_CR1_OFFSET),
+        adc_getreg(priv, EFM32_ADC_CR2_OFFSET));
   avdbg("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
-        adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
-        adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
-        adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
+        adc_getreg(priv, EFM32_ADC_SQR1_OFFSET),
+        adc_getreg(priv, EFM32_ADC_SQR2_OFFSET),
+        adc_getreg(priv, EFM32_ADC_SQR3_OFFSET));
 }
 
 /****************************************************************************
@@ -1012,7 +1041,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
 static int adc_setup(FAR struct adc_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   int ret;
 
   /* Attach the ADC interrupt */
@@ -1048,7 +1077,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
 
   /* Disable ADC interrupts and detach the ADC interrupt handler */
 
@@ -1074,12 +1103,12 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   uint32_t regval;
 
   avdbg("intf: %d enable: %d\n", priv->intf, enable);
 
-  regval = adc_getreg(priv, STM32_ADC_CR1_OFFSET);
+  regval = adc_getreg(priv, EFM32_ADC_CR1_OFFSET);
   if (enable)
     {
       /* Enable the end-of-conversion ADC and analog watchdog interrupts */
@@ -1092,7 +1121,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
       regval &= ~ADC_CR1_ALLINTS;
     }
-  adc_putreg(priv, STM32_ADC_CR1_OFFSET, regval);
+
+  adc_putreg(priv, EFM32_ADC_CR1_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -1126,13 +1156,13 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
 static int adc_interrupt(FAR struct adc_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   uint32_t adcsr;
   int32_t  value;
 
   /* Identifies the interruption AWD, OVR or EOC */
 
-  adcsr = adc_getreg(priv, STM32_ADC_SR_OFFSET);
+  adcsr = adc_getreg(priv, EFM32_ADC_SR_OFFSET);
   if ((adcsr & ADC_SR_AWD) != 0)
     {
       alldbg("WARNING: Analog Watchdog, Value converted out of range!\n");
@@ -1146,7 +1176,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
        * (It is cleared by reading the ADC_DR)
        */
 
-      value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
+      value  = adc_getreg(priv, EFM32_ADC_DR_OFFSET);
       value &= ADC_DR_DATA_MASK;
 
       /* Give the ADC data to the ADC driver.  adc_receive accepts 3 parameters:
@@ -1173,13 +1203,12 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
   return OK;
 }
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_adcinitialize
+ * Name: efm32_adcinitialize
  *
  * Description:
  *   Initialize the ADC.
@@ -1204,14 +1233,14 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist, int nchannels)
+struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nchannels)
 {
   FAR struct adc_dev_s   *dev;
-  FAR struct stm32_dev_s *priv;
+  FAR struct efm32_dev_s *priv;
 
   avdbg("intf: %d nchannels: %d\n", intf, nchannels);
 
-#ifdef CONFIG_STM32_ADC1
+#ifdef CONFIG_EFM32_ADC1
   if (intf == 1)
     {
       avdbg("ADC1 Selected\n");
@@ -1219,7 +1248,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
     }
   else
 #endif
-#ifdef CONFIG_STM32_ADC2
+#ifdef CONFIG_EFM32_ADC2
   if (intf == 2)
     {
       avdbg("ADC2 Selected\n");
@@ -1227,7 +1256,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
     }
   else
 #endif
-#ifdef CONFIG_STM32_ADC3
+#ifdef CONFIG_EFM32_ADC3
   if (intf == 3)
     {
       avdbg("ADC3 Selected\n");
@@ -1251,6 +1280,6 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
   return dev;
 }
 
-#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F40XX */
-#endif /* CONFIG_STM32_ADC || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
+#endif /* CONFIG_EFM32_EFM32F10XX || CONFIG_EFM32_EFM32F20XX || CONFIG_EFM32_EFM32F40XX */
+#endif /* CONFIG_EFM32_ADC || CONFIG_EFM32_ADC2 || CONFIG_EFM32_ADC3 */
 #endif /* CONFIG_ADC */
