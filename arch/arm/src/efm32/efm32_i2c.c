@@ -212,6 +212,7 @@ struct efm32_trace_s
   uint32_t i2c_reg_state;     /* I2C register I2Cx_STATES */
   uint32_t i2c_reg_if;        /* I2C register I2Cx_IF */
   uint32_t count;             /* Interrupt count when status change */
+  int      dcnt;               /* Interrupt count when status change */
   uint32_t time;              /* First of event or first status */
 };
 
@@ -242,7 +243,7 @@ struct efm32_i2c_priv_s
   sem_t sem_isr;              /* Interrupt wait semaphore */
 #endif
 
-  volatile uint8_t result;    /* result of transfer */
+  volatile int8_t result;    /* result of transfer */
 
   uint8_t i2c_state;          /* i2c state machine */
   uint32_t i2c_reg_if;        /* Current state of I2Cx_IF register. */
@@ -346,7 +347,9 @@ static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
                               FAR struct i2c_msg_s *msgs, int count);
 #endif /* CONFIG_I2C_TRANSFER */
 
+#ifdef CONFIG_I2C_TRACE
 static const char *efm32_i2c_state_str(int i2c_state);
+#endif
 
 /*******************************************************************************
  * Private Data
@@ -485,6 +488,7 @@ static inline void efm32_i2c_modifyreg(FAR struct efm32_i2c_priv_s *priv,
  *
  ******************************************************************************/
 
+#ifdef CONFIG_I2C_TRACE
 static const char *efm32_i2c_state_str(int i2c_state)
 {
   switch (i2c_state)
@@ -515,6 +519,7 @@ static const char *efm32_i2c_state_str(int i2c_state)
       return "Unknown state!";
     }
 }
+#endif
 
 /*******************************************************************************
  * Name: efm32_i2c_sem_wait
@@ -779,6 +784,7 @@ static void efm32_i2c_tracenew(FAR struct efm32_i2c_priv_s *priv)
   if ((trace->count == 0) ||
       (priv->i2c_reg_if != trace->i2c_reg_if) ||
       (priv->i2c_reg_state != trace->i2c_reg_state) ||
+      (priv->dcnt != trace->dcnt) ||
       (priv->i2c_state != trace->i2c_state))
     {
       /* Yes.. Was it the states changed? */
@@ -804,6 +810,7 @@ static void efm32_i2c_tracenew(FAR struct efm32_i2c_priv_s *priv)
       trace->i2c_reg_state = priv->i2c_reg_state;
       trace->i2c_reg_if = priv->i2c_reg_if;
       trace->count = 1;
+      trace->dcnt = priv->dcnt;
       trace->time = clock_systimer();
     }
   else
@@ -821,15 +828,15 @@ static void efm32_i2c_tracedump(FAR struct efm32_i2c_priv_s *priv)
 
   syslog(LOG_DEBUG, "Elapsed time: %d\n", clock_systimer() - priv->start_time);
 
-  for (i = 0; i <= priv->tndx; i++)
+  for (i = 0; i < priv->tndx; i++)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. I2Cx_STATE: %08x I2Cx_PENDING: %08x COUNT: %3d "
-             "STATE: %s(%2d) PARM: %08x TIME: %d\n",
-             i + 1, trace->i2c_reg_state, trace->i2c_reg_if, trace->count,
-             efm32_i2c_state_str(trace->i2c_state), trace->i2c_state,
-             trace->time - priv->start_time);
+             "%2d. I2Cx_STATE: %08x I2Cx_PENDING: %08x dcnt %3d COUNT: %3d "
+             "STATE: %s(%2d) TIME: %d\n",
+             i + 1, trace->i2c_reg_state, trace->i2c_reg_if, trace->dcnt, 
+             trace->count, efm32_i2c_state_str(trace->i2c_state), 
+             trace->i2c_state, trace->time - priv->start_time);
     }
 }
 #endif /* CONFIG_I2C_TRACE */
@@ -1233,19 +1240,22 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
                   efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_STOP);
 
                 }
-              else if (priv->dcnt == 1)
-                {
-                  /* If there is only one byte to receive we need to transmit
-                   * the NACK now, before the stop.
-                   */
-
-                  efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_NACK);
-                }
               else
                 {
                   /* Send ACK and wait for next byte */
 
                   efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_ACK);
+
+                  if (priv->dcnt == 1)
+                    {
+                      /* If there is more than one byte to receive and this is 
+                       * the next to last byte we need to transmit the NACK 
+                       * now, before receiving the last byte. 
+                       */
+
+                      efm32_i2c_putreg(priv,EFM32_I2C_CMD_OFFSET,I2C_CMD_NACK);
+                    }
+
                 }
             }
           goto done;
@@ -1595,23 +1605,47 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
       efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_ABORT);
 
     }
+  else
+    {
 
-  /* Check for error status conditions */
+      /* Check for error status conditions */
 
-#if 0
-  /* Arbitration Lost (master mode) */
-  errval = EAGAIN;
-  /* Acknowledge Failure */
-  errval = ENXIO;
-  /* Overrun/Underrun */
-  errval = EIO;
-  /* PEC Error in reception */
-  errval = EPROTO;
-  /* Timeout or Tlow Error */
-  errval = ETIME;
-  /* I2C Bus is for some reason busy */
-  errval = EBUSY;
-#endif
+      switch(priv->result)
+        {
+
+            /* Arbitration lost during transfer. */
+
+          case I2CRESULT_ARBLOST:
+              errval = EAGAIN;
+              break;
+
+              /* NACK received during transfer. */
+
+          case I2CRESULT_NACK:
+              errval = ENXIO;
+              break;
+
+              /* SW fault. */
+
+          case I2CRESULT_SWFAULT:
+              errval = EIO;
+              break;
+
+              /* Usage fault. */
+
+          case I2CRESULT_USAGEFAULT:
+              errval = EINTR;
+              break;
+
+              /* Bus error during transfer (misplaced START/STOP).
+               * I2C Bus is for some reason busy 
+               */
+
+          case I2CRESULT_BUSERR:
+              errval = EBUSY;
+              break;
+        }
+    }
 
   /* Dump the trace result */
 
@@ -1738,7 +1772,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
   struct efm32_i2c_priv_s *priv = NULL; /* Private data of device with multiple 
                                          * instances */
   struct efm32_i2c_inst_s *inst = NULL; /* Device, single instance */
-  int irqs;
+  irqstate_t irqs;
 
   /* Get I2C private structure */
 
@@ -1801,7 +1835,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
 int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 {
-  int irqs;
+  irqstate_t irqs;
 
   ASSERT(dev);
 

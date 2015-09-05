@@ -80,13 +80,13 @@ typedef struct
 static efm32_reset_cause_list_t efm32_reset_cause_list[] =
 {
   {
-    0x0001, // 0bXXXX XXXX XXXX XXX1
-    0x0001, // 0bXXXX XXXX XXXX XXX1
+    0x0001, //0bXXXX XXXX XXXX XXX1
+    0x0001, //0bXXXX XXXX XXXX XXX1
     "A Power-on Reset has been performed. X bits are don't care."
   },
   {
-    0x0002, // 0bXXXX XXXX 0XXX XX10
-    0x0003, // 0bXXXX XXXX 1XXX XX11
+    0x0002, //0bXXXX XXXX 0XXX XX10
+    0x0003, //0bXXXX XXXX 1XXX XX11
     "A Brown-out has been detected on the unregulated power."
   },
   {

@@ -132,6 +132,11 @@ config EFM32_RMU
 	bool "Reset Management Unit (RMU) "
 	default n
 
+config EFM32_FLASHPROG
+	bool "Enable Erase/Write flash function (MSC) "
+	default n
+	select ARCH_HAVE_RAMFUNCS
+
 config EFM32_RMU_DEBUG
 	bool "Reset Management Unit (RMU) DEBUG "
 	default n
@@ -143,6 +148,10 @@ config EFM32_I2C0
 
 config EFM32_I2C1
 	bool "I2C1"
+	default n
+
+config EFM32_BITBAND
+	bool "BITBAND"
 	default n
 
 config EFM32_USART0
