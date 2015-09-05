@@ -49,6 +49,7 @@
 #include "up_arch.h"
 #include "chip/efm32_gpio.h"
 #include "efm32_gpio.h"
+#include "efm32_bitband.h"
 
 #ifdef CONFIG_EFM32_GPIO_IRQ
 
@@ -270,20 +271,24 @@ void efm32_gpioirq(gpio_pinset_t pinset)
 
 void efm32_gpioirqenable(int irq)
 {
-  irqstate_t flags;
-  uint32_t regval;
-  uint32_t bit;
 
   if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
     {
       /* Enable the interrupt associated with the pin */
 
+#ifndef CONFIG_EFM32_BITBAND 
+      irqstate_t flags;
+      uint32_t regval;
+      uint32_t bit;
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
       flags   = irqsave();
       regval  = getreg32(EFM32_GPIO_IEN);
       regval |= bit;
       putreg32(regval, EFM32_GPIO_IEN);
       irqrestore(flags);
+#else
+      bitband_set_peripheral(EFM32_GPIO_IEN,(irq - EFM32_IRQ_EXTI0),1);
+#endif
     }
 }
 
@@ -297,20 +302,24 @@ void efm32_gpioirqenable(int irq)
 
 void efm32_gpioirqdisable(int irq)
 {
-  irqstate_t flags;
-  uint32_t regval;
-  uint32_t bit;
 
   if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
     {
       /* Enable the interrupt associated with the pin */
 
+#ifndef CONFIG_EFM32_BITBAND 
+      irqstate_t flags;
+      uint32_t regval;
+      uint32_t bit;
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
       flags   = irqsave();
       regval  = getreg32(EFM32_GPIO_IEN);
       regval &= ~bit;
       putreg32(regval, EFM32_GPIO_IEN);
       irqrestore(flags);
+#else
+      bitband_set_peripheral(EFM32_GPIO_IEN,(irq - EFM32_IRQ_EXTI0),0);
+#endif
     }
 }
 
@@ -325,13 +334,14 @@ void efm32_gpioirqdisable(int irq)
 void efm32_gpioirqclear(int irq)
 {
 
-      irqstate_t flags;
-      uint32_t regval;
-      uint32_t bit;
-
   if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
     {
       /* Enable the interrupt associated with the pin */
+
+#ifndef CONFIG_EFM32_BITBAND 
+      irqstate_t flags;
+      uint32_t regval;
+      uint32_t bit;
 
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
       flags   = irqsave();
@@ -339,6 +349,9 @@ void efm32_gpioirqclear(int irq)
       regval |= bit;
       putreg32(regval, EFM32_GPIO_IFC);
       irqrestore(flags);
+#else
+      bitband_set_peripheral(EFM32_GPIO_IFC,(irq - EFM32_IRQ_EXTI0),1);
+#endif
     }
 }
 

@@ -109,6 +109,10 @@ ifeq ($(CONFIG_EFM32_FLASHPROG),y)
 CHIP_CSRCS += efm32_flash.c 
 endif
 
+ifeq ($(CONFIG_EFM32_BITBAND),y)
+CHIP_CSRCS += efm32_bitband.c
+endif
+
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c
 endif

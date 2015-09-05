@@ -150,6 +150,10 @@ config EFM32_I2C1
 	bool "I2C1"
 	default n
 
+config EFM32_BITBAND
+	bool "BITBAND"
+	default n
+
 config EFM32_USART0
 	bool "USART0"
 	default n
