@@ -518,6 +518,10 @@ configs/rgmp
   See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
   information about RGMP.
 
+configs/sama5d2-xult
+  This is the  port of NuttX to the Atmel SAMA5D2-Xplained Ultra development
+  board.  This board features the Atmel SAMA5D27.  See http://www.atmel.com.
+
 configs/sama5d3x-ek
   This is the  port of NuttX to the Atmel SAMA5D3x-EK development boards
   (where x=1,3,4, or 5).  These boards feature the Atmel SAMA5D3

@@ -654,6 +654,15 @@ config ARCH_BOARD_RGMP
 		See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
 		about RGMP.
 
+config ARCH_BOARD_SAMA5D2_XULT
+	bool "Atmel SAMA5D2 Xplained Ultra development board"
+	depends on ARCH_CHIP_ATSAMA5D27
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAMA5D2-XULT development board
+
 config ARCH_BOARD_SAMA5D3X_EK
 	bool "Atmel SAMA5D3x-EK development board"
 	depends on ARCH_CHIP_ATSAMA5D31 || ARCH_CHIP_ATSAMA5D33 || ARCH_CHIP_ATSAMA5D34 || ARCH_CHIP_ATSAMA5D35
@@ -1268,6 +1277,7 @@ config ARCH_BOARD
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "rgmp"                     if ARCH_BOARD_RGMP
+	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
@@ -1561,6 +1571,9 @@ source "configs/qemu-i486/Kconfig"
 endif
 if ARCH_BOARD_RGMP
 source "configs/rgmp/Kconfig"
+endif
+if ARCH_BOARD_SAMA5D2_XULT
+source "configs/sama5d2-xult/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
 source "configs/sama5d3x-ek/Kconfig"
