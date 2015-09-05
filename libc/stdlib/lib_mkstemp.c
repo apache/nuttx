@@ -54,7 +54,7 @@
  * Pre-processor definitions
  ****************************************************************************/
 
- #ifndef CONFIG_LIBC_TMPDIR
+#ifndef CONFIG_LIBC_TMPDIR
 #  define CONFIG_LIBC_TMPDIR "/tmp"
 #endif
 

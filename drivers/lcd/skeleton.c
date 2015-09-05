@@ -395,7 +395,7 @@ FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
 #warning "Missing logic"
 
   /* Configure and enable LCD */
- #warning "Missing logic"
+#warning "Missing logic"
 
   return &g_lcddev.dev;
 }

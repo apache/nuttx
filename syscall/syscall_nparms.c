@@ -72,4 +72,4 @@ const uint8_t g_funcnparms[SYS_nsyscalls] =
  * Public Functions
  ****************************************************************************/
 
- #endif /* CONFIG_LIB_SYSCALL */
+#endif /* CONFIG_LIB_SYSCALL */

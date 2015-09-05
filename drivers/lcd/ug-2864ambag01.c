@@ -175,7 +175,7 @@
 #  define SH1101A_MRATIO(d)      ((d) & 0x3f)
 #define SH1101A_DCDC_MODE        (0xad)                 /* Set DC-DC OFF/ON: (Double Bytes Command) */
 #  define SH1101A_DCDC_OFF       (0x8a)
- # define SH1101A_DCDC_ON        (0x8b)
+#  define SH1101A_DCDC_ON        (0x8b)
 #define SH1101A_DISPOFFON(s)     (0xae | ((s) & 0x01))  /* Display OFF/ON: (aeh - afh) */
 #  define SH1101A_DISPOFF        SH1101A_DISPOFFON(0)   /*   Display off */
 #  define SH1101A_DISPON         SH1101A_DISPOFFON(1)   /*   Display on */

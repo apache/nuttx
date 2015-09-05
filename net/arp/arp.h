@@ -176,7 +176,7 @@ struct arp_notify_s
  * Public Function Prototypes
  ****************************************************************************/
 
- #ifdef CONFIG_NET_ARP
+#ifdef CONFIG_NET_ARP
 /****************************************************************************
  * Name: arp_reset
  *

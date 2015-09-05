@@ -107,7 +107,7 @@
 
 int fseek(FAR FILE *stream, long int offset, int whence)
 {
- #if CONFIG_STDIO_BUFFER_SIZE > 0
+#if CONFIG_STDIO_BUFFER_SIZE > 0
   /* Flush any valid read/write data in the buffer (also verifies stream) */
 
   if (lib_rdflush(stream) < 0 || lib_wrflush(stream) < 0)
