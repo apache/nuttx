@@ -65,7 +65,7 @@
  * F... .... .... ....
  */
 
- #define GPIO_GLITCH               (1 << 15) /* Bit 15: Glitch filter enable */
+#define GPIO_GLITCH                (1 << 15) /* Bit 15: Glitch filter enable */
 
 /* Interrupt modes (valid only if GPIO_INTR==1)
  * .MM. .... .... ....

@@ -59,7 +59,7 @@
  * Public Data
  ****************************************************************************/
 
- #ifndef __ASSEMBLY__
+#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"

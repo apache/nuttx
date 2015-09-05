@@ -72,4 +72,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
- #endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_PINCONFIG_H */

@@ -82,7 +82,7 @@
 #endif
 
 #ifndef CONFIG_SAM34_TWI1_FREQUENCY
- #define CONFIG_SAM34_TWI1_FREQUENCY 100000
+#  define CONFIG_SAM34_TWI1_FREQUENCY 100000
 #endif
 
 /* Driver internal definitions *************************************************/

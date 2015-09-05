@@ -84,11 +84,11 @@
 #endif
 
 #ifndef CONFIG_SAMV7_TWIHS1_FREQUENCY
- #define CONFIG_SAMV7_TWIHS1_FREQUENCY 100000
+#  define CONFIG_SAMV7_TWIHS1_FREQUENCY 100000
 #endif
 
 #ifndef CONFIG_SAMV7_TWIHS2_FREQUENCY
- #define CONFIG_SAMV7_TWIHS2_FREQUENCY 100000
+#  define CONFIG_SAMV7_TWIHS2_FREQUENCY 100000
 #endif
 
 /* Driver internal definitions *************************************************/

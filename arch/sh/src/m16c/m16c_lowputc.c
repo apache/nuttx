@@ -263,7 +263,7 @@ static inline void up_lowserialsetup(void)
 
   /* Set port direction registers for Rx/TX pins */
 
- #if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval  = getreg8(M16C_PD6);
   regval &= ~(1 << 2);                         /* PD6-2:RxD1 */
   regval |=  (1 << 3);                         /* PD6-3:TxD1 */

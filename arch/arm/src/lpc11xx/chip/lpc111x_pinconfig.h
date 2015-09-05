@@ -119,4 +119,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
- #endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC116X_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC116X_PINCONFIG_H */

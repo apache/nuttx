@@ -200,7 +200,7 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
- #undef EXTERN
+#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

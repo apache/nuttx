@@ -115,8 +115,8 @@
  * OSCCLK / (CLK_TCK * PRER_DIV) - 1
  */
 
- #define MODCNT_DENOM  ((uint32_t)CLK_TCK * (uint32_t)PRER_DIV)
- #define MODCNT_VALUE  ((((uint32_t)HCS12_OSCCLK  + (MODCNT_DENOM/2))/ MODCNT_DENOM) - 1)
+#define MODCNT_DENOM  ((uint32_t)CLK_TCK * (uint32_t)PRER_DIV)
+#define MODCNT_VALUE  ((((uint32_t)HCS12_OSCCLK  + (MODCNT_DENOM/2))/ MODCNT_DENOM) - 1)
 
 /****************************************************************************
  * Private Types

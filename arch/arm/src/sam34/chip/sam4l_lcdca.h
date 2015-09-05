@@ -159,7 +159,7 @@
 #define LCDCA_TIM_PRESC            (1 << 0)  /* Bit 0:  LCD Prescaler Select */
 #define LCDCA_TIM_CLKDIV_SHIFT     (1)       /* Bits 1-3: LCD Clock Division */
 #define LCDCA_TIM_CLKDIV_MASK      (7 << LCDCA_TIM_CLKDIV_SHIFT)
- #define LCDCA_TIM_CLKDIV(n)       (((n)-1) << LCDCA_TIM_CLKDIV_SHIFT) /* n=1..8 */
+#  define LCDCA_TIM_CLKDIV(n)      (((n)-1) << LCDCA_TIM_CLKDIV_SHIFT) /* n=1..8 */
 #define LCDCA_TIM_FC0_SHIFT        (8)       /* Bits 8-12: Frame Counter 0 */
 #define LCDCA_TIM_FC0_MASK         (31 << LCDCA_TIM_FC0_SHIFT)
 #  define LCDCA_TIM_FC0(n)         ((n) << LCDCA_TIM_FC0_SHIFT) /* n=0-31 */

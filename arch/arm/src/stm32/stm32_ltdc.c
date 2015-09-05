@@ -2095,7 +2095,7 @@ static void stm32_ltdc_linit(int lid)
 # ifdef STM32_LAYER_CLUT_SIZE
   ltdc->setclut      = stm32_setclut;
   ltdc->getclut      = stm32_getclut;
- #endif
+#endif
   ltdc->setcolor     = stm32_setcolor;
   ltdc->getcolor     = stm32_getcolor;
   ltdc->setcolorkey  = stm32_setcolorkey;
@@ -2107,11 +2107,11 @@ static void stm32_ltdc_linit(int lid)
   ltdc->setarea      = stm32_setarea;
   ltdc->getarea      = stm32_getarea;
   ltdc->update       = stm32_update;
- #ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32_DMA2D
   ltdc->blit         = stm32_blit;
   ltdc->blend        = stm32_blend;
   ltdc->fillarea     = stm32_fillarea;
- #endif
+#endif
 #endif
 
   /* Initialize the layer state */

@@ -89,7 +89,7 @@ EXTERN uint32_t ez80_systemclock;
  * Public Function Prototypes
  ************************************************************************************/
 
- #undef EXTERN
+#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

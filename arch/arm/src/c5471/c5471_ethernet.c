@@ -2240,7 +2240,7 @@ void up_netinitialize(void)
   g_c5471[0].c_dev.d_ifup    = c5471_ifup;     /* I/F down callback */
   g_c5471[0].c_dev.d_ifdown  = c5471_ifdown;   /* I/F up (new IP address) callback */
   g_c5471[0].c_dev.d_txavail = c5471_txavail;  /* New TX data callback */
- #ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_IGMP
   g_c5471[0].c_dev.d_addmac  = c5471_addmac;   /* Add multicast MAC address */
   g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;    /* Remove multicast MAC address */
 #endif

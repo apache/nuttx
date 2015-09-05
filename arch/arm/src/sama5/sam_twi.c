@@ -84,15 +84,15 @@
 #endif
 
 #ifndef CONFIG_SAMA5_TWI1_FREQUENCY
- #define CONFIG_SAMA5_TWI1_FREQUENCY 100000
+#  define CONFIG_SAMA5_TWI1_FREQUENCY 100000
 #endif
 
 #ifndef CONFIG_SAMA5_TWI2_FREQUENCY
- #define CONFIG_SAMA5_TWI2_FREQUENCY 100000
+#  define CONFIG_SAMA5_TWI2_FREQUENCY 100000
 #endif
 
 #ifndef CONFIG_SAMA5_TWI3_FREQUENCY
- #define CONFIG_SAMA5_TWI3_FREQUENCY 100000
+#  define CONFIG_SAMA5_TWI3_FREQUENCY 100000
 #endif
 
 /* Driver internal definitions *************************************************/

@@ -76,7 +76,7 @@
  * Pre-processor Definitions
  *******************************************************************************************************************************/
 
- #if defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define EFM32_DMA_NCHANNELS            12
 #elif defined(CONFIG_EFM32_EFM32G)
 #  define EFM32_DMA_NCHANNELS            8

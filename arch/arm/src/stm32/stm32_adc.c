@@ -546,7 +546,7 @@ static void adc_tim_dumpregs(struct stm32_dev_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
- #ifdef ADC_HAVE_TIMER
+#ifdef ADC_HAVE_TIMER
 static void adc_timstart(struct stm32_dev_s *priv, bool enable)
 {
   uint16_t regval;

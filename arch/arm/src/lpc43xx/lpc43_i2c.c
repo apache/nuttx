@@ -78,17 +78,20 @@
 #if defined(CONFIG_LPC43_I2C0) || defined(CONFIG_LPC43_I2C1)
 
 #ifndef GPIO_I2C1_SCL
- #define GPIO_I2C1_SCL GPIO_I2C1_SCL_1
- #define GPIO_I2C1_SDA GPIO_I2C1_SDA_1
+#  define GPIO_I2C1_SCL GPIO_I2C1_SCL_1
+#  define GPIO_I2C1_SDA GPIO_I2C1_SDA_1
 #endif
+
 #ifndef CONFIG_I2C0_FREQ
- #define CONFIG_I2C0_FREQ 100000
+#  define CONFIG_I2C0_FREQ 100000
 #endif
+
 #ifndef CONFIG_I2C1_FREQ
- #define CONFIG_I2C1_FREQ 100000
+#  define CONFIG_I2C1_FREQ 100000
 #endif
+
 #ifndef CONFIG_I2C2_FREQ
- #define CONFIG_I2C2_FREQ 100000
+#  define CONFIG_I2C2_FREQ 100000
 #endif
 
 /*******************************************************************************

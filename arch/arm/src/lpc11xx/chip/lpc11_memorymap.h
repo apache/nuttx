@@ -70,4 +70,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
- #endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC11_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC11_MEMORYMAP_H */
