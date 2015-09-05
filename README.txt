@@ -1,4 +1,5 @@
 README
+README
 ^^^^^^
 
   o Installation
@@ -1388,6 +1389,8 @@ nuttx/
  |   |- qemu-i486/
  |   |   `- README.txt
  |   |- rgmp/
+ |   |   `- README.txt
+ |   |- sama5d2-xult/
  |   |   `- README.txt
  |   |- sama5d3x-ek/
  |   |   `- README.txt

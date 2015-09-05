@@ -10943,3 +10943,6 @@
 	* configs/Board.mk and configs/*/src/Makefile: Simplify configs/
 	  Makefiles by combining common logic into a new Board.mk Makefile
 	  fragment.  From Paul Alexander Patience (2015-09-04).
+	* configs/sama5d2-xult: Add a very basic configuration for the SAMAD2
+	  Xplained Ultra board.  This configuration is incomplete and only
+	  intended to support the initial board bring-up (2015-09-05).
