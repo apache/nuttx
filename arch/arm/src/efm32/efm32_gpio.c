@@ -171,9 +171,11 @@ static inline void efm32_setdrive(uintptr_t base, uint8_t pin, uint8_t drive)
    * REVISIT: Is there any sane way to manage this for multiple pins in the port
    * with different drive values?
    */
-
-  putreg32((uint32_t)drive << _GPIO_P_CTRL_DRIVEMODE_SHIFT,
-           base + EFM32_GPIO_Pn_CTRL_OFFSET);
+  if (drive != _GPIO_DRIVE_STANDARD)
+    {
+      putreg32((uint32_t)drive << _GPIO_P_CTRL_DRIVEMODE_SHIFT,
+               base + EFM32_GPIO_Pn_CTRL_OFFSET);
+    }
 }
 
 /************************************************************************************
