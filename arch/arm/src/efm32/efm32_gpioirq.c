@@ -314,4 +314,32 @@ void efm32_gpioirqdisable(int irq)
     }
 }
 
+/************************************************************************************
+ * Name: efm32_gpioirqclear
+ *
+ * Description:
+ *   Disable the interrupt for specified PIO IRQ
+ *
+ ************************************************************************************/
+
+void efm32_gpioirqclear(int irq)
+{
+
+      irqstate_t flags;
+      uint32_t regval;
+      uint32_t bit;
+
+  if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
+    {
+      /* Enable the interrupt associated with the pin */
+
+      bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
+      flags   = irqsave();
+      regval  = getreg32(EFM32_GPIO_IFC);
+      regval |= bit;
+      putreg32(regval, EFM32_GPIO_IFC);
+      irqrestore(flags);
+    }
+}
+
 #endif /* CONFIG_EFM32_GPIO_IRQ */

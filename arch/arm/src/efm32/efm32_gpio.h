@@ -329,6 +329,20 @@ void efm32_gpioirqdisable(int irq);
 #endif
 
 /************************************************************************************
+ * Name: efm32_gpioirqclear
+ *
+ * Description:
+ *   clear the interrupt for specified PIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_EFM32_GPIO_IRQ
+void efm32_gpioirqclear(int irq);
+#else
+#  define efm32_gpioirqclear(irq)
+#endif
+
+/************************************************************************************
  * Function:  efm32_dumpgpio
  *
  * Description:
