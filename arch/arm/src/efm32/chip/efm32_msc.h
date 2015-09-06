@@ -544,7 +544,7 @@
 #define MSC_LOCK_LOCKKEY_LOCKED                 (_MSC_LOCK_LOCKKEY_LOCKED << 0)   /* Shifted mode LOCKED for MSC_LOCK */
 #define MSC_LOCK_LOCKKEY_UNLOCK                 (_MSC_LOCK_LOCKKEY_UNLOCK << 0)   /* Shifted mode UNLOCK for MSC_LOCK */
 
-#define MSC_UNLOCK_CODE                         0x1B71                            /**< MSC unlock code */
+#define MSC_UNLOCK_CODE                         0x1B71                            /* MSC unlock code */
 
 /* Bit fields for MSC CMD */
 

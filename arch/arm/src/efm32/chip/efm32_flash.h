@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/efm32/chip/efm32_flash.h
  *
- *   Copyright (C) 2014 Bouteville Pierre-Noel. All rights reserved.
+ *   Copyright (C) 2015 Bouteville Pierre-Noel. All rights reserved.
  *   Author: Bouteville Pierre-Noel <pnb990@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,3 +54,4 @@
 #   define EFM32_FLASH_PAGESIZE    512
 #endif 
 
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_FLASH_H */
