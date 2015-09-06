@@ -45,6 +45,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/loopback.h>
+#include <nuttx/net/tun.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
@@ -170,6 +171,12 @@ void up_initialize(void)
   /* Initialize the local loopback device */
 
   (void)localhost_initialize();
+#endif
+
+#ifdef CONFIG_NET_TUN
+  /* Initialize the TUN device */
+
+  (void)tun_initialize();
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_SIM_SPIFLASH)
