@@ -54,6 +54,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/spi/qspi.h>
 
 #include "up_internal.h"
@@ -126,6 +127,16 @@
 /* QSPI memory synchronization */
 
 #define MEMORY_SYNC()     do { ARM_DSB();ARM_ISB(); } while (0)
+
+/* The SAMV7x QSPI driver insists that transfers be performed in multiples
+ * of 32-bits.
+ */
+
+#define ALIGN_SHIFT       2
+#define ALIGN_MASK        3
+#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
+#define ALIGN_WORDS(n)    (((n)+ALIGN_MASK) >> ALIGN_SHIFT)
+#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug *******************************************************************/
 /* Check if QSPI debug is enabled (non-standard.. no support in
@@ -268,6 +279,8 @@ static int      qspi_memory_dma(struct sam_qspidev_s *priv,
 
 static int      qspi_memory_nodma(struct sam_qspidev_s *priv,
                   struct qspi_meminfo_s *meminfo);
+static void     qspi_memcpy(uint32_t *dest, const uint32_t *src,
+                  size_t wordlen);
 
 /* Interrupts */
 
@@ -288,6 +301,8 @@ static int      qspi_command(struct qspi_dev_s *dev,
                   struct qspi_cmdinfo_s *cmdinfo);
 static int      qspi_memory(struct qspi_dev_s *dev,
                   struct qspi_meminfo_s *meminfo);
+static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen);
+static void     qspi_free(FAR struct qspi_dev_s *dev, FAR void *buffer);
 
 /* Initialization */
 
@@ -308,6 +323,8 @@ static const struct qspi_ops_s g_qspi0ops =
   .setbits           = qspi_setbits,
   .command           = qspi_command,
   .memory            = qspi_memory,
+  .alloc             = qspi_alloc,
+  .free              = qspi_free,
 };
 
 /* This is the overall state of the QSPI0 controller */
@@ -971,6 +988,11 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                              struct qspi_meminfo_s *meminfo)
 {
  uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
+ uint16_t wordlen;
+
+  /* Get the length as an even multiple of 32-bit words. */
+
+  wordlen = ALIGN_WORDS(meminfo->buflen);
 
   /* Enable the memory transfer */
 
@@ -980,11 +1002,13 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      memcpy((void *)qspimem, meminfo->buffer, meminfo->buflen);
+      qspi_memcpy((uint32_t *)qspimem,
+                  (const uint32_t *)meminfo->buffer, wordlen);
     }
   else
     {
-      memcpy(meminfo->buffer, (void *)qspimem, meminfo->buflen);
+      qspi_memcpy((uint32_t *)meminfo->buffer,
+                  (const uint32_t *)qspimem, wordlen);
     }
 
   MEMORY_SYNC();
@@ -1005,6 +1029,30 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
 
   while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
   return OK;
+}
+
+/****************************************************************************
+ * Name: qspi_memcpy
+ *
+ * Description:
+ *   32-bit version of memcpy.
+ *
+ * Input Parameters:
+ *   dest    - Destination address of the copy
+ *   src     - Source address of the copy
+ *   wordlen - The number of 32-bit words to copy.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void qspi_memcpy(uint32_t *dest, const uint32_t *src, size_t wordlen)
+{
+  for (; wordlen > 0; wordlen--)
+    {
+      *dest++ = *src++;
+    }
 }
 
 /****************************************************************************
@@ -1373,16 +1421,14 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      uint16_t buflen;
+      uint16_t wordlen;
 
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
+      DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
 
-      /* Make sure that the length is an even multiple of 32-bit words.
-       * REVISIT: This could cause access past the end of an allocated
-       * buffer.
-       */
+      /* Get the length as an even multiple of 32-bit words. */
 
-      buflen = (cmdinfo->buflen + 3) & ~3;
+      wordlen = ALIGN_WORDS(cmdinfo->buflen);
 
       /* Write Instruction Frame Register:
        *
@@ -1411,7 +1457,8 @@ static int qspi_command(struct qspi_dev_s *dev,
 
           /* Copy the data to write to QSPI_RAM */
 
-          memcpy((void *)SAM_QSPIMEM_BASE, cmdinfo->buffer, buflen);
+          qspi_memcpy((uint32_t *)SAM_QSPIMEM_BASE,
+                      (const uint32_t *)cmdinfo->buffer, wordlen);
         }
       else
         {
@@ -1421,7 +1468,9 @@ static int qspi_command(struct qspi_dev_s *dev,
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
 
           /* Copy the data from QSPI memory into the user buffer */
-          memcpy(cmdinfo->buffer, (const void *)SAM_QSPIMEM_BASE, buflen);
+
+          qspi_memcpy((uint32_t *)cmdinfo->buffer,
+                      (const uint32_t *)SAM_QSPIMEM_BASE, wordlen);
         }
 
       MEMORY_SYNC();
@@ -1503,6 +1552,55 @@ static int qspi_memory(struct qspi_dev_s *dev,
 #endif
     {
       return qspi_memory_nodma(priv, meminfo);
+    }
+}
+
+/****************************************************************************
+ * Name: QSPI_ALLOC
+ *
+ * Description:
+ *   Allocate a buffer suitable for DMA data transfer
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buflen - Buffer length to allocate in bytes
+ *
+ * Returned Value:
+ *   Address of tha allocated memory on success; NULL is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen)
+{
+  /* Here we exploit the internal knowlege the kmm_malloc() will return memory
+   * aligned to 64-bit addresses.  The buffer length must be large enough to
+   * hold the rested buflen in units a 32-bits.
+   */
+
+  return kmm_malloc(ALIGN_UP(buflen));
+}
+
+/****************************************************************************
+ * Name: QSPI_FREE
+ *
+ * Description:
+ *   Free memory returned by QSPI_ALLOC
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - Buffer previously allocated via QSPI_ALLOC
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void qspi_free(FAR struct qspi_dev_s *dev, FAR void *buffer)
+{
+  if (buffer)
+    {
+      kmm_free(buffer);
     }
 }
 
