@@ -279,8 +279,8 @@ static int      qspi_memory_dma(struct sam_qspidev_s *priv,
 
 static int      qspi_memory_nodma(struct sam_qspidev_s *priv,
                   struct qspi_meminfo_s *meminfo);
-static void     qspi_memcpy(uint32_t *dest, const uint32_t *src,
-                  size_t wordlen);
+static void     qspi_memcpy(uint8_t *dest, const uint8_t *src,
+                  size_t buflen);
 
 /* Interrupts */
 
@@ -988,11 +988,11 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                              struct qspi_meminfo_s *meminfo)
 {
  uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
- uint16_t wordlen;
+ size_t buflen;
 
   /* Get the length as an even multiple of 32-bit words. */
 
-  wordlen = ALIGN_WORDS(meminfo->buflen);
+  buflen = ALIGN_UP(meminfo->buflen);
 
   /* Enable the memory transfer */
 
@@ -1002,13 +1002,13 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      qspi_memcpy((uint32_t *)qspimem,
-                  (const uint32_t *)meminfo->buffer, wordlen);
+      qspi_memcpy((uint8_t *)qspimem,
+                  (const uint8_t *)meminfo->buffer, buflen);
     }
   else
     {
-      qspi_memcpy((uint32_t *)meminfo->buffer,
-                  (const uint32_t *)qspimem, wordlen);
+      qspi_memcpy((uint8_t *)meminfo->buffer,
+                  (const uint8_t *)qspimem, buflen);
     }
 
   MEMORY_SYNC();
@@ -1038,18 +1038,22 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
  *   32-bit version of memcpy.
  *
  * Input Parameters:
- *   dest    - Destination address of the copy
- *   src     - Source address of the copy
- *   wordlen - The number of 32-bit words to copy.
+ *   dest   - Destination address of the copy
+ *   src    - Source address of the copy
+ *   buflen - The number of 32-bit words to copy.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void qspi_memcpy(uint32_t *dest, const uint32_t *src, size_t wordlen)
+static void qspi_memcpy(uint8_t *dest, const uint8_t *src, size_t buflen)
 {
-  for (; wordlen > 0; wordlen--)
+  /* The size of the SPI transfer is equal to the bus access width.
+   * 8-bit transfers should result in in 8-bit SPI accesses.
+   */
+
+  for (; buflen > 0; buflen--)
     {
       *dest++ = *src++;
     }
@@ -1391,7 +1395,16 @@ static int qspi_command(struct qspi_dev_s *dev,
     {
       DEBUGASSERT(cmdinfo->addrlen == 3 || cmdinfo->addrlen == 4);
 
-      qspi_putreg(priv, cmdinfo->addr, SAM_QSPI_IFR_OFFSET);
+      /* Set the addressin the IAR.  This is required only if the
+       * instruction frame includes an address, but no data.  When data is
+       * preset, the address of the instruction is determined by the address
+       * of QSPI memory accesses, and not by the content of the IAR.
+       */
+
+      qspi_putreg(priv, cmdinfo->addr, SAM_QSPI_IAR_OFFSET);
+
+      /* Set/clear the address enable bit and the address size in the IFR */
+
       ifr |= QSPI_IFR_ADDREN;
 
       if (cmdinfo->addrlen == 3)
@@ -1421,14 +1434,14 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      uint16_t wordlen;
+      uint16_t buflen;
 
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
       DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
 
       /* Get the length as an even multiple of 32-bit words. */
 
-      wordlen = ALIGN_WORDS(cmdinfo->buflen);
+      buflen = ALIGN_UP(cmdinfo->buflen);
 
       /* Write Instruction Frame Register:
        *
@@ -1450,27 +1463,43 @@ static int qspi_command(struct qspi_dev_s *dev,
 
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
+          /* Set write data operation */
+
           ifr |= QSPI_IFR_TFRTYP_WRITE;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
+
+          /* Write the IFR to the hardware.  If the instructrion frame
+           * includes data, writing to the IFR does not trigger the
+           * instruction frame transfer.  Rather, the instruction frame
+           * is triggered by the first access to QSPI memory.
+           */
 
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
 
           /* Copy the data to write to QSPI_RAM */
 
-          qspi_memcpy((uint32_t *)SAM_QSPIMEM_BASE,
-                      (const uint32_t *)cmdinfo->buffer, wordlen);
+          qspi_memcpy((uint8_t *)SAM_QSPIMEM_BASE,
+                      (const uint8_t *)cmdinfo->buffer, buflen);
         }
       else
         {
+          /* Set read data operation */
+
           ifr |= QSPI_IFR_TFRTYP_READ;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
+
+          /* Write the IFR to the hardware.  If the instructrion frame
+           * includes data, writing to the IFR does not trigger the
+           * instruction frame transfer.  Rather, the instruction frame
+           * is triggered by the first access to QSPI memory.
+           */
 
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
 
           /* Copy the data from QSPI memory into the user buffer */
 
-          qspi_memcpy((uint32_t *)cmdinfo->buffer,
-                      (const uint32_t *)SAM_QSPIMEM_BASE, wordlen);
+          qspi_memcpy((uint8_t *)cmdinfo->buffer,
+                      (const uint8_t *)SAM_QSPIMEM_BASE, buflen);
         }
 
       MEMORY_SYNC();
@@ -1501,13 +1530,16 @@ static int qspi_command(struct qspi_dev_s *dev,
        *   QSPI_IFR_NBDUM(0)      No dummy cycles
        */
 
-      ifr = QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_TFRTYP_READ |
-            QSPI_IFR_NBDUM(0);
+      ifr |= QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_TFRTYP_READ |
+             QSPI_IFR_NBDUM(0);
       qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
       MEMORY_SYNC();
 
-      /* Fall through to INSTRE wait */
+      /* If the insruction frame does not include data, writing to the IFR
+       * tiggers sending of the instruction frame. Fall through to INSTRE
+       * wait.
+       */
     }
 
   /* When the command has been sent, Instruction End Status (INTRE) will be
