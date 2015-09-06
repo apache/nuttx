@@ -1,6 +1,6 @@
 /****************************************************************************
  * drivers/lcd/ssd1351.c
- * LCD driver for the Solomon Systech SSD1351 LCD controller
+ * LCD driver for the Solomon Systech SSD1351 OLED controller
  *
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -61,6 +61,7 @@
 /* Configuration ************************************************************/
 
 /* SSD1351 configuration settings:
+ * CONFIG_SSD1351_PARALLEL8BIT - 8-bit parallel interface
  * CONFIG_SSD1351_SPI3WIRE     - 3-wire SPI interface
  * CONFIG_SSD1351_SPI4WIRE     - 4-wire SPI interface
  * CONFIG_SSD1351_SPIMODE      - SPI mode
@@ -106,28 +107,6 @@
 
 /* Verify that all configuration requirements have been met */
 
-/* Interface to use */
-
-#if !defined(CONFIG_SSD1351_SPI3WIRE) && !defined(CONFIG_SSD1351_SPI4WIRE)
-#  error "Choose an interface to use"
-#endif
-
-#if defined(CONFIG_SSD1351_SPI3WIRE) && defined(CONFIG_SSD1351_SPI4WIRE)
-#  error "Cannot choose more than one interface"
-#endif
-
-/* SPI */
-
-#ifndef CONFIG_SPI
-#  error "Requires support for SPI"
-#endif
-
-/* Cmd/data selection */
-
-#if defined(CONFIG_SSD1351_SPI4WIRE) && !defined(CONFIG_SPI_CMDDATA)
-#  error "4-wire SPI interface requires support for SPI_CMDDATA"
-#endif
-
 /* Number of bits per pixel */
 
 #ifdef CONFIG_NX_DISABLE_16BPP
@@ -136,120 +115,8 @@
 
 /* Max power */
 
-#ifndef CONFIG_LCD_MAXPOWER
-#  define CONFIG_LCD_MAXPOWER 1
-#endif
-
 #if CONFIG_LCD_MAXPOWER != 1
 #  error "CONFIG_LCD_MAXPOWER should be 1"
-#endif
-
-/* SPI mode */
-
-#ifndef CONFIG_SSD1351_SPIMODE
-#  define CONFIG_SSD1351_SPIMODE SPIDEV_MODE0
-#endif
-
-/* SPI frequency */
-
-#ifndef CONFIG_SSD1351_SPIFREQ
-#  define CONFIG_SSD1351_SPIFREQ 1000000
-#endif
-
-/* The number of physical interfaces that will be supported */
-
-#ifndef CONFIG_SSD1351_NINTERFACES
-#  define CONFIG_SSD1351_NINTERFACES 1
-#endif
-
-#if CONFIG_SSD1351_NINTERFACES != 1
-#  error "This implementation supports only a single LCD device"
-#endif
-
-/* X resolution */
-
-#ifndef CONFIG_SSD1351_XRES
-#  define CONFIG_SSD1351_XRES 128
-#endif
-
-#if CONFIG_SSD1351_XRES < 0 || CONFIG_SSD1351_XRES > 128
-#  error "Invalid X resolution"
-#endif
-
-/* Y resolution */
-
-#ifndef CONFIG_SSD1351_YRES
-#  define CONFIG_SSD1351_YRES 128
-#endif
-
-#if CONFIG_SSD1351_YRES < 0 || CONFIG_SSD1351_YRES > 128
-#  error "Invalid Y resolution"
-#endif
-
-/* Reset period */
-
-#ifndef CONFIG_SSD1351_TRST
-#  define CONFIG_SSD1351_TRST 5
-#endif
-
-/* First pre-charge period */
-
-#ifndef CONFIG_SSD1351_TPRECHG1
-#  define CONFIG_SSD1351_TPRECHG1 8
-#endif
-
-/* Clock divider */
-
-#ifndef CONFIG_SSD1351_CLKDIV
-#  define CONFIG_SSD1351_CLKDIV 0
-#endif
-
-/* Oscillator frequency */
-
-#ifndef CONFIG_SSD1351_OSCFREQ
-#  define CONFIG_SSD1351_OSCFREQ 15
-#endif
-
-/* Second pre-charge period */
-
-#ifndef CONFIG_SSD1351_TPRECHG2
-#  define CONFIG_SSD1351_TPRECHG2 8
-#endif
-
-/* Pre-charge voltage level */
-
-#ifndef CONFIG_SSD1351_VPRECHG
-#  define CONFIG_SSD1351_VPRECHG 50
-#endif
-
-/* COM deselect voltage level */
-
-#ifndef CONFIG_SSD1351_VCOMH
-#  define CONFIG_SSD1351_VCOMH 82
-#endif
-
-/* Color A contrast */
-
-#ifndef CONFIG_SSD1351_CONTRASTA
-#  define CONFIG_SSD1351_CONTRASTA 138
-#endif
-
-/* Color B contrast */
-
-#ifndef CONFIG_SSD1351_CONTRASTB
-#  define CONFIG_SSD1351_CONTRASTB 81
-#endif
-
-/* Color C contrast */
-
-#ifndef CONFIG_SSD1351_CONTRASTC
-#  define CONFIG_SSD1351_CONTRASTC 138
-#endif
-
-/* Master contrast ratio */
-
-#ifndef CONFIG_SSD1351_MSTRCONTRAST
-#  define CONFIG_SSD1351_MSTRCONTRAST 16
 #endif
 
 /* 9-bit SPI */
@@ -257,6 +124,9 @@
 #ifdef CONFIG_SSD1351_SPI3WIRE
 #  define SSD1351_SPICMD  0
 #  define SSD1351_SPIDATA (1 << 8)
+#  define SSD1351_SPIBITS 9
+#else
+#  define SSD1351_SPIBITS 8
 #endif
 
 /* Macro Helpers ************************************************************/
@@ -503,12 +373,16 @@ struct ssd1351_dev_s
 {
   /* Publically visible device structure */
 
-  struct lcd_dev_s      dev;
+  struct lcd_dev_s          dev;
 
   /* Private LCD-specific information follows */
 
-  FAR struct spi_dev_s *spi;   /* Contained SPI driver instance */
-  uint8_t               power; /* Current power (backlight) setting */
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+  FAR struct ssd1351_lcd_s *lcd;   /* Contained platform-specific interface */
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
+  FAR struct spi_dev_s     *spi;   /* Contained SPI driver instance */
+#endif
+  uint8_t                   power; /* Current power (backlight) setting */
 
   /* This is working memory allocated by the LCD driver for each LCD device
    * and for each color plane.  This memory will hold one raster line of
@@ -522,7 +396,7 @@ struct ssd1351_dev_s
    * buffers.
    */
 
-  uint16_t              runbuffer[SSD1351_XRES];
+  uint16_t                  runbuffer[SSD1351_XRES];
 
   /* This is another buffer, but used internally by the LCD driver in order
    * to expand the pixel data into 9-bit data needed by the LCD.  There are
@@ -533,7 +407,7 @@ struct ssd1351_dev_s
    */
 
 #ifdef CONFIG_SSD1351_SPI3WIRE
-  uint16_t              rowbuffer[SSD1351_STRIDE+1];
+  uint16_t                  rowbuffer[SSD1351_STRIDE+1];
 #endif
 };
 
@@ -541,18 +415,22 @@ struct ssd1351_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* SPI Helpers */
+/* Helpers */
 
-static inline void ssd1351_configspi(FAR struct spi_dev_s *spi);
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ssd1351_select(FAR struct spi_dev_s *spi);
-static inline void ssd1351_deselect(FAR struct spi_dev_s *spi);
-#else
-static void ssd1351_select(FAR struct spi_dev_s *spi);
-static void ssd1351_deselect(FAR struct spi_dev_s *spi);
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+#define ssd1351_select(priv)
+#define ssd1351_deselect(priv)
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
+static void ssd1351_select(FAR struct ssd1351_dev_s *priv);
+static void ssd1351_deselect(FAR struct ssd1351_dev_s *priv);
 #endif
-static void ssd1351_cmddata(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
-                            FAR const uint8_t *data, size_t datlen);
+
+#if defined(CONFIG_SSD1351_PARALLEL8BIT) && !defined(CONFIG_LCD_NOGETRUN)
+static void ssd1351_read(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
+                         FAR uint8_t *data, size_t datlen);
+#endif
+static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
+                          FAR const uint8_t *data, size_t datlen);
 
 /* LCD Data Transfer Methods */
 
@@ -605,25 +483,6 @@ static struct ssd1351_dev_s g_lcddev;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ssd1351_configspi
- *
- * Description:
- *   Configure the SPI.
- *
- ****************************************************************************/
-
-static inline void ssd1351_configspi(FAR struct spi_dev_s *spi)
-{
-  SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
-#ifdef CONFIG_SSD1351_SPI3WIRE
-  SPI_SETBITS(spi, 9);
-#else
-  SPI_SETBITS(spi, 8);
-#endif
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
-}
-
-/****************************************************************************
  * Name: ssd1351_select
  *
  * Description:
@@ -631,17 +490,11 @@ static inline void ssd1351_configspi(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ssd1351_select(FAR struct spi_dev_s *spi)
+#if defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
+static void ssd1351_select(FAR struct ssd1351_dev_s *priv)
 {
-  /* We own the SPI bus, so just select the chip */
+  FAR struct spi_dev_s *spi = priv->spi;
 
-  gdbg("SELECTED\n");
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-}
-#else
-static void ssd1351_select(FAR struct spi_dev_s *spi)
-{
   /* Select the chip, locking the SPI bus in case there are multiple devices
    * competing for the SPI bus
    */
@@ -654,7 +507,11 @@ static void ssd1351_select(FAR struct spi_dev_s *spi)
    * have gotten configured for a different device while unlocked)
    */
 
-  ssd1351_configspi(spi);
+#ifndef CONFIG_SPI_OWNBUS
+  SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
+  SPI_SETBITS(spi, SSD1351_SPIBITS);
+  SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
+#endif
 }
 #endif
 
@@ -666,17 +523,11 @@ static void ssd1351_select(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ssd1351_deselect(FAR struct spi_dev_s *spi)
+#if defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
+static void ssd1351_deselect(FAR struct ssd1351_dev_s *priv)
 {
-  /* We own the SPI bus, so just de-select the chip */
+  FAR struct spi_dev_s *spi = priv->spi;
 
-  gdbg("DE-SELECTED\n");
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
-static void ssd1351_deselect(FAR struct spi_dev_s *spi)
-{
   /* De-select the chip and relinquish the SPI bus */
 
   gdbg("DE-SELECTED\n");
@@ -686,16 +537,79 @@ static void ssd1351_deselect(FAR struct spi_dev_s *spi)
 #endif
 
 /****************************************************************************
- * Name: ssd1351_cmddata
+ * Name: ssd1351_read
+ *
+ * Description:
+ *   Send a 1-byte command and read datlen data bytes.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SSD1351_PARALLEL8BIT) && !defined(CONFIG_LCD_NOGETRUN)
+static void ssd1351_read(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
+                         FAR uint8_t *data, size_t datlen)
+{
+  FAR struct ssd1351_lcd_s *lcd = priv->lcd;
+  size_t i;
+
+  /* Sanity check */
+
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT((data == NULL && datlen == 0) || (data != NULL && datlen > 0));
+
+  /* Send the command */
+
+  lcd->cmd(lcd, cmd);
+
+  /* Discard the first data read if reading from the display */
+
+  if (cmd == SSD1351_CMD_RAMREAD)
+    {
+      (void)lcd->read(lcd);
+    }
+
+  /* Read all of the data */
+
+  for (i = 0; i < datlen; i++)
+    {
+      data[i] = lcd->read(lcd);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: ssd1351_write
  *
  * Description:
  *   Send a 1-byte command followed by datlen data bytes.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SSD1351_SPI3WIRE
-static void ssd1351_cmddata(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
-                            FAR const uint8_t *data, size_t datlen)
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
+                          FAR const uint8_t *data, size_t datlen)
+{
+  FAR struct ssd1351_lcd_s *lcd = priv->lcd;
+  size_t i;
+
+  /* Sanity check */
+
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT((data == NULL && datlen == 0) || (data != NULL && datlen > 0));
+
+  /* Send the command */
+
+  lcd->cmd(lcd, cmd);
+
+  /* Write all of the data */
+
+  for (i = 0; i < datlen; i++)
+    {
+      lcd->write(lcd, data[i]);
+    }
+}
+#elif defined(CONFIG_SSD1351_SPI3WIRE)
+static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
+                          FAR const uint8_t *data, size_t datlen)
 {
   size_t i;
 
@@ -720,10 +634,12 @@ static void ssd1351_cmddata(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
 
   (void)SPI_SNDBLOCK(priv->spi, priv->rowbuffer, datlen+1);
 }
-#else
-static void ssd1351_cmddata(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
-                            FAR const uint8_t *data, size_t datlen)
+#elif defined(CONFIG_SSD1351_SPI4WIRE)
+static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
+                          FAR const uint8_t *data, size_t datlen)
 {
+  FAR struct spi_dev_s *spi = priv->spi;
+
   /* Sanity check */
 
   DEBUGASSERT(priv != NULL);
@@ -731,11 +647,11 @@ static void ssd1351_cmddata(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
 
   /* Select command transfer */
 
-  (void)SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
 
   /* Send the command */
 
-  (void)SPI_SEND(priv->spi, cmd);
+  (void)SPI_SEND(spi, cmd);
 
   /* Do we have any data to send? */
 
@@ -743,11 +659,11 @@ static void ssd1351_cmddata(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
     {
       /* Yes, select data transfer */
 
-      (void)SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+      (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY, false);
 
       /* Transfer all of the data */
 
-      (void)SPI_SNDBLOCK(priv->spi, data, datlen);
+      (void)SPI_SNDBLOCK(spi, data, datlen);
     }
 }
 #endif
@@ -770,25 +686,25 @@ static void ssd1351_setcursor(FAR struct ssd1351_dev_s *priv, uint8_t col,
 
   buf[0] = col;
   buf[1] = SSD1351_XRES - 1;
-  ssd1351_cmddata(priv, SSD1351_CMD_COLADDR, buf, 2);
+  ssd1351_write(priv, SSD1351_CMD_COLADDR, buf, 2);
 
   /* Set the row address to the row */
 
   buf[0] = row;
   buf[1] = SSD1351_YRES - 1;
-  ssd1351_cmddata(priv, SSD1351_CMD_ROWADDR, buf, 2);
-#else
+  ssd1351_write(priv, SSD1351_CMD_ROWADDR, buf, 2);
+#elif defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
   /* Set the column address to the row */
 
   buf[0] = row;
   buf[1] = SSD1351_YRES - 1;
-  ssd1351_cmddata(priv, SSD1351_CMD_COLADDR, buf, 2);
+  ssd1351_write(priv, SSD1351_CMD_COLADDR, buf, 2);
 
   /* Set the row address to the column */
 
   buf[0] = col;
   buf[1] = SSD1351_XRES - 1;
-  ssd1351_cmddata(priv, SSD1351_CMD_ROWADDR, buf, 2);
+  ssd1351_write(priv, SSD1351_CMD_ROWADDR, buf, 2);
 #endif
 }
 
@@ -820,20 +736,20 @@ static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
 
   /* Select and lock the device */
 
-  ssd1351_select(priv->spi);
+  ssd1351_select(priv);
 
   /* Set the starting position for the run */
 
   ssd1351_setcursor(priv, col, row);
 
-  /* Transfer all of the data */
+  /* Write all of the data */
 
-  ssd1351_cmddata(priv, SSD1351_CMD_RAMWRITE, buffer,
-                  SSD1351_PIX2BYTES(npixels));
+  ssd1351_write(priv, SSD1351_CMD_RAMWRITE, buffer,
+                SSD1351_PIX2BYTES(npixels));
 
   /* Unlock and de-select the device */
 
-  ssd1351_deselect(priv->spi);
+  ssd1351_deselect(priv);
 
   return OK;
 }
@@ -856,7 +772,36 @@ static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
 static int ssd1351_getrun(fb_coord_t row, fb_coord_t col,
                           FAR uint8_t *buffer, size_t npixels)
 {
+#if defined(CONFIG_SSD1351_PARALLEL8BIT) && !defined(CONFIG_LCD_NOGETRUN)
+  FAR struct ssd1351_dev_s *priv = &g_lcddev;
+
+  /* Sanity check */
+
+  DEBUGASSERT(buffer != NULL && ((uintptr_t)buffer & 1) == 0 &&
+              col >= 0 && col+npixels <= SSD1351_XRES &&
+              row >= 0 && row < SSD1351_YRES);
+
+  /* Select and lock the device */
+
+  ssd1351_select(priv);
+
+  /* Set the starting position for the run */
+
+  ssd1351_setcursor(priv, col, row);
+
+  /* Read all of the data */
+
+  ssd1351_read(priv, SSD1351_CMD_RAMREAD, buffer,
+               SSD1351_PIX2BYTES(npixels));
+
+  /* Unlock and de-select the device */
+
+  ssd1351_deselect(priv);
+
+  return OK;
+#else
   return -ENOSYS;
+#endif
 }
 
 /****************************************************************************
@@ -945,31 +890,31 @@ static int ssd1351_setpower(FAR struct lcd_dev_s *dev, int power)
 
   /* Sanity check */
 
-  DEBUGASSERT(priv != NULL && (unsigned int)power <= CONFIG_LCD_MAXPOWER);
+  DEBUGASSERT(priv != NULL && (unsigned int)power <= LCD_FULL_ON);
   gvdbg("power: %d\n", power);
   
   /* Select and lock the device */
   
-  ssd1351_select(priv->spi);
+  ssd1351_select(priv);
 
-  if (power > 0)
+  if (power > LCD_FULL_OFF)
     {
       /* Turn the display on */
 
-      ssd1351_cmddata(priv, SSD1351_CMD_DISPON, NULL, 0);
-      priv->power = CONFIG_LCD_MAXPOWER;
+      ssd1351_write(priv, SSD1351_CMD_DISPON, NULL, 0);
+      priv->power = LCD_FULL_ON;
     }
   else
     {
       /* Turn the display off */
 
-      ssd1351_cmddata(priv, SSD1351_CMD_DISPOFF, NULL, 0);
-      priv->power = 0;
+      ssd1351_write(priv, SSD1351_CMD_DISPOFF, NULL, 0);
+      priv->power = LCD_FULL_OFF;
     }
 
   /* Unlock and de-select the device */
 
-  ssd1351_deselect(priv->spi);
+  ssd1351_deselect(priv);
 
   return OK;
 }
@@ -1016,21 +961,21 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
 
   /* Select and lock the device */
 
-  ssd1351_select(priv->spi);
+  ssd1351_select(priv);
 
   /* Unlock most commands */
 
   buf[0] = SSD1351_UNLOCK;
-  ssd1351_cmddata(priv, SSD1351_CMD_LOCK, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_LOCK, buf, 1);
 
   /* Unlock the rest of the commands */
 
   buf[0] = SSD1351_ACCESSIBLE;
-  ssd1351_cmddata(priv, SSD1351_CMD_LOCK, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_LOCK, buf, 1);
 
   /* Turn the display off */
 
-  ssd1351_cmddata(priv, SSD1351_CMD_DISPOFF, NULL, 0);
+  ssd1351_write(priv, SSD1351_CMD_DISPOFF, NULL, 0);
 
   /* Set the address increment, the column address mapping, the color
    * sequence, the scan direction, the COM split, and the color depth
@@ -1058,7 +1003,7 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
 #else
   buf[0] |= SSD1351_SCANFROMCOM0;
 #endif
-  ssd1351_cmddata(priv, SSD1351_CMD_ORIENTATION, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_ORIENTATION, buf, 1);
 
   /* Set the vertical scroll by RAM */
 
@@ -1070,19 +1015,19 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
 #else
   buf[0] = SSD1351_STARTLINE(0);
 #endif
-  ssd1351_cmddata(priv, SSD1351_CMD_STARTLINE, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_STARTLINE, buf, 1);
 
   /* Set the vertical scroll by row */
 
   buf[0] = SSD1351_OFFSET(0);
-  ssd1351_cmddata(priv, SSD1351_CMD_OFFSET, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_OFFSET, buf, 1);
 
   /* Set the display to normal or inverse */
 
 #ifdef CONFIG_SSD1351_INVERT
-  ssd1351_cmddata(priv, SSD1351_CMD_INVERSE, NULL, 0);
+  ssd1351_write(priv, SSD1351_CMD_INVERSE, NULL, 0);
 #else
-  ssd1351_cmddata(priv, SSD1351_CMD_NORMAL, NULL, 0);
+  ssd1351_write(priv, SSD1351_CMD_NORMAL, NULL, 0);
 #endif
 
   /* Set the VDD and the interface */
@@ -1093,13 +1038,13 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
   buf[0] = SSD1351_VDDINT;
 #endif
   buf[0] |= SSD1351_IFACE8BIT;
-  ssd1351_cmddata(priv, SSD1351_CMD_VDDIFACE, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_VDDIFACE, buf, 1);
 
   /* Set the reset period and the first pre-charge period */
 
   buf[0] = SSD1351_TRST(CONFIG_SSD1351_TRST) |
            SSD1351_TPRECHG1(CONFIG_SSD1351_TPRECHG1);
-  ssd1351_cmddata(priv, SSD1351_CMD_TRSTTPRECHG1, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_TRSTTPRECHG1, buf, 1);
 
   /* Set the display performance */
 
@@ -1110,66 +1055,66 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
 #endif
   buf[1] = SSD1351_PERFDATA2;
   buf[2] = SSD1351_PERFDATA3;
-  ssd1351_cmddata(priv, SSD1351_CMD_PERF, buf, 3);
+  ssd1351_write(priv, SSD1351_CMD_PERF, buf, 3);
 
   /* Set the clock divider and the oscillator frequency */
 
   buf[0] = SSD1351_CLKDIV(CONFIG_SSD1351_CLKDIV) |
            SSD1351_OSCFREQ(CONFIG_SSD1351_OSCFREQ);
-  ssd1351_cmddata(priv, SSD1351_CMD_DIVFREQ, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_DIVFREQ, buf, 1);
 
   /* Set the segment low voltage */
 
   buf[0] = SSD1351_VSLEXT;
   buf[1] = SSD1351_VSLDATA2;
   buf[2] = SSD1351_VSLDATA3;
-  ssd1351_cmddata(priv, SSD1351_CMD_VSL, buf, 3);
+  ssd1351_write(priv, SSD1351_CMD_VSL, buf, 3);
 
   /* Set the GPIO pins */
 
   buf[0] = SSD1351_GPIO0(SSD1351_GPIOLOW) | SSD1351_GPIO1(SSD1351_GPIOLOW);
-  ssd1351_cmddata(priv, SSD1351_CMD_GPIO, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_GPIO, buf, 1);
 
   /* Set the second pre-charge period */
 
   buf[0] = SSD1351_TPRECHG2(CONFIG_SSD1351_TPRECHG2);
-  ssd1351_cmddata(priv, SSD1351_CMD_TPRECHG2, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_TPRECHG2, buf, 1);
 
   /* Use the built-in linear lookup table */
 
-  ssd1351_cmddata(priv, SSD1351_CMD_LINEARLUT, NULL, 0);
+  ssd1351_write(priv, SSD1351_CMD_LINEARLUT, NULL, 0);
 
   /* Set the pre-charge voltage level */
 
   buf[0] = SSD1351_VPRECHG(CONFIG_SSD1351_VPRECHG);
-  ssd1351_cmddata(priv, SSD1351_CMD_VPRECHG, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_VPRECHG, buf, 1);
 
   /* Set the COM deselect voltage level */
 
   buf[0] = SSD1351_VCOMH(CONFIG_SSD1351_VCOMH);
-  ssd1351_cmddata(priv, SSD1351_CMD_VCOMH, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_VCOMH, buf, 1);
 
   /* Set the contrast */
 
   buf[0] = SSD1351_CONTRAST(CONFIG_SSD1351_CONTRASTA);
   buf[1] = SSD1351_CONTRAST(CONFIG_SSD1351_CONTRASTB);
   buf[2] = SSD1351_CONTRAST(CONFIG_SSD1351_CONTRASTC);
-  ssd1351_cmddata(priv, SSD1351_CMD_CONTRAST, buf, 3);
+  ssd1351_write(priv, SSD1351_CMD_CONTRAST, buf, 3);
 
   /* Set the master contrast ratio */
 
   buf[0] = SSD1351_MSTRCONTRAST(CONFIG_SSD1351_MSTRCONTRAST);
-  ssd1351_cmddata(priv, SSD1351_CMD_MSTRCONTRAST, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_MSTRCONTRAST, buf, 1);
 
   /* Set the multiplex ratio */
 
   buf[0] = SSD1351_MUXRATIO(128);
-  ssd1351_cmddata(priv, SSD1351_CMD_MUXRATIO, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_MUXRATIO, buf, 1);
 
   /* Lock some of the commands */
 
   buf[0] = SSD1351_INACCESSIBLE;
-  ssd1351_cmddata(priv, SSD1351_CMD_LOCK, buf, 1);
+  ssd1351_write(priv, SSD1351_CMD_LOCK, buf, 1);
 
   /* Set the cursor position */
 
@@ -1181,12 +1126,12 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
   buf[1] = 0;
   for (i = 0; i < SSD1351_XRES * SSD1351_YRES; i++)
     {
-      ssd1351_cmddata(priv, SSD1351_CMD_RAMWRITE, buf, 2);
+      ssd1351_write(priv, SSD1351_CMD_RAMWRITE, buf, 2);
     }
 
   /* Unlock and de-select the device */
 
-  ssd1351_deselect(priv->spi);
+  ssd1351_deselect(priv);
 }
 
 /****************************************************************************
@@ -1198,6 +1143,7 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
  *   but with the power setting at 0 (full off == sleep mode).
  *
  * Input Parameters:
+ *   lcd   - A reference to the platform-specific interface.
  *   spi   - A reference to the SPI driver instance.
  *   devno - A value in the range of 0 through CONFIG_SSD1351_NINTERFACES-1.
  *           This allows support for multiple devices.
@@ -1208,16 +1154,24 @@ static inline void ssd1351_hwinitialize(FAR struct ssd1351_dev_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+FAR struct lcd_dev_s *ssd1351_initialize(FAR struct ssd1351_lcd_s *lcd,
+                                         unsigned int devno)
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
 FAR struct lcd_dev_s *ssd1351_initialize(FAR struct spi_dev_s *spi,
                                          unsigned int devno)
+#endif
 {
   FAR struct ssd1351_dev_s *priv = &g_lcddev;
-  size_t i;
-  uint16_t buf[SSD1351_XRES/2];
 
   /* Sanity check */
 
-  DEBUGASSERT(spi != NULL && devno == 0);
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+  DEBUGASSERT(lcd != NULL);
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
+  DEBUGASSERT(spi != NULL);
+#endif
+  DEBUGASSERT(devno == 0);
 
   /* Initialize the driver data structure */
 
@@ -1227,28 +1181,28 @@ FAR struct lcd_dev_s *ssd1351_initialize(FAR struct spi_dev_s *spi,
   priv->dev.setpower     = ssd1351_setpower;
   priv->dev.getcontrast  = ssd1351_getcontrast;
   priv->dev.setcontrast  = ssd1351_setcontrast;
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+  priv->lcd              = lcd;
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
   priv->spi              = spi;
-  priv->power            = 0;
+#endif
+  priv->power            = LCD_FULL_OFF;
 
   /* Configure the SPI bus if we own it.  Otherwise, don't bother because
    * it might change.
    */
 
+#if defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
 #ifdef CONFIG_SPI_OWNBUS
-  ssd1351_configspi(spi);
+  SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
+  SPI_SETBITS(spi, SSD1351_SPIBITS);
+  SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
+#endif
 #endif
 
   /* Configure the device */
 
   ssd1351_hwinitialize(priv);
-
-  ssd1351_setpower(&priv->dev, 1);
-
-  memset(buf, 0xff, sizeof(buf));
-  for (i = 0; i < SSD1351_YRES / 4; i++)
-    {
-      ssd1351_putrun(i, 0, (const uint8_t *)buf, SSD1351_XRES/2);
-    }
 
   return &priv->dev;
 }
