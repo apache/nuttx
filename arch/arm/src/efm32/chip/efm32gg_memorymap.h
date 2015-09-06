@@ -137,4 +137,7 @@
 #define EFM32_CALIBRATE_BASE    0x0fe08000 /* CALIBRATE base address */
 #define EFM32_DEVINFO_BASE      0x0fe081b0 /* DEVINFO base address */
 
+#define EFM32_USERDATA_SIZE     0x00000800 /* User data page size */
+#define EFM32_USERDATA_NPAGES            1 /* User data page number */
+
 #endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32GG_MEMORYMAP_H */
