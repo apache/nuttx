@@ -302,15 +302,6 @@
 #define CLR_DIRTY(p)               do { (p)->flags &= ~ST25FL1_CACHE_DIRTY; } while (0)
 #define CLR_ERASED(p)              do { (p)->flags &= ~ST25FL1_CACHE_DIRTY; } while (0)
 
-/* Misc. ****************************************************************************/
-/* The SAMV7x QSPI driver insists that transfers be performed in multiples of 32-
- * bits.  Other QSPI drivers could have other requirements but, so far, there seems
- * to be no harm in making this unconditional.
- */
-
-#define ALIGN_MASK                 3
-#define ALIGN_UP(n)                (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -322,16 +313,17 @@
 
 struct st25fl1_dev_s
 {
-  struct mtd_dev_s      mtd;         /* MTD interface */
-  FAR struct qspi_dev_s *qspi;       /* Saved QuadSPI interface instance */
-  uint16_t              nsectors;    /* Number of erase sectors */
-  uint8_t               sectorshift; /* Log2 of sector size */
-  uint8_t               pageshift;   /* Log2 of page size */
+  struct mtd_dev_s       mtd;         /* MTD interface */
+  FAR struct qspi_dev_s *qspi;        /* Saved QuadSPI interface instance */
+  uint16_t               nsectors;    /* Number of erase sectors */
+  uint8_t                sectorshift; /* Log2 of sector size */
+  uint8_t                pageshift;   /* Log2 of page size */
+  FAR uint8_t           *cmdbuf;      /* Allocated command buffer */
 
 #ifdef CONFIG_ST25FL1_SECTOR512
-  uint8_t               flags;       /* Buffered sector flags */
-  uint16_t              esectno;     /* Erase sector number in the cache*/
-  FAR uint8_t          *sector;      /* Allocated sector data */
+  uint8_t                flags;       /* Buffered sector flags */
+  uint16_t               esectno;     /* Erase sector number in the cache*/
+  FAR uint8_t           *sector;      /* Allocated sector data */
 #endif
 };
 
@@ -353,11 +345,11 @@ static int  st25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
               FAR void *buffer, size_t buflen);
 static int  st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
               FAR const void *buffer, size_t buflen);
-static uint8_t sf25fl1_read_status1(FAR struct qspi_dev_s *qspi);
-static uint8_t sf25fl1_read_status2(FAR struct qspi_dev_s *qspi);
-static uint8_t sf25fl1_read_status3(FAR struct qspi_dev_s *qspi);
-static void st25fl1_write_enable(FAR struct qspi_dev_s *qspi);
-static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi);
+static uint8_t sf25fl1_read_status1(FAR struct st25fl1_dev_s *priv);
+static uint8_t sf25fl1_read_status2(FAR struct st25fl1_dev_s *priv);
+static uint8_t sf25fl1_read_status3(FAR struct st25fl1_dev_s *priv);
+static void st25fl1_write_enable(FAR struct st25fl1_dev_s *priv);
+static void st25fl1_write_disable(FAR struct st25fl1_dev_s *priv);
 
 static int  st25fl1_readid(FAR struct st25fl1_dev_s *priv);
 static int  st25fl1_protect(FAR struct st25fl1_dev_s *priv,
@@ -523,53 +515,47 @@ static int st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
  * Name: sf25fl1_read_status1
  ************************************************************************************/
 
-static uint8_t sf25fl1_read_status1(FAR struct qspi_dev_s *qspi)
+static uint8_t sf25fl1_read_status1(FAR struct st25fl1_dev_s *priv)
 {
-  uint8_t status[ALIGN_UP(1)];
-
-  DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS1,
-                                   (FAR void *)&status[0], 1));
-  return status[0];
+  DEBUGVERIFY(st25fl1_command_read(priv->qspi, ST25FL1_READ_STATUS1,
+                                   (FAR void *)&priv->cmdbuf[0], 1));
+  return priv->cmdbuf[0];
 }
 
 /************************************************************************************
  * Name: sf25fl1_read_status2
  ************************************************************************************/
 
-static uint8_t sf25fl1_read_status2(FAR struct qspi_dev_s *qspi)
+static uint8_t sf25fl1_read_status2(FAR struct st25fl1_dev_s *priv)
 {
-  uint8_t status[ALIGN_UP(1)];
-
-  DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS2,
-                                   (FAR void *)&status[0], 1));
-  return status[0];
+  DEBUGVERIFY(st25fl1_command_read(priv->qspi, ST25FL1_READ_STATUS2,
+                                   (FAR void *)&priv->cmdbuf[0], 1));
+  return priv->cmdbuf[0];
 }
 
 /************************************************************************************
  * Name: sf25fl1_read_status3
  ************************************************************************************/
 
-static uint8_t sf25fl1_read_status3(FAR struct qspi_dev_s *qspi)
+static uint8_t sf25fl1_read_status3(FAR struct st25fl1_dev_s *priv)
 {
-  uint8_t status[ALIGN_UP(1)];
-
-  DEBUGVERIFY(st25fl1_command_read(qspi, ST25FL1_READ_STATUS3,
-                                   (FAR void *)&status[0], 1));
-  return status[0];
+  DEBUGVERIFY(st25fl1_command_read(priv->qspi, ST25FL1_READ_STATUS3,
+                                   (FAR void *)&priv->cmdbuf[0], 1));
+  return priv->cmdbuf[0];
 }
 
 /************************************************************************************
  * Name:  st25fl1_write_enable
  ************************************************************************************/
 
-static void st25fl1_write_enable(FAR struct qspi_dev_s *qspi)
+static void st25fl1_write_enable(FAR struct st25fl1_dev_s *priv)
 {
   uint8_t status;
 
   do
     {
-      st25fl1_command(qspi, ST25FL1_WRITE_ENABLE);
-      status = sf25fl1_read_status1(qspi);
+      st25fl1_command(priv->qspi, ST25FL1_WRITE_ENABLE);
+      status = sf25fl1_read_status1(priv);
     }
   while ((status & STATUS1_WEL_MASK) != STATUS1_WEL_ENABLED);
 }
@@ -578,14 +564,14 @@ static void st25fl1_write_enable(FAR struct qspi_dev_s *qspi)
  * Name:  st25fl1_write_disable
  ************************************************************************************/
 
-static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi)
+static void st25fl1_write_disable(FAR struct st25fl1_dev_s *priv)
 {
   uint8_t status;
 
   do
     {
-      st25fl1_command(qspi, ST25FL1_WRITE_DISABLE);
-      status = sf25fl1_read_status1(qspi);
+      st25fl1_command(priv->qspi, ST25FL1_WRITE_DISABLE);
+      status = sf25fl1_read_status1(priv);
     }
   while ((status & STATUS1_WEL_MASK) != STATUS1_WEL_DISABLED);
 }
@@ -594,12 +580,12 @@ static void st25fl1_write_disable(FAR struct qspi_dev_s *qspi)
  * Name:  st25fl1_write_status
  ************************************************************************************/
 
-static void st25fl1_write_status(FAR struct qspi_dev_s *qspi,
-                                 uint8_t status[ALIGN_UP(3)])
+static void st25fl1_write_status(FAR struct st25fl1_dev_s *priv)
 {
-  st25fl1_write_enable(qspi);
-  st25fl1_command_write(qspi, ST25FL1_WRITE_STATUS, (FAR const void *)status, 3);
-  st25fl1_write_disable(qspi);
+  st25fl1_write_enable(priv);
+  st25fl1_command_write(priv->qspi, ST25FL1_WRITE_STATUS,
+                        (FAR const void *)priv->cmdbuf, 3);
+  st25fl1_write_disable(priv);
 }
 
 /************************************************************************************
@@ -608,34 +594,32 @@ static void st25fl1_write_status(FAR struct qspi_dev_s *qspi,
 
 static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 {
-  uint8_t jedecid[ALIGN_UP(3)];
-
   /* Lock the QuadSPI bus and configure the bus. */
 
   st25fl1_lock(priv->qspi);
 
   /* Read the JEDEC ID */
 
-  st25fl1_command_read(priv->qspi, ST25FL1_JEDEC_ID, jedecid, 3);
+  st25fl1_command_read(priv->qspi, ST25FL1_JEDEC_ID, priv->cmdbuf, 3);
 
   /* Unlock the bus */
 
   st25fl1_unlock(priv->qspi);
 
   fvdbg("Manufacturer: %02x Device Type %02x, Capacity: %02x",
-        jedecid[0], jedecid[1], jedecid[2]);
+        priv->cmdbuf[0], priv->cmdbuf[1], priv->cmdbuf[2]);
 
   /* Check for a recognized memory device type */
 
-  if (jedecid[1] != ST25FL1_JEDEC_DEVICE_TYPE)
+  if (priv->cmdbuf[1] != ST25FL1_JEDEC_DEVICE_TYPE)
     {
-      fdbg("ERROR: Unrecognized device type: %02x\n", jedecid[1]);
+      fdbg("ERROR: Unrecognized device type: %02x\n", priv->cmdbuf[1]);
       return -ENODEV;
     }
 
   /* Check for a supported capacity */
 
-  switch (jedecid[2])
+  switch (priv->cmdbuf[2])
     {
       case S25FL116K_JEDEC_CAPACITY:
         priv->sectorshift = S25FL116K_SECTOR_SHIFT;
@@ -658,7 +642,7 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
       /* Support for this part is not implemented yet */
 
       default:
-        fdbg("ERROR: Unsupported memory capacity: %02x\n", jedecid[2]);
+        fdbg("ERROR: Unsupported memory capacity: %02x\n", priv->cmdbuf[2]);
         return -ENODEV;
    }
 
@@ -672,15 +656,13 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
 static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
                             off_t startblock, size_t nblocks)
 {
-  unsigned char status[ALIGN_UP(3)];
-
   /* Get the status register value to check the current protection */
 
-  status[0] = sf25fl1_read_status1(priv->qspi);
-  status[1] = sf25fl1_read_status2(priv->qspi);
-  status[2] = sf25fl1_read_status3(priv->qspi);
+  priv->cmdbuf[0] = sf25fl1_read_status1(priv);
+  priv->cmdbuf[1] = sf25fl1_read_status2(priv);
+  priv->cmdbuf[2] = sf25fl1_read_status3(priv);
 
-  if ((status[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
+  if ((priv->cmdbuf[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
     {
       /* Protection already disabled */
 
@@ -689,12 +671,12 @@ static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
 
   /* Check if sector protection registers are locked */
 
-  if ((status[0] & STATUS1_SRP0_MASK) == STATUS1_SRP0_LOCKED)
+  if ((priv->cmdbuf[0] & STATUS1_SRP0_MASK) == STATUS1_SRP0_LOCKED)
     {
       /* Yes.. unprotect section protection registers */
 
-      status[0] &= ~STATUS1_SRP0_MASK;
-      st25fl1_write_status(priv->qspi, status);
+      priv->cmdbuf[0] &= ~STATUS1_SRP0_MASK;
+      st25fl1_write_status(priv);
     }
 
   /* Set the protection mask to zero.
@@ -702,13 +684,13 @@ static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
    * necessary to protect the range of sectors.
    */
 
-  status[0] |= STATUS1_BP_MASK;
-  st25fl1_write_status(priv->qspi, status);
+  priv->cmdbuf[0] |= STATUS1_BP_MASK;
+  st25fl1_write_status(priv);
 
   /* Check the new status */
 
-  status[0] = sf25fl1_read_status1(priv->qspi);
-  if ((status[0] & STATUS1_BP_MASK) != STATUS1_BP_MASK)
+  priv->cmdbuf[0] = sf25fl1_read_status1(priv);
+  if ((priv->cmdbuf[0] & STATUS1_BP_MASK) != STATUS1_BP_MASK)
     {
       return -EACCES;
     }
@@ -723,15 +705,13 @@ static int st25fl1_protect(FAR struct st25fl1_dev_s *priv,
 static int st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
                               off_t startblock, size_t nblocks)
 {
-  unsigned char status[ALIGN_UP(3)];
-
   /* Get the status register value to check the current protection */
 
-  status[0] = sf25fl1_read_status1(priv->qspi);
-  status[1] = sf25fl1_read_status2(priv->qspi);
-  status[2] = sf25fl1_read_status3(priv->qspi);
+  priv->cmdbuf[0] = sf25fl1_read_status1(priv);
+  priv->cmdbuf[1] = sf25fl1_read_status2(priv);
+  priv->cmdbuf[2] = sf25fl1_read_status3(priv);
 
-  if ((status[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
+  if ((priv->cmdbuf[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
     {
       /* Protection already disabled */
 
@@ -740,12 +720,12 @@ static int st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
 
   /* Check if sector protection registers are locked */
 
-  if ((status[0] & STATUS1_SRP0_MASK) == STATUS1_SRP0_LOCKED)
+  if ((priv->cmdbuf[0] & STATUS1_SRP0_MASK) == STATUS1_SRP0_LOCKED)
     {
       /* Yes.. unprotect section protection registers */
 
-      status[0] &= ~STATUS1_SRP0_MASK;
-      st25fl1_write_status(priv->qspi, status);
+      priv->cmdbuf[0] &= ~STATUS1_SRP0_MASK;
+      st25fl1_write_status(priv);
     }
 
   /* Set the protection mask to zero.
@@ -753,13 +733,13 @@ static int st25fl1_unprotect(FAR struct st25fl1_dev_s *priv,
    * necessary to unprotect the range of sectors.
    */
 
-  status[0] &= ~STATUS1_BP_MASK;
-    st25fl1_write_status(priv->qspi, status);
+  priv->cmdbuf[0] &= ~STATUS1_BP_MASK;
+    st25fl1_write_status(priv);
 
   /* Check the new status */
 
-  status[0] = sf25fl1_read_status1(priv->qspi);
-  if ((status[0] & (STATUS1_SRP0_MASK | STATUS1_BP_MASK)) != 0)
+  priv->cmdbuf[0] = sf25fl1_read_status1(priv);
+  if ((priv->cmdbuf[0] & (STATUS1_SRP0_MASK | STATUS1_BP_MASK)) != 0)
     {
       return -EACCES;
     }
@@ -845,7 +825,7 @@ static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
 
   /* Check that the flash is ready and unprotected */
 
-  status = sf25fl1_read_status1(priv->qspi);
+  status = sf25fl1_read_status1(priv);
   if ((status & STATUS1_BUSY_MASK) != STATUS1_READY)
     {
       fdbg("ERROR: Flash busy: %02x", status);
@@ -865,12 +845,12 @@ static int st25fl1_erase_sector(struct st25fl1_dev_s *priv, off_t sector)
 
   /* Send the sector erase command */
 
-  st25fl1_write_enable(priv->qspi);
+  st25fl1_write_enable(priv);
   st25fl1_command_address(priv->qspi, ST25FL1_SECTOR_ERASE, address, 3);
 
   /* Wait for erasure to finish */
 
-  while ((sf25fl1_read_status1(priv->qspi) & STATUS1_BUSY_MASK) != 0);
+  while ((sf25fl1_read_status1(priv) & STATUS1_BUSY_MASK) != 0);
   return OK;
 }
 
@@ -884,7 +864,7 @@ static int st25fl1_erase_chip(struct st25fl1_dev_s *priv)
 
   /* Check if the FLASH is protected */
 
-  status = sf25fl1_read_status1(priv->qspi);
+  status = sf25fl1_read_status1(priv);
   if ((status & STATUS1_BP_MASK) != 0)
     {
       fdbg("ERROR: FLASH is Protected: %02x", status);
@@ -893,16 +873,16 @@ static int st25fl1_erase_chip(struct st25fl1_dev_s *priv)
 
   /* Erase the whole chip */
 
-  st25fl1_write_enable(priv->qspi);
+  st25fl1_write_enable(priv);
   st25fl1_command(priv->qspi, ST25FL1_CHIP_ERASE_2);
 
   /* Wait for the erasure to complete */
 
-  status = sf25fl1_read_status1(priv->qspi);
+  status = sf25fl1_read_status1(priv);
   while ((status & STATUS1_BUSY_MASK) != 0)
     {
       usleep(200*1000);
-      status = sf25fl1_read_status1(priv->qspi);
+      status = sf25fl1_read_status1(priv);
     }
 
   return OK;
@@ -981,7 +961,7 @@ static int st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buf
 
       /* Write one page */
 
-      st25fl1_write_enable(priv->qspi);
+      st25fl1_write_enable(priv);
       ret = QSPI_MEMORY(priv->qspi, &meminfo);
       if (ret < 0)
         {
@@ -1002,7 +982,7 @@ static int st25fl1_write_page(struct st25fl1_dev_s *priv, FAR const uint8_t *buf
    */
 
   DEBUGASSERT(buflen == 0);
-  st25fl1_write_disable(priv->qspi);
+  st25fl1_write_disable(priv);
   return OK;
 }
 
@@ -1444,10 +1424,10 @@ static int st25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
 {
   FAR struct st25fl1_dev_s *priv;
-  uint8_t status[ALIGN_UP(3)];
   int ret;
 
   fvdbg("qspi: %p\n", qspi);
+  DEBUGASSERT(qspi != NULL);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -1470,6 +1450,15 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
       priv->mtd.ioctl  = st25fl1_ioctl;
       priv->qspi       = qspi;
 
+      /* Allocate a tiny buffer to support DMA command data */
+
+      priv->cmdbuf = (FAR uint8_t *)QSPI_ALLOC(qspi, 4);
+      if (priv->cmdbuf == NULL)
+        {
+          fdbg("ERROR Failed to allocate command buffer\n");
+          goto errout_with_priv;
+        }
+
       /* Identify the FLASH chip and get its capacity */
 
       ret = st25fl1_readid(priv);
@@ -1478,35 +1467,33 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
           fdbg("ERROR Unrecognized QSPI device\n");
-          kmm_free(priv);
-          return NULL;
+          goto errout_with_cmdbuf;
         }
 
       /* Enable quad mode */
 
-      status[0] = sf25fl1_read_status1(priv->qspi);
-      status[1] = sf25fl1_read_status2(priv->qspi);
-      status[2] = sf25fl1_read_status3(priv->qspi);
+      priv->cmdbuf[0] = sf25fl1_read_status1(priv);
+      priv->cmdbuf[1] = sf25fl1_read_status2(priv);
+      priv->cmdbuf[2] = sf25fl1_read_status3(priv);
 
-      while ((status[1] & STATUS2_QUAD_ENABLE_MASK) == 0)
+      while ((priv->cmdbuf[1] & STATUS2_QUAD_ENABLE_MASK) == 0)
         {
-          status[1] |= STATUS2_QUAD_ENABLE;
-          st25fl1_write_status(priv->qspi, status);
-          status[1] = sf25fl1_read_status2(priv->qspi);
+          priv->cmdbuf[1] |= STATUS2_QUAD_ENABLE;
+          st25fl1_write_status(priv);
+          priv->cmdbuf[1] = sf25fl1_read_status2(priv);
           usleep(50*1000);
         }
 
-#ifdef CONFIG_ST25FL1_SECTOR512        /* Simulate a 512 byte sector */
+#ifdef CONFIG_ST25FL1_SECTOR512  /* Simulate a 512 byte sector */
       /* Allocate a buffer for the erase block cache */
 
-      priv->sector = (FAR uint8_t *)kmm_malloc((1 << priv->sectorshift));
-      if (!priv->sector)
+      priv->sector = (FAR uint8_t *)QSPI_ALLOC(1 << priv->sectorshift);
+      if (priv->sector == NULL)
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */
 
-          fdbg("ERROR: Allocation failed\n");
-          kmm_free(priv);
-          return NULL;
+          fdbg("ERROR: Sector allocation failed\n");
+          goto errout_with_cmdbuf;
         }
 #endif
     }
@@ -1521,4 +1508,11 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
 
   fvdbg("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
+
+errout_with_cmdbuf:
+  QSPI_FREE(qspi, priv->cmdbuf);
+
+errout_with_priv:
+  kmm_free(priv);
+  return NULL;
 }

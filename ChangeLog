@@ -10946,3 +10946,6 @@
 	* configs/sama5d2-xult: Add a very basic configuration for the SAMAD2
 	  Xplained Ultra board.  This configuration is incomplete and only
 	  intended to support the initial board bring-up (2015-09-05).
+	* up_initialize() all architectures:  Automatically initialize all
+	  the TUN device if it is in the configuration (2015-09-06).
+

@@ -192,6 +192,41 @@
           (QSPIMEM_SCRAMBLE|QSPIMEM_RANDOM))
 
 /****************************************************************************
+ * Name: QSPI_ALLOC
+ *
+ * Description:
+ *   Allocate a buffer suitable for DMA data transfer
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buflen - Buffer length to allocate in bytes
+ *
+ * Returned Value:
+ *   Address of tha allocated memory on success; NULL is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+#define QSPI_ALLOC(d,b) (d)->ops->alloc(d,b)
+
+/****************************************************************************
+ * Name: QSPI_FREE
+ *
+ * Description:
+ *   Free memory returned by QSPI_ALLOC
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - Buffer previously allocated via QSPI_ALLOC
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#define QSPI_FREE(d,b) (d)->ops->free(d,b)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -236,14 +271,18 @@ struct qspi_meminfo_s
 struct qspi_dev_s;
 struct qspi_ops_s
 {
-  CODE int      (*lock)(FAR struct qspi_dev_s *dev, bool lock);
-  CODE uint32_t (*setfrequency)(FAR struct qspi_dev_s *dev, uint32_t frequency);
-  CODE void     (*setmode)(FAR struct qspi_dev_s *dev, enum qspi_mode_e mode);
-  CODE void     (*setbits)(FAR struct qspi_dev_s *dev, int nbits);
-  CODE int      (*command)(FAR struct qspi_dev_s *dev,
-                   FAR struct qspi_cmdinfo_s *cmdinfo);
-  CODE int      (*memory)(FAR struct qspi_dev_s *dev,
-                   FAR struct qspi_meminfo_s *meminfo);
+  CODE int       (*lock)(FAR struct qspi_dev_s *dev, bool lock);
+  CODE uint32_t  (*setfrequency)(FAR struct qspi_dev_s *dev,
+                    uint32_t frequency);
+  CODE void      (*setmode)(FAR struct qspi_dev_s *dev,
+                    enum qspi_mode_e mode);
+  CODE void      (*setbits)(FAR struct qspi_dev_s *dev, int nbits);
+  CODE int       (*command)(FAR struct qspi_dev_s *dev,
+                    FAR struct qspi_cmdinfo_s *cmdinfo);
+  CODE int       (*memory)(FAR struct qspi_dev_s *dev,
+                    FAR struct qspi_meminfo_s *meminfo);
+  CODE FAR void *(*alloc)(FAR struct qspi_dev_s *dev, size_t buflen);
+  CODE void      (*free)(FAR struct qspi_dev_s *dev, FAR void *buffer);
 };
 
 /* QSPI private data.  This structure only defines the initial fields of the
