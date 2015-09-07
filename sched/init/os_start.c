@@ -152,11 +152,21 @@ volatile dq_queue_t g_inactivetasks;
  * while it is within an interrupt handler.
  */
 
-volatile sq_queue_t g_delayed_kufree;
-
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
      defined(CONFIG_MM_KERNEL_HEAP)
 volatile sq_queue_t g_delayed_kfree;
+#endif
+
+#ifndef CONFIG_BUILD_KERNEL
+/* REVISIT:  It is not safe to defer user allocation in the kernel mode
+ * build.  Why?  Because the correct user context will not be in place
+ * when these deferred de-allocations are performed.  In order to make this
+ * work, we would need to do something like:  (1) move g_delayed_kufree
+ * into the group structure, then traverse the groups to collect garbage
+ * on a group-by-group basis.
+ */
+
+volatile sq_queue_t g_delayed_kufree;
 #endif
 
 /* This is the value of the last process ID assigned to a task */
@@ -271,10 +281,12 @@ void os_start(void)
   dq_init(&g_waitingforfill);
 #endif
   dq_init(&g_inactivetasks);
-  sq_init(&g_delayed_kufree);
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
      defined(CONFIG_MM_KERNEL_HEAP)
   sq_init(&g_delayed_kfree);
+#endif
+#ifndef CONFIG_BUILD_KERNEL
+  sq_init(&g_delayed_kufree);
 #endif
 
   /* Initialize the logic that determine unique process IDs. */

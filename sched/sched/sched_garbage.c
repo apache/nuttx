@@ -78,6 +78,16 @@
 
 static inline void sched_kucleanup(void)
 {
+#ifdef CONFIG_BUILD_KERNEL
+  /* REVISIT:  It is not safe to defer user allocation in the kernel mode
+   * build.  Why?  Because the correct user context will not be in place
+   * when these deferred de-allocations are performed.  In order to make
+   * this work, we would need to do something like:  (1) move
+   * g_delayed_kufree into the group structure, then traverse the groups to
+   * collect garbage on a group-by-group basis.
+   */
+
+#else
    irqstate_t flags;
    FAR void *address;
 
@@ -106,6 +116,7 @@ static inline void sched_kucleanup(void)
           kumm_free(address);
         }
     }
+#endif
 }
 
 /****************************************************************************

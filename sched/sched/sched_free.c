@@ -85,8 +85,6 @@
 
 void sched_ufree(FAR void *address)
 {
-  irqstate_t flags;
-
   /* Check if this is an attempt to deallocate memory from an exception
    * handler.  If this function is called from the IDLE task, then we
    * must have exclusive access to the memory manager to do this.
@@ -94,6 +92,21 @@ void sched_ufree(FAR void *address)
 
   if (up_interrupt_context() || kumm_trysemaphore() != 0)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      /* REVISIT:  It is not safe to defer user allocation in the kernel
+       * mode build.  Why?  Because the correct user context is in place
+       * now but will not be in place when the deferred de-allocation is
+       * performed.  In order to make this work, we would need to do
+       * something like:  (1) move g_delayed_kufree into the group
+       * structure, then traverse the groups to collect garbage on a
+       * group-by-group basis.
+       */
+
+      PANIC();
+
+#else
+      irqstate_t flags;
+
       /* Yes.. Make sure that this is not a attempt to free kernel memory
        * using the user deallocator.
        */
@@ -114,6 +127,7 @@ void sched_ufree(FAR void *address)
       work_signal(LPWORK);
 #endif
       irqrestore(flags);
+#endif
     }
   else
     {
