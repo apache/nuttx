@@ -51,6 +51,7 @@
 /* Configuration ************************************************************/
 
 /* SSD1351 configuration settings:
+ * CONFIG_SSD1351_PARALLEL8BIT - 8-bit parallel interface
  * CONFIG_SSD1351_SPI3WIRE     - 3-wire SPI interface
  * CONFIG_SSD1351_SPI4WIRE     - 4-wire SPI interface
  * CONFIG_SSD1351_SPIMODE      - SPI mode
@@ -98,7 +99,18 @@
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+struct ssd1351_lcd_s
+{
+  void    (*cmd)(FAR struct ssd1351_lcd_s *lcd, uint8_t cmd);
+#ifndef CONFIG_LCD_NOGETRUN
+  uint8_t (*read)(FAR struct ssd1351_lcd_s *lcd);
+#endif
+  void    (*write)(FAR struct ssd1351_lcd_s *lcd, uint8_t data);
+};
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
 struct spi_dev_s;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -118,6 +130,7 @@ extern "C"
  *   but with the power setting at 0 (full off == sleep mode).
  *
  * Input Parameters:
+ *   lcd   - A reference to the platform-specific interface.
  *   spi   - A reference to the SPI driver instance.
  *   devno - A value in the range of 0 through CONFIG_SSD1351_NINTERFACES-1.
  *           This allows support for multiple devices.
@@ -128,8 +141,13 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SSD1351_PARALLEL8BIT
+FAR struct lcd_dev_s *ssd1351_initialize(FAR struct ssd1351_lcd_s *lcd,
+                                         unsigned int devno);
+#elif defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
 FAR struct lcd_dev_s *ssd1351_initialize(FAR struct spi_dev_s *spi,
                                          unsigned int devno);
+#endif
 
 #ifdef __cplusplus
 }

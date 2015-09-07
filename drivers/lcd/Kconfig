@@ -378,6 +378,11 @@ choice
 	prompt "Interface"
 	default SSD1351_SPI4WIRE
 
+config SSD1351_PARALLEL8BIT
+	bool "8-bit Parallel Interface"
+	---help---
+		Enables support for the 8-bit parallel interface.
+
 config SSD1351_SPI3WIRE
 	bool "3-wire SPI Interface"
 	select SPI
@@ -393,6 +398,8 @@ config SSD1351_SPI4WIRE
 
 endchoice
 
+if SSD1351_SPI3WIRE || SSD1351_SPI4WIRE
+
 config SSD1351_SPIMODE
 	int "SPI Mode"
 	default 0
@@ -405,6 +412,8 @@ config SSD1351_SPIFREQ
 	default 1000000
 	---help---
 		Specifies the SPI frequency.
+
+endif
 
 config SSD1351_NINTERFACES
 	int "Number of SSD1351 Devices"
