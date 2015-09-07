@@ -278,7 +278,7 @@ int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_IPv6
 int tcp_remote_ipv6_device(FAR struct tcp_conn_s *conn)
 {
-  return int tcp_find_ipv6_device(conn, conn->u.ipv6.raddr);
+  return tcp_find_ipv6_device(conn, conn->u.ipv6.raddr);
 }
 #endif /* CONFIG_NET_IPv6 */
 
