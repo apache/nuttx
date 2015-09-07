@@ -201,7 +201,7 @@ void sched_garbagecollection(void)
 
   sched_kcleanup();
 
-  /* Handle deferred dealloctions for the user heap */
+  /* Handle deferred deallocations for the user heap */
 
   sched_kucleanup();
 }
