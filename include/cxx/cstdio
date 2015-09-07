@@ -91,7 +91,7 @@ namespace std
   using ::vprintf;
   using ::vfprintf;
   using ::vsprintf;
-  using ::avsprintf;
+  using ::vasprintf;
   using ::vsnprintf;
   using ::vsscanf;
 

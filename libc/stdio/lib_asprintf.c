@@ -97,10 +97,10 @@ int asprintf (FAR char **ptr, const char *fmt, ...)
   va_list ap;
   int ret;
 
-  /* Let avsprintf do all of the work */
+  /* Let vasprintf do all of the work */
 
   va_start(ap, fmt);
-  ret = avsprintf(ptr, fmt, ap);
+  ret = vasprintf(ptr, fmt, ap);
   va_end(ap);
 
   return ret;

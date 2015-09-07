@@ -10948,4 +10948,6 @@
 	  intended to support the initial board bring-up (2015-09-05).
 	* up_initialize() all architectures:  Automatically initialize all
 	  the TUN device if it is in the configuration (2015-09-06).
+	* Change all references from avsprintf to vasprintf.  From Sebastien
+	  Lorquet (2015-09-07).
 
