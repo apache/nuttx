@@ -59,12 +59,12 @@ index ba7dbe7..45e4ab1 100644
 +#else
 +  char *str;
 +
-+  /* Use avsprintf() to allocate a buffer and fill it with the formatted
++  /* Use vasprintf() to allocate a buffer and fill it with the formatted
 +   * data
 +   */
 +
 +  str = NULL;
-+  (void)avsprintf(&str, fmt, ap);
++  (void)vasprintf(&str, fmt, ap);
 +
 +  /* Was a string allocated? */
 +
