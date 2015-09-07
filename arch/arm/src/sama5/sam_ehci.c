@@ -2581,7 +2581,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
       /* Yes... we cannot process the QH while it is still active.  Return
        * zero to visit the next QH in the list.
        */
-
+      *bp = &qh->hw.hlp;
       return OK;
     }
 

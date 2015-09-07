@@ -2765,7 +2765,7 @@ static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
       /* Yes... we cannot process the QH while it is still active.  Return
        * zero to visit the next QH in the list.
        */
-
+      *bp = &qh->hw.hlp;
       return OK;
     }
 
