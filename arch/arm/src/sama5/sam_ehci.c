@@ -2129,20 +2129,9 @@ static int sam_async_setup(struct sam_rhport_s *rhport,
         }
     }
 
-  /* Disable the asynchronous schedule */
-
-  regval  = sam_getreg(&HCOR->usbcmd);
-  regval &= ~EHCI_USBCMD_ASEN;
-  sam_putreg(regval, &HCOR->usbcmd);
-
   /* Add the new QH to the head of the asynchronous queue list */
 
   sam_qh_enqueue(&g_asynchead, qh);
-
-  /* Re-enable the asynchronous schedule */
-
-  regval |= EHCI_USBCMD_ASEN;
-  sam_putreg(regval, &HCOR->usbcmd);
   return OK;
 
   /* Clean-up after an error */

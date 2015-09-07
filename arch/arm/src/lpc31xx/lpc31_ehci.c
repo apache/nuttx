@@ -2313,20 +2313,9 @@ static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
         }
     }
 
-  /* Disable the asynchronous schedule */
-
-  regval  = lpc31_getreg(&HCOR->usbcmd);
-  regval &= ~EHCI_USBCMD_ASEN;
-  lpc31_putreg(regval, &HCOR->usbcmd);
-
   /* Add the new QH to the head of the asynchronous queue list */
 
   lpc31_qh_enqueue(&g_asynchead, qh);
-
-  /* Re-enable the asynchronous schedule */
-
-  regval |= EHCI_USBCMD_ASEN;
-  lpc31_putreg(regval, &HCOR->usbcmd);
   return OK;
 
   /* Clean-up after an error */
