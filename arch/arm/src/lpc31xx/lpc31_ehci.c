@@ -500,7 +500,7 @@ static int lpc31_intr_setup(struct lpc31_rhport_s *rhport,
 #endif
 static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo);
 #ifdef CONFIG_USBHOST_ASYNCH
-static inline int lpc31_asynch_setup(struct lpc31_rhport_s *rhport,
+static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
          struct lpc31_epinfo_s *epinfo, usbhost_asynch_t callback,
          FAR void *arg);
 static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo);
@@ -2554,7 +2554,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
 }
 
 /*******************************************************************************
- * Name: lpc31_asynch_setup
+ * Name: lpc31_ioc_async_setup
  *
  * Description:
  *   Setup to receive an asynchronous notification when a transfer completes.
@@ -2574,7 +2574,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
  *******************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static inline int lpc31_asynch_setup(struct lpc31_rhport_s *rhport,
+static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
                                      struct lpc31_epinfo_s *epinfo,
                                      usbhost_asynch_t callback, FAR void *arg)
 {
@@ -4418,7 +4418,7 @@ static int lpc31_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* Set the request for the callback well BEFORE initiating the transfer. */
 
-  ret = lpc31_asynch_setup(rhport, epinfo, callback, arg);
+  ret = lpc31_ioc_async_setup(rhport, epinfo, callback, arg);
   if (ret != OK)
     {
       usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
