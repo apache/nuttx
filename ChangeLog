@@ -10950,4 +10950,11 @@
 	  the TUN device if it is in the configuration (2015-09-06).
 	* Change all references from avsprintf to vasprintf.  From Sebastien
 	  Lorquet (2015-09-07).
+	* net/tcp: Fix unbuffered send compilation error when Ethernet is not
+	  enabled.  From Alan Cavalho de Assis (2015-09-07).
+	* LPC31 and SAMA5D EHCI: Fix qh_ioccheck to move bp to next QH.  From
+	  Ilya Averyanov (2015-09-07).
+	* LPC31 and SAMA5D EHCI:  Performance improvement:  Do not disable the
+	  asynchronous queue when adding a new QH structure.  From  Ilya
+	  Averyanov (2015-09-07).
 
