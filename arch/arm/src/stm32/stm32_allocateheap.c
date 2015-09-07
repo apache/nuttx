@@ -131,7 +131,7 @@
 
    /* Check if external FSMC SRAM is provided */
 
-#  if CONFIG_STM32_FSMC_SRAM
+#  ifdef CONFIG_STM32_FSMC_SRAM
 #    if CONFIG_MM_REGIONS < 2
 #      warning "FSMC SRAM not included in the heap"
 #      undef CONFIG_STM32_FSMC_SRAM
