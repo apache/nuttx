@@ -450,7 +450,7 @@ void cc1101_dumpregs(struct cc1101_dev_s * dev, uint8_t addr, uint8_t length)
 {
   uint8_t buf[0x30], i;
 
-  cc1101_access(dev, addr, FAR uint8_t *buf, length);
+  cc1101_access(dev, addr, (FAR uint8_t *)buf, length);
 
   printf("CC1101[%2x]: ", addr);
   for (i=0; i<length; i++) printf(" %2x,", buf[i]);
