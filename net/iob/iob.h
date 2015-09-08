@@ -46,6 +46,8 @@
 
 #include <nuttx/net/iob.h>
 
+#ifdef CONFIG_NET_IOB
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -132,4 +134,5 @@ FAR struct iob_s *iob_tryalloc(bool throttled);
 
 FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
+#endif /* CONFIG_NET_IOB */
 #endif /* __NET_IOB_IOB_H */
