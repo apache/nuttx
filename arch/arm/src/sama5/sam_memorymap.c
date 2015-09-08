@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/sama5/sam_periphclks.h
+ * arch/arm/src/sama5/sam_memorymap.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,6 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_PERIPHCLKS_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_PERIPHCLKS_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
@@ -48,13 +45,11 @@
 /* Include the correct logic for the configured chip */
 
 #if defined(ATSAMA5D2)
-#  include "sama5d2x_periphclks.h"
+#  include "sama5d2x_memorymap.c"
 #elif defined(ATSAMA5D3)
-#  include "sama5d3x_periphclks.h"
+#  include "sama5d3x_memorymap.c"
 #elif defined(ATSAMA5D4)
-#  include "sama5d4x_periphclks.h"
+#  include "sama5d4x_memorymap.c"
 #else
 #  error Unrecognized SAMA5 family
 #endif
-
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_PERIPHCLKS_H */

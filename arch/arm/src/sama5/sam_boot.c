@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_boot.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,9 @@
 
 #include "chip/sam_wdt.h"
 #include "chip/sam_aximx.h"
+
 #include "sam_clockconfig.h"
+#include "sam_memorymap.h"
 #include "sam_lowputc.h"
 #include "sam_serial.h"
 #include "sam_lcd.h"
@@ -67,52 +69,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* The vectors are, by default, positioned at the beginning of the text
- * section.  Under what conditions do we have to remap the these vectors?
- *
- * 1) If we are using high vectors (CONFIG_ARCH_LOWVECTORS=n).  In this case,
- *    the vectors will lie at virtual address 0xffff:000 and we will need
- *    to a) copy the vectors to another location, and b) map the vectors
- *    to that address, and
- *
- *    For the case of CONFIG_ARCH_LOWVECTORS=y, defined.  The SAMA5 boot-up
- *    logic will map the beginning of the boot memory to address 0x0000:0000
- *    using both the MMU and the AXI matrix REMAP register.  No vector copy
- *    is required because the vectors are position at the beginning of the
- *    boot memory at link time and no additional MMU mapping required.
- *
- * 2) We are not using a ROM page table.  We cannot set any custom mappings in
- *    the case and the build must conform to the ROM page table properties
- */
-
-#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_ARCH_ROMPGTABLE)
-#  error High vector remap cannot be performed if we are using a ROM page table
-#endif
-
-/* If SDRAM needs to be configured, then it will be configured twice:  It
- * will first be configured to a temporary state to support low-level
- * initialization.  After the SDRAM has been fully initialized, SRAM be used
- * to set the SDRM in its final, fully cache-able state.
- */
-
-#undef NEED_SDRAM_CONFIGURATION
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
-#  define NEED_SDRAM_CONFIGURATION 1
-#endif
-
-#undef NEED_SDRAM_MAPPING
-#undef NEED_SDRAM_REMAPPING
-#if defined(NEED_SDRAM_CONFIGURATION) && !defined(CONFIG_ARCH_ROMPGTABLE)
-#  define NEED_SDRAM_MAPPING 1
-#  define NEED_SDRAM_REMAPPING 1
-#endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* Symbols defined via the linker script */
@@ -121,246 +84,8 @@ extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
-
-/* This table describes how to map a set of 1Mb pages to space the physical
- * address space of the SAMA5.
- */
-
-#ifndef CONFIG_ARCH_ROMPGTABLE
-static const struct section_mapping_s section_mapping[] =
-{
-  /* SAMA5 Internal Memories */
-
-  /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
-   * beginning of the .text region must appear at address at the address
-   * specified in the VBAR.  There are three ways to accomplish this:
-   *
-   *   1. By explicitly mapping the beginning of .text region with a page
-   *      table entry so that the virtual address zero maps to the beginning
-   *      of the .text region.  VBAR == 0x0000:0000.
-   *
-   *   2. A second way is to map the use the AXI MATRIX remap register to
-   *      map physical address zero to the beginning of the text region,
-   *      either internal SRAM or EBI CS 0.  Then we can set an identity
-   *      mapping to map the boot region at 0x0000:0000 to virtual address
-   *      0x0000:00000.   VBAR == 0x0000:0000.
-   *
-   *      This method is used when booting from ISRAM or NOR FLASH.  In
-   &      that case, vectors must lie at the beginning of NOFR FLASH.
-   *
-   *   3. Set the Cortex-A5 VBAR register so that the vector table address
-   *      is moved to a location other than 0x0000:0000.
-   *
-   *      This is the method used when booting from SDRAM.
-   *
-   * - When executing from NOR FLASH, the first level bootloader is supposed
-   *   to provide the AXI MATRIX mapping for us at boot time base on the state
-   *   of the BMS pin.  However, I have found that in the test environments
-   *   that I use, I cannot always be assured of that physical address mapping.
-   *
-   *   So we do both here.  If we are executing from NOR FLASH, then we provide
-   *   the MMU to map the physical address of FLASH to address 0x0000:0000;
-   *
-   * - If we are executing out of ISRAM, then the SAMA5 primary bootloader
-   *   probably copied us into ISRAM and set the AXI REMAP bit for us.
-   *
-   * - If we are executing from external SDRAM, then a secondary bootloader must
-   *   have loaded us into SDRAM.  In this case, simply set the VBAR register
-   *   to the address of the vector table (not necessary at the beginning
-   *   or SDRAM).
-   */
-
-#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM) && \
-    !defined(CONFIG_SAMA5_BOOT_SDRAM)
-  { CONFIG_FLASH_START,    0x00000000,
-    MMU_ROMFLAGS,          1
-  },
-#else
-  { SAM_BOOTMEM_PSECTION,  SAM_BOOTMEM_VSECTION,
-    SAM_BOOTMEM_MMUFLAGS,  SAM_BOOTMEM_NSECTIONS
-  },
-#endif
-
-  { SAM_ROM_PSECTION,      SAM_ROM_VSECTION,
-    SAM_ROM_MMUFLAGS,      SAM_ROM_NSECTIONS
-  },
-  { SAM_NFCSRAM_PSECTION,  SAM_NFCSRAM_VSECTION,
-    SAM_NFCSRAM_MMUFLAGS,  SAM_NFCSRAM_NSECTIONS
-  },
-
-#ifndef CONFIG_PAGING /* Internal SRAM is already fully mapped */
-  { SAM_ISRAM_PSECTION,    SAM_ISRAM_VSECTION,
-    SAM_ISRAM_MMUFLAGS,    SAM_ISRAM_NSECTIONS
-  },
-#endif
-
-#ifdef SAM_VDEC_PSECTION
-  /* If the memory map supports a video decoder (VDEC), then map it */
-
-  { SAM_VDEC_PSECTION,     SAM_VDEC_VSECTION,
-    SAM_VDEC_MMUFLAGS,     SAM_VDEC_NSECTIONS
-  },
-#endif
-
-  { SAM_SMD_PSECTION,      SAM_SMD_VSECTION,
-    SAM_SMD_MMUFLAGS,      SAM_SMD_NSECTIONS
-  },
-  { SAM_UDPHSRAM_PSECTION, SAM_UDPHSRAM_VSECTION,
-    SAM_UDPHSRAM_MMUFLAGS, SAM_UDPHSRAM_NSECTIONS
-  },
-  { SAM_UHPOHCI_PSECTION,  SAM_UHPOHCI_VSECTION,
-    SAM_UHPOHCI_MMUFLAGS,  SAM_UHPOHCI_NSECTIONS
-  },
-  { SAM_UHPEHCI_PSECTION,  SAM_UHPEHCI_VSECTION,
-    SAM_UHPEHCI_MMUFLAGS,  SAM_UHPEHCI_NSECTIONS
-  },
-  { SAM_AXIMX_PSECTION,    SAM_AXIMX_VSECTION,
-    SAM_AXIMX_MMUFLAGS,    SAM_AXIMX_NSECTIONS
-  },
-  { SAM_DAP_PSECTION,      SAM_DAP_VSECTION,
-    SAM_DAP_MMUFLAGS,      SAM_DAP_NSECTIONS
-  },
-
-#ifdef SAM_L2CC_PSECTION
-  /* If the memory map supports an L2 cache controller (L2CC), then map it */
-
-  { SAM_L2CC_PSECTION,     SAM_L2CC_VSECTION,
-    SAM_L2CC_MMUFLAGS,     SAM_L2CC_NSECTIONS
-  },
-#endif
-
-/* SAMA5 CS0 External Memories */
-
-#ifdef CONFIG_SAMA5_EBICS0
-  { SAM_EBICS0_PSECTION, SAM_EBICS0_VSECTION,
-    SAM_EBICS0_MMUFLAGS, SAM_EBICS0_NSECTIONS
-  },
-#endif
-
-/* SAMA5 External SDRAM Memory.  The SDRAM is not usable until it has been
- * initialized.  If we are running out of SDRAM now, we can assume that some
- * second level boot loader has properly configured SRAM for us.  In that
- * case, we set the MMU flags for the final, fully cache-able state.
- *
- * Also, in this case, the mapping for the SDRAM was done in arm_head.S and
- * need not be repeated here.
- *
- * If we are running from ISRAM or NOR flash, then we will need to configure
- * the SDRAM ourselves.  In this case, we set the MMU flags to the strongly
- * ordered, non-cacheable state.  We need this direct access to SDRAM in
- * order to configure it.  Once SDRAM has been initialized, it will be re-
- * configured in its final state.
- */
-
-#ifdef NEED_SDRAM_MAPPING
-  { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
-    MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS
-  },
-#endif
-
-/* SAMA5 CS1-3 External Memories */
-
-#ifdef CONFIG_SAMA5_EBICS1
-  { SAM_EBICS1_PSECTION,   SAM_EBICS1_VSECTION,
-    SAM_EBICS1_MMUFLAGS,   SAM_EBICS1_NSECTIONS
-  },
-#endif
-#ifdef CONFIG_SAMA5_EBICS2
-  { SAM_EBICS2_PSECTION,   SAM_EBICS2_VSECTION,
-    SAM_EBICS2_MMUFLAGS,   SAM_EBICS2_NSECTIONS
-  },
-#endif
-#ifdef CONFIG_SAMA5_EBICS3
-  { SAM_EBICS3_PSECTION,   SAM_EBICS3_VSECTION,
-    SAM_EBICS3_MMUFLAGS,   SAM_EBICS3_NSECTIONS
-  },
-#endif
-#ifdef CONFIG_SAMA5_HAVE_NAND
-  { SAM_NFCCR_PSECTION,   SAM_NFCCR_VSECTION,
-    SAM_NFCCR_MMUFLAGS,   SAM_NFCCR_NSECTIONS
-  },
-#endif
-
-/* SAMA5 Internal Peripherals
- *
- * Naming of peripheral sections differs between the SAMA5D3 and SAMA5D4.
- * There is nothing called SYSC in the SAMA5D4 memory map.  The third
- * peripheral section is un-named in the SAMA5D4 memory map, but I have
- * chosen the name PERIPHC for this usage.
- */
-
-  { SAM_PERIPHA_PSECTION, SAM_PERIPHA_VSECTION,
-    SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS
-  },
-
-  { SAM_PERIPHB_PSECTION, SAM_PERIPHB_VSECTION,
-    SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS
-  },
-
-#ifdef SAM_PERIPHC_PSECTION
-  { SAM_PERIPHC_PSECTION, SAM_PERIPHC_VSECTION,
-    SAM_PERIPHC_MMUFLAGS, SAM_PERIPHC_NSECTIONS
-  },
-#endif
-
-#ifdef SAM_SYSC_PSECTION
-  { SAM_SYSC_PSECTION,    SAM_SYSC_VSECTION,
-    SAM_SYSC_MMUFLAGS,    SAM_SYSC_NSECTIONS
-  },
-#endif
-
-/* LCDC Framebuffer.  This entry reprograms a part of one of the above
- * regions, making it non-cacheable and non-buffereable.
- *
- * If SDRAM will be reconfigured, then we will defer setup of the framebuffer
- * until after the SDRAM remapping (since the framebuffer problem resides) in
- * SDRAM.
- */
-
-#if defined(CONFIG_SAMA5_LCDC) && !defined(NEED_SDRAM_REMAPPING)
-  { CONFIG_SAMA5_LCDC_FB_PBASE, CONFIG_SAMA5_LCDC_FB_VBASE,
-    MMU_IOFLAGS, SAMA5_LCDC_FBNSECTIONS
-  },
-#endif
-};
-
-#define NMAPPINGS \
-  (sizeof(section_mapping) / sizeof(struct section_mapping_s))
-#endif
-
-/* SAMA5 External SDRAM Memory.  Final configuration.  The SDRAM was
- * configured in a temporary state to support low-level ininitialization.
- * After the SDRAM has been fully initialized, this structure is used to
- * set the SDRM in its final, fully cache-able state.
- */
-
-#ifdef NEED_SDRAM_REMAPPING
-static const struct section_mapping_s operational_mapping[] =
-{
-/* This entry reprograms the SDRAM entry, making it cacheable and
- * bufferable.
- */
-
-  { SAM_DDRCS_PSECTION, SAM_DDRCS_VSECTION,
-    SAM_DDRCS_MMUFLAGS, SAM_DDRCS_NSECTIONS
-  },
-
-/* LCDC Framebuffer.  This entry reprograms a part of one of the above
- * regions, making it non-cacheable and non-buffereable.
- */
-
-#ifdef CONFIG_SAMA5_LCDC
-  { CONFIG_SAMA5_LCDC_FB_PBASE, CONFIG_SAMA5_LCDC_FB_VBASE,
-    MMU_IOFLAGS, SAMA5_LCDC_FBNSECTIONS
-  },
-#endif
-};
-
-#define NREMAPPINGS \
-  (sizeof(operational_mapping) / sizeof(struct section_mapping_s))
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -370,7 +95,7 @@ static const struct section_mapping_s operational_mapping[] =
  * Name: sam_setupmappings
  *
  * Description
- *   Map all of the initial memory regions defined in section_mapping[]
+ *   Map all of the initial memory regions defined in g_section_mapping[]
  *
  ****************************************************************************/
 
@@ -381,9 +106,9 @@ static inline void sam_setupmappings(void)
 
   /* Set up each group of section mappings */
 
-  for (i = 0; i < NMAPPINGS; i++)
+  for (i = 0; i < g_num_mappings; i++)
     {
-      mmu_l1_map_region(&section_mapping[i]);
+      mmu_l1_map_region(&g_section_mapping[i]);
     }
 }
 #endif
@@ -392,7 +117,7 @@ static inline void sam_setupmappings(void)
  * Name: sam_remap
  *
  * Description
- *   Map all of the final memory regions defined in operation_mapping[]
+ *   Map all of the final memory regions defined in g_operational_mapping[]
  *
  ****************************************************************************/
 
@@ -403,9 +128,9 @@ static inline void sam_remap(void)
 
   /* Re-map each group of section */
 
-  for (i = 0; i < NREMAPPINGS; i++)
+  for (i = 0; i < g_num_opmappings; i++)
     {
-      mmu_l1_map_region(&operational_mapping[i]);
+      mmu_l1_map_region(&g_operational_mapping[i]);
     }
 }
 #endif
@@ -686,6 +411,18 @@ void up_boot(void)
 #ifdef CONFIG_ARCH_RAMFUNCS
   const uint32_t *src;
   uint32_t *dest;
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAMA5D2) && !defined(CONFIG_ARCH_L2CACHE)
+  /* The SAMA5D2 features a second 128-Kbyte SRAM that can be allocated
+   * either to the L2 cache controller or used as an internal SRAM. After
+   * reset, this block is connected to the L2 cache controller. The
+   * SRAM_SEL bit, located in the SFR_L2CC_HRAMC register, is used to
+   * reassign this memory as system SRAM, making the two 128-Kbyte
+   * RAMs contiguous.
+   */
+
+# warning Missing Logic
 #endif
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
