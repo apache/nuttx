@@ -10957,4 +10957,6 @@
 	* LPC31 and SAMA5D EHCI:  Performance improvement:  Do not disable the
 	  asynchronous queue when adding a new QH structure.  From  Ilya
 	  Averyanov (2015-09-07).
+	* arch/arm/src/sama5: Separate memory mapping tables for SAMA5D2, 3,
+	  and 4 (2015-09-07).
 
