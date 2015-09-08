@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
+#include "chip/lpc17_ethernet.h"
 #include "chip/lpc17_memorymap.h"
 
 /************************************************************************************
@@ -137,15 +138,9 @@
  * 15,756 is not well aligned.).
  */
 
-#define LPC17_TXDESC_SIZE     8
-#define LPC17_TXSTAT_SIZE     4
-
 #define LPC17_TXDESCTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXDESC_SIZE)
 #define LPC17_TXSTATTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXSTAT_SIZE)
 #define LPC17_TXTAB_SIZE     (LPC17_TXDESCTAB_SIZE+LPC17_TXSTATTAB_SIZE)
-
-#define LPC17_RXDESC_SIZE     8
-#defube LPC17_RXSTAT_SIZE     8
 
 #define LPC17_RXDESCTAB_SIZE (CONFIG_NET_NRXDESC*LPC17_RXDESC_SIZE)
 #define LPC17_RXSTATTAB_SIZE (CONFIG_NET_NRXDESC*LPC17_RXSTAT_SIZE)
