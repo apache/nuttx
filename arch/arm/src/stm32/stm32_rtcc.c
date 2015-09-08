@@ -609,7 +609,9 @@ static int rtc_interrupt(int irq, void *context)
 
 int up_rtcinitialize(void)
 {
-  uint32_t regval, clksrc, tr_bkp, dr_bkp;
+  uint32_t regval;
+  uint32_t tr_bkp;
+  uint32_t dr_bkp;
   int ret;
   int maxretry = 10;
   int nretry = 0;
@@ -665,7 +667,10 @@ int up_rtcinitialize(void)
     }
   else /* The RTC is already in use: check if the clock source is changed */
     {
-      clksrc = getreg32(STM32_RCC_XXX);
+#if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_RTC_LSICLOCK) || \
+    defined(CONFIG_RTC_LSECLOCK)
+
+      uint32_t clksrc = getreg32(STM32_RCC_XXX);
 
 #if defined(CONFIG_RTC_HSECLOCK)
       if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_HSE)
@@ -673,6 +678,7 @@ int up_rtcinitialize(void)
       if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_LSI)
 #elif defined(CONFIG_RTC_LSECLOCK)
       if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_LSE)
+#endif
 #endif
         {
           tr_bkp = getreg32(STM32_RTC_TR);
