@@ -1,6 +1,6 @@
 /**************************************************************************
- *  drivers/wireless/cc3000/cc3000drv.c - Driver wrapper functions to
- *  conntect nuttx to the TI CC3000
+ *  drivers/wireless/cc3000/cc3000drv.c
+ *  Driver wrapper functions to conntect nuttx to the TI CC3000
  *
  *  Port to nuttx:
  *      David Sidrane <david_s5@nscdg.com>
@@ -179,7 +179,8 @@ uint8_t *cc3000_wait(void)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0);
 
-  mq_receive(spiconf.queue, &spiconf.rx_buffer, sizeof(spiconf.rx_buffer), 0);
+  mq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
+             sizeof(spiconf.rx_buffer), 0);
   return spiconf.rx_buffer.pbuffer;
 }
 
@@ -206,7 +207,7 @@ static void *unsoliced_thread_func(void *parameter)
 
   ioctl(spiconf.cc3000fd, CC3000IOC_GETQUESEMID, (unsigned long)&minor);
   snprintf(buff, QUEUE_NAMELEN, QUEUE_FORMAT, minor);
-  spiconf.queue = mq_open(buff,O_RDONLY);
+  spiconf.queue = mq_open(buff, O_RDONLY);
   DEBUGASSERT(spiconf.queue != (mqd_t) -1);
   DEBUGASSERT(SEM_NAMELEN == QUEUE_NAMELEN);
   snprintf(buff, SEM_NAMELEN, SEM_FORMAT, minor);
@@ -218,7 +219,7 @@ static void *unsoliced_thread_func(void *parameter)
   while (spiconf.run)
     {
       memset(&spiconf.rx_buffer,0,sizeof(spiconf.rx_buffer));
-      nbytes = mq_receive(spiconf.queue, &spiconf.rx_buffer,
+      nbytes = mq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
                           sizeof(spiconf.rx_buffer), 0);
       if (nbytes > 0)
         {

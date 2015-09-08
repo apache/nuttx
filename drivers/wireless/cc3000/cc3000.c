@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/cc3000.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David_s5 <david_s5@nscdg.com>
  *
@@ -719,7 +719,8 @@ static void * cc3000_worker(FAR void *arg)
                     priv->state = eSPI_STATE_READ_READY;
                     priv->rx_buffer.len = data_to_recv;
 
-                    ret = mq_send(priv->queue, &priv->rx_buffer, sizeof(priv->rx_buffer), 1);
+                    ret = mq_send(priv->queue, (FAR const char *)&priv->rx_buffer,
+                                  sizeof(priv->rx_buffer), 1);
                     DEBUGASSERT(ret >= 0);
                     UNUSED(ret);
 
@@ -886,7 +887,7 @@ static int cc3000_open(FAR struct file *filep)
        */
 
       snprintf(queuename, QUEUE_NAMELEN, QUEUE_FORMAT, priv->minor);
-      priv->queue = mq_open(queuename,O_WRONLY|O_CREAT, 0666, &attr);
+      priv->queue = mq_open(queuename, O_WRONLY|O_CREAT, 0666, &attr);
       if (priv->queue < 0)
         {
           ret = -errno;
