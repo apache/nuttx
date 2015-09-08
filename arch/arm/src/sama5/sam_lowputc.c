@@ -79,6 +79,11 @@
 #  undef CONFIG_SAMA5_USART3
 #endif
 
+#undef SUPPRESS_CONSOLE_CONFIG
+#ifdef CONFIG_SUPPRESS_UART_CONFIG
+#  define SUPPRESS_CONSOLE_CONFIG 1
+#endif
+
 /* Is there a serial console?  It could be on UART0-1 or USART0-3 */
 
 #if defined(CONFIG_SAMA5_DBGU_CONSOLE) && defined(CONFIG_SAMA5_DBGU)
@@ -158,10 +163,17 @@
 
 #if defined(CONFIG_SAMA5_DBGU_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_DBGU_VBASE
-#  define SAM_CONSOLE_BAUD     CONFIG_SAMA5_DBGU_BAUD
 #  define SAM_CONSOLE_BITS     8
-#  define SAM_CONSOLE_PARITY   CONFIG_SAMA5_DBGU_PARITY
 #  define SAM_CONSOLE_2STOP    0
+#  ifdef CONFIG_SAMA5_DBGU_NOCONFIG
+#    undef  SUPPRESS_CONSOLE_CONFIG
+#    define SUPPRESS_CONSOLE_CONFIG 1
+#    define SAM_CONSOLE_BAUD   115200
+#    define SAM_CONSOLE_PARITY 0
+#  else
+#    define SAM_CONSOLE_BAUD   CONFIG_SAMA5_DBGU_BAUD
+#    define SAM_CONSOLE_PARITY CONFIG_SAMA5_DBGU_PARITY
+#  endif
 #elif defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART0_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
@@ -441,7 +453,7 @@ void sam_lowsetup(void)
 
   /* Configure the console (only) */
 
-#if defined(HAVE_UART_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+#if defined(HAVE_UART_CONSOLE) && !defined(SUPPRESS_CONSOLE_CONFIG)
   /* Reset and disable receiver and transmitter */
 
   putreg32((UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS),
