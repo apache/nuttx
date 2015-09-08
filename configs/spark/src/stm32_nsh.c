@@ -184,7 +184,7 @@ int board_app_initialize(void)
       return ret;
     }
 
-#if CONFIG_SPARK_MOUNT_FLASH
+#ifdef CONFIG_SPARK_MOUNT_FLASH
   char  partname[16];
   char  mntpoint[16];
 

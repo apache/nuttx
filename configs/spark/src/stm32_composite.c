@@ -127,6 +127,7 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_NSH_ARCHINIT) i|| !defined(CONFIG_NSH_BUILTIN_APPS)
 static int do_composite_archinitialize(void)
 {
 #ifdef HAVE_SST25
@@ -176,7 +177,7 @@ static int do_composite_archinitialize(void)
       return ret;
     }
 
-#if CONFIG_SPARK_MOUNT_FLASH
+#ifdef CONFIG_SPARK_MOUNT_FLASH
   char  partname[16];
   char  mntpoint[16];
 
@@ -276,6 +277,7 @@ static int do_composite_archinitialize(void)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
