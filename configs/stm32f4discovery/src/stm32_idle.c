@@ -88,7 +88,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
+#if 0 /* Not used */
 static void up_alarmcb(void);
 #endif
 
@@ -107,9 +107,6 @@ static void up_alarmcb(void);
 #ifdef CONFIG_PM
 static void stm32_idlepm(void)
 {
-#ifdef CONFIG_RTC_ALARM
-  struct timespec alarmtime;
-#endif
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
   irqstate_t flags;
@@ -229,7 +226,7 @@ errout:
  *
  ************************************************************************************/
 
-#if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
+#if 0 /* Not used */
 static void up_alarmcb(void)
 {
   /* This alarm occurs because there wasn't any EXTI interrupt during the

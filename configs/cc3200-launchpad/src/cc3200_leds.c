@@ -7,12 +7,12 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <arch/board/cc3200_utils.h>
 #include <chip/cc3200_memorymap.h>
 
 #include "up_arch.h"
 
 #include "cc3200_launchpad.h"
-#include "cc3200_utils.h"
 
 #define LED1_GPIO              9
 #define LED2_GPIO              10

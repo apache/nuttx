@@ -295,6 +295,7 @@
 # define BOARD_LTDC_HEIGHT              320
 #endif
 
+#define BOARD_LTDC_OUTPUT_BPP           16
 #define BOARD_LTDC_HFP                  10
 #define BOARD_LTDC_HBP                  20
 #define BOARD_LTDC_VFP                  4

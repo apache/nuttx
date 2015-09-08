@@ -147,7 +147,7 @@ struct stm32f4_dev_s
 static void stm32_select(FAR struct mio283qt2_lcd_s *dev);
 static void stm32_deselect(FAR struct mio283qt2_lcd_s *dev);
 static void stm32_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index);
-#if !defined(CONFIG_MIO283QT2_WRONLY) && CONFIG_LCD_NOGETRUN != 1
+#if !defined(CONFIG_MIO283QT2_WRONLY) && !defined(CONFIG_LCD_NOGETRUN)
 static uint16_t stm32_read(FAR struct mio283qt2_lcd_s *dev);
 #endif
 static void stm32_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data);
@@ -165,7 +165,7 @@ static struct stm32f4_dev_s g_stm32f4_lcd =
     .select    = stm32_select,
     .deselect  = stm32_deselect,
     .index     = stm32_index,
-#if !defined(CONFIG_MIO283QT2_WRONLY) && CONFIG_LCD_NOGETRUN != 1
+#if !defined(CONFIG_MIO283QT2_WRONLY) && !defined(CONFIG_LCD_NOGETRUN)
     .read      = stm32_read,
 #endif
     .write     = stm32_write,
@@ -308,7 +308,7 @@ static void stm32_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index)
  *
  **************************************************************************************/
 
-#if !defined(CONFIG_MIO283QT2_WRONLY) && CONFIG_LCD_NOGETRUN != 1
+#if !defined(CONFIG_MIO283QT2_WRONLY) && !defined(CONFIG_LCD_NOGETRUN)
 static uint16_t stm32_read(FAR struct mio283qt2_lcd_s *dev)
 {
   FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;

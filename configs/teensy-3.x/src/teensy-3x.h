@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
+#include <arch/kinetis/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
