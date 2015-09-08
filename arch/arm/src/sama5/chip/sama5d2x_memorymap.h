@@ -731,7 +731,20 @@
    * the page table at boot time.
    */
 
-#  ifndef CONFIG_SAMA5_BOOT_ISRAM
+#  if defined(CONFIG_BOOT_RUNFROMFLASH)
+  /* If we are running from FLASH, than the primary memory region is
+   * given by NUTTX_RAM_PADDR.
+   */
+
+#    if NUTTX_RAM_PADDR != SAM_ISRAM_PSECTION
+#      define ARMV7A_PGTABLE_MAPPING 1
+#    endif
+
+/* Otherwise, we are running from RAM and that RAM is also the primary
+ * RAM.
+ */
+
+#  elif !defined(CONFIG_SAMA5_BOOT_ISRAM)
 #    define ARMV7A_PGTABLE_MAPPING 1
 #  endif
 
