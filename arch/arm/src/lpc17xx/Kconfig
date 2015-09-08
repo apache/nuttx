@@ -641,13 +641,6 @@ config SDIO_DMA
 		For most usages, SD accesses will cause data overruns if used without
 		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.
 
-config SDIO_DMAPRIO
-	hex "SDIO DMA priority"
-	default 0x0
-	depends on LPC17_GPDMA
-	---help---
-		Select SDIO DMA prority.
-
 config SDIO_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n

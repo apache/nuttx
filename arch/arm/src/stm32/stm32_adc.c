@@ -2433,6 +2433,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         ret = -ENOTTY;
     }
 
+  UNUSED(priv);
   return ret;
 }
 

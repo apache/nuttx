@@ -93,8 +93,6 @@
  *   CONFIG_SDIO_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
- *   CONFIG_SDCARD_DMAPRIO - SD card DMA priority.  This can be selected if
- *     CONFIG_SDIO_DMA is enabled.
  *   CONFIG_DEBUG_SDIO - Enables some very low-level debug output
  *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_VERBOSE
  */
@@ -109,13 +107,6 @@
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
-#endif
-
-#ifdef CONFIG_SDIO_DMA
-#  define CONFIG_SDCARD_DMAPRIO DMA_SCR_PRIVERYHI
-#  if (CONFIG_SDCARD_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_SDCARD_DMAPRIO"
-#  endif
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG)
