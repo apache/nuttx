@@ -127,7 +127,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NSH_ARCHINIT) i|| !defined(CONFIG_NSH_BUILTIN_APPS)
+#if !defined(CONFIG_NSH_ARCHINIT) || !defined(CONFIG_NSH_BUILTIN_APPS)
 static int do_composite_archinitialize(void)
 {
 #ifdef HAVE_SST25
