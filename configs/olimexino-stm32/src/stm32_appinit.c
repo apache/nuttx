@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/olimexino-stm32/src/stm32_nss.c
+ * configs/olimexino-stm32/src/stm32_appinit.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -87,14 +87,16 @@ int board_app_initialize(void)
 {
   int ret = OK;
 
-  /* Initialize SPI-based microSD if the apps are not installed*/
-
+#ifdef CONFIG_USBMSC
 #if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_USBMSC)
   ret = usbmsc_archinitialize();
 #endif
+#endif
 
+#ifdef CONFIG_USBDEV_COMPOSITE
 #if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_COMPOSITE)
   ret = composite_archinitialize();
+#endif
 #endif
 
   return ret;

@@ -42,8 +42,8 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
 
-ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
