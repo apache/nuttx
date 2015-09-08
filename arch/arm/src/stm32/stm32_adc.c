@@ -114,6 +114,12 @@
 #define ADC_MAX_CHANNELS_DMA   16
 #define ADC_MAX_CHANNELS_NODMA 1
 
+#ifdef ADC_HAVE_DMA
+#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
+#else
+#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
+#endif
+
 /* DMA channels and interface values differ for the F1 and F4 families */
 
 #if defined(CONFIG_STM32_STM32L15XX)
@@ -167,18 +173,14 @@ struct stm32_dev_s
 #ifdef ADC_HAVE_DMA
   DMA_HANDLE dma;       /* Allocated DMA channel */
 
-  /* List of selected DMA channels to sample */
-
-  uint8_t chanlist[ADC_MAX_CHANNELS_DMA];
-
   /* DMA transfer buffer */
 
-  uint16_t dmabuffer[ADC_MAX_CHANNELS_DMA];
-#else
-  /* List of selected DMA channels to sample */
-
-  uint8_t  chanlist[ADC_MAX_CHANNELS_NODMA];
+  uint16_t dmabuffer[ADC_MAX_SAMPLES];
 #endif
+
+  /* List of selected ADC channels to sample */
+
+  uint8_t  chanlist[ADC_MAX_SAMPLES];
 };
 
 /****************************************************************************
