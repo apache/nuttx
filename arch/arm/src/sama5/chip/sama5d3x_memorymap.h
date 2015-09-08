@@ -651,15 +651,13 @@
 
 #  endif /* CONFIG_SAMA5_BOOT_ISRAM && CONFIG_ARCH_LOWVECTORS */
 
-#ifdef CONFIG_BOOT_RUNFROMFLASH
   /* In either case, the page table lies in ISRAM.  If ISRAM is not the
    * primary RAM region, then we will need to set-up a special mapping for
    * the page table at boot time.
    */
 
-#    if NUTTX_RAM_PADDR != SAM_ISRAM_PSECTION
-#      define ARMV7A_PGTABLE_MAPPING 1
-#    endif
+#  ifndef CONFIG_SAMA5_BOOT_ISRAM
+#    define ARMV7A_PGTABLE_MAPPING 1
 #  endif
 
 #else /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
