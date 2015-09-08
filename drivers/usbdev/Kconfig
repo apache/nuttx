@@ -102,7 +102,7 @@ config USBDEV_TRACE_NRECORDS
 		Number of trace entries to remember
 
 config USBDEV_TRACE_STRINGS
-bool "Decode device controller events"
+	bool "Decode device controller events"
 	default n
 	depends on USBDEV_TRACE || DEBUG_USB
 	---help---
@@ -115,6 +115,15 @@ bool "Decode device controller events"
 		extern const struct trace_msg_t g_usb_trace_strings_deverror[];
 		extern const struct trace_msg_t g_usb_trace_strings_intdecode[];
 		#endif
+
+config USBDEV_TRACE_INITIALIDSET
+	bool "Initial enable bits"
+	default 0
+	depends on USBDEV_TRACE
+	---help---
+		This is the set of initial USB features that are enabled at boot
+		time.  See the event ID class bit definitions in
+		include/nuttx/usbdev_trace.h.
 
 comment "USB Device Class Driver Options"
 
