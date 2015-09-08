@@ -76,37 +76,31 @@ irqstate_t irqidle_mask;
  * Private Functions
  ****************************************************************************/
 
-static void led_setonoff(unsigned int bits)
-{
-}
-
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 
 void board_led_initialize(void)
 {
    stm32_configgpio(GPIO_LED);
 }
 
-
 void board_led_on(int led)
 {
-  if (led==LED_IDLE) {
-	irqidle_mask = irqsave();
-	stm32_gpiowrite(GPIO_LED, true);
-  }
+  if (led == LED_IDLE)
+    {
+      irqidle_mask = irqsave();
+      stm32_gpiowrite(GPIO_LED, true);
+    }
 }
-
 
 void board_led_off(int led)
 {
-  if (led==LED_IDLE) {
-    stm32_gpiowrite(GPIO_LED, false);
-    irqrestore(irqidle_mask);
-  }
+  if (led == LED_IDLE)
+    {
+      stm32_gpiowrite(GPIO_LED, false);
+      irqrestore(irqidle_mask);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

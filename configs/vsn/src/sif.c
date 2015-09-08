@@ -1,6 +1,5 @@
 /****************************************************************************
  * config/vsn/src/sif.c
- * arch/arm/src/board/sif.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *

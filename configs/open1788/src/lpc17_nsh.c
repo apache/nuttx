@@ -248,7 +248,7 @@ static int nsh_sdinitialize(void)
    * inserted or deleted.
    */
 
-#if NSH_HAVE_MMCSD_CDINT
+#ifdef NSH_HAVE_MMCSD_CDINT
 
    (void)irq_attach(LPC17_IRQ_P0p13, nsh_cdinterrupt);
    up_enable_irq(LPC17_IRQ_P0p13);
