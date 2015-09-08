@@ -209,8 +209,12 @@ int main(int argc, char **argv, char **envp)
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
   printf(" * support should be disabled\n");
   printf(" */\n\n");
+  printf("#ifndef CONFIG_MQ_MAXMSGSIZE)\n");
+  printf("# define CONFIG_DISABLE_MQUEUE 0\n");
+  printf("#endif\n\n");
   printf("#if CONFIG_MQ_MAXMSGSIZE <= 0 && !defined(CONFIG_DISABLE_MQUEUE)\n");
-  printf("# define CONFIG_DISABLE_MQUEUE 1\n");
+  printf("# undef CONFIG_DISABLE_MQUEUE\n");
+  printf("# define CONFIG_DISABLE_MQUEUE 0\n");
   printf("#endif\n\n");
   printf("/* If mountpoint support in not included, then no filesystem can be supported */\n\n");
   printf("#ifdef CONFIG_DISABLE_MOUNTPOINT\n");
