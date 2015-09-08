@@ -1919,7 +1919,6 @@ static int sam_async_setup(struct sam_rhport_s *rhport,
   uint32_t *flink;
   uint32_t *alt;
   uint32_t toggle;
-  uint32_t regval;
   bool dirin = false;
   int ret;
 

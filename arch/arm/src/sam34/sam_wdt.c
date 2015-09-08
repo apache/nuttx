@@ -668,7 +668,8 @@ void sam_wdtinitialize(FAR const char *devpath)
 
   /* Enable watchdog with 5 sec timeout */
 
-  mr_val |= (WDT_MR_WDD((5) * WDT_FCLK) | WDT_MR_WDV((5) * WDT_FCLK) | WDT_MR_WDRSTEN);
+  mr_val = (WDT_MR_WDD((5) * WDT_FCLK) | WDT_MR_WDV((5) * WDT_FCLK) |
+           WDT_MR_WDRSTEN);
   sam34_putreg(mr_val, SAM_WDT_MR);
 
   wdvdbg("Entry: devpath=%s\n", devpath);

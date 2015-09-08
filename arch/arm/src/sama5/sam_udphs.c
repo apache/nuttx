@@ -4351,12 +4351,6 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
 
       priv->eplist[epno].ep.maxpacket = SAM_UDPHS_MAXPACKETSIZE(epno);
     }
-
-  /* Select a smaller endpoint size for EP0 */
-
-#if SAM_EP0MAXPACKET < SAM_MAXPACKET_SIZE
-  priv->eplist[EP0].ep.maxpacket = SAM_EP0MAXPACKET;
-#endif
 }
 
 /****************************************************************************

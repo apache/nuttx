@@ -207,7 +207,7 @@
  */
 
 #if defined(CONFIG_SAM34_RC80M) || defined(BOARD_SYSCLK_SOURCE_RC80M) || \
-    defined(BOARD_DFLL0_SOURCE_RC80M) || BOARD_GLCK9_SOURCE_RC80M
+    defined(BOARD_DFLL0_SOURCE_RC80M) || defined(BOARD_GLCK9_SOURCE_RC80M)
 #  define NEED_RC80M                 1
 #endif
 

@@ -104,22 +104,22 @@
 #    define CONSOLE_DEV   g_uart0port     /* UART0 is console */
 #  endif
 #  define TTYS0_DEV       g_uart0port     /* UART0 is tty0 */
-#  if CONFIG_STR71X_UART1
+#  if defined(CONFIG_STR71X_UART1)
 #    define TTYS1_DEV     g_uart1port     /* UART1 is tty1 */
-#    if CONFIG_STR71X_UART2
+#    if defined(CONFIG_STR71X_UART2)
 #      define TTYS2_DEV   g_uart2port     /* UART2 is tty2 */
-#      if CONFIG_STR71X_UART3
+#      if defined(CONFIG_STR71X_UART3)
 #        define TTYS3_DEV g_uart3port     /* UART3 is tty3 */
 #      endif
-#    elif CONFIG_STR71X_UART3
+#    elif defined(CONFIG_STR71X_UART3)
 #      define TTYS2_DEV   g_uart3port     /* UART3 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART2
+#  elif defined(CONFIG_STR71X_UART2)
 #    define TTYS1_DEV   g_uart2port       /* UART2 is tty1 */
-#    if CONFIG_STR71X_UART3
+#    if defined(CONFIG_STR71X_UART3)
 #      define TTYS2_DEV g_uart3port       /* UART3 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART3
+#  elif defined(CONFIG_STR71X_UART3)
 #    define TTYS1_DEV   g_uart3port       /* UART3 is tty1 */
 #  endif
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -132,18 +132,18 @@
 #    define TTYS1_DEV     g_uart0port     /* UART0 is tty1 */
 #    if CONFIG_STR71X_UART2
 #      define TTYS2_DEV   g_uart2port     /* UART2 is tty2 */
-#      if CONFIG_STR71X_UART3
+#      if defined(CONFIG_STR71X_UART3)
 #        define TTYS3_DEV g_uart3port     /* UART3 is tty3 */
 #      endif
-#    elif CONFIG_STR71X_UART3
+#    elif defined(CONFIG_STR71X_UART3)
 #      define TTYS2_DEV   g_uart3port     /* UART3 is tty2 */
 #    endif
 #  elif CONFIG_STR71X_UART2
 #    define TTYS1_DEV   g_uart2port       /* UART2 is tty1 */
-#    if CONFIG_STR71X_UART3
+#    if defined(CONFIG_STR71X_UART3)
 #      define TTYS2_DEV g_uart3port       /* UART3 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART3
+#  elif defined(CONFIG_STR71X_UART3)
 #    define TTYS1_DEV   g_uart3port       /* UART3 is tty1 */
 #  endif
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
@@ -154,20 +154,20 @@
 #  define TTYS0_DEV       g_uart2port     /* UART2 is tty0 */
 #  if CONFIG_STR71X_UART0
 #    define TTYS1_DEV     g_uart0port     /* UART0 is tty1 */
-#    if CONFIG_STR71X_UART1
+#    if defined(CONFIG_STR71X_UART1)
 #      define TTYS2_DEV   g_uart1port     /* UART1 is tty2 */
-#      if CONFIG_STR71X_UART3
+#      if defined(CONFIG_STR71X_UART3)
 #        define TTYS3_DEV g_uart3port     /* UART3 is tty3 */
 #      endif
-#    elif CONFIG_STR71X_UART3
+#    elif defined(CONFIG_STR71X_UART3)
 #      define TTYS2_DEV   g_uart3port     /* UART3 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART1
+#  elif defined(CONFIG_STR71X_UART1)
 #    define TTYS1_DEV   g_uart1port       /* UART1 is tty1 */
-#    if CONFIG_STR71X_UART3
+#    if defined(CONFIG_STR71X_UART3)
 #      define TTYS2_DEV g_uart3port       /* UART3 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART3
+#  elif defined(CONFIG_STR71X_UART3)
 #    define TTYS1_DEV   g_uart3port       /* UART3 is tty1 */
 #  endif
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
@@ -178,20 +178,20 @@
 #  define TTYS0_DEV       g_uart3port     /* UART3 is tty0 */
 #  if CONFIG_STR71X_UART0
 #    define TTYS1_DEV     g_uart0port     /* UART0 is tty1 */
-#    if CONFIG_STR71X_UART1
+#    if defined(CONFIG_STR71X_UART1)
 #      define TTYS2_DEV   g_uart1port     /* UART1 is tty2 */
-#      if CONFIG_STR71X_UART2
+#      if defined(CONFIG_STR71X_UART2)
 #        define TTYS3_DEV g_uart2port     /* UART2 is tty3 */
 #      endif
-#    elif CONFIG_STR71X_UART2
+#    elif defined(CONFIG_STR71X_UART2)
 #      define TTYS2_DEV   g_uart2port     /* UART2 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART1
+#  elif defined(CONFIG_STR71X_UART1)
 #    define TTYS1_DEV   g_uart1port       /* UART1 is tty1 */
-#    if CONFIG_STR71X_UART2
+#    if defined(CONFIG_STR71X_UART2)
 #      define TTYS2_DEV g_uart2port       /* UART2 is tty2 */
 #    endif
-#  elif CONFIG_STR71X_UART2
+#  elif defined(CONFIG_STR71X_UART2)
 #    define TTYS1_DEV   g_uart2port       /* UART2 is tty1 */
 #  endif
 #else
