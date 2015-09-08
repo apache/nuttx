@@ -141,7 +141,7 @@ static struct lpc17_mediachange_s g_ssp1callback;
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SPI_CALLBACK
+#if 0 /* #ifdef CONFIG_SPI_CALLBACK */
 static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
 {
   irqstate_t flags;
@@ -181,7 +181,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SPI_CALLBACK
+#if 0 /* ifdef CONFIG_SPI_CALLBACK */
 #ifdef CONFIG_LPC17_SSP0
 static int ssp0_cdinterrupt(int irq, FAR void *context)
 {
