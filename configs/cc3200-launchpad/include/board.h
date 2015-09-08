@@ -202,8 +202,9 @@ void tiva_boardinitialize(void);
  *
  ************************************************************************************/
 
-#ifndef CONFIG_ARCH_LEDS
 void cc3200_ledinit(void);
+
+#ifndef CONFIG_ARCH_LEDS
 void cc3200_setled(int led, unsigned char ledon);
 void cc3200_setleds(unsigned char ledset);
 #endif
