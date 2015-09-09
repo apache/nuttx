@@ -37,7 +37,10 @@
 
 CSRCS += lib_addrconfig.c lib_etherntoa.c lib_htons.c lib_htonl.c
 CSRCS += lib_inetaddr.c lib_inetntoa.c lib_inetntop.c lib_inetpton.c
+
+ifeq ($(CONFIG_NET),y)
 CSRCS += lib_shutdown.c
+endif
 
 # Routing table support
 
