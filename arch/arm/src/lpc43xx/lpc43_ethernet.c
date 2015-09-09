@@ -2171,7 +2171,7 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
    * Interrupts will be re-enabled when lpc43_ifup() is called.
    */
 
-  up_disable_irq(STM32_IRQ_ETH);
+  up_disable_irq(LPC43M4_IRQ_ETHERNET);
 
   /* Cancel any pending poll or interrupt work.  This will have no effect
    * on work that has already been started.
