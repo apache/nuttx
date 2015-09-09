@@ -25,6 +25,34 @@ config SAMA5_HAVE_UART1
 	bool
 	default n
 
+config SAMA5_HAVE_UART2
+	bool
+	default n
+
+config SAMA5_HAVE_UART3
+	bool
+	default n
+
+config SAMA5_HAVE_UART4
+	bool
+	default n
+
+config SAMA5_HAVE_USART0
+	bool
+	default n
+
+config SAMA5_HAVE_USART1
+	bool
+	default n
+
+config SAMA5_HAVE_USART2
+	bool
+	default n
+
+config SAMA5_HAVE_USART3
+	bool
+	default n
+
 config SAMA5_HAVE_USART4
 	bool
 	default n
@@ -130,7 +158,9 @@ config ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_LCDC
 	select SAMA5_HAVE_UART0
 	select SAMA5_HAVE_UART1
-	select SAMA5_HAVE_USART4
+	select SAMA5_HAVE_UART2
+	select SAMA5_HAVE_UART3
+	select SAMA5_HAVE_UART4
 	select SAMA5_HAVE_QSPI
 	select SAMA5_HAVE_XDMA
 	select SAMA5_HAVE_SAIC
@@ -144,6 +174,10 @@ config ARCH_CHIP_SAMA5D3
 	default n
 	select SAMA5_HAVE_DMA
 	select SAMA5_HAVE_PIOE
+	select SAMA5_HAVE_USART0
+	select SAMA5_HAVE_USART1
+	select SAMA5_HAVE_USART2
+	select SAMA5_HAVE_USART3
 
 config ARCH_CHIP_SAMA5D4
 	bool
@@ -157,6 +191,10 @@ config ARCH_CHIP_SAMA5D4
 	select SAMA5_HAVE_LCDC
 	select SAMA5_HAVE_UART0
 	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_USART0
+	select SAMA5_HAVE_USART1
+	select SAMA5_HAVE_USART2
+	select SAMA5_HAVE_USART3
 	select SAMA5_HAVE_USART4
 	select SAMA5_HAVE_XDMA
 	select SAMA5_HAVE_PIOE
@@ -355,27 +393,52 @@ config SAMA5_UART1
 	select ARCH_HAVE_UART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config SAMA5_UART2
+	bool "UART 2"
+	default n
+	depends on SAMA5_HAVE_UART2
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_UART3
+	bool "UART 3"
+	default n
+	depends on SAMA5_HAVE_UART3
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_UART4
+	bool "UART 4"
+	default n
+	depends on SAMA5_HAVE_UART4
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
 config SAMA5_USART0
 	bool "USART 0"
 	default n
+	depends on SAMA5_HAVE_USART0
 	select ARCH_HAVE_USART0
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART1
 	bool "USART 1"
 	default n
+	depends on SAMA5_HAVE_USART1
 	select ARCH_HAVE_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART2
 	bool "USART 2"
 	default n
+	depends on SAMA5_HAVE_USART2
 	select ARCH_HAVE_USART2
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART3
 	bool "USART 3"
 	default n
+	depends on SAMA5_HAVE_USART3
 	select ARCH_HAVE_USART3
 	select ARCH_HAVE_SERIAL_TERMIOS
 
