@@ -357,11 +357,8 @@ int cc3000_wait_data(int sockfd)
  *
  ****************************************************************************/
 
-int to_cc3000_accept_socket(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-
 int cc3000_accept_socket(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-  //return to_cc3000_accept_socket(sockfd, addr,addrlen);
   DEBUGASSERT(spiconf.cc3000fd >= 0);
 
   cc3000_acceptcfg cfg;
