@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_sfr.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,19 +58,32 @@
                                            /* 0x002c: Reserved */
 #define SAM_SFR_UTMICKTRIM_OFFSET   0x0030 /* UTMI Clock Trimming Register */
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SAM_SFR_UTMIHSTRIM_OFFSET 0x0034 /* UTMI High Speed Trimming Register */
 #  define SAM_SFR_UTMIFSTRIM_OFFSET 0x0038 /* UTMI Full Speed Trimming Register */
 #  define SAM_SFR_UTMISWAP_OFFSET   0x003c /* UTMI DP/DM Pin Swapping Register */
 #endif
 
 #define SAM_SFR_EBICFG_OFFSET       0x0040 /* EBI Configuration Register */
-                                           /* 0x0044-0x3ffc: Reserved */
-#ifdef ATSAMA5D4
+
+#ifdef ATSAMA5D2
+#  define SAM_SFR_ANACFG_OFFSET     0x0044 /* Analog Configuration Register */
+#  define SAM_SFR_CAN_OFFSET        0x0048 /* CAN Memories Address-based Register */
+#endif
+
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SAM_SFR_SN0_OFFSET        0x004c /* Serial Number 0 Register */
 #  define SAM_SFR_SN1_OFFSET        0x0050 /* Serial Number 1 Register */
 #  define SAM_SFR_AICREDIR_OFFSET   0x0054 /* AIC Redirection Register */
 #endif
+
+#ifdef ATSAMA5D2
+#  define SAM_SFR_L2CCHRAMC_OFFSET  0x0044 /* L2CC HRAMC1 */
+                                           /* 0x005c-0x008c: Reserved */
+#  define SAM_SFR_I2SCLKSEL_OFFSET  0x0090 /* I2SC Register */
+#  define SAM_SFR_QSPICLK_OFFSET    0x0094 /* QSPI Clock Pad Supply Select Register */
+#endif
+                                           /* 0x0098-0x3ffc: Reserved */
 
 /* SFR Register Addresses ***********************************************************/
 
@@ -80,7 +93,7 @@
 #define SAM_SFR_SECURE              (SAM_SFR_VBASE+SAM_SFR_SECURE_OFFSET)
 #define SAM_SFR_UTMICKTRIM          (SAM_SFR_VBASE+SAM_SFR_UTMICKTRIM_OFFSET)
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SAM_SFR_UTMIHSTRIM        (SAM_SFR_VBASE+SAM_SFR_UTMIHSTRIM_OFFSET)
 #  define SAM_SFR_UTMIFSTRIM        (SAM_SFR_VBASE+SAM_SFR_UTMIFSTRIM_OFFSET)
 #  define SAM_SFR_UTMISWAP          (SAM_SFR_VBASE+SAM_SFR_UTMISWAP_OFFSET)
@@ -88,10 +101,21 @@
 
 #define SAM_SFR_EBICFG              (SAM_SFR_VBASE+SAM_SFR_EBICFG_OFFSET)
 
-#ifdef ATSAMA5D4
+#ifdef ATSAMA5D2
+#  define SAM_SFR_ANACFG            (SAM_SFR_VBASE+SAM_SFR_ANACFG_OFFSET)
+#  define SAM_SFR_CAN               (SAM_SFR_VBASE+SAM_SFR_CAN_OFFSET)
+#endif
+
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SAM_SFR_SN0               (SAM_SFR_VBASE+SAM_SFR_SN0_OFFSET)
 #  define SAM_SFR_SN1               (SAM_SFR_VBASE+SAM_SFR_SN1_OFFSET)
 #  define SAM_SFR_AICREDIR          (SAM_SFR_VBASE+SAM_SFR_AICREDIR_OFFSET)
+#endif
+
+#ifdef ATSAMA5D2
+#  define SAM_SFR_L2CCHRAMC         (SAM_SFR_VBASE+SAM_SFR_L2CCHRAMC_OFFSET)
+#  define SAM_SFR_I2SCLKSEL         (SAM_SFR_VBASE+SAM_SFR_I2SCLKSEL_OFFSET)
+#  define SAM_SFR_QSPICLK           (SAM_SFR_VBASE+SAM_SFR_QSPICLK_OFFSET)
 #endif
 
 /* SFR Register Bit Definitions *****************************************************/
@@ -109,7 +133,19 @@
 #  define SFR_OHCIICR_RES2          (1 << 2)  /* Bit 2:  USB port 2 reset */
 #define SFR_OHCIICR_ARIE            (1 << 4)  /* Bit 4:  OHCI asynchronous resume interrupt enable */
 #define SFR_OHCIICR_APPSTART        (0)       /* Bit 5:  Reserved, must write 0 */
+
+#ifdef ATSAMA5D2
+#  define SFR_OHCIICR_SUSPEND(n)    (1 << ((n)+8))
+#    define SFR_OHCIICR_SUSPENDA    (1 << 8)  /* Bit 8:  Suspend USB port A */
+#    define SFR_OHCIICR_SUSPENDB    (1 << 9)  /* Bit 9:  Suspend USB port B */
+#    define SFR_OHCIICR_SUSPENDC    (1 << 10) /* Bit 10: Suspend USB port C */
+#endif
+
 #define SFR_OHCIICR_UDPPUDIS        (1 << 23) /* Bit 23: USB device pull-up disable */
+
+#ifdef ATSAMA5D2
+#  define SFR_OHCIICR_HSIC_SEL      (0)       /* Bit 27: Reserved (must write 0) */
+#endif
 
 /* OHCI Interrupt Status Register */
 
@@ -129,15 +165,17 @@
 #  define SFR_UTMICKTRIM_FREQ_12MHZ (0 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 12 MHz reference clock */
 #  define SFR_UTMICKTRIM_FREQ_16MHZ (1 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 16 MHz reference clock */
 #  define SFR_UTMICKTRIM_FREQ_24MHZ (2 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 24 MHz reference clock */
+#ifndef ATSAMA5D2
 #  define SFR_UTMICKTRIM_FREQ_48MHZ (3 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 48 MHz reference clock */
+#endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SFR_UTMICKTRIM_VBG_SHIFT  (16)     /* Bits 16-19: UTMI Band Gap Voltage Trimming */
 #  define SFR_UTMICKTRIM_VBG_MASK   (15 << SFR_UTMICKTRIM_VBG_SHIFT)
 #    define SFR_UTMICKTRIM_VBG(n)   ((uint32_t)(n) << SFR_UTMICKTRIM_VBG_SHIFT)
 #endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* UTMI High Speed Trimming Register */
 
 #  define SFR_UTMIHSTRIM_SQUELCH_SHIFT (0)   /* Bits 0-2: UTMI HS SQUELCH Voltage Trimming */
@@ -157,7 +195,7 @@
 #    define SFR_UTMIHSTRIM_SLOPE2(n)   ((uint32_t)(n) << SFR_UTMIHSTRIM_SLOPE2_SHIFT)
 #endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* UTMI Full Speed Trimming Register */
 
 #  define SFR_UTMIFSTRIM_RISE_SHIFT (0)      /* Bits 0-2: FS Transceiver Output Rising Slope Trimming */
@@ -177,12 +215,13 @@
 #    define SFR_UTMIFSTRIM_ZP(n)    ((uint32_t)(n) << SFR_UTMIHSTRIM_SLOPE2_SHIFT)
 #endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* UTMI DP/DM Pin Swapping Register */
 
-#  define SFR_UTMISWAP_PORT0       (1 << 0)  /* Bit 0:  PORT 0 DP/DM Pin Swapping */
-#  define SFR_UTMISWAP_PORT1       (1 << 1)  /* Bit 1:  PORT 1 DP/DM Pin Swapping */
-#  define SFR_UTMISWAP_PORT2       (1 << 2)  /* Bit 2:  PORT 2 DP/DM Pin Swapping */
+#  define SFR_UTMISWAP_PORT(n)     (1 << (n)) /* Bit n:  PORT n DP/DM Pin Swapping */
+#    define SFR_UTMISWAP_PORT0     (1 << 0)  /* Bit 0:  PORT 0 DP/DM Pin Swapping */
+#    define SFR_UTMISWAP_PORT1     (1 << 1)  /* Bit 1:  PORT 1 DP/DM Pin Swapping */
+#    define SFR_UTMISWAP_PORT2     (1 << 2)  /* Bit 2:  PORT 2 DP/DM Pin Swapping */
 #endif
 
 /* EBI Configuration Register */
@@ -214,16 +253,61 @@
 #  define SFR_EBICFG_BMS            (1 << 16) /* Bit 16:  BMS Sampled Value (Read Only) */
 #endif
 
-#ifdef ATSAMA5D4
+#ifdef ATSAMA5D2
+/* Analog Configuration Register */
+
+#  define SFR_ANACFG_SMDDREN        (1 << 0)  /* Bit 0: DDR Supply Monitor Enable */
+#endif
+
+#ifdef ATSAMA5D2
+/* CAN Memories Address-based Register */
+
+#  define SFR_CAN0_EXTMEMADDR_SHIFT (0)        /* Bits 0-15: MSB CAN0 Base Address */
+#  define SFR_CAN0_EXTMEMADDR_MASK  (0xffff << SFR_CAN0_EXTMEMADDR_SHIFT)
+#    define SFR_CAN0_EXTMEMADDR(n)  ((uint32_t)(n) << SFR_CAN0_EXTMEMADDR_SHIFT)
+#  define SFR_CAN1_EXTMEMADDR_SHIFT (16)       /* Bits 16-31: MSB CAN0 Base Address */
+#  define SFR_CAN1_EXTMEMADDR_MASK  (0xffff << SFR_CAN1_EXTMEMADDR_SHIFT)
+#    define SFR_CAN1_EXTMEMADDR(n)  ((uint32_t)(n) << SFR_CAN1_EXTMEMADDR_SHIFT)
+#endif
+
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* Serial Number 0 Register (32-bit value) */
 /* Serial Number 1 Register (32-bit value) */
 
 /* AIC Redirection Register */
 
-#  define SFR_AICREDIR_ENABLE       (1 << 0)  /* Bit 0: 1=All interrupts to AIC */
-#  define SFR_AICREDIR_DISABLE      (0)       /* Bit 0: 0=Secure interrupts to SAIC */
+#  define SFR_AICREDIR_NSAIC        (1 << 0)  /* Bit 0: Interrupt redirection to Non-Secure AIC */
+#    define SFR_AICREDIR_ENABLE     (1 << 0)  /* Bit 0: 1=All interrupts to AIC */
+#    define SFR_AICREDIR_DISABLE    (0)       /* Bit 0: 0=Secure interrupts to SAIC */
 #  define SFR_AICREDIR_KEY          (0x5f67b102) /* Bits 1-31: Access key */
 
+#endif
+
+#ifdef ATSAMA5D2
+/* L2CC HRAMC1 */
+
+#  define SFR_L2CCHRAMC_SRAMSEL     (1 << 0)  /* Bit 0: SRAM selector */
+#    define SFR_L2CCHRAMC_SRAM      (0)       /* Bit 0: 0=Selects SRAM */
+#    define SFR_L2CCHRAMC_L2CC      (1 << 0)  /* Bit 0: 1=Selects L2CC */
+#endif
+
+#ifdef ATSAMA5D2
+/* I2SC Register */
+
+#  define SFR_I2S_CLKSEL0           (1 << 0)  /* Bit 0: Clock selection 0 */
+#    define SFR_I2S_CLKSEL0_GCLK    (0)       /* Bit 0: 0=Selects GCLK */
+#    define SFR_I2S_CLKSEL0_PCLK    (1 << 0)  /* Bit 0: 1=Selects PCLK */
+#  define SFR_I2S_CLKSEL1           (1 << 1)  /* Bit 1: Clock selection 1 */
+#    define SFR_I2S_CLKSEL1_GCLK    (0)       /* Bit 0: 0=Selects GCLK */
+#    define SFR_I2S_CLKSEL1_PCLK    (1 << 1)  /* Bit 0: 1=Selects PCLK */
+#endif
+
+#ifdef ATSAMA5D2
+/* QSPI Clock Pad Supply Select Register */
+
+#  define SFR_QSPICLK_SUPSEL        (1 << 0)  /* Bit 0: Supply selection */
+#    define SFR_QSPICLK_1p8V        (0)       /* Bit 0: 0=1.8V */
+#    define SFR_QSPICLK_3p3V        (1 << 0)  /* Bit 0: 1=3.3V */
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_SFR_H */

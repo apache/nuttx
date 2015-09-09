@@ -59,6 +59,7 @@
 
 #include "chip/sam_wdt.h"
 #include "chip/sam_aximx.h"
+#include "chip/sam_sfr.h"
 
 #include "sam_clockconfig.h"
 #include "sam_memorymap.h"
@@ -412,17 +413,8 @@ void up_boot(void)
   const uint32_t *src;
   uint32_t *dest;
 #endif
-
-#if defined(CONFIG_ARCH_CHIP_SAMA5D2) && !defined(CONFIG_ARCH_L2CACHE)
-  /* The SAMA5D2 features a second 128-Kbyte SRAM that can be allocated
-   * either to the L2 cache controller or used as an internal SRAM. After
-   * reset, this block is connected to the L2 cache controller. The
-   * SRAM_SEL bit, located in the SFR_L2CC_HRAMC register, is used to
-   * reassign this memory as system SRAM, making the two 128-Kbyte
-   * RAMs contiguous.
-   */
-
-# warning Missing Logic
+#ifdef ATSAMA5D2
+  uint32_t regval;
 #endif
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
@@ -439,6 +431,26 @@ void up_boot(void)
   sam_vectormapping();
 
 #endif /* CONFIG_ARCH_ROMPGTABLE */
+
+#ifdef ATSAMA5D2
+  /* The SAMA5D2 features a second 128-Kbyte SRAM that can be allocated
+   * either to the L2 cache controller or used as an internal SRAM. After
+   * reset, this block is connected to the L2 cache controller. The
+   * SRAM_SEL bit, located in the SFR_L2CC_HRAMC register, is used to
+   * reassign this memory as system SRAM, making the two 128-Kbyte
+   * RAMs contiguous.
+   */
+
+  regval = getreg32(SAM_SFR_L2CCHRAMC);
+
+#ifdef CONFIG_ARCH_L2CACHE
+  regval |= SFR_L2CCHRAMC_SRAMSEL;  /* 1=Selects L2CC */
+#else
+  regval &= ~SFR_L2CCHRAMC_SRAMSEL; /* 0=Selects SRAM */
+#endif
+
+  putreg32(regval, SAM_SFR_L2CCHRAMC);
+#endif
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct

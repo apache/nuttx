@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/chip/sam_wdt.h
  * Watchdog Timer (WDT) definitions for the SAMA5D3
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,12 @@
 /* WDT register bit definitions ********************************************************/
 /* Watchdog Timer Control Register */
 
-#define WDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Rest */
+#define WDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Restart */
+
+#ifdef ATSAMA5D2
+#define WDT_CR_LOCKMR             (1 << 4)   /* Bit 4:  Lock Mode Register Write Access */
+#endif
+
 #define WDT_CR_KEY_SHIFT          (24)       /* Bits 24-31:  Password */
 #define WDT_CR_KEY_MASK           (0xff << WDT_CR_KEY_SHIFT)
 #  define WDT_CR_KEY              (0xa5 << WDT_CR_KEY_SHIFT)
