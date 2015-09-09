@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/socket.h
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,6 +155,12 @@
 
 #define SOL_SOCKET     0  /* Only socket-level options supported */
 
+/* Values for the 'how' argument of shutdown() */
+
+#define SHUT_RD        1  /* Bit 0: Disables further receive operations */
+#define SHUT_WR        2  /* Bit 1: Disables further send operations */
+#define SHUT_RDWR      3  /* Bits 0+1: Disables further send and receive operations */
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -226,6 +232,8 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
 ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags);
 ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                  FAR struct sockaddr *from, FAR socklen_t *fromlen);
+
+int shutdown(int sockfd, int how);
 
 int setsockopt(int sockfd, int level, int option,
                FAR const void *value, socklen_t value_len);

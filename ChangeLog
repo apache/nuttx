@@ -10958,5 +10958,9 @@
 	  asynchronous queue when adding a new QH structure.  From  Ilya
 	  Averyanov (2015-09-07).
 	* arch/arm/src/sama5: Separate memory mapping tables for SAMA5D2, 3,
-	  and 4 (2015-09-07).
+	  and 4 (2015-09-08).
+	* libc/net/lib_shutdown.c:  Add an empty implementatino of the
+	  standard shutdown function.  This provides only the framework for
+	  the shutdown function; the internal logic is not included
+	  (2015-09-09).
 
