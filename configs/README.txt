@@ -385,6 +385,10 @@ configs/nucleo-f4x1re
   http://developer.mbed.org/platforms/ST-Nucleo-F411RE for more
   information about these boards.
 
+configs/nucleo-f303re
+  STMicro ST Nucleo F401RE and F303RE board.  Contributed by Paul Alexander
+  Patience.
+
 configs/nucleus2g
   This port uses the Nucleus 2G board (with Babel CAN board).  This board
   features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
