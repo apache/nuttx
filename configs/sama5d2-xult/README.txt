@@ -646,43 +646,60 @@ Buttons and LEDs
 Serial Console
 ==============
 
-  Two UART ports are available:
+  Virtual COM / DBGU Port.  Either may be driven by USART3, depending
+  upon the setting of JP2 (DBGU_PE):
 
-  Virtual COM / DBGU Port (J24).  Either may be driven by USART3, depending
-  upon the setting of JP19 and JP20:
+    ------------ -------------- --------
+      SAMA5D2    BOARD SIGNAL   USAGE
+    PIO FUNCTION NAME           FUNCTION
+    ------------ -------------- --------
+    PD3 UTXD1    DBGU_UTXD1_PD3 DBGU_RXD
+    PD2 URXD1    DBGU_URXD1_PD2 DBGU_TXD
+    ------------ -------------- --------
 
-  ------------------------------ ------------------- -------------------------
-  SAMA5D2 PIO                    SIGNAL              USAGE
-  ------------------------------ ------------------- -------------------------
-  PE16/A16/RXD3/TIOB0            DBGU_RXD3_PE16      DBGU_RXD3 (See JP19)
-  PE17/A17/TXD3/TCLK0            DBGU_TXD3_PE17      DBGU_TXD3 (See JP20)
-  ------------------------------ ------------------- -------------------------
+  Terminologicy: FLEXCOM is the same as USART in previous SAMA5D versions.
 
-  In one jumper position UART3 connects to the SAM3U which will, in turn,
-  provide the serial output over a USB virtual COM port.  In other other
-  jumper position, UART3 will connect the RS-232 port labelled DBGU (J24).
+  Standard UART on Arduino connector (J21) is FLEXCOM4.
 
-  I personally prefer the RS-232 port because my terminal software does not
-  lose the USB Virtual COM every time I reset or power-cycle the board.
+    ---- ------- -------------
+    J21  BOARD      SAMA5D2
+    PIN  NAME    PIO  FUNCTION
+    ---- ------- -------------
+     7   F4_TXD  PD12 FLEXCOM4
+     8   F4_RXD  PD13 FLEXCOM4
+    ---- ------- -------------
 
-  USART4 TTL-Level
-  ------------------------------ ------------------- -------------------------
-  SAMA5D2 PIO                    SIGNAL              USAGE
-  ------------------------------ ------------------- -------------------------
-  PE26/NCS2/RXD4/A18             RXD4_PE26           RXD4
-  PE27/NWR1/NBS1/TXD4            TXD4_PE27           TXD4
-  ------------------------------ ------------------- -------------------------
+  Other USARTs are available on J22:
 
-  A TTL-to-RS232 converter is required to use this USART for a serial console.
+    ---- ------- -------------
+    J22  BOARD      SAMA5D2
+    PIN  NAME    PIO  FUNCTION
+    ---- ------- -------------
+     3   F0_TXD  PB28 FLEXCOM0
+     4   F0_RXD  PB29 FLEXCOM0
+     5   F3_TXD  PB23 FLEXCOM3
+     6   F3_RXD  PB22 FLEXCOM3
+    ---- ------- -------------
 
-  - RXD4/PE26 is available at Expansion Interface, J19C pin 59
-  - TXD4/PE27 is available at Expansion Interface, J19C pin 60
-  - VCC_3V3 is also available at Expansion Interface, J19B pins 21 and 22
-  - GND is available J19A pin 11, J19B pin 31, and J19C pin 51
+  UARTs available of EXT1
 
-  By default the RS-232 DBGU port on USART3 is used as the NuttX serial
-  console in all configurations (unless otherwise noted).  USART4, however,
-  is the also available.
+    ---- ------- -------------
+    EXT1 BOARD      SAMA5D2
+    PIN  NAME    PIO  FUNCTION
+    ---- ------- -------------
+     13  UART_RX PA23 FLEXCOM1
+     14  UART_TX PA24 FLEXCOM1
+    ---- ------- ---- --------
+
+  UARTs available of EXT2
+
+    ---- ------- -------------
+    EXT2 BOARD      SAMA5D2
+    PIN  NAME    PIO  FUNCTION
+    ---- ------- -------------
+     13  UART_RX PB29 FLEXCOM0
+     14  UART_TX PB28 FLEXCOM0
+    ---- ------- ---- --------
 
 SAMA5D2-XULT Configuration Options
 =================================
