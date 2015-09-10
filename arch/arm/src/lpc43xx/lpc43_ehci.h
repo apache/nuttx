@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/lpc43xx/lpc43_cgu.h
+ * arch/arm/src/lpc43xx/lpc43_ehci.h
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_CGU_H
-#define __ARCH_ARM_SRC_LPC43XX_CGU_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_EHCI_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_EHCI_H
 
 /************************************************************************************
  * Included Files
@@ -42,7 +42,6 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/lpc43_cgu.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -52,11 +51,11 @@
  * Public Types
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -68,51 +67,38 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
-/****************************************************************************
- * Name: lpc43_pll0usbdisable
+/*******************************************************************************
+ * Name: lpc31_ehci_initialize
  *
  * Description:
- *   Take PLL0USB to power-down mode.
+ *   Initialize USB EHCI host controller hardware.
  *
- ****************************************************************************/
-
-EXTERN void lpc43_pll0usbdisable(void);
-
-/****************************************************************************
- * Name: lpc43_pll0usbenable
+ * Input Parameters:
+ *   controller -- If the device supports more than one EHCI interface, then
+ *     this identifies which controller is being initializeed.  Normally, this
+ *     is just zero.
  *
- * Description:
- *   Take PLL0USB out of power-down mode and wait until it is locked onto the
- *   input clock.
+ * Returned Value:
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
  *
- ****************************************************************************/
-
-EXTERN void lpc43_pll0usbenable(void);
-
-/************************************************************************************
- * Name: lpc43_pll0usbconfig
+ * Assumptions:
+ * - This function should called in the initialization sequence in order
+ *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
  *
- * Description:
- *   Config USB0 PLL
- *
- ************************************************************************************/
+ *******************************************************************************/
 
-EXTERN void lpc43_pll0usbconfig(void);
-
-/************************************************************************************
- * Name: lpc43_clockconfig
- *
- * Description:
- *   Called to initialize the LPC43XX.  This does whatever setup is needed to put the
- *   MCU in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.
- *
- ************************************************************************************/
-
-void lpc43_clockconfig(void);
+#if defined(CONFIG_LPC43_USBOTG) && defined(CONFIG_USBHOST)
+struct usbhost_connection_s;
+FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -120,4 +106,4 @@ void lpc43_clockconfig(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_CGU_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_EHCI_H */

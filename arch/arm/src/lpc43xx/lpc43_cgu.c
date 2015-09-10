@@ -418,6 +418,77 @@ static inline void lpc43_m4clkselect(uint32_t clksel)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: lpc43_pll0usbconfig
+ *
+ * Description:
+ *   Configure PLL0USB dividers and multipliers per the settings in the board.h
+ *   file to generate the desired Fclkcout and Fcco frequencies.
+ *
+ ****************************************************************************/
+
+void lpc43_pll0usbconfig(void)
+{
+  putreg32(BOARD_USB0_CTL, LPC43_PLL0USB_CTRL);
+
+  putreg32(BOARD_USB0_MDIV, LPC43_PLL0USB_MDIV);
+  putreg32(BOARD_USB0_NP_DIV, LPC43_PLL0USB_NP_DIV);
+}
+
+
+/****************************************************************************
+ * Name: lpc43_pll0usbenable
+ *
+ * Description:
+ *   Take PLL0USB out of power-down mode and wait until it is locked onto the
+ *   input clock.
+ *
+ ****************************************************************************/
+
+void lpc43_pll0usbenable(void)
+{
+  uint32_t regval;
+
+  /* Take PLL1 out of power down mode.  The reset state of the PD bit
+   * is one, i.e., powered down.
+   */
+
+  regval  = getreg32(LPC43_PLL0USB_CTRL);
+  regval &= ~PLL0USB_CTRL_PD;
+  putreg32(regval, LPC43_PLL0USB_CTRL);
+
+  /* When the power-down mode is terminated, PPL1 will resume its normal
+   * operation and will make the lock signal high once it has regained
+   * lock on the input clock
+   *
+   * Wait for PLL1 to report that it is locked.
+   */
+
+  while ((getreg32(LPC43_PLL0USB_STAT) & PLL0USB_STAT_LOCK) == 0);
+}
+
+
+/****************************************************************************
+ * Name: lpc43_pll0usbdisable
+ *
+ * Description:
+ *   Take PLL0USB to power-down mode.
+ *
+ ****************************************************************************/
+
+void lpc43_pll0usbdisable(void)
+{
+  uint32_t regval;
+
+  /* Take PLL1 out of power down mode.  The reset state of the PD bit
+   * is one, i.e., powered down.
+   */
+
+  regval  = getreg32(LPC43_PLL0USB_CTRL);
+  regval |= PLL0USB_CTRL_PD;
+  putreg32(regval, LPC43_PLL0USB_CTRL);
+}
+
+/****************************************************************************
  * Name: lpc43_clockconfig
  *
  * Description:

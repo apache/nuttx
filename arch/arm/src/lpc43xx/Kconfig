@@ -421,6 +421,48 @@ config LPC43_USART3
 	select ARCH_HAVE_USART3
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config LPC43_USBOTG
+	bool "USB EHCI"
+	default n
+	select USBHOST_HAVE_ASYNCH
+
+if LPC43_USBOTG && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config LPC43_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config LPC43_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config LPC43_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config LPC43_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # LPC43_USBOTG && USBHOST
+
 config LPC43_USB0
 	bool "USB0"
 	default n
