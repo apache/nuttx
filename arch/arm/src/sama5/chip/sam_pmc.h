@@ -384,6 +384,7 @@
 #endif
 
 #if defined(ATSAMA5D3) || defined(ATSAMA5D4)
+#  undef  SAMA5_HAVE_PCK_INT_PRES                /* Supports conditional compilation */
 #  define PMC_PCK_PRES_SHIFT           (4)       /* Bits 4-6: Programmable Clock Prescaler */
 #  define PMC_PCK_PRES_MASK            (7 << PMC_PCK_PRES_SHIFT)
 #    define PMC_PCK_PRES_DIV1          (0 << PMC_PCK_PRES_SHIFT) /* Selected clock */
@@ -394,6 +395,7 @@
 #    define PMC_PCK_PRES_DIV32         (5 << PMC_PCK_PRES_SHIFT) /* Selected clock divided by 32 */
 #    define PMC_PCK_PRES_DIV64         (6 << PMC_PCK_PRES_SHIFT) /* Selected clock divided by 64 */
 #elif defined(ATSAMA5D2)
+#  define SAMA5_HAVE_PCK_INT_PRES      1         /* Supports conditional compilation */
 #  define PMC_PCK_PRES_SHIFT           (4)       /* Bits 4-11: Programmable Clock Prescaler */
 #  define PMC_PCK_PRES_MASK            (0xff << PMC_PCK_PRES_SHIFT)
 #    define PMC_PCK_PRES(n)            ((uint32_t)(n) << PMC_PCK_PRES_SHIFT)

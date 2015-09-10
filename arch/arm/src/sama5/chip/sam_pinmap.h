@@ -43,7 +43,9 @@
 #include <nuttx/config.h>
 #include <arch/sama5/chip.h>
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D2)
+#  include "chip/sama5d3x_pinmap.h"
+#elif defined(ATSAMA5D3)
 #  include "chip/sama5d3x_pinmap.h"
 #elif defined(ATSAMA5D4)
 #  include "chip/sama5d4x_pinmap.h"

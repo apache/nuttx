@@ -78,11 +78,22 @@
  * contiguous.  If not defined, then we need to do a table lookup.
  */
 
-#ifndef SAM_PION_VBASE
+#if !defined(SAM_PION_VBASE) && SAM_NPIO > 0
 const uintptr_t g_piobase[SAM_NPIO] =
 {
-  SAM_PIOA_VBASE, SAM_PIOB_VBASE, SAM_PIOC_VBASE, SAM_PIOD_VBASE,
+  SAM_PIOA_VBASE,
+#if SAM_NPIO > 1
+  SAM_PIOB_VBASE,
+#endif
+#if SAM_NPIO > 2
+  SAM_PIOC_VBASE,
+#endif
+#if SAM_NPIO > 3
+  SAM_PIOD_VBASE,
+#endif
+#if SAM_NPIO > 4
   SAM_PIOE_VBASE
+#endif
 };
 #endif
 
@@ -91,10 +102,22 @@ const uintptr_t g_piobase[SAM_NPIO] =
  ****************************************************************************/
 /* Maps a port number to the standard port character */
 
-#ifdef CONFIG_DEBUG_GPIO
+#if defined(CONFIG_DEBUG_GPIO) && SAM_NPIO > 0
 static const char g_portchar[SAM_NPIO] =
 {
-  'A', 'B', 'C', 'D', 'E'
+  'A',
+#if SAM_NPIO > 1
+  'B',
+#endif
+#if SAM_NPIO > 2
+  'C',
+#endif
+#if SAM_NPIO > 3
+  'D',
+#endif
+#if SAM_NPIO > 4
+  'E'
+#endif
 };
 #endif
 

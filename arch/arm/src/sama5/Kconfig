@@ -17,6 +17,10 @@ config SAMA5_HAVE_ICM
 	bool
 	default n
 
+config SAMA5_HAVE_RXLP
+	bool
+	default n
+
 config SAMA5_HAVE_UART0
 	bool
 	default n
@@ -54,6 +58,26 @@ config SAMA5_HAVE_USART3
 	default n
 
 config SAMA5_HAVE_USART4
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM0
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM1
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM2
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM3
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM4
 	bool
 	default n
 
@@ -145,6 +169,24 @@ config SAMA5_HAVE_VDEC
 	bool
 	default n
 
+# Summary configuratinos
+
+config SAMA5_FLEXCOM
+	bool
+	default n
+
+config SAMA5_FLEXCOM_USART
+	bool
+	default n
+
+config SAMA5_FLEXCOM_SPI
+	bool
+	default n
+
+config SAMA5_FLEXCOM_TWI
+	bool
+	default n
+
 # Chip Selection
 
 config ARCH_CHIP_SAMA5D2
@@ -156,11 +198,16 @@ config ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_EMACB
 	select SAMA5_HAVE_ICM
 	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_RXLP
 	select SAMA5_HAVE_UART0
 	select SAMA5_HAVE_UART1
 	select SAMA5_HAVE_UART2
 	select SAMA5_HAVE_UART3
 	select SAMA5_HAVE_UART4
+	select SAMA5_HAVE_FLEXCOM0
+	select SAMA5_HAVE_FLEXCOM1
+	select SAMA5_HAVE_FLEXCOM2
+	select SAMA5_HAVE_FLEXCOM3
 	select SAMA5_HAVE_QSPI
 	select SAMA5_HAVE_XDMA
 	select SAMA5_HAVE_SAIC
@@ -379,6 +426,11 @@ config SAMA5_SAIC
 	depends on SAMA5_HAVE_SAIC
 	select ARMV7A_DECODEFIQ
 
+config SAMA5_RXLP
+	bool "Low power asynchronous receiver"
+	default y
+	depends on SAMA5_HAVE_RXLP
+
 config SAMA5_UART0
 	bool "UART 0"
 	default y
@@ -448,6 +500,36 @@ config SAMA5_USART4
 	depends on SAMA5_HAVE_USART4
 	select ARCH_HAVE_USART4
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM0
+	bool "FLEXCOM 0"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM0
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM1
+	bool "FLEXCOM 1"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM1
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM2
+	bool "FLEXCOM 2"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM2
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM3
+	bool "FLEXCOM 3"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM3
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM4
+	bool "FLEXCOM 4"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM4
+	select SAMA5_FLEXCOM
 
 config SAMA5_TWI0
 	bool "Two-Wire Interface 0 (TWI0)"
@@ -702,6 +784,105 @@ config SAMA5_PIOE_IRQ
 	depends on SAMA5_HAVE_PIOE
 
 endif # PIO_IRQ
+
+menu "Flexcom Configuration"
+	depends on SAMA5_FLEXCOM
+
+choice
+	prompt "FLEXCOM0 Configuration"
+	default SAMA5_FLEXCOM0_USART
+	depends on SAMA5_FLEXCOM0
+
+config SAMA5_FLEXCOM0_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+
+config SAMA5_FLEXCOM0_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM0_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM0 Configuration
+
+choice
+	prompt "FLEXCOM1 Configuration"
+	default SAMA5_FLEXCOM1_USART
+	depends on SAMA5_FLEXCOM1
+
+config SAMA5_FLEXCOM1_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+
+config SAMA5_FLEXCOM1_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM1_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM1 Configuration
+
+choice
+	prompt "FLEXCOM2 Configuration"
+	default SAMA5_FLEXCOM2_USART
+	depends on SAMA5_FLEXCOM2
+
+config SAMA5_FLEXCOM2_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+
+config SAMA5_FLEXCOM2_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM2_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM2 Configuration
+
+choice
+	prompt "FLEXCOM3 Configuration"
+	default SAMA5_FLEXCOM3_USART
+	depends on SAMA5_FLEXCOM3
+
+config SAMA5_FLEXCOM3_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+
+config SAMA5_FLEXCOM3_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM3_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM3 Configuration
+
+choice
+	prompt "FLEXCOM4 Configuration"
+	default SAMA5_FLEXCOM4_USART
+	depends on SAMA5_FLEXCOM4
+
+config SAMA5_FLEXCOM4_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+
+config SAMA5_FLEXCOM4_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM4_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM4 Configuration
+endmenu # Flexcom Configuration
 
 menu "DBGU Configuration"
 	depends on SAMA5_DBGU

@@ -103,7 +103,7 @@ const struct section_mapping_s g_section_mapping[] =
    */
 
 #ifdef CONFIG_ARCH_LOWVECTORS
-  { SAM_SRAMREMAP_PSECTION, SAM_SRAMREMAP_vSECTION,
+  { SAM_SRAMREMAP_PSECTION, SAM_SRAMREMAP_VSECTION,
     SAM_SRAMREMAP_MMUFLAGS, SAM_SRAMREMAP_NSECTIONS
   },
 #endif
@@ -134,7 +134,7 @@ const struct section_mapping_s g_section_mapping[] =
     SAM_DAP_MMUFLAGS,       SAM_DAP_NSECTIONS
   },
 
-#if defined(CONFIG_ARCH_CHIP_SAMA5D2) && !defined(CONFIG_ARCH_L2CACHE)
+#if defined(CONFIG_ARCH_CHIP_SAMA5D2) && defined(CONFIG_ARCH_L2CACHE)
   /* The SAMA5D2 features a second 128-Kbyte SRAM that can be allocated
    * either to the L2 cache controller or used as an internal SRAM. After
    * reset, this block is connected to the L2 cache controller. The
