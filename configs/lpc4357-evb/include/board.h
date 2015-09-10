@@ -150,6 +150,13 @@
 
 #define LPC43_CCLK                  BOARD_FCLKOUT_FREQUENCY
 
+/* USB0 ********************************************************************/
+/* Settings needed in lpc43_cpu.c */
+
+#define BOARD_USB0_CTL              0x0600081d
+#define BOARD_USB0_MDIV             0x06167ffa /* Table 149 datsheet */
+#define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet */
+
 /* SPIFI clocking **********************************************************/
 /* The SPIFI will receive clocking from a divider per the settings provided
  * in this file.  The NuttX code will configure PLL1 as the input clock
