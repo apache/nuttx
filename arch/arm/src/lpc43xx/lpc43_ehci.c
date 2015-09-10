@@ -66,7 +66,6 @@
 #include "chip/lpc43_creg.h"
 #include "chip/lpc43_evntrtr.h"
 
-
 #if defined(CONFIG_LPC43_USBOTG) && defined(CONFIG_USBHOST)
 
 /*******************************************************************************
