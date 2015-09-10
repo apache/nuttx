@@ -3,7 +3,9 @@
  * include/arch/board/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -225,6 +227,32 @@
 
 #define GPIO_CAN1_RX GPIO_CAN_RX_2
 #define GPIO_CAN1_TX GPIO_CAN_TX_2
+
+/* I2C */
+
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_3
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_3
+
+/* SPI */
+
+#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
+#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
+#define GPIO_SPI1_SCK GPIO_SPI1_SCK_1
+
+/* TIM */
+
+#define GPIO_TIM2_CH2OUT GPIO_TIM2_CH2OUT_2
+#define GPIO_TIM2_CH3OUT GPIO_TIM2_CH3OUT_3
+
+#define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_2
+#define GPIO_TIM3_CH2OUT GPIO_TIM3_CH2OUT_4
+
+#define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_2
+
+/* USART */
+
+#define GPIO_USART2_RX GPIO_USART2_RX_2
+#define GPIO_USART2_TX GPIO_USART2_TX_2
 
 /****************************************************************************
  * Public Data
