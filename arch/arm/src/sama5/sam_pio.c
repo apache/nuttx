@@ -81,18 +81,18 @@
 #if !defined(SAM_PION_VBASE) && SAM_NPIO > 0
 const uintptr_t g_piobase[SAM_NPIO] =
 {
-  SAM_PIOA_VBASE,
+  SAM_PIOA_VBASE
 #if SAM_NPIO > 1
-  SAM_PIOB_VBASE,
+  , SAM_PIOB_VBASE
 #endif
 #if SAM_NPIO > 2
-  SAM_PIOC_VBASE,
+  , SAM_PIOC_VBASE
 #endif
 #if SAM_NPIO > 3
-  SAM_PIOD_VBASE,
+  , SAM_PIOD_VBASE
 #endif
 #if SAM_NPIO > 4
-  SAM_PIOE_VBASE
+  , SAM_PIOE_VBASE
 #endif
 };
 #endif
@@ -105,59 +105,87 @@ const uintptr_t g_piobase[SAM_NPIO] =
 #if defined(CONFIG_DEBUG_GPIO) && SAM_NPIO > 0
 static const char g_portchar[SAM_NPIO] =
 {
-  'A',
+  'A'
 #if SAM_NPIO > 1
-  'B',
+  , 'B'
 #endif
 #if SAM_NPIO > 2
-  'C',
+  , 'C'
 #endif
 #if SAM_NPIO > 3
-  'D',
+  , 'D'
 #endif
 #if SAM_NPIO > 4
-  'E'
+  , 'E'
 #endif
 };
 #endif
 
 /* Map a PIO number to the PIO peripheral identifier (PID) */
 
+#if SAM_NPIO > 0
 static const uint8_t g_piopid[SAM_NPIO] =
 {
-  SAM_PID_PIOA, SAM_PID_PIOB, SAM_PID_PIOC, SAM_PID_PIOD, SAM_PID_PIOE
+  SAM_PID_PIOA
+#if SAM_NPIO > 1
+  , SAM_PID_PIOB
+#endif
+#if SAM_NPIO > 2
+  , SAM_PID_PIOC
+#endif
+#if SAM_NPIO > 3
+  , SAM_PID_PIOD
+#endif
+#if SAM_NPIO > 4
+  , SAM_PID_PIOE
+#endif
 };
+#endif
 
 /* Used to determine if a PIO port is configured to support interrupts */
 
+#if SAM_NPIO > 0
 static const bool g_piointerrupt[SAM_NPIO] =
 {
 #ifdef CONFIG_SAMA5_PIOA_IRQ
-  true,
-#else
-  false,
-#endif
-#ifdef CONFIG_SAMA5_PIOB_IRQ
-  true,
-#else
-  false,
-#endif
-#ifdef CONFIG_SAMA5_PIOC_IRQ
-  true,
-#else
-  false,
-#endif
-#ifdef CONFIG_SAMA5_PIOD_IRQ
-  true,
-#else
-  false,
-#endif
-#ifdef CONFIG_SAMA5_PIOE_IRQ
   true
 #else
   false
 #endif
+
+#if SAM_NPIO > 1
+#ifdef CONFIG_SAMA5_PIOB_IRQ
+  , true
+#else
+  , false
+#endif
+#endif
+
+#if SAM_NPIO > 2
+#ifdef CONFIG_SAMA5_PIOC_IRQ
+  , true
+#else
+  , false
+#endif
+#endif
+
+#if SAM_NPIO > 3
+#ifdef CONFIG_SAMA5_PIOD_IRQ
+  , true
+#else
+  , false
+#endif
+#endif
+
+#if SAM_NPIO > 4
+#ifdef CONFIG_SAMA5_PIOE_IRQ
+  , true
+#else
+  , false
+#endif
+#endif
 };
+#endif
 
 /* This is an array of ports that PIO enable forced on */
 
