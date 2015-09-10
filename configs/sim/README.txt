@@ -149,6 +149,10 @@ with the NuttX networking (I probably should try using raw sockets instead).
 Update:  Max Holtzberg reports to me that the tap device actually does work properly,
 but not in an NSH configuration because of stdio operations freeze the simulation.
 
+REVISIT: This may not long be an issue even with NSH because of the recent redesign
+of how the stdio devices are handled in the simulation (they should no longer freeze
+the simulation).
+
 X11 Issues
 ----------
 There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
