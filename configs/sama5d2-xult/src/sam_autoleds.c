@@ -37,13 +37,13 @@
  * provided VDD_LED and so bringing the LED low will will illuminated the
  * LED.
  *
- * ------------------------------ ------------------- -----------------------
- * SAMA5D2 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -----------------------
- * PA13                           SDHC_CD_PA13        Red LED
- * PB5                            LED_GREEN_PB5       Green LED
- * PB0                            LED_BLUE_PB0        Blue LED
- * ------------------------------ ------------------- -----------------------
+ *   ------------------------------ ------------------- ---------------------
+ *   SAMA5D2 PIO                    SIGNAL              USAGE
+ *   ------------------------------ ------------------- ---------------------
+ *   PA13                           SDHC_CD_PA13        Red LED
+ *   PB5                            LED_GREEN_PB5       Green LED
+ *   PB0                            LED_BLUE_PB0        Blue LED
+ *   ------------------------------ ------------------- ---------------------
  *
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in

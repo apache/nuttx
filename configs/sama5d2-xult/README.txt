@@ -581,11 +581,11 @@ Buttons and LEDs
   -------
   A single button, PB_USER1 (PB6), is available on the SAMA5D2-XULT
 
-  ------------------------------ ------------------- -------------------------
-  SAMA5D2 PIO                    SIGNAL              USAGE
-  ------------------------------ ------------------- -------------------------
-  PB6                            USER_PB_PB6         PB_USER push button
-  ------------------------------ ------------------- -------------------------
+    ------------------------------ ------------------- -------------------------
+    SAMA5D2 PIO                    SIGNAL              USAGE
+    ------------------------------ ------------------- -------------------------
+    PB6                            USER_PB_PB6         PB_USER push button
+    ------------------------------ ------------------- -------------------------
 
   Closing PB_USER will bring PB6 to ground so 1) PB6 should have a weak pull-up,
   and 2) when PB_USER is pressed, a low value will be senses.
@@ -617,13 +617,13 @@ Buttons and LEDs
   the SDHC_CD pin (PA13) and so will not be used.  The LEDs are provided VDD_LED
   and so bringing the LED low will will illuminated the LED.
 
-  ------------------------------ ------------------- -------------------------
-  SAMA5D2 PIO                    SIGNAL              USAGE
-  ------------------------------ ------------------- -------------------------
-  PA13                           SDHC_CD_PA13        Red LED
-  PB5                            LED_GREEN_PB5       Green LED
-  PB0                            LED_BLUE_PB0        Blue LED
-  ------------------------------ ------------------- -------------------------
+    ------------------------------ ------------------- -------------------------
+    SAMA5D2 PIO                    SIGNAL              USAGE
+    ------------------------------ ------------------- -------------------------
+    PA13                           SDHC_CD_PA13        Red LED
+    PB5                            LED_GREEN_PB5       Green LED
+    PB0                            LED_BLUE_PB0        Blue LED
+    ------------------------------ ------------------- -------------------------
 
   When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
   control the Green LED (only)as follows:

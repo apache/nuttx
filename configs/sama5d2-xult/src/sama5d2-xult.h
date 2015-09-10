@@ -54,32 +54,26 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ************************************************************/
+/* Configuration ********************************************************************/
 
 /* LEDs *****************************************************************************/
-/* There are 3 LEDs on the SAMA5D4-EK:
+/* There is an RGB LED on board the SAMA5D2-XULT.  The RED component is driven by
+ * the SDHC_CD pin (PA13) and so will not be used.  The LEDs are provided VDD_LED
+ * and so bringing the LED low will illuminated the LED.
  *
- * ------------------------------ ------------------- -------------------------
- * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
- * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
- * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
- * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
- * ------------------------------ ------------------- -------------------------
- *
- * - D8: D8 is shared with other functions and cannot be used if the 1-Wire ROM
- *   is used.  I am not sure of the LCD function, but the LED may not be available
- *   if the LCD is used either.  We will avoid using D8 just for simplicity.
- * - D10:  Nothing special here.  A low output illuminates.
- * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.  This LED will
- *   be on when power is applied but otherwise; a low output value will turn it
- *   off.
+ *   ------------------------------ ------------------- -------------------------
+ *   SAMA5D2 PIO                    SIGNAL              USAGE
+ *   ------------------------------ ------------------- -------------------------
+ *   PA13                           SDHC_CD_PA13        Red LED
+ *   PB5                            LED_GREEN_PB5       Green LED
+ *   PB0                            LED_BLUE_PB0        Blue LED
+ *   ------------------------------ ------------------- -------------------------
  */
 
-#define PIO_LED_GREEN (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
-                       PIO_PORT_PIOE | PIO_PIN8)
-#define PIO_LED_BLUE  (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
-                       PIO_PORT_PIOE | PIO_PIN9)
+#define PIO_LED_GREEN (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_SET | \
+                       PIO_PORT_PIOB | PIO_PIN5)
+#define PIO_LED_BLUE  (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_SET | \
+                       PIO_PORT_PIOB | PIO_PIN0)
 
 /* Buttons **************************************************************************/
 /* A single button, PB_USER (PB6), is available on the SAMA5D2-XULT
