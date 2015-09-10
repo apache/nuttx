@@ -10963,4 +10963,8 @@
 	  standard shutdown function.  This provides only the framework for
 	  the shutdown function; the internal logic is not included
 	  (2015-09-09).
+	* configs/nucleo-f303re: Support for the STMicro Nucleo F303ERE board
+	  from Paul Alexander Patience (2014-09-10).
+	* arch/arm/src/lpc43xx/lpc32_ehci.c and .h:  LPC43xx EHCI driver from
+	  Ilya Averyanov (2015-09-10).
 

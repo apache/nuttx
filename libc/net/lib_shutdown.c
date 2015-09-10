@@ -83,7 +83,8 @@
 
 int shutdown(int sockfd, int how)
 {
-#warning Missing Logic
+  /* REVISIT: Not implemented. */
+
   return OK;
 }
 
