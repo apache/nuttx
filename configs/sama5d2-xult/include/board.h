@@ -41,8 +41,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdbool.h>
-#include <nuttx/irq.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdbool.h>
+#  include <nuttx/irq.h>
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -207,7 +210,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
