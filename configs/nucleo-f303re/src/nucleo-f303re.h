@@ -2,7 +2,9 @@
  * configs/nucleo-f303re/src/nucleo-f303re.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,7 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LED definitions ********************************************************************/
+/* LED definitions **********************************************************/
 /* The Nucleo F303RE board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
