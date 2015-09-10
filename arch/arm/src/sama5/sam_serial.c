@@ -697,6 +697,16 @@ static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 /* This describes the state of the UART0 port. */
 
 #ifdef CONFIG_SAMA5_UART0
+#  if CONFIG_UART0_BITS == 8 && CONFIG_UART0_PARITY == 0
+#  elif CONFIG_UART0_BITS == 7 && CONFIG_UART0_PARITY != 0
+#  else
+#    error "Unsupported combination of bits and parity for UART0"
+#  endif
+
+#  if CONFIG_UART0_2STOP != 0
+#    error "Unsupported number of stop bits and parity for UART0"
+#  endif
+
 static struct up_dev_s g_uart0priv =
 {
   .usartbase      = SAM_UART0_VBASE,
@@ -727,6 +737,16 @@ static uart_dev_t g_uart0port =
 /* This describes the state of the UART1 port. */
 
 #ifdef CONFIG_SAMA5_UART1
+#  if CONFIG_UART1_BITS == 8 && CONFIG_UART1_PARITY == 0
+#  elif CONFIG_UART1_BITS == 7 && CONFIG_UART1_PARITY != 0
+#  else
+#    error "Unsupported combination of bits and parity for UART1"
+#  endif
+
+#  if CONFIG_UART1_2STOP != 0
+#    error "Unsupported number of stop bits and parity for UART1"
+#  endif
+
 static struct up_dev_s g_uart1priv =
 {
   .usartbase      = SAM_UART1_VBASE,
@@ -757,6 +777,16 @@ static uart_dev_t g_uart1port =
 /* This describes the state of the UART2 port. */
 
 #ifdef CONFIG_SAMA5_UART2
+#  if CONFIG_UART2_BITS == 8 && CONFIG_UART2_PARITY == 0
+#  elif CONFIG_UART2_BITS == 7 && CONFIG_UART2_PARITY != 0
+#  else
+#    error "Unsupported combination of bits and parity for UART2"
+#  endif
+
+#  if CONFIG_UART2_2STOP != 0
+#    error "Unsupported number of stop bits and parity for UART2"
+#  endif
+
 static struct up_dev_s g_uart2priv =
 {
   .usartbase      = SAM_UART2_VBASE,
@@ -787,6 +817,16 @@ static uart_dev_t g_uart2port =
 /* This describes the state of the UART3 port. */
 
 #ifdef CONFIG_SAMA5_UART3
+#  if CONFIG_UART3_BITS == 8 && CONFIG_UART3_PARITY == 0
+#  elif CONFIG_UART3_BITS == 7 && CONFIG_UART3_PARITY != 0
+#  else
+#    error "Unsupported combination of bits and parity for UART3"
+#  endif
+
+#  if CONFIG_UART3_2STOP != 0
+#    error "Unsupported number of stop bits and parity for UART3"
+#  endif
+
 static struct up_dev_s g_uart3priv =
 {
   .usartbase      = SAM_UART3_VBASE,
@@ -817,6 +857,16 @@ static uart_dev_t g_uart3port =
 /* This describes the state of the UART4 port. */
 
 #ifdef CONFIG_SAMA5_UART4
+#  if CONFIG_UART4_BITS == 8 && CONFIG_UART4_PARITY == 0
+#  elif CONFIG_UART4_BITS == 7 && CONFIG_UART4_PARITY != 0
+#  else
+#    error "Unsupported combination of bits and parity for UART4"
+#  endif
+
+#  if CONFIG_UART4_2STOP != 0
+#    error "Unsupported number of stop bits and parity for UART4"
+#  endif
+
 static struct up_dev_s g_uart4priv =
 {
   .usartbase      = SAM_UART4_VBASE,
@@ -1101,18 +1151,28 @@ static int up_setup(struct uart_dev_s *dev)
     {
       /* Enable hardware flow control and MCK as the timing source */
 
-      regval = (UART_MR_MODE_HWHS | SAM_MR_USCLKS);
+      regval = (UART_MR_MODE_HWHS | SAM_MR_USCLKS | UART_MR_CHMODE_NORMAL);
     }
   else
 #endif
     {
+#if defined(ATSAMA5D2)
+      /* Set up the mode register.  Start with normal UART mode and the
+       * peripheral clock as the timing source
+       */
+
+      regval = (UART_MR_PERIPHCLK | UART_MR_CHMODE_NORMAL);
+
+#elif defined(ATSAMA5D3) || defined(ATSAMA5D4)
       /* Set up the mode register.  Start with normal UART mode and the MCK
        * as the timing source
        */
 
-      regval = (UART_MR_MODE_NORMAL | SAM_MR_USCLKS);
+      regval = (UART_MR_MODE_NORMAL | SAM_MR_USCLKS | UART_MR_CHMODE_NORMAL);
+#endif
     }
 
+#if defined(ATSAMA5D3) || defined(ATSAMA5D4)
   /* OR in settings for the selected number of bits */
 
   if (priv->bits == 5)
@@ -1153,6 +1213,7 @@ static int up_setup(struct uart_dev_s *dev)
     {
       regval |= UART_MR_CHRL_8BITS; /* 8 bits (default) */
     }
+#endif /* ATSAMA5D3 || ATSAMA5D4 */
 
   /* OR in settings for the selected parity */
 
@@ -1169,6 +1230,7 @@ static int up_setup(struct uart_dev_s *dev)
       regval |= UART_MR_PAR_NONE;
     }
 
+#if defined(ATSAMA5D3) || defined(ATSAMA5D4)
   /* OR in settings for the number of stop bits */
 
   if (priv->stopbits2)
@@ -1179,6 +1241,7 @@ static int up_setup(struct uart_dev_s *dev)
     {
       regval |= UART_MR_NBSTOP_1;
     }
+#endif /* ATSAMA5D3 || ATSAMA5D4 */
 
   /* And save the new mode register value */
 
