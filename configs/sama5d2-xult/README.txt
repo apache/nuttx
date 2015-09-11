@@ -646,7 +646,7 @@ Buttons and LEDs
 Serial Console
 ==============
 
-  Virtual COM / DBGU Port.  Either may be driven by USART3, depending
+  Virtual COM / DBGU Port.  Either may be driven by UART1, depending
   upon the setting of JP2 (DBGU_PE):
 
     ------------ -------------- --------

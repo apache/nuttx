@@ -192,6 +192,70 @@
  * The PCK logic will then automatically configure PB26 as the PCK0 pin.
  */
 
+/* Virtual COM / DBGU Port.  Either may be driven by UART1, depending
+ * upon the setting of JP2 (DBGU_PE):
+ *
+ *   ------------ -------------- --------
+ *     SAMA5D2    BOARD SIGNAL   USAGE
+ *   PIO FUNCTION NAME           FUNCTION
+ *   ------------ -------------- --------
+ *   PD3 UTXD1    DBGU_UTXD1_PD3 DBGU_RXD
+ *   PD2 URXD1    DBGU_URXD1_PD2 DBGU_TXD
+ *   ------------ -------------- --------
+ */
+
+/* Standard UART on Arduino connector (J21) is FLEXCOM4.
+ *
+ *   ---- ------- -------------
+ *   J21  BOARD      SAMA5D2
+ *   PIN  NAME    PIO  FUNCTION
+ *   ---- ------- -------------
+ *    7   F4_TXD  PD12 FLEXCOM4
+ *    8   F4_RXD  PD13 FLEXCOM4
+ *   ---- ------- -------------
+ */
+
+#define PIO_FLEXCOM4_IO0  PIO_FLEXCOM4_IO0_2
+#define PIO_FLEXCOM4_IO1  PIO_FLEXCOM4_IO1_2
+
+/* Other USARTs are available on J22:
+ *
+ *   ---- ------- -------------
+ *   J22  BOARD      SAMA5D2
+ *   PIN  NAME    PIO  FUNCTION
+ *   ---- ------- -------------
+ *    3   F0_TXD  PB28 FLEXCOM0
+ *    4   F0_RXD  PB29 FLEXCOM0
+ *    5   F3_TXD  PB23 FLEXCOM3
+ *    6   F3_RXD  PB22 FLEXCOM3
+ *   ---- ------- -------------
+ */
+
+#define PIO_FLEXCOM3_IO0  PIO_FLEXCOM3_IO0_2
+#define PIO_FLEXCOM3_IO1  PIO_FLEXCOM3_IO1_2
+
+/* UARTs available of EXT1
+ *
+ *   ---- ------- -------------
+ *   EXT1 BOARD      SAMA5D2
+ *   PIN  NAME    PIO  FUNCTION
+ *   ---- ------- -------------
+ *    13  UART_RX PA23 FLEXCOM1
+ *    14  UART_TX PA24 FLEXCOM1
+ *   ---- ------- ---- --------
+ */
+
+/* UARTs available of EXT2
+ *
+ *   ---- ------- -------------
+ *   EXT2 BOARD      SAMA5D2
+ *   PIN  NAME    PIO  FUNCTION
+ *   ---- ------- -------------
+ *    13  UART_RX PB29 FLEXCOM0
+ *    14  UART_TX PB28 FLEXCOM0
+ *   ---- ------- ---- --------
+ */
+
 /************************************************************************************
  * Assembly Language Macros
  ************************************************************************************/
