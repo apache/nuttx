@@ -390,6 +390,21 @@ void sam_lowsetup(void)
 #ifdef CONFIG_SAMA5_USART3
   sam_usart3_enableclk();
 #endif
+#ifdef CONFIG_SAMA5_FLEXCOM0
+  sam_flexcom0_enableclk();
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM1
+  sam_flexcom1_enableclk();
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM2
+  sam_flexcom2_enableclk();
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM3
+  sam_flexcom3_enableclk();
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM4
+  sam_flexcom4_enableclk();
+#endif
 
   /* Configure UART pins for all selected UART/USARTs.  USARTs pins are
    * only configured if the USART is also configured as as a UART.
@@ -472,6 +487,70 @@ void sam_lowsetup(void)
 #endif
 #ifdef CONFIG_USART4_IFLOWCONTROL
   (void)sam_configpio(PIO_USART4_RTS);
+#endif
+#endif
+
+  /* For Flexcom USARTs:
+   *
+   *   FLEXCOM_IO0 = TXD
+   *   FLEXCOM_IO1 = RXD
+   *   FLEXCOM_IO2 = SCK
+   *   FLEXCOM_IO3 = CTS
+   *   FLEXCOM_IO4 = RTS
+   */
+
+#if defined(CONFIG_USART0_ISUART) && defined(CONFIG_SAMA5_USART0)
+  (void)sam_configpio(PIO_FLEXCOM0_IO0);
+  (void)sam_configpio(PIO_FLEXCOM0_IO1);
+#ifdef CONFIG_USART0_OFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM0_IO3);
+#endif
+#ifdef CONFIG_USART0_IFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM0_IO4);
+#endif
+#endif
+
+#if defined(CONFIG_USART1_ISUART) && defined(CONFIG_SAMA5_USART1)
+  (void)sam_configpio(PIO_FLEXCOM1_IO0);
+  (void)sam_configpio(PIO_FLEXCOM1_IO1);
+#ifdef CONFIG_USART1_OFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM1_IO3);
+#endif
+#ifdef CONFIG_USART1_IFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM1_IO4);
+#endif
+#endif
+
+#if defined(CONFIG_USART2_ISUART) && defined(CONFIG_SAMA5_USART2)
+  (void)sam_configpio(PIO_FLEXCOM2_IO0);
+  (void)sam_configpio(PIO_FLEXCOM2_IO1);
+#ifdef CONFIG_USART2_OFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM2_IO3);
+#endif
+#ifdef CONFIG_USART2_IFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM2_IO4);
+#endif
+#endif
+
+#if defined(CONFIG_USART3_ISUART) && defined(CONFIG_SAMA5_USART3)
+  (void)sam_configpio(PIO_FLEXCOM3_IO0);
+  (void)sam_configpio(PIO_FLEXCOM3_IO1);
+#ifdef CONFIG_USART3_OFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM3_IO3);
+#endif
+#ifdef CONFIG_USART3_IFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM3_IO4);
+#endif
+#endif
+
+#if defined(CONFIG_USART4_ISUART) && defined(CONFIG_SAMA5_USART4)
+  (void)sam_configpio(PIO_FLEXCOM4_IO0);
+  (void)sam_configpio(PIO_FLEXCOM4_IO0);
+#ifdef CONFIG_USART4_OFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM4_IO3);
+#endif
+#ifdef CONFIG_USART4_IFLOWCONTROL
+  (void)sam_configpio(PIO_FLEXCOM4_IO4);
 #endif
 #endif
 
