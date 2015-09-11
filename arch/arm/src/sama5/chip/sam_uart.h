@@ -1,7 +1,8 @@
 /************************************************************************************************
- * arch/arm/src/sama5/chip/sam3u_uart.h
- * Universal Asynchronous Receiver Transmitter (UART) and Universal Synchronous Asynchronous
- * Receiver Transmitter (USART) definitions for the SAMA5D3
+ * arch/arm/src/sama5/chip/sam_uart.h
+ * Universal Asynchronous Receiver Transmitter (UART) for the SAMA5D2, SAMA5D3, and SAMA5D4 and
+ * Universal Synchronous Asynchronous Receiver Transmitter (USART) definitions for the SAMA5D3
+ * and SAMAD4
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -430,7 +431,7 @@
 #  define UART_SR_CTS                (1 << 23) /* Bit 23: Image of CTS Input (SR only) */
 #  define UART_INT_MANE              (1 << 24) /* Bit 24: Manchester Error Interrupt (4) */
 
-#define UART_INT_ALLINTS             0x018827e7
+#  define UART_INT_ALLINTS           0x018827e7
 #endif
 
 /* UART Receiver Holding Register */
@@ -493,29 +494,29 @@
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
 /* USART Transmitter Timeguard Register (USART only) */
 
-#  define UART_TTGR_TG_SHIFT           (0)       /* Bits 0-7: Timeguard Value (USART only) */
-#  define UART_TTGR_TG_MASK            (0xff << UART_TTGR_TG_SHIFT)
+#  define UART_TTGR_TG_SHIFT         (0)       /* Bits 0-7: Timeguard Value (USART only) */
+#  define UART_TTGR_TG_MASK          (0xff << UART_TTGR_TG_SHIFT)
 #endif
 
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
 /* USART FI DI RATIO Register (USART only) */
 
-#  define UART_FIDI_RATIO_SHIFT        (0)       /* Bits 0-15: FI Over DI Ratio Value (USART only) */
-#  define UART_FIDI_RATIO_MASK         (0xffff << UART_FIDI_RATIO_SHIFT)
+#  define UART_FIDI_RATIO_SHIFT      (0)       /* Bits 0-15: FI Over DI Ratio Value (USART only) */
+#  define UART_FIDI_RATIO_MASK       (0xffff << UART_FIDI_RATIO_SHIFT)
 #endif
 
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
 /* USART Number of Errors Register (USART only) */
 
-#  define UART_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errrors (USART only) */
-#  define UART_NER_NBERRORS_MASK       (0xff << UART_NER_NBERRORS_SHIFT)
+#  define UART_NER_NBERRORS_SHIFT    (0)       /* Bits 0-7: Number of Errrors (USART only) */
+#  define UART_NER_NBERRORS_MASK     (0xff << UART_NER_NBERRORS_SHIFT)
 #endif
 
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
 /* USART IrDA FILTER Register (USART only) */
 
-#  define UART_IFR_IRDAFILTER_SHIFT    (0)       /* Bits 0-7: IrDA Filter (USART only) */
-#  define UART_IFR_IRDAFILTER_MASK     (0xff << UART_IFR_IRDAFILTER_SHIFT)
+#  define UART_IFR_IRDAFILTER_SHIFT  (0)       /* Bits 0-7: IrDA Filter (USART only) */
+#  define UART_IFR_IRDAFILTER_MASK   (0xff << UART_IFR_IRDAFILTER_SHIFT)
 #endif
 
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
