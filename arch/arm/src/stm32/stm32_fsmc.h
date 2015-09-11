@@ -205,7 +205,7 @@
 #  define FSMC_BTR_DATAST(n)      ((n-1) << FSMC_BTR_DATAST_SHIFT)  /* (n)xHCLK n=2..256 */
 #define FSMC_BTR_BUSTURN_SHIFT    (16)       /* Bus turnaround phase duration */
 #define FSMC_BTR_BUSTURN_MASK     (15 << FSMC_BTR1_BUSTURN_SHIFT)
-#  define FSMC_BTR_BUSTRUN(n)     ((n-1) << FSMC_BTR_BUSTURN_SHIFT) /* (n)xHCLK n=1..16 */
+#  define FSMC_BTR_BUSTURN(n)     ((n-1) << FSMC_BTR_BUSTURN_SHIFT) /* (n)xHCLK n=1..16 */
 #define FSMC_BTR_CLKDIV_SHIFT     (20)       /* Clock divide ratio */
 #define FSMC_BTR_CLKDIV_MASK      (15 << FSMC_BTR_CLKDIV_SHIFT)
 #  define FSMC_BTR_CLKDIV(n)      ((n-1) << FSMC_BTR_CLKDIV_SHIFT)  /* (n)xHCLK n=2..16 */
