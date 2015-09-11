@@ -258,10 +258,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               /* Return the previous free node to the nodelist (with the new size) */
 
               mm_addfreechunk(heap, prev);
-
-             /* Now we want to return newnode */
-
-              oldnode = newnode;
             }
           else
             {
@@ -271,6 +267,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               newnode->preceding |= MM_ALLOC_BIT;
               next->preceding     = newnode->size | (next->preceding & MM_ALLOC_BIT);
             }
+
+          /* Now we want to return newnode */
 
           oldnode = newnode;
           oldsize = newnode->size;

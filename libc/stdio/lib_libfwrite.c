@@ -94,7 +94,13 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   /* Make sure that writing to this stream is allowed */
 
-  if (!stream || (stream->fs_oflags & O_WROK) == 0)
+  if (stream == NULL)
+    {
+      set_errno(EBADF);
+      return ret;
+    }
+
+  if ((stream->fs_oflags & O_WROK) == 0)
     {
       set_errno(EBADF);
       goto errout;

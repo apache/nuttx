@@ -179,7 +179,6 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Start the watchdog */
 
-  errcode = OK;
   (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)sem_timeout, 1, getpid());
 
   /* Now perform the blocking wait */
@@ -195,6 +194,11 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
   /* Stop the watchdog timer */
 
   wd_cancel(rtcb->waitdog);
+
+  if (errcode != OK)
+    {
+      goto errout_with_irqdisabled;
+    }
 
   /* We can now restore interrupts and delete the watchdog */
 

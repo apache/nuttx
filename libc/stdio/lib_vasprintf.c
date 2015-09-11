@@ -112,7 +112,7 @@
  *
  ****************************************************************************/
 
-int vasprintf(FAR char **ptr, const char *fmt, va_list ap)
+int vasprintf(FAR char **ptr, FAR const char *fmt, va_list ap)
 {
   struct lib_outstream_s nulloutstream;
   struct lib_memoutstream_s memoutstream;
@@ -130,12 +130,12 @@ int vasprintf(FAR char **ptr, const char *fmt, va_list ap)
   va_copy(ap2, ap);
 #endif
 
-/* First, use a nullstream to get the size of the buffer.  The number
+  /* First, use a nullstream to get the size of the buffer.  The number
    * of bytes returned may or may not include the null terminator.
    */
 
   lib_nulloutstream(&nulloutstream);
-  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap1);
+  (void)lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap1);
 
   /* Then allocate a buffer to hold that number of characters, adding one
    * for the null terminator.
