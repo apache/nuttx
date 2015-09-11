@@ -49,6 +49,7 @@
 
 #include "sam_pio.h"
 #include "sam_periphclks.h"
+#include "sam_config.h"
 #include "sam_dbgu.h"
 #include "sam_lowputc.h"
 
@@ -59,157 +60,6 @@
 /**************************************************************************
  * Pre-processor Definitions
  **************************************************************************/
-
-/* Configuration **********************************************************/
-
-/* If the USART is not being used as a UART, then it really isn't enabled
- * for our purposes.
- */
-
-#ifndef CONFIG_USART0_ISUART
-#  undef CONFIG_SAMA5_USART0
-#endif
-#ifndef CONFIG_USART1_ISUART
-#  undef CONFIG_SAMA5_USART1
-#endif
-#ifndef CONFIG_USART2_ISUART
-#  undef CONFIG_SAMA5_USART2
-#endif
-#ifndef CONFIG_USART3_ISUART
-#  undef CONFIG_SAMA5_USART3
-#endif
-
-#undef SUPPRESS_CONSOLE_CONFIG
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
-#  define SUPPRESS_CONSOLE_CONFIG 1
-#endif
-
-/* Is there a serial console?  It could be on UART0-4 or USART0-3 */
-
-#if defined(CONFIG_SAMA5_DBGU_CONSOLE) && defined(CONFIG_SAMA5_DBGU)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  undef HAVE_UART_CONSOLE
-#elif defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART0)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART1)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART2)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART3)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART4)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART0)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART1)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART2)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART3)
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  define HAVE_UART_CONSOLE 1
-#else
-#  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
-#  undef CONFIG_SAMA5_DBGU_CONSOLE
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  undef HAVE_UART_CONSOLE
-#endif
 
 /* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
 
@@ -295,6 +145,13 @@
 #  define SAM_CONSOLE_PARITY   CONFIG_USART3_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART3_2STOP
 #  undef SAM_CONSOLE_ISUART
+#elif defined(CONFIG_USART4_SERIAL_CONSOLE)
+#  define SAM_CONSOLE_VBASE    SAM_USART4_VBASE
+#  define SAM_CONSOLE_BAUD     CONFIG_USART4_BAUD
+#  define SAM_CONSOLE_BITS     CONFIG_USART4_BITS
+#  define SAM_CONSOLE_PARITY   CONFIG_USART4_PARITY
+#  define SAM_CONSOLE_2STOP    CONFIG_USART4_2STOP
+#  undef SAM_CONSOLE_ISUART
 #else
 #  error "No CONFIG_U[S]ARTn_SERIAL_CONSOLE Setting"
 #endif
@@ -352,26 +209,6 @@
 #endif
 
 /**************************************************************************
- * Private Types
- **************************************************************************/
-
-/**************************************************************************
- * Private Function Prototypes
- **************************************************************************/
-
-/**************************************************************************
- * Global Variables
- **************************************************************************/
-
-/**************************************************************************
- * Private Variables
- **************************************************************************/
-
-/**************************************************************************
- * Private Functions
- **************************************************************************/
-
-/**************************************************************************
  * Public Functions
  **************************************************************************/
 
@@ -385,7 +222,7 @@
 
 void up_lowputc(char ch)
 {
-#if defined(HAVE_UART_CONSOLE)
+#if defined(SAMA5_HAVE_SERIAL_CONSOLE)
   irqstate_t flags;
 
   for (;;)
@@ -450,7 +287,7 @@ void up_lowputc(char ch)
 
 int up_putc(int ch)
 {
-#if defined(HAVE_UART_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
+#if defined(SAMA5_HAVE_SERIAL_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
   /* Check for LF */
 
   if (ch == '\n')
@@ -461,9 +298,9 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
+#endif
   return ch;
 }
-#endif
 
 /**************************************************************************
  * Name: sam_lowsetup
@@ -477,7 +314,9 @@ int up_putc(int ch)
 
 void sam_lowsetup(void)
 {
-  /* Enable clocking for all selected UART/USARTs */
+  /* Enable clocking for all selected UART/USARTs (USARTs may not
+   * necessarily be configured as UARTs).
+   */
 
 #ifdef CONFIG_SAMA5_UART0
   sam_uart0_enableclk();
@@ -494,7 +333,7 @@ void sam_lowsetup(void)
 #ifdef CONFIG_SAMA5_UART4
   sam_uart4_enableclk();
 #endif
-#ifdef CONFIG_SAMA5_USART0
+#ifdef CONFIG_USART0_ISUART
   sam_usart0_enableclk();
 #endif
 #ifdef CONFIG_SAMA5_USART1
@@ -507,7 +346,9 @@ void sam_lowsetup(void)
   sam_usart3_enableclk();
 #endif
 
-  /* Configure UART pins for all selected UART/USARTs */
+  /* Configure UART pins for all selected UART/USARTs.  USARTs pins are
+   * only configured if the USART is also configured as as a UART.
+   */
 
 #ifdef CONFIG_SAMA5_UART0
   (void)sam_configpio(PIO_UART0_RXD);
@@ -534,7 +375,7 @@ void sam_lowsetup(void)
   (void)sam_configpio(PIO_UART4_TXD);
 #endif
 
-#ifdef CONFIG_SAMA5_USART0
+#if defined(CONFIG_USART0_ISUART) && defined(CONFIG_SAMA5_USART0)
   (void)sam_configpio(PIO_USART0_RXD);
   (void)sam_configpio(PIO_USART0_TXD);
 #ifdef CONFIG_USART0_OFLOWCONTROL
@@ -545,7 +386,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_SAMA5_USART1
+#if defined(CONFIG_USART1_ISUART) && defined(CONFIG_SAMA5_USART1)
   (void)sam_configpio(PIO_USART1_RXD);
   (void)sam_configpio(PIO_USART1_TXD);
 #ifdef CONFIG_USART1_OFLOWCONTROL
@@ -556,7 +397,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_SAMA5_USART2
+#if defined(CONFIG_USART2_ISUART) && defined(CONFIG_SAMA5_USART2)
   (void)sam_configpio(PIO_USART2_RXD);
   (void)sam_configpio(PIO_USART2_TXD);
 #ifdef CONFIG_USART2_OFLOWCONTROL
@@ -567,7 +408,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_SAMA5_USART3
+#if defined(CONFIG_USART3_ISUART) && defined(CONFIG_SAMA5_USART3)
   (void)sam_configpio(PIO_USART3_RXD);
   (void)sam_configpio(PIO_USART3_TXD);
 #ifdef CONFIG_USART3_OFLOWCONTROL
@@ -578,9 +419,20 @@ void sam_lowsetup(void)
 #endif
 #endif
 
+#if defined(CONFIG_USART4_ISUART) && defined(CONFIG_SAMA5_USART4)
+  (void)sam_configpio(PIO_USART4_RXD);
+  (void)sam_configpio(PIO_USART4_TXD);
+#ifdef CONFIG_USART4_OFLOWCONTROL
+  (void)sam_configpio(PIO_USART4_CTS);
+#endif
+#ifdef CONFIG_USART4_IFLOWCONTROL
+  (void)sam_configpio(PIO_USART4_RTS);
+#endif
+#endif
+
   /* Configure the console (only) */
 
-#if defined(HAVE_UART_CONSOLE) && !defined(SUPPRESS_CONSOLE_CONFIG)
+#if defined(SAMA5_HAVE_SERIAL_CONSOLE) && !defined(SUPPRESS_CONSOLE_CONFIG)
   /* Reset and disable receiver and transmitter */
 
   putreg32((UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS),
