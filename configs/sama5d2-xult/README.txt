@@ -701,6 +701,9 @@ Serial Console
      14  UART_TX PB28 FLEXCOM0
     ---- ------- ---- --------
 
+  By default, the standard UART on Arduino connector (J21, FLEXCOM4) is
+  enabled in all of these configurations unless otherwise noted.
+
 SAMA5D2-XULT Configuration Options
 =================================
 
