@@ -169,7 +169,6 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
       /* Adjust pointers and counts */
 
       sector       += nsectors;
-
       nbytes        = nsectors * bch->sectsize;
       byteswritten += nbytes;
 

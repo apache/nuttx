@@ -167,7 +167,6 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
       /* Adjust pointers and counts */
 
       sector    += nsectors;
-
       nbytes     = nsectors * bch->sectsize;
       bytesread += nbytes;
 
