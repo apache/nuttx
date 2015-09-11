@@ -549,8 +549,8 @@
 #define UART_WPMR_WPEN               (1 << 0)  /* Bit 0: Write Protect Enable (USART only) */
 #define UART_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protect KEY (USART only) */
 #define UART_WPMR_WPKEY_MASK         (0x00ffffff << UART_WPMR_WPKEY_SHIFT)
-#  define USART_WPMR_WPKEY           (0x00555341 << UART_WPMR_WPKEY_SHIFT) /* "USA" */
-#  define UART_WPMR_WPKEY            (0x00554152 << UART_WPMR_WPKEY_SHIFT) /* "UAR" */
+#  define USART_WPMR_WPKEY           (0x00555341 << UART_WPMR_WPKEY_SHIFT) /* "USAR" */
+#  define UART_WPMR_WPKEY            (0x00554152 << UART_WPMR_WPKEY_SHIFT) /* "UART" */
 
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
 /* USART Write Protect Status Register (USART only) */
