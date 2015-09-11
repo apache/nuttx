@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_serial.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,7 @@
 
 #ifdef USE_SERIALDRIVER
 
+#undef TTYS0_DEV
 #undef TTYS1_DEV
 #undef TTYS2_DEV
 #undef TTYS3_DEV
@@ -101,9 +102,13 @@
 
 #if defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART)
 
-/* Which UART/USART with be tty0/console and which tty1? tty2? tty3? ... tty9? */
+/* Which UART/USART with be ttyS0/console and which ttyS1? ttyS2? ttyS3? ...
+ * ttyS9?
+ */
 
-/* First pick the console and ttyS0.  This could be any of UART0-4, USART0-4 */
+/* First pick the console and ttyS0.  This could be any of UART0-4,
+ * USART0-4.
+ */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart0port  /* UART0 is console */
@@ -249,7 +254,7 @@
 #endif
 
 /* Pick ttyS3.  This could be one of UART2-4 or USART0-4. It can't be
- * UART0-1; those have already been assigned to ttsyS0, 1, or 2.  One of
+ * UART0-1; those have already been assigned to ttyS0, 1, or 2.  One of
  * UART2-4 or USART0-4 could also be the console.
  */
 
@@ -280,7 +285,7 @@
 #endif
 
 /* Pick ttyS4.  This could be one of UART3-4 or USART0-4. It can't be
- * UART0-2; those have already been assigned to ttsyS0-3.  One of
+ * UART0-2; those have already been assigned to ttyS0-3.  One of
  * UART3-4 or USART0-4 could also be the console.
  */
 
@@ -308,7 +313,7 @@
 #endif
 
 /* Pick ttyS5.  This could be one of UART4 or USART0-4. It can't be
- * UART0-3; those have already been assigned to ttsyS0-4.  One of
+ * UART0-3; those have already been assigned to ttyS0-4.  One of
  * UART4 or USART0-4 could also be the console.
  */
 
@@ -333,7 +338,7 @@
 #endif
 
 /* Pick ttyS6.  This could be one of USART0-4. It can't be UART0-4;
- * those have already been assigned to ttsyS0-5.  One of USART0-4
+ * those have already been assigned to ttyS0-5.  One of USART0-4
  * could also be the console.
  */
 
@@ -355,7 +360,7 @@
 #endif
 
 /* Pick ttyS7.  This could be one of USART1-4. It can't be UART0-4
- * or USART0; those have already been assigned to ttsyS0-5.  One of
+ * or USART0; those have already been assigned to ttyS0-5.  One of
  * USART1-4 could also be the console.
  */
 
@@ -374,7 +379,7 @@
 #endif
 
 /* Pick ttyS8.  This could be one of USART2-4. It can't be UART0-4
- * or USART0-1; those have already been assigned to ttsyS0-5.  One of
+ * or USART0-1; those have already been assigned to ttyS0-5.  One of
  * USART2-4 could also be the console.
  */
 
@@ -390,7 +395,7 @@
 #endif
 
 /* Pick ttyS9.  This could be one of USART3-4. It can't be UART0-4
- * or USART0-2; those have already been assigned to ttsyS0-8.  One of
+ * or USART0-2; those have already been assigned to ttyS0-8.  One of
  * USART3-4 could also be the console.
  */
 
@@ -402,7 +407,7 @@
 #  define USART4_ASSIGNED      1
 #endif
 
- /* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
+/* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
 
 #define SAM_USART_CLOCK  BOARD_USART_FREQUENCY /* Frequency of the USART clock */
 #define SAM_MR_USCLKS    UART_MR_USCLKS_MCK    /* Source = Main clock */
@@ -413,6 +418,7 @@
 
 struct up_dev_s
 {
+  xcpt_t   handler;   /* Interrupt handler */
   uint32_t usartbase; /* Base address of USART registers */
   uint32_t baud;      /* Configured baud */
   uint32_t sr;        /* Saved status bits */
@@ -429,11 +435,42 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static int  up_interrupt(struct uart_dev_s *dev);
+#ifdef CONFIG_SAMA5_UART0
+static int  up_uart0_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_SAMA5_UART1
+static int  up_uart1_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_SAMA5_UART2
+static int  up_uart2_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_SAMA5_UART3
+static int  up_uart3_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_SAMA5_UART4
+static int  up_uart4_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_USART0_ISUART
+static int  up_usart0_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_USART1_ISUART
+static int  up_usart1_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_USART2_ISUART
+static int  up_usart2_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_USART3_ISUART
+static int  up_usart3_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_USART4_ISUART
+static int  up_usart4_interrupt(int irq, void *context);
+#endif
+
 static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -524,6 +561,7 @@ static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 
 static struct up_dev_s g_uart0priv =
 {
+  .handler        = up_uart0_interrupt,
   .usartbase      = SAM_UART0_VBASE,
   .baud           = CONFIG_UART0_BAUD,
   .irq            = SAM_IRQ_UART0,
@@ -564,6 +602,7 @@ static uart_dev_t g_uart0port =
 
 static struct up_dev_s g_uart1priv =
 {
+  .handler        = up_uart1_interrupt,
   .usartbase      = SAM_UART1_VBASE,
   .baud           = CONFIG_UART1_BAUD,
   .irq            = SAM_IRQ_UART1,
@@ -604,6 +643,7 @@ static uart_dev_t g_uart1port =
 
 static struct up_dev_s g_uart2priv =
 {
+  .handler        = up_uart2_interrupt,
   .usartbase      = SAM_UART2_VBASE,
   .baud           = CONFIG_UART2_BAUD,
   .irq            = SAM_IRQ_UART2,
@@ -644,6 +684,7 @@ static uart_dev_t g_uart2port =
 
 static struct up_dev_s g_uart3priv =
 {
+  .handler        = up_uart3_interrupt,
   .usartbase      = SAM_UART3_VBASE,
   .baud           = CONFIG_UART3_BAUD,
   .irq            = SAM_IRQ_UART3,
@@ -684,6 +725,7 @@ static uart_dev_t g_uart3port =
 
 static struct up_dev_s g_uart4priv =
 {
+  .handler        = up_uart4_interrupt,
   .usartbase      = SAM_UART4_VBASE,
   .baud           = CONFIG_UART4_BAUD,
   .irq            = SAM_IRQ_UART4,
@@ -714,6 +756,7 @@ static uart_dev_t g_uart4port =
 #ifdef CONFIG_USART0_ISUART
 static struct up_dev_s g_usart0priv =
 {
+  .handler        = up_usart0_interrupt,
   .usartbase      = SAM_USART0_VBASE,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_USART0,
@@ -747,6 +790,7 @@ static uart_dev_t g_usart0port =
 #ifdef CONFIG_USART1_ISUART
 static struct up_dev_s g_usart1priv =
 {
+  .handler        = up_usart1_interrupt,
   .usartbase      = SAM_USART1_VBASE,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_USART1,
@@ -780,6 +824,7 @@ static uart_dev_t g_usart1port =
 #ifdef CONFIG_USART2_ISUART
 static struct up_dev_s g_usart2priv =
 {
+  .handler        = up_usart2_interrupt,
   .usartbase      = SAM_USART2_VBASE,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_USART2,
@@ -813,6 +858,7 @@ static uart_dev_t g_usart2port =
 #ifdef CONFIG_USART3_ISUART
 static struct up_dev_s g_usart3priv =
 {
+  .handler        = up_usart3_interrupt,
   .usartbase      = SAM_USART3_VBASE,
   .baud           = CONFIG_USART3_BAUD,
   .irq            = SAM_IRQ_USART3,
@@ -846,6 +892,7 @@ static uart_dev_t g_usart3port =
 #ifdef CONFIG_USART4_ISUART
 static struct up_dev_s g_usart4priv =
 {
+  .handler        = up_uart4_interrupt,
   .usartbase      = SAM_USART4_VBASE,
   .baud           = CONFIG_USART4_BAUD,
   .irq            = SAM_IRQ_USART4,
@@ -931,6 +978,131 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
   up_serialout(priv, SAM_UART_IDR_OFFSET, UART_INT_ALLINTS);
   irqrestore(flags);
 }
+
+/****************************************************************************
+ * Name: up_interrupt
+ *
+ * Description:
+ *   This is the common USART interrupt handler.  It should call
+ *   uart_transmitchars or uart_receivechar to perform the appropriate
+ *   data transfers.
+ *
+ ****************************************************************************/
+
+static int up_interrupt(struct uart_dev_s *dev)
+{
+  struct up_dev_s   *priv;
+  uint32_t           pending;
+  uint32_t           imr;
+  int                passes;
+  bool               handled;
+
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (struct up_dev_s*)dev->priv;
+
+  /* Loop until there are no characters to be transferred or, until we have
+   * been looping for a long time.
+   */
+
+  handled = true;
+  for (passes = 0; passes < 256 && handled; passes++)
+    {
+      handled = false;
+
+      /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
+
+      priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
+      imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */
+      pending  = priv->sr & imr;                         /* Mask out disabled interrupt sources */
+
+      /* Handle an incoming, receive byte.  RXRDY: At least one complete character
+       * has been received and US_RHR has not yet been read.
+       */
+
+      if ((pending & UART_INT_RXRDY) != 0)
+        {
+           /* Received data ready... process incoming bytes */
+
+           uart_recvchars(dev);
+           handled = true;
+        }
+
+      /* Handle outgoing, transmit bytes. XRDY: There is no character in the
+       * US_THR.
+       */
+
+      if ((pending & UART_INT_TXRDY) != 0)
+        {
+           /* Transmit data register empty ... process outgoing bytes */
+
+           uart_xmitchars(dev);
+           handled = true;
+        }
+    }
+
+  return OK;
+}
+
+#ifdef CONFIG_SAMA5_UART0
+static int  up_uart0_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_uart0port);
+}
+#endif
+#ifdef CONFIG_SAMA5_UART1
+static int  up_uart1_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_uart1port);
+}
+#endif
+#ifdef CONFIG_SAMA5_UART2
+static int  up_uart2_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_uart2port);
+}
+#endif
+#ifdef CONFIG_SAMA5_UART3
+static int  up_uart3_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_uart3port);
+}
+#endif
+#ifdef CONFIG_SAMA5_UART4
+static int  up_uart4_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_uart4port);
+}
+#endif
+#ifdef CONFIG_USART0_ISUART
+static int  up_usart0_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_usart0port);
+}
+#endif
+#ifdef CONFIG_USART1_ISUART
+static int  up_usart1_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_usart1port);
+}
+#endif
+#ifdef CONFIG_USART2_ISUART
+static int  up_usart2_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_usart2port);
+}
+#endif
+#ifdef CONFIG_USART3_ISUART
+static int  up_usart3_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_usart3port);
+}
+#endif
+#ifdef CONFIG_USART4_ISUART
+static int  up_usart4_interrupt(int irq, void *context)
+{
+  return up_interrupt(&g_usart4port);
+}
+#endif
 
 /****************************************************************************
  * Name: up_setup
@@ -1121,7 +1293,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, priv->handler);
   if (ret == OK)
     {
        /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1149,146 +1321,6 @@ static void up_detach(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
-}
-
-/****************************************************************************
- * Name: up_interrupt
- *
- * Description:
- *   This is the USART interrupt handler.  It will be invoked when an
- *   interrupt received on the 'irq'  It should call uart_transmitchars or
- *   uart_receivechar to perform the appropriate data transfers.  The
- *   interrupt handling logic must be able to map the 'irq' number into the
- *   appropriate uart_dev_s structure in order to call these functions.
- *
- ****************************************************************************/
-
-static int up_interrupt(int irq, void *context)
-{
-  struct uart_dev_s *dev = NULL;
-  struct up_dev_s   *priv;
-  uint32_t           pending;
-  uint32_t           imr;
-  int                passes;
-  bool               handled;
-
-#ifdef CONFIG_SAMA5_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAMA5_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAMA5_UART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAMA5_UART3
-  if (g_uart3priv.irq == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAMA5_UART4
-  if (g_uart4priv.irq == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_USART0_ISUART
-  if (g_usart0priv.irq == irq)
-    {
-      dev = &g_usart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_USART1_ISUART
-  if (g_usart1priv.irq == irq)
-    {
-      dev = &g_usart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_USART2_ISUART
-  if (g_usart2priv.irq == irq)
-    {
-      dev = &g_usart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_USART3_ISUART
-  if (g_usart3priv.irq == irq)
-    {
-      dev = &g_usart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_USART4_ISUART
-  if (g_usart4priv.irq == irq)
-    {
-      dev = &g_usart4port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
-  priv = (struct up_dev_s*)dev->priv;
-
-  /* Loop until there are no characters to be transferred or, until we have
-   * been looping for a long time.
-   */
-
-  handled = true;
-  for (passes = 0; passes < 256 && handled; passes++)
-    {
-      handled = false;
-
-      /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
-
-      priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
-      imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */
-      pending  = priv->sr & imr;                         /* Mask out disabled interrupt sources */
-
-      /* Handle an incoming, receive byte.  RXRDY: At least one complete character
-       * has been received and US_RHR has not yet been read.
-       */
-
-      if ((pending & UART_INT_RXRDY) != 0)
-        {
-           /* Received data ready... process incoming bytes */
-
-           uart_recvchars(dev);
-           handled = true;
-        }
-
-      /* Handle outgoing, transmit bytes. XRDY: There is no character in the
-       * US_THR.
-       */
-
-      if ((pending & UART_INT_TXRDY) != 0)
-        {
-           /* Transmit data register empty ... process outgoing bytes */
-
-           uart_xmitchars(dev);
-           handled = true;
-        }
-    }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -1641,14 +1673,12 @@ static bool up_txempty(struct uart_dev_s *dev)
   return ((up_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0);
 }
 
-#endif /* SAMA5_HAVE_UART || SAMA5_HAVE_USART */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_earlyserialinit
+ * Name: uart_earlyserialinit
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
@@ -1657,7 +1687,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void sam_earlyserialinit(void)
+void uart_earlyserialinit(void)
 {
   /* NOTE:  All PIO configuration for the USARTs was performed in
    * sam_lowsetup
@@ -1698,26 +1728,26 @@ void sam_earlyserialinit(void)
 
   /* Configuration whichever one is the console */
 
-#ifdef SAMA5_HAVE_SERIAL_CONSOLE
+#if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
 }
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: uart_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   Register UART/USART serial console and serial ports.  This assumes that
+ *   uart_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void uart_serialinit(void)
 {
   /* Register the console */
 
-#ifdef SAMA5_HAVE_SERIAL_CONSOLE
+#if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1753,12 +1783,7 @@ void up_serialinit(void)
 #ifdef TTYS9_DEV
   (void)uart_register("/dev/ttyS9", &TTYS9_DEV);
 #endif
-
-/* Register the DBGU as well */
-
-#ifdef CONFIG_SAMA5_DBGU
-  sam_dbgu_register();
-#endif
 }
 
+#endif /* SAMA5_HAVE_UART || SAMA5_HAVE_USART */
 #endif /* USE_SERIALDRIVER */

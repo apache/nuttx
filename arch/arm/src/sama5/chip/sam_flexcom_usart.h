@@ -502,7 +502,7 @@
 #  define FLEXUS_LINBRR_LINCD(n)       ((uint32_t)(n) << FLEXUS_LINBRR_LINCD_SHIFT)
 #define FLEXUS_LINBRR_LINFP_SHIFT      (16)      /* Bits 16-18: Fractional Part after Synchronization */
 #define FLEXUS_LINBRR_LINFP_MASK       (7 << FLEXUS_LINBRR_LINFP_SHIFT)
-#  define FLEXUS_LINBRR_LINFP_MASK     ((uint32_t)(n) << FLEXUS_LINBRR_LINFP_SHIFT)
+#  define FLEXUS_LINBRR_LINFP(n)     ((uint32_t)(n) << FLEXUS_LINBRR_LINFP_SHIFT)
 
 /* USART Comparison Register */
 

@@ -54,6 +54,7 @@
 #include "sam_lowputc.h"
 
 #include "chip/sam_uart.h"
+#include "chip/sam_flexcom.h"
 #include "chip/sam_dbgu.h"
 #include "chip/sam_pinmap.h"
 
@@ -63,8 +64,13 @@
 
 /* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
 
-#define SAM_USART_CLOCK  BOARD_USART_FREQUENCY /* Frequency of the USART clock */
-#define SAM_MR_USCLKS    UART_MR_USCLKS_MCK    /* Source = Main clock */
+#ifdef SAMA5_HAVE_FLEXCOM_CONSOLE
+#  define SAM_USART_CLOCK  BOARD_FLEXCOM_FREQUENCY /* Frequency of the FLEXCOM clock */
+#  define SAM_MR_USCLKS    FLEXUS_MR_USCLKS_MCK    /* Source = Main clock */
+#else
+#  define SAM_USART_CLOCK  BOARD_USART_FREQUENCY   /* Frequency of the USART clock */
+#  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK      /* Source = Main clock */
+#endif
 
 /* Select USART parameters for the selected console */
 
@@ -81,84 +87,93 @@
 #    define SAM_CONSOLE_BAUD   CONFIG_SAMA5_DBGU_BAUD
 #    define SAM_CONSOLE_PARITY CONFIG_SAMA5_DBGU_PARITY
 #  endif
-#  undef SAM_CONSOLE_ISUART
 #elif defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART0_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART0_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART0_2STOP
-#  define SAM_CONSOLE_ISUART   1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART1_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART1_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART1_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART1_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART1_2STOP
-#  define SAM_CONSOLE_ISUART   1
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART2_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART2_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART2_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART2_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART2_2STOP
-#  define SAM_CONSOLE_ISUART   1
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART3_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART3_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART3_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART3_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART3_2STOP
-#  define SAM_CONSOLE_ISUART   1
 #elif defined(CONFIG_UART4_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART4_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART4_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART4_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART4_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART4_2STOP
-#  define SAM_CONSOLE_ISUART   1
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_VBASE    SAM_USART0_VBASE
+#  ifdef CONFIG_SAMA5_FLEXCOM0_USART
+#    define SAM_CONSOLE_VBASE    SAM_FLEXUS0_VBASE
+#  else
+#    define SAM_CONSOLE_VBASE    SAM_USART0_VBASE
+#  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART0_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART0_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART0_2STOP
-#  undef SAM_CONSOLE_ISUART
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_VBASE    SAM_USART1_VBASE
+#  ifdef CONFIG_SAMA5_FLEXCOM1_USART
+#    define SAM_CONSOLE_VBASE    SAM_FLEXUS1_VBASE
+#  else
+#    define SAM_CONSOLE_VBASE    SAM_USART1_VBASE
+#  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART1_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART1_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART1_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART1_2STOP
-#  undef SAM_CONSOLE_ISUART
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_VBASE    SAM_USART2_VBASE
+#  ifdef CONFIG_SAMA5_FLEXCOM2_USART
+#    define SAM_CONSOLE_VBASE    SAM_FLEXUS2_VBASE
+#  else
+#    define SAM_CONSOLE_VBASE    SAM_USART2_VBASE
+#  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART2_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART2_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART2_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART2_2STOP
-#  undef SAM_CONSOLE_ISUART
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_VBASE    SAM_USART3_VBASE
+#  ifdef CONFIG_SAMA5_FLEXCOM3_USART
+#   define SAM_CONSOLE_VBASE    SAM_FLEXUS3_VBASE
+#  else
+#   define SAM_CONSOLE_VBASE    SAM_USART3_VBASE
+#  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART3_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART3_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART3_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART3_2STOP
-#  undef SAM_CONSOLE_ISUART
 #elif defined(CONFIG_USART4_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_VBASE    SAM_USART4_VBASE
+#  ifdef CONFIG_SAMA5_FLEXCOM4_USART
+#    define SAM_CONSOLE_VBASE    SAM_FLEXUS4_VBASE
+#  else
+#    define SAM_CONSOLE_VBASE    SAM_USART4_VBASE
+#  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART4_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART4_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART4_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART4_2STOP
-#  undef SAM_CONSOLE_ISUART
 #else
 #  error "No CONFIG_U[S]ARTn_SERIAL_CONSOLE Setting"
 #endif
 
 /* Select the settings for the mode register */
 
-#if defined(SAM_CONSOLE_ISUART)
+#if defined(SAMA5_HAVE_UART_CONSOLE)
 #  if SAM_CONSOLE_BITS == 8 && SAM_CONSOLE_PARITY == 0
 #  elif SAM_CONSOLE_BITS == 7 && SAM_CONSOLE_PARITY != 0
 #  else
@@ -222,7 +237,7 @@
 
 void up_lowputc(char ch)
 {
-#if defined(SAMA5_HAVE_SERIAL_CONSOLE)
+#if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)
   irqstate_t flags;
 
   for (;;)
@@ -249,6 +264,35 @@ void up_lowputc(char ch)
 
       irqrestore(flags);
     }
+
+#elif defined(SAMA5_HAVE_FLEXCOM_CONSOLE)
+  irqstate_t flags;
+
+  for (;;)
+    {
+      /* Wait for the transmitter to be available */
+
+      while ((getreg32(SAM_CONSOLE_VBASE + SAM_FLEXUS_CSR_OFFSET) &
+        FLEXUS_INT_TXEMPTY) == 0);
+
+      /* Disable interrupts so that the test and the transmission are
+       * atomic.
+       */
+
+      flags = irqsave();
+      if ((getreg32(SAM_CONSOLE_VBASE + SAM_FLEXUS_CSR_OFFSET) &
+        FLEXUS_INT_TXEMPTY) != 0)
+        {
+          /* Send the character */
+
+          putreg32((uint32_t)ch, SAM_CONSOLE_VBASE + SAM_FLEXUS_THR_OFFSET);
+          irqrestore(flags);
+          return;
+        }
+
+      irqrestore(flags);
+    }
+
 #elif defined(CONFIG_SAMA5_DBGU_CONSOLE)
   irqstate_t flags;
 
@@ -287,7 +331,8 @@ void up_lowputc(char ch)
 
 int up_putc(int ch)
 {
-#if defined(SAMA5_HAVE_SERIAL_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
+#if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE) || \
+    defined(SAMA5_HAVE_FLEXCOM_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
   /* Check for LF */
 
   if (ch == '\n')
@@ -432,7 +477,8 @@ void sam_lowsetup(void)
 
   /* Configure the console (only) */
 
-#if defined(SAMA5_HAVE_SERIAL_CONSOLE) && !defined(SUPPRESS_CONSOLE_CONFIG)
+#if (defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)) && \
+    !defined(SUPPRESS_CONSOLE_CONFIG)
   /* Reset and disable receiver and transmitter */
 
   putreg32((UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS),
@@ -457,6 +503,33 @@ void sam_lowsetup(void)
 
   putreg32((UART_CR_RXEN | UART_CR_TXEN),
            SAM_CONSOLE_VBASE + SAM_UART_CR_OFFSET);
+
+#elif defined(SAMA5_HAVE_FLEXCOM_CONSOLE) &&  !defined(SUPPRESS_CONSOLE_CONFIG)
+  /* Reset and disable receiver and transmitter */
+
+  putreg32((FLEXUS_CR_RSTRX | FLEXUS_CR_RSTTX | FLEXUS_CR_RXDIS | FLEXUS_CR_TXDIS),
+           SAM_CONSOLE_VBASE + SAM_FLEXUS_CR_OFFSET);
+
+  /* Disable all interrupts */
+
+  putreg32(0xffffffff, SAM_CONSOLE_VBASE + SAM_FLEXUS_IDR_OFFSET);
+
+  /* Set up the mode register */
+
+  putreg32(MR_VALUE, SAM_CONSOLE_VBASE + SAM_FLEXUS_MR_OFFSET);
+
+  /* Configure the console baud.  NOTE: Oversampling by 8 is not supported.
+   * This may limit BAUD rates for lower USART clocks.
+   */
+
+  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
+           SAM_CONSOLE_VBASE + SAM_FLEXUS_BRGR_OFFSET);
+
+  /* Enable receiver & transmitter */
+
+  putreg32((FLEXUS_CR_RXEN | FLEXUS_CR_TXEN),
+           SAM_CONSOLE_VBASE + SAM_FLEXUS_CR_OFFSET);
+
 #endif
 
 #ifdef CONFIG_SAMA5_DBGU

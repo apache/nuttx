@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include "up_internal.h"
+#include "sam_config.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,6 +88,60 @@ extern "C"
 
 #ifdef USE_EARLYSERIALINIT
 void sam_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: uart_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level USART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#if defined(USE_EARLYSERIALINIT) && (defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART))
+void uart_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: flexus_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level Flexcom USART initialization early so that the
+ *   Flexcom serial console will be available during bootup.  This must be
+ *   called before flexus_serialinit.
+ *
+ ****************************************************************************/
+
+#if defined(USE_EARLYSERIALINIT) && defined(SAMA5_HAVE_FLEXCOM_USART)
+void flexus_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: uart_serialinit
+ *
+ * Description:
+ *   Register UART/USART serial console and serial ports.  This assumes that
+ *   uart_earlyserialinit was called previously.
+ *
+ ****************************************************************************/
+
+#if defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART)
+void uart_serialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: flexus_serialinit
+ *
+ * Description:
+ *   Register Flexcom serial console and serial ports.  This assumes that
+ *   flexus_earlyserialinit was called previously.
+ *
+ ****************************************************************************/
+
+#if defined(USE_EARLYSERIALINIT) && defined(SAMA5_HAVE_FLEXCOM_USART)
+void flexus_serialinit(void);
 #endif
 
 #undef EXTERN
