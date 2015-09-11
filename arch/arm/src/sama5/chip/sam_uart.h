@@ -354,11 +354,13 @@
 #    define UART_MR_PAR_MULTIDROP    (6 << UART_MR_PAR_SHIFT) /* Multidrop mode (2) */
 #  endif
 
-#if defined(ATSAMA5D2)
-#  define UART_MR_BRSRCCK            (1 << 12) /* Bit 12: Baud Rate Source Clock */
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
+#  define UART_MR_BRSRCCK            (1 << 12) /* Bit 12: Baud Rate Source Clock (UART only) */
 #    define UART_MR_PERIPHCLK        (0)       /* Bit 12: 0=Peripheral clock */
 #    define UART_MR_PMCPCK           (1 << 12) /* Bit 12: 1=PMC programmable clock */
-#elif defined(ATSAMA5D3) ||defined(ATSAMA5D4)
+#endif
+
+#if defined(ATSAMA5D3) || defined(ATSAMA5D4)
 #  define UART_MR_NBSTOP_SHIFT       (12)      /* Bits 12-13: Number of Stop Bits (2) */
 #  define UART_MR_NBSTOP_MASK        (3 << UART_MR_NBSTOP_SHIFT)
 #    define UART_MR_NBSTOP_1         (0 << UART_MR_NBSTOP_SHIFT) /* 1 stop bit 1 stop bit */
