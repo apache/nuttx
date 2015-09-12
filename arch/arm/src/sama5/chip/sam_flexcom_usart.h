@@ -569,7 +569,7 @@
 #define FLEXUS_WPMR_WPEN               (1 << 0)  /* Bit 0: Write Protect Enable (USART only) */
 #define FLEXUS_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protect KEY (USART only) */
 #define FLEXUS_WPMR_WPKEY_MASK         (0x00ffffff << FLEXUS_WPMR_WPKEY_SHIFT)
-#  define FLEXUSWPMR_WPKEY             (0x00555341 << FLEXUS_WPMR_WPKEY_SHIFT) /* "USAR" */
+#  define FLEXUSWPMR_WPKEY             (0x00555341 << FLEXUS_WPMR_WPKEY_SHIFT) /* "USA" */
 
 /* USART Write Protect Status Register (USART only) */
 
