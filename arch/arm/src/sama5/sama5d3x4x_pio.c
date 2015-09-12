@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_pio.c
- * General Purpose Input/Output (PIO) logic for the SAMA5
+ * arch/arm/src/sama5/sama5d3x4x_pio.c
+ * General Purpose Input/Output (PIO) logic for the SAMA5D3x and SAMA5D4x
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
