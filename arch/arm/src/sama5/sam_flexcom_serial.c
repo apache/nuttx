@@ -315,7 +315,7 @@ static char g_flexus4txbuffer[CONFIG_USART4_TXBUFSIZE];
 static struct flexus_dev_s g_flexus0priv =
 {
   .handler        = flexus0_interrupt,
-  .usartbase      = SAM_FLEXUS0_VBASE,
+  .usartbase      = SAM_FLEXCOM0_VBASE,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_FLEXCOM0,
   .parity         = CONFIG_USART0_PARITY,
@@ -349,7 +349,7 @@ static uart_dev_t g_flexus0port =
 static struct flexus_dev_s g_flexus1priv =
 {
   .handler        = flexus1_interrupt,
-  .usartbase      = SAM_FLEXUS1_VBASE,
+  .usartbase      = SAM_FLEXCOM1_VBASE,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_FLEXCOM1,
   .parity         = CONFIG_USART1_PARITY,
@@ -383,7 +383,7 @@ static uart_dev_t g_flexus1port =
 static struct flexus_dev_s g_flexus2priv =
 {
   .handler        = flexus2_interrupt,
-  .usartbase      = SAM_FLEXUS2_VBASE,
+  .usartbase      = SAM_FLEXCOM2_VBASE,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_FLEXCOM2,
   .parity         = CONFIG_USART2_PARITY,
@@ -417,7 +417,7 @@ static uart_dev_t g_flexus2port =
 static struct flexus_dev_s g_flexus3priv =
 {
   .handler        = flexus3_interrupt,
-  .usartbase      = SAM_FLEXUS3_VBASE,
+  .usartbase      = SAM_FLEXCOM3_VBASE,
   .baud           = CONFIG_USART3_BAUD,
   .irq            = SAM_IRQ_FLEXCOM3,
   .parity         = CONFIG_USART3_PARITY,
@@ -451,7 +451,7 @@ static uart_dev_t g_flexus3port =
 static struct flexus_dev_s g_flexus4priv =
 {
   .handler        = flexus4_interrupt,
-  .usartbase      = SAM_FLEXUS4_VBASE,
+  .usartbase      = SAM_FLEXCOM4_VBASE,
   .baud           = CONFIG_USART4_BAUD,
   .irq            = SAM_IRQ_FLEXCOM4,
   .parity         = CONFIG_USART4_PARITY,
@@ -1202,21 +1202,51 @@ void flexus_earlyserialinit(void)
    * sam_lowsetup
    */
 
-  /* Disable all USARTS */
+  /* Disable the USART */
 
 #ifdef TTYFC0_DEV
+  /* Select USART mode for the Flexcom */
+
+  flexus_serialout(TTYFC0_DEV.priv, SAM_FLEX_MR_OFFSET, FLEX_MR_OPMODE_USART);
+
+  /* Disable the USART */
+
   flexus_disableallints(TTYFC0_DEV.priv, NULL);
 #endif
 #ifdef TTYFC1_DEV
+  /* Select USART mode for the Flexcom */
+
+  flexus_serialout(TTYFC1_DEV.priv, SAM_FLEX_MR_OFFSET, FLEX_MR_OPMODE_USART);
+
+  /* Disable the USART */
+
   flexus_disableallints(TTYFC1_DEV.priv, NULL);
 #endif
 #ifdef TTYFC2_DEV
+  /* Select USART mode for the Flexcom */
+
+  flexus_serialout(TTYFC2_DEV.priv, SAM_FLEX_MR_OFFSET, FLEX_MR_OPMODE_USART);
+
+  /* Disable the USART */
+
   flexus_disableallints(TTYFC2_DEV.priv, NULL);
 #endif
 #ifdef TTYFC3_DEV
+  /* Select USART mode for the Flexcom */
+
+  flexus_serialout(TTYFC3_DEV.priv, SAM_FLEX_MR_OFFSET, FLEX_MR_OPMODE_USART);
+
+  /* Disable the USART */
+
   flexus_disableallints(TTYFC3_DEV.priv, NULL);
 #endif
 #ifdef TTYFC4_DEV
+  /* Select USART mode for the Flexcom */
+
+  flexus_serialout(TTYFC4_DEV.priv, SAM_FLEX_MR_OFFSET, FLEX_MR_OPMODE_USART);
+
+  /* Disable the USART */
+
   flexus_disableallints(TTYFC4_DEV.priv, NULL);
 #endif
 

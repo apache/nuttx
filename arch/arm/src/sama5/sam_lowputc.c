@@ -42,7 +42,6 @@
 #include <stdint.h>
 
 #include <arch/irq.h>
-#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -58,6 +57,8 @@
 #include "chip/sam_dbgu.h"
 #include "chip/sam_pinmap.h"
 
+#include <arch/board/board.h>
+
 /**************************************************************************
  * Pre-processor Definitions
  **************************************************************************/
@@ -65,11 +66,11 @@
 /* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
 
 #ifdef SAMA5_HAVE_FLEXCOM_CONSOLE
-#  define SAM_USART_CLOCK  BOARD_FLEXCOM_FREQUENCY /* Frequency of the FLEXCOM clock */
-#  define SAM_MR_USCLKS    FLEXUS_MR_USCLKS_MCK    /* Source = Main clock */
+#  define SAM_USART_CLOCK      BOARD_FLEXCOM_FREQUENCY /* Frequency of the FLEXCOM clock */
+#  define SAM_MR_USCLKS        FLEXUS_MR_USCLKS_MCK    /* Source = Main clock */
 #else
-#  define SAM_USART_CLOCK  BOARD_USART_FREQUENCY   /* Frequency of the USART clock */
-#  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK      /* Source = Main clock */
+#  define SAM_USART_CLOCK      BOARD_USART_FREQUENCY   /* Frequency of the USART clock */
+#  define SAM_MR_USCLKS        UART_MR_USCLKS_MCK      /* Source = Main clock */
 #endif
 
 /* Select USART parameters for the selected console */
@@ -119,9 +120,9 @@
 #  define SAM_CONSOLE_2STOP    CONFIG_UART4_2STOP
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  ifdef CONFIG_SAMA5_FLEXCOM0_USART
-#    define SAM_CONSOLE_VBASE    SAM_FLEXUS0_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_FLEXCOM0_VBASE
 #  else
-#    define SAM_CONSOLE_VBASE    SAM_USART0_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_USART0_VBASE
 #  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART0_BITS
@@ -129,9 +130,9 @@
 #  define SAM_CONSOLE_2STOP    CONFIG_USART0_2STOP
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  ifdef CONFIG_SAMA5_FLEXCOM1_USART
-#    define SAM_CONSOLE_VBASE    SAM_FLEXUS1_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_FLEXCOM1_VBASE
 #  else
-#    define SAM_CONSOLE_VBASE    SAM_USART1_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_USART1_VBASE
 #  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART1_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART1_BITS
@@ -139,9 +140,9 @@
 #  define SAM_CONSOLE_2STOP    CONFIG_USART1_2STOP
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  ifdef CONFIG_SAMA5_FLEXCOM2_USART
-#    define SAM_CONSOLE_VBASE    SAM_FLEXUS2_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_FLEXCOM2_VBASE
 #  else
-#    define SAM_CONSOLE_VBASE    SAM_USART2_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_USART2_VBASE
 #  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART2_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART2_BITS
@@ -149,9 +150,9 @@
 #  define SAM_CONSOLE_2STOP    CONFIG_USART2_2STOP
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  ifdef CONFIG_SAMA5_FLEXCOM3_USART
-#   define SAM_CONSOLE_VBASE    SAM_FLEXUS3_VBASE
+#   define SAM_CONSOLE_VBASE   SAM_FLEXCOM3_VBASE
 #  else
-#   define SAM_CONSOLE_VBASE    SAM_USART3_VBASE
+#   define SAM_CONSOLE_VBASE   SAM_USART3_VBASE
 #  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART3_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART3_BITS
@@ -159,9 +160,9 @@
 #  define SAM_CONSOLE_2STOP    CONFIG_USART3_2STOP
 #elif defined(CONFIG_USART4_SERIAL_CONSOLE)
 #  ifdef CONFIG_SAMA5_FLEXCOM4_USART
-#    define SAM_CONSOLE_VBASE    SAM_FLEXUS4_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_FLEXCOM4_VBASE
 #  else
-#    define SAM_CONSOLE_VBASE    SAM_USART4_VBASE
+#    define SAM_CONSOLE_VBASE  SAM_USART4_VBASE
 #  endif
 #  define SAM_CONSOLE_BAUD     CONFIG_USART4_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART4_BITS
@@ -499,7 +500,7 @@ void sam_lowsetup(void)
    *   FLEXCOM_IO4 = RTS
    */
 
-#if defined(CONFIG_USART0_ISUART) && defined(CONFIG_SAMA5_USART0)
+#if defined(CONFIG_USART0_ISUART) && defined(CONFIG_SAMA5_FLEXCOM0_USART)
   (void)sam_configpio(PIO_FLEXCOM0_IO0);
   (void)sam_configpio(PIO_FLEXCOM0_IO1);
 #ifdef CONFIG_USART0_OFLOWCONTROL
@@ -510,7 +511,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#if defined(CONFIG_USART1_ISUART) && defined(CONFIG_SAMA5_USART1)
+#if defined(CONFIG_USART1_ISUART) && defined(CONFIG_SAMA5_FLEXCOM1_USART)
   (void)sam_configpio(PIO_FLEXCOM1_IO0);
   (void)sam_configpio(PIO_FLEXCOM1_IO1);
 #ifdef CONFIG_USART1_OFLOWCONTROL
@@ -521,7 +522,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#if defined(CONFIG_USART2_ISUART) && defined(CONFIG_SAMA5_USART2)
+#if defined(CONFIG_USART2_ISUART) && defined(CONFIG_SAMA5_FLEXCOM2_USART)
   (void)sam_configpio(PIO_FLEXCOM2_IO0);
   (void)sam_configpio(PIO_FLEXCOM2_IO1);
 #ifdef CONFIG_USART2_OFLOWCONTROL
@@ -532,7 +533,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#if defined(CONFIG_USART3_ISUART) && defined(CONFIG_SAMA5_USART3)
+#if defined(CONFIG_USART3_ISUART) && defined(CONFIG_SAMA5_FLEXCOM3_USART)
   (void)sam_configpio(PIO_FLEXCOM3_IO0);
   (void)sam_configpio(PIO_FLEXCOM3_IO1);
 #ifdef CONFIG_USART3_OFLOWCONTROL
@@ -543,9 +544,9 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#if defined(CONFIG_USART4_ISUART) && defined(CONFIG_SAMA5_USART4)
+#if defined(CONFIG_USART4_ISUART) && defined(CONFIG_SAMA5_FLEXCOM4_USART)
   (void)sam_configpio(PIO_FLEXCOM4_IO0);
-  (void)sam_configpio(PIO_FLEXCOM4_IO0);
+  (void)sam_configpio(PIO_FLEXCOM4_IO1);
 #ifdef CONFIG_USART4_OFLOWCONTROL
   (void)sam_configpio(PIO_FLEXCOM4_IO3);
 #endif
@@ -584,6 +585,10 @@ void sam_lowsetup(void)
            SAM_CONSOLE_VBASE + SAM_UART_CR_OFFSET);
 
 #elif defined(SAMA5_HAVE_FLEXCOM_CONSOLE) &&  !defined(SUPPRESS_CONSOLE_CONFIG)
+  /* Select USART mode for the Flexcom */
+
+  putreg32(FLEX_MR_OPMODE_USART, SAM_CONSOLE_VBASE + SAM_FLEX_MR_OFFSET);
+
   /* Reset and disable receiver and transmitter */
 
   putreg32((FLEXUS_CR_RSTRX | FLEXUS_CR_RSTTX | FLEXUS_CR_RXDIS | FLEXUS_CR_TXDIS),

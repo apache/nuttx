@@ -226,23 +226,29 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
 
   switch (pckid)
     {
+#ifdef PIO_PMC_PCK0
     case PCK0:
       putreg32(PMC_PCK0, SAM_PMC_SCDR);
       (void)sam_configpio(PIO_PMC_PCK0);
       putreg32(regval, SAM_PMC_PCK0);
       break;
+#endif
 
+#ifdef PIO_PMC_PCK1
     case PCK1:
       putreg32(PMC_PCK1, SAM_PMC_SCDR);
       (void)sam_configpio(PIO_PMC_PCK1);
       putreg32(regval, SAM_PMC_PCK1);
       break;
+#endif
 
+#ifdef PIO_PMC_PCK2
     case PCK2:
       putreg32(PMC_PCK2, SAM_PMC_SCDR);
       (void)sam_configpio(PIO_PMC_PCK2);
       putreg32(regval, SAM_PMC_PCK2);
       break;
+#endif
 
     default:
       return -EINVAL;
@@ -287,4 +293,3 @@ void sam_pck_enable(enum pckid_e pckid, bool enable)
 
   putreg32(regval, regaddr);
 }
-
