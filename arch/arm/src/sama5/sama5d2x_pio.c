@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/sama5/sama5d3x4x_pio.c
- * General Purpose Input/Output (PIO) logic for the SAMA5D3x and SAMA5D4x
+ * arch/arm/src/sama5/sama5d2x_pio.c
+ * General Purpose Input/Output (PIO) logic for the SAMA5D2x
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,22 +74,41 @@
  * Public Data
  ****************************************************************************/
 
-/* Lookup for (non-secure) PIOs */
+/* Lookup for non-secure PIOs */
 
 const uintptr_t g_piobase[SAM_NPIO] =
 {
-  SAM_PIOA_VBASE
+  SAM_PIO_IOGROUPA_VBASE
 #if SAM_NPIO > 1
-  , SAM_PIOB_VBASE
+  , SAM_PIO_IOGROUPB_VBASE
 #endif
 #if SAM_NPIO > 2
-  , SAM_PIOC_VBASE
+  , SAM_PIO_IOGROUPC_VBASE
 #endif
 #if SAM_NPIO > 3
-  , SAM_PIOD_VBASE
+  , SAM_PIO_IOGROUPD_VBASE
 #endif
 #if SAM_NPIO > 4
-  , SAM_PIOE_VBASE
+  , SAM_PIO_IOGROUPE_VBASE
+#endif
+};
+
+/* Lookup for non-secure PIOs */
+
+const uintptr_t g_spiobase[SAM_NPIO] =
+{
+  SAM_SPIO_IOGROUPA_VBASE
+#if SAM_NPIO > 1
+  , SAM_SPIO_IOGROUPB_VBASE
+#endif
+#if SAM_NPIO > 2
+  , SAM_SPIO_IOGROUPC_VBASE
+#endif
+#if SAM_NPIO > 3
+  , SAM_SPIO_IOGROUPD_VBASE
+#endif
+#if SAM_NPIO > 4
+  , SAM_SPIO_IOGROUPE_VBASE
 #endif
 };
 
@@ -198,18 +217,40 @@ static uint32_t g_forced[SAM_NPIO];
  *
  ****************************************************************************/
 
-static inline uintptr_t sam_piobase(pio_pinset_t cfgset)
+static inline bool sam_issecure(pio_pinset_t cfgset)
+{
+  return ((cfgset & PIO_INT_SECURE) != 0);
+}
+
+/****************************************************************************
+ * Name: sam_piobase
+ *
+ * Description:
+ *   Return the base address of the PIO register set
+ *
+ ****************************************************************************/
+
+static uintptr_t sam_piobase(pio_pinset_t cfgset)
 {
   int port = (cfgset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
 
+  /* Verify that the port number is within range */
+
   if (port < SAM_NPIO)
     {
-      return sam_pion_vbase(port);
+      /* Is this a secure or an un-secured PIO? */
+
+      if (sam_issecure(cfgset))
+        {
+          return sam_spion_vbase(port);
+        }
+      else
+        {
+          return sam_pion_vbase(port);
+        }
     }
-  else
-    {
-      return 0;
-    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -292,7 +333,7 @@ static void sam_pio_disableclk(pio_pinset_t cfgset)
     {
       /* Get the base address of the PIO port */
 
-      base = sam_pion_vbase(port);
+      base = sam_piobase(cfgset);
 
       /* Are any pins configured as PIO inputs?
        *
@@ -573,7 +614,6 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
   putreg32(pin, base + SAM_PIO_IFDR_OFFSET);
 
-#ifdef PIO_HAVE_PERIPHCD
   /* Configure pin, depending upon the peripheral A, B, C or D
    *
    *   PERIPHA: ABCDSR1[n] = 0 ABCDSR2[n] = 0
@@ -608,26 +648,6 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
   putreg32(regval, base + SAM_PIO_ABCDSR2_OFFSET);
 
-#else
-  /* Configure pin, depending upon the peripheral A or B:
-   *
-   *   PERIPHA: ABSR[n] = 0
-   *   PERIPHB: ABSR[n] = 1
-   */
-
-  regval = getreg32(base + SAM_PIO_ABSR_OFFSET);
-  if ((cfgset & PIO_MODE_MASK) == PIO_PERIPHA)
-    {
-      regval &= ~pin;
-    }
-  else
-    {
-      regval |= pin;
-    }
-
-  putreg32(regval, base + SAM_PIO_ABSR_OFFSET);
-#endif
-
   /* Disable PIO functionality */
 
   putreg32(pin, base + SAM_PIO_PDR_OFFSET);
@@ -657,7 +677,7 @@ int sam_configpio(pio_pinset_t cfgset)
   irqstate_t flags;
   int ret;
 
-  /* Sanity check */
+  /* Get the base address and pin mask associated with this pin configuration */
 
   base = sam_piobase(cfgset);
   if (base == 0)
@@ -671,23 +691,43 @@ int sam_configpio(pio_pinset_t cfgset)
 
   flags = irqsave();
 
-  /* Enable writing to PIO registers.  The following registers are protected:
+  /* Enable writing to PIO registers.
    *
-   *  - PIO Enable/Disable Registers (PER/PDR)
-   *  - PIO Output Enable/Disable Registers (OER/ODR)
-   *  - PIO Interrupt Security Level Register (ISLR)
-   *  - PIO Input Filter Enable/Disable Registers (IFER/IFDR)
-   *  - PIO Multi-driver Enable/Disable Registers (MDER/MDDR)
-   *  - PIO Pull-Up Enable/Disable Registers (PUER/PUDR)
-   *  - PIO Peripheral ABCD Select Register 1/2 (ABCDSR1/2)
-   *  - PIO Output Write Enable/Disable Registers
-   *  - PIO Pad Pull-Down Enable/Disable Registers (PPER/PPDR)
+   *   The following registers are write-protected when WPEN is set in
+   *   PIO_WPMR:
+   *     - PIO Mask Register
+   *     - PIO Configuration Register
+   *   The following registers are write-protected when WPEN is set in
+   *   S_PIO_WPMR:
+   *     - Secure PIO Mask Register
+   *     - Secure PIO Configuration Register
+   *     - Secure PIO Slow Clock Divider Debouncing Register
+   *   The following registers are write-protected when WPITEN is set in
+   *   PIO_WPMR:
+   *     - PIO Interrupt Enable Register
+   *     - PIO Interrupt Disable Register
+   *   The following registers are write-protected when WPITEN is set in
+   *   S_PIO_WPMR:
+   *     - Secure PIO Interrupt Enable Register
+   *     - Secure PIO Interrupt Disable Register
    *
    * I suspect that the default state is the WPMR is unprotected, so these
    * operations could probably all be avoided.
    */
 
-  putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
+  putreg32(PIO_WPMR_WPKEY, SAM_PIO_WPMR);
+  putreg32(PIO_WPMR_WPKEY, SAM_SPIO_WPMR);
+
+  /* Select the secure or un-secured PIO operation */
+
+  if (sam_issecured(cfgset))
+    {
+      putreg32(pin, base + SAM_SPIO_SIOSR_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base + SAM_SPIO_SIONR_OFFSET);        
+    }
 
   /* Put the pin in an intial state -- a vanilla input pin */
 
@@ -705,12 +745,18 @@ int sam_configpio(pio_pinset_t cfgset)
         ret = sam_configoutput(base, pin, cfgset);
         break;
 
+      case PIO_ANALOG:
+        /* REVISIT */
+        ret = OK;
+        break;
+
       case PIO_PERIPHA:
       case PIO_PERIPHB:
-#ifdef PIO_HAVE_PERIPHCD
       case PIO_PERIPHC:
       case PIO_PERIPHD:
-#endif
+      case PIO_PERIPHE:
+      case PIO_PERIPHF:
+      case PIO_PERIPHG:
         ret = sam_configperiph(base, pin, cfgset);
         break;
 
@@ -721,7 +767,8 @@ int sam_configpio(pio_pinset_t cfgset)
 
   /* Disable writing to PIO registers */
 
-  putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
+  putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPITEN | PIO_WPMR_WPKEY, SAM_PIO_WPMR);
+  putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPITEN | PIO_WPMR_WPKEY, SAM_SPIO_WPMR);
   irqrestore(flags);
 
   return ret;
@@ -863,7 +910,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
   /* Get the base address associated with the PIO port */
 
   port = (pinset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
-  base = sam_pion_vbase(port);
+  base = sam_piobase(pinset);
 
   /* The following requires exclusive access to the PIO registers */
 

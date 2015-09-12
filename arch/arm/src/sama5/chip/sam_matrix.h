@@ -146,6 +146,7 @@
 #if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define SAM_MATRIX_SCFG13_OFFSET       0x0074 /* Slave Configuration Register 13 */
 #  define SAM_MATRIX_SCFG14_OFFSET       0x0078 /* Slave Configuration Register 14 */
+#endif
 
 #ifdef ATSAMA5D3
 #  define SAM_MATRIX_SCFG15_OFFSET       0x007c /* Slave Configuration Register 15 */
@@ -185,6 +186,7 @@
 #  define SAM_MATRIX_PRBS13_OFFSET       0x00ec /* Priority Register B for Slave 13 */
 #  define SAM_MATRIX_PRAS14_OFFSET       0x00f0 /* Priority Register A for Slave 14 */
 #  define SAM_MATRIX_PRBS14_OFFSET       0x00f4 /* Priority Register B for Slave 14 */
+#endif
 
 #ifdef ATSAMA5D3
 #  define SAM_MATRIX_PRAS15_OFFSET       0x00f8 /* Priority Register A for Slave 15 */

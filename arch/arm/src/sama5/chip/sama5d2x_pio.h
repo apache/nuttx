@@ -332,5 +332,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* SAMV7_NPIO > 0 */
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_PIO_H */

@@ -68,15 +68,16 @@
  * Public Types
  ************************************************************************************/
 
-/* SAM_PION_VBASE will only be defined if the PIO register blocks are contiguous.
- * If not defined, then we need to do a table lookup.
- */
+/* Lookup for non-secure PIOs */
 
-#ifndef SAM_PION_VBASE
 extern const uintptr_t g_piobase[SAM_NPIO];
-#  define sam_pion_vbase(n) (g_piobase[(n)])
-#else
-#  define sam_pion_vbase(n) SAM_PION_VBASE(n)
+#define sam_pion_vbase(n) (g_piobase[(n)])
+
+#ifdef ATSAMA5D2
+/* Lookup for secrure PIOs */
+
+extern const uintptr_t g_spiobase[SAM_NPIO];
+#  define sam_spion_vbase(n) (g_spiobase[(n)])
 #endif
 
 /************************************************************************************
