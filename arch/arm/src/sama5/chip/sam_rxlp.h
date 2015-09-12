@@ -112,10 +112,10 @@
 #define RXLP_CMPR_VAL2_MASK          (0xff << RXLP_CMPR_VAL2_SHIFT)
 #  define RXLP_CMPR_VAL2(n)          ((uint32_t)(n) << RXLP_CMPR_VAL2_SHIFT)
 
-/* USART Write Protect Mode Register (USART only) */
+/* RXLP Write Protect Mode Register */
 
-#define RXLP_WPMR_WPEN               (1 << 0)  /* Bit 0: Write Protect Enable (USART only) */
-#define RXLP_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protect KEY (USART only) */
+#define RXLP_WPMR_WPEN               (1 << 0)  /* Bit 0: Write Protect Enable */
+#define RXLP_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protect KEY */
 #define RXLP_WPMR_WPKEY_MASK         (0x00ffffff << RXLP_WPMR_WPKEY_SHIFT)
 #  define RXLP_WPMR_WPKEY            (0x0052584c << RXLP_WPMR_WPKEY_SHIFT) /* "RXL" */
 
