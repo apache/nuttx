@@ -50,6 +50,32 @@
  * Pre-processor Definitions
  ****************************************************************************************/
 
+#ifdef ATSAMA5D2
+/* These are bits maps of PIDs in the H64MX SPSELR registers.  These are used by
+ * application code to quickly determine if a given PID is served by H32MX or H64MX
+ * which, in turn, is needed to know if the peripheral secured in SPSELR).
+ * Reference: "In Matrix" column of "Table 9-2. Peripheral identifiers."
+ *
+ * NOTE that these hard-code bit values must match the PID assignments in
+ * arch/arm/include/sama5/sama5*_irq.h.
+ */
+
+/* ARM=2, XDMAC0=6, XDMAC1=7, AES=9, AESB=10, SHA=12,  MPDDRC=13, MATRIX0=15,
+ * SDMMC0=31
+ */
+
+#  define H64MX_SPSELR0_PIDS             0x8000b6c4
+
+/* SDMMC1=32, LCDC=45, ISC=46, QSPI0=52, QSPI1=53,  L2CC=63 */
+
+#  define H64MX_SPSELR1_PIDS             0x80306001
+
+/* None */
+
+#  define H64MX_SPSELR2_PIDS             0x00000000
+
+#endif
+
 #ifdef ATSAMA5D4
 #  define H64MX_DDR_SLAVE_PORT0          3
 
@@ -90,9 +116,12 @@
 #define SAM_MATRIX_MCFG8_OFFSET          0x0020 /* Master Configuration Register 8 */
 #define SAM_MATRIX_MCFG9_OFFSET          0x0024 /* Master Configuration Register 9 */
 
-#ifdef ATSAMA5D3
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define SAM_MATRIX_MCFG10_OFFSET       0x0028 /* Master Configuration Register 10 */
 #  define SAM_MATRIX_MCFG11_OFFSET       0x002c /* Master Configuration Register 11 */
+#endif
+
+#ifdef ATSAMA5D3
 #  define SAM_MATRIX_MCFG12_OFFSET       0x0030 /* Master Configuration Register 12 */
 #  define SAM_MATRIX_MCFG13_OFFSET       0x0034 /* Master Configuration Register 13 */
 #  define SAM_MATRIX_MCFG14_OFFSET       0x0038 /* Master Configuration Register 14 */
@@ -114,9 +143,11 @@
 #define SAM_MATRIX_SCFG11_OFFSET         0x006c /* Slave Configuration Register 11 */
 #define SAM_MATRIX_SCFG12_OFFSET         0x0070 /* Slave Configuration Register 12 */
 
-#ifdef ATSAMA5D3
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define SAM_MATRIX_SCFG13_OFFSET       0x0074 /* Slave Configuration Register 13 */
 #  define SAM_MATRIX_SCFG14_OFFSET       0x0078 /* Slave Configuration Register 14 */
+
+#ifdef ATSAMA5D3
 #  define SAM_MATRIX_SCFG15_OFFSET       0x007c /* Slave Configuration Register 15 */
 #endif
 
@@ -149,17 +180,19 @@
 #define SAM_MATRIX_PRAS12_OFFSET         0x00e0 /* Priority Register A for Slave 12 */
 #define SAM_MATRIX_PRBS12_OFFSET         0x00e4 /* Priority Register B for Slave 12 */
 
-#ifdef ATSAMA5D3
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define SAM_MATRIX_PRAS13_OFFSET       0x00e8 /* Priority Register A for Slave 13 */
 #  define SAM_MATRIX_PRBS13_OFFSET       0x00ec /* Priority Register B for Slave 13 */
 #  define SAM_MATRIX_PRAS14_OFFSET       0x00f0 /* Priority Register A for Slave 14 */
 #  define SAM_MATRIX_PRBS14_OFFSET       0x00f4 /* Priority Register B for Slave 14 */
+
+#ifdef ATSAMA5D3
 #  define SAM_MATRIX_PRAS15_OFFSET       0x00f8 /* Priority Register A for Slave 15 */
 #  define SAM_MATRIX_PRBS15_OFFSET       0x00fc /* Priority Register B for Slave 15 */
 #  define SAM_MATRIX_MRCR_OFFSET         0x0100 /* Master Remap Control Register */
 #endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SAM_MATRIX_MEIER_OFFSET        0x0150 /* Master Error Interrupt Enable Register */
 #  define SAM_MATRIX_MEIDR_OFFSET        0x0154 /* Master Error Interrupt Disable Register */
 #  define SAM_MATRIX_MEIMR_OFFSET        0x0158 /* Master Error Interrupt Mask Register */
@@ -175,12 +208,17 @@
 #  define SAM_MATRIX_MEAR7_OFFSET        0x017c /* Master 7 Error Address Register */
 #  define SAM_MATRIX_MEAR8_OFFSET        0x0180 /* Master 8 Error Address Register */
 #  define SAM_MATRIX_MEAR9_OFFSET        0x0184 /* Master 9 Error Address Register */
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX_MEAR10_OFFSET     0x0188 /* Master 10 Error Address Register */
+#    define SAM_MATRIX_MEAR11_OFFSET     0x018c /* Master 11 Error Address Register */
+#  endif
 #endif
 
 #define SAM_MATRIX_WPMR_OFFSET           0x01e4 /* Write Protect Mode Register */
 #define SAM_MATRIX_WPSR_OFFSET           0x01e8 /* Write Protect Status Register */
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SAM_MATRIX_SSR_OFFSET(n)       (0x0200+((n)<<2))
 #  define SAM_MATRIX_SSR0_OFFSET         0x0200 /* Security Slave 0 Register */
 #  define SAM_MATRIX_SSR1_OFFSET         0x0204 /* Security Slave 1 Register */
@@ -195,6 +233,11 @@
 #  define SAM_MATRIX_SSR10_OFFSET        0x0228 /* Security Slave 10 Register */
 #  define SAM_MATRIX_SSR11_OFFSET        0x022c /* Security Slave 11 Register */
 #  define SAM_MATRIX_SSR12_OFFSET        0x0230 /* Security Slave 12 Register */
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX_SSR13_OFFSET      0x0234 /* Security Slave 13 Register */
+#    define SAM_MATRIX_SSR14_OFFSET      0x0238 /* Security Slave 14 Register */
+#  endif
 
 #  define SAM_MATRIX_SASSR_OFFSET(n)     (0x0240+((n)<<2))
 #  define SAM_MATRIX_SASSR0_OFFSET       0x0240 /* Security Areas Split Slave 0 Register */
@@ -211,6 +254,11 @@
 #  define SAM_MATRIX_SASSR11_OFFSET      0x026c /* Security Areas Split Slave 11 Register */
 #  define SAM_MATRIX_SASSR12_OFFSET      0x0270 /* Security Areas Split Slave 12 Register */
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX_SASSR13_OFFSET    0x0274 /* Security Areas Split Slave 13 Register */
+#    define SAM_MATRIX_SASSR14_OFFSET    0x0275 /* Security Areas Split Slave 14 Register */
+#  endif
+
 #  define SAM_MATRIX_SRTSR_OFFSET(n)     (0x0280+((n)<<2))
 #  define SAM_MATRIX_SRTSR1_OFFSET       0x0284 /* Security Region Top Slave 1 Register */
 #  define SAM_MATRIX_SRTSR2_OFFSET       0x0288 /* Security Region Top Slave 2 Register */
@@ -224,6 +272,11 @@
 #  define SAM_MATRIX_SRTSR10_OFFSET      0x02a8 /* Security Region Top Slave 10 Register */
 #  define SAM_MATRIX_SRTSR11_OFFSET      0x02ac /* Security Region Top Slave 11 Register */
 #  define SAM_MATRIX_SRTSR12_OFFSET      0x02b0 /* Security Region Top Slave 12 Register */
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX_SRTSR13_OFFSET    0x02b4 /* Security Region Top Slave 13 Register */
+#    define SAM_MATRIX_SRTSR14_OFFSET    0x02b8 /* Security Region Top Slave 14 Register */
+#  endif
 
 #  define SAM_MATRIX_SPSELR_OFFSET(n)    (0x02c0 + ((n) << 2))
 #  define SAM_MATRIX_SPSELR1_OFFSET      0x02c0 /* Security Peripheral Select 1 Register */
@@ -312,7 +365,7 @@
 
 #endif /* ATSAMA5D3 */
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* HMATRIX0 (H64MX) */
 
 #  define SAM_MATRIX0_MCFG(n))           (SAM_MATRIX64_VBASE+SAM_MATRIX_MCFG_OFFSET(n))
@@ -326,6 +379,11 @@
 #  define SAM_MATRIX0_MCFG7              (SAM_MATRIX64_VBASE+SAM_MATRIX_MCFG7_OFFSET)
 #  define SAM_MATRIX0_MCFG8              (SAM_MATRIX64_VBASE+SAM_MATRIX_MCFG8_OFFSET)
 #  define SAM_MATRIX0_MCFG9              (SAM_MATRIX64_VBASE+SAM_MATRIX_MCFG9_OFFSET)
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_MCFG10           (SAM_MATRIX64_VBASE+SAM_MATRIX_MCFG10_OFFSET)
+#    define SAM_MATRIX0_MCFG11           (SAM_MATRIX64_VBASE+SAM_MATRIX_MCFG11_OFFSET)
+#  endif
 
 #  define SAM_MATRIX0_SCFG(n)            (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG_OFFSET(n))
 #  define SAM_MATRIX0_SCFG0              (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG0_OFFSET)
@@ -341,6 +399,11 @@
 #  define SAM_MATRIX0_SCFG10             (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG10_OFFSET)
 #  define SAM_MATRIX0_SCFG11             (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG11_OFFSET)
 #  define SAM_MATRIX0_SCFG12             (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG12_OFFSET)
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_SCFG13           (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG13_OFFSET)
+#    define SAM_MATRIX0_SCFG14           (SAM_MATRIX64_VBASE+SAM_MATRIX_SCFG14_OFFSET)
+#  endif
 
 #  define SAM_MATRIX0_PRAS(n)            (SAM_MATRIX64_VBASE+SAM_MATRIX_PRAS_OFFSET(n))
 #  define SAM_MATRIX0_PRBS(n)            (SAM_MATRIX64_VBASE+SAM_MATRIX_PRBS_OFFSET(n))
@@ -371,6 +434,13 @@
 #  define SAM_MATRIX0_PRAS12             (SAM_MATRIX64_VBASE+SAM_MATRIX_PRAS12_OFFSET)
 #  define SAM_MATRIX0_PRBS12             (SAM_MATRIX64_VBASE+SAM_MATRIX_PRBS12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_PRAS13           (SAM_MATRIX64_VBASE+SAM_MATRIX_PRAS13_OFFSET)
+#    define SAM_MATRIX0_PRBS13           (SAM_MATRIX64_VBASE+SAM_MATRIX_PRBS13_OFFSET)
+#    define SAM_MATRIX0_PRAS14           (SAM_MATRIX64_VBASE+SAM_MATRIX_PRAS14_OFFSET)
+#    define SAM_MATRIX0_PRBS15           (SAM_MATRIX64_VBASE+SAM_MATRIX_PRBS15_OFFSET)
+#  endif
+
 #  define SAM_MATRIX0_MEIER              (SAM_MATRIX64_VBASE+SAM_MATRIX_MEIER_OFFSET)
 #  define SAM_MATRIX0_MEIDR              (SAM_MATRIX64_VBASE+SAM_MATRIX_MEIDR_OFFSET
 #  define SAM_MATRIX0_MEIMR              (SAM_MATRIX64_VBASE+SAM_MATRIX_MEIMR_OFFSET)
@@ -386,6 +456,11 @@
 #  define SAM_MATRIX0_MEAR7              (SAM_MATRIX64_VBASE+SAM_MATRIX_MEAR7_OFFSET)
 #  define SAM_MATRIX0_MEAR8              (SAM_MATRIX64_VBASE+SAM_MATRIX_MEAR8_OFFSET)
 #  define SAM_MATRIX0_MEAR9              (SAM_MATRIX64_VBASE+SAM_MATRIX_MEAR9_OFFSET)
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_MEAR10           (SAM_MATRIX64_VBASE+SAM_MATRIX_MEAR10_OFFSET)
+#    define SAM_MATRIX0_MEAR11           (SAM_MATRIX64_VBASE+SAM_MATRIX_MEAR11_OFFSET)
+#  endif
 
 #  define SAM_MATRIX0_WPMR               (SAM_MATRIX64_VBASE+SAM_MATRIX_WPMR_OFFSET)
 #  define SAM_MATRIX0_WPSR               (SAM_MATRIX64_VBASE+SAM_MATRIX_WPSR_OFFSET)
@@ -405,6 +480,11 @@
 #  define SAM_MATRIX0_SSR11              (SAM_MATRIX64_VBASE+SAM_MATRIX_SSR11_OFFSET)
 #  define SAM_MATRIX0_SSR12              (SAM_MATRIX64_VBASE+SAM_MATRIX_SSR12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_SSR13            (SAM_MATRIX64_VBASE+SAM_MATRIX_SSR13_OFFSET)
+#    define SAM_MATRIX0_SSR14            (SAM_MATRIX64_VBASE+SAM_MATRIX_SSR14_OFFSET)
+#  endif
+
 #  define SAM_MATRIX0_SASSR(n)           (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR_OFFSET(n))
 #  define SAM_MATRIX0_SASSR0             (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR0_OFFSET)
 #  define SAM_MATRIX0_SASSR1             (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR1_OFFSET)
@@ -420,6 +500,11 @@
 #  define SAM_MATRIX0_SASSR11            (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR11_OFFSET)
 #  define SAM_MATRIX0_SASSR12            (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_SASSR13          (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR13_OFFSET)
+#    define SAM_MATRIX0_SASSR14          (SAM_MATRIX64_VBASE+SAM_MATRIX_SASSR14_OFFSET)
+#  endif
+
 #  define SAM_MATRIX0_SRTSR(n)           (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR_OFFSET(n))
 #  define SAM_MATRIX0_SRTSR1             (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR1_OFFSET)
 #  define SAM_MATRIX0_SRTSR2             (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR2_OFFSET)
@@ -433,6 +518,11 @@
 #  define SAM_MATRIX0_SRTSR10            (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR10_OFFSET)
 #  define SAM_MATRIX0_SRTSR11            (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR11_OFFSET)
 #  define SAM_MATRIX0_SRTSR12            (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR12_OFFSET)
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX0_SRTSR13          (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR13_OFFSET)
+#    define SAM_MATRIX0_SRTSR14          (SAM_MATRIX64_VBASE+SAM_MATRIX_SRTSR14_OFFSET)
+#  endif
 
 #  define SAM_MATRIX0_SPSELR(n)          (SAM_MATRIX64_VBASE+SAM_MATRIX_SPSELR_OFFSET(n))
 #  define SAM_MATRIX0_SPSELR1            (SAM_MATRIX64_VBASE+SAM_MATRIX_SPSELR1_OFFSET)
@@ -453,6 +543,11 @@
 #  define SAM_MATRIX1_MCFG8              (SAM_MATRIX32_VBASE+SAM_MATRIX_MCFG8_OFFSET)
 #  define SAM_MATRIX1_MCFG9              (SAM_MATRIX32_VBASE+SAM_MATRIX_MCFG9_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_MCFG10           (SAM_MATRIX32_VBASE+SAM_MATRIX_MCFG10_OFFSET)
+#    define SAM_MATRIX1_MCFG11           (SAM_MATRIX32_VBASE+SAM_MATRIX_MCFG11_OFFSET)
+#  endif
+
 #  define SAM_MATRIX1_SCFG(n)            (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG_OFFSET(n))
 #  define SAM_MATRIX1_SCFG0              (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG0_OFFSET)
 #  define SAM_MATRIX1_SCFG1              (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG1_OFFSET)
@@ -467,6 +562,11 @@
 #  define SAM_MATRIX1_SCFG10             (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG10_OFFSET)
 #  define SAM_MATRIX1_SCFG11             (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG11_OFFSET)
 #  define SAM_MATRIX1_SCFG12             (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG12_OFFSET)
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_SCFG13           (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG13_OFFSET)
+#    define SAM_MATRIX1_SCFG14           (SAM_MATRIX32_VBASE+SAM_MATRIX_SCFG14_OFFSET)
+#  endif
 
 #  define SAM_MATRIX1_PRAS(n)            (SAM_MATRIX32_VBASE+SAM_MATRIX_PRAS_OFFSET(n))
 #  define SAM_MATRIX1_PRBS(n)            (SAM_MATRIX32_VBASE+SAM_MATRIX_PRBS_OFFSET(n))
@@ -497,6 +597,13 @@
 #  define SAM_MATRIX1_PRAS12             (SAM_MATRIX32_VBASE+SAM_MATRIX_PRAS12_OFFSET)
 #  define SAM_MATRIX1_PRBS12             (SAM_MATRIX32_VBASE+SAM_MATRIX_PRBS12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_PRAS13           (SAM_MATRIX32_VBASE+SAM_MATRIX_PRAS13_OFFSET)
+#    define SAM_MATRIX1_PRBS13           (SAM_MATRIX32_VBASE+SAM_MATRIX_PRBS13_OFFSET)
+#    define SAM_MATRIX1_PRAS14           (SAM_MATRIX32_VBASE+SAM_MATRIX_PRAS14_OFFSET)
+#    define SAM_MATRIX1_PRBS15           (SAM_MATRIX32_VBASE+SAM_MATRIX_PRBS15_OFFSET)
+#  endif
+
 #  define SAM_MATRIX1_MEIER              (SAM_MATRIX32_VBASE+SAM_MATRIX_MEIER_OFFSET)
 #  define SAM_MATRIX1_MEIDR              (SAM_MATRIX32_VBASE+SAM_MATRIX_MEIDR_OFFSET
 #  define SAM_MATRIX1_MEIMR              (SAM_MATRIX32_VBASE+SAM_MATRIX_MEIMR_OFFSET)
@@ -512,6 +619,11 @@
 #  define SAM_MATRIX1_MEAR7              (SAM_MATRIX32_VBASE+SAM_MATRIX_MEAR7_OFFSET)
 #  define SAM_MATRIX1_MEAR8              (SAM_MATRIX32_VBASE+SAM_MATRIX_MEAR8_OFFSET)
 #  define SAM_MATRIX1_MEAR9              (SAM_MATRIX32_VBASE+SAM_MATRIX_MEAR9_OFFSET)
+
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_MEAR10           (SAM_MATRIX32_VBASE+SAM_MATRIX_MEAR10_OFFSET)
+#    define SAM_MATRIX1_MEAR11           (SAM_MATRIX32_VBASE+SAM_MATRIX_MEAR11_OFFSET)
+#  endif
 
 #  define SAM_MATRIX1_WPMR               (SAM_MATRIX32_VBASE+SAM_MATRIX_WPMR_OFFSET)
 #  define SAM_MATRIX1_WPSR               (SAM_MATRIX32_VBASE+SAM_MATRIX_WPSR_OFFSET)
@@ -531,6 +643,11 @@
 #  define SAM_MATRIX1_SSR11              (SAM_MATRIX32_VBASE+SAM_MATRIX_SSR11_OFFSET)
 #  define SAM_MATRIX1_SSR12              (SAM_MATRIX32_VBASE+SAM_MATRIX_SSR12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_SSR13            (SAM_MATRIX32_VBASE+SAM_MATRIX_SSR13_OFFSET)
+#    define SAM_MATRIX1_SSR14            (SAM_MATRIX32_VBASE+SAM_MATRIX_SSR14_OFFSET)
+#  endif
+
 #  define SAM_MATRIX1_SASSR(n)           (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR_OFFSET(n))
 #  define SAM_MATRIX1_SASSR0             (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR0_OFFSET)
 #  define SAM_MATRIX1_SASSR1             (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR1_OFFSET)
@@ -546,6 +663,11 @@
 #  define SAM_MATRIX1_SASSR11            (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR11_OFFSET)
 #  define SAM_MATRIX1_SASSR12            (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_SASSR13            (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR13_OFFSET)
+#    define SAM_MATRIX1_SASSR14            (SAM_MATRIX32_VBASE+SAM_MATRIX_SASSR14_OFFSET)
+#  endif
+
 #  define SAM_MATRIX1_SRTSR(n)           (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR_OFFSET(n))
 #  define SAM_MATRIX1_SRTSR1             (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR1_OFFSET)
 #  define SAM_MATRIX1_SRTSR2             (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR2_OFFSET)
@@ -560,12 +682,17 @@
 #  define SAM_MATRIX1_SRTSR11            (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR11_OFFSET)
 #  define SAM_MATRIX1_SRTSR12            (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR12_OFFSET)
 
+#  ifdef ATSAMA5D2
+#    define SAM_MATRIX1_SRTSR13          (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR13_OFFSET)
+#    define SAM_MATRIX1_SRTSR14          (SAM_MATRIX32_VBASE+SAM_MATRIX_SRTSR14_OFFSET)
+#  endif
+
 #  define SAM_MATRIX1_SPSELR(n)          (SAM_MATRIX32_VBASE+SAM_MATRIX_SPSELR_OFFSET(n))
 #  define SAM_MATRIX1_SPSELR1            (SAM_MATRIX32_VBASE+SAM_MATRIX_SPSELR1_OFFSET)
 #  define SAM_MATRIX1_SPSELR2            (SAM_MATRIX32_VBASE+SAM_MATRIX_SPSELR2_OFFSET)
 #  define SAM_MATRIX1_SPSELR3            (SAM_MATRIX32_VBASE+SAM_MATRIX_SPSELR3_OFFSET)
 
-#endif /* ATSAMA5D4 */
+#endif /* ATSAMA5D2 || ATSAMA5D4 */
 
 /* MATRIX register bit definitions ******************************************************/
 /* Master Configuration Registers */
@@ -637,13 +764,16 @@
 #  define MATRIX_PRBS_M9PR_MASK          (3 << MATRIX_PRBS_M9PR_SHIFT)
 #    define MATRIX_PRBS_M9PR(n)          ((uint32_t)(n) << MATRIX_PRBS_M9PR_SHIFT)
 
-#ifdef ATSAMA5D3
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define MATRIX_PRBS_M10PR_SHIFT        (8)       /* Bits 8-9:  Master 10 Priority */
 #  define MATRIX_PRBS_M10PR_MASK         (3 << MATRIX_PRBS_M10PR_SHIFT)
 #    define MATRIX_PRBS_M10PR(n)         ((uint32_t)(n) << MATRIX_PRBS_M10PR_SHIFT)
 #  define MATRIX_PRBS_M11PR_SHIFT        (12)      /* Bits 12-13: Master 11 Priority */
 #  define MATRIX_PRBS_M11PR_MASK         (3 << MATRIX_PRBS_M11PR_SHIFT)
 #    define MATRIX_PRBS_M11PR(n)         ((uint32_t)(n) << MATRIX_PRBS_M11PR_SHIFT)
+#endif
+
+#ifdef ATSAMA5D3
 #  define MATRIX_PRBS_M12PR_SHIFT        (16)      /* Bits 16-17: Master 12 Priority */
 #  define MATRIX_PRBS_M12PR_MASK         (3 << MATRIX_PRBS_M12PR_SHIFT)
 #    define MATRIX_PRBS_M12PR(n)         ((uint32_t)(n) << MATRIX_PRBS_M12PR_SHIFT)
@@ -680,7 +810,7 @@
 #    define MATRIX_MRCR_RCB15            (1 << 15) /* Bit 15: Remap Command Bit for Master 15 */
 #endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* Master Error Interrupt Enable Register, Master Error Interrupt Disable Register,
  * Master Error Interrupt Mask Register, and Master Error Status Register 
  */
@@ -696,6 +826,11 @@
 #    define MATRIX_MEINT_MERR7           (1 << 7)   /* Master 7 Access Error */
 #    define MATRIX_MEINT_MERR8           (1 << 8)   /* Master 8 Access Error */
 #    define MATRIX_MEINT_MERR9           (1 << 9)   /* Master 9 Access Error */
+
+#  ifdef ATSAMA5D2
+#    define MATRIX_MEINT_MERR10          (1 << 10)  /* Master 10 Access Error */
+#    define MATRIX_MEINT_MERR11          (1 << 11)  /* Master 11 Access Error */
+#  endif
 
 /* Master 0-9 Error Address Register (32-bit addresses) */
 #endif
@@ -713,7 +848,7 @@
 #define MATRIX_WPSR_WPVSRC_SHIFT         (8)       /* Bits 8-23:  Write Protect Violation Source */
 #define MATRIX_WPSR_WPVSRC_MASK          (0xffff << MATRIX_WPSR_WPVSRC_SHIFT)
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* Security Slave 0-12 Registers */
 
 #  define MATRIX_SSR_LANSECH_SHIFT(n)   (0)       /* Bits 0-7: Low Area Not Secured in HSELn Security Region, n=0..7 */

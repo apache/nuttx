@@ -73,7 +73,7 @@
 
 /* 32-bit Encoding:
  *
- *   .... ...M MMMM CCCC CDDI II.V .PPB BBBB
+ *   .... ...M MMMM CCCC CDDI IISV .PPB BBBB
  */
 
 /* Input/Output mode:
@@ -133,6 +133,14 @@
 #  define PIO_INT_BOTHEDGES       (3 << PIO_INT_SHIFT)
 #  define PIO_INT_LOWLEVEL        (4 << PIO_INT_SHIFT)
 #  define PIO_INT_HIGHLEVEL       (5 << PIO_INT_SHIFT)
+
+/* If the pin is an interrupt, then this determines if the pin is a secure:
+ *
+ *   .... .... .... .... .... ..S. .... ....
+ */
+
+#define PIO_INT_SECURE            (1 << 9)    /* Bit 9: Secure PIO */
+#define PIO_INT_UNSECURE          (0)
 
 /* If the pin is an PIO output, then this identifies the initial output value:
  *
