@@ -69,7 +69,7 @@
 #define SAM_PID_MATRIX0        (15) /* H64MX, 64-bit AHB Matrix */
 #define SAM_PID_SECUMOD        (16) /* Secure Module */
 #define SAM_PID_HSMC           (17) /* Multi-bit ECC Interrupt */
-#define SAM_PID_PIOA           (18) /* Parallel I/O Controller A */
+#define SAM_PID_PIO            (18) /* Parallel I/O Controller */
 #define SAM_PID_FLEXCOM0       (19) /* FLEXCOM 0 */
 
 #define SAM_PID_FLEXCOM1       (20) /* FLEXCOM 1 */
@@ -159,7 +159,7 @@
 #define SAM_IRQ_MATRIX0        SAM_PID_MATRIX0   /* H64MX, 64-bit AHB Matrix */
 #define SAM_IRQ_SECUMOD        SAM_PID_SECUMOD   /* Secure Module */
 #define SAM_IRQ_HSMC           SAM_PID_HSMC      /* Multi-bit ECC Interrupt */
-#define SAM_IRQ_PIOA           SAM_PID_PIOA      /* Parallel I/O Controller A */
+#define SAM_IRQ_PIO            SAM_PID_PIO       /* Parallel I/O Controller */
 #define SAM_IRQ_FLEXCOM0       SAM_PID_FLEXCOM0  /* FLEXCOM 0 */
 
 #define SAM_IRQ_FLEXCOM1       SAM_PID_FLEXCOM1  /* FLEXCOM 1 */

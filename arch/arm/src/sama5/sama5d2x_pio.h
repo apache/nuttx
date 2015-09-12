@@ -73,15 +73,15 @@
 
 /* 32-bit Encoding:
  *
- *   .... ...M MMMM CCCC CDDI IISV .PPB BBBB
+ *   .... .MMM MM.C CCCC CDDI IISV .PPB BBBB
  */
 
 /* Input/Output mode:
  *
- *   .... ...M MMMM .... .... .... .... ....
+ *   .... .MMM MM.. .... .... .... .... ....
  */
 
-#define PIO_MODE_SHIFT            (20)        /* Bits 20-24: PIO mode */
+#define PIO_MODE_SHIFT            (22)        /* Bits 22-26: PIO mode */
 #define PIO_MODE_MASK             (15 << PIO_MODE_SHIFT)
 #  define PIO_INPUT               (0 << PIO_MODE_SHIFT) /* Input */
 #  define PIO_OUTPUT              (1 << PIO_MODE_SHIFT) /* Output */
@@ -97,17 +97,18 @@
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
  *
- *   .... .... .... CCCC C... .... .... ....
+ *   .... .... ...C CCCC C... .... .... ....
  */
 
-#define PIO_CFG_SHIFT             (15)        /* Bits 15-19: PIO configuration bits */
-#define PIO_CFG_MASK              (31 << PIO_CFG_SHIFT)
-#  define PIO_CFG_DEFAULT         (0  << PIO_CFG_SHIFT) /* Default, no attribute */
-#  define PIO_CFG_PULLUP          (1  << PIO_CFG_SHIFT) /* Bit 15: Internal pull-up */
-#  define PIO_CFG_PULLDOWN        (2  << PIO_CFG_SHIFT) /* Bit 16: Internal pull-down */
-#  define PIO_CFG_DEGLITCH        (4  << PIO_CFG_SHIFT) /* Bit 17: Internal input filter */
-#  define PIO_CFG_OPENDRAIN       (8  << PIO_CFG_SHIFT) /* Bit 18: Open drain */
-#  define PIO_CFG_SCHMITT         (16 << PIO_CFG_SHIFT) /* Bit 19: Schmitt trigger */
+#define PIO_CFG_SHIFT             (15)        /* Bits 15-20: PIO configuration bits */
+#define PIO_CFG_MASK              (0x3f << PIO_CFG_SHIFT)
+#  define PIO_CFG_DEFAULT         (0x00 << PIO_CFG_SHIFT) /* Default, no attribute */
+#  define PIO_CFG_PULLUP          (0x01 << PIO_CFG_SHIFT) /* Bit 15: Internal pull-up */
+#  define PIO_CFG_PULLDOWN        (0x02 << PIO_CFG_SHIFT) /* Bit 16: Internal pull-down */
+#  define PIO_CFG_DEGLITCH        (0x04 << PIO_CFG_SHIFT) /* Bit 17: Internal input filter (Tmck/2)*/
+#  define PIO_CFG_SLOWCLK         (0x0c << PIO_CFG_SHIFT) /* Bits 17+18: Internal input filter (Tslwclk/2)*/
+#  define PIO_CFG_OPENDRAIN       (0x10 << PIO_CFG_SHIFT) /* Bit 19: Open drain */
+#  define PIO_CFG_SCHMITT         (0x20 << PIO_CFG_SHIFT) /* Bit 20: Schmitt trigger */
 
 /* Drive Strength:
  *

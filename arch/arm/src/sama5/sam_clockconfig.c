@@ -44,10 +44,12 @@
 
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
+#include <arch/sama5/chip.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "sam_periphclks.h"
 #include "sam_clockconfig.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_sfr.h"
@@ -699,6 +701,12 @@ void __ramfunc__ sam_clockconfig(void)
       sam_selectplla();
     }
 #endif /* NEED_PLLSETUP */
+
+#ifdef ATSAMA5D2
+  /* Enable clocking to the PIO module */
+
+  sam_pio_enableclk();
+#endif
 
   /* Setup USB clocking */
 

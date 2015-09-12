@@ -67,7 +67,7 @@
 
 #define SAM_PIO_MSKR_OFFSET        0x0000 /* PIO Mask Register */
 #define SAM_PIO_CFGR_OFFSET        0x0004 /* PIO Configuration Register */
-#define SAM_PIO_PDS_OFFSET         0x0008 /* PIO Pin Data Status Register */
+#define SAM_PIO_PDSR_OFFSET        0x0008 /* PIO Pin Data Status Register */
 #define SAM_PIO_LOCKSR_OFFSET      0x000c /* PIO Lock Status Register */
 #define SAM_PIO_SODR_OFFSET        0x0010 /* PIO Set Output Data Register */
 #define SAM_PIO_CODR_OFFSET        0x0014 /* PIO Clear Output Data Register */
@@ -124,7 +124,7 @@
 
 #define SAM_PIOA_MSKR              (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_MSKR_OFFSET)
 #define SAM_PIOA_CFGR              (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_CFGR_OFFSET)
-#define SAM_PIOA_PDS               (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_PDS_OFFSET)
+#define SAM_PIOA_PDSR              (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_PDSR_OFFSET)
 #define SAM_PIOA_LOCKSR            (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_LOCKSR_OFFSET)
 #define SAM_PIOA_SODR              (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_SODR_OFFSET)
 #define SAM_PIOA_CODR              (SAM_PIO_IOGROUPA_VBASE+SAM_PIO_CODR_OFFSET)
@@ -137,7 +137,7 @@
 
 #define SAM_PIOB_MSKR              (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_MSKR_OFFSET)
 #define SAM_PIOB_CFGR              (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_CFGR_OFFSET)
-#define SAM_PIOB_PDS               (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_PDS_OFFSET)
+#define SAM_PIOB_PDSR              (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_PDSR_OFFSET)
 #define SAM_PIOB_LOCKSR            (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_LOCKSR_OFFSET)
 #define SAM_PIOB_SODR              (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_SODR_OFFSET)
 #define SAM_PIOB_CODR              (SAM_PIO_IOGROUPB_VBASE+SAM_PIO_CODR_OFFSET)
@@ -150,7 +150,7 @@
 
 #define SAM_PIOC_MSKR              (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_MSKR_OFFSET)
 #define SAM_PIOC_CFGR              (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_CFGR_OFFSET)
-#define SAM_PIOC_PDS               (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_PDS_OFFSET)
+#define SAM_PIOC_PDSR              (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_PDSR_OFFSET)
 #define SAM_PIOC_LOCKSR            (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_LOCKSR_OFFSET)
 #define SAM_PIOC_SODR              (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_SODR_OFFSET)
 #define SAM_PIOC_CODR              (SAM_PIO_IOGROUPC_VBASE+SAM_PIO_CODR_OFFSET)
@@ -163,7 +163,7 @@
 
 #define SAM_PIOD_MSKR              (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_MSKR_OFFSET)
 #define SAM_PIOD_CFGR              (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_CFGR_OFFSET)
-#define SAM_PIOD_PDS               (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_PDS_OFFSET)
+#define SAM_PIOD_PDSR              (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_PDSR_OFFSET)
 #define SAM_PIOD_LOCKSR            (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_LOCKSR_OFFSET)
 #define SAM_PIOD_SODR              (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_SODR_OFFSET)
 #define SAM_PIOD_CODR              (SAM_PIO_IOGROUPD_VBASE+SAM_PIO_CODR_OFFSET)
@@ -262,7 +262,7 @@
 #define PIO_CFGR_FUNC_SHIFT        (0)       /* Bits 0-2: I/O Line Function */
 #define PIO_CFGR_FUNC_MASK         (7 << PIO_CFGR_FUNC_SHIFT)
 #  define PIO_CFGR_FUNC_GPIO       (0 << PIO_CFGR_FUNC_SHIFT) /* Select PIO mode */
-#  define PIO_CFGR_FUNC_PERIPH(n)  ((uint32_t)((n)+1) << PIO_CFGR_FUNC_SHIFT)
+#  define PIO_CFGR_FUNC_PERIPH(n)  ((uint32_t)(n) << PIO_CFGR_FUNC_SHIFT)
 #  define PIO_CFGR_FUNC_PERIPHA    (1 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral A */
 #  define PIO_CFGR_FUNC_PERIPHB    (2 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral B */
 #  define PIO_CFGR_FUNC_PERIPHC    (3 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral C */
@@ -271,6 +271,8 @@
 #  define PIO_CFGR_FUNC_PERIPHF    (6 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral F */
 #  define PIO_CFGR_FUNC_PERIPHG    (7 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral G */
 #define PIO_CFGR_DIR               (1 << 8)  /* Bit 8:  Direction */
+#  define PIO_CFGR_DIR_INPUT       (0)       /*         0=Input */
+#  define PIO_CFGR_DIR_OUTPUT      (1 << 8)  /*         1=Output */
 #define PIO_CFGR_PUEN              (1 << 9)  /* Bit 9:  Pull-Up Enable */
 #define PIO_CFGR_PDEN              (1 << 10) /* Bit 10: Pull-Down Enable */
 #define PIO_CFGR_IFEN              (1 << 12) /* Bit 12: Input Filter Enable */
