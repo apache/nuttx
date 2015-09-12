@@ -73,7 +73,7 @@
 
 /* 32-bit Encoding:
  *
- *   .... ...M MMMM CCCC CDDI IISV .PPB BBBB
+ *   .... ...M MMMM CCCC CDDI II.V .PPB BBBB
  */
 
 /* Input/Output mode:
@@ -92,6 +92,7 @@
 #  define PIO_PERIPHD             (6 << PIO_MODE_SHIFT) /* Controlled by periph D signal */
 #  define PIO_PERIPHE             (7 << PIO_MODE_SHIFT) /* Controlled by periph E signal */
 #  define PIO_PERIPHF             (8 << PIO_MODE_SHIFT) /* Controlled by periph F signal */
+#  define PIO_PERIPHG             (9 << PIO_MODE_SHIFT) /* Controlled by periph G signal */
 
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
@@ -104,7 +105,7 @@
 #  define PIO_CFG_DEFAULT         (0  << PIO_CFG_SHIFT) /* Default, no attribute */
 #  define PIO_CFG_PULLUP          (1  << PIO_CFG_SHIFT) /* Bit 15: Internal pull-up */
 #  define PIO_CFG_PULLDOWN        (2  << PIO_CFG_SHIFT) /* Bit 16: Internal pull-down */
-#  define PIO_CFG_DEGLITCH        (4  << PIO_CFG_SHIFT) /* Bit 17: Internal glitch filter */
+#  define PIO_CFG_DEGLITCH        (4  << PIO_CFG_SHIFT) /* Bit 17: Internal input filter */
 #  define PIO_CFG_OPENDRAIN       (8  << PIO_CFG_SHIFT) /* Bit 18: Open drain */
 #  define PIO_CFG_SCHMITT         (16 << PIO_CFG_SHIFT) /* Bit 19: Schmitt trigger */
 
@@ -126,29 +127,12 @@
 
 #define PIO_INT_SHIFT             (10)        /* Bits 9-12: PIO interrupt bits */
 #define PIO_INT_MASK              (7 << PIO_INT_SHIFT)
-#  define _PIO_INT_AIM            (1 << 10)   /* Bit 10: Additional Interrupt modes */
-#  define _PIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
-#  define _PIO_INT_EDGE           (0)         /*        (vs. Edge detection interrupt) */
-#  define _PIO_INT_RH             (1 << 8)    /* Bit 9: Rising edge/High level detection interrupt */
-#  define _PIO_INT_FL             (0)         /*        (vs. Falling edge/Low level detection interrupt) */
-
-#  define PIO_INT_HIGHLEVEL       (_PIO_INT_AIM | _PIO_INT_LEVEL | _PIO_INT_RH)
-#  define PIO_INT_LOWLEVEL        (_PIO_INT_AIM | _PIO_INT_LEVEL | _PIO_INT_FL)
-#  define PIO_INT_RISING          (_PIO_INT_AIM | _PIO_INT_EDGE  | _PIO_INT_RH)
-#  define PIO_INT_FALLING         (_PIO_INT_AIM | _PIO_INT_EDGE  | _PIO_INT_FL)
-#  define PIO_INT_BOTHEDGES       (0)
-
-/* If the pin is an interrupt, then this determines if the pin is a secure interrupt:
- *
- *   .... .... .... .... .... ..S. .... ....
- */
-
-#ifdef SAMA5_SAIC
-#  define PIO_INT_SECURE          (1 << 9)    /* Bit 9: Secure interrupt */
-#else
-#  define PIO_INT_SECURE          (0)
-#endif
-#define PIO_INT_UNSECURE          (0)
+#  define PIO_INT_NONE            (0 << PIO_INT_SHIFT)
+#  define PIO_INT_FALLING         (1 << PIO_INT_SHIFT)
+#  define PIO_INT_RISING          (2 << PIO_INT_SHIFT)
+#  define PIO_INT_BOTHEDGES       (3 << PIO_INT_SHIFT)
+#  define PIO_INT_LOWLEVEL        (4 << PIO_INT_SHIFT)
+#  define PIO_INT_HIGHLEVEL       (5 << PIO_INT_SHIFT)
 
 /* If the pin is an PIO output, then this identifies the initial output value:
  *
