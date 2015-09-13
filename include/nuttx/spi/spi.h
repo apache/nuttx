@@ -364,6 +364,7 @@ enum spi_dev_e
   SPIDEV_EEPROM,        /* Select SPI EEPROM device */
   SPIDEV_ACCELEROMETER, /* Select SPI Accelerometer device */
   SPIDEV_BAROMETER,     /* Select SPI Pressure/Barometer device */
+  SPIDEV_TEMPERATURE,   /* Select SPI Temperature sensor device */
   SPIDEV_USER           /* Board-specific values start here */
 };
 
