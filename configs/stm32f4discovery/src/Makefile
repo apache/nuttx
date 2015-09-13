@@ -56,6 +56,10 @@ ifeq ($(CONFIG_BMP180),y)
 CSRCS += stm32_bmp180.c
 endif
 
+ifeq ($(CONFIG_MAX31855),y)
+CSRCS += stm32_max31855.c
+endif
+
 ifeq ($(CONFIG_STM32_SDIO),y)
 CSRCS += stm32_sdio.c
 endif

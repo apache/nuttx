@@ -166,5 +166,9 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MAX31855
+  ret = stm32_max31855initialize("/dev/temp0");
+#endif
+
   return ret;
 }

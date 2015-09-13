@@ -97,6 +97,9 @@ void weak_function stm32_spiinitialize(void)
 #ifdef CONFIG_STM32_SPI1
   (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
 #endif
+#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_MAX31855)
+  (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
+#endif
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
   (void)stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
 # if defined(CONFIG_LCD_UG2864AMBAG01)
@@ -160,6 +163,13 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_MAX31855)
+  if (devid == SPIDEV_TEMPERATURE)
+    {
+      stm32_gpiowrite(GPIO_MAX31855_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

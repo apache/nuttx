@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f4discovery/include/board.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -255,10 +255,8 @@
  * for USART6.  This is the preferred serial console for use with the STM32F4DIS-BB.
  */
 
-#ifdef CONFIG_STM32F4DISBB
-#  define GPIO_USART6_RX GPIO_USART6_RX_1
-#  define GPIO_USART6_TX GPIO_USART6_TX_1
-#endif
+#define GPIO_USART6_RX GPIO_USART6_RX_1
+#define GPIO_USART6_TX GPIO_USART6_TX_1
 
 /* PWM
  *
@@ -273,6 +271,12 @@
 #define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
+
+/* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
+
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_1
 
 /* I2C config to use with Nunchuk PB7 (SDA) and PB8 (SCL) */
 
