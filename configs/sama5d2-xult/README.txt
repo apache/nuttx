@@ -646,20 +646,21 @@ Buttons and LEDs
 Serial Console
 ==============
 
-  Virtual COM / DBGU Port.  Either may be driven by UART1, depending
-  upon the setting of JP2 (DBGU_PE):
+  DEBUG / DBGU Port (J1).  There is a TTL serial connection available on
+  pins 2 and 3 of the DEBUG connector.  This may be driven by UART1,
+  depending upon the setting of JP2 (DBGU_PE on the schematic, DEBUG_DIS
+  on the board):
 
-    ------------ -------------- --------
-      SAMA5D2    BOARD SIGNAL   USAGE
-    PIO FUNCTION NAME           FUNCTION
-    ------------ -------------- --------
-    PD3 UTXD1    DBGU_UTXD1_PD3 DBGU_RXD
-    PD2 URXD1    DBGU_URXD1_PD2 DBGU_TXD
-    ------------ -------------- --------
-
-  Terminologicy: FLEXCOM is the same as USART in previous SAMA5D versions.
+    ---- ------------------------ -------------
+    J1   SCHEMATIC                   SAMA5D2
+    PIN  NAME(s)                  PIO  FUNCTION
+    ---- ------------------------ -------------
+     2   DBGU_TXD  DBGU_UTXD1_PD3 PD3  UTXD1
+     3   DBGU_RXD  DBGU_URXD1_PD2 PD2  URXD1
+    ---- ------------------------ -------------
 
   Standard UART on Arduino connector (J21) is FLEXCOM4.
+  Terminologicy: FLEXCOM is the same as USART in previous SAMA5D versions.
 
     ---- ------- -------------
     J21  BOARD      SAMA5D2
@@ -989,13 +990,13 @@ Configurations
 
     2. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
-       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       native, generic ARM EABI GCC toolchain (such as the ARM supported
        toolchain).  Both the build environment and the toolchain
        selection can easily be changed by reconfiguring:
 
-       CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_HOST_WINDOWS=y           : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y         : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_EABIW=y : Generic GCC EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a
@@ -1112,7 +1113,7 @@ Configurations
     8. This configuration has support for NSH built-in applications enabled.
        No built-in applications are enabled, however.
 
-    9. This configuration has support for the FAT, ROMFS, and PROCFS file
+    9. This configuration has support for the FAT and PROCFS file
        systems built in.
 
        The FAT file system includes long file name support.  Please be aware
@@ -1125,11 +1126,7 @@ Configurations
          CONFIG_FAT_MAXFNAME=32 : Arbitrarily limits the size of a path
                                   segment name to 32 bytes
 
-       The ROMFS file system is enabled simply with:
-
-         CONFIG_FS_ROMFS=y      : Enable ROMFS file system
-
-       The ROMFS file system is enabled simply with:
+       The PROCFS file system is enabled simply with:
 
          CONFIG_FS_PROCFS=y     : Enable PROCFS file system
 

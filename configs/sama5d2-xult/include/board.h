@@ -192,16 +192,18 @@
  * The PCK logic will then automatically configure PB26 as the PCK0 pin.
  */
 
-/* Virtual COM / DBGU Port.  Either may be driven by UART1, depending
- * upon the setting of JP2 (DBGU_PE):
+/* DEBUG / DBGU Port (J1).  There is a TTL serial connection available on
+ * pins 2 and 3 of the DEBUG connector.  This may be driven by UART1,
+ * depending upon the setting of JP2 (DBGU_PE on the schematic, DEBUG_DIS
+ * on the board):
  *
- *   ------------ -------------- --------
- *     SAMA5D2    BOARD SIGNAL   USAGE
- *   PIO FUNCTION NAME           FUNCTION
- *   ------------ -------------- --------
- *   PD3 UTXD1    DBGU_UTXD1_PD3 DBGU_RXD
- *   PD2 URXD1    DBGU_URXD1_PD2 DBGU_TXD
- *   ------------ -------------- --------
+ *   ---- ------------------------ -------------
+ *   J1   SCHEMATIC                   SAMA5D2
+ *   PIN  NAME(s)                  PIO  FUNCTION
+ *   ---- ------------------------ -------------
+ *    2   DBGU_TXD  DBGU_UTXD1_PD3 PD3  UTXD1
+ *    3   DBGU_RXD  DBGU_URXD1_PD2 PD2  URXD1
+ *   ---- ------------------------ -------------
  */
 
 /* Standard UART on Arduino connector (J21) is FLEXCOM4.
