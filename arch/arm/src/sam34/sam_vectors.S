@@ -325,9 +325,9 @@ exception_common:
 	 */
 
 	ldr		sp, =g_intstackbase
-	str		r1, [sp, #-4]!			/* Save the MSP on the interrupt stack */
-	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
-	ldr		r1, [sp, #+4]!			/* Recover R1=main stack pointer */
+	push	{r1}					/* Save the MSP on the interrupt stack */
+	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
+	pop		{r1}					/* Recover R1=main stack pointer */
 
 #else
 	/* Otherwise, we will re-use the interrupted thread's stack.  That may
