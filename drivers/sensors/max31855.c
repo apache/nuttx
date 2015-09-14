@@ -144,10 +144,11 @@ static int max31855_close(FAR struct file *filep)
 static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
   FAR struct inode          *inode = filep->f_inode;
-  FAR struct max31855_dev_s *priv   = inode->i_private;
-  FAR uint16_t              *temp = (FAR uint16_t *) buffer;
-  int                       ret = 2;
-  int32_t                   regmsb, regval;
+  FAR struct max31855_dev_s *priv  = inode->i_private;
+  FAR uint16_t              *temp  = (FAR uint16_t *) buffer;
+  int                       ret    = 2;
+  int32_t                   regmsb;
+  int32_t                   regval;
 
   /* Check for issues */
 
@@ -186,11 +187,11 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
 
   if (regval & 0x80000000)
     {
-     temp = 0xFFFFC000 | (regval >> 18);
+      *temp = 0xc000 | (regval >> 18);
     }
   else
     {
-      temp = (regval >> 18);
+      *temp = (regval >> 18);
     }
 
   /* Detect any fault */
