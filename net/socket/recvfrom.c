@@ -88,7 +88,7 @@
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
 struct recvfrom_s
 {
   FAR struct socket       *rf_sock;      /* The parent socket structure */
@@ -1207,7 +1207,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
 static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
                           size_t len, FAR struct sockaddr *infrom,
                           FAR socklen_t *fromlen,
@@ -1255,7 +1255,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
   int save_errno = get_errno(); /* In case something we do changes it */
