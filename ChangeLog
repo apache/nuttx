@@ -10967,4 +10967,7 @@
 	  from Paul Alexander Patience (2014-09-10).
 	* arch/arm/src/lpc43xx/lpc32_ehci.c and .h:  LPC43xx EHCI driver from
 	  Ilya Averyanov (2015-09-10).
-
+	* ARMv7-M, all "lazy" interrupt stack logic.  Assembly instruction
+	  that fetches the saved value is incorrect; replace with more
+	  traditional push and pop.  This is an important fix.  Noted by
+	  Stefan Kolb (2015-09-14).
