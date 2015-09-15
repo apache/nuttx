@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/armv7-m/up_exception.S
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Michael Smith. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -183,16 +183,17 @@ exception_common:
 
 	mov		r1, sp
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	/* Also save the top of the stack in a preserved register */
+
+	mov		r4, sp
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will set the MSP to use
 	 * a special special interrupt stack pointer.  The way that this is done
 	 * here prohibits nested interrupts without some additional logic!
 	 */
 
 	ldr		sp, =g_intstackbase
-	push	{r1}					/* Save the MSP on the interrupt stack */
-	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
-	pop		{r1}					/* Recover R1=main stack pointer */
 
 #else
 	/* Otherwise, we will re-use the interrupted thread's stack.  That may
@@ -200,9 +201,13 @@ exception_common:
 	 * kernel mode).
 	 */
 
-	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
-	mrs		r1, msp					/* Get R1=main stack pointer */
+	bic		r2, r4, #7				/* Get the stack pointer with 8-byte alignment */
+	mov		sp, r2					/* Instantiate the aligned stack */
+
 #endif
+
+	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
+	mov		r1, r4					/* Recover R1=main stack pointer */
 
 	/* On return from up_doirq, R0 will hold a pointer to register context
 	 * array to use for the interrupt return.  If that return value is the same
@@ -312,13 +317,13 @@ exception_common:
  *
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
 	.bss
 	.global	g_intstackalloc
 	.global	g_intstackbase
-	.align	4
+	.align	8
 g_intstackalloc:
-	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~7)
 g_intstackbase:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif
