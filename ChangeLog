@@ -10971,3 +10971,6 @@
 	  that fetches the saved value is incorrect; replace with more
 	  traditional push and pop.  This is an important fix.  Noted by
 	  Stefan Kolb (2015-09-14).
+	* All ARMV7-M: Force 8-byte stack alignment when calling from assembly
+	  to C to interrupt handling (2015-09-15).
+
