@@ -8,6 +8,7 @@ README
 Contents
 ========
 
+  - STATUS
   - Loading Code into SRAM with J-Link
   - Creating and Using DRAMBOOT
   - Creating and Using AT25BOOT
@@ -17,8 +18,19 @@ Contents
   - SAMA5D2-XULT Configuration Options
   - Configurations
 
+STATUS
+======
+
+1. Most of this document is a partially corrected clone of the SAMA5D4-EK
+   README.txt and still contains errors and inconsistencies.
+
+2. Coding is complete for the the basic SAMA5D2-XULT NSH configuration, but
+   is completely untested as of this writing (2015-09-15).  The primary
+   issue is  that I have not yet determine how to load and test code.
+
 Loading Code into SRAM with J-Link
 ==================================
+REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
   Loading code with the Segger tools and GDB
   ------------------------------------------
@@ -44,6 +56,7 @@ Loading Code into SRAM with J-Link
 
 Creating and Using DRAMBOOT
 ===========================
+REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
   In order to have more control of debugging code that runs out of DARM,
   I created the sama5d2-xult/dramboot configuration.  That configuration is
@@ -143,6 +156,7 @@ Creating and Using DRAMBOOT
 
 Creating and Using AT25BOOT
 ===========================
+REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
   To work around some SAM-BA availability issues that I had at one time,
   I created the AT25BOOT program. AT25BOOT is a tiny program that runs in
@@ -237,6 +251,7 @@ Creating and Using AT25BOOT
 
 Running NuttX from SDRAM
 ========================
+REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
   NuttX may be executed from SDRAM.  But this case means that the NuttX
   binary must reside on some other media (typically NAND FLASH, Serial
@@ -705,6 +720,9 @@ Serial Console
   By default, the standard UART on Arduino connector (J21, FLEXCOM4) is
   enabled in all of these configurations unless otherwise noted.
 
+REVISIT: UART1 on the DBGU connect might be a better choice for the
+default serial console
+
 SAMA5D2-XULT Configuration Options
 =================================
 
@@ -778,23 +796,27 @@ SAMA5D2-XULT Configuration Options
   the delay actually is 100 seconds.
 
   Individual subsystems can be enabled:
+REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
     CONFIG_SAMA5_DBGU        - Debug Unit
     CONFIG_SAMA5_PIT         - Periodic Interval Timer
     CONFIG_SAMA5_WDT         - Watchdog timer
     CONFIG_SAMA5_HSMC        - Multi-bit ECC
     CONFIG_SAMA5_SMD         - SMD Soft Modem
-    CONFIG_SAMA5_USART0      - USART 0
-    CONFIG_SAMA5_USART1      - USART 1
-    CONFIG_SAMA5_USART2      - USART 2
-    CONFIG_SAMA5_USART3      - USART 3
+    CONFIG_SAMA5_FLEXCOM0    - Flexcom 0
+    CONFIG_SAMA5_FLEXCOM1    - Flexcom 0
+    CONFIG_SAMA5_FLEXCOM2    - Flexcom 0
+    CONFIG_SAMA5_FLEXCOM3    - Flexcom 0
+    CONFIG_SAMA5_FLEXCOM4    - Flexcom 0
     CONFIG_SAMA5_UART0       - UART 0
     CONFIG_SAMA5_UART1       - UART 1
+    CONFIG_SAMA5_UART2       - UART 2
+    CONFIG_SAMA5_UART3       - UART 3
+    CONFIG_SAMA5_UART4       - UART 4
     CONFIG_SAMA5_TWI0        - Two-Wire Interface 0
     CONFIG_SAMA5_TWI1        - Two-Wire Interface 1
-    CONFIG_SAMA5_TWI2        - Two-Wire Interface 2
-    CONFIG_SAMA5_HSMCI0      - High Speed Multimedia Card Interface 0
-    CONFIG_SAMA5_HSMCI1      - High Speed Multimedia Card Interface 1
+    CONFIG_SAMA5_SDMMC0      - SD MMC card interface 0
+    CONFIG_SAMA5_SDMMC1      - SD MMC card interface 1
     CONFIG_SAMA5_SPI0        - Serial Peripheral Interface 0
     CONFIG_SAMA5_SPI1        - Serial Peripheral Interface 1
     CONFIG_SAMA5_TC0         - Timer Counter 0 (ch. 0, 1, 2)
@@ -826,12 +848,12 @@ SAMA5D2-XULT Configuration Options
     CONFIG_SAMA5_PIOB_IRQ    - Support PIOB interrupts
     CONFIG_SAMA5_PIOC_IRQ    - Support PIOD interrupts
     CONFIG_SAMA5_PIOD_IRQ    - Support PIOD interrupts
-    CONFIG_SAMA5_PIOE_IRQ    - Support PIOE interrupts
 
-    CONFIG_USART0_ISUART     - USART0 is configured as a UART
-    CONFIG_USART1_ISUART     - USART1 is configured as a UART
-    CONFIG_USART2_ISUART     - USART2 is configured as a UART
-    CONFIG_USART3_ISUART     - USART3 is configured as a UART
+    CONFIG_USART0_ISUART     - Flexcom0 is configured as a UART
+    CONFIG_USART1_ISUART     - Flexcom1 is configured as a UART
+    CONFIG_USART2_ISUART     - Flexcom2 is configured as a UART
+    CONFIG_USART3_ISUART     - Flexcom3 is configured as a UART
+    CONFIG_USART4_ISUART     - Flexcom4 is configured as a UART
 
   AT91SAMA5 specific device driver settings
 
