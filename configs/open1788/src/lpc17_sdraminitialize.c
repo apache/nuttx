@@ -160,7 +160,7 @@ void open1788_sdram_initialize(void)
 
   putreg32(MDKCFG_RASCAS0VAL, LPC17_EMC_DYNAMICRASCAS0);
 
-  #ifdef CONFIG_LPC17_SDRAM_16BIT
+#ifdef CONFIG_LPC17_SDRAM_16BIT
     /* For Manley lpc1778 SDRAM: H57V2562GTR-75C, 256Mb, 16Mx16, 4 banks, row=13, column=9:
      *
      * 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC
