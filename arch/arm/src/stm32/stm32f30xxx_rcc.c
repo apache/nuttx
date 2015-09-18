@@ -198,7 +198,7 @@ static inline void rcc_enableapb1(void)
 
   regval  = getreg32(STM32_RCC_APB1ENR);
 
-  #ifdef CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2
   /* Timer 2 clock enable */
 
 #ifdef CONFIG_STM32_FORCEPOWER

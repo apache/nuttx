@@ -2554,7 +2554,7 @@ static int lpc43_txavail(struct net_driver_s *dev)
 
   lpc43_txavail_process(priv);
   irqrestore(flags);
-  #endif
+#endif
 
   return OK;
 }

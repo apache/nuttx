@@ -651,29 +651,29 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   switch (priv->id)
     {
-  #ifdef CONFIG_LPC43_USART0
+#ifdef CONFIG_LPC43_USART0
       case 0:
         lpc43_usart0_reset();
         break;
-  #endif
+#endif
 
-  #ifdef CONFIG_LPC43_UART1
+#ifdef CONFIG_LPC43_UART1
       case 1:
         lpc43_uart1_reset();
         break;
-  #endif
+#endif
 
-  #ifdef CONFIG_LPC43_USART2
+#ifdef CONFIG_LPC43_USART2
       case 2:
         lpc43_usart2_reset();
         break;
-  #endif
+#endif
 
-  #ifdef CONFIG_LPC43_USART3
+#ifdef CONFIG_LPC43_USART3
       case 3:
         lpc43_usart3_reset();
         break;
-  #endif
+#endif
 
       default:
         break;

@@ -892,7 +892,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
       {
         ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP);
       }
-  #endif
+#  endif
 
 #else
 

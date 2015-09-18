@@ -74,5 +74,5 @@ unsigned int cp15_read_icachelockdown(void);
 void         cp15_write_icachelockdown(unsigned int value);
 #endif
 
-#endif // #ifndef __ARCH_ARM_SRC_ARM_CACHE_H
+#endif /* __ARCH_ARM_SRC_ARM_CACHE_H */
 

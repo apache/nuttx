@@ -467,7 +467,7 @@
    * in the way at that position.
    */
 
-  #if defined(CONFIG_ARCH_LOWVECTORS)
+#  if defined(CONFIG_ARCH_LOWVECTORS)
   /* In this case, table must lie in SRAM A2 after the vectors in SRAM A1 */
 
 #    define PGTABLE_BASE_PADDR  A1X_SRAMA2_PADDR

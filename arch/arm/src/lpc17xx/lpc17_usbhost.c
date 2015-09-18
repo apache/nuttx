@@ -3228,7 +3228,7 @@ static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   ed->xfrinfo       = xfrinfo;
 
-  #if LPC17_IOBUFFERS > 0
+#if LPC17_IOBUFFERS > 0
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
 
   ret = lpc17_dma_alloc(priv, ed, buffer, buflen, &xfrinfo->alloc);
