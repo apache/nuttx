@@ -86,11 +86,6 @@
  *   Input value:  A pointer to type b16_t.
  */
 
-#define BATIOC_STATE    _BATIOC(0x0001)
-#define BATIOC_ONLINE   _BATIOC(0x0002)
-#define BATIOC_VOLTAGE  _BATIOC(0x0003)
-#define BATIOC_CAPACITY _BATIOC(0x0004)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

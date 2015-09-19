@@ -1,6 +1,6 @@
 /****************************************************************************
  * drivers/power/max1704x.c
- * Lower half driver for MAX1704x battery charger
+ * Lower half driver for MAX1704x battery fuel gauge
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,11 +55,11 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c.h>
-#include <nuttx/power/battery.h>
+#include <nuttx/power/battery_gauge.h>
 
 /* This driver requires:
  *
- * CONFIG_BATTERY - Upper half battery driver support
+ * CONFIG_BATTERY - Upper half battery gauge driver support
  * CONFIG_I2C - I2C support
  * CONFIG_I2C_MAX1704X - And the driver must be explictly selected.
  */
@@ -177,8 +177,8 @@ struct max1704x_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  FAR const struct battery_operations_s *ops; /* Battery operations */
-  sem_t batsem;  /* Enforce mutually exclusive access */
+  FAR const struct battery_gauge_operations_s *ops; /* Battery operations */
+  sem_t batsem;              /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower half MAX1704x driver follow */
 
@@ -208,16 +208,16 @@ static inline int max1704x_reset(FAR struct max1704x_dev_s *priv);
 
 /* Battery driver lower half methods */
 
-static int max1704x_state(struct battery_dev_s *dev, int *status);
-static int max1704x_online(struct battery_dev_s *dev, bool *status);
-static int max1704x_voltage(struct battery_dev_s *dev, b16_t *value);
-static int max1704x_capacity(struct battery_dev_s *dev, b16_t *value);
+static int max1704x_state(struct battery_gauge_dev_s *dev, int *status);
+static int max1704x_online(struct battery_gauge_dev_s *dev, bool *status);
+static int max1704x_voltage(struct battery_gauge_dev_s *dev, b16_t *value);
+static int max1704x_capacity(struct battery_gauge_dev_s *dev, b16_t *value);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct battery_operations_s g_max1704xops =
+static const struct battery_gauge_operations_s g_max1704xops =
 {
   max1704x_state,
   max1704x_online,
@@ -410,7 +410,7 @@ static inline int max1704x_reset(FAR struct max1704x_dev_s *priv)
  *
  ****************************************************************************/
 
-static int max1704x_state(struct battery_dev_s *dev, int *status)
+static int max1704x_state(struct battery_gauge_dev_s *dev, int *status)
 {
   FAR struct max1704x_dev_s *priv = (FAR struct max1704x_dev_s *)dev;
   b16_t soc = 0;
@@ -454,7 +454,7 @@ static int max1704x_state(struct battery_dev_s *dev, int *status)
  *
  ****************************************************************************/
 
-static int max1704x_online(struct battery_dev_s *dev, bool *status)
+static int max1704x_online(struct battery_gauge_dev_s *dev, bool *status)
 {
   /* There is no concept of online/offline in this driver */
 
@@ -470,7 +470,7 @@ static int max1704x_online(struct battery_dev_s *dev, bool *status)
  *
  ****************************************************************************/
 
-static int max1704x_voltage(struct battery_dev_s *dev, b16_t *value)
+static int max1704x_voltage(struct battery_gauge_dev_s *dev, b16_t *value)
 {
   FAR struct max1704x_dev_s *priv = (FAR struct max1704x_dev_s *)dev;
   return max1704x_getvcell(priv, value);
@@ -484,7 +484,7 @@ static int max1704x_voltage(struct battery_dev_s *dev, b16_t *value)
  *
  ****************************************************************************/
 
-static int max1704x_capacity(struct battery_dev_s *dev, b16_t *value)
+static int max1704x_capacity(struct battery_gauge_dev_s *dev, b16_t *value)
 {
   FAR struct max1704x_dev_s *priv = (FAR struct max1704x_dev_s *)dev;
   return max1704x_getsoc(priv, value);
@@ -520,8 +520,9 @@ static int max1704x_capacity(struct battery_dev_s *dev, b16_t *value)
  *
  ****************************************************************************/
 
-FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c,
-                            uint8_t addr, uint32_t frequency)
+FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c,
+                                                    uint8_t addr,
+                                                    uint32_t frequency)
 {
   FAR struct max1704x_dev_s *priv;
 #if 0
@@ -557,7 +558,7 @@ FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c,
         }
 #endif
     }
-  return (FAR struct battery_dev_s *)priv;
+  return (FAR struct battery_gauge_dev_s *)priv;
 }
 
 #endif /* CONFIG_BATTERY && CONFIG_I2C && CONFIG_I2C_MAX1704X */

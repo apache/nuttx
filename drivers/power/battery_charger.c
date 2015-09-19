@@ -47,6 +47,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/power/battery_charger.h>
+#include <nuttx/power/battery_ioctl.h>
 
 /* This driver requires:
  *

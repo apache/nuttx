@@ -83,12 +83,6 @@
  *   Input value:  An int defining the voltage value.
  */
 
-#define BATIOC_STATE       _BATIOC(0x0001)
-#define BATIOC_HEALTH      _BATIOC(0x0002)
-#define BATIOC_ONLINE      _BATIOC(0x0003)
-#define BATIOC_VOLTAGE     _BATIOC(0x0004)
-#define BATIOC_CURRENT     _BATIOC(0x0005)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
