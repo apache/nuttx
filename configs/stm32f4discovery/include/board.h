@@ -43,12 +43,15 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
+#  include <stdbool.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
+#ifdef __KERNEL__
+#  include "stm32_rcc.h"
+#  include "stm32_sdio.h"
+#  include "stm32.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
