@@ -10973,4 +10973,10 @@
 	  Stefan Kolb (2015-09-14).
 	* All ARMV7-M: Force 8-byte stack alignment when calling from assembly
 	  to C to interrupt handling (2015-09-15).
+	* drivers/power/battery_gauge.c and include/nuttx/power/battery_gauge.h:
+	  battery.c/h renamed to batter_gauge.c/.h since it really only
+	  implements a battery fuel gauge.  From Alan Carvalho de Assis (2015-09-19).
+	* drivers/power/battery_charter.c and include/nuttx/power/batter_charger.h:
+	  Add a new frame to support a batter charger interface.  From Alan
+	  Carvalho de Assis (2015-09-19).
 
