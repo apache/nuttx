@@ -53,6 +53,10 @@ endif
 
 # Add battery drivers
 
+ifeq ($(CONFIG_BATTERY_CHARGER),y)
+CSRCS += battery_charger.c
+endif
+
 ifeq ($(CONFIG_BATTERY_GAUGE),y)
 
 CSRCS += battery_gauge.c
