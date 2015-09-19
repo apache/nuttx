@@ -1,6 +1,6 @@
 /****************************************************************************
- * include/nuttx/power/battery.h
- * NuttX Battery Interfaces
+ * include/nuttx/power/battery_gauge.h
+ * NuttX Battery Fuel Gauge Interfaces
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_POWER_BATTERY_H
-#define __INCLUDE_NUTTX_POWER_BATTERY_H
+#ifndef __INCLUDE_NUTTX_POWER_BATTERY_GAUGE_H
+#define __INCLUDE_NUTTX_POWER_BATTERY_GAUGE_H
 
 /****************************************************************************
  * Included Files
@@ -48,13 +48,13 @@
 #include <semaphore.h>
 #include <fixedmath.h>
 
-#ifdef CONFIG_BATTERY
+#ifdef CONFIG_BATTERY_GAUGE
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_BATTERY - Upper half battery driver support
+/* CONFIG_BATTERY_GAUGE - Upper half battery fuel gauge driver support
  *
  * Specific, lower-half drivers will have other configuration requirements
  * such as:
@@ -64,15 +64,16 @@
  */
 
 /* IOCTL Commands ***********************************************************/
-/* The upper-half battery driver provides a character driver "wrapper"
- * around the lower-half battery driver that does all of the real work.
+/* The upper-half battery fuel gauge driver provides a character driver
+ * "wrapper"  * around the lower-half battery driver that does all of the
+ * real work.
  * Since there is no real data transfer to/or from a battery, all of the
  * driver interaction is through IOCTIL commands.  The IOCTL commands
  * supported by the upper-half driver simply provide calls into the the
  * lower half as summarized below:
  *
  * BATIOC_STATE - Return the current state of the battery (see
- *   enum battery_status_e).
+ *   enum battery_gauge_status_e).
  *   Input value:  A pointer to type int.
  * BATIOC_ONLINE - Return 1 if the battery is online; 0 if offline.
  *   Input value:  A pointer to type bool.
@@ -95,7 +96,7 @@
  ****************************************************************************/
 /* Battery status */
 
-enum battery_status_e
+enum battery_gauge_status_e
 {
   BATTERY_UNKNOWN = 0, /* Battery state is not known */
   BATTERY_IDLE,        /* Not full, not charging, not discharging */
@@ -106,33 +107,33 @@ enum battery_status_e
 
  /* This structure defines the lower half battery interface */
 
-struct battery_dev_s;
-struct battery_operations_s
+struct battery_gauge_dev_s;
+struct battery_gauge_operations_s
 {
-  /* Return the current battery state (see enum battery_status_e) */
+  /* Return the current battery state (see enum battery_gauge_status_e) */
 
-  int (*state)(struct battery_dev_s *dev, int *status);
+  int (*state)(struct battery_gauge_dev_s *dev, int *status);
 
   /* Return true if the batter is online */
 
-  int (*online)(struct battery_dev_s *dev, bool *status);
+  int (*online)(struct battery_gauge_dev_s *dev, bool *status);
 
   /* Current battery voltage */
 
-  int (*voltage)(struct battery_dev_s *dev, b16_t *value);
+  int (*voltage)(struct battery_gauge_dev_s *dev, b16_t *value);
 
   /* Battery capacity */
 
-  int (*capacity)(struct battery_dev_s *dev, b16_t *value);
+  int (*capacity)(struct battery_gauge_dev_s *dev, b16_t *value);
 };
 
 /* This structure defines the battery driver state structure */
 
-struct battery_dev_s
+struct battery_gauge_dev_s
 {
   /* Fields required by the upper-half driver */
 
-  FAR const struct battery_operations_s *ops; /* Battery operations */
+  FAR const struct battery_gauge_operations_s *ops; /* Battery operations */
   sem_t batsem;  /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower-half driver may follow */
@@ -156,7 +157,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 /****************************************************************************
- * Name: battery_register
+ * Name: battery_gauge_register
  *
  * Description:
  *   Register a lower half battery driver with the common, upper-half
@@ -172,18 +173,19 @@ extern "C"
  *
  ****************************************************************************/
 
-int battery_register(FAR const char *devpath, FAR struct battery_dev_s *dev);
+int battery_gauge_register(FAR const char *devpath,
+                           FAR struct battery_gauge_dev_s *dev);
 
 /****************************************************************************
  * Name: max1704x_initialize
  *
  * Description:
  *   Initialize the MAX1704x battery driver and return an instance of the
- *   lower_half interface that may be used with battery_register();
+ *   lower_half interface that may be used with battery_gauge_register();
  *
  *   This driver requires:
  *
- *   CONFIG_BATTERY - Upper half battery driver support
+ *   CONFIG_BATTERY_GAUGE - Upper half battery fuel gauge driver support
  *   CONFIG_I2C - I2C support
  *   CONFIG_I2C_MAX1704X - And the driver must be explictly selected.
  *   CONFIG_I2C_MAX17040 or CONFIG_I2C_MAX17041 - The driver must know which
@@ -203,8 +205,9 @@ int battery_register(FAR const char *devpath, FAR struct battery_dev_s *dev);
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_MAX1704X)
 struct i2c_dev_s; /* Forward reference */
 
-FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c
-                                              uint8_t addr, uint32_t frequency);
+FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c
+                                                    uint8_t addr,
+                                                    uint32_t frequency);
 #endif
 
 #undef EXTERN
@@ -213,5 +216,5 @@ FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_BATTERY */
-#endif /* __INCLUDE_NUTTX_POWER_BATTERY_H */
+#endif /* CONFIG_BATTERY_GAUGE */
+#endif /* __INCLUDE_NUTTX_POWER_BATTERY_GAUGE_H */

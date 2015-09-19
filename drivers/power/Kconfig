@@ -2,8 +2,8 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
-config BATTERY
-	bool "Battery support"
+config BATTERY_GAUGE
+	bool "Battery Fuel Gauge support"
 	default n
 	
 config MAX1704X
@@ -11,7 +11,7 @@ config MAX1704X
 	default n
 	select I2C
 	select I2C_MAX1704X
-	depends on BATTERY
+	depends on BATTERY_GAUGE
 	---help---
 		The MAX17040/MAX17041 are ultra-compact, low-cost, host-side fuel-gauge
 		systems for lithium-ion (Li+) batteries in handheld and portable equipment.

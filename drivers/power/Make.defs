@@ -53,9 +53,9 @@ endif
 
 # Add battery drivers
 
-ifeq ($(CONFIG_BATTERY),y)
+ifeq ($(CONFIG_BATTERY_GAUGE),y)
 
-CSRCS += battery.c
+CSRCS += battery_gauge.c
 
 # Add I2C-based battery drivers
 

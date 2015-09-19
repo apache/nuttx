@@ -1,6 +1,6 @@
 /****************************************************************************
- * drivers/power/battery.c
- * Upper-half, character driver for batteries.
+ * drivers/power/battery_gauge_gauge.c
+ * Upper-half, character driver for battery fuel gauge.
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/power/battery.h>
+#include <nuttx/power/battery_gauge.h>
 
 /* This driver requires:
  *
@@ -69,11 +69,13 @@
 
 /* Character driver methods */
 
-static int     bat_open(FAR struct file *filep);
-static int     bat_close(FAR struct file *filep);
-static ssize_t bat_read(FAR struct file *, FAR char *, size_t nbytes);
-static ssize_t bat_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-static int     bat_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static int     bat_gauge_open(FAR struct file *filep);
+static int     bat_gauge_close(FAR struct file *filep);
+static ssize_t bat_gauge_read(FAR struct file *, FAR char *, size_t nbytes);
+static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     bat_gauge_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -81,12 +83,12 @@ static int     bat_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
 
 static const struct file_operations g_batteryops =
 {
-  bat_open,
-  bat_close,
-  bat_read,
-  bat_write,
+  bat_gauge_open,
+  bat_gauge_close,
+  bat_gauge_read,
+  bat_gauge_write,
   0,
-  bat_ioctl
+  bat_gauge_ioctl
 #ifndef CONFIG_DISABLE_POLL
   , 0
 #endif
@@ -96,36 +98,37 @@ static const struct file_operations g_batteryops =
  * Private Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: bat_open
+ * Name: bat_gauge_open
  *
  * Description:
  *   This function is called whenever the battery device is opened.
  *
  ****************************************************************************/
 
-static int bat_open(FAR struct file *filep)
+static int bat_gauge_open(FAR struct file *filep)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: bat_close
+ * Name: bat_gauge_close
  *
  * Description:
  *   This routine is called when the battery device is closed.
  *
  ****************************************************************************/
 
-static int bat_close(FAR struct file *filep)
+static int bat_gauge_close(FAR struct file *filep)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: bat_read
+ * Name: bat_gauge_read
  ****************************************************************************/
 
-static ssize_t bat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t bat_gauge_read(FAR struct file *filep, FAR char *buffer,
+                              size_t buflen)
 {
   /* Return nothing read */
 
@@ -133,10 +136,10 @@ static ssize_t bat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 }
 
 /****************************************************************************
- * Name: bat_write
+ * Name: bat_gauge_write
  ****************************************************************************/
 
-static ssize_t bat_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
   /* Return nothing written */
@@ -145,13 +148,13 @@ static ssize_t bat_write(FAR struct file *filep, FAR const char *buffer,
 }
 
 /****************************************************************************
- * Name: bat_ioctl
+ * Name: bat_gauge_ioctl
  ****************************************************************************/
 
-static int bat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int bat_gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct battery_dev_s *dev  = inode->i_private;
+  FAR struct battery_gauge_dev_s *dev  = inode->i_private;
   int ret;
 
   /* Inforce mutually exclusive access to the battery driver */
@@ -222,7 +225,7 @@ static int bat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: battery_register
+ * Name: battery_gauge_register
  *
  * Description:
  *   Register a lower half battery driver with the common, upper-half
@@ -238,7 +241,8 @@ static int bat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int battery_register(FAR const char *devpath, FAR struct battery_dev_s *dev)
+int battery_gauge_register(FAR const char *devpath,
+                           FAR struct battery_gauge_dev_s *dev)
 {
   int ret;
 
