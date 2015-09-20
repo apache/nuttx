@@ -91,6 +91,7 @@
 enum battery_charger_status_e
 {
   BATTERY_UNKNOWN = 0, /* Battery state is not known */
+  BATTERY_FAULT,       /* Charger reported a fault, get health for more info */
   BATTERY_IDLE,        /* Not full, not charging, not discharging */
   BATTERY_FULL,        /* Full, not discharging */
   BATTERY_CHARGING,    /* Not full, charging */
@@ -109,7 +110,8 @@ enum battery_charger_health_e
   BATTERY_HEALTH_UNSPEC_FAIL,  /* Battery charger reported an unspected failure */
   BATTERY_HEALTH_COLD,         /* Battery is under recommended temperature */
   BATTERY_HEALTH_WD_TMR_EXP,   /* Battery WatchDog Timer Expired */
-  BATTERY_HEALTH_SAFE_TMR_EXP  /* Battery Safety Timer Expired */
+  BATTERY_HEALTH_SAFE_TMR_EXP, /* Battery Safety Timer Expired */
+  BATTERY_HEALTH_DISCONNECTED  /* Battery is not connected */
 };
 
  /* This structure defines the lower half battery interface */
