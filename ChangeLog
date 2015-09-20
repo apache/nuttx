@@ -10979,4 +10979,6 @@
 	* drivers/power/battery_charter.c and include/nuttx/power/batter_charger.h:
 	  Add a new frame to support a batter charger interface.  From Alan
 	  Carvalho de Assis (2015-09-19).
+	* drivers/power/bq2425x.c and .h: Battery Charger: Add BQ24250 driver.
+	  From Alan Carvalho de Assis (2015-09-20).
 

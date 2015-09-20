@@ -207,9 +207,9 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         {
           int volts;
           FAR int *voltsp = (FAR int *)((uintptr_t)arg);
-          volts = *voltsp;
-          if (ptr)
+          if (voltsp)
             {
+              volts = *voltsp;
               ret = dev->ops->voltage(dev, volts);
             }
         }
@@ -219,9 +219,9 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         {
           int amps;
           FAR int *ampsp = (FAR int *)((uintptr_t)arg);
-          amps = *ampsp;
-          if (ptr)
+          if (ampsp)
             {
+              amps = *ampsp;
               ret = dev->ops->current(dev, amps);
             }
         }
