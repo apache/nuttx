@@ -38,7 +38,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include "chip.h"
 #include "stm32_pwr.h"
+#include "itm_syslog.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -790,6 +793,30 @@ static void stm32_stdclockconfig(void)
 #endif
 
 /****************************************************************************
+ * Name: efm32_itm_syslog
+ *
+ * Description:
+ *   Enable Serial wire output pin, configure debug clocking, and enable
+ *   ITM syslog support.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
+static inline void rcc_itm_syslog(void)
+{
+
+  /* Enable SWO output */
+
+  modifyreg32(STM32_DBGMCU_CR, DBGMCU_CR_TRACEMODE_MASK, DBGMCU_CR_ASYNCH|\
+              DBGMCU_CR_TRACEIOEN);
+
+  itm_syslog_initialize();
+}
+#else
+#  define rcc_itm_syslog()
+#endif
+
+/****************************************************************************
  * Name: rcc_enableperiphals
  ****************************************************************************/
 
@@ -800,6 +827,7 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb3();
   rcc_enableapb1();
   rcc_enableapb2();
+  rcc_itm_syslog();
 }
 
 /****************************************************************************
