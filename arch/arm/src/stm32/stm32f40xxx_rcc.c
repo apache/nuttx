@@ -804,7 +804,6 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
 static inline void rcc_itm_syslog(void)
 {
-
   /* Enable SWO output */
 
   modifyreg32(STM32_DBGMCU_CR, DBGMCU_CR_TRACEMODE_MASK, DBGMCU_CR_ASYNCH|\
