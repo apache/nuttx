@@ -311,17 +311,6 @@ static inline uint32_t getipsr(void)
   return ipsr;
 }
 
-static inline void setipsr(uint32_t ipsr) inline_function;
-static inline void setipsr(uint32_t ipsr)
-{
-  __asm__ __volatile__
-    (
-      "\tmsr ipsr, %0\n"
-      :
-      : "r" (ipsr)
-      : "memory");
-}
-
 /* Get/set CONTROL */
 
 static inline uint32_t getcontrol(void) inline_function;
