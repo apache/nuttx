@@ -51,16 +51,16 @@
  * device.
  */
 
-#if CONFIG_STM32F7_ < 4
+#if STM32F7_NUART < 4
 #  undef CONFIG_STM32F7_UART8
 #endif
-#if CONFIG_STM32F7_ < 4
+#if STM32F7_NUART < 3
 #  undef CONFIG_STM32F7_UART7
 #endif
-#if CONFIG_STM32F7_ < 3
+#if STM32F7_NUART < 2
 #  undef CONFIG_STM32F7_UART5
 #endif
-#if CONFIG_STM32F7_ < 1
+#if STM32F7_NUART < 1
 #  undef CONFIG_STM32F7_UART4
 #endif
 
