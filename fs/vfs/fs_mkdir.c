@@ -154,7 +154,10 @@ int mkdir(const char *pathname, mode_t mode)
 
   else
     {
-      /* Create an inode in the pseudo-filesystem at this path */
+      /* Create an inode in the pseudo-filesystem at this path.
+       * NOTE that the new inode will be created with a reference
+       * count of zero.
+       */
 
       inode_semtake();
       ret = inode_reserve(pathname, &inode);

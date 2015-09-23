@@ -2568,6 +2568,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
+   * NOTE that the inode will be created with a refernce count of zero.
    */
 
   inode_semtake();

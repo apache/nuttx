@@ -296,6 +296,8 @@ int mount(FAR const char *source, FAR const char *target,
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
+   * NOTE that the new inode will be created with an initial reference
+   * count of zero.
    */
 
     {

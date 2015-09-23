@@ -136,7 +136,7 @@ int mq_close(mqd_t mqdes)
 }
 
 /****************************************************************************
- * Name: mq_close
+ * Name: mq_inode_release
  *
  * Description:
  *   Release a reference count on a message queue inode.

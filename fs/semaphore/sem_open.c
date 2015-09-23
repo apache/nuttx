@@ -148,8 +148,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
       snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
 
-      /* Get the inode for this semaphore.  This should succeed if the semaphore
-       * has already been created.
+      /* Get the inode for this semaphore.  This should succeed if the
+       * semaphore has already been created.  In this case, inode_finde()
+       * will have incremented the reference count on the inode.
        */
 
       inode = inode_find(fullpath, &relpath);
@@ -214,7 +215,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
               goto errout_with_lock;
             }
 
-          /* Create an inode in the pseudo-filesystem at this path */
+          /* Create an inode in the pseudo-filesystem at this path.  The new
+           * inode will be created with a reference count of zero.
+           */
 
           inode_semtake();
           ret = inode_reserve(fullpath, &inode);

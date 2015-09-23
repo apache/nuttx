@@ -175,7 +175,10 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
     {
-      /* Create a new, empty inode at the destination location */
+      /* Create a new, empty inode at the destination location.
+       * NOTE that the new inode will be created with a reference count
+       * of  zero.
+       */
 
       inode_semtake();
       ret = inode_reserve(newpath, &newinode);

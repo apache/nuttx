@@ -10981,4 +10981,7 @@
 	  Carvalho de Assis (2015-09-19).
 	* drivers/power/bq2425x.c and .h: Battery Charger: Add BQ24250 driver.
 	  From Alan Carvalho de Assis (2015-09-20).
+	* fs/mqueue/mq_open.c: When message queue is opened, inode_reserve()
+	  leaves the reference count at zero.  mq_open() logic must assure
+	  that the reference count of the newly created inode is one (2015-09-23).
 

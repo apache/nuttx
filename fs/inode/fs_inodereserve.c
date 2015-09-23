@@ -145,9 +145,8 @@ static void inode_insert(FAR struct inode *node,
  * Name: inode_reserve
  *
  * Description:
- *   Reserve an (initialized) inode the pseudo file system.
- *
- *   NOTE: Caller must hold the inode semaphore
+ *   Reserve an (initialized) inode the pseudo file system.  The initial
+ *   reference count on the new inode is zero.
  *
  * Input parameters:
  *   path - The path to the inode to create
@@ -160,6 +159,9 @@ static void inode_insert(FAR struct inode *node,
  *   EINVAL - 'path' is invalid for this operation
  *   EEXIST - An inode already exists at 'path'
  *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ * Assumptions:
+ *   Caller must hold the inode semaphore
  *
  ****************************************************************************/
 
