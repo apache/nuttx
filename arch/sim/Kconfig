@@ -32,6 +32,15 @@ config SIM_M32
 		beyond.  For thoses versions, you must add SIM_M32=y to the .config file in
 		order to enable building a 32-bit image on a 64-bit platform.
 
+config SIM_CYGWIN_DECORATED
+	bool "Decorated Cygwin names"
+	default n
+	depends on WINDOWS_CYGWIN
+	---help---
+		Older versions of Cygwin toolsdecorated C symbol names by adding an
+		underscore to the beginning of the symbol name.  Newer versions of
+		Cygwin do not seem to do this.
+
 config SIM_WALLTIME
 	bool "Execution simulation in near real-time"
 	default n

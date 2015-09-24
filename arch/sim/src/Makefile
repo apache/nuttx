@@ -206,7 +206,11 @@ GNU/Linux-names.dat: GNU nuttx-names.dat
 	$(Q) cp nuttx-names.dat $@
 
 Cygwin-names.dat: nuttx-names.dat
+ifeq ($())CONFIG_SIM_CYGWIN_DECORATED),y)
 	$(Q) cat $^ | sed -e "s/^/_/g" >$@
+else
+	$(Q) cp nuttx-names.dat $@
+endif
 
 nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	$(Q) echo "LD:  nuttx.rel"
