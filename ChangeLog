@@ -10984,4 +10984,9 @@
 	* fs/mqueue/mq_open.c: When message queue is opened, inode_reserve()
 	  leaves the reference count at zero.  mq_open() logic must assure
 	  that the reference count of the newly created inode is one (2015-09-23).
-
+	* arch/sim/src/Kconfig, Makefile, up_setjmp64.S:  Modern Cygwin X86_64
+	  machines follow the Microsoft ABI for parameter passing.  The older,
+	  Linux System 5 ABI will not work on X86_64-based Cygwin machines.  Also,
+	  the newer Cygwin tool chains do nor pre-pend symbol names with the
+	  underscore character.  With these changes the simulator agains works
+	  with the newere Cygwin64 platform (2015-09-24).
