@@ -41,6 +41,45 @@ config SIM_CYGWIN_DECORATED
 		underscore to the beginning of the symbol name.  Newer versions of
 		Cygwin do not seem to do this.
 
+choice
+	prompt "X64_64 ABI"
+	default SIM_X8664_SYSTEMV if HOST_LINUX
+	default SIM_X8664_MICROSOFT if HOST_WINDOWS
+	depends on HOST_X86_64 && !SIM_32
+
+config SIM_X8664_SYSTEMV
+	bool "System V AMD64 ABI"
+	---help---
+		The calling convention of the System V AMD64 ABI is followed on Solaris,
+		Linux, FreeBSD, Mac OS X, and other UNIX-like or POSIX-compliant operating
+		systems. The first six integer or pointer arguments are passed in registers
+		RDI, RSI, RDX, RCX, R8, and R9, while XMM0, XMM1, XMM2, XMM3, XMM4, XMM5,
+		XMM6 and XMM7 are used for floating point arguments. For system calls, R10
+		is used instead of RCX.   As in the Microsoft x64 calling convention,
+		additional arguments are passed on the stack and the return value is stored
+		in RAX.
+
+		Registers RBP, RBX, and R12-R15 are callee-save registers; all others must
+		be saved by the caller if they wish to preserve their values.
+
+		Unlike the Microsoft calling convention, a shadow space is not provided; on
+		function entry, the return address is adjacent to the seventh integer argument
+		on the stack.
+
+config SIM_X8664_MICROSOFT
+	bool "Microsoft x64 calling convention"
+	---help---
+		The Microsoft x64 calling convention is followed on Microsoft Windows and
+		pre-boot UEFI (for long mode on x86-64). It uses registers RCX, RDX, R8,
+		R9 for the first four integer or pointer arguments (in that order), and
+		XMM0, XMM1, XMM2, XMM3 are used for floating point arguments. Additional
+		arguments are pushed onto the stack (right to left). Integer return
+		values (similar to x86) are returned in RAX if 64 bits or less. Floating
+		point return values are returned in XMM0. Parameters less than 64 bits
+		long are not zero extended; the high bits are not zeroed.
+
+endchoice
+
 config SIM_WALLTIME
 	bool "Execution simulation in near real-time"
 	default n
