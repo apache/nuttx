@@ -10989,4 +10989,4 @@
 	  Linux System 5 ABI will not work on X86_64-based Cygwin machines.  Also,
 	  the newer Cygwin tool chains do nor pre-pend symbol names with the
 	  underscore character.  With these changes the simulator agains works
-	  with the newere Cygwin64 platform (2015-09-24).
+	  with the newer Cygwin64 platform (2015-09-24).
