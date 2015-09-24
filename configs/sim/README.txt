@@ -175,21 +175,48 @@ X11.  See the discussion "Stack Size Issues" above.
 
 Cygwin64 Issues
 ---------------
-Since using Cygwin64, I have been unable to use the simulator.  When I try
-to run nutt.exe from the command line, it exists silently.  Running with GDB
-I get following (before hitting a breakpoint at main()):
+There are some additional issues using the simulator with Cygwin64.  Below is the
+summary of the changes that I had to make to get the simulator working in that
+environment:
 
-  (gdb) r
-  Starting program: /cygdrive/c/Users/Gregory/Documents/projects/nuttx/master/nuttx/nuttx.exe
-  [New Thread 6512.0xda8]
-  [New Thread 6512.0x998]
-        1 [main] nuttx 6512 C:\Users\Gregory\Documents\projects\nuttx\master\nuttx\nuttx.exe: *** fatal error - Internal error: Out of memory for new path buf.
-      736 [main] nuttx 6512 cygwin_exception::open_stackdumpfile: Dumping stack trace to nuttx.exe.stackdump
-  [Thread 6512.0x998 exited with code 256]
-  [Inferior 1 (process 6512) exited with code 0400]
+  CONFIG_SIM_CYGWIN_DECORATED=n
+    Older versions of Cygwin toolsdecorated C symbol names by adding an
+    underscore to the beginning of the symbol name.  Newer versions of
+    Cygwin do not seem to do this.  Deselecting CONFIG_SIM_CYGWIN_DECORATED
+    will select the symbols without the leading underscore as needed by
+    the Cygwin64 toolchain.
 
-Still clueless on this one.  The simulator used to work great with an older,
-32-bit Cygwin version.  I currently use only Linux to test with the Simulator.
+    How do you know if you need this option?  You could look at the generated
+    symbol tables to see if there are underscore characters at the beginning
+    of the symbol names.  Or, if you need this option, the simulation will not
+    run:  It will crash early, probably in some function due to the failure to
+    allocate memory.
+
+    In this case, when I tried to run nutt.exe from the command line, it
+    exited silently.  Running with GDB I get following (before hitting a
+    breakpoint at main()):
+
+      (gdb) r
+      Starting program: /cygdrive/c/Users/Gregory/Documents/projects/nuttx/master/nuttx/nuttx.exe
+      [New Thread 6512.0xda8]
+      [New Thread 6512.0x998]
+            1 [main] nuttx 6512 C:\Users\Gregory\Documents\projects\nuttx\master\nuttx\nuttx.exe: *** fatal error - Internal error: Out of memory for new path buf.
+          736 [main] nuttx 6512 cygwin_exception::open_stackdumpfile: Dumping stack trace to nuttx.exe.stackdump
+      [Thread 6512.0x998 exited with code 256]
+      [Inferior 1 (process 6512) exited with code 0400]
+
+  CONFIG_SIM_X8664_SYSTEMV=n
+  CONFIG_SIM_X8664_MICROSOFT=y
+    Selet Microsoft x64 calling convention.
+
+    The Microsoft x64 calling convention is followed on Microsoft Windows and
+    pre-boot UEFI (for long mode on x86-64). It uses registers RCX, RDX, R8,
+    R9 for the first four integer or pointer arguments (in that order), and
+    XMM0, XMM1, XMM2, XMM3 are used for floating point arguments. Additional
+    arguments are pushed onto the stack (right to left). Integer return
+    values (similar to x86) are returned in RAX if 64 bits or less. Floating
+    point return values are returned in XMM0. Parameters less than 64 bits
+    long are not zero extended; the high bits are not zeroed.
 
 BASIC
 ^^^^^
