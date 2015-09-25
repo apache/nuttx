@@ -251,8 +251,8 @@ Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card 
     CONFIG_SAMV7_XDMAC=y                  : XDMAC is needed by HSMCI0/1
 
   System Type
-    CONFIG_SAMV7_PIO_IRQ=y                : PIO interrupts needed
-    CONFIG_SAMV7_PIOD_IRQ=y               : Card detect pin is on PD18
+    CONFIG_SAMV7_GPIO_IRQ=y               : PIO interrupts needed
+    CONFIG_SAMV7_GPIOD_IRQ=y              : Card detect pin is on PD18
 
   Device Drivers -> MMC/SD Driver Support
     CONFIG_MMCSD=y                        : Enable MMC/SD support
@@ -591,7 +591,7 @@ Server or XML RPC and others.  There are also other features that
 you can enable like DHCP client (or server) or network name
 resolution.
 
-By default, the IP address of the SAMA4D4-EK will be 10.0.0.2 and
+By default, the IP address of the SAMV71-XULT will be 10.0.0.2 and
 it will assume that your host is the gateway and has the IP address
 10.0.0.1.
 
@@ -621,7 +621,7 @@ NOTE: In this configuration is is normal to have packet loss > 0%
 the first time you ping due to the default handling of the ARP
 table.
 
-On the host side, you should also be able to ping the SAMA4D4-EK:
+On the host side, you should also be able to ping the SAMV71-XULT:
 
   $ ping 10.0.0.2
 
@@ -1480,14 +1480,11 @@ Configuration sub-directories
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
 
-    4. The network initialization thread is NOT enabled in this configuration.
-       As a result, networking initialization is performed serially with
-       NSH bring-up.  The time from reset to the NSH prompt will be determined
-       primarily by this network initialization time.  And can be especially
-       long, perhaps minutes, if the network cable is not connected!
-
-       If fast boot times are required, you need to perform asynchronous
-       network initialization as described under "Network Initialization Thread"
+    4. The network initialization thread and the NSH network montior are
+       enabled in this configuration. As a result, networking initialization
+       is performed asynchronously with NSH bring-up.  For more information,
+       see the paragraphs above entitled "Network Initialization Thread" and
+       "Network Monitor".
 
     5. SDRAM is NOT enabled in this configuration.
 

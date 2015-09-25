@@ -91,7 +91,7 @@
  * Private Data
  ************************************************************************************/
 
-#ifdef CONFIG_SAMV7_PIOA_IRQ
+#ifdef CONFIG_SAMV7_GPIOA_IRQ
 static xcpt_t g_emac0_handler;
 #endif
 
@@ -103,17 +103,17 @@ static xcpt_t g_emac0_handler;
  * Name: sam_emac0_phy_enable
  ************************************************************************************/
 
-#ifdef CONFIG_SAMV7_PIOA_IRQ
+#ifdef CONFIG_SAMV7_GPIOA_IRQ
 static void sam_emac0_phy_enable(bool enable)
 {
   phydbg("IRQ%d: enable=%d\n", IRQ_EMAC0_INT, enable);
   if (enable)
     {
-      sam_pioirqenable(IRQ_EMAC0_INT);
+      sam_gpioirqenable(IRQ_EMAC0_INT);
     }
   else
     {
-      sam_pioirqdisable(IRQ_EMAC0_INT);
+      sam_gpioirqdisable(IRQ_EMAC0_INT);
     }
 }
 #endif
@@ -301,13 +301,13 @@ int sam_emac0_setmac(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_PIOA_IRQ
+#ifdef CONFIG_SAMV7_GPIOA_IRQ
 xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 {
   irqstate_t flags;
   xcpt_t *phandler;
   xcpt_t oldhandler;
-  pio_pinset_t pinset;
+  gpio_pinset_t pinset;
   phy_enable_t enabler;
   int irq;
 
@@ -346,7 +346,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   if (handler)
     {
       phydbg("Configure pin: %08x\n", pinset);
-      sam_pioirq(pinset);
+      sam_gpioirq(pinset);
 
       phydbg("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
@@ -360,7 +360,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   /* Return with the interrupt disabled in either case */
 
-  sam_pioirqdisable(irq);
+  sam_gpioirqdisable(irq);
 
   /* Return the enabling function pointer */
 
@@ -374,6 +374,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   irqrestore(flags);
   return oldhandler;
 }
-#endif /* CONFIG_SAMV7_PIOA_IRQ */
+#endif /* CONFIG_SAMV7_GPIOA_IRQ */
 
 #endif /* HAVE_NETWORK */

@@ -788,6 +788,7 @@ config ARCH_BOARD_SAMV71_XULT
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT if NETDEVICES
 	---help---
 		The port of NuttX to the Atmel SAMV71 Xplained Ultra evalutation board.
 

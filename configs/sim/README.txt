@@ -91,9 +91,9 @@ Issues
 As mentioned above, context switching is based on logic like setjmp() and
 longjmp().  This context switching is available for 32-bit and 64-bit
 targets.  You must, however, set the correct target in the configuration
-before you build: HOST_X86_64 or HOST_X86 for 62- and 32-bit targets,
-respectively.  On a 64-bit machine, you can also force the 32-bit build
-with CONFIG_SIM_M32=y (which does not seem to be supported by more
+before you build: CONFIG_HOST_X86_64 or CONFIG_HOST_X86 for 64- and 32-bit
+targets, respectively.  On a 64-bit machine, you can also force the 32-bit
+build with CONFIG_SIM_M32=y (which does not seem to be supported by more
 contemporary x86_64 compilers).
 
 There are other 64-bit issues as well.  For example, addresses are retained in
@@ -178,6 +178,11 @@ Cygwin64 Issues
 There are some additional issues using the simulator with Cygwin64.  Below is the
 summary of the changes that I had to make to get the simulator working in that
 environment:
+
+  CONFIG_HOST_X86_64=y
+  CONFIG_SIM_M32=n
+    Need to select X64_64.  Cygwin64 tools do not seem to support any option
+    to build a 32-bit target.
 
   CONFIG_SIM_CYGWIN_DECORATED=n
     Older versions of Cygwin toolsdecorated C symbol names by adding an
