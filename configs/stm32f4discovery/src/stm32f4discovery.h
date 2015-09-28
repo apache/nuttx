@@ -70,6 +70,7 @@
 #define HAVE_SDIO       1
 #define HAVE_RTC_DRIVER 1
 #define HAVE_ELF        1
+#define HAVE_NETMONITOR 1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
@@ -148,6 +149,27 @@
 #  undef HAVE_ELF
 #endif
 
+/* NSH Network monitor  */
+
+#if !defined(CONFIG_NET) || !defined(CONFIG_STM32_EMACMAC)
+#  undef HAVE_NETMONITOR
+#endif
+
+#if !defined(CONFIG_NSH_NETINIT_THREAD) || !defined(CONFIG_ARCH_PHY_INTERRUPT) || \
+    !defined(CONFIG_NETDEV_PHY_IOCTL) || !defined(CONFIG_NET_UDP) || \
+     defined(CONFIG_DISABLE_SIGNALS)
+#  undef HAVE_NETMONITOR
+#endif
+
+/* The NSH Network Monitor cannot be used with the STM32F4DIS-BB base board.
+ * That is because the LAN8720 is configured in REF_CLK OUT mode.  In that
+ * mode, the PHY interrupt is not supported.  The NINT pin serves instead as
+ * REFLCK0.
+ */
+
+#ifdef CONFIG_STM32F4DISBB
+#  undef HAVE_NETMONITOR
+#endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
 /* LEDs */
@@ -258,6 +280,31 @@
 #if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_SDIO)
 #  define GPIO_SDIO_NCD   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
                            GPIO_PORTB|GPIO_PIN15)
+#endif
+
+/* STM32F4DIS-BB LAN8720
+ *
+ * ---------- ------------- ------------------------------
+ * PIO        SIGNAL        Comments
+ * ---------- ------------- ------------------------------
+ * PB11       TXEN           Configured by driver
+ * PB12       TXD0          "        " "" "    "
+ * PB13       TXD1          "        " "" "    "
+ * PC4        RXD0/MODE0    "        " "" "    "
+ * PC5        RXD1/MODE1    "        " "" "    "
+ * PA7        CRS_DIV/MODE2 "        " "" "    "
+ * PA2        MDIO          "        " "" "    "
+ * PC1        MDC           "        " "" "    "
+ * PA1        NINT/REFCLK0  "        " "" "    "
+ * PE2        DAT2          "        " "" "    "
+ * ---------- ------------- ------------------------------
+ */
+
+#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
+#  define GPIO_EMAC_NINT  (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|\
+                           GPIO_PORTA|GPIO_PIN1)
+#  define GPIO_EMAC_NRST  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN2)
 #endif
 
 /****************************************************************************
@@ -453,6 +500,18 @@ int stm32_bringup(void);
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDIO)
 int stm32_sdio_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_netinitialize
+ *
+ * Description:
+ *   Configure board resources to support networking.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_NETMONITOR
+void weak_function stm32_netinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

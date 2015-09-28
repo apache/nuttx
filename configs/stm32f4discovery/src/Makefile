@@ -64,6 +64,10 @@ ifeq ($(CONFIG_STM32_SDIO),y)
 CSRCS += stm32_sdio.c
 endif
 
+ifeq ($(CONFIG_STM32_ETHMAC),y)
+CSRCS += stm32_ethernet.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif

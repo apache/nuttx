@@ -95,6 +95,15 @@ void stm32_boardinitialize(void)
     }
 #endif
 
+#ifdef HAVE_NETMONITOR
+  /* Configure board resources to support networking. */
+
+  if (stm32_netinitialize)
+    {
+      stm32_netinitialize();
+    }
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 

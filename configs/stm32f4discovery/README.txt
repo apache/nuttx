@@ -1251,7 +1251,9 @@ Where <subdir> is one of the following:
        on your system and that you have the full path to the installed genromfs
        executable in PATH variable (see apps/examples/README.txt)
 
-    6. This configuration can be extended to use the hello++4 example and to build uClibc with the following additions to to the configuration file (from Leo aloe3132):
+    6. This configuration can be extended to use the hello++4 example and to
+       build uClibc with the following additions to to the configuration file
+       (from Leo aloe3132):
 
        CONFIG_C99_BOOL8=y
        CONFIG_HAVE_CXXINITIALIZE=y
@@ -1263,6 +1265,17 @@ Where <subdir> is one of the following:
 
        CONFIG_EXAMPLES_ELF_CXXINITIALIZE=y
        CONFIG_EXAMPLES_ELF_UCLIBCXX=y
+
+    4. The network initialization thread is enabled in this configuration.
+       As a result, networking initialization is performed asynchronously with
+       NSH bring-up.
+
+       The network monitor is not enabled in this configuration, however, so
+       the firmware will not know when the network is disconnected or
+       reconnected.  The NSH Network Monitor cannot be used with the
+       STM32F4DIS-BB base board because the LAN8720 is configured in REF_CLK
+       OUT mode.  In that mode, the PHY interrupt is not supported.  The NINT
+       pin serves as REFLCK0 in that case.
 
   ipv6:
   ----
@@ -1278,7 +1291,9 @@ Where <subdir> is one of the following:
        configuration other than using IPv6.  So all of the notes above
        regarding the netnsh configuration apply.
 
-       Telnet does not work with IPv6.
+       a. Telnet does not work with IPv6.
+       b. The network initialization thread was enabed in the netnsh
+          configuration on 2015-09-28, but not in the ipv6 configuration.
 
     2. This configuration can be modified to that both IPv4 and IPv6
        are support.  Here is a summary of the additional configuration
