@@ -10994,3 +10994,6 @@
 	  (2015-09-29).
 	* configs/lpc4370-link2: Support for the NXP LPC4370-Link2 development
 	  board from Lok Tep  (2015-09-29).
+	* configs/nucleo-f303re: Add SSD1351 SPI 4-wire interface.  From Paul
+	  Alexander Patience (2015-09-29).
+
