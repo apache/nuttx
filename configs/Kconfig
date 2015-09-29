@@ -308,6 +308,14 @@ config ARCH_BOARD_LPC4357_EVB
 		NXP Technologies LPC4357 EVB board.  This board is based on the
 		LPC4357FET256.
 
+config ARCH_BOARD_LPC4370_LINK2
+	bool "NXP LPC4370-Link2"
+	depends on ARCH_CHIP_LPC4370FET100
+	select ARCH_HAVE_LEDS
+	---help---
+		NXP LPC4370 Link2 board.  This board is based on the
+		LPC4370FET100.  The Code Red toolchain is used by default.
+
 config ARCH_BOARD_MBED
 	bool "mbed LCP1768"
 	depends on ARCH_CHIP_LPC1768
@@ -788,7 +796,6 @@ config ARCH_BOARD_SAMV71_XULT
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
 	---help---
 		The port of NuttX to the Atmel SAMV71 Xplained Ultra evalutation board.
 
@@ -1254,6 +1261,7 @@ config ARCH_BOARD
 	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
 	default "lpc4357-evb"              if ARCH_BOARD_LPC4357_EVB
+	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
 	default "lpcxpresso-lpc1115"       if ARCH_BOARD_LPCXPRESSO_LPC1115
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "maple"                    if ARCH_BOARD_MAPLE
@@ -1486,6 +1494,9 @@ source "configs/lpc4330-xplorer/Kconfig"
 endif
 if ARCH_BOARD_LPC4357_EVB
 source "configs/lpc4357-evb/Kconfig"
+endif
+if ARCH_BOARD_LPC4370_LINK2
+source "configs/lpc4370-link2/Kconfig"
 endif
 if ARCH_BOARD_LPCXPRESSO
 source "configs/lpcxpresso-lpc1768/Kconfig"
