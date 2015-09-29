@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 — 4 June 2012 */
+/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 ï¿½ 4 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -74,7 +74,7 @@
  * manager.  This gives some symmetry to all of the members of the family.
  */
 
-/* Per the user manual: UM10503, Rev. 1.2 — 8 June 2012 */
+/* Per the user manual: UM10503, Rev. 1.2 ï¿½ 8 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -538,6 +538,31 @@
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
 #  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
 #  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#elif defined(CONFIG_ARCH_CHIP_LPC4370FET100)
+#  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
+#  define LPC43_FLASH_BANKB_SIZE   (0)
+#  define LPC43_LOCSRAM_BANK0_SIZE (128*1024)  /* 200Kb Local SRAM*/
+#  define LPC43_LOCSRAM_BANK1_SIZE (72*1024)
+#  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
+#  define LPC43_AHBSRAM_BANK1_SIZE (0)
+#  define LPC43_AHBSRAM_BANK2_SIZE (16*1024)
+#  define LPC43_EEPROM_SIZE        (0)         /* No EEPROM */
+#  undef  LPC43_NLCD                           /* No LCD controller */
+#  define LPC43_ETHERNET           (1)         /* One Ethernet controller */
+#  define LPC43_USB0               (1)         /* Have USB0 (Host, Device, OTG) */
+#  define LPC43_USB1               (1)         /* Have USB1 (Host, Device) */
+#  undef  LPC43_USB1_ULPI                      /* No USB1 (Host, Device) with ULPI I/F */
+#  undef  LPC43_MCPWM                          /* No PWM capability */
+#  undef  LPC43_QEI                            /* No Quadrature Encoder capability */
+#  define LPC43_NUSARTS            (4)         /* Three USARTs + 1 UART */
+#  define LPC43_NSSP               (2)         /* Two SSP controllers */
+#  define LPC43_NTIMERS            (4)         /* Four Timers */
+#  define LPC43_NI2C               (2)         /* Two I2C controllers */
+#  define LPC43_NI2S               (2)         /* Two I2S controllers */
+#  define LPC43_NCAN               (2)         /* Two CAN controllers */
+#  define LPC43_NDAC               (1)         /* One 10-bit DAC */
+#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC_CHANNELS      (4)         /* Four ADC channels */
 #else
 #  error "Unsupported LPC43xx chip"
 #endif
