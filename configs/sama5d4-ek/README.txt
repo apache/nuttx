@@ -2563,9 +2563,9 @@ NAND Support
   4. As mentioned above, FAT does work but (1) has some performance issues on
      writes and (2) cannot handle bad blocks.
 
-  5. As of 2015-09-29, this SAMA5D4-EK port appears to be broken.  This breakage
-     seems to be the consequence of adding SAMA5D2 support *after* NuttX-7.11.
-     This will need to be fixed.
+  5. There was a major reorganization of the SAMA5 code after NuttX-7.11 to
+     add support for the SAMA5D2.  Only the SAMA5D4-EK nsh configuration was
+     re-verified on 2015-09-29.
 
 I2C Tool
 ========
