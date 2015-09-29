@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sama5/sama5d2x_memorymap.h
+ * arch/arm/src/sama5/_sama5d2x_memorymap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D2X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D2X_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -884,4 +884,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D2X_MEMORYMAP_H */

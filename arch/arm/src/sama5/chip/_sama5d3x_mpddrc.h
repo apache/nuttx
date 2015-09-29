@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sama5/chip/sama5d3x_mpddrc.h
+ * arch/arm/src/sama5/chip/_sama5d3x_mpddrc.h
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MPDDRC_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MPDDRC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D3X_MPDDRC_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D3X_MPDDRC_H
 
 /************************************************************************************
  * Included Files
@@ -402,4 +402,4 @@
 #define MPDDRC_WPSR_WPVSRC_SHIFT        (8)       /* Bits 8-23: Write Protection Violation Source */
 #define MPDDRC_WPSR_WPVSRC_MASK         (0xffff << MPDDRC_WPSR_WPVSRC_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MPDDRC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D3X_MPDDRC_H */

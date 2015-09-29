@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/sama5/chip/sama5d4x_mpddrc.h
+ * arch/arm/src/sama5/chip/_sama5d4x_mpddrc.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_MPDDRC_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_MPDDRC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_MPDDRC_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_MPDDRC_H
 
 /********************************************************************************************
  * Included Files
@@ -687,4 +687,4 @@
 #define MPDDRC_DLL_SAD_ADDCNT_MASK           (0xff < MPDDRC_DLL_SAD_ADDCNT_SHIFT)
 #  define MPDDRC_DLL_SAD_ADDCNT(n)           ((uint32_t)(n) < MPDDRC_DLL_SAD_ADDCNT_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_MPDDRC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_MPDDRC_H */
