@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/nucleo-f303re/src/stm32_boot.c
+ * configs/nucleo-f303re/src/stm32_ssd1351.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -41,54 +41,99 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <debug.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/ssd1351.h>
+
+#include "stm32_gpio.h"
 #include "nucleo-f303re.h"
+
+#ifdef CONFIG_LCD_SSD1351
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+/* Configuration ************************************************************/
+/* The pin configurations here require that SPI1 is selected */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef CONFIG_STM32_SPI1
+#  error "The OLED driver requires CONFIG_STM32_SPI1 in the configuration"
+#endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef CONFIG_SSD1351_SPI4WIRE
+#  error "The configuration requires the SPI 4-wire interface"
+#endif
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_DEBUG_LCD
+#  define lcddbg(format, ...)  dbg(format, ##__VA_ARGS__)
+#  define lcdvdbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#else
+#  define lcddbg(x...)
+#  define lcdvdbg(x...)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_boardinitialize
+ * Name: board_graphics_setup
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This
- *   entry point is called early in the intitialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   Called by NX initialization logic to configure the OLED.
  *
  ****************************************************************************/
 
-void stm32_boardinitialize(void)
+FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
-#ifdef CONFIG_SPI
-  if (stm32_spiinitialize != NULL)
+  FAR struct spi_dev_s *spi;
+  FAR struct lcd_dev_s *dev;
+
+  /* Configure the OLED GPIOs. This initial configuration is RESET low,
+   * putting the OLED into reset state.
+   */
+
+  (void)stm32_configgpio(GPIO_OLED_RESET);
+
+  /* Wait a bit then release the OLED from the reset state */
+
+  up_mdelay(20);
+  stm32_gpiowrite(GPIO_OLED_RESET, true);
+
+  /* Get the SPI1 port interface */
+
+  spi = up_spiinitialize(1);
+  if (spi == NULL)
     {
-      stm32_spiinitialize();
+      lcddbg("Failed to initialize SPI port 1\n");
     }
-#endif
+  else
+    {
+      /* Bind the SPI port to the OLED */
 
-  /* Configure on-board LEDs if LED support has been selected. */
+      dev = ssd1351_initialize(spi, devno);
+      if (dev == NULL)
+        {
+          lcddbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+        }
+     else
+        {
+          lcdvdbg("Bound SPI port 1 to OLED %d\n", devno);
 
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+          /* And turn the OLED on */
+
+          (void)dev->setpower(dev, LCD_FULL_ON);
+          return dev;
+        }
+    }
+
+  return NULL;
 }
+#endif /* CONFIG_LCD_SSD1351 */

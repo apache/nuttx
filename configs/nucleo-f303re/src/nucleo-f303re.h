@@ -86,6 +86,17 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
+/* OLED display definitions *************************************************/
+
+#ifdef CONFIG_LCD_SSD1351
+#  define GPIO_OLED_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
+#  define GPIO_OLED_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN8)
+#  define GPIO_OLED_DC    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN9)
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -93,5 +104,17 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI
+void weak_function stm32_spiinitialize(void);
+#endif
 
 #endif /* __CONFIGS_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */
