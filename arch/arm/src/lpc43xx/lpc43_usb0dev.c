@@ -71,6 +71,10 @@
 #include "up_internal.h"
 
 #include "lpc43_usb0dev.h"
+#include "lpc43_creg.h"
+#include "lpc43_ccu.h"
+#include "lpc43_cgu.h"
+#include "lpc43_rgu.h"
 
 /*******************************************************************************
  * Pre-processor Definitions
@@ -244,9 +248,6 @@ struct lpc43_dqh_s
 #define LPC43_BULKMAXPACKET          (512)        /* Bulk endpoint max packet (8/16/32/64/512) */
 #define LPC43_INTRMAXPACKET          (1024)       /* Interrupt endpoint max packet (1 to 1024) */
 #define LPC43_ISOCMAXPACKET          (512)        /* Acutally 1..1023 */
-
-/* The address of the endpoint control register */
-#define LPC43_USBDEV_ENDPTCTRL(epphy) (LPC43_USBDEV_ENDPTCTRL0 + ((epphy)>>1)*4)
 
 /* Endpoint bit position in SETUPSTAT, PRIME, FLUSH, STAT, COMPLETE registers */
 #define LPC43_ENDPTSHIFT(epphy)      (LPC43_EPPHYIN(epphy) ? (16 + ((epphy) >> 1)) : ((epphy) >> 1))
@@ -2106,7 +2107,6 @@ static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 static int lpc43_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
   FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
-  FAR struct lpc43_usbdev_s *priv;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG
@@ -2118,7 +2118,6 @@ static int lpc43_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 #endif
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
-  priv = privep->dev;
 
   flags = irqsave();
 
@@ -2434,10 +2433,8 @@ static int lpc43_pullup(struct usbdev_s *dev, bool enable)
  *
  * Assumptions:
  * - This function is called very early in the initialization sequence
- * - PLL and GIO pin initialization is not performed here but should been in
- *   the low-level  boot logic:  PLL1 must be configured for operation at 48MHz
- *   and P0.23 and PO.31 in PINSEL1 must be configured for Vbus and USB connect
- *   LED.
+ * - PLL  initialization is not performed here but should been in
+ *   the low-level  boot logic:  PLL0 must be configured for operation at 480MHz
  *
  *******************************************************************************/
 
@@ -2445,6 +2442,7 @@ void up_usbinitialize(void)
 {
   struct lpc43_usbdev_s *priv = &g_usbdev;
   int i;
+  uint32_t regval;
 
   usbtrace(TRACE_DEVINIT, 0);
 
@@ -2507,48 +2505,51 @@ void up_usbinitialize(void)
         }
     }
 
-  /* Enable USB to AHB clock and to Event router*/
 
-  lpc43_enableclock (CLKID_USBOTGAHBCLK);
-  lpc43_enableclock (CLKID_EVENTROUTERPCLK);
+  //clock
+  regval  = getreg32(LPC43_BASE_USB0_CLK);
+  regval &= ~BASE_USB0_CLK_CLKSEL_MASK;
+  regval |= (BASE_USB0_CLKSEL_PLL0USB | BASE_USB0_CLK_AUTOBLOCK);
+  putreg32(regval, LPC43_BASE_USB0_CLK);
+
+  //clock run
+  regval  = getreg32(LPC43_CCU1_M4_USB0_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU1_M4_USB0_CFG);
+
+  /* Enable PLL0 clock*/
+  lpc43_pll0usbconfig();
+  lpc43_pll0usbenable();
+
 
   /* Reset USB block */
-
-  lpc43_softreset (RESETID_USBOTGAHBRST);
-
-  /* Enable USB OTG PLL and wait for lock */
-
-  lpc43_putreg (0, LPC43_SYSCREG_USB_ATXPLLPDREG);
-
-  uint32_t bank = EVNTRTR_BANK(EVENTRTR_USBATXPLLLOCK);
-  uint32_t bit  = EVNTRTR_BIT(EVENTRTR_USBATXPLLLOCK);
-
-  while (! (lpc43_getreg(LPC43_EVNTRTR_RSR(bank)) & (1 << bit)))
-    ;
-
-  /* Enable USB AHB clock */
-
-  lpc43_enableclock (CLKID_USBOTGAHBCLK);
+  regval  = lpc43_getreg(LPC43_RGU_CTRL0);
+    regval |= RGU_CTRL0_USB0_RST;
+  lpc43_putreg(regval, LPC43_RGU_CTRL0);
 
   /* Reset the controller */
-
   lpc43_putreg (USBDEV_USBCMD_RST, LPC43_USBDEV_USBCMD);
   while (lpc43_getreg (LPC43_USBDEV_USBCMD) & USBDEV_USBCMD_RST)
       ;
 
+  //power PHY
+  regval  = getreg32(LPC43_CREG0);
+  regval &= ~CREG0_USB0PHY;
+  putreg32(regval, LPC43_CREG0);
+
   /* Attach USB controller interrupt handler */
 
-  if (irq_attach(LPC43_IRQ_USBOTG, lpc43_usbinterrupt) != 0)
+  if (irq_attach(LPC43M4_IRQ_USB0, lpc43_usbinterrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_IRQREGISTRATION),
-               (uint16_t)LPC43_IRQ_USBOTG);
+               (uint16_t)LPC43M4_IRQ_USB0);
       goto errout;
     }
 
 
   /* Program the controller to be the USB device controller */
 
-  lpc43_putreg (USBDEV_USBMODE_SDIS | USBDEV_USBMODE_SLOM | USBDEV_USBMODE_CMDEVICE,
+  lpc43_putreg (USBDEV_USBMODE_SDIS | USBDEV_USBMODE_SLOM | USBDEV_USBMODE_CM_DEVICE,
           LPC43_USBDEV_USBMODE);
 
   /* Disconnect device */
@@ -2590,8 +2591,8 @@ void up_usbuninitialize(void)
 
   /* Disable and detach IRQs */
 
-  up_disable_irq(LPC43_IRQ_USBOTG);
-  irq_detach(LPC43_IRQ_USBOTG);
+  up_disable_irq(LPC43M4_IRQ_USB0);
+  irq_detach(LPC43M4_IRQ_USB0);
 
   /* Reset the controller */
 
@@ -2601,9 +2602,7 @@ void up_usbuninitialize(void)
 
   /* Turn off USB power and clocking */
 
-  lpc43_disableclock (CLKID_USBOTGAHBCLK);
-  lpc43_disableclock (CLKID_EVENTROUTERPCLK);
-
+  lpc43_pll0usbdisable();
 
   irqrestore(flags);
 }
@@ -2654,7 +2653,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
     {
       /* Enable USB controller interrupts */
 
-      up_enable_irq(LPC43_IRQ_USBOTG);
+      up_enable_irq(LPC43M4_IRQ_USB0);
 
       /* FIXME: nothing seems to call DEV_CONNECT(), but we need to set
        *        the RS bit to enable the controller.  It kind of makes sense
@@ -2697,7 +2696,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Disable USB controller interrupts */
 
-  up_disable_irq(LPC43_IRQ_USBOTG);
+  up_disable_irq(LPC43M4_IRQ_USB0);
 
   /* Unhook the driver */
 

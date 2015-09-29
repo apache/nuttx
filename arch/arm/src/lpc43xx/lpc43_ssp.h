@@ -103,7 +103,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc43_sspinitialize(int port)
+FAR struct spi_dev_s *lpc43_sspinitialize(int port);
 
 /************************************************************************************
  * Name:  lpc43_ssp0/1select, lpc43_ssp0/1status, and lpc43_ssp0/1cmddata
