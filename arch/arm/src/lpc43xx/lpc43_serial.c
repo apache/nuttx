@@ -365,7 +365,7 @@ static uart_dev_t g_uart3port =
 #  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart2port     /* USART2=console */
 #    define TTYS0_DEV       g_uart2port     /* USART2=ttyS0 */
-#    ifdef CONFIG_LPC43_USART2
+#    ifdef CONFIG_LPC43_USART0
 #      define TTYS1_DEV     g_uart0port     /* USART2=ttyS0;USART0=ttyS1 */
 #      ifdef CONFIG_LPC43_UART1
 #        define TTYS2_DEV   g_uart1port     /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS2 */
@@ -882,7 +882,7 @@ static int up_interrupt(int irq, void *context)
  *     RS-485/EIA-485 Auto Address Detection (AAD) mode -- NOT supported
  *
  *       In this mode, the receiver will compare any address byte received
- *       (parity = ‘1’) to the 8-bit value programmed into the RS485ADRMATCH
+ *       (parity = ï¿½1ï¿½) to the 8-bit value programmed into the RS485ADRMATCH
  *       register.  When a matching address character is detected it will be
  *       pushed onto the RXFIFO along with the parity bit, and the receiver
  *       will be automatically enabled.

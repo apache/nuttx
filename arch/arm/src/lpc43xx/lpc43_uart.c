@@ -52,6 +52,7 @@
 #include "lpc43_pinconfig.h"
 #include "lpc43_rgu.h"
 #include "lpc43_cgu.h"
+#include "lpc43_ccu.h"
 
 #include "lpc43_uart.h"
 
@@ -333,6 +334,16 @@ void lpc43_usart0_setup(void)
   regval |= (BOARD_USART0_CLKSRC | BASE_USART0_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USART0_CLK);
 
+  //clock register
+  regval  = getreg32(LPC43_CCU1_M4_USART0_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU1_M4_USART0_CFG);
+
+  //clock peripheral
+  regval  = getreg32(LPC43_CCU2_APB0_USART0_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU2_APB0_USART0_CFG);
+
   /* Configure I/O pins.  NOTE that multiple pin configuration options must
    * be disambiguated by defining the pin configuration in the board.h
    * header file.
@@ -369,6 +380,16 @@ void lpc43_uart1_setup(void)
   regval &= ~BASE_UART1_CLK_CLKSEL_MASK;
   regval |= (BOARD_UART1_CLKSRC | BASE_UART1_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_UART1_CLK);
+
+  //clock register
+  regval  = getreg32(LPC43_CCU1_M4_UART1_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU1_M4_UART1_CFG);
+
+  //clock peripheral
+  regval  = getreg32(LPC43_CCU2_APB0_UART1_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU2_APB0_UART1_CFG);
 
   /* Configure I/O pins.  NOTE that multiple pin configuration options must
    * be disambiguated by defining the pin configuration in the board.h
@@ -407,6 +428,17 @@ void lpc43_usart2_setup(void)
   regval |= (BOARD_USART2_CLKSRC | BASE_USART2_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USART2_CLK);
 
+  //clock register
+  regval  = getreg32(LPC43_CCU1_M4_USART2_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU1_M4_USART2_CFG);
+
+  //clock peripheral
+  regval  = getreg32(LPC43_CCU2_APB2_USART2_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU2_APB2_USART2_CFG);
+
+
   /* Configure I/O pins.  NOTE that multiple pin configuration options must
    * be disambiguated by defining the pin configuration in the board.h
    * header file.
@@ -443,6 +475,16 @@ void lpc43_usart3_setup(void)
   regval &= ~BASE_USART3_CLK_CLKSEL_MASK;
   regval |= (BOARD_USART3_CLKSRC | BASE_USART3_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USART3_CLK);
+
+  //clock register
+  regval  = getreg32(LPC43_CCU1_M4_USART3_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU1_M4_USART3_CFG);
+
+  //clock peripheral
+  regval  = getreg32(LPC43_CCU2_APB2_USART3_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU2_APB2_USART3_CFG);
 
   /* Configure I/O pins.  NOTE that multiple pin configuration options must
    * be disambiguated by defining the pin configuration in the board.h
