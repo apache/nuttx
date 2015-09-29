@@ -334,12 +334,14 @@ void lpc43_usart0_setup(void)
   regval |= (BOARD_USART0_CLKSRC | BASE_USART0_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USART0_CLK);
 
-  //clock register
+  /* Clock register */
+
   regval  = getreg32(LPC43_CCU1_M4_USART0_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_USART0_CFG);
 
-  //clock peripheral
+  /* Clock peripheral */
+
   regval  = getreg32(LPC43_CCU2_APB0_USART0_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU2_APB0_USART0_CFG);
@@ -381,12 +383,14 @@ void lpc43_uart1_setup(void)
   regval |= (BOARD_UART1_CLKSRC | BASE_UART1_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_UART1_CLK);
 
-  //clock register
+  /* Clock register */
+
   regval  = getreg32(LPC43_CCU1_M4_UART1_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_UART1_CFG);
 
-  //clock peripheral
+  /* Clock peripheral */
+
   regval  = getreg32(LPC43_CCU2_APB0_UART1_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU2_APB0_UART1_CFG);
@@ -428,12 +432,14 @@ void lpc43_usart2_setup(void)
   regval |= (BOARD_USART2_CLKSRC | BASE_USART2_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USART2_CLK);
 
-  //clock register
+  /* Clock register */
+
   regval  = getreg32(LPC43_CCU1_M4_USART2_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_USART2_CFG);
 
-  //clock peripheral
+  /* Clock peripheral */
+
   regval  = getreg32(LPC43_CCU2_APB2_USART2_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU2_APB2_USART2_CFG);
@@ -476,12 +482,14 @@ void lpc43_usart3_setup(void)
   regval |= (BOARD_USART3_CLKSRC | BASE_USART3_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USART3_CLK);
 
-  //clock register
+  /* Clock register */
+
   regval  = getreg32(LPC43_CCU1_M4_USART3_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_USART3_CFG);
 
-  //clock peripheral
+  /* Clock peripheral */
+
   regval  = getreg32(LPC43_CCU2_APB2_USART3_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU2_APB2_USART3_CFG);
@@ -561,7 +569,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
           /* Candidate:
            *   dl         = ((Fbase * mul) >> 4) / ((mul + cdivadd) * Fbaud)
            *   (dl << 32) = (Fbase << 28) * cmul / ((mul + cdivadd) * Fbaud)
-          */
+           */
 
           uint64_t dl64 = ((uint64_t)basefreq << 28) * cmul /
                           ((cmul + cdivadd) * baud);

@@ -94,15 +94,15 @@ struct lpc43_i2cdev_s
   struct i2c_msg_s msg;        /* a single message for legacy read/write */
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
-  uint32_t  	   baseFreq;   /* branch frequency */
+  uint32_t         baseFreq;   /* branch frequency */
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
   WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
 
-  struct i2c_msg_s *msgs;       /* remaining transfers - first one is in progress */
-  unsigned int      nmsg;       /* number of transfer remaining */
+  struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
+  unsigned int     nmsg;       /* number of transfer remaining */
 
   uint16_t         wrcnt;      /* number of bytes sent to tx fifo */
   uint16_t         rdcnt;      /* number of bytes read from rx fifo */
@@ -152,8 +152,6 @@ struct i2c_ops_s lpc43_i2c_ops =
 #endif
 };
 
-
-
 /*******************************************************************************
  * Name: lpc43_i2c_setfrequency
  *
@@ -166,23 +164,23 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *) dev;
 
   if (frequency > 100000)
-  	    {
-  	      /* asymetric per 400Khz I2C spec */
+    {
+      /* asymetric per 400Khz I2C spec */
 
-  	      putreg32(priv->baseFreq / (83 + 47) * 47 / frequency, priv->base + LPC43_I2C_SCLH_OFFSET);
-  	      putreg32(priv->baseFreq / (83 + 47) * 83 / frequency, priv->base + LPC43_I2C_SCLL_OFFSET);
-  	    }
-  	  else
-  	    {
-  	      /* 50/50 mark space ratio */
+      putreg32(priv->baseFreq / (83 + 47) * 47 / frequency, priv->base + LPC43_I2C_SCLH_OFFSET);
+      putreg32(priv->baseFreq / (83 + 47) * 83 / frequency, priv->base + LPC43_I2C_SCLL_OFFSET);
+    }
+  else
+    {
+      /* 50/50 mark space ratio */
 
-  	      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base + LPC43_I2C_SCLH_OFFSET);
-  	      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base + LPC43_I2C_SCLL_OFFSET);
-  	    }
+      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base + LPC43_I2C_SCLH_OFFSET);
+      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base + LPC43_I2C_SCLL_OFFSET);
+    }
 
   /* FIXME: This function should return the actual selected frequency */
 
-  return (frequency);
+  return frequency;
 }
 
 /*******************************************************************************
@@ -232,9 +230,10 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
   priv->nmsg = 1;
   priv->msgs = &(priv->msg);
 
-  if ( buflen>0 ) {
-	  ret = i2c_start(priv);
-  }
+  if (buflen > 0)
+    {
+      ret = i2c_start(priv);
+    }
 
   return (ret == 0 ? 0 : -ETIMEDOUT);
 }
@@ -255,8 +254,8 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   DEBUGASSERT(dev != NULL);
 
-  priv->wrcnt=0;
-  priv->rdcnt=0;
+  priv->wrcnt = 0;
+  priv->rdcnt = 0;
   priv->msg.addr |= 0x01;
   priv->msg.buffer = buffer;
   priv->msg.length = buflen;
@@ -264,9 +263,10 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
   priv->nmsg = 1;
   priv->msgs = &(priv->msg);
 
-  if ( buflen>0 ) {
-	  ret = i2c_start(priv);
-  }
+  if (buflen > 0)
+    {
+      ret = i2c_start(priv);
+    }
 
   return (ret == 0 ? 0 : -ETIMEDOUT);
 }
@@ -297,7 +297,7 @@ static int i2c_start(struct lpc43_i2cdev_s *priv)
 
   sem_post(&priv->mutex);
 
-  return (ret);
+  return ret;
 }
 
 /*******************************************************************************
@@ -358,19 +358,22 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, i
 
   ret = count - i2c_start(priv);
 
-
-  return (ret);
+  return ret;
 }
 
-void startStopNextMessage(struct lpc43_i2cdev_s *priv) {
-	priv->nmsg--;
+void startStopNextMessage(struct lpc43_i2cdev_s *priv)
+{
+  priv->nmsg--;
 
-	if( priv->nmsg > 0 ) {
-		priv->msgs++;
-		putreg32(I2C_CONSET_STA,priv->base+LPC43_I2C_CONSET_OFFSET);
-	} else {
-		i2c_stop(priv);
-	}
+  if(priv->nmsg > 0)
+    {
+      priv->msgs++;
+      putreg32(I2C_CONSET_STA,priv->base+LPC43_I2C_CONSET_OFFSET);
+    }
+  else
+    {
+      i2c_stop(priv);
+    }
 }
 
 /*******************************************************************************
@@ -406,57 +409,60 @@ static int i2c_interrupt(int irq, FAR void *context)
     }
 
   /* Reference UM10360 19.10.5 */
+
   state = getreg32(priv->base+LPC43_I2C_STAT_OFFSET);
   msg  = priv->msgs;
 
   priv->state = state;
-  state &= 0xf8;  //state mask, only 0xX8 is possible
+  state &= 0xf8;  /* state mask, only 0xX8 is possible */
   switch (state)
     {
 
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
-      putreg32(msg->addr, priv->base + LPC43_I2C_DAT_OFFSET);  //set address
-      putreg32(I2C_CONCLR_STAC, priv->base + LPC43_I2C_CONCLR_OFFSET); //clear start bit
+      putreg32(msg->addr, priv->base + LPC43_I2C_DAT_OFFSET);  /* set address */
+      putreg32(I2C_CONCLR_STAC, priv->base + LPC43_I2C_CONCLR_OFFSET); /* clear start bit */
       break;
 
-    //write cases
-    case 0x18: //SLA+W has been transmitted; ACK has been received
+    /* Write cases */
+
+    case 0x18: /* SLA+W has been transmitted; ACK has been received  */
       priv->wrcnt=0;
-      putreg32(msg->buffer[0], priv->base + LPC43_I2C_DAT_OFFSET); //put first byte
+      putreg32(msg->buffer[0], priv->base + LPC43_I2C_DAT_OFFSET); /* put first byte */
       break;
 
-    case 0x28: //Data byte in DAT has been transmitted; ACK has been received.
+    case 0x28: /* Data byte in DAT has been transmitted; ACK has been received. */
       priv->wrcnt++;
 
       if (priv->wrcnt < msg->length) {
-          putreg32(msg->buffer[priv->wrcnt],priv->base+LPC43_I2C_DAT_OFFSET); //put next byte
+          putreg32(msg->buffer[priv->wrcnt],priv->base+LPC43_I2C_DAT_OFFSET); /* Put next byte */
       } else {
-    	  startStopNextMessage(priv);
+          startStopNextMessage(priv);
       }
       break;
 
-    //read cases
-    case 0x40:  //SLA+R has been transmitted; ACK has been received
+    /* Read cases */
+
+    case 0x40:  /* SLA+R has been transmitted; ACK has been received */
       priv->rdcnt = 0;
-      if ( msg->length > 1 ) {
-    	  putreg32(I2C_CONSET_AA, priv->base + LPC43_I2C_CONSET_OFFSET); // set ACK next read
+      if (msg->length > 1) {
+          putreg32(I2C_CONSET_AA, priv->base + LPC43_I2C_CONSET_OFFSET); /* Set ACK next read */
       } else {
-    	  putreg32(I2C_CONCLR_AAC,priv->base + LPC43_I2C_CONCLR_OFFSET);  // do not ACK because only one byte
+          putreg32(I2C_CONCLR_AAC,priv->base + LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK because only one byte */
       }
       break;
 
-    case 0x50:  //Data byte has been received; ACK has been returned.
+    case 0x50:  /* Data byte has been received; ACK has been returned. */
       priv->rdcnt++;
       msg->buffer[priv->rdcnt-1 ] = getreg32(priv->base+LPC43_I2C_BUFR_OFFSET);
 
-      if ( priv->rdcnt >= (msg->length - 1) ) {
-    	  putreg32(I2C_CONCLR_AAC,priv->base+LPC43_I2C_CONCLR_OFFSET);  // do not ACK any more
+      if (priv->rdcnt >= (msg->length - 1)) {
+          putreg32(I2C_CONCLR_AAC,priv->base+LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK any more */
 
       }
       break;
 
-    case 0x58:  //Data byte has been received; NACK has been returned.
+    case 0x58:  /* Data byte has been received; NACK has been returned. */
       msg->buffer[priv->rdcnt ] = getreg32(priv->base+LPC43_I2C_BUFR_OFFSET);
       startStopNextMessage(priv);
       break;
@@ -466,12 +472,10 @@ static int i2c_interrupt(int irq, FAR void *context)
       break;
     }
 
-  putreg32(I2C_CONCLR_SIC, priv->base + LPC43_I2C_CONCLR_OFFSET); //clear interrupt
+  putreg32(I2C_CONCLR_SIC, priv->base + LPC43_I2C_CONCLR_OFFSET); /* clear interrupt */
 
   return OK;
 }
-
-
 
 /****************************************************************************
  * Public Functions
@@ -489,7 +493,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 {
   struct lpc43_i2cdev_s *priv;
 
-  if (port>1)
+  if (port > 1)
     {
       dbg("lpc I2C Only support 0,1\n");
       return NULL;
@@ -503,27 +507,33 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC43_I2C0
   if (port == 0)
     {
-      priv        = &g_i2c0dev;
-      priv->base  = LPC43_I2C0_BASE;
-      priv->irqid = LPC43M0_IRQ_I2C0;
+      priv            = &g_i2c0dev;
+      priv->base     = LPC43_I2C0_BASE;
+      priv->irqid    = LPC43M0_IRQ_I2C0;
       priv->baseFreq = BOARD_ABP1_FREQUENCY;
 
-      //enable, set mode
-      regval  = getreg32(LPC43_SCU_SFSI2C0 );
+      /* Enable, set mode */
+
+      regval  = getreg32(LPC43_SCU_SFSI2C0);
       regval |= SCU_SFSI2C0_SCL_EZI | SCU_SFSI2C0_SDA_EZI;
-      if ( CONFIG_I2C0_FREQ == 1000000 ) { //super fast mode
-    	  regval |= SCU_SFSI2C0_SCL_EHD | SCU_SFSI2C0_SDA_EHD;
-      }
+      if (CONFIG_I2C0_FREQ == 1000000)
+        {
+          /* Super fast mode */
+
+          regval |= SCU_SFSI2C0_SCL_EHD | SCU_SFSI2C0_SDA_EHD;
+        }
+
       putreg32(regval, LPC43_SCU_SFSI2C0);
 
-      //enable clock
+      /* Enable clock */
+
       regval  = getreg32(LPC43_CCU1_APB1_I2C0_CFG);
       regval |= CCU_CLK_CFG_RUN;
       putreg32(regval, LPC43_CCU1_APB1_I2C0_CFG);
 
-      i2c_setfrequency( (struct i2c_dev_s *)priv,CONFIG_I2C0_FREQ);
+      i2c_setfrequency((struct i2c_dev_s *)priv,CONFIG_I2C0_FREQ);
 
-      //no pins configuration needed
+      /* No pin configuration needed */
     }
   else
 #endif
@@ -535,14 +545,16 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       priv->irqid = LPC43M0_IRQ_I2C1;
       priv->baseFreq = BOARD_ABP3_FREQUENCY;
 
-      //no need to enable
+      /* No need to enable */
 
-      //enable clock
+      /* Enable clock */
+
       regval  = getreg32(LPC43_CCU1_APB3_I2C1_CFG);
       regval |= CCU_CLK_CFG_RUN;
       putreg32(regval, LPC43_CCU1_APB3_I2C1_CFG);
 
-      //pins configuration
+      /* Pin configuration */
+
       lpc43_pin_config(PINCONF_I2C1_SCL);
       lpc43_pin_config(PINCONF_I2C1_SDA);
 
@@ -578,7 +590,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
   /* Install our operations */
 
   priv->dev.ops = &lpc43_i2c_ops;
-  return (&priv->dev);
+  return &priv->dev;
 }
 
 /*******************************************************************************
@@ -599,5 +611,4 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
   return OK;
 }
 
-
-#endif
+#endif /* CONFIG_LPC43_I2C0 || CONFIG_LPC43_I2C1 */

@@ -175,7 +175,7 @@ static struct lpc43_sspdev_s g_ssp0dev =
 {
   .spidev            = { &g_spi0ops },
   .sspbase           = LPC43_SSP0_BASE,
-  .sspbasefreq		 = BOARD_SSP0_BASEFREQ
+  .sspbasefreq       = BOARD_SSP0_BASEFREQ
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   .sspirq            = LPC43_IRQ_SSP0,
 #endif
@@ -210,7 +210,7 @@ static struct lpc43_sspdev_s g_ssp1dev =
 {
   .spidev            = { &g_spi1ops },
   .sspbase           = LPC43_SSP1_BASE,
-  .sspbasefreq		 = BOARD_SSP1_BASEFREQ
+  .sspbasefreq       = BOARD_SSP1_BASEFREQ
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   .sspirq            = LPC43_IRQ_SSP1,
 #endif
@@ -309,6 +309,7 @@ static int ssp_lock(FAR struct spi_dev_s *dev, bool lock)
     {
       (void)sem_post(&priv->exclsem);
     }
+
   return OK;
 }
 #endif
@@ -708,22 +709,26 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
   flags = irqsave();
 
   /* Configure clocking */
+
   regval  = getreg32(LPC43_BASE_SSP0_CLK);
   regval &= ~BASE_SSP0_CLK_CLKSEL_MASK;
   regval |= (BOARD_SSP0_CLKSRC | BASE_SSP0_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_SSP0_CLK);
 
-  //clock register
+  /* Clock register */
+
   regval  = getreg32(LPC43_CCU1_M4_SSP0_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_SSP0_CFG);
 
-  //clock peripheral
+  /* Clock peripheral */
+
   regval  = getreg32(LPC43_CCU2_APB0_SSP0_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU2_APB0_SSP0_CFG);
 
-  //pins configuration
+  /* Pin configuration */
+
   lpc43_pin_config(PINCONF_SSP0_SCK);
   lpc43_pin_config(PINCONF_SSP0_SSEL);
   lpc43_pin_config(PINCONF_SSP0_MISO);
@@ -758,22 +763,26 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
   flags = irqsave();
 
   /* Configure clocking */
+
   regval  = getreg32(LPC43_BASE_SSP1_CLK);
   regval &= ~BASE_SSP1_CLK_CLKSEL_MASK;
   regval |= (BOARD_SSP1_CLKSRC | BASE_SSP1_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_SSP1_CLK);
 
-  //clock register
+  /* Clock register */
+
   regval  = getreg32(LPC43_CCU1_M4_SSP1_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_SSP1_CFG);
 
-  //clock peripheral
+  /* Clock peripheral */
+
   regval  = getreg32(LPC43_CCU2_APB2_SSP1_CFG);
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU2_APB2_SSP1_CFG);
 
-  //pins configuration
+  /* Pins configuration */
+
   lpc43_pin_config(PINCONF_SSP1_SCK);
   lpc43_pin_config(PINCONF_SSP1_SSEL);
   lpc43_pin_config(PINCONF_SSP1_MISO);
@@ -818,11 +827,13 @@ FAR struct spi_dev_s *lpc43_sspinitialize(int port)
       priv = lpc43_ssp0initialize();
       break;
 #endif
+
 #ifdef CONFIG_LPC43_SSP1
     case 1:
       priv = lpc43_ssp1initialize();
       break;
 #endif
+
     default:
       return NULL;
     }
@@ -908,4 +919,3 @@ void ssp_flush(FAR struct spi_dev_s *dev)
 }
 
 #endif /* CONFIG_LPC43_SSP0/1 */
-
