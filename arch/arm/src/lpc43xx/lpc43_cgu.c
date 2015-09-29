@@ -428,13 +428,13 @@ static inline void lpc43_m4clkselect(uint32_t clksel)
 
 void lpc43_pll0usbconfig(void)
 {
-  //power down, no bypass, direct i-o,
-  putreg32( (PLL0USB_CTRL_PD | PLL0USB_CTRL_DIRECTI | PLL0USB_CTRL_DIRECTO | PLL0USB_CTRL_CLKEN | PLL0USB_CTRL_AUTOBLOCK | BOARD_USB0_CLKSRC), LPC43_PLL0USB_CTRL);
+  /* Power down, no bypass, direct i-o, */
+
+  putreg32((PLL0USB_CTRL_PD | PLL0USB_CTRL_DIRECTI | PLL0USB_CTRL_DIRECTO | PLL0USB_CTRL_CLKEN | PLL0USB_CTRL_AUTOBLOCK | BOARD_USB0_CLKSRC), LPC43_PLL0USB_CTRL);
 
   putreg32(BOARD_USB0_MDIV, LPC43_PLL0USB_MDIV);
   putreg32(BOARD_USB0_NP_DIV, LPC43_PLL0USB_NP_DIV);
 }
-
 
 /****************************************************************************
  * Name: lpc43_pll0usbenable
@@ -467,7 +467,6 @@ void lpc43_pll0usbenable(void)
   while ((getreg32(LPC43_PLL0USB_STAT) & PLL0USB_STAT_LOCK) == 0);
 }
 
-
 /****************************************************************************
  * Name: lpc43_pll0usbdisable
  *
@@ -489,17 +488,17 @@ void lpc43_pll0usbdisable(void)
   putreg32(regval, LPC43_PLL0USB_CTRL);
 }
 
-#if defined(BOARD_IDIVA_DIVIDER) && defined(BOARD_IDIVA_CLKSRC )
+#if defined(BOARD_IDIVA_DIVIDER) && defined(BOARD_IDIVA_CLKSRC)
 void lpc43_idiva(void)
 {
   uint32_t regval;
 
-  //set clock source, divider
+  /* Set clock source, divider */
+
   regval  = getreg32(LPC43_IDIVA_CTRL);
-  regval &= ~( IDIVA_CTRL_CLKSEL_MASK | IDIVA_CTRL_IDIV_MASK );
+  regval &= ~(IDIVA_CTRL_CLKSEL_MASK | IDIVA_CTRL_IDIV_MASK);
   regval |= BOARD_IDIVA_CLKSRC | IDIVA_CTRL_AUTOBLOCK | IDIVA_CTRL_IDIV(BOARD_IDIVA_DIVIDER);
   putreg32(regval, LPC43_IDIVA_CTRL);
-
 }
 #endif
 
@@ -508,12 +507,12 @@ void lpc43_idivb(void)
 {
   uint32_t regval;
 
-  //set clock source, divider
+  /* Set clock source, divider */
+
   regval  = getreg32(LPC43_IDIVB_CTRL);
-  regval &= ~( IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK );
+  regval &= ~(IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK);
   regval |= BOARD_IDIVB_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK | IDIVBCD_CTRL_IDIV(BOARD_IDIVB_DIVIDER);
   putreg32(regval, LPC43_IDIVB_CTRL);
-
 }
 #endif
 
@@ -522,12 +521,12 @@ void lpc43_idivc(void)
 {
   uint32_t regval;
 
-  //set clock source, divider
+  /* Set clock source, divider */
+
   regval  = getreg32(LPC43_IDIVC_CTRL);
-  regval &= ~( IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK );
+  regval &= ~(IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK);
   regval |= BOARD_IDIVC_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK | IDIVBCD_CTRL_IDIV(BOARD_IDIVC_DIVIDER);
   putreg32(regval, LPC43_IDIVC_CTRL);
-
 }
 #endif
 
@@ -536,12 +535,12 @@ void lpc43_idivd(void)
 {
   uint32_t regval;
 
-  //set clock source, divider
+  /* Set clock source, divider */
+
   regval  = getreg32(LPC43_IDIVD_CTRL);
-  regval &= ~( IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK );
+  regval &= ~(IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK);
   regval |= BOARD_IDIVD_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK | IDIVBCD_CTRL_IDIV(BOARD_IDIVD_DIVIDER);
   putreg32(regval, LPC43_IDIVD_CTRL);
-
 }
 #endif
 
@@ -550,27 +549,26 @@ void lpc43_idive(void)
 {
   uint32_t regval;
 
-  //set clock source, divider
+  /* Set clock source, divider */
+
   regval  = getreg32(LPC43_IDIVE_CTRL);
-  regval &= ~( IDIVE_CTRL_CLKSEL_MASK | IDIVE_CTRL_IDIV_MASK );
+  regval &= ~(IDIVE_CTRL_CLKSEL_MASK | IDIVE_CTRL_IDIV_MASK);
   regval |= BOARD_IDIVE_CLKSRC | IDIVE_CTRL_AUTOBLOCK | IDIVE_CTRL_IDIV(BOARD_IDIVE_DIVIDER);
   putreg32(regval, LPC43_IDIVE_CTRL);
-
 }
 #endif
-
 
 #if defined(BOARD_ABP1_CLKSRC)
 void lpc43_abp1(void)
 {
   uint32_t regval;
 
-  //set clock source
+  /* Set clock source */
+
   regval  = getreg32(LPC43_BASE_APB1_CLK);
   regval &= ~BASE_APB1_CLK_CLKSEL_MASK;
   regval |= BOARD_ABP1_CLKSRC | BASE_APB1_CLK_AUTOBLOCK;
   putreg32(regval, LPC43_BASE_APB1_CLK);
-
 }
 #endif
 
@@ -579,12 +577,12 @@ void lpc43_abp3(void)
 {
   uint32_t regval;
 
-  //set clock source
+  /* Set clock source */
+
   regval  = getreg32(LPC43_BASE_APB3_CLK);
   regval &= ~BASE_APB3_CLK_CLKSEL_MASK;
   regval |= BOARD_ABP3_CLKSRC | BASE_APB3_CLK_AUTOBLOCK;
   putreg32(regval, LPC43_BASE_APB3_CLK);
-
 }
 #endif
 
@@ -652,7 +650,7 @@ void lpc43_clockconfig(void)
   lpc43_pll1config(PLL_CONTROLS);
 #endif
 
-  //configure idivs
+  /* Configure idivs */
 
 #if defined(BOARD_IDIVA_DIVIDER) && defined(BOARD_IDIVA_CLKSRC)
   lpc43_idiva();
@@ -674,7 +672,7 @@ void lpc43_clockconfig(void)
   lpc43_idive();
 #endif
 
-  //configure abpXs
+  /* Configure abpXs */
 
 #if defined(BOARD_ABP1_CLKSRC)
   lpc43_abp1();
@@ -683,6 +681,4 @@ void lpc43_clockconfig(void)
 #if defined(BOARD_ABP3_CLKSRC)
   lpc43_abp3();
 #endif
-
-
 }

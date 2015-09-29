@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
@@ -1149,23 +1150,30 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
   DEBUGASSERT(spino == 1);
 #endif
 
-  /* Allocate a new state structure for this chip select.  NOTE that there
-   * is no protection if the same chip select is used in two different
-   * chip select structures.
-   */
-
-  priv = (struct sam_spidev_s *)zalloc(sizeof(struct sam_spidev_s));
-  if (!priv)
+#if defined(CONFIG_SAMV7_SPI0_SLAVE) && defined(CONFIG_SAMV7_SPI1_SLAVE)
+  if (spino == 0)
     {
-      spidbg("ERROR: Failed to allocate a chip select structure\n");
-      return NULL;
+      priv = &g_spi0_sctrlr;
+    }
+  else
+    {
+      priv = &g_spi1_sctrlr;
     }
 
+#elif defined(CONFIG_SAMV7_SPI0_SLAVE)
+  priv = &g_spi0_sctrlr;
+
+#elif defined(CONFIG_SAMV7_SPI1_SLAVE)
+  priv = &g_spi1_sctrlr;
+#endif
+
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * are zeroed.
    */
 
-   /* Initialize the SPI operations */
+  memset(priv, 0, sizeof(struct sam_spidev_s));
+
+  /* Initialize the SPI operations */
 
   priv->sctrlr.ops = &g_sctrlr_ops;
 

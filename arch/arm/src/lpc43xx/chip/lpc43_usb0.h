@@ -565,9 +565,9 @@
 
 #define USBHOST_USBMODE_CM_SHIFT             (0)       /* Bits 0-1: Controller mode */
 #define USBHOST_USBMODE_CM_MASK              (3 << USBHOST_USBMODE_CM_SHIFT)
-#define USBHOST_USBMODE_CM_IDLE             (0 << USBHOST_USBMODE_CM_SHIFT) /* Idle */
-#define USBHOST_USBMODE_CM_DEVICE           (2 << USBHOST_USBMODE_CM_SHIFT) /* Device controller */
-#define USBHOST_USBMODE_CM_HOST             (3 << USBHOST_USBMODE_CM_SHIFT) /* Host controller */
+#  define USBHOST_USBMODE_CM_IDLE            (0 << USBHOST_USBMODE_CM_SHIFT) /* Idle */
+#  define USBHOST_USBMODE_CM_DEVICE          (2 << USBHOST_USBMODE_CM_SHIFT) /* Device controller */
+#  define USBHOST_USBMODE_CM_HOST            (3 << USBHOST_USBMODE_CM_SHIFT) /* Host controller */
 #define USBHOST_USBMODE_ES                   (1 << 2)  /* Bit 2:  Endian select */
                                                        /* Bit 3:  Not used in host mode */
 #define USBHOST_USBMODE_SDIS                 (1 << 4)  /* Bit 4:  Stream disable mode */
