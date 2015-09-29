@@ -59,6 +59,7 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
+#include "cache.h"
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"
@@ -207,8 +208,7 @@ struct sam_spidev_s
   select_t select;             /* SPI select call-out */
   bool initialized;            /* TRUE: Controller has been initialized */
 #ifdef CONFIG_SAMV7_SPI_DMA
-  uint8_t rxintf;              /* RX hardware interface number */
-  uint8_t txintf;              /* TX hardware interface number */
+  uint8_t pid;                 /* SPI peripheral ID */
 #endif
 
   /* Debug stuff */
@@ -342,8 +342,7 @@ static struct sam_spidev_s g_spi0dev =
   .base              = SAM_SPI0_BASE,
   .select            = sam_spi0select,
 #ifdef CONFIG_SAMV7_SPI_DMA
-  .rxintf            = DMACHAN_INTF_SPI0RX,
-  .txintf            = DMACHAN_INTF_SPI0TX,
+  .pid               = SAM_PID_SPI0,
 #endif
 };
 #endif
@@ -381,8 +380,7 @@ static struct sam_spidev_s g_spi1dev =
   .base              = SAM_SPI1_BASE,
   .select            = sam_spi1select,
 #ifdef CONFIG_SAMV7_SPI_DMA
-  .rxintf            = DMACHAN_INTF_SPI1RX,
-  .txintf            = DMACHAN_INTF_SPI1TX,
+  .pid               = SAM_PID_SPI1,
 #endif
 };
 #endif
@@ -1466,11 +1464,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   /* Configure the RX DMA channel */
 
-  rxflags = DMACH_FLAG_FIFOCFG_LARGEST |
-            ((uint32_t)spi->rxintf << DMACH_FLAG_PERIPHPID_SHIFT) |
+  rxflags = DMACH_FLAG_FIFOCFG_LARGEST | DMACH_FLAG_PERIPHPID(spi->pid) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
-            ((uint32_t)(15) << DMACH_FLAG_MEMPID_SHIFT) |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX |
             DMACH_FLAG_MEMCHUNKSIZE_1;
 
   /* Set the source and destination width bits */
@@ -1495,7 +1491,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * the DMA completes
        */
 
-      sam_cmcc_invalidate((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
+      arch_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
 
       /* Use normal RX memory incrementing. */
 
@@ -1504,11 +1500,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   /* Configure the TX DMA channel */
 
-  txflags = DMACH_FLAG_FIFOCFG_LARGEST |
-            ((uint32_t)spi->txintf << DMACH_FLAG_PERIPHPID_SHIFT) |
+  txflags = DMACH_FLAG_FIFOCFG_LARGEST | DMACH_FLAG_PERIPHPID(spi->pid) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
-            ((uint32_t)(15) << DMACH_FLAG_MEMPID_SHIFT) |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX |
             DMACH_FLAG_MEMCHUNKSIZE_1;
 
   /* Set the source and destination width bits */
@@ -1782,14 +1776,11 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   spics->candma = spino ? SAMV7_SPI1_DMA : SAMV7_SPI0_DMA;
 
-  /* Pre-allocate DMA channels.  These allocations exploit that fact that
-   * SPI0 is managed by DMAC0 and SPI1 is managed by DMAC1.  Hence,
-   * the SPI number (spino) is the same as the DMAC number.
-   */
+  /* Pre-allocate DMA channels. */
 
   if (spics->candma)
     {
-      spics->rxdma = sam_dmachannel(0);
+      spics->rxdma = sam_dmachannel(0, 0);
       if (!spics->rxdma)
         {
           spidbg("ERROR: Failed to allocate the RX DMA channel\n");
@@ -1799,7 +1790,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   if (spics->candma)
     {
-      spics->txdma = sam_dmachannel(0);
+      spics->txdma = sam_dmachannel(0, 0);
       if (!spics->txdma)
         {
           spidbg("ERROR: Failed to allocate the TX DMA channel\n");
