@@ -73,7 +73,7 @@
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #endif
 #ifndef CONFIG_USART4_ISUART
-#  undef CONFIG_SAMA4_USART4
+#  undef CONFIG_SAMA5_USART4
 #  undef CONFIG_SAMA5_FLEXCOM4_USART
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #endif
@@ -86,9 +86,9 @@
 #  define SAMA5_HAVE_UART
 #endif
 
-#if defined(CONFIG_SAMA0_USART4) || defined(CONFIG_SAMA1_USART4) || \
-    defined(CONFIG_SAMA2_USART4) || defined(CONFIG_SAMA3_USART4) || \
-    defined(CONFIG_SAMA4_USART4)
+#if defined(CONFIG_SAMA5_USART0) || defined(CONFIG_SAMA5_USART1) || \
+    defined(CONFIG_SAMA5_USART2) || defined(CONFIG_SAMA5_USART3) || \
+    defined(CONFIG_SAMA5_USART4)
 #  define SAMA5_HAVE_USART
 #endif
 

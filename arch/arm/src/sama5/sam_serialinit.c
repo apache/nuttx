@@ -68,7 +68,7 @@ void sam_earlyserialinit(void)
 #if defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART)
   /* Initialize UART/USART drivers */
 
-   uart_serialinit();
+   uart_earlyserialinit();
 #endif
 
 #ifdef SAMA5_HAVE_FLEXCOM_USART
@@ -96,9 +96,9 @@ void up_serialinit(void)
 #endif
 
 #ifdef SAMA5_HAVE_FLEXCOM_USART
-  /* Register Flexcom USARTs */
+  /* Register Flexcom USART drivers */
 
-  flexus_earlyserialinit();
+  flexus_serialinit();
 #endif
 
 /* Register the DBGU as well */
