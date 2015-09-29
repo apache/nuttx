@@ -62,4 +62,12 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
 
+ifeq ($(CONFIG_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1351),y)
+CSRCS += stm32_ssd1351.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
