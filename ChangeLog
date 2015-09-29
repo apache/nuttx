@@ -10990,3 +10990,7 @@
 	  the newer Cygwin tool chains do nor pre-pend symbol names with the
 	  underscore character.  With these changes the simulator agains works
 	  with the newer Cygwin64 platform (2015-09-24).
+	* arch/arm/src/lpc43xx: Extensive I2C and clocking updates from Lok Tep
+	  (2015-09-29).
+	* configs/lpc4370-link2: Support for the NXP LPC4370-Link2 development
+	  board from Lok Tep  (2015-09-29).
