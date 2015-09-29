@@ -316,6 +316,11 @@ configs/lpc4357-evb
   LPC4357FET256 MCU.  Based on the LPC4300 Xplorer port and provided by
   Toby Duckworth.
 
+configs/lpc4370-link2
+  NuttX port to the NXP LPC4370-Link2 development board featuring the NXP
+  LPC4370FET100 MCU.  Based on the LPC4300 Xplorer port and provided by
+  Lok Tep.
+
 configs/maple
   NuttX support for the LeafLab's Maple and Maple Mini boards. These boards
   are based on the STM32F103RBT6 chip for the standard version and on the
