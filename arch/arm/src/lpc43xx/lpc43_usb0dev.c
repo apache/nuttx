@@ -1078,9 +1078,8 @@ static void lpc43_usbreset(struct lpc43_usbdev_s *priv)
 {
   int epphy;
 
-  /* Disable all endpoints */
+  /* Disable all endpoints. Control endpoint 0 is always enabled */
 
-  lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL0);
   lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL1);
   lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL2);
   lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL3);
