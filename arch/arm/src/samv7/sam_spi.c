@@ -87,13 +87,13 @@
 
 #ifdef CONFIG_SAMV7_SPI_DMA
 
-#  if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_DMAC0)
+#  if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_XDMAC)
 #    define SAMV7_SPI0_DMA true
 #  else
 #    define SAMV7_SPI0_DMA false
 #  endif
 
-#  if defined(CONFIG_SAMV7_SPI1_MASTER) && defined(CONFIG_SAMV7_DMAC1)
+#  if defined(CONFIG_SAMV7_SPI1_MASTER) && defined(CONFIG_SAMV7_XDMAC)
 #    define SAMV7_SPI1_DMA true
 #  else
 #    define SAMV7_SPI1_DMA false

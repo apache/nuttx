@@ -2982,17 +2982,14 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       return ret;
     }
 
-  /* Allocate DMA channels.  These allocations exploit that fact that
-   * SSC0 is managed by DMAC0 and SSC1 is managed by DMAC1.  Hence,
-   * the SSC number (sscno) is the same as the DMAC number.
-   */
+  /* Allocate DMA channels. */
 
 #ifdef SSC_HAVE_RX
   if (priv->rxenab)
     {
       /* Allocate an RX DMA channel */
 
-      priv->rx.dma = sam_dmachannel(priv->sscno, dmaflags);
+      priv->rx.dma = sam_dmachannel(0, dmaflags);
       if (!priv->rx.dma)
         {
           i2sdbg("ERROR: Failed to allocate the RX DMA channel\n");
@@ -3015,7 +3012,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
     {
       /* Allocate a TX DMA channel */
 
-      priv->tx.dma = sam_dmachannel(priv->sscno, dmaflags);
+      priv->tx.dma = sam_dmachannel(0, dmaflags);
       if (!priv->tx.dma)
         {
           i2sdbg("ERROR: Failed to allocate the TX DMA channel\n");
