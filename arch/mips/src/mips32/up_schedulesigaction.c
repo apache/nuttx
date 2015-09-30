@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/mips32/up_schedulesigaction.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,20 +103,19 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
+  irqstate_t flags;
   uint32_t status;
-
-  /* Refuse to handle nested signal actions */
 
   sdbg("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
 
+  /* Make sure that interrupts are disabled */
+
+  flags = irqsave();
+
+  /* Refuse to handle nested signal actions */
+
   if (!tcb->xcp.sigdeliver)
     {
-      irqstate_t flags;
-
-      /* Make sure that interrupts are disabled */
-
-      flags = irqsave();
-
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -212,9 +211,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                 tcb->xcp.saved_epc, tcb->xcp.saved_status,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_STATUS]);
         }
-
-      irqrestore(flags);
     }
+
+  irqrestore(flags);
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */
