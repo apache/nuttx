@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/samv7/chip/sama5d2x_pio.h
+ * arch/arm/src/samv7/chip/_sama5d2x_pio.h
  * Parallel Input/Output (PIO) Controller definitions for the SAMA5D2
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_PIO_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_PIO_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D2X_PIO_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D2X_PIO_H
 
 /****************************************************************************************
  * Included Files
@@ -334,4 +334,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D2X_PIO_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D2X_PIO_H */

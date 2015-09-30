@@ -892,7 +892,7 @@ static uart_dev_t g_usart3port =
 #ifdef CONFIG_USART4_ISUART
 static struct up_dev_s g_usart4priv =
 {
-  .handler        = up_uart4_interrupt,
+  .handler        = up_usart4_interrupt,
   .usartbase      = SAM_USART4_VBASE,
   .baud           = CONFIG_USART4_BAUD,
   .irq            = SAM_IRQ_USART4,

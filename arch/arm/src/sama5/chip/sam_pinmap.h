@@ -44,11 +44,11 @@
 #include <arch/sama5/chip.h>
 
 #if defined(ATSAMA5D2)
-#  include "chip/sama5d2x_pinmap.h"
+#  include "chip/_sama5d2x_pinmap.h"
 #elif defined(ATSAMA5D3)
-#  include "chip/sama5d3x_pinmap.h"
+#  include "chip/_sama5d3x_pinmap.h"
 #elif defined(ATSAMA5D4)
-#  include "chip/sama5d4x_pinmap.h"
+#  include "chip/_sama5d4x_pinmap.h"
 #else
 #  error Unrecognized SAMA5 architecture
 #endif

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/sama5/sama5d3x_memorymap.h
+ * arch/arm/src/sama5/_sama5d4x_memorymap.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -64,7 +64,7 @@
  *  Section MMU Flags
  *  SAMA5 Virtual (mapped) Memory Map
  *  - Peripheral virtual base addresses
- *  - NuttX vitual base address
+ *  - NuttX virtual base address
  *  MMU Page Table Location
  *  Page table start addresses
  *  Base address of the interrupt vector table
@@ -73,104 +73,99 @@
 /* SAMA5 Physical (unmapped) Memory Map */
 
 #define SAM_INTMEM_PSECTION      0x00000000 /* 0x00000000-0x0fffffff: Internal Memories */
-#define SAM_EBICS0_PSECTION      0x10000000 /* 0x10000000-0x1fffffff: EBI Chip select 0 */
-#define SAM_DDRCS_PSECTION       0x20000000 /* 0x20000000-0x3fffffff: EBI DDRCS */
-#define SAM_EBICS1_PSECTION      0x40000000 /* 0x40000000-0x4fffffff: EBI Chip select 1 */
-#define SAM_EBICS2_PSECTION      0x50000000 /* 0x50000000-0x5fffffff: EBI Chip select 2 */
-#define SAM_EBICS3_PSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip select 2 */
-#define SAM_NFCCR_PSECTION       0x70000000 /* 0x70000000-0x7fffffff: NFC Command Registers */
+#define SAM_EBICS0_PSECTION      0x10000000 /* 0x10000000-0x1fffffff: EBI Chip Select 0 */
+#define SAM_DDRCS_PSECTION       0x20000000 /* 0x20000000-0x3fffffff: EBI DDR Chip Select */
+#define SAM_EBICS1_PSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip Select 1 */
+#define SAM_EBICS2_PSECTION      0x70000000 /* 0x70000000-0x7fffffff: EBI Chip Select 2 */
+#define SAM_EBICS3_PSECTION      0x80000000 /* 0x80000000-0x8fffffff: EBI Chip Select 3 */
+#define SAM_NFCCR_PSECTION       0x90000000 /* 0x90000000-0x9fffffff: NFC Command Registers */
                                             /* 0x80000000-0xefffffff: Undefined */
 #define SAM_PERIPH_PSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 
 /* SAMA5 Internal Memories */
 
 #define SAM_BOOTMEM_PSECTION     0x00000000 /* 0x00000000-0x000fffff: Boot memory */
-#define SAM_ROM_PSECTION         0x00100000 /* 0x00100000-0x001fffff: ROM */
-#define SAM_NFCSRAM_PSECTION     0x00200000 /* 0x00200000-0x002fffff: NFC SRAM */
-#define SAM_ISRAM_PSECTION       0x00300000 /* 0x00300000-0x0030ffff: SRAM */
-#  define SAM_ISRAM0_PADDR       0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
-#  define SAM_ISRAM1_PADDR       0x00310000 /* 0x00310000-0x003fffff: SRAM1 */
-#define SAM_SMD_PSECTION         0x00400000 /* 0x00400000-0x004fffff: SMD */
-#define SAM_UDPHSRAM_PSECTION    0x00500000 /* 0x00500000-0x005fffff: UDPH SRAM */
-#define SAM_UHPOHCI_PSECTION     0x00600000 /* 0x00600000-0x006fffff: UHP OHCI */
-#define SAM_UHPEHCI_PSECTION     0x00700000 /* 0x00700000-0x007fffff: UHP EHCI */
-#define SAM_AXIMX_PSECTION       0x00800000 /* 0x00800000-0x008fffff: AXI Matr */
-#define SAM_DAP_PSECTION         0x00900000 /* 0x00900000-0x009fffff: DAP */
+#define SAM_ROM_PSECTION         0x00000000 /* 0x00000000-0x000fffff: ROM */
+#define SAM_NFCSRAM_PSECTION     0x00100000 /* 0x00100000-0x001fffff: NFC SRAM */
+#define SAM_ISRAM_PSECTION       0x00200000 /* 0x00200000-0x0020ffff: SRAM */
+#  define SAM_ISRAM0_PADDR       0x00200000 /* 0x00200000-0x0020ffff: SRAM0 */
+#  define SAM_ISRAM1_PADDR       0x00210000 /* 0x00210000-0x002fffff: SRAM1 */
+#define SAM_VDEC_PSECTION        0x00300000 /* 0x00300000-0x0030ffff: VDEC */
+#define SAM_UDPHSRAM_PSECTION    0x00400000 /* 0x00400000-0x004fffff: UDPH SRAM */
+#define SAM_UHPOHCI_PSECTION     0x00500000 /* 0x00500000-0x005fffff: UHP OHCI */
+#define SAM_UHPEHCI_PSECTION     0x00600000 /* 0x00600000-0x006fffff: UHP EHCI */
+#define SAM_AXIMX_PSECTION       0x00700000 /* 0x00700000-0x007fffff: AXI Matr */
+#define SAM_DAP_PSECTION         0x00800000 /* 0x00800000-0x008fffff: DAP */
+#define SAM_SMD_PSECTION         0x00900000 /* 0x00900000-0x009fffff: SMD */
+#define SAM_L2CC_PSECTION        0x00a00000 /* 0x00a00000-0x00afffff: L2CC */
                                             /* 0x00a00000-0x0fffffff: Undefined */
 /* SAMA5 Internal Peripheral Offsets */
 
 #define SAM_PERIPHA_PSECTION     0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_HSMCI0_OFFSET      0x00000000 /* 0x00000000-0x00003fff: HSMCI0 */
-#  define SAM_SPI0_OFFSET        0x00004000 /* 0x00004000-0x00007fff: SPI0 */
-#  define SAM_SSC0_OFFSET        0x00008000 /* 0x00008000-0x0000bfff: SSC0 */
-#  define SAM_CAN0_OFFSET        0x0000c000 /* 0x0000c000-0x0000ffff: CAN0 */
-#  define SAM_TC012_OFFSET       0x00010000 /* 0x00010000-0x00013fff: TC channels 0, 1, and 2 */
-#  define SAM_TWI0_OFFSET        0x00014000 /* 0x00014000-0x00017fff: TWI0 */
-#  define SAM_TWI1_OFFSET        0x00018000 /* 0x00018000-0x0001bfff: TWI1 */
-#  define SAM_USART0_OFFSET      0x0001c000 /* 0x0001c000-0x0001ffff: USART0 */
-#  define SAM_USART1_OFFSET      0x00020000 /* 0x00020000-0x00023fff: USART1 */
-#  define SAM_UART0_OFFSET       0x00024000 /* 0x00024000-0x00027fff: UART0 */
-#  define SAM_GMAC_OFFSET        0x00028000 /* 0x00028000-0x0002bfff: GMAC */
-#  define SAM_PWMC_OFFSET        0x0002c000 /* 0x0002c000-0x0002ffff: PWMC */
-#  define SAM_LCDC_OFFSET        0x00030000 /* 0x00030000-0x00033fff: LCDC */
-#  define SAM_ISI_OFFSET         0x00034000 /* 0x00034000-0x00037fff: ISI */
-#  define SAM_SFR_OFFSET         0x00038000 /* 0x00038000-0x0003bfff: SFR */
-                                            /* 0x0003c000-0x07ffffff: Reserved */
+#  define SAM_LCDC_OFFSET        0x00000000 /* 0x00000000-0x00003fff: LCDC */
+#  define SAM_XDMAC1_OFFSET      0x00004000 /* 0x00004000-0x00007fff: XDMAC1 */
+#  define SAM_ISI_OFFSET         0x00008000 /* 0x00008000-0x0000bfff: ISI */
+#  define SAM_PKCC_OFFSET        0x0000c000 /* 0x0000c000-0x0000ffff: PKCC */
+#  define SAM_MPDDRC_OFFSET      0x00010000 /* 0x00010000-0x00013fff: MPDDRC */
+#  define SAM_XDMAC0_OFFSET      0x00014000 /* 0x00014000-0x00017fff: XDMAC0 */
+#  define SAM_PMC_OFFSET         0x00018000 /* 0x00018000-0x0001bfff: PMC */
+#  define SAM_MATRIX64_OFFSET    0x0001c000 /* 0x0001c000-0x0001ffff: MATRIX64 */
+#  define SAM_AESB_OFFSET        0x00020000 /* 0x00020000-0x00023fff: AESB */
 
 #define SAM_PERIPHB_PSECTION     0xf8000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
-#  define SAM_HSMCI1_OFFSET      0x00000000 /* 0x00000000-0x00000fff: HSMCI1 */
-#  define SAM_HSMCI2_OFFSET      0x00004000 /* 0x00004000-0x00007fff: HSMCI2 */
-#  define SAM_SPI1_OFFSET        0x00008000 /* 0x00008000-0x0000bfff: SPI1 */
-#  define SAM_SSC1_OFFSET        0x0000c000 /* 0x0000c000-0x0000ffff: SSC1 */
-#  define SAM_CAN1_OFFSET        0x00010000 /* 0x00010000-0x00013fff: CAN1 */
-#  define SAM_TC345_OFFSET       0x00014000 /* 0x00014000-0x00017fff: TC channels 3, 4, and 5 */
-#  define SAM_TSADC_OFFSET       0x00018000 /* 0x00018000-0x0001bfff: TSADC */
-#  define SAM_TWI2_OFFSET        0x0001c000 /* 0x0001c000-0x0001ffff: TWI2 */
-#  define SAM_USART2_OFFSET      0x00020000 /* 0x00020000-0x00023fff: USART2 */
-#  define SAM_USART3_OFFSET      0x00024000 /* 0x00024000-0x00027fff: USART3 */
-#  define SAM_UART1_OFFSET       0x00028000 /* 0x00028000-0x0002bfff: UART1 */
-#  define SAM_EMAC_OFFSET        0x0002c000 /* 0x0002c000-0x0002ffff: EMAC */
-#  define SAM_UDPHS_OFFSET       0x00030000 /* 0x00030000-0x00033fff: UDPHS */
-#  define SAM_SHA_OFFSET         0x00034000 /* 0x00034000-0x00037fff: SHA */
-#  define SAM_AES_OFFSET         0x00038000 /* 0x00038000-0x0003bfff: AES */
-#  define SAM_TDES_OFFSET        0x0003c000 /* 0x0003c000-0x0003ffff: TDES */
-#  define SAM_TRNG_OFFSET        0x00040000 /* 0x00040000-0x00043fff: TRNG */
-                                            /* 0x00044000-0x00ffbfff: Reserved */
-#define SAM_SYSC_PSECTION        0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
-#define SAM_SYSC_PADDR           0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
-#  define SAM_SYSC_OFFSET        0x00000000 /* 0x0fffc000-0x0fffffff: System Controller */
+#  define SAM_HSMCI0_OFFSET      0x00000000 /* 0x00000000-0x00003fff: HSMCI0 */
+#  define SAM_UART0_OFFSET       0x00004000 /* 0x00004000-0x00007fff: UART0 */
+#  define SAM_SSC0_OFFSET        0x00008000 /* 0x00008000-0x0000bfff: SSC0 */
+#  define SAM_PWMC_OFFSET        0x0000c000 /* 0x0000c000-0x0000ffff: PWMC */
+#  define SAM_SPI0_OFFSET        0x00010000 /* 0x00010000-0x00013fff: SPI0 */
+#  define SAM_TWI0_OFFSET        0x00014000 /* 0x00014000-0x00017fff: TWI0 */
+#  define SAM_TWI1_OFFSET        0x00018000 /* 0x00018000-0x0001bfff: TWI1 */
+#  define SAM_TC012_OFFSET       0x0001c000 /* 0x0001c000-0x0001ffff: TC channels 0, 1, and 2 */
+#  define SAM_EMAC0_OFFSET       0x00020000 /* 0x00020000-0x00023fff: GMAC 0 */
+#  define SAM_TWI2_OFFSET        0x00024000 /* 0x00024000-0x00027fff: TWI2 */
+#  define SAM_SFR_OFFSET         0x00028000 /* 0x00028000-0x0002bfff: SFR */
+#  define SAM_USART0_OFFSET      0x0002c000 /* 0x0002c000-0x0002ffff: USART0 */
+#  define SAM_USART1_OFFSET      0x00030000 /* 0x00030000-0x00033fff: USART1 */
+#  define SAM_CATB_OFFSET        0x0003c000 /* 0x0003c000-0x0003ffff: CATB */
 
-/* System Controller Peripheral Offsets.  All relative to the beginning of the
- * 16KB virtual or physical SYSC region (SAM_SYSC_VADDR or SAM_SYSC_PADDR).
- */
-
-#define SAM_HSMC_OFFSET          0x00000000 /* 0x00000000-0x00000fff: HSMC */
-                                            /* 0x00001000-0x000023ff: Reserved */
-#define SAM_FUSE_OFFSET          0x00002400 /* 0x00002400-0x000025ff: FUSE */
-#define SAM_DMAC0_OFFSET         0x00002600 /* 0x00002600-0x000027ff: DMAC0 */
-#define SAM_DMAC1_OFFSET         0x00002800 /* 0x00002800-0x000029ff: DMAC1 */
-#define SAM_MPDDRC_OFFSET        0x00002a00 /* 0x00002a00-0x00002bff: MPDDRC */
-#define SAM_MATRIX_OFFSET        0x00002c00 /* 0x00002c00-0x00002dff: MATRIX */
-#define SAM_DBGU_OFFSET          0x00002e00 /* 0x00002e00-0x00002fff: DBGU */
-#define SAM_AIC_OFFSET           0x00003000 /* 0x00003000-0x000031ff: AIC */
-#define SAM_PION_OFFSET(n)       (0x00003200+((n) << 9))
-#define SAM_PIOA_OFFSET          0x00003200 /* 0x00003200-0x000033ff: PIOA */
-#define SAM_PIOB_OFFSET          0x00003400 /* 0x00003400-0x000035ff: PIOB */
-#define SAM_PIOC_OFFSET          0x00003600 /* 0x00003600-0x000037ff: PIOC */
-#define SAM_PIOD_OFFSET          0x00003800 /* 0x00003800-0x000039ff: PIOD */
-#define SAM_PIOE_OFFSET          0x00003a00 /* 0x00003a00-0x00003bff: PIOE */
-#define SAM_PMC_OFFSET           0x00003c00 /* 0x00003c00-0x00003dff: PMC */
-#define SAM_RSTC_OFFSET          0x00003e00 /* 0x00003e00-0x00003e0f: RSTC */
-#define SAM_SHDC_OFFSET          0x00003e10 /* 0x00003e10-0x00003e1f: SHDC */
-                                            /* 0x00003e20-0x00003e2f: Reserved */
-#define SAM_PITC_OFFSET          0x00003e30 /* 0x00003e30-0x00003e3f: PITC */
-#define SAM_WDT_OFFSET           0x00003e40 /* 0x00003e40-0x00003e4f: WDT */
-#define SAM_SCKCR_OFFSET         0x00003e50 /* 0x00003e50-0x00003e53: SCKCR */
-#define SAM_BSC_OFFSET           0x00003e54 /* 0x00003e54-0x00003e5f: BSC */
-#define SAM_GPBR_OFFSET          0x00003e60 /* 0x00003e60-0x00003e6f: GPBR */
-                                            /* 0x00003e70-0x00003eaf: Reserved */
-#define SAM_RTCC_OFFSET          0x00003eb0 /* 0x00003eb0-0x00003edf: RTCC */
-                                            /* 0x00003ee0-0x00003fff: Reserved */
+#define SAM_PERIPHC_PSECTION     0xfc000000 /* 0xfc000000-0xfc06f000: Internal Peripherals C */
+#  define SAM_HSMCI1_OFFSET      0x00000000 /* 0x00000000-0x00003fff: HSMCI1 */
+#  define SAM_UART1_OFFSET       0x00004000 /* 0x00004000-0x00007fff: UART1 */
+#  define SAM_USART2_OFFSET      0x00008000 /* 0x00008000-0x0000bfff: USART2 */
+#  define SAM_USART3_OFFSET      0x0000c000 /* 0x0000c000-0x0000ffff: USART3 */
+#  define SAM_USART4_OFFSET      0x00010000 /* 0x00010000-0x00013fff: USART4 */
+#  define SAM_SSC1_OFFSET        0x00014000 /* 0x00014000-0x00017fff: SSC1 */
+#  define SAM_SPI1_OFFSET        0x00018000 /* 0x00018000-0x0001bfff: SPI1 */
+#  define SAM_SPI2_OFFSET        0x0001c000 /* 0x0001c000-0x0001ffff: SPI2 */
+#  define SAM_TC345_OFFSET       0x00020000 /* 0x00020000-0x00023fff: TC channels 3, 4, and 5 */
+#  define SAM_TC678_OFFSET       0x00024000 /* 0x00024000-0x00027fff: TC channels 6, 7, and 8 */
+#  define SAM_EMAC1_OFFSET       0x00028000 /* 0x00028000-0x0002bfff: GMAC 1 */
+#  define SAM_UDPHS_OFFSET       0x0002c000 /* 0x0002c000-0x0002ffff: UDPHS */
+#  define SAM_TRNG_OFFSET        0x00030000 /* 0x00030000-0x0003efff: TRNG */
+#  define SAM_ADC_OFFSET         0x00034000 /* 0x00034000-0x00037fff: ADC */
+#  define SAM_TWI3_OFFSET        0x00038000 /* 0x00038000-0x0003bfff: TWI3 */
+#  define SAM_ICM_OFFSET         0x00040000 /* 0x00040000-0x00043fff: ICM */
+#  define SAM_AES_OFFSET         0x00044000 /* 0x00044000-0x00047fff: AES */
+#  define SAM_TDES_OFFSET        0x00048000 /* 0x00048000-0x0004bfff: TDES */
+#  define SAM_SHA_OFFSET         0x00050000 /* 0x00050000-0x00053fff: SHA */
+#  define SAM_MATRIX32_OFFSET    0x00054000 /* 0x00054000-0x00057fff: MATRIX32 */
+#  define SAM_HSMC_OFFSET        0x0005c000 /* 0x0005c000-0x0005ffff: SMC */
+#  define SAM_SFC_OFFSET         0x00060000 /* 0x00060000-0x00063fff: SFC */
+#  define SAM_PIOD_OFFSET        0x00068000 /* 0x00068000-0x0006bfff: PIOD */
+#  define SAM_SBM_OFFSET         0x00068200 /* 0x00068200-0x000683ff: SBM */
+#  define SAM_SAIC_OFFSET        0x00068400 /* 0x00068400-0x000685ff: SAIC */
+#  define SAM_RSTC_OFFSET        0x00068600 /* 0x00068600-0x0006860f: RSTC */
+#  define SAM_SHDC_OFFSET        0x00068610 /* 0x00068610-0x0006862f: SHDC */
+#  define SAM_PITC_OFFSET        0x00068630 /* 0x00068630-0x0006863f: PITC */
+#  define SAM_WDT_OFFSET         0x00068640 /* 0x00068640-0x0006864f: WDTC */
+#  define SAM_SCKCR_OFFSET       0x00068650 /* 0x00068650-0x000686af: SCKCR */
+#  define SAM_RTCC_OFFSET        0x000686b0 /* 0x000686b0-0x000688cf: RTCC */
+#  define SAM_DBGU_OFFSET        0x00069000 /* 0x00069000-0x0006bfff: DBGU */
+#  define SAM_PIOA_OFFSET        0x0006a000 /* 0x0006a000-0x0006afff: PIOA */
+#  define SAM_PIOB_OFFSET        0x0006b000 /* 0x0006b000-0x0006bfff: PIOB */
+#  define SAM_PIOC_OFFSET        0x0006c000 /* 0x0006c000-0x0006cfff: PIOC */
+#  define SAM_PIOE_OFFSET        0x0006d000 /* 0x0006d000-0x0006dfff: PIOE */
+#  define SAM_AIC_OFFSET         0x0006e000 /* 0x0006e000-0x0006efff: AIC */
 
 /* Sizes of memory regions in bytes.
  *
@@ -180,21 +175,23 @@
  */
                                                  /* 0x00000000-0x0fffffff: Internal Memories */
 #define SAM_BOOTMEM_SIZE         (1*1024*1024)   /* 0x00000000-0x000fffff: Boot memory */
-#define SAM_ROM_SIZE             (1*1024*1024)   /* 0x00100000-0x001fffff: ROM */
-#define SAM_NFCSRAM_SIZE         (1*1024*1024)   /* 0x00200000-0x002fffff: NFC SRAM */
-                                                 /* 0x00300000-0x003fffff: SRAM0 and SRAM1 */
+#define SAM_ROM_SIZE             (1*1024*1024)   /* 0x00000000-0x000fffff: ROM */
+#define SAM_NFCSRAM_SIZE         (1*1024*1024)   /* 0x00100000-0x001fffff: NFC SRAM */
+                                                 /* 0x00200000-0x002fffff: SRAM0 and SRAM1 */
 #define SAM_ISRAM_SIZE           (64*1024 + SAM_ISRAM1_SIZE)
-#define SAM_SMD_SIZE             (1*1024*1024)   /* 0x00400000-0x004fffff: SMD */
-#define SAM_UDPHSRAM_SIZE        (1*1024*1024)   /* 0x00500000-0x005fffff: UDPH SRAM */
-#define SAM_UHPOHCI_SIZE         (1*1024*1024)   /* 0x00600000-0x006fffff: UHP OHCI */
-#define SAM_UHPEHCI_SIZE         (1*1024*1024)   /* 0x00700000-0x007fffff: UHP EHCI */
-#define SAM_AXIMX_SIZE           (4)             /* 0x00800000-0x008fffff: AXI Matr */
-#define SAM_DAP_SIZE             (1*1024*1024)   /* 0x00900000-0x009fffff: DAP */
+#define SAM_VDEC_SIZE            (1*1024*1024)   /* 0x00300000-0x0030ffff: VDEC */
+#define SAM_UDPHSRAM_SIZE        (1*1024*1024)   /* 0x00400000-0x004fffff: UDPH SRAM */
+#define SAM_UHPOHCI_SIZE         (1*1024*1024)   /* 0x00500000-0x005fffff: UHP OHCI */
+#define SAM_UHPEHCI_SIZE         (1*1024*1024)   /* 0x00600000-0x006fffff: UHP EHCI */
+#define SAM_AXIMX_SIZE           (4)             /* 0x00700000-0x007fffff: AXI Matrix */
+#define SAM_DAP_SIZE             (1*1024*1024)   /* 0x00800000-0x008fffff: DAP */
+#define SAM_SMD_SIZE             (1*1024*1024)   /* 0x00900000-0x009fffff: SMD */
+#define SAM_L2CC_SIZE            (1*1024*1024)   /* 0x00a00000-0x00afffff: L2CC */
 #define SAM_NFCCR_SIZE           (256*1024*1024) /* 0x70000000-0x7fffffff: NFC Command Registers */
                                                  /* 0xf0000000-0xffffffff: Internal Peripherals */
-#define SAM_PERIPHA_SIZE         (240*1024)      /* 0xf0000000-0xf003bfff: Internal Peripherals */
-#define SAM_PERIPHB_SIZE         (272*1024)      /* 0xf8000000-0xf8043fff: Internal Peripherals */
-#define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xfff00000-0x0ffffedf: Internal Peripherals */
+#define SAM_PERIPHA_SIZE         (144*1024)      /* 0xf0000000-0xf0023fff: Internal Peripherals */
+#define SAM_PERIPHB_SIZE         (241*1024)      /* 0xf8000000-0xf803c3ff: Internal Peripherals */
+#define SAM_PERIPHC_SIZE         (444*1024)      /* 0xfc000000-0xfc06efff: Internal Peripherals */
 
 /* Force configured sizes that might exceed 2GB to be unsigned long */
 
@@ -232,12 +229,14 @@
 #define SAM_ROM_NSECTIONS        _NSECTIONS(SAM_ROM_SIZE)
 #define SAM_NFCSRAM_NSECTIONS    _NSECTIONS(SAM_NFCSRAM_SIZE)
 #define SAM_ISRAM_NSECTIONS      _NSECTIONS(SAM_ISRAM_SIZE)
-#define SAM_SMD_NSECTIONS        _NSECTIONS(SAM_SMD_SIZE)
+#define SAM_VDEC_NSECTIONS       _NSECTIONS(SAM_VDEC_SIZE)
 #define SAM_UDPHSRAM_NSECTIONS   _NSECTIONS(SAM_UDPHSRAM_SIZE)
 #define SAM_UHPOHCI_NSECTIONS    _NSECTIONS(SAM_UHPOHCI_SIZE)
 #define SAM_UHPEHCI_NSECTIONS    _NSECTIONS(SAM_UHPEHCI_SIZE)
 #define SAM_AXIMX_NSECTIONS      _NSECTIONS(SAM_AXIMX_SIZE)
 #define SAM_DAP_NSECTIONS        _NSECTIONS(SAM_DAP_SIZE)
+#define SAM_SMD_NSECTIONS        _NSECTIONS(SAM_SMD_SIZE)
+#define SAM_L2CC_NSECTIONS       _NSECTIONS(SAM_L2CC_SIZE)
 
 #define SAM_EBICS0_NSECTIONS     _NSECTIONS(SAMA5_EBICS0_SIZE)
 #define SAM_DDRCS_NSECTIONS      _NSECTIONS(SAMA5_DDRCS_SIZE)
@@ -248,19 +247,21 @@
 
 #define SAM_PERIPHA_NSECTIONS    _NSECTIONS(SAM_PERIPHA_SIZE)
 #define SAM_PERIPHB_NSECTIONS    _NSECTIONS(SAM_PERIPHB_SIZE)
-#define SAM_SYSC_NSECTIONS       _NSECTIONS(SAM_SYSC_SIZE)
+#define SAM_PERIPHC_NSECTIONS    _NSECTIONS(SAM_PERIPHC_SIZE)
 
 /* Section MMU Flags */
 
 #define SAM_BOOTMEM_MMUFLAGS     MMU_ROMFLAGS
 #define SAM_ROM_MMUFLAGS         MMU_ROMFLAGS
 #define SAM_ISRAM_MMUFLAGS       MMU_MEMFLAGS
-#define SAM_SMD_MMUFLAGS         MMU_MEMFLAGS
+#define SAM_VDEC_MMUFLAGS        MMU_IOFLAGS
 #define SAM_UDPHSRAM_MMUFLAGS    MMU_IOFLAGS
 #define SAM_UHPOHCI_MMUFLAGS     MMU_IOFLAGS
 #define SAM_UHPEHCI_MMUFLAGS     MMU_IOFLAGS
 #define SAM_AXIMX_MMUFLAGS       MMU_IOFLAGS
 #define SAM_DAP_MMUFLAGS         MMU_IOFLAGS
+#define SAM_SMD_MMUFLAGS         MMU_MEMFLAGS
+#define SAM_L2CC_MMUFLAGS        MMU_IOFLAGS
 
 /* If the NFC is not being used, the NFC SRAM can be used as general purpose
  * SRAM (cached).  If the NFC is used, then the NFC SRAM should be treated
@@ -320,7 +321,7 @@
 #define SAM_NFCCR_MMUFLAGS       MMU_IOFLAGS
 #define SAM_PERIPHA_MMUFLAGS     MMU_IOFLAGS
 #define SAM_PERIPHB_MMUFLAGS     MMU_IOFLAGS
-#define SAM_SYSC_MMUFLAGS        MMU_IOFLAGS
+#define SAM_PERIPHC_MMUFLAGS     MMU_IOFLAGS
 
 /* SAMA5 Virtual (mapped) Memory Map
  *
@@ -345,107 +346,98 @@
  * the high vectors must reside.
  */
 
-#define SAM_INTMEM_VSECTION      0x00000000 /* 0x00000000-0x0fffffff: Internal Memories */
-#  define SAM_BOOTMEM_VSECTION   0x00000000 /* 0x00000000-0x000fffff: Boot memory */
-#  define SAM_ROM_VSECTION       0x00100000 /* 0x00100000-0x001fffff: ROM */
-#  define SAM_NFCSRAM_VSECTION   0x00200000 /* 0x00200000-0x002fffff: NFC SRAM */
-#  define SAM_ISRAM_VSECTION     0x00300000 /* 0x00300000-0x0030ffff: SRAM */
-#    define SAM_ISRAM0_VADDR     0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
-#    define SAM_ISRAM1_VADDR     0x00310000 /* 0x00310000-0x003fffff: SRAM1 */
-#  define SAM_SMD_VSECTION       0x00400000 /* 0x00400000-0x004fffff: SMD */
-#  define SAM_UDPHSRAM_VSECTION  0x00500000 /* 0x00500000-0x005fffff: UDPH SRAM */
-#  define SAM_UHPOHCI_VSECTION   0x00600000 /* 0x00600000-0x006fffff: UHP OHCI */
-#  define SAM_UHPEHCI_VSECTION   0x00700000 /* 0x00700000-0x007fffff: UHP EHCI */
-#  define SAM_AXIMX_VSECTION     0x00800000 /* 0x00800000-0x008fffff: AXI Matrix */
-#  define SAM_DAP_VSECTION       0x00900000 /* 0x00900000-0x009fffff: DAP */
-#define SAM_EBICS0_VSECTION      0x10000000 /* 0x10000000-0x1fffffff: EBI Chip select 0 */
-#define SAM_DDRCS_VSECTION       0x20000000 /* 0x20000000-0x3fffffff: EBI DDRCS */
-#define SAM_EBICS1_VSECTION      0x40000000 /* 0x40000000-0x4fffffff: EBI Chip select 1 */
-#define SAM_EBICS2_VSECTION      0x50000000 /* 0x50000000-0x5fffffff: EBI Chip select 2 */
-#define SAM_EBICS3_VSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip select 2 */
-#define SAM_NFCCR_VSECTION       0x70000000 /* 0x70000000-0x7fffffff: NFC Command Registers */
-                                            /* 0x80000000-0xefffffff: Undefined */
-
-/* If CONFIG_ARCH_LOWVECTORS is not defined, then move the system control
- * registers out of the way.
- */
-
-#ifdef CONFIG_ARCH_LOWVECTORS
-#define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf7ffffff: Internal Peripherals A */
-#  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xffefffff: Internal Peripherals B */
-#  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffbfff: System Controller */
-#  define SAM_SYSC_VADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
-#else
-#define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf00fffff: Internal Peripherals A */
-#  define SAM_PERIPHB_VSECTION   0xf1000000 /* 0xf1000000-0xf10fffff: Internal Peripherals B */
-#  define SAM_SYSC_VSECTION      0xf2000000 /* 0xf2000000-0xf20fffff: System Controller */
-#  define SAM_SYSC_VADDR         0xf20fc000 /* 0xf20fc000-0xf20fffff: System Controller */
-#endif
-#endif
+#  define SAM_INTMEM_VSECTION     0x00000000 /* 0x00000000-0x0fffffff: Internal Memories */
+#    define SAM_BOOTMEM_VSECTION  0x00000000 /* 0x00000000-0x000fffff: Boot memory */
+#    define SAM_ROM_VSECTION      0x00000000 /* 0x00000000-0x000fffff: ROM */
+#    define SAM_NFCSRAM_VSECTION  0x00100000 /* 0x00100000-0x001fffff: NFC SRAM */
+#    define SAM_ISRAM_VSECTION    0x00200000 /* 0x00200000-0x0020ffff: SRAM */
+#      define SAM_ISRAM0_VADDR    0x00200000 /* 0x00200000-0x0020ffff: SRAM0 */
+#      define SAM_ISRAM1_VADDR    0x00210000 /* 0x00210000-0x002fffff: SRAM1 */
+#    define SAM_VDEC_VSECTION     0x00300000 /* 0x00300000-0x0030ffff: VDEC */
+#    define SAM_UDPHSRAM_VSECTION 0x00400000 /* 0x00400000-0x004fffff: UDPH SRAM */
+#    define SAM_UHPOHCI_VSECTION  0x00500000 /* 0x00500000-0x005fffff: UHP OHCI */
+#    define SAM_UHPEHCI_VSECTION  0x00600000 /* 0x00600000-0x006fffff: UHP EHCI */
+#    define SAM_AXIMX_VSECTION    0x00700000 /* 0x00700000-0x007fffff: AXI Matr */
+#    define SAM_DAP_VSECTION      0x00800000 /* 0x00800000-0x008fffff: DAP */
+#    define SAM_SMD_VSECTION      0x00900000 /* 0x00900000-0x009fffff: SMD */
+#    define SAM_L2CC_VSECTION     0x00a00000 /* 0x00a00000-0x00afffff: L2CC */
+#  define SAM_EBICS0_VSECTION     0x10000000 /* 0x10000000-0x1fffffff: EBI Chip Select 0 */
+#  define SAM_DDRCS_VSECTION      0x20000000 /* 0x20000000-0x3fffffff: EBI DDR Chip Select */
+#  define SAM_EBICS1_VSECTION     0x60000000 /* 0x60000000-0x6fffffff: EBI Chip Select 1 */
+#  define SAM_EBICS2_VSECTION     0x70000000 /* 0x70000000-0x7fffffff: EBI Chip Select 2 */
+#  define SAM_EBICS3_VSECTION     0x80000000 /* 0x80000000-0x8fffffff: EBI Chip Select 3 */
+#  define SAM_NFCCR_VSECTION      0x90000000 /* 0x90000000-0x9fffffff: NFC Command Registers */
+#  define SAM_PERIPHA_VSECTION    0xf0000000 /* 0xf0000000-0xf0023fff: Internal Peripherals A */
+#  define SAM_PERIPHB_VSECTION    0xf8000000 /* 0xf8000000-0xf803c3ff: Internal Peripherals B */
+#  define SAM_PERIPHC_VSECTION    0xfc000000 /* 0xfc000000-0xfc06efff: Internal Peripherals C */
+#endif /* !CONFIG_ARCH_ROMPGTABLE */
 
 /* Peripheral virtual base addresses */
 
-#define SAM_HSMCI0_VBASE         (SAM_PERIPHA_VSECTION+SAM_HSMCI0_OFFSET)
-#define SAM_SPI0_VBASE           (SAM_PERIPHA_VSECTION+SAM_SPI0_OFFSET)
-#define SAM_SSC0_VBASE           (SAM_PERIPHA_VSECTION+SAM_SSC0_OFFSET)
-#define SAM_CAN0_VBASE           (SAM_PERIPHA_VSECTION+SAM_CAN0_OFFSET)
-#define SAM_TC012_VBASE          (SAM_PERIPHA_VSECTION+SAM_TC012_OFFSET)
-#define SAM_TWI0_VBASE           (SAM_PERIPHA_VSECTION+SAM_TWI0_OFFSET)
-#define SAM_TWI1_VBASE           (SAM_PERIPHA_VSECTION+SAM_TWI1_OFFSET)
-#define SAM_USART0_VBASE         (SAM_PERIPHA_VSECTION+SAM_USART0_OFFSET)
-#define SAM_USART1_VBASE         (SAM_PERIPHA_VSECTION+SAM_USART1_OFFSET)
-#define SAM_UART0_VBASE          (SAM_PERIPHA_VSECTION+SAM_UART0_OFFSET)
-#define SAM_GMAC_VBASE           (SAM_PERIPHA_VSECTION+SAM_GMAC_OFFSET)
-#define SAM_PWMC_VBASE           (SAM_PERIPHA_VSECTION+SAM_PWMC_OFFSET)
 #define SAM_LCDC_VBASE           (SAM_PERIPHA_VSECTION+SAM_LCDC_OFFSET)
+#define SAM_XDMAC1_VBASE         (SAM_PERIPHA_VSECTION+SAM_XDMAC1_OFFSET)
 #define SAM_ISI_VBASE            (SAM_PERIPHA_VSECTION+SAM_ISI_OFFSET)
-#define SAM_SFR_VBASE            (SAM_PERIPHA_VSECTION+SAM_SFR_OFFSET)
+#define SAM_PKCC_VBASE           (SAM_PERIPHA_VSECTION+SAM_PKCC_OFFSET)
+#define SAM_MPDDRC_VBASE         (SAM_PERIPHA_VSECTION+SAM_MPDDRC_OFFSET)
+#define SAM_XDMAC0_VBASE         (SAM_PERIPHA_VSECTION+SAM_XDMAC0_OFFSET)
+#define SAM_PMC_VBASE            (SAM_PERIPHA_VSECTION+SAM_PMC_OFFSET)
+#define SAM_MATRIX64_VBASE       (SAM_PERIPHA_VSECTION+SAM_MATRIX64_OFFSET)
+#define SAM_AESB_VBASE           (SAM_PERIPHA_VSECTION+SAM_AESB_OFFSET)
 
-#define SAM_HSMCI1_VBASE         (SAM_PERIPHB_VSECTION+SAM_HSMCI1_OFFSET)
-#define SAM_HSMCI2_VBASE         (SAM_PERIPHB_VSECTION+SAM_HSMCI2_OFFSET)
-#define SAM_SPI1_VBASE           (SAM_PERIPHB_VSECTION+SAM_SPI1_OFFSET)
-#define SAM_SSC1_VBASE           (SAM_PERIPHB_VSECTION+SAM_SSC1_OFFSET)
-#define SAM_CAN1_VBASE           (SAM_PERIPHB_VSECTION+SAM_CAN1_OFFSET)
-#define SAM_TC345_VBASE          (SAM_PERIPHB_VSECTION+SAM_TC345_OFFSET)
-#define SAM_TSADC_VBASE          (SAM_PERIPHB_VSECTION+SAM_TSADC_OFFSET)
+#define SAM_HSMCI0_VBASE         (SAM_PERIPHB_VSECTION+SAM_HSMCI0_OFFSET)
+#define SAM_UART0_VBASE          (SAM_PERIPHB_VSECTION+SAM_UART0_OFFSET)
+#define SAM_SSC0_VBASE           (SAM_PERIPHB_VSECTION+SAM_SSC0_OFFSET)
+#define SAM_PWMC_VBASE           (SAM_PERIPHB_VSECTION+SAM_PWMC_OFFSET)
+#define SAM_SPI0_VBASE           (SAM_PERIPHB_VSECTION+SAM_SPI0_OFFSET)
+#define SAM_TWI0_VBASE           (SAM_PERIPHB_VSECTION+SAM_TWI0_OFFSET)
+#define SAM_TWI1_VBASE           (SAM_PERIPHB_VSECTION+SAM_TWI1_OFFSET)
+#define SAM_TC012_VBASE          (SAM_PERIPHB_VSECTION+SAM_TC012_OFFSET)
+#define SAM_EMAC0_VBASE          (SAM_PERIPHB_VSECTION+SAM_EMAC0_OFFSET)
 #define SAM_TWI2_VBASE           (SAM_PERIPHB_VSECTION+SAM_TWI2_OFFSET)
-#define SAM_USART2_VBASE         (SAM_PERIPHB_VSECTION+SAM_USART2_OFFSET)
-#define SAM_USART3_VBASE         (SAM_PERIPHB_VSECTION+SAM_USART3_OFFSET)
-#define SAM_UART1_VBASE          (SAM_PERIPHB_VSECTION+SAM_UART1_OFFSET)
-#define SAM_EMAC_VBASE           (SAM_PERIPHB_VSECTION+SAM_EMAC_OFFSET)
-#define SAM_UDPHS_VBASE          (SAM_PERIPHB_VSECTION+SAM_UDPHS_OFFSET)
-#define SAM_SHA_VBASE            (SAM_PERIPHB_VSECTION+SAM_SHA_OFFSET)
-#define SAM_AES_VBASE            (SAM_PERIPHB_VSECTION+SAM_AES_OFFSET)
-#define SAM_TDES_VBASE           (SAM_PERIPHB_VSECTION+SAM_TDES_OFFSET)
-#define SAM_TRNG_VBASE           (SAM_PERIPHB_VSECTION+SAM_TRNG_OFFSET)
+#define SAM_SFR_VBASE            (SAM_PERIPHB_VSECTION+SAM_SFR_OFFSET)
+#define SAM_USART0_VBASE         (SAM_PERIPHB_VSECTION+SAM_USART0_OFFSET)
+#define SAM_USART1_VBASE         (SAM_PERIPHB_VSECTION+SAM_USART1_OFFSET)
+#define SAM_CATB_VBASE           (SAM_PERIPHB_VSECTION+SAM_CATB_OFFSET)
 
-#define SAM_HSMC_VBASE           (SAM_SYSC_VADDR+SAM_HSMC_OFFSET)
-#define SAM_FUSE_VBASE           (SAM_SYSC_VADDR+SAM_FUSE_OFFSET)
-#define SAM_DMAC0_VBASE          (SAM_SYSC_VADDR+SAM_DMAC0_OFFSET)
-#define SAM_DMAC1_VBASE          (SAM_SYSC_VADDR+SAM_DMAC1_OFFSET)
-#define SAM_MPDDRC_VBASE         (SAM_SYSC_VADDR+SAM_MPDDRC_OFFSET)
-#define SAM_MATRIX_VBASE         (SAM_SYSC_VADDR+SAM_MATRIX_OFFSET)
-#define SAM_DBGU_VBASE           (SAM_SYSC_VADDR+SAM_DBGU_OFFSET)
-#define SAM_AIC_VBASE            (SAM_SYSC_VADDR+SAM_AIC_OFFSET)
-#define SAM_PION_VBASE(n)        (SAM_SYSC_VADDR+SAM_PION_OFFSET(n))
-#define SAM_PIOA_VBASE           (SAM_SYSC_VADDR+SAM_PIOA_OFFSET)
-#define SAM_PIOB_VBASE           (SAM_SYSC_VADDR+SAM_PIOB_OFFSET)
-#define SAM_PIOC_VBASE           (SAM_SYSC_VADDR+SAM_PIOC_OFFSET)
-#define SAM_PIOD_VBASE           (SAM_SYSC_VADDR+SAM_PIOD_OFFSET)
-#define SAM_PIOE_VBASE           (SAM_SYSC_VADDR+SAM_PIOE_OFFSET)
-#define SAM_PMC_VBASE            (SAM_SYSC_VADDR+SAM_PMC_OFFSET)
-#define SAM_RSTC_VBASE           (SAM_SYSC_VADDR+SAM_RSTC_OFFSET)
-#define SAM_SHDC_VBASE           (SAM_SYSC_VADDR+SAM_SHDC_OFFSET)
-#define SAM_PITC_VBASE           (SAM_SYSC_VADDR+SAM_PITC_OFFSET)
-#define SAM_WDT_VBASE            (SAM_SYSC_VADDR+SAM_WDT_OFFSET)
-#define SAM_SCKCR_VBASE          (SAM_SYSC_VADDR+SAM_SCKCR_OFFSET)
-#define SAM_BSC_VBASE            (SAM_SYSC_VADDR+SAM_BSC_OFFSET)
-#define SAM_GPBR_VBASE           (SAM_SYSC_VADDR+SAM_GPBR_OFFSET)
-#define SAM_RTCC_VBASE           (SAM_SYSC_VADDR+SAM_RTCC_OFFSET)
+#define SAM_HSMCI1_VBASE         (SAM_PERIPHC_VSECTION+SAM_HSMCI1_OFFSET)
+#define SAM_UART1_VBASE          (SAM_PERIPHC_VSECTION+SAM_UART1_OFFSET)
+#define SAM_USART2_VBASE         (SAM_PERIPHC_VSECTION+SAM_USART2_OFFSET)
+#define SAM_USART3_VBASE         (SAM_PERIPHC_VSECTION+SAM_USART3_OFFSET)
+#define SAM_USART4_VBASE         (SAM_PERIPHC_VSECTION+SAM_USART4_OFFSET)
+#define SAM_SSC1_VBASE           (SAM_PERIPHC_VSECTION+SAM_SSC1_OFFSET)
+#define SAM_SPI1_VBASE           (SAM_PERIPHC_VSECTION+SAM_SPI1_OFFSET)
+#define SAM_SPI2_VBASE           (SAM_PERIPHC_VSECTION+SAM_SPI2_OFFSET)
+#define SAM_TC345_VBASE          (SAM_PERIPHC_VSECTION+SAM_TC345_OFFSET)
+#define SAM_TC678_VBASE          (SAM_PERIPHC_VSECTION+SAM_TC678_OFFSET)
+#define SAM_EMAC1_VBASE          (SAM_PERIPHC_VSECTION+SAM_EMAC1_OFFSET)
+#define SAM_UDPHS_VBASE          (SAM_PERIPHC_VSECTION+SAM_UDPHS_OFFSET)
+#define SAM_TRNG_VBASE           (SAM_PERIPHC_VSECTION+SAM_TRNG_OFFSET)
+#define SAM_ADC_VBASE            (SAM_PERIPHC_VSECTION+SAM_ADC_OFFSET)
+#define SAM_TWI3_VBASE           (SAM_PERIPHC_VSECTION+SAM_TWI3_OFFSET)
+#define SAM_ICM_VBASE            (SAM_PERIPHC_VSECTION+SAM_ICM_OFFSET)
+#define SAM_AES_VBASE            (SAM_PERIPHC_VSECTION+SAM_AES_OFFSET)
+#define SAM_TDES_VBASE           (SAM_PERIPHC_VSECTION+SAM_TDES_OFFSET)
+#define SAM_SHA_VBASE            (SAM_PERIPHC_VSECTION+SAM_SHA_OFFSET)
+#define SAM_MATRIX32_VBASE       (SAM_PERIPHC_VSECTION+SAM_MATRIX32_OFFSET)
+#define SAM_HSMC_VBASE           (SAM_PERIPHC_VSECTION+SAM_HSMC_OFFSET)
+#define SAM_SFC_VBASE            (SAM_PERIPHC_VSECTION+SAM_SFC_OFFSET)
+#define SAM_PIOD_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIOD_OFFSET)
+#define SAM_SBM_VBASE            (SAM_PERIPHC_VSECTION+SAM_SBM_OFFSET)
+#define SAM_SAIC_VBASE           (SAM_PERIPHC_VSECTION+SAM_SAIC_OFFSET)
+#define SAM_RSTC_VBASE           (SAM_PERIPHC_VSECTION+SAM_RSTC_OFFSET)
+#define SAM_SHDC_VBASE           (SAM_PERIPHC_VSECTION+SAM_SHDC_OFFSET)
+#define SAM_PITC_VBASE           (SAM_PERIPHC_VSECTION+SAM_PITC_OFFSET)
+#define SAM_WDT_VBASE            (SAM_PERIPHC_VSECTION+SAM_WDT_OFFSET)
+#define SAM_SCKCR_VBASE          (SAM_PERIPHC_VSECTION+SAM_SCKCR_OFFSET)
+#define SAM_RTCC_VBASE           (SAM_PERIPHC_VSECTION+SAM_RTCC_OFFSET)
+#define SAM_DBGU_VBASE           (SAM_PERIPHC_VSECTION+SAM_DBGU_OFFSET)
+#define SAM_PIOA_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIOA_OFFSET)
+#define SAM_PIOB_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIOB_OFFSET)
+#define SAM_PIOC_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIOC_OFFSET)
+#define SAM_PIOE_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIOE_OFFSET)
+#define SAM_AIC_VBASE            (SAM_PERIPHC_VSECTION+SAM_AIC_OFFSET)
 
-/* NuttX vitual base address
+/* NuttX virtual base address
  *
  * The boot logic will create a temporarily mapping based on where NuttX is
  * executing in memory.  In this case, NuttX could be running from NOR FLASH,
@@ -616,7 +608,7 @@
 #    endif
 #    define PGTABLE_IN_HIGHSRAM   1
 
-  /* If we execute from SRAM but keep data in SDRAM, then we will also have
+  /* If we execute from SRAM, but keep data in SDRAM, then we will also have
    * to position the initial, IDLE stack in SRAM.  SDRAM will not be ready
    * soon enough to serve as the stack.
    *
@@ -643,6 +635,14 @@
 #      define PGTABLE_BASE_VADDR  SAM_ISRAM0_VADDR
 #    endif
 #    define PGTABLE_IN_LOWSRAM    1
+
+  /* If we execute from SRAM, but keep data in SDRAM, then we will also have
+   * to position the initial, IDLE stack in SRAM.  SDRAM will not be ready
+   * soon enough to serve as the stack.
+   *
+   * In this case, the initial IDLE stack can just follow the page table
+   * in ISRAM.
+   */
 
 #    ifdef CONFIG_BOOT_SDRAM_DATA
 #      define IDLE_STACK_PBASE    (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
@@ -681,13 +681,7 @@
 #    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is undefined"
 #  endif
 
-  /* If we execute from SRAM but keep data in SDRAM, then we will also have
-   * to position the initial, IDLE stack in SRAM.  SDRAM will not be ready
-   * soon enough to serve as the stack.
-   *
-   * In this case, the initial IDLE stack can just follow the page table
-   * in ISRAM.
-   */
+  /* If data is in SDRAM, then the IDLE stack at the beginning of ISRAM */
 
 #    ifdef CONFIG_BOOT_SDRAM_DATA
 #      define IDLE_STACK_PBASE    (SAM_ISRAM0_PADDR + PGTABLE_SIZE)
@@ -752,7 +746,7 @@
 
 #  define PGTABLE_L2_OFFSET       0x000002000
 #  define PGTABLE_L2_SIZE         0x000001c00
-#endif
+#endif /* CONFIG_ARCH_LOWVECTORS */
 
 /* Paging L2 page table base addresses
  *
@@ -794,7 +788,7 @@
 #  endif
 #  define SAM_VECTOR_VADDR        0xffff0000
 
-#endif
+#endif /* CONFIG_ARCH_LOWVECTORS */
 
 /************************************************************************************
  * Public Types
@@ -808,4 +802,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_MEMORYMAP_H */

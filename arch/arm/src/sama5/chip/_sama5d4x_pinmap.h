@@ -1,5 +1,5 @@
 /************************************************************************************************************
- * arch/arm/src/sama5/chip/sama5d4x_pinmap.h
+ * arch/arm/src/sama5/chip/_sama5d4x_pinmap.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_PINMAP_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_PINMAP_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_PINMAP_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_PINMAP_H
 
 /************************************************************************************************************
  * Included Files
@@ -473,4 +473,4 @@
 #define PIO_USART4_SCK    (PIO_PERIPHB | PIO_CFG_DEFAULT | PIO_PORT_PIOE | PIO_PIN25)
 #define PIO_USART4_TXD    (PIO_PERIPHB | PIO_CFG_DEFAULT | PIO_PORT_PIOE | PIO_PIN27)
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP__SAMA5D4X_PINMAP_H */

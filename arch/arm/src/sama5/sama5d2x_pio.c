@@ -51,7 +51,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/sama5d2x_pio.h"
+#include "chip/_sama5d2x_pio.h"
 
 #include "chip.h"
 #include "sam_periphclks.h"
