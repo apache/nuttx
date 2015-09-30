@@ -115,7 +115,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
                   (FAR dq_entry_t *)work == wqueue->q.head);
 
       /* Remove the entry from the work queue and make sure that it is
-       * mark as available (i.e., the worker field is nullified).
+       * marked as available (i.e., the worker field is nullified).
        */
 
       dq_rem((FAR dq_entry_t *)work, &wqueue->q);
