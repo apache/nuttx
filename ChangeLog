@@ -11000,3 +11000,6 @@
 	  if there is a pending signal action before scheduling the next signal
 	  action.  Both the test and the scheduling action need to be atomic
 	  (2015-09-30).
+	* sched/wqueue/kwork_queue.c and libc/wqueue/work_queue.c: Logic that
+	  sets the queued indication and the logic that does the actual queuing
+	  must be atomic (2015-09-20).
