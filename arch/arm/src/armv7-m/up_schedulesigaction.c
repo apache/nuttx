@@ -104,18 +104,19 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  /* Refuse to handle nested signal actions */
+  irqstate_t flags;
 
   sdbg("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  DEBUGASSERT(tcb != NULL && sigdeliver != NULL);
 
-  if (!tcb->xcp.sigdeliver)
+  /* Make sure that interrupts are disabled */
+
+  flags = irqsave();
+
+  /* Refuse to handle nested signal actions */
+
+  if (tcb->xcp.sigdeliver == NULL)
     {
-      irqstate_t flags;
-
-      /* Make sure that interrupts are disabled */
-
-      flags = irqsave();
-
       /* First, handle some special cases when the signal is being delivered
        * to the currently executing task.
        */
@@ -222,9 +223,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
         }
-
-      irqrestore(flags);
     }
+
+  irqrestore(flags);
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */
