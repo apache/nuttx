@@ -107,20 +107,20 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 {
   irqstate_t flags;
 
-  DEBUGASSERT(work != NULL);
+  DEBUGASSERT(work != NULL && worker != NULL);
 
-  /* First, initialize the work structure */
-
-  work->worker = worker;           /* Work callback */
-  work->arg    = arg;              /* Callback argument */
-  work->delay  = delay;            /* Delay until work performed */
-
-  /* Now, time-tag that entry and put it in the work queue.  This must be
-   * done with interrupts disabled.  This permits this function to be called
-   * from with task logic or interrupt handlers.
+  /* First, initialize the work structure.  This must be done with interrupts
+   * disabled.  This permits this function to be called from with task logic
+   * or interrupt handlers.
    */
 
   flags        = irqsave();
+  work->worker = worker;           /* Work callback. non-NULL means queued */
+  work->arg    = arg;              /* Callback argument */
+  work->delay  = delay;            /* Delay until work performed */
+
+  /* Now, time-tag that entry and put it in the work queue */
+
   work->qtime  = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);

@@ -10996,4 +10996,7 @@
 	  board from Lok Tep  (2015-09-29).
 	* configs/nucleo-f303re: Add SSD1351 SPI 4-wire interface.  From Paul
 	  Alexander Patience (2015-09-29).
-
+	* arch/arm/src/armv7-m/up_schedulesigaction.c: Fix logic that determines
+	  if there is a pending signal action before scheduling the next signal
+	  action.  Both the test and the scheduling action need to be atomic
+	  (2015-09-30).
