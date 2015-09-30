@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 � 4 June 2012 */
+/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 4 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources

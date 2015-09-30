@@ -2667,9 +2667,7 @@ void up_usbinitialize(void)
 
   /* Reset USB block */
 
-  regval  = lpc43_getreg(LPC43_RGU_CTRL0);
-  regval |= RGU_CTRL0_USB0_RST;
-  lpc43_putreg(regval, LPC43_RGU_CTRL0);
+  lpc43_putreg(RGU_CTRL0_USB0_RST, LPC43_RGU_CTRL0);
 
   /* Reset the controller */
 
