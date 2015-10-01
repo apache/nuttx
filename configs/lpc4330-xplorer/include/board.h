@@ -154,9 +154,9 @@
 /* USB0 ********************************************************************/
 /* Settings needed in lpc43_cpu.c */
 
-#define BOARD_USB0_CTL              0x0600081d
-#define BOARD_USB0_MDIV             0x06167ffa /* Table 149 datsheet */
-#define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet */
+#define BOARD_USB0_CLKSRC           PLL0USB_CLKSEL_XTAL
+#define BOARD_USB0_MDIV             0x06167ffa /* Table 149 datsheet, valid for 12Mhz Fclkin */
+#define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
 
 /* SPIFI clocking **********************************************************/
 /* The SPIFI will receive clocking from a divider per the settings provided

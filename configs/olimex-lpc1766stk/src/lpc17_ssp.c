@@ -64,9 +64,12 @@
  ************************************************************************************/
 /* Configuration ************************************************************/
 
+#undef HAVE_SPI_CALLBACK
 #ifdef CONFIG_SPI_CALLBACK
 #  ifndef CONFIG_GPIO_IRQ
 #    warning "CONFIG_GPIO_IRQ is required to support CONFIG_SPI_CALLBACK"
+#  else
+#    define HAVE_SPI_CALLBACK 1
 #  endif
 #endif
 
@@ -106,7 +109,7 @@
 
 /* This structure describes on media change callback */
 
-#ifdef CONFIG_SPI_CALLBACK
+#ifdef HAVE_SPI_CALLBACK
 struct lpc17_mediachange_s
 {
   spi_mediachange_t callback; /* The media change callback */
@@ -120,7 +123,7 @@ struct lpc17_mediachange_s
 
 /* Registered media change callback */
 
-#ifdef CONFIG_SPI_CALLBACK
+#ifdef HAVE_SPI_CALLBACK
 #ifdef CONFIG_LPC17_SSP0
 static struct lpc17_mediachange_s g_ssp0callback;
 #endif
@@ -141,7 +144,7 @@ static struct lpc17_mediachange_s g_ssp1callback;
  *
  ************************************************************************************/
 
-#if 0 /* #ifdef CONFIG_SPI_CALLBACK */
+#if 0 /* #ifdef HAVE_SPI_CALLBACK */
 static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
 {
   irqstate_t flags;
@@ -181,7 +184,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
  *
  ************************************************************************************/
 
-#if 0 /* ifdef CONFIG_SPI_CALLBACK */
+#if 0 /* ifdef HAVE_SPI_CALLBACK */
 #ifdef CONFIG_LPC17_SSP0
 static int ssp0_cdinterrupt(int irq, FAR void *context)
 {
@@ -246,7 +249,7 @@ void weak_function lpc1766stk_sspinitialize(void)
   ssp_dumpssp0gpio("AFTER SSP1 Initialization");
 #endif
 
-#ifdef CONFIG_SPI_CALLBACK
+#ifdef HAVE_SPI_CALLBACK
   /* If there were any CD detect pins for the LPC1766-STK, this is where
    * they would be configured.
    */
