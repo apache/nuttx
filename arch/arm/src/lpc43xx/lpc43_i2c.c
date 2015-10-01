@@ -84,6 +84,14 @@
 
 #define I2C_TIMEOUT     (20*1000/CONFIG_USEC_PER_TICK) /* 20 mS */
 
+#ifdef CONFIG_LPC43_I2C0_SUPERFAST
+#  define I2C0_DEFAULT_FREQUENCY 1000000
+#else
+#  define I2C0_DEFAULT_FREQUENCY 400000
+#endif
+
+#define I2C1_DEFAULT_FREQUENCY 400000
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -507,7 +515,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC43_I2C0
   if (port == 0)
     {
-      priv            = &g_i2c0dev;
+      priv           = &g_i2c0dev;
       priv->base     = LPC43_I2C0_BASE;
       priv->irqid    = LPC43M0_IRQ_I2C0;
       priv->baseFreq = BOARD_ABP1_FREQUENCY;
@@ -516,12 +524,12 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 
       regval  = getreg32(LPC43_SCU_SFSI2C0);
       regval |= SCU_SFSI2C0_SCL_EZI | SCU_SFSI2C0_SDA_EZI;
-      if (CONFIG_I2C0_FREQ == 1000000)
-        {
-          /* Super fast mode */
 
-          regval |= SCU_SFSI2C0_SCL_EHD | SCU_SFSI2C0_SDA_EHD;
-        }
+#ifdef CONFIG_LPC43_I2C0_SUPERFAST
+      /* Enable super fast mode */
+
+      regval |= SCU_SFSI2C0_SCL_EHD | SCU_SFSI2C0_SDA_EHD;
+#endif
 
       putreg32(regval, LPC43_SCU_SFSI2C0);
 
@@ -531,7 +539,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       regval |= CCU_CLK_CFG_RUN;
       putreg32(regval, LPC43_CCU1_APB1_I2C0_CFG);
 
-      i2c_setfrequency((struct i2c_dev_s *)priv,CONFIG_I2C0_FREQ);
+      i2c_setfrequency((struct i2c_dev_s *)priv, I2C0_DEFAULT_FREQUENCY);
 
       /* No pin configuration needed */
     }
@@ -558,7 +566,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       lpc43_pin_config(PINCONF_I2C1_SCL);
       lpc43_pin_config(PINCONF_I2C1_SDA);
 
-      i2c_setfrequency(priv,CONFIG_I2C1_FREQ);
+      i2c_setfrequency(priv, I2C1_DEFAULT_FREQUENCY);
 
     }
   else
