@@ -4114,7 +4114,7 @@
 	  group exits.
 	* sched/waitpid.c, task_exithook.c and include/nuttx/sched.h:
 	  Move waitpid data data structures to task group.  Callers of
-	  of waitpid() are now only awakened whent he final thread of the
+	  of waitpid() are now only awakened when the final thread of the
 	  task group exits.
 	* sched/mq_descreate.c, mq_open.c, mq_remove.c, group_leave.c, and
 	  include/nuttx/sched.h:  Move list of opened message queues to
@@ -4533,7 +4533,7 @@
 	* arch/arm/src/lpc17_lcd.c:  Rommel Marcelo got the LPC1788
 	  framebuffer-based LCD working.  Very nice! (2013-4-08).
 	* arch/arm/src/lm/lm_clockconfig.c and configs/lm4f120-launchpad:
-	  Fix handling of the RCC SYSDIV2 field whent the PLL output is
+	  Fix handling of the RCC SYSDIV2 field when the PLL output is
 	  400MHz.  Don't forget to set the USERCC2 bit in the register or
 	  all is for naught (2013-4-09).
 	* configs/zkit-arm-1769/src/up_lcd.c, up_ssp.c, and up_spi.c:
@@ -10814,7 +10814,7 @@
 	  support for an MS5805 altimeter.  From Paul Alexander Patience
 	  (2015-08-12).
 
-7.12 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.12 2015-10-01 Gregory Nutt <gnutt@nuttx.org>
 
 	* fs/vfs/fs_poll.c:  Use sem_tickwait() instead of sem_timedwait()
 	  From Macs Neklyudov (2015-08-13).
@@ -10828,7 +10828,7 @@
 	* include/signal.h and files that include it:  Add si_errno to
 	  siginfo_t (2015-08-14).
 	* drivers/sensors/mx58xx.c and include/nuttx/sensors/ms58xx.h:
-	  General the MS5805 altimeter driver to support other family
+	  Generalize the MS5805 altimeter driver to support other family
 	  members and rename to ms58xx. From Paul Alexander Patience
 	  (2015-08-14).
 	* Network drivers. Fix bug in tun interface driver.  From Max
@@ -10866,12 +10866,12 @@
 	  as defined in the standard. Original implementation used that
 	  for numeric addresses but for DNS lookup returned pointer to
 	  whole sockaddr_in or sockaddr_in6.  From Pavel Pisa  (2015-08-21).
-	* tools/mksymtab: declare g_symtab array as conts to occupy RO
+	* tools/mksymtab: declare g_symtab array as const to occupy RO
 	  section (Flash).  From Pavel Pisa (2015-08-23).
 	* libc/libc.csv and syscalls/syscalls.csv:  Define some symbol
 	  export conditions, correct errno and add sleep and usleep. From
 	  Pavel Pisa (2015-08-23).
-	* net/ ande include/nuttx/net:  Remove references to PPP as a
+	* net/ and include/nuttx/net:  Remove references to PPP as a
 	  link layer protocol (2015-08-24).
 	* net/, drivers/net, and include/net:  Add definitions to support
 	  a local loopback device and link layer (2015-08-24).
@@ -10889,7 +10889,7 @@
 	  with the SAMV71 QSPI hardware (2015-08-25).
 	* drivers/rwbuffer.c: Fix some logic errors.  From Dmitry Nikolaev
 	  via Juha Niskanen (2015-08-26).
-	* net/socket and net/tcp: Fix a problem in whent there are multiple
+	* net/socket and net/tcp: Fix a problem in when there are multiple
 	  network devices.  Polls were being sent to all TCP sockets before.
 	  This is not good because it means that packets may sometimes be
 	  sent out on the wrong device.  That is inefficient because it
@@ -10908,7 +10908,7 @@
 	* fs/romfs: One allocation was not being freed if there was a
 	  subsequent failure to allocation I/O buffers resulting in a memory
 	  leak on certain error conditions.  From Bruno Herrera (2015-08-30).
-	* arch/arm/src/up_iternal.h and several ARM Make.defs files:  In the
+	* arch/arm/src/up_internal.h and several ARM Make.defs files:  In the
 	  original implementation, !defined(CONFIG_ARMV7M_CMNVECTOR) was a
 	  sufficient test to determine if lazy floating point register saving
 	  was being used.  But recents changes added common lazy register as
@@ -10924,7 +10924,7 @@
 	* libc/math/lib_asin.c: The function did not convert for some input
 	  values.  Asin did not convert for values which do not belong to the
 	  domain of the function. But aside of that the function also did not
-	  convert for sine allowed values.  I achieved a conversion of the
+	  converge for some allowed values.  I achieved a conversion of the
 	  function by reducing the DBL_EPSION and by checking if the input
 	  value is in the domain of the function. This is a fix for the
 	  problem but the function should always terminate after a given
@@ -10933,7 +10933,7 @@
 	  Averyanov (2015-09-02).
 	* arch/arm/src/lpc43xx/lpc43_ethernet.c: Add Ethernet support.  From
 	  Ilya Averyanov (2015-09-02).
-	* net/tcp:  The logic that binds a specific networkd device to
+	* net/tcp:  The logic that binds a specific network device to
 	  a connection was faulty for the case of multiple network
 	  devices.  On bind(), the local address should be used to associate
 	  a device with the connection (if the local address is not INADDR_ANY);
@@ -10959,12 +10959,12 @@
 	  Averyanov (2015-09-07).
 	* arch/arm/src/sama5: Separate memory mapping tables for SAMA5D2, 3,
 	  and 4 (2015-09-08).
-	* libc/net/lib_shutdown.c:  Add an empty implementatino of the
+	* libc/net/lib_shutdown.c:  Add an empty implementation of the
 	  standard shutdown function.  This provides only the framework for
 	  the shutdown function; the internal logic is not included
 	  (2015-09-09).
-	* configs/nucleo-f303re: Support for the STMicro Nucleo F303ERE board
-	  from Paul Alexander Patience (2014-09-10).
+	* configs/nucleo-f303re: Support for the STMicro Nucleo F303RE board
+	  from Paul Alexander Patience (2015-09-10).
 	* arch/arm/src/lpc43xx/lpc32_ehci.c and .h:  LPC43xx EHCI driver from
 	  Ilya Averyanov (2015-09-10).
 	* ARMv7-M, all "lazy" interrupt stack logic.  Assembly instruction
@@ -10976,8 +10976,8 @@
 	* drivers/power/battery_gauge.c and include/nuttx/power/battery_gauge.h:
 	  battery.c/h renamed to batter_gauge.c/.h since it really only
 	  implements a battery fuel gauge.  From Alan Carvalho de Assis (2015-09-19).
-	* drivers/power/battery_charter.c and include/nuttx/power/batter_charger.h:
-	  Add a new frame to support a batter charger interface.  From Alan
+	* drivers/power/battery_charger.c and include/nuttx/power/batter_charger.h:
+	  Add a new framework to support a batter charger interface.  From Alan
 	  Carvalho de Assis (2015-09-19).
 	* drivers/power/bq2425x.c and .h: Battery Charger: Add BQ24250 driver.
 	  From Alan Carvalho de Assis (2015-09-20).
@@ -11003,3 +11003,5 @@
 	* sched/wqueue/kwork_queue.c and libc/wqueue/work_queue.c: Logic that
 	  sets the queued indication and the logic that does the actual queuing
 	  must be atomic (2015-09-20).
+
+7.13 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
