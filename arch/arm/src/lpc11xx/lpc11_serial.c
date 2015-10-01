@@ -177,14 +177,14 @@ static uart_dev_t g_uart0port =
 
 /* Which UART with be tty0/console and which tty1? tty2? tty3? */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart0port     /* UART0=console */
 #    define TTYS0_DEV       g_uart0port     /* UART0=ttyS0 */
 #  endif
 #else /* No console */
 #  define TTYS0_DEV       g_uart0port       /* UART0=ttyS0 */
-#endif /*HAVE_CONSOLE*/
+#endif /* HAVE_SERIAL_CONSOLE */
 
 /****************************************************************************
  * Inline Functions
@@ -990,7 +990,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   uint32_t ier;
   up_disableuartint(priv, &ier);
@@ -1006,7 +1006,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
 

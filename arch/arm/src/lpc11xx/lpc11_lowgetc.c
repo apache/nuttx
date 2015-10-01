@@ -115,7 +115,7 @@ int lpc11_lowgetc(void)
 {
   uint8_t ch = 0;
 
-#if defined HAVE_UART && defined HAVE_CONSOLE
+#if defined HAVE_UART && defined HAVE_SERIAL_CONSOLE
   /* Wait while the Receiver Data Ready (RDR) is indicating a "empty" FIFO to
    * assure that we have data in the buffer to read.
    */
