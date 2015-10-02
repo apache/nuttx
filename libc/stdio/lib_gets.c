@@ -67,7 +67,7 @@
  *   This API should not be used because it is inherently unsafe.  Consider
  *   using fgets which is safer and slightly more efficient.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 FAR char *gets(FAR char *s)
 {

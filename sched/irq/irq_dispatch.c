@@ -77,7 +77,7 @@
  *   order to dispatch an interrupt to the appropriate, registered handling
  *   logic.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void irq_dispatch(int irq, FAR void *context)
 {

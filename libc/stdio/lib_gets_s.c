@@ -77,7 +77,7 @@
  *   characters from stdin until new-line character, end-of-file condition,
  *   or read error.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 FAR char *gets_s(FAR char *s, rsize_t n)
 {

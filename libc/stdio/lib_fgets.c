@@ -65,7 +65,7 @@
  *   buffer.  A null terminator is stored after the last character in the
  *   buffer.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 char *fgets(FAR char *buf, int buflen, FILE *stream)
 {

@@ -274,7 +274,7 @@ errout:
   return ERROR;
 }
 
-/***************************************************************************
+/****************************************************************************
  *
  * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGHCLD
  * signal.  It can also handle the pid == (pid_t)-1 arguement.  This is
@@ -285,7 +285,7 @@ errout:
  * lost (or to have the data in the struct siginfo to be overwritten by
  * the next signal).
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #else
 pid_t waitpid(pid_t pid, int *stat_loc, int options)

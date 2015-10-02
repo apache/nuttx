@@ -92,7 +92,7 @@
  *   'stream' until an EOF or a newline encountered or until a read error
  *   occurs.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 static void consume_eol(FILE *stream, bool consume)
 {
@@ -139,7 +139,7 @@ static void consume_eol(FILE *stream, bool consume)
  *   until a read error occurs.  Otherwise, lib_fgets() returns with the
  *   remaining of the incoming stream buffer.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
                     bool keepnl, bool consume)
