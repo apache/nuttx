@@ -42,7 +42,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 char *strpbrk(const char *str, const char *charset)

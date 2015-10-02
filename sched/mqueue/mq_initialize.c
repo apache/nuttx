@@ -62,7 +62,7 @@ struct mq_des_block_s
 };
 
 /************************************************************************
- * Public Variables
+ * Public Data
  ************************************************************************/
 
 /* The g_msgfree is a list of messages that are available for general

@@ -172,7 +172,7 @@ static const uint8_t g_direntrycount = sizeof(g_direntry) /
                       sizeof(struct smartfs_procfs_entry_s);
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See include/nutts/fs/procfs.h

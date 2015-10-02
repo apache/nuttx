@@ -122,7 +122,7 @@ static int     fat_stat(struct inode *mountpt, const char *relpath,
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly extern'ed there.

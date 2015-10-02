@@ -70,7 +70,7 @@ typedef int (*xcpt_t)(int irq, FAR void *context);
 #include <arch/irq.h>
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

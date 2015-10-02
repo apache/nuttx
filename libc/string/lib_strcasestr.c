@@ -66,7 +66,7 @@ static FAR char *strcasechr(FAR const char *s, int uc)
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 FAR char *strcasestr(FAR const char *str, FAR const char *substr)

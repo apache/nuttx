@@ -42,7 +42,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 FAR char *strstr(FAR const char *str, FAR const char *substr)

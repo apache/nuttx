@@ -117,7 +117,7 @@ static uint8_t  g_seminitialized = FALSE;
 static sem_t    g_sem;
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.

@@ -42,7 +42,7 @@
 #include <string.h>
 
 /************************************************************************
- * Global Functions
+ * Public Functions
  ************************************************************************/
 
 /* The strrchr() function returns a pointer to the last

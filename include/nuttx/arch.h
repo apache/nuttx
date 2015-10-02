@@ -120,7 +120,7 @@ typedef CODE void (*sig_deliver_t)(FAR struct tcb_s *tcb);
 typedef CODE void (*phy_enable_t)(bool enable);
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN

@@ -79,7 +79,7 @@ struct inode_sem_s
 static struct inode_sem_s g_inode_sem;
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 FAR struct inode *g_root_inode = NULL;

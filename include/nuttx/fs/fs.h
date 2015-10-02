@@ -352,7 +352,7 @@ typedef int (*foreach_mountpoint_t)(FAR const char *mountpoint,
 #endif
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN

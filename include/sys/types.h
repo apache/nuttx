@@ -263,7 +263,7 @@ typedef CODE int (*main_t)(int argc, char *argv[]);
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __INCLUDE_SYS_TYPES_H */

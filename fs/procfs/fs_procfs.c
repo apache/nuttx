@@ -183,7 +183,7 @@ static int     procfs_stat(FAR struct inode *mountpt,
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.

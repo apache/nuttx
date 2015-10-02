@@ -111,7 +111,7 @@ typedef int (*foreach_inode_t)(FAR struct inode *node,
                                FAR void *arg);
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN

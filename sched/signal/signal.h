@@ -117,7 +117,7 @@ struct sigq_s
 typedef struct sigq_s sigq_t;
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /* The g_sigfreeaction data structure is a list of available signal action

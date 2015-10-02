@@ -97,7 +97,7 @@ static int     mtd_stat(FAR const char *relpath, FAR struct stat *buf);
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.
