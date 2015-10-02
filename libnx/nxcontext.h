@@ -51,7 +51,7 @@
 #include <nuttx/streams.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The NuttX NX library an be build in two modes: (1) as a standard, C-library
