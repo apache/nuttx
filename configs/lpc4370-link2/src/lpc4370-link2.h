@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpc4370-LINK2/src/lpc4370-LINK2.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,3 +93,4 @@
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H */
+

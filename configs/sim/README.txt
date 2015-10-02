@@ -830,7 +830,7 @@ unionfs
 ustream
 
   This is the same as the nsh configuration except that it includes
-  two addition build in applications:  server and client.  These
+  two addition built in applications:  server and client.  These
   applications are provided by the test at apps/examples/ustream.
   This configuration enables local, Unix domain sockets and supports
   the test of the stream sockets.

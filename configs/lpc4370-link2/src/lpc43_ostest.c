@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/lpc4357-evb/src/lpc43_ostest.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,3 +111,4 @@ bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
 }
 
 #endif /* HAVE_FPU */
+

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/lpc4357-evb/src/lpc43_nsh.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -147,3 +147,4 @@ int board_app_initialize(void)
 
   return nsh_spifi_initialize();
 }
+

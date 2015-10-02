@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/lpc4357-evb/src/lpc43_boot.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,3 +79,4 @@ void lpc43_boardinitialize(void)
   board_led_initialize();
 #endif
 }
+
