@@ -400,7 +400,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)SPDR;
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

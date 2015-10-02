@@ -63,7 +63,7 @@ struct section_mapping_s
 };
 
 /************************************************************************************
- * Public Variables
+ * Public Data
  ************************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */

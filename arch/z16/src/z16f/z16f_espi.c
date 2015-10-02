@@ -755,7 +755,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 }
 
-/***************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

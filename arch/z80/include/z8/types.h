@@ -100,7 +100,7 @@ typedef _uint8_t           irqstate_t;
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_Z80_INCLUDE_Z8_IRQ_H */

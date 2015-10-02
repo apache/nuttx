@@ -1437,7 +1437,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 }
 #endif
 
-/*************************************************************************
+/****************************************************************************
  * Name: ssi_sndblock
  *
  * Description:

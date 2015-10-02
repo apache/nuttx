@@ -91,7 +91,7 @@ typedef unsigned int       irqstate_t;
 #endif /* __ASSEMBLY__ */
 
 /************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ************************************************************************/
 
 #endif /* __ARCH_X86_INCLUDE_I486_TYPES_H */

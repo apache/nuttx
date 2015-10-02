@@ -64,7 +64,7 @@
 #define INITEE_EE  (MMC_INITEE_EE(HCS12_EEPROM_BASE)|MMC_INITEE_EEON)
 
 /****************************************************************************
- * Global Symbols
+ * Public Symbols
  ****************************************************************************/
 
 	.file		"m9s12_start.S"

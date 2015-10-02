@@ -1396,7 +1396,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   DEBUGASSERT(unsent == 0);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_exchange (with DMA capability)
  *
  * Description:
@@ -1481,7 +1481,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 }
 #endif /* CONFIG_EFM32_SPI_DMA */
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

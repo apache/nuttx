@@ -444,7 +444,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)getreg32(LPC11_SPI_DR);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

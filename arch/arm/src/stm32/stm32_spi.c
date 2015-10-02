@@ -1360,7 +1360,7 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
 }
 #endif /* !CONFIG_STM32_SPI_DMA || CONFIG_STM32_DMACAPABLE */
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_exchange (with DMA capability)
  *
  * Description:
@@ -1421,7 +1421,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 }
 #endif /* CONFIG_STM32_SPI_DMA */
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

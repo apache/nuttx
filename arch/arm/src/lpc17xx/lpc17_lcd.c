@@ -711,7 +711,7 @@ int up_fbinitialize(void)
  * Returned value:
  *   Reference to the framebuffer object (NULL on failure)
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 {

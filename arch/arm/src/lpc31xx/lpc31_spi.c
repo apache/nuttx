@@ -720,7 +720,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t word)
   return spi_readword(priv);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_exchange
  *
  * Description:
@@ -833,7 +833,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

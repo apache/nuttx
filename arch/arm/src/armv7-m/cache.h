@@ -237,7 +237,7 @@ static inline void arch_dcache_writethrough(void)
 #endif
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus

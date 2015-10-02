@@ -129,7 +129,7 @@
 #  define MPU_RASR_XN           (1 << 28) /* Bit 28: Instruction access disable */
 
 /************************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__

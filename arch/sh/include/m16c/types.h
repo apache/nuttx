@@ -92,7 +92,7 @@ typedef _uint16_t          irqstate_t;
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_SH_INCLUDE_M16C_TYPES_H */

@@ -328,7 +328,7 @@ static inline uint32_t ssp_getreg(FAR struct lpc11_sspdev_s *priv,
  * Returned Value:
  *   None
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 static inline void ssp_putreg(FAR struct lpc11_sspdev_s *priv,
                               uint8_t offset, uint32_t value)
@@ -635,7 +635,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)regval;
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: ssp_sndblock
  *
  * Description:

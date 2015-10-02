@@ -2882,7 +2882,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  * Returned Value:
  *   True: Data is available
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not Used */
 bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)

@@ -1653,7 +1653,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 }
 #endif /* CONFIG_SAMV7_SPI_DMA */
 
-/***************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

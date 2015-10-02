@@ -183,7 +183,7 @@ static inline void arch_flush_dcache(uintptr_t start, uintptr_t end)
 }
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus

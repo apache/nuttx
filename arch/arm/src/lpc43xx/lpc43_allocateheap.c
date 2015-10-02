@@ -253,14 +253,14 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_size = CONFIG_RAM_END - g_idle_topstack;
 }
 
-/************************************************************************
+/****************************************************************************
  * Name: up_addregion
  *
  * Description:
  *   Memory may be added in non-contiguous chunks.  Additional chunks are
  *   added by calling this function.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)

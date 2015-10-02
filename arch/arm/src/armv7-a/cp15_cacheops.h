@@ -875,7 +875,7 @@ static inline void cp15_cleaninvalidate_dcacheline(unsigned int setway)
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
