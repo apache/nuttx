@@ -11008,3 +11008,6 @@
 
 	* libc/stdlib/lib_bsearch.c and include/stdlib.h:  Add the bsearch()
 	  function from NetBSD (2015-10-02).
+	* libc/stdlib/lib_qsort.c and include/stdlib.h:  Make coding style
+	  more conformant, take description from OpenGroup.org, rename formal
+	  parameters to match names used on OpenGroup.org (2015-10-02).

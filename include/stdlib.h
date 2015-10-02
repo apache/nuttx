@@ -229,7 +229,7 @@ int      mkstemp(FAR char *path_template);
 
 /* Sorting */
 
-void     qsort(FAR void *base, size_t nmemb, size_t size,
+void     qsort(FAR void *base, size_t nel, size_t width,
                int (*compar)(FAR const void *, FAR const void *));
 
 /* Binary search */

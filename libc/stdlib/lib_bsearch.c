@@ -49,8 +49,6 @@
  * Name: bsearch
  *
  * Description:
- *   Per OpenGroup.org:
- *
  *   The bsearch() function will search an array of nel objects, the initial
  *   element of which is pointed to by 'base', for an element that matches
  *   the object pointed to by 'key'. The size of each element in the array
@@ -82,6 +80,8 @@
  *   all the elements that compare less than, all the elements that compare
  *   equal to, and all the elements that compare greater than the key
  *   object, in that order.
+ *
+ *   (Based on description from OpenGroup.org).
  *
  * Returned Value:
  *   The bsearch() function will return a pointer to a matching member of
