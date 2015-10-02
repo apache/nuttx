@@ -11005,3 +11005,6 @@
 	  must be atomic (2015-09-20).
 
 7.13 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* libc/stdlib/lib_bsearch.c and include/stdlib.h:  Add the bsearch()
+	  function from NetBSD (2015-10-02).

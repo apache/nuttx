@@ -200,6 +200,12 @@ FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
+struct mallinfo mallinfo(void);
+#else
+int      mallinfo(struct mallinfo *info);
+#endif
+
 /* Arithmetic */
 
 int      abs(int j);
@@ -226,11 +232,11 @@ int      mkstemp(FAR char *path_template);
 void     qsort(FAR void *base, size_t nmemb, size_t size,
                int (*compar)(FAR const void *, FAR const void *));
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-struct mallinfo mallinfo(void);
-#else
-int      mallinfo(struct mallinfo *info);
-#endif
+/* Binary search */
+
+FAR void *bsearch(FAR const void *key, FAR const void *base, size_t nel,
+                  size_t width, CODE int (*compar)(FAR const void *,
+                  FAR const void *));
 
 #undef EXTERN
 #if defined(__cplusplus)
