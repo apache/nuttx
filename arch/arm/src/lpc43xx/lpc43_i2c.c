@@ -356,7 +356,7 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, i
   priv->msgs = msgs;
   priv->nmsg = count;
 
-  ret = count - i2c_start(priv);
+  ret = i2c_start(priv);
 
   return ret;
 }
