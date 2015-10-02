@@ -790,7 +790,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint8_t)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

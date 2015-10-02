@@ -82,7 +82,7 @@
  *   Once booted these functions control the 4 isolated FET outputs from the
  *   master BMS controller
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void nucleus_bms_relay1(enum output_state state)
 {
@@ -108,13 +108,13 @@ void nucleus_bms_relay4(enum output_state state)
   lpc17_gpiowrite(NUCLEUS_BMS_RELAY4, value);
 }
 
-/***************************************************************************
+/****************************************************************************
  * Name: up_relayinit
  *
  * Description:
  *  This function is called on boot to init the GPIO for relay control
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void up_relayinit(void)
 {

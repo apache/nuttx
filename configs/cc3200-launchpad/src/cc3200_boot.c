@@ -107,14 +107,14 @@ void tiva_boardinitialize(void)
   cc3200_ledinit();
 }
 
-/************************************************************************
+/****************************************************************************
  * Name: up_addregion
  *
  * Description:
  *   Memory may be added in non-contiguous chunks.  Additional chunks are
  *   added by calling this function.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
 

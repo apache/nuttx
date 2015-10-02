@@ -423,7 +423,7 @@ static int stm32_ili9341_initialize(void)
  *
  * Return:
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -448,7 +448,7 @@ void board_lcd_uninitialize(void)
  * Return:
  *   Reference to the LCD object if exist otherwise NULL
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
