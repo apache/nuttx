@@ -131,7 +131,7 @@ FAR void *composite_initialize(void);
  * Returned Value:
  *   None
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void composite_uninitialize(FAR void *handle);
 

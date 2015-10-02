@@ -70,7 +70,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************
+/****************************************************************************
  * Name: sendfile
  *
  * Description:
@@ -112,7 +112,7 @@ extern "C"
  *   EINVAL - Bad input parameters.
  *   ENOMEM - Could not allocated an I/O buffer
  *
- ************************************************************************/
+ ****************************************************************************/
 
 ssize_t sendfile(int outfd, int infd, FAR off_t *offset, size_t count);
 

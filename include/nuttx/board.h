@@ -351,7 +351,7 @@ int board_ioctl(unsigned int cmd, uintptr_t arg);
  *                            multiple LCD devices.
  *   board_lcd_uninitialize - Uninitialize the LCD support
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD
 struct lcd_dev_s; /* Forward reference */

@@ -1604,7 +1604,7 @@ char up_romgetc(FAR const char *ptr);
  *   Some device drivers may require that the plaform-specific logic
  *   provide these timing loops for short delays.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void up_mdelay(unsigned int milliseconds);
 void up_udelay(useconds_t microseconds);
@@ -1623,7 +1623,7 @@ void up_udelay(useconds_t microseconds);
  *   definition only provides the 'contract' between application
  *   specific C++ code and platform-specific toolchain support
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
 void up_cxxinitialize(void);
@@ -1698,7 +1698,7 @@ void sched_timer_expiration(void);
 void sched_alarm_expiration(FAR const struct timespec *ts);
 #endif
 
-/************************************************************************
+/****************************************************************************
  * Name: sched_process_cpuload
  *
  * Description:
@@ -1714,7 +1714,7 @@ void sched_alarm_expiration(FAR const struct timespec *ts);
  *   This function is called from a timer interrupt handler with all
  *   interrupts disabled.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
 void weak_function sched_process_cpuload(void);
@@ -1728,7 +1728,7 @@ void weak_function sched_process_cpuload(void);
  *   order to dispatch an interrupt to the appropriate, registered handling
  *   logic.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void irq_dispatch(int irq, FAR void *context);
 

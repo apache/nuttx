@@ -372,7 +372,7 @@ extern "C"
  *                       multiple planes of video.
  *   up_fbuninitialize - Uninitialize the framebuffer support
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 int up_fbinitialize(void);
 FAR struct fb_vtable_s *up_fbgetvplane(int vplane);

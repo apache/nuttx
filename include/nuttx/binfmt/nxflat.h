@@ -249,7 +249,7 @@ int nxflat_unload(struct nxflat_loadinfo_s *loadinfo);
 /****************************************************************************
  * These are APIs used internally only by NuttX:
  ****************************************************************************/
-/***********************************************************************
+/****************************************************************************
  * Name: nxflat_initialize
  *
  * Description:
@@ -262,7 +262,7 @@ int nxflat_unload(struct nxflat_loadinfo_s *loadinfo);
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- ***********************************************************************/
+ ****************************************************************************/
 
 int nxflat_initialize(void);
 
