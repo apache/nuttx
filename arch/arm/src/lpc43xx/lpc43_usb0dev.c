@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_usbdev.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
@@ -41,11 +41,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -76,9 +76,9 @@
 #include "lpc43_cgu.h"
 #include "lpc43_rgu.h"
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Configuration ***************************************************************/
 
@@ -272,9 +272,9 @@ struct lpc43_dqh_s
 #define lpc43_rqempty(ep)            ((ep)->head == NULL)
 #define lpc43_rqpeek(ep)             ((ep)->head)
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 
 /* A container for a request so that the request may be retained in a list */
 
@@ -351,9 +351,9 @@ struct lpc43_usbdev_s
 #define EP0STATE_DATA_IN          8
 #define EP0STATE_DATA_OUT         9
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -441,9 +441,9 @@ static int  lpc43_wakeup(struct usbdev_s *dev);
 static int  lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered);
 static int  lpc43_pullup(struct usbdev_s *dev, bool enable);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Since there is only a single USB interface, all status information can be
  * be simply retained in a single global instance.
@@ -479,21 +479,21 @@ static const struct usbdev_ops_s g_devops =
   .pullup      = lpc43_pullup,
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Public Data
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_getreg
  *
  * Description:
  *   Get the contents of an LPC433x register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LPC43_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static uint32_t lpc43_getreg(uint32_t addr)
@@ -549,13 +549,13 @@ static uint32_t lpc43_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_putreg
  *
  * Description:
  *   Set the contents of an LPC433x register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LPC43_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static void lpc43_putreg(uint32_t val, uint32_t addr)
@@ -570,13 +570,13 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_clrbits
  *
  * Description:
  *   Clear bits in a register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_clrbits(uint32_t mask, uint32_t addr)
 {
@@ -585,13 +585,13 @@ static inline void lpc43_clrbits(uint32_t mask, uint32_t addr)
   lpc43_putreg(reg, addr);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_setbits
  *
  * Description:
  *   Set bits in a register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_setbits(uint32_t mask, uint32_t addr)
 {
@@ -600,13 +600,13 @@ static inline void lpc43_setbits(uint32_t mask, uint32_t addr)
   lpc43_putreg(reg, addr);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_chgbits
  *
  * Description:
  *   Change bits in a register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_chgbits(uint32_t mask, uint32_t val, uint32_t addr)
 {
@@ -616,13 +616,13 @@ static inline void lpc43_chgbits(uint32_t mask, uint32_t val, uint32_t addr)
   lpc43_putreg(reg, addr);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_rqdequeue
  *
  * Description:
  *   Remove a request from an endpoint request queue
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct lpc43_req_s *lpc43_rqdequeue(FAR struct lpc43_ep_s *privep)
 {
@@ -642,13 +642,13 @@ static FAR struct lpc43_req_s *lpc43_rqdequeue(FAR struct lpc43_ep_s *privep)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_rqenqueue
  *
  * Description:
  *   Add a request from an endpoint request queue
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static bool lpc43_rqenqueue(FAR struct lpc43_ep_s *privep,
                               FAR struct lpc43_req_s *req)
@@ -670,13 +670,13 @@ static bool lpc43_rqenqueue(FAR struct lpc43_ep_s *privep,
   return is_empty;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_writedtd
  *
  * Description:
  *   Initialise a DTD to transfer the data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_writedtd(struct lpc43_dtd_s *dtd, const uint8_t *data, uint32_t nbytes)
 {
@@ -690,13 +690,13 @@ static inline void lpc43_writedtd(struct lpc43_dtd_s *dtd, const uint8_t *data, 
   dtd->xfer_len  = nbytes;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_queuedtd
  *
  * Description:
  *   Add the DTD to the device list
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_queuedtd(uint8_t epphy, struct lpc43_dtd_s *dtd)
 {
@@ -714,13 +714,13 @@ static void lpc43_queuedtd(uint8_t epphy, struct lpc43_dtd_s *dtd)
     ;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ep0xfer
  *
  * Description:
  *   Schedule a short transfer for Endpoint 0 (IN or OUT)
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_ep0xfer(uint8_t epphy, uint8_t *buf, uint32_t nbytes)
 {
@@ -731,13 +731,13 @@ static inline void lpc43_ep0xfer(uint8_t epphy, uint8_t *buf, uint32_t nbytes)
   lpc43_queuedtd(epphy, dtd);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_readsetup
  *
  * Description:
  *   Read a Setup packet from the DTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 static void lpc43_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl)
 {
   struct lpc43_dqh_s *dqh = &g_qh[epphy];
@@ -767,13 +767,13 @@ static void lpc43_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl)
   lpc43_putreg (LPC43_ENDPTMASK(LPC43_EP0_OUT), LPC43_USBDEV_ENDPTSETUPSTAT);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_set_address
  *
  * Description:
  *   Set the devices USB address
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_set_address(struct lpc43_usbdev_s *priv, uint16_t address)
 {
@@ -784,13 +784,13 @@ static inline void lpc43_set_address(struct lpc43_usbdev_s *priv, uint16_t addre
                 LPC43_USBDEV_DEVICEADDR);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_flushep
  *
  * Description:
  *   Flush any primed descriptors from this ep
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_flushep(struct lpc43_ep_s *privep)
 {
@@ -805,13 +805,13 @@ static void lpc43_flushep(struct lpc43_ep_s *privep)
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_progressep
  *
  * Description:
  *   Progress the Endpoint by priming the first request into the queue head
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_progressep(struct lpc43_ep_s *privep)
 {
@@ -886,13 +886,13 @@ static int lpc43_progressep(struct lpc43_ep_s *privep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_abortrequest
  *
  * Description:
  *   Discard a request
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_abortrequest(struct lpc43_ep_s *privep,
                                       struct lpc43_req_s *privreq,
@@ -909,13 +909,13 @@ static inline void lpc43_abortrequest(struct lpc43_ep_s *privep,
   privreq->req.callback(&privep->ep, &privreq->req);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_reqcomplete
  *
  * Description:
  *   Handle termination of the request at the head of the endpoint request queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_reqcomplete(struct lpc43_ep_s *privep,
                               struct lpc43_req_s *privreq, int16_t result)
@@ -941,13 +941,13 @@ static void lpc43_reqcomplete(struct lpc43_ep_s *privep,
   privep->stalled = stalled;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_cancelrequests
  *
  * Description:
  *   Cancel all pending requests for an endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_cancelrequests(struct lpc43_ep_s *privep, int16_t status)
 {
@@ -964,14 +964,14 @@ static void lpc43_cancelrequests(struct lpc43_ep_s *privep, int16_t status)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epfindbyaddr
  *
  * Description:
  *   Find the physical endpoint structure corresponding to a logic endpoint
  *   address
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_ep_s *lpc43_epfindbyaddr(struct lpc43_usbdev_s *priv,
                          uint16_t eplog)
@@ -1007,14 +1007,14 @@ static struct lpc43_ep_s *lpc43_epfindbyaddr(struct lpc43_usbdev_s *priv,
   return NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_dispatchrequest
  *
  * Description:
  *   Provide unhandled setup actions to the class driver. This is logically part
  *   of the USB interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_dispatchrequest(struct lpc43_usbdev_s *priv,
                                     const struct usb_ctrlreq_s *ctrl)
@@ -1038,13 +1038,13 @@ static void lpc43_dispatchrequest(struct lpc43_usbdev_s *priv,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ep0configure
  *
  * Description:
  *   Reset Usb engine
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_ep0configure(struct lpc43_usbdev_s *priv)
 {
@@ -1066,13 +1066,13 @@ static void lpc43_ep0configure(struct lpc43_usbdev_s *priv)
   lpc43_setbits (USBDEV_ENDPTCTRL0_RXE | USBDEV_ENDPTCTRL0_TXE, LPC43_USBDEV_ENDPTCTRL0);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_usbreset
  *
  * Description:
  *   Reset Usb engine
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_usbreset(struct lpc43_usbdev_s *priv)
 {
@@ -1148,13 +1148,13 @@ static void lpc43_usbreset(struct lpc43_usbdev_s *priv)
          LPC43_USBDEV_USBINTR);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_setstate
  *
  * Description:
  *   Sets the EP0 state and manages the NAK interrupts
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_ep0state(struct lpc43_usbdev_s *priv, uint16_t state)
 {
@@ -1176,14 +1176,14 @@ static inline void lpc43_ep0state(struct lpc43_usbdev_s *priv, uint16_t state)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ep0setup
  *
  * Description:
  *   USB Ctrl EP Setup Event. This is logically part of the USB interrupt
  *   handler.  This event occurs when a setup packet is receive on EP0 OUT.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
 {
@@ -1528,13 +1528,13 @@ static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ep0complete
  *
  * Description:
  *   Transfer complete handler for Endpoint 0
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_ep0complete(struct lpc43_usbdev_s *priv, uint8_t epphy)
 {
@@ -1611,13 +1611,13 @@ static void lpc43_ep0complete(struct lpc43_usbdev_s *priv, uint8_t epphy)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ep0nak
  *
  * Description:
  *   Handle a NAK interrupt on EP0
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_ep0nak(struct lpc43_usbdev_s *priv, uint8_t epphy)
 {
@@ -1652,14 +1652,14 @@ static void lpc43_ep0nak(struct lpc43_usbdev_s *priv, uint8_t epphy)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epcomplete
  *
  * Description:
  *   Transfer complete handler for Endpoints other than 0
  *   returns whether the request at the head has completed
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 bool lpc43_epcomplete(struct lpc43_usbdev_s *priv, uint8_t epphy)
 {
@@ -1727,13 +1727,13 @@ bool lpc43_epcomplete(struct lpc43_usbdev_s *priv, uint8_t epphy)
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_usbinterrupt
  *
  * Description:
  *   USB interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_usbinterrupt(int irq, FAR void *context)
 {
@@ -1913,11 +1913,11 @@ static int lpc43_usbinterrupt(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Endpoint operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epconfigure
  *
  * Description:
@@ -1930,7 +1930,7 @@ static int lpc43_usbinterrupt(int irq, FAR void *context)
  *          needs to take special action when all of the endpoints have been
  *          configured.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
                                FAR const struct usb_epdesc_s *desc,
@@ -2012,13 +2012,13 @@ static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
    return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epdisable
  *
  * Description:
  *   The endpoint will no longer be used
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_epdisable(FAR struct usbdev_ep_s *ep)
 {
@@ -2057,13 +2057,13 @@ static int lpc43_epdisable(FAR struct usbdev_ep_s *ep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epallocreq
  *
  * Description:
  *   Allocate an I/O request
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
 {
@@ -2089,13 +2089,13 @@ static FAR struct usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
   return &privreq->req;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epfreereq
  *
  * Description:
  *   Free an I/O request
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
@@ -2113,13 +2113,13 @@ static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   kmm_free(privreq);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epallocbuffer
  *
  * Description:
  *   Allocate an I/O buffer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
 static void *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
@@ -2134,13 +2134,13 @@ static void *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epfreebuffer
  *
  * Description:
  *   Free an I/O buffer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
 static void lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
@@ -2155,13 +2155,13 @@ static void lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epsubmit
  *
  * Description:
  *   Submit an I/O request to the endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
@@ -2227,13 +2227,13 @@ static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epcancel
  *
  * Description:
  *   Cancel an I/O request previously sent to an endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
@@ -2263,13 +2263,13 @@ static int lpc43_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_epstall
  *
  * Description:
  *   Stall or resume and endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 {
@@ -2304,11 +2304,11 @@ static int lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Device operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_allocep
  *
  * Description:
@@ -2322,7 +2322,7 @@ static int lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev, uint8_t eplog,
                                              bool in, uint8_t eptype)
@@ -2435,13 +2435,13 @@ static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev, uint8_t e
   return NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_freeep
  *
  * Description:
  *   Free the previously allocated endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
 {
@@ -2461,13 +2461,13 @@ static void lpc43_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_getframe
  *
  * Description:
  *   Returns the current frame number
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_getframe(struct usbdev_s *dev)
 {
@@ -2489,13 +2489,13 @@ static int lpc43_getframe(struct usbdev_s *dev)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_wakeup
  *
  * Description:
  *   Tries to wake up the host connected to this device
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_wakeup(struct usbdev_s *dev)
 {
@@ -2509,13 +2509,13 @@ static int lpc43_wakeup(struct usbdev_s *dev)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_selfpowered
  *
  * Description:
  *   Sets/clears the device selfpowered feature
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered)
 {
@@ -2535,13 +2535,13 @@ static int lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_pullup
  *
  * Description:
  *   Software-controlled connect to/disconnect from USB host
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_pullup(struct usbdev_s *dev, bool enable)
 {
@@ -2561,11 +2561,11 @@ static int lpc43_pullup(struct usbdev_s *dev, bool enable)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_usbinitialize
  *
  * Description:
@@ -2576,7 +2576,7 @@ static int lpc43_pullup(struct usbdev_s *dev, bool enable)
  * - PLL  initialization is not performed here but should been in
  *   the low-level  boot logic:  PLL0 must be configured for operation at 480MHz
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void up_usbinitialize(void)
 {
@@ -2712,9 +2712,9 @@ errout:
   up_usbuninitialize();
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_usbuninitialize
- *******************************************************************************/
+ ****************************************************************************/
 
 void up_usbuninitialize(void)
 {
@@ -2753,14 +2753,14 @@ void up_usbuninitialize(void)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbdev_register
  *
  * Description:
  *   Register a USB device class driver. The class driver's bind() method will be
  *   called to bind it to a USB device driver.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int usbdev_register(struct usbdevclass_driver_s *driver)
 {
@@ -2815,7 +2815,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbdev_unregister
  *
  * Description:
@@ -2823,7 +2823,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
  *   it will first disconnect().  The driver is also requested to unbind() and clean
  *   up any device state, before this procedure finally returns.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {

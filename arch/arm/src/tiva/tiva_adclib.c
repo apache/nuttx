@@ -44,7 +44,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver Library.
- *****************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files

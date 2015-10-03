@@ -1324,7 +1324,7 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
  * Description:
  *   Handle the ep0 state on writes.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 inline static int stm32_wrrequest_ep0(struct stm32_usbdev_s *priv,
                                       struct stm32_ep_s *privep)
@@ -1438,7 +1438,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ep0_rdrequest
  *
  * Description:
@@ -1446,7 +1446,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
  *   is EP0STATE_SETUP_OUT and uppon new incoming data is available in the endpoint
  *   0's buffer.  This function will simply copy the OUT data into ep0data.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int stm32_ep0_rdrequest(struct stm32_usbdev_s *priv)
 {

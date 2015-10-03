@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
  *   Copyright (C) 2010-2012, 2014-2015 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -69,9 +69,9 @@
 #include "lpc17_gpio.h"
 #include "lpc17_ohciram.h"
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Configuration ***************************************************************/
 
@@ -143,9 +143,9 @@
 
 #define TD_DELAY(n) (uint32_t)((n) << GTD_STATUS_DI_SHIFT)
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 
 /* This structure retains the state of the USB host controller */
 
@@ -260,9 +260,9 @@ struct lpc17_list_s
                               /* Variable length buffer data follows */
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -404,9 +404,9 @@ static void lpc17_disconnect(struct usbhost_driver_s *drvr,
 
 static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 
 /* In this driver implementation, support is provided for only a single a single
  * USB device.  All status information can be simply retained in a single global
@@ -437,21 +437,21 @@ static struct lpc17_list_s *g_iofree; /* List of unused I/O buffers */
 static struct lpc17_list_s *g_xfrfree;
 static struct lpc17_xfrinfo_s g_xfrbuffers[CONFIG_LPC17_USBHOST_NPREALLOC];
 
-/*******************************************************************************
+/****************************************************************************
  * Public Data
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_printreg
  *
  * Description:
  *   Print the contents of an LPC17xx register operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -460,13 +460,13 @@ static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_checkreg
  *
  * Description:
  *   Get the contents of an LPC17xx register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -524,13 +524,13 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_getreg
  *
  * Description:
  *   Get the contents of an LPC17xx register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static uint32_t lpc17_getreg(uint32_t addr)
@@ -546,13 +546,13 @@ static uint32_t lpc17_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_putreg
  *
  * Description:
  *   Set the contents of an LPC17xx register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_putreg(uint32_t val, uint32_t addr)
@@ -574,7 +574,7 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_takesem(sem_t *sem)
 {
@@ -596,7 +596,7 @@ static void lpc17_takesem(sem_t *sem)
  * Description:
  *   Get a (possibly unaligned) 16-bit little endian value.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t lpc17_getle16(const uint8_t *val)
 {
@@ -609,7 +609,7 @@ static inline uint16_t lpc17_getle16(const uint8_t *val)
  * Description:
  *   Put a (possibly unaligned) 16-bit little endian value.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static void lpc17_putle16(uint8_t *dest, uint16_t val)
@@ -619,13 +619,13 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_edfree
  *
  * Description:
  *   Return an endpoint descriptor to the free list
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc17_edfree(struct lpc17_ed_s *ed)
 {
@@ -637,7 +637,7 @@ static inline void lpc17_edfree(struct lpc17_ed_s *ed)
   g_edfree     = entry;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_tdalloc
  *
  * Description:
@@ -649,7 +649,7 @@ static inline void lpc17_edfree(struct lpc17_ed_s *ed)
  *     handler
  *   - Protection from re-entrance must be assured by the caller
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc17_gtd_s *lpc17_tdalloc(void)
 {
@@ -671,7 +671,7 @@ static struct lpc17_gtd_s *lpc17_tdalloc(void)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_tdfree
  *
  * Description:
@@ -681,7 +681,7 @@ static struct lpc17_gtd_s *lpc17_tdalloc(void)
  *   - Only called from the WDH interrupt handler (and during initialization).
  *   - Interrupts are disabled in any case.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_tdfree(struct lpc17_gtd_s *td)
 {
@@ -698,7 +698,7 @@ static void lpc17_tdfree(struct lpc17_gtd_s *td)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_tballoc
  *
  * Description:
@@ -708,7 +708,7 @@ static void lpc17_tdfree(struct lpc17_gtd_s *td)
  *   - Never called from an interrupt handler.
  *   - Protection from re-entrance must be assured by the caller
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint8_t *lpc17_tballoc(void)
 {
@@ -720,13 +720,13 @@ static uint8_t *lpc17_tballoc(void)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_tbfree
  *
  * Description:
  *   Return an request/descriptor transfer buffer to the free list
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_tbfree(uint8_t *buffer)
 {
@@ -739,7 +739,7 @@ static void lpc17_tbfree(uint8_t *buffer)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_allocio
  *
  * Description:
@@ -749,7 +749,7 @@ static void lpc17_tbfree(uint8_t *buffer)
  *   - Never called from an interrupt handler.
  *   - Protection from re-entrance must be assured by the caller
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
 static uint8_t *lpc17_allocio(void)
@@ -771,13 +771,13 @@ static uint8_t *lpc17_allocio(void)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_freeio
  *
  * Description:
  *   Return an TD buffer to the free list
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
 static void lpc17_freeio(uint8_t *buffer)
@@ -795,7 +795,7 @@ static void lpc17_freeio(uint8_t *buffer)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_alloc_xfrinfo
  *
  * Description:
@@ -805,7 +805,7 @@ static void lpc17_freeio(uint8_t *buffer)
  *   - Never called from an interrupt handler.
  *   - Protection from re-entrance must be assured by the caller
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc17_xfrinfo_s *lpc17_alloc_xfrinfo(void)
 {
@@ -825,13 +825,13 @@ static struct lpc17_xfrinfo_s *lpc17_alloc_xfrinfo(void)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_freeio
  *
  * Description:
  *   Return an TD buffer to the free list
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_free_xfrinfo(struct lpc17_xfrinfo_s *xfrinfo)
 {
@@ -847,13 +847,13 @@ static void lpc17_free_xfrinfo(struct lpc17_xfrinfo_s *xfrinfo)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_addctrled
  *
  * Description:
  *   Helper function to add an ED to the control list.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_addctrled(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
@@ -885,13 +885,13 @@ static inline int lpc17_addctrled(struct lpc17_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_remctrled
  *
  * Description:
  *   Helper function remove an ED from the control list.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
@@ -967,13 +967,13 @@ static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_addbulked
  *
  * Description:
  *   Helper function to add an ED to the bulk list.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
@@ -1009,13 +1009,13 @@ static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_rembulked
  *
  * Description:
  *   Helper function remove an ED from the bulk list.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
@@ -1089,13 +1089,13 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_getinterval
  *
  * Description:
  *   Convert the endpoint polling interval into a HCCA table increment
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static unsigned int lpc17_getinterval(uint8_t interval)
@@ -1128,14 +1128,14 @@ static unsigned int lpc17_getinterval(uint8_t interval)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_setinttab
  *
  * Description:
  *   Set the interrupt table to the selected value using the provided interval
  *   and offset.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int offset)
@@ -1148,7 +1148,7 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_addinted
  *
  * Description:
@@ -1166,7 +1166,7 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
  *     1. The minimum support polling rate is 2MS, and
  *     2. Some devices may get polled at a much higher rate than they request.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
                                  const struct usbhost_epdesc_s *epdesc,
@@ -1257,7 +1257,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_reminted
  *
  * Description:
@@ -1275,7 +1275,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
  *     1. The minimum support polling rate is 2MS, and
  *     2. Some devices may get polled at a much higher rate than they request.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed)
@@ -1398,13 +1398,13 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_addisoced
  *
  * Description:
  *   Helper functions to add an ED to the periodic table.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
                                   const struct usbhost_epdesc_s *epdesc,
@@ -1416,13 +1416,13 @@ static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
   return -ENOSYS;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_remisoced
  *
  * Description:
  *   Helper functions to remove an ED from the periodic table.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
@@ -1433,14 +1433,14 @@ static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
   return -ENOSYS;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_enqueuetd
  *
  * Description:
  *   Enqueue a transfer descriptor.  Notice that this function only supports
  *   queue on TD per ED.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
                            struct lpc17_ed_s *ed, uint32_t dirpid,
@@ -1480,7 +1480,7 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_wdhwait
  *
  * Description:
@@ -1489,7 +1489,7 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
  *   We do this to minimize race conditions.  This logic would have to be expanded
  *   if we want to have more than one packet in flight at a time!
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
 {
@@ -1516,7 +1516,7 @@ static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_ctrltd
  *
  * Description:
@@ -1528,7 +1528,7 @@ static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
                         uint32_t dirpid, uint8_t *buffer, size_t buflen)
@@ -1620,13 +1620,13 @@ errout_with_xfrinfo:
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_usbinterrupt
  *
  * Description:
  *   USB interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_usbinterrupt(int irq, void *context)
 {
@@ -1906,11 +1906,11 @@ static int lpc17_usbinterrupt(int irq, void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * USB Host Controller Operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_wait
  *
  * Description:
@@ -1933,7 +1933,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_wait(struct usbhost_connection_s *conn,
                       struct usbhost_hubport_s **hport)
@@ -1999,7 +1999,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_enumerate
  *
  * Description:
@@ -2025,7 +2025,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_rh_enumerate(struct usbhost_connection_s *conn,
                               struct usbhost_hubport_s *hport)
@@ -2387,7 +2387,7 @@ static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_alloc
  *
  * Description:
@@ -2417,7 +2417,7 @@ static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_alloc(struct usbhost_driver_s *drvr,
                        uint8_t **buffer, size_t *maxlen)
@@ -2441,7 +2441,7 @@ static int lpc17_alloc(struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_free
  *
  * Description:
@@ -2462,7 +2462,7 @@ static int lpc17_alloc(struct usbhost_driver_s *drvr,
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
@@ -2561,7 +2561,7 @@ static int lpc17_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_ctrlin and lpc17_ctrlout
  *
  * Description:
@@ -2595,7 +2595,7 @@ static int lpc17_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         const struct usb_ctrlreq_s *req,
@@ -2673,7 +2673,7 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_transfer_common
  *
  * Description:
@@ -2697,7 +2697,7 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed, uint8_t *buffer,
@@ -2751,7 +2751,7 @@ static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_dma_alloc
  *
  * Description:
@@ -2774,7 +2774,7 @@ static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
 static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
@@ -2823,7 +2823,7 @@ static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_dma_free
  *
  * Description:
@@ -2846,7 +2846,7 @@ static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
                            struct lpc17_ed_s *ed, uint8_t *userbuffer,
@@ -2879,7 +2879,7 @@ static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_transfer
  *
  * Description:
@@ -2915,7 +2915,7 @@ static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                               uint8_t *buffer, size_t buflen)
@@ -3062,7 +3062,7 @@ errout_with_sem:
   return nbytes;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_asynch_completion
  *
  * Description:
@@ -3080,7 +3080,7 @@ errout_with_sem:
  * Assumptions:
  *   - Called from the interrupt level
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
@@ -3151,7 +3151,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_asynch
  *
  * Description:
@@ -3184,7 +3184,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -3471,7 +3471,7 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_disconnect
  *
  * Description:
@@ -3494,7 +3494,7 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
  *   - Only a single class bound to a single device is supported.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_disconnect(struct usbhost_driver_s *drvr,
                              struct usbhost_hubport_s *hport)
@@ -3503,10 +3503,10 @@ static void lpc17_disconnect(struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Initialization
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc17_ep0init
  *
  * Description:
@@ -3519,7 +3519,7 @@ static void lpc17_disconnect(struct usbhost_driver_s *drvr,
  * Returned Values:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
 {
@@ -3544,11 +3544,11 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
   lpc17_addctrled(priv, EDCTRL);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_usbhost_initialize
  *
  * Description:
@@ -3571,7 +3571,7 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 {

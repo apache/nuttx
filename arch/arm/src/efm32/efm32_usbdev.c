@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_usbdev.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -66,9 +66,9 @@
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_EFM32_OTGFS))
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 /* Configuration ***************************************************************/
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
@@ -278,9 +278,9 @@
 #  define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Overall device state */
 
@@ -468,9 +468,9 @@ struct efm32_usbdev_s
   struct efm32_ep_s       epout[EFM32_NENDPOINTS];
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -649,9 +649,9 @@ static int         efm32_rxfifo_flush(void);
 static void        efm32_swinitialize(FAR struct efm32_usbdev_s *priv);
 static void        efm32_hwinitialize(FAR struct efm32_usbdev_s *priv);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 /* Since there is only a single USB interface, all status information can be
  * be simply retained in a single global instance.
  */
@@ -778,21 +778,21 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 };
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Public Data
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_getreg
  *
  * Description:
  *   Get the contents of an EFM32 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static uint32_t efm32_getreg(uint32_t addr)
@@ -848,13 +848,13 @@ static uint32_t efm32_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_putreg
  *
  * Description:
  *   Set the contents of an EFM32 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static void efm32_putreg(uint32_t val, uint32_t addr)
@@ -869,13 +869,13 @@ static void efm32_putreg(uint32_t val, uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_req_remfirst
  *
  * Description:
  *   Remove a request from the head of an endpoint request queue
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct efm32_req_s *efm32_req_remfirst(FAR struct efm32_ep_s *privep)
 {
@@ -895,13 +895,13 @@ static FAR struct efm32_req_s *efm32_req_remfirst(FAR struct efm32_ep_s *privep)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_req_addlast
  *
  * Description:
  *   Add a request to the end of an endpoint request queue
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static bool efm32_req_addlast(FAR struct efm32_ep_s *privep,
                               FAR struct efm32_req_s *req)
@@ -922,13 +922,13 @@ static bool efm32_req_addlast(FAR struct efm32_ep_s *privep,
   return is_empty;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0in_setupresponse
  *
  * Description:
  *   Schedule a short transfer on Endpoint 0 (IN or OUT)
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep0in_setupresponse(FAR struct efm32_usbdev_s *priv,
                                       FAR uint8_t *buf, uint32_t nbytes)
@@ -951,13 +951,13 @@ static inline void efm32_ep0in_transmitzlp(FAR struct efm32_usbdev_s *priv)
   efm32_ep0in_setupresponse(priv, NULL, 0);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0in_activate
  *
  * Description:
  *   Activate the endpoint 0 IN endpoint.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep0in_activate(void)
 {
@@ -989,13 +989,13 @@ static void efm32_ep0in_activate(void)
   efm32_putreg(regval, EFM32_USB_DCTL);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0out_ctrlsetup
  *
  * Description:
  *   Setup to receive a SETUP packet.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep0out_ctrlsetup(FAR struct efm32_usbdev_s *priv)
 {
@@ -1378,13 +1378,13 @@ static void efm32_epin_request(FAR struct efm32_usbdev_s *priv,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_rxfifo_read
  *
  * Description:
  *   Read packet from the RxFIFO into a read request.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_rxfifo_read(FAR struct efm32_ep_s *privep,
                               FAR uint8_t *dest, uint16_t len)
@@ -1421,13 +1421,13 @@ static void efm32_rxfifo_read(FAR struct efm32_ep_s *privep,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_rxfifo_discard
  *
  * Description:
  *   Discard packet data from the RxFIFO.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_rxfifo_discard(FAR struct efm32_ep_s *privep, int len)
 {
@@ -1452,7 +1452,7 @@ static void efm32_rxfifo_discard(FAR struct efm32_ep_s *privep, int len)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_complete
  *
  * Description:
@@ -1460,7 +1460,7 @@ static void efm32_rxfifo_discard(FAR struct efm32_ep_s *privep, int len)
  *   received.  It completes the read request at the head of the endpoint's
  *   request queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_epout_complete(FAR struct efm32_usbdev_s *priv,
                                  FAR struct efm32_ep_s *privep)
@@ -1501,7 +1501,7 @@ static void efm32_epout_complete(FAR struct efm32_usbdev_s *priv,
   efm32_epout_request(priv, privep);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0out_receive
  *
  * Description:
@@ -1509,7 +1509,7 @@ static void efm32_epout_complete(FAR struct efm32_usbdev_s *priv,
  *   data is available in the endpoint's RxFIFO.  This function will simply
  *   copy the incoming data into pending request's data buffer.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_ep0out_receive(FAR struct efm32_ep_s *privep, int bcnt)
 {
@@ -1559,7 +1559,7 @@ static inline void efm32_ep0out_receive(FAR struct efm32_ep_s *privep, int bcnt)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_receive
  *
  * Description:
@@ -1567,7 +1567,7 @@ static inline void efm32_ep0out_receive(FAR struct efm32_ep_s *privep, int bcnt)
  *   data is available in the endpoint's RxFIFO.  This function will simply
  *   copy the incoming data into pending request's data buffer.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_epout_receive(FAR struct efm32_ep_s *privep, int bcnt)
 {
@@ -1641,7 +1641,7 @@ static inline void efm32_epout_receive(FAR struct efm32_ep_s *privep, int bcnt)
   privreq->req.xfrd += readlen;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_request
  *
  * Description:
@@ -1649,7 +1649,7 @@ static inline void efm32_epout_receive(FAR struct efm32_ep_s *privep, int bcnt)
  *   (2) a pending receive request completes.  If there is no read in pending,
  *   then this function will initiate the next OUT (read) operation.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_epout_request(FAR struct efm32_usbdev_s *priv,
                                 FAR struct efm32_ep_s *privep)
@@ -1780,13 +1780,13 @@ static void efm32_epout_request(FAR struct efm32_usbdev_s *priv,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_flush
  *
  * Description:
  *   Flush any primed descriptors from this ep
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep_flush(struct efm32_ep_s *privep)
 {
@@ -1800,13 +1800,13 @@ static void efm32_ep_flush(struct efm32_ep_s *privep)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_req_complete
  *
  * Description:
  *   Handle termination of the request at the head of the endpoint request queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_req_complete(struct efm32_ep_s *privep, int16_t result)
 {
@@ -1840,13 +1840,13 @@ static void efm32_req_complete(struct efm32_ep_s *privep, int16_t result)
   privep->stalled = stalled;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_req_cancel
  *
  * Description:
  *   Cancel all pending requests for an endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_req_cancel(struct efm32_ep_s *privep, int16_t status)
 {
@@ -1863,14 +1863,14 @@ static void efm32_req_cancel(struct efm32_ep_s *privep, int16_t status)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_findbyaddr
  *
  * Description:
  *   Find the physical endpoint structure corresponding to a logic endpoint
  *   address
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct efm32_ep_s *efm32_ep_findbyaddr(struct efm32_usbdev_s *priv,
                                               uint16_t eplog)
@@ -1900,14 +1900,14 @@ static struct efm32_ep_s *efm32_ep_findbyaddr(struct efm32_usbdev_s *priv,
   return privep;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_req_dispatch
  *
  * Description:
  *   Provide unhandled setup actions to the class driver. This is logically part
  *   of the USB interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_req_dispatch(struct efm32_usbdev_s *priv,
                               const struct usb_ctrlreq_s *ctrl)
@@ -1934,13 +1934,13 @@ static int efm32_req_dispatch(struct efm32_usbdev_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_usbreset
  *
  * Description:
  *   Reset Usb engine
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_usbreset(struct efm32_usbdev_s *priv)
 {
@@ -2034,13 +2034,13 @@ static void efm32_usbreset(struct efm32_usbdev_s *priv)
   efm32_ep0out_ctrlsetup(priv);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0out_testmode
  *
  * Description:
  *   Select test mode
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_ep0out_testmode(FAR struct efm32_usbdev_s *priv,
                                          uint16_t index)
@@ -2081,14 +2081,14 @@ static inline void efm32_ep0out_testmode(FAR struct efm32_usbdev_s *priv,
   efm32_ep0in_transmitzlp(priv);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0out_stdrequest
  *
  * Description:
  *   Handle a stanard request on EP0.  Pick off the things of interest to the
  *   USB device controller driver; pass what is left to the class driver.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_ep0out_stdrequest(struct efm32_usbdev_s *priv,
                                            FAR struct efm32_ctrlreq_s *ctrlreq)
@@ -2449,14 +2449,14 @@ static inline void efm32_ep0out_stdrequest(struct efm32_usbdev_s *priv,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0out_setup
  *
  * Description:
  *   USB Ctrl EP Setup Event. This is logically part of the USB interrupt
  *   handler.  This event occurs when a setup packet is receive on EP0 OUT.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_ep0out_setup(struct efm32_usbdev_s *priv)
 {
@@ -2524,14 +2524,14 @@ static inline void efm32_ep0out_setup(struct efm32_usbdev_s *priv)
    priv->ep0datlen = 0;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout
  *
  * Description:
  *   This is part of the OUT endpoint interrupt processing.  This function
  *   handles the OUT event for a single endpoint.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_epout(FAR struct efm32_usbdev_s *priv, uint8_t epno)
 {
@@ -2576,7 +2576,7 @@ static inline void efm32_epout(FAR struct efm32_usbdev_s *priv, uint8_t epno)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_interrupt
  *
  * Description:
@@ -2587,7 +2587,7 @@ static inline void efm32_epout(FAR struct efm32_usbdev_s *priv, uint8_t epno)
  *   corresponding OTGFS DOEPINTx register to determine the exact cause of the
  *   interrupt.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_epout_interrupt(FAR struct efm32_usbdev_s *priv)
 {
@@ -2710,13 +2710,13 @@ static inline void efm32_epout_interrupt(FAR struct efm32_usbdev_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epin_runtestmode
  *
  * Description:
  *   Execute the test mode setup by the SET FEATURE request
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_epin_runtestmode(FAR struct efm32_usbdev_s *priv)
 {
@@ -2729,14 +2729,14 @@ static inline void efm32_epin_runtestmode(FAR struct efm32_usbdev_s *priv)
   priv->testmode = _USB_DCTL_TSTCTL_DISABLE;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epin
  *
  * Description:
  *   This is part of the IN endpoint interrupt processing.  This function
  *   handles the IN event for a single endpoint.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_epin(FAR struct efm32_usbdev_s *priv, uint8_t epno)
 {
@@ -2807,7 +2807,7 @@ static inline void efm32_epin_txfifoempty(FAR struct efm32_usbdev_s *priv, int e
   efm32_epin_request(priv, privep);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epin_interrupt
  *
  * Description:
@@ -2817,7 +2817,7 @@ static inline void efm32_epin_txfifoempty(FAR struct efm32_usbdev_s *priv, int e
  *   endpoint on which the interrupt occurred, and then read the corresponding
  *   OTGFS DIEPINTx register to determine the exact cause of the interrupt.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_epin_interrupt(FAR struct efm32_usbdev_s *priv)
 {
@@ -3006,13 +3006,13 @@ static inline void efm32_epin_interrupt(FAR struct efm32_usbdev_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_resumeinterrupt
  *
  * Description:
  *   Resume/remote wakeup detected interrupt
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_resumeinterrupt(FAR struct efm32_usbdev_s *priv)
 {
@@ -3044,13 +3044,13 @@ static inline void efm32_resumeinterrupt(FAR struct efm32_usbdev_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_suspendinterrupt
  *
  * Description:
  *   USB suspend interrupt
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_suspendinterrupt(FAR struct efm32_usbdev_s *priv)
 {
@@ -3099,14 +3099,14 @@ static inline void efm32_suspendinterrupt(FAR struct efm32_usbdev_s *priv)
   efm32_usbsuspend((FAR struct usbdev_s *)priv, false);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_rxinterrupt
  *
  * Description:
  *   RxFIFO non-empty interrupt.  This interrupt indicates that there is at
  *   least one packet pending to be read from the RxFIFO.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
 {
@@ -3263,13 +3263,13 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
   efm32_putreg(regval, EFM32_USB_GINTMSK);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_enuminterrupt
  *
  * Description:
  *   Enumeration done interrupt
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_enuminterrupt(FAR struct efm32_usbdev_s *priv)
 {
@@ -3287,7 +3287,7 @@ static inline void efm32_enuminterrupt(FAR struct efm32_usbdev_s *priv)
   efm32_putreg(regval, EFM32_USB_GUSBCFG);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_isocininterrupt
  *
  * Description:
@@ -3295,7 +3295,7 @@ static inline void efm32_enuminterrupt(FAR struct efm32_usbdev_s *priv)
  *   isochronous IN transfer interrupt indicates an incomplete isochronous IN
  *   transfer on at least one of the isochronous IN endpoints.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
 static inline void efm32_isocininterrupt(FAR struct efm32_usbdev_s *priv)
@@ -3360,13 +3360,13 @@ static inline void efm32_isocininterrupt(FAR struct efm32_usbdev_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_isocoutinterrupt
  *
  * Description:
  *   Incomplete periodic transfer interrupt
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
 static inline void efm32_isocoutinterrupt(FAR struct efm32_usbdev_s *priv)
@@ -3442,13 +3442,13 @@ static inline void efm32_isocoutinterrupt(FAR struct efm32_usbdev_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_sessioninterrupt
  *
  * Description:
  *   Session request/new session detected interrupt
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_VBUSSENSING
 static inline void efm32_sessioninterrupt(FAR struct efm32_usbdev_s *priv)
@@ -3457,13 +3457,13 @@ static inline void efm32_sessioninterrupt(FAR struct efm32_usbdev_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_otginterrupt
  *
  * Description:
  *   OTG interrupt
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_VBUSSENSING
 static inline void efm32_otginterrupt(FAR struct efm32_usbdev_s *priv)
@@ -3484,13 +3484,13 @@ static inline void efm32_otginterrupt(FAR struct efm32_usbdev_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_usbinterrupt
  *
  * Description:
  *   USB interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_usbinterrupt(int irq, FAR void *context)
 {
@@ -3679,17 +3679,17 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Endpoint operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_enablegonak
  *
  * Description:
  *   Enable global OUT NAK mode
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_enablegonak(FAR struct efm32_ep_s *privep)
 {
@@ -3729,13 +3729,13 @@ static void efm32_enablegonak(FAR struct efm32_ep_s *privep)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_disablegonak
  *
  * Description:
  *   Disable global OUT NAK mode
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_disablegonak(FAR struct efm32_ep_s *privep)
 {
@@ -3748,7 +3748,7 @@ static void efm32_disablegonak(FAR struct efm32_ep_s *privep)
   efm32_putreg(regval, EFM32_USB_DCTL);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_configure
  *
  * Description:
@@ -3759,7 +3759,7 @@ static void efm32_disablegonak(FAR struct efm32_ep_s *privep)
  *   eptype    - The type of the endpoint
  *   maxpacket - The max packet size of the endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
                                  uint16_t maxpacket)
@@ -3843,7 +3843,7 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epin_configure
  *
  * Description:
@@ -3854,7 +3854,7 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
  *   eptype    - The type of the endpoint
  *   maxpacket - The max packet size of the endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
                                 uint16_t maxpacket)
@@ -3942,7 +3942,7 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_configure
  *
  * Description:
@@ -3955,7 +3955,7 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
  *          needs to take special action when all of the endpoints have been
  *          configured.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_configure(FAR struct usbdev_ep_s *ep,
                               FAR const struct usb_epdesc_s *desc,
@@ -3988,13 +3988,13 @@ static int efm32_ep_configure(FAR struct usbdev_ep_s *ep,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0_configure
  *
  * Description:
  *   Reset Usb engine
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep0_configure(FAR struct efm32_usbdev_s *priv)
 {
@@ -4006,13 +4006,13 @@ static void efm32_ep0_configure(FAR struct efm32_usbdev_s *priv)
                               CONFIG_USBDEV_EP0_MAXSIZE);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_disable
  *
  * Description:
  *   Diable an OUT endpoint will no longer be used
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_epout_disable(FAR struct efm32_ep_s *privep)
 {
@@ -4076,13 +4076,13 @@ static void efm32_epout_disable(FAR struct efm32_ep_s *privep)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epin_disable
  *
  * Description:
  *   Disable an IN endpoint when it will no longer be used
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
 {
@@ -4170,13 +4170,13 @@ static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_disable
  *
  * Description:
  *   The endpoint will no longer be used
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_disable(FAR struct usbdev_ep_s *ep)
 {
@@ -4210,13 +4210,13 @@ static int efm32_ep_disable(FAR struct usbdev_ep_s *ep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_allocreq
  *
  * Description:
  *   Allocate an I/O request
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct usbdev_req_s *efm32_ep_allocreq(FAR struct usbdev_ep_s *ep)
 {
@@ -4243,13 +4243,13 @@ static FAR struct usbdev_req_s *efm32_ep_allocreq(FAR struct usbdev_ep_s *ep)
   return &privreq->req;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_freereq
  *
  * Description:
  *   Free an I/O request
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
@@ -4267,13 +4267,13 @@ static void efm32_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
   kmm_free(privreq);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_allocbuffer
  *
  * Description:
  *   Allocate an I/O buffer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
 static void *efm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
@@ -4288,13 +4288,13 @@ static void *efm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_freebuffer
  *
  * Description:
  *   Free an I/O buffer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
 static void efm32_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
@@ -4309,13 +4309,13 @@ static void efm32_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_submit
  *
  * Description:
  *   Submit an I/O request to the endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
@@ -4403,13 +4403,13 @@ static int efm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_cancel
  *
  * Description:
  *   Cancel an I/O request previously sent to an endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_cancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 {
@@ -4439,13 +4439,13 @@ static int efm32_ep_cancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epout_setstall
  *
  * Description:
  *   Stall an OUT endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_epout_setstall(FAR struct efm32_ep_s *privep)
 {
@@ -4511,13 +4511,13 @@ static int efm32_epout_setstall(FAR struct efm32_ep_s *privep)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_epin_setstall
  *
  * Description:
  *   Stall an IN endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_epin_setstall(FAR struct efm32_ep_s *privep)
 {
@@ -4540,13 +4540,13 @@ static int efm32_epin_setstall(FAR struct efm32_ep_s *privep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_setstall
  *
  * Description:
  *   Stall an endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_setstall(FAR struct efm32_ep_s *privep)
 {
@@ -4564,13 +4564,13 @@ static int efm32_ep_setstall(FAR struct efm32_ep_s *privep)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_clrstall
  *
  * Description:
  *   Resume a stalled endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_clrstall(FAR struct efm32_ep_s *privep)
 {
@@ -4623,13 +4623,13 @@ static int efm32_ep_clrstall(FAR struct efm32_ep_s *privep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_stall
  *
  * Description:
  *   Stall or resume an endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ep_stall(FAR struct usbdev_ep_s *ep, bool resume)
 {
@@ -4653,13 +4653,13 @@ static int efm32_ep_stall(FAR struct usbdev_ep_s *ep, bool resume)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep0_stall
  *
  * Description:
  *   Stall endpoint 0
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep0_stall(FAR struct efm32_usbdev_s *priv)
 {
@@ -4669,11 +4669,11 @@ static void efm32_ep0_stall(FAR struct efm32_usbdev_s *priv)
   efm32_ep0out_ctrlsetup(priv);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Device operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_alloc
  *
  * Description:
@@ -4687,7 +4687,7 @@ static void efm32_ep0_stall(FAR struct efm32_usbdev_s *priv)
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct usbdev_ep_s *efm32_ep_alloc(FAR struct usbdev_s *dev,
                                               uint8_t eplog, bool in,
@@ -4766,13 +4766,13 @@ static FAR struct usbdev_ep_s *efm32_ep_alloc(FAR struct usbdev_s *dev,
   return NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ep_free
  *
  * Description:
  *   Free the previously allocated endpoint
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_ep_free(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
 {
@@ -4792,13 +4792,13 @@ static void efm32_ep_free(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_getframe
  *
  * Description:
  *   Returns the current frame number
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_getframe(struct usbdev_s *dev)
 {
@@ -4812,13 +4812,13 @@ static int efm32_getframe(struct usbdev_s *dev)
   return (int)((regval & _USB_DSTS_SOFFN_MASK) >> _USB_DSTS_SOFFN_SHIFT);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_wakeup
  *
  * Description:
  *   Exit suspend mode.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_wakeup(struct usbdev_s *dev)
 {
@@ -4860,13 +4860,13 @@ static int efm32_wakeup(struct usbdev_s *dev)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_selfpowered
  *
  * Description:
  *   Sets/clears the device self-powered feature
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
 {
@@ -4886,13 +4886,13 @@ static int efm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_pullup
  *
  * Description:
  *   Software-controlled connect to/disconnect from USB host
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_pullup(struct usbdev_s *dev, bool enable)
 {
@@ -4924,13 +4924,13 @@ static int efm32_pullup(struct usbdev_s *dev, bool enable)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_setaddress
  *
  * Description:
  *   Set the devices USB address
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_setaddress(struct efm32_usbdev_s *priv, uint16_t address)
 {
@@ -4959,13 +4959,13 @@ static void efm32_setaddress(struct efm32_usbdev_s *priv, uint16_t address)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_txfifo_flush
  *
  * Description:
  *   Flush the specific TX fifo.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_txfifo_flush(uint32_t txfnum)
 {
@@ -4994,13 +4994,13 @@ static int efm32_txfifo_flush(uint32_t txfnum)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_rxfifo_flush
  *
  * Description:
  *   Flush the RX fifo.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_rxfifo_flush(void)
 {
@@ -5028,13 +5028,13 @@ static int efm32_rxfifo_flush(void)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_swinitialize
  *
  * Description:
  *   Initialize all driver data structures.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_swinitialize(FAR struct efm32_usbdev_s *priv)
 {
@@ -5110,13 +5110,13 @@ static void efm32_swinitialize(FAR struct efm32_usbdev_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_hwinitialize
  *
  * Description:
  *   Configure the OTG FS core for operation.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 {
@@ -5400,11 +5400,11 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
                EFM32_USB_GAHBCFG);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_usbinitialize
  *
  * Description:
@@ -5417,7 +5417,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
  *   and P0.23 and PO.31 in PINSEL1 must be configured for Vbus and USB connect
  *   LED.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void up_usbinitialize(void)
 {
@@ -5510,9 +5510,9 @@ errout:
   up_usbuninitialize();
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_usbuninitialize
- *******************************************************************************/
+ ****************************************************************************/
 
 void up_usbuninitialize(void)
 {
@@ -5580,14 +5580,14 @@ void up_usbuninitialize(void)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbdev_register
  *
  * Description:
  *   Register a USB device class driver. The class driver's bind() method will be
  *   called to bind it to a USB device driver.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int usbdev_register(struct usbdevclass_driver_s *driver)
 {
@@ -5650,7 +5650,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbdev_unregister
  *
  * Description:
@@ -5658,7 +5658,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
  *   it will first disconnect().  The driver is also requested to unbind() and clean
  *   up any device state, before this procedure finally returns.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {

@@ -291,7 +291,7 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
  *   This configures the SERCOM as a USART, but does not configure USART
  *   interrupts or enable the USART.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SAMDL_HAVE_USART
 int sam_usart_internal(const struct sam_usart_config_s * const config)
@@ -398,7 +398,7 @@ void sam_lowsetup(void)
  *   This configures the SERCOM as a USART, but does not configure USART
  *   interrupts or enable the USART.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SAMDL_HAVE_USART
 int sam_usart_initialize(const struct sam_usart_config_s * const config)
@@ -428,7 +428,7 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
  *   Reset the USART SERCOM.  This restores all SERCOM register to the
  *   initial state and disables the SERCOM.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SAMDL_HAVE_USART
 void sam_usart_reset(const struct sam_usart_config_s * const config)
@@ -457,7 +457,7 @@ void sam_usart_reset(const struct sam_usart_config_s * const config)
  * Description:
  *   Output one character to the USART using a simple polling method.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
 void sam_lowputc(uint32_t ch)

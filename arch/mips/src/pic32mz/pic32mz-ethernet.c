@@ -495,13 +495,13 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv);
  * Private Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_printreg
  *
  * Description:
  *   Print the contents of an PIC32MZ register operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mz_printreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -510,13 +510,13 @@ static void pic32mz_printreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_checkreg
  *
  * Description:
  *   Get the contents of an PIC32MZ register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mz_checkreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -574,13 +574,13 @@ static void pic32mz_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_getreg
  *
  * Description:
  *   Get the contents of an PIC32MZ register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static uint32_t pic32mz_getreg(uint32_t addr)
@@ -596,13 +596,13 @@ static uint32_t pic32mz_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_putreg
  *
  * Description:
  *   Set the contents of an PIC32MZ register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mz_putreg(uint32_t val, uint32_t addr)
@@ -2425,7 +2425,7 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_showmii
  *
  * Description:
@@ -2439,7 +2439,7 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  * Assumptions:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_NET_REGDEBUG) && defined(PIC32MZ_HAVE_PHY)
 static void pic32mz_showmii(uint8_t phyaddr, const char *msg)

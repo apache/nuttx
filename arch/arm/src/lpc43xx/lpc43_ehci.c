@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_ehci.c
  *
  *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -68,9 +68,9 @@
 
 #if defined(CONFIG_LPC43_USBOTG) && defined(CONFIG_USBHOST)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 /* Configuration ***************************************************************/
 /* Pre-requisites */
 
@@ -187,9 +187,9 @@
 #define RHPNDX(rh)            ((rh)->hport.hport.port)
 #define RHPORT(rh)            (RHPNDX(rh)+1)
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 /* Internal representation of the EHCI Queue Head (QH) */
 
 struct lpc43_epinfo_s;
@@ -389,9 +389,9 @@ struct lpc43_ehci_trace_s
 
 #endif /* HAVE_USBHOST_TRACE */
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -548,9 +548,9 @@ static void lpc43_disconnect(FAR struct usbhost_driver_s *drvr,
 
 static int lpc43_reset(void);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 /* In this driver implementation, support is provided for only a single a single
  * USB device.  All status information can be simply retained in a single global
  * instance.
@@ -689,19 +689,19 @@ static const struct lpc43_ehci_trace_s g_trace2[TRACE2_NSTRINGS] =
 };
 #endif /* HAVE_USBHOST_TRACE */
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Register Operations
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc43_read16
  *
  * Description:
  *   Read 16-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint16_t lpc43_read16(const uint8_t *addr)
 {
@@ -712,13 +712,13 @@ static uint16_t lpc43_read16(const uint8_t *addr)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_read32
  *
  * Description:
  *   Read 32-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t lpc43_read32(const uint8_t *addr)
 {
@@ -731,13 +731,13 @@ static inline uint32_t lpc43_read32(const uint8_t *addr)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_write16
  *
  * Description:
  *   Write 16-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static void lpc43_write16(uint16_t memval, uint8_t *addr)
@@ -752,13 +752,13 @@ static void lpc43_write16(uint16_t memval, uint8_t *addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_write32
  *
  * Description:
  *   Write 32-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static void lpc43_write32(uint32_t memval, uint8_t *addr)
@@ -773,13 +773,13 @@ static void lpc43_write32(uint32_t memval, uint8_t *addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_swap16
  *
  * Description:
  *   Swap bytes on a 16-bit value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint16_t lpc43_swap16(uint16_t value)
@@ -788,13 +788,13 @@ static uint16_t lpc43_swap16(uint16_t value)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_swap32
  *
  * Description:
  *   Swap bytes on a 32-bit value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint32_t lpc43_swap32(uint32_t value)
@@ -804,13 +804,13 @@ static uint32_t lpc43_swap32(uint32_t value)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_printreg
  *
  * Description:
  *   Print the contents of a LPC43 EHCI register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static void lpc43_printreg(volatile uint32_t *regaddr, uint32_t regval,
@@ -820,14 +820,14 @@ static void lpc43_printreg(volatile uint32_t *regaddr, uint32_t regval,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_checkreg
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a LPC43
  *   EHCI register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static void lpc43_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool iswrite)
@@ -885,13 +885,13 @@ static void lpc43_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool isw
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_getreg
  *
  * Description:
  *   Get the contents of an LPC43 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static uint32_t lpc43_getreg(volatile uint32_t *regaddr)
@@ -912,13 +912,13 @@ static inline uint32_t lpc43_getreg(volatile uint32_t *regaddr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_putreg
  *
  * Description:
  *   Set the contents of an LPC43 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static void lpc43_putreg(uint32_t regval, volatile uint32_t *regaddr)
@@ -938,7 +938,7 @@ static inline void lpc43_putreg(uint32_t regval, volatile uint32_t *regaddr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: ehci_wait_usbsts
  *
  * Description:
@@ -946,7 +946,7 @@ static inline void lpc43_putreg(uint32_t regval, volatile uint32_t *regaddr)
  *   value, (2) for a timeout to occur, or (3) a error to occur.  Return
  *   a value to indicate which terminated the wait.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
                             unsigned int delay)
@@ -988,17 +988,17 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
   return (regval == donebits) ? OK : -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Semaphores
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc43_takesem
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_takesem(sem_t *sem)
 {
@@ -1014,10 +1014,10 @@ static void lpc43_takesem(sem_t *sem)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Allocators
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc43_qh_alloc
  *
  * Description:
@@ -1025,7 +1025,7 @@ static void lpc43_takesem(sem_t *sem)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_qh_s *lpc43_qh_alloc(void)
 {
@@ -1043,7 +1043,7 @@ static struct lpc43_qh_s *lpc43_qh_alloc(void)
   return qh;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_free
  *
  * Description:
@@ -1051,7 +1051,7 @@ static struct lpc43_qh_s *lpc43_qh_alloc(void)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_qh_free(struct lpc43_qh_s *qh)
 {
@@ -1063,7 +1063,7 @@ static void lpc43_qh_free(struct lpc43_qh_s *qh)
   g_ehci.qhfree = entry;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_alloc
  *
  * Description:
@@ -1072,7 +1072,7 @@ static void lpc43_qh_free(struct lpc43_qh_s *qh)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_qtd_s *lpc43_qtd_alloc(void)
 {
@@ -1090,7 +1090,7 @@ static struct lpc43_qtd_s *lpc43_qtd_alloc(void)
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_free
  *
  * Description:
@@ -1099,7 +1099,7 @@ static struct lpc43_qtd_s *lpc43_qtd_alloc(void)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_qtd_free(struct lpc43_qtd_s *qtd)
 {
@@ -1111,11 +1111,11 @@ static void lpc43_qtd_free(struct lpc43_qtd_s *qtd)
   g_ehci.qtdfree = entry;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * List Management
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_foreach
  *
  * Description:
@@ -1123,7 +1123,7 @@ static void lpc43_qtd_free(struct lpc43_qtd_s *qtd)
  *   handler for each QH structure in the list (including the one at the head
  *   of the list).
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qh_foreach(struct lpc43_qh_s *qh, uint32_t **bp, foreach_qh_t handler,
                           void *arg)
@@ -1195,14 +1195,14 @@ static int lpc43_qh_foreach(struct lpc43_qh_s *qh, uint32_t **bp, foreach_qh_t h
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_foreach
  *
  * Description:
  *   Give a Queue Head (QH) instance, call the handler for each qTD structure
  *   in the queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qtd_foreach(struct lpc43_qh_s *qh, foreach_qtd_t handler, void *arg)
 {
@@ -1276,14 +1276,14 @@ static int lpc43_qtd_foreach(struct lpc43_qh_s *qh, foreach_qtd_t handler, void 
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_discard
  *
  * Description:
  *   This is a lpc43_qtd_foreach callback.  It simply unlinks the QTD, updates
  *   the back pointer, and frees the QTD structure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qtd_discard(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
 {
@@ -1302,7 +1302,7 @@ static int lpc43_qtd_discard(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_discard
  *
  * Description:
@@ -1312,7 +1312,7 @@ static int lpc43_qtd_discard(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
  *   The QH structure itself has already been unlinked from whatever list it
  *   may have been in.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qh_discard(struct lpc43_qh_s *qh)
 {
@@ -1334,17 +1334,17 @@ static int lpc43_qh_discard(struct lpc43_qh_s *qh)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Endpoint Transfer Handling
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_print
  *
  * Description:
  *   Print the context of one qTD
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static void lpc43_qtd_print(struct lpc43_qtd_s *qtd)
@@ -1359,13 +1359,13 @@ static void lpc43_qtd_print(struct lpc43_qtd_s *qtd)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_print
  *
  * Description:
  *   Print the context of one QH
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static void lpc43_qh_print(struct lpc43_qh_s *qh)
@@ -1401,14 +1401,14 @@ static void lpc43_qh_print(struct lpc43_qh_s *qh)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_dump
  *
  * Description:
  *   This is a lpc43_qtd_foreach callout function.  It dumps the context of one
  *   qTD
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static int lpc43_qtd_dump(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
@@ -1418,14 +1418,14 @@ static int lpc43_qtd_dump(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_dump
  *
  * Description:
  *   This is a lpc43_qh_foreach callout function.  It dumps a QH structure and
  *   all of the qTD structures linked to the QH.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_EHCI_REGDEBUG
 static int lpc43_qh_dump(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
@@ -1435,14 +1435,14 @@ static int lpc43_qh_dump(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ehci_speed
  *
  * Description:
  *  Map a speed enumeration value per Chapter 9 of the USB specification to the
  *  speed enumeration required in the EHCI queue head.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint8_t lpc43_ehci_speed(uint8_t usbspeed)
 {
@@ -1450,7 +1450,7 @@ static inline uint8_t lpc43_ehci_speed(uint8_t usbspeed)
   return g_ehci_speed[usbspeed];
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ioc_setup
  *
  * Description:
@@ -1461,7 +1461,7 @@ static inline uint8_t lpc43_ehci_speed(uint8_t usbspeed)
  *
  * Assumption:  The caller holds tex EHCI exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_ioc_setup(struct lpc43_rhport_s *rhport, struct lpc43_epinfo_s *epinfo)
 {
@@ -1498,7 +1498,7 @@ static int lpc43_ioc_setup(struct lpc43_rhport_s *rhport, struct lpc43_epinfo_s 
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ioc_wait
  *
  * Description:
@@ -1507,7 +1507,7 @@ static int lpc43_ioc_setup(struct lpc43_rhport_s *rhport, struct lpc43_epinfo_s 
  * Assumption:  The caller does *NOT* hold the EHCI exclsem.  That would cause
  * a deadlock when the bottom-half, worker thread needs to take the semaphore.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_ioc_wait(struct lpc43_epinfo_s *epinfo)
 {
@@ -1521,7 +1521,7 @@ static int lpc43_ioc_wait(struct lpc43_epinfo_s *epinfo)
   return epinfo->result;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_enqueue
  *
  * Description:
@@ -1529,7 +1529,7 @@ static int lpc43_ioc_wait(struct lpc43_epinfo_s *epinfo)
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_qh_enqueue(struct lpc43_qh_s *qhead, struct lpc43_qh_s *qh)
 {
@@ -1559,13 +1559,13 @@ static void lpc43_qh_enqueue(struct lpc43_qh_s *qhead, struct lpc43_qh_s *qh)
   qhead->hw.hlp = lpc43_swap32(physaddr | QH_HLP_TYP_QH);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_create
  *
  * Description:
  *   Create a new Queue Head (QH)
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_qh_s *lpc43_qh_create(struct lpc43_rhport_s *rhport,
                                           struct lpc43_epinfo_s *epinfo)
@@ -1696,13 +1696,13 @@ static struct lpc43_qh_s *lpc43_qh_create(struct lpc43_rhport_s *rhport,
   return qh;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_addbpl
  *
  * Description:
  *   Add a buffer pointer list to a qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qtd_addbpl(struct lpc43_qtd_s *qtd, const void *buffer, size_t buflen)
 {
@@ -1765,13 +1765,13 @@ static int lpc43_qtd_addbpl(struct lpc43_qtd_s *qtd, const void *buffer, size_t 
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_setupphase
  *
  * Description:
  *   Create a SETUP phase request qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_qtd_s *lpc43_qtd_setupphase(struct lpc43_epinfo_s *epinfo,
                                             const struct usb_ctrlreq_s *req)
@@ -1832,13 +1832,13 @@ static struct lpc43_qtd_s *lpc43_qtd_setupphase(struct lpc43_epinfo_s *epinfo,
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_dataphase
  *
  * Description:
  *   Create a data transfer or SET data phase qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_qtd_s *lpc43_qtd_dataphase(struct lpc43_epinfo_s *epinfo,
                                            void *buffer, int buflen,
@@ -1900,13 +1900,13 @@ static struct lpc43_qtd_s *lpc43_qtd_dataphase(struct lpc43_epinfo_s *epinfo,
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_statusphase
  *
  * Description:
  *   Create a STATUS phase request qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc43_qtd_s *lpc43_qtd_statusphase(uint32_t tokenbits)
 {
@@ -1949,7 +1949,7 @@ static struct lpc43_qtd_s *lpc43_qtd_statusphase(uint32_t tokenbits)
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_async_setup
  *
  * Description:
@@ -1967,7 +1967,7 @@ static struct lpc43_qtd_s *lpc43_qtd_statusphase(uint32_t tokenbits)
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_async_setup(struct lpc43_rhport_s *rhport,
                              struct lpc43_epinfo_s *epinfo,
@@ -2201,7 +2201,7 @@ errout_with_qh:
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_intr_setup
  *
  * Description:
@@ -2247,7 +2247,7 @@ errout_with_qh:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
 static int lpc43_intr_setup(struct lpc43_rhport_s *rhport,
@@ -2339,7 +2339,7 @@ errout_with_qh:
 }
 #endif /* CONFIG_USBHOST_INT_DISABLE */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_transfer_wait
  *
  * Description:
@@ -2356,7 +2356,7 @@ errout_with_qh:
  *   plus the size of the data (which could be short); For bulk transfers, this
  *   will be the number of data bytes transfers (which could be short).
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t lpc43_transfer_wait(struct lpc43_epinfo_s *epinfo)
 {
@@ -2400,7 +2400,7 @@ static ssize_t lpc43_transfer_wait(struct lpc43_epinfo_s *epinfo)
   return epinfo->xfrd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ioc_async_setup
  *
  * Description:
@@ -2418,7 +2418,7 @@ static ssize_t lpc43_transfer_wait(struct lpc43_epinfo_s *epinfo)
  * Assumptions:
  *   - Called from the interrupt level
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int lpc43_ioc_async_setup(struct lpc43_rhport_s *rhport,
@@ -2454,7 +2454,7 @@ static inline int lpc43_ioc_async_setup(struct lpc43_rhport_s *rhport,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_asynch_completion
  *
  * Description:
@@ -2471,7 +2471,7 @@ static inline int lpc43_ioc_async_setup(struct lpc43_rhport_s *rhport,
  * Assumptions:
  *   - Called from the interrupt level
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void lpc43_asynch_completion(struct lpc43_epinfo_s *epinfo)
@@ -2509,11 +2509,11 @@ static void lpc43_asynch_completion(struct lpc43_epinfo_s *epinfo)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * EHCI Interrupt Handling
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_ioccheck
  *
  * Description:
@@ -2521,7 +2521,7 @@ static void lpc43_asynch_completion(struct lpc43_epinfo_s *epinfo)
  *   qTD in the asynchronous queue.  It removes all of the qTD structures that
  *   are no longer active.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qtd_ioccheck(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
 {
@@ -2556,7 +2556,7 @@ static int lpc43_qtd_ioccheck(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_ioccheck
  *
  * Description:
@@ -2565,7 +2565,7 @@ static int lpc43_qtd_ioccheck(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
  *   remove all of the structures that are no longer active.  if all of the
  *   qTD structures are removed, then QH itself will also be removed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_qh_ioccheck(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
 {
@@ -2710,14 +2710,14 @@ static int lpc43_qh_ioccheck(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qtd_cancel
  *
  * Description:
  *   This function is a lpc43_qtd_foreach() callback function.  It removes each
  *   qTD attached to a QH.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc43_qtd_cancel(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
@@ -2745,7 +2745,7 @@ static int lpc43_qtd_cancel(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_qh_cancel
  *
  * Description:
@@ -2754,7 +2754,7 @@ static int lpc43_qtd_cancel(struct lpc43_qtd_s *qtd, uint32_t **bp, void *arg)
  *   and remove all of the structures that are no longer active.  Then QH
  *   itself will also be removed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc43_qh_cancel(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
@@ -2815,7 +2815,7 @@ static int lpc43_qh_cancel(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ioc_bottomhalf
  *
  * Description:
@@ -2831,7 +2831,7 @@ static int lpc43_qh_cancel(struct lpc43_qh_s *qh, uint32_t **bp, void *arg)
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_ioc_bottomhalf(void)
 {
@@ -2887,7 +2887,7 @@ static inline void lpc43_ioc_bottomhalf(void)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_portsc_bottomhalf
  *
  * Description:
@@ -2907,7 +2907,7 @@ static inline void lpc43_ioc_bottomhalf(void)
  *   bits (including: Force port resume, over-current change, enable/disable
  *   change and connect status change)."
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_portsc_bottomhalf(void)
 {
@@ -3010,7 +3010,7 @@ static inline void lpc43_portsc_bottomhalf(void)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_syserr_bottomhalf
  *
  * Description:
@@ -3021,7 +3021,7 @@ static inline void lpc43_portsc_bottomhalf(void)
  *   error occurs, the Host Controller clears the Run/Stop bit in the Command
  *   register to prevent further execution of the scheduled TDs."
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_syserr_bottomhalf(void)
 {
@@ -3029,7 +3029,7 @@ static inline void lpc43_syserr_bottomhalf(void)
   PANIC();
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_async_advance_bottomhalf
  *
  * Description:
@@ -3041,7 +3041,7 @@ static inline void lpc43_syserr_bottomhalf(void)
  *   register. This status bit indicates the assertion of that interrupt
  *   source."
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc43_async_advance_bottomhalf(void)
 {
@@ -3050,13 +3050,13 @@ static inline void lpc43_async_advance_bottomhalf(void)
   /* REVISIT: Could remove all tagged QH entries here */
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ehci_bottomhalf
  *
  * Description:
  *   EHCI "Bottom Half" interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_ehci_bottomhalf(FAR void *arg)
 {
@@ -3184,13 +3184,13 @@ static void lpc43_ehci_bottomhalf(FAR void *arg)
   lpc43_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ehci_interrupt
  *
  * Description:
  *   EHCI "Top Half" interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_ehci_interrupt(int irq, FAR void *context)
 {
@@ -3242,10 +3242,10 @@ static int lpc43_ehci_interrupt(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * USB Host Controller Operations
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc43_wait
  *
  * Description:
@@ -3268,7 +3268,7 @@ static int lpc43_ehci_interrupt(int irq, FAR void *context)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_wait(FAR struct usbhost_connection_s *conn,
                       FAR struct usbhost_hubport_s **hport)
@@ -3340,7 +3340,7 @@ static int lpc43_wait(FAR struct usbhost_connection_s *conn,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_enumerate
  *
  * Description:
@@ -3366,7 +3366,7 @@ static int lpc43_wait(FAR struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_rh_enumerate(FAR struct usbhost_connection_s *conn,
                               FAR struct usbhost_hubport_s *hport)
@@ -3811,7 +3811,7 @@ static int lpc43_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_alloc
  *
  * Description:
@@ -3841,7 +3841,7 @@ static int lpc43_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
                      FAR uint8_t **buffer, FAR size_t *maxlen)
@@ -3861,7 +3861,7 @@ static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_free
  *
  * Description:
@@ -3882,7 +3882,7 @@ static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -3967,7 +3967,7 @@ static int lpc43_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_ctrlin and lpc43_ctrlout
  *
  * Description:
@@ -4001,7 +4001,7 @@ static int lpc43_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
@@ -4073,7 +4073,7 @@ static int lpc43_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return lpc43_ctrlin(drvr, ep0, req, (uint8_t *)buffer);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_transfer
  *
  * Description:
@@ -4109,7 +4109,7 @@ static int lpc43_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t lpc43_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                               FAR uint8_t *buffer, size_t buflen)
@@ -4179,7 +4179,7 @@ errout_with_sem:
   return (ssize_t)ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_asynch
  *
  * Description:
@@ -4212,7 +4212,7 @@ errout_with_sem:
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc43_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -4530,7 +4530,7 @@ static int lpc43_connect(FAR struct usbhost_driver_s *drvr,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc43_disconnect
  *
  * Description:
@@ -4553,7 +4553,7 @@ static int lpc43_connect(FAR struct usbhost_driver_s *drvr,
  *   - Only a single class bound to a single device is supported.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc43_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
@@ -4562,10 +4562,10 @@ static void lpc43_disconnect(FAR struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Initialization
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc43_reset
  *
  * Description:
@@ -4605,7 +4605,7 @@ static void lpc43_disconnect(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  * - Called during the initialization of the EHCI.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc43_reset(void)
 {
@@ -4679,10 +4679,10 @@ static int lpc43_reset(void)
   return (regval & EHCI_USBCMD_HCRESET) != 0 ? -ETIMEDOUT : OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc43_ehci_initialize
  *
  * Description:
@@ -4705,7 +4705,7 @@ static int lpc43_reset(void)
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
 {

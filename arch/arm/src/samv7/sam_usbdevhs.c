@@ -709,13 +709,13 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_printreg
  *
  * Description:
  *   Print the contents of a SAMV7 USBHS register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
@@ -724,14 +724,14 @@ static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_checkreg
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a SAMV7
  *   USBHS register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
@@ -789,13 +789,13 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_getreg
  *
  * Description:
  *   Get the contents of an SAMV7 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr)
@@ -816,13 +816,13 @@ static inline uint32_t sam_getreg(uintptr_t regaddr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_putreg
  *
  * Description:
  *   Set the contents of an SAMV7 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_putreg(uint32_t regval, uintptr_t regaddr)

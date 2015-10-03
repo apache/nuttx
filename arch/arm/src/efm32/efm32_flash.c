@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_flash.c
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com
@@ -183,7 +183,7 @@ void efm32_flash_unlock(void)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: msc_load_verify_address
  *
  * Description:
@@ -206,7 +206,7 @@ void efm32_flash_unlock(void)
  *   -EBUSY     - Busy timeout.
  *   -EINVAL    - Operation tried to access a non-flash area.
  *   -EACCES    - Operation tried to access a locked area of the flash.
- *******************************************************************************/
+ ****************************************************************************/
 
 int __ramfunc__ msc_load_verify_address(uint32_t* address)
 {
@@ -251,7 +251,7 @@ int __ramfunc__ msc_load_verify_address(uint32_t* address)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:msc_load_data
  *
  * Description:
@@ -276,7 +276,7 @@ int __ramfunc__ msc_load_verify_address(uint32_t* address)
  *   OK         - Operation completed successfully.
  *   -ETIMEDOUT - Operation timed out waiting for flash operation
  *                      to complete.
- ******************************************************************************/
+ ****************************************************************************/
 
 int __ramfunc__ msc_load_write_data(uint32_t* data, uint32_t num_words,
                                     bool write_strategy_safe)

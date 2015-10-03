@@ -488,13 +488,13 @@ void efm32_lowsetup(void)
 #endif
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: efm32_lowputc
  *
  * Description:
  *   Output one character to the UART using a simple polling method.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_UART_CONSOLE)
 void efm32_lowputc(uint32_t ch)
@@ -527,13 +527,13 @@ void efm32_lowputc(uint32_t ch)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: efm32_uartconfigure
  *
  * Description:
  *   Configure a U[S]ART as a RS-232 UART.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
@@ -646,13 +646,13 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: efm32_leuartconfigure
  *
  * Description:
  *   Configure a LEUART as a RS-232 UART.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_LEUART_DEVICE
 void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
@@ -722,7 +722,7 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: efm32_uart_reset
  *
  * Description:
@@ -730,7 +730,7 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  *   to the initial, reset value.  Only the ROUTE data set by efm32_lowsetup
  *   is preserved.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_UART_DEVICE) || defined(HAVE_SPI_DEVICE)
 void efm32_uart_reset(uintptr_t base)
@@ -755,7 +755,7 @@ void efm32_uart_reset(uintptr_t base)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: efm32_leuart_reset
  *
  * Description:
@@ -763,7 +763,7 @@ void efm32_uart_reset(uintptr_t base)
  *   to the initial, reset value.  Only the ROUTE data set by efm32_lowsetup
  *   is preserved.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_LEUART_DEVICE
 void efm32_leuart_reset(uintptr_t base)

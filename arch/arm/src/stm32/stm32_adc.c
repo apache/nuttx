@@ -1077,7 +1077,7 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_power_down_idle
  *
  * Description    : Enables or disables power down during the idle phase.
@@ -1091,7 +1091,7 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
@@ -1118,7 +1118,7 @@ static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_power_down_delay
  *
  * Description    : Enables or disables power down during the delay phase.
@@ -1132,7 +1132,7 @@ static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
@@ -1159,7 +1159,7 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_dels_after_conversion
  *
  * Description    : Defines the length of the delay which is applied
@@ -1173,7 +1173,7 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
@@ -1190,7 +1190,7 @@ static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_select_ch_bank
  *
  * Description    : Selects the bank of channels to be converted
@@ -1204,7 +1204,7 @@ static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_select_ch_bank(FAR struct stm32_dev_s *priv, bool chb_selected)
@@ -1228,7 +1228,7 @@ static void adc_select_ch_bank(FAR struct stm32_dev_s *priv, bool chb_selected)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_enable
  *
  * Description    : Enables or disables the specified ADC peripheral.
@@ -1242,7 +1242,7 @@ static void adc_select_ch_bank(FAR struct stm32_dev_s *priv, bool chb_selected)
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 {
@@ -2693,7 +2693,7 @@ static int adc123_interrupt(int irq, void *context)
  * Public Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_change_sample_time
  *
  * Description    : Changes sample times for specified channels. This method
@@ -2712,7 +2712,7 @@ static int adc123_interrupt(int irq, void *context)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 void stm32_adcchange_sample_time(FAR struct adc_dev_s *dev,

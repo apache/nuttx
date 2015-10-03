@@ -108,7 +108,7 @@
  *   Wait until the console is ready to add another character to the TX
  *   FIFO.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
 static inline void nuc_console_ready(void)
@@ -142,7 +142,7 @@ static inline void nuc_console_ready(void)
  * Description:
  *   Called at the very beginning of _start.  Performs low level initialization.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void nuc_lowsetup(void)
 {
@@ -323,7 +323,7 @@ void nuc_lowsetup(void)
  * Description:
  *   Output one character to the UART using a simple polling method.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void nuc_lowputc(uint32_t ch)
 {
@@ -353,7 +353,7 @@ void nuc_lowputc(uint32_t ch)
  * Here we assume that the default clock source for the UART modules is
  * the external high speed crystal.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_UART
 void nuc_setbaud(uintptr_t base, uint32_t baud)
