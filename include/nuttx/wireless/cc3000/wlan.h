@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * include/nuttx/wireless/cc3000/wlan.h
  *
  *  wlan.h  - CC3000 Host Driver Implementation.
@@ -32,40 +32,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_WLAN_H
 #define __INCLUDE_NUTTX_WIRELESS_CC3000_WLAN_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include "cc3000_common.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #define WLAN_SEC_UNSEC (0)
 #define WLAN_SEC_WEP   (1)
 #define WLAN_SEC_WPA   (2)
 #define WLAN_SEC_WPA2  (3)
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef  __cplusplus
 extern "C"
 {
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_init
  *
  * Input Parameters:
@@ -109,14 +109,14 @@ extern "C"
  *
  * WARNING: This function must be called before ANY other wlan driver function
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void wlan_init(size_t max_tx_len,
                tWlanCB sWlanCB, tFWPatches sFWPatches,
                tDriverPatches sDriverPatches,
                tBootLoaderPatches sBootLoaderPatches);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_start
  *
  * Input Parameters:
@@ -141,11 +141,11 @@ void wlan_init(size_t max_tx_len,
  *  WARNING: This function must be called after wlan_init and before any
  *    other wlan API
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void wlan_start(uint16_t usPatchesAvailableAtHost);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_stop
  *
  * Input Parameters:
@@ -157,11 +157,11 @@ void wlan_start(uint16_t usPatchesAvailableAtHost);
  * Description:
  *   Stop WLAN device by putting it into reset state.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void wlan_stop(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_connect
  *
  * Input Parameters:
@@ -191,7 +191,7 @@ void wlan_stop(void);
  *          type WEP, please confirm that the key is set as ASCII and not
  *          as HEX.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 long wlan_connect(unsigned long ulSecType, FAR const char *ssid,
@@ -201,7 +201,7 @@ long wlan_connect(unsigned long ulSecType, FAR const char *ssid,
 long wlan_connect(FAR const char *ssid, long ssid_len);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_disconnect
  *
  * Input Parameters:
@@ -213,11 +213,11 @@ long wlan_connect(FAR const char *ssid, long ssid_len);
  * Description:
  *   Disconnect connection from AP.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_disconnect(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_add_profile
  *
  * Input Parameters:
@@ -243,7 +243,7 @@ long wlan_disconnect(void);
  *             profile based on security policy, signal strength, etc
  *             parameters. All the profiles are stored in CC3000 NVMEM.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_add_profile(unsigned long ulSecType, uint8_t* ucSsid,
                       unsigned long ulSsidLen, uint8_t *ucBssid,
@@ -253,7 +253,7 @@ long wlan_add_profile(unsigned long ulSecType, uint8_t* ucSsid,
                       unsigned long ulKeyMgmt, uint8_t* ucPf_OrKey,
                       unsigned long ulPassPhraseLen);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_ioctl_del_profile
  *
  * Input Parameters:
@@ -267,11 +267,11 @@ long wlan_add_profile(unsigned long ulSecType, uint8_t* ucSsid,
  *
  *  @Note      In order to delete all stored profile, set index to 255.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_ioctl_del_profile(unsigned long ulIndex);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_set_event_mask
  *
  * Input Parameters:
@@ -293,11 +293,11 @@ long wlan_ioctl_del_profile(unsigned long ulIndex);
  *   Mask event according to bit mask. In case that event is
  *            masked (1), the device will not send the masked event to host.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_set_event_mask(unsigned long ulMask);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_ioctl_statusget
  *
  * Input Parameters:
@@ -310,11 +310,11 @@ long wlan_set_event_mask(unsigned long ulMask);
  * Description:
  *   get wlan status: disconnected, scanning, connecting or connected
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_ioctl_statusget(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_ioctl_set_connection_policy
  *
  * Input Parameters:
@@ -344,13 +344,13 @@ long wlan_ioctl_statusget(void);
  *      enabled, the device will try to connect to any AP.
  *   * Note that the policy settings are stored in the CC3000 NVMEM.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_ioctl_set_connection_policy(unsigned long should_connect_to_open_ap,
                                       unsigned long ulShouldUseFastConnect,
                                       unsigned long ulUseProfiles);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_ioctl_get_scan_results
  *
  * Input Parameters:
@@ -381,11 +381,11 @@ long wlan_ioctl_set_connection_policy(unsigned long should_connect_to_open_ap,
  *
  *  NOTE: scan_timeout, is not supported on this version.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_ioctl_get_scan_results(unsigned long ulScanTimeout, uint8_t *ucResults);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_ioctl_set_scan_params
  *
  * Input Parameters:
@@ -420,7 +420,7 @@ long wlan_ioctl_get_scan_results(unsigned long ulScanTimeout, uint8_t *ucResults
  *
  *  @Note     uiDefaultTxPower, is not supported on this version.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_ioctl_set_scan_params(unsigned long uiEnable,
                                 unsigned long uiMinDwellTime,
@@ -431,7 +431,7 @@ long wlan_ioctl_set_scan_params(unsigned long uiEnable,
                                 unsigned long uiDefaultTxPower,
                                 unsigned long *aiIntervalList);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_smart_config_start
  *
  * Input Parameters:
@@ -450,11 +450,11 @@ long wlan_ioctl_set_scan_params(unsigned long uiEnable,
  *  @Note    An asynchronous event - Smart Config Done will be generated as soon
  *           as the process finishes successfully.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_smart_config_start(unsigned long algoEncryptedFlag);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_smart_config_stop
  *
  * Input Parameters:
@@ -466,11 +466,11 @@ long wlan_smart_config_start(unsigned long algoEncryptedFlag);
  * Description:
  *   Stop the acquire profile procedure
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_smart_config_stop(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_smart_config_set_prefix
  *
  * Input Parameters:
@@ -485,11 +485,11 @@ long wlan_smart_config_stop(void);
  *
  *  @Note    The prefix is stored in CC3000 NVMEM
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_smart_config_set_prefix(char* cNewPrefix);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: wlan_smart_config_process
  *
  * Input Parameters:
@@ -504,7 +504,7 @@ long wlan_smart_config_set_prefix(char* cNewPrefix);
  *           The encrypted data is decrypted and stored as a profile.
  *           behavior is as defined by connection policy.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long wlan_smart_config_process(void);
 

@@ -301,7 +301,7 @@ struct fb_vtable_s;
 FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: board_can_initialize
  *
  * Description:

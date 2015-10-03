@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * drivers/wireless/cc3000_socket.h  - CC3000 Host Driver Implementation.
  *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
@@ -30,7 +30,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __DRIVERS_WIRELESS_CC3000_SOCKET_H
 #define __DRIVERS_WIRELESS_CC3000_SOCKET_H
@@ -43,9 +43,9 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #define CC3000_HOSTNAME_MAX_LENGTH    (230)  /* 230 bytes + header shouldn't exceed 8
                                               * bit value */
@@ -150,9 +150,9 @@
                                           sockaddr.sa_data[4] = 0x0; \
                                           sockaddr.sa_data[5] = 0xfb;
 
-/*****************************************************************************
+/****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
 /* The fd_set member is required to be an array of longs. */
 
@@ -165,19 +165,19 @@ typedef struct
   __fd_mask fds_bits[CC3000_FD_SETSIZE / __NFDBITS];
 } TICC3000fd_set;
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_socket_impl
  *
  * Decription:
@@ -198,11 +198,11 @@ extern "C" {
  *   On success, socket handle that is used for consequent socket
  *    operations. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_socket_impl(long domain, long type, long protocol);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_closesocket_impl
  *
  * Decription:
@@ -214,11 +214,11 @@ int cc3000_socket_impl(long domain, long type, long protocol);
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long cc3000_closesocket_impl(long sd);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_accept_impl
  *
  * Decription:
@@ -261,11 +261,11 @@ long cc3000_closesocket_impl(long sd);
  *   - On connection pending, SOC_IN_PROGRESS (-2)
  *   - On failure, SOC_ERROR  (-1)
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long cc3000_accept_impl(long sd, struct sockaddr *addr, socklen_t *addrlen);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_bind_impl
  *
  * Decription:
@@ -286,11 +286,11 @@ long cc3000_accept_impl(long sd, struct sockaddr *addr, socklen_t *addrlen);
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long cc3000_bind_impl(long sd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_listen_impl
  *
  * Decription:
@@ -312,11 +312,11 @@ long cc3000_bind_impl(long sd, FAR const struct sockaddr *addr, socklen_t addrle
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long cc3000_listen_impl(long sd, long backlog);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_connect_impl
  *
  * Decription:
@@ -344,11 +344,11 @@ long cc3000_listen_impl(long sd, long backlog);
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long cc3000_connect_impl(long sd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_select_impl
  *
  * Decription:
@@ -385,7 +385,7 @@ long cc3000_connect_impl(long sd, FAR const struct sockaddr *addr, socklen_t add
  *     will return without delay.
  *   *exceptfds - return the sockets which closed recently.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 struct timeval;
 
@@ -396,7 +396,7 @@ int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
 
 
 #ifndef CC3000_TINY_DRIVER
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_setsockopt_impl
  *
  * Decription:
@@ -442,12 +442,12 @@ int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_setsockopt_impl(long sd, long level, long optname, const void *optval, socklen_t optlen);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_getsockopt_impl
  *
  * Decription:
@@ -493,12 +493,12 @@ int cc3000_setsockopt_impl(long sd, long level, long optname, const void *optval
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_getsockopt_impl(long sd, long level, long optname, void *optval, socklen_t *optlen);
 
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_recv_impl
  *
  * Decription:
@@ -518,11 +518,11 @@ int cc3000_getsockopt_impl(long sd, long level, long optname, void *optval, sock
  *     Return the number of bytes received, or -1 if an error
  *     occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_recv_impl(long sd, void *buf, long len, long flags);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_recvfrom_impl
  *
  * Decription:
@@ -549,12 +549,12 @@ int cc3000_recv_impl(long sd, void *buf, long len, long flags);
  *     Return the number of bytes received, or -1 if an error
  *     occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_recvfrom_impl(long sd, void *buf, long len, long flags,
                              struct sockaddr *from, socklen_t *fromlen);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_send_impl
  *
  * Decription:
@@ -574,11 +574,11 @@ int cc3000_recvfrom_impl(long sd, void *buf, long len, long flags,
  *     Return the number of bytes transmitted, or -1 if an
  *     error occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_send_impl(long sd, const void *buf, long len, long flags);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_sendto_impl
  *
  * Decription:
@@ -602,13 +602,13 @@ int cc3000_send_impl(long sd, const void *buf, long len, long flags);
  *     Return the number of bytes transmitted, or -1 if an
  *     error occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_sendto_impl(long sd, FAR const void *buf, long len, long flags,
                       FAR const struct sockaddr *to, socklen_t tolen);
 
 #ifndef CC3000_TINY_DRIVER
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_gethostbyname_impl
  *
  * Decription:
@@ -629,13 +629,13 @@ int cc3000_sendto_impl(long sd, FAR const void *buf, long len, long flags,
  * Returned Value:
  *   On success, positive is returned. On error, negative is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 //struct hostent *gethostbyname(const char *name);
 int cc3000_gethostbyname_impl(char * hostname, uint16_t usNameLen, unsigned long* out_ip_addr);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: cc3000_mdnsAdvertiser_impl
  *
  * Decription:
@@ -651,7 +651,7 @@ int cc3000_gethostbyname_impl(char * hostname, uint16_t usNameLen, unsigned long
  *   On success, zero is returned, return SOC_ERROR if socket was not
  *   opened successfully, or if an error occurred.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_mdnsadvertiser_impl(uint16_t mdnsEnabled, char * deviceServiceName,
                    uint16_t deviceServiceNameLength);

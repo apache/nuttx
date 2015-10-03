@@ -163,7 +163,7 @@
 
 #define CLASS_DISCONNECTED(devclass) ((devclass)->disconnected(devclass))
 
-/*******************************************************************************
+/****************************************************************************
  * Name: CONN_WAIT
  *
  * Description:
@@ -186,7 +186,7 @@
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #define CONN_WAIT(conn,hport) ((conn)->wait(conn,hport))
 
@@ -1103,7 +1103,7 @@ int usbhost_mouse_init(void);
 
 int usbhost_wlaninit(void);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_enumerate
  *
  * Description:
@@ -1135,7 +1135,7 @@ int usbhost_wlaninit(void);
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int usbhost_enumerate(FAR struct usbhost_hubport_s *hub,
                       FAR struct usbhost_class_s **devclass);
