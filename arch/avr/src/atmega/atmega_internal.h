@@ -188,7 +188,7 @@ int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
 void gpio_irqenable(int irq);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: gpio_irqdisable
  *
  * Description:
