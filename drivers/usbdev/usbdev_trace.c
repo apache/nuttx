@@ -113,7 +113,7 @@ static int usbtrace_syslog(const char *fmt, ...)
  * Public Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enable
  *
  * Description:
@@ -129,7 +129,7 @@ static int usbtrace_syslog(const char *fmt, ...)
  * Assumptions:
  * - May be called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || \
    (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
@@ -148,7 +148,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace
  *
  * Description:
@@ -157,7 +157,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
  * Assumptions:
  *   May be called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
 void usbtrace(uint16_t event, uint16_t value)
@@ -200,7 +200,7 @@ void usbtrace(uint16_t event, uint16_t value)
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enumerate
  *
  * Description:
@@ -209,7 +209,7 @@ void usbtrace(uint16_t event, uint16_t value)
  * Assumptions:
  *   NEVER called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE
 int usbtrace_enumerate(trace_callback_t callback, void *arg)

@@ -230,7 +230,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16)
 
 #endif /* CONFIG_USBHOST_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enumerate
  *
  * Description:
@@ -239,7 +239,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16)
  * Assumptions:
  *   NEVER called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_TRACE
 int usbhost_trenumerate(usbhost_trcallback_t callback, FAR void *arg)

@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  *  evnt_handler.c  - CC3000 Host Driver Implementation.
  *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
@@ -30,11 +30,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,9 +51,9 @@
 #include "cc3000drv.h"
 #include <nuttx/wireless/cc3000/netapp.h>
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #define FLOW_CONTROL_EVENT_HANDLE_OFFSET           (0)
 #define FLOW_CONTROL_EVENT_BLOCK_MODE_OFFSET       (1)
@@ -103,23 +103,23 @@
 #define GET_SCAN_RESULTS_FRAME_TIME_OFFSET         (10)
 #define GET_SCAN_RESULTS_SSID_MAC_LENGTH           (38)
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 unsigned long socket_active_status = SOCKET_STATUS_INIT_VAL;
 
-/*****************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
 static long hci_event_unsol_flowcontrol_handler(char *pEvent);
 static void update_socket_active_status(char *resp_params);
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
-/*****************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: hci_unsol_handle_patch_request
  *
  * Description:
@@ -131,7 +131,7 @@ static void update_socket_active_status(char *resp_params);
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void hci_unsol_handle_patch_request(char *event_hdr)
 {
@@ -208,7 +208,7 @@ void hci_unsol_handle_patch_request(char *event_hdr)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: hci_event_handler
  *
  * Description:
@@ -223,7 +223,7 @@ void hci_unsol_handle_patch_request(char *event_hdr)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
 {
@@ -552,7 +552,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
   return NULL;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: hci_unsol_event_handler
  *
  * Description:
@@ -565,7 +565,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
  *   1 if event supported and handled
  *   0 if event is not supported
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long hci_unsol_event_handler(char *event_hdr)
 {
@@ -737,7 +737,7 @@ long hci_unsol_event_handler(char *event_hdr)
   return 0;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: hci_unsolicited_event_handler
  *
  * Description:
@@ -750,7 +750,7 @@ long hci_unsol_event_handler(char *event_hdr)
  * Returned Value:
  *   ESUCCESS if successful, EFAIL if an error occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long hci_unsolicited_event_handler(void)
 {
@@ -782,7 +782,7 @@ long hci_unsolicited_event_handler(void)
   return res;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: set_socket_active_status
  *
  * Description:
@@ -796,7 +796,7 @@ long hci_unsolicited_event_handler(void)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void set_socket_active_status(long Sd, long Status)
 {
@@ -807,7 +807,7 @@ void set_socket_active_status(long Sd, long Status)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: hci_event_unsol_flowcontrol_handler
  *
  * Description:
@@ -821,7 +821,7 @@ void set_socket_active_status(long Sd, long Status)
  * Returned Value:
  *   ESUCCESS if successful, EFAIL if an error occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long hci_event_unsol_flowcontrol_handler(char *pEvent)
 {
@@ -848,7 +848,7 @@ long hci_event_unsol_flowcontrol_handler(char *pEvent)
   return(ESUCCESS);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: get_socket_active_status
  *
  * Description:
@@ -860,7 +860,7 @@ long hci_event_unsol_flowcontrol_handler(char *pEvent)
  * Returned Value:
  *   Current status of the socket.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long get_socket_active_status(long Sd)
 {
@@ -873,7 +873,7 @@ long get_socket_active_status(long Sd)
   return SOCKET_STATUS_INACTIVE;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: update_socket_active_status
  *
  * Description:
@@ -885,7 +885,7 @@ long get_socket_active_status(long Sd)
  * Returned Value:
  *   Current status of the socket.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void update_socket_active_status(char *resp_params)
 {
@@ -900,7 +900,7 @@ void update_socket_active_status(char *resp_params)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: SimpleLinkWaitEvent
  *
  * Description:
@@ -914,7 +914,7 @@ void update_socket_active_status(char *resp_params)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void SimpleLinkWaitEvent(uint16_t opcode, void *pRetParams)
 {
@@ -956,7 +956,7 @@ void SimpleLinkWaitEvent(uint16_t opcode, void *pRetParams)
   nllvdbg("Done for opcode 0x%x\n",opcode);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: SimpleLinkWaitData
  *
  * Description:
@@ -971,7 +971,7 @@ void SimpleLinkWaitEvent(uint16_t opcode, void *pRetParams)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
 {

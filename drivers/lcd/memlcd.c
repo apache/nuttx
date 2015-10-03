@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * drivers/lcd/memlcd.c
  * Driver for Sharp Memory LCD.
  *
@@ -33,11 +33,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,9 +55,9 @@
 
 #include <arch/irq.h>
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Configuration */
 
@@ -119,9 +119,9 @@
 #  define lcdvdbg(x...)
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Type Definition
- ******************************************************************************/
+ ****************************************************************************/
 
 struct memlcd_dev_s
 {
@@ -144,9 +144,9 @@ struct memlcd_dev_s
   uint8_t fb[MEMLCD_FBSIZE];
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Low-level spi helpers */
 
@@ -180,9 +180,9 @@ static int memlcd_setpower(struct lcd_dev_s *dev, int power);
 static int memlcd_getcontrast(struct lcd_dev_s *dev);
 static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
-/******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 static uint8_t g_runbuffer[MEMLCD_BPP * MEMLCD_XRES / 8];
 
@@ -226,11 +226,11 @@ static struct memlcd_dev_s g_memlcddev =
   },
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * __set_bit - Set a bit in memory
  *
  * @nr: the bit to set
@@ -240,7 +240,7 @@ static struct memlcd_dev_s g_memlcddev =
  * If it's called on the same region of memory simultaneously, the effect
  * may be that only one operation succeeds.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #define BIT(nr)            (1 << (nr))
 #define BITS_PER_BYTE        8
@@ -266,7 +266,7 @@ static inline int __test_bit(int nr, const volatile uint8_t * addr)
   return 1 & (addr[BIT_BYTE(nr)] >> (nr & (BITS_PER_BYTE - 1)));
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: memlcd_configspi
  *
  * Description:
@@ -280,7 +280,7 @@ static inline int __test_bit(int nr, const volatile uint8_t * addr)
  *
  * Assumptions:
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void memlcd_configspi(FAR struct spi_dev_s *spi)
 {
@@ -307,7 +307,7 @@ static inline void memlcd_configspi(FAR struct spi_dev_s *spi)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: memlcd_select
  *
  * Description:
@@ -321,7 +321,7 @@ static inline void memlcd_configspi(FAR struct spi_dev_s *spi)
  *
  * Assumptions:
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPI_OWNBUS
 static inline void memlcd_select(FAR struct spi_dev_s *spi)
@@ -354,7 +354,7 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: memlcd_deselect
  *
  * Description:
@@ -368,7 +368,7 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
  *
  * Assumptions:
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPI_OWNBUS
 static inline void memlcd_deselect(FAR struct spi_dev_s *spi)
@@ -385,7 +385,7 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_clear
  *
  * Description:
@@ -396,7 +396,7 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi)
  *
  * Assumptions:
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
 {
@@ -409,7 +409,7 @@ static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
   memlcd_deselect(mlcd->spi);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_extcominisr
  *
  * Description:
@@ -427,7 +427,7 @@ static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
  * Assumptions:
  *   Board specific logic needs to be provided to support it.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_extcominisr(int irq, FAR void *context)
 {
@@ -445,7 +445,7 @@ static int memlcd_extcominisr(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_putrun
  *
  * Description:
@@ -458,7 +458,7 @@ static int memlcd_extcominisr(int irq, FAR void *context)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t * buffer, size_t npixels)
@@ -538,7 +538,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_getrun
  *
  * Description:
@@ -550,7 +550,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
                          size_t npixels)
@@ -609,13 +609,13 @@ static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- ******************************************************************************/
+ ****************************************************************************/
 static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
 {
@@ -627,13 +627,13 @@ static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
@@ -644,14 +644,14 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_getpower
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on.
  *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_getpower(FAR struct lcd_dev_s *dev)
 {
@@ -661,14 +661,14 @@ static int memlcd_getpower(FAR struct lcd_dev_s *dev)
   return mlcd->power;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_setpower
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on).
  *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_setpower(FAR struct lcd_dev_s *dev, int power)
 {
@@ -690,13 +690,13 @@ static int memlcd_setpower(FAR struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_getcontrast(struct lcd_dev_s *dev)
 {
@@ -706,13 +706,13 @@ static int memlcd_getcontrast(struct lcd_dev_s *dev)
   return mlcd->contrast;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -734,11 +734,11 @@ static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  memlcd_initialize
  *
  * Description:
@@ -757,7 +757,7 @@ static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *   On success, this function returns a reference to the LCD object for
  *   the specified LCD.  NULL is returned on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
                                         FAR struct memlcd_priv_s *priv,
                                         unsigned int devno)
