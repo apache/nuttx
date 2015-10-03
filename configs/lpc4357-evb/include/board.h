@@ -320,7 +320,7 @@ extern "C" {
 
 EXTERN void lpc43_boardinitialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name:  lpc43_ledinit, lpc43_setled, and lpc43_setleds
  *
  * Description:

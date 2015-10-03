@@ -234,13 +234,13 @@ void stm32_pmbuttons(void);
  *   for the specified ILI9341 LCD Single chip driver connected as 4 wire serial
  *   (spi). NULL is returned on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #endif
 
 #ifdef CONFIG_STM32_SPI5
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_spi5initialize
  *
  * Description:
@@ -259,7 +259,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  * Returned Value:
  *   Valid SPI device structure reference on succcess; a NULL on failure
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *stm32_spi5initialize(void);
 #endif

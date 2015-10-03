@@ -326,7 +326,7 @@ void sam_sram_initialize(void);
  * Description:
  *   Initialize the SPI-based SD card.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
