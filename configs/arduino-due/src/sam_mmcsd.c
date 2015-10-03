@@ -245,7 +245,7 @@ static FAR struct spi_dev_s *sam_mmcsd_spiinitialize(void)
  * Description:
  *   Initialize the SPI-based SD card.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int sam_sdinitialize(int minor)
 {

@@ -113,7 +113,7 @@ void sam_ledinit(void)
  *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setled() is
  *  available to control the LED from user application logic.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void sam_setled(int led, bool ledon)
 {
@@ -132,7 +132,7 @@ void sam_setled(int led, bool ledon)
  *  available to control the LED from user application logic.  NOTE:  since
  *  there is only a single LED on-board, this is function is not very useful.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void sam_setleds(uint8_t ledset)
 {

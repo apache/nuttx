@@ -160,12 +160,12 @@ uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return SPI_STATUS_PRESENT;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name:  lpc17_ssp1cmddata
  *
  * Description: Dummy Function
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
 int weak_function lpc17_ssp1cmddata(FAR struct spi_dev_s *dev,

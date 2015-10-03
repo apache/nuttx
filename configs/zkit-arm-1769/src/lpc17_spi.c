@@ -174,12 +174,12 @@ uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 
 #ifdef CONFIG_SPI_CMDDATA
-/******************************************************************************
+/****************************************************************************
  * Name:  lpc17_spicmddata
  *
  * Description: Dummy Function
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int lpc17_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {

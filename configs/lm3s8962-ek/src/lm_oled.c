@@ -136,7 +136,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   return NULL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name:  tiva_spicmddata
  *
  * Description:
@@ -157,7 +157,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int tiva_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {

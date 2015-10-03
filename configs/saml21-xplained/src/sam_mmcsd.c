@@ -84,7 +84,7 @@
  *   - CONFIG_MMCSD=y, and
  *   - SAMDL_HAVE_SPI0=y (CONFIG_SAMDL_SERCOM0 && CONFIG_SAMDL_SERCOM0_ISSPI)
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int sam_sdinitialize(int port, int minor)
 {

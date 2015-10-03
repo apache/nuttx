@@ -90,7 +90,7 @@ void stm32_ledinit(void)
  *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the stm32_setled() is
  *  available to control the LED from user application logic.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void stm32_setled(int led, bool ledon)
 {
@@ -109,7 +109,7 @@ void stm32_setled(int led, bool ledon)
  *  available to control the LED from user application logic.  NOTE:  since
  *  there is only a single LED on-board, this is function is not very useful.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void stm32_setleds(uint8_t ledset)
 {

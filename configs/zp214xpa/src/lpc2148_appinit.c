@@ -56,7 +56,7 @@
  *   called directly from application code, but only indirectly via the
  *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int board_app_initialize(void)
 {

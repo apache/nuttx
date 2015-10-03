@@ -128,7 +128,7 @@ uint8_t board_buttons(void)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Button interrupt support.
  *
  * Description:
@@ -149,7 +149,7 @@ uint8_t board_buttons(void)
  *   value.  The previous interrupt handler address is returned (so that it
  *   may restored, if so desired).
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
