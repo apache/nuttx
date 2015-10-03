@@ -230,7 +230,7 @@ extern "C"
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_ohci_initialize
  *
  * Description:
@@ -253,14 +253,14 @@ extern "C"
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
 struct usbhost_connection_s;
 FAR struct usbhost_connection_s *sam_ohci_initialize(int controller);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_ohci_tophalf
  *
  * Description:
@@ -268,13 +268,13 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller);
  *   EHCI will manage the common UHPHS interrupt and will forward the interrupt
  *   event to this function.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
 int sam_ohci_tophalf(int irq, FAR void *context);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_ehci_initialize
  *
  * Description:
@@ -297,7 +297,7 @@ int sam_ohci_tophalf(int irq, FAR void *context);
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SAMA5_EHCI
 struct usbhost_connection_s;

@@ -70,7 +70,7 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: lpc31_ehci_initialize
  *
  * Description:
@@ -93,7 +93,7 @@ extern "C"
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if defined(CONFIG_LPC43_USBOTG) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;
