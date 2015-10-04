@@ -160,8 +160,8 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32F7_SPI4
 void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
- spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-}}
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+}
 
 uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {

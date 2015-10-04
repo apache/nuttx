@@ -110,16 +110,16 @@ void at90usb_ledinit(void)
 
 void board_led_on(int led)
 {
- /*                         ON      OFF
-  * LED_STARTED        0    OFF     ON  (never happens)
-  * LED_HEAPALLOCATE   0    OFF     ON  (never happens)
-  * LED_IRQSENABLED    0    OFF     ON  (never happens)
-  * LED_STACKCREATED   1    ON      ON  (never happens)
-  * LED_INIRQ          2    OFF     NC  (momentary)
-  * LED_SIGNAL         2    OFF     NC  (momentary)
-  * LED_ASSERTION      2    OFF     NC  (momentary)
-  * LED_PANIC          0    OFF     ON  (1Hz flashing)
-  */
+  /*                         ON      OFF
+   * LED_STARTED        0    OFF     ON  (never happens)
+   * LED_HEAPALLOCATE   0    OFF     ON  (never happens)
+   * LED_IRQSENABLED    0    OFF     ON  (never happens)
+   * LED_STACKCREATED   1    ON      ON  (never happens)
+   * LED_INIRQ          2    OFF     NC  (momentary)
+   * LED_SIGNAL         2    OFF     NC  (momentary)
+   * LED_ASSERTION      2    OFF     NC  (momentary)
+   * LED_PANIC          0    OFF     ON  (1Hz flashing)
+   */
 
   switch (led)
     {
@@ -152,16 +152,16 @@ void board_led_on(int led)
 
 void board_led_off(int led)
 {
- /*                         ON      OFF
-  * LED_STARTED        0    OFF     ON  (never happens)
-  * LED_HEAPALLOCATE   0    OFF     ON  (never happens)
-  * LED_IRQSENABLED    0    OFF     ON  (never happens)
-  * LED_STACKCREATED   1    ON      ON  (never happens)
-  * LED_INIRQ          2    OFF     NC  (momentary)
-  * LED_SIGNAL         2    OFF     NC  (momentary)
-  * LED_ASSERTION      2    OFF     NC  (momentary)
-  * LED_PANIC          0    OFF     ON  (1Hz flashing)
-  */
+  /*                         ON      OFF
+   * LED_STARTED        0    OFF     ON  (never happens)
+   * LED_HEAPALLOCATE   0    OFF     ON  (never happens)
+   * LED_IRQSENABLED    0    OFF     ON  (never happens)
+   * LED_STACKCREATED   1    ON      ON  (never happens)
+   * LED_INIRQ          2    OFF     NC  (momentary)
+   * LED_SIGNAL         2    OFF     NC  (momentary)
+   * LED_ASSERTION      2    OFF     NC  (momentary)
+   * LED_PANIC          0    OFF     ON  (1Hz flashing)
+   */
 
   switch (led)
     {

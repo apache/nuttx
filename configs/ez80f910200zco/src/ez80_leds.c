@@ -302,7 +302,7 @@ void board_led_off(int led)
  * Name: up_timerhook
  ****************************************************************************/
 
- void up_timerhook(void)
+void up_timerhook(void)
 {
   if (g_cathoderow > 6)
     {

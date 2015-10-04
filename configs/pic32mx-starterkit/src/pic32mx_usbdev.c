@@ -105,7 +105,7 @@ void weak_function pic32mx_usbdevinitialize(void)
    */
 
 #ifdef CONFIG_USBHOST
- // pic32mx_configgpio(GPIO_USB_VBUSON);
+  //pic32mx_configgpio(GPIO_USB_VBUSON);
 #endif
 
   /* "If the host PC sends a GetStatus (device) request, the firmware must respond
@@ -120,7 +120,7 @@ void weak_function pic32mx_usbdevinitialize(void)
    */
 
 #ifdef CONFIG_USB_PWRSENSE
- // pic32mx_configgpio(GPIO_USB_PWRSENSE);
+  //pic32mx_configgpio(GPIO_USB_PWRSENSE);
 #endif
 }
 

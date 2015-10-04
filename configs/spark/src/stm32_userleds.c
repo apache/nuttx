@@ -130,7 +130,7 @@ void up_setled(int led, bool ledon)
 
 void up_setleds(uint8_t ledset, uint8_t led_states_set)
 {
- led_states_set ^= LED_ACTIVE_LOW;
+  led_states_set ^= LED_ACTIVE_LOW;
   if ((ledset & BOARD_USR_LED_BIT) == 0)
     {
       stm32_gpiowrite(GPIO_LED1, (led_states_set & BOARD_USR_LED_BIT) == 0);

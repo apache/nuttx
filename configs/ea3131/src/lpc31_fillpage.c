@@ -296,8 +296,8 @@ static inline void lpc31_initsrc(void)
 
   /* Are we already initialized? */
 
- if (!g_pgsrc.initialized)
-   {
+  if (!g_pgsrc.initialized)
+    {
       /* No... the initialize now */
 
       pgllvdbg("Initializing\n");

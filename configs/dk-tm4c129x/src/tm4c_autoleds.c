@@ -75,49 +75,49 @@ void tm4c_ledinit(void)
 
 void board_led_on(int led)
 {
-/* --------------- ------- ---- ----- --------------------
- * STATE           VALUE   RED  GREEN BLUE
- * --------------- ------- ---- ----- --------------------
- * LED_STARTED       0     OFF  OFF   ON
- * LED_HEAPALLOCATE  1     NC   NC    NC
- * LED_IRQSENABLED   1     NC   NC    NC
- * LED_STACKCREATED  2     OFF  ON    OFF
- * LED_INIRQ         1     NC   NC    NC
- * LED_SIGNAL        1     NC   NC    NC
- * LED_ASSERTION     1     NC   NC    NC
- * LED_PANIC         3     ON   OFF   OFF (flashing 2Hz)
- * --------------- ------- ---- ----- --------------------
- *
- * A high output illuminates the LED.
- */
+  /* --------------- ------- ---- ----- --------------------
+   * STATE           VALUE   RED  GREEN BLUE
+   * --------------- ------- ---- ----- --------------------
+   * LED_STARTED       0     OFF  OFF   ON
+   * LED_HEAPALLOCATE  1     NC   NC    NC
+   * LED_IRQSENABLED   1     NC   NC    NC
+   * LED_STACKCREATED  2     OFF  ON    OFF
+   * LED_INIRQ         1     NC   NC    NC
+   * LED_SIGNAL        1     NC   NC    NC
+   * LED_ASSERTION     1     NC   NC    NC
+   * LED_PANIC         3     ON   OFF   OFF (flashing 2Hz)
+   * --------------- ------- ---- ----- --------------------
+   *
+   * A high output illuminates the LED.
+   */
 
- switch (led)
-  {
-  case 0: /* R=OFF, G=OFF, B=ON */
-    /* Previous state was all OFF */
+  switch (led)
+    {
+    case 0: /* R=OFF, G=OFF, B=ON */
+      /* Previous state was all OFF */
 
-    tiva_gpiowrite(GPIO_LED_B, true);
-    break;
+      tiva_gpiowrite(GPIO_LED_B, true);
+      break;
 
-  default:
-  case 1: /* No change */
-    break;
+    default:
+    case 1: /* No change */
+      break;
 
-  case 2: /* R=OFF, G=ON, B=OFF */
-    /* Previous state was all: R=OFF, G=OFF, B=ON */
+    case 2: /* R=OFF, G=ON, B=OFF */
+      /* Previous state was all: R=OFF, G=OFF, B=ON */
 
-    tiva_gpiowrite(GPIO_LED_G, true);
-    tiva_gpiowrite(GPIO_LED_B, false);
-    break;
+      tiva_gpiowrite(GPIO_LED_G, true);
+      tiva_gpiowrite(GPIO_LED_B, false);
+      break;
 
-  case 3: /* R=ON, G=OFF, B=OFF */
-    /* Previous state was all: R=OFF, G=Unknown, B=Unknown */
+    case 3: /* R=ON, G=OFF, B=OFF */
+      /* Previous state was all: R=OFF, G=Unknown, B=Unknown */
 
-    tiva_gpiowrite(GPIO_LED_R, true);
-    tiva_gpiowrite(GPIO_LED_G, false);
-    tiva_gpiowrite(GPIO_LED_B, false);
-    break;
-  }
+      tiva_gpiowrite(GPIO_LED_R, true);
+      tiva_gpiowrite(GPIO_LED_G, false);
+      tiva_gpiowrite(GPIO_LED_B, false);
+      break;
+    }
 }
 
 /****************************************************************************
@@ -126,35 +126,35 @@ void board_led_on(int led)
 
 void board_led_off(int led)
 {
-/* --------------- ------- ---- ----- --------------------
- * STATE           VALUE   RED  GREEN BLUE
- * --------------- ------- ---- ----- --------------------
- * LED_STARTED       0     OFF  OFF   ON
- * LED_HEAPALLOCATE  1     NC   NC    NC
- * LED_IRQSENABLED   1     NC   NC    NC
- * LED_STACKCREATED  2     OFF  ON    OFF
- * LED_INIRQ         1     NC   NC    NC
- * LED_SIGNAL        1     NC   NC    NC
- * LED_ASSERTION     1     NC   NC    NC
- * LED_PANIC         3     ON   OFF   OFF (flashing 2Hz)
- * --------------- ------- ---- ----- --------------------
- *
- * A high output illuminates the LED.
- */
+  /* --------------- ------- ---- ----- --------------------
+   * STATE           VALUE   RED  GREEN BLUE
+   * --------------- ------- ---- ----- --------------------
+   * LED_STARTED       0     OFF  OFF   ON
+   * LED_HEAPALLOCATE  1     NC   NC    NC
+   * LED_IRQSENABLED   1     NC   NC    NC
+   * LED_STACKCREATED  2     OFF  ON    OFF
+   * LED_INIRQ         1     NC   NC    NC
+   * LED_SIGNAL        1     NC   NC    NC
+   * LED_ASSERTION     1     NC   NC    NC
+   * LED_PANIC         3     ON   OFF   OFF (flashing 2Hz)
+   * --------------- ------- ---- ----- --------------------
+   *
+   * A high output illuminates the LED.
+   */
 
- switch (led)
-  {
-  case 0: /* Will not happen */
-  case 1: /* No change */
-  case 2: /* Will not happen */
-  default:
-    break;
+  switch (led)
+    {
+    case 0: /* Will not happen */
+    case 1: /* No change */
+    case 2: /* Will not happen */
+    default:
+      break;
 
-  case 3: /* R=OFF, G=OFF, B=OFF */
-    /* Previous state was all: R=ON, G=OFF, B=OFF */
+    case 3: /* R=OFF, G=OFF, B=OFF */
+      /* Previous state was all: R=ON, G=OFF, B=OFF */
 
-    tiva_gpiowrite(GPIO_LED_R, false);
-  }
+      tiva_gpiowrite(GPIO_LED_R, false);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

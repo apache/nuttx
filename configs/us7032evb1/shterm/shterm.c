@@ -609,8 +609,8 @@ int main(int argc, char **argv, char **envp)
   tty.c_cflag &= ~(CSIZE|PARENB);
   tty.c_cflag |= CS8;
 
- (void)cfsetispeed(&tty, speed);
- (void)cfsetospeed(&tty, speed);
+  (void)cfsetispeed(&tty, speed);
+  (void)cfsetospeed(&tty, speed);
 
   ret = tcsetattr(g_fd, TCSANOW, &tty);
   if (ret < 0)

@@ -153,10 +153,10 @@ void board_button_initialize(void)
 {
   uint32_t regval;
 
- /* PB12 is set up as a system flash ERASE pin when the firmware boots. To
-  * use the SW1, PB12 has to be configured as a normal regular I/O pin in
-  * the MATRIX module. For more information see the SAM V71 datasheet.
-  */
+  /* PB12 is set up as a system flash ERASE pin when the firmware boots. To
+   * use the SW1, PB12 has to be configured as a normal regular I/O pin in
+   * the MATRIX module. For more information see the SAM V71 datasheet.
+   */
 
   regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
   regval |= MATRIX_CCFG_SYSIO_SYSIO12;

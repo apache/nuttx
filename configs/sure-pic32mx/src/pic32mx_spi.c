@@ -105,9 +105,8 @@
 
 #  undef PIC32_HAVE_SD
 
- /* The Sure DB-DP11212 PIC32 General Purpose Demo Board has an SOIC (Flash or
+/* The Sure DB-DP11212 PIC32 General Purpose Demo Board has an SOIC (Flash or
  * EEPROM) connected on SPI2:
- *
  *
  *  TMS/AN10/PMA13/RB10   UTIL_WP FLASH (U4) WP
  *  TDO/AN11/PMA12/RB11   UTIL_CS FLASH (U4) CS

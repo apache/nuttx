@@ -290,6 +290,6 @@ int usbmsc_archinitialize(void)
 #if defined(CONFIG_NSH_ARCHINIT)
   return OK;
 #else
- return board_app_initialize();
+  return board_app_initialize();
 #endif
 }

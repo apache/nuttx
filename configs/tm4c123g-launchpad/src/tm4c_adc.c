@@ -76,7 +76,7 @@
 
 #ifdef CONFIG_TIVA_ADC
 int board_adc_initialize(void)
- {
+{
 #  if defined (CONFIG_TIVA_ADC) && defined (CONFIG_ADC)
   static bool initialized = false;
   int ret;

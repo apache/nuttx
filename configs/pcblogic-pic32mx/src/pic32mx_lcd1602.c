@@ -37,7 +37,7 @@
  *
  ****************************************************************************/
 
- /* LCD pin mapping (see configs/pcblogic-pic32mx/README.txt)
+/* LCD pin mapping (see configs/pcblogic-pic32mx/README.txt)
  *
  *  ----------------------------------- ---------- ----------------------------------
  *  PIC32                               LCD1602    PCBLogic PIN
