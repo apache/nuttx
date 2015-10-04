@@ -121,11 +121,11 @@ typedef unsigned char vsn_sif_gpio_t;
 #   define VSN_SIF_GPIO_READ_MASK   0x40    ///< Readout mask
 
 
-#define VSN_SIF_ANOUT_LOW       0	// Pseudo Analog Output acts as GPIO
-#define VSN_SIF_ANOUT_HIGH      1	// Pseudo Analog Output acts as GPIO high
-#define	VSN_SIF_ANOUT_HIGHPWR   2	// ... acts as high power output
-#define VSN_SIF_ANOUT_PWM       3	// ... acts as PWM output
-#define VSN_SIF_ANOUT_PWMPWR    4	// acts as power PWM output
+#define VSN_SIF_ANOUT_LOW       0  // Pseudo Analog Output acts as GPIO
+#define VSN_SIF_ANOUT_HIGH      1  // Pseudo Analog Output acts as GPIO high
+#define VSN_SIF_ANOUT_HIGHPWR   2  // ... acts as high power output
+#define VSN_SIF_ANOUT_PWM       3  // ... acts as PWM output
+#define VSN_SIF_ANOUT_PWMPWR    4  // acts as power PWM output
 
 #define VSN_SIF_ANIN_GAINMASK   7
 #define VSN_SIF_ANIN_GAIN1      0
@@ -148,21 +148,21 @@ typedef unsigned char vsn_sif_gpio_t;
 #define VSN_SIF_ANIN_OVERSMP1
 #define VSN_SIF_ANIN_OVERSMP2
 #define VSN_SIF_ANIN_OVERSMP4
-#define VSN_SIF_ANIN_OVERSMP8	
+#define VSN_SIF_ANIN_OVERSMP8
 #define VSN_SIF_ANIN_OVERSMP16
 
 
 struct vsn_sif_s {
     vsn_sif_state_t     state;              // activity
     unsigned char       opencnt;            // open count
-	
+
     vsn_sif_gpio_t      gpio[2];
 
     unsigned char       anout_opts;
     unsigned short int  anout_width;
     unsigned short int  anout_period;       // setting it to 0, disables PWM
     unsigned short int  anout_samplerate;   // as written by write()
-	 		
+
     unsigned short int  anref_width;
     unsigned short int  anref_period;       // setting it to 0, disables PWM
     unsigned short int  anref_samplerate;   // as written by write()
@@ -535,7 +535,7 @@ extern int cc1101_eventcb(int irq, FAR void *context);
 
 int sif_main(int argc, char *argv[])
 {
-    if (argc >= 2) {	
+    if (argc >= 2) {
         if (!strcmp(argv[1], "init")) {
           return sif_init();
         }

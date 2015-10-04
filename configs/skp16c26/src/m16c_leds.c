@@ -235,10 +235,11 @@ void board_led_off(int led)
         }
       else if (led > LED_STACKCREATED)
         {
-	  /* This shouldn't happen */
+          /* This shouldn't happen */
 
           led--;
         }
+
       ledset = g_ledstate[led];
       up_setleds(ledset & GREENYELLOW_LED_MASK, ledset & RED_LED_MASK);
       g_prevled[g_nestlevel]= led;

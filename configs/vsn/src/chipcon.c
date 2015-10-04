@@ -44,40 +44,36 @@
  * Public Functions
  ****************************************************************************/
 
-/** Set external clock frequency, or disable it
- */
+/* Set external clock frequency, or disable it */
+
 int chipcon_setXclock(int prescaler)
 {
-	// check present state, if it is enabled (in the chip!)
-	
-	// change state and with OK if everything is OK.
-	
-	return ERROR;
+  // check present state, if it is enabled (in the chip!)
+  
+  // change state and with OK if everything is OK.
+  
+  return ERROR;
 }
-
 
 int chipcon_setchannel(uint16_t channel)
 {
 }
 
-
 void chipcon_init(int spino)
 {
-	// create stream driver, where STDIN is packet oriented
-	// means that two messages received are kept separated
-	// in internal buffers.
-	
-	// default mode is AUTO, RX enabled and auto TX on writes and
-	// when chipcon is IDLE.
+  // create stream driver, where STDIN is packet oriented
+  // means that two messages received are kept separated
+  // in internal buffers.
+  
+  // default mode is AUTO, RX enabled and auto TX on writes and
+  // when chipcon is IDLE.
 }
-
 
 void chipcon_open(void)
 {
 }
 
-
 void chipcon_ioctl(void)
 {
-	// access to setXclock
+  // access to setXclock
 }

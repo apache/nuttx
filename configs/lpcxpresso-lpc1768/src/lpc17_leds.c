@@ -108,19 +108,19 @@ void board_led_on(int led)
 
   switch (led)
     {
-	case 0:
-	case 2:
-	  off = true;
-	  break;
+    case 0:
+    case 2:
+      off = true;
+      break;
 
-	case 1:
-	  off       = false;
+    case 1:
+      off       = false;
       g_ncstate = false;
-	  break;
+      break;
 
-	default:
-	  return;
-	}
+    default:
+      return;
+    }
 
   lpc17_gpiowrite(LPCXPRESSO_LED, off);
 }
@@ -135,18 +135,18 @@ void board_led_off(int led)
 
   switch (led)
     {
-	case 0:
-	case 1:
-	  off = false;
-	  break;
+    case 0:
+    case 1:
+      off = false;
+      break;
 
-	case 2:
-	  off = g_ncstate;
-	  break;
+    case 2:
+      off = g_ncstate;
+      break;
 
-	default:
-	  return;
-	}
+    default:
+      return;
+    }
 
   lpc17_gpiowrite(LPCXPRESSO_LED, off);
 }
