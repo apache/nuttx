@@ -59,7 +59,7 @@ FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
       s   = (char*) src;
       while (count--)
         {
-	  *tmp++ = *s++;
+          *tmp++ = *s++;
         }
     }
   else
@@ -68,7 +68,7 @@ FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
       s   = (char*) src + count;
       while (count--)
         {
-	  *--tmp = *--s;
+          *--tmp = *--s;
         }
     }
 

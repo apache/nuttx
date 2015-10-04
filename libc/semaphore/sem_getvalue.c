@@ -103,6 +103,6 @@ int sem_getvalue(FAR sem_t *sem, FAR int *sval)
   else
     {
       set_errno(EINVAL);
-	  return ERROR;
+      return ERROR;
     }
 }

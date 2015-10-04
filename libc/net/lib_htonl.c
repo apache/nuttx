@@ -54,7 +54,7 @@ uint32_t htonl(uint32_t hl)
   return (( (hl) >> 24) |
           (((hl) >>  8) & 0x0000ff00) |
           (((hl) <<  8) & 0x00ff0000) |
-	  ( (hl) << 24));
+          ( (hl) << 24));
 #endif
 }
 

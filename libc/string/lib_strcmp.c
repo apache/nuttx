@@ -52,8 +52,9 @@ int strcmp(const char *cs, const char *ct)
   for (;;)
     {
       if ((result = *cs - *ct++) != 0 || !*cs++)
-	break;
+      break;
     }
+
   return result;
 }
 #endif

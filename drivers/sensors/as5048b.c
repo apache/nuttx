@@ -197,7 +197,7 @@ static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
                            uint8_t regval)
 {
   uint8_t buffer[2];
-	int ret;
+  int ret;
 
   sndbg("addr: %02x value: %02x\n", regaddr, regval);
 
