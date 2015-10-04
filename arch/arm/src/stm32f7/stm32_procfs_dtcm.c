@@ -228,7 +228,7 @@ static ssize_t dtcm_read(FAR struct file *filep, FAR char *buffer,
 
 
   mm_mallinfo(&g_dtcm_heap, &mem);
-  
+
   remaining = buflen;
   totalsize = 0;
 

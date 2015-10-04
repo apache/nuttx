@@ -68,7 +68,7 @@
                              BOARD_CKGR_MOR_MOSCXTST | PMC_CKGR_MOR_KEY)
 #define BOARD_CKGR_PLLAR    (BOARD_CKGR_PLLAR_DIV | BOARD_CKGR_PLLAR_COUNT | \
                              BOARD_CKGR_PLLAR_MUL | PMC_CKGR_PLLAR_ONE)
-                             
+
 #define BOARD_PMC_MCKR_FAST (PMC_MCKR_CSS_MAIN | BOARD_PMC_MCKR_PRES | \
                              BOARD_PMC_MCKR_MDIV | BOARD_PMC_MCKR_UPLLDIV2)
 #define BOARD_PMC_MCKR      (BOARD_PMC_MCKR_CSS | BOARD_PMC_MCKR_PRES | \

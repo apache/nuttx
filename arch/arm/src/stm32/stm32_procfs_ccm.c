@@ -222,7 +222,7 @@ static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
 
 
   mm_mallinfo(&g_ccm_heap, &mem);
-  
+
   remaining = buflen;
   totalsize = 0;
 
