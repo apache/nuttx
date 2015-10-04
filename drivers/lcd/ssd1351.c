@@ -892,9 +892,9 @@ static int ssd1351_setpower(FAR struct lcd_dev_s *dev, int power)
 
   DEBUGASSERT(priv != NULL && (unsigned int)power <= LCD_FULL_ON);
   gvdbg("power: %d\n", power);
-  
+
   /* Select and lock the device */
-  
+
   ssd1351_select(priv);
 
   if (power > LCD_FULL_OFF)

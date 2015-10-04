@@ -174,7 +174,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
         }
 
       /* Save the new, current group */
-  
+
       g_gid_current = gid;
     }
 

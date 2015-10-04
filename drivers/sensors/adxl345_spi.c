@@ -101,7 +101,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
   /* Select the ADXL345 */
 
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
-  
+
   /* Send register to read and get the next byte */
 
   (void)SPI_SEND(priv->spi, regaddr);
@@ -148,7 +148,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
   /* Select the ADXL345 */
 
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
-  
+
   /* Send register address and set the value */
 
   (void)SPI_SEND(priv->spi, regaddr);
@@ -186,7 +186,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
   /* Select the ADXL345 */
 
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
-  
+
   /* Send register to read and get the next 2 bytes */
 
   (void)SPI_SEND(priv->spi, regaddr);

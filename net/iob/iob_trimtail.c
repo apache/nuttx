@@ -143,7 +143,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 
               penultimate->io_flink = NULL;
             }
-               
+
           else
             {
               /* No, then just take what we need from this I/O buffer and

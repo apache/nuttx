@@ -226,7 +226,7 @@ FAR struct devif_callback_s *
       /* Add the newly allocated instance to the head of the device event
        * list.
        */
-      
+
       if (dev)
         {
           /* Verify that the device pointer is valid, i.e., that it still

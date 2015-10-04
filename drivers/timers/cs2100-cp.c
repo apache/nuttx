@@ -409,7 +409,7 @@ static int cs2100_refclk(FAR const struct cs2100_config_s *config)
       csdbg("ERROR: Failed to set CS2100_FNCCFG3: %d\n", ret);
       return ret;
     }
-  
+
   /* Configure so that CLK_OUT will be enabled when the registers are
    * unlocked (also clears other settings).
    * NOTE: This implicitly sets High Multiplier mode for the Rud.
@@ -446,7 +446,7 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
   bool highmul;
   int rmod;
   int ret;
- 
+
   DEBUGASSERT(config->clkin > 0 && config->clkout > 0);
 
   /* Calculate a 64-bit RUD value:

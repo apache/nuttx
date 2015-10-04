@@ -126,7 +126,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   icmp->destipaddr[7] = ipaddr[7];
 
   /* Add out IPv6 address as the source address */
- 
+
   net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
   /* Set up the ICMPv6 Neighbor Solicitation message */

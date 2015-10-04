@@ -115,7 +115,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
           return ret;
         }
     }
- 
+
   return OK;
 }
 

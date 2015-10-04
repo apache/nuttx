@@ -61,7 +61,7 @@
  *
  * Dependencies:  CONFIG_ARCH_USE_MMU and CONFIG_GRAN
  */
- 
+
 /* Debug */
 
 #ifdef CONFIG_CPP_HAVE_VARARGS

@@ -88,7 +88,7 @@ struct timer_upperhalf_s
   FAR char *path;     /* Registration path */
 
   /* The contained lower-half driver */
- 
+
   FAR struct timer_lowerhalf_s *lower;
 };
 
@@ -173,7 +173,7 @@ static int timer_open(FAR struct file *filep)
 
 errout_with_sem:
 //  sem_post(&upper->exclsem);
-  
+
 errout:
   return ret;
 }
@@ -214,7 +214,7 @@ static int timer_close(FAR struct file *filep)
 
   //sem_post(&upper->exclsem);
   ret = OK;
-  
+
 errout:
   return ret;
 }
@@ -254,7 +254,7 @@ static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
  * Description:
  *   The standard ioctl method.  This is where ALL of the timer work is
  *   done.
- *   
+ *
  ************************************************************************************/
 
 static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

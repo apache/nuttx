@@ -991,7 +991,7 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
         priv->sensdivhs = 0;
         break;
     }
-  
+
   switch (priv->model)
     {
       case MS58XX_MODEL_MS5803_02:

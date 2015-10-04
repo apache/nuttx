@@ -1112,7 +1112,7 @@ int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct tun_device_s *priv = filep->f_priv;
   pollevent_t eventset;
   int ret = OK;
-  
+
   if (!priv)
     {
       return -EINVAL;

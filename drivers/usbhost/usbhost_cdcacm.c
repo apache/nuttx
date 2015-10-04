@@ -1129,12 +1129,12 @@ static void usbhost_rxdata_work(FAR void *arg)
 
       rxbuf->head = nexthead;
       priv->rxndx = rxndx;
- 
+
       /* Update the head point for for the next pass through the loop
        * handling. If nexthead incremented to rxbuf->tail, then the
        * RX buffer will and we will exit the loop at the top.
        */
- 
+
       if (++nexthead >= rxbuf->size)
         {
            nexthead = 0;
@@ -1759,7 +1759,7 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
            ret, priv->pktsize);
       goto errout;
     }
-  
+
   /* Allocate a TX buffer for Bulk IN transfers */
 
   ret = DRVR_IOALLOC(hport->drvr, &priv->outbuf, priv->pktsize);
@@ -2213,7 +2213,7 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
   usbhost_takesem(&priv->exclsem);
 
   /* Check if the CDC/ACM device is still connected.  We need to disable
-   * interrupts momentarily to assure that there are no asynchronous 
+   * interrupts momentarily to assure that there are no asynchronous
    * isconnect events.
    */
 
@@ -2592,7 +2592,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
 
 static bool usbhost_rxavailable(FAR struct uart_dev_s *uartdev)
 {
-  
+
   FAR struct usbhost_cdcacm_s *priv;
 
   DEBUGASSERT(uartdev && uartdev->priv);

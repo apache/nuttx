@@ -111,7 +111,7 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
-/* This is the duration of the currently active timer or, when 
+/* This is the duration of the currently active timer or, when
  * sched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
  */
@@ -211,7 +211,7 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
   /* If a context switch occurred, then need to return delay remaining for
    * the new task at the head of the ready to run list.
    */
-  
+
   ntcb = (FAR struct tcb_s*)g_readytorun.head;
 
   /* Check if the new task at the head of the ready-to-run has changed. */
