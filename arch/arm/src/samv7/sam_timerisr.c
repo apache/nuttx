@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* Select MCU-specific settings
+/* Select MCU-specific settings
  *
  * The SysTick timer is driven by the output of the Mast Clock Controller
  * prescaler output (i.e., the MDIV output divider is not applied so that

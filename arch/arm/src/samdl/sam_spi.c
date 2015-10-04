@@ -804,9 +804,9 @@ static int spi_interrupt(struct sam_spidev_s *dev)
   uint8_t intflag;
   uint8_t inten;
 
- /* Get the set of pending SPI interrupts (we are only interested in the
-  * unmasked interrupts).
-  */
+  /* Get the set of pending SPI interrupts (we are only interested in the
+   * unmasked interrupts).
+   */
 
   intflag = sam_getreg8(priv, SAM_SPI_INTFLAG_OFFSET);
   inten   = sam_getreg8(priv, SAM_SPI_INTENCLR_OFFSET);
@@ -1263,7 +1263,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Get word 1;
    *   Send word 1;  Now word 1 is "in flight"
    *   nwords--;
-   *   for ( ; nwords > 0; nwords--)
+   *   for (; nwords > 0; nwords--)
    *     {
    *       Get word N.
    *       Wait for DRE:: meaning that word N-1 has moved to the shift
@@ -1280,7 +1280,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Save the final word.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source) */
 

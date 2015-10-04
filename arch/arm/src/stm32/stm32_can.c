@@ -1362,7 +1362,7 @@ static int can_bittiming(struct stm32_can_s *priv)
 
   canllvdbg("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
 
- /* Configure bit timing.  This also does the following, less obvious
+  /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
    *
    * - Disables silent mode.
@@ -1563,13 +1563,13 @@ static int can_filterinit(struct stm32_can_s *priv)
   can_putfreg(priv,  STM32_CAN_FIR_OFFSET(priv->filter, 1), 0);
   can_putfreg(priv,  STM32_CAN_FIR_OFFSET(priv->filter, 2), 0);
 
- /* Set Id/Mask mode for the filter */
+  /* Set Id/Mask mode for the filter */
 
   regval  = can_getfreg(priv, STM32_CAN_FM1R_OFFSET);
   regval &= ~bitmask;
   can_putfreg(priv, STM32_CAN_FM1R_OFFSET, regval);
 
- /* Assign FIFO 0 for the filter */
+  /* Assign FIFO 0 for the filter */
 
   regval  = can_getfreg(priv, STM32_CAN_FFA1R_OFFSET);
   regval &= ~bitmask;

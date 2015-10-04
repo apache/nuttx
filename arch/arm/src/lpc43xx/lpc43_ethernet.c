@@ -438,7 +438,7 @@
 #define DMABMR_CLEAR_MASK \
   (ETH_DMABMODE_SWR | ETH_DMABMODE_DA | ETH_DMABMODE_DSL_MASK | ETH_DMABMODE_ATDS | \
    ETH_DMABMODE_PBL_MASK | ETH_DMABMODE_PR_MASK | ETH_DMABMODE_FB | ETH_DMABMODE_RPBL_MASK | \
-   ETH_DMABMODE_USP | ETH_DMABMODE_PBL8X | ETH_DMABMODE_AAL | ETH_DMABMODE_MB | ETH_DMABMODE_TXPR )
+   ETH_DMABMODE_USP | ETH_DMABMODE_PBL8X | ETH_DMABMODE_AAL | ETH_DMABMODE_MB | ETH_DMABMODE_TXPR)
 
 
 /* The following bits are set or left zero unconditionally in all modes.
@@ -2634,7 +2634,7 @@ static int lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast hash table */
 
-  crc = lpc43_calcethcrc( mac, 6 );
+  crc = lpc43_calcethcrc(mac, 6);
 
   hashindex = (crc >> 26) & 0x3F;
 
@@ -2691,7 +2691,7 @@ static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Remove the MAC address to the hardware multicast hash table */
 
-  crc = lpc43_calcethcrc( mac, 6 );
+  crc = lpc43_calcethcrc(mac, 6);
 
   hashindex = (crc >> 26) & 0x3F;
 
@@ -2711,7 +2711,7 @@ static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* If there is no address registered any more, delete multicast filtering */
 
-  if (lpc43_getreg(LPC43_ETH_MACHTHI ) == 0 &&
+  if (lpc43_getreg(LPC43_ETH_MACHTHI) == 0 &&
       lpc43_getreg(LPC43_ETH_MACHTLO) == 0)
     {
       temp = lpc43_getreg(LPC43_ETH_MACFFLT);

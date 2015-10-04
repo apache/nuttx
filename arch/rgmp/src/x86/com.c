@@ -171,40 +171,44 @@ static struct uart_ops_s g_com_ops =
 
 static uart_dev_t *up_alloc_com(unsigned int base, int irq)
 {
-    uart_dev_t *dev;
-    struct up_dev_s *priv;
+  uart_dev_t *dev;
+  struct up_dev_s *priv;
 
-    priv = kmm_zalloc(sizeof(struct up_dev_s));
-    if (priv == NULL)
-        goto err0;
+  priv = kmm_zalloc(sizeof(struct up_dev_s));
+  if (priv == NULL)
+    {
+      goto err0;
+    }
 
-    dev = kmm_zalloc(sizeof(uart_dev_t));
-    if (dev == NULL)
-        goto err1;
+  dev = kmm_zalloc(sizeof(uart_dev_t));
+  if (dev == NULL)
+    {
+      goto err1;
+    }
 
-    priv->base = base;
-    priv->irq = irq;
-    priv->baud = 115200;
-    priv->lcr.val = 0;
-    priv->lcr.sep.parity = 0;
-    priv->lcr.sep.bits = 3;
-    priv->lcr.sep.stopbits = 0;
-    priv->action.handler = up_com_int_handler;
-    priv->action.dev_id = dev;
+  priv->base = base;
+  priv->irq = irq;
+  priv->baud = 115200;
+  priv->lcr.val = 0;
+  priv->lcr.sep.parity = 0;
+  priv->lcr.sep.bits = 3;
+  priv->lcr.sep.stopbits = 0;
+  priv->action.handler = up_com_int_handler;
+  priv->action.dev_id = dev;
 
-    dev->recv.size = CONFIG_COM_RXBUFSIZE;
-    dev->recv.buffer = priv->rxbuff;
-    dev->xmit.size = CONFIG_COM_TXBUFSIZE;
-    dev->xmit.buffer = priv->txbuff;
-    dev->ops = &g_com_ops;
-    dev->priv = priv;
+  dev->recv.size = CONFIG_COM_RXBUFSIZE;
+  dev->recv.buffer = priv->rxbuff;
+  dev->xmit.size = CONFIG_COM_TXBUFSIZE;
+  dev->xmit.buffer = priv->txbuff;
+  dev->ops = &g_com_ops;
+  dev->priv = priv;
 
-    return dev;
+  return dev;
 
- err1:
-    kmm_free(priv);
- err0:
-    return NULL;
+err1:
+  kmm_free(priv);
+err0:
+  return NULL;
 }
 
 /****************************************************************************

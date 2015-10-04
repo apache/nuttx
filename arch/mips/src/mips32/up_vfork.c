@@ -222,12 +222,12 @@ pid_t up_vfork(const struct vfork_s *context)
         child->cmn.adj_stack_ptr, newsp);
 #endif
 
- /* Update the stack pointer, frame pointer, global pointer and saved
-  * registers.  When the child TCB was initialized, all of the values
-  * were set to zero. up_initial_state() altered a few values, but the
-  * return value in v0 should be cleared to zero, providing the
-  * indication to the newly started child thread.
-  */
+  /* Update the stack pointer, frame pointer, global pointer and saved
+   * registers.  When the child TCB was initialized, all of the values
+   * were set to zero. up_initial_state() altered a few values, but the
+   * return value in v0 should be cleared to zero, providing the
+   * indication to the newly started child thread.
+   */
 
   child->cmn.xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
   child->cmn.xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */

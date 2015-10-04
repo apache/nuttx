@@ -540,18 +540,18 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   uint32_t cdivadd;  /* Candidate FDR DIVADDVAL value */
   uint32_t errval;   /* Error value associated with the candidate */
 
- /* The U[S]ART buad is given by:
-  *
-  * Fbaud =  Fbase * mul / (mul + divadd) / (16 * dl)
-  * dl    =  Fbase * mul / (mul + divadd) / Fbaud / 16
-  *       =  Fbase * mul / ((mul + divadd) * Fbaud * 16)
-  *       = ((Fbase * mul) >> 4) / ((mul + divadd) * Fbaud)
-  *
-  * Where the  value of MULVAL and DIVADDVAL comply with:
-  *
-  *  0 < mul < 16
-  *  0 <= divadd < mul
-  */
+  /* The U[S]ART buad is given by:
+   *
+   * Fbaud =  Fbase * mul / (mul + divadd) / (16 * dl)
+   * dl    =  Fbase * mul / (mul + divadd) / Fbaud / 16
+   *       =  Fbase * mul / ((mul + divadd) * Fbaud * 16)
+   *       = ((Fbase * mul) >> 4) / ((mul + divadd) * Fbaud)
+   *
+   * Where the  value of MULVAL and DIVADDVAL comply with:
+   *
+   *  0 < mul < 16
+   *  0 <= divadd < mul
+   */
 
   best   = UINT32_MAX;
   divadd = 0;

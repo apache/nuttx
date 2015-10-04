@@ -1539,10 +1539,10 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK);
 #endif
 
- /* These clock devisor values that must be defined in the board-specific
-  * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
-  * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
-  */
+  /* These clock devisor values that must be defined in the board-specific
+   * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
+   * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
+   */
 
   switch (rate)
     {
@@ -1780,7 +1780,7 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
 
   DEBUGASSERT(dev != NULL && nblocks > 0 && nblocks < 65535 && blocklen < 65535);
 
- /* When TRTYP - Single or Multi, blocklen must be 1-511, 0-512 */
+  /* When TRTYP - Single or Multi, blocklen must be 1-511, 0-512 */
 
   DEBUGASSERT(blocklen <= 512);
 
@@ -2082,14 +2082,14 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
   struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   int ret = OK;
 
- /* R2  CID, CSD register (136-bit)
-  *     135       0               Start bit
-  *     134       0               Transmission bit (0=from card)
-  *     133:128   bit5   - bit0   Reserved
-  *     127:1     bit127 - bit1   127-bit CID or CSD register
-  *                               (including internal CRC)
-  *     0         1               End bit
-  */
+  /* R2  CID, CSD register (136-bit)
+   *     135       0               Start bit
+   *     134       0               Transmission bit (0=from card)
+   *     133:128   bit5   - bit0   Reserved
+   *     127:1     bit127 - bit1   127-bit CID or CSD register
+   *                               (including internal CRC)
+   *     0         1               End bit
+   */
 
 #ifdef CONFIG_DEBUG
   /* Check that R1 is the correct response to this command */

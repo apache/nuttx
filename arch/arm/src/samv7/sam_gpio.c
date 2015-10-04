@@ -69,7 +69,7 @@
 #ifdef CONFIG_DEBUG_GPIO
 static const char g_portchar[SAMV7_NPIO] =
 {
- 'A'
+  'A'
 #if SAMV7_NPIO > 1
   , 'B'
 #endif
@@ -91,7 +91,7 @@ static const char g_portchar[SAMV7_NPIO] =
 
 const uintptr_t g_portbase[SAMV7_NPIO] =
 {
- SAM_PIOA_BASE
+  SAM_PIOA_BASE
 #if SAMV7_NPIO > 1
   , SAM_PIOB_BASE
 #endif
@@ -197,7 +197,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
    *         another, new API... perhaps sam_configfilter()
    */
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************

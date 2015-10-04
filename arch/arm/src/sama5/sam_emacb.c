@@ -3961,7 +3961,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
           sam_configpio(PIO_EMAC0_COL);  /* Collision Detect */
         }
     }
- else
+  else
 #endif
 
 #if defined(CONFIG_SAMA5_EMAC1)

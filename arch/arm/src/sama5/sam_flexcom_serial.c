@@ -549,7 +549,7 @@ static void flexus_disableallints(struct flexus_dev_s *priv, uint32_t *imr)
  *
  ****************************************************************************/
 
-static int flexus_interrupt( struct uart_dev_s *dev)
+static int flexus_interrupt(struct uart_dev_s *dev)
 {
   struct flexus_dev_s   *priv;
   uint32_t           pending;
@@ -1166,7 +1166,7 @@ static bool flexus_txready(struct uart_dev_s *dev)
 {
   struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
   return ((flexus_serialin(priv, SAM_FLEXUS_CSR_OFFSET) & FLEXUS_INT_TXRDY) != 0);
- }
+}
 
 /****************************************************************************
  * Name: flexus_txempty

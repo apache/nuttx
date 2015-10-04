@@ -90,7 +90,7 @@ int up_timerisr(int irq, chipreg_t *regs)
 
   sched_process_timer();
 
- /* Architecture specific hook into the timer interrupt handler */
+  /* Architecture specific hook into the timer interrupt handler */
 
 #ifdef CONFIG_ARCH_TIMERHOOK
   up_timerhook();

@@ -3453,7 +3453,7 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist)
   void *arg;
   ssize_t nbytes;
 
-  DEBUGASSERT(eplist->ed && eplist->tail && eplist->callback != NULL && 
+  DEBUGASSERT(eplist->ed && eplist->tail && eplist->callback != NULL &&
               eplist->buffer != NULL && eplist->buflen > 0);
   ed = eplist->ed;
 
@@ -3603,7 +3603,7 @@ static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   sam_givesem(&g_ohci.exclsem);
   return OK;
- 
+
 errout:
   /* Make sure that there is no outstanding request on this endpoint */
 

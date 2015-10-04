@@ -2958,7 +2958,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
  ****************************************************************************/
 
 #ifdef CONFIG_USB_NOISYVBUS
- void avr_pollvbus(void)
+void avr_pollvbus(void)
 {
   irqstate_t flags;
 

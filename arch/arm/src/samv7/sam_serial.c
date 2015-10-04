@@ -1447,7 +1447,7 @@ static bool sam_txready(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
   return ((sam_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
- }
+}
 
 /****************************************************************************
  * Name: sam_txempty

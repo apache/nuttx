@@ -312,16 +312,16 @@ static void _up_assert(int errorcode)
 
   if (current_regs || ((struct tcb_s*)g_readytorun.head)->pid == 0)
     {
-       (void)irqsave();
-        for (;;)
-          {
+      (void)irqsave();
+      for (;;)
+        {
 #ifdef CONFIG_ARCH_LEDS
-            board_led_on(LED_PANIC);
-            up_mdelay(250);
-            board_led_off(LED_PANIC);
-            up_mdelay(250);
+          board_led_on(LED_PANIC);
+          up_mdelay(250);
+          board_led_off(LED_PANIC);
+          up_mdelay(250);
 #endif
-          }
+        }
     }
   else
     {

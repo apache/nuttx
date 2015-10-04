@@ -154,9 +154,9 @@ static int a1x_pio_interrupt(int irq, void *context)
           pending >>= 2;
         }
 
-     /* Check for pending interrupts in any of the last bits */
+      /* Check for pending interrupts in any of the last bits */
 
-     else
+      else
         {
           if ((pending & 0x00000001) == 0)
             {

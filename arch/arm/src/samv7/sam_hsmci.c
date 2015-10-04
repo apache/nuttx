@@ -162,9 +162,9 @@
  */
 
 #define HSMCI_STATUS_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
-    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
-    HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+   HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
+   HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
 
 /* Response errors:
  *
@@ -177,13 +177,13 @@
  */
 
 #define HSMCI_RESPONSE_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
-    HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
+   HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
 #define HSMCI_RESPONSE_NOCRC_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
-    HSMCI_INT_RINDE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
+   HSMCI_INT_RINDE)
 #define HSMCI_RESPONSE_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE)
 
 /* Data transfer errors:
  *
@@ -196,18 +196,18 @@
  */
 
 #define HSMCI_DATA_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
-    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+   HSMCI_INT_DTOE  | HSMCI_INT_DCRCE)
 
 #define HSMCI_DATA_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_DTOE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_DTOE)
 
 #define HSMCI_DATA_RECV_ERRORS \
-  ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
-    HSMCI_INT_DCRCE )
+  (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
+   HSMCI_INT_DCRCE)
 
 #define HSMCI_DATA_DMASEND_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE)
 
 /* Data transfer status and interrupt mask bits.
  *
@@ -224,11 +224,11 @@
  */
 
 #define HSMCI_RECV_INTS \
-  ( HSMCI_DATA_RECV_ERRORS | HSMCI_INT_RXRDY)
+  (HSMCI_DATA_RECV_ERRORS | HSMCI_INT_RXRDY)
 #define HSMCI_DMARECV_INTS \
-  ( HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  (HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 #define HSMCI_DMASEND_INTS \
-  ( HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  (HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 
 /* Event waiting interrupt mask bits.
  *
@@ -240,9 +240,9 @@
  */
 
 #define HSMCI_CMDRESP_INTS \
-  ( HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY )
+  (HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY)
 #define HSMCI_CMDRESP_NOCRC_INTS \
-  ( HSMCI_RESPONSE_NOCRC_ERRORS | HSMCI_INT_CMDRDY )
+  (HSMCI_RESPONSE_NOCRC_ERRORS | HSMCI_INT_CMDRDY)
 
 /* Register logging support */
 
@@ -1773,10 +1773,10 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   regval = sam_getreg(priv, SAM_HSMCI_MR_OFFSET);
   regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK | HSMCI_MR_CLKODD);
 
- /* These clock devisor values that must be defined in the board-specific
-  * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
-  * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
-  */
+  /* These clock devisor values that must be defined in the board-specific
+   * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
+   * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
+   */
 
   switch (rate)
     {
@@ -2455,14 +2455,14 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
   struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   int ret = OK;
 
- /* R2  CID, CSD register (136-bit)
-  *     135       0               Start bit
-  *     134       0               Transmission bit (0=from card)
-  *     133:128   bit5   - bit0   Reserved
-  *     127:1     bit127 - bit1   127-bit CID or CSD register
-  *                               (including internal CRC)
-  *     0         1               End bit
-  */
+  /* R2  CID, CSD register (136-bit)
+   *     135       0               Start bit
+   *     134       0               Transmission bit (0=from card)
+   *     133:128   bit5   - bit0   Reserved
+   *     127:1     bit127 - bit1   127-bit CID or CSD register
+   *                               (including internal CRC)
+   *     0         1               End bit
+   */
 
 #ifdef CONFIG_DEBUG
   /* Check that R1 is the correct response to this command */

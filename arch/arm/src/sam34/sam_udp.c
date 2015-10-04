@@ -112,7 +112,7 @@
                              UDPEP_CSR_STALLSENT | UDPEP_CSR_RXSETUP | \
                              UDPEP_CSR_TXCOMP)
 
-#define nop()               __asm__ __volatile__ ( "nop" )
+#define nop()               __asm__ __volatile__ ("nop")
 
 /* USB-related masks */
 
@@ -2351,7 +2351,7 @@ static void sam_csr_setbits(uint8_t epno, uint32_t setbits)
    * accessing DPR.
    */
 
-  for (count = 0; count < 15; count++ )
+  for (count = 0; count < 15; count++)
     {
       nop();
     }
@@ -2386,7 +2386,7 @@ static void sam_csr_clrbits(uint8_t epno, uint32_t clrbits)
    * accessing DPR.
    */
 
-  for (count = 0; count < 15; count++ )
+  for (count = 0; count < 15; count++)
     {
       nop();
     }

@@ -3679,7 +3679,7 @@ static int lpc43_enumerate(FAR struct usbhost_connection_s *conn,
 
 static int lpc43_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                               uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
- {
+{
   struct lpc43_epinfo_s *epinfo = (struct lpc43_epinfo_s *)ep0;
 
   DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);

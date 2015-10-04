@@ -122,7 +122,7 @@ int lpc11_lowgetc(void)
 
   while ((getreg32(CONSOLE_BASE+LPC11_UART_LSR_OFFSET) & UART_LSR_RDR) == 0);
 
- /* Then read a character from the UART data register */
+  /* Then read a character from the UART data register */
 
   ch = getreg8(CONSOLE_BASE+LPC11_UART_RBR_OFFSET);
 #endif

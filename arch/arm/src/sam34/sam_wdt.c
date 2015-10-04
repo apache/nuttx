@@ -371,7 +371,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the watchdog timer or "petting the dog".
  *
  *   The application program must write in the WDT_CR register at regular
- *   intervals during normal operation to prevent an MCU reset. 
+ *   intervals during normal operation to prevent an MCU reset.
  *
  * Input Parameters:
  *   lower - A pointer the publicly visible representation of the "lower-half"
@@ -385,7 +385,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
 static int sam34_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
   wdvdbg("Entry\n");
-  
+
   sam34_putreg((WDT_CR_KEY | WDT_CR_WDRSTT), SAM_WDT_CR);
   return OK;
 }
@@ -422,7 +422,7 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
     {
       status->flags |= WDFLAGS_ACTIVE;
     }
- 
+
   if (priv->handler)
     {
       status->flags |= WDFLAGS_CAPTURE;
@@ -480,7 +480,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       return -ERANGE;
     }
 
-   
+
     reload = ((timeout * WDT_FCLK) / 1000) - 1;
 
   /* Make sure that the final reload value is within range */
@@ -503,7 +503,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   wdvdbg("fwdt=%d reload=%d timout=%d\n",
          WDT_FCLK, reload, priv->timeout);
-  
+
   /* Don't commit to MR register until started! */
 
   return OK;
@@ -560,7 +560,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
 
       regval |= WWDG_CFR_EWI;
       sam34_putreg(regval, SAM_WDT_CFR);
- 
+
       up_enable_irq(STM32_IRQ_WWDG);
     }
   else
@@ -619,7 +619,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
       uint32_t mintime = (uint32_t)arg;
 
       ret = -EINVAL;
-      if (priv->started) 
+      if (priv->started)
         {
           ret = -ENOSYS; /* can't write the MR more than once! */
         }
@@ -632,7 +632,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
         {
           uint32_t window = (((priv->timeout - mintime) * WDT_FCLK) / 1000) - 1;
           DEBUGASSERT(window <= priv->reload);
-          priv->window = window; 
+          priv->window = window;
           ret = OK;
         }
     }
@@ -649,7 +649,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *
  * Description:
  *   Initialize the WDT watchdog timer.  The watchdog timer is initialized and
- *   registers as 'devpath'.  
+ *   registers as 'devpath'.
  *
  * Input Parameters:
  *   devpath - The full path to the watchdog.  This should be of the form

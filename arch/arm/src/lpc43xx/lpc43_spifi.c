@@ -241,7 +241,7 @@
  * Compute this from the SPIFI clock period and the minimum high time of CS
  * from the serial flash data sheet:
  *
- *   csHigh = ceiling( min CS high / SPIFI clock period ) - 1
+ *   csHigh = ceiling(min CS high / SPIFI clock period) - 1
  *
  * where ceiling means round up to the next higher integer if the argument
  * isn’t an integer.

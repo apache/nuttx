@@ -987,8 +987,8 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                              struct qspi_meminfo_s *meminfo)
 {
- uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
- size_t buflen;
+  uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
+  size_t buflen;
 
   /* Get the length as an even multiple of 32-bit words. */
 

@@ -436,11 +436,11 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
    * data transfer.
    */
 
- while ((getreg32(LPC11_SPI_SR) & SPI_SR_SPIF) == 0);
+  while ((getreg32(LPC11_SPI_SR) & SPI_SR_SPIF) == 0);
 
- /* Read the SPI Status Register again to clear the status bit */
+  /* Read the SPI Status Register again to clear the status bit */
 
- (void)getreg32(LPC11_SPI_SR);
+  (void)getreg32(LPC11_SPI_SR);
   return (uint16_t)getreg32(LPC11_SPI_DR);
 }
 

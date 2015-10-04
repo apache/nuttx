@@ -547,7 +547,7 @@ static void dbgu_txint(struct uart_dev_s *dev, bool enable)
 static bool dbgu_txready(struct uart_dev_s *dev)
 {
   return ((getreg32(SAM_DBGU_SR) & DBGU_INT_TXRDY) != 0);
- }
+}
 
 /****************************************************************************
  * Name: dbgu_txempty

@@ -107,7 +107,7 @@ static uint8_t g_nibblemap[16] = { 0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 
 #ifndef CONFIG_VECTORED_INTERRUPTS
 void up_decodeirq(uint32_t *regs)
 #else
-static void lpc214x_decodeirq( uint32_t *regs)
+static void lpc214x_decodeirq(uint32_t *regs)
 #endif
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

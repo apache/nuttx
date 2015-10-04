@@ -499,14 +499,14 @@ static ssize_t stm32_bbsram_internal_write(FAR struct bbsramfh_s *bbf,
 static ssize_t stm32_bbsram_write(FAR struct file *filep, FAR const char *buffer,
                                   size_t len)
 {
- FAR struct inode *inode = filep->f_inode;
- FAR struct stm32_bbsram_s *bbr;
- int ret = -EFBIG;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct stm32_bbsram_s *bbr;
+  int ret = -EFBIG;
 
- DEBUGASSERT(inode && inode->i_private);
- bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode && inode->i_private);
+  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
 
- /* Forbid writes past the end of the device */
+  /* Forbid writes past the end of the device */
 
   if (filep->f_pos <  bbr->bbf->len)
     {
@@ -529,8 +529,8 @@ static ssize_t stm32_bbsram_write(FAR struct file *filep, FAR const char *buffer
       stm32_bbsram_semgive(bbr);
     }
 
- BBSRAM_DEBUG_READ();
- return ret;
+  BBSRAM_DEBUG_READ();
+  return ret;
 }
 
 /****************************************************************************

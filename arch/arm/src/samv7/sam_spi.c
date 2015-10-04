@@ -923,9 +923,9 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
- static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
-                        bool selected)
- {
+static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool selected)
+{
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
   uint32_t regval;

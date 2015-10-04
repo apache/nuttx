@@ -1346,7 +1346,7 @@ static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
- }
+}
 
 /****************************************************************************
  * Name: up_txempty

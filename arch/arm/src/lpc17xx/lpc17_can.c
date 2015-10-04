@@ -1192,7 +1192,7 @@ static int can_bittiming(struct up_dev_s *priv)
 
   canllvdbg("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
 
- /* Configure bit timing */
+  /* Configure bit timing */
 
   btr = (((brp - 1) << CAN_BTR_BRP_SHIFT)   |
          ((ts1 - 1) << CAN_BTR_TSEG1_SHIFT) |
@@ -1290,14 +1290,14 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
       lpc17_configgpio(GPIO_CAN2_TD);
 
       candev = &g_can2dev;
-   }
- else
+    }
+  else
 #endif
-  {
-    candbg("Unsupported port: %d\n", port);
-    irqrestore(flags);
-    return NULL;
-  }
+    {
+      candbg("Unsupported port: %d\n", port);
+      irqrestore(flags);
+      return NULL;
+    }
 
   /* Then just perform a CAN reset operation */
 
@@ -1306,4 +1306,3 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
   return candev;
 }
 #endif
-

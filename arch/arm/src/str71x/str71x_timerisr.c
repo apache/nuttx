@@ -75,19 +75,19 @@
 
 #define MAX_OCAR    65535
 
- /* In this case, the desired, maximum clocking would be MAX_TIM0CLK.  For
-  * example if CLK_TCK is the default of 100Hz, then the ideal clocking for
-  * timer0 would be 6,553,500 */
+/* In this case, the desired, maximum clocking would be MAX_TIM0CLK.  For
+ * example if CLK_TCK is the default of 100Hz, then the ideal clocking for
+ * timer0 would be 6,553,500 */
 
 #define MAX_TIM0CLK (MAX_OCAR * CLK_TCK)
 
- /* The best divider then would be the one that reduces PCLK2 to MAX_TIM0CLK.
-  * Note that the following calculation forces an integer divisor to the next
-  * integer above the optimal.  So, for example, if MAX_TIM0CLK is 6,553,500
-  * and PCLK2 is 32MHz, then ideal PCLK2_DIVIDER would be 4.88 but 5 is used
-  * instead.  The value 5 would give an actual TIM0CLK of 6,400,000, less
-  * than the maximum.
-  */
+/* The best divider then would be the one that reduces PCLK2 to MAX_TIM0CLK.
+ * Note that the following calculation forces an integer divisor to the next
+ * integer above the optimal.  So, for example, if MAX_TIM0CLK is 6,553,500
+ * and PCLK2 is 32MHz, then ideal PCLK2_DIVIDER would be 4.88 but 5 is used
+ * instead.  The value 5 would give an actual TIM0CLK of 6,400,000, less
+ * than the maximum.
+ */
 
 #if STR71X_PCLK2 > MAX_TIM0CLK
 #  define PCLK2_DIVIDER (((STR71X_PCLK2) + (MAX_TIM0CLK+1)) / MAX_TIM0CLK)
@@ -99,10 +99,10 @@
 #  error "PCLK2 is too fast for any divisor"
 #endif
 
-  /* Then we can get the actual OCAR value from the selected divider value.
-   * For example, if PCLK2 is 32MHz and PCLK2_DIVIDER is 5, then the actual
-   * TIM0CLK would 6,4000,000 and the final OCAR_VALUE would be 64,000.
-   */
+/* Then we can get the actual OCAR value from the selected divider value.
+ * For example, if PCLK2 is 32MHz and PCLK2_DIVIDER is 5, then the actual
+ * TIM0CLK would 6,4000,000 and the final OCAR_VALUE would be 64,000.
+ */
 
 #define ACTUAL_TIM0CLK (STR71X_PCLK2 / PCLK2_DIVIDER)
 #define OCAR_VALUE     (ACTUAL_TIM0CLK / CLK_TCK)
@@ -175,14 +175,14 @@ void up_timer_initialize(void)
   putreg16(0x0000, STR71X_TIMER0_CR2);
   putreg16(0x0000, STR71X_TIMER0_SR);
 
- /* Configure TIM0 so that it is clocked by the internal APB2 frequency (PCLK2)
-  * divided by the above prescaler value (1) -- versus an external Clock.
-  * -- Nothing to do because  STR71X_TIMERCR1_ECKEN is already cleared.
-  *
-  * Select a divisor to reduce the frequency of clocking.  This must be
-  * done so that the entire timer interval can fit in the 16-bit OCAR register.
-  * (see the discussion above).
-  */
+  /* Configure TIM0 so that it is clocked by the internal APB2 frequency (PCLK2)
+   * divided by the above prescaler value (1) -- versus an external Clock.
+   * -- Nothing to do because  STR71X_TIMERCR1_ECKEN is already cleared.
+   *
+   * Select a divisor to reduce the frequency of clocking.  This must be
+   * done so that the entire timer interval can fit in the 16-bit OCAR register.
+   * (see the discussion above).
+   */
 
   putreg16(STR71X_TIMERCR2_OCAIE | (PCLK2_DIVIDER - 1), STR71X_TIMER0_CR2);
 

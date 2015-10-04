@@ -181,7 +181,7 @@ static int sam_configinput(uintptr_t base, uint32_t pin, gpio_pinset_t cfgset)
       putreg32(pin, base + SAM_GPIO_STERC_OFFSET);
     }
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -412,7 +412,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_GPIO_IMR1S_OFFSET);
     }
 
- /* REVISIT:  Should event generation be enabled now?  I am assuming so */
+  /* REVISIT:  Should event generation be enabled now?  I am assuming so */
 
   if ((cfgset & GPIO_PERIPH_EVENTS) != 0)
     {
@@ -421,7 +421,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_GPIO_EVERS_OFFSET);
     }
 
- /* Finally, drive the pen from the peripheral */
+  /* Finally, drive the pen from the peripheral */
 
   putreg32(pin, base + SAM_GPIO_GPERC_OFFSET);
   return OK;

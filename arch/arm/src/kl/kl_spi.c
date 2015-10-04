@@ -499,9 +499,9 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
    * from the SPI data registr
    */
 
- while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPRF) == 0);
+  while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPRF) == 0);
 
- /* Return the data */
+  /* Return the data */
 
   return (uint16_t)spi_getreg(priv, KL_SPI_D_OFFSET);
 }
@@ -538,7 +538,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   /* Loop, sending each word in the user-provied data buffer. */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source) */
 
@@ -597,7 +597,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         size_t nwords)
 {
   spivdbg("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);

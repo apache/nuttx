@@ -181,7 +181,7 @@ struct lpc17_usbhost_s
 
   volatile struct usbhost_hubport_s *hport;
 #endif
- };
+};
 
 /* This structure describes one asynchronous transfer */
 
@@ -691,7 +691,7 @@ static void lpc17_tdfree(struct lpc17_gtd_s *td)
    * allocated tail TD.
    */
 
- if (tdfree != NULL && td != TDTAIL)
+  if (tdfree != NULL && td != TDTAIL)
     {
       tdfree->flink = g_tdfree;
       g_tdfree      = tdfree;

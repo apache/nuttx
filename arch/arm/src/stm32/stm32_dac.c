@@ -845,7 +845,7 @@ static int dac_timinit(struct stm32_chan_s *chan)
 
   /* Enable the timer. */
 
- modifyreg32(regaddr, 0, setbits);
+  modifyreg32(regaddr, 0, setbits);
 
   /* Calculate the pre-scaler value */
 

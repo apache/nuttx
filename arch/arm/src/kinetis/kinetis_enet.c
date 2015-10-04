@@ -195,7 +195,7 @@ struct kinetis_driver_s
    * requirements.
    */
 
- uint8_t desc[NENET_NBUFFERS * sizeof(struct enet_desc_s) + 16];
+  uint8_t desc[NENET_NBUFFERS * sizeof(struct enet_desc_s) + 16];
 
   /* The DMA buffers.  Again, A unaligned uint8_t is used to allocate the
    * memory; 16 is added to assure that we can meet the descriptor alignment
@@ -883,7 +883,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize ENET buffers */
 

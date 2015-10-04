@@ -106,16 +106,16 @@ void IO_Init(void);
  */
 
 #ifdef CONFIG_LPC2378_PLL_CLKSRC
-#       if ( (CONFIG_LPC2378_PLL_CLKSRC < 0) || (CONFIG_LPC2378_PLL_CLKSRC > 2) )
-#               error "PLL clock source not valid, check configuration "
-#       endif
+#  if ((CONFIG_LPC2378_PLL_CLKSRC < 0) || (CONFIG_LPC2378_PLL_CLKSRC > 2))
+#    error "PLL clock source not valid, check configuration "
+#  endif
 #else
-#       error "PLL clock source not defined, check configuration file"
+#  error "PLL clock source not defined, check configuration file"
 #endif
 
 /* PLL provides CCLK and must always be configured */
 
-#define PLL     ( PLL_M | (PLL_N << 16) )
+#define PLL     (PLL_M | (PLL_N << 16))
 
 /* Memory Accelerator Module (MAM) initialization values
  *
