@@ -108,7 +108,7 @@ void kinetis_wddisable(void)
   /* Unlock the watchdog so that we can write to registers */
 
   kinetis_wdunlock();
-	
+
   /* Clear the WDOGEN bit to disable the watchdog */
 
   regval  = getreg16(KINETIS_WDOG_STCTRLH);

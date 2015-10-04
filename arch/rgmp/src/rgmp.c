@@ -65,106 +65,108 @@ const unsigned int rtos_tick_time = 10;
 
 void rtos_entry(void)
 {
-    os_start();
+  os_start();
 }
 
 void *rtos_get_page(void)
 {
-    return memalign(PTMEMSIZE, PTMEMSIZE);
+  return memalign(PTMEMSIZE, PTMEMSIZE);
 }
 
 void rtos_free_page(void *page)
 {
-    free(page);
+  free(page);
 }
 
 void *rtos_kmalloc(int size)
 {
-	return kmm_malloc(size);
+  return kmm_malloc(size);
 }
 
 void rtos_kfree(void *addr)
 {
-	kmm_free(addr);
+  kmm_free(addr);
 }
 
-/**
- * The interrupt can be nested. The pair of rtos_enter_interrupt()
+/* The interrupt can be nested. The pair of rtos_enter_interrupt()
  * and rtos_exit_interrupt() make sure the context switch is
  * performed only in the last IRQ exit.
  */
+
 void rtos_enter_interrupt(void)
 {
-    nest_irq++;
+  nest_irq++;
 }
 
 void rtos_exit_interrupt(void)
 {
-    local_irq_disable();
-    nest_irq--;
-    if (!nest_irq) {
-		struct tcb_s *rtcb = current_task;
-		struct tcb_s *ntcb;
+  local_irq_disable();
+  nest_irq--;
+  if (!nest_irq)
+    {
+      struct tcb_s *rtcb = current_task;
+      struct tcb_s *ntcb;
 
-		if (rtcb->xcp.sigdeliver) {
-			rtcb->xcp.ctx.tf = current_regs;
-			push_xcptcontext(&rtcb->xcp);
-		}
-		ntcb = (struct tcb_s*)g_readytorun.head;
-		// switch needed
-		if (rtcb != ntcb) {
-			rtcb->xcp.ctx.tf = current_regs;
-			current_task = ntcb;
-			rgmp_switch_to(&ntcb->xcp.ctx);
-		}
+      if (rtcb->xcp.sigdeliver)
+        {
+          rtcb->xcp.ctx.tf = current_regs;
+          push_xcptcontext(&rtcb->xcp);
+        }
+
+      ntcb = (struct tcb_s*)g_readytorun.head;
+
+      // switch needed
+
+      if (rtcb != ntcb)
+        {
+          rtcb->xcp.ctx.tf = current_regs;
+          current_task = ntcb;
+          rgmp_switch_to(&ntcb->xcp.ctx);
+        }
     }
 }
 
 void rtos_timer_isr(void *data)
 {
-    sched_process_timer();
+  sched_process_timer();
 }
 
-/**
- * RTOS semaphore operation
- */
+/* RTOS semaphore operation */
+
 int rtos_sem_init(struct semaphore *sem, int val)
 {
-	if ((sem->sem = kmm_malloc(sizeof(sem_t))) == NULL)
-		return -1;
-    return sem_init(sem->sem, 0, val);
+  if ((sem->sem = kmm_malloc(sizeof(sem_t))) == NULL)
+    return -1;
+  return sem_init(sem->sem, 0, val);
 }
 
 int rtos_sem_up(struct semaphore *sem)
 {
-    return sem_post(sem->sem);
+  return sem_post(sem->sem);
 }
 
 int rtos_sem_down(struct semaphore *sem)
 {
-    return sem_wait(sem->sem);
+  return sem_wait(sem->sem);
 }
 
 void rtos_stop_running(void)
 {
-    extern void nuttx_arch_exit(void);
+  extern void nuttx_arch_exit(void);
 
-    local_irq_disable();
+  local_irq_disable();
 
-    nuttx_arch_exit();
+  nuttx_arch_exit();
 
-    while (1)
-      {
-	arch_hlt();
-      }
+  while (1)
+    {
+      arch_hlt();
+    }
 }
 
 int rtos_vnet_init(struct rgmp_vnet *vnet)
 {
-	extern int vnet_init(struct rgmp_vnet *vnet);
+  extern int vnet_init(struct rgmp_vnet *vnet);
 
-	return vnet_init(vnet);
+  return vnet_init(vnet);
 }
-
-
-

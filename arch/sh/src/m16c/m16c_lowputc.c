@@ -167,7 +167,7 @@
  */
 
 #define M16C_UART_BRG_VALUE \
-	((M16C_XIN_FREQ / (16 * M16C_XIN_PRESCALER * M16C_UART_BAUD)) - 1)
+  ((M16C_XIN_FREQ / (16 * M16C_XIN_PRESCALER * M16C_UART_BAUD)) - 1)
 
 #endif /* HAVE_SERIALCONSOLE */
 
@@ -256,7 +256,7 @@ static inline void up_lowserialsetup(void)
   /* Set UART transmit/receive control register 1 to enable transmit and receive */
 
   putreg8(UART_C1_TE|UART_C1_RE, M16C_UART_BASE + M16C_UART_C1);
-	
+
   /* Set UART transmit/receive mode register data bits, stop bits, parity */
 
   putreg8(M16C_MR_VALUE, M16C_UART_BASE + M16C_UART_MR);

@@ -108,6 +108,6 @@ void up_savestate(uint32_t *regs)
     }
   else
     {
-	  DEBUGASSERT(regs[REG_SP] == current_regs[REG_ESP] + 4*BOTTOM_PRIO);
-	}
+      DEBUGASSERT(regs[REG_SP] == current_regs[REG_ESP] + 4*BOTTOM_PRIO);
+    }
 }

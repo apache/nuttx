@@ -94,14 +94,14 @@ static inline uint32_t gpio_baseaddress(unsigned int irq)
   if (irq < __IRQ_GPIO_PB0)
     {
       return AVR32_GPIO0_BASE;
-	}
+    }
   else
 #endif
 #if CONFIG_AVR32_GPIOIRQSETB != 0
   if (irq < NR_GPIO_IRQS)
     {
       return AVR32_GPIO1_BASE;
-	}
+    }
   else
 #endif
     {
@@ -132,7 +132,7 @@ static inline int gpio_pin(unsigned int irq)
     {
       pinset = CONFIG_AVR32_GPIOIRQSETA;
       pinirq = __IRQ_GPIO_PA0;
-	}
+    }
   else
 #endif
 #if CONFIG_AVR32_GPIOIRQSETB != 0
@@ -140,7 +140,7 @@ static inline int gpio_pin(unsigned int irq)
     {
       pinset = CONFIG_AVR32_GPIOIRQSETB;
       pinirq = __IRQ_GPIO_PB0;
-	}
+    }
   else
 #endif
     {

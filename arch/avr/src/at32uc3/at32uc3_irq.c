@@ -223,8 +223,8 @@ void up_irqinitialize(void)
 
   for (irq = 0; irq < AVR32_IRQ_NEVENTS; irq++)
     {
-	  irq_attach(irq, avr32_xcptn);
-	}
+      irq_attach(irq, avr32_xcptn);
+    }
 
   /* Initialize GPIO interrupt facilities */
 

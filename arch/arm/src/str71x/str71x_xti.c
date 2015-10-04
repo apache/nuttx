@@ -119,7 +119,7 @@ static int str71x_xtiinterrupt(int irq, FAR void *context)
 
       if ((pending & mask) != 0)
         {
-	  /* Deliver the IRQ */
+          /* Deliver the IRQ */
 
           irq_dispatch(irq, context);
           pending &= ~mask;

@@ -594,7 +594,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set UART transmit/receive control register 1 to enable transmit and receive */
 
   up_serialout(priv, M16C_UART_C1, UART_C1_TE|UART_C1_RE);
-	
+
   /* Set UART transmit/receive mode register data bits, stop bits, parity */
 
   regval = 0;

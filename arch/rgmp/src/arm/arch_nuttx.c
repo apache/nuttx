@@ -43,38 +43,37 @@
 #include <arch/arch.h>
 #include <nuttx/sched.h>
 
-
 void nuttx_arch_init(void)
 {
-
 }
 
 void nuttx_arch_exit(void)
 {
-
 }
 
 void up_initial_state(struct tcb_s *tcb)
 {
-    struct Trapframe *tf;
+  struct Trapframe *tf;
 
-    if (tcb->pid != 0) {
-	tf = (struct Trapframe *)tcb->adj_stack_ptr-1;
-	memset(tf, 0, sizeof(struct Trapframe));
-	tf->tf_cpsr = SVC_MOD;
-	tf->tf_pc = (uint32_t)tcb->start;
-	tcb->xcp.tf = tf;
+  if (tcb->pid != 0)
+    {
+      tf = (struct Trapframe *)tcb->adj_stack_ptr-1;
+      memset(tf, 0, sizeof(struct Trapframe));
+      tf->tf_cpsr = SVC_MOD;
+      tf->tf_pc = (uint32_t)tcb->start;
+      tcb->xcp.tf = tf;
     }
 }
 
 void push_xcptcontext(struct xcptcontext *xcp)
 {
-    xcp->save_eip = xcp->tf->tf_pc;
-    xcp->save_eflags = xcp->tf->tf_cpsr;
+  xcp->save_eip = xcp->tf->tf_pc;
+  xcp->save_eflags = xcp->tf->tf_cpsr;
 
-    // set  interrupts disabled
-    xcp->tf->tf_pc = (uint32_t)up_sigentry;
-    xcp->tf->tf_cpsr |= CPSR_IF;
+  // set  interrupts disabled
+
+  xcp->tf->tf_pc = (uint32_t)up_sigentry;
+  xcp->tf->tf_cpsr |= CPSR_IF;
 }
 
 void pop_xcptcontext(struct xcptcontext *xcp)

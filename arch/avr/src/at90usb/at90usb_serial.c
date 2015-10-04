@@ -373,7 +373,7 @@ static int usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status)
 
   if (status)
     {
-	  *status = (FAR unsigned int)UCSR1A;
+      *status = (FAR unsigned int)UCSR1A;
     }
 
   /* Then return the actual received byte */

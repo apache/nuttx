@@ -81,7 +81,7 @@
 
 #define M16C_DIVISOR (65535 * CLK_TCK)
 #define M16C_IDEAL_PRESCALER \
-	((M16C_XIN_FREQ + M16C_DIVISOR - 1) / M16C_DIVISOR)
+  ((M16C_XIN_FREQ + M16C_DIVISOR - 1) / M16C_DIVISOR)
 
 /* Now, given this idel prescaler value, pick between available choices: 1, 8, and 32 */
 
@@ -99,12 +99,12 @@
 /* Timer 0 Mode Settings */
 
 #define M16C_TA0MODE_CONFIG \
-	(TAnMR_TMOD_TIMER|TAnMR_MR_TMNOOUT|TAnMR_MR_TMNOGATE|M16C_PRESCALE_BITS)
+  (TAnMR_TMOD_TIMER|TAnMR_MR_TMNOOUT|TAnMR_MR_TMNOGATE|M16C_PRESCALE_BITS)
 
 /* The actual reload value matching the selected prescaler value */
 
 #define M16C_RELOAD_VALUE \
-	((M16C_XIN_FREQ / M16C_PRESCALE_VALUE / CLK_TCK)  - 1)
+  ((M16C_XIN_FREQ / M16C_PRESCALE_VALUE / CLK_TCK)  - 1)
 
 /****************************************************************************
  * Private Type Definitions

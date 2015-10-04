@@ -62,34 +62,37 @@ void nuttx_arch_init(void)
 
 void nuttx_arch_exit(void)
 {
-    extern void e1000_mod_exit(void);
+  extern void e1000_mod_exit(void);
 
 #ifdef CONFIG_NET_E1000
-    e1000_mod_exit();
+  e1000_mod_exit();
 #endif
-
 }
 
 void up_initial_state(struct tcb_s *tcb)
 {
-    struct Trapframe *tf;
+  struct Trapframe *tf;
 
-    if (tcb->pid) {
-		tf = (struct Trapframe *)tcb->adj_stack_ptr - 1;
-		rgmp_setup_context(&tcb->xcp.ctx, tf, tcb->start, 1);
+  if (tcb->pid)
+    {
+      tf = (struct Trapframe *)tcb->adj_stack_ptr - 1;
+      rgmp_setup_context(&tcb->xcp.ctx, tf, tcb->start, 1);
     }
-	else
-		rgmp_setup_context(&tcb->xcp.ctx, NULL, NULL, 0);
+  else
+    {
+      rgmp_setup_context(&tcb->xcp.ctx, NULL, NULL, 0);
+    }
 }
 
 void push_xcptcontext(struct xcptcontext *xcp)
 {
-    xcp->save_eip = xcp->ctx.tf->tf_eip;
-    xcp->save_eflags = xcp->ctx.tf->tf_eflags;
+  xcp->save_eip = xcp->ctx.tf->tf_eip;
+  xcp->save_eflags = xcp->ctx.tf->tf_eflags;
 
-    // set up signal entry with interrupts disabled
-    xcp->ctx.tf->tf_eip = (uint32_t)up_sigentry;
-    xcp->ctx.tf->tf_eflags = 0;
+  // set up signal entry with interrupts disabled
+
+  xcp->ctx.tf->tf_eip = (uint32_t)up_sigentry;
+  xcp->ctx.tf->tf_eflags = 0;
 }
 
 void pop_xcptcontext(struct xcptcontext *xcp)
