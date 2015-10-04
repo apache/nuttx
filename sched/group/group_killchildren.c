@@ -77,7 +77,7 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
       ret = pthread_cancel(pid);
     }
 
- return ret;
+  return ret;
 }
 
 /****************************************************************************

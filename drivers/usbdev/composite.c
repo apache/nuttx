@@ -146,7 +146,7 @@ const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
 const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
 const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
 
- /****************************************************************************
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 /****************************************************************************

@@ -780,7 +780,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
 void sem_initholders(void)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
- int i;
+  int i;
 
   /* Put all of the pre-allocated holder structures into the free list */
 

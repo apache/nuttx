@@ -742,7 +742,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
 
 static inline uint32_t usbhost_getle32(const uint8_t *val)
 {
- /* Little endian means LS halfword first in byte stream */
+  /* Little endian means LS halfword first in byte stream */
 
   return (uint32_t)usbhost_getle16(&val[2]) << 16 | (uint32_t)usbhost_getle16(val);
 }

@@ -126,7 +126,7 @@ void arp_timer_initialize(void)
   /* Create and start the ARP timer */
 
   g_arptimer = wd_create();
- (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
+  (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
 }
 
 #endif /* CONFIG_NET_ARP */

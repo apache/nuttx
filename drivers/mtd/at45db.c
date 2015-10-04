@@ -640,7 +640,7 @@ static ssize_t at45db_bread(FAR struct mtd_dev_s *mtd, off_t startblock,
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   ssize_t nbytes;
 
- /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the byte-oriented read */
 
   nbytes = at45db_read(mtd, startblock << priv->pageshift,
                        nblocks << priv->pageshift, buffer);

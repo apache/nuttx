@@ -181,9 +181,9 @@ int mkdir(const char *pathname, mode_t mode)
 
   return OK;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout:
+errout:
   set_errno(errcode);
   return ERROR;
 }

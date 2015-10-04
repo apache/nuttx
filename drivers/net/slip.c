@@ -183,9 +183,9 @@ struct slip_driver_s
  * Private Data
  ****************************************************************************/
 
- /* We really should get rid of CONFIG_NET_SLIP_NINTERFACES and, instead,
-  * kmm_malloc() new interface instances as needed.
-  */
+/* We really should get rid of CONFIG_NET_SLIP_NINTERFACES and, instead,
+ * kmm_malloc() new interface instances as needed.
+ */
 
 static struct slip_driver_s g_slip[CONFIG_NET_SLIP_NINTERFACES];
 

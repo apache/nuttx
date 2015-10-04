@@ -199,7 +199,7 @@ static int cs2100_read_reg(FAR const struct cs2100_config_s *config,
         }
     }
 
- return ret;
+  return ret;
 }
 #endif
 

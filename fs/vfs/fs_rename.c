@@ -245,12 +245,12 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   return OK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
- errout_with_newinode:
+errout_with_newinode:
   inode_release(newinode);
 #endif
- errout_with_oldinode:
+errout_with_oldinode:
   inode_release(oldinode);
- errout:
+errout:
   set_errno(errcode);
   return ERROR;
 }

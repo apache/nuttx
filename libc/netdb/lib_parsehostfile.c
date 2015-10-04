@@ -279,7 +279,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }

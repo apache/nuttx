@@ -2202,7 +2202,7 @@ static void cdcuart_txint(FAR struct uart_dev_s *dev, bool enable)
     }
 #endif
 
- /* Extract references to private data */
+  /* Extract references to private data */
 
   priv = (FAR struct cdcacm_dev_s*)dev->priv;
 

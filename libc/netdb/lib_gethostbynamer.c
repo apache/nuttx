@@ -112,7 +112,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }
@@ -335,7 +335,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }
@@ -360,7 +360,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       return ret;
     }
 
- /* Get the address type; verify the address size. */
+  /* Get the address type; verify the address size. */
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
@@ -479,7 +479,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }
@@ -676,7 +676,7 @@ errorout_with_herrnocode:
       *h_errnop = herrnocode;
     }
 
- return ERROR;
+  return ERROR;
 }
 #endif /* CONFIG_NETDB_HOSTFILE */
 
@@ -793,7 +793,7 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
       *h_errnop = HOST_NOT_FOUND;
     }
 
- return ERROR;
+  return ERROR;
 #endif
 }
 

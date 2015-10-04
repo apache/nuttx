@@ -83,8 +83,8 @@ int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz)
 
   /* Convert the timeval to a timespec */
 
- ts.tv_sec  = tv->tv_sec;
- ts.tv_nsec = tv->tv_usec * NSEC_PER_USEC;
+  ts.tv_sec  = tv->tv_sec;
+  ts.tv_nsec = tv->tv_usec * NSEC_PER_USEC;
 
   /* Let clock_settime do the work */
 

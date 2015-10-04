@@ -87,7 +87,7 @@
  *   of the attached shared memory segment and return 0.
  *
  *   Otherwise, the shared memory segment will not be detached, shmdt()
- &   will return -1, and errno will be set to indicate the error.
+ *   will return -1, and errno will be set to indicate the error.
  *
  *   - EINVAL
  *     The value of shmaddr is not the data segment start address of a

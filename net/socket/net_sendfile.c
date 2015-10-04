@@ -744,15 +744,15 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   tcp_callback_free(conn, state.snd_ackcb);
 
- errout_datacb:
+errout_datacb:
   tcp_callback_free(conn, state.snd_datacb);
 
- errout_locked:
+errout_locked:
 
   sem_destroy(&state. snd_sem);
   net_unlock(save);
 
- errout:
+errout:
 
   if (err)
     {

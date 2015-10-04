@@ -271,9 +271,9 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
       rettime = tmp;
     }
 
- /* Check for operations specific to scheduling policy of the currently
-  * active task.
-  */
+  /* Check for operations specific to scheduling policy of the currently
+   * active task.
+   */
 
   tmp = sched_process_scheduler(ticks, noswitches);
   if (tmp > 0 && tmp < cmptime)

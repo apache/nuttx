@@ -264,9 +264,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
   return sem;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout_with_lock:
+errout_with_lock:
   set_errno(errcode);
   sched_unlock();
   return (FAR sem_t *)ERROR;

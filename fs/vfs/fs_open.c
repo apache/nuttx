@@ -201,11 +201,11 @@ int open(const char *path, int oflags, ...)
 
   return fd;
 
- errout_with_fd:
+errout_with_fd:
   files_release(fd);
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout:
+errout:
   set_errno(ret);
   return ERROR;
 }

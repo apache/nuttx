@@ -199,10 +199,10 @@ int main(int argc, char **argv)
 
 void my_assert(bool value)
 {
- if (!value)
-   {
-    fprintf(stderr, "Assertion failed\n");
+  if (!value)
+    {
+      fprintf(stderr, "Assertion failed\n");
 
-    abort();
-  }
+      abort();
+    }
 }

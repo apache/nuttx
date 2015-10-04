@@ -418,14 +418,14 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
       return;
     }
 
- /* Loop until all of the bytes have been written.  This function may be
-  * called from an interrupt handler!  Semaphores cannot be used!
-  *
-  * The write logic only needs to modify the head index.  Therefore,
-  * there is a difference in the way that head and tail are protected:
-  * tail is protected with a semaphore; tail is protected by disabling
-  * interrupts.
-  */
+  /* Loop until all of the bytes have been written.  This function may be
+   * called from an interrupt handler!  Semaphores cannot be used!
+   *
+   * The write logic only needs to modify the head index.  Therefore,
+   * there is a difference in the way that head and tail are protected:
+   * tail is protected with a semaphore; tail is protected by disabling
+   * interrupts.
+   */
 
   for (nwritten = 0; nwritten < buflen; nwritten++)
     {

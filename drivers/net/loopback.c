@@ -561,9 +561,9 @@ int localhost_initialize(void)
 #endif
 
 #ifdef CONFIG_NET_IPv6
- net_ipv6addr_copy(priv->lo_dev.d_ipv6addr, g_lo_ipv6addr);
- net_ipv6addr_copy(priv->lo_dev.d_ipv6draddr, g_lo_ipv6addr);
- net_ipv6addr_copy(priv->lo_dev.d_ipv6netmask, g_ipv6_alloneaddr);
+  net_ipv6addr_copy(priv->lo_dev.d_ipv6addr, g_lo_ipv6addr);
+  net_ipv6addr_copy(priv->lo_dev.d_ipv6draddr, g_lo_ipv6addr);
+  net_ipv6addr_copy(priv->lo_dev.d_ipv6netmask, g_ipv6_alloneaddr);
 #endif
 
   /* Put the network in the UP state */

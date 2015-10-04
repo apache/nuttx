@@ -247,10 +247,10 @@ struct ug_dev_s
   uint8_t contrast;
   uint8_t powered;
 
- /* The SSD1305 does not support reading from the display memory in SPI mode.
-  * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-  * a shadow copy of the framebuffer memory.
-  */
+  /* The SSD1305 does not support reading from the display memory in SPI mode.
+   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
+   * a shadow copy of the framebuffer memory.
+   */
 
   uint8_t fb[UG_FBSIZE];
 };

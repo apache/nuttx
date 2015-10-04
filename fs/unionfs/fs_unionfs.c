@@ -2444,7 +2444,7 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
 static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 {
- FAR struct inode *minode;
+  FAR struct inode *minode;
 
   /* Find the mountpt */
 

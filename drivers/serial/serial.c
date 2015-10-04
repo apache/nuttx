@@ -792,7 +792,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
       nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
     }
 
- /* Is the level now below the watermark level that we need to report? */
+  /* Is the level now below the watermark level that we need to report? */
 
   watermark = (CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK * rxbuf->size) / 100;
   if (nbuffered <= watermark)
@@ -1170,7 +1170,7 @@ static int uart_close(FAR struct file *filep)
 
   uart_givesem(&dev->closesem);
   return OK;
- }
+}
 
 /************************************************************************************
  * Name: uart_open
@@ -1443,6 +1443,3 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
   irqrestore(flags);
 }
 #endif
-
-
-

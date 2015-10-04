@@ -426,14 +426,14 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
       nsent += msglen;
     }
 
- /* We get here after all messages have been added to the FIFO.  Check if
-  * we need to kick of the XMIT sequence.
-  */
+  /* We get here after all messages have been added to the FIFO.  Check if
+   * we need to kick of the XMIT sequence.
+   */
 
- if (empty)
-   {
-     dac_xmit(dev);
-   }
+  if (empty)
+    {
+      dac_xmit(dev);
+    }
 
   /* Return the number of bytes that were sent */
 

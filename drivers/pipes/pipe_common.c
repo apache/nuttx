@@ -161,7 +161,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev, pollevent_t events
 
 FAR struct pipe_dev_s *pipecommon_allocdev(void)
 {
- struct pipe_dev_s *dev;
+  FAR struct pipe_dev_s *dev;
 
   /* Allocate a private structure to manage the pipe */
 

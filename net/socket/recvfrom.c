@@ -265,8 +265,8 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
    * add it to the read-ahead buffers.
    */
 
- if (recvlen < dev->d_len)
-   {
+  if (recvlen < dev->d_len)
+    {
 #ifdef CONFIG_NET_TCP_READAHEAD
       FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->rf_sock->s_conn;
       FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;

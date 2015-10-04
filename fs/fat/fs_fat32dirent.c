@@ -463,7 +463,7 @@ static inline int fat_parsesfname(const char **path,
       dirinfo->fd_name[ndx++] = ch;
     }
 
- errout:
+errout:
   return -EINVAL;
 }
 
@@ -552,7 +552,7 @@ static inline int fat_parselfname(const char **path,
       dirinfo->fd_lfname[ndx++] = ch;
     }
 
- errout:
+errout:
     dirinfo->fd_lfname[0] = '\0';
     return -EINVAL;
 }

@@ -138,7 +138,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
     }
 #endif
 
- /* Associate file descriptors with the new task */
+  /* Associate file descriptors with the new task */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   ret = group_setuptaskfiles(ttcb);

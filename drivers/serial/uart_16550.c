@@ -708,10 +708,10 @@ static int u16550_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void u16550_detach(struct uart_dev_s *dev)
+static void u16550_detach(FAR struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
- struct u16550_s *priv = (struct u16550_s*)dev->priv;
+  FAR struct u16550_s *priv = (struct u16550_s*)dev->priv;
 #ifndef CONFIG_ARCH_NOINTC
   up_disable_irq(priv->irq);
 #endif

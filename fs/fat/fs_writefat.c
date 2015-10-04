@@ -333,7 +333,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
   /* Write all of the reserved sectors */
 
   memset(var->fv_sect, 0, var->fv_sectorsize);
- for (sectno = 1; sectno < fmt->ff_rsvdseccount && ret >= 0; sectno++)
+  for (sectno = 1; sectno < fmt->ff_rsvdseccount && ret >= 0; sectno++)
     {
       ret = DEV_WRITE(var->fv_sect, sectno, 1);
     }

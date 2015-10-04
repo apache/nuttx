@@ -540,7 +540,7 @@ static int nand_writepage(FAR struct nand_dev_s *nand, off_t block,
    * ECC calculations.
    */
 
- else
+  else
 #endif
     {
       return NAND_WRITEPAGE(nand->raw, block, page, data, NULL);

@@ -405,7 +405,7 @@ static const uint8_t g_sleepon[] =
 static const uint8_t g_horzinc[] =
 {
   SSD1329_GDDRAM_REMAP,
- (SSD1329_COM_SPLIT|SSD1329_COM_REMAP|SSD1329_NIBBLE_REMAP),
+  (SSD1329_COM_SPLIT|SSD1329_COM_REMAP|SSD1329_NIBBLE_REMAP),
 };
 
 /* The following set a window that covers the entire display */

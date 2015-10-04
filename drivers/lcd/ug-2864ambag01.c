@@ -287,10 +287,10 @@ struct ug2864ambag01_dev_s
   bool                   on;       /* true: display is on */
 
 
- /* The SH1101A does not support reading from the display memory in SPI mode.
-  * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-  * a shadow copy of the framebuffer memory. At 128x64, this amounts to 1KB.
-  */
+  /* The SH1101A does not support reading from the display memory in SPI mode.
+   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
+   * a shadow copy of the framebuffer memory. At 128x64, this amounts to 1KB.
+   */
 
   uint8_t fb[UG2864AMBAG01_FBSIZE];
 };

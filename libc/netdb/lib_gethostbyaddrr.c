@@ -228,7 +228,7 @@ errorout_with_herrnocode:
       *h_errnop = herrnocode;
     }
 
- return ERROR;
+  return ERROR;
 }
 #endif
 
@@ -341,7 +341,7 @@ errorout_with_herrnocode:
       *h_errnop = herrnocode;
     }
 
- return ERROR;
+  return ERROR;
 }
 
 /****************************************************************************

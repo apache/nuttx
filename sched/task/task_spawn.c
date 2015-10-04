@@ -216,7 +216,7 @@ errout:
 
 static int task_spawn_proxy(int argc, FAR char *argv[])
 {
- int ret;
+  int ret;
 
   /* Perform file actions and/or set a custom signal mask.  We get here only
    * if the file_actions parameter to task_spawn[p] was non-NULL and/or the

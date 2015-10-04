@@ -76,9 +76,9 @@ void tcp_ipv4_select(FAR struct net_driver_s *dev)
 
   IFF_SET_IPv4(dev->d_flags);
 
- /* Set the offset to the beginning of the TCP data payload */
+  /* Set the offset to the beginning of the TCP data payload */
 
- dev->d_appdata = &dev->d_buf[IPv4TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+  dev->d_appdata = &dev->d_buf[IPv4TCP_HDRLEN + NET_LL_HDRLEN(dev)];
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -97,9 +97,9 @@ void tcp_ipv6_select(FAR struct net_driver_s *dev)
 
   IFF_SET_IPv6(dev->d_flags);
 
- /* Set the offset to the beginning of the TCP data payload */
+  /* Set the offset to the beginning of the TCP data payload */
 
- dev->d_appdata = &dev->d_buf[IPv6TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+  dev->d_appdata = &dev->d_buf[IPv6TCP_HDRLEN + NET_LL_HDRLEN(dev)];
 }
 #endif /* CONFIG_NET_IPv6 */
 

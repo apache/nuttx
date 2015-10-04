@@ -589,7 +589,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
               conn->expired++;
             }
         }
-      
+
       /* Move all segments that have been sent but not ACKed to the write
        * queue again note, the un-ACKed segments are put at the head of the
        * write_q so they can be resent as soon as possible.
@@ -726,7 +726,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
            * retransmitting, then the sequence number will already
            * be set for this write buffer.
            */
-           
+
            if (WRB_SEQNO(wrb) == (unsigned)-1)
             {
               WRB_SEQNO(wrb) = conn->isn + conn->sent;

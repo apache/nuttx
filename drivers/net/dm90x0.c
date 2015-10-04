@@ -1257,16 +1257,16 @@ static int dm9x_interrupt(int irq, FAR void *context)
       ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
     }
 
- /* Check if we received an incoming packet */
+  /* Check if we received an incoming packet */
 
- if (isr & DM9X_INT_PR)
+  if (isr & DM9X_INT_PR)
     {
       dm9x_receive(dm9x);
     }
 
- /* Check if we are able to transmit a packet */
+  /* Check if we are able to transmit a packet */
 
- if (isr & DM9X_INT_PT)
+  if (isr & DM9X_INT_PT)
     {
       dm9x_txdone(dm9x);
     }

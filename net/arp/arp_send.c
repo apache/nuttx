@@ -221,7 +221,7 @@ int arp_send(in_addr_t ipaddr)
    *   addresses=0xff (ff00::/8.)
    */
 
- if (NTOHL(ipaddr) >= 0xe0000000 && NTOHL(ipaddr) <= 0xefffffff)
+  if (NTOHL(ipaddr) >= 0xe0000000 && NTOHL(ipaddr) <= 0xefffffff)
     {
       /* We don't need to send the ARP request */
 

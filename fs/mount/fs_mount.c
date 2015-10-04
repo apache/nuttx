@@ -381,11 +381,11 @@ int mount(FAR const char *source, FAR const char *target,
   mountpt_inode->i_private = fshandle;
   inode_semgive();
 
- /* We can release our reference to the blkdrver_inode, if the filesystem
-  * wants to retain the blockdriver inode (which it should), then it must
-  * have called inode_addref().  There is one reference on mountpt_inode
-  * that will persist until umount2() is called.
-  */
+  /* We can release our reference to the blkdrver_inode, if the filesystem
+   * wants to retain the blockdriver inode (which it should), then it must
+   * have called inode_addref().  There is one reference on mountpt_inode
+   * that will persist until umount2() is called.
+   */
 
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT

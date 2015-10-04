@@ -88,7 +88,7 @@
 #define EBICSA_EBI_DBPDC         (1 << 9)
 #define EBICSA_NAND_D0_ON_D16    (1 << 24)
 
- /* Misc. definitions */
+/* Misc. definitions */
 
 #define MAX_READ_STATUS_COUNT    100000 /* Read status timeout */
 #define ONFI_PARAM_TABLE_SIZE    116    /* Not all 256 bytes are useful */

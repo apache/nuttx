@@ -2218,7 +2218,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
     }
 #endif
 
- /* Extract references to private data */
+  /* Extract references to private data */
 
   priv = (FAR struct pl2303_dev_s*)dev->priv;
 

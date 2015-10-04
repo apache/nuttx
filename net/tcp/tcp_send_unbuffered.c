@@ -386,7 +386,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       /* Fall through to re-send data from the last that was ACKed */
     }
 
- /* Check for a loss of connection */
+  /* Check for a loss of connection */
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {

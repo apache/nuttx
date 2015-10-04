@@ -115,7 +115,7 @@ static char g_command[MAX_BUFFER];
  * Private Functions
  ****************************************************************************/
 
- /* MinGW does not seem to provide strtok_r */
+/* MinGW does not seem to provide strtok_r */
 
 #ifndef HAVE_STRTOK_R
 static char *MY_strtok_r(char *str, const char *delim, char **saveptr)

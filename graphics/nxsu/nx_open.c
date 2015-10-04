@@ -151,7 +151,7 @@ static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
 
   fe->be.topwnd = &fe->be.bkgd;
 
- /* Initialize the mouse position */
+  /* Initialize the mouse position */
 
 #ifdef CONFIG_NX_XYINPUT
   nxsu_mouseinit(fe->be.vinfo.xres, fe->be.vinfo.yres);

@@ -118,7 +118,7 @@ void (*sigset(int signo, void (*disp)(int)))(int)
    * indicate the error.
    */
 
- if (ret == OK)
+  if (ret == OK)
    {
      return oact.sa_handler;
    }

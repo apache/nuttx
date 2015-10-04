@@ -301,9 +301,9 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
 
   ret = icmpv6_rwait(notify, &delay);
 
- /* icmpv6_wait will return OK if and only if the matching Router
-  * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
-  */
+  /* icmpv6_wait will return OK if and only if the matching Router
+   * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
+   */
 
   return ret;
 }
@@ -368,9 +368,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   /* The interface should be in the down state */
 
- save = net_lock();
- netdev_ifdown(dev);
- net_unlock(save);
+  save = net_lock();
+  netdev_ifdown(dev);
+  net_unlock(save);
 
   /* IPv6 Stateless Autoconfiguration
    * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm

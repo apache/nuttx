@@ -1615,7 +1615,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   enc_wrbreg(priv, ENC_ERXRDPTL, (priv->nextpkt));
   enc_wrbreg(priv, ENC_ERXRDPTH, (priv->nextpkt) >> 8);
 
- /* Decrement the packet counter indicate we are done with this packet */
+  /* Decrement the packet counter indicate we are done with this packet */
 
   enc_bfsgreg(priv, ENC_ECON2, ECON2_PKTDEC);
 }

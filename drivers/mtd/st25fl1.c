@@ -644,9 +644,9 @@ static inline int st25fl1_readid(struct st25fl1_dev_s *priv)
       default:
         fdbg("ERROR: Unsupported memory capacity: %02x\n", priv->cmdbuf[2]);
         return -ENODEV;
-   }
+    }
 
- return OK;
+  return OK;
 }
 
 /************************************************************************************

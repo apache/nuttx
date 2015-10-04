@@ -426,14 +426,14 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
- /* Loop until all of the bytes have been written.  This function may be
-  * called from an interrupt handler!  Semaphores cannot be used!
-  *
-  * The write logic only needs to modify the rl_head index.  Therefore,
-  * there is a difference in the way that rl_head and rl_tail are protected:
-  * rl_tail is protected with a semaphore; rl_tail is protected by disabling
-  * interrupts.
-  */
+  /* Loop until all of the bytes have been written.  This function may be
+   * called from an interrupt handler!  Semaphores cannot be used!
+   *
+   * The write logic only needs to modify the rl_head index.  Therefore,
+   * there is a difference in the way that rl_head and rl_tail are protected:
+   * rl_tail is protected with a semaphore; rl_tail is protected by disabling
+   * interrupts.
+   */
 
   for (nwritten = 0; nwritten < len; nwritten++)
     {

@@ -178,8 +178,8 @@ void arp_out(FAR struct net_driver_s *dev)
    *   addresses=0xff (ff00::/8.)
    */
 
- else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
-          NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
+  else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
+           NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
     {
       /* Build the well-known IPv4 IGMP Ethernet address.  The first
        * three bytes are fixed; the final three variable come from the
