@@ -88,7 +88,7 @@ int stm32_max31855initialize(FAR const char *devpath)
     }
 
   /* Then register the barometer sensor */
-  
+
   ret = max31855_register(devpath, spi);
   if (ret < 0)
     {

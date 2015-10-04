@@ -91,7 +91,7 @@ int stm32_bmp180initialize(FAR const char *devpath)
     }
 
   /* Then register the barometer sensor */
-  
+
   ret = bmp180_register(devpath, i2c);
   if (ret < 0)
     {

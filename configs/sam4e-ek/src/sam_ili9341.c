@@ -463,7 +463,7 @@ static void sam_putreg(uint8_t regaddr, FAR const uint8_t *buffer, unsigned int 
 
   /* Write the multi-byte register value */
 
-  for (; buflen > 0; buflen--) 
+  for (; buflen > 0; buflen--)
     {
       LCD_DATA = *buffer++;
     }
@@ -484,7 +484,7 @@ static void sam_getreg(uint8_t regaddr, FAR uint8_t *buffer, unsigned int buflen
 
   /* Read the multi-byte register value */
 
-  for (; buflen > 0; buflen--) 
+  for (; buflen > 0; buflen--)
     {
       *buffer++ = LCD_DATA;
     }
@@ -1136,7 +1136,7 @@ static void sam_lcd9341_initialize(void)
   buffer[2] = 0x27;
   buffer[3] = 0x00;
   sam_putreg(ILI9341_DISPLAY_FUNCTION_CTL, buffer, 4);
-    
+
   /* Set window area*/
 
   sam_setwindow(0, 0, SAM_XRES, SAM_YRES);

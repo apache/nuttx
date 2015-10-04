@@ -280,7 +280,7 @@ static bool sam_inserted(FAR const struct automount_lower_s *lower)
  *    None
  *
  ************************************************************************************/
- 
+
 void sam_automount_initialize(void)
 {
   FAR void *handle;
@@ -318,7 +318,7 @@ void sam_automount_initialize(void)
  *   sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0_SLOTNO or HSMCI1_SLOTNO.  There is a 
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0_SLOTNO or HSMCI1_SLOTNO.  There is a
  *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
  *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
  *      number.
@@ -331,7 +331,7 @@ void sam_automount_initialize(void)
  *    Interrupts are disabled.
  *
  ************************************************************************************/
- 
+
 void sam_automount_event(int slotno, bool inserted)
 {
   FAR const struct sam_automount_config_s *config;

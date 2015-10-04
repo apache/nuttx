@@ -88,7 +88,7 @@ int stm32_mpl115ainitialize(FAR const char *devpath)
     }
 
   /* Then register the barometer sensor */
-  
+
   ret = mpl115a_register(devpath, spi);
   if (ret < 0)
     {

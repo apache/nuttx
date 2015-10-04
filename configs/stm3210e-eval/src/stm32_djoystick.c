@@ -113,7 +113,7 @@ static const struct djoy_lowerhalf_s g_djoylower =
  * Name: djoy_supported
  *
  * Description:
- *   Return the set of buttons supported on the discrete joystick device 
+ *   Return the set of buttons supported on the discrete joystick device
  *
  ****************************************************************************/
 
@@ -207,7 +207,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 
                falling = ((press & bit) != 0);
                rising  = ((release & bit) != 0);
-               
+
                illvdbg("GPIO %d: rising: %d falling: %d\n",
                         i, rising, falling);
 

@@ -86,7 +86,7 @@
 void board_led_initialize(void)
 {
    /* Configure LED_STATUS GPIO for output */
-  
+
    stm32_configgpio(GPIO_LED_STATUS);
 }
 
@@ -98,7 +98,7 @@ void board_led_on(int led)
 {
   if(led == LED_STARTED)
     stm32_gpiowrite(GPIO_LED_STATUS, true);
-  
+
   if(led == LED_ASSERTION || led == LED_PANIC)
       stm32_gpiowrite(GPIO_LED_STATUS, false);
 }
@@ -111,7 +111,7 @@ void board_led_off(int led)
 {
   if(led == LED_STARTED)
       stm32_gpiowrite(GPIO_LED_STATUS, false);
-    
+
     if(led == LED_ASSERTION || led == LED_PANIC)
         stm32_gpiowrite(GPIO_LED_STATUS, true);
 }

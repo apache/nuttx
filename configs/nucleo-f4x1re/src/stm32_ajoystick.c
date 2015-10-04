@@ -373,7 +373,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
 
                falling = ((press & bit) != 0);
                rising  = ((release & bit) != 0);
-               
+
                illvdbg("GPIO %d: rising: %d falling: %d\n",
                         i, rising, falling);
 
