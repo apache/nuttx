@@ -772,6 +772,7 @@ int sam_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 int up_rtc_gettime(FAR struct timespec *tp)
 {
   /* This is a hack to emulate a high resolution rtc using the rtt */
+
   uint32_t rtc_cal, rtc_tim, rtt_val;
   struct tm t;
 

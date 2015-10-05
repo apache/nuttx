@@ -195,7 +195,10 @@ void up_timer_initialize(void)
    * complicated.  When I have a better idea, I'll change this.
    */
 
-  while (!((mask_test >> mask_bits) & ticks_per_int)) mask_bits++;
+  while (!((mask_test >> mask_bits) & ticks_per_int))
+    {
+      mask_bits++;
+    }
 
   lldbg("mask_bits = %d, mask = %X, ticks_per_int = %d\r\n",
         mask_bits, (0xFFFFFFFF<<(32 - mask_bits)), ticks_per_int);
