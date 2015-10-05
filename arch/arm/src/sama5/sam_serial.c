@@ -1238,12 +1238,12 @@ static int up_setup(struct uart_dev_s *dev)
    * This may limit BAUD rates for lower USART clocks.
    */
 
-  regval  = (SAM_USART_CLOCK + (priv->baud << 3))/(priv->baud << 4);
+  regval  = (SAM_USART_CLOCK + (priv->baud << 3)) / (priv->baud << 4);
   up_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
 
   /* Enable receiver & transmitter */
 
-  up_serialout(priv, SAM_UART_CR_OFFSET, (UART_CR_RXEN|UART_CR_TXEN));
+  up_serialout(priv, SAM_UART_CR_OFFSET, (UART_CR_RXEN | UART_CR_TXEN));
 #endif
   return OK;
 }
@@ -1264,7 +1264,8 @@ static void up_shutdown(struct uart_dev_s *dev)
   /* Reset and disable receiver and transmitter */
 
   up_serialout(priv, SAM_UART_CR_OFFSET,
-               (UART_CR_RSTRX|UART_CR_RSTTX|UART_CR_RXDIS|UART_CR_TXDIS));
+               (UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS |
+                UART_CR_TXDIS));
 
   /* Disable all interrupts */
 

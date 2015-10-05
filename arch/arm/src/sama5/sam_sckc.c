@@ -109,7 +109,7 @@ void sam_sckc_enable(bool enable)
   regval &= ~SCKC_CR_OSC32BYP;
   putreg32(regval, SAM_SCKC_CR);
 
-  /* Switch slow clock source to external OSC 32 kHz (*/
+  /* Switch slow clock source to external OSC 32 kHz */
 
   regval |= SCKC_CR_OSCSEL;
   putreg32(regval, SAM_SCKC_CR);

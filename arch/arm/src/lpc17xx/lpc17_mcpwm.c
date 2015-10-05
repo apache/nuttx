@@ -395,7 +395,7 @@ static void mcpwm_set_apb_clock(FAR struct lpc17_mcpwmtimer_s *priv, bool on)
       modifyreg32(regaddr, en_bit, 0);
     }
 }
-#endif /*XXXXX*/
+#endif
 
 /****************************************************************************
  * Name: mcpwm_setup
@@ -452,7 +452,7 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   putreg32((0xFFFFFFFF), LPC17_MCPWM_CAPCLR);/* Clear all event capture */
 
-  /* Configure the output pins*/
+  /* Configure the output pins */
 
   lpc17_configgpio(GPIO_MCPWM_MCOA0);
   lpc17_configgpio(GPIO_MCPWM_MCOB0);
@@ -469,7 +469,7 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
   putreg32(400, LPC17_MCPWM_LIM0);           /* Set the starting duty cycle to 0.25 */
   putreg32(0, LPC17_MCPWM_MAT0);             /* Reset the timer */
 
-  putreg32(100000, LPC17_MCPWM_TC1);         /* Count frequency:Fpclk/100000 = 50 MHz/100000 = 500 Hz*/
+  putreg32(100000, LPC17_MCPWM_TC1);         /* Count frequency:Fpclk/100000 = 50 MHz/100000 = 500 Hz */
   putreg32(50000, LPC17_MCPWM_LIM1);         /* Set the starting duty cycle to 0.5 */
   putreg32(0, LPC17_MCPWM_MAT1);             /* Reset the timer */
 

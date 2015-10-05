@@ -69,7 +69,7 @@ void up_systemreset(void)
 {
   putreg32(0, FTWDT010_CR);
   putreg32(0, FTWDT010_LOAD);
-  putreg32(0x5ab9, FTWDT010_RESTART); // Magic
+  putreg32(0x5ab9, FTWDT010_RESTART); /* Magic */
 
   putreg32(0x11, FTWDT010_CR);
   putreg32(0x13, FTWDT010_CR);

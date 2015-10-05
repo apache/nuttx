@@ -478,7 +478,7 @@ static uart_dev_t g_uart3port =
 #      undef TTYS3_DEV                      /* No ttyS3 */
 #    endif
 #  endif
-#endif /*HAVE_CONSOLE*/
+#endif /* HAVE_CONSOLE */
 
 /************************************************************************************
  * Inline Functions
@@ -609,7 +609,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 16 / MinDL
    */
 
-  if (baud < (LPC17_CCLK / 16 / UART_MINDL ))
+  if (baud < (LPC17_CCLK / 16 / UART_MINDL))
     {
       return SYSCON_PCLKSEL_CCLK;
     }
@@ -625,7 +625,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 8 / MinDL
    */
 
-  else if (baud < (LPC17_CCLK / 8 / UART_MINDL ))
+  else if (baud < (LPC17_CCLK / 8 / UART_MINDL))
     {
       return SYSCON_PCLKSEL_CCLK2;
     }
@@ -641,7 +641,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 4 / MinDL
    */
 
-  else if (baud < (LPC17_CCLK / 4 / UART_MINDL ))
+  else if (baud < (LPC17_CCLK / 4 / UART_MINDL))
     {
       return SYSCON_PCLKSEL_CCLK4;
     }
@@ -657,7 +657,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 2 / MinDL
    */
 
-  else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL )) */
+  else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL)) */
     {
       return SYSCON_PCLKSEL_CCLK8;
     }
@@ -1256,7 +1256,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          * and reset the divider in the CLKSEL0/1 register.
          */
 
-#if 0 // ifdef LPC176x
+#if 0 /* ifdef LPC176x */
         priv->cclkdiv = lpc17_uartcclkdiv(priv->baud);
 #endif
         /* DLAB open latch */

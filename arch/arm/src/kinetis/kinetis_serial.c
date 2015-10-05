@@ -590,9 +590,9 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 
   flags = irqsave();
   if (ie)
-   {
-     *ie = priv->ie;
-   }
+    {
+      *ie = priv->ie;
+    }
 
   up_restoreuartint(priv, 0);
   irqrestore(flags);

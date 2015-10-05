@@ -191,11 +191,13 @@ void efm32_timer_reset(uintptr_t base)
   putreg32(_TIMER_IEN_RESETVALUE,   base + EFM32_TIMER_STATUS_OFFSET   );
   putreg32(_TIMER_IFC_MASK,         base + EFM32_TIMER_IEN_OFFSET      );
   putreg32(_TIMER_TOP_RESETVALUE,   base + EFM32_TIMER_IF_OFFSET       );
-  putreg32(_TIMER_TOPB_RESETVALUE,  base + EFM32_TIMER_CTRL_OFFSET     ); 
-  putreg32(_TIMER_CNT_RESETVALUE,   base + EFM32_TIMER_CMD_OFFSET      ); 
+  putreg32(_TIMER_TOPB_RESETVALUE,  base + EFM32_TIMER_CTRL_OFFSET     );
+  putreg32(_TIMER_CNT_RESETVALUE,   base + EFM32_TIMER_CMD_OFFSET      );
 
-  /* Do not reset route register, setting should be done independently */
-  /* (Note: ROUTE register may be locked by DTLOCK register.) */
+  /* Do not reset route register, setting should be done independently
+   * (Note: ROUTE register may be locked by DTLOCK register.)
+   */
+
   //putreg32(_TIMER_ROUTE_RESETVALUE, base + EFM32_TIMER_ROUTE_OFFSET    );
 
   for(i = 0; i < EFM32_TIMER_NCC; i++)
@@ -219,13 +221,13 @@ void efm32_timer_reset(uintptr_t base)
   putreg32(_TIMER_DTOGEN_RESETVALUE,base + EFM32_TIMER_DTOGEN_OFFSET   );
   putreg32(_TIMER_DTFAULTC_MASK,    base + EFM32_TIMER_DTFAULTC_OFFSET );
 #endif
-}   
+}
 
 /****************************************************************************
  * Name: efm32_timer_set_freq
  *
  * Description:
- *   set prescaler and top timer with best value to have "freq" 
+ *   set prescaler and top timer with best value to have "freq"
  *
  * Input parameters:
  *   base       - A base address of timer
@@ -239,14 +241,14 @@ void efm32_timer_reset(uintptr_t base)
 int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 {
   int prescaler = 0;
-  int cnt_freq = clk_freq>>16;
+  int cnt_freq = clk_freq >> 16;
   int reload;
 
-  while ( cnt_freq > freq )
+  while (cnt_freq > freq)
     {
       prescaler++;
       cnt_freq>>=1;
-      if ( prescaler > (_TIMER_CTRL_PRESC_MASK>>_TIMER_CTRL_PRESC_SHIFT))
+      if (prescaler > (_TIMER_CTRL_PRESC_MASK>>_TIMER_CTRL_PRESC_SHIFT))
         {
           return -1;
         }

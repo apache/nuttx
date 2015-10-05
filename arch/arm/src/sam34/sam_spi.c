@@ -1347,7 +1347,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Save the final word.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source). */
 

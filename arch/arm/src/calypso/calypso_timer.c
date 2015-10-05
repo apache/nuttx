@@ -161,11 +161,11 @@ void wdog_enable(int on)
 
 void wdog_reset(void)
 {
-  // enable watchdog
+  /* Enable watchdog */
 
   putreg16(WD_MODE_ENABLE, WDOG_REG(WD_MODE));
 
-  // force expiration
+  /* Force expiration */
 
   putreg16(0x0000, WDOG_REG(WD_LOAD_TIMER));
   putreg16(0x0000, WDOG_REG(WD_LOAD_TIMER));
@@ -186,10 +186,10 @@ void wdog_reset(void)
 
 int up_timerisr(int irq, uint32_t *regs)
 {
- /* Process timer interrupt */
+  /* Process timer interrupt */
 
- sched_process_timer();
- return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************

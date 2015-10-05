@@ -441,10 +441,11 @@ static uint8_t dm320_getreg8(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -727,7 +728,7 @@ static int dm320_ep0write(uint8_t *buf, uint16_t nbytes)
   uint16_t bytesleft;
   uint16_t nwritten;
 
-  if ( nbytes <=  DM320_EP0MAXPACKET)
+  if (nbytes <=  DM320_EP0MAXPACKET)
     {
       bytesleft = nbytes;
       csr0     |= USB_PERCSR0_DATAEND; /* Transaction end bit */
@@ -762,13 +763,13 @@ static int dm320_epwrite(uint8_t epphy, uint8_t *buf, uint16_t nbytes)
   uint16_t bytesleft;
   int ret = ERROR;
 
-  if (/*epphy < USB_EP0_SELECT || */ epphy >= DM320_NENDPOINTS)
+  if (/* epphy < USB_EP0_SELECT || */ epphy >= DM320_NENDPOINTS)
     {
       return ret;
     }
   dm320_putreg8(epphy, DM320_USB_INDEX);
 
-  if (epphy == USB_EP0_SELECT )
+  if (epphy == USB_EP0_SELECT)
     {
       return dm320_ep0write(buf, nbytes);
     }
@@ -813,7 +814,7 @@ static int dm320_epread(uint8_t epphy, uint8_t *buf, uint16_t nbytes)
   int bytesleft;
   int ret  = ERROR;
 
-  if (/*epphy < USB_EP0_SELECT || */ epphy >= DM320_NENDPOINTS)
+  if (/* epphy < USB_EP0_SELECT || */ epphy >= DM320_NENDPOINTS)
     {
       return ret;
     }
@@ -1848,7 +1849,7 @@ static void dm320_ctrlinitialize(FAR struct dm320_usbdev_s *priv)
   priv->paddr = 0;
   dm320_putreg8(0, DM320_USB_FADDR);
 
-  /* Finished -- set default endpoint as EP0*/
+  /* Finished -- set default endpoint as EP0 */
 
   dm320_putreg8(USB_EP0_SELECT, DM320_USB_INDEX);
 }
@@ -2133,6 +2134,7 @@ static int dm320_epcancel(struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPCANCEL, privep->epphy);
   priv = privep->dev;
 
@@ -2516,7 +2518,7 @@ int usbdev_register(FAR struct usbdevclass_driver_s *driver)
 
   /* Hook up the driver */
 
- g_usbdev.driver = driver;
+  g_usbdev.driver = driver;
 
   /* Then bind the class driver */
 

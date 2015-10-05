@@ -120,7 +120,7 @@ int kl_lowgetc(void)
 
   while ((getreg8(CONSOLE_BASE+KL_UART_S1_OFFSET) & UART_S1_RDRF) == 0);
 
- /* Then read a character from the UART data register */
+  /* Then read a character from the UART data register */
 
   ch = getreg8(CONSOLE_BASE+KL_UART_D_OFFSET);
 #endif

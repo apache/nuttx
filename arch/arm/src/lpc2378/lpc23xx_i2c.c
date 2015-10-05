@@ -311,9 +311,9 @@ static int i2c_start (struct lpc23xx_i2cdev_s *priv)
 static void i2c_stop (struct lpc23xx_i2cdev_s *priv)
 {
   if (priv->state != 0x38)
-   {
-     putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + I2C_CONSET_OFFSET);
-   }
+    {
+      putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + I2C_CONSET_OFFSET);
+    }
 
   sem_post (&priv->wait);
 }

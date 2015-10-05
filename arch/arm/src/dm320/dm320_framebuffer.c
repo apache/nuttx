@@ -1201,15 +1201,15 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
   flags = irqsave();
   for (i = cmap.first, len = 0; i < 256 && len < cmap.len, i++, len++)
     {
-       /* Convert the RGB to YUV */
+      /* Convert the RGB to YUV */
 
-       nxgl_rgb2yuv(cmap->red[i], cmap->green[i], cmap->blue[i], &y, &u, &v);
+      nxgl_rgb2yuv(cmap->red[i], cmap->green[i], cmap->blue[i], &y, &u, &v);
 
-       /* Program the CLUT */
+      /* Program the CLUT */
 
-       while (getreg16(DM320_OSD_MISCCTL) & 0x8);
-       putreg16(((uint16_t)y) << 8 | uint16_t(u)), DM320_OSD_CLUTRAMYCB);
-       putreg16(((uint16_t)v << 8 | i), DM320_OSD_CLUTRAMCR);
+      while (getreg16(DM320_OSD_MISCCTL) & 0x8);
+      putreg16(((uint16_t)y) << 8 | uint16_t(u)), DM320_OSD_CLUTRAMYCB);
+      putreg16(((uint16_t)v << 8 | i), DM320_OSD_CLUTRAMCR);
     }
 
   /* Select RAM clut */
@@ -1296,10 +1296,10 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
     {
       gvdbg("x=%d y=%d\n", settings->pos.x, settings->pos.y);
 
-     if (settings->pos.x > MAX_YRES)
-       {
+      if (settings->pos.x > MAX_YRES)
+        {
           settings->pos.x = MAX_YRES;
-       }
+        }
 
      if (settings->pos.y > MAX_YRES)
        {

@@ -860,10 +860,11 @@ static uint8_t lpc17_log2(uint16_t value)
 
   DEBUGASSERT(value > 0);
   while (value != 1)
-  {
-    value >>= 1;
-    log2++;
-  }
+    {
+      value >>= 1;
+      log2++;
+    }
+
   return log2;
 }
 
@@ -959,27 +960,27 @@ static void lpc17_sendfifo(struct lpc17_dev_s *priv)
         }
       else
         {
-           /* No.. transfer just the bytes remaining in the user buffer,
-            * padding with zero as necessary to extend to a full word.
-            */
+          /* No.. transfer just the bytes remaining in the user buffer,
+           * padding with zero as necessary to extend to a full word.
+           */
 
-           uint8_t *ptr = (uint8_t *)priv->remaining;
-           int i;
+          uint8_t *ptr = (uint8_t *)priv->remaining;
+          int i;
 
-           data.w = 0;
-           for (i = 0; i < priv->remaining; i++)
-             {
-                data.b[i] = *ptr++;
-             }
+          data.w = 0;
+          for (i = 0; i < priv->remaining; i++)
+            {
+               data.b[i] = *ptr++;
+            }
 
-           /* Now the transfer is finished */
+          /* Now the transfer is finished */
 
-           priv->remaining = 0;
-         }
+          priv->remaining = 0;
+        }
 
-       /* Put the word in the FIFO */
+      /* Put the word in the FIFO */
 
-       putreg32(data.w, LPC17_SDCARD_FIFO);
+      putreg32(data.w, LPC17_SDCARD_FIFO);
     }
 }
 

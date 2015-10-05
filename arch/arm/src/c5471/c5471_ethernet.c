@@ -871,11 +871,11 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
       /* Words #0 and #1 of descriptor */
 
       while (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc))
-       {
-         /* Loop until the SWITCH lets go of the descriptor giving us access
-          * rights to submit our new ether frame to it.
-          */
-       }
+        {
+          /* Loop until the SWITCH lets go of the descriptor giving us access
+           * rights to submit our new ether frame to it.
+           */
+        }
 
       if (bfirstframe)
         {
@@ -1683,7 +1683,7 @@ static int c5471_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initilize Ethernet interface */
 
@@ -2244,12 +2244,12 @@ void up_netinitialize(void)
   g_c5471[0].c_dev.d_addmac  = c5471_addmac;   /* Add multicast MAC address */
   g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;    /* Remove multicast MAC address */
 #endif
- g_c5471[0].c_dev.d_private = (void*)g_c5471; /* Used to recover private state from dev */
+  g_c5471[0].c_dev.d_private = (void*)g_c5471; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_c5471[0].c_txpoll       = wd_create();   /* Create periodic poll timer */
-  g_c5471[0].c_txtimeout    = wd_create();   /* Create TX timeout timer */
+  g_c5471[0].c_txpoll        = wd_create();    /* Create periodic poll timer */
+  g_c5471[0].c_txtimeout     = wd_create();    /* Create TX timeout timer */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
@@ -2257,4 +2257,3 @@ void up_netinitialize(void)
 }
 
 #endif /* CONFIG_NET */
-

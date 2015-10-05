@@ -100,10 +100,10 @@
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************

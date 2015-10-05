@@ -1337,10 +1337,10 @@ static int sam_interrupt(int irq, void *context)
                     }
                 }
               else
-               {
+                {
                   /* The Command-Response sequence ended with no error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
+                  wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
                 }
 
              /* Yes.. Is there a thread waiting for this event set? */
@@ -2268,7 +2268,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-           return SDIOWAIT_TIMEOUT;
+          return SDIOWAIT_TIMEOUT;
         }
 
       /* Start the watchdog timer */

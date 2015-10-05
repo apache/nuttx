@@ -102,9 +102,9 @@ void up_irqinitialize(void)
   putreg16(0xffff, DM320_INTC_IRQ1);
   putreg16(0xffff, DM320_INTC_IRQ2);
 
- /* Make sure that the base addresses are zero and that
-  * the table increment is 4 bytes.
-  */
+  /* Make sure that the base addresses are zero and that
+   * the table increment is 4 bytes.
+   */
 
   putreg16(0, DM320_INTC_EABASE0);
   putreg16(0, DM320_INTC_EABASE1);

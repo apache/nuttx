@@ -574,7 +574,7 @@ static int nand_translate_address(struct sam_nandcs_s *priv,
 
 static uint32_t nand_get_acycle(int ncycles)
 {
-  switch(ncycles)
+  switch (ncycles)
     {
     case 1:
       return NFCADDR_CMD_ACYCLE_ONE;

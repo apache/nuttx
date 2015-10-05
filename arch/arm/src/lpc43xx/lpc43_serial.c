@@ -480,7 +480,7 @@ static uart_dev_t g_uart3port =
 #      undef TTYS3_DEV                    /* No ttyS3 */
 #    endif
 #  endif
-#endif /*HAVE_CONSOLE*/
+#endif /* HAVE_CONSOLE */
 
 /****************************************************************************
  * Inline Functions
@@ -984,15 +984,15 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
         }
       else
         {
-           tmp = ((priv->baud << 4) * mode->delay_rts_after_send) / 1000;
-           if (tmp > 255)
-             {
-               regval = 255;
-             }
-           else
-             {
-               regval = (uint32_t)tmp;
-             }
+          tmp = ((priv->baud << 4) * mode->delay_rts_after_send) / 1000;
+          if (tmp > 255)
+            {
+              regval = 255;
+            }
+          else
+            {
+              regval = (uint32_t)tmp;
+            }
         }
 
 

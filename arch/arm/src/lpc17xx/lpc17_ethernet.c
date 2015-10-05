@@ -1006,7 +1006,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
                */
 
               if (priv->lp_dev.d_len > 0)
-               {
+                {
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -2681,16 +2681,16 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 
   for (phyaddr = 1; phyaddr < 32; phyaddr++)
     {
-       /* Check if we can see the selected device ID at this
-        * PHY address.
-        */
+      /* Check if we can see the selected device ID at this
+       * PHY address.
+       */
 
-       phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
-       nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+      phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
+      nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
 
-       /* Compare OUI bits 3-18 */
+      /* Compare OUI bits 3-18 */
 
-       if (phyreg == LPC17_PHYID1)
+      if (phyreg == LPC17_PHYID1)
         {
           phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
           nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);

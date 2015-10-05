@@ -635,7 +635,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
         }
     }
 
-  /* Byte sent*/
+  /* Byte sent */
 
   else if ((pending & TWI_INT_TXRDY) != 0)
     {
@@ -768,7 +768,7 @@ static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   priv->result = -EBUSY;
   priv->xfrd   = 0;
 
-  /* Set STOP signal if only one byte is sent*/
+  /* Set STOP signal if only one byte is sent */
 
   if (msg->length == 1)
     {
@@ -815,7 +815,7 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
   twi_putrel(priv, SAM_TWI_IADR_OFFSET, 0);
 
-  /* Write first byte to send.*/
+  /* Write first byte to send. */
 
   twi_putrel(priv, SAM_TWI_THR_OFFSET, msg->buffer[priv->xfrd++]);
 

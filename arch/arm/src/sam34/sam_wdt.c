@@ -194,10 +194,11 @@ static uint32_t sam34_getreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -328,7 +329,7 @@ static int sam34_start(FAR struct watchdog_lowerhalf_s *lower)
   }
 #endif
 
- /* TODO: WDT_MR_WDFIEN if handler available? WDT_MR_WDRPROC? */
+  /* TODO: WDT_MR_WDFIEN if handler available? WDT_MR_WDRPROC? */
 
   mr_val |= (WDT_MR_WDD(priv->window) | WDT_MR_WDV(priv->reload) | WDT_MR_WDRSTEN);
   sam34_putreg(mr_val, SAM_WDT_MR);
@@ -534,7 +535,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
-#if 0 // TODO
+#if 0 /* TODO */
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;

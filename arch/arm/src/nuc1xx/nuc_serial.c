@@ -730,7 +730,7 @@ static int up_interrupt(int irq, void *context)
          up_serialout(priv, NUC_UART_MCR_OFFSET, regval | UART_MSR_DCTSF);
         }
 
-      /* Check for line status or buffer errors*/
+      /* Check for line status or buffer errors */
 
       if ((isr & UART_ISR_RLS_INT) != 0 ||
           (isr & UART_ISR_BUF_ERR_INT) != 0)
@@ -739,7 +739,7 @@ static int up_interrupt(int irq, void *context)
 
           regval = up_serialin(priv, NUC_UART_FCR_OFFSET);
           up_serialout(priv, NUC_UART_FCR_OFFSET, regval | UART_FCR_RFR);
-       }
+        }
     }
 
   return OK;

@@ -322,10 +322,11 @@ static void can_printreg(uint32_t addr, uint32_t value)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return;
         }
     }

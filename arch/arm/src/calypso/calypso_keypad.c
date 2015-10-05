@@ -143,7 +143,7 @@ static int pwr_btn_dec(uint32_t * state, uint8_t reg, char *buf, size_t * len)
           *state |= 0x80000000;
         }
 
-        return 1; // break loop in caller
+      return 1; /* break loop in caller */
     }
   else
     {
@@ -164,7 +164,7 @@ static int pwr_btn_dec(uint32_t * state, uint8_t reg, char *buf, size_t * len)
         }
     }
 
-  return 0; // continue with other columns
+  return 0; /* Continue with other columns */
 }
 
 /****************************************************************************

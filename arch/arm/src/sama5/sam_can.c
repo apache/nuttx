@@ -384,10 +384,10 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
     {
       if (priv->count == 0xffffffff || ++priv->count > 3)
         {
-           if (priv->count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (priv->count == 4)
+            {
+              lldbg("...\n");
+            }
 
           return regval;
         }
@@ -1820,7 +1820,7 @@ static int can_autobaud(struct sam_can_s *priv)
 
 #warning Missing logic
     }
-  while ( no errors reported );
+  while (no errors reported);
 
   /* Once no error has been detected, the application disables the Autobaud
    * Mode, clearing the ABM field in the CAN_MR register.  To go back to the

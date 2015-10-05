@@ -196,10 +196,11 @@ static uint32_t sam_getreg(uintptr_t regaddr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return regval;
         }
     }

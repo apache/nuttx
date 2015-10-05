@@ -103,9 +103,9 @@ int lpc43_pin_config(uint32_t pinconf)
   /* Enable/disable input buffering */
 
   if (PINCONF_INBUFFER_ENABLED(pinconf))
-   {
-     regval |= SCU_PIN_EZI; /* Set bit to enable */
-   }
+    {
+      regval |= SCU_PIN_EZI; /* Set bit to enable */
+    }
 
   /* Enable/disable glitch filtering */
 

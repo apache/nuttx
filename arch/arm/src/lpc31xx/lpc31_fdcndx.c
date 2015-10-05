@@ -106,22 +106,22 @@ int lpc31_fdcndx(enum lpc31_clockid_e clkid, enum lpc31_domainid_e dmnid)
 
   esrndx = lpc31_esrndx(clkid);
   if (esrndx != ESRNDX_INVALID)
-  {
-    /* Read the clock's ESR to get the fractional divider */
-
-    uint32_t regval = getreg32(LPC31_CGU_ESR(esrndx));
-
-    /* Check if any fractional divider is enabled for this clock. */
-
-    if ((regval & CGU_ESR_ESREN) != 0)
     {
-      /* Yes.. The FDC index is an offset from this fractional
-       * divider base for this domain.
-       */
+      /* Read the clock's ESR to get the fractional divider */
 
-      fdcndx = CGU_ESRSEL(regval) + (int)g_fdcbase[dmnid];
+      uint32_t regval = getreg32(LPC31_CGU_ESR(esrndx));
+
+      /* Check if any fractional divider is enabled for this clock. */
+
+      if ((regval & CGU_ESR_ESREN) != 0)
+        {
+          /* Yes.. The FDC index is an offset from this fractional
+           * divider base for this domain.
+           */
+
+          fdcndx = CGU_ESRSEL(regval) + (int)g_fdcbase[dmnid];
+        }
     }
-  }
+
   return fdcndx;
 }
-

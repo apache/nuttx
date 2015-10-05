@@ -394,7 +394,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   txdesc->length  = kinesis_swap16(priv->dev.d_len);
 #ifdef CONFIG_ENET_ENHANCEDBD
   txdesc->bdu     = 0x00000000;
-  txdesc->status2 = TXDESC_INT | TXDESC_TS; // | TXDESC_IINS | TXDESC_PINS;
+  txdesc->status2 = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
   txdesc->status1 = (TXDESC_R | TXDESC_L | TXDESC_TC | TXDESC_W);
 
@@ -480,7 +480,7 @@ static int kinetis_txpoll(struct net_driver_s *dev)
 
       if (kinetics_txringfull(priv))
         {
-           return -EBUSY;
+          return -EBUSY;
         }
     }
 
@@ -603,7 +603,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4

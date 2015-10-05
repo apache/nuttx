@@ -65,7 +65,6 @@
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"
-//#include "sam_memories.h"
 #include "sam_periphclks.h"
 #include "sam_ssc.h"
 #include "chip/sam_pmc.h"
@@ -339,7 +338,7 @@
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_8BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
    DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_16BITS | \
-   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1| \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1 | \
    DMACH_FLAG_MEMBURST_4)
 
 #define DMA16_FLAGS \

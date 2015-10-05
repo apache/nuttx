@@ -256,7 +256,7 @@ static inline void sam_init_pbamask(void)
   mask    |= PM_PBAMASK_TWIM3;        /* TWIM3 */
 #endif
 #ifdef CONFIG_SAM34_LCDCA
-  mask    |= PM_PBAMASK_LCDCA;        /* LCDCA*/
+  mask    |= PM_PBAMASK_LCDCA;        /* LCDCA */
 #endif
 #endif
 

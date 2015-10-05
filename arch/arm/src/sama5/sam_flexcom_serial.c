@@ -747,12 +747,12 @@ static int flexus_setup(struct uart_dev_s *dev)
    * This may limit BAUD rates for lower USART clocks.
    */
 
-  regval  = (SAM_USART_CLOCK + (priv->baud << 3))/(priv->baud << 4);
+  regval  = (SAM_USART_CLOCK + (priv->baud << 3)) / (priv->baud << 4);
   flexus_serialout(priv, SAM_FLEXUS_BRGR_OFFSET, regval);
 
   /* Enable receiver & transmitter */
 
-  flexus_serialout(priv, SAM_FLEXUS_CR_OFFSET, (FLEXUS_CR_RXEN|FLEXUS_CR_TXEN));
+  flexus_serialout(priv, SAM_FLEXUS_CR_OFFSET, (FLEXUS_CR_RXEN | FLEXUS_CR_TXEN));
 #endif
   return OK;
 }
@@ -773,7 +773,8 @@ static void flexus_shutdown(struct uart_dev_s *dev)
   /* Reset and disable receiver and transmitter */
 
   flexus_serialout(priv, SAM_FLEXUS_CR_OFFSET,
-               (FLEXUS_CR_RSTRX|FLEXUS_CR_RSTTX|FLEXUS_CR_RXDIS|FLEXUS_CR_TXDIS));
+                   (FLEXUS_CR_RSTRX | FLEXUS_CR_RSTTX | FLEXUS_CR_RXDIS |
+                    FLEXUS_CR_TXDIS));
 
   /* Disable all interrupts */
 

@@ -169,7 +169,7 @@ void up_lowputc(char ch)
   while ((getreg8(CONSOLE_BASE+KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
 #endif
 
- /* Then write the character to the UART data register */
+  /* Then write the character to the UART data register */
 
   putreg8((uint8_t)ch, CONSOLE_BASE+KINETIS_UART_D_OFFSET);
 #endif

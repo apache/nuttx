@@ -3934,7 +3934,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 
   if (priv->attr->emac == EMAC0_INTF)
     {
-      /* Configure PIO pins common to RMII and MII mode*/
+      /* Configure PIO pins common to RMII and MII mode */
 
        sam_configpio(PIO_EMAC0_TXCK);    /* Transmit Clock (or Reference Clock) */
        sam_configpio(PIO_EMAC0_TXEN);    /* Transmit Enable */
@@ -3947,7 +3947,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
        sam_configpio(PIO_EMAC0_MDC);     /* Management Data Clock */
        sam_configpio(PIO_EMAC0_MDIO);    /* Management Data Input/Output */
 
-      /* Configure additional PIO pins to support EMAC in MII mode*/
+      /* Configure additional PIO pins to support EMAC in MII mode */
 
       if (!priv->attr->rmii)
         {
@@ -3969,7 +3969,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 
   if (priv->attr->emac == EMAC1_INTF)
     {
-      /* Configure PIO pins common to RMII and MII mode*/
+      /* Configure PIO pins common to RMII and MII mode */
 
        sam_configpio(PIO_EMAC1_TXCK);    /* Transmit Clock (or Reference Clock) */
        sam_configpio(PIO_EMAC1_TXEN);    /* Transmit Enable */
@@ -3982,7 +3982,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
        sam_configpio(PIO_EMAC1_MDC);     /* Management Data Clock */
        sam_configpio(PIO_EMAC1_MDIO);    /* Management Data Input/Output */
 
-      /* Configure additional PIO pins to support EMAC in MII mode*/
+      /* Configure additional PIO pins to support EMAC in MII mode */
 
       if (!priv->attr->rmii)
         {

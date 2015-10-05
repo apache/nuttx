@@ -343,9 +343,9 @@ static void efm32_disableuartint(struct efm32_leuart_s *priv, uint32_t *ien)
 
   flags = irqsave();
   if (ien)
-   {
-     *ien = priv->ien;
-   }
+    {
+      *ien = priv->ien;
+    }
 
   efm32_restoreuartint(priv, 0);
   irqrestore(flags);
@@ -362,12 +362,12 @@ static void efm32_disableuartint(struct efm32_leuart_s *priv, uint32_t *ien)
 
 static int efm32_setup(struct uart_dev_s *dev)
 {
- struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
 
 #ifndef CONFIG_SUPPRESS_LEUART_CONFIG
- const struct efm32_config_s *config = priv->config;
+  const struct efm32_config_s *config = priv->config;
 
- /* Configure the UART as an RS-232 UART */
+  /* Configure the UART as an RS-232 UART */
 
   efm32_leuartconfigure(config->uartbase, config->baud, config->parity,
                         config->bits, config->stop2);

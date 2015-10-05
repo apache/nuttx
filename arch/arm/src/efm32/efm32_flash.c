@@ -240,7 +240,9 @@ int __ramfunc__ msc_load_verify_address(uint32_t* address)
       /* Check for invalid address */
 
       if (status & MSC_STATUS_INVADDR)
-        return -EINVAL;
+        {
+          return -EINVAL;
+        }
 
       /* Check for write protected page */
 
@@ -374,7 +376,7 @@ int __ramfunc__ msc_load_write_data(uint32_t* data, uint32_t num_words,
           DEBUGASSERT(BOARD_SYSTEM_FREQUENCY >= 1000000);
 
           word_index = 0;
-          while(word_index < num_words)
+          while (word_index < num_words)
             {
               putreg32(*data++,EFM32_MSC_WDATA);
               word_index++;
@@ -431,7 +433,7 @@ int __ramfunc__ msc_load_write_data(uint32_t* data, uint32_t num_words,
 
           word_index = 0;
 
-          while(word_index < num_words)
+          while (word_index < num_words)
             {
 
               /* Wait for the MSC to be ready for the next word. */

@@ -78,7 +78,7 @@
 
 #define T0_PCLKSEL_MASK     (0x0000000C)
 
-#define T0_TICKS_COUNT      ((CCLK / T0_PCLK_DIV ) / TICK_PER_SEC)
+#define T0_TICKS_COUNT      ((CCLK / T0_PCLK_DIV) / TICK_PER_SEC)
 
 /****************************************************************************
  * Private Types

@@ -373,7 +373,7 @@ void startStopNextMessage(struct lpc43_i2cdev_s *priv)
 {
   priv->nmsg--;
 
-  if(priv->nmsg > 0)
+  if (priv->nmsg > 0)
     {
       priv->msgs++;
       putreg32(I2C_CONSET_STA,priv->base+LPC43_I2C_CONSET_OFFSET);
@@ -442,22 +442,28 @@ static int i2c_interrupt(int irq, FAR void *context)
     case 0x28: /* Data byte in DAT has been transmitted; ACK has been received. */
       priv->wrcnt++;
 
-      if (priv->wrcnt < msg->length) {
+      if (priv->wrcnt < msg->length)
+        {
           putreg32(msg->buffer[priv->wrcnt],priv->base+LPC43_I2C_DAT_OFFSET); /* Put next byte */
-      } else {
+        }
+      else
+        {
           startStopNextMessage(priv);
-      }
+        }
       break;
 
     /* Read cases */
 
     case 0x40:  /* SLA+R has been transmitted; ACK has been received */
       priv->rdcnt = 0;
-      if (msg->length > 1) {
+      if (msg->length > 1)
+        {
           putreg32(I2C_CONSET_AA, priv->base + LPC43_I2C_CONSET_OFFSET); /* Set ACK next read */
-      } else {
+        }
+      else
+        {
           putreg32(I2C_CONCLR_AAC,priv->base + LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK because only one byte */
-      }
+        }
       break;
 
     case 0x50:  /* Data byte has been received; ACK has been returned. */
@@ -567,12 +573,11 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       lpc43_pin_config(PINCONF_I2C1_SDA);
 
       i2c_setfrequency(priv, I2C1_DEFAULT_FREQUENCY);
-
     }
   else
 #endif
     {
-        return NULL;
+      return NULL;
     }
 
   irqrestore(flags);

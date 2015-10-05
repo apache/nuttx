@@ -201,7 +201,7 @@ static void dbgu_configure(void)
 
   /* Enable receiver & transmitter */
 
-  putreg32((DBGU_CR_RXEN|DBGU_CR_TXEN), SAM_DBGU_CR);
+  putreg32((DBGU_CR_RXEN | DBGU_CR_TXEN), SAM_DBGU_CR);
 }
 
 #else
@@ -256,7 +256,8 @@ static void dbgu_shutdown(struct uart_dev_s *dev)
 
   /* Reset and disable receiver and transmitter */
 
-  putreg32((DBGU_CR_RSTRX|DBGU_CR_RSTTX|DBGU_CR_RXDIS|DBGU_CR_TXDIS), SAM_DBGU_CR);
+  putreg32((DBGU_CR_RSTRX | DBGU_CR_RSTTX | DBGU_CR_RXDIS | DBGU_CR_TXDIS),
+           SAM_DBGU_CR);
 
   /* Disable all interrupts */
 

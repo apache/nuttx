@@ -178,7 +178,7 @@ static inline uint32_t sam34_readvr(void)
     {
       v = getreg32(SAM_RTT_VR);
     }
-  while(v != getreg32(SAM_RTT_VR));
+  while (v != getreg32(SAM_RTT_VR));
 
   return v;
 }
@@ -210,10 +210,10 @@ static uint32_t sam34_getreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
 
           return val;
         }
@@ -434,7 +434,7 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
   rttvdbg("Entry\n");
   DEBUGASSERT(priv);
 
-  if(!priv->started)
+  if (!priv->started)
     {
       return -EINVAL;
     }
@@ -526,7 +526,10 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
   DEBUGASSERT(priv);
   rttvdbg("Entry: timeout=%d\n", timeout);
 
-  if(priv->started) return -EPERM;
+  if (priv->started)
+    {
+      return -EPERM;
+    }
 
   /* Can this timeout be represented? */
 

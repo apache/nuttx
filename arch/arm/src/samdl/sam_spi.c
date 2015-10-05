@@ -799,7 +799,7 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 #if 0 /* Not used */
 static int spi_interrupt(struct sam_spidev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;;
   uint8_t pending;
   uint8_t intflag;
   uint8_t inten;
@@ -959,7 +959,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 {
-  struct sam_spidev_s *priv =(struct sam_spidev_s *)dev;
+  struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
   uint32_t maxfreq;
   uint32_t actual;
   uint32_t baud;

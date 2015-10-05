@@ -750,7 +750,7 @@ static void sam_disableallints(struct sam_dev_s *priv, uint32_t *imr)
 
 static int sam_setup(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t divb3;
   uint32_t intpart;
@@ -918,7 +918,7 @@ static int sam_setup(struct uart_dev_s *dev)
 
 static void sam_shutdown(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   /* Reset and disable receiver and transmitter */
 
@@ -947,7 +947,7 @@ static void sam_shutdown(struct uart_dev_s *dev)
 
 static int sam_attach(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -977,7 +977,7 @@ static int sam_attach(struct uart_dev_s *dev)
 
 static void sam_detach(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -1002,7 +1002,7 @@ static int sam_interrupt(struct uart_dev_s *dev)
   bool              handled;
 
   DEBUGASSERT(dev && dev->priv);
-  priv = (struct sam_dev_s*)dev->priv;
+  priv = (struct sam_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
    * been looping for a long time.
@@ -1134,7 +1134,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct sam_dev_s *user = (struct sam_dev_s*)arg;
+         struct sam_dev_s *user = (struct sam_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -1326,7 +1326,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int sam_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   /* Return the error information in the saved status */
 
@@ -1348,7 +1348,7 @@ static int sam_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void sam_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   if (enable)
     {
@@ -1376,7 +1376,7 @@ static void sam_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool sam_rxavailable(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_RXRDY) != 0);
 }
 
@@ -1390,7 +1390,7 @@ static bool sam_rxavailable(struct uart_dev_s *dev)
 
 static void sam_send(struct uart_dev_s *dev, int ch)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   sam_serialout(priv, SAM_UART_THR_OFFSET, (uint32_t)ch);
 }
 
@@ -1404,7 +1404,7 @@ static void sam_send(struct uart_dev_s *dev, int ch)
 
 static void sam_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -1445,7 +1445,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
 
 static bool sam_txready(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
 }
 
@@ -1459,7 +1459,7 @@ static bool sam_txready(struct uart_dev_s *dev)
 
 static bool sam_txempty(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0);
 }
 

@@ -296,7 +296,7 @@ static int wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Process the IOCTL command (see arch/watchdog.h) */
 
-  switch(cmd)
+  switch (cmd)
     {
     case WDIOC_KEEPALIVE:
       wdt_setusec(MAX_WDT_USEC);

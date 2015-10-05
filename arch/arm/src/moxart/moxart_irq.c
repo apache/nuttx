@@ -101,7 +101,8 @@ void up_irqinitialize(void)
 
   (*(volatile uint32_t *)0x98100008) &= ~0x9;
 
-  while (!((*(volatile uint32_t *)0x98100008) & 0x2)) { ; }
+  while (!((*(volatile uint32_t *)0x98100008) & 0x2))
+    ;
 
   (*(volatile uint32_t *)0x98100008) |= 0x4;
 

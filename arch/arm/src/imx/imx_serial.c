@@ -524,7 +524,7 @@ static int up_setup(struct uart_dev_s *dev)
       /* Set CTS trigger level */
 
       regval |= 30 << UART_UCR4_CTSTL_SHIFT;
-   }
+    }
 #endif
 
   /* i.MX reference clock (PERCLK1) is configured for 16MHz */
@@ -546,15 +546,15 @@ static int up_setup(struct uart_dev_s *dev)
    * First, select a closest value we can for the divider
    */
 
-   div = (IMX_PERCLK1_FREQ >> 4) / priv->baud;
-   if (div > 7)
-     {
-       div = 7;
-     }
-   else if (div < 1)
-     {
-       div = 1;
-     }
+  div = (IMX_PERCLK1_FREQ >> 4) / priv->baud;
+  if (div > 7)
+    {
+      div = 7;
+    }
+  else if (div < 1)
+    {
+      div = 1;
+    }
 
   /* Now find the numerator and denominator.  These must have
    * the ratio baud/(PERCLK / div / 16), but the values cannot

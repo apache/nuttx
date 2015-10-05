@@ -139,7 +139,7 @@ struct imx_spidev_s
  * Private Function Prototypes
  ****************************************************************************/
 
- /* SPI register access */
+/* SPI register access */
 
 static inline uint32_t spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
 static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32_t value);
@@ -468,11 +468,11 @@ static void spi_startxfr(struct imx_spidev_s *priv, int ntxd)
    */
 
   if (ntxd > 0)
-   {
+    {
       regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
       regval |= CSPI_CTRL_XCH;
       spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
-   }
+    }
 }
 
 /****************************************************************************
@@ -773,7 +773,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           freqbits = CSPI_CTRL_DIV256;
           actual   = IMX_PERCLK2_FREQ / 256;
         }
-      else /*if (frequency >= IMX_PERCLK2_FREQ / 512) */
+      else /* if (frequency >= IMX_PERCLK2_FREQ / 512) */
         {
           freqbits = CSPI_CTRL_DIV512;
           actual   = IMX_PERCLK2_FREQ / 512;

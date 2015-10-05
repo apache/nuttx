@@ -404,8 +404,8 @@ void sam_pioirq(pio_pinset_t pinset)
 
   /* Is the interrupt secure? */
 
-   regval = getreg32(base + SAM_PIO_ISLR_OFFSET);
-   if ((pinset & PIO_INT_SECURE) != 0)
+  regval = getreg32(base + SAM_PIO_ISLR_OFFSET);
+  if ((pinset & PIO_INT_SECURE) != 0)
      {
        /* Yes.. make sure that the corresponding bit in ISLR is cleared */
 

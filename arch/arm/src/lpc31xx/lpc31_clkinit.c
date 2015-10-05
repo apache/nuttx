@@ -138,8 +138,8 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
                       regaddr = LPC31_CGU_ESR(esrndx);
                       putreg32((fdndx << CGU_ESR_ESRSEL_SHIFT) | CGU_ESR_ESREN, regaddr);
                     }
-                 }
-             }
+                }
+            }
 
           /* Enable the fractional divider */
 
@@ -158,7 +158,7 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
       putreg32(CGU_BCR_FDRUN, regaddr);
     }
 
-   /* Select input base clock for domain*/
+   /* Select input base clock for domain */
 
   lpc31_selectfreqin(dmn->dmnid, dmn->finsel);
 }

@@ -128,7 +128,7 @@ static void dispatch_syscall(void)
     " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
     " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
     " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this SYSCALL */
-    " blx ip\n"                    /* Call the stub (modifies lr)*/
+    " blx ip\n"                    /* Call the stub (modifies lr) */
     " ldr lr, [sp, #12]\n"         /* Restore lr */
     " add sp, sp, #16\n"           /* Destroy the stack frame */
     " mov r2, r0\n"                /* R2=Save return value in R2 */

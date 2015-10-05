@@ -1665,7 +1665,7 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
        preved = NULL;
        curred && curred != edctrl;
        preved = curred,
-       curred =(struct sam_ed_s *)sam_virtramaddr(physcurr))
+       curred = (struct sam_ed_s *)sam_virtramaddr(physcurr))
     {
       physcurr = curred->hw.nexted;
     }
@@ -1712,7 +1712,7 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
 
   for (currtd = (struct sam_gtd_s *)sam_virtramaddr(physcurr);
        currtd && currtd != tdtail;
-       currtd =(struct sam_gtd_s *)sam_virtramaddr(physcurr))
+       currtd = (struct sam_gtd_s *)sam_virtramaddr(physcurr))
     {
       physcurr = currtd->hw.nexttd;
       sam_tdfree(currtd);
@@ -2125,7 +2125,7 @@ static void sam_wdh_bottomhalf(void)
        */
 
       arch_invalidate_dcache((uintptr_t)td,
-                             (uintptr_t)td + sizeof( struct ohci_gtd_s));
+                             (uintptr_t)td + sizeof(struct ohci_gtd_s));
 
       /* Get the ED in which this TD was enqueued */
 
@@ -2152,7 +2152,7 @@ static void sam_wdh_bottomhalf(void)
            */
 
           arch_invalidate_dcache((uintptr_t)ed,
-                                 (uintptr_t)ed + sizeof( struct ohci_ed_s));
+                                 (uintptr_t)ed + sizeof(struct ohci_ed_s));
 
           /* Save the condition code from the (single) TD status/control
            * word.
@@ -3393,7 +3393,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         }
 
       nbytes = eplist->xfrd;
-      DEBUGASSERT(nbytes >=0 && nbytes <= buflen);
+      DEBUGASSERT(nbytes >= 0 && nbytes <= buflen);
 
       sam_givesem(&g_ohci.exclsem);
       return nbytes;

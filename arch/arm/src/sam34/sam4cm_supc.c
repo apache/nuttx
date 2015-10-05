@@ -85,11 +85,11 @@ void supc_set_slcd_power_mode(uint32_t mode)
 
   if (mode == SUPC_MR_LCDMODE_LCDOFF)
     {
-      while(getreg32(SAM_SUPC_SR) & SUPC_SR_LCDS);
+      while (getreg32(SAM_SUPC_SR) & SUPC_SR_LCDS);
     }
   else
     {
-      while(!(getreg32(SAM_SUPC_SR) & SUPC_SR_LCDS));
+      while (!(getreg32(SAM_SUPC_SR) & SUPC_SR_LCDS));
     }
 }
 

@@ -192,10 +192,10 @@ static uint32_t sam34_getreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
 
           return val;
         }
@@ -609,7 +609,7 @@ void sam_tcinitialize(FAR const char *devpath, int irq)
    * is only called once so it is never necessary to re-zero the structure.
    */
 
-  switch(irq)
+  switch (irq)
     {
 #if defined(CONFIG_SAM34_TC0)
     case SAM_IRQ_TC0:

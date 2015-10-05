@@ -243,4 +243,3 @@ void kl_clockconfig(void)
   //kl_traceconfig();
   //kl_fbconfig();
 }
-

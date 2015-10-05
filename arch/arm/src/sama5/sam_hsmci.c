@@ -1542,13 +1542,13 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                 {
                   /* Yes.. Terminate with a timeout. */
 
-                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
                 }
               else
                 {
                   /* No..  Terminate with an I/O error. */
 
-                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
                 }
             }
 
@@ -1616,20 +1616,22 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                     {
                       /* Yes.. signal a timeout error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_TIMEOUT;
+                      wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                  SDIOWAIT_TIMEOUT;
                     }
                   else
                     {
                       /* No.. signal some generic I/O error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_ERROR;
+                      wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                  SDIOWAIT_ERROR;
                     }
                 }
               else
-               {
+                {
                   /* The Command-Response sequence ended with no error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
+                  wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE;
                 }
 
              /* Yes.. Is there a thread waiting for this event set? */
@@ -2393,14 +2395,16 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
                 {
                   /* Yes.. return a timeout error */
 
-                  priv->wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_TIMEOUT;
+                  priv->wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                    SDIOWAIT_TIMEOUT;
                   return -ETIMEDOUT;
                 }
               else
                 {
                   /* No.. return some generic I/O error */
 
-                  priv->wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_ERROR;
+                  priv->wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                    SDIOWAIT_ERROR;
                   return -EIO;
                 }
             }
@@ -2408,7 +2412,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* The Command-Response sequence ended with no error */
 
-              priv->wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
+              priv->wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE;
               return OK;
             }
        }
@@ -2647,7 +2651,7 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
    */
 
   waitmask = 0;
-  if ((eventset & (SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE)) != 0)
+  if ((eventset & (SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE)) != 0)
     {
       waitmask |= priv->cmdrmask;
     }
@@ -2723,7 +2727,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-           return SDIOWAIT_TIMEOUT;
+          return SDIOWAIT_TIMEOUT;
         }
 
       /* Start the watchdog timer.  I am not sure why this is, but I am

@@ -62,8 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Memory Map ***************************************************************/
-/*
- * 0x0400:0000 - Beginning of the internal FLASH.   Address of vectors.
+/* 0x0400:0000 - Beginning of the internal FLASH.   Address of vectors.
  *               Mapped as boot memory address 0x0000:0000 at reset.
  * 0x041f:ffff - End of flash region (assuming the max of 2MiB of FLASH).
  * 0x2000:0000 - Start of internal SRAM and start of .data (_sdata)

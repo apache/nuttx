@@ -291,7 +291,7 @@ int up_rtcinitialize(void)
     {
       up_enable_irq(LPC17_IRQ_RTC);
     }
-#endif /*CONFIG_RTC_ALARM*/
+#endif /* CONFIG_RTC_ALARM */
 
   /* Perform the one-time setup of the RTC */
 

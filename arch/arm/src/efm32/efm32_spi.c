@@ -903,7 +903,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
        *    = 128 * fHFPERCLK / (256 + CLKDIV)
        */
 
-      actual = (BOARD_HFPERCLK_FREQUENCY << 7) / ( 256 + clkdiv);
+      actual = (BOARD_HFPERCLK_FREQUENCY << 7) / (256 + clkdiv);
       spivdbg("frequency=%u actual=%u\n", frequency, actual);
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -1745,18 +1745,18 @@ struct spi_dev_s *efm32_spi_initialize(int port)
 
       /* Initialize the SPI device */
 
-       ret = spi_portinitialize(priv);
-       if (ret < 0)
-         {
-           spidbg("ERROR: Failed to initialize SPI port %d\n", port);
-           irqrestore(flags);
-           return NULL;
-         }
+      ret = spi_portinitialize(priv);
+      if (ret < 0)
+        {
+          spidbg("ERROR: Failed to initialize SPI port %d\n", port);
+          irqrestore(flags);
+          return NULL;
+        }
 
-       /* Now we are initialized */
+      /* Now we are initialized */
 
-       priv->initialized = true;
-       irqrestore(flags);
+      priv->initialized = true;
+      irqrestore(flags);
     }
 
   return (struct spi_dev_s *)priv;

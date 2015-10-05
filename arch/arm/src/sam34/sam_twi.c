@@ -530,7 +530,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
         }
     }
 
-  /* Byte sent*/
+  /* Byte sent */
 
   else if ((pending & TWI_INT_TXRDY) != 0)
     {
@@ -639,7 +639,7 @@ static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   priv->result = -EBUSY;
   priv->xfrd   = 0;
 
-  /* Set STOP signal if only one byte is sent*/
+  /* Set STOP signal if only one byte is sent */
 
   if (msg->length == 1)
     {
@@ -685,7 +685,7 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
   twi_putrel(priv, SAM_TWI_IADR_OFFSET, 0);
 
-  /* Write first byte to send.*/
+  /* Write first byte to send. */
 
   twi_putrel(priv, SAM_TWI_THR_OFFSET, msg->buffer[priv->xfrd++]);
 
@@ -1126,8 +1126,10 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
                               uint32_t frequency)
 {
-  //uint32_t regval;
-  //uint32_t mck;
+#if 0
+  uint32_t regval;
+  uint32_t mck;
+#endif
 
   i2cvdbg("TWI%d Initializing\n", priv->twi);
 

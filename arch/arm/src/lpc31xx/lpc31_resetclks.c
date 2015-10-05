@@ -103,41 +103,42 @@ void lpc31_resetclks(void)
   /* Disable all clocks except those that are necessary */
 
   for (i = CLKID_FIRST; i <= CLKID_LAST; i++)
-  {
-    /* Check if this clock has an ESR register */
-
-    esrndx = lpc31_esrndx((enum lpc31_clockid_e)i);
-    if (esrndx != ESRNDX_INVALID)
     {
-      /* Yes.. Clear the clocks ESR to deselect fractional divider */
+      /* Check if this clock has an ESR register */
 
-      putreg32(0, LPC31_CGU_ESR(esrndx));
+      esrndx = lpc31_esrndx((enum lpc31_clockid_e)i);
+      if (esrndx != ESRNDX_INVALID)
+        {
+          /* Yes.. Clear the clocks ESR to deselect fractional divider */
+
+          putreg32(0, LPC31_CGU_ESR(esrndx));
+        }
+
+      /* Enable external enabling for all possible clocks to conserve power */
+
+      lpc31_enableexten((enum lpc31_clockid_e)i);
+
+      /* Set enable-out's for only the following clocks */
+
+      regaddr = LPC31_CGU_PCR(i);
+      regval  = getreg32(regaddr);
+      if (i == (int)CLKID_ARM926BUSIFCLK || i == (int)CLKID_MPMCCFGCLK)
+        {
+          regval |=  CGU_PCR_ENOUTEN;
+        }
+      else
+        {
+          regval &= ~CGU_PCR_ENOUTEN;
+        }
+
+      putreg32(regval, regaddr);
+
+      /* Set/clear the RUN bit in the PCR regiser of  all clocks, depending
+       * upon if the clock is needed by the board logic or not
+       */
+
+      (void)lpc31_defclk((enum lpc31_clockid_e)i);
     }
-
-    /* Enable external enabling for all possible clocks to conserve power */
-
-    lpc31_enableexten((enum lpc31_clockid_e)i);
-
-    /* Set enable-out's for only the following clocks */
-
-    regaddr = LPC31_CGU_PCR(i);
-    regval  = getreg32(regaddr);
-    if (i == (int)CLKID_ARM926BUSIFCLK || i == (int)CLKID_MPMCCFGCLK)
-      {
-        regval |=  CGU_PCR_ENOUTEN;
-      }
-    else
-      {
-        regval &= ~CGU_PCR_ENOUTEN;
-      }
-    putreg32(regval, regaddr);
-
-    /* Set/clear the RUN bit in the PCR regiser of  all clocks, depending
-     * upon if the clock is needed by the board logic or not
-     */
-
-    (void)lpc31_defclk((enum lpc31_clockid_e)i);
-  }
 
   /* Disable all fractional dividers */
 

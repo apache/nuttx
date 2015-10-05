@@ -474,12 +474,12 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
        * data transfer.
        */
 
-     while ((getreg32(LPC17_SPI_SR) & SPI_SR_SPIF) == 0);
+      while ((getreg32(LPC17_SPI_SR) & SPI_SR_SPIF) == 0);
 
-     /* Read the SPI Status Register again to clear the status bit */
+      /* Read the SPI Status Register again to clear the status bit */
 
-     (void)getreg32(LPC17_SPI_SR);
-     nwords--;
+      (void)getreg32(LPC17_SPI_SR);
+      nwords--;
     }
 }
 

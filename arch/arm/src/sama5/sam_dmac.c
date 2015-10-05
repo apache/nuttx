@@ -1826,7 +1826,7 @@ static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
               /* Is the transfer complete? */
 
               else if ((regval & DMAC_EBC_CBTC(chndx)) != 0)
-               {
+                {
                   /* Yes.. Terminate the transfer with success */
 
                   sam_dmaterminate(dmach, OK);

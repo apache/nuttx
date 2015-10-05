@@ -1047,7 +1047,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
 #ifdef CONFIG_SDIO_DMA
-  /* Stop the DMA by resetting the data path*/
+  /* Stop the DMA by resetting the data path */
 
   regval = getreg32(KINETIS_SDHC_SYSCTL);
   regval |= SDHC_SYSCTL_RSTD;
@@ -1420,8 +1420,8 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
    *   96MHz / 16 <= 400KHz <= 96MHz / 16 / 16    -- YES, prescaler == 16
    */
 
-  if (/*frequency >= (BOARD_CORECLK_FREQ / 2) && */
-        frequency <= (BOARD_CORECLK_FREQ / 2 / 16))
+  if (/* frequency >= (BOARD_CORECLK_FREQ / 2) && */
+      frequency <= (BOARD_CORECLK_FREQ / 2 / 16))
     {
       sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV2;
       prescaler = 2;
@@ -1791,7 +1791,7 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
       regval |= SDHC_XFERTYP_RSPTYP_NONE;
       break;
 
-    case MMCSD_R1B_RESPONSE:              /* Response length 48, check busy & cmdindex*/
+    case MMCSD_R1B_RESPONSE:              /* Response length 48, check busy & cmdindex */
       regval |= (SDHC_XFERTYP_RSPTYP_LEN48BSY|SDHC_XFERTYP_CICEN|SDHC_XFERTYP_CCCEN);
       break;
 
@@ -2002,7 +2002,7 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
 #ifdef CONFIG_SDIO_DMA
-  /* Stop the DMA by resetting the data path*/
+  /* Stop the DMA by resetting the data path */
 
   regval = getreg32(KINETIS_SDHC_SYSCTL);
   regval |= SDHC_SYSCTL_RSTD;
@@ -2233,7 +2233,7 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
         }
     }
 
-  /* Return the long response in CMDRSP3..0*/
+  /* Return the long response in CMDRSP3..0 */
 
   if (rlong)
     {
@@ -2404,7 +2404,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-           return SDIOWAIT_TIMEOUT;
+          return SDIOWAIT_TIMEOUT;
         }
 
       /* Start the watchdog timer */

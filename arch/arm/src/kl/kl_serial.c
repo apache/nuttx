@@ -376,9 +376,9 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 
   flags = irqsave();
   if (ie)
-   {
-     *ie = priv->ie;
-   }
+    {
+      *ie = priv->ie;
+    }
 
   up_restoreuartint(priv, 0);
   irqrestore(flags);
@@ -595,10 +595,10 @@ static int up_interrupts(int irq, void *context)
        * OR: Receiver Overrun Flag.  To clear OR, write a logic 1 to the OR flag.
        */
 
-       if ((s1 & UART_S1_ERRORS) != 0)
-         {
-           up_serialout(priv, KL_UART_S1_OFFSET, (s1 & UART_S1_ERRORS));
-         }
+      if ((s1 & UART_S1_ERRORS) != 0)
+        {
+          up_serialout(priv, KL_UART_S1_OFFSET, (s1 & UART_S1_ERRORS));
+        }
     }
 
   return OK;

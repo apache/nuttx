@@ -562,18 +562,18 @@ static int up_interrupt(int irq, void *context)
       /* Is this an interrupt from the IrDA UART? */
 
       if (irq == C5471_IRQ_UART_IRDA)
-         {
-           /* Save the currently enabled IrDA UART interrupts
-            * so that we can restore the IrDA interrupt state
-            * below.
-            */
+        {
+          /* Save the currently enabled IrDA UART interrupts
+           * so that we can restore the IrDA interrupt state
+           * below.
+           */
 
-           ier_val = up_inserial(priv, UART_IER_OFFS);
+          ier_val = up_inserial(priv, UART_IER_OFFS);
 
-           /* Then disable all IrDA UART interrupts */
+          /* Then disable all IrDA UART interrupts */
 
-           up_serialout(priv, UART_IER_OFFS, 0);
-         }
+          up_serialout(priv, UART_IER_OFFS, 0);
+        }
 
       /* Receive characters from the RX fifo */
 

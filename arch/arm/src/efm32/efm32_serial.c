@@ -593,9 +593,9 @@ static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
 
   flags = irqsave();
   if (ien)
-   {
-     *ien = priv->ien;
-   }
+    {
+      *ien = priv->ien;
+    }
 
   efm32_restoreuartint(priv, 0);
   irqrestore(flags);

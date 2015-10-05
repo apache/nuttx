@@ -223,18 +223,18 @@ int spi_xfer(uint8_t dev_idx, uint8_t bitlen, const void *dout, void *din)
   /* wait until the transfer is complete */
 
   while (1)
-  {
-    reg_status = getreg16(SPI_REG(REG_STATUS));
-    dbg("status=0x%04x ", reg_status);
-    if (din && (reg_status & SPI_STATUS_RE))
-      {
-        break;
-      }
-    else if (reg_status & SPI_STATUS_WE)
-      {
-        break;
-      }
-  }
+    {
+      reg_status = getreg16(SPI_REG(REG_STATUS));
+      dbg("status=0x%04x ", reg_status);
+      if (din && (reg_status & SPI_STATUS_RE))
+        {
+          break;
+        }
+      else if (reg_status & SPI_STATUS_WE)
+        {
+          break;
+        }
+    }
 
   /* FIXME: calibrate how much delay we really need (seven 13MHz cycles) */
 

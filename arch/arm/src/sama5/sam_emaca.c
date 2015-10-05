@@ -1155,15 +1155,15 @@ static int sam_recvframe(struct sam_emac_s *priv)
           priv->rxndx = rxndx;
         }
 
-    /* Process the next buffer */
+      /* Process the next buffer */
 
-    rxdesc = &priv->rxdesc[rxndx];
+      rxdesc = &priv->rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+      /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    arch_invalidate_dcache((uintptr_t)rxdesc,
-                           (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-  }
+      arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+    }
 
   /* No packet was found */
 
@@ -1274,7 +1274,7 @@ static void sam_receive(struct sam_emac_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -2624,7 +2624,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = EMAC_MAN_DATA(phyval) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
-           EMAC_MAN_PHYA(phyaddr) | EMAC_MAN_WRITE| EMAC_MAN_SOF;
+           EMAC_MAN_PHYA(phyaddr) | EMAC_MAN_WRITE | EMAC_MAN_SOF;
   sam_putreg(priv, SAM_EMAC_MAN, regval);
 
   /* Wait until the PHY is again IDLE */

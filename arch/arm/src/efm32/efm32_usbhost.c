@@ -73,8 +73,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ***************************************************************/
-/*
- * EFM32 USB OTG FS Host Driver Support
+/* EFM32 USB OTG FS Host Driver Support
  *
  * Pre-requisites
  *
@@ -806,14 +805,14 @@ static void efm32_chan_free(FAR struct efm32_usbhost_s *priv, int chidx)
 
 static inline void efm32_chan_freeall(FAR struct efm32_usbhost_s *priv)
 {
-   uint8_t chidx;
+  uint8_t chidx;
 
-   /* Free all host channels */
+  /* Free all host channels */
 
-   for (chidx = 2; chidx < EFM32_NHOST_CHANNELS; chidx ++)
-     {
-       efm32_chan_free(priv, chidx);
-     }
+  for (chidx = 2; chidx < EFM32_NHOST_CHANNELS; chidx ++)
+    {
+      efm32_chan_free(priv, chidx);
+    }
 }
 
 /****************************************************************************
@@ -2282,7 +2281,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK?*/
+  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2936,11 +2935,11 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
 
       /* Are we bound to a class driver? */
 
-      if ( priv->rhport.hport.devclass)
+      if (priv->rhport.hport.devclass)
         {
           /* Yes.. Disconnect the class driver */
 
-          CLASS_DISCONNECTED( priv->rhport.hport.devclass);
+          CLASS_DISCONNECTED(priv->rhport.hport.devclass);
            priv->rhport.hport.devclass = NULL;
         }
 

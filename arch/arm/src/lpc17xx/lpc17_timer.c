@@ -387,7 +387,7 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
 
   flags = irqsave();
 
-  /* Power on the timer peripherals*/
+  /* Power on the timer peripherals */
 
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCTIM0;
@@ -396,7 +396,7 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
   regval |= SYSCON_PCONP_PCTIM3;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
-  /* Select clock for the timer peripheral*/
+  /* Select clock for the timer peripheral */
 
   regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~(0x3 << 2);
@@ -424,7 +424,7 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
    */
 
   putreg32(((1 << 1)|(3 << 6)), LPC17_TMR0_EMR);
-  putreg32((1 << 0), LPC17_TMR0_TCR);    /* Start timer0*/
+  putreg32((1 << 0), LPC17_TMR0_TCR);    /* Start timer0 */
 
   /* Configure the output pins GPIO3.26 */
 
@@ -436,8 +436,8 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
   putreg32(~(0x3 << 0), LPC17_TMR1_CCR); /* Prescaler count frequency:Fpclk/1 */
   putreg32(~(0x3 << 0), LPC17_TMR1_CTCR);/* Prescaler count frequency:Fpclk/1 */
   putreg32((2 << 0), LPC17_TMR1_MCR);    /* Reset on match register MR0 */
-//  putreg32(((1 << 0)|(3 << 4)), LPC17_TMR1_EMR); /* Output bit toggle on external match event MAT0*/
-  putreg32((1 << 0), LPC17_TMR1_TCR);    /* Start timer1*/
+//  putreg32(((1 << 0)|(3 << 4)), LPC17_TMR1_EMR); /* Output bit toggle on external match event MAT0 */
+  putreg32((1 << 0), LPC17_TMR1_TCR);    /* Start timer1 */
 
   /* configure the output pins GPIO3.26 */
 //  lpc17_configgpio(GPIO_MAT0p1_2);

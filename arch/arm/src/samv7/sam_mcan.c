@@ -1189,10 +1189,10 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
     {
       if (priv->count == 0xffffffff || ++priv->count > 3)
         {
-           if (priv->count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (priv->count == 4)
+            {
+              lldbg("...\n");
+            }
 
           return regval;
         }
@@ -1440,7 +1440,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
        * be incremented and, hence, to be too low.
        */
 
-      for(;;)
+      for (;;)
         {
           /* Get the current queue status and semaphore count. */
 
@@ -2716,7 +2716,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
-  dest   = (FAR uint8_t*)&txbuffer[2];
+  dest   = (FAR uint8_t *)&txbuffer[2];
   src    = msg->cm_data;
   nbytes = mcan_dlc2bytes(priv, msg->cm_hdr.ch_dlc);
 

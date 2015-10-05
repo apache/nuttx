@@ -410,7 +410,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 #error "Not implemented ! Sorry"
 #endif
 
-  if ( efm32_timer_set_freq(priv->base,priv->pclk,info->frequency) < 0 )
+  if (efm32_timer_set_freq(priv->base,priv->pclk,info->frequency) < 0)
     {
       pwmdbg("Cannot set TIMER frequency %dHz from clock %dHz\n",
              info->frequency,
@@ -421,7 +421,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 
   regval = ((uint32_t)(priv->pinloc)) << _TIMER_ROUTE_LOCATION_SHIFT;
 
-  switch(priv->channel)
+  switch (priv->channel)
     {
     case 0:
       regval |= _TIMER_ROUTE_CC0PEN_MASK;
@@ -439,7 +439,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
       ASSERT(false);
     }
 
-  pwm_putreg( priv, EFM32_TIMER_ROUTE_OFFSET, regval );
+  pwm_putreg(priv, EFM32_TIMER_ROUTE_OFFSET, regval);
 
   regval = (info->duty * pwm_getreg(priv, EFM32_TIMER_TOP_OFFSET)) >> 16;
   pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCV_OFFSET , regval);
@@ -449,11 +449,11 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
            (_TIMER_CC_CTRL_CMOA_CLEAR << _TIMER_CC_CTRL_CMOA_SHIFT)   | \
            (_TIMER_CC_CTRL_COFOA_SET  << _TIMER_CC_CTRL_COFOA_SHIFT)   ;
 
-  pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CTRL_OFFSET, regval );
+  pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CTRL_OFFSET, regval);
 
   /* Start Timer */
 
-  pwm_putreg(priv, EFM32_TIMER_CMD_OFFSET, TIMER_CMD_START );
+  pwm_putreg(priv, EFM32_TIMER_CMD_OFFSET, TIMER_CMD_START);
   pwm_dumpregs(priv, "After starting");
   return OK;
 }
@@ -676,7 +676,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   /* Dnable TIMER clock */
 
-  switch(priv->timid)
+  switch (priv->timid)
     {
     case 0:
       modifyreg32(EFM32_CMU_HFPERCLKEN0,0,CMU_HFPERCLKEN0_TIMER0);
@@ -819,7 +819,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   pwm_putreg(priv, EFM32_TIMER_CMD_OFFSET, TIMER_CMD_STOP);
 
-  irqrestore( flags);
+  irqrestore(flags);
 
   pwm_dumpregs(priv, "After stop");
   return OK;

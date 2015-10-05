@@ -264,8 +264,8 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   else
     {
-       *regaddr = NVIC_SYSHCON;
-       if (irq == LPC43_IRQ_MEMFAULT)
+      *regaddr = NVIC_SYSHCON;
+      if (irq == LPC43_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }

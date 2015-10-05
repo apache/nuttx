@@ -481,13 +481,13 @@ int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
    *     has the highest priority and DMA channel 7 the lowest priority.
    */
 
-   regval = getreg32(LPC17_DMA_ENBLDCHNS);
-   if ((regval & chbit) != 0)
-     {
-       /* There is an active DMA on this channel! */
+  regval = getreg32(LPC17_DMA_ENBLDCHNS);
+  if ((regval & chbit) != 0)
+    {
+      /* There is an active DMA on this channel! */
 
-       return -EBUSY;
-     }
+      return -EBUSY;
+    }
 
   /* 2. "Clear any pending interrupts on the channel to be used by writing
    *     to the DMACIntTCClear and DMACIntErrClear register. The previous

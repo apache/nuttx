@@ -144,9 +144,9 @@ static int sam_interrupt(int irq, void *context)
 
       if ((getreg32(SAM_TRNG_ISR) & TRNG_INT_DATRDY) == 0)
         {
-           /* No?  Then return and continue processing on the next interrupt. */
+          /* No?  Then return and continue processing on the next interrupt. */
 
-           return OK;
+          return OK;
         }
 
       /* As required by the FIPS PUB (Federal Information Processing Standard
@@ -258,7 +258,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
 
   DEBUGASSERT(((uintptr_t)buffer & 3) == 0);
 
-  g_trngdev.samples    = (uint32_t*)buffer;
+  g_trngdev.samples    = (uint32_t *)buffer;
   g_trngdev.maxsamples = buflen >> 2;
   g_trngdev.nsamples   = 0;
   g_trngdev.first      = true;

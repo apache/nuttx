@@ -2224,7 +2224,7 @@ static int sam_udp_interrupt(int irq, void *context)
           sam_suspend(priv);
         }
 
-      /* SOF interrupt*/
+      /* SOF interrupt */
 
       else if ((pending & UDP_INT_SOF) != 0)
         {
@@ -3971,7 +3971,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       sam_pullup(&priv->usbdev, true);
       priv->usbdev.speed = USB_SPEED_FULL;
-   }
+    }
 
   return ret;
 }

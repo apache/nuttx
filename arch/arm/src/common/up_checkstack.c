@@ -136,7 +136,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
                 }
 
               up_putc(ch);
-             }
+            }
 
           up_putc('\n');
         }

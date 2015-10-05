@@ -113,8 +113,8 @@ struct efm32_dev_s
 
 /* ADC Register access */
 
-static uint32_t adc_getreg( struct efm32_dev_s *priv, int offset);
-static void     adc_putreg( struct efm32_dev_s *priv, int offset, uint32_t value);
+static uint32_t adc_getreg(struct efm32_dev_s *priv, int offset);
+static void     adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value);
 static void     adc_hw_reset(struct efm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
@@ -662,9 +662,9 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
       /* Just in case, make sure we get non-zero freq for below calculation */
 
       if (!hfperFreq)
-      {
-        hfperFreq = 1;
-      }
+        {
+          hfperFreq = 1;
+        }
     }
 
 #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
@@ -675,7 +675,7 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
    * See reference manual for details.
    */
 
-  if (hfperFreq > 32000000 )
+  if (hfperFreq > 32000000)
     {
       hfperFreq = 32000000;
     }

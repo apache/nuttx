@@ -504,8 +504,7 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
       return;
     }
 
-  /*
-   * Since we don't use sequential multi-slave mode, but rather
+  /* Since we don't use sequential multi-slave mode, but rather
    * perform the transfer piecemeal by consecutive calls to
    * SPI_SEND, then we must manually assert the chip select
    * across the whole transfer
@@ -555,7 +554,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint32_t spi_clk, div, div1, div2;
 
   if (priv->frequency != frequency)
-  {
+    {
       /* The SPI clock is derived from the (main system oscillator / 2),
        * so compute the best divider from that clock */
 
@@ -580,8 +579,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       priv->slv1 = (priv->slv1 & ~(SPI_SLV_1_CLKDIV2_MASK | SPI_SLV_1_CLKDIV1_MASK)) | (div2 << SPI_SLV_1_CLKDIV2_SHIFT) | (div1 << SPI_SLV_1_CLKDIV1_SHIFT);
 
       priv->frequency = frequency;
-      priv->actual    = frequency;                // FIXME
-  }
+      priv->actual    = frequency;                /* FIXME */
+    }
 
   return priv->actual;
 }
@@ -689,10 +688,10 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-    /* FIXME: is there anyway to determine this
-    *         it should probably be board dependant anyway */
+  /* FIXME: is there anyway to determine this
+   *        it should probably be board dependant anyway */
 
-    return SPI_STATUS_PRESENT;
+  return SPI_STATUS_PRESENT;
 }
 
 /************************************************************************************

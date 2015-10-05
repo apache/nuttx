@@ -238,7 +238,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the user-space heap settings */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)ubase;
+  *heap_start = (FAR void *)ubase;
   *heap_size  = usize;
 
   /* Allow user-mode access to the user heap memory */
@@ -249,7 +249,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the heap settings */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_start = (FAR void *)g_idle_topstack;
   *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 #endif
 }
@@ -328,7 +328,7 @@ void up_addregion(void)
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS0_BASE, CONFIG_SAMV7_EXTSRAM0SIZE);
+  kumm_addregion((FAR void *)SAM_EXTCS0_BASE, CONFIG_SAMV7_EXTSRAM0SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
@@ -339,7 +339,7 @@ void up_addregion(void)
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS1_BASE, CONFIG_SAMV7_EXTSRAM1SIZE);
+  kumm_addregion((FAR void *)SAM_EXTCS1_BASE, CONFIG_SAMV7_EXTSRAM1SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
@@ -350,7 +350,7 @@ void up_addregion(void)
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS2_BASE, CONFIG_SAMV7_EXTSRAM2SIZE);
+  kumm_addregion((FAR void *)SAM_EXTCS2_BASE, CONFIG_SAMV7_EXTSRAM2SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
@@ -361,7 +361,7 @@ void up_addregion(void)
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS3_BASE, CONFIG_SAMV7_EXTSRAM3SIZE);
+  kumm_addregion((FAR void *)SAM_EXTCS3_BASE, CONFIG_SAMV7_EXTSRAM3SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 }

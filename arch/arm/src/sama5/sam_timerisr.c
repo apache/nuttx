@@ -102,7 +102,7 @@ int up_timerisr(int irq, uint32_t *regs)
    *  Interval Value Register (PIT_PIVR), the overflow counter (PICNT) is
    *  reset and the PITS is cleared, thus acknowledging the interrupt. The
    *  value of PICNT gives the number of periodic intervals elapsed since the
-   *  last read of PIT_PIVR.
+   *  last read of PIT_PIVR."
    */
 
   uint32_t picnt = getreg32(SAM_PIT_PIVR) >> PIT_PICNT_SHIFT;

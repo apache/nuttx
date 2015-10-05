@@ -1085,15 +1085,15 @@ static int sam_recvframe(struct sam_gmac_s *priv)
           priv->rxndx = rxndx;
         }
 
-    /* Process the next buffer */
+      /* Process the next buffer */
 
-    rxdesc = &priv->rxdesc[rxndx];
+      rxdesc = &priv->rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+      /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    arch_invalidate_dcache((uintptr_t)rxdesc,
-                           (uintptr_t)rxdesc + sizeof(struct gmac_rxdesc_s));
-  }
+      arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct gmac_rxdesc_s));
+   }
 
   /* No packet was found */
 
@@ -1507,7 +1507,7 @@ static int sam_gmac_interrupt(int irq, void *context)
           clrbits |= GMAC_RSR_BNA;
         }
 
-      /* Check for HRESP not OK (HNO)*/
+      /* Check for HRESP not OK (HNO) */
 
       if ((rsr & GMAC_RSR_HNO) != 0)
         {

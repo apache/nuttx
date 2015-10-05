@@ -83,9 +83,11 @@ void uart_decodeirq(int irq, FAR void *context)
   i = 0;
   do
     {
-      if (!(status & 0x1)) {
-        irq_dispatch(VIRQ_START + i, context);
-      }
+      if (!(status & 0x1))
+        {
+          irq_dispatch(VIRQ_START + i, context);
+        }
+
       status >>= 1;
     }
   while (++i <= 4);
@@ -102,8 +104,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
   unsigned int       opmode;
   int                bitm_off;
 
-  /*
-   * TODO: calculate bit offset from UART_BASE address.
+  /* TODO: calculate bit offset from UART_BASE address.
    *  E.g.:
    *       0x9820_0000 -> 0
    *       0x9820_0020 -> 1

@@ -1287,8 +1287,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   if (spics->nbits > 8)
     {
-      rxptr16 = (uint16_t*)rxbuffer;
-      txptr16 = (uint16_t*)txbuffer;
+      rxptr16 = (uint16_t *)rxbuffer;
+      txptr16 = (uint16_t *)txbuffer;
       rxptr8  = NULL;
       txptr8  = NULL;
     }
@@ -1296,8 +1296,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       rxptr16 = NULL;
       txptr16 = NULL;
-      rxptr8  = (uint8_t*)rxbuffer;
-      txptr8  = (uint8_t*)txbuffer;
+      rxptr8  = (uint8_t *)rxbuffer;
+      txptr8  = (uint8_t *)txbuffer;
     }
 
   /* Make sure that any previous transfer is flushed from the hardware */
@@ -1332,7 +1332,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Save the final word.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source). */
 

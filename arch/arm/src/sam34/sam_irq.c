@@ -310,8 +310,8 @@ static int sam_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   else
     {
-       *regaddr = NVIC_SYSHCON;
-       if (irq == SAM_IRQ_MEMFAULT)
+     *regaddr = NVIC_SYSHCON;
+     if (irq == SAM_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }

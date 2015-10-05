@@ -136,7 +136,7 @@ void kl_lowputc(uint32_t ch)
 
   while ((getreg8(CONSOLE_BASE+KL_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
 
- /* Then write the character to the UART data register */
+  /* Then write the character to the UART data register */
 
   putreg8((uint8_t)ch, CONSOLE_BASE+KL_UART_D_OFFSET);
 

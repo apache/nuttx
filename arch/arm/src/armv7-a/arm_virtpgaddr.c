@@ -85,4 +85,4 @@ uintptr_t arm_virtpgaddr(uintptr_t paddr)
   return 0;
 }
 
-#endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_PGPOOL_MAPPING*/
+#endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_PGPOOL_MAPPING */

@@ -112,7 +112,7 @@ static void aes_encryptblock(void *out, const void *in)
 
   putreg32(AES_CR_START, SAM_AES_CR);
 
-  while(!(getreg32(SAM_AES_ISR) & AES_ISR_DATRDY)) {}
+  while (!(getreg32(SAM_AES_ISR) & AES_ISR_DATRDY));
 
   if (out)
     {
@@ -125,42 +125,46 @@ static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
   uint32_t regval = AES_MR_SMOD_MANUAL_START | AES_MR_CKEY;
 
   if (encrypt)
-    regval |= AES_MR_CIPHER_ENCRYPT;
+    {
+      regval |= AES_MR_CIPHER_ENCRYPT;
+    }
   else
-    regval |= AES_MR_CIPHER_DECRYPT;
+    {
+      regval |= AES_MR_CIPHER_DECRYPT;
+    }
 
-  switch(keysize)
-  {
-  case 16:
-    regval |= AES_MR_KEYSIZE_AES128;
-    break;
-  case 24:
-    regval |= AES_MR_KEYSIZE_AES192;
-    break;
-  case 32:
-    regval |= AES_MR_KEYSIZE_AES256;
-    break;
-  default:
-    return -EINVAL;
-  }
+  switch (keysize)
+    {
+    case 16:
+      regval |= AES_MR_KEYSIZE_AES128;
+      break;
+    case 24:
+      regval |= AES_MR_KEYSIZE_AES192;
+      break;
+    case 32:
+      regval |= AES_MR_KEYSIZE_AES256;
+      break;
+    default:
+      return -EINVAL;
+    }
 
-  switch(mode)
-  {
-  case AES_MODE_ECB:
-    regval |= AES_MR_OPMOD_ECB;
-    break;
-  case AES_MODE_CBC:
-    regval |= AES_MR_OPMOD_CBC;
-    break;
-  case AES_MODE_CTR:
-    regval |= AES_MR_OPMOD_CTR;
-    break;
-  case AES_MODE_CFB:
-    regval |= AES_MR_OPMOD_CFB;
-    break;
-  default:
-    return -EINVAL;
-  }
+  switch (mode)
+    {
+    case AES_MODE_ECB:
+      regval |= AES_MR_OPMOD_ECB;
+      break;
+    case AES_MODE_CBC:
+      regval |= AES_MR_OPMOD_CBC;
+      break;
+    case AES_MODE_CTR:
+      regval |= AES_MR_OPMOD_CTR;
+      break;
+    case AES_MODE_CFB:
+      regval |= AES_MR_OPMOD_CFB;
+      break;
+    default:
+      return -EINVAL;
+    }
 
   putreg32(regval, SAM_AES_MR);
   return OK;
@@ -176,7 +180,9 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
   int res = OK;
 
   if (size % 16)
-    return -EINVAL;
+    {
+      return -EINVAL;
+    }
 
   aes_lock();
 

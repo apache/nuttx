@@ -196,7 +196,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   struct lpc17_i2cdev_s *priv = (struct lpc17_i2cdev_s *) dev;
 
   DEBUGASSERT(dev != NULL);
-  DEBUGASSERT(nbits == 7 );
+  DEBUGASSERT(nbits == 7);
 
   priv->msg.addr  = addr << 1;
   priv->msg.flags = 0 ;
@@ -375,7 +375,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
   switch (state)
     {
-    case 0x00:      // Bus Error
+    case 0x00:      /* Bus Error */
     case 0x20:
     case 0x30:
     case 0x38:
@@ -383,8 +383,8 @@ static int i2c_interrupt(int irq, FAR void *context)
       i2c_stop(priv);
       break;
 
-    case 0x08:     // START
-    case 0x10:     // Repeat START
+    case 0x08:     /* START */
+    case 0x10:     /* Repeat START */
       putreg32(priv->msg.addr, priv->base + LPC17_I2C_DAT_OFFSET);
       putreg32(I2C_CONCLR_STAC, priv->base + LPC17_I2C_CONCLR_OFFSET);
       break;

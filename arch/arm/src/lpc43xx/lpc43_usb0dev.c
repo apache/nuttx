@@ -514,10 +514,11 @@ static uint32_t lpc43_getreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -956,8 +957,10 @@ static void lpc43_cancelrequests(struct lpc43_ep_s *privep, int16_t status)
 
   while (!lpc43_rqempty(privep))
     {
-      // FIXME: the entry at the head should be sync'd with the DTD
-      // FIXME: only report the error status if the transfer hasn't completed
+      /* FIXME: the entry at the head should be sync'd with the DTD
+       * FIXME: only report the error status if the transfer hasn't completed
+       */
+
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (lpc43_rqpeek(privep))->req.xfrd);
       lpc43_reqcomplete(privep, lpc43_rqdequeue(privep), status);
@@ -2646,7 +2649,6 @@ void up_usbinitialize(void)
         }
     }
 
-
   /* Clock */
 
   regval  = getreg32(LPC43_BASE_USB0_CLK);
@@ -2660,7 +2662,7 @@ void up_usbinitialize(void)
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_USB0_CFG);
 
-  /* Enable PLL0 clock*/
+  /* Enable PLL0 clock */
 
   lpc43_pll0usbconfig();
   lpc43_pll0usbenable();

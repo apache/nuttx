@@ -1182,10 +1182,10 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
   /* Initialize the SPIFI ROM driver */
 
   ret = lpc43_rominit(priv);
-   if (ret != OK)
-     {
-       return NULL;
-     }
+  if (ret != OK)
+    {
+      return NULL;
+    }
 
   /* Check if we need to emulator a 512 byte sector */
 

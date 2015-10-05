@@ -154,7 +154,7 @@ static inline void efm32_statuswait(uint32_t bitset)
 {
   /* Wait for clock to stabilize if requested */
 
-   while ((getreg32(EFM32_CMU_STATUS) & bitset) == 0);
+  while ((getreg32(EFM32_CMU_STATUS) & bitset) == 0);
 }
 
 /****************************************************************************
@@ -502,7 +502,7 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_LECLOCK
-uint32_t efm32_coreleclk_config( int frequency )
+uint32_t efm32_coreleclk_config(int frequency)
 {
 #ifdef CMU_CTRL_HFLE
   uint32_t regval;

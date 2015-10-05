@@ -126,7 +126,7 @@
 
 /* Macros to convert a I2C pin to a GPIO output */
 
-#define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD )
+#define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD)
 
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
@@ -873,8 +873,8 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 #if defined(CONFIG_EFM32_I2C_CLHR_FAST)
 #  define n (11 + 6)          /* Ratio is 11:3 */
 #elif defined(CONFIG_EFM32_I2C_CLHR_ASYMMETRIC)
-#  define n ( 6 + 3)          /* Ratio is 6:3 */
-#else                                /* CLHR STANDARD */
+#  define n (6 + 3)           /* Ratio is 6:3 */
+#else                         /* CLHR STANDARD */
 #  define n ( 4 + 4)          /* Ratio is 4:4 */
 #endif
 
@@ -1284,7 +1284,6 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
     }
 
 done:
-
   if (priv->i2c_state == I2CSTATE_DONE)
     {
 #ifndef CONFIG_I2C_POLLED
@@ -1607,35 +1606,35 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
     {
       /* Check for error status conditions */
 
-      switch(priv->result)
+      switch (priv->result)
         {
-            /* Arbitration lost during transfer. */
+          /* Arbitration lost during transfer. */
 
           case I2CRESULT_ARBLOST:
               errval = EAGAIN;
               break;
 
-              /* NACK received during transfer. */
+          /* NACK received during transfer. */
 
           case I2CRESULT_NACK:
               errval = ENXIO;
               break;
 
-              /* SW fault. */
+          /* SW fault. */
 
           case I2CRESULT_SWFAULT:
               errval = EIO;
               break;
 
-              /* Usage fault. */
+          /* Usage fault. */
 
           case I2CRESULT_USAGEFAULT:
               errval = EINTR;
               break;
 
-              /* Bus error during transfer (misplaced START/STOP).
-               * I2C Bus is for some reason busy
-               */
+          /* Bus error during transfer (misplaced START/STOP).
+           * I2C Bus is for some reason busy
+           */
 
           case I2CRESULT_BUSERR:
               errval = EBUSY;
@@ -1975,7 +1974,6 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
   ret = OK;
 
 out:
-
   /* Release the port for re-use by other clients */
 
   efm32_i2c_sem_post(dev);

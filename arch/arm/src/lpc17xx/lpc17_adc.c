@@ -174,7 +174,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   putreg32(0x100, LPC17_ADC_INTEN);        /* Enable only global interrupt */
 
   putreg32((priv->mask) |                  /* Select channels 0 to 7 on ADC0 */
-//         (clkdiv) << 8) |               /* CLKDIV = divisor to make the samples
+//         (clkdiv) << 8) |                /* CLKDIV = divisor to make the samples
 //                                          * per second conversion rate */
            ((32) << 8) |                   /* CLKDIV = divisor to make the faster
                                             * conversion rate */
@@ -187,14 +187,14 @@ static void adc_reset(FAR struct adc_dev_s *dev)
                                             * trigger A/D conversion) */
            LPC17_ADC_CR);
 
-#else /*CONFIG_ADC_BURSTMODE*/
+#else /* CONFIG_ADC_BURSTMODE */
 
   clkdiv   = LPC17_CCLK / 8 / 65 / priv->sps;
   clkdiv <<= 8;
   clkdiv  &= 0xff00;
   putreg32(ADC_CR_PDN | ADC_CR_BURST | clkdiv | priv->mask, LPC17_ADC_CR);
 
-#endif /*CONFIG_ADC_BURSTMODE*/
+#endif /* CONFIG_ADC_BURSTMODE */
 
   if ((priv->mask & 0x01) != 0)
     {
@@ -322,11 +322,11 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
       putreg32(ADC_INTEN_GLOBAL, LPC17_ADC_INTEN);
 #endif
-#else /*CONFIG_ADC_BURSTMODE*/
+#else /* CONFIG_ADC_BURSTMODE */
       /* Enable only global interrupt */
 
       putreg32(0x100, LPC17_ADC_INTEN);
-#endif /*CONFIG_ADC_BURSTMODE*/
+#endif /* CONFIG_ADC_BURSTMODE */
     }
   else
     {
@@ -416,7 +416,7 @@ static int adc_interrupt(int irq, void *context)
   return OK;
 
 #endif
-#else /*CONFIG_ADC_BURSTMODE*/
+#else /* CONFIG_ADC_BURSTMODE */
 
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   volatile uint32_t regVal, regVal2, regVal3;
@@ -462,21 +462,21 @@ static int adc_interrupt(int irq, void *context)
           ADC1Buffer0[0] = regVal;
           ADC0IntDone = 1;
 
-#else /*CONFIG_ADC_DIRECT_ACCESS*/
+#else /* CONFIG_ADC_DIRECT_ACCESS */
 #ifdef CONFIG_ADC_WORKER_THREAD
           /* Store the data value plus the status bits */
 
           ADC1Buffer0[0] = regVal;
           ADC0IntDone = 1;
 
-#else /*CONFIG_ADC_WORKER_THREAD*/
+#else /* CONFIG_ADC_WORKER_THREAD */
           if ((regVal) & (1 << 31))
             {
               adc_receive(&g_adcdev, 1, (regVal >> 4) & 0xFFF);
             }
 
-#endif /*CONFIG_ADC_WORKER_THREAD*/
-#endif /*CONFIG_ADC_DIRECT_ACCESS*/
+#endif /* CONFIG_ADC_WORKER_THREAD */
+#endif /* CONFIG_ADC_DIRECT_ACCESS */
         }
 
       if ((priv->mask & 0x04) != 0)
@@ -489,21 +489,21 @@ static int adc_interrupt(int irq, void *context)
           ADC2Buffer0[0] = regVal;
           ADC0IntDone = 1;
 
-#else /*CONFIG_ADC_DIRECT_ACCESS*/
+#else /* CONFIG_ADC_DIRECT_ACCESS */
 #ifdef CONFIG_ADC_WORKER_THREAD
           /* Store the data value plus the status bits */
 
           ADC2Buffer0[0] = regVal;
           ADC0IntDone = 1;
 
-#else /*CONFIG_ADC_WORKER_THREAD*/
+#else /* CONFIG_ADC_WORKER_THREAD */
           if ((regVal) & (1 << 31))
             {
               adc_receive(&g_adcdev, 2, (regVal >> 4) & 0xFFF);
             }
 
-#endif /*CONFIG_ADC_WORKER_THREAD*/
-#endif /*CONFIG_ADC_DIRECT_ACCESS*/
+#endif /* CONFIG_ADC_WORKER_THREAD */
+#endif /* CONFIG_ADC_DIRECT_ACCESS */
         }
 
       if ((priv->mask & 0x08) != 0)
@@ -558,7 +558,7 @@ static int adc_interrupt(int irq, void *context)
                      (FAR void *)priv, 0);
         }
 
-#endif /*CONFIG_ADC_WORKER_THREAD*/
+#endif /* CONFIG_ADC_WORKER_THREAD */
     }
 
   regVal3 = getreg32(LPC17_ADC_GDR); /* Read ADGDR clear the DONE and OVERRUN bits */
@@ -575,7 +575,7 @@ static int adc_interrupt(int irq, void *context)
 //lpc17_gpiowrite(LPCXPRESSO_GPIO0_21, 0); /* Reset pin P0.21 */
 //irqrestore(saved_state);
   return OK;
-#endif /*CONFIG_ADC_BURSTMODE*/
+#endif /* CONFIG_ADC_BURSTMODE */
 }
 
 /****************************************************************************

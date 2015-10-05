@@ -1149,15 +1149,15 @@ static int sam_recvframe(struct sam_emac_s *priv)
           priv->rxndx   = rxndx;
         }
 
-    /* Process the next buffer */
+      /* Process the next buffer */
 
-    rxdesc = &priv->rxdesc[rxndx];
+      rxdesc = &priv->rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+      /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    sam_cmcc_invalidate((uintptr_t)rxdesc,
-                        (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-  }
+      sam_cmcc_invalidate((uintptr_t)rxdesc,
+                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+    }
 
   /* No packet was found */
 
@@ -3371,7 +3371,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
 
 static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 {
-  /* Configure PIO pins to support EMAC in MII mode*/
+  /* Configure PIO pins to support EMAC in MII mode */
 
   sam_configgpio(GPIO_EMAC_TXCK);    /* Transmit Clock (or Reference Clock) */
   sam_configgpio(GPIO_EMAC_TXEN);    /* Transmit Enable */

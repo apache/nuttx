@@ -167,11 +167,10 @@ uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid,
           return 0;
         }
 
-     /* Finally, calculate the frequency based on m and n values */
+       /* Finally, calculate the frequency based on m and n values */
 
-    freq = (freq * n) / m ;
-  }
+      freq = (freq * n) / m ;
+    }
 
   return  freq;
 }
-

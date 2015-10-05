@@ -167,7 +167,10 @@
 
 /* Hardware interface **********************************************************/
 
-/* This represents a Endpoint Transfer Descriptor - note these must be 32 byte aligned */
+/* This represents a Endpoint Transfer Descriptor - note these must be 32 byte
+ * aligned
+ */
+
 struct lpc31_dtd_s
 {
   volatile uint32_t       nextdesc;      /* Address of the next DMA descripto in RAM */
@@ -180,7 +183,8 @@ struct lpc31_dtd_s
   uint32_t                xfer_len;      /* Software only - transfer len that was queued */
 };
 
-/* DTD nextdesc field*/
+/* DTD nextdesc field */
+
 #define DTD_NEXTDESC_INVALID         (1 << 0)    /* Bit 0     : Next Descriptor Invalid */
 
 /* DTD config field */
@@ -495,10 +499,11 @@ static uint32_t lpc31_getreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -718,26 +723,34 @@ static inline void lpc31_ep0xfer(uint8_t epphy, uint8_t *buf, uint32_t nbytes)
  *   Read a Setup packet from the DTD.
  *
  ****************************************************************************/
+
 static void lpc31_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl)
 {
-    struct lpc31_dqh_s *dqh = &g_qh[epphy];
-    int i;
+  struct lpc31_dqh_s *dqh = &g_qh[epphy];
+  int i;
 
-    do {
-    /* Set the trip wire */
-    lpc31_setbits(USBDEV_USBCMD_SUTW, LPC31_USBDEV_USBCMD);
+  do
+    {
+      /* Set the trip wire */
 
-    /* copy the request... */
-    for (i = 0; i < 8; i++)
-        ((uint8_t *) ctrl)[i] = ((uint8_t *) dqh->setup)[i];
+      lpc31_setbits(USBDEV_USBCMD_SUTW, LPC31_USBDEV_USBCMD);
 
-    } while (!(lpc31_getreg(LPC31_USBDEV_USBCMD) & USBDEV_USBCMD_SUTW));
+      /* copy the request... */
 
-    /* Clear the trip wire */
-    lpc31_clrbits(USBDEV_USBCMD_SUTW, LPC31_USBDEV_USBCMD);
+      for (i = 0; i < 8; i++)
+        {
+          ((uint8_t *) ctrl)[i] = ((uint8_t *) dqh->setup)[i];
+        }
+    }
+  while (!(lpc31_getreg(LPC31_USBDEV_USBCMD) & USBDEV_USBCMD_SUTW));
 
-    /* Clear the Setup Interrupt */
-    lpc31_putreg (LPC31_ENDPTMASK(LPC31_EP0_OUT), LPC31_USBDEV_ENDPTSETUPSTAT);
+  /* Clear the trip wire */
+
+  lpc31_clrbits(USBDEV_USBCMD_SUTW, LPC31_USBDEV_USBCMD);
+
+  /* Clear the Setup Interrupt */
+
+  lpc31_putreg (LPC31_ENDPTMASK(LPC31_EP0_OUT), LPC31_USBDEV_ENDPTSETUPSTAT);
 }
 
 /****************************************************************************
@@ -909,12 +922,16 @@ static void lpc31_reqcomplete(struct lpc31_ep_s *privep,
 static void lpc31_cancelrequests(struct lpc31_ep_s *privep, int16_t status)
 {
   if (!lpc31_rqempty(privep))
+    {
       lpc31_flushep(privep);
+    }
 
   while (!lpc31_rqempty(privep))
     {
-      // FIXME: the entry at the head should be sync'd with the DTD
-      // FIXME: only report the error status if the transfer hasn't completed
+      /* FIXME: the entry at the head should be sync'd with the DTD
+       * FIXME: only report the error status if the transfer hasn't completed
+       */
+
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (lpc31_rqpeek(privep))->req.xfrd);
       lpc31_reqcomplete(privep, lpc31_rqdequeue(privep), status);
@@ -2193,7 +2210,7 @@ static int lpc31_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  ****************************************************************************/
 
 static FAR struct usbdev_ep_s *lpc31_allocep(FAR struct usbdev_s *dev, uint8_t eplog,
-                                               bool in, uint8_t eptype)
+                                             bool in, uint8_t eptype)
 {
   FAR struct lpc31_usbdev_s *priv = (FAR struct lpc31_usbdev_s *)dev;
   uint32_t epset = LPC31_EPALLSET & ~LPC31_EPCTRLSET;

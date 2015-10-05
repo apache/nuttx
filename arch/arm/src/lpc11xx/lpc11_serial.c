@@ -313,7 +313,7 @@ static inline uint32_t lpc11_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 16 / MinDL
    */
 
-   return 1;
+  return 1;
 }
 #endif /* LPC111x */
 
@@ -378,8 +378,8 @@ static inline void lpc11_uart0config(void)
 #ifdef LPC111x
 static inline uint32_t lpc11_uartdl(uint32_t baud, uint8_t divcode)
 {
+  /* TODO: Calculate DL automatically */
 
-  /*TODO: Calculate DL automatically */
   uint32_t num = 312;
 
   return num;

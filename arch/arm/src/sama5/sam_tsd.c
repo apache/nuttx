@@ -315,7 +315,7 @@ static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct sam_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct sam_sample_s));
 
       /* Now manage state transitions */
 
@@ -330,10 +330,10 @@ static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
+          priv->sample.contact = CONTACT_MOVE;
        }
 
       priv->penchange = false;
@@ -596,9 +596,9 @@ static void sam_tsd_bottomhalf(void *arg)
        * this case; we rely on the timer expiry to get us going again.
        */
 
-       wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
-       ier = 0;
-       goto ignored;
+      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
+      ier = 0;
+      goto ignored;
     }
   else
     {

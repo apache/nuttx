@@ -33,8 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/*
- * Power-Up Reset Overview
+/* Power-Up Reset Overview
  * -----------------------
  *
  * The ARM core starts executing code on reset with the program counter set
@@ -81,7 +80,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /****************************************************************************
+/****************************************************************************
  * Name: showprogress
  *
  * Description:

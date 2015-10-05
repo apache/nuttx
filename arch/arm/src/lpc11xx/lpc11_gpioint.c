@@ -163,10 +163,10 @@ static void lpc11_setintedge(uint32_t intbase, unsigned int pin,
 
 static int lpc11_irq2port(int irq)
 {
- /* Set 1:
-  *   LPC176x: 12 interrupts p0.0-p0.11
-  *   LPC178x: 16 interrupts p0.0-p0.15
-  */
+  /* Set 1:
+   *   LPC176x: 12 interrupts p0.0-p0.11
+   *   LPC178x: 16 interrupts p0.0-p0.15
+   */
 
   if (irq >= LPC17_VALID_FIRST0L &&
       irq < (LPC17_VALID_FIRST0L + LPC17_VALID_NIRQS0L))
@@ -364,24 +364,24 @@ static void lpc11_gpiodemux(uint32_t intbase, uint32_t intmask,
 
       if ((intmask & bit) != 0)
         {
-           /* This pin can support an interrupt.  Is there an interrupt pending
-            * and enabled?
-            */
+          /* This pin can support an interrupt.  Is there an interrupt pending
+           * and enabled?
+           */
 
-           if ((intstatus & bit) != 0)
-             {
-               /* Clear the interrupt status */
+          if ((intstatus & bit) != 0)
+            {
+              /* Clear the interrupt status */
 
-               putreg32(bit, intbase + LPC17_GPIOINT_INTCLR_OFFSET);
+              putreg32(bit, intbase + LPC17_GPIOINT_INTCLR_OFFSET);
 
-               /* And dispatch the interrupt */
+              /* And dispatch the interrupt */
 
-               irq_dispatch(irq, context);
-             }
+              irq_dispatch(irq, context);
+            }
 
-           /* Increment the IRQ number on each interrupt pin */
+          /* Increment the IRQ number on each interrupt pin */
 
-           irq++;
+          irq++;
         }
 
       /* Next bit */

@@ -2816,7 +2816,7 @@ static int sam_udphs_interrupt(int irq, void *context)
           sam_suspend(priv);
         }
 
-      /* SOF interrupt*/
+      /* SOF interrupt */
 
       else if ((pending & UDPHS_INT_INTSOF) != 0)
         {
@@ -3497,7 +3497,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 
 static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct sam_req_s *privreq = (struct sam_req_s*)req;
+  struct sam_req_s *privreq = (struct sam_req_s *)req;
 
 #ifdef CONFIG_DEBUG
   if (!ep || !req)
@@ -4293,7 +4293,7 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
   priv->dtdpool = (struct sam_dtd_s *)
     kmm_memalign(16, CONFIG_SAMA5_UDPHS_NDTDS * sizeof(struct sam_dtd_s));
   if (!priv->dtdpool)
-     {
+    {
       udbg("ERROR: Failed to allocate the DMA transfer descriptor pool\n");
       return NULL;
     }
