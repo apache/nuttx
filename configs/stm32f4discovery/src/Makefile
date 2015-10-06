@@ -104,6 +104,10 @@ CSRCS += stm32_ssd1289.c
 endif
 endif
 
+ifeq ($(CONFIG_LCD_SSD1351),y)
+CSRCS += stm32_ssd1351.c
+endif
+
 ifeq ($(CONFIG_LCD_UG2864AMBAG01),y)
 CSRCS += stm32_ug2864ambag01.c
 endif
