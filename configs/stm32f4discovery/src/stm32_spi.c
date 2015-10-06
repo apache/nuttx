@@ -100,12 +100,13 @@ void weak_function stm32_spiinitialize(void)
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_MAX31855)
   (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
 #endif
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
+#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
+    defined(CONFIG_LCD_SSD1351)
   (void)stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
 # if defined(CONFIG_LCD_UG2864AMBAG01)
   (void)stm32_configgpio(GPIO_OLED_A0);    /* OLED Command/Data */
 # endif
-# if defined(CONFIG_LCD_UG2864HSWEG01)
+# if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
   (void)stm32_configgpio(GPIO_OLED_DC);    /* OLED Command/Data */
 # endif
 #endif
@@ -141,7 +142,8 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
+#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
+    defined(CONFIG_LCD_SSD1351)
   if (devid == SPIDEV_DISPLAY)
     {
       stm32_gpiowrite(GPIO_OLED_CS, !selected);
@@ -217,7 +219,8 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
+#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
+    defined(CONFIG_LCD_SSD1351)
   if (devid == SPIDEV_DISPLAY)
     {
       /* "This is the Data/Command control pad which determines whether the
@@ -231,7 +234,7 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 # if defined(CONFIG_LCD_UG2864AMBAG01)
       (void)stm32_gpiowrite(GPIO_OLED_A0, !cmd);
 # endif
-# if defined(CONFIG_LCD_UG2864HSWEG01)
+# if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
       (void)stm32_gpiowrite(GPIO_OLED_DC, !cmd);
 # endif
       return OK;
