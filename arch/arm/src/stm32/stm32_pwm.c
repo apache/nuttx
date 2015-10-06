@@ -454,7 +454,26 @@ static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset)
 
 static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value)
 {
-  putreg16(value, priv->base + offset);
+  if (priv->timtype == TIMTYPE_GENERAL32 &&
+      (offset == STM32_GTIM_CNT_OFFSET ||
+       offset == STM32_GTIM_ARR_OFFSET ||
+       offset == STM32_GTIM_CCR1_OFFSET ||
+       offset == STM32_GTIM_CCR2_OFFSET ||
+       offset == STM32_GTIM_CCR3_OFFSET ||
+       offset == STM32_GTIM_CCR4_OFFSET))
+    {
+      /* a 32 bit access is required for a 32 bit register:
+       * if only a 16 bit write would be performed, then the
+       * upper 16 bits of the 32 bit register will be a copy of
+       * the lower 16 bits.
+       */
+
+      putreg32(value, priv->base + offset);
+    }
+  else
+    {
+      putreg16(value, priv->base + offset);
+    }
 }
 
 /****************************************************************************
