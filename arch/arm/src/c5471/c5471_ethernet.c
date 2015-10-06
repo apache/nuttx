@@ -1815,7 +1815,7 @@ static int c5471_txavail(struct net_driver_s *dev)
           /* If so, then poll uIP for new XMIT data */
 
           (void)devif_poll(&c5471->c_dev, c5471_txpoll);
-       }
+        }
     }
 
   irqrestore(flags);
@@ -1912,7 +1912,8 @@ static void c5471_eimreset (struct c5471_driver_s *c5471)
 
   /* Assert nRESET to reset the board's PHY0/1 chips */
 
-  putreg32((CLKM_CTL_RST_EXT_RESET|CLKM_CTL_RST_LEAD_RESET), CLKM_CTL_RST);
+  putreg32((CLKM_CTL_RST_EXT_RESET | CLKM_CTL_RST_LEAD_RESET),
+           CLKM_CTL_RST);
   up_mdelay(2);
 
   /* Release the peripheral nRESET signal */
@@ -1960,7 +1961,8 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       else
         val = EIM_TXDESC_WRAP_FIRST;
 
-      val |= EIM_TXDESC_OWN_HOST|EIM_TXDESC_INTRE|EIM_TXDESC_PADCRC|EIM_PACKET_BYTES;
+      val |= EIM_TXDESC_OWN_HOST | EIM_TXDESC_INTRE | EIM_TXDESC_PADCRC |
+             EIM_PACKET_BYTES;
 
       putreg32(val, desc);
       desc += sizeof(uint32_t);
@@ -1986,7 +1988,8 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       else
         val = EIM_RXDESC_WRAP_FIRST;
 
-      val |= EIM_RXDESC_OWN_ENET|EIM_RXDESC_INTRE|EIM_RXDESC_PADCRC|EIM_PACKET_BYTES;
+      val |= EIM_RXDESC_OWN_ENET | EIM_RXDESC_INTRE | EIM_RXDESC_PADCRC |
+             EIM_PACKET_BYTES;
 
       putreg32(val, desc);
       desc += sizeof(uint32_t);
@@ -2015,7 +2018,8 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       else
         val = EIM_TXDESC_WRAP_FIRST;
 
-      val |= EIM_TXDESC_OWN_HOST|EIM_TXDESC_INTRE|EIM_TXDESC_PADCRC|EIM_PACKET_BYTES;
+      val |= EIM_TXDESC_OWN_HOST | EIM_TXDESC_INTRE | EIM_TXDESC_PADCRC |
+             EIM_PACKET_BYTES;
 
       putreg32(val, desc);
       desc += sizeof(uint32_t);
@@ -2044,7 +2048,8 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       else
         val = EIM_RXDESC_WRAP_FIRST;
 
-      val |= EIM_RXDESC_OWN_ENET|EIM_RXDESC_INTRE|EIM_RXDESC_PADCRC|EIM_PACKET_BYTES;
+      val |= EIM_RXDESC_OWN_ENET | EIM_RXDESC_INTRE | EIM_RXDESC_PADCRC |
+             EIM_PACKET_BYTES;
 
       putreg32(val, desc);
       desc += sizeof(uint32_t);
@@ -2069,9 +2074,10 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 #if 0
   putreg32(EIM_FILTER_UNICAST, EIM_CPU_FILTER);
 #else
-//  putreg32(EIM_FILTER_LOGICAL|EIM_FILTER_UNICAST|EIM_FILTER_MULTICAST|
+//  putreg32(EIM_FILTER_LOGICAL | EIM_FILTER_UNICAST | EIM_FILTER_MULTICAST |
 //           EIM_FILTER_BROADCAST, EIM_CPU_FILTER);
-  putreg32(EIM_FILTER_UNICAST|EIM_FILTER_MULTICAST|EIM_FILTER_BROADCAST, EIM_CPU_FILTER);
+  putreg32(EIM_FILTER_UNICAST | EIM_FILTER_MULTICAST | EIM_FILTER_BROADCAST,
+           EIM_CPU_FILTER);
 #endif
 
   /* Disable all Ethernet interrupts */
@@ -2081,11 +2087,12 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
   /* Setup the EIM control register */
 
 #if 1
-  putreg32(EIM_CTRL_ENET0_EN|EIM_CTRL_RXENET0_EN|EIM_CTRL_TXENET0_EN|
-           EIM_CTRL_RXCPU_EN|EIM_CTRL_TXCPU_EN, EIM_CTRL);
+  putreg32(EIM_CTRL_ENET0_EN | EIM_CTRL_RXENET0_EN | EIM_CTRL_TXENET0_EN |
+           EIM_CTRL_RXCPU_EN | EIM_CTRL_TXCPU_EN, EIM_CTRL);
 #else
-  putreg32(EIM_CTRL_ENET0_EN|EIM_CTRL_ENET0_FLW|EIM_CTRL_RXENET0_EN|
-           EIM_CTRL_TXENET0_EN|EIM_CTRL_RXCPU_EN|EIM_CTRL_TXCPU_EN, EIM_CTRL);
+  putreg32(EIM_CTRL_ENET0_EN | EIM_CTRL_ENET0_FLW | EIM_CTRL_RXENET0_EN |
+           EIM_CTRL_TXENET0_EN | EIM_CTRL_RXCPU_EN | EIM_CTRL_TXCPU_EN,
+           EIM_CTRL);
 #endif
 
 #if 1
@@ -2103,9 +2110,11 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
   /* Setup the ENET0 mode register */
 
 #if 1
-  putreg32(ENET_MODE_RJCT_SFE|ENET_MODE_MWIDTH|ENET_MODE_FULLDUPLEX, ENET0_MODE);
+  putreg32(ENET_MODE_RJCT_SFE | ENET_MODE_MWIDTH | ENET_MODE_FULLDUPLEX,
+           ENET0_MODE);
 #else
-  putreg32(ENET_MODE_RJCT_SFE|ENET_MODE_MWIDTH|ENET_MODE_HALFDUPLEX, ENET0_MODE);
+  putreg32(ENET_MODE_RJCT_SFE | ENET_MODE_MWIDTH | ENET_MODE_HALFDUPLEX,
+           ENET0_MODE);
 #endif
 
   putreg32(0x00000000, ENET0_BOFFSEED);
@@ -2114,7 +2123,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
   putreg32(0x00000000, ENET0_VTYPE);
 
 #if 0
-  putreg32(ENET_ADR_BROADCAST|ENET_ADR_PROMISCUOUS, ENET0_ADRMODE_EN);
+  putreg32(ENET_ADR_BROADCAST | ENET_ADR_PROMISCUOUS, ENET0_ADRMODE_EN);
 #else
   /* The CPU port is not PROMISCUOUS, it wants a no-promiscuous address
    * match yet the SWITCH receives packets from the PROMISCUOUS ENET0
@@ -2239,19 +2248,19 @@ void up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(g_c5471, 0, CONFIG_C5471_NET_NINTERFACES*sizeof(struct c5471_driver_s));
-  g_c5471[0].c_dev.d_ifup    = c5471_ifup;     /* I/F down callback */
-  g_c5471[0].c_dev.d_ifdown  = c5471_ifdown;   /* I/F up (new IP address) callback */
-  g_c5471[0].c_dev.d_txavail = c5471_txavail;  /* New TX data callback */
+  g_c5471[0].c_dev.d_ifup    = c5471_ifup;      /* I/F down callback */
+  g_c5471[0].c_dev.d_ifdown  = c5471_ifdown;    /* I/F up (new IP address) callback */
+  g_c5471[0].c_dev.d_txavail = c5471_txavail;   /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  g_c5471[0].c_dev.d_addmac  = c5471_addmac;   /* Add multicast MAC address */
-  g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;    /* Remove multicast MAC address */
+  g_c5471[0].c_dev.d_addmac  = c5471_addmac;    /* Add multicast MAC address */
+  g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;     /* Remove multicast MAC address */
 #endif
-  g_c5471[0].c_dev.d_private = (void*)g_c5471; /* Used to recover private state from dev */
+  g_c5471[0].c_dev.d_private = (void *)g_c5471; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_c5471[0].c_txpoll        = wd_create();    /* Create periodic poll timer */
-  g_c5471[0].c_txtimeout     = wd_create();    /* Create TX timeout timer */
+  g_c5471[0].c_txpoll        = wd_create();     /* Create periodic poll timer */
+  g_c5471[0].c_txtimeout     = wd_create();     /* Create TX timeout timer */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

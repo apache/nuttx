@@ -2952,9 +2952,9 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
 
       priv->rhport.hport.speed = USB_SPEED_FULL;
 
-    /* Notify any waiters that there is a change in the connection state */
+      /* Notify any waiters that there is a change in the connection state */
 
-     if (priv->pscwait)
+      if (priv->pscwait)
         {
           efm32_givesem(&priv->pscsem);
           priv->pscwait = false;
@@ -4400,7 +4400,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       ret = efm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
-       {
+        {
           usbhost_trace1(USBHOST_TRACE1_SENDSETUP, -ret);
           continue;
         }

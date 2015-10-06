@@ -65,7 +65,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ***************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef  CONFIG_USBDEV_MAXPOWER
 #  define CONFIG_USBDEV_MAXPOWER 100  /* mA */
@@ -385,28 +385,28 @@ static struct dm320_usbdev_s g_usbdev;
 static const struct dm320_epinfo_s g_epinfo[DM320_NENDPOINTS] =
 {
   {
-    0,                                        /* EP0 */
-    USB_EP_ATTR_XFER_CONTROL,                 /* Type: Control IN/OUT */
-    USB_TXFIFO2_SZ_64|USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
-    DM320_EP0MAXPACKET                        /* Max packet size */
+    0,                                          /* EP0 */
+    USB_EP_ATTR_XFER_CONTROL,                   /* Type: Control IN/OUT */
+    USB_TXFIFO2_SZ_64 | USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
+    DM320_EP0MAXPACKET                          /* Max packet size */
   },
   {
-    DM320_EPBULKIN | USB_DIR_IN,              /* Logical endpoint number: 1 IN */
-    USB_EP_ATTR_XFER_BULK,                    /* Type: Bulk */
-    USB_TXFIFO2_SZ_64|USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
-    DM320_BULKMAXPACKET,                      /* Max packet size */
+    DM320_EPBULKIN | USB_DIR_IN,                /* Logical endpoint number: 1 IN */
+    USB_EP_ATTR_XFER_BULK,                      /* Type: Bulk */
+    USB_TXFIFO2_SZ_64 | USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
+    DM320_BULKMAXPACKET,                        /* Max packet size */
   },
   {
-    DM320_EPBULKOUT | USB_DIR_OUT,            /* Logical endpoint number: 2 OUT */
-    USB_EP_ATTR_XFER_BULK,                    /* Type: Bulk */
-    USB_TXFIFO2_SZ_64|USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
-    DM320_BULKMAXPACKET                       /* Max packet size */
+    DM320_EPBULKOUT | USB_DIR_OUT,              /* Logical endpoint number: 2 OUT */
+    USB_EP_ATTR_XFER_BULK,                      /* Type: Bulk */
+    USB_TXFIFO2_SZ_64 | USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
+    DM320_BULKMAXPACKET                         /* Max packet size */
   },
   {
-    DM320_EPINTRIN| USB_DIR_IN,               /* Logical endpoint number: 3 IN */
-    USB_EP_ATTR_XFER_INT,                     /* Type: Interrupt */
-    USB_TXFIFO2_SZ_64|USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
-    DM320_INTRMAXPACKET                       /* Max packet size */
+    DM320_EPINTRIN | USB_DIR_IN,                /* Logical endpoint number: 3 IN */
+    USB_EP_ATTR_XFER_INT,                       /* Type: Interrupt */
+    USB_TXFIFO2_SZ_64 | USB_TXFIFO2_SINGLE_BUF, /* Bits for TX/RXFIFO2 */
+    DM320_INTRMAXPACKET                         /* Max packet size */
   }
 };
 
@@ -454,20 +454,20 @@ static uint8_t dm320_getreg8(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -504,10 +504,11 @@ static uint32_t dm320_getreg16(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -516,20 +517,20 @@ static uint32_t dm320_getreg16(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -566,10 +567,11 @@ static uint32_t dm320_getreg32(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -578,20 +580,20 @@ static uint32_t dm320_getreg32(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -829,7 +831,7 @@ static int dm320_epread(uint8_t epphy, uint8_t *buf, uint16_t nbytes)
         }
     }
   else
-   {
+    {
       bytesleft = dm320_getreg8(DM320_USB_RXCOUNT2);
       bytesleft = (bytesleft << 8) + dm320_getreg8(DM320_USB_RXCOUNT1);
       if (bytesleft > nbytes)
@@ -838,15 +840,15 @@ static int dm320_epread(uint8_t epphy, uint8_t *buf, uint16_t nbytes)
         }
     }
 
-  ret    = bytesleft;
-  fifo = (uint8_t*)DM320_USB_FIFO0;
+  ret  = bytesleft;
+  fifo = (uint8_t *)DM320_USB_FIFO0;
   fifo = fifo + (epphy << 2);
 
   while (bytesleft > 0)
-  {
-    *buf++ = *fifo;
-     bytesleft--;
-  }
+    {
+      *buf++ = *fifo;
+      bytesleft--;
+    }
 
   /* Clear RXPKTRDY bit in PER_RXCSR1 */
 
@@ -1204,7 +1206,7 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
 
   /* Read EP0 data */
 
-  ret = dm320_epread(USB_EP0_SELECT, (uint8_t*)&ctrl, USB_SIZEOF_CTRLREQ);
+  ret = dm320_epread(USB_EP0_SELECT, (uint8_t *)&ctrl, USB_SIZEOF_CTRLREQ);
   if (ret <= 0)
     {
       return;
@@ -1351,7 +1353,8 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
          * len:   0; data = none
          */
 
-        dm320_putreg8(USB_PERCSR0_CLRRXRDY|USB_PERCSR0_DATAEND, DM320_USB_PERCSR0);
+        dm320_putreg8(USB_PERCSR0_CLRRXRDY | USB_PERCSR0_DATAEND,
+                      DM320_USB_PERCSR0);
         usbtrace(TRACE_INTDECODE(DM320_TRACEINTID_SETADDRESS), 0);
         priv->paddr = value & 0xff;
       }
@@ -1400,8 +1403,10 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
        * index: interface;
        * len:   0; data = none
        */
+
       {
-        dm320_putreg8(USB_PERCSR0_CLRRXRDY|USB_PERCSR0_DATAEND, DM320_USB_PERCSR0);
+        dm320_putreg8(USB_PERCSR0_CLRRXRDY | USB_PERCSR0_DATAEND,
+                      DM320_USB_PERCSR0);
         usbtrace(TRACE_INTDECODE(DM320_TRACEINTID_GETSETIFCONFIG), 0);
         dm320_dispatchrequest(priv, &ctrl);
       }
@@ -1415,14 +1420,16 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
          * len:   2; data = frame number
          */
 
-        dm320_putreg8(USB_PERCSR0_CLRRXRDY|USB_PERCSR0_SENDST, DM320_USB_PERCSR0);
+        dm320_putreg8(USB_PERCSR0_CLRRXRDY | USB_PERCSR0_SENDST,
+                      DM320_USB_PERCSR0);
         usbtrace(TRACE_INTDECODE(DM320_TRACEINTID_SYNCHFRAME), 0);
       }
       break;
 
     default:
       {
-        dm320_putreg8(USB_PERCSR0_CLRRXRDY|USB_PERCSR0_SENDST, DM320_USB_PERCSR0);
+        dm320_putreg8(USB_PERCSR0_CLRRXRDY | USB_PERCSR0_SENDST,
+                      DM320_USB_PERCSR0);
         usbtrace(TRACE_DEVERROR(DM320_TRACEERR_STALLEDREQUEST), ctrl.req);
         priv->stalled = 1;
       }
@@ -1441,27 +1448,59 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
 static inline uint32_t dm320_highestpriinterrupt(int intstatus)
 {
   if ((intstatus & USB_INT_CONNECTED) != 0)
-    return USB_INT_CONNECTED;
+    {
+      return USB_INT_CONNECTED;
+    }
+
   if ((intstatus & USB_INT_DISCONNECTED) != 0)
-    return USB_INT_DISCONNECTED;
+    {
+      return USB_INT_DISCONNECTED;
+    }
+
   if ((intstatus & USB_INT_RESET) != 0)
-    return USB_INT_RESET;
+    {
+      return USB_INT_RESET;
+    }
+
   if ((intstatus & USB_INT_RESUME) != 0)
-    return USB_INT_RESUME;
+    {
+      return USB_INT_RESUME;
+    }
+
   if ((intstatus & USB_INT_SESSRQ) != 0)
-    return USB_INT_SESSRQ;
+    {
+      return USB_INT_SESSRQ;
+    }
+
   if ((intstatus & USB_INT_VBUSERR) != 0)
-    return USB_INT_VBUSERR;
+    {
+      return USB_INT_VBUSERR;
+    }
+
   if ((intstatus & USB_INT_SOF) != 0)
-    return USB_INT_SOF;
+    {
+      return USB_INT_SOF;
+    }
+
   if ((intstatus & USB_INT_SUSPEND) != 0)
-    return USB_INT_SUSPEND;
+    {
+      return USB_INT_SUSPEND;
+    }
+
   if ((intstatus & USB_INT_CONTROL) != 0)
-    return USB_INT_CONTROL;
+    {
+      return USB_INT_CONTROL;
+    }
+
   if ((intstatus & USB_INT_RXFIFO) != 0)
-    return USB_INT_RXFIFO;
+    {
+      return USB_INT_RXFIFO;
+    }
+
   if ((intstatus & USB_INT_TXFIFO) != 0)
-    return USB_INT_TXFIFO;
+    {
+      return USB_INT_TXFIFO;
+    }
 
   return USB_INT_NOINTERRUPT;
 }
@@ -1721,7 +1760,8 @@ static inline void dm320_epinitialize(struct dm320_usbdev_s *priv)
   /* Initialize endpoint 0 */
 
   dm320_putreg8(USB_EP0_SELECT, DM320_USB_INDEX);
-  dm320_putreg8(USB_PERCSR0_CLRSETEND|USB_PERCSR0_CLRRXRDY, DM320_USB_PERCSR0);
+  dm320_putreg8(USB_PERCSR0_CLRSETEND | USB_PERCSR0_CLRRXRDY,
+                DM320_USB_PERCSR0);
   dm320_putreg8(USB_CSR2_FLFIFO, DM320_USB_CSR2);
   dm320_putreg8(USB_CSR2_FLFIFO, DM320_USB_CSR2);
 
@@ -1755,15 +1795,17 @@ static inline void dm320_epinitialize(struct dm320_usbdev_s *priv)
         {
           /* Initialize TX endpoint */
 
-          dm320_putreg8(USB_TXCSR1_CLRDATTOG|USB_TXCSR1_FLFIFO|USB_TXCSR1_UNDERRUN,
-                  DM320_USB_PERTXCSR1);
+          dm320_putreg8(USB_TXCSR1_CLRDATTOG | USB_TXCSR1_FLFIFO |
+                        USB_TXCSR1_UNDERRUN,
+                        DM320_USB_PERTXCSR1);
           dm320_putreg8(USB_TXCSR1_FLFIFO, DM320_USB_PERTXCSR1);
-          dm320_putreg8(USB_TXCSR2_FRDATTOG|USB_TXCSR2_MODE_TX, DM320_USB_TXCSR2);
+          dm320_putreg8(USB_TXCSR2_FRDATTOG | USB_TXCSR2_MODE_TX,
+                        DM320_USB_TXCSR2);
 
           /* FIFO address, max packet size, dual/single buffered */
 
           dm320_putreg8(addrlo, DM320_USB_TXFIFO1);
-          dm320_putreg8(addrhi|g_epinfo[i].fifo, DM320_USB_TXFIFO2);
+          dm320_putreg8(addrhi | g_epinfo[i].fifo, DM320_USB_TXFIFO2);
 
           /* TX endpoint max packet size */
 
@@ -1776,15 +1818,15 @@ static inline void dm320_epinitialize(struct dm320_usbdev_s *priv)
         {
           /* Initialize RX endpoint */
 
-          dm320_putreg8(USB_PERRXCSR1_CLRDATTOG|USB_PERRXCSR1_FLFIFO,
-                  DM320_USB_PERRXCSR1);
+          dm320_putreg8(USB_PERRXCSR1_CLRDATTOG | USB_PERRXCSR1_FLFIFO,
+                        DM320_USB_PERRXCSR1);
           dm320_putreg8(USB_PERRXCSR1_FLFIFO, DM320_USB_PERRXCSR1);
           dm320_putreg8(0x00, DM320_USB_PERRXCSR2);
 
           /* FIFO address, max packet size, dual/single buffered */
 
           dm320_putreg8(addrhi, DM320_USB_RXFIFO1);
-          dm320_putreg8(addrhi|g_epinfo[i].fifo | USB_RXFIF02_DPB, DM320_USB_RXFIFO2);
+          dm320_putreg8(addrhi | g_epinfo[i].fifo | USB_RXFIF02_DPB, DM320_USB_RXFIFO2);
 
           /* RX endpoint max packet size */
 
@@ -1837,8 +1879,9 @@ static void dm320_ctrlinitialize(FAR struct dm320_usbdev_s *priv)
 
   dm320_putreg8((DM320_EPBULKIN << 1), DM320_USB_INTRRX1E);
   dm320_putreg8((DM320_EPBULKOUT << 1) | USB_EP0, DM320_USB_INTRTX1E);
-  dm320_putreg8(USB_INT_RESET|USB_INT_RESUME|USB_INT_SUSPEND|USB_INT_SESSRQ|USB_INT_SOF,
-          DM320_USB_INTRUSBE);
+  dm320_putreg8(USB_INT_RESET | USB_INT_RESUME | USB_INT_SUSPEND |
+                USB_INT_SESSRQ | USB_INT_SOF,
+                DM320_USB_INTRUSBE);
 
   /* Initialize endpoints ******************************************************/
 
@@ -2534,8 +2577,9 @@ int usbdev_register(FAR struct usbdevclass_driver_s *driver)
 
   dm320_epreset(0);
   dm320_putreg8(USB_EP0, DM320_USB_INTRTX1E);
-  dm320_putreg8(USB_INT_RESET|USB_INT_RESUME|USB_INT_SUSPEND|USB_INT_SESSRQ|USB_INT_SOF,
-          DM320_USB_INTRUSBE);
+  dm320_putreg8(USB_INT_RESET | USB_INT_RESUME | USB_INT_SUSPEND |
+                USB_INT_SESSRQ | USB_INT_SOF,
+                DM320_USB_INTRUSBE);
 
   /* Enable interrupts */
 

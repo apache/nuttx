@@ -362,7 +362,7 @@ static void efm32_disableuartint(struct efm32_leuart_s *priv, uint32_t *ien)
 
 static int efm32_setup(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
 
 #ifndef CONFIG_SUPPRESS_LEUART_CONFIG
   const struct efm32_config_s *config = priv->config;
@@ -390,7 +390,7 @@ static int efm32_setup(struct uart_dev_s *dev)
 
 static void efm32_shutdown(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
 
   /* Disable interrupts */
 
@@ -421,7 +421,7 @@ static void efm32_shutdown(struct uart_dev_s *dev)
 
 static int efm32_attach(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   const struct efm32_config_s *config = priv->config;
   int ret;
 
@@ -450,7 +450,7 @@ static int efm32_attach(struct uart_dev_s *dev)
 
 static void efm32_detach(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   const struct efm32_config_s *config = priv->config;
 
   /* Disable interrupts */
@@ -473,7 +473,7 @@ static void efm32_detach(struct uart_dev_s *dev)
 
 static int  efm32_interrupt(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   uint32_t intflags;
 
   DEBUGASSERT(priv);
@@ -569,7 +569,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
   dev   = inode->i_private;
 
   DEBUGASSERT(dev, dev->priv);
-  priv = (struct efm32_leuart_s*)dev->priv;
+  priv = (struct efm32_leuart_s *)dev->priv;
 
   switch (cmd)
     {
@@ -599,7 +599,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   uint32_t rxdatax;
 
   /* Get error status information:
@@ -632,7 +632,7 @@ static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void efm32_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -666,7 +666,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool efm32_rxavailable(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
 
   /* Return true if the receive data is available (RXDATAV). */
 
@@ -683,7 +683,7 @@ static bool efm32_rxavailable(struct uart_dev_s *dev)
 
 static void efm32_send(struct uart_dev_s *dev, int ch)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   efm32_serialout(priv, EFM32_LEUART_TXDATA_OFFSET, (uint32_t)ch);
 }
 
@@ -697,7 +697,7 @@ static void efm32_send(struct uart_dev_s *dev, int ch)
 
 static void efm32_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -737,7 +737,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
 
 static bool efm32_txready(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
 
   /* The TX Buffer Level (TXBL) status bit indicates the level of the
    * transmit buffer.  Set when the transmit buffer is empty, and cleared
@@ -757,7 +757,7 @@ static bool efm32_txready(struct uart_dev_s *dev)
 
 static bool efm32_txempty(struct uart_dev_s *dev)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
 
   /* TX Complete (TXC) is set when a transmission has completed and no more
    * data is available in the transmit buffer.
@@ -837,7 +837,7 @@ void up_serialinit(void)
 #ifdef HAVE_LEUART_CONSOLE
 int up_putc(int ch)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)CONSOLE_DEV.priv;
+  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)CONSOLE_DEV.priv;
   uint32_t ien;
 
   efm32_disableuartint(priv, &ien);

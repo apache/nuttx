@@ -208,7 +208,7 @@ void efm32_flash_unlock(void)
  *   -EACCES    - Operation tried to access a locked area of the flash.
  ****************************************************************************/
 
-int __ramfunc__ msc_load_verify_address(uint32_t* address)
+int __ramfunc__ msc_load_verify_address(uint32_t *address)
 {
   uint32_t status;
   uint32_t timeout;
@@ -247,7 +247,9 @@ int __ramfunc__ msc_load_verify_address(uint32_t* address)
       /* Check for write protected page */
 
       if (status & MSC_STATUS_LOCKED)
-        return -EACCES;
+        {
+          return -EACCES;
+        }
     }
 
   return OK;
@@ -280,7 +282,7 @@ int __ramfunc__ msc_load_verify_address(uint32_t* address)
  *                      to complete.
  ****************************************************************************/
 
-int __ramfunc__ msc_load_write_data(uint32_t* data, uint32_t num_words,
+int __ramfunc__ msc_load_write_data(uint32_t *data, uint32_t num_words,
                                     bool write_strategy_safe)
 {
   int timeout;
@@ -748,8 +750,8 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
   int       word_count;
   int       num_words;
   int       page_words;
-  uint32_t* p_data;
-  uint32_t* address = (uint32_t*) addr;
+  uint32_t *p_data;
+  uint32_t *address = (uint32_t *)addr;
   uint32_t  num_bytes = size;
 
   /* EFM32 requires word access */
@@ -781,7 +783,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
    * increments the address internally for each data load inside a page.
    */
 
-  for (word_count = 0, p_data = (uint32_t*) buf; word_count < num_words;)
+  for (word_count = 0, p_data = (uint32_t *)buf; word_count < num_words;)
     {
       int page_bytes;
       ssize_t page_idx;
@@ -789,7 +791,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
 
       /* Compute the number of words to write to the current page. */
 
-      page_idx = up_progmem_getpage((size_t)address+(word_count<<2));
+      page_idx = up_progmem_getpage((size_t)address+(word_count << 2));
       if (page_idx < 0)
         {
           ret = -EINVAL;

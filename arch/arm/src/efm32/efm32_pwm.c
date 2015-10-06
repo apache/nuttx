@@ -413,9 +413,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
   if (efm32_timer_set_freq(priv->base,priv->pclk,info->frequency) < 0)
     {
       pwmdbg("Cannot set TIMER frequency %dHz from clock %dHz\n",
-             info->frequency,
-             priv->pclk
-            );
+             info->frequency, priv->pclk);
       return -EINVAL;
     }
 
@@ -734,7 +732,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   /* Then put the GPIO pin back to the default state */
 
-  pincfg = priv->pincfg & (GPIO_PORT_MASK|GPIO_PIN_MASK);
+  pincfg = priv->pincfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
 
   pincfg |= (_GPIO_DISABLE);
 

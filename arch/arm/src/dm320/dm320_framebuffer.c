@@ -471,7 +471,7 @@
 #ifdef CONFIG_FB_HWCURSOR
 #  define DM320_RECTCURSOR_SETUP \
    ((CONFIG_DM320_CURSORLINEHEIGHT << 1) | \
-    (CONFIG_DM320_CURSORLINEWIDTH <<4) | \
+    (CONFIG_DM320_CURSORLINEWIDTH << 4) | \
     (CONFIG_DM320_CURSORCLUT << 8))
 #endif
 
@@ -676,7 +676,7 @@ static int dm320_allocvideomemory(void)
 #ifndef CONFIG_DM320_VID0_DISABLE
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
   g_vid0base   = (FAR void *)kmm_malloc(2 * DM320_VID0_FBLEN);
-  g_vid0ppbase = (FAR char*)g_vid0base + DM320_VID0_FBLEN;
+  g_vid0ppbase = (FAR char *)g_vid0base + DM320_VID0_FBLEN;
 #else
   g_vid0base   = (FAR void *)kmm_malloc(DM320_VID0_FBLEN);
 #endif
@@ -1301,13 +1301,13 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
           settings->pos.x = MAX_YRES;
         }
 
-     if (settings->pos.y > MAX_YRES)
-       {
-          settings->pos.y = MAX_YRES;
-       }
+      if (settings->pos.y > MAX_YRES)
+        {
+           settings->pos.y = MAX_YRES;
+        }
 
-     putreg16(settings->pos.x, DM320_OSD_CURXP);
-     putreg16(settings->pos.y, DM320_OSD_CURYP);
+      putreg16(settings->pos.x, DM320_OSD_CURXP);
+      putreg16(settings->pos.y, DM320_OSD_CURYP);
    }
 
 #ifdef CONFIG_FB_HWCURSORSIZE

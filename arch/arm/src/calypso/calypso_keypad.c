@@ -160,7 +160,7 @@ static int pwr_btn_dec(uint32_t * state, uint8_t reg, char *buf, size_t * len)
            * false keystrokes otherwise
            */
 
-           return 1;
+          return 1;
         }
     }
 

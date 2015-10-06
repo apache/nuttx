@@ -826,20 +826,20 @@ static uint32_t efm32_getreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -1231,12 +1231,12 @@ static void efm32_epin_request(FAR struct efm32_usbdev_s *priv,
 
   if (privreq->req.len == 0)
     {
-       /* The ZLP flag is set TRUE whenever we want to force the driver to
-        * send a zero-length-packet on the next pass through the loop (below).
-        * The flag is cleared whenever a packet is sent in the loop below.
-        */
+      /* The ZLP flag is set TRUE whenever we want to force the driver to
+       * send a zero-length-packet on the next pass through the loop (below).
+       * The flag is cleared whenever a packet is sent in the loop below.
+       */
 
-       privep->zlp = true;
+      privep->zlp = true;
     }
 
   /* Add one more packet to the TxFIFO.  We will wait for the transfer
@@ -3213,7 +3213,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
          * last SETUP packet will be processed.
          */
 
-        efm32_rxfifo_read(&priv->epout[EP0], (FAR uint8_t*)&priv->ctrlreq,
+        efm32_rxfifo_read(&priv->epout[EP0], (FAR uint8_t *)&priv->ctrlreq,
                          USB_SIZEOF_CTRLREQ);
 
         /* Was this an IN or an OUT SETUP packet.  If it is an OUT SETUP,

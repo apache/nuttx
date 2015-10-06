@@ -80,9 +80,13 @@ void hwtimer_enable(int num, int on)
 
   ctl = getreg8(TIMER_REG(num, CNTL_TIMER));
   if (on)
-      ctl |= CNTL_START|CNTL_CLOCK_ENABLE;
+    {
+      ctl |= CNTL_START | CNTL_CLOCK_ENABLE;
+    }
   else
+    {
       ctl &= ~CNTL_START;
+    }
 
   putreg8(ctl, TIMER_REG(num, CNTL_TIMER));
 }
@@ -107,10 +111,12 @@ uint16_t hwtimer_read(int num)
 {
   uint8_t ctl = getreg8(TIMER_REG(num, CNTL_TIMER));
 
-  /* somehow a read results in an abort */
+  /* Somehow a read results in an abort */
 
-  if ((ctl & (CNTL_START|CNTL_CLOCK_ENABLE)) != (CNTL_START|CNTL_CLOCK_ENABLE))
-      return 0xFFFF;
+  if ((ctl & (CNTL_START | CNTL_CLOCK_ENABLE)) != (CNTL_START | CNTL_CLOCK_ENABLE))
+    {
+      return 0xffff;
+    }
 
   return getreg16(TIMER_REG(num, READ_TIMER));
 }

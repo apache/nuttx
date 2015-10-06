@@ -166,8 +166,8 @@ static struct efm32_dev_s g_adcpriv1 =
 
 static struct adc_dev_s g_adcdev1 =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv1,
+  .ad_ops      = &g_adcops,
+  .ad_priv     = &g_adcpriv1,
 };
 #endif
 
@@ -213,7 +213,7 @@ static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
   putreg32(value, priv->base + offset);
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_CalibrateLoadScan
  *
  * Description:
@@ -297,7 +297,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
   }
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_CalibrateLoadSingle
  *
  * Description:
@@ -385,7 +385,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  * Public Functions
  ****************************************************************************/
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_Init
  *   Initialize ADC.
  *
@@ -397,7 +397,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *   NOTE: This function will stop any ongoing conversion.
  *
  * Input Parameters:
- *   adc- Pointer to ADC peripheral register block.
+ *   adc - Pointer to ADC peripheral register block.
  *   int - Pointer to ADC initialization structure.
  *
  ****************************************************************************/
@@ -426,7 +426,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
   adc->CTRL = tmp;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_InitScan
  *
  * Description:
@@ -489,7 +489,7 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
   adc->SCANCTRL = tmp;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_InitSingle
  *
  * Description:
@@ -552,7 +552,7 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
   adc->SINGLECTRL = tmp;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_PrescaleCalc
  *
  * Description:
@@ -603,7 +603,7 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
   return (uint8_t)ret;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_Reset
  *
  * Description:
@@ -638,7 +638,7 @@ void ADC_Reset(ADC_TypeDef *adc)
   /* Do not reset route register, setting should be done independently */
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_TimebaseCalc
  *
  * Description:

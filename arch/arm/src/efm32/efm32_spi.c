@@ -1288,8 +1288,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* 16-bit mode */
 
-      const uint16_t *src  = (const uint16_t*)txbuffer;;
-            uint16_t *dest = (uint16_t*)rxbuffer;
+      const uint16_t *src  = (const uint16_t *)txbuffer;;
+            uint16_t *dest = (uint16_t *)rxbuffer;
             uint16_t  word;
 
       unrecvd = nwords;
@@ -1342,8 +1342,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* 8-bit mode */
 
-      const uint8_t *src  = (const uint8_t*)txbuffer;;
-            uint8_t *dest = (uint8_t*)rxbuffer;
+      const uint8_t *src  = (const uint8_t *)txbuffer;;
+            uint8_t *dest = (uint8_t *)rxbuffer;
             uint8_t  word;
 
       unrecvd = nwords;

@@ -101,7 +101,7 @@ static const struct section_mapping_s section_mapping[] =
 
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t *pgtable = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
@@ -116,7 +116,7 @@ static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mm
 static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
                                            uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *ctable  = (uint32_t*)ctabvaddr;
+  uint32_t *ctable  = (uint32_t *)ctabvaddr;
   uint32_t  index;
 
   /* The coarse table divides a 1Mb address space up into 256 entries, each
@@ -188,9 +188,9 @@ static void up_vectormapping(void)
 
 static void up_copyvectorblock(void)
 {
-  uint32_t *src  = (uint32_t*)&_vector_start;
-  uint32_t *end  = (uint32_t*)&_vector_end;
-  uint32_t *dest = (uint32_t*)VECTOR_BASE;
+  uint32_t *src  = (uint32_t *)&_vector_start;
+  uint32_t *end  = (uint32_t *)&_vector_end;
+  uint32_t *dest = (uint32_t *)VECTOR_BASE;
 
   while (src < end)
     {

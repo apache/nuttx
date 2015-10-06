@@ -96,6 +96,6 @@ void up_addregion(void)
   /* Configure the RHEA bridge with some sane default values */
   calypso_rhea_cfg(0, 0, 0xff, 0, 1, 0, 0);
 
-  kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  kmm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 }
 #endif

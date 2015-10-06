@@ -200,7 +200,7 @@ void efm32_timer_reset(uintptr_t base)
 
   //putreg32(_TIMER_ROUTE_RESETVALUE, base + EFM32_TIMER_ROUTE_OFFSET    );
 
-  for(i = 0; i < EFM32_TIMER_NCC; i++)
+  for (i = 0; i < EFM32_TIMER_NCC; i++)
     {
       uintptr_t base_cc = base + EFM32_TIMER_CC_OFFSET(i);
       putreg32(_TIMER_CC_CTRL_RESETVALUE, base_cc+EFM32_TIMER_CC_CTRL_OFFSET);
@@ -247,8 +247,8 @@ int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
   while (cnt_freq > freq)
     {
       prescaler++;
-      cnt_freq>>=1;
-      if (prescaler > (_TIMER_CTRL_PRESC_MASK>>_TIMER_CTRL_PRESC_SHIFT))
+      cnt_freq >>= 1;
+      if (prescaler > (_TIMER_CTRL_PRESC_MASK >> _TIMER_CTRL_PRESC_SHIFT))
         {
           return -1;
         }
@@ -256,18 +256,14 @@ int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 
   modifyreg32(base + EFM32_TIMER_CTRL_OFFSET,
               _TIMER_CTRL_PRESC_MASK,
-              prescaler<<_TIMER_CTRL_PRESC_SHIFT
-             );
+              prescaler << _TIMER_CTRL_PRESC_SHIFT);
 
-  prescaler = 1<<prescaler;
+  prescaler = 1 << prescaler;
 
-  reload = (clk_freq/prescaler/freq);
+  reload = (clk_freq / prescaler / freq);
 
   efm32_timerdbg("Source: %4xHz Div: %4x Reload: %4x \n",
-                 clk_freq,
-                 prescaler,
-                 reload
-                );
+                 clk_freq, prescaler, reload);
 
   putreg32(reload, base + EFM32_TIMER_TOP_OFFSET);
 

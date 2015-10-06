@@ -509,7 +509,7 @@ uint32_t efm32_coreleclk_config(int frequency)
 
   /* Check if the core frequency is higher than CMU_MAX_FREQ_HFLE */
 
-   if (frequency > CMU_MAX_FREQ_HFLE)
+  if (frequency > CMU_MAX_FREQ_HFLE)
     {
       /* Enable HFLE */
 

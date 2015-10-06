@@ -68,7 +68,7 @@ typedef struct
 {
   const uint32_t val;
   const uint32_t mask;
-  const char*    str;
+  const char    *str;
 } efm32_reset_cause_list_t;
 #endif
 
@@ -265,7 +265,7 @@ void efm32_rmu_initialize(void)
   rmudbg("RMU => reg = 0x%08X\n", g_efm32_rstcause);
   for (;;)
     {
-      const char* str;
+      const char *str;
 
       str = efm32_reset_cause_list_str(g_efm32_rstcause, &idx);
       if (str == NULL)
