@@ -87,7 +87,7 @@ void up_sigdeliver(void)
    * copy an may overwrite the regs[] array contents.  Sorry.
    */
 
-  struct tcb_s  *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s  *rtcb = (struct tcb_s *)g_readytorun.head;
   uint32_t regs[XCPTCONTEXT_REGS + 4];
   sig_deliver_t sigdeliver;
 
