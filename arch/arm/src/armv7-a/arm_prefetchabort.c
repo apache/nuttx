@@ -97,7 +97,7 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
    * for register dumps and possibly context switching.
    */
 
-  savestate    = (uint32_t*)current_regs;
+  savestate    = (uint32_t *)current_regs;
   current_regs = regs;
 
   /* Get the (virtual) address of instruction that caused the prefetch abort.

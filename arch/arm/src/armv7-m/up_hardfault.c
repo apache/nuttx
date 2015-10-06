@@ -95,13 +95,13 @@
 int up_hardfault(int irq, FAR void *context)
 {
 #if defined(CONFIG_DEBUG_HARDFAULT) || !defined(CONFIG_ARMV7M_USEBASEPRI)
-  uint32_t *regs = (uint32_t*)context;
+  uint32_t *regs = (uint32_t *)context;
 #endif
 
   /* Get the value of the program counter where the fault occurred */
 
 #ifndef CONFIG_ARMV7M_USEBASEPRI
-  uint16_t *pc = (uint16_t*)regs[REG_PC] - 1;
+  uint16_t *pc = (uint16_t *)regs[REG_PC] - 1;
 
   /* Check if the pc lies in known FLASH memory.
    * REVISIT:  What if the PC lies in "unknown" external memory?  Best

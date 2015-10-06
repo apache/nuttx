@@ -75,17 +75,17 @@
 /* The size of one depends on ARM configuration */
 
 #if defined(CONFIG_ARMV7A_WAYSIZE_16KB)
-#  define PL310_WAYSIZE (16*1024)
+#  define PL310_WAYSIZE (16 * 1024)
 #elif defined(CONFIG_ARMV7A_WAYSIZE_32KB)
-#  define PL310_WAYSIZE (32*1024)
+#  define PL310_WAYSIZE (32 * 1024)
 #elif defined(CONFIG_ARMV7A_WAYSIZE_64KB)
-#  define PL310_WAYSIZE (64*1024)
+#  define PL310_WAYSIZE (64 * 1024)
 #elif defined(CONFIG_ARMV7A_WAYSIZE_128KB)
-#  define PL310_WAYSIZE (128*1024)
+#  define PL310_WAYSIZE (128 * 1024)
 #elif defined(CONFIG_ARMV7A_WAYSIZE_256KB)
-#  define PL310_WAYSIZE (256*1024)
+#  define PL310_WAYSIZE (256 * 1024)
 #elif defined(CONFIG_ARMV7A_WAYSIZE_512KB)
-#  define PL310_WAYSIZE (512*1024)
+#  define PL310_WAYSIZE (512 * 1024)
 #else
 #  error "Way size not selected"
 #endif

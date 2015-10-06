@@ -101,11 +101,11 @@ uint32_t *arm_va2pte(uintptr_t vaddr)
 
   /* Get the L1 table entry associated with this virtual address */
 
-  L1 = *(uint32_t*)PG_POOL_VA2L1VADDR(vaddr);
+  L1 = *(uint32_t *)PG_POOL_VA2L1VADDR(vaddr);
 
   /* Get the address of the L2 page table from the L1 entry */
 
-  L2 = (uint32_t*)PG_POOL_L12VPTABLE(L1);
+  L2 = (uint32_t *)PG_POOL_L12VPTABLE(L1);
 
   /* Get the index into the L2 page table.  Each L1 entry maps
    * 256 x 4Kb or 1024 x 1Kb pages.

@@ -379,7 +379,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            * parameter will reside at an offset of 4 from the stack pointer.
            */
 
-          regs[REG_R3]   = *(uint32_t*)(regs[REG_SP]+4);
+          regs[REG_R3]   = *(uint32_t *)(regs[REG_SP]+4);
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* If we are signalling a user process, then we must be operating

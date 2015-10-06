@@ -541,7 +541,7 @@ static int c5471_mdrxbit (void)
 
   /* MDCLK falling edge. */
 
-  putreg32((getreg32(GPIO_IO)&~GPIO_IO_MDCLK), GPIO_IO); /* MDCLK falling edge */
+  putreg32((getreg32(GPIO_IO) & ~GPIO_IO_MDCLK), GPIO_IO); /* MDCLK falling edge */
   if (bit_state)
     {
       return 1;
@@ -909,12 +909,12 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
 
       /* Words #2 and #3 of descriptor */
 
-      packetmem = (uint16_t*)getreg32(c5471->c_rxcpudesc + sizeof(uint32_t));
+      packetmem = (uint16_t *)getreg32(c5471->c_rxcpudesc + sizeof(uint32_t));
       for (i = 0; i < nshorts; i++, j++)
         {
           /* 16-bits at a time. */
 
-          packetmem[i] = htons(((uint16_t*)dev->d_buf)[j]);
+          packetmem[i] = htons(((uint16_t *)dev->d_buf)[j]);
         }
 
       putreg32(((getreg32(c5471->c_rxcpudesc) & ~EIM_RXDESC_BYTEMASK) | framelen), c5471->c_rxcpudesc);
@@ -1192,7 +1192,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
         {
           /* Get the packet memory from words #2 and #3 of descriptor */
 
-          packetmem = (uint16_t*)getreg32(c5471->c_txcpudesc + sizeof(uint32_t));
+          packetmem = (uint16_t *)getreg32(c5471->c_txcpudesc + sizeof(uint32_t));
 
           /* Divide by 2 with round up to get the number of 16-bit words. */
 
@@ -1206,7 +1206,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
                * a time.
                */
 
-              ((uint16_t*)dev->d_buf)[j] = htons(packetmem[i]);
+              ((uint16_t *)dev->d_buf)[j] = htons(packetmem[i]);
             }
         }
       else
@@ -1223,7 +1223,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
        * the settings of a select few. Can leave descriptor words 2/3 alone.
        */
 
-      putreg32((getreg32(c5471->c_txcpudesc) & (EIM_TXDESC_WRAP_NEXT|EIM_TXDESC_INTRE)),
+      putreg32((getreg32(c5471->c_txcpudesc) & (EIM_TXDESC_WRAP_NEXT | EIM_TXDESC_INTRE)),
                c5471->c_txcpudesc);
 
       /* Next, Give ownership of now emptied descriptor back to the Ether Module's SWITCH */
@@ -1700,7 +1700,8 @@ static int c5471_ifup(struct net_driver_s *dev)
 
   /* Enable interrupts going from EIM Module to Interrupt Module. */
 
-  putreg32(((getreg32(EIM_INTEN) | EIM_INTEN_CPU_TX|EIM_INTEN_CPU_RX)), EIM_INTEN);
+  putreg32(((getreg32(EIM_INTEN) | EIM_INTEN_CPU_TX | EIM_INTEN_CPU_RX)),
+           EIM_INTEN);
 
   /* Next, go on-line. According to the C547X documentation the enables have to
    * occur in this order to insure proper operation; ESM first then the ENET.
@@ -1751,7 +1752,8 @@ static int c5471_ifdown(struct net_driver_s *dev)
 
   /* Disable interrupts going from EIM Module to Interrupt Module. */
 
-  putreg32((getreg32(EIM_INTEN) & ~(EIM_INTEN_CPU_TX|EIM_INTEN_CPU_RX)), EIM_INTEN);
+  putreg32((getreg32(EIM_INTEN) & ~(EIM_INTEN_CPU_TX | EIM_INTEN_CPU_RX)),
+           EIM_INTEN);
 
   /* Disable ENET */
 
@@ -1809,7 +1811,7 @@ static int c5471_txavail(struct net_driver_s *dev)
        */
 
       if ((EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
-       {
+        {
           /* If so, then poll uIP for new XMIT data */
 
           (void)devif_poll(&c5471->c_dev, c5471_txpoll);

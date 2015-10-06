@@ -90,7 +90,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  savestate    = (uint32_t*)current_regs;
+  savestate    = (uint32_t *)current_regs;
   current_regs = regs;
 
   /* Acknowledge the interrupt */
@@ -107,7 +107,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t*)current_regs;
+  regs = (uint32_t *)current_regs;
 
   /* Restore the previous value of current_regs.  NULL would indicate that
    * we are no longer in an interrupt handler.  It will be non-NULL if we
