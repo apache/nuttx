@@ -50,7 +50,7 @@ endif
 
 ifneq ($(CONFIG_UCLIBCXX),y)
 CXXSRCS += libxx_delete.cxx libxx_deletea.cxx libxx_new.cxx libxx_newa.cxx
-CXXSRCS += libxx_stdthrow.cxx
+CXXSRCS += libxx_stdthrow.cxx libxx_cxa_guard.cxx
 else
 ifneq ($(UCLIBCXX_EXCEPTION),y)
 CXXSRCS += libxx_stdthrow.cxx
