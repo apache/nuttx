@@ -11011,3 +11011,6 @@
 	* libc/stdlib/lib_qsort.c and include/stdlib.h:  Make coding style
 	  more conformant, take description from OpenGroup.org, rename formal
 	  parameters to match names used on OpenGroup.org (2015-10-02).
+	* drivers/lcd/st7565.c:  Extend to include support for the ERC12864-3.
+	  From  Pierre-noel Bouteville (2015-10-07).
+

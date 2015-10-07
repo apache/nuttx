@@ -564,6 +564,9 @@ choice
 config NHD_C12864KGZ
 	bool "like NHD C12864KGZ"
 
+config ERC_12864_3
+	bool "like ERC12864-3"
+
 endchoice
 
 config ST7565_NINTERFACES
