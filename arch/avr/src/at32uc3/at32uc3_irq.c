@@ -211,9 +211,9 @@ void up_irqinitialize(void)
    */
 
   for (group = 0; group < AVR32_IRQ_MAXGROUPS; group++)
-   {
-     putreg32(g_ipr[0], AVR32_INTC_IPR(group));
-   }
+    {
+      putreg32(g_ipr[0], AVR32_INTC_IPR(group));
+    }
 
   /* currents_regs is non-NULL only while processing an interrupt */
 

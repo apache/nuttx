@@ -110,7 +110,7 @@ static inline void up_enableosc32(void)
 
   regval = getreg32(AVR32_PM_OSCCTRL32);
   regval &= ~PM_OSCCTRL32_STARTUP_MASK;
-  regval |= PM_OSCCTRL32_EN|(AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
+  regval |= PM_OSCCTRL32_EN | (AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
   putreg32(regval, AVR32_PM_OSCCTRL32);
 }
 #endif

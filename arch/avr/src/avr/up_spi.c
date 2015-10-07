@@ -263,7 +263,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
         }
       else /* if (frequency >= BOARD_CPU_CLOCK / 128) */
         {
-          spcr  |= (1 << SPR0)|(1 << SPR1);
+          spcr  |= (1 << SPR0) | (1 << SPR1);
           actual = BOARD_CPU_CLOCK / 128;
         }
 
@@ -393,7 +393,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   /* Wait for transmission to complete */
 
-  while (!(SPSR & (1<<SPIF)));
+  while (!(SPSR & (1 << SPIF)));
 
   /* Then return the received value */
 
@@ -422,13 +422,13 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
   spidbg("nwords: %d\n", nwords);
   while (nwords-- > 0)
-  {
-    (void)spi_send(dev, (uint16_t)*ptr++);
-  }
+    {
+      (void)spi_send(dev, (uint16_t)*ptr++);
+    }
 }
 
 /****************************************************************************
@@ -453,13 +453,13 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
   spidbg("nwords: %d\n", nwords);
   while (nwords-- > 0)
-  {
-    *ptr++ = spi_send(dev, (uint16_t)0xff);
-  }
+    {
+      *ptr++ = spi_send(dev, (uint16_t)0xff);
+    }
 }
 
 /****************************************************************************

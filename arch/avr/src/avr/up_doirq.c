@@ -90,12 +90,12 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs)
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  savestate    = (uint8_t*)current_regs;   /* Cast removes volatile attribute */
+  savestate    = (uint8_t *)current_regs;   /* Cast removes volatile attribute */
   current_regs = regs;
 
   /* Deliver the IRQ */
 
-  irq_dispatch((int)irq, (uint32_t*)regs);
+  irq_dispatch((int)irq, (uint32_t *)regs);
 
   /* If a context switch occurred while processing the interrupt then
    * current_regs may have change value.  If we return any value different
@@ -103,7 +103,7 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint8_t*)current_regs;   /* Cast removes volatile attribute */
+  regs = (uint8_t *)current_regs;   /* Cast removes volatile attribute */
 
   /* Restore the previous value of current_regs.  NULL would indicate that
    * we are no longer in an interrupt handler.  It will be non-NULL if we

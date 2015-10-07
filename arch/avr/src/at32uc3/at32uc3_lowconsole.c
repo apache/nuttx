@@ -152,7 +152,7 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
     {
       /* Select 16x oversampling mode and clear the SYNC mode bit */
 
-      mr &= ~(USART_MR_OVER|USART_MR_SYNC);
+      mr &= ~(USART_MR_OVER | USART_MR_SYNC);
 
       /* Calculate the clock divider assuming 16x oversampling */
 
@@ -218,8 +218,9 @@ void usart_reset(uintptr_t usart_base)
   /* Disable RX and TX, put USART in reset, disable handshaking signals */
 
   usart_putreg(usart_base, AVR32_USART_CR_OFFSET,
-               USART_CR_RSTRX|USART_CR_RSTTX|USART_CR_RSTSTA|USART_CR_RSTIT|
-               USART_CR_RSTNACK|USART_CR_DTRDIS|USART_CR_RTSDIS);
+               USART_CR_RSTRX | USART_CR_RSTTX | USART_CR_RSTSTA |
+               USART_CR_RSTIT | USART_CR_RSTNACK | USART_CR_DTRDIS |
+               USART_CR_RTSDIS);
 }
 #endif
 
@@ -243,7 +244,7 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 
   /* Configure STOP bits */
 
-  regval  = USART_MR_MODE_NORMAL|USART_MR_CHMODE_NORMAL;  /* Normal RS-232 mode */
+  regval  = USART_MR_MODE_NORMAL | USART_MR_CHMODE_NORMAL;  /* Normal RS-232 mode */
   regval |= stop2 ? USART_MR_NBSTOP_2 : USART_MR_NBSTOP_1;
 
   /* Configure parity */
@@ -285,7 +286,7 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
   /* Enable RX and TX */
 
   regval = usart_getreg(usart_base, AVR32_USART_CR_OFFSET);
-  regval |= (USART_CR_RXEN|USART_CR_TXEN);
+  regval |= (USART_CR_RXEN | USART_CR_TXEN);
   usart_putreg(usart_base, AVR32_USART_CR_OFFSET, regval);
 }
 #endif
@@ -354,7 +355,7 @@ void up_consoleinit(void)
   /* Enable selected clocks (and disabled unselected clocks) */
 
   regval = getreg32(AVR32_PM_PBAMASK);
-  regval &= ~(PM_PBAMASK_USART0|PM_PBAMASK_USART1|PM_PBAMASK_USART2);
+  regval &= ~(PM_PBAMASK_USART0 | PM_PBAMASK_USART1 | PM_PBAMASK_USART2);
   regval |= pbamask;
   putreg32(regval, AVR32_PM_PBAMASK);
 

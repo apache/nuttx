@@ -450,7 +450,7 @@ static int avr_fifoready(int timeout)
 {
   UDINT &= ~(1 << SOFI);
 
-  for (;;)
+  for (; ; )
     {
       /* Check if the FIFO is ready by testing RWAL (read/write allowed).  The
        * meaning of this bigtdepends on the direction of the endpoint: For an
@@ -518,9 +518,9 @@ static void avr_ep0send(FAR const uint8_t *buffer, uint16_t buflen)
 
   while (buflen)
     {
-     /* Verify that RXOUTI is clear.  RXOUTI is set when a new OUT data is
-      * received.  In this case, we have not option but to abort the transfer.
-      */
+      /* Verify that RXOUTI is clear.  RXOUTI is set when a new OUT data is
+       * received.  In this case, we have not option but to abort the transfer.
+       */
 
       regval = UEINTX;
       if ((regval & (1 << RXOUTI)) != 0)
@@ -854,10 +854,10 @@ static int avr_epINqueue(FAR struct avr_ep_s *privep)
     }
   else
     {
-       /* No.. remove the next request from the queue of IN requests */
+      /* No.. remove the next request from the queue of IN requests */
 
-       privreq         =  avr_rqdequeue(privep);
-       privep->pending = privreq;
+      privreq         =  avr_rqdequeue(privep);
+      privep->pending = privreq;
     }
 
   /* Is there an IN request */
@@ -873,7 +873,7 @@ static int avr_epINqueue(FAR struct avr_ep_s *privep)
        * pending transfer in place.
        */
 
-       if (ret == OK || ret != -ETIME)
+      if (ret == OK || ret != -ETIME)
         {
           /* The transfer has completed, perhaps with an error.  Return the request
            * to the class driver.
@@ -1386,7 +1386,7 @@ static inline void avr_ep0setup(void)
 
   /* Read EP0 setup data -- Read the setup data from the hardware. */
 
-  ptr = (uint8_t*)&ctrl;
+  ptr = (uint8_t *)&ctrl;
   for (i = 0; i < USB_SIZEOF_CTRLREQ; i++)
     {
       *ptr++ = UEDATX;
@@ -2611,33 +2611,33 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
           epmask = 1 << epndx;
           if ((epset & epmask) != 0)
             {
-               /* Initialize the endpoint structure */
+              /* Initialize the endpoint structure */
 
-               privep           = &g_usbdev.eplist[epndx];
-               memset(privep, 0, sizeof(struct avr_ep_s));
+              privep           = &g_usbdev.eplist[epndx];
+              memset(privep, 0, sizeof(struct avr_ep_s));
 
-               privep->ep.ops       = &g_epops;
-               privep->ep.eplog     = epndx;
-               privep->ep.maxpacket = (epndx == 1) ? 256 : 64;
+              privep->ep.ops       = &g_epops;
+              privep->ep.eplog     = epndx;
+              privep->ep.maxpacket = (epndx == 1) ? 256 : 64;
 
-               /* Mark the IN/OUT endpoint no longer available */
+              /* Mark the IN/OUT endpoint no longer available */
 
-               g_usbdev.epavail &= ~epmask;
-               if (in)
-                 {
-                   g_usbdev.epinset |= epmask;
-                   privep->epin      = 1;
-                 }
-               else
-                 {
-                   g_usbdev.epoutset |= epmask;
-                   privep->epin       = 0;
-                 }
+              g_usbdev.epavail &= ~epmask;
+              if (in)
+                {
+                  g_usbdev.epinset |= epmask;
+                  privep->epin      = 1;
+                }
+              else
+                {
+                  g_usbdev.epoutset |= epmask;
+                  privep->epin       = 0;
+                }
 
-               /* And return the pointer to the standard endpoint structure */
+              /* And return the pointer to the standard endpoint structure */
 
-               irqrestore(flags);
-               return &privep->ep;
+              irqrestore(flags);
+              return &privep->ep;
             }
         }
 

@@ -92,7 +92,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
     }
   else
     {
-      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+      struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
       bool switch_needed;
 
       slldbg("TCB=%p PRI=%d\n", tcb, priority);
@@ -150,7 +150,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * of the g_readytorun task list.
                */
 
-              rtcb = (struct tcb_s*)g_readytorun.head;
+              rtcb = (struct tcb_s *)g_readytorun.head;
 
               /* Update scheduler parameters */
 
@@ -171,7 +171,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * ready to run list.
                */
 
-              struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+              struct tcb_s *nexttcb = (struct tcb_s *)g_readytorun.head;
 
 #ifdef CONFIG_ARCH_ADDRENV
               /* Make sure that the address environment for the previously
