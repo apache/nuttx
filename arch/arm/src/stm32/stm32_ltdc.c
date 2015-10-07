@@ -469,7 +469,7 @@
 
 enum stm32_layer_e
 {
-  LTDC_LAYER_L1 = 0,       /* LCD Layer 1*/
+  LTDC_LAYER_L1 = 0,       /* LCD Layer 1 */
   LTDC_LAYER_L2,           /* LCD Layer 2 */
 };
 
@@ -579,7 +579,7 @@ static void stm32_ltdc_lblendmode(FAR struct stm32_layer_s *layer,
 #ifdef STM32_LAYER_CLUT_SIZE
 static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer,
                              FAR const struct fb_cmap_s *cmap);
-static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s* layer,
+static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s *layer,
                                     bool enable);
 #endif
 static void stm32_ltdc_linit(int lid);
@@ -687,7 +687,8 @@ static const struct fb_vtable_s g_vtable =
   .getvideoinfo  = stm32_getvideoinfo,
   .getplaneinfo  = stm32_getplaneinfo
 #ifdef STM32_LAYER_CLUT_SIZE
- ,.getcmap       = stm32_getcmap,
+  ,
+  .getcmap      = stm32_getcmap,
   .putcmap       = stm32_putcmap
 #endif
 };
@@ -744,12 +745,13 @@ static struct stm32_ltdcdev_s g_ltdc =
               .nplanes  = 1
             }
 #ifdef STM32_LTDC_L1CMAP
-         ,.clut         = &g_clut[LTDC_L1CLUT_OFFSET]
+        , .clut         = &g_clut[LTDC_L1CLUT_OFFSET]
 #endif
         }
     }
 #ifdef CONFIG_STM32_LTDC_L2
- ,.layer[LTDC_LAYER_L2] =
+  ,
+  .layer[LTDC_LAYER_L2] =
     {
       .state =
         {
@@ -769,7 +771,7 @@ static struct stm32_ltdcdev_s g_ltdc =
               .nplanes  = 1
             }
 #ifdef STM32_LTDC_L2CMAP
-         ,.clut         = &g_clut[LTDC_L2CLUT_OFFSET]
+        , .clut         = &g_clut[LTDC_L2CLUT_OFFSET]
 #endif
         }
     }
@@ -782,7 +784,7 @@ static const uint32_t stm32_fmt_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1PFCR_PF
 #ifdef CONFIG_STM32_LTDC_L2
- ,STM32_LTDC_L2PFCR_PF
+  , STM32_LTDC_L2PFCR_PF
 #endif
 };
 
@@ -1297,7 +1299,7 @@ static void stm32_global_configure(void)
 
   /* Enable register reload interrupt only */
 
-  stm32_ltdc_irqctrl(LTDC_IER_RRIE,LTDC_IER_TERRIE|LTDC_IER_FUIE|LTDC_IER_LIE);
+  stm32_ltdc_irqctrl(LTDC_IER_RRIE, LTDC_IER_TERRIE | LTDC_IER_FUIE | LTDC_IER_LIE);
 
   /* Configure line interrupt */
 
@@ -1383,7 +1385,7 @@ static void stm32_lcd_enable(bool enable)
  ****************************************************************************/
 
 #ifdef STM32_LAYER_CLUT_SIZE
-static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s* layer, bool enable)
+static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s *layer, bool enable)
 {
   uint32_t    regval;
 
@@ -1879,7 +1881,7 @@ static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer,
     {
       /* Update the layer clut entry */
 #ifndef CONFIG_FB_TRANSPARENCY
-       uint8_t  *clut888 = (uint8_t*)clut;
+       uint8_t  *clut888 = (uint8_t *)clut;
        uint16_t offset   = 3 * n;
 
        clut888[offset]     = cmap->blue[n];
@@ -1978,7 +1980,7 @@ static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
 #if STM32_LTDC_L1_BPP == 8 || STM32_LTDC_L2_BPP == 8
   if (priv->pinfo.bpp == 8)
     {
-      uint8_t *dest = (uint8_t*)priv->pinfo.fbmem;
+      uint8_t *dest = (uint8_t *)priv->pinfo.fbmem;
       int i;
 
       gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
@@ -1996,7 +1998,7 @@ static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
 #if STM32_LTDC_L1_BPP == 16 || STM32_LTDC_L2_BPP == 16
   if (priv->pinfo.bpp == 16)
     {
-      uint16_t *dest = (uint16_t*)priv->pinfo.fbmem;
+      uint16_t *dest = (uint16_t *)priv->pinfo.fbmem;
       int i;
 
       gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
@@ -2014,7 +2016,7 @@ static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
 #if STM32_LTDC_L1_BPP == 24 || STM32_LTDC_L2_BPP == 24
   if (priv->pinfo.bpp == 24)
     {
-      uint8_t *dest = (uint8_t*)priv->pinfo.fbmem;
+      uint8_t *dest = (uint8_t *)priv->pinfo.fbmem;
       uint8_t r;
       uint8_t g;
       uint8_t b;
@@ -2041,7 +2043,7 @@ static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
 #if STM32_LTDC_L1_BPP == 32 || STM32_LTDC_L2_BPP == 32
   if (priv->pinfo.bpp == 32)
     {
-      uint32_t *dest = (uint32_t*)priv->pinfo.fbmem;
+      uint32_t *dest = (uint32_t *)priv->pinfo.fbmem;
       int i;
 
       gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
@@ -2192,9 +2194,9 @@ static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
     {
       FAR struct ltdc_layer_s *ltdc;
 #ifdef CONFIG_STM32_LTDC_L2
-      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L2;
+      ltdc = (FAR struct ltdc_layer_s *)&LAYER_L2;
 #else
-      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L1;
+      ltdc = (FAR struct ltdc_layer_s *)&LAYER_L1;
 #endif
       return stm32_lgetvideoinfo(ltdc, vinfo);
     }
@@ -2227,9 +2229,9 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
     {
       FAR struct ltdc_layer_s *ltdc;
 #ifdef CONFIG_STM32_LTDC_L2
-      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L2;
+      ltdc = (FAR struct ltdc_layer_s *)&LAYER_L2;
 #else
-      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L1;
+      ltdc = (FAR struct ltdc_layer_s *)&LAYER_L1;
 #endif
       return stm32_lgetplaneinfo(ltdc, planeno, pinfo);
     }
@@ -2259,9 +2261,9 @@ static int stm32_getcmap(struct fb_vtable_s *vtable,
                             struct fb_cmap_s *cmap)
 {
 #ifdef CONFIG_STM32_LTDC_L2
-  return stm32_getclut((FAR struct ltdc_layer_s*)&LAYER_L2, cmap);
+  return stm32_getclut((FAR struct ltdc_layer_s *)&LAYER_L2, cmap);
 #else
-  return stm32_getclut((FAR struct ltdc_layer_s*)&LAYER_L1, cmap);
+  return stm32_getclut((FAR struct ltdc_layer_s *)&LAYER_L1, cmap);
 #endif
 }
 
@@ -2285,9 +2287,9 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
                             const struct fb_cmap_s *cmap)
 {
 #ifdef CONFIG_STM32_LTDC_L2
-  return stm32_setclut((FAR struct ltdc_layer_s*)&LAYER_L2, cmap);
+  return stm32_setclut((FAR struct ltdc_layer_s *)&LAYER_L2, cmap);
 #else
-  return stm32_setclut((FAR struct ltdc_layer_s*)&LAYER_L1, cmap);
+  return stm32_setclut((FAR struct ltdc_layer_s *)&LAYER_L1, cmap);
 #endif
 }
 #endif /* STM32_LAYER_CLUT_SIZE */
@@ -2446,8 +2448,7 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
     {
       sem_wait(priv->state.lock);
 #ifdef CONFIG_STM32_DMA2D
-      /*
-       * Note! We share the same color lookup table with the dma2d driver and
+      /* Note! We share the same color lookup table with the dma2d driver and
        * the getclut implementation works in the same way.
        * To prevent redundant code we simply call the getclut function of the
        * dma2d interface.
@@ -2479,7 +2480,7 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
           for (n = cmap->first; n < cmap->len && n < STM32_LTDC_NCLUT; n++)
             {
 # ifndef CONFIG_FB_TRANSPARENCY
-              uint8_t  *clut888 = (uint8_t*)clut;
+              uint8_t  *clut888 = (uint8_t *)clut;
               uint16_t offset   = 3 * n;
 
               cmap->blue[n]   = clut888[offset];
@@ -2534,7 +2535,8 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
  *
  ****************************************************************************/
 
-static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid, uint32_t flag)
+static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid,
+                        uint32_t flag)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
@@ -2863,10 +2865,10 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
       /* Disable colorkeying by default */
 
-      priv->operation &=~ LTDC_LAYER_ENABLECOLORKEY;
+      priv->operation &= ~LTDC_LAYER_ENABLECOLORKEY;
 
-      if (blendmode & (LTDC_BLEND_ALPHA|LTDC_BLEND_PIXELALPHA|
-                        LTDC_BLEND_ALPHAINV|LTDC_BLEND_PIXELALPHAINV))
+      if (blendmode & (LTDC_BLEND_ALPHA | LTDC_BLEND_PIXELALPHA |
+                        LTDC_BLEND_ALPHAINV | LTDC_BLEND_PIXELALPHAINV))
         {
           /* Enable any alpha blending */
 
@@ -2929,8 +2931,8 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
       if (ret == OK)
         {
           priv->state.blendmode = mode;
-          priv->operation      |= (LTDC_LAYER_SETBLENDMODE|
-                                   LTDC_LAYER_SETALPHAVALUE|
+          priv->operation      |= (LTDC_LAYER_SETBLENDMODE |
+                                   LTDC_LAYER_SETALPHAVALUE |
                                    LTDC_LAYER_SETCOLORKEY);
         }
 
@@ -3214,9 +3216,9 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
            * settings restored during the next update (non flip) operation
            */
 
-          active->operation |= (LTDC_LAYER_SETBLENDMODE|
-                                LTDC_LAYER_ENABLE|
-                                LTDC_LAYER_SETCOLOR|
+          active->operation |= (LTDC_LAYER_SETBLENDMODE |
+                                LTDC_LAYER_ENABLE |
+                                LTDC_LAYER_SETCOLOR |
                                 LTDC_LAYER_SETENABLE);
 
           /* Change layer activity */
@@ -3543,8 +3545,8 @@ void stm32_ltdcuninitialize(void)
 {
   /* Disable all ltdc interrupts */
 
-  stm32_ltdc_irqctrl(0, LTDC_IER_RRIE|LTDC_IER_TERRIE|
-                        LTDC_IER_FUIE|LTDC_IER_LIE);
+  stm32_ltdc_irqctrl(0, LTDC_IER_RRIE | LTDC_IER_TERRIE |
+                        LTDC_IER_FUIE | LTDC_IER_LIE);
 
   up_disable_irq(g_interrupt.irq);
   irq_detach(g_interrupt.irq);

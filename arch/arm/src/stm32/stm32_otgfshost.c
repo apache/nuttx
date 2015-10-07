@@ -73,8 +73,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ***************************************************************/
-/*
- * STM32 USB OTG FS Host Driver Support
+/* STM32 USB OTG FS Host Driver Support
  *
  * Pre-requisites
  *
@@ -730,14 +729,14 @@ static void stm32_chan_free(FAR struct stm32_usbhost_s *priv, int chidx)
 
 static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv)
 {
-   uint8_t chidx;
+  uint8_t chidx;
 
-   /* Free all host channels */
+  /* Free all host channels */
 
-   for (chidx = 2; chidx < STM32_NHOST_CHANNELS; chidx ++)
-     {
-       stm32_chan_free(priv, chidx);
-     }
+  for (chidx = 2; chidx < STM32_NHOST_CHANNELS; chidx ++)
+    {
+      stm32_chan_free(priv, chidx);
+    }
 }
 
 /****************************************************************************
@@ -1651,9 +1650,9 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
           return ret;
         }
 
-     /* Get the elapsed time (in frames) */
+      /* Get the elapsed time (in frames) */
 
-     elapsed = clock_systimer() - start;
+      elapsed = clock_systimer() - start;
     }
   while (elapsed < STM32_SETUP_DELAY);
 
@@ -1872,7 +1871,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2117,7 +2116,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       ret = stm32_chan_waitsetup(priv, chan);
       if (ret < 0)
         {
-          usbhost_trace1(OTGFS_TRACE1_DEVDISCONN,0);
+          usbhost_trace1(OTGFS_TRACE1_DEVDISCONN, 0);
           return (ssize_t)ret;
         }
 
@@ -2130,7 +2129,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           return (ssize_t)ret;
         }
 
-     /* Wait for the transfer to complete and get the result */
+      /* Wait for the transfer to complete and get the result */
 
       ret = stm32_chan_wait(priv, chan);
 
@@ -2138,7 +2137,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2204,7 +2203,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK?*/
+  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2837,7 +2836,7 @@ static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv)
     {
       /* Yes.. then now we are connected */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_CONNECTED,0);
+      usbhost_vtrace1(OTGFS_VTRACE1_CONNECTED, 0);
       priv->connected = true;
       priv->change    = true;
       DEBUGASSERT(priv->smstate == SMSTATE_DETACHED);
@@ -2869,16 +2868,16 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
     {
       /* Yes.. then we no longer connected */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_DISCONNECTED,0);
+      usbhost_vtrace1(OTGFS_VTRACE1_DISCONNECTED, 0);
 
       /* Are we bound to a class driver? */
 
-      if ( priv->rhport.hport.devclass)
+      if (priv->rhport.hport.devclass)
         {
           /* Yes.. Disconnect the class driver */
 
-          CLASS_DISCONNECTED( priv->rhport.hport.devclass);
-           priv->rhport.hport.devclass = NULL;
+          CLASS_DISCONNECTED(priv->rhport.hport.devclass);
+          priv->rhport.hport.devclass = NULL;
         }
 
       /* Re-Initialize Host for new Enumeration */
@@ -2890,9 +2889,9 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
 
       priv->rhport.hport.speed = USB_SPEED_FULL;
 
-    /* Notify any waiters that there is a change in the connection state */
+      /* Notify any waiters that there is a change in the connection state */
 
-     if (priv->pscwait)
+      if (priv->pscwait)
         {
           stm32_givesem(&priv->pscsem);
           priv->pscwait = false;
@@ -3450,7 +3449,7 @@ static int stm32_gint_isr(int irq, FAR void *context)
    * little interrupt handling overhead.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the unmasked bits in the GINT status */
 
@@ -3741,7 +3740,7 @@ static int stm32_wait(FAR struct usbhost_connection_s *conn,
   /* Loop until a change in connection state is detected */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -3835,7 +3834,7 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
     {
       /* No, return an error */
 
-      usbhost_trace1(OTGFS_TRACE1_DEVDISCONN,0);
+      usbhost_trace1(OTGFS_TRACE1_DEVDISCONN, 0);
       return -ENODEV;
     }
 
@@ -4333,7 +4332,7 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       ret = stm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
-       {
+        {
           usbhost_trace1(OTGFS_TRACE1_SENDSETUP, -ret);
           continue;
         }
@@ -4805,7 +4804,8 @@ static void stm32_portreset(FAR struct stm32_usbhost_s *priv)
   uint32_t regval;
 
   regval  = stm32_getreg(STM32_OTGFS_HPRT);
-  regval &= ~(OTGFS_HPRT_PENA|OTGFS_HPRT_PCDET|OTGFS_HPRT_PENCHNG|OTGFS_HPRT_POCCHNG);
+  regval &= ~(OTGFS_HPRT_PENA | OTGFS_HPRT_PCDET | OTGFS_HPRT_PENCHNG |
+              OTGFS_HPRT_POCCHNG);
   regval |= OTGFS_HPRT_PRST;
   stm32_putreg(STM32_OTGFS_HPRT, regval);
 
@@ -4922,7 +4922,8 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
   /* Turn on the Host port power. */
 
   regval = stm32_getreg(STM32_OTGFS_HPRT);
-  regval &= ~(OTGFS_HPRT_PENA|OTGFS_HPRT_PCDET|OTGFS_HPRT_PENCHNG|OTGFS_HPRT_POCCHNG);
+  regval &= ~(OTGFS_HPRT_PENA | OTGFS_HPRT_PCDET | OTGFS_HPRT_PENCHNG |
+              OTGFS_HPRT_POCCHNG);
 
   if (((regval & OTGFS_HPRT_PPWR) == 0) && state)
     {
@@ -5132,7 +5133,7 @@ static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
    * transceiver: "This bit is always 1 with write-only access"
    */
 
-  regval = stm32_getreg(STM32_OTGFS_GUSBCFG);;
+  regval = stm32_getreg(STM32_OTGFS_GUSBCFG);
   regval |= OTGFS_GUSBCFG_PHYSEL;
   stm32_putreg(STM32_OTGFS_GUSBCFG, regval);
 

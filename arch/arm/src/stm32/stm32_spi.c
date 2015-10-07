@@ -804,7 +804,7 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
           rxbuffer    = rxdummy;
           priv->rxccr = SPI_RXDMA8NULL_CONFIG;
         }
-     }
+    }
 
   /* Configure the RX DMA */
 
@@ -1016,7 +1016,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
           setbits = SPI_CR1_FPCLCKd4; /* 001: fPCLK/4 */
           actual = priv->spiclock >> 2;
-       }
+        }
       else if (frequency >= priv->spiclock >> 3)
         {
           /* Between fPCLCK/4 and fPCLCK/8, pick the slower */
@@ -1115,7 +1115,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
           setbits = 0;
-          clrbits = SPI_CR1_CPOL|SPI_CR1_CPHA;
+          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
           break;
 
         case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
@@ -1129,7 +1129,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          setbits = SPI_CR1_CPOL|SPI_CR1_CPHA;
+          setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
           clrbits = 0;
           break;
 
@@ -1189,11 +1189,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
         case 8:
           setbits = 0;
-          clrbits = SPI_CR1_DFF|SPI_CR1_LSBFIRST;
+          clrbits = SPI_CR1_DFF | SPI_CR1_LSBFIRST;
           break;
 
         case -16:
-          setbits = SPI_CR1_DFF|SPI_CR1_LSBFIRST;
+          setbits = SPI_CR1_DFF | SPI_CR1_LSBFIRST;
           clrbits = 0;
           break;
 
@@ -1295,8 +1295,8 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
     {
       /* 16-bit mode */
 
-      const uint16_t *src  = (const uint16_t*)txbuffer;;
-            uint16_t *dest = (uint16_t*)rxbuffer;
+      const uint16_t *src  = (const uint16_t *)txbuffer;
+            uint16_t *dest = (uint16_t *)rxbuffer;
             uint16_t  word;
 
       while (nwords-- > 0)
@@ -1308,9 +1308,9 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
               word = *src++;
             }
           else
-          {
+            {
               word = 0xffff;
-          }
+            }
 
           /* Exchange one word */
 
@@ -1328,8 +1328,8 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
     {
       /* 8-bit mode */
 
-      const uint8_t *src  = (const uint8_t*)txbuffer;;
-            uint8_t *dest = (uint8_t*)rxbuffer;
+      const uint8_t *src  = (const uint8_t *)txbuffer;
+            uint8_t *dest = (uint8_t *)rxbuffer;
             uint8_t  word;
 
       while (nwords-- > 0)
@@ -1341,9 +1341,9 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
               word = *src++;
             }
           else
-          {
+            {
               word = 0xff;
-          }
+            }
 
           /* Exchange one word */
 
@@ -1503,9 +1503,9 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
    *   Two lines full duplex:         BIDIMODE=0 BIDIOIE=(Don't care) and RXONLY=0
    */
 
-  clrbits = SPI_CR1_CPHA|SPI_CR1_CPOL|SPI_CR1_BR_MASK|SPI_CR1_LSBFIRST|
-            SPI_CR1_RXONLY|SPI_CR1_DFF|SPI_CR1_BIDIOE|SPI_CR1_BIDIMODE;
-  setbits = SPI_CR1_MSTR|SPI_CR1_SSI|SPI_CR1_SSM;
+  clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
+            SPI_CR1_RXONLY | SPI_CR1_DFF | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+  setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
   spi_modifycr1(priv, setbits, clrbits);
 
 #ifndef CONFIG_SPI_OWNBUS

@@ -679,7 +679,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    */
 
   regval  = dmast_getreg(dmast, STM32_DMA_SCR_OFFSET);
-  regval &= ~(DMA_SCR_PL_MASK|DMA_SCR_CHSEL_MASK);
+  regval &= ~(DMA_SCR_PL_MASK | DMA_SCR_CHSEL_MASK);
   regval |= scr & DMA_SCR_PL_MASK;
   regval |= (uint32_t)dmast->channel << DMA_SCR_CHSEL_SHIFT;
   dmast_putreg(dmast, STM32_DMA_SCR_OFFSET, regval);
@@ -721,16 +721,16 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    */
 
   regval  = dmast_getreg(dmast, STM32_DMA_SCR_OFFSET);
-  regval &= ~(DMA_SCR_PFCTRL|DMA_SCR_DIR_MASK|DMA_SCR_PINC|DMA_SCR_MINC|
-              DMA_SCR_PSIZE_MASK|DMA_SCR_MSIZE_MASK|DMA_SCR_PINCOS|
-              DMA_SCR_CIRC|DMA_SCR_DBM|DMA_SCR_CT|
-              DMA_SCR_PBURST_MASK|DMA_SCR_MBURST_MASK);
-  scr    &=  (DMA_SCR_PFCTRL|DMA_SCR_DIR_MASK|DMA_SCR_PINC|DMA_SCR_MINC|
-              DMA_SCR_PSIZE_MASK|DMA_SCR_MSIZE_MASK|DMA_SCR_PINCOS|
-              DMA_SCR_DBM|DMA_SCR_CIRC|
-              DMA_SCR_PBURST_MASK|DMA_SCR_MBURST_MASK);
+  regval &= ~(DMA_SCR_PFCTRL | DMA_SCR_DIR_MASK | DMA_SCR_PINC | DMA_SCR_MINC |
+              DMA_SCR_PSIZE_MASK | DMA_SCR_MSIZE_MASK | DMA_SCR_PINCOS |
+              DMA_SCR_CIRC | DMA_SCR_DBM | DMA_SCR_CT |
+              DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK);
+  scr    &=  (DMA_SCR_PFCTRL | DMA_SCR_DIR_MASK | DMA_SCR_PINC | DMA_SCR_MINC |
+              DMA_SCR_PSIZE_MASK | DMA_SCR_MSIZE_MASK | DMA_SCR_PINCOS |
+              DMA_SCR_DBM | DMA_SCR_CIRC |
+              DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK);
   regval |= scr;
-  dmast->nonstop = (scr & (DMA_SCR_DBM|DMA_SCR_CIRC)) != 0;
+  dmast->nonstop = (scr & (DMA_SCR_DBM | DMA_SCR_CIRC)) != 0;
   dmast_putreg(dmast, STM32_DMA_SCR_OFFSET, regval);
 }
 
@@ -775,7 +775,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
        * Interrupt Enable bit (TCIE) is set.
        */
 
-      scr |= (half ? (DMA_SCR_HTIE|DMA_SCR_TEIE) : (DMA_SCR_TCIE|DMA_SCR_TEIE));
+      scr |= (half ? (DMA_SCR_HTIE | DMA_SCR_TEIE) : (DMA_SCR_TCIE | DMA_SCR_TEIE));
     }
   else
     {

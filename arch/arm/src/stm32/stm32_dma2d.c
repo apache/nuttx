@@ -693,7 +693,7 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
    * A4
    */
 
-  switch(fmt)
+  switch (fmt)
     {
 #ifdef CONFIG_STM32_DMA2D_RGB565
       case FB_FMT_RGB16_565:
@@ -738,7 +738,7 @@ static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
 {
   gvdbg("fmt=%d, bpp=%p\n", fmt, bpp);
 
-  switch(fmt)
+  switch (fmt)
     {
 #ifdef CONFIG_STM32_DMA2D_RGB565
       case FB_FMT_RGB16_565:
@@ -1030,7 +1030,7 @@ static void stm32_dma2d_llnr(FAR struct stm32_dma2d_s *layer,
   gvdbg("pixel per line: %d, number of lines: %d\n", area->xres, area->yres);
 
   nlrreg = getreg32(STM32_DMA2D_NLR);
-  nlrreg = (DMA2D_NLR_PL(area->xres)|DMA2D_NLR_NL(area->yres));
+  nlrreg = (DMA2D_NLR_PL(area->xres) | DMA2D_NLR_NL(area->yres));
   putreg32(nlrreg, STM32_DMA2D_NLR);
 }
 
@@ -1315,7 +1315,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
           sem_post(priv->lock);
 
           return ret;
-      }
+        }
 #endif
 
       if (priv->fmt != DMA2D_PF_L8)
@@ -1342,7 +1342,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
               /* Update the layer clut entry */
 
 #ifndef CONFIG_FB_TRANSPARENCY
-              uint8_t  *clut888 = (uint8_t*)clut;
+              uint8_t  *clut888 = (uint8_t *)clut;
               uint16_t offset   = 3 * n;
 
               clut888[offset]     = cmap->blue[n];
@@ -1431,7 +1431,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
           for (n = cmap->first; n < cmap->len && n < STM32_DMA2D_NCLUT; n++)
             {
 #ifndef CONFIG_FB_TRANSPARENCY
-              uint8_t  *clut888 = (uint8_t*)clut;
+              uint8_t  *clut888 = (uint8_t *)clut;
               uint16_t offset   = 3 * n;
 
               cmap->blue[n]   = clut888[offset];
@@ -2155,9 +2155,9 @@ int up_dma2dinitialize(void)
 
       up_dma2duninitialize();
 
-     /* Enable dma2d is done in rcc_enableahb1, see
-      * arch/arm/src/stm32/stm32f40xxx_rcc.c
-      */
+      /* Enable dma2d is done in rcc_enableahb1, see
+       * arch/arm/src/stm32/stm32f40xxx_rcc.c
+       */
 
       /* Initialize the DMA2D semaphore that enforces mutually exclusive access
        * to the driver
@@ -2172,13 +2172,13 @@ int up_dma2dinitialize(void)
 #ifdef CONFIG_STM32_DMA2D_L8
       /* Enable dma2d transfer and clut loading interrupts only */
 
-      stm32_dma2d_control(DMA2D_CR_TCIE|DMA2D_CR_CTCIE, DMA2D_CR_TEIE|
-                            DMA2D_CR_TWIE|DMA2D_CR_CAEIE||DMA2D_CR_CEIE);
+      stm32_dma2d_control(DMA2D_CR_TCIE | DMA2D_CR_CTCIE, DMA2D_CR_TEIE |
+                          DMA2D_CR_TWIE | DMA2D_CR_CAEIE | DMA2D_CR_CEIE);
 #else
       /* Enable dma transfer interrupt only */
 
-      stm32_dma2d_control(DMA2D_CR_TCIE, DMA2D_CR_TEIE|DMA2D_CR_TWIE|
-                            DMA2D_CR_CAEIE|DMA2D_CR_CTCIE|DMA2D_CR_CEIE);
+      stm32_dma2d_control(DMA2D_CR_TCIE, DMA2D_CR_TEIE | DMA2D_CR_TWIE |
+                          DMA2D_CR_CAEIE | DMA2D_CR_CTCIE | DMA2D_CR_CEIE);
 #endif
 
       /* Attach DMA2D interrupt vector */

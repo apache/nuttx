@@ -213,10 +213,11 @@ static uint16_t stm32_getreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -225,20 +226,20 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -301,7 +302,7 @@ static inline void stm32_setprescaler(FAR struct stm32_lowerhalf_s *priv)
    */
 
 #ifndef CONFIG_STM32_IWDG_ONETIMESETUP
-  while ((stm32_getreg(STM32_IWDG_SR) & (IWDG_SR_PVU|IWDG_SR_RVU)) != 0);
+  while ((stm32_getreg(STM32_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU)) != 0);
 #endif
 
   /* Set the prescaler */

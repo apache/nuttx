@@ -306,7 +306,7 @@ static int ccm_stat(const char *relpath, struct stat *buf)
       return -ENOENT;
     }
 
-  buf->st_mode    = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;

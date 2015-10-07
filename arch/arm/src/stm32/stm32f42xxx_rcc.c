@@ -93,7 +93,7 @@ static inline void rcc_reset(void)
   /* Reset HSION, HSEON, CSSON and PLLON bits */
 
   regval  = getreg32(STM32_RCC_CR);
-  regval &= ~(RCC_CR_HSION|RCC_CR_HSEON|RCC_CR_CSSON|RCC_CR_PLLON);
+  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_CSSON | RCC_CR_PLLON);
   putreg32(regval, STM32_RCC_CR);
 
   /* Reset PLLCFGR register to reset default */
@@ -129,33 +129,33 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-  /* Enable GPIOA, GPIOB, .... GPIOI*/
+  /* Enable GPIOA, GPIOB, .... GPIOI */
 
 #if STM32_NGPIO > 0
   regval |= (RCC_AHB1ENR_GPIOAEN
 #if STM32_NGPIO > 16
-             |RCC_AHB1ENR_GPIOBEN
+             | RCC_AHB1ENR_GPIOBEN
 #endif
 #if STM32_NGPIO > 32
-             |RCC_AHB1ENR_GPIOCEN
+             | RCC_AHB1ENR_GPIOCEN
 #endif
 #if STM32_NGPIO > 48
-             |RCC_AHB1ENR_GPIODEN
+             | RCC_AHB1ENR_GPIODEN
 #endif
 #if STM32_NGPIO > 64
-             |RCC_AHB1ENR_GPIOEEN
+             | RCC_AHB1ENR_GPIOEEN
 #endif
 #if STM32_NGPIO > 80
-             |RCC_AHB1ENR_GPIOFEN
+             | RCC_AHB1ENR_GPIOFEN
 #endif
 #if STM32_NGPIO > 96
-             |RCC_AHB1ENR_GPIOGEN
+             | RCC_AHB1ENR_GPIOGEN
 #endif
 #if STM32_NGPIO > 112
-             |RCC_AHB1ENR_GPIOHEN
+             | RCC_AHB1ENR_GPIOHEN
 #endif
 #if STM32_NGPIO > 128
-             |RCC_AHB1ENR_GPIOIEN
+             | RCC_AHB1ENR_GPIOIEN
 #endif
              );
 #endif
@@ -193,7 +193,7 @@ static inline void rcc_enableahb1(void)
 #ifdef CONFIG_STM32_ETHMAC
   /* Ethernet MAC clocking */
 
-  regval |= (RCC_AHB1ENR_ETHMACEN|RCC_AHB1ENR_ETHMACTXEN|RCC_AHB1ENR_ETHMACRXEN);
+  regval |= (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN);
 
 #ifdef CONFIG_STM32_ETH_PTP
   /* Precision Time Protocol (PTP) */
@@ -703,10 +703,10 @@ static void stm32_stdclockconfig(void)
       /* Set the PLL dividers and multipliers to configure the main PLL */
 
 #ifdef STM32_BOARD_USEHSI
-      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |
+      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN | STM32_PLLCFG_PLLP |
                 RCC_PLLCFG_PLLSRC_HSI | STM32_PLLCFG_PLLQ);
 #else /* if STM32_BOARD_USEHSE */
-      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |
+      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN | STM32_PLLCFG_PLLP |
                 RCC_PLLCFG_PLLSRC_HSE | STM32_PLLCFG_PLLQ);
 #endif
       putreg32(regval, STM32_RCC_PLLCFG);

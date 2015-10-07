@@ -1021,7 +1021,7 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
 
       /* Set DUTY and fast speed bits */
 
-      ccr |= (I2C_CCR_DUTY|I2C_CCR_FS);
+      ccr |= (I2C_CCR_DUTY | I2C_CCR_FS);
 #else
       /* Fast mode speed calculation with Tlow/Thigh = 2 */
 
@@ -1105,7 +1105,7 @@ static inline void stm32_i2c_clrstart(FAR struct stm32_i2c_priv_s *priv)
    */
 
   stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET,
-                      I2C_CR1_START|I2C_CR1_STOP|I2C_CR1_PEC, 0);
+                      I2C_CR1_START | I2C_CR1_STOP | I2C_CR1_PEC, 0);
 }
 
 /************************************************************************************
@@ -1261,11 +1261,11 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   else if ((status & I2C_SR1_ADD10) != 0)
     {
-       /* TODO: Finish 10-bit mode addressing.
-        *
-        * For now just clear ISR by writing to DR register. As we don't do
-        * 10 bit addressing this must be a spurious ISR
-        */
+      /* TODO: Finish 10-bit mode addressing.
+       *
+       * For now just clear ISR by writing to DR register. As we don't do
+       * 10 bit addressing this must be a spurious ISR
+       */
 
        stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, 0);
     }
@@ -1384,7 +1384,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
     defined(CONFIG_STM32_STM32L15XX)
-  if (priv->dcnt <= 0 && (status & (I2C_SR1_BTF|I2C_SR1_RXNE)) != 0)
+  if (priv->dcnt <= 0 && (status & (I2C_SR1_BTF | I2C_SR1_RXNE)) != 0)
 #else
   if (priv->dcnt <= 0 && (status & I2C_SR1_BTF) != 0)
 #endif
@@ -1938,9 +1938,10 @@ static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
     },
     {
       .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags | ((buflen>0) ? I2C_M_READ : I2C_M_NORESTART),
+      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags |
+                ((buflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
       .buffer = buffer,
-      .length = (buflen>0) ? buflen : -buflen
+      .length = (buflen > 0) ? buflen : -buflen
     }
   };
 
