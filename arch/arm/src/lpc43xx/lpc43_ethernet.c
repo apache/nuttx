@@ -475,7 +475,7 @@
  */
 
 #define ETH_DMAINT_NORMAL \
-  (ETH_DMAINT_TI | ETH_DMAINT_TU |ETH_DMAINT_RI | ETH_DMAINT_ERI)
+  (ETH_DMAINT_TI | ETH_DMAINT_TU | ETH_DMAINT_RI | ETH_DMAINT_ERI)
 
 #define ETH_DMAINT_ABNORMAL \
   (ETH_DMAINT_TPS | ETH_DMAINT_TJT | ETH_DMAINT_OVF | ETH_DMAINT_UNF | \
@@ -713,20 +713,20 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -1467,7 +1467,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
       /* Check if this is an intermediate segment in the frame */
 
-      else if (((rxdesc->rdes0 & ETH_RDES0_LS) == 0)&&
+      else if (((rxdesc->rdes0 & ETH_RDES0_LS) == 0) &&
                ((rxdesc->rdes0 & ETH_RDES0_FS) == 0))
         {
           priv->segments++;
@@ -1519,14 +1519,14 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                */
 
               DEBUGASSERT(dev->d_buf == NULL);
-              dev->d_buf    = (uint8_t*)rxcurr->rdes2;
+              dev->d_buf    = (uint8_t *)rxcurr->rdes2;
               rxcurr->rdes2 = (uint32_t)buffer;
 
               /* Return success, remembering where we should re-start scanning
                * and resetting the segment scanning logic
                */
 
-              priv->rxhead   = (struct eth_rxdesc_s*)rxdesc->rdes3;
+              priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               lpc43_freesegment(priv, rxcurr, priv->segments);
 
               nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
@@ -1547,7 +1547,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
       /* Try the next descriptor */
 
-      rxdesc = (struct eth_rxdesc_s*)rxdesc->rdes3;
+      rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
   /* We get here after all of the descriptors have been scanned or when rxdesc points
@@ -1676,7 +1676,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -1788,7 +1788,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
             {
               /* Yes.. Free the buffer */
 
-              lpc43_freebuffer(priv, (uint8_t*)txdesc->tdes2);
+              lpc43_freebuffer(priv, (uint8_t *)txdesc->tdes2);
             }
 
           /* In any event, make sure that TDES2 is nullified. */
@@ -1821,7 +1821,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
 
           /* Try the next descriptor in the TX chain */
 
-          txdesc = (struct eth_txdesc_s*)txdesc->tdes3;
+          txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
@@ -3954,7 +3954,7 @@ static inline int lpc43_ethinitialize(void)
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   priv->dev.d_ioctl   = lpc43_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void*)&g_lpc43ethmac; /* Used to recover private state from dev */
+  priv->dev.d_private = (void *)&g_lpc43ethmac; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 

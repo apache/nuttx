@@ -290,7 +290,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
   DEBUGASSERT(dev != NULL);
 
   priv->msg.flags &= ~I2C_M_READ;
-  priv->msg.buffer = (uint8_t*)buffer;
+  priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
   ret = i2c_transfer(dev, &priv->msg, 1);

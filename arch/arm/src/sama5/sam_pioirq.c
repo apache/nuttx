@@ -406,57 +406,57 @@ void sam_pioirq(pio_pinset_t pinset)
 
   regval = getreg32(base + SAM_PIO_ISLR_OFFSET);
   if ((pinset & PIO_INT_SECURE) != 0)
-     {
-       /* Yes.. make sure that the corresponding bit in ISLR is cleared */
+    {
+      /* Yes.. make sure that the corresponding bit in ISLR is cleared */
 
-       regval &= ~pin;
-     }
-   else
-     {
-       /* Yes.. make sure that the corresponding bit in ISLR is set */
+      regval &= ~pin;
+    }
+  else
+    {
+      /* Yes.. make sure that the corresponding bit in ISLR is set */
 
-       regval |= pin;
-     }
+      regval |= pin;
+    }
 
-   putreg32(regval, base + SAM_PIO_ISLR_OFFSET);
+  putreg32(regval, base + SAM_PIO_ISLR_OFFSET);
 #endif
 
-   /* Are any additional interrupt modes selected? */
+  /* Are any additional interrupt modes selected? */
 
-   if ((pinset & _PIO_INT_AIM) != 0)
-     {
-       /* Yes.. Enable additional interrupt mode */
+  if ((pinset & _PIO_INT_AIM) != 0)
+    {
+      /* Yes.. Enable additional interrupt mode */
 
-       putreg32(pin, base + SAM_PIO_AIMER_OFFSET);
+      putreg32(pin, base + SAM_PIO_AIMER_OFFSET);
 
-       /* Level or edge detected interrupt? */
+      /* Level or edge detected interrupt? */
 
-       if ((pinset & _PIO_INT_LEVEL) != 0)
-         {
-           putreg32(pin, base + SAM_PIO_LSR_OFFSET); /* Level */
-         }
-       else
-         {
-           putreg32(pin, base + SAM_PIO_ESR_OFFSET); /* Edge */
-         }
+      if ((pinset & _PIO_INT_LEVEL) != 0)
+        {
+          putreg32(pin, base + SAM_PIO_LSR_OFFSET); /* Level */
+        }
+      else
+        {
+          putreg32(pin, base + SAM_PIO_ESR_OFFSET); /* Edge */
+        }
 
       /* High level/rising edge or low level /falling edge? */
 
-       if ((pinset & _PIO_INT_RH) != 0)
-         {
-           putreg32(pin, base + SAM_PIO_REHLSR_OFFSET); /* High level/Rising edge */
-         }
-       else
-         {
-           putreg32(pin, base + SAM_PIO_FELLSR_OFFSET); /* Low level/Falling edge */
-         }
-     }
-   else
-     {
-       /* No.. Disable additional interrupt mode */
+      if ((pinset & _PIO_INT_RH) != 0)
+        {
+          putreg32(pin, base + SAM_PIO_REHLSR_OFFSET); /* High level/Rising edge */
+        }
+      else
+        {
+          putreg32(pin, base + SAM_PIO_FELLSR_OFFSET); /* Low level/Falling edge */
+        }
+    }
+  else
+    {
+      /* No.. Disable additional interrupt mode */
 
-       putreg32(pin, base + SAM_PIO_AIMDR_OFFSET);
-     }
+      putreg32(pin, base + SAM_PIO_AIMDR_OFFSET);
+    }
 
 #if defined(SAM_PIO_ISLR_OFFSET)
   /* Disable writing to PIO registers */
@@ -480,10 +480,10 @@ void sam_pioirqenable(int irq)
 
   if (sam_irqbase(irq, &base, &pin) == OK)
     {
-       /* Clear (all) pending interrupts and enable this pin interrupt */
+      /* Clear (all) pending interrupts and enable this pin interrupt */
 
-       //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
-       putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
+      //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
+      putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
     }
 }
 
@@ -502,9 +502,9 @@ void sam_pioirqdisable(int irq)
 
   if (sam_irqbase(irq, &base, &pin) == OK)
     {
-       /* Disable this pin interrupt */
+      /* Disable this pin interrupt */
 
-       putreg32((1 << pin), base + SAM_PIO_IDR_OFFSET);
+      putreg32((1 << pin), base + SAM_PIO_IDR_OFFSET);
     }
 }
 

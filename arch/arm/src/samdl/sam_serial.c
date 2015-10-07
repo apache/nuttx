@@ -557,7 +557,7 @@ static void sam_disableallints(struct sam_dev_s *priv)
 
 static int sam_interrupt(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   uint8_t pending;
   uint8_t intflag;
   uint8_t inten;
@@ -591,9 +591,9 @@ static int sam_interrupt(struct uart_dev_s *dev)
 
   if ((pending & USART_INT_DRE) != 0)
     {
-       /* Transmit data register empty ... process outgoing bytes */
+      /* Transmit data register empty ... process outgoing bytes */
 
-       uart_xmitchars(dev);
+      uart_xmitchars(dev);
     }
 
   return OK;
@@ -729,11 +729,11 @@ static int sam_attach(struct uart_dev_s *dev)
   ret = irq_attach(config->irq, priv->handler);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the USART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the USART
+       */
 
-       up_enable_irq(config->irq);
+      up_enable_irq(config->irq);
     }
 
   return ret;

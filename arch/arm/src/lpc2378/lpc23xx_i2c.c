@@ -229,12 +229,12 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
   priv->wrcnt = 0;
   priv->rdcnt = 0;
   priv->msg.addr &= ~0x01;
-  priv->msg.buffer = (uint8_t*)buffer;
+  priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
   ret = i2c_start (priv);
 
-  return ret >0 ? OK : -ETIMEDOUT;
+  return ret > 0 ? OK : -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -290,11 +290,11 @@ static int i2c_start (struct lpc23xx_i2cdev_s *priv)
 
   if (priv-> state == 0x18 || priv->state == 0x28)
     {
-      ret=priv->wrcnt;
+      ret = priv->wrcnt;
     }
   else if (priv-> state == 0x50 || priv->state == 0x58)
     {
-      ret=priv->rdcnt;
+      ret = priv->rdcnt;
     }
 
   return ret;
@@ -397,15 +397,15 @@ static int i2c_interrupt (int irq, FAR void *context)
         break;
 
       case 0x18:
-        priv->wrcnt=0;
+        priv->wrcnt = 0;
         putreg32(priv->msg.buffer[0], priv->base + I2C_DAT_OFFSET);
         break;
 
       case 0x28:
         priv->wrcnt++;
-        if (priv->wrcnt<priv->msg.length)
+        if (priv->wrcnt < priv->msg.length)
           {
-            putreg32(priv->msg.buffer[priv->wrcnt],priv->base+I2C_DAT_OFFSET);
+            putreg32(priv->msg.buffer[priv->wrcnt], priv->base + I2C_DAT_OFFSET);
           }
         else
           {
@@ -421,12 +421,12 @@ static int i2c_interrupt (int irq, FAR void *context)
 
       case 0x50:
         priv->rdcnt++;
-        if (priv->rdcnt<priv->msg.length)
+        if (priv->rdcnt < priv->msg.length)
           {
             priv->msg.buffer[priv->rdcnt] = getreg32(priv->base + I2C_DAT_OFFSET);
           }
 
-        if (priv->rdcnt>=priv->msg.length-1)
+        if (priv->rdcnt >= priv->msg.length-1)
           {
             putreg32(I2C_CONCLR_AAC | I2C_CONCLR_SIC, priv->base + I2C_CONCLR_OFFSET);
           }
@@ -501,7 +501,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC2378_I2C1
   if (port == 1)
     {
-      priv= (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[1];
+      priv        = (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[1];
       priv->base  = I2C1_BASE_ADDR;
       priv->irqid = I2C1_IRQ;
 
@@ -529,7 +529,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC2378_I2C2
   if (port == 2)
     {
-      priv= (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[2];
+      priv        = (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[2];
       priv->base  = I2C2_BASE_ADDR;
       priv->irqid = I2C2_IRQ;
 
@@ -559,7 +559,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       return NULL;
     }
 
-  putreg32(I2C_CONSET_I2EN,priv->base+I2C_CONSET_OFFSET);
+  putreg32(I2C_CONSET_I2EN, priv->base + I2C_CONSET_OFFSET);
 
   sem_init (&priv->mutex, 0, 1);
   sem_init (&priv->wait, 0, 0);
@@ -598,7 +598,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 {
   struct lpc23xx_i2cdev_s *priv = (struct lpc23xx_i2cdev_s *)dev;
 
-  putreg32(I2C_CONCLRT_I2ENC,priv->base+I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLRT_I2ENC, priv->base + I2C_CONCLR_OFFSET);
   up_disable_irq(priv->irqid);
   irq_detach(priv->irqid);
   return OK;

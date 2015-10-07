@@ -527,20 +527,20 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -1054,15 +1054,13 @@ static void lpc43_ep0configure(struct lpc43_usbdev_s *priv)
   /* Enable ep0 IN and ep0 OUT */
 
   g_qh[LPC43_EP0_OUT].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_USBDEV_EP0_MAXSIZE) |
-                      DQH_CAPABILITY_IOS |
-                      DQH_CAPABILITY_ZLT);
+                                    DQH_CAPABILITY_IOS | DQH_CAPABILITY_ZLT);
 
-  g_qh[LPC43_EP0_IN ].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_USBDEV_EP0_MAXSIZE) |
-                      DQH_CAPABILITY_IOS |
-                      DQH_CAPABILITY_ZLT);
+  g_qh[LPC43_EP0_IN].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_USBDEV_EP0_MAXSIZE) |
+                                   DQH_CAPABILITY_IOS | DQH_CAPABILITY_ZLT);
 
   g_qh[LPC43_EP0_OUT].currdesc = DTD_NEXTDESC_INVALID;
-  g_qh[LPC43_EP0_IN ].currdesc = DTD_NEXTDESC_INVALID;
+  g_qh[LPC43_EP0_IN].currdesc = DTD_NEXTDESC_INVALID;
 
   /* Enable EP0 */
 
@@ -1752,7 +1750,7 @@ static int lpc43_usbinterrupt(int irq, FAR void *context)
 
   if (disr & USBDEV_USBSTS_URI)
     {
-      usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_DEVRESET),0);
+      usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_DEVRESET), 0);
 
       lpc43_usbreset(priv);
 
@@ -1766,7 +1764,7 @@ static int lpc43_usbinterrupt(int irq, FAR void *context)
 
   if (!priv->suspended && (disr & USBDEV_USBSTS_SLI) != 0)
     {
-      usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_SUSPENDED),0);
+      usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_SUSPENDED), 0);
 
       /* Inform the Class driver of the suspend event */
 
@@ -1785,7 +1783,7 @@ static int lpc43_usbinterrupt(int irq, FAR void *context)
 
   else if (priv->suspended && (disr & USBDEV_USBSTS_SLI) == 0)
     {
-      usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_RESUMED),0);
+      usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_RESUMED), 0);
 
       /* Inform the Class driver of the resume event */
 

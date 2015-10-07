@@ -780,14 +780,14 @@ void lpc17_lcdclear(nxgl_mxpixel_t color)
 {
   int i;
 #if LPC17_BPP > 16
-  uint32_t *dest = (uint32_t*)CONFIG_LPC17_LCD_VRAMBASE;
+  uint32_t *dest = (uint32_t *)CONFIG_LPC17_LCD_VRAMBASE;
 
   gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
         color, CONFIG_LPC17_LCD_VRAMBASE,
         CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint32_t));
 
 #else
-  uint16_t *dest = (uint16_t*)CONFIG_LPC17_LCD_VRAMBASE;
+  uint16_t *dest = (uint16_t *)CONFIG_LPC17_LCD_VRAMBASE;
 
   gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
         color, CONFIG_LPC17_LCD_VRAMBASE,

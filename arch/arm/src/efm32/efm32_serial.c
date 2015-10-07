@@ -1019,7 +1019,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           /* Just speed is yet implemented */
 
-          efm32_disableuartint(priv,&ien);
+          efm32_disableuartint(priv, &ien);
 
           efm32_uartconfigure(config->uartbase, config->baud, config->parity,
                             config->bits, config->stop2);

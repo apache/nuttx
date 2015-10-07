@@ -151,7 +151,7 @@ static inline void sam_supcsetup(void)
     {
       uint32_t delay;
 
-      putreg32((SUPC_CR_XTALSEL|SUPR_CR_KEY), SAM_SUPC_CR);
+      putreg32((SUPC_CR_XTALSEL | SUPR_CR_KEY), SAM_SUPC_CR);
       for (delay = 0;
            (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
            delay++);
@@ -310,19 +310,19 @@ static inline void sam_enabledefaultmaster(void)
   /* Set default master: SRAM0 -> Cortex-M3 System */
 
   regval  = getreg32(SAM_MATRIX_SCFG0);
-  regval |= (MATRIX_SCFG0_FIXEDDEFMSTR_ARMS|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
+  regval |= (MATRIX_SCFG0_FIXEDDEFMSTR_ARMS | MATRIX_SCFG_DEFMSTRTYPE_FIXED);
   putreg32(regval, SAM_MATRIX_SCFG0);
 
   /* Set default master: SRAM1 -> Cortex-M3 System */
 
   regval  = getreg32(SAM_MATRIX_SCFG1);
-  regval |= (MATRIX_SCFG1_FIXEDDEFMSTR_ARMS|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
+  regval |= (MATRIX_SCFG1_FIXEDDEFMSTR_ARMS | MATRIX_SCFG_DEFMSTRTYPE_FIXED);
   putreg32(regval, SAM_MATRIX_SCFG1);
 
   /* Set default master: Internal flash0 -> Cortex-M3 Instruction/Data */
 
   regval  = getreg32(SAM_MATRIX_SCFG3);
-  regval |= (MATRIX_SCFG3_FIXEDDEFMSTR_ARMC|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
+  regval |= (MATRIX_SCFG3_FIXEDDEFMSTR_ARMC | MATRIX_SCFG_DEFMSTRTYPE_FIXED);
   putreg32(regval, SAM_MATRIX_SCFG3);
 }
 

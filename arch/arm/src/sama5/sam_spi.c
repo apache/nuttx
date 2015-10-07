@@ -1284,8 +1284,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
-  uint8_t *rxptr = (uint8_t*)rxbuffer;
-  uint8_t *txptr = (uint8_t*)txbuffer;
+  uint8_t *rxptr = (uint8_t *)rxbuffer;
+  uint8_t *txptr = (uint8_t *)txbuffer;
   uint32_t pcs;
   uint32_t data;
 
@@ -1754,7 +1754,7 @@ struct spi_dev_s *up_spiinitialize(int port)
     }
 #endif
 
-   /* Select the SPI operations */
+  /* Select the SPI operations */
 
 #if defined(CONFIG_SAMA5_SPI0) && defined(CONFIG_SAMA5_SPI1)
   spics->spidev.ops = spino ? &g_spi1ops : &g_spi0ops;

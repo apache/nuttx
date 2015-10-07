@@ -82,7 +82,7 @@ void lpc31_softreset(enum lpc31_resetid_e resetid)
 
   /* Delay a bit */
 
-  for (i = 0;i < 1000; i++);
+  for (i = 0; i < 1000; i++);
 
   /* Then set the soft reset bit */
 

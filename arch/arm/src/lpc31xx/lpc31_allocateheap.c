@@ -181,7 +181,7 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_start = (FAR void *)g_idle_topstack;
   *heap_size  = LPC31_HEAP_VEND - g_idle_topstack;
 }
 
@@ -198,15 +198,15 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 void up_addregion(void)
 {
 #if defined(CONFIG_LPC31_EXTSRAM0) && defined(CONFIG_LPC31_EXTSRAM0HEAP)
-  kmm_addregion((FAR void*)LPC31_EXTSRAM0_VSECTION, CONFIG_LPC31_EXTSRAM0SIZE);
+  kmm_addregion((FAR void *)LPC31_EXTSRAM0_VSECTION, CONFIG_LPC31_EXTSRAM0SIZE);
 #endif
 
 #if defined(CONFIG_LPC31_EXTSRAM1) && defined(CONFIG_LPC31_EXTSRAM1HEAP)
-  kmm_addregion((FAR void*)LPC31_EXTSRAM1_VSECTION, CONFIG_LPC31_EXTSRAM1SIZE);
+  kmm_addregion((FAR void *)LPC31_EXTSRAM1_VSECTION, CONFIG_LPC31_EXTSRAM1SIZE);
 #endif
 
 #if defined(CONFIG_LPC31_EXTDRAM) && defined(CONFIG_LPC31_EXTDRAMHEAP)
-  kmm_addregion((FAR void*)LPC31_EXTSDRAM_VSECTION, CONFIG_LPC31_EXTDRAMSIZE);
+  kmm_addregion((FAR void *)LPC31_EXTSDRAM_VSECTION, CONFIG_LPC31_EXTDRAMSIZE);
 #endif
 }
 #endif

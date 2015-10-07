@@ -217,7 +217,8 @@ static uint32_t lpc17_getioconmask(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-static void lpc17_seti2cmode(unsigned int port,unsigned int pin, uint32_t value)
+static void lpc17_seti2cmode(unsigned int port, unsigned int pin,
+                             uint32_t value)
 {
   uint32_t regaddr;
   uint32_t regval;

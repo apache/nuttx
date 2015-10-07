@@ -1441,7 +1441,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
 
   /* Loop while there are pending interrupts. */
 
-  for (;;)
+  for (; ; )
     {
       /* Check the HSMCI status register.  Mask out all bits that don't
        * correspond to enabled interrupts.  (This depends on the fact that
@@ -1911,7 +1911,7 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
 
   sam_cmdsampleinit(priv);
 
-    /* Set the HSMCI Argument value */
+  /* Set the HSMCI Argument value */
 
   sam_putreg(priv, arg, SAM_HSMCI_ARGR_OFFSET);
 
@@ -2287,7 +2287,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
-  for (;;)
+  for (; ; )
     {
       /* Did a Command-Response sequence termination evernt occur? */
 
@@ -2648,7 +2648,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-           return SDIOWAIT_TIMEOUT;
+          return SDIOWAIT_TIMEOUT;
         }
 
       /* Start the watchdog timer.  I am not sure why this is, but I am
@@ -2677,7 +2677,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
    * may have already occurred before this function was called!
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for an event in event set to occur.  If this the event has already
        * occurred, then the semaphore will already have been incremented and
@@ -2870,7 +2870,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       regaddr += sizeof(uint32_t);
       memaddr += blocksize;
-   }
+    }
 
   /* Enable DMA handshaking */
 
@@ -2966,7 +2966,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       regaddr += sizeof(uint32_t);
       memaddr += blocksize;
-   }
+    }
 
   /* Enable DMA handshaking */
 
@@ -3029,8 +3029,8 @@ static void sam_callback(void *arg)
           /* Media is present.  Is the media inserted event enabled? */
 
           if ((priv->cbevents & SDIOMEDIA_INSERTED) == 0)
-           {
-             /* No... return without performing the callback */
+            {
+              /* No... return without performing the callback */
 
               return;
             }
@@ -3056,7 +3056,7 @@ static void sam_callback(void *arg)
       /* This function is called either from (1) the context of the calling
        * thread or from the the context of (2) card detection logic.  The
        * caller may or may not have interrupts disabled (we have them
-       & disabled here!).
+       * disabled here!).
        *
        * So to minimize the possibility of recursive behavior and to assure
        * that callback is always performed outside of the interrupt handling

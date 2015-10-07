@@ -3235,16 +3235,17 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
 #ifdef CONFIG_SAMA5_OHCI
 static int sam_uhphs_interrupt(int irq, FAR void *context)
 {
-   int ohci;
-   int ehci;
+  int ohci;
+  int ehci;
 
-   /* Provide the interrupting event to both the EHCI and OHCI top half */
-   ohci = sam_ohci_tophalf(irq, context);
-   ehci = sam_ehci_tophalf(irq, context);
+  /* Provide the interrupting event to both the EHCI and OHCI top half */
 
-   /* Return OK only if both handlers returned OK */
+  ohci = sam_ohci_tophalf(irq, context);
+  ehci = sam_ehci_tophalf(irq, context);
 
-   return ohci == OK ? ehci : ohci;
+  /* Return OK only if both handlers returned OK */
+
+  return ohci == OK ? ehci : ohci;
 }
 #endif
 
@@ -3287,7 +3288,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
    */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
 

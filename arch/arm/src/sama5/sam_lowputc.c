@@ -241,7 +241,7 @@ void up_lowputc(char ch)
 #if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)
   irqstate_t flags;
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for the transmitter to be available */
 
@@ -269,7 +269,7 @@ void up_lowputc(char ch)
 #elif defined(SAMA5_HAVE_FLEXCOM_CONSOLE)
   irqstate_t flags;
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for the transmitter to be available */
 
@@ -297,7 +297,7 @@ void up_lowputc(char ch)
 #elif defined(CONFIG_SAMA5_DBGU_CONSOLE)
   irqstate_t flags;
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for the transmitter to be available */
 

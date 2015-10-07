@@ -100,15 +100,15 @@ static void aes_memcpy(void *out, const void *in, size_t size)
 {
   size_t i;
   size_t wcount = size / 4;
-  for (i = 0; i < wcount; i++, out = (uint8_t*)out + 4, in = (uint8_t*)in + 4)
+  for (i = 0; i < wcount; i++, out = (uint8_t *)out + 4, in = (uint8_t *)in + 4)
     {
-      *(uint32_t*)out = *(uint32_t*)in;
+      *(uint32_t *)out = *(uint32_t *)in;
     }
 }
 
 static void aes_encryptblock(void *out, const void *in)
 {
-  aes_memcpy((void*)SAM_AES_IDATAR, in, AES_BLOCK_SIZE);
+  aes_memcpy((void *)SAM_AES_IDATAR, in, AES_BLOCK_SIZE);
 
   putreg32(AES_CR_START, SAM_AES_CR);
 
@@ -116,7 +116,7 @@ static void aes_encryptblock(void *out, const void *in)
 
   if (out)
     {
-      aes_memcpy(out, (void*)SAM_AES_ODATAR, AES_BLOCK_SIZE);
+      aes_memcpy(out, (void *)SAM_AES_ODATAR, AES_BLOCK_SIZE);
     }
 }
 
@@ -193,10 +193,10 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
       return res;
     }
 
-  aes_memcpy((void*)SAM_AES_KEYWR, key, keysize);
+  aes_memcpy((void *)SAM_AES_KEYWR, key, keysize);
   if (iv)
     {
-      aes_memcpy((void*)SAM_AES_IVR, iv, AES_BLOCK_SIZE);
+      aes_memcpy((void *)SAM_AES_IVR, iv, AES_BLOCK_SIZE);
     }
 
   while (size)
@@ -204,7 +204,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
       if ((mode & AES_MODE_MAC) == 0)
         {
           aes_encryptblock(out, in);
-          out = (char*)out + AES_BLOCK_SIZE;
+          out = (char *)out + AES_BLOCK_SIZE;
         }
       else if (size == AES_BLOCK_SIZE)
         {
@@ -215,7 +215,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
           aes_encryptblock(NULL, in);
         }
 
-      in  = (char*)in  + AES_BLOCK_SIZE;
+      in  = (char *)in  + AES_BLOCK_SIZE;
       size -= AES_BLOCK_SIZE;
     }
 

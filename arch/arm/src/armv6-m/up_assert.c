@@ -226,7 +226,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return ret;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace,FAR  void *arg)
+static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
@@ -368,7 +368,7 @@ static void _up_assert(int errorcode)
   if (current_regs || ((struct tcb_s *)g_readytorun.head)->pid == 0)
     {
       (void)irqsave();
-      for (;;)
+      for (; ; )
         {
 #ifdef CONFIG_ARCH_LEDS
           board_led_on(LED_PANIC);

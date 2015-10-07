@@ -237,7 +237,7 @@ void efm32_rmu_initialize(void)
 
   /* Now clear reset cause */
 
-  putreg32(RMU_CMD_RCCLR,EFM32_RMU_CMD);
+  putreg32(RMU_CMD_RCCLR, EFM32_RMU_CMD);
 
   /* Clear some reset causes not cleared with RMU CMD register
    * (If EMU registers locked, they must be unlocked first)
@@ -248,22 +248,22 @@ void efm32_rmu_initialize(void)
     {
       /* EMU unlock */
 
-      putreg32(EMU_LOCK_LOCKKEY_LOCK,EMU_LOCK_LOCKKEY_UNLOCK);
+      putreg32(EMU_LOCK_LOCKKEY_LOCK, EMU_LOCK_LOCKKEY_UNLOCK);
     }
 
-  modifyreg32(EFM32_EMU_AUXCTRL,0,EMU_AUXCTRL_HRCCLR);
-  modifyreg32(EFM32_EMU_AUXCTRL,EMU_AUXCTRL_HRCCLR,0);
+  modifyreg32(EFM32_EMU_AUXCTRL, 0, EMU_AUXCTRL_HRCCLR);
+  modifyreg32(EFM32_EMU_AUXCTRL, EMU_AUXCTRL_HRCCLR, 0);
 
   if (locked)
     {
       /* EMU lock */
 
-      putreg32(EMU_LOCK_LOCKKEY_LOCK,EMU_LOCK_LOCKKEY_LOCK);
+      putreg32(EMU_LOCK_LOCKKEY_LOCK, EMU_LOCK_LOCKKEY_LOCK);
     }
 
 #ifdef CONFIG_EFM32_RMU_DEBUG
   rmudbg("RMU => reg = 0x%08X\n", g_efm32_rstcause);
-  for (;;)
+  for (; ; )
     {
       const char *str;
 

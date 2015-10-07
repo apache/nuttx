@@ -1788,7 +1788,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 
       if (priv->candma)
         {
-          priv->dmach = sam_dmachannel(0,0);
+          priv->dmach = sam_dmachannel(0, 0);
           if (!priv->dmach)
             {
               qspidbg("ERROR: Failed to allocate the DMA channel\n");

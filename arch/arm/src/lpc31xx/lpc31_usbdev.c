@@ -512,20 +512,20 @@ static uint32_t lpc31_getreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -817,18 +817,24 @@ static int lpc31_progressep(struct lpc31_ep_s *privep)
 
   if (privreq->req.len == 0)
     {
-    /* If the class driver is responding to a setup packet, then wait for the
-     * host to illicit thr response */
+      /* If the class driver is responding to a setup packet, then wait for the
+       * host to illicit thr response */
 
-    if (privep->epphy == LPC31_EP0_IN && privep->dev->ep0state == EP0STATE_SETUP_OUT)
-      lpc31_ep0state (privep->dev, EP0STATE_WAIT_NAK_IN);
-    else
-      {
-        if (LPC31_EPPHYIN(privep->epphy))
-        usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPINNULLPACKET), 0);
-        else
-        usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPOUTNULLPACKET), 0);
-      }
+      if (privep->epphy == LPC31_EP0_IN && privep->dev->ep0state == EP0STATE_SETUP_OUT)
+        {
+          lpc31_ep0state (privep->dev, EP0STATE_WAIT_NAK_IN);
+        }
+      else
+        {
+          if (LPC31_EPPHYIN(privep->epphy))
+            {
+              usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPINNULLPACKET), 0);
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPOUTNULLPACKET), 0);
+            }
+        }
 
       lpc31_reqcomplete(privep, lpc31_rqdequeue(privep), OK);
       return OK;
@@ -1027,12 +1033,12 @@ static void lpc31_ep0configure(struct lpc31_usbdev_s *priv)
                       DQH_CAPABILITY_IOS |
                       DQH_CAPABILITY_ZLT);
 
-  g_qh[LPC31_EP0_IN ].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_LPC31_USBDEV_EP0_MAXSIZE) |
+  g_qh[LPC31_EP0_IN].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_LPC31_USBDEV_EP0_MAXSIZE) |
                       DQH_CAPABILITY_IOS |
                       DQH_CAPABILITY_ZLT);
 
   g_qh[LPC31_EP0_OUT].currdesc = DTD_NEXTDESC_INVALID;
-  g_qh[LPC31_EP0_IN ].currdesc = DTD_NEXTDESC_INVALID;
+  g_qh[LPC31_EP0_IN].currdesc = DTD_NEXTDESC_INVALID;
 
   /* Enable EP0 */
   lpc31_setbits (USBDEV_ENDPTCTRL0_RXE | USBDEV_ENDPTCTRL0_TXE, LPC31_USBDEV_ENDPTCTRL0);
@@ -1185,91 +1191,94 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
     lpc31_dispatchrequest(priv, &ctrl);
   else
     {
-    /* Handle standard request.  Pick off the things of interest to the USB
-     * device controller driver; pass what is left to the class driver */
-    switch (ctrl.req)
-      {
-      case USB_REQ_GETSTATUS:
+      /* Handle standard request.  Pick off the things of interest to the USB
+       * device controller driver; pass what is left to the class driver
+       */
+
+      switch (ctrl.req)
         {
-          /* type:  device-to-host; recipient = device, interface, endpoint
-           * value: 0
-           * index: zero interface endpoint
-           * len:   2; data = status
-           */
+        case USB_REQ_GETSTATUS:
+          {
+            /* type:  device-to-host; recipient = device, interface, endpoint
+             * value: 0
+             * index: zero interface endpoint
+             * len:   2; data = status
+             */
 
-          usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_GETSTATUS), 0);
-          if (!priv->paddrset || len != 2 ||
-              (ctrl.type & USB_REQ_DIR_IN) == 0 || value != 0)
-            {
-              priv->stalled = true;
-            }
-          else
-            {
-              switch (ctrl.type & USB_REQ_RECIPIENT_MASK)
-                {
-                case USB_REQ_RECIPIENT_ENDPOINT:
+            usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_GETSTATUS), 0);
+            if (!priv->paddrset || len != 2 ||
+                (ctrl.type & USB_REQ_DIR_IN) == 0 || value != 0)
+              {
+                priv->stalled = true;
+              }
+            else
+              {
+                switch (ctrl.type & USB_REQ_RECIPIENT_MASK)
                   {
-                    usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPGETSTATUS), 0);
-                    privep = lpc31_epfindbyaddr(priv, index);
-                    if (!privep)
-                      {
-                        usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADEPGETSTATUS), 0);
-                        priv->stalled = true;
-                      }
-                    else
-                      {
-                        if (privep->stalled)
-                          priv->ep0buf[0] = 1; /* Stalled */
-                        else
-                          priv->ep0buf[0] = 0; /* Not stalled */
-                        priv->ep0buf[1] = 0;
+                  case USB_REQ_RECIPIENT_ENDPOINT:
+                    {
+                      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPGETSTATUS), 0);
+                      privep = lpc31_epfindbyaddr(priv, index);
+                      if (!privep)
+                        {
+                          usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADEPGETSTATUS), 0);
+                          priv->stalled = true;
+                        }
+                      else
+                         {
+                          if (privep->stalled)
+                            priv->ep0buf[0] = 1; /* Stalled */
+                          else
+                            priv->ep0buf[0] = 0; /* Not stalled */
 
-                        lpc31_ep0xfer (LPC31_EP0_IN, priv->ep0buf, 2);
-                        lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
-                      }
+                          priv->ep0buf[1] = 0;
+
+                          lpc31_ep0xfer (LPC31_EP0_IN, priv->ep0buf, 2);
+                          lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
+                        }
                     }
-                  break;
+                    break;
 
-                case USB_REQ_RECIPIENT_DEVICE:
-                  {
-                    if (index == 0)
-                      {
-                        usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_DEVGETSTATUS), 0);
+                  case USB_REQ_RECIPIENT_DEVICE:
+                    {
+                      if (index == 0)
+                        {
+                          usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_DEVGETSTATUS), 0);
 
-                        /* Features:  Remote Wakeup=YES; selfpowered=? */
+                          /* Features:  Remote Wakeup=YES; selfpowered=? */
 
-                        priv->ep0buf[0] = (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
-                              (1 << USB_FEATURE_REMOTEWAKEUP);
-                        priv->ep0buf[1] = 0;
+                          priv->ep0buf[0] = (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
+                                (1 << USB_FEATURE_REMOTEWAKEUP);
+                          priv->ep0buf[1] = 0;
 
-                        lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
-                        lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
-                      }
-                    else
-                      {
-                        usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADDEVGETSTATUS), 0);
-                        priv->stalled = true;
-                      }
-                  }
-                  break;
+                          lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
+                          lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
+                        }
+                      else
+                        {
+                          usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADDEVGETSTATUS), 0);
+                          priv->stalled = true;
+                        }
+                    }
+                    break;
 
-                case USB_REQ_RECIPIENT_INTERFACE:
-                  {
-                    usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_IFGETSTATUS), 0);
-                    priv->ep0buf[0] = 0;
-                    priv->ep0buf[1] = 0;
+                  case USB_REQ_RECIPIENT_INTERFACE:
+                    {
+                      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_IFGETSTATUS), 0);
+                      priv->ep0buf[0] = 0;
+                      priv->ep0buf[1] = 0;
 
-                    lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
-                    lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
-                  }
-                  break;
+                      lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
+                      lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
+                    }
+                    break;
 
-                default:
-                  {
-                    usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADGETSTATUS), 0);
-                    priv->stalled = true;
-                  }
-                  break;
+                  default:
+                    {
+                      usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADGETSTATUS), 0);
+                      priv->stalled = true;
+                    }
+                    break;
                 }
             }
         }
@@ -1601,13 +1610,18 @@ bool lpc31_epcomplete(struct lpc31_usbdev_s *priv, uint8_t epphy)
   struct lpc31_dtd_s *dtd     = &g_td[epphy];
 
   if (privreq == NULL)        /* This shouldn't really happen */
-  {
-    if (LPC31_EPPHYOUT(privep->epphy))
-      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPINQEMPTY), 0);
-    else
-      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPOUTQEMPTY), 0);
-    return true;
-  }
+    {
+      if (LPC31_EPPHYOUT(privep->epphy))
+        {
+          usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPINQEMPTY), 0);
+        }
+      else
+        {
+          usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPOUTQEMPTY), 0);
+        }
+
+      return true;
+    }
 
   int xfrd = dtd->xfer_len - (dtd->config >> 16);
 
@@ -1677,7 +1691,7 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
 
   if (disr & USBDEV_USBSTS_URI)
     {
-      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_DEVRESET),0);
+      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_DEVRESET), 0);
 
       lpc31_usbreset(priv);
 
@@ -1691,7 +1705,7 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
 
   if (!priv->suspended && (disr & USBDEV_USBSTS_SLI) != 0)
     {
-      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_SUSPENDED),0);
+      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_SUSPENDED), 0);
 
       /* Inform the Class driver of the suspend event */
 
@@ -1710,7 +1724,7 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
 
   else if (priv->suspended && (disr & USBDEV_USBSTS_SLI) == 0)
     {
-      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_RESUMED),0);
+      usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_RESUMED), 0);
 
       /* Inform the Class driver of the resume event */
 
@@ -1777,10 +1791,15 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
 
           for (n = 1; n < LPC31_NLOGENDPOINTS; n++)
             {
-              if (mask & LPC31_ENDPTMASK((n<<1)))
-                lpc31_epcomplete (priv, (n<<1));
-              if (mask & LPC31_ENDPTMASK((n<<1)+1))
-                lpc31_epcomplete(priv, (n<<1)+1);
+              if (mask & LPC31_ENDPTMASK((n << 1)))
+                {
+                  lpc31_epcomplete (priv, (n << 1));
+                }
+
+              if (mask & LPC31_ENDPTMASK((n << 1) + 1))
+                {
+                  lpc31_epcomplete(priv, (n << 1) + 1);
+                }
             }
         }
 

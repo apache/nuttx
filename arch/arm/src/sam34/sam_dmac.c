@@ -1307,7 +1307,7 @@ static int sam_dmainterrupt(int irq, void *context)
 
               if ((regval & DMAC_EBC_ERR(chndx)) != 0)
                 {
-                   /* Yes... Terminate the transfer with an error? */
+                  /* Yes... Terminate the transfer with an error? */
 
                   sam_dmaterminate(dmach, -EIO);
                 }
@@ -1315,7 +1315,7 @@ static int sam_dmainterrupt(int irq, void *context)
               /* Is the transfer complete? */
 
               else if ((regval & DMAC_EBC_CBTC(chndx)) != 0)
-               {
+                {
                   /* Yes.. Terminate the transfer with success */
 
                   sam_dmaterminate(dmach, OK);

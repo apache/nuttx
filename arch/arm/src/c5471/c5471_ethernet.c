@@ -1058,7 +1058,7 @@ static void c5471_rxstatus(struct c5471_driver_s *c5471)
   /* Walk that last packet we just received to collect xmit status bits. */
 
   rxstatus = 0;
-  for (;;)
+  for (; ; )
     {
       if (EIM_TXDESC_OWN_HOST & getreg32(desc))
         {
@@ -1405,7 +1405,7 @@ static void c5471_txstatus(struct c5471_driver_s *c5471)
   txstatus = 0;
   if (c5471->c_lastdescstart && c5471->c_lastdescend)
     {
-      for (;;)
+      for (; ; )
         {
           txstatus |= (getreg32(desc) & EIM_RXDESC_STATUSMASK);
           if (desc == c5471->c_lastdescend)

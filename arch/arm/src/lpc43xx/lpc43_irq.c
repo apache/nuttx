@@ -61,9 +61,9 @@
 /* Get a 32-bit version of the default priority */
 
 #define DEFPRIORITY32 \
-  (LPC43M4_SYSH_PRIORITY_DEFAULT << 24 |\
-   LPC43M4_SYSH_PRIORITY_DEFAULT << 16 |\
-   LPC43M4_SYSH_PRIORITY_DEFAULT << 8  |\
+  (LPC43M4_SYSH_PRIORITY_DEFAULT << 24 | \
+   LPC43M4_SYSH_PRIORITY_DEFAULT << 16 | \
+   LPC43M4_SYSH_PRIORITY_DEFAULT << 8  | \
    LPC43M4_SYSH_PRIORITY_DEFAULT)
 
 /* Given the address of a NVIC ENABLE register, this is the offset to

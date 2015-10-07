@@ -664,7 +664,7 @@ static struct lpc17_gtd_s *lpc17_tdalloc(void)
   ret   = (struct lpc17_gtd_s *)g_tdfree;
   if (ret)
     {
-      g_tdfree = ((struct lpc17_list_s*)ret)->flink;
+      g_tdfree = ((struct lpc17_list_s *)ret)->flink;
     }
 
   irqrestore(flags);
@@ -715,7 +715,7 @@ static uint8_t *lpc17_tballoc(void)
   uint8_t *ret = (uint8_t *)g_tbfree;
   if (ret)
     {
-      g_tbfree = ((struct lpc17_list_s*)ret)->flink;
+      g_tbfree = ((struct lpc17_list_s *)ret)->flink;
     }
   return ret;
 }
@@ -763,7 +763,7 @@ static uint8_t *lpc17_allocio(void)
   ret = (uint8_t *)g_iofree;
   if (ret)
     {
-      g_iofree = ((struct lpc17_list_s*)ret)->flink;
+      g_iofree = ((struct lpc17_list_s *)ret)->flink;
     }
 
   irqrestore(flags);
@@ -818,7 +818,7 @@ static struct lpc17_xfrinfo_s *lpc17_alloc_xfrinfo(void)
   ret = (struct lpc17_xfrinfo_s *)g_xfrfree;
   if (ret)
     {
-      g_xfrfree = ((struct lpc17_list_s*)ret)->flink;
+      g_xfrfree = ((struct lpc17_list_s *)ret)->flink;
     }
 
   irqrestore(flags);
@@ -1943,7 +1943,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
   irqstate_t flags;
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -2208,11 +2208,11 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
     {
       /* Remove the ED from the freelist */
 
-      g_edfree = ((struct lpc17_list_s*)ed)->flink;
+      g_edfree = ((struct lpc17_list_s *)ed)->flink;
 
       /* Configure the endpoint descriptor. */
 
-      memset((void*)ed, 0, sizeof(struct lpc17_ed_s));
+      memset((void *)ed, 0, sizeof(struct lpc17_ed_s));
 
       hport = epdesc->hport;
       ed->hw.ctrl = (uint32_t)(hport->funcaddr)      << ED_CONTROL_FA_SHIFT |
@@ -2606,7 +2606,7 @@ static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   uint16_t len;
   int  ret;
 
-  DEBUGASSERT(priv != NULL && ed != NULL && req!= NULL);
+  DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
@@ -2617,7 +2617,7 @@ static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   lpc17_takesem(&priv->exclsem);
 
   len = lpc17_getle16(req->len);
-  ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
@@ -2644,7 +2644,7 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   uint16_t len;
   int  ret;
 
-  DEBUGASSERT(priv != NULL && ed != NULL && req!= NULL);
+  DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
@@ -2655,12 +2655,12 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   lpc17_takesem(&priv->exclsem);
 
   len = lpc17_getle16(req->len);
-  ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
         {
-          ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_OUT, (uint8_t*)buffer, len);
+          ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_OUT, (uint8_t *)buffer, len);
         }
 
       if (ret == OK)
@@ -3013,7 +3013,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       /* Return the number of bytes successfully transferred */
 
       nbytes = xfrinfo->xfrd;
-      DEBUGASSERT(nbytes >=0 && nbytes <= buflen);
+      DEBUGASSERT(nbytes >= 0 && nbytes <= buflen);
     }
   else
     {
@@ -3392,7 +3392,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
               lpc17_givesem(&ed->wdhsem);
               xfrinfo->wdhwait = false;
 
-               /* And free the transfer structure */
+              /* And free the transfer structure */
 
               lpc17_free_xfrinfo(xfrinfo);
               ed->xfrinfo = NULL;
@@ -3408,7 +3408,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
         }
       else
         {
-           /* Just free the transfer structure */
+          /* Just free the transfer structure */
 
           lpc17_free_xfrinfo(xfrinfo);
           ed->xfrinfo = NULL;
@@ -3712,9 +3712,9 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   /* Initialize all the TDs, EDs and HCCA to 0 */
 
-  memset((void*)HCCA,   0, sizeof(struct ohci_hcca_s));
-  memset((void*)TDTAIL, 0, sizeof(struct ohci_gtd_s));
-  memset((void*)EDCTRL, 0, sizeof(struct lpc17_ed_s));
+  memset((void *)HCCA,   0, sizeof(struct ohci_hcca_s));
+  memset((void *)TDTAIL, 0, sizeof(struct ohci_gtd_s));
+  memset((void *)EDCTRL, 0, sizeof(struct lpc17_ed_s));
   sem_init(&EDCTRL->wdhsem, 0, 0);
 
   /* Initialize user-configurable EDs */
@@ -3819,7 +3819,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   /* Enable OHCI interrupts */
 
-  lpc17_putreg((LPC17_ALL_INTS|OHCI_INT_MIE), LPC17_USBHOST_INTEN);
+  lpc17_putreg((LPC17_ALL_INTS | OHCI_INT_MIE), LPC17_USBHOST_INTEN);
 
   /* Attach USB host controller interrupt handler */
 

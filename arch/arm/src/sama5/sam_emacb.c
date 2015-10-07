@@ -1517,15 +1517,15 @@ static int sam_recvframe(struct sam_emac_s *priv)
           priv->rxndx = rxndx;
         }
 
-    /* Process the next buffer */
+      /* Process the next buffer */
 
-    rxdesc = &priv->rxdesc[rxndx];
+      rxdesc = &priv->rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+      /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    arch_invalidate_dcache((uintptr_t)rxdesc,
-                           (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-  }
+      arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+    }
 
   /* No packet was found */
 
@@ -1636,7 +1636,7 @@ static void sam_receive(struct sam_emac_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -2860,7 +2860,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && sam_getreg(priv, regoffset2) == 0)
     {
-       /* Yes.. disable all address matching */
+      /* Yes.. disable all address matching */
 
       regval  = sam_getreg(priv, SAM_EMAC_NCFGR_OFFSET);
       regval &= ~(EMAC_NCFGR_UNIHEN | EMAC_NCFGR_MTIHEN);
@@ -3637,7 +3637,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   /* Check AutoNegotiate complete */
 
   timeout = 0;
-  for (;;)
+  for (; ; )
     {
       ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
       if (ret < 0)
@@ -3998,9 +3998,9 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
     }
   else
 #endif
-   {
-     nvdbg("ERROR: emac=%d\n", priv->attr->emac);
-   }
+    {
+      nvdbg("ERROR: emac=%d\n", priv->attr->emac);
+    }
 }
 
 /****************************************************************************
@@ -4040,15 +4040,15 @@ static void sam_txreset(struct sam_emac_s *priv)
   priv->txtail = 0;
 
   for (ndx = 0; ndx < priv->attr->ntxbuffers; ndx++)
-  {
-    bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
+    {
+      bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
 
-    /* Set the buffer address and mark the descriptor as in used by firmware */
+      /* Set the buffer address and mark the descriptor as in used by firmware */
 
-    physaddr           = sam_physramaddr(bufaddr);
-    txdesc[ndx].addr   = physaddr;
-    txdesc[ndx].status = EMACTXD_STA_USED;
-  }
+      physaddr           = sam_physramaddr(bufaddr);
+      txdesc[ndx].addr   = physaddr;
+      txdesc[ndx].status = EMACTXD_STA_USED;
+    }
 
   /* Mark the final descriptor in the list */
 
@@ -4102,18 +4102,18 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   priv->rxndx = 0;
   for (ndx = 0; ndx < priv->attr->nrxbuffers; ndx++)
-  {
-    bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
-    DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
+    {
+      bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
+      DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
 
-    /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
-     * EMACRXD_ADDR_WRAP.
-     */
+      /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
+       * EMACRXD_ADDR_WRAP.
+       */
 
-    physaddr           = sam_physramaddr(bufaddr);
-    rxdesc[ndx].addr   = physaddr;
-    rxdesc[ndx].status = 0;
-  }
+      physaddr           = sam_physramaddr(bufaddr);
+      rxdesc[ndx].addr   = physaddr;
+      rxdesc[ndx].status = 0;
+    }
 
   /* Mark the final descriptor in the list */
 

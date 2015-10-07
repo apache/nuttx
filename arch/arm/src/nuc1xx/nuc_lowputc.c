@@ -161,7 +161,7 @@ void nuc_lowsetup(void)
 
 #ifdef CONFIG_NUC_UART0
 #ifdef CONFIG_UART0_FLOWCONTROL
-  regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1 | GCR_GPB_MFP2| GCR_GPB_MFP3);
+  regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1 | GCR_GPB_MFP2 | GCR_GPB_MFP3);
 #else
   regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1);
 #endif
@@ -174,7 +174,7 @@ void nuc_lowsetup(void)
 
 #ifdef CONFIG_NUC_UART1
 #ifdef CONFIG_UART1_FLOWCONTROL
-  regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5 | GCR_GPB_MFP6| GCR_GPB_MFP7)
+  regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5 | GCR_GPB_MFP6 | GCR_GPB_MFP7)
 #else
   regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5);
 #endif
@@ -365,7 +365,7 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
 
   regval = getreg32(base + NUC_UART_BAUD_OFFSET);
 
-   /* Mode 0: Source Clock mod 16 < 3 => Using Divider X = 16 */
+  /* Mode 0: Source Clock mod 16 < 3 => Using Divider X = 16 */
 
   clksperbit = (NUC_UART_CLK + (baud >> 1)) / baud;
   if ((clksperbit & 15) < 3)

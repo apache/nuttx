@@ -249,7 +249,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Start with the first SRAM region */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_start = (FAR void *)g_idle_topstack;
   *heap_size = CONFIG_RAM_END - g_idle_topstack;
 }
 
@@ -268,7 +268,7 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 1
   /* Add the next SRAM region (which should exist) */
 
-  kmm_addregion((FAR void*)MM_REGION2_BASE, MM_REGION2_SIZE);
+  kmm_addregion((FAR void *)MM_REGION2_BASE, MM_REGION2_SIZE);
 
 #ifdef MM_REGION3_BASE
   /* Add the third SRAM region (which will not exist in configuration B) */
@@ -276,12 +276,12 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 2
   /* Add the third SRAM region (which may not exist) */
 
-  kmm_addregion((FAR void*)MM_REGION3_BASE, MM_REGION3_SIZE);
+  kmm_addregion((FAR void *)MM_REGION3_BASE, MM_REGION3_SIZE);
 
 #if CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE)
   /* Add the DMA region (which may not be available) */
 
-  kmm_addregion((FAR void*)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
+  kmm_addregion((FAR void *)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
 
 #endif /* CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE) */
 #endif /* CONFIG_MM_REGIONS > 2 */
@@ -290,7 +290,7 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 2 && defined(MM_DMAHEAP_BASE)
   /* Add the DMA region (which may not be available) */
 
-  kmm_addregion((FAR void*)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
+  kmm_addregion((FAR void *)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
 
 #endif /* CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE) */
 #endif /* MM_REGION3_BASE */

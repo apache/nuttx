@@ -96,17 +96,17 @@ static int  dac_interrupt(int irq, void *context);
 
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset =dac_reset,
-  .ao_setup = dac_setup,
+  .ao_reset    = dac_reset,
+  .ao_setup    = dac_setup,
   .ao_shutdown = dac_shutdown,
-  .ao_txint = dac_txint,
-  .ao_send = dac_send,
-  .ao_ioctl = dac_ioctl,
+  .ao_txint    = dac_txint,
+  .ao_send     = dac_send,
+  .ao_ioctl    = dac_ioctl,
 };
 
 static struct dac_dev_s g_dacdev =
 {
-  .ad_ops = &g_dacops,
+  .ad_ops      = &g_dacops,
 };
 
 /****************************************************************************
@@ -129,7 +129,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
   regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_DAC_SHIFT);
   putreg32(regval, LPC43_SYSCON_PCLKSEL0);
 
-  //putreg32(DAC_CTRL_DBLBUFEN,LPC43_DAC_CTRL); ?
+  //putreg32(DAC_CTRL_DBLBUFEN, LPC43_DAC_CTRL); ?
 
   lpc43_configgpio(GPIO_AOUT);
 
@@ -163,7 +163,7 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
 
 static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 {
-  putreg32((msg->am_data>>16)&0xfffff,LPC43_DAC_CR);
+  putreg32((msg->am_data >> 16) & 0xfffff, LPC43_DAC_CR);
   dac_txdone(&g_dacdev);
   return 0;
 }
@@ -201,4 +201,3 @@ FAR struct dac_dev_s *lpc43_dacinitialize(void)
 }
 
 #endif /* CONFIG_LPC43_DAC */
-

@@ -293,7 +293,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * that was not dedicated to the user heap).
    */
 
-  *heap_start = (FAR void*)USERSPACE->us_bssend;
+  *heap_start = (FAR void *)USERSPACE->us_bssend;
   *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
 }
 #endif
@@ -317,7 +317,7 @@ void up_addregion(void)
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_SDRAMCS_BASE, CONFIG_SAMV7_SDRAMSIZE);
+  kumm_addregion((FAR void *)SAM_SDRAMCS_BASE, CONFIG_SAMV7_SDRAMSIZE);
 
 #endif /* HAVE_SDRAM_REGION */
 

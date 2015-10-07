@@ -232,7 +232,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
   priv->wrcnt      = 0;
   priv->rdcnt      = 0;
   priv->msg.addr  &= ~0x01;
-  priv->msg.buffer = (uint8_t*)buffer;
+  priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
   priv->nmsg = 1;
@@ -293,8 +293,8 @@ static int i2c_start(struct lpc43_i2cdev_s *priv)
 
   sem_wait(&priv->mutex);
 
-  putreg32(I2C_CONCLR_STAC|I2C_CONCLR_SIC,priv->base+LPC43_I2C_CONCLR_OFFSET);
-  putreg32(I2C_CONSET_STA,priv->base+LPC43_I2C_CONSET_OFFSET);
+  putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC, priv->base + LPC43_I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
 
   wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
   sem_wait(&priv->wait);
@@ -320,7 +320,7 @@ static void i2c_stop(struct lpc43_i2cdev_s *priv)
 {
   if (priv->state != 0x38)
     {
-      putreg32(I2C_CONSET_STO|I2C_CONSET_AA,priv->base+LPC43_I2C_CONSET_OFFSET);
+      putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + LPC43_I2C_CONSET_OFFSET);
     }
 
   sem_post(&priv->wait);
@@ -359,10 +359,10 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, i
 
   DEBUGASSERT(dev != NULL);
 
-  priv->wrcnt=0;
-  priv->rdcnt=0;
-  priv->msgs = msgs;
-  priv->nmsg = count;
+  priv->wrcnt = 0;
+  priv->rdcnt = 0;
+  priv->msgs  = msgs;
+  priv->nmsg  = count;
 
   ret = count - i2c_start(priv);
 
@@ -376,7 +376,7 @@ void startStopNextMessage(struct lpc43_i2cdev_s *priv)
   if (priv->nmsg > 0)
     {
       priv->msgs++;
-      putreg32(I2C_CONSET_STA,priv->base+LPC43_I2C_CONSET_OFFSET);
+      putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
     }
   else
     {
@@ -418,7 +418,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
   /* Reference UM10360 19.10.5 */
 
-  state = getreg32(priv->base+LPC43_I2C_STAT_OFFSET);
+  state = getreg32(priv->base + LPC43_I2C_STAT_OFFSET);
   msg  = priv->msgs;
 
   priv->state = state;
@@ -435,7 +435,7 @@ static int i2c_interrupt(int irq, FAR void *context)
     /* Write cases */
 
     case 0x18: /* SLA+W has been transmitted; ACK has been received  */
-      priv->wrcnt=0;
+      priv->wrcnt = 0;
       putreg32(msg->buffer[0], priv->base + LPC43_I2C_DAT_OFFSET); /* put first byte */
       break;
 
@@ -444,7 +444,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
       if (priv->wrcnt < msg->length)
         {
-          putreg32(msg->buffer[priv->wrcnt],priv->base+LPC43_I2C_DAT_OFFSET); /* Put next byte */
+          putreg32(msg->buffer[priv->wrcnt], priv->base + LPC43_I2C_DAT_OFFSET); /* Put next byte */
         }
       else
         {
@@ -462,22 +462,22 @@ static int i2c_interrupt(int irq, FAR void *context)
         }
       else
         {
-          putreg32(I2C_CONCLR_AAC,priv->base + LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK because only one byte */
+          putreg32(I2C_CONCLR_AAC, priv->base + LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK because only one byte */
         }
       break;
 
     case 0x50:  /* Data byte has been received; ACK has been returned. */
       priv->rdcnt++;
-      msg->buffer[priv->rdcnt-1 ] = getreg32(priv->base+LPC43_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt - 1] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
 
-      if (priv->rdcnt >= (msg->length - 1)) {
-          putreg32(I2C_CONCLR_AAC,priv->base+LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK any more */
-
-      }
+      if (priv->rdcnt >= (msg->length - 1))
+        {
+          putreg32(I2C_CONCLR_AAC, priv->base + LPC43_I2C_CONCLR_OFFSET);  /* Do not ACK any more */
+        }
       break;
 
     case 0x58:  /* Data byte has been received; NACK has been returned. */
-      msg->buffer[priv->rdcnt ] = getreg32(priv->base+LPC43_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
       startStopNextMessage(priv);
       break;
 
@@ -582,7 +582,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 
   irqrestore(flags);
 
-  putreg32(I2C_CONSET_I2EN,priv->base+LPC43_I2C_CONSET_OFFSET);
+  putreg32(I2C_CONSET_I2EN, priv->base + LPC43_I2C_CONSET_OFFSET);
 
   sem_init(&priv->mutex, 0, 1);
   sem_init(&priv->wait, 0, 0);
@@ -618,7 +618,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *) dev;
 
-  putreg32(I2C_CONCLRT_I2ENC,priv->base+LPC43_I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLRT_I2ENC, priv->base + LPC43_I2C_CONCLR_OFFSET);
   up_disable_irq(priv->irqid);
   irq_detach(priv->irqid);
   return OK;

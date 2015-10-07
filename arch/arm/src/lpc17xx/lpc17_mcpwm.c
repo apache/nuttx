@@ -179,7 +179,7 @@ static struct lpc17_mcpwmtimer_s g_pwm1dev =
   .timtype    = TIMTYPE_TIM1,
   .base       = LPC17_MCPWM_BASE,
   .pincfg     = GPIO_MCPWM_MCOA0,
-  .pclk       = (0x1<<12),
+  .pclk       = (1 << 12),
 };
 #endif
 
@@ -435,22 +435,22 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   regval  = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~(0x3 << 30);
-  regval |= (0x2 << 30);                     /* PCLK_MC peripheral clk = CCLK/2 = 50 MHz */
+  regval |= (0x2 << 30);                      /* PCLK_MC peripheral clk = CCLK/2 = 50 MHz */
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
   priv->pclk = (0x1 << 12) | (0x1 << 4);
 
-  putreg32((1 << 15), LPC17_MCPWM_INTENCLR); /* Disable MCABORT pin interrupt */
-  putreg32((1 << 0),  LPC17_MCPWM_INTENCLR); /* Disable ILIM0 interrupt */
-  putreg32((1 << 1),  LPC17_MCPWM_INTENCLR); /* Disable IMAT0 interrupt */
-  putreg32((1 << 2),  LPC17_MCPWM_INTENCLR); /* Disable ICAP0 interrupt */
-  putreg32((1 << 4),  LPC17_MCPWM_INTENCLR); /* Disable ILIM1 interrupt */
-  putreg32((1 << 5),  LPC17_MCPWM_INTENCLR); /* Disable IMAT1 interrupt */
-  putreg32((1 << 6),  LPC17_MCPWM_INTENCLR); /* Disable ICAP1 interrupt */
-  putreg32((1 << 8),  LPC17_MCPWM_INTENCLR); /* Disable ILIM2 interrupt */
-  putreg32((1 << 9),  LPC17_MCPWM_INTENCLR); /* Disable IMAT2 interrupt */
-  putreg32((1 << 10), LPC17_MCPWM_INTENCLR); /* Disable ICAP2 interrupt */
+  putreg32((1 << 15), LPC17_MCPWM_INTENCLR);  /* Disable MCABORT pin interrupt */
+  putreg32((1 << 0),  LPC17_MCPWM_INTENCLR);  /* Disable ILIM0 interrupt */
+  putreg32((1 << 1),  LPC17_MCPWM_INTENCLR);  /* Disable IMAT0 interrupt */
+  putreg32((1 << 2),  LPC17_MCPWM_INTENCLR);  /* Disable ICAP0 interrupt */
+  putreg32((1 << 4),  LPC17_MCPWM_INTENCLR);  /* Disable ILIM1 interrupt */
+  putreg32((1 << 5),  LPC17_MCPWM_INTENCLR);  /* Disable IMAT1 interrupt */
+  putreg32((1 << 6),  LPC17_MCPWM_INTENCLR);  /* Disable ICAP1 interrupt */
+  putreg32((1 << 8),  LPC17_MCPWM_INTENCLR);  /* Disable ILIM2 interrupt */
+  putreg32((1 << 9),  LPC17_MCPWM_INTENCLR);  /* Disable IMAT2 interrupt */
+  putreg32((1 << 10), LPC17_MCPWM_INTENCLR);  /* Disable ICAP2 interrupt */
 
-  putreg32((0xFFFFFFFF), LPC17_MCPWM_CAPCLR);/* Clear all event capture */
+  putreg32((0xFFFFFFFF), LPC17_MCPWM_CAPCLR); /* Clear all event capture */
 
   /* Configure the output pins */
 
@@ -459,39 +459,39 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   /* Program the timing registers */
 
-  putreg32((1 << 0),  LPC17_MCPWM_CONCLR);   /* Stop MCPWM timer0 */
-  putreg32((1 << 8),  LPC17_MCPWM_CONCLR);   /* Stop MCPWM timer1 */
-  putreg32((1 << 16), LPC17_MCPWM_CONCLR);   /* Stop MCPWM timer2 */
+  putreg32((1 << 0),  LPC17_MCPWM_CONCLR);    /* Stop MCPWM timer0 */
+  putreg32((1 << 8),  LPC17_MCPWM_CONCLR);    /* Stop MCPWM timer1 */
+  putreg32((1 << 16), LPC17_MCPWM_CONCLR);    /* Stop MCPWM timer2 */
 
-  putreg32((1 << 30), LPC17_MCPWM_CONCLR);   /* MCPWM not in AC mode */
+  putreg32((1 << 30), LPC17_MCPWM_CONCLR);    /* MCPWM not in AC mode */
 
-  putreg32(1000, LPC17_MCPWM_TC0);           /* Count frequency: Fpclk/1000 = 50 MHz/1000 = 50 KHz */
-  putreg32(400, LPC17_MCPWM_LIM0);           /* Set the starting duty cycle to 0.25 */
-  putreg32(0, LPC17_MCPWM_MAT0);             /* Reset the timer */
+  putreg32(1000, LPC17_MCPWM_TC0);            /* Count frequency: Fpclk/1000 = 50 MHz/1000 = 50 KHz */
+  putreg32(400, LPC17_MCPWM_LIM0);            /* Set the starting duty cycle to 0.25 */
+  putreg32(0, LPC17_MCPWM_MAT0);              /* Reset the timer */
 
-  putreg32(100000, LPC17_MCPWM_TC1);         /* Count frequency:Fpclk/100000 = 50 MHz/100000 = 500 Hz */
-  putreg32(50000, LPC17_MCPWM_LIM1);         /* Set the starting duty cycle to 0.5 */
-  putreg32(0, LPC17_MCPWM_MAT1);             /* Reset the timer */
+  putreg32(100000, LPC17_MCPWM_TC1);          /* Count frequency:Fpclk/100000 = 50 MHz/100000 = 500 Hz */
+  putreg32(50000, LPC17_MCPWM_LIM1);          /* Set the starting duty cycle to 0.5 */
+  putreg32(0, LPC17_MCPWM_MAT1);              /* Reset the timer */
 
-  putreg32(1000, LPC17_MCPWM_TC2);           /* Count frequency:Fpclk/1000 = 50 MHz/1000 = 50 KHz */
-  putreg32(400, LPC17_MCPWM_LIM2);           /* Set the starting duty cycle to 0.25 */
-  putreg32(0, LPC17_MCPWM_MAT2);             /* Reset the timer */
+  putreg32(1000, LPC17_MCPWM_TC2);            /* Count frequency:Fpclk/1000 = 50 MHz/1000 = 50 KHz */
+  putreg32(400, LPC17_MCPWM_LIM2);            /* Set the starting duty cycle to 0.25 */
+  putreg32(0, LPC17_MCPWM_MAT2);              /* Reset the timer */
 
-  putreg32((1 << 2),  LPC17_MCPWM_CONCLR);   /* Channel 0 polarity set to default */
-  putreg32((1 << 10), LPC17_MCPWM_CONCLR);   /* Channel 1 polarity set to default */
-  putreg32((1 << 18), LPC17_MCPWM_CONCLR);   /* Channel 2 polarity set to default */
+  putreg32((1 << 2),  LPC17_MCPWM_CONCLR);    /* Channel 0 polarity set to default */
+  putreg32((1 << 10), LPC17_MCPWM_CONCLR);    /* Channel 1 polarity set to default */
+  putreg32((1 << 18), LPC17_MCPWM_CONCLR);    /* Channel 2 polarity set to default */
 
-  putreg32((1 << 3),  LPC17_MCPWM_CONCLR);   /* Channel 0 dead time disabled */
-  putreg32((1 << 11), LPC17_MCPWM_CONCLR);   /* Channel 1 dead time disabled */
-  putreg32((1 << 19), LPC17_MCPWM_CONCLR);   /* Channel 2 dead time disabled */
+  putreg32((1 << 3),  LPC17_MCPWM_CONCLR);    /* Channel 0 dead time disabled */
+  putreg32((1 << 11), LPC17_MCPWM_CONCLR);    /* Channel 1 dead time disabled */
+  putreg32((1 << 19), LPC17_MCPWM_CONCLR);    /* Channel 2 dead time disabled */
 
-  putreg32((1 << 1),  LPC17_MCPWM_CONCLR);   /* Channel 0 edge aligned */
-  putreg32((1 << 9),  LPC17_MCPWM_CONCLR);   /* Channel 1 edge aligned */
-  putreg32((1 << 17), LPC17_MCPWM_CONCLR);   /* Channel 2 edge aligned */
+  putreg32((1 << 1),  LPC17_MCPWM_CONCLR);    /* Channel 0 edge aligned */
+  putreg32((1 << 9),  LPC17_MCPWM_CONCLR);    /* Channel 1 edge aligned */
+  putreg32((1 << 17), LPC17_MCPWM_CONCLR);    /* Channel 2 edge aligned */
 
-  putreg32((0xFFFFFFFF), LPC17_MCPWM_CNTCONCLR);/* All channels in counter mode on PCLK */
+  putreg32((0xFFFFFFFF), LPC17_MCPWM_CNTCONCLR); /* All channels in counter mode on PCLK */
 
-  putreg32((1 << 0), LPC17_MCPWM_CONSET);    /* Start MCPWM timer0 */
+  putreg32((1 << 0), LPC17_MCPWM_CONSET);     /* Start MCPWM timer0 */
 
   irqrestore(flags);
   pwm_dumpgpio(priv->pincfg, "PWM setup");

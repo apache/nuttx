@@ -67,9 +67,9 @@
 #  ifdef CONFIG_UART_SERIAL_CONSOLE
 #    define HAVE_CONSOLE 1
 
-     /* Is initialization performed by up_earlyserialinit()?  Or is UART
-      * initialization suppressed?
-      */
+/* Is initialization performed by up_earlyserialinit()?  Or is UART
+ * initialization suppressed?
+ */
 
 #    if defined(USE_EARLYSERIALINIT) || defined(CONFIG_SUPPRESS_UART_CONFIG)
 #      undef NEED_LOWSETUP
@@ -187,7 +187,7 @@ static inline void up_configbaud(void)
           /* Calculate the divisor with these fractional divider settings */
 
           uint32_t tmp = (tmulval * qtrclk) / ((tmulval + tdivaddval));
-          tdiv         = (tmp + (CONFIG_UART_BAUD>>1)) / CONFIG_UART_BAUD;
+          tdiv         = (tmp + (CONFIG_UART_BAUD >> 1)) / CONFIG_UART_BAUD;
 
           /* Check if this candidate divisor is within a valid range */
 
@@ -221,45 +221,45 @@ static inline void up_configbaud(void)
         }
     }
 
-    /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
+  /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
 
-    regval  = getreg32(LPC31_UART_LCR);
-    regval |= UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval  = getreg32(LPC31_UART_LCR);
+  regval |= UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the MS and LS DLAB registers */
+  /* Configure the MS and LS DLAB registers */
 
-    putreg32(div & UART_DLL_MASK, LPC31_UART_DLL);
-    putreg32((div >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
+  putreg32(div & UART_DLL_MASK, LPC31_UART_DLL);
+  putreg32((div >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
 
-    regval &= ~UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval &= ~UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the Fractional Divider Register (FDR) */
+  /* Configure the Fractional Divider Register (FDR) */
 
-    putreg32((mulval    << UART_FDR_MULVAL_SHIFT) |
-             (divaddval << UART_FDR_DIVADDVAL_SHIFT),
-             LPC31_UART_FDR);
+  putreg32((mulval    << UART_FDR_MULVAL_SHIFT) |
+           (divaddval << UART_FDR_DIVADDVAL_SHIFT),
+           LPC31_UART_FDR);
 #else
-    /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
+  /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
 
-    regval  = getreg32(LPC31_UART_LCR);
-    regval |= UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval  = getreg32(LPC31_UART_LCR);
+  regval |= UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the MS and LS DLAB registers */
+  /* Configure the MS and LS DLAB registers */
 
-    putreg32(CONFIG_LPC31_UART_DIVISOR & UART_DLL_MASK, LPC31_UART_DLL);
-    putreg32((CONFIG_LPC31_UART_DIVISOR >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
+  putreg32(CONFIG_LPC31_UART_DIVISOR & UART_DLL_MASK, LPC31_UART_DLL);
+  putreg32((CONFIG_LPC31_UART_DIVISOR >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
 
-    regval &= ~UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval &= ~UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the Fractional Divider Register (FDR) */
+  /* Configure the Fractional Divider Register (FDR) */
 
-    putreg32((CONFIG_LPC31_UART_MULVAL    << UART_FDR_MULVAL_SHIFT) |
-             (CONFIG_LPC31_UART_DIVADDVAL << UART_FDR_DIVADDVAL_SHIFT),
-             LPC31_UART_FDR);
+  putreg32((CONFIG_LPC31_UART_MULVAL    << UART_FDR_MULVAL_SHIFT) |
+           (CONFIG_LPC31_UART_DIVADDVAL << UART_FDR_DIVADDVAL_SHIFT),
+           LPC31_UART_FDR);
 #endif
 }
 #endif
@@ -287,11 +287,11 @@ void lpc31_lowsetup(void)
 
   /* Clear fifos */
 
-  putreg32((UART_FCR_RXFIFORST|UART_FCR_TXFIFORST), LPC31_UART_FCR);
+  putreg32((UART_FCR_RXFIFORST | UART_FCR_TXFIFORST), LPC31_UART_FCR);
 
   /* Set trigger */
 
-  putreg32((UART_FCR_FIFOENABLE|UART_FCR_RXTRIGLEVEL_16), LPC31_UART_FCR);
+  putreg32((UART_FCR_FIFOENABLE | UART_FCR_RXTRIGLEVEL_16), LPC31_UART_FCR);
 
   /* Set up the LCR */
 
@@ -314,7 +314,7 @@ void lpc31_lowsetup(void)
 #if CONFIG_UART_PARITY == 1
   regval |= UART_LCR_PAREN;
 #elif CONFIG_UART_PARITY == 2
-  regval |= (UART_LCR_PAREVEN|UART_LCR_PAREN);
+  regval |= (UART_LCR_PAREVEN | UART_LCR_PAREN);
 #endif
   putreg32(regval, LPC31_UART_LCR);
 
@@ -324,8 +324,8 @@ void lpc31_lowsetup(void)
 
   /* Configure the FIFOs */
 
-  putreg32((UART_FCR_RXTRIGLEVEL_16|UART_FCR_TXFIFORST|
-            UART_FCR_RXFIFORST|UART_FCR_FIFOENABLE),
+  putreg32((UART_FCR_RXTRIGLEVEL_16 | UART_FCR_TXFIFORST |
+            UART_FCR_RXFIFORST | UART_FCR_FIFOENABLE),
            LPC31_UART_FCR);
 
   /* The NuttX serial driver waits for the first THRE interrupt before

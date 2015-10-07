@@ -1007,7 +1007,7 @@ static void efm32_ep0out_ctrlsetup(FAR struct efm32_usbdev_s *priv)
   regval = (USB_SIZEOF_CTRLREQ * 3 << _USB_DOEP0TSIZ_XFERSIZE_SHIFT) |
            (USB_DOEP0TSIZ_PKTCNT) |
            (3 << _USB_DOEP0TSIZ_SUPCNT_SHIFT);
-  efm32_putreg(regval,EFM32_USB_DOEP0TSIZ);
+  efm32_putreg(regval, EFM32_USB_DOEP0TSIZ);
 
   /* Then clear NAKing and enable the transfer */
 
@@ -1672,7 +1672,7 @@ static void efm32_epout_request(FAR struct efm32_usbdev_s *priv,
        * read request is encountered.
        */
 
-      for (;;)
+      for (; ; )
         {
           /* Get a reference to the request at the head of the endpoint's request queue */
 
@@ -3475,9 +3475,9 @@ static inline void efm32_otginterrupt(FAR struct efm32_usbdev_s *priv)
 
   regval = efm32_getreg(EFM32_USB_GOTGINT);
   if ((regval & OTGFS_GOTGINT_SEDET) != 0)
-  {
+    {
 #warning "Missing logic"
-  }
+    }
 
   /* Clear OTG interrupt */
 
@@ -3516,7 +3516,7 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
    * events.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the set of pending, un-masked interrupts */
 
@@ -3531,6 +3531,7 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
         {
           break;
         }
+
       usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_INTPENDING), (uint16_t)regval);
 
       /* OUT endpoint interrupt. The core sets this bit to indicate that an
@@ -3572,7 +3573,7 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
           efm32_putreg(USB_GINTSTS_WKUPINT, EFM32_USB_GINTSTS);
         }
 
-     /* USB suspend interrupt */
+      /* USB suspend interrupt */
 
       if ((regval & USB_GINTSTS_USBSUSP) != 0)
         {
@@ -4757,7 +4758,7 @@ static FAR struct usbdev_ep_s *efm32_ep_alloc(FAR struct usbdev_s *dev,
               irqrestore(flags);
               return in ? &priv->epin[epno].ep : &priv->epout[epno].ep;
             }
-       }
+        }
 
       /* We should not get here */
     }
@@ -4839,7 +4840,7 @@ static int efm32_wakeup(struct usbdev_s *dev)
       regval = efm32_getreg(EFM32_USB_DSTS);
       if ((regval & USB_DSTS_SUSPSTS) != 0)
         {
-           /* Re-start the PHY clock and un-gate USB core clock (HCLK) */
+          /* Re-start the PHY clock and un-gate USB core clock (HCLK) */
 
 #ifdef CONFIG_USBDEV_LOWPOWER
           regval = efm32_getreg(EFM32_USB_PCGCCTL);
@@ -5188,7 +5189,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* First Turn on USB clocking */
 
-  modifyreg32(EFM32_CMU_HFCORECLKEN0,0,
+  modifyreg32(EFM32_CMU_HFCORECLKEN0, 0,
               CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC);
 
   /* At start-up the core is in FS mode. */
@@ -5271,7 +5272,8 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Set Rx FIFO size */
 
-  efm32_putreg(EFM32_RXFIFO_WORDS << _USB_GRXFSIZ_RXFDEP_SHIFT,EFM32_USB_GRXFSIZ);
+  efm32_putreg(EFM32_RXFIFO_WORDS << _USB_GRXFSIZ_RXFDEP_SHIFT,
+               EFM32_USB_GRXFSIZ);
 
   /* EP0 TX */
 

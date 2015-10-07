@@ -530,14 +530,14 @@ void sam_pba_disableperipheral(uint32_t bitset)
       sam_hsb_disableperipheral(PM_HSBMASK_APBA);
     }
 
-   /* Disable PBA UART divided clock if none of the UARTS are in use */
+  /* Disable PBA UART divided clock if none of the UARTS are in use */
 
   if ((getreg32(SAM_PM_PBAMASK) & PM_PBAMASK_UARTS) == 0)
     {
       sam_pba_disabledivmask(PM_PBADIVMASK_CLK_USART);
     }
 
-   /* Disable PBA TIMER divided clocks if none of the UARTS are in use */
+  /* Disable PBA TIMER divided clocks if none of the UARTS are in use */
 
   if ((getreg32(SAM_PM_PBAMASK) & PM_PBAMASK_TIMERS) == 0)
     {

@@ -325,7 +325,8 @@ static void pwm_putreg(struct efm32_pwmtimer_s *priv, int offset, uint32_t value
 #if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
 static void pwm_dumpregs(struct efm32_pwmtimer_s *priv, FAR const char *msg)
 {
-    /* TODO debug pwm_dumpregs */
+  /* TODO debug pwm_dumpregs */
+
 #if 0
   pwmvdbg("%s:\n", msg);
   pwmvdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -410,7 +411,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 #error "Not implemented ! Sorry"
 #endif
 
-  if (efm32_timer_set_freq(priv->base,priv->pclk,info->frequency) < 0)
+  if (efm32_timer_set_freq(priv->base, priv->pclk, info->frequency) < 0)
     {
       pwmdbg("Cannot set TIMER frequency %dHz from clock %dHz\n",
              info->frequency, priv->pclk);
@@ -440,7 +441,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
   pwm_putreg(priv, EFM32_TIMER_ROUTE_OFFSET, regval);
 
   regval = (info->duty * pwm_getreg(priv, EFM32_TIMER_TOP_OFFSET)) >> 16;
-  pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCV_OFFSET , regval);
+  pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCV_OFFSET, regval);
   //pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCVB_OFFSET, regval);
 
   regval = (_TIMER_CC_CTRL_MODE_PWM   << _TIMER_CC_CTRL_MODE_SHIFT)   | \
@@ -677,19 +678,19 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   switch (priv->timid)
     {
     case 0:
-      modifyreg32(EFM32_CMU_HFPERCLKEN0,0,CMU_HFPERCLKEN0_TIMER0);
+      modifyreg32(EFM32_CMU_HFPERCLKEN0, 0, CMU_HFPERCLKEN0_TIMER0);
       break;
 
     case 1:
-      modifyreg32(EFM32_CMU_HFPERCLKEN0,0,CMU_HFPERCLKEN0_TIMER1);
+      modifyreg32(EFM32_CMU_HFPERCLKEN0, 0, CMU_HFPERCLKEN0_TIMER1);
       break;
 
     case 2:
-      modifyreg32(EFM32_CMU_HFPERCLKEN0,0,CMU_HFPERCLKEN0_TIMER2);
+      modifyreg32(EFM32_CMU_HFPERCLKEN0, 0, CMU_HFPERCLKEN0_TIMER2);
       break;
 
     case 3:
-      modifyreg32(EFM32_CMU_HFPERCLKEN0,0,CMU_HFPERCLKEN0_TIMER3);
+      modifyreg32(EFM32_CMU_HFPERCLKEN0, 0, CMU_HFPERCLKEN0_TIMER3);
       break;
 
     default:
@@ -698,7 +699,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
     }
 
   efm32_configgpio(priv->pincfg);
-  pwm_putreg(priv,EFM32_TIMER_ROUTE_OFFSET,BOARD_PWM_TIMER0_PINLOC);
+  pwm_putreg(priv, EFM32_TIMER_ROUTE_OFFSET, BOARD_PWM_TIMER0_PINLOC);
   pwm_dumpgpio(priv->pincfg, "PWM setup");
   return OK;
 }

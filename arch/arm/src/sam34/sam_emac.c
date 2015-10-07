@@ -1268,7 +1268,7 @@ static void sam_receive(struct sam_emac_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -2434,7 +2434,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && sam_getreg(priv, regaddr2) == 0)
     {
-       /* Yes.. disable all address matching */
+      /* Yes.. disable all address matching */
 
       regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
       regval &= ~(EMAC_NCFGR_UNIHEN | EMAC_NCFGR_MTIHEN);
@@ -3110,7 +3110,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   /* Check AutoNegotiate complete */
 
   timeout = 0;
-  for (;;)
+  for (; ; )
     {
       ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
       if (ret < 0)
@@ -3429,14 +3429,14 @@ static void sam_txreset(struct sam_emac_s *priv)
   priv->txtail = 0;
 
   for (ndx = 0; ndx < CONFIG_SAM34_EMAC_NTXBUFFERS; ndx++)
-  {
-    bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
+    {
+      bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
 
-    /* Set the buffer address and mark the descriptor as in used by firmware */
+      /* Set the buffer address and mark the descriptor as in used by firmware */
 
-    txdesc[ndx].addr   = bufaddr;
-    txdesc[ndx].status = EMACTXD_STA_USED;
-  }
+      txdesc[ndx].addr   = bufaddr;
+      txdesc[ndx].status = EMACTXD_STA_USED;
+    }
 
   /* Mark the final descriptor in the list */
 
@@ -3482,17 +3482,17 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   priv->rxndx = 0;
   for (ndx = 0; ndx < CONFIG_SAM34_EMAC_NRXBUFFERS; ndx++)
-  {
-    bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
-    DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
+    {
+      bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
+      DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
 
-    /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
-     * EMACRXD_ADDR_WRAP.
-     */
+      /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
+       * EMACRXD_ADDR_WRAP.
+       */
 
-    rxdesc[ndx].addr   = bufaddr;
-    rxdesc[ndx].status = 0;
-  }
+      rxdesc[ndx].addr   = bufaddr;
+      rxdesc[ndx].status = 0;
+    }
 
   /* Mark the final descriptor in the list */
 
@@ -3703,7 +3703,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   sam_emac_enableclk();
 
-   /* Disable TX, RX, clear statistics.  Disable all interrupts. */
+  /* Disable TX, RX, clear statistics.  Disable all interrupts. */
 
   sam_putreg(priv, SAM_EMAC_NCR, EMAC_NCR_CLRSTAT);
   sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
@@ -3793,17 +3793,17 @@ void up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct sam_emac_s));
-  priv->dev.d_ifup    = sam_ifup;       /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown  = sam_ifdown;     /* I/F down callback */
-  priv->dev.d_txavail = sam_txavail;    /* New TX data callback */
+  priv->dev.d_ifup    = sam_ifup;        /* I/F up (new IP address) callback */
+  priv->dev.d_ifdown  = sam_ifdown;      /* I/F down callback */
+  priv->dev.d_txavail = sam_txavail;     /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  priv->dev.d_addmac  = sam_addmac;     /* Add multicast MAC address */
-  priv->dev.d_rmmac   = sam_rmmac;      /* Remove multicast MAC address */
+  priv->dev.d_addmac  = sam_addmac;      /* Add multicast MAC address */
+  priv->dev.d_rmmac   = sam_rmmac;       /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-  priv->dev.d_ioctl   = sam_ioctl;      /* Support PHY ioctl() calls */
+  priv->dev.d_ioctl   = sam_ioctl;       /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void*)&g_emac; /* Used to recover private state from dev */
+  priv->dev.d_private = (void *)&g_emac; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
@@ -3814,7 +3814,7 @@ void up_netinitialize(void)
       return;
     }
 
-  priv->txtimeout = wd_create();     /* Create TX timeout timer */
+  priv->txtimeout = wd_create();         /* Create TX timeout timer */
   if (!priv->txtimeout)
     {
       nlldbg("ERROR: Failed to create periodic poll timer\n");

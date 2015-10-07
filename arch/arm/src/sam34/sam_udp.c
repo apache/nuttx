@@ -3008,7 +3008,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 
 static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct sam_req_s *privreq = (struct sam_req_s*)req;
+  struct sam_req_s *privreq = (struct sam_req_s *)req;
 
 #ifdef CONFIG_DEBUG
   if (!ep || !req)

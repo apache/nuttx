@@ -960,7 +960,7 @@ static int dm320_wrrequest(struct dm320_ep_s *privep)
    * may be resuming transfer already in progress.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the number of bytes left to be sent in the packet */
 
@@ -2251,7 +2251,7 @@ static FAR struct usbdev_ep_s *dm320_allocep(FAR struct usbdev_s *dev, uint8_t e
 
       if (g_epinfo[ndx].attr == eptype)
         {
-           /* Success! */
+          /* Success! */
 
           return &priv->eplist[ndx].ep;
         }

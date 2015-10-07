@@ -62,9 +62,9 @@
 /* Get a 32-bit version of the default priority */
 
 #define DEFPRIORITY32 \
-  (NVIC_SYSH_PRIORITY_DEFAULT << 24 |\
-   NVIC_SYSH_PRIORITY_DEFAULT << 16 |\
-   NVIC_SYSH_PRIORITY_DEFAULT << 8  |\
+  (NVIC_SYSH_PRIORITY_DEFAULT << 24 | \
+   NVIC_SYSH_PRIORITY_DEFAULT << 16 | \
+   NVIC_SYSH_PRIORITY_DEFAULT << 8  | \
    NVIC_SYSH_PRIORITY_DEFAULT)
 
 /* Given the address of a NVIC ENABLE register, this is the offset to
@@ -310,8 +310,8 @@ static int sam_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   else
     {
-     *regaddr = NVIC_SYSHCON;
-     if (irq == SAM_IRQ_MEMFAULT)
+      *regaddr = NVIC_SYSHCON;
+      if (irq == SAM_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }

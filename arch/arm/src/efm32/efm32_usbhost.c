@@ -1728,7 +1728,7 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
           return ret;
         }
 
-     /* Get the elapsed time (in frames) */
+      /* Get the elapsed time (in frames) */
 
      elapsed = clock_systimer() - start;
     }
@@ -1949,7 +1949,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2194,7 +2194,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
       ret = efm32_chan_waitsetup(priv, chan);
       if (ret < 0)
         {
-          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN,0);
+          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
           return (ssize_t)ret;
         }
 
@@ -2207,7 +2207,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
           return (ssize_t)ret;
         }
 
-     /* Wait for the transfer to complete and get the result */
+      /* Wait for the transfer to complete and get the result */
 
       ret = efm32_chan_wait(priv, chan);
 
@@ -2215,7 +2215,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2899,7 +2899,7 @@ static void efm32_gint_connected(FAR struct efm32_usbhost_s *priv)
     {
       /* Yes.. then now we are connected */
 
-      usbhost_vtrace1(USBHOST_VTRACE1_CONNECTED,0);
+      usbhost_vtrace1(USBHOST_VTRACE1_CONNECTED, 0);
       priv->connected = true;
       priv->change    = true;
       DEBUGASSERT(priv->smstate == SMSTATE_DETACHED);
@@ -2931,7 +2931,7 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
     {
       /* Yes.. then we no longer connected */
 
-      usbhost_vtrace1(USBHOST_VTRACE1_DISCONNECTED,0);
+      usbhost_vtrace1(USBHOST_VTRACE1_DISCONNECTED, 0);
 
       /* Are we bound to a class driver? */
 
@@ -3514,7 +3514,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
    * little interrupt handling overhead.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the unmasked bits in the GINT status */
 
@@ -3807,7 +3807,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
   /* Loop until a change in connection state is detected */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -3901,7 +3901,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
     {
       /* No, return an error */
 
-      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN,0);
+      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
       return -ENODEV;
     }
 

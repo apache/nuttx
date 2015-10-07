@@ -422,13 +422,13 @@ static const struct i2c_ops_s efm32_i2c_ops =
   .write = efm32_i2c_write,
   .read = efm32_i2c_read
 #ifdef CONFIG_I2C_WRITEREAD
-    ,.writeread = efm32_i2c_writeread
+  , .writeread = efm32_i2c_writeread
 #endif
 #ifdef CONFIG_I2C_TRANSFER
-    ,.transfer = efm32_i2c_transfer
+  , .transfer = efm32_i2c_transfer
 #endif
 #ifdef CONFIG_I2C_SLAVE
-    ,.setownaddress = efm32_i2c_setownaddress,
+  , .setownaddress = efm32_i2c_setownaddress,
   .registercallback = efm32_i2c_registercallback
 #endif
 };
@@ -903,7 +903,7 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 
 static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
 {
-  for (;;)
+  for (; ; )
     {
       int regval;
 
@@ -1253,7 +1253,7 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
                        * now, before receiving the last byte.
                        */
 
-                      efm32_i2c_putreg(priv,EFM32_I2C_CMD_OFFSET,I2C_CMD_NACK);
+                      efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_NACK);
                     }
                 }
             }

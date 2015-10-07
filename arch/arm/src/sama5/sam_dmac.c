@@ -1895,7 +1895,7 @@ void sam_dmainitialize(struct sam_dmac_s *dmac)
 
   /* Enable the DMA controller */
 
-  sam_putdmac(dmac,DMAC_EN_ENABLE, SAM_DMAC_EN_OFFSET);
+  sam_putdmac(dmac, DMAC_EN_ENABLE, SAM_DMAC_EN_OFFSET);
 
   /* Initialize semaphores */
 
@@ -2032,7 +2032,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
            * disable register
            */
 
-          sam_putdmac(dmac,DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR_OFFSET);
+          sam_putdmac(dmac, DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR_OFFSET);
 
           /* Set the DMA channel flags. */
 

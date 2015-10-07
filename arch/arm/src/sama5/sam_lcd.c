@@ -1409,7 +1409,7 @@ static int sam_setclut(struct sam_layer_s *layer,
   end = offset + len;
   if (end > (layer->offset + layer->nclut))
     {
-      layer->nclut = end - layer->offset;offset
+      layer->nclut = end - layer->offset;
     }
 
   /* Get the offset address to the first CLUT entry to modify */
@@ -3041,7 +3041,7 @@ void fb_uninitialize(void)
 void sam_lcdclear(nxgl_mxpixel_t color)
 {
 #if SAMA5_LCDC_BASE_BPP == 16
-  uint16_t *dest = (uint16_t*)LAYER_BASE.framebuffer;
+  uint16_t *dest = (uint16_t *)LAYER_BASE.framebuffer;
   int i;
 
   gvdbg("Clearing display: BPP=16 color=%04x framebuffer=%08x size=%d\n",
@@ -3052,7 +3052,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
       *dest++ = (uint16_t)color;
     }
 #elif SAMA5_LCDC_BASE_BPP == 24
-  uint8_t *dest = (uint8_t*)LAYER_BASE.framebuffer;
+  uint8_t *dest = (uint8_t *)LAYER_BASE.framebuffer;
   uint8_t r;
   uint8_t g;
   uint8_t b;
@@ -3072,7 +3072,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
       *dest++ = r;
     }
 #elif SAMA5_LCDC_BASE_BPP == 32
-  uint32_t *dest = (uint32_t*)LAYER_BASE.framebuffer;
+  uint32_t *dest = (uint32_t *)LAYER_BASE.framebuffer;
   int i;
 
   gvdbg("Clearing display: BPP=32 color=%08x framebuffer=%08x size=%d\n",

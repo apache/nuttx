@@ -1827,17 +1827,17 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
           xfrq->rxndx = rxndx;
         }
 
-    /* Set-up to process the next fragment.  Get the RX descriptor
-     * associated with the next fragment.
-     */
+      /* Set-up to process the next fragment.  Get the RX descriptor
+       * associated with the next fragment.
+       */
 
-    rxdesc = &xfrq->rxdesc[rxndx];
+      rxdesc = &xfrq->rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+      /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    arch_invalidate_dcache((uintptr_t)rxdesc,
-                           (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-  }
+     arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+    }
 
   /* No packet was found */
 
@@ -1949,7 +1949,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -3290,7 +3290,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && sam_getreg(priv, regoffset2) == 0)
     {
-       /* Yes.. disable all address matching */
+      /* Yes.. disable all address matching */
 
       regval  = sam_getreg(priv, SAM_EMAC_NCFGR_OFFSET);
       regval &= ~(EMAC_NCFGR_UNIHEN | EMAC_NCFGR_MTIHEN);
@@ -4072,7 +4072,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   /* Check AutoNegotiate complete */
 
   timeout = 0;
-  for (;;)
+  for (; ; )
     {
       ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
       if (ret < 0)
@@ -4446,9 +4446,9 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
     }
   else
 #endif
-   {
-     nvdbg("ERROR: emac=%d\n", priv->attr->emac);
-   }
+    {
+      nvdbg("ERROR: emac=%d\n", priv->attr->emac);
+    }
 }
 
 /****************************************************************************

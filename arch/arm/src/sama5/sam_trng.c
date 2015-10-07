@@ -100,7 +100,7 @@ static const struct file_operations g_trngops =
   0,               /* seek */
   0                /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  ,0               /* poll */
+  , 0              /* poll */
 #endif
 };
 
@@ -130,7 +130,7 @@ static int sam_interrupt(int irq, void *context)
    * that we will loop here.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Read the random sample (before checking DATRDY -- but probably not
        * necessary)

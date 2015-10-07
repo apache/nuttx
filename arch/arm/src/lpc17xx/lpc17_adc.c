@@ -383,7 +383,7 @@ static int adc_interrupt(int irq, void *context)
             {
               value           = priv->buf[ch] / priv->count[ch];
               value         <<= 15;
-              adc_receive(&g_adcdev,ch,value);
+              adc_receive(&g_adcdev, ch, value);
               priv->buf[ch]   = 0;
               priv->count[ch] = 0;
             }
@@ -408,7 +408,7 @@ static int adc_interrupt(int irq, void *context)
     {
       value            = priv->buf[ch] / priv->count[ch];
       value          <<= 15;
-      adc_receive(&g_adcdev,ch,value);
+      adc_receive(&g_adcdev, ch, value);
       priv->buf[ch]    = 0;
       priv->count[ch]  = 0;
     }
@@ -424,7 +424,7 @@ static int adc_interrupt(int irq, void *context)
   /* Verify that an interrupt has actually occured */
 
   regVal2 = getreg32(LPC17_ADC_STAT);  /* Read ADSTAT will clear the interrupt flag */
-  if ((regVal2) & (1<<16))
+  if ((regVal2) & (1 << 16))
     {
       if ((priv->mask & 0x01) != 0)
         {
@@ -563,7 +563,7 @@ static int adc_interrupt(int irq, void *context)
 
   regVal3 = getreg32(LPC17_ADC_GDR); /* Read ADGDR clear the DONE and OVERRUN bits */
   putreg32((priv->mask) |            /* Select channels 0 to 7 on ADC0 */
-           ((32) << 8) |             /* CLKDIV = 16 */
+           (32 << 8) |               /* CLKDIV = 16 */
            (0 << 16) |               /* BURST = 1, BURST capture all selected channels */
            (1 << 17) |               /* Reserved bit = 0 */
            (1 << 21) |               /* PDN = 1, normal operation */

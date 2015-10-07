@@ -454,7 +454,7 @@ static int lpc11_gpiointerrupt(int irq, void *context)
 
 void lpc11_gpioirqinitialize(void)
 {
-   /* Disable all GPIO interrupts */
+  /* Disable all GPIO interrupts */
 
   putreg32(0, LPC17_GPIOINT0_INTENR);
   putreg32(0, LPC17_GPIOINT0_INTENF);

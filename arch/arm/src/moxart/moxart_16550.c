@@ -98,7 +98,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct u16550_s   *priv  = (struct u16550_s*)dev->priv;
+  struct u16550_s   *priv  = (struct u16550_s *)dev->priv;
   int                ret   = -ENOTTY;
   uint32_t           vmode;
   unsigned int       opmode;

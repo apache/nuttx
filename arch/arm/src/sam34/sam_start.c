@@ -67,7 +67,7 @@ static inline void sam_fpuconfig(void);
 #endif
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
-  __attribute__ ((naked,no_instrument_function,noreturn));
+  __attribute__ ((naked, no_instrument_function, noreturn));
 #endif
 
 #ifdef CONFIG_ARMV7M_STACKCHECK
@@ -339,6 +339,6 @@ void __start(void)
 
   /* Shouldn't get here */
 
-  for (;;);
+  for (; ; );
 #endif
 }

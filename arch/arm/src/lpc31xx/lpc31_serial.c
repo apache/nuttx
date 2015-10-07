@@ -258,7 +258,7 @@ static inline void up_configbaud(void)
           /* Calculate the divisor with these fractional divider settings */
 
           uint32_t tmp = (tmulval * qtrclk) / ((tmulval + tdivaddval));
-          tdiv         = (tmp + (CONFIG_UART_BAUD>>1)) / CONFIG_UART_BAUD;
+          tdiv         = (tmp + (CONFIG_UART_BAUD >> 1)) / CONFIG_UART_BAUD;
 
           /* Check if this candidate divisor is within a valid range */
 
@@ -292,45 +292,45 @@ static inline void up_configbaud(void)
         }
     }
 
-    /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
+  /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
 
-    regval  = getreg32(LPC31_UART_LCR);
-    regval |= UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval  = getreg32(LPC31_UART_LCR);
+  regval |= UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the MS and LS DLAB registers */
+  /* Configure the MS and LS DLAB registers */
 
-    putreg32(div & UART_DLL_MASK, LPC31_UART_DLL);
-    putreg32((div >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
+  putreg32(div & UART_DLL_MASK, LPC31_UART_DLL);
+  putreg32((div >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
 
-    regval &= ~UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval &= ~UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the Fractional Divider Register (FDR) */
+  /* Configure the Fractional Divider Register (FDR) */
 
-    putreg32((mulval    << UART_FDR_MULVAL_SHIFT) |
-             (divaddval << UART_FDR_DIVADDVAL_SHIFT),
-             LPC31_UART_FDR);
+  putreg32((mulval    << UART_FDR_MULVAL_SHIFT) |
+           (divaddval << UART_FDR_DIVADDVAL_SHIFT),
+           LPC31_UART_FDR);
 #else
-    /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
+  /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
 
-    regval  = getreg32(LPC31_UART_LCR);
-    regval |= UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval  = getreg32(LPC31_UART_LCR);
+  regval |= UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the MS and LS DLAB registers */
+  /* Configure the MS and LS DLAB registers */
 
-    putreg32(CONFIG_LPC31_UART_DIVISOR & UART_DLL_MASK, LPC31_UART_DLL);
-    putreg32((CONFIG_LPC31_UART_DIVISOR >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
+  putreg32(CONFIG_LPC31_UART_DIVISOR & UART_DLL_MASK, LPC31_UART_DLL);
+  putreg32((CONFIG_LPC31_UART_DIVISOR >> 8) & UART_DLL_MASK, LPC31_UART_DLM);
 
-    regval &= ~UART_LCR_DLAB;
-    putreg32(regval, LPC31_UART_LCR);
+  regval &= ~UART_LCR_DLAB;
+  putreg32(regval, LPC31_UART_LCR);
 
-    /* Configure the Fractional Divider Register (FDR) */
+  /* Configure the Fractional Divider Register (FDR) */
 
-    putreg32((CONFIG_LPC31_UART_MULVAL    << UART_FDR_MULVAL_SHIFT) |
-             (CONFIG_LPC31_UART_DIVADDVAL << UART_FDR_DIVADDVAL_SHIFT),
-             LPC31_UART_FDR);
+  putreg32((CONFIG_LPC31_UART_MULVAL    << UART_FDR_MULVAL_SHIFT) |
+           (CONFIG_LPC31_UART_DIVADDVAL << UART_FDR_DIVADDVAL_SHIFT),
+           LPC31_UART_FDR);
 #endif
 }
 
@@ -346,16 +346,16 @@ static inline void up_configbaud(void)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t regval;
 
   /* Clear fifos */
 
-  putreg32((UART_FCR_RXFIFORST|UART_FCR_TXFIFORST), LPC31_UART_FCR);
+  putreg32((UART_FCR_RXFIFORST | UART_FCR_TXFIFORST), LPC31_UART_FCR);
 
   /* Set trigger */
 
-  putreg32((UART_FCR_FIFOENABLE|UART_FCR_RXTRIGLEVEL_16), LPC31_UART_FCR);
+  putreg32((UART_FCR_FIFOENABLE | UART_FCR_RXTRIGLEVEL_16), LPC31_UART_FCR);
 
   /* Set up the IER */
 
@@ -382,7 +382,7 @@ static int up_setup(struct uart_dev_s *dev)
 #if CONFIG_UART_PARITY == 1
   regval |= UART_LCR_PAREN;
 #elif CONFIG_UART_PARITY == 2
-  regval |= (UART_LCR_PAREVEN|UART_LCR_PAREN);
+  regval |= (UART_LCR_PAREVEN | UART_LCR_PAREN);
 #endif
   putreg32(regval, LPC31_UART_LCR);
 
@@ -392,8 +392,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure the FIFOs */
 
-  putreg32((UART_FCR_RXTRIGLEVEL_16|UART_FCR_TXFIFORST|
-            UART_FCR_RXFIFORST|UART_FCR_FIFOENABLE),
+  putreg32((UART_FCR_RXTRIGLEVEL_16 | UART_FCR_TXFIFORST |
+            UART_FCR_RXFIFORST | UART_FCR_FIFOENABLE),
            LPC31_UART_FCR);
 
   /* The NuttX serial driver waits for the first THRE interrupt before
@@ -418,7 +418,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disableuartint(priv, NULL);
 }
 
@@ -447,11 +447,11 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(LPC31_IRQ_UART, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the UART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the UART
+       */
 
-       up_enable_irq(LPC31_IRQ_UART);
+      up_enable_irq(LPC31_IRQ_UART);
     }
   return ret;
 }
@@ -589,7 +589,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct up_dev_s *user = (struct up_dev_s*)arg;
+         struct up_dev_s *user = (struct up_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -657,7 +657,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -707,7 +707,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS

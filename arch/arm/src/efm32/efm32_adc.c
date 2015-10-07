@@ -784,7 +784,7 @@ static void adc_startconv(struct efm32_dev_s *priv, bool enable)
       regval &= ~ADC_CR2_SWSTART;
     }
 
-  adc_putreg(priv, EFM32_ADC_CR2_OFFSET,regval);
+  adc_putreg(priv, EFM32_ADC_CR2_OFFSET, regval);
 }
 #endif
 

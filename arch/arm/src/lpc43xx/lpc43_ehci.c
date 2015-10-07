@@ -3281,7 +3281,7 @@ static int lpc43_wait(FAR struct usbhost_connection_s *conn,
    */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
 

@@ -397,20 +397,20 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (priv->count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (priv->count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", priv->count - 3);
-         }
+          lldbg("[repeats %d more times]\n", priv->count - 3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       priv->regaddr = regaddr;
-       priv->regval  = regval;
-       priv->count   = 1;
+      priv->regaddr = regaddr;
+      priv->regval  = regval;
+      priv->count   = 1;
     }
 
   /* Show the register value read */

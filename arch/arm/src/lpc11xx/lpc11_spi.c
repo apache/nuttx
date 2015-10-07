@@ -485,7 +485,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 
       while ((getreg32(LPC11_SPI_SR) & SPI_SR_SPIF) == 0);
 
-     /* Read the SPI Status Register again to clear the status bit */
+      /* Read the SPI Status Register again to clear the status bit */
 
      (void)getreg32(LPC11_SPI_SR);
      nwords--;

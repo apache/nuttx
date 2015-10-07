@@ -704,7 +704,7 @@ static struct sam_ed_s *sam_edalloc(void)
   ed = (struct sam_ed_s *)g_edfree;
   if (ed)
     {
-      g_edfree = ((struct sam_list_s*)ed)->flink;
+      g_edfree = ((struct sam_list_s *)ed)->flink;
     }
 
   return ed;
@@ -755,7 +755,7 @@ static struct sam_gtd_s *sam_tdalloc(void)
   ret   = (struct sam_gtd_s *)g_tdfree;
   if (ret)
     {
-      g_tdfree = ((struct sam_list_s*)ret)->flink;
+      g_tdfree = ((struct sam_list_s *)ret)->flink;
     }
 
   irqrestore(flags);
@@ -800,7 +800,7 @@ static uint8_t *sam_tballoc(void)
   uint8_t *ret = (uint8_t *)g_tbfree;
   if (ret)
     {
-      g_tbfree = ((struct sam_list_s*)ret)->flink;
+      g_tbfree = ((struct sam_list_s *)ret)->flink;
     }
 
   return ret;
@@ -2025,10 +2025,10 @@ static void sam_rhsc_bottomhalf(void)
 
                   rhport->connected = false;
 
-                   /* Set the port speed to the default (FULL).  We cannot
-                    * yet free the function address.  That has to be done
-                    * by the class when responds to the disconnection.
-                    */
+                  /* Set the port speed to the default (FULL).  We cannot
+                   * yet free the function address.  That has to be done
+                   * by the class when responds to the disconnection.
+                   */
 
                   rhport->hport.hport.speed = USB_SPEED_FULL;
 
@@ -2341,7 +2341,7 @@ static int sam_wait(struct usbhost_connection_s *conn,
    */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
 
@@ -2697,7 +2697,7 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
 
   /* Configure the endpoint descriptor. */
 
-  memset((void*)ed, 0, sizeof(struct sam_ed_s));
+  memset((void *)ed, 0, sizeof(struct sam_ed_s));
 
   ed->hw.ctrl = (uint32_t)(hport->funcaddr)      << ED_CONTROL_FA_SHIFT |
                 (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
@@ -3114,7 +3114,7 @@ static int sam_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   sam_takesem(&g_ohci.exclsem);
 
   len = sam_getle16(req->len);
-  ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_SETUP, (uint8_t*)req,
+  ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_SETUP, (uint8_t *)req,
                    USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
@@ -3163,14 +3163,14 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   sam_takesem(&g_ohci.exclsem);
 
   len = sam_getle16(req->len);
-  ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_SETUP, (uint8_t*)req,
+  ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_SETUP, (uint8_t *)req,
                    USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
         {
           ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_OUT,
-                           (uint8_t*)buffer, len);
+                           (uint8_t *)buffer, len);
         }
 
       if (ret == OK)
@@ -3193,7 +3193,7 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  * Input Parameters:
  *   rhport - Internal driver root hub port state structure.
  *   eplist - The internal representation of the device endpoint on which
-  *     to perform the transfer.
+ *     to perform the transfer.
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
@@ -3973,7 +3973,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Initialize all the HCCA to 0 */
 
-  memset((void*)&g_hcca, 0, sizeof(struct ohci_hcca_s));
+  memset((void *)&g_hcca, 0, sizeof(struct ohci_hcca_s));
 
   arch_clean_dcache((uint32_t)&g_hcca,
                     (uint32_t)&g_hcca + sizeof(struct ohci_hcca_s));

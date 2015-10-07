@@ -832,9 +832,9 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
           priv->remaining = 0;
         }
 
-       /* Put the word in the FIFO */
+      /* Put the word in the FIFO */
 
-       putreg32(data.w, KINETIS_SDHC_DATPORT);
+      putreg32(data.w, KINETIS_SDHC_DATPORT);
     }
 
   fllvdbg("Exit: remaining: %d IRQSTAT: %08x\n",
@@ -2426,7 +2426,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
    * may have already occurred before this function was called!
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for an event in event set to occur.  If this the event has already
        * occurred, then the semaphore will already have been incremented and
@@ -2706,8 +2706,8 @@ static void kinetis_callback(void *arg)
           /* Media is present.  Is the media inserted event enabled? */
 
           if ((priv->cbevents & SDIOMEDIA_INSERTED) == 0)
-           {
-             /* No... return without performing the callback */
+            {
+              /* No... return without performing the callback */
 
               return;
             }

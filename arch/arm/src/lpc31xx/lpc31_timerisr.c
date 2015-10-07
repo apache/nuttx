@@ -133,7 +133,7 @@ void up_timer_initialize(void)
       freq   >>= 4;
     }
 
-  load =((freq * (uint64_t)10000) / 1000000);
+  load = ((freq * (uint64_t)10000) / 1000000);
   putreg32((uint32_t)load, LPC31_TIMER0_LOAD);
 
   /* Set periodic mode */

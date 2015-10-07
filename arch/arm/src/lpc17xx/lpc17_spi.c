@@ -264,7 +264,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   divisor = SPI_CLOCK / frequency;
 
-   /* The SPI CCR register must contain an even number greater than or equal to 8. */
+  /* The SPI CCR register must contain an even number greater than or equal
+   * to 8.
+   */
 
   if (divisor < 8)
     {
@@ -325,7 +327,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
       /* Yes... Set CR appropriately */
 
       regval = getreg32(LPC17_SPI_CR);
-      regval &= ~(SPI_CR_CPOL|SPI_CR_CPHA);
+      regval &= ~(SPI_CR_CPOL | SPI_CR_CPHA);
 
       switch (mode)
         {
@@ -341,7 +343,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SPI_CR_CPOL|SPI_CR_CPHA);
+          regval |= (SPI_CR_CPOL | SPI_CR_CPHA);
           break;
 
         default:
@@ -458,7 +460,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
 
   spidbg("nwords: %d\n", nwords);
@@ -504,7 +506,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
   spidbg("nwords: %d\n", nwords);
   while (nwords)
@@ -520,16 +522,16 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * data transfer.
        */
 
-     while ((getreg32(LPC17_SPI_SR) & SPI_SR_SPIF) == 0);
+      while ((getreg32(LPC17_SPI_SR) & SPI_SR_SPIF) == 0);
 
-     /* Read the SPI Status Register again to clear the status bit */
+      /* Read the SPI Status Register again to clear the status bit */
 
-     (void)getreg32(LPC17_SPI_SR);
+      (void)getreg32(LPC17_SPI_SR);
 
-     /* Read the received data from the SPI Data Register */
+      /* Read the received data from the SPI Data Register */
 
-     *ptr++ = (uint8_t)getreg32(LPC17_SPI_DR);
-     nwords--;
+      *ptr++ = (uint8_t)getreg32(LPC17_SPI_DR);
+      nwords--;
     }
 }
 
@@ -587,7 +589,8 @@ FAR struct spi_dev_s *lpc17_spiinitialize(int port)
 
   /* Configure 8-bit SPI mode and master mode */
 
-  putreg32(SPI_CR_BITS_8BITS|SPI_CR_BITENABLE|SPI_CR_MSTR, LPC17_SPI_CR);
+  putreg32(SPI_CR_BITS_8BITS | SPI_CR_BITENABLE | SPI_CR_MSTR,
+           LPC17_SPI_CR);
 
   /* Set the initial SPI configuration */
 

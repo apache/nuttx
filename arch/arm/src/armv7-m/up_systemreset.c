@@ -77,7 +77,7 @@ void up_systemreset(void)
 
   /* Wait for the reset */
 
-  for (;;);
+  for (; ; );
 }
 
 

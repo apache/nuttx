@@ -101,7 +101,7 @@ void up_serialinit(void)
   flexus_serialinit();
 #endif
 
-/* Register the DBGU as well */
+  /* Register the DBGU as well */
 
 #ifdef CONFIG_SAMA5_DBGU
   sam_dbgu_register();

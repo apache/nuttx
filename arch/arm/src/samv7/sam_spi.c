@@ -1801,7 +1801,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
     }
 #endif
 
-   /* Select the SPI operations */
+  /* Select the SPI operations */
 
 #if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
   spics->spidev.ops = spino ? &g_spi1ops : &g_spi0ops;

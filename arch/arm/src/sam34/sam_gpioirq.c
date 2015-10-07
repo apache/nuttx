@@ -441,10 +441,10 @@ void sam_gpioirqenable(int irq)
 
   if (sam_irqbase(irq, &base, &pin) == OK)
     {
-       /* Clear (all) pending interrupts and enable this pin interrupt */
+      /* Clear (all) pending interrupts and enable this pin interrupt */
 
-       //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
-       putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
+      //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
+      putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
     }
 }
 
@@ -463,9 +463,9 @@ void sam_gpioirqdisable(int irq)
 
   if (sam_irqbase(irq, &base, &pin) == OK)
     {
-       /* Disable this pin interrupt */
+      /* Disable this pin interrupt */
 
-       putreg32((1 << pin), base + SAM_PIO_IDR_OFFSET);
+      putreg32((1 << pin), base + SAM_PIO_IDR_OFFSET);
     }
 }
 

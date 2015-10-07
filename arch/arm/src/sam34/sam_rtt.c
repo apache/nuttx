@@ -223,20 +223,20 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -317,7 +317,7 @@ static int sam34_interrupt(int irq, FAR void *context)
            */
 
           lateticks = vr - priv->val;
-          if (lateticks <= (priv->clkticks>>1))
+          if (lateticks <= (priv->clkticks >> 1))
             {
               priv->clkticks -= lateticks;
             }

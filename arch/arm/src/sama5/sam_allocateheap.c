@@ -259,7 +259,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)&_ebss;
+  *heap_start = (FAR void *)&_ebss;
   *heap_size  = SAMA5_PRIMARY_HEAP_END - (size_t)&_ebss;
 
 #else
@@ -268,7 +268,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_start = (FAR void *)g_idle_topstack;
   *heap_size  = SAMA5_PRIMARY_HEAP_END - g_idle_topstack;
 #endif
 }

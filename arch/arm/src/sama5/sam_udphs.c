@@ -4557,7 +4557,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       sam_pullup(&priv->usbdev, true);
       priv->usbdev.speed = USB_SPEED_FULL;
-   }
+    }
 
   return ret;
 }

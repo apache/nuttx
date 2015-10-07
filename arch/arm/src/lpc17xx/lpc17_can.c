@@ -335,20 +335,20 @@ static void can_printreg(uint32_t addr, uint32_t value)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = value;
-       count    = 1;
+      prevaddr = addr;
+      preval   = value;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -616,9 +616,9 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
 
   canvdbg("CAN%d enable: %d\n", priv->port, enable);
 
-   /* The EIR register is also modifed from the interrupt handler, so we have
-    * to protect this code section.
-    */
+  /* The EIR register is also modifed from the interrupt handler, so we have
+   * to protect this code section.
+   */
 
   flags = irqsave();
   regval = can_getreg(priv, LPC17_CAN_IER_OFFSET);
@@ -630,6 +630,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
     {
       regval &= ~CAN_IER_RIE;
     }
+
   can_putreg(priv, LPC17_CAN_IER_OFFSET, regval);
   irqrestore(flags);
 }
@@ -829,7 +830,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       regval |= CAN_IER_TIE2;
       can_putreg(priv, LPC17_CAN_IER_OFFSET, regval);
 
-    /* Set up the transfer */
+      /* Set up the transfer */
 
       can_putreg(priv, LPC17_CAN_TFI2_OFFSET, tfi);
       can_putreg(priv, LPC17_CAN_TID2_OFFSET, tid);
@@ -1185,7 +1186,7 @@ static int can_bittiming(struct up_dev_s *priv)
     {
       ts1 = CONFIG_CAN_TSEG1;
       ts2 = CONFIG_CAN_TSEG2;
-      brp = (nclks + (CAN_BIT_QUANTA/2)) / CAN_BIT_QUANTA;
+      brp = (nclks + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >=1 && brp <= CAN_BTR_BRP_MAX);
     }
 

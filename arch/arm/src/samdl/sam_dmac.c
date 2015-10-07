@@ -122,7 +122,7 @@ static int    sam_dmainterrupt(int irq, void *context);
 static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach);
 static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
                 uint16_t btctrl, uint16_t btcnt,
-                uint32_t srcaddr,uint32_t dstaddr);
+                uint32_t srcaddr, uint32_t dstaddr);
 static void   sam_free_desc(struct sam_dmach_s *dmach);
 static size_t sam_maxtransfer(struct sam_dmach_s *dmach);
 static uint16_t sam_bytes2beats(struct sam_dmach_s *dmach, size_t nbytes);
@@ -153,7 +153,7 @@ static struct sam_dmach_s g_dmach[SAMDL_NDMACHAN];
  */
 
 static struct dma_desc_s g_base_desc[SAMDL_NDMACHAN]
-  __attribute__ ((section(".lpram"),aligned(16)));
+  __attribute__ ((section(".lpram"), aligned(16)));
 #define g_writeback_desc g_base_desc
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
@@ -162,7 +162,7 @@ static struct dma_desc_s g_base_desc[SAMDL_NDMACHAN]
  */
 
 static struct dma_desc_s g_dma_desc[CONFIG_SAMDL_DMAC_NDESC]
-  __attribute__ ((section(".lpram"),aligned(16)));
+  __attribute__ ((section(".lpram"), aligned(16)));
 #endif
 
 /****************************************************************************

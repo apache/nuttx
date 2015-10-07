@@ -493,11 +493,11 @@ static uint32_t pmecc_getsigma(void)
 
               /* Check if one operand of the multiplier is null, its index is -1 */
 
-              else if (g_pmecc.desc.smu[i+1][k] && si[ 2 * (i - 1) + 3 - k])
+              else if (g_pmecc.desc.smu[i + 1][k] && si[2 * (i - 1) + 3 - k])
                 {
                   dmu[i + 1] =
-                    g_pmecc.desc.alphato[(g_pmecc.desc.indexof[g_pmecc.desc.smu[ i + 1 ][ k ]] +
-                    g_pmecc.desc.indexof[si[ 2 * (i - 1) + 3 - k]]) % g_pmecc.desc.nn] ^ dmu[ i + 1];
+                    g_pmecc.desc.alphato[(g_pmecc.desc.indexof[g_pmecc.desc.smu[i + 1][k]] +
+                    g_pmecc.desc.indexof[si[2 * (i - 1) + 3 - k]]) % g_pmecc.desc.nn] ^ dmu[i + 1];
                 }
             }
         }
@@ -635,24 +635,24 @@ static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
               fdbg("Correct error bit @[Byte %d, Bit %d]\n",
                       (int)bytepos, (int)bitpos);
 
-              if (*(uint8_t*)(sectorbase + bytepos) & (1 << bitpos))
+              if (*(uint8_t *)(sectorbase + bytepos) & (1 << bitpos))
                 {
-                  *(uint8_t*)(sectorbase + bytepos) &= (0xff ^ (1 << bitpos));
+                  *(uint8_t *)(sectorbase + bytepos) &= (0xff ^ (1 << bitpos));
                 }
               else
                 {
-                  *(uint8_t*)(sectorbase + bytepos) |= (1 << bitpos);
+                  *(uint8_t *)(sectorbase + bytepos) |= (1 << bitpos);
                 }
             }
           else
             {
-              if (*(uint8_t*)(sectorbase + bytepos + eccsize) & (1 << bitpos))
+              if (*(uint8_t *)(sectorbase + bytepos + eccsize) & (1 << bitpos))
                 {
-                  *(uint8_t*)(sectorbase + bytepos + eccsize) &= (0xff ^ (1 << bitpos));
+                  *(uint8_t *)(sectorbase + bytepos + eccsize) &= (0xff ^ (1 << bitpos));
                 }
               else
                 {
-                  *(uint8_t*)(sectorbase + bytepos + eccsize) |= (1 << bitpos);
+                  *(uint8_t *)(sectorbase + bytepos + eccsize) |= (1 << bitpos);
                 }
             }
         }
@@ -1442,8 +1442,8 @@ void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato)
   /* Second
    *
    * Build elements from 0 to mm - 1.  Very easy because degree is less than
-    * mm so it is just a logical shift ! (only the remainder)
-    */
+   * mm so it is just a logical shift ! (only the remainder)
+   */
 
   mask = 1;
   for (i = 0; i < mm; i++)

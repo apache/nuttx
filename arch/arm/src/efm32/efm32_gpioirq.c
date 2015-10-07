@@ -287,7 +287,7 @@ void efm32_gpioirqenable(int irq)
       putreg32(regval, EFM32_GPIO_IEN);
       irqrestore(flags);
 #else
-      bitband_set_peripheral(EFM32_GPIO_IEN,(irq - EFM32_IRQ_EXTI0),1);
+      bitband_set_peripheral(EFM32_GPIO_IEN, (irq - EFM32_IRQ_EXTI0), 1);
 #endif
     }
 }
@@ -318,7 +318,7 @@ void efm32_gpioirqdisable(int irq)
       putreg32(regval, EFM32_GPIO_IEN);
       irqrestore(flags);
 #else
-      bitband_set_peripheral(EFM32_GPIO_IEN,(irq - EFM32_IRQ_EXTI0),0);
+      bitband_set_peripheral(EFM32_GPIO_IEN, (irq - EFM32_IRQ_EXTI0), 0);
 #endif
     }
 }
@@ -349,7 +349,7 @@ void efm32_gpioirqclear(int irq)
       putreg32(regval, EFM32_GPIO_IFC);
       irqrestore(flags);
 #else
-      bitband_set_peripheral(EFM32_GPIO_IFC,(irq - EFM32_IRQ_EXTI0),1);
+      bitband_set_peripheral(EFM32_GPIO_IFC, (irq - EFM32_IRQ_EXTI0), 1);
 #endif
     }
 }

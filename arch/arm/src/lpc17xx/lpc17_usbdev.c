@@ -660,7 +660,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
   flags = irqsave();
-  lpc17_putreg(USBDEV_INT_CDFULL|USBDEV_INT_CCEMPTY, LPC17_USBDEV_INTCLR);
+  lpc17_putreg(USBDEV_INT_CDFULL | USBDEV_INT_CCEMPTY, LPC17_USBDEV_INTCLR);
 
   /* Shift the command in position and mask out extra bits */
 
@@ -870,7 +870,7 @@ static void lpc17_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes)
         {
           if (aligned)
             {
-              value = *(uint32_t*)data;
+              value = *(uint32_t *)data;
             }
           else
             {
@@ -919,11 +919,11 @@ static int lpc17_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
 
   if (data)
     {
-       if (((uint32_t)data & 3) == 0)
+      if (((uint32_t)data & 3) == 0)
         {
           aligned = 1;
         }
-       else
+      else
         {
           aligned = 2;
         }
@@ -951,7 +951,7 @@ static int lpc17_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
       value = lpc17_getreg(LPC17_USBDEV_RXDATA);
       if (aligned == 1)
         {
-          *(uint32_t*)data = value;
+          *(uint32_t *)data = value;
           data += 4;
         }
       else if (aligned == 2)
@@ -1331,7 +1331,7 @@ static void lpc17_eprealize(struct lpc17_ep_s *privep, bool prio, uint32_t packe
 
   /* Clear realize interrupt bit */
 
-  lpc17_putreg(USBDEV_INT_EPRLZED,LPC17_USBDEV_INTCLR);
+  lpc17_putreg(USBDEV_INT_EPRLZED, LPC17_USBDEV_INTCLR);
 }
 
 /****************************************************************************
@@ -1487,7 +1487,8 @@ static void lpc17_usbreset(struct lpc17_usbdev_s *priv)
 
   /* Enable Device interrupts */
 
-  lpc17_putreg(USB_SLOW_INT|USB_DEVSTATUS_INT|USB_FAST_INT|USB_FRAME_INT|USB_ERROR_INT,
+  lpc17_putreg(USB_SLOW_INT | USB_DEVSTATUS_INT | USB_FAST_INT |
+               USB_FRAME_INT | USB_ERROR_INT,
                LPC17_USBDEV_INTEN);
 
   /* Tell the class driver that we are disconnected. The class
@@ -1580,7 +1581,7 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
 
   /* Read EP0 data */
 
-  ret = lpc17_epread(LPC17_EP0_OUT, (uint8_t*)&ctrl, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_epread(LPC17_EP0_OUT, (uint8_t *)&ctrl, USB_SIZEOF_CTRLREQ);
   if (ret <= 0)
     {
       return;
@@ -1638,7 +1639,8 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
                     }
                   else
                     {
-                       if ((lpc17_usbcmd(CMD_USBDEV_EPSELECT|privep->epphy, 0) & CMD_EPSELECT_ST) != 0)
+                       if ((lpc17_usbcmd(CMD_USBDEV_EPSELECT | privep->epphy, 0) &
+                            CMD_EPSELECT_ST) != 0)
                          {
                            response[0] = 1; /* Stalled */
                          }
@@ -2070,7 +2072,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
   /* Check for low priority and high priority (non-DMA) interrupts */
 
   usbintstatus = lpc17_getreg(LPC17_SYSCON_USBINTST);
-  if ((usbintstatus & (SYSCON_USBINTST_REQLP|SYSCON_USBINTST_REQHP)) != 0)
+  if ((usbintstatus & (SYSCON_USBINTST_REQLP | SYSCON_USBINTST_REQHP)) != 0)
     {
 #endif
 #ifdef CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
@@ -2080,10 +2082,10 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
         {
           /* Clear Fast EP interrupt */
 
-         lpc17_putreg(USBDEV_INT_EPFAST, LPC17_USBDEV_INTCLR);
-         usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_EPFAST), 0);
+          lpc17_putreg(USBDEV_INT_EPFAST, LPC17_USBDEV_INTCLR);
+          usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_EPFAST), 0);
 
-         /* Do what? */
+          /* Do what? */
         }
 
 #endif
@@ -2143,31 +2145,31 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                        (uint16_t)g_usbdev.devstatus);
               if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
                 {
-                   /* Host is connected */
+                  /* Host is connected */
 
-                   if (!priv->attached)
-                     {
-                       /* We have a transition from unattached to attached */
+                  if (!priv->attached)
+                    {
+                      /* We have a transition from unattached to attached */
 
-                       usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_CONNECTED),
-                                (uint16_t)g_usbdev.devstatus);
-                       priv->usbdev.speed = USB_SPEED_UNKNOWN;
-                       lpc17_usbcmd(CMD_USBDEV_CONFIG, 0);
-                       priv->attached     = 1;
+                      usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_CONNECTED),
+                               (uint16_t)g_usbdev.devstatus);
+                      priv->usbdev.speed = USB_SPEED_UNKNOWN;
+                      lpc17_usbcmd(CMD_USBDEV_CONFIG, 0);
+                      priv->attached     = 1;
                     }
-                 }
+                }
 
-               /* Otherwise the host is not attached */
+              /* Otherwise the host is not attached */
 
-               else if (priv->attached)
-                 {
-                   usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_DISCONNECTED),
-                            (uint16_t)g_usbdev.devstatus);
-                   priv->usbdev.speed = USB_SPEED_UNKNOWN;
-                   lpc17_usbcmd(CMD_USBDEV_CONFIG, 0);
-                   priv->attached = 0;
-                   priv->paddrset = 0;
-                 }
+              else if (priv->attached)
+                {
+                  usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_DISCONNECTED),
+                           (uint16_t)g_usbdev.devstatus);
+                  priv->usbdev.speed = USB_SPEED_UNKNOWN;
+                  lpc17_usbcmd(CMD_USBDEV_CONFIG, 0);
+                  priv->attached = 0;
+                  priv->paddrset = 0;
+                }
             }
 
           /* Device suspend status */
@@ -2275,7 +2277,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
                       if ((pending & 1) != 0)
                         {
-                           /* Yes.. clear the endpoint interrupt */
+                          /* Yes.. clear the endpoint interrupt */
 
                           (void)lpc17_epclrinterrupt(epphy);
 
@@ -2304,7 +2306,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
                               privep->txbusy = 0;
                               lpc17_wrrequest(privep);
-                           }
+                            }
                           else
                             {
                               /* OUT: host-to-device */
@@ -2313,8 +2315,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
                               /* Read host data into the current read request */
 
-                             if (!lpc17_rqempty(privep))
-                                 {
+                              if (!lpc17_rqempty(privep))
+                                {
                                   lpc17_rdrequest(privep);
                                 }
                               else
@@ -2590,7 +2592,8 @@ static int lpc17_epconfigure(FAR struct usbdev_ep_s *ep,
     {
       lpc17_usbcmd(CMD_USBDEV_CONFIG, 1);
     }
-   return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -3334,8 +3337,8 @@ void up_usbinitialize(void)
 
   /* Enable EP0 for OUT (host-to-device) */
 
-  lpc17_usbcmd(CMD_USBDEV_SETADDRESS, CMD_USBDEV_SETADDRESS_DEVEN|0);
-  lpc17_usbcmd(CMD_USBDEV_SETADDRESS, CMD_USBDEV_SETADDRESS_DEVEN|0);
+  lpc17_usbcmd(CMD_USBDEV_SETADDRESS, CMD_USBDEV_SETADDRESS_DEVEN | 0);
+  lpc17_usbcmd(CMD_USBDEV_SETADDRESS, CMD_USBDEV_SETADDRESS_DEVEN | 0);
 
   /* Reset/Re-initialize the USB hardware */
 

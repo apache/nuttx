@@ -114,7 +114,7 @@ lpc31_switchdomains(const struct lpc31_pllconfig_s * const cfg)
  *
  * Description:
  *   Restore the PLL reference clock to the domains that were temporarily
-     switched to FFAST by lpc31_switchdomains.
+ *   switched to FFAST by lpc31_switchdomains.
  *
  ****************************************************************************/
 

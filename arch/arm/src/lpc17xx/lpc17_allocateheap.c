@@ -250,7 +250,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the user-space heap settings */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)ubase;
+  *heap_start = (FAR void *)ubase;
   *heap_size  = usize;
 
   /* Allow user-mode access to the user heap memory */
@@ -261,7 +261,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the heap settings */
 
   board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_start = (FAR void *)g_idle_topstack;
   *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 #endif
 }
@@ -305,7 +305,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * that was not dedicated to the user heap).
    */
 
-  *heap_start = (FAR void*)USERSPACE->us_bssend;
+  *heap_start = (FAR void *)USERSPACE->us_bssend;
   *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
 }
 #endif
@@ -345,17 +345,17 @@ void up_addregion(void)
 
   /* Add the AHB SRAM user heap region. */
 
-   kumm_addregion((FAR void*)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
+   kumm_addregion((FAR void *)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
 
 #endif
 
 #if CONFIG_MM_REGIONS >= 3
 #if defined(CONFIG_LPC17_EXTDRAM) && defined(CONFIG_LPC17_EXTDRAMHEAP)
-  kmm_addregion((FAR void*)LPC17_EXTDRAM_CS0, CONFIG_LPC17_EXTDRAMSIZE);
+  kmm_addregion((FAR void *)LPC17_EXTDRAM_CS0, CONFIG_LPC17_EXTDRAMSIZE);
 #endif
 #if !defined(CONFIG_LPC17_EXTDRAMHEAP) || (CONFIG_MM_REGIONS >= 4)
 #if defined(CONFIG_LPC17_EXTSRAM0) && defined(CONFIG_LPC17_EXTSRAM0HEAP)
-  kmm_addregion((FAR void*)LPC17_EXTSRAM_CS0, CONFIG_LPC17_EXTSRAM0SIZE);
+  kmm_addregion((FAR void *)LPC17_EXTSRAM_CS0, CONFIG_LPC17_EXTSRAM0SIZE);
 #endif
 #endif
 #endif

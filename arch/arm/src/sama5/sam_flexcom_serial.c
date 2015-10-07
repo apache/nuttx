@@ -558,7 +558,7 @@ static int flexus_interrupt(struct uart_dev_s *dev)
   bool               handled;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct flexus_dev_s*)dev->priv;
+  priv = (struct flexus_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
    * been looping for a long time.
@@ -581,10 +581,10 @@ static int flexus_interrupt(struct uart_dev_s *dev)
 
       if ((pending & FLEXUS_INT_RXRDY) != 0)
         {
-           /* Received data ready... process incoming bytes */
+          /* Received data ready... process incoming bytes */
 
-           uart_recvchars(dev);
-           handled = true;
+          uart_recvchars(dev);
+          handled = true;
         }
 
       /* Handle outgoing, transmit bytes. XRDY: There is no character in the
@@ -593,10 +593,10 @@ static int flexus_interrupt(struct uart_dev_s *dev)
 
       if ((pending & FLEXUS_INT_TXRDY) != 0)
         {
-           /* Transmit data register empty ... process outgoing bytes */
+          /* Transmit data register empty ... process outgoing bytes */
 
-           uart_xmitchars(dev);
-           handled = true;
+          uart_xmitchars(dev);
+          handled = true;
         }
     }
 
@@ -655,7 +655,7 @@ static int  flexus4_interrupt(int irq, void *context)
 
 static int flexus_setup(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t regval;
 
@@ -768,7 +768,7 @@ static int flexus_setup(struct uart_dev_s *dev)
 
 static void flexus_shutdown(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
 
   /* Reset and disable receiver and transmitter */
 
@@ -798,7 +798,7 @@ static void flexus_shutdown(struct uart_dev_s *dev)
 
 static int flexus_attach(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -806,11 +806,11 @@ static int flexus_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, priv->handler);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the USART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the USART
+       */
 
-       up_enable_irq(priv->irq);
+      up_enable_irq(priv->irq);
     }
 
   return ret;
@@ -828,7 +828,7 @@ static int flexus_attach(struct uart_dev_s *dev)
 
 static void flexus_detach(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -854,7 +854,7 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct flexus_dev_s *user = (struct flexus_dev_s*)arg;
+         struct flexus_dev_s *user = (struct flexus_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -870,8 +870,8 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
-        struct termios  *termiosp = (struct termios*)arg;
-        struct flexus_dev_s *priv     = (struct flexus_dev_s *)dev->priv;
+        struct termios  *termiosp = (struct termios *)arg;
+        struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
 
         if (!termiosp)
           {
@@ -927,8 +927,8 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios  *termiosp = (struct termios*)arg;
-        struct flexus_dev_s *priv     = (struct flexus_dev_s *)dev->priv;
+        struct termios  *termiosp = (struct termios *)arg;
+        struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
         uint32_t baud;
         uint32_t imr;
         uint8_t parity;
@@ -1046,7 +1046,7 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int flexus_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
 
   /* Return the error information in the saved status */
 
@@ -1068,7 +1068,7 @@ static int flexus_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void flexus_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
 
   if (enable)
     {
@@ -1096,7 +1096,7 @@ static void flexus_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool flexus_rxavailable(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   return ((flexus_serialin(priv, SAM_FLEXUS_CSR_OFFSET) & FLEXUS_INT_RXRDY) != 0);
 }
 
@@ -1110,7 +1110,7 @@ static bool flexus_rxavailable(struct uart_dev_s *dev)
 
 static void flexus_send(struct uart_dev_s *dev, int ch)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   flexus_serialout(priv, SAM_FLEXUS_THR_OFFSET, (uint32_t)ch);
 }
 
@@ -1124,7 +1124,7 @@ static void flexus_send(struct uart_dev_s *dev, int ch)
 
 static void flexus_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -1165,7 +1165,7 @@ static void flexus_txint(struct uart_dev_s *dev, bool enable)
 
 static bool flexus_txready(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   return ((flexus_serialin(priv, SAM_FLEXUS_CSR_OFFSET) & FLEXUS_INT_TXRDY) != 0);
 }
 
@@ -1179,7 +1179,7 @@ static bool flexus_txready(struct uart_dev_s *dev)
 
 static bool flexus_txempty(struct uart_dev_s *dev)
 {
-  struct flexus_dev_s *priv = (struct flexus_dev_s*)dev->priv;
+  struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   return ((flexus_serialin(priv, SAM_FLEXUS_CSR_OFFSET) & FLEXUS_INT_TXEMPTY) != 0);
 }
 

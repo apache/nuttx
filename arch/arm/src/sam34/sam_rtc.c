@@ -415,7 +415,7 @@ int up_rtcinitialize(void)
 #endif
 
 #if defined(CONFIG_RTC_HIRES) && defined(CONFIG_SAM34_RTT)
-   /* Using the RTT for subsecond ticks. */
+  /* Using the RTT for subsecond ticks. */
 
   sam_rtt_enableclk();
 

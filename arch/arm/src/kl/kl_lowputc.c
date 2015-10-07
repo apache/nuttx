@@ -154,62 +154,62 @@ void kl_lowputc(uint32_t ch)
  ****************************************************************************/
 void kl_lowsetup(void)
 {
-   uint32_t regval;
-   uint8_t regval8;
+  uint32_t regval;
+  uint8_t regval8;
 
 #if 0
-   regval = getreg32(KL_SIM_SOPT2);
-   regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_UART0SRC_MCGCLK ;
-   putreg32(regval, KL_SIM_SOPT2);
+  regval = getreg32(KL_SIM_SOPT2);
+  regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_UART0SRC_MCGCLK ;
+  putreg32(regval, KL_SIM_SOPT2);
 #endif
 
-   regval = getreg32(KL_SIM_SCGC4);
+  regval = getreg32(KL_SIM_SCGC4);
 #ifdef CONFIG_KL_UART0
-   regval |= SIM_SCGC4_UART0;
+  regval |= SIM_SCGC4_UART0;
 #endif
 #ifdef CONFIG_KL_UART1
-   regval |= SIM_SCGC4_UART1;
+  regval |= SIM_SCGC4_UART1;
 #endif
 #ifdef CONFIG_KL_UART2
-   regval |= SIM_SCGC4_UART2;
+  regval |= SIM_SCGC4_UART2;
 #endif
-   putreg32(regval, KL_SIM_SCGC4);
+  putreg32(regval, KL_SIM_SCGC4);
 
-   regval = getreg32(KL_SIM_SOPT2);
-   regval &= ~(SIM_SOPT2_UART0SRC_MASK);
-   putreg32(regval, KL_SIM_SOPT2);
+  regval = getreg32(KL_SIM_SOPT2);
+  regval &= ~(SIM_SOPT2_UART0SRC_MASK);
+  putreg32(regval, KL_SIM_SOPT2);
 
-   regval = getreg32(KL_SIM_SOPT2);
-   regval |= SIM_SOPT2_UART0SRC_MCGCLK;
-   putreg32(regval, KL_SIM_SOPT2);
+  regval = getreg32(KL_SIM_SOPT2);
+  regval |= SIM_SOPT2_UART0SRC_MCGCLK;
+  putreg32(regval, KL_SIM_SOPT2);
 
-   putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR1);
-   putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR2);
+  putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR1);
+  putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR2);
 
-   /* Disable UART before changing registers */
+  /* Disable UART before changing registers */
 
-   putreg8(0, KL_UART0_C2);
-   putreg8(0, KL_UART0_C1);
-   putreg8(0, KL_UART0_C3);
-   putreg8(0, KL_UART0_S2);
+  putreg8(0, KL_UART0_C2);
+  putreg8(0, KL_UART0_C1);
+  putreg8(0, KL_UART0_C3);
+  putreg8(0, KL_UART0_S2);
 
-   /* Set the baud rate divisor */
+  /* Set the baud rate divisor */
 
-   uint16_t divisor = (CONSOLE_FREQ / OVER_SAMPLE) / CONSOLE_BAUD;
-   regval8 = OVER_SAMPLE - 1;
-   putreg8(regval8, KL_UART0_C4);
+  uint16_t divisor = (CONSOLE_FREQ / OVER_SAMPLE) / CONSOLE_BAUD;
+  regval8 = OVER_SAMPLE - 1;
+  putreg8(regval8, KL_UART0_C4);
 
-   regval8 = (divisor >> 8) & UART_BDH_SBR_MASK;
-   putreg8(regval8, KL_UART0_BDH);
+  regval8 = (divisor >> 8) & UART_BDH_SBR_MASK;
+  putreg8(regval8, KL_UART0_BDH);
 
-   regval8 = (divisor & UART_BDL_SBR_MASK);
-   putreg8(regval8, KL_UART0_BDL);
+  regval8 = (divisor & UART_BDL_SBR_MASK);
+  putreg8(regval8, KL_UART0_BDL);
 
-   /* Enable UART before changing registers */
+  /* Enable UART before changing registers */
 
-   regval8 = getreg8(KL_UART0_C2);
-   regval8 |= (UART_C2_RE | UART_C2_TE);
-   putreg8(regval8, KL_UART0_C2);
+  regval8 = getreg8(KL_UART0_C2);
+  regval8 |= (UART_C2_RE | UART_C2_TE);
+  putreg8(regval8, KL_UART0_C2);
 
   /* Configure the console (only) now.  Other UARTs will be configured
    * when the serial driver is opened.

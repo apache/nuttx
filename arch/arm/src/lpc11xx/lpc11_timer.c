@@ -400,24 +400,24 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
 
   regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~(0x3 << 2);
-  regval |= (0x1 << 2);                  /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
+  regval |= (0x1 << 2);                   /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
   regval &= ~(0x3 << 4);
-  regval |= (0x1 << 4);                  /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
+  regval |= (0x1 << 4);                   /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
   regval  = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~(0x3 << 12);
-  regval |= (0x1 << 12);                 /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
+  regval |= (0x1 << 12);                  /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
   regval &= ~(0x3 << 14);
-  regval |= (0x1 << 14);                 /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
+  regval |= (0x1 << 14);                  /* PCLK_MC peripheral clk=CCLK=12.5 MHz */
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
   priv->pclk = (0x1 << 12) | (0x1 << 4);
 
-  putreg32(1000, LPC17_TMR0_MR1);        /* Set TIMER0 MR1 = number of counts */
+  putreg32(1000, LPC17_TMR0_MR1);         /* Set TIMER0 MR1 = number of counts */
 
-  putreg32(1, LPC17_TMR0_PR);            /* Prescaler count frequency: Fpclk/1 */
-  putreg32(~(0x3 << 0), LPC17_TMR0_CCR); /* Prescaler count frequency: Fpclk/1 */
-  putreg32(~(0x3 << 0), LPC17_TMR0_CTCR);/* Prescaler count frequency: Fpclk/1 */
-  putreg32((2 << 3), LPC17_TMR0_MCR);    /* Reset on match register MR1 */
+  putreg32(1, LPC17_TMR0_PR);             /* Prescaler count frequency: Fpclk/1 */
+  putreg32(~(0x3 << 0), LPC17_TMR0_CCR);  /* Prescaler count frequency: Fpclk/1 */
+  putreg32(~(0x3 << 0), LPC17_TMR0_CTCR); /* Prescaler count frequency: Fpclk/1 */
+  putreg32((2 << 3), LPC17_TMR0_MCR);     /* Reset on match register MR1 */
 
   /* Output bit toggle on external match event External match on MR1, Toggle
    * external bit
@@ -430,14 +430,14 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
 
   lpc11_configgpio(GPIO_MAT0p1_2);
 
-  putreg32(500, LPC17_TMR1_MR0);         /* Set TIMER1 MR0 = number of counts */
+  putreg32(500, LPC17_TMR1_MR0);          /* Set TIMER1 MR0 = number of counts */
 
-  putreg32(1, LPC17_TMR1_PR);            /* Prescaler count frequency:Fpclk/1 */
-  putreg32(~(0x3 << 0), LPC17_TMR1_CCR); /* Prescaler count frequency:Fpclk/1 */
-  putreg32(~(0x3 << 0), LPC17_TMR1_CTCR);/* Prescaler count frequency:Fpclk/1 */
-  putreg32((2 << 0), LPC17_TMR1_MCR);    /* Reset on match register MR0 */
+  putreg32(1, LPC17_TMR1_PR);             /* Prescaler count frequency:Fpclk/1 */
+  putreg32(~(0x3 << 0), LPC17_TMR1_CCR);  /* Prescaler count frequency:Fpclk/1 */
+  putreg32(~(0x3 << 0), LPC17_TMR1_CTCR); /* Prescaler count frequency:Fpclk/1 */
+  putreg32((2 << 0), LPC17_TMR1_MCR);     /* Reset on match register MR0 */
 //  putreg32(((1 << 0) | (3 << 4)), LPC17_TMR1_EMR); /* Output bit toggle on external match event MAT0 */
-  putreg32((1 << 0), LPC17_TMR1_TCR);    /* Start timer1 */
+  putreg32((1 << 0), LPC17_TMR1_TCR);     /* Start timer1 */
 
   /* configure the output pins GPIO3.26 */
 //  lpc11_configgpio(GPIO_MAT0p1_2);

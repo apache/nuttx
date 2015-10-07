@@ -519,7 +519,7 @@ int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
    * interrupt enable bit which is controlled by the driver.
    */
 
-  regval  = control & ~(DMACH_CONTROL_XFRSIZE_MASK|DMACH_CONTROL_I);
+  regval  = control & ~(DMACH_CONTROL_XFRSIZE_MASK | DMACH_CONTROL_I);
   regval |= ((uint32_t)nxfrs << DMACH_CONTROL_XFRSIZE_SHIFT);
   putreg32(regval, base + LPC17_DMACH_CONTROL_OFFSET);
 
@@ -535,7 +535,7 @@ int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
    * are provided by the caller.  Little endian is assumed.
    */
 
-  regval = config & (DMACH_CONFIG_SRCPER_MASK|DMACH_CONFIG_DSTPER_MASK|
+  regval = config & (DMACH_CONFIG_SRCPER_MASK | DMACH_CONFIG_DSTPER_MASK |
                      DMACH_CONFIG_XFRTYPE_MASK);
   putreg32(regval, base + LPC17_DMACH_CONFIG_OFFSET);
 

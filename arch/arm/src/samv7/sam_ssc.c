@@ -3333,7 +3333,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 #if defined(CONFIG_SAMV7_SSC1_TX_TKOUTPUT_CONT)
   priv->txout = SSC_CLKOUT_CONT; /* Continuous */
 #elif defined(CONFIG_SAMV7_SSC1_TX_TKOUTPUT_XFR)
-  priv->txout = SSC_CLKOUT_XFER;/* Only output clock during transfers */
+  priv->txout = SSC_CLKOUT_XFER; /* Only output clock during transfers */
 #else /* if defined(CONFIG_SAMV7_SSC1_TX_TKOUTPUT_NONE) */
   priv->txout = SSC_CLKOUT_NONE; /* No output clock */
 #endif

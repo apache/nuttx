@@ -136,7 +136,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           sched_suspend_scheduler(rtcb);
 
-         /* Are we in an interrupt handler? */
+          /* Are we in an interrupt handler? */
 
           if (current_regs)
             {

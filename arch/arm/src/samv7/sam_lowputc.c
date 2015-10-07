@@ -208,7 +208,7 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   irqstate_t flags;
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for the transmitter to be available */
 

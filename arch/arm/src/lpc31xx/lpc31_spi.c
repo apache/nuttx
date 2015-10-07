@@ -616,7 +616,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* SPO=0; SPH=0 */
           setbits = 0;
-          clrbits = SPI_SLV_2_SPO|SPI_SLV_2_SPH;
+          clrbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
           break;
 
         case SPIDEV_MODE1: /* SPO=0; SPH=1 */
@@ -630,7 +630,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* SPO=1; SPH=1 */
-          setbits = SPI_SLV_2_SPO|SPI_SLV_2_SPH;
+          setbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
           clrbits = 0;
           break;
 
@@ -754,8 +754,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* 16-bit mode */
 
-      const uint16_t *src  = (const uint16_t*)txbuffer;;
-            uint16_t *dest = (uint16_t*)rxbuffer;
+      const uint16_t *src  = (const uint16_t *)txbuffer;
+            uint16_t *dest = (uint16_t *)rxbuffer;
             uint16_t  word;
 
       while (nwords > 0)
@@ -794,8 +794,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* 8-bit mode */
 
-      const uint8_t *src  = (const uint8_t*)txbuffer;;
-            uint8_t *dest = (uint8_t*)rxbuffer;
+      const uint8_t *src  = (const uint8_t *)txbuffer;
+            uint8_t *dest = (uint8_t *)rxbuffer;
             uint8_t  word;
 
       while (nwords > 0)

@@ -680,7 +680,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
           priv->txtail = 0;
         }
 
-        /* Update statistics */
+      /* Update statistics */
 
       EMAC_STAT(priv, tx_done);
     }

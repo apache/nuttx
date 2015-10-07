@@ -290,11 +290,11 @@ static int dbgu_attach(struct uart_dev_s *dev)
   ret = irq_attach(SAM_IRQ_DBGU, dbgu_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the DBGU
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the DBGU
+       */
 
-       up_enable_irq(SAM_IRQ_DBGU);
+      up_enable_irq(SAM_IRQ_DBGU);
     }
 
   return ret;
@@ -331,7 +331,7 @@ static void dbgu_detach(struct uart_dev_s *dev)
 static int dbgu_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = &g_dbgu_port;
-  struct dbgu_dev_s *priv = (struct dbgu_dev_s*)dev->priv;
+  struct dbgu_dev_s *priv = (struct dbgu_dev_s *)dev->priv;
   uint32_t           pending;
   uint32_t           imr;
   int                passes;
@@ -358,10 +358,10 @@ static int dbgu_interrupt(int irq, void *context)
 
       if ((pending & DBGU_INT_RXRDY) != 0)
         {
-           /* Received data ready... process incoming bytes */
+          /* Received data ready... process incoming bytes */
 
-           uart_recvchars(dev);
-           handled = true;
+          uart_recvchars(dev);
+          handled = true;
         }
 
       /* Handle outgoing, transmit bytes. XRDY: There is no character in the
@@ -370,10 +370,10 @@ static int dbgu_interrupt(int irq, void *context)
 
       if ((pending & DBGU_INT_TXRDY) != 0)
         {
-           /* Transmit data register empty ... process outgoing bytes */
+          /* Transmit data register empty ... process outgoing bytes */
 
-           uart_xmitchars(dev);
-           handled = true;
+          uart_xmitchars(dev);
+          handled = true;
         }
     }
 
@@ -401,15 +401,15 @@ static int dbgu_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct dbgu_dev_s *user = (struct dbgu_dev_s*)arg;
-         if (!user)
-           {
-             ret = -EINVAL;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct dbgu_dev_s));
-           }
+        struct dbgu_dev_s *user = (struct dbgu_dev_s *)arg;
+        if (!user)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            memcpy(user, dev, sizeof(struct dbgu_dev_s));
+          }
        }
        break;
 #endif
@@ -434,7 +434,7 @@ static int dbgu_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int dbgu_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct dbgu_dev_s *priv = (struct dbgu_dev_s*)dev->priv;
+  struct dbgu_dev_s *priv = (struct dbgu_dev_s *)dev->priv;
 
   /* Return the error information in the saved status */
 
