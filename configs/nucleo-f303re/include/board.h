@@ -50,7 +50,9 @@
 #  include <stdbool.h>
 #endif
 
-#include "stm32.h"
+#ifdef __KERNEL__
+#  include "stm32.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions

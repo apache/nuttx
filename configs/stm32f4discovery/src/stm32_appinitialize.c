@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f303re/src/stm32_appinitialize.c
+ * configs/stm32f4discovery/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
