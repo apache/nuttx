@@ -284,7 +284,7 @@ void kinetis_uartreset(uintptr_t uart_base)
   /* Just disable the transmitter and receiver */
 
   regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
-  regval &= ~(UART_C2_RE|UART_C2_TE);
+  regval &= ~(UART_C2_RE | UART_C2_TE);
   putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 }
 #endif
@@ -313,7 +313,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
   regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
-  regval &= ~(UART_C2_RE|UART_C2_TE);
+  regval &= ~(UART_C2_RE | UART_C2_TE);
   putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 
   /* Configure number of bits, stop bits and parity */
@@ -324,7 +324,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   if (parity == 1)
     {
-      regval |= (UART_C1_PE|UART_C1_PT); /* Enable + odd parity type */
+      regval |= (UART_C1_PE | UART_C1_PT); /* Enable + odd parity type */
     }
 
   /* Check for even parity */

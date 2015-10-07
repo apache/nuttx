@@ -5189,7 +5189,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
   /* First Turn on USB clocking */
 
   modifyreg32(EFM32_CMU_HFCORECLKEN0,0,
-              CMU_HFCORECLKEN0_USB|CMU_HFCORECLKEN0_USBC);
+              CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC);
 
   /* At start-up the core is in FS mode. */
 

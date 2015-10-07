@@ -523,7 +523,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
        */
 
       priv->dev.d_len = kinesis_swap16(priv->rxdesc[priv->rxtail].length);
-      priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
+      priv->dev.d_buf = (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
 
       /* Doing this here could cause corruption! */
 
@@ -1060,13 +1060,13 @@ static int kinetis_txavail(struct net_driver_s *dev)
        * packet.
        */
 
-       if (!kinetics_txringfull(priv))
-         {
-           /* No, there is space for another transfer.  Poll uIP for new
-            * XMIT data.
-            */
+      if (!kinetics_txringfull(priv))
+        {
+          /* No, there is space for another transfer.  Poll uIP for new
+           * XMIT data.
+           */
 
-           (void)devif_poll(&priv->dev, kinetis_txpoll);
+          (void)devif_poll(&priv->dev, kinetis_txpoll);
         }
     }
 
@@ -1417,7 +1417,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
     {
       priv->txdesc[i].status1 = 0;
       priv->txdesc[i].length  = 0;
-      priv->txdesc[i].data    = (uint8_t*)kinesis_swap32((uint32_t)addr);
+      priv->txdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
 #ifdef CONFIG_ENET_ENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
@@ -1430,7 +1430,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
     {
       priv->rxdesc[i].status1 = RXDESC_E;
       priv->rxdesc[i].length  = 0;
-      priv->rxdesc[i].data    = (uint8_t*)kinesis_swap32((uint32_t)addr);
+      priv->rxdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
 #ifdef CONFIG_ENET_ENHANCEDBD
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
@@ -1619,7 +1619,7 @@ int kinetis_netinitialize(int intf)
   priv->dev.d_addmac  = kinetis_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = kinetis_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = (void*)g_enet;    /* Used to recover private state from dev */
+  priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 

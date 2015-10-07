@@ -1308,26 +1308,26 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
 
       putreg16(settings->pos.x, DM320_OSD_CURXP);
       putreg16(settings->pos.y, DM320_OSD_CURYP);
-   }
+    }
 
 #ifdef CONFIG_FB_HWCURSORSIZE
   if ((settings->flags & FB_CUR_SETSIZE) != 0)
     {
       gvdbg("h=%d w=%d\n", settings->size.h, settings->size.w);
 
-     if (settings->size.w > MAX_YRES)
-       {
+      if (settings->size.w > MAX_YRES)
+        {
           settings->size.w = MAX_YRES;
-       }
+        }
 
-     if (settings->size.h > MAX_YRES)
-       {
+      if (settings->size.h > MAX_YRES)
+        {
           settings->size.h = MAX_YRES;
-       }
+        }
 
-     putreg16(settings->size.w, DM320_OSD_CURXL);
-     putreg16(settings->size.h, DM320_OSD_CURYL);
-   }
+      putreg16(settings->size.w, DM320_OSD_CURXL);
+      putreg16(settings->size.h, DM320_OSD_CURYL);
+    }
 #endif
 
   regval = getreg16(DM320_OSD_RECTCUR);

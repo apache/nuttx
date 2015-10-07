@@ -2002,7 +2002,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
       putreg32(0, pbuf);
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
-  }
+    }
 
   /* TX CPU */
 
@@ -2032,7 +2032,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
       putreg32(0, pbuf);
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
-  }
+    }
 
   /* RX CPU */
 
@@ -2062,7 +2062,8 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
       putreg32(0, pbuf);
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
-  }
+    }
+
   ndbg("END desc: %08x pbuf: %08x\n", desc, pbuf);
 
   /* Save the descriptor packet size */

@@ -530,8 +530,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
-  FAR uint8_t *rxptr = (FAR uint8_t*)rxbuffer;
-  FAR uint8_t *txptr = (FAR uint8_t*)txbuffer;
+  FAR uint8_t *rxptr = (FAR uint8_t *)rxbuffer;
+  FAR uint8_t *txptr = (FAR uint8_t *)txbuffer;
   uint8_t data;
 
   spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);

@@ -903,7 +903,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
         {
           /* Transfer any trailing fractional word */
 
-          uint8_t *ptr = (uint8_t*)priv->buffer;
+          uint8_t *ptr = (uint8_t *)priv->buffer;
           int i;
 
           for (i = 0; i < priv->remaining; i++)
@@ -1134,10 +1134,10 @@ static int kinetis_interrupt(int irq, void *context)
           kinetis_receive(priv);
         }
 
-        /* Otherwise, Is the TX buffer write ready? If so we must
-         * be processing a non-DMA send transaction.  NOTE:  We can't be
-         * processing both!
-         */
+      /* Otherwise, Is the TX buffer write ready? If so we must
+       * be processing a non-DMA send transaction.  NOTE:  We can't be
+       * processing both!
+       */
 
       else if ((pending & SDHC_INT_BWR) != 0)
         {
@@ -1163,7 +1163,7 @@ static int kinetis_interrupt(int irq, void *context)
           /* Terminate the transfer with an error */
 
           flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
-          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
         }
 
       /* Handle data timeout error */
@@ -1173,7 +1173,7 @@ static int kinetis_interrupt(int irq, void *context)
           /* Terminate the transfer with an error */
 
           flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
-          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
         }
     }
 
@@ -1188,7 +1188,7 @@ static int kinetis_interrupt(int irq, void *context)
         {
           /* Yes.. Is their a thread waiting for response done? */
 
-          if ((priv->waitevents & (SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE)) != 0)
+          if ((priv->waitevents & (SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE)) != 0)
             {
               /* Yes.. mask further interrupts and wake the thread up */
 
@@ -1463,7 +1463,7 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
       prescaler = 128;
     }
   else /* if (frequency >= (BOARD_CORECLK_FREQ / 256) &&
-              frequency <= (BOARD_CORECLK_FREQ / 256 / 16)) */
+        *     frequency <= (BOARD_CORECLK_FREQ / 256 / 16)) */
     {
       sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV256;
       prescaler = 256;
@@ -1499,9 +1499,9 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
    */
 
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
-  regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK|SDHC_SYSCTL_DVS_MASK);
+  regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK | SDHC_SYSCTL_DVS_MASK);
   regval |= (sdclkfs | SDHC_SYSCTL_DVS_DIV(divisor));
-  regval |= (SDHC_SYSCTL_SDCLKEN|SDHC_SYSCTL_PEREN|SDHC_SYSCTL_HCKEN|
+  regval |= (SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
              SDHC_SYSCTL_IPGEN);
   putreg32(regval, KINETIS_SDHC_SYSCTL);
   fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
@@ -1549,8 +1549,8 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
            * enables as well.
            */
 
-          regval &= ~(SDHC_SYSCTL_IPGEN|SDHC_SYSCTL_HCKEN|SDHC_SYSCTL_PEREN|
-                      SDHC_SYSCTL_SDCLKFS_MASK|SDHC_SYSCTL_DVS_MASK);
+          regval &= ~(SDHC_SYSCTL_IPGEN | SDHC_SYSCTL_HCKEN | SDHC_SYSCTL_PEREN |
+                      SDHC_SYSCTL_SDCLKFS_MASK | SDHC_SYSCTL_DVS_MASK);
           putreg32(regval, KINETIS_SDHC_SYSCTL);
           fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
           return;
@@ -1599,7 +1599,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
    * in.
    */
 
-  regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK|SDHC_SYSCTL_DVS_MASK);
+  regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK | SDHC_SYSCTL_DVS_MASK);
 
   /* Select the new prescaler and divisor values based on the requested mode
    * and the settings from the board.h file.
@@ -1617,37 +1617,37 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
            * enables as well.
            */
 
-          regval &= ~(SDHC_SYSCTL_IPGEN|SDHC_SYSCTL_HCKEN|SDHC_SYSCTL_PEREN);
+          regval &= ~(SDHC_SYSCTL_IPGEN | SDHC_SYSCTL_HCKEN | SDHC_SYSCTL_PEREN);
           putreg32(regval, KINETIS_SDHC_SYSCTL);
           fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
           return;
         }
 
       case CLOCK_IDMODE :            /* Initial ID mode clocking (<400KHz) */
-        regval |= (BOARD_SDHC_IDMODE_PRESCALER|BOARD_SDHC_IDMODE_DIVISOR|
-                   SDHC_SYSCTL_SDCLKEN|SDHC_SYSCTL_PEREN|SDHC_SYSCTL_HCKEN|
+        regval |= (BOARD_SDHC_IDMODE_PRESCALER | BOARD_SDHC_IDMODE_DIVISOR |
+                   SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
                    SDHC_SYSCTL_IPGEN);
         break;
 
       case CLOCK_MMC_TRANSFER :      /* MMC normal operation clocking */
-        regval |= (BOARD_SDHC_MMCMODE_PRESCALER|BOARD_SDHC_MMCMODE_DIVISOR|
-                   SDHC_SYSCTL_SDCLKEN|SDHC_SYSCTL_PEREN|SDHC_SYSCTL_HCKEN|
+        regval |= (BOARD_SDHC_MMCMODE_PRESCALER | BOARD_SDHC_MMCMODE_DIVISOR |
+                   SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
                    SDHC_SYSCTL_IPGEN);
         break;
 
       case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow
                                       * 1-bit mode) */
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
-        regval |= (BOARD_SDHC_SD1MODE_PRESCALER|BOARD_SDHC_IDMODE_DIVISOR|
-                   SDHC_SYSCTL_SDCLKEN|SDHC_SYSCTL_PEREN|SDHC_SYSCTL_HCKEN|
+        regval |= (BOARD_SDHC_SD1MODE_PRESCALER | BOARD_SDHC_IDMODE_DIVISOR |
+                   SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
                    SDHC_SYSCTL_IPGEN);
         break;
 #endif
 
       case CLOCK_SD_TRANSFER_4BIT :  /* SD normal operation clocking (wide
                                       * 4-bit mode) */
-        regval |= (BOARD_SDHC_SD4MODE_PRESCALER|BOARD_SDHC_SD4MODE_DIVISOR|
-                   SDHC_SYSCTL_SDCLKEN|SDHC_SYSCTL_PEREN|SDHC_SYSCTL_HCKEN|
+        regval |= (BOARD_SDHC_SD4MODE_PRESCALER | BOARD_SDHC_SD4MODE_DIVISOR |
+                   SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
                    SDHC_SYSCTL_IPGEN);
         break;
     }
@@ -1792,17 +1792,19 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
       break;
 
     case MMCSD_R1B_RESPONSE:              /* Response length 48, check busy & cmdindex */
-      regval |= (SDHC_XFERTYP_RSPTYP_LEN48BSY|SDHC_XFERTYP_CICEN|SDHC_XFERTYP_CCCEN);
+      regval |= (SDHC_XFERTYP_RSPTYP_LEN48BSY | SDHC_XFERTYP_CICEN |
+                 SDHC_XFERTYP_CCCEN);
       break;
 
     case MMCSD_R1_RESPONSE:              /* Response length 48, check cmdindex */
     case MMCSD_R5_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      regval |= (SDHC_XFERTYP_RSPTYP_LEN48|SDHC_XFERTYP_CICEN|SDHC_XFERTYP_CCCEN);
+      regval |= (SDHC_XFERTYP_RSPTYP_LEN48 | SDHC_XFERTYP_CICEN |
+                 SDHC_XFERTYP_CCCEN);
       break;
 
     case MMCSD_R2_RESPONSE:              /* Response length 136, check CRC */
-      regval |= (SDHC_XFERTYP_RSPTYP_LEN136|SDHC_XFERTYP_CCCEN);
+      regval |= (SDHC_XFERTYP_RSPTYP_LEN136 | SDHC_XFERTYP_CCCEN);
       break;
 
     case MMCSD_R3_RESPONSE:              /* Response length 48 */
@@ -1894,7 +1896,7 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Save the destination buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
 
   /* Then set up the SDIO data path */
@@ -1945,7 +1947,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
 
   /* Then set up the SDIO data path */
@@ -1979,7 +1981,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
 static int kinetis_cancel(FAR struct sdio_dev_s *dev)
 {
-  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 #ifdef CONFIG_SDIO_DMA
   uint32_t regval;
 #endif
@@ -2329,7 +2331,7 @@ static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_
 static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
                              sdio_eventset_t eventset)
 {
-  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   uint32_t waitints;
 
   DEBUGASSERT(priv != NULL);
@@ -2343,7 +2345,7 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
    */
 
   waitints = 0;
-  if ((eventset & (SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE)) != 0)
+  if ((eventset & (SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE)) != 0)
     {
       waitints |= SDHC_RESPDONE_INTS;
     }
@@ -2382,7 +2384,7 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
 static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
                                        uint32_t timeout)
 {
-  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
   int ret;
 
@@ -2482,7 +2484,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
 static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
                                  sdio_eventset_t eventset)
 {
-  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
   fvdbg("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
@@ -2516,7 +2518,7 @@ static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
 static int kinetis_registercallback(FAR struct sdio_dev_s *dev,
                                   worker_t callback, void *arg)
 {
-  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
   /* Disable callbacks and register this callback and is argument */
 
@@ -2589,7 +2591,7 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Save the destination buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
 
   /* Then set up the SDIO data path */
@@ -2647,7 +2649,7 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
 
   /* Then set up the SDIO data path */
@@ -2687,7 +2689,7 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
 static void kinetis_callback(void *arg)
 {
-  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)arg;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)arg;
 
   /* Is a callback registered? */
 

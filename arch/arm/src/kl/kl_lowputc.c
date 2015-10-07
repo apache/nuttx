@@ -262,7 +262,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
   regval = getreg8(uart_base+KL_UART_C2_OFFSET);
-  regval &= ~(UART_C2_RE|UART_C2_TE);
+  regval &= ~(UART_C2_RE | UART_C2_TE);
   putreg8(regval, uart_base+KL_UART_C2_OFFSET);
 
   /* Configure number of bits, stop bits and parity */
