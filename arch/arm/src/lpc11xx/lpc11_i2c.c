@@ -226,7 +226,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
   priv->wrcnt      = 0;
   priv->rdcnt      = 0;
   priv->msg.addr  &= ~0x01;
-  priv->msg.buffer = (uint8_t*)buffer;
+  priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
   ret = i2c_start(priv);
@@ -347,21 +347,21 @@ static int i2c_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_LPC11_I2C0
   if (irq == LPC11_IRQ_I2C0)
     {
-      priv=&i2cdevices[0];
+      priv = &i2cdevices[0];
     }
   else
 #endif
 #ifdef CONFIG_LPC11_I2C1
   if (irq == LPC11_IRQ_I2C1)
     {
-      priv=&i2cdevices[1];
+      priv = &i2cdevices[1];
     }
   else
 #endif
 #ifdef CONFIG_LPC11_I2C2
   if (irq == LPC11_IRQ_I2C2)
     {
-      priv=&i2cdevices[2];
+      priv = &i2cdevices[2];
     }
   else
 #endif
@@ -399,7 +399,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
     case 0x28:
       priv->wrcnt++;
-      if (priv->wrcnt<priv->msg.length)
+      if (priv->wrcnt < priv->msg.length)
         {
           putreg32(priv->msg.buffer[priv->wrcnt], priv->base + LPC11_I2C_DAT_OFFSET);
         }
@@ -465,11 +465,11 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 
   flags = irqsave();
 
-  priv= &i2cdevices[port];
+  priv = &i2cdevices[port];
 #ifdef CONFIG_LPC11_I2C0
   if (port == 0)
     {
-      priv= (FAR struct lpc11_i2cdev_s *)&i2cdevices[0];
+      priv        = (FAR struct lpc11_i2cdev_s *)&i2cdevices[0];
       priv->base  = LPC11_I2C0_BASE;
       priv->irqid = LPC11_IRQ_I2C0;
 
@@ -493,7 +493,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC11_I2C1
   if (port == 1)
     {
-      priv= (FAR struct lpc11_i2cdev_s *)&i2cdevices[1];
+      priv        = (FAR struct lpc11_i2cdev_s *)&i2cdevices[1];
       priv->base  = LPC11_I2C1_BASE;
       priv->irqid = LPC11_IRQ_I2C1;
 
@@ -517,7 +517,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC11_I2C2
   if (port == 2)
     {
-      priv= (FAR struct lpc11_i2cdev_s *)&i2cdevices[2];
+      priv        = (FAR struct lpc11_i2cdev_s *)&i2cdevices[2];
       priv->base  = LPC11_I2C2_BASE;
       priv->irqid = LPC11_IRQ_I2C2;
 

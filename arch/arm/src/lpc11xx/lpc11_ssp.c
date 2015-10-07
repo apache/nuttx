@@ -518,7 +518,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
       /* Yes... Set CR0 appropriately */
 
       regval = ssp_getreg(priv, LPC11_SSP_CR0_OFFSET);
-      regval &= ~(SSP_CR0_CPOL|SSP_CR0_CPHA);
+      regval &= ~(SSP_CR0_CPOL | SSP_CR0_CPHA);
 
       switch (mode)
         {
@@ -534,7 +534,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SSP_CR0_CPOL|SSP_CR0_CPHA);
+          regval |= (SSP_CR0_CPOL | SSP_CR0_CPHA);
           break;
 
         default:
@@ -1012,7 +1012,7 @@ FAR struct spi_dev_s *lpc11_sspinitialize(int port)
 
   /* Configure 8-bit SPI mode */
 
-  ssp_putreg(priv, LPC11_SSP_CR0_OFFSET, SSP_CR0_DSS_8BIT|SSP_CR0_FRF_SPI);
+  ssp_putreg(priv, LPC11_SSP_CR0_OFFSET, SSP_CR0_DSS_8BIT | SSP_CR0_FRF_SPI);
 
   /* Disable the SSP and all interrupts (we'll poll for all data) */
 
