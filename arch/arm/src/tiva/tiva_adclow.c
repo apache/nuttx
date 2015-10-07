@@ -116,7 +116,7 @@
  */
 
 #define ADC_TRIG_PWM_CFG(t) \
-    (1<<(ADC_TSSEL_PS_SHIFT(ADC_TRIG_gen(t))))
+    (1 << (ADC_TSSEL_PS_SHIFT(ADC_TRIG_gen(t))))
 
 /* ADC support definitions **************************************************/
 
@@ -466,7 +466,7 @@ static void tiva_adc_shutdown(struct adc_dev_s *dev)
   struct tiva_adc_sse_s *sse;
   uint8_t s = 0;
 
-  for (s=0; s<4; ++s)
+  for (s = 0; s < 4; ++s)
     {
     }
 #endif
@@ -496,7 +496,7 @@ static void tiva_adc_rxint(struct adc_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv->ena);
 
-  for (s=0; s<4; ++s)
+  for (s = 0; s < 4; ++s)
     {
       trigger = tiva_adc_get_trigger(priv->devno, s);
       sse = g_sses[SSE_IDX(priv->devno, s)];
@@ -559,7 +559,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           fifo_count = tiva_adc_sse_data(priv->devno, sse, buf);
 
-          for (i=0; i<fifo_count; ++i)
+          for (i = 0; i < fifo_count; ++i)
             {
               (void)adc_receive(dev,
                                 tiva_adc_get_ain(priv->devno, sse, i),
@@ -656,7 +656,7 @@ static void tiva_adc_read(void *arg)
       return;
     }
 
-  for (i=0; i<fifo_count; ++i)
+  for (i = 0; i < fifo_count; ++i)
     {
       (void)adc_receive(dev,
                         tiva_adc_get_ain(sse->adc, sse->num, i),
@@ -743,7 +743,7 @@ static struct tiva_adc_s *tiva_adc_struct_init(struct tiva_adc_cfg_s *cfg)
           adc->ena = false;
           adc->devno = cfg->adc;
 
-          for (s=0; s<4; s++)
+          for (s = 0; s < 4; s++)
             {
 
               /* Only configure selected SSEs */
@@ -903,7 +903,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
   int ret;
 #ifdef CONFIG_DEBUG_ANALOG
-  uint16_t loop_count=0;
+  uint16_t loop_count = 0;
 #endif
 
   do
@@ -958,21 +958,33 @@ static void tiva_adc_runtimeobj_ptrs(void)
 {
 #  ifdef CONFIG_TIVA_ADC0
   avdbg("ADC0 [struct]       [global value]   [array value]\n");
-  avdbg("     adc_dev_s      dev0=0x%08x   g_devs[0]=0x%08x\n", &dev0, g_devs[0]);
-  avdbg("     tiva_adc_s     adc0=0x%08x   g_adcs[0]=0x%08x\n", &adc0, g_adcs[0]);
-  avdbg("     tiva_adc_sse_s sse0=0x%08x   g_sses[0,0]=0x%08x\n", &sse00, g_sses[SSE_IDX(0,0)]);
-  avdbg("     tiva_adc_sse_s sse1=0x%08x   g_sses[0,1]=0x%08x\n", &sse01, g_sses[SSE_IDX(0,1)]);
-  avdbg("     tiva_adc_sse_s sse2=0x%08x   g_sses[0,2]=0x%08x\n", &sse02, g_sses[SSE_IDX(0,2)]);
-  avdbg("     tiva_adc_sse_s sse3=0x%08x   g_sses[0,3]=0x%08x\n", &sse03, g_sses[SSE_IDX(0,3)]);
+  avdbg("     adc_dev_s      dev0=0x%08x   g_devs[0]=0x%08x\n",
+        &dev0, g_devs[0]);
+  avdbg("     tiva_adc_s     adc0=0x%08x   g_adcs[0]=0x%08x\n",
+        &adc0, g_adcs[0]);
+  avdbg("     tiva_adc_sse_s sse0=0x%08x   g_sses[0,0]=0x%08x\n",
+        &sse00, g_sses[SSE_IDX(0, 0)]);
+  avdbg("     tiva_adc_sse_s sse1=0x%08x   g_sses[0,1]=0x%08x\n",
+        &sse01, g_sses[SSE_IDX(0, 1)]);
+  avdbg("     tiva_adc_sse_s sse2=0x%08x   g_sses[0,2]=0x%08x\n",
+        &sse02, g_sses[SSE_IDX(0, 2)]);
+  avdbg("     tiva_adc_sse_s sse3=0x%08x   g_sses[0,3]=0x%08x\n",
+        &sse03, g_sses[SSE_IDX(0, 3)]);
 #  endif
 #  ifdef CONFIG_TIVA_ADC1
   avdbg("ADC1 [struct]       [global value]   [array value]\n");
-  avdbg("     adc_dev_s      dev1=0x%08x   g_devs[1]=0x%08x\n", &dev1, g_devs[1]);
-  avdbg("     tiva_adc_s     adc1=0x%08x   g_adcs[1]=0x%08x\n", &adc1, g_adcs[1]);
-  avdbg("     tiva_adc_sse_s sse0=0x%08x   g_sses[1,0]=0x%08x\n", &sse10, g_sses[SSE_IDX(1,0)]);
-  avdbg("     tiva_adc_sse_s sse1=0x%08x   g_sses[1,1]=0x%08x\n", &sse11, g_sses[SSE_IDX(1,1)]);
-  avdbg("     tiva_adc_sse_s sse2=0x%08x   g_sses[1,2]=0x%08x\n", &sse12, g_sses[SSE_IDX(1,2)]);
-  avdbg("     tiva_adc_sse_s sse3=0x%08x   g_sses[1,3]=0x%08x\n", &sse13, g_sses[SSE_IDX(1,3)]);
+  avdbg("     adc_dev_s      dev1=0x%08x   g_devs[1]=0x%08x\n",
+        &dev1, g_devs[1]);
+  avdbg("     tiva_adc_s     adc1=0x%08x   g_adcs[1]=0x%08x\n",
+        &adc1, g_adcs[1]);
+  avdbg("     tiva_adc_sse_s sse0=0x%08x   g_sses[1,0]=0x%08x\n",
+        &sse10, g_sses[SSE_IDX(1, 0)]);
+  avdbg("     tiva_adc_sse_s sse1=0x%08x   g_sses[1,1]=0x%08x\n",
+        &sse11, g_sses[SSE_IDX(1, 1)]);
+  avdbg("     tiva_adc_sse_s sse2=0x%08x   g_sses[1,2]=0x%08x\n",
+        &sse12, g_sses[SSE_IDX(1, 2)]);
+  avdbg("     tiva_adc_sse_s sse3=0x%08x   g_sses[1,3]=0x%08x\n",
+        &sse13, g_sses[SSE_IDX(1, 3)]);
 #  endif
 }
 
@@ -983,7 +995,8 @@ static void tiva_adc_runtimeobj_vals(void)
 #  ifdef CONFIG_TIVA_ADC0
   avdbg("ADC0 [0x%08x] cfg=%d ena=%d devno=%d\n",
          &adc0, adc0.cfg, adc0.ena, adc0.devno);
-  for (s=0; s<4; ++s)
+
+  for (s = 0; s < 4; ++s)
     {
       sse = g_sses[SSE_IDX(0, s)];
       avdbg("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",
@@ -993,7 +1006,8 @@ static void tiva_adc_runtimeobj_vals(void)
 #  ifdef CONFIG_TIVA_ADC1
   avdbg("ADC1 [0x%08x] cfg=%d ena=%d devno=%d\n",
          &adc1, adc1.cfg, adc1.ena, adc1.devno);
-  for (s=0; s<4; ++s)
+
+  for (s = 0; s < 4; ++s)
     {
       sse = g_sses[SSE_IDX(1, s)];
       avdbg("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",

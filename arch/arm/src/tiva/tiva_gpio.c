@@ -506,7 +506,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
 
   /* Set the pin type. */
 
-  switch(padtype)
+  switch (padtype)
     {
       case GPIO_PADTYPE_STD:
         {

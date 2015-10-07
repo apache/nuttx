@@ -1327,12 +1327,12 @@ static int tiva_i2c_interrupt(struct tiva_i2c_priv_s *priv, uint32_t status)
 
           dr = tiva_i2c_getreg(priv, TIVA_I2CM_DR_OFFSET);
 
-         /* We check for msgc > 0 here as an unexpected interrupt with
-          * due to noise on the I2C cable can otherwise cause msgc to
-          * wrap causing memory overwrite
-          */
+          /* We check for msgc > 0 here as an unexpected interrupt with
+           * due to noise on the I2C cable can otherwise cause msgc to
+           * wrap causing memory overwrite
+           */
 
-         if (priv->msgc > 0 && priv->msgv != NULL)
+          if (priv->msgc > 0 && priv->msgv != NULL)
             {
               /* Was this the completion of an address or of the data portion
                * of the transfer?
@@ -2051,8 +2051,8 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgv, int m
    * of a reset.
    */
 
-   regval = tiva_i2c_getreg(priv, TIVA_I2CM_CS_OFFSET);
-   if ((regval & (I2CM_CS_BUSY | I2CM_CS_BUSBSY)) != 0)
+  regval = tiva_i2c_getreg(priv, TIVA_I2CM_CS_OFFSET);
+  if ((regval & (I2CM_CS_BUSY | I2CM_CS_BUSBSY)) != 0)
     {
       /* I2C Bus is for some reason busy.  If I2CM_CS_BUSY then none of the
        * other bits are valid.

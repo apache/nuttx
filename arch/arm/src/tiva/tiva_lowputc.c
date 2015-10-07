@@ -237,11 +237,11 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while ((getreg32(TIVA_CONSOLE_BASE+TIVA_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
+  while ((getreg32(TIVA_CONSOLE_BASE + TIVA_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
 
   /* Then send the character */
 
-  putreg32((uint32_t)ch, TIVA_CONSOLE_BASE+TIVA_UART_DR_OFFSET);
+  putreg32((uint32_t)ch, TIVA_CONSOLE_BASE + TIVA_UART_DR_OFFSET);
 #endif
 }
 
@@ -351,25 +351,25 @@ void up_lowsetup(void)
 
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
-  ctl = getreg32(TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
+  ctl = getreg32(TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
   ctl &= ~UART_CTL_UARTEN;
-  putreg32(ctl, TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
+  putreg32(ctl, TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
 
   /* Write the integer portion of the BRD to the UART IBRD register */
 
-  putreg32(TIVA_BRDI, TIVA_CONSOLE_BASE+TIVA_UART_IBRD_OFFSET);
+  putreg32(TIVA_BRDI, TIVA_CONSOLE_BASE + TIVA_UART_IBRD_OFFSET);
 
   /* Write the fractional portion of the BRD to the UART FBRD register */
 
-  putreg32(TIVA_DIVFRAC, TIVA_CONSOLE_BASE+TIVA_UART_FBRD_OFFSET);
+  putreg32(TIVA_DIVFRAC, TIVA_CONSOLE_BASE + TIVA_UART_FBRD_OFFSET);
 
   /* Write the desired serial parameters to the UART LCRH register */
 
-  putreg32(UART_LCRH_VALUE, TIVA_CONSOLE_BASE+TIVA_UART_LCRH_OFFSET);
+  putreg32(UART_LCRH_VALUE, TIVA_CONSOLE_BASE + TIVA_UART_LCRH_OFFSET);
 
   /* Enable the UART by setting the UARTEN bit in the UART CTL register */
 
-  ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
-  putreg32(ctl, TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
+  ctl |= (UART_CTL_UARTEN | UART_CTL_TXE | UART_CTL_RXE);
+  putreg32(ctl, TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
 #endif
 }

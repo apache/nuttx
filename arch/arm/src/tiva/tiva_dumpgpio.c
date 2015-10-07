@@ -170,10 +170,10 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
         tiva_gpioport(port), pinset, base, msg);
 #ifdef TIVA_SYSCON_RCGCGPIO
   lldbg("RCGCGPIO: %08x (%s)\n",
-        rcgcgpio, enabled ? "enabled" : "disabled" );
+        rcgcgpio, enabled ? "enabled" : "disabled");
 #else
   lldbg("   RCGC2: %08x (%s)\n",
-        rcgc2, enabled ? "enabled" : "disabled" );
+        rcgc2, enabled ? "enabled" : "disabled");
 #endif
 
   /* Don't bother with the rest unless the port is enabled */

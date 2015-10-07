@@ -77,8 +77,8 @@
  ****************************************************************************/
 
 #define CLOCK_CONFIG(div, src) \
-    ( ((((div) << ADC_CC_CLKDIV_SHIFT) & ADC_CC_CLKDIV_MASK) | \
-    ((src) & ADC_CC_CS_MASK)) & (ADC_CC_CLKDIV_MASK + ADC_CC_CS_MASK) )
+    (((((div) << ADC_CC_CLKDIV_SHIFT) & ADC_CC_CLKDIV_MASK) | \
+    ((src) & ADC_CC_CS_MASK)) & (ADC_CC_CLKDIV_MASK + ADC_CC_CS_MASK))
 
 /****************************************************************************
  * Private Types
@@ -252,36 +252,36 @@ void tiva_adc_one_time_init(uint32_t clock, uint8_t sample_rate)
 
 void tiva_adc_configure(struct tiva_adc_cfg_s *cfg)
 {
-    uint8_t s;
-    uint8_t c;
+  uint8_t s;
+  uint8_t c;
 
-    avdbg("configure ADC%d...\n", cfg->adc);
+  avdbg("configure ADC%d...\n", cfg->adc);
 
-    /* Configure each SSE */
+  /* Configure each SSE */
 
-    for (s=0; s<4; ++s)
-      {
-        if (cfg->sse[s])
-          {
-            tiva_adc_sse_cfg(cfg->adc, s, &cfg->ssecfg[s]);
-          }
+  for (s = 0; s < 4; ++s)
+    {
+      if (cfg->sse[s])
+        {
+          tiva_adc_sse_cfg(cfg->adc, s, &cfg->ssecfg[s]);
+        }
 #ifdef CONFIG_DEBUG_ANALOG
-        else
-          {
-            avdbg("ADC%d SSE%d has no configuration\n", cfg->adc, s);
-          }
+      else
+        {
+          avdbg("ADC%d SSE%d has no configuration\n", cfg->adc, s);
+        }
 #endif
-      }
+    }
 
-    /* Configure each step */
+  /* Configure each step */
 
-    for (c=0; c<cfg->steps; ++c)
-      {
-          tiva_adc_step_cfg(&cfg->stepcfg[c]);
-      }
+  for (c = 0; c < cfg->steps; ++c)
+    {
+      tiva_adc_step_cfg(&cfg->stepcfg[c]);
+    }
 
 #ifdef CONFIG_DEBUG_ANALOG
-    tiva_adc_dump_reg_cfg(cfg->adc, 0);
+  tiva_adc_dump_reg_cfg(cfg->adc, 0);
 #endif
 }
 
