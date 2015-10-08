@@ -11013,4 +11013,6 @@
 	  parameters to match names used on OpenGroup.org (2015-10-02).
 	* drivers/lcd/st7565.c:  Extend to include support for the ERC12864-3.
 	  From  Pierre-noel Bouteville (2015-10-07).
+	* fs/tmpfs:  Created a directory that will eventually hold a trivial
+	  temporary RAM file file system (2015-10-0i8).
 
