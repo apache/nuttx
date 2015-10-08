@@ -99,7 +99,7 @@ static void timer_set(struct timer *t, unsigned int interval)
   t->start    = up_getwalltime();
 }
 
-static bool timer_expired( struct timer *t )
+static bool timer_expired(struct timer *t)
 {
   return (up_getwalltime() - t->start) >= t->interval;
 }
@@ -166,7 +166,7 @@ static int sim_txpoll(struct net_driver_s *dev)
 
 void netdriver_loop(void)
 {
- struct eth_hdr_s *eth;
+  struct eth_hdr_s *eth;
 
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 

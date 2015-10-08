@@ -903,7 +903,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
        *    = 128 * fHFPERCLK / (256 + CLKDIV)
        */
 
-      actual = (BOARD_HFPERCLK_FREQUENCY << 7) / ( 256 + clkdiv);
+      actual = (BOARD_HFPERCLK_FREQUENCY << 7) / (256 + clkdiv);
       spivdbg("frequency=%u actual=%u\n", frequency, actual);
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -1288,8 +1288,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* 16-bit mode */
 
-      const uint16_t *src  = (const uint16_t*)txbuffer;;
-            uint16_t *dest = (uint16_t*)rxbuffer;
+      const uint16_t *src  = (const uint16_t *)txbuffer;
+            uint16_t *dest = (uint16_t *)rxbuffer;
             uint16_t  word;
 
       unrecvd = nwords;
@@ -1342,8 +1342,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* 8-bit mode */
 
-      const uint8_t *src  = (const uint8_t*)txbuffer;;
-            uint8_t *dest = (uint8_t*)rxbuffer;
+      const uint8_t *src  = (const uint8_t *)txbuffer;
+            uint8_t *dest = (uint8_t *)rxbuffer;
             uint8_t  word;
 
       unrecvd = nwords;
@@ -1396,7 +1396,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   DEBUGASSERT(unsent == 0);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_exchange (with DMA capability)
  *
  * Description:
@@ -1481,7 +1481,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 }
 #endif /* CONFIG_EFM32_SPI_DMA */
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:
@@ -1745,18 +1745,18 @@ struct spi_dev_s *efm32_spi_initialize(int port)
 
       /* Initialize the SPI device */
 
-       ret = spi_portinitialize(priv);
-       if (ret < 0)
-         {
-           spidbg("ERROR: Failed to initialize SPI port %d\n", port);
-           irqrestore(flags);
-           return NULL;
-         }
+      ret = spi_portinitialize(priv);
+      if (ret < 0)
+        {
+          spidbg("ERROR: Failed to initialize SPI port %d\n", port);
+          irqrestore(flags);
+          return NULL;
+        }
 
-       /* Now we are initialized */
+      /* Now we are initialized */
 
-       priv->initialized = true;
-       irqrestore(flags);
+      priv->initialized = true;
+      irqrestore(flags);
     }
 
   return (struct spi_dev_s *)priv;

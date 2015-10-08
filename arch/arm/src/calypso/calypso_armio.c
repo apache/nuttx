@@ -90,11 +90,11 @@ void calypso_armio(void)
 {
   /* Enable ARMIO clock */
 
-  putreg16(1<<5, ARMIO_REG(CNTL_REG));
+  putreg16(1 << 5, ARMIO_REG(CNTL_REG));
 
   /* Mask GPIO interrupt and keypad interrupt */
 
-  putreg16(KBD_INT|GPIO_INT, ARMIO_REG(KBD_GPIO_MASKIT));
+  putreg16(KBD_INT | GPIO_INT, ARMIO_REG(KBD_GPIO_MASKIT));
 
   /* Attach and enable the interrupt */
 

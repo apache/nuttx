@@ -311,8 +311,8 @@ static struct stm32_dev_s g_adcpriv1 =
 
 static struct adc_dev_s g_adcdev1 =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv1,
+  .ad_ops      = &g_adcops,
+  .ad_priv     = &g_adcpriv1,
 };
 #endif
 
@@ -345,8 +345,8 @@ static struct stm32_dev_s g_adcpriv2 =
 
 static struct adc_dev_s g_adcdev2 =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv2,
+  .ad_ops      = &g_adcops,
+  .ad_priv     = &g_adcpriv2,
 };
 #endif
 
@@ -379,8 +379,8 @@ static struct stm32_dev_s g_adcpriv3 =
 
 static struct adc_dev_s g_adcdev3 =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv3,
+  .ad_ops      = &g_adcops,
+  .ad_priv     = &g_adcpriv3,
 };
 #endif
 
@@ -515,20 +515,20 @@ static void adc_tim_dumpregs(struct stm32_dev_s *priv, FAR const char *msg)
         tim_getreg(priv, STM32_GTIM_CCR3_OFFSET),
         tim_getreg(priv, STM32_GTIM_CCR4_OFFSET));
 #  ifndef CONFIG_STM32_STM32L15XX
-     if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
-      {
-        avdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-              tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
-              tim_getreg(priv, STM32_ATIM_BDTR_OFFSET),
-              tim_getreg(priv, STM32_ATIM_DCR_OFFSET),
-              tim_getreg(priv, STM32_ATIM_DMAR_OFFSET));
-      }
-    else
-      {
-        avdbg("  DCR: %04x DMAR: %04x\n",
-              tim_getreg(priv, STM32_GTIM_DCR_OFFSET),
-              tim_getreg(priv, STM32_GTIM_DMAR_OFFSET));
-      }
+  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
+    {
+      avdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+            tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_BDTR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_DCR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_DMAR_OFFSET));
+    }
+  else
+    {
+      avdbg("  DCR: %04x DMAR: %04x\n",
+            tim_getreg(priv, STM32_GTIM_DCR_OFFSET),
+            tim_getreg(priv, STM32_GTIM_DMAR_OFFSET));
+    }
 #  endif
 #endif
 }
@@ -857,7 +857,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   ccmr1 |= ocmode1;
   ccmr2 |= ocmode2;
 
-  /* Reset the output polarity level of all channels (selects high polarity)*/
+  /* Reset the output polarity level of all channels (selects high polarity) */
 
   ccer &= ~(ATIM_CCER_CC1P | ATIM_CCER_CC2P | ATIM_CCER_CC3P | ATIM_CCER_CC4P);
 
@@ -1077,7 +1077,7 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_power_down_idle
  *
  * Description    : Enables or disables power down during the idle phase.
@@ -1091,7 +1091,7 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
@@ -1118,7 +1118,7 @@ static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_power_down_delay
  *
  * Description    : Enables or disables power down during the delay phase.
@@ -1132,7 +1132,7 @@ static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
@@ -1159,7 +1159,7 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_dels_after_conversion
  *
  * Description    : Defines the length of the delay which is applied
@@ -1173,7 +1173,7 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
@@ -1190,7 +1190,7 @@ static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_select_ch_bank
  *
  * Description    : Selects the bank of channels to be converted
@@ -1204,7 +1204,7 @@ static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 static void adc_select_ch_bank(FAR struct stm32_dev_s *priv, bool chb_selected)
@@ -1228,7 +1228,7 @@ static void adc_select_ch_bank(FAR struct stm32_dev_s *priv, bool chb_selected)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_enable
  *
  * Description    : Enables or disables the specified ADC peripheral.
@@ -1242,7 +1242,7 @@ static void adc_select_ch_bank(FAR struct stm32_dev_s *priv, bool chb_selected)
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 {
@@ -1302,15 +1302,15 @@ static void adc_write_sample_time_registers(FAR struct adc_dev_s *dev)
   uint8_t i, shift;
 
   /* Sampling time individually for each channel
-  * 000: 4 cycles
-  * 001: 9 cycles
-  * 010: 16 cycles
-  * 011: 24 cycles
-  * 100: 48 cycles
-  * 101: 96 cycles
-  * 110: 192 cycles
-  * 111: 384 cycles    - selected for all channels
-  */
+   * 000: 4 cycles
+   * 001: 9 cycles
+   * 010: 16 cycles
+   * 011: 24 cycles
+   * 100: 48 cycles
+   * 101: 96 cycles
+   * 110: 192 cycles
+   * 111: 384 cycles    - selected for all channels
+   */
 
   for (i = 0, shift = 0; i < 32; i++)
     {
@@ -1369,7 +1369,7 @@ static void adc_write_sample_time_registers(FAR struct adc_dev_s *dev)
 #ifdef ADC_HAVE_DMA
 static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s*) arg;
+  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s *)arg;
   FAR struct stm32_dev_s *priv = dev->ad_priv;
   uint32_t regval;
   int i;
@@ -1562,9 +1562,10 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
 #if ADC_MAX_SAMPLES == 1
   /* Select on first indexed channel for backward compatibility. */
-  adc_set_ch_idx(dev,0);
+
+  adc_set_ch_idx(dev, 0);
 #else
-  adc_set_ch(dev,0);
+  adc_set_ch(dev, 0);
 #endif
 
   /* ADC CCR configuration */
@@ -1643,10 +1644,10 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
 #ifdef ADC_HAVE_TIMER
   ret = adc_timinit(priv);
-  if (ret!=OK)
-   {
+  if (ret != OK)
+    {
       adbg("Error initializing the timers\n");
-   }
+    }
 #elif !defined(CONFIG_ADC_NO_STARTUP_CONV)
 
 #ifdef CONFIG_STM32_STM32F10XX
@@ -2280,9 +2281,9 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
 
       regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
       for (i = 24, offset = 0; i < priv->nchannels && i < 28; i++, offset += 5)
-      {
-        regval |= (uint32_t)priv->chanlist[i] << offset;
-      }
+        {
+          regval |= (uint32_t)priv->chanlist[i] << offset;
+        }
 
 #else
       priv->nchannels = priv->cchannels;
@@ -2316,7 +2317,7 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
         {
           if ((uint32_t)priv->chanlist[i] == ch)
             {
-              ret = adc_set_ch_idx(dev,i);
+              ret = adc_set_ch_idx(dev, i);
               if (ret < 0)
                 {
                   break;
@@ -2335,7 +2336,7 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
       ret = -ENODEV;
     }
 
-    return ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -2382,7 +2383,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
       case IO_ENABLE_DISABLE_JEOCIE:
       case IO_ENABLE_DISABLE_OVRIE:
       case IO_ENABLE_DISABLE_ALL_INTS:
-        adc_ioc_change_ints(dev, cmd, *(bool*)arg);
+        adc_ioc_change_ints(dev, cmd, *(bool *)arg);
         break;
 
       case IO_START_CONV:
@@ -2396,7 +2397,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
               return ret;
             }
 
-          ret = adc_set_ch(dev,ch);
+          ret = adc_set_ch(dev, ch);
           if (ret < 0)
             {
               set_errno(-ret);
@@ -2693,7 +2694,7 @@ static int adc123_interrupt(int irq, void *context)
  * Public Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_change_sample_time
  *
  * Description    : Changes sample times for specified channels. This method
@@ -2712,7 +2713,7 @@ static int adc123_interrupt(int irq, void *context)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_STM32L15XX
 void stm32_adcchange_sample_time(FAR struct adc_dev_s *dev,
@@ -2828,9 +2829,9 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
     }
   else
 #endif
-  {
-    DEBUGASSERT(priv->nchannels <= ADC_MAX_CHANNELS_NODMA);
-  }
+    {
+      DEBUGASSERT(priv->nchannels <= ADC_MAX_CHANNELS_NODMA);
+    }
 
   priv->cchannels = cchannels;
 

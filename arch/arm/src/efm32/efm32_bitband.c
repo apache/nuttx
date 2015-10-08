@@ -73,7 +73,7 @@
  * Private Functions
  ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: bitband_set_peripheral
  *
  * Description:
@@ -91,7 +91,7 @@
  *   bit      Bit position to modify, 0-31.
  *   val      Value to set bit to, 0 or 1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val)
 {
@@ -101,7 +101,7 @@ inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val)
   *((volatile uint32_t *)regval) = (uint32_t)val;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: bitband_get_peripheral
  *
  * Description:
@@ -122,7 +122,7 @@ inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val)
  * Returned Value:
  *   Return bit value read, 0 or 1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit)
 {
@@ -132,7 +132,7 @@ inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit)
   return *((volatile uint32_t *)regval);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: bitband_set_sram
  *
  * Description:
@@ -150,7 +150,7 @@ inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit)
  *   bit      Bit position to modify, 0-31.
  *   val      Value to set bit to, 0 or 1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
 {
@@ -160,7 +160,7 @@ inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
   *((volatile uint32_t *)regval) = (uint32_t)val;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: bitband_get_sram
  *
  * Description::
@@ -181,7 +181,7 @@ inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
  * Returned Value:
  *   Return bit value read, 0 or 1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 inline uint32_t bitband_get_sram(uint32_t addr, uint32_t bit)
 {

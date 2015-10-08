@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* GPIO pin definitions *************************************************************/
 /* NOTE that functions have a alternate pins that can be selected.  These alternates

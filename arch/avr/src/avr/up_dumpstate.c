@@ -104,7 +104,7 @@ static void up_stackdump(uint16_t sp, uint16_t stack_base)
 
   for (stack = sp & ~3; stack < stack_base; stack += 12)
     {
-      uint8_t *ptr = (uint8_t*)stack;
+      uint8_t *ptr = (uint8_t *)stack;
       lldbg("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
             " %02x %02x %02x %02x\n",
              stack,
@@ -168,7 +168,7 @@ static inline void up_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
   uint16_t sp = up_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;

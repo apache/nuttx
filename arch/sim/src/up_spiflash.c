@@ -586,7 +586,7 @@ static void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
   uint32_t  len;
 
   /* Ensure the WREN bit is set before any erase operation */
-  
+
   if (priv->wren)
     {
       address = priv->address;
@@ -645,7 +645,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
               break;
 
             /* Sector / Subsector erase */
-             
+
             case SPIFLASH_SE:
             case SPIFLASH_SSE:
               priv->state = SPIFLASH_STATE_SE1;
@@ -657,7 +657,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
               priv->state = SPIFLASH_STATE_IDLE;
               if (priv->wren)
                 {
-                  memset(priv->data, 0xff, CONFIG_SPIFLASH_SIZE); 
+                  memset(priv->data, 0xff, CONFIG_SPIFLASH_SIZE);
                 }
               break;
 
@@ -755,7 +755,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
          * the actual FLASH.
          */
 
-        if ((priv->address & CONFIG_SIM_SPIFLASH_PAGESIZE_MASK) == 
+        if ((priv->address & CONFIG_SIM_SPIFLASH_PAGESIZE_MASK) ==
               CONFIG_SIM_SPIFLASH_PAGESIZE_MASK)
           {
             priv->address &= !CONFIG_SIM_SPIFLASH_PAGESIZE_MASK;

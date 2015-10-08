@@ -211,9 +211,9 @@ void up_irqinitialize(void)
    */
 
   for (group = 0; group < AVR32_IRQ_MAXGROUPS; group++)
-   {
-     putreg32(g_ipr[0], AVR32_INTC_IPR(group));
-   }
+    {
+      putreg32(g_ipr[0], AVR32_INTC_IPR(group));
+    }
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -223,8 +223,8 @@ void up_irqinitialize(void)
 
   for (irq = 0; irq < AVR32_IRQ_NEVENTS; irq++)
     {
-	  irq_attach(irq, avr32_xcptn);
-	}
+      irq_attach(irq, avr32_xcptn);
+    }
 
   /* Initialize GPIO interrupt facilities */
 

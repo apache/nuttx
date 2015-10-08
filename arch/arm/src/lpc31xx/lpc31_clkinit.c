@@ -64,7 +64,7 @@ struct lpc31_domainconfig_s
   uint32_t nclks;                /* Number of clocks in the domain */
   uint32_t fdiv1;                /* First frequency divider in the domain */
   uint32_t nfdiv;                /* Number of frequency dividers in the domain */
-  const struct lpc31_subdomainconfig_s* sub; /* Sub=domain array */
+  const struct lpc31_subdomainconfig_s *sub; /* Sub=domain array */
 };
 
 /************************************************************************************
@@ -87,7 +87,7 @@ struct lpc31_domainconfig_s
  *
  ************************************************************************************/
 
-static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
+static void lpc31_domaininit(struct lpc31_domainconfig_s *dmn)
 {
   const struct lpc31_subdomainconfig_s * sub = dmn->sub;
   uint32_t fdivcfg;
@@ -138,8 +138,8 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
                       regaddr = LPC31_CGU_ESR(esrndx);
                       putreg32((fdndx << CGU_ESR_ESRSEL_SHIFT) | CGU_ESR_ESREN, regaddr);
                     }
-                 }
-             }
+                }
+            }
 
           /* Enable the fractional divider */
 
@@ -158,7 +158,7 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
       putreg32(CGU_BCR_FDRUN, regaddr);
     }
 
-   /* Select input base clock for domain*/
+  /* Select input base clock for domain */
 
   lpc31_selectfreqin(dmn->dmnid, dmn->finsel);
 }
@@ -175,7 +175,7 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
  *
  ************************************************************************************/
 
-void lpc31_clkinit(const struct lpc31_clkinit_s* cfg)
+void lpc31_clkinit(const struct lpc31_clkinit_s *cfg)
 {
   struct lpc31_domainconfig_s domain;
 

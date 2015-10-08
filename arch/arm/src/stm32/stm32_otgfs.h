@@ -78,7 +78,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_otgfshost_initialize
  *
  * Description:
@@ -101,7 +101,7 @@ extern "C"
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;

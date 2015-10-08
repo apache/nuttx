@@ -73,7 +73,7 @@ struct section_mapping_s
 };
 
 /************************************************************************************
- * Public Variables
+ * Public Data
  ************************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */
@@ -141,7 +141,7 @@ static const struct section_mapping_s section_mapping[] =
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t *pgtable = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
@@ -157,7 +157,7 @@ static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mm
 static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
                                            uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *ctable  = (uint32_t*)ctabvaddr;
+  uint32_t *ctable  = (uint32_t *)ctabvaddr;
   uint32_t  index;
 
   /* The coarse table divides a 1Mb address space up into 256 entries, each
@@ -210,7 +210,7 @@ static void  up_vectorpermissions(uint32_t mmuflags)
 {
   /* The PTE for the beginning of ISRAM is at the base of the L2 page table */
 
-  uint32_t *ptr = (uint32_t*)PG_L2_VECT_VADDR;
+  uint32_t *ptr = (uint32_t *)PG_L2_VECT_VADDR;
   uint32_t pte;
 
   /* The pte might be zero the first time this function is called. */
@@ -305,9 +305,9 @@ static void up_copyvectorblock(void)
    *   LPC31_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
    */
 
-  src  = (uint32_t*)&_vector_start;
-  end  = (uint32_t*)&_vector_end;
-  dest = (uint32_t*)LPC31_VECTOR_VSRAM;
+  src  = (uint32_t *)&_vector_start;
+  end  = (uint32_t *)&_vector_end;
+  dest = (uint32_t *)LPC31_VECTOR_VSRAM;
 
   while (src < end)
     {

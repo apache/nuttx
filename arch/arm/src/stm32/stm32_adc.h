@@ -326,9 +326,9 @@
 #    define ADC2_TIMER_BASE           STM32_TIM5_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32_APB1_TIM5_CLKIN
 #elif defined(CONFIG_STM32_TIM8_ADC2)
-#    define ADC1_HAVE_TIMER           1
-#    define ADC1_TIMER_BASE           STM32_TIM8_BASE
-#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
 #else
 #    undef  ADC2_HAVE_TIMER
 #endif
@@ -364,9 +364,9 @@
 #    define ADC3_TIMER_BASE           STM32_TIM5_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32_APB1_TIM5_CLKIN
 #elif defined(CONFIG_STM32_TIM8_ADC3)
-#    define ADC1_HAVE_TIMER           1
-#    define ADC1_TIMER_BASE           STM32_TIM8_BASE
-#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_APB2_TIM8_CLKIN
 #else
 #    undef  ADC3_HAVE_TIMER
 #endif

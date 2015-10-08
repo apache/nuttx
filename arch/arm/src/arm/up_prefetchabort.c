@@ -96,7 +96,7 @@ void up_prefetchabort(uint32_t *regs)
    * for register dumps and possibly context switching.
    */
 
-  savestate    = (uint32_t*)current_regs;
+  savestate    = (uint32_t *)current_regs;
 #endif
   current_regs = regs;
 

@@ -425,7 +425,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
    * execution.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the current set of pending/enabled interrupts */
 

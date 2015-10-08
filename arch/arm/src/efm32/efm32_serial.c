@@ -188,7 +188,7 @@
 #endif
 
 /* Pick ttys4. This could be one of UART0-1. It can't be USART0-2 because
-* those have already been assigned to ttsyS0, 1, 2, or 3.  One of
+ * those have already been assigned to ttsyS0, 1, 2, or 3.  One of
  * these could also be the console.  There is really only 1 unassigned.
  */
 
@@ -593,9 +593,9 @@ static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
 
   flags = irqsave();
   if (ien)
-   {
-     *ien = priv->ien;
-   }
+    {
+      *ien = priv->ien;
+    }
 
   efm32_restoreuartint(priv, 0);
   irqrestore(flags);
@@ -613,7 +613,7 @@ static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
 
 static int efm32_setup(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   uint32_t regval;
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
@@ -650,7 +650,7 @@ static int efm32_setup(struct uart_dev_s *dev)
 
 static void efm32_shutdown(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
 
   /* Disable interrupts */
 
@@ -681,7 +681,7 @@ static void efm32_shutdown(struct uart_dev_s *dev)
 
 static int efm32_attach(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   const struct efm32_config_s *config = priv->config;
   int ret;
 
@@ -719,7 +719,7 @@ static int efm32_attach(struct uart_dev_s *dev)
 
 static void efm32_detach(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   const struct efm32_config_s *config = priv->config;
 
   /* Disable interrupts */
@@ -744,7 +744,7 @@ static void efm32_detach(struct uart_dev_s *dev)
 
 static int  efm32_rxinterrupt(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   uint32_t intflags;
 
   DEBUGASSERT(priv);
@@ -832,7 +832,7 @@ static int  efm32_uart1_rxinterrupt(int irq, void *context)
 
 static int  efm32_txinterrupt(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   uint32_t intflags;
 
   DEBUGASSERT(priv);
@@ -933,7 +933,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(dev->priv);
 
 #ifdef CONFIG_SERIAL_TERMIOS
-  priv = (struct efm32_usart_s*)dev->priv;
+  priv = (struct efm32_usart_s *)dev->priv;
 #endif
 
   switch (cmd)
@@ -941,7 +941,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
-        struct termios *termiosp = (struct termios*)arg;
+        struct termios *termiosp = (struct termios *)arg;
 
         if (!termiosp)
           {
@@ -963,7 +963,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios *termiosp = (struct termios*)arg;
+        struct termios *termiosp = (struct termios *)arg;
 
         if (!termiosp)
           {
@@ -1013,13 +1013,13 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         {
           uint32_t ien;
-          struct efm32_config_s* config = priv->config;
+          struct efm32_config_s *config = priv->config;
 
           config->baud = cfgetispeed(termiosp);
 
           /* Just speed is yet implemented */
 
-          efm32_disableuartint(priv,&ien);
+          efm32_disableuartint(priv, &ien);
 
           efm32_uartconfigure(config->uartbase, config->baud, config->parity,
                             config->bits, config->stop2);
@@ -1050,7 +1050,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   uint32_t rxdatax;
 
   /* Get error status information:
@@ -1083,7 +1083,7 @@ static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void efm32_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -1117,7 +1117,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool efm32_rxavailable(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
 
   /* Return true if the receive data is available (RXDATAV). */
 
@@ -1134,7 +1134,7 @@ static bool efm32_rxavailable(struct uart_dev_s *dev)
 
 static void efm32_send(struct uart_dev_s *dev, int ch)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   efm32_serialout(priv, EFM32_USART_TXDATA_OFFSET, (uint32_t)ch);
 }
 
@@ -1148,7 +1148,7 @@ static void efm32_send(struct uart_dev_s *dev, int ch)
 
 static void efm32_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -1188,7 +1188,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
 
 static bool efm32_txready(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
 
   /* The TX Buffer Level (TXBL) status bit indicates the level of the
    * transmit buffer.  If TXBIL is set, TXBL is set whenever the transmit
@@ -1208,7 +1208,7 @@ static bool efm32_txready(struct uart_dev_s *dev)
 
 static bool efm32_txempty(struct uart_dev_s *dev)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
 
   /* TX Complete (TXC) is set when a transmission has completed and no more
    * data is available in the transmit buffer.
@@ -1309,7 +1309,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  struct efm32_usart_s *priv = (struct efm32_usart_s*)CONSOLE_DEV.priv;
+  struct efm32_usart_s *priv = (struct efm32_usart_s *)CONSOLE_DEV.priv;
   uint32_t ien;
 
   efm32_disableuartint(priv, &ien);

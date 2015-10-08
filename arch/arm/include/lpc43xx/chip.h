@@ -134,8 +134,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4310FET100)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -159,8 +160,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (4)         /* Four ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (4)         /* Four ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4320FBD144)
 #  warning "Data sheet and user manual are consistement for the LPC4320"
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
@@ -185,8 +187,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4320FET100)
 #  warning "Data sheet and user manual are consistement for the LPC4320"
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
@@ -211,8 +214,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (4)         /* Four ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (4)         /* Four ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4330FBD144)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -236,8 +240,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4330FET100)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -261,8 +266,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (4)         /* Four ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (4)         /* Four ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4330FET180)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -286,8 +292,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4330FET256)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -311,8 +318,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4350FBD208)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -336,8 +344,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4350FET180)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -361,8 +370,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4350FET256)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
@@ -386,8 +396,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4353FBD208)
 #  define LPC43_FLASH_BANKA_SIZE   (256*1025)  /* 512Kb FLASH */
 #  define LPC43_FLASH_BANKB_SIZE   (256*1025)
@@ -411,8 +422,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4353FET180)
 #  define LPC43_FLASH_BANKA_SIZE   (256*1025)  /* 512Kb FLASH */
 #  define LPC43_FLASH_BANKB_SIZE   (256*1025)
@@ -436,8 +448,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4353FET256)
 #  define LPC43_FLASH_BANKA_SIZE   (256*1025)  /* 512Kb FLASH */
 #  define LPC43_FLASH_BANKB_SIZE   (256*1025)
@@ -461,8 +474,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4357FET180)
 #  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
 #  define LPC43_FLASH_BANKB_SIZE   (512*1025)
@@ -486,8 +500,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4357FBD208)
 #  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
 #  define LPC43_FLASH_BANKB_SIZE   (512*1025)
@@ -511,8 +526,9 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4357FET256)
 #  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
 #  define LPC43_FLASH_BANKB_SIZE   (512*1025)
@@ -536,15 +552,16 @@
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
 #  define LPC43_NCAN               (2)         /* Two CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (8)         /* Eight ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4370FET100)
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
-#  define LPC43_LOCSRAM_BANK0_SIZE (128*1024)  /* 200Kb Local SRAM*/
+#  define LPC43_LOCSRAM_BANK0_SIZE (128*1024)  /* 200Kb Local SRAM (plus 18Kb for Cortex-M0)*/
 #  define LPC43_LOCSRAM_BANK1_SIZE (72*1024)
-#  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
-#  define LPC43_AHBSRAM_BANK1_SIZE (0)
+#  define LPC43_AHBSRAM_BANK0_SIZE (32*1024)   /* 64Kb AHB SRAM */
+#  define LPC43_AHBSRAM_BANK1_SIZE (16*1024)
 #  define LPC43_AHBSRAM_BANK2_SIZE (16*1024)
 #  define LPC43_EEPROM_SIZE        (0)         /* No EEPROM */
 #  undef  LPC43_NLCD                           /* No LCD controller */
@@ -559,10 +576,37 @@
 #  define LPC43_NTIMERS            (4)         /* Four Timers */
 #  define LPC43_NI2C               (2)         /* Two I2C controllers */
 #  define LPC43_NI2S               (2)         /* Two I2S controllers */
-#  define LPC43_NCAN               (2)         /* Two CAN controllers */
+#  define LPC43_NCAN               (2)         /* Two C-CAN controllers */
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
-#  define LPC43_NADC               (2)         /* Two 10-bit ADC controllers */
-#  define LPC43_NADC_CHANNELS      (4)         /* Four ADC channels */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels (per ADC)*/
+#  define LPC43_NADC12             (1)         /* ONne 12-bit ADC controllers (ADCHS)*/
+#elif defined(CONFIG_ARCH_CHIP_LPC4370FET256)
+#  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
+#  define LPC43_FLASH_BANKB_SIZE   (0)
+#  define LPC43_LOCSRAM_BANK0_SIZE (128*1024)  /* 200Kb Local SRAM (plus 18Kb for Cortex-M0)*/
+#  define LPC43_LOCSRAM_BANK1_SIZE (72*1024)
+#  define LPC43_AHBSRAM_BANK0_SIZE (32*1024)   /* 64Kb AHB SRAM */
+#  define LPC43_AHBSRAM_BANK1_SIZE (16*1024)
+#  define LPC43_AHBSRAM_BANK2_SIZE (16*1024)
+#  define LPC43_EEPROM_SIZE        (0)         /* No EEPROM */
+#  define LPC43_NLCD               (1)         /* One LCD controller */
+#  define LPC43_ETHERNET           (1)         /* One Ethernet controller */
+#  define LPC43_USB0               (1)         /* Have USB0 (Host, Device, OTG) */
+#  define LPC43_USB1               (1)         /* Have USB1 (Host, Device) */
+#  define LPC43_USB1_ULPI          (1)         /* Have USB1 (Host, Device) with ULPI I/F */
+#  define LPC43_MCPWM              (1)         /* One PWM interface */
+#  define LPC43_QEI                (1)         /* One Quadrature Encoder interface */
+#  define LPC43_NUSARTS            (4)         /* Three USARTs + 1 UART */
+#  define LPC43_NSSP               (2)         /* Two SSP controllers */
+#  define LPC43_NTIMERS            (4)         /* Four Timers */
+#  define LPC43_NI2C               (2)         /* Two I2C controllers */
+#  define LPC43_NI2S               (2)         /* Two I2S controllers */
+#  define LPC43_NCAN               (2)         /* Two C-CAN controllers */
+#  define LPC43_NDAC               (1)         /* One 10-bit DAC */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels (per ADC)*/
+#  define LPC43_NADC12             (1)         /* ONne 12-bit ADC controllers (ADCHS)*/
+>>>>>>> remotes/nuttx/arch/master
 #else
 #  error "Unsupported LPC43xx chip"
 #endif

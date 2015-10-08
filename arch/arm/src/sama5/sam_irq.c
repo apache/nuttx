@@ -590,35 +590,35 @@ static uint32_t *sam_decodeirq(uintptr_t base, uint32_t *regs)
   uint32_t irqid;
   uint32_t ivr;
 
- /* Paragraph 17.8.5 Protect Mode: "The Protect Mode permits reading the
-  *   Interrupt Vector Register without performing the associated automatic
-  *   operations. ... Writing PROT in AIC_DCR (Debug Control Register) at 0x1
-  *   enables the Protect Mode.
-  *
-  *  "When the Protect Mode is enabled, the AIC performs interrupt stacking
-  *    only when a write access is performed on the AIC_IVR. Therefore, the
-  *    Interrupt Service Routines must write (arbitrary data) to the AIC_IVR
-  *    just after reading it. The new context of the AIC, including the value
-  *    of the Interrupt Status Register (AIC_ISR), is updated with the current
-  *    interrupt only when AIC_IVR is written. ..."
-  *
-  *  "To summarize, in normal operating mode, the read of AIC_IVR performs the
-  *   following operations within the AIC:
-  *
-  *   1. Calculates active interrupt (higher than current or spurious).
-  *   2. Determines and returns the vector of the active interrupt.
-  *   3. Memorizes the interrupt.
-  *   4. Pushes the current priority level onto the internal stack.
-  *   5. Acknowledges the interrupt.
-  *
-  * "However, while the Protect Mode is activated, only operations 1 to 3 are
-  *  performed when AIC_IVR is read.  Operations 4 and 5 are only performed by
-  *  the AIC when AIC_IVR is written.
-  *
-  * "Software that has been written and debugged using the Protect Mode runs
-  *  correctly in Normal Mode without modification. However, in Normal Mode the
-  *  AIC_IVR write has no effect and can be removed to optimize the code.
-  */
+  /* Paragraph 17.8.5 Protect Mode: "The Protect Mode permits reading the
+   *   Interrupt Vector Register without performing the associated automatic
+   *   operations. ... Writing PROT in AIC_DCR (Debug Control Register) at 0x1
+   *   enables the Protect Mode.
+   *
+   *  "When the Protect Mode is enabled, the AIC performs interrupt stacking
+   *    only when a write access is performed on the AIC_IVR. Therefore, the
+   *    Interrupt Service Routines must write (arbitrary data) to the AIC_IVR
+   *    just after reading it. The new context of the AIC, including the value
+   *    of the Interrupt Status Register (AIC_ISR), is updated with the current
+   *    interrupt only when AIC_IVR is written. ..."
+   *
+   *  "To summarize, in normal operating mode, the read of AIC_IVR performs the
+   *   following operations within the AIC:
+   *
+   *   1. Calculates active interrupt (higher than current or spurious).
+   *   2. Determines and returns the vector of the active interrupt.
+   *   3. Memorizes the interrupt.
+   *   4. Pushes the current priority level onto the internal stack.
+   *   5. Acknowledges the interrupt.
+   *
+   * "However, while the Protect Mode is activated, only operations 1 to 3 are
+   *  performed when AIC_IVR is read.  Operations 4 and 5 are only performed by
+   *  the AIC when AIC_IVR is written.
+   *
+   * "Software that has been written and debugged using the Protect Mode runs
+   *  correctly in Normal Mode without modification. However, in Normal Mode the
+   *  AIC_IVR write has no effect and can be removed to optimize the code.
+   */
 
   /* Write in the IVR to support Protect Mode */
 

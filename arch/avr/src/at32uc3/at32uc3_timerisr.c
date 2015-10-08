@@ -153,7 +153,7 @@ static void rtc_waitnotbusy(void)
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -167,14 +167,14 @@ static void rtc_waitnotbusy(void)
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-   /* Clear the pending timer interrupt */
+  /* Clear the pending timer interrupt */
 
-   putreg32(RTC_INT_TOPI, AVR32_RTC_ICR);
+  putreg32(RTC_INT_TOPI, AVR32_RTC_ICR);
 
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************

@@ -120,10 +120,10 @@
  * SDCARD_MMCXFR_CLKDIV, and SDCARD_SDXFR_CLKDIV.
  */
 
-#define LPC17_CLCKCR_INIT         (SDCARD_INIT_CLKDIV|SDCARD_CLOCK_WIDBUS_D1)
-#define SDCARD_CLOCK_MMCXFR       (SDCARD_MMCXFR_CLKDIV|SDCARD_CLOCK_WIDBUS_D1)
-#define SDCARD_CLOCK_SDXFR        (SDCARD_SDXFR_CLKDIV|SDCARD_CLOCK_WIDBUS_D1)
-#define SDCARD_CLOCK_SDWIDEXFR    (SDCARD_SDXFR_CLKDIV|SDCARD_CLOCK_WIDBUS_D4)
+#define LPC17_CLCKCR_INIT         (SDCARD_INIT_CLKDIV | SDCARD_CLOCK_WIDBUS_D1)
+#define SDCARD_CLOCK_MMCXFR       (SDCARD_MMCXFR_CLKDIV | SDCARD_CLOCK_WIDBUS_D1)
+#define SDCARD_CLOCK_SDXFR        (SDCARD_SDXFR_CLKDIV | SDCARD_CLOCK_WIDBUS_D1)
+#define SDCARD_CLOCK_SDWIDEXFR    (SDCARD_SDXFR_CLKDIV | SDCARD_CLOCK_WIDBUS_D4)
 
 /* Timing */
 
@@ -149,19 +149,19 @@
  * controlled by the driver.
  */
 
-#define SDCARD_RXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_8|DMACH_CONTROL_DBSIZE_8|\
-                                   DMACH_CONTROL_SWIDTH_32BIT|DMACH_CONTROL_DWIDTH_32BIT|\
+#define SDCARD_RXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_8 | DMACH_CONTROL_DBSIZE_8 | \
+                                   DMACH_CONTROL_SWIDTH_32BIT | DMACH_CONTROL_DWIDTH_32BIT | \
                                    DMACH_CONTROL_DI)
-#define SDCARD_TXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_8|DMACH_CONTROL_DBSIZE_8|\
-                                   DMACH_CONTROL_SWIDTH_32BIT|DMACH_CONTROL_DWIDTH_32BIT|\
+#define SDCARD_TXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_8 | DMACH_CONTROL_DBSIZE_8 | \
+                                   DMACH_CONTROL_SWIDTH_32BIT | DMACH_CONTROL_DWIDTH_32BIT | \
                                    DMACH_CONTROL_SI)
 
 /* DMA configuration register settings.  Only the SRCPER, DSTPER, and
  * XFRTTYPE fields of the CONFIG register need be specified.
  */
 
-#define SDCARD_RXDMA32_CONFIG     (DMACH_CONFIG_SRCPER_SDCARD|DMACH_CONFIG_XFRTYPE_P2M_SC)
-#define SDCARD_TXDMA32_CONFIG     (DMACH_CONFIG_DSTPER_SDCARD|DMACH_CONFIG_XFRTYPE_M2P_DC)
+#define SDCARD_RXDMA32_CONFIG     (DMACH_CONFIG_SRCPER_SDCARD | DMACH_CONFIG_XFRTYPE_P2M_SC)
+#define SDCARD_TXDMA32_CONFIG     (DMACH_CONFIG_DSTPER_SDCARD | DMACH_CONFIG_XFRTYPE_M2P_DC)
 
 /* FIFO sizes */
 
@@ -170,39 +170,39 @@
 
 /* Data transfer interrupt mask bits */
 
-#define SDCARD_RECV_MASK     (SDCARD_MASK0_DCRCFAILIE|SDCARD_MASK0_DTIMEOUTIE|\
-                              SDCARD_MASK0_DATAENDIE|SDCARD_MASK0_RXOVERRIE|\
-                              SDCARD_MASK0_RXFIFOHFIE|SDCARD_MASK0_STBITERRIE)
-#define SDCARD_SEND_MASK     (SDCARD_MASK0_DCRCFAILIE|SDCARD_MASK0_DTIMEOUTIE|\
-                              SDCARD_MASK0_DATAENDIE|SDCARD_MASK0_TXUNDERRIE|\
-                              SDCARD_MASK0_TXFIFOHEIE|SDCARD_MASK0_STBITERRIE)
-#define SDCARD_DMARECV_MASK  (SDCARD_MASK0_DCRCFAILIE|SDCARD_MASK0_DTIMEOUTIE|\
-                              SDCARD_MASK0_DATAENDIE|SDCARD_MASK0_RXOVERRIE|\
+#define SDCARD_RECV_MASK     (SDCARD_MASK0_DCRCFAILIE | SDCARD_MASK0_DTIMEOUTIE | \
+                              SDCARD_MASK0_DATAENDIE | SDCARD_MASK0_RXOVERRIE | \
+                              SDCARD_MASK0_RXFIFOHFIE | SDCARD_MASK0_STBITERRIE)
+#define SDCARD_SEND_MASK     (SDCARD_MASK0_DCRCFAILIE | SDCARD_MASK0_DTIMEOUTIE | \
+                              SDCARD_MASK0_DATAENDIE | SDCARD_MASK0_TXUNDERRIE | \
+                              SDCARD_MASK0_TXFIFOHEIE | SDCARD_MASK0_STBITERRIE)
+#define SDCARD_DMARECV_MASK  (SDCARD_MASK0_DCRCFAILIE | SDCARD_MASK0_DTIMEOUTIE | \
+                              SDCARD_MASK0_DATAENDIE | SDCARD_MASK0_RXOVERRIE | \
                               SDCARD_MASK0_STBITERRIE)
-#define SDCARD_DMASEND_MASK  (SDCARD_MASK0_DCRCFAILIE|SDCARD_MASK0_DTIMEOUTIE|\
-                              SDCARD_MASK0_DATAENDIE|SDCARD_MASK0_TXUNDERRIE|\
+#define SDCARD_DMASEND_MASK  (SDCARD_MASK0_DCRCFAILIE | SDCARD_MASK0_DTIMEOUTIE | \
+                              SDCARD_MASK0_DATAENDIE | SDCARD_MASK0_TXUNDERRIE | \
                               SDCARD_MASK0_STBITERRIE)
 
 /* Event waiting interrupt mask bits */
 
 #define SDCARD_CMDDONE_STA   (SDCARD_STATUS_CMDSENT)
-#define SDCARD_RESPDONE_STA  (SDCARD_STATUS_CTIMEOUT|SDCARD_STATUS_CCRCFAIL|\
+#define SDCARD_RESPDONE_STA  (SDCARD_STATUS_CTIMEOUT | SDCARD_STATUS_CCRCFAIL | \
                               SDCARD_STATUS_CMDREND)
 #define SDCARD_XFRDONE_STA   (0)
 
 #define SDCARD_CMDDONE_MASK  (SDCARD_MASK0_CMDSENTIE)
-#define SDCARD_RESPDONE_MASK (SDCARD_MASK0_CCRCFAILIE|SDCARD_MASK0_CTIMEOUTIE|\
+#define SDCARD_RESPDONE_MASK (SDCARD_MASK0_CCRCFAILIE | SDCARD_MASK0_CTIMEOUTIE | \
                               SDCARD_MASK0_CMDRENDIE)
 #define SDCARD_XFRDONE_MASK  (0)
 
 #define SDCARD_CMDDONE_ICR   (SDCARD_CLEAR_CMDSENTC)
-#define SDCARD_RESPDONE_ICR  (SDCARD_CLEAR_CTIMEOUTC|SDCARD_CLEAR_CCRCFAILC|\
+#define SDCARD_RESPDONE_ICR  (SDCARD_CLEAR_CTIMEOUTC | SDCARD_CLEAR_CCRCFAILC | \
                               SDCARD_CLEAR_CMDRENDC)
-#define SDCARD_XFRDONE_ICR   (SDCARD_CLEAR_DATAENDC|SDCARD_CLEAR_DCRCFAILC|\
-                              SDCARD_CLEAR_DTIMEOUTC|SDCARD_CLEAR_RXOVERRC|\
-                              SDCARD_CLEAR_TXUNDERRC|SDCARD_CLEAR_STBITERRC)
+#define SDCARD_XFRDONE_ICR   (SDCARD_CLEAR_DATAENDC | SDCARD_CLEAR_DCRCFAILC | \
+                              SDCARD_CLEAR_DTIMEOUTC | SDCARD_CLEAR_RXOVERRC | \
+                              SDCARD_CLEAR_TXUNDERRC | SDCARD_CLEAR_STBITERRC)
 
-#define SDCARD_WAITALL_ICR   (SDCARD_CMDDONE_ICR|SDCARD_RESPDONE_ICR|\
+#define SDCARD_WAITALL_ICR   (SDCARD_CMDDONE_ICR | SDCARD_RESPDONE_ICR | \
                               SDCARD_XFRDONE_ICR)
 
 /* Let's wait until we have both SD card transfer complete and DMA complete. */
@@ -516,13 +516,15 @@ static inline void lpc17_setclock(uint32_t clkcr)
 
   /* Clear CLKDIV, PWRSAV, BYPASS, and WIDBUS bits */
 
-  regval &= ~(SDCARD_CLOCK_CLKDIV_MASK|SDCARD_CLOCK_PWRSAV|SDCARD_CLOCK_BYPASS|
-              SDCARD_CLOCK_WIDBUS|SDCARD_CLOCK_CLKEN);
+  regval &= ~(SDCARD_CLOCK_CLKDIV_MASK | SDCARD_CLOCK_PWRSAV |
+              SDCARD_CLOCK_BYPASS | SDCARD_CLOCK_WIDBUS |
+              SDCARD_CLOCK_CLKEN);
 
   /* Replace with user provided settings */
 
-  clkcr  &=  (SDCARD_CLOCK_CLKDIV_MASK|SDCARD_CLOCK_PWRSAV|SDCARD_CLOCK_BYPASS|
-              SDCARD_CLOCK_WIDBUS|SDCARD_CLOCK_CLKEN);
+  clkcr  &=  (SDCARD_CLOCK_CLKDIV_MASK | SDCARD_CLOCK_PWRSAV |
+              SDCARD_CLOCK_BYPASS | SDCARD_CLOCK_WIDBUS |
+              SDCARD_CLOCK_CLKEN);
 
   regval |=  clkcr;
   putreg32(regval, LPC17_SDCARD_CLOCK);
@@ -617,7 +619,7 @@ static void lpc17_setpwrctrl(uint32_t pwrctrl)
    */
 
   regval  = getreg32(LPC17_SDCARD_PWR);
-  regval &= ~(SDCARD_PWR_CTRL_MASK | SDCARD_PWR_OPENDRAIN |  SDCARD_PWR_ROD);
+  regval &= ~(SDCARD_PWR_CTRL_MASK | SDCARD_PWR_OPENDRAIN | SDCARD_PWR_ROD);
   regval |= pwrctrl;
   putreg32(regval, LPC17_SDCARD_PWR);
 }
@@ -805,7 +807,7 @@ static void lpc17_dmacallback(DMA_HANDLE handle, void *arg, int status)
    * Transfer.
    */
 
-  lpc17_sample((struct lpc17_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
+  lpc17_sample((struct lpc17_dev_s *)arg, SAMPLENDX_DMA_CALLBACK);
 
   /* Get the result of the DMA transfer */
 
@@ -860,10 +862,11 @@ static uint8_t lpc17_log2(uint16_t value)
 
   DEBUGASSERT(value > 0);
   while (value != 1)
-  {
-    value >>= 1;
-    log2++;
-  }
+    {
+      value >>= 1;
+      log2++;
+    }
+
   return log2;
 }
 
@@ -889,9 +892,11 @@ static void lpc17_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
    */
 
   regval  =  getreg32(LPC17_SDCARD_DCTRL);
-  regval &= ~(SDCARD_DCTRL_DTDIR|SDCARD_DCTRL_DTMODE|SDCARD_DCTRL_DBLOCKSIZE_MASK);
-  dctrl  &=  (SDCARD_DCTRL_DTDIR|SDCARD_DCTRL_DTMODE|SDCARD_DCTRL_DBLOCKSIZE_MASK);
-  regval |=  (dctrl|SDCARD_DCTRL_DTEN);
+  regval &= ~(SDCARD_DCTRL_DTDIR | SDCARD_DCTRL_DTMODE |
+              SDCARD_DCTRL_DBLOCKSIZE_MASK);
+  dctrl  &=  (SDCARD_DCTRL_DTDIR | SDCARD_DCTRL_DTMODE |
+              SDCARD_DCTRL_DBLOCKSIZE_MASK);
+  regval |=  (dctrl | SDCARD_DCTRL_DTEN);
   putreg32(regval, LPC17_SDCARD_DCTRL);
 }
 
@@ -916,8 +921,8 @@ static void lpc17_datadisable(void)
   /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
 
   regval  = getreg32(LPC17_SDCARD_DCTRL);
-  regval &= ~(SDCARD_DCTRL_DTEN|SDCARD_DCTRL_DTDIR|SDCARD_DCTRL_DTMODE|
-              SDCARD_DCTRL_DMAEN|SDCARD_DCTRL_DBLOCKSIZE_MASK);
+  regval &= ~(SDCARD_DCTRL_DTEN | SDCARD_DCTRL_DTDIR | SDCARD_DCTRL_DTMODE |
+              SDCARD_DCTRL_DMAEN | SDCARD_DCTRL_DBLOCKSIZE_MASK);
   putreg32(regval, LPC17_SDCARD_DCTRL);
 }
 
@@ -959,27 +964,27 @@ static void lpc17_sendfifo(struct lpc17_dev_s *priv)
         }
       else
         {
-           /* No.. transfer just the bytes remaining in the user buffer,
-            * padding with zero as necessary to extend to a full word.
-            */
+          /* No.. transfer just the bytes remaining in the user buffer,
+           * padding with zero as necessary to extend to a full word.
+           */
 
-           uint8_t *ptr = (uint8_t *)priv->remaining;
-           int i;
+          uint8_t *ptr = (uint8_t *)priv->remaining;
+          int i;
 
-           data.w = 0;
-           for (i = 0; i < priv->remaining; i++)
-             {
-                data.b[i] = *ptr++;
-             }
+          data.w = 0;
+          for (i = 0; i < priv->remaining; i++)
+            {
+               data.b[i] = *ptr++;
+            }
 
-           /* Now the transfer is finished */
+          /* Now the transfer is finished */
 
-           priv->remaining = 0;
-         }
+          priv->remaining = 0;
+        }
 
-       /* Put the word in the FIFO */
+      /* Put the word in the FIFO */
 
-       putreg32(data.w, LPC17_SDCARD_FIFO);
+      putreg32(data.w, LPC17_SDCARD_FIFO);
     }
 }
 
@@ -1026,7 +1031,7 @@ static void lpc17_recvfifo(struct lpc17_dev_s *priv)
         {
           /* Transfer any trailing fractional word */
 
-          uint8_t *ptr = (uint8_t*)priv->buffer;
+          uint8_t *ptr = (uint8_t *)priv->buffer;
           int i;
 
           for (i = 0; i < priv->remaining; i++)
@@ -1215,30 +1220,30 @@ static int lpc17_interrupt(int irq, void *context)
 #ifdef CONFIG_SDIO_DMA
           if (!priv->dmamode)
 #endif
-           {
-             /* Is the RX FIFO half full or more?  Is so then we must be
-              * processing a receive transaction.
-             */
-
-             if ((pending & SDCARD_STATUS_RXFIFOHF) != 0)
-               {
-                 /* Receive data from the RX FIFO */
-
-                 lpc17_recvfifo(priv);
-               }
-
-             /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
-              * be processing a send transaction.  NOTE:  We can't be processing
-              * both!
+            {
+              /* Is the RX FIFO half full or more?  Is so then we must be
+               * processing a receive transaction.
               */
 
-             else if ((pending & SDCARD_STATUS_TXFIFOHE) != 0)
-               {
-                 /* Send data via the TX FIFO */
+              if ((pending & SDCARD_STATUS_RXFIFOHF) != 0)
+                {
+                  /* Receive data from the RX FIFO */
 
-                 lpc17_sendfifo(priv);
-               }
-           }
+                  lpc17_recvfifo(priv);
+                }
+
+              /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
+               * be processing a send transaction.  NOTE:  We can't be processing
+               * both!
+               */
+
+              else if ((pending & SDCARD_STATUS_TXFIFOHE) != 0)
+                {
+                  /* Send data via the TX FIFO */
+
+                  lpc17_sendfifo(priv);
+                }
+            }
 
           /* Handle data end events */
 
@@ -1293,7 +1298,7 @@ static int lpc17_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
-              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle data timeout error */
@@ -1303,7 +1308,7 @@ static int lpc17_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
-              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
             }
 
           /* Handle RX FIFO overrun error */
@@ -1313,7 +1318,7 @@ static int lpc17_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
-              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle TX FIFO underrun error */
@@ -1323,7 +1328,7 @@ static int lpc17_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
-              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle start bit error */
@@ -1333,8 +1338,8 @@ static int lpc17_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
-              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-           }
+              lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
+            }
         }
 
       /* Handle wait events *************************************************/
@@ -1352,7 +1357,7 @@ static int lpc17_interrupt(int irq, void *context)
                 {
                   /* Yes.. wake the thread up */
 
-                  putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
+                  putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
                   lpc17_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
@@ -1471,7 +1476,7 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
 
   /* Configure and enable the SD card peripheral */
 
-  lpc17_setclock(LPC17_CLCKCR_INIT|SDCARD_CLOCK_CLKEN);
+  lpc17_setclock(LPC17_CLCKCR_INIT | SDCARD_CLOCK_CLKEN);
   lpc17_setpwrctrl(SDCARD_PWR_CTRL_ON);
   irqrestore(flags);
 
@@ -1652,8 +1657,9 @@ static int lpc17_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
   /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, and CPSMEN bits */
 
   regval = getreg32(LPC17_SDCARD_CMD);
-  regval &= ~(SDCARD_CMD_INDEX_MASK|SDCARD_CMD_WAITRESP_MASK|
-              SDCARD_CMD_WAITINT|SDCARD_CMD_WAITPEND|SDCARD_CMD_CPSMEN);
+  regval &= ~(SDCARD_CMD_INDEX_MASK | SDCARD_CMD_WAITRESP_MASK |
+              SDCARD_CMD_WAITINT | SDCARD_CMD_WAITPEND |
+              SDCARD_CMD_CPSMEN);
 
   /* Set WAITRESP bits */
 
@@ -1687,7 +1693,7 @@ static int lpc17_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
   /* Write the SD card CMD */
 
-  putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
+  putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
   putreg32(regval, LPC17_SDCARD_CMD);
   return OK;
 }
@@ -1730,7 +1736,7 @@ static int lpc17_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Save the destination buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
 #ifdef CONFIG_SDIO_DMA
   priv->dmamode   = false;
@@ -1739,7 +1745,8 @@ static int lpc17_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Then set up the SD card data path */
 
   dblocksize = lpc17_log2(nbytes) << SDCARD_DCTRL_DBLOCKSIZE_SHIFT;
-  lpc17_dataconfig(SDCARD_DTIMER_DATATIMEOUT, nbytes, dblocksize|SDCARD_DCTRL_DTDIR);
+  lpc17_dataconfig(SDCARD_DTIMER_DATATIMEOUT, nbytes,
+                   dblocksize | SDCARD_DCTRL_DTDIR);
 
   /* And enable interrupts */
 
@@ -1784,7 +1791,7 @@ static int lpc17_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
 #ifdef CONFIG_SDIO_DMA
   priv->dmamode   = false;
@@ -1821,7 +1828,7 @@ static int lpc17_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
 static int lpc17_cancel(FAR struct sdio_dev_s *dev)
 {
-  struct lpc17_dev_s *priv = (struct lpc17_dev_s*)dev;
+  struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
 
   /* Disable all transfer- and event- related interrupts */
 
@@ -2026,7 +2033,7 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 
   /* Clear all pending message completion events and return the R1/R6 response */
 
-  putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
+  putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
   *rshort = getreg32(LPC17_SDCARD_RESP0);
   return ret;
 }
@@ -2036,14 +2043,14 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
   uint32_t regval;
   int ret = OK;
 
- /* R2  CID, CSD register (136-bit)
-  *     135       0               Start bit
-  *     134       0               Transmission bit (0=from card)
-  *     133:128   bit5   - bit0   Reserved
-  *     127:1     bit127 - bit1   127-bit CID or CSD register
-  *                               (including internal CRC)
-  *     0         1               End bit
-  */
+  /* R2  CID, CSD register (136-bit)
+   *     135       0               Start bit
+   *     134       0               Transmission bit (0=from card)
+   *     133:128   bit5   - bit0   Reserved
+   *     127:1     bit127 - bit1   127-bit CID or CSD register
+   *                               (including internal CRC)
+   *     0         1               End bit
+   */
 
 #ifdef CONFIG_DEBUG
   /* Check that R1 is the correct response to this command */
@@ -2073,7 +2080,7 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
 
   /* Return the long response */
 
-  putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
+  putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
   if (rlong)
     {
       rlong[0] = getreg32(LPC17_SDCARD_RESP0);
@@ -2089,14 +2096,14 @@ static int lpc17_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
   uint32_t regval;
   int ret = OK;
 
- /* R3  OCR (48-bit)
-  *     47        0               Start bit
-  *     46        0               Transmission bit (0=from card)
-  *     45:40     bit5   - bit0   Reserved
-  *     39:8      bit31  - bit0   32-bit OCR register
-  *     7:1       bit6   - bit0   Reserved
-  *     0         1               End bit
-  */
+  /* R3  OCR (48-bit)
+   *     47        0               Start bit
+   *     46        0               Transmission bit (0=from card)
+   *     45:40     bit5   - bit0   Reserved
+   *     39:8      bit31  - bit0   32-bit OCR register
+   *     7:1       bit6   - bit0   Reserved
+   *     0         1               End bit
+   */
 
   /* Check that this is the correct response to this command */
 
@@ -2122,7 +2129,7 @@ static int lpc17_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
         }
     }
 
-  putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
+  putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
   if (rshort)
     {
       *rshort = getreg32(LPC17_SDCARD_RESP0);
@@ -2134,7 +2141,7 @@ static int lpc17_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
 
 static int lpc17_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
 {
-  putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
+  putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
   return -ENOSYS;
 }
 
@@ -2165,7 +2172,7 @@ static int lpc17_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
 static void lpc17_waitenable(FAR struct sdio_dev_s *dev,
                              sdio_eventset_t eventset)
 {
-  struct lpc17_dev_s *priv = (struct lpc17_dev_s*)dev;
+  struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
   uint32_t waitmask;
 
   DEBUGASSERT(priv != NULL);
@@ -2224,7 +2231,7 @@ static void lpc17_waitenable(FAR struct sdio_dev_s *dev,
 static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
                                        uint32_t timeout)
 {
-  struct lpc17_dev_s *priv = (struct lpc17_dev_s*)dev;
+  struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
   irqstate_t flags;
   int ret;
@@ -2249,10 +2256,10 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-           /* Then just tell the caller that we already timed out */
+          /* Then just tell the caller that we already timed out */
 
-           wkupevent = SDIOWAIT_TIMEOUT;
-           goto errout;
+          wkupevent = SDIOWAIT_TIMEOUT;
+          goto errout;
         }
 
       /* Start the watchdog timer */
@@ -2262,8 +2269,8 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-           fdbg("ERROR: wd_start failed: %d\n", ret);
-         }
+          fdbg("ERROR: wd_start failed: %d\n", ret);
+        }
     }
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
@@ -2272,7 +2279,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
    * may have already occurred before this function was called!
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for an event in event set to occur.  If this the event has already
        * occurred, then the semaphore will already have been incremented and
@@ -2332,7 +2339,7 @@ errout:
 static void lpc17_callbackenable(FAR struct sdio_dev_s *dev,
                                  sdio_eventset_t eventset)
 {
-  struct lpc17_dev_s *priv = (struct lpc17_dev_s*)dev;
+  struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
 
   fvdbg("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
@@ -2366,7 +2373,7 @@ static void lpc17_callbackenable(FAR struct sdio_dev_s *dev,
 static int lpc17_registercallback(FAR struct sdio_dev_s *dev,
                                   worker_t callback, void *arg)
 {
-  struct lpc17_dev_s *priv = (struct lpc17_dev_s*)dev;
+  struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
 
   /* Disable callbacks and register this callback and is argument */
 
@@ -2444,14 +2451,15 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Save the destination buffer information for use by the interrupt handler */
 
-      priv->buffer    = (uint32_t*)buffer;
+      priv->buffer    = (uint32_t *)buffer;
       priv->remaining = buflen;
       priv->dmamode   = true;
 
       /* Then set up the SD card data path */
 
       dblocksize = lpc17_log2(buflen) << SDCARD_DCTRL_DBLOCKSIZE_SHIFT;
-      lpc17_dataconfig(SDCARD_DTIMER_DATATIMEOUT, buflen, dblocksize|SDCARD_DCTRL_DTDIR);
+      lpc17_dataconfig(SDCARD_DTIMER_DATATIMEOUT, buflen,
+                       dblocksize | SDCARD_DCTRL_DTDIR);
 
       /* Configure the RX DMA */
 
@@ -2522,7 +2530,7 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Save the source buffer information for use by the interrupt handler */
 
-      priv->buffer    = (uint32_t*)buffer;
+      priv->buffer    = (uint32_t *)buffer;
       priv->remaining = buflen;
       priv->dmamode   = true;
 
@@ -2577,7 +2585,7 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
 
 static void lpc17_callback(void *arg)
 {
-  struct lpc17_dev_s *priv = (struct lpc17_dev_s*)arg;
+  struct lpc17_dev_s *priv = (struct lpc17_dev_s *)arg;
 
   /* Is a callback registered? */
 
@@ -2594,8 +2602,8 @@ static void lpc17_callback(void *arg)
           /* Media is present.  Is the media inserted event enabled? */
 
           if ((priv->cbevents & SDIOMEDIA_INSERTED) == 0)
-           {
-             /* No... return without performing the callback */
+            {
+              /* No... return without performing the callback */
 
               return;
             }

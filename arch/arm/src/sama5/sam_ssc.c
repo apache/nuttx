@@ -365,7 +365,7 @@
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_8BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
    DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_16BITS | \
-   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1| \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1 | \
    DMACH_FLAG_MEMBURST_4)
 
 #define DMA16_FLAGS \
@@ -3359,7 +3359,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 #if defined(CONFIG_SAMA5_SSC1_TX_TKOUTPUT_CONT)
   priv->txout = SSC_CLKOUT_CONT; /* Continuous */
 #elif defined(CONFIG_SAMA5_SSC1_TX_TKOUTPUT_XFR)
-  priv->txout = SSC_CLKOUT_XFER;/* Only output clock during transfers */
+  priv->txout = SSC_CLKOUT_XFER; /* Only output clock during transfers */
 #else /* if defined(CONFIG_SAMA5_SSC1_TX_TKOUTPUT_NONE) */
   priv->txout = SSC_CLKOUT_NONE; /* No output clock */
 #endif

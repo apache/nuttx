@@ -229,9 +229,9 @@
  */
 
 #define HSMCI_STATUS_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
-    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
-    HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+   HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
+   HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
 
 /* Response errors:
  *
@@ -244,13 +244,13 @@
  */
 
 #define HSMCI_RESPONSE_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
-    HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
+   HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
 #define HSMCI_RESPONSE_NOCRC_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
-    HSMCI_INT_RINDE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
+   HSMCI_INT_RINDE)
 #define HSMCI_RESPONSE_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE)
 
 /* Data transfer errors:
  *
@@ -263,18 +263,18 @@
  */
 
 #define HSMCI_DATA_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
-    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+   HSMCI_INT_DTOE  | HSMCI_INT_DCRCE)
 
 #define HSMCI_DATA_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_DTOE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_DTOE)
 
 #define HSMCI_DATA_RECV_ERRORS \
-  ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
-    HSMCI_INT_DCRCE )
+  (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
+   HSMCI_INT_DCRCE)
 
 #define HSMCI_DATA_DMASEND_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE)
 
 /* Data transfer status and interrupt mask bits.
  *
@@ -291,11 +291,11 @@
  */
 
 #define HSMCI_RECV_INTS \
-  ( HSMCI_DATA_RECV_ERRORS | HSMCI_INT_RXRDY)
+  (HSMCI_DATA_RECV_ERRORS | HSMCI_INT_RXRDY)
 #define HSMCI_DMARECV_INTS \
-  ( HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  (HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 #define HSMCI_DMASEND_INTS \
-  ( HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  (HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 
 /* Event waiting interrupt mask bits.
  *
@@ -307,9 +307,9 @@
  */
 
 #define HSMCI_CMDRESP_INTS \
-  ( HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY )
+  (HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY)
 #define HSMCI_CMDRESP_NOCRC_INTS \
-  ( HSMCI_RESPONSE_NOCRC_ERRORS | HSMCI_INT_CMDRDY )
+  (HSMCI_RESPONSE_NOCRC_ERRORS | HSMCI_INT_CMDRDY)
 
 /* Register logging support */
 
@@ -1509,7 +1509,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
 
   /* Loop while there are pending interrupts. */
 
-  for (;;)
+  for (; ; )
     {
       /* Check the HSMCI status register.  Mask out all bits that don't
        * correspond to enabled interrupts.  (This depends on the fact that
@@ -1542,13 +1542,13 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                 {
                   /* Yes.. Terminate with a timeout. */
 
-                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
                 }
               else
                 {
                   /* No..  Terminate with an I/O error. */
 
-                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
                 }
             }
 
@@ -1616,25 +1616,27 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                     {
                       /* Yes.. signal a timeout error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_TIMEOUT;
+                      wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                  SDIOWAIT_TIMEOUT;
                     }
                   else
                     {
                       /* No.. signal some generic I/O error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_ERROR;
+                      wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                  SDIOWAIT_ERROR;
                     }
                 }
               else
-               {
+                {
                   /* The Command-Response sequence ended with no error */
 
-                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
+                  wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE;
                 }
 
-             /* Yes.. Is there a thread waiting for this event set? */
+              /* Yes.. Is there a thread waiting for this event set? */
 
-             wkupevent &= priv->waitevents;
+              wkupevent &= priv->waitevents;
               if (wkupevent != 0)
                 {
                   /* Yes.. wake the thread up */
@@ -1847,10 +1849,10 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   regval = sam_getreg(priv, SAM_HSMCI_MR_OFFSET);
   regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK | HSMCI_MR_CLKODD);
 
- /* These clock devisor values that must be defined in the board-specific
-  * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
-  * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
-  */
+  /* These clock devisor values that must be defined in the board-specific
+   * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
+   * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
+   */
 
   switch (rate)
     {
@@ -1986,13 +1988,13 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 static int sam_sendcmd(FAR struct sdio_dev_s *dev,
                        uint32_t cmd, uint32_t arg)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t regval;
   uint32_t cmdidx;
 
   sam_cmdsampleinit(priv);
 
-    /* Set the HSMCI Argument value */
+  /* Set the HSMCI Argument value */
 
   sam_putreg(priv, arg, SAM_HSMCI_ARGR_OFFSET);
 
@@ -2180,7 +2182,7 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Save the destination buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t*)buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
 
   /* And enable interrupts */
@@ -2285,7 +2287,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
 
 static int sam_cancel(FAR struct sdio_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   /* Disable all transfer- and event- related interrupts */
 
@@ -2338,7 +2340,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
 static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t sr;
   uint32_t pending;
   int32_t  timeout;
@@ -2368,7 +2370,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
-  for (;;)
+  for (; ; )
     {
       /* Did a Command-Response sequence termination evernt occur? */
 
@@ -2393,14 +2395,16 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
                 {
                   /* Yes.. return a timeout error */
 
-                  priv->wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_TIMEOUT;
+                  priv->wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                    SDIOWAIT_TIMEOUT;
                   return -ETIMEDOUT;
                 }
               else
                 {
                   /* No.. return some generic I/O error */
 
-                  priv->wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_ERROR;
+                  priv->wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE |
+                                    SDIOWAIT_ERROR;
                   return -EIO;
                 }
             }
@@ -2408,7 +2412,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* The Command-Response sequence ended with no error */
 
-              priv->wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
+              priv->wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE;
               return OK;
             }
        }
@@ -2448,7 +2452,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 static int sam_recvshort(FAR struct sdio_dev_s *dev,
                          uint32_t cmd, uint32_t *rshort)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   int ret = OK;
 
   /* These responses could have CRC errors:
@@ -2534,17 +2538,17 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
 
 static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   int ret = OK;
 
- /* R2  CID, CSD register (136-bit)
-  *     135       0               Start bit
-  *     134       0               Transmission bit (0=from card)
-  *     133:128   bit5   - bit0   Reserved
-  *     127:1     bit127 - bit1   127-bit CID or CSD register
-  *                               (including internal CRC)
-  *     0         1               End bit
-  */
+  /* R2  CID, CSD register (136-bit)
+   *     135       0               Start bit
+   *     134       0               Transmission bit (0=from card)
+   *     133:128   bit5   - bit0   Reserved
+   *     127:1     bit127 - bit1   127-bit CID or CSD register
+   *                               (including internal CRC)
+   *     0         1               End bit
+   */
 
 #ifdef CONFIG_DEBUG
   /* Check that R1 is the correct response to this command */
@@ -2590,7 +2594,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
 static int sam_recvnotimpl(FAR struct sdio_dev_s *dev,
                            uint32_t cmd, uint32_t *rnotimpl)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   priv->wkupevent = 0;
   return -ENOSYS;
 }
@@ -2633,7 +2637,7 @@ static int sam_recvnotimpl(FAR struct sdio_dev_s *dev,
 static void sam_waitenable(FAR struct sdio_dev_s *dev,
                            sdio_eventset_t eventset)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t waitmask;
 
   DEBUGASSERT(priv != NULL);
@@ -2647,7 +2651,7 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
    */
 
   waitmask = 0;
-  if ((eventset & (SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE)) != 0)
+  if ((eventset & (SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE)) != 0)
     {
       waitmask |= priv->cmdrmask;
     }
@@ -2692,7 +2696,7 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
 static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
                                      uint32_t timeout)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
   int ret;
 
@@ -2723,7 +2727,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-           return SDIOWAIT_TIMEOUT;
+          return SDIOWAIT_TIMEOUT;
         }
 
       /* Start the watchdog timer.  I am not sure why this is, but I am
@@ -2752,7 +2756,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
    * may have already occurred before this function was called!
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for an event in event set to occur.  If this the event has already
        * occurred, then the semaphore will already have been incremented and
@@ -2806,7 +2810,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 static void sam_callbackenable(FAR struct sdio_dev_s *dev,
                                sdio_eventset_t eventset)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   fvdbg("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
@@ -2840,7 +2844,7 @@ static void sam_callbackenable(FAR struct sdio_dev_s *dev,
 static int sam_registercallback(FAR struct sdio_dev_s *dev,
                                 worker_t callback, void *arg)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   /* Disable callbacks and register this callback and is argument */
 
@@ -2945,7 +2949,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       paddr += sizeof(uint32_t);
       maddr += blocksize;
-   }
+    }
 
   /* Enable DMA handshaking */
 
@@ -3041,7 +3045,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       paddr += sizeof(uint32_t);
       maddr += blocksize;
-   }
+    }
 
   /* Enable DMA handshaking */
 
@@ -3084,7 +3088,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
 static void sam_callback(void *arg)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)arg;
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
   irqstate_t flags;
   int ret;
 
@@ -3104,8 +3108,8 @@ static void sam_callback(void *arg)
           /* Media is present.  Is the media inserted event enabled? */
 
           if ((priv->cbevents & SDIOMEDIA_INSERTED) == 0)
-           {
-             /* No... return without performing the callback */
+            {
+              /* No... return without performing the callback */
 
               return;
             }
@@ -3131,7 +3135,7 @@ static void sam_callback(void *arg)
       /* This function is called either from (1) the context of the calling
        * thread or from the the context of (2) card detection logic.  The
        * caller may or may not have interrupts disabled (we have them
-       & disabled here!).
+       * disabled here!).
        *
        * So to minimize the possibility of recursive behavior and to assure
        * that callback is always performed outside of the interrupt handling

@@ -388,42 +388,42 @@ void sam_gpioirq(gpio_pinset_t pinset)
   uint32_t base = sam_gpiobase(pinset);
   int      pin  = sam_gpiopin(pinset);
 
-   /* Are any additional interrupt modes selected? */
+  /* Are any additional interrupt modes selected? */
 
-   if ((pinset & _GIO_INT_AIM) != 0)
-     {
-       /* Yes.. Enable additional interrupt mode */
+  if ((pinset & _GIO_INT_AIM) != 0)
+    {
+      /* Yes.. Enable additional interrupt mode */
 
-       putreg32(pin, base + SAM_PIO_AIMER_OFFSET);
+      putreg32(pin, base + SAM_PIO_AIMER_OFFSET);
 
-       /* Level or edge detected interrupt? */
+      /* Level or edge detected interrupt? */
 
-       if ((pinset & _GPIO_INT_LEVEL) != 0)
-         {
-           putreg32(pin, base + SAM_PIO_LSR_OFFSET); /* Level */
-         }
-       else
-         {
-           putreg32(pin, base + SAM_PIO_ESR_OFFSET); /* Edge */
-         }
+      if ((pinset & _GPIO_INT_LEVEL) != 0)
+        {
+          putreg32(pin, base + SAM_PIO_LSR_OFFSET); /* Level */
+        }
+      else
+        {
+          putreg32(pin, base + SAM_PIO_ESR_OFFSET); /* Edge */
+        }
 
       /* High level/rising edge or low level /falling edge? */
 
-       if ((pinset & _GPIO_INT_RH) != 0)
-         {
-           putreg32(pin, base + SAM_PIO_REHLSR_OFFSET); /* High level/Rising edge */
-         }
-       else
-         {
-           putreg32(pin, base + SAM_PIO_FELLSR_OFFSET); /* Low level/Falling edge */
-         }
-     }
-   else
-     {
-       /* No.. Disable additional interrupt mode */
+      if ((pinset & _GPIO_INT_RH) != 0)
+        {
+          putreg32(pin, base + SAM_PIO_REHLSR_OFFSET); /* High level/Rising edge */
+        }
+      else
+        {
+          putreg32(pin, base + SAM_PIO_FELLSR_OFFSET); /* Low level/Falling edge */
+        }
+    }
+  else
+    {
+      /* No.. Disable additional interrupt mode */
 
-       putreg32(pin, base + SAM_PIO_AIMDR_OFFSET);
-     }
+      putreg32(pin, base + SAM_PIO_AIMDR_OFFSET);
+    }
 }
 
 /************************************************************************************
@@ -441,10 +441,10 @@ void sam_gpioirqenable(int irq)
 
   if (sam_irqbase(irq, &base, &pin) == OK)
     {
-       /* Clear (all) pending interrupts and enable this pin interrupt */
+      /* Clear (all) pending interrupts and enable this pin interrupt */
 
-       //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
-       putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
+      //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
+      putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
     }
 }
 
@@ -463,9 +463,9 @@ void sam_gpioirqdisable(int irq)
 
   if (sam_irqbase(irq, &base, &pin) == OK)
     {
-       /* Disable this pin interrupt */
+      /* Disable this pin interrupt */
 
-       putreg32((1 << pin), base + SAM_PIO_IDR_OFFSET);
+      putreg32((1 << pin), base + SAM_PIO_IDR_OFFSET);
     }
 }
 

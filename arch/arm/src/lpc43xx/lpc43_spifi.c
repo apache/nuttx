@@ -241,7 +241,7 @@
  * Compute this from the SPIFI clock period and the minimum high time of CS
  * from the serial flash data sheet:
  *
- *   csHigh = ceiling( min CS high / SPIFI clock period ) - 1
+ *   csHigh = ceiling(min CS high / SPIFI clock period) - 1
  *
  * where ceiling means round up to the next higher integer if the argument
  * isn’t an integer.
@@ -1182,10 +1182,10 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
   /* Initialize the SPIFI ROM driver */
 
   ret = lpc43_rominit(priv);
-   if (ret != OK)
-     {
-       return NULL;
-     }
+  if (ret != OK)
+    {
+      return NULL;
+    }
 
   /* Check if we need to emulator a 512 byte sector */
 

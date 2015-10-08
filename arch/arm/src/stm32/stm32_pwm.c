@@ -454,7 +454,26 @@ static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset)
 
 static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value)
 {
-  putreg16(value, priv->base + offset);
+  if (priv->timtype == TIMTYPE_GENERAL32 &&
+      (offset == STM32_GTIM_CNT_OFFSET ||
+       offset == STM32_GTIM_ARR_OFFSET ||
+       offset == STM32_GTIM_CCR1_OFFSET ||
+       offset == STM32_GTIM_CCR2_OFFSET ||
+       offset == STM32_GTIM_CCR3_OFFSET ||
+       offset == STM32_GTIM_CCR4_OFFSET))
+    {
+      /* a 32 bit access is required for a 32 bit register:
+       * if only a 16 bit write would be performed, then the
+       * upper 16 bits of the 32 bit register will be a copy of
+       * the lower 16 bits.
+       */
+
+      putreg32(value, priv->base + offset);
+    }
+  else
+    {
+      putreg16(value, priv->base + offset);
+    }
 }
 
 /****************************************************************************
@@ -1289,13 +1308,13 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   /* Then put the GPIO pin back to the default state */
 
-  pincfg = priv->pincfg & (GPIO_PORT_MASK|GPIO_PIN_MASK);
+  pincfg = priv->pincfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
 
 #if defined(CONFIG_STM32_STM32F10XX)
-  pincfg |= (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT);
+  pincfg |= (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT);
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
       defined(CONFIG_STM32_STM32L15XX)
-  pincfg |= (GPIO_INPUT|GPIO_FLOAT);
+  pincfg |= (GPIO_INPUT | GPIO_FLOAT);
 #else
 #  error "Unrecognized STM32 chip"
 #endif

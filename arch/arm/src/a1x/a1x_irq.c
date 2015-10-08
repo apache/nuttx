@@ -226,10 +226,10 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 #if 0 /* Use PEND registers instead */
   uint32_t regval;
 
- /* During initialization, the BASE address register was set to zero.
-  * Therefore, when we read the VECTOR address register, we get the IRQ number
-  * shifted left by two.
-  */
+  /* During initialization, the BASE address register was set to zero.
+   * Therefore, when we read the VECTOR address register, we get the IRQ number
+   * shifted left by two.
+   */
 
   regval = getreg32(A1X_INTC_VECTOR);
 

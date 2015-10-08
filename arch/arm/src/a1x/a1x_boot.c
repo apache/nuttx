@@ -81,7 +81,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */
@@ -268,9 +268,9 @@ static void a1x_copyvectorblock(void)
    *                      0xffff0000)
    */
 
-  src  = (uint32_t*)&_vector_start;
-  end  = (uint32_t*)&_vector_end;
-  dest = (uint32_t*)(A1X_VECTOR_VSRAM + VECTOR_TABLE_OFFSET);
+  src  = (uint32_t *)&_vector_start;
+  end  = (uint32_t *)&_vector_end;
+  dest = (uint32_t *)(A1X_VECTOR_VSRAM + VECTOR_TABLE_OFFSET);
 
   while (src < end)
     {

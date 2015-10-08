@@ -190,7 +190,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
    *         another, new API... perhaps sam_configfilter()
    */
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -362,7 +362,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

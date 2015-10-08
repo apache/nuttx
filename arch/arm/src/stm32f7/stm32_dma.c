@@ -683,7 +683,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    */
 
   regval  = dmast_getreg(dmast, STM32_DMA_SCR_OFFSET);
-  regval &= ~(DMA_SCR_PL_MASK|DMA_SCR_CHSEL_MASK);
+  regval &= ~(DMA_SCR_PL_MASK | DMA_SCR_CHSEL_MASK);
   regval |= scr & DMA_SCR_PL_MASK;
   regval |= (uint32_t)dmast->channel << DMA_SCR_CHSEL_SHIFT;
   dmast_putreg(dmast, STM32_DMA_SCR_OFFSET, regval);
@@ -775,7 +775,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
    * interrupt at the halfway point.
    */
 
-  if ((scr & (DMA_SCR_DBM|DMA_SCR_CIRC)) == 0)
+  if ((scr & (DMA_SCR_DBM | DMA_SCR_CIRC)) == 0)
     {
       /* Once half of the bytes are transferred, the half-transfer flag (HTIF) is
        * set and an interrupt is generated if the Half-Transfer Interrupt Enable
@@ -784,7 +784,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
        * Interrupt Enable bit (TCIE) is set.
        */
 
-      scr |= (half ? (DMA_SCR_HTIE|DMA_SCR_TEIE) : (DMA_SCR_TCIE|DMA_SCR_TEIE));
+      scr |= (half ? (DMA_SCR_HTIE | DMA_SCR_TEIE) : (DMA_SCR_TCIE | DMA_SCR_TEIE));
     }
   else
     {

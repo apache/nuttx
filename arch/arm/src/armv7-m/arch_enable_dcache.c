@@ -114,7 +114,7 @@ void arch_enable_dcache(void)
         }
       while (tmpways--);
     }
-  while(sets--);
+  while (sets--);
 
   ARM_DSB();
 

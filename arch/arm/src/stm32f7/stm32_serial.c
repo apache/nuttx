@@ -264,7 +264,7 @@ struct up_dev_s
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
 
-  int (* const vector)(int irq, void *context); /* Interrupt handler */
+  int (*const vector)(int irq, void *context); /* Interrupt handler */
 
   /* RX DMA state */
 
@@ -1244,7 +1244,7 @@ static void up_set_format(struct uart_dev_s *dev)
   /* Configure hardware flow control */
 
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval &= ~(USART_CR3_CTSE|USART_CR3_RTSE);
+  regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32F7_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
@@ -1397,7 +1397,7 @@ static int up_setup(struct uart_dev_s *dev)
       config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
 #endif
       stm32_configgpio(config);
-   }
+    }
 #endif
 
 #ifdef HAVE_RS485
@@ -1665,9 +1665,9 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, priv->vector);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the USART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the USART
+       */
 
        up_enable_irq(priv->irq);
     }
@@ -1768,17 +1768,17 @@ static int up_interrupt_common(struct up_dev_s *priv)
 
       if ((priv->sr & USART_ISR_RXNE) != 0 && (priv->ie & USART_CR1_RXNEIE) != 0)
         {
-           /* Received data ready... process incoming bytes.  NOTE the check for
-            * RXNEIE:  We cannot call uart_recvchards of RX interrupts are disabled.
-            */
+          /* Received data ready... process incoming bytes.  NOTE the check for
+           * RXNEIE:  We cannot call uart_recvchards of RX interrupts are disabled.
+           */
 
-           uart_recvchars(&priv->dev);
-           handled = true;
+          uart_recvchars(&priv->dev);
+          handled = true;
         }
 
-       /* We may still have to read from the DR register to clear any pending
-        * error conditions.
-        */
+      /* We may still have to read from the DR register to clear any pending
+       * error conditions.
+       */
 
       else if ((priv->sr & (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE)) != 0)
         {
@@ -1794,10 +1794,10 @@ static int up_interrupt_common(struct up_dev_s *priv)
 
       if ((priv->sr & USART_ISR_TXE) != 0 && (priv->ie & USART_CR1_TXEIE) != 0)
         {
-           /* Transmit data register empty ... process outgoing bytes */
+          /* Transmit data register empty ... process outgoing bytes */
 
-           uart_xmitchars(&priv->dev);
-           handled = true;
+          uart_xmitchars(&priv->dev);
+          handled = true;
         }
     }
 
@@ -1869,7 +1869,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
-        struct termios *termiosp = (struct termios*)arg;
+        struct termios *termiosp = (struct termios *)arg;
 
         if (!termiosp)
           {
@@ -1901,7 +1901,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios *termiosp = (struct termios*)arg;
+        struct termios *termiosp = (struct termios *)arg;
 
         if (!termiosp)
           {
@@ -2122,7 +2122,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static bool up_rxflowcontrol(struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
     defined(CONFIG_STM32F7_FLOWCONTROL_BROKEN)

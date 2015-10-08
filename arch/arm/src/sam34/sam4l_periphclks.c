@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -256,7 +256,7 @@ static inline void sam_init_pbamask(void)
   mask    |= PM_PBAMASK_TWIM3;        /* TWIM3 */
 #endif
 #ifdef CONFIG_SAM34_LCDCA
-  mask    |= PM_PBAMASK_LCDCA;        /* LCDCA*/
+  mask    |= PM_PBAMASK_LCDCA;        /* LCDCA */
 #endif
 #endif
 
@@ -530,14 +530,14 @@ void sam_pba_disableperipheral(uint32_t bitset)
       sam_hsb_disableperipheral(PM_HSBMASK_APBA);
     }
 
-   /* Disable PBA UART divided clock if none of the UARTS are in use */
+  /* Disable PBA UART divided clock if none of the UARTS are in use */
 
   if ((getreg32(SAM_PM_PBAMASK) & PM_PBAMASK_UARTS) == 0)
     {
       sam_pba_disabledivmask(PM_PBADIVMASK_CLK_USART);
     }
 
-   /* Disable PBA TIMER divided clocks if none of the UARTS are in use */
+  /* Disable PBA TIMER divided clocks if none of the UARTS are in use */
 
   if ((getreg32(SAM_PM_PBAMASK) & PM_PBAMASK_TIMERS) == 0)
     {

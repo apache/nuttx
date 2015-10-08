@@ -883,10 +883,10 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    */
 #warning Missing Logic
 
-   /* Enable wait-on-trigger?
-    *
-    * TODO: Not implemented
-    */
+  /* Enable wait-on-trigger?
+   *
+   * TODO: Not implemented
+   */
 #warning Missing Logic
 
   /* Enable count down? */
@@ -2350,7 +2350,7 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 
   flags = irqsave();
 
-   /* Set the new timeout interval */
+  /* Set the new timeout interval */
 
   putreg32(interval, loadr);
 
@@ -2497,14 +2497,14 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
   if (toints)
     {
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-        if (tmndx)
-          {
-            moder  = base + TIVA_TIMER_TBMR_OFFSET;
-          }
-        else
-          {
-            moder  = base + TIVA_TIMER_TAMR_OFFSET;
-          }
+      if (tmndx)
+        {
+          moder  = base + TIVA_TIMER_TBMR_OFFSET;
+        }
+      else
+        {
+          moder  = base + TIVA_TIMER_TAMR_OFFSET;
+        }
 
       /* Clearing the TACINTD bit allows the time-out interrupt to be
        * generated as normal

@@ -71,7 +71,7 @@
 
 void up_unblock_task(struct tcb_s *tcb)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
 
   /* Verify that the context switch can be performed */
 
@@ -110,7 +110,7 @@ void up_unblock_task(struct tcb_s *tcb)
            * of the g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (struct tcb_s *)g_readytorun.head;
 
           /* Update scheduler parameters */
 
@@ -136,16 +136,16 @@ void up_unblock_task(struct tcb_s *tcb)
            * g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (struct tcb_s *)g_readytorun.head;
 
 #ifdef CONFIG_ARCH_ADDRENV
-         /* Make sure that the address environment for the previously
-          * running task is closed down gracefully (data caches dump,
-          * MMU flushed) and set up the address environment for the new
-          * thread at the head of the ready-to-run list.
-          */
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
+           */
 
-         (void)group_addrenv(rtcb);
+          (void)group_addrenv(rtcb);
 #endif
           /* Update scheduler parameters */
 

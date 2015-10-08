@@ -97,8 +97,8 @@ extern uintptr_t up_vectors[16];
 static void z180_seti(uint8_t value) __naked
 {
   __asm
-	ld      a, 4(ix)	;value
-	ld      l, a
+	ld	a, 4(ix)	; value
+	ld	l, a
   __endasm;
 }
 

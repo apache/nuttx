@@ -91,7 +91,7 @@ static int lpc43_RIT_isr(int irq, FAR void *context)
 
   flags = irqsave();
 
-  putreg32(RIT_CTRL_INT,LPC43_RIT_CTRL);
+  putreg32(RIT_CTRL_INT, LPC43_RIT_CTRL);
 
   internal_timer += (uint64_t)RIT_TIMER_RESOLUTION;
   if (alarm > 0 && internal_timer >= alarm)
@@ -195,10 +195,13 @@ void up_timer_initialize(void)
    * complicated.  When I have a better idea, I'll change this.
    */
 
-  while(!((mask_test >> mask_bits) & ticks_per_int)) mask_bits++;
+  while (!((mask_test >> mask_bits) & ticks_per_int))
+    {
+      mask_bits++;
+    }
 
   lldbg("mask_bits = %d, mask = %X, ticks_per_int = %d\r\n",
-        mask_bits, (0xFFFFFFFF<<(32 - mask_bits)), ticks_per_int);
+        mask_bits, (0xffffffff << (32 - mask_bits)), ticks_per_int);
 
   /* Set the mask and compare value so we get interrupts every
    * RIT_TIMER_RESOLUTION cycles.

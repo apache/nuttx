@@ -796,7 +796,7 @@ static void stm32_checksetup(void)
 
 static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 {
-  volatile uint32_t *epaddr = (uint32_t*)STM32_USB_COUNT_TX(epno);
+  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_COUNT_TX(epno);
   *epaddr = count;
 }
 
@@ -806,7 +806,7 @@ static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 
 static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 {
-  volatile uint32_t *txaddr = (uint32_t*)STM32_USB_ADDR_TX(epno);
+  volatile uint32_t *txaddr = (uint32_t *)STM32_USB_ADDR_TX(epno);
   *txaddr = addr;
 }
 
@@ -816,7 +816,7 @@ static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 {
-  volatile uint32_t *txaddr = (uint32_t*)STM32_USB_ADDR_TX(epno);
+  volatile uint32_t *txaddr = (uint32_t *)STM32_USB_ADDR_TX(epno);
   return (uint16_t)*txaddr;
 }
 
@@ -826,7 +826,7 @@ static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 
 static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 {
-  volatile uint32_t *epaddr = (uint32_t*)STM32_USB_COUNT_RX(epno);
+  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_COUNT_RX(epno);
   uint32_t rxcount = 0;
   uint16_t nblocks;
 
@@ -873,7 +873,7 @@ static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 
 static inline uint16_t stm32_geteprxcount(uint8_t epno)
 {
-  volatile uint32_t *epaddr = (uint32_t*)STM32_USB_COUNT_RX(epno);
+  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_COUNT_RX(epno);
   return (*epaddr) & USB_COUNT_RX_MASK;
 }
 
@@ -883,7 +883,7 @@ static inline uint16_t stm32_geteprxcount(uint8_t epno)
 
 static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 {
-  volatile uint32_t *rxaddr = (uint32_t*)STM32_USB_ADDR_RX(epno);
+  volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_ADDR_RX(epno);
   *rxaddr = addr;
 }
 
@@ -893,7 +893,7 @@ static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteprxaddr(uint8_t epno)
 {
-  volatile uint32_t *rxaddr = (uint32_t*)STM32_USB_ADDR_RX(epno);
+  volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_ADDR_RX(epno);
   return (uint16_t)*rxaddr;
 }
 
@@ -1138,7 +1138,7 @@ static void stm32_copytopma(const uint8_t *buffer, uint16_t pma, uint16_t nbytes
 
   /* Copy loop.  Source=user buffer, Dest=packet memory */
 
-  dest = (uint16_t*)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
+  dest = (uint16_t *)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
   for (i = nwords; i != 0; i--)
     {
       /* Read two bytes and pack into on 16-bit word */
@@ -1168,12 +1168,12 @@ stm32_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 
   /* Copy loop.  Source=packet memory, Dest=user buffer */
 
-  src = (uint32_t*)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
+  src = (uint32_t *)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
   for (i = nwords; i != 0; i--)
     {
       /* Copy 16-bits from packet memory to user buffer. */
 
-      *(uint16_t*)buffer = *src++;
+      *(uint16_t *)buffer = *src++;
 
       /* Source address increments by 1*sizeof(uint32_t) = 4; Dest address
        * increments by 2*sizeof(uint8_t) = 2.
@@ -1324,7 +1324,7 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
  * Description:
  *   Handle the ep0 state on writes.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 inline static int stm32_wrrequest_ep0(struct stm32_usbdev_s *priv,
                                       struct stm32_ep_s *privep)
@@ -1438,7 +1438,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ep0_rdrequest
  *
  * Description:
@@ -1446,7 +1446,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
  *   is EP0STATE_SETUP_OUT and uppon new incoming data is available in the endpoint
  *   0's buffer.  This function will simply copy the OUT data into ep0data.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int stm32_ep0_rdrequest(struct stm32_usbdev_s *priv)
 {
@@ -1709,7 +1709,7 @@ static void stm32_setdevaddr(struct stm32_usbdev_s *priv, uint8_t value)
 
   /* Set the device address and enable function */
 
-  stm32_putreg(value|USB_DADDR_EF, STM32_USB_DADDR);
+  stm32_putreg(value | USB_DADDR_EF, STM32_USB_DADDR);
 }
 
 /****************************************************************************
@@ -1755,9 +1755,12 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   if (priv->ep0state != EP0STATE_SETUP_READY)
     {
       /* Not the data phase */
-      /* Get a 32-bit PMA address and use that to get the 8-byte setup request */
+      /* Get a 32-bit PMA address and use that to get the 8-byte setup
+       * request
+       */
 
-      stm32_copyfrompma((uint8_t*)&priv->ctrl, stm32_geteprxaddr(EP0), USB_SIZEOF_CTRLREQ);
+      stm32_copyfrompma((uint8_t *)&priv->ctrl, stm32_geteprxaddr(EP0),
+                        USB_SIZEOF_CTRLREQ);
 
       /* And extract the little-endian 16-bit values to host order */
 
@@ -2506,7 +2509,7 @@ static int stm32_lpinterrupt(int irq, void *context)
        * interrupts.
        */
 
-      stm32_setimask(priv, USB_CNTR_SUSPM, USB_CNTR_ESOFM|USB_CNTR_WKUPM);
+      stm32_setimask(priv, USB_CNTR_SUSPM, USB_CNTR_ESOFM | USB_CNTR_WKUPM);
       stm32_putreg(~USB_CNTR_SUSPM, STM32_USB_ISTR);
     }
 
@@ -2589,7 +2592,7 @@ static void stm32_suspend(struct stm32_usbdev_s *priv)
    * interrupt.  Clear any pending WKUP interrupt.
    */
 
-  stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM|USB_CNTR_SUSPM);
+  stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM | USB_CNTR_SUSPM);
   stm32_putreg(~USB_ISTR_WKUP, STM32_USB_ISTR);
 
   /* Set the FSUSP bit in the CNTR register.  This activates suspend mode
@@ -2698,7 +2701,7 @@ static void stm32_esofpoll(struct stm32_usbdev_s *priv)
            * the WKUP interrupt.  Clear any pending WKUP interrupt.
            */
 
-          stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM|USB_CNTR_SUSPM);
+          stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM | USB_CNTR_SUSPM);
           stm32_putreg(~USB_ISTR_WKUP, STM32_USB_ISTR);
         }
       break;
@@ -2994,7 +2997,7 @@ static struct usbdev_req_s *stm32_epallocreq(struct usbdev_ep_s *ep)
 
 static void stm32_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct stm32_req_s *privreq = (struct stm32_req_s*)req;
+  struct stm32_req_s *privreq = (struct stm32_req_s *)req;
 
 #ifdef CONFIG_DEBUG
   if (!ep || !req)
@@ -3454,7 +3457,7 @@ static int stm32_wakeup(struct usbdev_s *dev)
    * pending ESOF interrupt.
    */
 
-  stm32_setimask(priv, USB_CNTR_ESOFM, USB_CNTR_WKUPM|USB_CNTR_SUSPM);
+  stm32_setimask(priv, USB_CNTR_ESOFM, USB_CNTR_WKUPM | USB_CNTR_SUSPM);
   stm32_putreg(~USB_ISTR_ESOF, STM32_USB_ISTR);
   irqrestore(flags);
   return OK;
@@ -3686,7 +3689,7 @@ static void stm32_hwshutdown(struct stm32_usbdev_s *priv)
 
   /* Power down the USB controller */
 
-  stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
+  stm32_putreg(USB_CNTR_FRES | USB_CNTR_PDWN, STM32_USB_CNTR);
 }
 
 /****************************************************************************
@@ -3881,7 +3884,8 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       stm32_usbpullup(&priv->usbdev, true);
       priv->usbdev.speed = USB_SPEED_FULL;
-   }
+    }
+
   return ret;
 }
 

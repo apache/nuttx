@@ -32,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Supports:
  *  - Master operation, 100 kHz (standard) and 400 kHz (full speed)
@@ -51,9 +51,9 @@
  *
  */
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -84,9 +84,9 @@
 
 #if defined(CONFIG_EFM32_I2C0) || defined(CONFIG_EFM32_I2C1)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Configuration **************************************************************/
 
@@ -126,7 +126,7 @@
 
 /* Macros to convert a I2C pin to a GPIO output */
 
-#define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD )
+#define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD)
 
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
@@ -281,9 +281,9 @@ struct efm32_i2c_inst_s
   uint32_t flags;             /* Flags used in this instantiation */
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t efm32_i2c_getreg(FAR struct efm32_i2c_priv_s *priv,
                                         uint8_t offset);
@@ -351,9 +351,9 @@ static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
 static const char *efm32_i2c_state_str(int i2c_state);
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Trace events strings */
 
@@ -422,28 +422,28 @@ static const struct i2c_ops_s efm32_i2c_ops =
   .write = efm32_i2c_write,
   .read = efm32_i2c_read
 #ifdef CONFIG_I2C_WRITEREAD
-    ,.writeread = efm32_i2c_writeread
+  , .writeread = efm32_i2c_writeread
 #endif
 #ifdef CONFIG_I2C_TRANSFER
-    ,.transfer = efm32_i2c_transfer
+  , .transfer = efm32_i2c_transfer
 #endif
 #ifdef CONFIG_I2C_SLAVE
-    ,.setownaddress = efm32_i2c_setownaddress,
+  , .setownaddress = efm32_i2c_setownaddress,
   .registercallback = efm32_i2c_registercallback
 #endif
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_getreg
  *
  * Description:
  *   Get a 16-bit register value by offset
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t efm32_i2c_getreg(FAR struct efm32_i2c_priv_s *priv,
                                         uint8_t offset)
@@ -451,13 +451,13 @@ static inline uint32_t efm32_i2c_getreg(FAR struct efm32_i2c_priv_s *priv,
   return getreg32(priv->config->base + offset);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_putreg
  *
  * Description:
  *  Put a 16-bit register value by offset
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_i2c_putreg(FAR struct efm32_i2c_priv_s *priv,
                                     uint8_t offset, uint32_t value)
@@ -465,13 +465,13 @@ static inline void efm32_i2c_putreg(FAR struct efm32_i2c_priv_s *priv,
   putreg32(value, priv->config->base + offset);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_modifyreg
  *
  * Description:
  *   Modify a 16-bit register value by offset
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_i2c_modifyreg(FAR struct efm32_i2c_priv_s *priv,
                                        uint8_t offset, uint32_t clearbits,
@@ -480,13 +480,13 @@ static inline void efm32_i2c_modifyreg(FAR struct efm32_i2c_priv_s *priv,
   modifyreg32(priv->config->base + offset, clearbits, setbits);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_state_str
  *
  * Description:
  *   Convert i2c_state into corresponding text.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRACE
 static const char *efm32_i2c_state_str(int i2c_state)
@@ -521,13 +521,13 @@ static const char *efm32_i2c_state_str(int i2c_state)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_sem_wait
  *
  * Description:
  *   Take the exclusive access, waiting as necessary
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
 {
@@ -537,14 +537,14 @@ static inline void efm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_tousecs
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
  *   processed.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEO
 static useconds_t efm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
@@ -566,13 +566,13 @@ static useconds_t efm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_sem_waitdone
  *
  * Description:
  *   Wait for a transfer to complete
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
 static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
@@ -701,26 +701,26 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_sem_post
  *
  * Description:
  *   Release the mutual exclusion semaphore
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
 {
   sem_post(&((struct efm32_i2c_inst_s *)dev)->priv->sem_excl);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_sem_init
  *
  * Description:
  *   Initialize semaphores
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
 {
@@ -730,13 +730,13 @@ static inline void efm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_sem_destroy
  *
  * Description:
  *   Destroy semaphores.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
 {
@@ -746,13 +746,13 @@ static inline void efm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_trace*
  *
  * Description:
  *   I2C trace instrumentation
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRACE
 static void efm32_i2c_traceclear(FAR struct efm32_i2c_priv_s *priv)
@@ -841,13 +841,13 @@ static void efm32_i2c_tracedump(FAR struct efm32_i2c_priv_s *priv)
 }
 #endif /* CONFIG_I2C_TRACE */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_setclock
  *
  * Description:
  *   Set the I2C clock
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
                                uint32_t frequency)
@@ -873,8 +873,8 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 #if defined(CONFIG_EFM32_I2C_CLHR_FAST)
 #  define n (11 + 6)          /* Ratio is 11:3 */
 #elif defined(CONFIG_EFM32_I2C_CLHR_ASYMMETRIC)
-#  define n ( 6 + 3)          /* Ratio is 6:3 */
-#else                                /* CLHR STANDARD */
+#  define n (6 + 3)           /* Ratio is 6:3 */
+#else                         /* CLHR STANDARD */
 #  define n ( 4 + 4)          /* Ratio is 4:4 */
 #endif
 
@@ -893,17 +893,17 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
   efm32_i2c_putreg(priv, EFM32_I2C_CLKDIV_OFFSET, div);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_isr
  *
  * Description:
  *  Common Interrupt Service Routine
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
 {
-  for (;;)
+  for (; ; )
     {
       int regval;
 
@@ -1253,7 +1253,7 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
                        * now, before receiving the last byte.
                        */
 
-                      efm32_i2c_putreg(priv,EFM32_I2C_CMD_OFFSET,I2C_CMD_NACK);
+                      efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_NACK);
                     }
                 }
             }
@@ -1284,7 +1284,6 @@ static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
     }
 
 done:
-
   if (priv->i2c_state == I2CSTATE_DONE)
     {
 #ifndef CONFIG_I2C_POLLED
@@ -1307,13 +1306,13 @@ done:
 
 #ifndef CONFIG_I2C_POLLED
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c0_isr
  *
  * Description:
  *   I2C0 interrupt service routine
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_I2C0
 static int efm32_i2c0_isr(int irq, void *context)
@@ -1322,13 +1321,13 @@ static int efm32_i2c0_isr(int irq, void *context)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c1_isr
  *
  * Description:
  *   I2C1 interrupt service routine
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_I2C1
 static int efm32_i2c1_isr(int irq, void *context)
@@ -1339,17 +1338,17 @@ static int efm32_i2c1_isr(int irq, void *context)
 
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Private Initialization and Deinitialization
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_reset
  *
  * Description:
  *   Reset I2C to same state as after a HW reset.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv)
 {
@@ -1363,14 +1362,14 @@ static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv)
   /* Do not reset route register, setting should be done independently */
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_init
  *
  * Description:
  *   Setup the I2C hardware, ready for operation with defaults
  *   Prepare and start an I2C transfer (single master mode only).
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv, int frequency)
 {
@@ -1434,13 +1433,13 @@ static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv, int frequency)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_deinit
  *
  * Description:
  *   Shutdown the I2C hardware
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv)
 {
@@ -1466,17 +1465,17 @@ static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Device Driver Operations
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_setfrequency
  *
  * Description:
  *   Set the I2C frequency
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t efm32_i2c_setfrequency(FAR struct i2c_dev_s *dev,
                                        uint32_t frequency)
@@ -1489,13 +1488,13 @@ static uint32_t efm32_i2c_setfrequency(FAR struct i2c_dev_s *dev,
   return frequency;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_setaddress
  *
  * Description:
  *   Set the I2C slave address
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 {
@@ -1508,13 +1507,13 @@ static int efm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_process
  *
  * Description:
  *   Common I2C transfer logic
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
                              FAR struct i2c_msg_s *msgs, int count)
@@ -1607,35 +1606,35 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
     {
       /* Check for error status conditions */
 
-      switch(priv->result)
+      switch (priv->result)
         {
-            /* Arbitration lost during transfer. */
+          /* Arbitration lost during transfer. */
 
           case I2CRESULT_ARBLOST:
               errval = EAGAIN;
               break;
 
-              /* NACK received during transfer. */
+          /* NACK received during transfer. */
 
           case I2CRESULT_NACK:
               errval = ENXIO;
               break;
 
-              /* SW fault. */
+          /* SW fault. */
 
           case I2CRESULT_SWFAULT:
               errval = EIO;
               break;
 
-              /* Usage fault. */
+          /* Usage fault. */
 
           case I2CRESULT_USAGEFAULT:
               errval = EINTR;
               break;
 
-              /* Bus error during transfer (misplaced START/STOP).
-               * I2C Bus is for some reason busy
-               */
+          /* Bus error during transfer (misplaced START/STOP).
+           * I2C Bus is for some reason busy
+           */
 
           case I2CRESULT_BUSERR:
               errval = EBUSY;
@@ -1660,13 +1659,13 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
   return -errval;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_write
  *
  * Description:
  *   Write I2C data
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t * buffer,
                            int buflen)
@@ -1682,13 +1681,13 @@ static int efm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t * buffer,
   return efm32_i2c_process(dev, &msgv, 1);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_read
  *
  * Description:
  *   Read I2C data
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer, int buflen)
 {
@@ -1703,13 +1702,13 @@ int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer, int buflen)
   return efm32_i2c_process(dev, &msgv, 1);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_writeread
  *
  * Description:
  *  Read then write I2C data
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_WRITEREAD
 static int efm32_i2c_writeread(FAR struct i2c_dev_s *dev,
@@ -1735,13 +1734,13 @@ static int efm32_i2c_writeread(FAR struct i2c_dev_s *dev,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_transfer
  *
  * Description:
  *   Generic I2C transfer function
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER
 static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
@@ -1751,17 +1750,17 @@ static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cinitialize
  *
  * Description:
  *   Initialize one I2C bus
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct i2c_dev_s *up_i2cinitialize(int port)
 {
@@ -1821,13 +1820,13 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
   return (struct i2c_dev_s *)inst;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cuninitialize
  *
  * Description:
  *   Uninitialize an I2C bus
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 {
@@ -1865,13 +1864,13 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2creset
  *
  * Description:
  *   Reset an I2C bus
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 int up_i2creset(FAR struct i2c_dev_s *dev)
@@ -1975,7 +1974,6 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
   ret = OK;
 
 out:
-
   /* Release the port for re-use by other clients */
 
   efm32_i2c_sem_post(dev);

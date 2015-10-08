@@ -98,7 +98,7 @@ typedef unsigned char      irqstate_t;
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_HC_INCLUDE_HCS12_TYPES_H */

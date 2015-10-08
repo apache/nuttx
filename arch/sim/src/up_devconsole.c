@@ -69,10 +69,10 @@ static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations devconsole_fops =
 {
-  .read		= devconsole_read,
-  .write	= devconsole_write,
+  .read   = devconsole_read,
+  .write  = devconsole_write,
 #ifndef CONFIG_DISABLE_POLL
-  .poll         = devconsole_poll,
+  .poll   = devconsole_poll,
 #endif
 };
 
@@ -108,7 +108,7 @@ static ssize_t devconsole_read(struct file *filep, char *buffer, size_t len)
         }
 
       *buffer++ = ch;
-	  nread++;
+       nread++;
 
       /* We have at least one character.  Return now if no further
        * characters are available without waiting.

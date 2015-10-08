@@ -894,9 +894,9 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
 
       sr = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
       if ((sr & I2C_INT_TIMEOUT) != 0)
-      {
-        return;
-      }
+        {
+          return;
+        }
 
       /* Calculate the elapsed time */
 
@@ -924,7 +924,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
 
 static inline void stm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
 {
-  sem_post( &((struct stm32_i2c_inst_s *)dev)->priv->sem_excl );
+  sem_post(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
 }
 
 /************************************************************************************
@@ -1138,10 +1138,10 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
     }
 
   uint32_t timingr =
-    (presc << I2C_TIMINGR_PRESC_SHIFT)|
-    (s_time << I2C_TIMINGR_SCLDEL_SHIFT)|
-    (h_time << I2C_TIMINGR_SDADEL_SHIFT)|
-    (scl_h_period << I2C_TIMINGR_SCLH_SHIFT)|
+    (presc << I2C_TIMINGR_PRESC_SHIFT) |
+    (s_time << I2C_TIMINGR_SCLDEL_SHIFT) |
+    (h_time << I2C_TIMINGR_SDADEL_SHIFT) |
+    (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
     (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
   stm32_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
@@ -1233,7 +1233,7 @@ static inline void stm32_i2c_clrstart(FAR struct stm32_i2c_priv_s *priv)
   /* TODO check PEC (32 bit separate reg) */
 
   stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET,
-                        I2C_CR2_START|I2C_CR2_STOP, 0);
+                        I2C_CR2_START | I2C_CR2_STOP, 0);
 }
 
 /************************************************************************************
@@ -1397,7 +1397,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
       stm32_i2c_traceevent(priv, I2CEVENT_REITBUFEN, 0);
       stm32_i2c_enableinterrupts(priv);
     }
-  else if ((priv->dcnt == 0) && (priv->msgc==0))
+  else if ((priv->dcnt == 0) && (priv->msgc == 0))
     {
       stm32_i2c_traceevent(priv, I2CEVENT_DISITBUFEN, 0);
       stm32_i2c_disableinterrupts(priv);
@@ -1459,7 +1459,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
                * and wake it up.
                */
 
-              sem_post( &priv->sem_isr );
+              sem_post(&priv->sem_isr);
               priv->intstate = INTSTATE_DONE;
             }
 #else
@@ -1494,7 +1494,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
            * and wake it up.
            */
 
-          sem_post( &priv->sem_isr );
+          sem_post(&priv->sem_isr);
           priv->intstate = INTSTATE_DONE;
         }
 #else
@@ -1937,9 +1937,10 @@ static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
     },
     {
       .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags | ((buflen>0) ? I2C_M_READ : I2C_M_NORESTART),
+      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags |
+                ((buflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
       .buffer = buffer,
-      .length = (buflen>0) ? buflen : -buflen
+      .length = (buflen > 0) ? buflen : -buflen
     }
   };
 
@@ -1988,7 +1989,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
 #if STM32_PCLK1_FREQUENCY < 2000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-    return NULL;
+  return NULL;
 #endif
 
   /* Get I2C private structure */
@@ -2016,7 +2017,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Allocate instance */
 
-  if (!(inst = kmm_malloc( sizeof(struct stm32_i2c_inst_s))))
+  if (!(inst = kmm_malloc(sizeof(struct stm32_i2c_inst_s))))
     {
       return NULL;
     }
@@ -2037,8 +2038,8 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   if ((volatile int)priv->refs++ == 0)
     {
-      stm32_i2c_sem_init( (struct i2c_dev_s *)inst );
-      stm32_i2c_init( priv );
+      stm32_i2c_sem_init((struct i2c_dev_s *)inst);
+      stm32_i2c_init(priv);
     }
 
   irqrestore(irqs);
@@ -2079,11 +2080,11 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 
   /* Disable power and other HW resource (GPIO's) */
 
-  stm32_i2c_deinit( ((struct stm32_i2c_inst_s *)dev)->priv );
+  stm32_i2c_deinit(((struct stm32_i2c_inst_s *)dev)->priv);
 
   /* Release unused resources */
 
-  stm32_i2c_sem_destroy( (struct i2c_dev_s *)dev );
+  stm32_i2c_sem_destroy((struct i2c_dev_s *)dev);
 
   kmm_free(dev);
   return OK;

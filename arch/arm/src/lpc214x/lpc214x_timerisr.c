@@ -80,7 +80,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -98,20 +98,20 @@ int up_timerisr(uint32_t *regs)
 int up_timerisr(int irq, uint32_t *regs)
 #endif
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
+  sched_process_timer();
 
-   /* Clear the MR0 match interrupt */
+  /* Clear the MR0 match interrupt */
 
-   tmr_putreg8(LPC214X_TMR_IR_MR0I, LPC214X_TMR_IR_OFFSET);
+  tmr_putreg8(LPC214X_TMR_IR_MR0I, LPC214X_TMR_IR_OFFSET);
 
-   /* Reset the VIC as well */
+  /* Reset the VIC as well */
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-   vic_putreg(0, LPC214X_VIC_VECTADDR_OFFSET);
+  vic_putreg(0, LPC214X_VIC_VECTADDR_OFFSET);
 #endif
-   return 0;
+  return 0;
 }
 
 /****************************************************************************

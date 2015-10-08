@@ -51,7 +51,7 @@
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
-/* HSE divisor to yield ~1MHz RTC clock (valid for HSE = 8MHz)*/
+/* HSE divisor to yield ~1MHz RTC clock (valid for HSE = 8MHz) */
 
 #define HSE_DIVISOR RCC_CR_RTCPRE_HSEd8
 
@@ -573,7 +573,7 @@ static void stm32_stdclockconfig(void)
   regval |= HSE_DIVISOR;
   putreg32(regval, STM32_RCC_CR);
 
-   /* Restore the previous state of the DBP bit */
+  /* Restore the previous state of the DBP bit */
 
   putreg32(regval, STM32_PWR_CR);
 
@@ -711,8 +711,8 @@ static void stm32_stdclockconfig(void)
 
 #if defined(CONFIG_STM32_IWDG)   || \
     defined(CONFIG_RTC_LSICLOCK) || defined(CONFIG_LCD_LSICLOCK)
-  /* Low speed internal clock source LSI */
-  /*
+  /* Low speed internal clock source LSI
+   *
    * TODO: There is another case where the LSI needs to
    * be enabled: if the MCO pin selects LSI as source.
    */

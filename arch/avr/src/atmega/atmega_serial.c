@@ -387,7 +387,7 @@ static int usart0_attach(struct uart_dev_s *dev)
 
   (void)irq_attach(ATMEGA_IRQ_U0RX, usart0_rxinterrupt);
   (void)irq_attach(ATMEGA_IRQ_U0DRE, usart0_txinterrupt);
-//  (void)irq_attach(ATMEGA_IRQ_U0TX, usart0_txinterrupt);
+//(void)irq_attach(ATMEGA_IRQ_U0TX, usart0_txinterrupt);
   return OK;
 }
 #endif
@@ -409,7 +409,7 @@ static int usart1_attach(struct uart_dev_s *dev)
 
   (void)irq_attach(ATMEGA_IRQ_U1RX, usart1_rxinterrupt);
   (void)irq_attach(ATMEGA_IRQ_U1DRE, usart1_txinterrupt);
-//  (void)irq_attach(ATMEGA_IRQ_U1TX, usart1_txinterrupt);
+//(void)irq_attach(ATMEGA_IRQ_U1TX, usart1_txinterrupt);
   return OK;
 }
 #endif
@@ -450,7 +450,7 @@ static void usart1_detach(struct uart_dev_s *dev)
 
   (void)irq_detach(ATMEGA_IRQ_U1RX);
   (void)irq_detach(ATMEGA_IRQ_U1DRE);
-//  (void)irq_detach(ATMEGA_IRQ_U1TX);
+//(void)irq_detach(ATMEGA_IRQ_U1TX);
 }
 #endif
 
@@ -473,9 +473,9 @@ static int usart0_rxinterrupt(int irq, void *context)
 
   if ((ucsr0a & (1 << RXC0)) != 0)
     {
-       /* Received data ready... process incoming bytes */
+      /* Received data ready... process incoming bytes */
 
-       uart_recvchars(&g_usart0port);
+      uart_recvchars(&g_usart0port);
     }
 
   return OK;
@@ -491,9 +491,9 @@ static int usart1_rxinterrupt(int irq, void *context)
 
   if ((ucsr1a & (1 << RXC1)) != 0)
     {
-       /* Received data ready... process incoming bytes */
+      /* Received data ready... process incoming bytes */
 
-       uart_recvchars(&g_usart1port);
+      uart_recvchars(&g_usart1port);
     }
 
   return OK;
@@ -521,9 +521,9 @@ static int usart0_txinterrupt(int irq, void *context)
 
   if ((ucsr0a & (1 << UDRE0)) != 0)
     {
-       /* Transmit data regiser empty ... process outgoing bytes */
+      /* Transmit data regiser empty ... process outgoing bytes */
 
-       uart_xmitchars(&g_usart0port);
+      uart_xmitchars(&g_usart0port);
     }
 
   return OK;
@@ -541,9 +541,9 @@ static int usart1_txinterrupt(int irq, void *context)
 
   if ((ucsr1a & (1 << UDRE1)) != 0)
     {
-       /* Transmit data regiser empty ... process outgoing bytes */
+      /* Transmit data regiser empty ... process outgoing bytes */
 
-       uart_xmitchars(&g_usart1port);
+      uart_xmitchars(&g_usart1port);
     }
 
   return OK;

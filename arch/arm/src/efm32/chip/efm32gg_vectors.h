@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/chip/efm32ggxxx_vectors.h
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 /* This file is included by efm32_vectors.S.  It provides the macro VECTOR
  * that supplies each EFM32GG vector in terms of a (lower-case) ISR label and
  * an (upper-case) IRQ number as defined in arch/arm/include/efm32/efm32gg_irq.h.

@@ -304,6 +304,6 @@ bool nuc_gpioread(gpio_cfgset_t pinset)
 
   /* Return the state of the selected pin */
 
- return (getreg32(base + NUC_GPIO_PIN_OFFSET) & (1 << pin)) != 0;
+  return (getreg32(base + NUC_GPIO_PIN_OFFSET) & (1 << pin)) != 0;
 #endif
 }

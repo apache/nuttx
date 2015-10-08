@@ -113,8 +113,8 @@ struct efm32_dev_s
 
 /* ADC Register access */
 
-static uint32_t adc_getreg( struct efm32_dev_s *priv, int offset);
-static void     adc_putreg( struct efm32_dev_s *priv, int offset, uint32_t value);
+static uint32_t adc_getreg(struct efm32_dev_s *priv, int offset);
+static void     adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value);
 static void     adc_hw_reset(struct efm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
@@ -166,8 +166,8 @@ static struct efm32_dev_s g_adcpriv1 =
 
 static struct adc_dev_s g_adcdev1 =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv1,
+  .ad_ops      = &g_adcops,
+  .ad_priv     = &g_adcpriv1,
 };
 #endif
 
@@ -213,7 +213,7 @@ static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
   putreg32(value, priv->base + offset);
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_CalibrateLoadScan
  *
  * Description:
@@ -230,7 +230,7 @@ static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
  *   ref - Reference to load calibrated values for. No values are loaded for
  *   external references.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 {
@@ -297,7 +297,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
   }
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_CalibrateLoadSingle
  *
  * Description:
@@ -314,7 +314,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *   ref - Reference to load calibrated values for. No values are loaded for
  *         external references.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 {
@@ -381,11 +381,11 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
   }
 }
 
-/*******************************************************************************
- * Global Functions
- ******************************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_Init
  *   Initialize ADC.
  *
@@ -397,10 +397,10 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *   NOTE: This function will stop any ongoing conversion.
  *
  * Input Parameters:
- *   adc- Pointer to ADC peripheral register block.
+ *   adc - Pointer to ADC peripheral register block.
  *   int - Pointer to ADC initialization structure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
 {
@@ -426,7 +426,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
   adc->CTRL = tmp;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_InitScan
  *
  * Description:
@@ -444,7 +444,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
  *   adc - Pointer to ADC peripheral register block.
  *   init - Pointer to ADC initialization structure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
 {
@@ -489,7 +489,7 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
   adc->SCANCTRL = tmp;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_InitSingle
  *
  * Description:
@@ -507,7 +507,7 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
  *   adc - Pointer to ADC peripheral register block.
  *   init - Pointer to ADC initialization structure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
 {
@@ -552,7 +552,7 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
   adc->SINGLECTRL = tmp;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_PrescaleCalc
  *
  * Description:
@@ -570,7 +570,7 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
  *   Prescaler value to use for ADC in order to achieve a clock value
  *   <= @p adcFreq.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
 {
@@ -603,7 +603,7 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
   return (uint8_t)ret;
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_Reset
  *
  * Description:
@@ -616,7 +616,7 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
  * Input Parameters:
  *   adc - Pointer to ADC peripheral register block.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void ADC_Reset(ADC_TypeDef *adc)
 {
@@ -638,7 +638,7 @@ void ADC_Reset(ADC_TypeDef *adc)
   /* Do not reset route register, setting should be done independently */
 }
 
-/***************************************************************************//**
+/****************************************************************************
  * Name: ADC_TimebaseCalc
  *
  * Description:
@@ -651,7 +651,7 @@ void ADC_Reset(ADC_TypeDef *adc)
  * Returned Value:
  *   Timebase value to use for ADC in order to achieve at least 1 us.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
 {
@@ -662,9 +662,9 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
       /* Just in case, make sure we get non-zero freq for below calculation */
 
       if (!hfperFreq)
-      {
-        hfperFreq = 1;
-      }
+        {
+          hfperFreq = 1;
+        }
     }
 
 #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
@@ -675,7 +675,7 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
    * See reference manual for details.
    */
 
-  if (hfperFreq > 32000000 )
+  if (hfperFreq > 32000000)
     {
       hfperFreq = 32000000;
     }
@@ -784,7 +784,7 @@ static void adc_startconv(struct efm32_dev_s *priv, bool enable)
       regval &= ~ADC_CR2_SWSTART;
     }
 
-  adc_putreg(priv, EFM32_ADC_CR2_OFFSET,regval);
+  adc_putreg(priv, EFM32_ADC_CR2_OFFSET, regval);
 }
 #endif
 
@@ -837,7 +837,7 @@ static void adc_hw_reset(struct efm32_dev_s *priv, bool reset)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: adc_enable
  *
  * Description    : Enables or disables the specified ADC peripheral.
@@ -851,7 +851,7 @@ static void adc_hw_reset(struct efm32_dev_s *priv, bool reset)
  *
  * Returned Value:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void adc_enable(FAR struct efm32_dev_s *priv, bool enable)
 {

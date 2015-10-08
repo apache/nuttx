@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_start.c
- * arch/arm/src/chip/lpc43_start.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/*
- * Power-Up Reset Overview
+/* Power-Up Reset Overview
  * -----------------------
  *
  * The ARM core starts executing code on reset with the program counter set
@@ -81,7 +79,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /****************************************************************************
+/****************************************************************************
  * Name: showprogress
  *
  * Description:
@@ -358,5 +356,5 @@ void __start(void)
 
   /* Shouldn't get here */
 
-  for (;;);
+  for (; ; );
 }

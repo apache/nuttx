@@ -159,7 +159,7 @@ static void dispatch_syscall(void)
 
 int up_svcall(int irq, FAR void *context)
 {
-  uint32_t *regs = (uint32_t*)context;
+  uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
 
   DEBUGASSERT(regs && regs == current_regs);
@@ -211,7 +211,7 @@ int up_svcall(int irq, FAR void *context)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
         }
         break;
 
@@ -233,7 +233,7 @@ int up_svcall(int irq, FAR void *context)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-          current_regs = (uint32_t*)regs[REG_R1];
+          current_regs = (uint32_t *)regs[REG_R1];
         }
         break;
 
@@ -256,8 +256,8 @@ int up_svcall(int irq, FAR void *context)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-          current_regs = (uint32_t*)regs[REG_R2];
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          current_regs = (uint32_t *)regs[REG_R2];
         }
         break;
 
@@ -407,7 +407,7 @@ int up_svcall(int irq, FAR void *context)
            * parameter will reside at an offset of 4 from the stack pointer.
            */
 
-          regs[REG_R3]         = *(uint32_t*)(regs[REG_SP]+4);
+          regs[REG_R3]         = *(uint32_t *)(regs[REG_SP]+4);
         }
         break;
 #endif

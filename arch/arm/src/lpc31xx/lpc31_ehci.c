@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_ehci.c
  *
  *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -69,9 +69,9 @@
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 /* Configuration ***************************************************************/
 /* Pre-requisites */
 
@@ -195,9 +195,9 @@
 #define RHPNDX(rh)            ((rh)->hport.hport.port)
 #define RHPORT(rh)            (RHPNDX(rh)+1)
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 /* Internal representation of the EHCI Queue Head (QH) */
 
 struct lpc31_epinfo_s;
@@ -397,9 +397,9 @@ struct lpc31_ehci_trace_s
 
 #endif /* HAVE_USBHOST_TRACE */
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -564,9 +564,9 @@ static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
 
 static int lpc31_reset(void);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 /* In this driver implementation, support is provided for only a single a single
  * USB device.  All status information can be simply retained in a single global
  * instance.
@@ -705,19 +705,19 @@ static const struct lpc31_ehci_trace_s g_trace2[TRACE2_NSTRINGS] =
 };
 #endif /* HAVE_USBHOST_TRACE */
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Register Operations
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc31_read16
  *
  * Description:
  *   Read 16-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint16_t lpc31_read16(const uint8_t *addr)
 {
@@ -728,13 +728,13 @@ static uint16_t lpc31_read16(const uint8_t *addr)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_read32
  *
  * Description:
  *   Read 32-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t lpc31_read32(const uint8_t *addr)
 {
@@ -747,13 +747,13 @@ static inline uint32_t lpc31_read32(const uint8_t *addr)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_write16
  *
  * Description:
  *   Write 16-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static void lpc31_write16(uint16_t memval, uint8_t *addr)
@@ -768,13 +768,13 @@ static void lpc31_write16(uint16_t memval, uint8_t *addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_write32
  *
  * Description:
  *   Write 32-bit little endian data
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static void lpc31_write32(uint32_t memval, uint8_t *addr)
@@ -789,13 +789,13 @@ static void lpc31_write32(uint32_t memval, uint8_t *addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_swap16
  *
  * Description:
  *   Swap bytes on a 16-bit value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint16_t lpc31_swap16(uint16_t value)
@@ -804,13 +804,13 @@ static uint16_t lpc31_swap16(uint16_t value)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_swap32
  *
  * Description:
  *   Swap bytes on a 32-bit value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint32_t lpc31_swap32(uint32_t value)
@@ -820,13 +820,13 @@ static uint32_t lpc31_swap32(uint32_t value)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_printreg
  *
  * Description:
  *   Print the contents of a LPC31 EHCI register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_printreg(volatile uint32_t *regaddr, uint32_t regval,
@@ -836,14 +836,14 @@ static void lpc31_printreg(volatile uint32_t *regaddr, uint32_t regval,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_checkreg
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a LPC31
  *   EHCI register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool iswrite)
@@ -901,13 +901,13 @@ static void lpc31_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool isw
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_getreg
  *
  * Description:
  *   Get the contents of an LPC31 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static uint32_t lpc31_getreg(volatile uint32_t *regaddr)
@@ -928,13 +928,13 @@ static inline uint32_t lpc31_getreg(volatile uint32_t *regaddr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_putreg
  *
  * Description:
  *   Set the contents of an LPC31 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_putreg(uint32_t regval, volatile uint32_t *regaddr)
@@ -954,7 +954,7 @@ static inline void lpc31_putreg(uint32_t regval, volatile uint32_t *regaddr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: ehci_wait_usbsts
  *
  * Description:
@@ -962,7 +962,7 @@ static inline void lpc31_putreg(uint32_t regval, volatile uint32_t *regaddr)
  *   value, (2) for a timeout to occur, or (3) a error to occur.  Return
  *   a value to indicate which terminated the wait.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
                             unsigned int delay)
@@ -1004,17 +1004,17 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
   return (regval == donebits) ? OK : -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Semaphores
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc31_takesem
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_takesem(sem_t *sem)
 {
@@ -1030,10 +1030,10 @@ static void lpc31_takesem(sem_t *sem)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Allocators
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc31_qh_alloc
  *
  * Description:
@@ -1041,7 +1041,7 @@ static void lpc31_takesem(sem_t *sem)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc31_qh_s *lpc31_qh_alloc(void)
 {
@@ -1059,7 +1059,7 @@ static struct lpc31_qh_s *lpc31_qh_alloc(void)
   return qh;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_free
  *
  * Description:
@@ -1067,7 +1067,7 @@ static struct lpc31_qh_s *lpc31_qh_alloc(void)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_qh_free(struct lpc31_qh_s *qh)
 {
@@ -1079,7 +1079,7 @@ static void lpc31_qh_free(struct lpc31_qh_s *qh)
   g_ehci.qhfree = entry;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_alloc
  *
  * Description:
@@ -1088,7 +1088,7 @@ static void lpc31_qh_free(struct lpc31_qh_s *qh)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc31_qtd_s *lpc31_qtd_alloc(void)
 {
@@ -1106,7 +1106,7 @@ static struct lpc31_qtd_s *lpc31_qtd_alloc(void)
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_free
  *
  * Description:
@@ -1115,7 +1115,7 @@ static struct lpc31_qtd_s *lpc31_qtd_alloc(void)
  *
  * Assumption:  Caller holds the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_qtd_free(struct lpc31_qtd_s *qtd)
 {
@@ -1127,11 +1127,11 @@ static void lpc31_qtd_free(struct lpc31_qtd_s *qtd)
   g_ehci.qtdfree = entry;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * List Management
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_foreach
  *
  * Description:
@@ -1139,7 +1139,7 @@ static void lpc31_qtd_free(struct lpc31_qtd_s *qtd)
  *   handler for each QH structure in the list (including the one at the head
  *   of the list).
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qh_foreach(struct lpc31_qh_s *qh, uint32_t **bp, foreach_qh_t handler,
                           void *arg)
@@ -1211,14 +1211,14 @@ static int lpc31_qh_foreach(struct lpc31_qh_s *qh, uint32_t **bp, foreach_qh_t h
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_foreach
  *
  * Description:
  *   Give a Queue Head (QH) instance, call the handler for each qTD structure
  *   in the queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qtd_foreach(struct lpc31_qh_s *qh, foreach_qtd_t handler, void *arg)
 {
@@ -1292,14 +1292,14 @@ static int lpc31_qtd_foreach(struct lpc31_qh_s *qh, foreach_qtd_t handler, void 
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_discard
  *
  * Description:
  *   This is a lpc31_qtd_foreach callback.  It simply unlinks the QTD, updates
  *   the back pointer, and frees the QTD structure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qtd_discard(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 {
@@ -1318,7 +1318,7 @@ static int lpc31_qtd_discard(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_discard
  *
  * Description:
@@ -1328,7 +1328,7 @@ static int lpc31_qtd_discard(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
  *   The QH structure itself has already been unlinked from whatever list it
  *   may have been in.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qh_discard(struct lpc31_qh_s *qh)
 {
@@ -1350,18 +1350,18 @@ static int lpc31_qh_discard(struct lpc31_qh_s *qh)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Cache Operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_invalidate
  *
  * Description:
  *   This is a callback from lpc31_qtd_foreach.  It simply invalidates D-cache for
  *   address range of the qTD entry.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static int lpc31_qtd_invalidate(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
@@ -1376,13 +1376,13 @@ static int lpc31_qtd_invalidate(struct lpc31_qtd_s *qtd, uint32_t **bp, void *ar
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_invalidate
  *
  * Description:
  *   Invalidate the Queue Head and all qTD entries in the queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static int lpc31_qh_invalidate(struct lpc31_qh_s *qh)
@@ -1398,14 +1398,14 @@ static int lpc31_qh_invalidate(struct lpc31_qh_s *qh)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_flush
  *
  * Description:
  *   This is a callback from lpc31_qtd_foreach.  It simply flushes D-cache for
  *   address range of the qTD entry.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qtd_flush(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 {
@@ -1422,13 +1422,13 @@ static int lpc31_qtd_flush(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_flush
  *
  * Description:
  *   Invalidate the Queue Head and all qTD entries in the queue.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qh_flush(struct lpc31_qh_s *qh)
 {
@@ -1447,17 +1447,17 @@ static int lpc31_qh_flush(struct lpc31_qh_s *qh)
   return lpc31_qtd_foreach(qh, lpc31_qtd_flush, NULL);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Endpoint Transfer Handling
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_print
  *
  * Description:
  *   Print the context of one qTD
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_qtd_print(struct lpc31_qtd_s *qtd)
@@ -1472,13 +1472,13 @@ static void lpc31_qtd_print(struct lpc31_qtd_s *qtd)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_print
  *
  * Description:
  *   Print the context of one QH
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_qh_print(struct lpc31_qh_s *qh)
@@ -1514,14 +1514,14 @@ static void lpc31_qh_print(struct lpc31_qh_s *qh)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_dump
  *
  * Description:
  *   This is a lpc31_qtd_foreach callout function.  It dumps the context of one
  *   qTD
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static int lpc31_qtd_dump(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
@@ -1531,14 +1531,14 @@ static int lpc31_qtd_dump(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_dump
  *
  * Description:
  *   This is a lpc31_qh_foreach callout function.  It dumps a QH structure and
  *   all of the qTD structures linked to the QH.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static int lpc31_qh_dump(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
@@ -1548,14 +1548,14 @@ static int lpc31_qh_dump(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ehci_speed
  *
  * Description:
  *  Map a speed enumeration value per Chapter 9 of the USB specification to the
  *  speed enumeration required in the EHCI queue head.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint8_t lpc31_ehci_speed(uint8_t usbspeed)
 {
@@ -1563,7 +1563,7 @@ static inline uint8_t lpc31_ehci_speed(uint8_t usbspeed)
   return g_ehci_speed[usbspeed];
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ioc_setup
  *
  * Description:
@@ -1574,7 +1574,7 @@ static inline uint8_t lpc31_ehci_speed(uint8_t usbspeed)
  *
  * Assumption:  The caller holds tex EHCI exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_ioc_setup(struct lpc31_rhport_s *rhport, struct lpc31_epinfo_s *epinfo)
 {
@@ -1611,7 +1611,7 @@ static int lpc31_ioc_setup(struct lpc31_rhport_s *rhport, struct lpc31_epinfo_s 
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ioc_wait
  *
  * Description:
@@ -1620,7 +1620,7 @@ static int lpc31_ioc_setup(struct lpc31_rhport_s *rhport, struct lpc31_epinfo_s 
  * Assumption:  The caller does *NOT* hold the EHCI exclsem.  That would cause
  * a deadlock when the bottom-half, worker thread needs to take the semaphore.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_ioc_wait(struct lpc31_epinfo_s *epinfo)
 {
@@ -1634,7 +1634,7 @@ static int lpc31_ioc_wait(struct lpc31_epinfo_s *epinfo)
   return epinfo->result;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_enqueue
  *
  * Description:
@@ -1642,7 +1642,7 @@ static int lpc31_ioc_wait(struct lpc31_epinfo_s *epinfo)
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_qh_enqueue(struct lpc31_qh_s *qhead, struct lpc31_qh_s *qh)
 {
@@ -1675,13 +1675,13 @@ static void lpc31_qh_enqueue(struct lpc31_qh_s *qhead, struct lpc31_qh_s *qh)
                      (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_create
  *
  * Description:
  *   Create a new Queue Head (QH)
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc31_qh_s *lpc31_qh_create(struct lpc31_rhport_s *rhport,
                                           struct lpc31_epinfo_s *epinfo)
@@ -1812,13 +1812,13 @@ static struct lpc31_qh_s *lpc31_qh_create(struct lpc31_rhport_s *rhport,
   return qh;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_addbpl
  *
  * Description:
  *   Add a buffer pointer list to a qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qtd_addbpl(struct lpc31_qtd_s *qtd, const void *buffer, size_t buflen)
 {
@@ -1888,13 +1888,13 @@ static int lpc31_qtd_addbpl(struct lpc31_qtd_s *qtd, const void *buffer, size_t 
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_setupphase
  *
  * Description:
  *   Create a SETUP phase request qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc31_qtd_s *lpc31_qtd_setupphase(struct lpc31_epinfo_s *epinfo,
                                             const struct usb_ctrlreq_s *req)
@@ -1955,13 +1955,13 @@ static struct lpc31_qtd_s *lpc31_qtd_setupphase(struct lpc31_epinfo_s *epinfo,
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_dataphase
  *
  * Description:
  *   Create a data transfer or SET data phase qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc31_qtd_s *lpc31_qtd_dataphase(struct lpc31_epinfo_s *epinfo,
                                            void *buffer, int buflen,
@@ -2023,13 +2023,13 @@ static struct lpc31_qtd_s *lpc31_qtd_dataphase(struct lpc31_epinfo_s *epinfo,
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_statusphase
  *
  * Description:
  *   Create a STATUS phase request qTD.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static struct lpc31_qtd_s *lpc31_qtd_statusphase(uint32_t tokenbits)
 {
@@ -2072,7 +2072,7 @@ static struct lpc31_qtd_s *lpc31_qtd_statusphase(uint32_t tokenbits)
   return qtd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_async_setup
  *
  * Description:
@@ -2090,7 +2090,7 @@ static struct lpc31_qtd_s *lpc31_qtd_statusphase(uint32_t tokenbits)
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
                              struct lpc31_epinfo_s *epinfo,
@@ -2325,7 +2325,7 @@ errout_with_qh:
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_intr_setup
  *
  * Description:
@@ -2371,7 +2371,7 @@ errout_with_qh:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
 static int lpc31_intr_setup(struct lpc31_rhport_s *rhport,
@@ -2463,7 +2463,7 @@ errout_with_qh:
 }
 #endif /* CONFIG_USBHOST_INT_DISABLE */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_transfer_wait
  *
  * Description:
@@ -2480,7 +2480,7 @@ errout_with_qh:
  *   plus the size of the data (which could be short); For bulk transfers, this
  *   will be the number of data bytes transfers (which could be short).
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
 {
@@ -2542,7 +2542,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
   return epinfo->xfrd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ioc_async_setup
  *
  * Description:
@@ -2560,7 +2560,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
  * Assumptions:
  *   - Called from the interrupt level
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
@@ -2596,7 +2596,7 @@ static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_asynch_completion
  *
  * Description:
@@ -2613,7 +2613,7 @@ static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
  * Assumptions:
  *   - Called from the interrupt level
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo)
@@ -2651,11 +2651,11 @@ static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * EHCI Interrupt Handling
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_ioccheck
  *
  * Description:
@@ -2663,7 +2663,7 @@ static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo)
  *   qTD in the asynchronous queue.  It removes all of the qTD structures that
  *   are no longer active.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qtd_ioccheck(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 {
@@ -2702,7 +2702,7 @@ static int lpc31_qtd_ioccheck(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_ioccheck
  *
  * Description:
@@ -2711,7 +2711,7 @@ static int lpc31_qtd_ioccheck(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
  *   remove all of the structures that are no longer active.  if all of the
  *   qTD structures are removed, then QH itself will also be removed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 {
@@ -2861,14 +2861,14 @@ static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qtd_cancel
  *
  * Description:
  *   This function is a lpc31_qtd_foreach() callback function.  It removes each
  *   qTD attached to a QH.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc31_qtd_cancel(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
@@ -2900,7 +2900,7 @@ static int lpc31_qtd_cancel(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_qh_cancel
  *
  * Description:
@@ -2909,7 +2909,7 @@ static int lpc31_qtd_cancel(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
  *   and remove all of the structures that are no longer active.  Then QH
  *   itself will also be removed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
@@ -2975,7 +2975,7 @@ static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ioc_bottomhalf
  *
  * Description:
@@ -2991,7 +2991,7 @@ static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc31_ioc_bottomhalf(void)
 {
@@ -3057,7 +3057,7 @@ static inline void lpc31_ioc_bottomhalf(void)
 #endif
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_portsc_bottomhalf
  *
  * Description:
@@ -3077,7 +3077,7 @@ static inline void lpc31_ioc_bottomhalf(void)
  *   bits (including: Force port resume, over-current change, enable/disable
  *   change and connect status change)."
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc31_portsc_bottomhalf(void)
 {
@@ -3180,7 +3180,7 @@ static inline void lpc31_portsc_bottomhalf(void)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_syserr_bottomhalf
  *
  * Description:
@@ -3191,7 +3191,7 @@ static inline void lpc31_portsc_bottomhalf(void)
  *   error occurs, the Host Controller clears the Run/Stop bit in the Command
  *   register to prevent further execution of the scheduled TDs."
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc31_syserr_bottomhalf(void)
 {
@@ -3199,7 +3199,7 @@ static inline void lpc31_syserr_bottomhalf(void)
   PANIC();
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_async_advance_bottomhalf
  *
  * Description:
@@ -3211,7 +3211,7 @@ static inline void lpc31_syserr_bottomhalf(void)
  *   register. This status bit indicates the assertion of that interrupt
  *   source."
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc31_async_advance_bottomhalf(void)
 {
@@ -3220,13 +3220,13 @@ static inline void lpc31_async_advance_bottomhalf(void)
   /* REVISIT: Could remove all tagged QH entries here */
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ehci_bottomhalf
  *
  * Description:
  *   EHCI "Bottom Half" interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_ehci_bottomhalf(FAR void *arg)
 {
@@ -3354,13 +3354,13 @@ static void lpc31_ehci_bottomhalf(FAR void *arg)
   lpc31_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ehci_interrupt
  *
  * Description:
  *   EHCI "Top Half" interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_ehci_interrupt(int irq, FAR void *context)
 {
@@ -3412,10 +3412,10 @@ static int lpc31_ehci_interrupt(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * USB Host Controller Operations
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc31_wait
  *
  * Description:
@@ -3438,7 +3438,7 @@ static int lpc31_ehci_interrupt(int irq, FAR void *context)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_wait(FAR struct usbhost_connection_s *conn,
                       FAR struct usbhost_hubport_s **hport)
@@ -3451,7 +3451,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
    */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
 
@@ -3510,7 +3510,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_enumerate
  *
  * Description:
@@ -3536,7 +3536,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
                               FAR struct usbhost_hubport_s *hport)
@@ -3849,7 +3849,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn,
 
 static int lpc31_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                               uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
- {
+{
   struct lpc31_epinfo_s *epinfo = (struct lpc31_epinfo_s *)ep0;
 
   DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);
@@ -3981,7 +3981,7 @@ static int lpc31_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_alloc
  *
  * Description:
@@ -4011,7 +4011,7 @@ static int lpc31_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
                      FAR uint8_t **buffer, FAR size_t *maxlen)
@@ -4034,7 +4034,7 @@ static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_free
  *
  * Description:
@@ -4055,7 +4055,7 @@ static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -4143,7 +4143,7 @@ static int lpc31_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ctrlin and lpc31_ctrlout
  *
  * Description:
@@ -4177,7 +4177,7 @@ static int lpc31_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
@@ -4249,7 +4249,7 @@ static int lpc31_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return lpc31_ctrlin(drvr, ep0, req, (uint8_t *)buffer);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_transfer
  *
  * Description:
@@ -4285,7 +4285,7 @@ static int lpc31_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t lpc31_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                               FAR uint8_t *buffer, size_t buflen)
@@ -4355,7 +4355,7 @@ errout_with_sem:
   return (ssize_t)ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_asynch
  *
  * Description:
@@ -4388,7 +4388,7 @@ errout_with_sem:
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc31_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -4706,7 +4706,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_disconnect
  *
  * Description:
@@ -4729,7 +4729,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
  *   - Only a single class bound to a single device is supported.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
@@ -4738,10 +4738,10 @@ static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Initialization
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc31_reset
  *
  * Description:
@@ -4781,7 +4781,7 @@ static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  * - Called during the initialization of the EHCI.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int lpc31_reset(void)
 {
@@ -4855,10 +4855,10 @@ static int lpc31_reset(void)
   return (regval & EHCI_USBCMD_HCRESET) != 0 ? -ETIMEDOUT : OK;
 }
 
-/*******************************************************************************
- * Global Functions
- *******************************************************************************/
-/*******************************************************************************
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+/****************************************************************************
  * Name: lpc31_ehci_initialize
  *
  * Description:
@@ -4881,7 +4881,7 @@ static int lpc31_reset(void)
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 {

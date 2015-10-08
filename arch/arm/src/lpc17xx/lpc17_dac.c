@@ -91,12 +91,12 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset =dac_reset,
-  .ao_setup = dac_setup,
+  .ao_reset    = dac_reset,
+  .ao_setup    = dac_setup,
   .ao_shutdown = dac_shutdown,
-  .ao_txint = dac_txint,
-  .ao_send = dac_send,
-  .ao_ioctl = dac_ioctl,
+  .ao_txint    = dac_txint,
+  .ao_send     = dac_send,
+  .ao_ioctl    = dac_ioctl,
 };
 
 static struct dac_dev_s g_dacdev =
@@ -124,7 +124,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
   regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_DAC_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
-  //putreg32(DAC_CTRL_DBLBUFEN,LPC17_DAC_CTRL); ?
+  //putreg32(DAC_CTRL_DBLBUFEN, LPC17_DAC_CTRL); ?
 
   lpc17_configgpio(GPIO_AOUT);
 

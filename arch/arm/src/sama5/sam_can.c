@@ -384,10 +384,10 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
     {
       if (priv->count == 0xffffffff || ++priv->count > 3)
         {
-           if (priv->count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (priv->count == 4)
+            {
+              lldbg("...\n");
+            }
 
           return regval;
         }
@@ -397,20 +397,20 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (priv->count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (priv->count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", priv->count - 3);
-         }
+          lldbg("[repeats %d more times]\n", priv->count - 3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       priv->regaddr = regaddr;
-       priv->regval  = regval;
-       priv->count   = 1;
+      priv->regaddr = regaddr;
+      priv->regval  = regval;
+      priv->count   = 1;
     }
 
   /* Show the register value read */
@@ -1820,7 +1820,7 @@ static int can_autobaud(struct sam_can_s *priv)
 
 #warning Missing logic
     }
-  while ( no errors reported );
+  while (no errors reported);
 
   /* Once no error has been detected, the application disables the Autobaud
    * Mode, clearing the ABM field in the CAN_MR register.  To go back to the

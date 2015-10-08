@@ -448,13 +448,13 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv);
  * Private Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_printreg
  *
  * Description:
  *   Print the contents of an LPC17xx register operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -463,13 +463,13 @@ static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_checkreg
  *
  * Description:
  *   Get the contents of an LPC17xx register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -527,13 +527,13 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_getreg
  *
  * Description:
  *   Get the contents of an LPC17xx register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static uint32_t lpc17_getreg(uint32_t addr)
@@ -549,13 +549,13 @@ static uint32_t lpc17_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_putreg
  *
  * Description:
  *   Set the contents of an LPC17xx register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_REGDEBUG
 static void lpc17_putreg(uint32_t val, uint32_t addr)
@@ -599,7 +599,7 @@ static int lpc17_txdesc(struct lpc17_driver_s *priv)
   prodidx = lpc17_getreg(LPC17_ETH_TXPRODIDX) & ETH_TXPRODIDX_MASK;
   if (++prodidx >= CONFIG_NET_NTXDESC)
     {
-     /* Wrap back to index zero */
+      /* Wrap back to index zero */
 
       prodidx = 0;
     }
@@ -659,8 +659,8 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
    * fields.
    */
 
-  txdesc   = (uint32_t*)(LPC17_TXDESC_BASE + (prodidx << 3));
-  txbuffer = (void*)*txdesc++;
+  txdesc   = (uint32_t *)(LPC17_TXDESC_BASE + (prodidx << 3));
+  txbuffer = (void *)*txdesc++;
   *txdesc  = TXDESC_CONTROL_INT | TXDESC_CONTROL_LAST | TXDESC_CONTROL_CRC |
              (priv->lp_dev.d_len - 1);
 
@@ -682,7 +682,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   if (++prodidx >= CONFIG_NET_NTXDESC)
     {
-     /* Wrap back to index zero */
+      /* Wrap back to index zero */
 
       prodidx = 0;
     }
@@ -873,7 +873,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       /* Get the Rx status and packet length (-4+1) */
 
-      rxstat   = (uint32_t*)(LPC17_RXSTAT_BASE + (considx << 3));
+      rxstat   = (uint32_t *)(LPC17_RXSTAT_BASE + (considx << 3));
       pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) - 3;
 
       /* Check for errors.  NOTE:  The DMA engine reports bogus length errors,
@@ -920,8 +920,8 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
           /* Get the Rx buffer address from the Rx descriptor */
 
-          rxdesc   = (uint32_t*)(LPC17_RXDESC_BASE + (considx << 3));
-          rxbuffer = (void*)*rxdesc;
+          rxdesc   = (uint32_t *)(LPC17_RXDESC_BASE + (considx << 3));
+          rxbuffer = (void *)*rxdesc;
 
           /* Copy the data data from the EMAC DMA RAM to priv->lp_dev.d_buf.
            * Set amount of data in priv->lp_dev.d_len
@@ -1006,7 +1006,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
                */
 
               if (priv->lp_dev.d_len > 0)
-               {
+                {
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -1059,8 +1059,8 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
        */
 
       if (++considx >= CONFIG_NET_NRXDESC)
-       {
-         /* Wrap back to index zero */
+        {
+          /* Wrap back to index zero */
 
           considx = 0;
         }
@@ -1245,7 +1245,7 @@ static int lpc17_interrupt(int irq, void *context)
        * error.
        */
 
-      if ((status & (ETH_INT_RXOVR|ETH_INT_TXUNR)) != 0)
+      if ((status & (ETH_INT_RXOVR | ETH_INT_TXUNR)) != 0)
         {
           if ((status & ETH_INT_RXOVR) != 0)
             {
@@ -1259,7 +1259,7 @@ static int lpc17_interrupt(int irq, void *context)
               EMAC_STAT(priv, tx_underrun);
             }
 
-           /* ifup() will reset the EMAC and bring it back up */
+          /* ifup() will reset the EMAC and bring it back up */
 
            (void)lpc17_ifup(&priv->lp_dev);
         }
@@ -2315,7 +2315,7 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_showpins
  *
  * Description:
@@ -2329,17 +2329,17 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  * Assumptions:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
 static void lpc17_showpins(void)
 {
-  lpc17_dumpgpio(GPIO_PORT1|GPIO_PIN0, "P1[1-15]");
-  lpc17_dumpgpio(GPIO_PORT1|GPIO_PIN16, "P1[16-31]");
+  lpc17_dumpgpio(GPIO_PORT1 | GPIO_PIN0, "P1[1-15]");
+  lpc17_dumpgpio(GPIO_PORT1 | GPIO_PIN16, "P1[16-31]");
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_showmii
  *
  * Description:
@@ -2353,7 +2353,7 @@ static void lpc17_showpins(void)
  *
  * Assumptions:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_NET_REGDEBUG) && defined(LPC17_HAVE_PHY)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
@@ -2449,7 +2449,7 @@ static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr)
 
   /* Wait for the PHY command to complete */
 
-  while ((lpc17_getreg(LPC17_ETH_MIND) & (ETH_MIND_BUSY|ETH_MIND_NVALID)) != 0);
+  while ((lpc17_getreg(LPC17_ETH_MIND) & (ETH_MIND_BUSY | ETH_MIND_NVALID)) != 0);
   lpc17_putreg(0, LPC17_ETH_MCMD);
 
   /* Return the PHY register data */
@@ -2681,16 +2681,16 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 
   for (phyaddr = 1; phyaddr < 32; phyaddr++)
     {
-       /* Check if we can see the selected device ID at this
-        * PHY address.
-        */
+      /* Check if we can see the selected device ID at this
+       * PHY address.
+       */
 
-       phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
-       nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+      phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
+      nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
 
-       /* Compare OUI bits 3-18 */
+      /* Compare OUI bits 3-18 */
 
-       if (phyreg == LPC17_PHYID1)
+      if (phyreg == LPC17_PHYID1)
         {
           phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
           nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
@@ -2970,7 +2970,7 @@ static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
 
   /* Initialize Tx descriptors and link to packet buffers */
 
-  txdesc  = (uint32_t*)LPC17_TXDESC_BASE;
+  txdesc  = (uint32_t *)LPC17_TXDESC_BASE;
   pktaddr = LPC17_TXBUFFER_BASE;
 
   for (i = 0; i < CONFIG_NET_NTXDESC; i++)
@@ -2982,7 +2982,7 @@ static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
 
   /* Initialize Tx status */
 
-  txstat  = (uint32_t*)LPC17_TXSTAT_BASE;
+  txstat  = (uint32_t *)LPC17_TXSTAT_BASE;
   for (i = 0; i < CONFIG_NET_NTXDESC; i++)
     {
       *txstat++ = 0;
@@ -3026,7 +3026,7 @@ static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
 
   /* Initialize Rx descriptors and link to packet buffers */
 
-  rxdesc  = (uint32_t*)LPC17_RXDESC_BASE;
+  rxdesc  = (uint32_t *)LPC17_RXDESC_BASE;
   pktaddr = LPC17_RXBUFFER_BASE;
 
   for (i = 0; i < CONFIG_NET_NRXDESC; i++)
@@ -3038,7 +3038,7 @@ static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
 
   /* Initialize Rx status */
 
-  rxstat  = (uint32_t*)LPC17_RXSTAT_BASE;
+  rxstat  = (uint32_t *)LPC17_RXSTAT_BASE;
   for (i = 0; i < CONFIG_NET_NRXDESC; i++)
     {
       *rxstat++ = 0;
@@ -3264,7 +3264,7 @@ static inline int lpc17_ethinitialize(int intf)
   priv->lp_dev.d_addmac  = lpc17_addmac;  /* Add multicast MAC address */
   priv->lp_dev.d_rmmac   = lpc17_rmmac;   /* Remove multicast MAC address */
 #endif
-  priv->lp_dev.d_private = (void*)priv;   /* Used to recover private state from dev */
+  priv->lp_dev.d_private = (void *)priv;   /* Used to recover private state from dev */
 
 #if CONFIG_LPC17_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"

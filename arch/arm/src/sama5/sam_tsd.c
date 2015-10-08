@@ -315,7 +315,7 @@ static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct sam_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct sam_sample_s));
 
       /* Now manage state transitions */
 
@@ -330,11 +330,11 @@ static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
-       }
+          priv->sample.contact = CONTACT_MOVE;
+        }
 
       priv->penchange = false;
       ret = OK;
@@ -399,7 +399,7 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
 
   ivdbg("Sampled\n");
 
-   /* Re-acquire the semaphore that manages mutually exclusive access to
+  /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
@@ -571,15 +571,15 @@ static void sam_tsd_bottomhalf(void *arg)
 
        priv->sample.contact = CONTACT_UP;
 
-       /* Stop periodic trigger & enable pen */
+      /* Stop periodic trigger & enable pen */
 
-       sam_tsd_setaverage(priv, ADC_TSMR_TSAV_NOFILTER);
-       sam_tsd_debounce(priv, BOARD_TSD_DEBOUNCE);
+      sam_tsd_setaverage(priv, ADC_TSMR_TSAV_NOFILTER);
+      sam_tsd_debounce(priv, BOARD_TSD_DEBOUNCE);
 
-       regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
-       regval &= ~ADC_TRGR_TRGMOD_MASK;
-       regval |= ADC_TRGR_TRGMOD_PEN;
-       sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
+      regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
+      regval &= ~ADC_TRGR_TRGMOD_MASK;
+      regval |= ADC_TRGR_TRGMOD_PEN;
+      sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
     }
 
   /* It is a pen down event.  If the last loss-of-contact event has not been
@@ -596,9 +596,9 @@ static void sam_tsd_bottomhalf(void *arg)
        * this case; we rely on the timer expiry to get us going again.
        */
 
-       wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
-       ier = 0;
-       goto ignored;
+      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
+      ier = 0;
+      goto ignored;
     }
   else
     {
@@ -697,7 +697,7 @@ static void sam_tsd_bottomhalf(void *arg)
       priv->threshx  = x;
       priv->threshy  = y;
 
-     /* Update the x/y position in the sample data */
+      /* Update the x/y position in the sample data */
 
       priv->sample.x = MIN(x, UINT16_MAX);
       priv->sample.y = MIN(y, UINT16_MAX);
@@ -958,7 +958,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 
@@ -990,10 +990,10 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important
-        * to know because the release will be sent to the window based on
-        * its last positional data.
-        */
+      /* Pen is now up.  Is the positional data valid?  This is important
+       * to know because the release will be sent to the window based on
+       * its last positional data.
+       */
 
       if (sample.valid)
         {
@@ -1441,10 +1441,10 @@ static void sam_tsd_debounce(struct sam_tsd_s *priv, uint32_t time)
 
   div = 1000000000;
   while (div > 1 && (time % 10) == 0)
-   {
+    {
       time /= 10;
       div  /= 10;
-   }
+    }
 
   clk = BOARD_ADCCLK_FREQUENCY;
   while (div > 1 && (clk % 10) == 0)

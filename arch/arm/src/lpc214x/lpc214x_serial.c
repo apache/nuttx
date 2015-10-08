@@ -296,19 +296,19 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint16_t baud;
   uint8_t lcr;
 
   /* Clear fifos */
 
   up_serialout(priv, LPC214X_UART_FCR_OFFSET,
-               (LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_TX_FIFO_RESET));
+               (LPC214X_FCR_RX_FIFO_RESET | LPC214X_FCR_TX_FIFO_RESET));
 
   /* Set trigger */
 
   up_serialout(priv, LPC214X_UART_FCR_OFFSET,
-               (LPC214X_FCR_FIFO_ENABLE|LPC214X_FCR_FIFO_TRIG14));
+               (LPC214X_FCR_FIFO_ENABLE | LPC214X_FCR_FIFO_TRIG14));
 
   /* Set up the IER */
 
@@ -359,8 +359,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* Configure the FIFOs */
 
   up_serialout(priv, LPC214X_UART_FCR_OFFSET,
-               (LPC214X_FCR_FIFO_TRIG8|LPC214X_FCR_TX_FIFO_RESET|\
-                LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_FIFO_ENABLE));
+               (LPC214X_FCR_FIFO_TRIG8 | LPC214X_FCR_TX_FIFO_RESET |
+                LPC214X_FCR_RX_FIFO_RESET | LPC214X_FCR_FIFO_ENABLE));
 
   /* The NuttX serial driver waits for the first THRE interrupt before
    * sending serial data... However, it appears that the lpc214x hardware
@@ -385,7 +385,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disableuartint(priv, NULL);
 }
 
@@ -406,7 +406,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
 static int up_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -414,12 +414,13 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the UART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the UART
+       */
 
-       up_enable_irq(priv->irq);
+      up_enable_irq(priv->irq);
     }
+
   return ret;
 }
 
@@ -435,7 +436,7 @@ static int up_attach(struct uart_dev_s *dev)
 
 static void up_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -472,7 +473,7 @@ static int up_interrupt(int irq, void *context)
     {
       PANIC();
     }
-  priv = (struct up_dev_s*)dev->priv;
+  priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -566,7 +567,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
+  struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
   int                ret    = OK;
 
   switch (cmd)
@@ -574,7 +575,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct up_dev_s *user = (struct up_dev_s*)arg;
+         struct up_dev_s *user = (struct up_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -624,7 +625,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t rbr;
 
   *status = up_serialin(priv, LPC214X_UART_LSR_OFFSET);
@@ -642,7 +643,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -666,7 +667,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_RDR) != 0);
 }
 
@@ -680,7 +681,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_serialout(priv, LPC214X_UART_THR_OFFSET, (uint8_t)ch);
 }
 
@@ -694,7 +695,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -718,7 +719,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
 }
 
@@ -732,7 +733,7 @@ static bool up_txready(struct uart_dev_s *dev)
 
 static bool up_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
 }
 
@@ -755,8 +756,8 @@ void up_earlyserialinit(void)
   /* Enable UART0 and 1 */
 
   uint32_t pinsel = getreg32(LPC214X_PINSEL0);
-  pinsel &= ~(LPC214X_UART0_PINMASK|LPC214X_UART1_PINMASK);
-  pinsel |= (LPC214X_UART0_PINSEL|LPC214X_UART1_PINSEL);
+  pinsel &= ~(LPC214X_UART0_PINMASK | LPC214X_UART1_PINMASK);
+  pinsel |= (LPC214X_UART0_PINSEL | LPC214X_UART1_PINSEL);
   putreg32(pinsel, LPC214X_PINSEL0);
 
   /* Disable both UARTS */
@@ -796,7 +797,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint8_t ier;
 
   up_disableuartint(priv, &ier);

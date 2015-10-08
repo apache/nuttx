@@ -130,7 +130,7 @@ static void dispatch_syscall(void)
     " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
     " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
     " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
-    " blx ip\n"                    /* Call the stub (modifies lr)*/
+    " blx ip\n"                    /* Call the stub (modifies lr) */
     " ldr lr, [sp, #12]\n"         /* Restore lr */
     " add sp, sp, #16\n"           /* Destroy the stack frame */
     " mov r2, r0\n"                /* R2=Save return value in R2 */
@@ -154,7 +154,7 @@ static void dispatch_syscall(void)
 
 int up_svcall(int irq, FAR void *context)
 {
-  uint32_t *regs = (uint32_t*)context;
+  uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
 
   DEBUGASSERT(regs && regs == current_regs);
@@ -205,10 +205,10 @@ int up_svcall(int irq, FAR void *context)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #if defined(CONFIG_ARCH_FPU) && \
     (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
-          up_savefpu((uint32_t*)regs[REG_R1]);
+          up_savefpu((uint32_t *)regs[REG_R1]);
 #endif
         }
         break;
@@ -231,7 +231,7 @@ int up_svcall(int irq, FAR void *context)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-          current_regs = (uint32_t*)regs[REG_R1];
+          current_regs = (uint32_t *)regs[REG_R1];
         }
         break;
 
@@ -254,12 +254,12 @@ int up_svcall(int irq, FAR void *context)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #if defined(CONFIG_ARCH_FPU) && \
     (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
-          up_savefpu((uint32_t*)regs[REG_R1]);
+          up_savefpu((uint32_t *)regs[REG_R1]);
 #endif
-          current_regs = (uint32_t*)regs[REG_R2];
+          current_regs = (uint32_t *)regs[REG_R2];
         }
         break;
 
@@ -409,7 +409,7 @@ int up_svcall(int irq, FAR void *context)
            * parameter will reside at an offset of 4 from the stack pointer.
            */
 
-          regs[REG_R3]         = *(uint32_t*)(regs[REG_SP]+4);
+          regs[REG_R3]         = *(uint32_t *)(regs[REG_SP]+4);
         }
         break;
 #endif

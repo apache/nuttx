@@ -63,7 +63,7 @@ struct section_mapping_s
 };
 
 /************************************************************************************
- * Public Variables
+ * Public Data
  ************************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */
@@ -118,7 +118,7 @@ extern void imx_boardinitialize(void);
 
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t *pgtable = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
@@ -180,9 +180,9 @@ static void up_copyvectorblock(void)
    */
 
 #if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
-  uint32_t *src  = (uint32_t*)&_vector_start;
-  uint32_t *end  = (uint32_t*)&_vector_end;
-  uint32_t *dest = (uint32_t*)VECTOR_BASE;
+  uint32_t *src  = (uint32_t *)&_vector_start;
+  uint32_t *end  = (uint32_t *)&_vector_end;
+  uint32_t *dest = (uint32_t *)VECTOR_BASE;
 
   while (src < end)
     {

@@ -65,7 +65,7 @@
 
 void up_release_pending(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
 
   slldbg("From TCB=%p\n", rtcb);
 
@@ -96,7 +96,7 @@ void up_release_pending(void)
            * of the g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (struct tcb_s *)g_readytorun.head;
 
           /* Update scheduler parameters */
 
@@ -121,7 +121,7 @@ void up_release_pending(void)
            * of the g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (struct tcb_s *)g_readytorun.head;
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously

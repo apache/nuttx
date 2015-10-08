@@ -292,7 +292,7 @@ static int rtc_interrupt(int irq, void *context)
       rtclldbg("ERRPR: work_queue failed: %d\n", ret);
     }
 
-  /* Disable any further alarm interrupts*/
+  /* Disable any further alarm interrupts */
 
   putreg32(RTC_IDR_ALRDIS, SAM_RTC_IDR);
 

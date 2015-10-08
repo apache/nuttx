@@ -189,9 +189,9 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context)
   uint32_t source = getreg32(EFM32_BURTC_IF);
 
   if (source & BURTC_IF_LFXOFAIL)
-  {
+    {
       burtcdbg("BURTC_IF_LFXOFAIL");
-  }
+    }
 
 #ifdef CONFIG_RTC_HIRES
   if (source & BURTC_IF_OF)

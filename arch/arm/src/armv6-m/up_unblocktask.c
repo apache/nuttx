@@ -69,7 +69,7 @@
 
 void up_unblock_task(struct tcb_s *tcb)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
 
   /* Verify that the context switch can be performed */
 
@@ -108,7 +108,7 @@ void up_unblock_task(struct tcb_s *tcb)
            * of the g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (struct tcb_s *)g_readytorun.head;
 
           /* Update scheduler parameters */
 
@@ -123,7 +123,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
       else
         {
-          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+          struct tcb_s *nexttcb = (struct tcb_s *)g_readytorun.head;
 
           /* Update scheduler parameters */
 

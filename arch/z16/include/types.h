@@ -86,7 +86,7 @@ typedef unsigned short    irqstate_t;
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_Z16_INCLUDE_TYPES_H  */

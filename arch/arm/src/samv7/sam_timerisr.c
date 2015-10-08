@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* Select MCU-specific settings
+/* Select MCU-specific settings
  *
  * The SysTick timer is driven by the output of the Mast Clock Controller
  * prescaler output (i.e., the MDIV output divider is not applied so that
@@ -94,7 +94,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -108,10 +108,10 @@
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************

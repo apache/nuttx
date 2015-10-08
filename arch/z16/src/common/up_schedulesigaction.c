@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_schedulesigaction.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,18 +102,18 @@
 
 void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  /* Refuse to handle nested signal actions */
+  irqstate_t flags;
 
   dbg("tcb=0x%p sigdeliver=0x%06x\n", tcb, (uint32_t)sigdeliver);
 
+  /* Make sure that interrupts are disabled */
+
+  flags = irqsave();
+
+  /* Refuse to handle nested signal actions */
+
   if (!tcb->xcp.sigdeliver)
     {
-      irqstate_t flags;
-
-      /* Make sure that interrupts are disabled */
-
-      flags = irqsave();
-
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -192,9 +192,9 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
           *saved_pc                = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_FLAGS] = 0;
         }
-
-      irqrestore(flags);
     }
+
+  irqrestore(flags);
 }
 
 #endif /* CONFIG_DISABLE_SIGNALS */

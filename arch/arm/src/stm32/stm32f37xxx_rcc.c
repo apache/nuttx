@@ -92,7 +92,7 @@ static inline void rcc_reset(void)
   putreg32(0, STM32_RCC_CFGR2);             /* Reset fCK source for all U[S]ARTs to PCLK */
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEON, CSSON and PLLON bits */
-  regval &= ~(RCC_CR_HSEON|RCC_CR_CSSON|RCC_CR_PLLON);
+  regval &= ~(RCC_CR_HSEON | RCC_CR_CSSON | RCC_CR_PLLON);
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEBYP bit */
@@ -473,97 +473,97 @@ static void stm32_stdclockconfig(void)
 #  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
 # endif
 
-    /* Set the HSE prescaler */
+  /* Set the HSE prescaler */
 
-    regval = STM32_CFGR2_PREDIV1;
-    putreg32(regval, STM32_RCC_CFGR2);
+  regval = STM32_CFGR2_PREDIV1;
+  putreg32(regval, STM32_RCC_CFGR2);
 
 # endif
 
-    /* Enable FLASH prefetch buffer and 2 wait states */
+  /* Enable FLASH prefetch buffer and 2 wait states */
 
-    regval  = getreg32(STM32_FLASH_ACR);
-    regval &= ~FLASH_ACR_LATENCY_MASK;
-    regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
-    putreg32(regval, STM32_FLASH_ACR);
+  regval  = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval |= (FLASH_ACR_LATENCY_2 | FLASH_ACR_PRTFBE);
+  putreg32(regval, STM32_FLASH_ACR);
 
-    /* Set the HCLK source/divider */
+  /* Set the HCLK source/divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_HPRE_MASK;
-    regval |= STM32_RCC_CFGR_HPRE;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_HPRE_MASK;
+  regval |= STM32_RCC_CFGR_HPRE;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Set the PCLK2 divider */
+  /* Set the PCLK2 divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_PPRE2_MASK;
-    regval |= STM32_RCC_CFGR_PPRE2;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_PPRE2_MASK;
+  regval |= STM32_RCC_CFGR_PPRE2;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Set the PCLK1 divider */
+  /* Set the PCLK1 divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_PPRE1_MASK;
-    regval |= STM32_RCC_CFGR_PPRE1;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_PPRE1_MASK;
+  regval |= STM32_RCC_CFGR_PPRE1;
+  putreg32(regval, STM32_RCC_CFGR);
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
-    /* If we are using the PLL, configure and start it */
-    /* Set the PLL divider and multiplier */
+  /* If we are using the PLL, configure and start it */
+  /* Set the PLL divider and multiplier */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMUL_MASK);
-    regval |= (STM32_CFGR_PLLSRC | STM32_CFGR_PLLXTPRE | STM32_CFGR_PLLMUL);
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMUL_MASK);
+  regval |= (STM32_CFGR_PLLSRC | STM32_CFGR_PLLXTPRE | STM32_CFGR_PLLMUL);
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Enable the PLL */
+  /* Enable the PLL */
 
-    regval = getreg32(STM32_RCC_CR);
-    regval |= RCC_CR_PLLON;
-    putreg32(regval, STM32_RCC_CR);
+  regval = getreg32(STM32_RCC_CR);
+  regval |= RCC_CR_PLLON;
+  putreg32(regval, STM32_RCC_CR);
 
-    /* Wait until the PLL is ready */
+  /* Wait until the PLL is ready */
 
-    while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
 
 #endif
 
-    /* Select the system clock source (probably the PLL) */
+  /* Select the system clock source (probably the PLL) */
 
-    regval  = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_SW_MASK;
-    regval |= STM32_SYSCLK_SW;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_SW_MASK;
+  regval |= STM32_SYSCLK_SW;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Wait until the selected source is used as the system clock source */
+  /* Wait until the selected source is used as the system clock source */
 
-    while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
 
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
-    /* Low speed internal clock source LSI
-     *
-     * TODO: There is another case where the LSI needs to
-     * be enabled: if the MCO pin selects LSI as source.
-     */
+  /* Low speed internal clock source LSI
+   *
+   * TODO: There is another case where the LSI needs to
+   * be enabled: if the MCO pin selects LSI as source.
+   */
 
-    stm32_rcc_enablelsi();
+  stm32_rcc_enablelsi();
 #endif
 
 #if defined(CONFIG_RTC_LSECLOCK)
-    /* Low speed external clock source LSE 
-     *
-     * TODO: There is another case where the LSE needs to
-     * be enabled: if the MCO pin selects LSE as source.
-     *
-     * TODO: There is another case where the LSE needs to
-     * be enabled: if USART1-2-3 selects LSE as source.
-     *
-     * TODO: There is another case where the LSE needs to
-     * be enabled: if CEC selects LSE as source.
-     */
+  /* Low speed external clock source LSE 
+   *
+   * TODO: There is another case where the LSE needs to
+   * be enabled: if the MCO pin selects LSE as source.
+   *
+   * TODO: There is another case where the LSE needs to
+   * be enabled: if USART1-2-3 selects LSE as source.
+   *
+   * TODO: There is another case where the LSE needs to
+   * be enabled: if CEC selects LSE as source.
+   */
 
-    stm32_rcc_enablelse();
+  stm32_rcc_enablelse();
 #endif
 }
 #endif

@@ -112,7 +112,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * for register dumps and possibly context switching.
    */
 
-  savestate    = (uint32_t*)current_regs;
+  savestate    = (uint32_t *)current_regs;
   current_regs = regs;
 
   /* In the NuttX on-demand paging implementation, only the read-only, .text

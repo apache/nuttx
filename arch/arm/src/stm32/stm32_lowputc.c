@@ -1,4 +1,4 @@
-/**************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_lowputc.c
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,9 +53,9 @@
 #include "stm32_gpio.h"
 #include "stm32_uart.h"
 
-/**************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************/
+ ****************************************************************************/
 
 /* Select USART parameters for the selected console */
 
@@ -232,13 +232,13 @@
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #    define USART_CR1_CLRBITS\
-      (USART_CR1_UESM | USART_CR1_RE | USART_CR1_TE | USART_CR1_PS |\
-       USART_CR1_PCE |USART_CR1_WAKE | USART_CR1_M | USART_CR1_MME |\
-       USART_CR1_OVER8 | USART_CR1_DEDT_MASK | USART_CR1_DEAT_MASK |\
+      (USART_CR1_UESM | USART_CR1_RE | USART_CR1_TE | USART_CR1_PS | \
+       USART_CR1_PCE | USART_CR1_WAKE | USART_CR1_M | USART_CR1_MME | \
+       USART_CR1_OVER8 | USART_CR1_DEDT_MASK | USART_CR1_DEAT_MASK | \
        USART_CR1_ALLINTS)
 #  else
 #    define USART_CR1_CLRBITS\
-      (USART_CR1_M | USART_CR1_PCE |USART_CR1_PS | USART_CR1_TE |\
+      (USART_CR1_M | USART_CR1_PCE | USART_CR1_PS | USART_CR1_TE | \
        USART_CR1_RE | USART_CR1_ALLINTS)
 #  endif
 
@@ -254,15 +254,15 @@
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #    define USART_CR2_CLRBITS \
-      (USART_CR2_ADDM7 | USART_CR2_LBDL | USART_CR2_LBDIE | USART_CR2_LBCL |\
-       USART_CR2_CPHA | USART_CR2_CPOL | USART_CR2_CLKEN | USART_CR2_STOP_MASK |\
-       USART_CR2_LINEN | USART_CR2_RXINV | USART_CR2_TXINV | USART_CR2_DATAINV |\
-       USART_CR2_MSBFIRST | USART_CR2_ABREN | USART_CR2_ABRMOD_MASK |\
+      (USART_CR2_ADDM7 | USART_CR2_LBDL | USART_CR2_LBDIE | USART_CR2_LBCL | \
+       USART_CR2_CPHA | USART_CR2_CPOL | USART_CR2_CLKEN | USART_CR2_STOP_MASK | \
+       USART_CR2_LINEN | USART_CR2_RXINV | USART_CR2_TXINV | USART_CR2_DATAINV | \
+       USART_CR2_MSBFIRST | USART_CR2_ABREN | USART_CR2_ABRMOD_MASK | \
        USART_CR2_RTOEN | USART_CR2_ADD8_MASK)
 #  else
 #    define USART_CR2_CLRBITS \
-       (USART_CR2_STOP_MASK|USART_CR2_CLKEN|USART_CR2_CPOL|USART_CR2_CPHA|\
-       USART_CR2_LBCL|USART_CR2_LBDIE)
+       (USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL | USART_CR2_CPHA | \
+        USART_CR2_LBCL | USART_CR2_LBDIE)
 #  endif
 #  define USART_CR2_SETBITS USART_CR2_STOP2_VALUE
 
@@ -271,14 +271,14 @@
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 
 #    define USART_CR3_CLRBITS \
-      (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL |\
-       USART_CR3_NACK | USART_CR3_SCEN | USART_CR3_DMAR | USART_CR3_DMAT |\
-       USART_CR3_RTSE | USART_CR3_CTSE | USART_CR3_CTSIE | USART_CR1_ONEBIT |\
-       USART_CR1_OVRDIS | USART_CR1_DDRE | USART_CR1_DEM | USART_CR1_DEP |\
+      (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL | \
+       USART_CR3_NACK | USART_CR3_SCEN | USART_CR3_DMAR | USART_CR3_DMAT | \
+       USART_CR3_RTSE | USART_CR3_CTSE | USART_CR3_CTSIE | USART_CR1_ONEBIT | \
+       USART_CR1_OVRDIS | USART_CR1_DDRE | USART_CR1_DEM | USART_CR1_DEP | \
        USART_CR1_SCARCNT_MASK | USART_CR1_WUS_MASK | USART_CR1_WUFIE)
 #  else
 #    define USART_CR3_CLRBITS \
-      (USART_CR3_CTSIE|USART_CR3_CTSE|USART_CR3_RTSE|USART_CR3_EIE)
+      (USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE)
 #  endif
 #  define USART_CR3_SETBITS 0
 
@@ -368,37 +368,37 @@
 #  endif /* CONFIG_STM32_STM32F30XX */
 #endif /* HAVE_CONSOLE */
 
-/**************************************************************************
+/****************************************************************************
  * Private Types
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
- * Global Variables
- **************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Variables
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Name: up_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
- **************************************************************************/
+ ****************************************************************************/
 
 void up_lowputc(char ch)
 {
@@ -422,7 +422,7 @@ void up_lowputc(char ch)
 #endif /* HAVE_CONSOLE */
 }
 
-/**************************************************************************
+/****************************************************************************
  * Name: stm32_lowsetup
  *
  * Description:
@@ -430,7 +430,7 @@ void up_lowputc(char ch)
  *   console.  Its purpose is to get the console output availabe as soon
  *   as possible.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F10XX)
 
@@ -555,7 +555,7 @@ void stm32_lowsetup(void)
   /* Enable Rx, Tx, and the USART */
 
   cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
-  cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
+  cr |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
@@ -634,7 +634,7 @@ void stm32_lowsetup(void)
 
   /* Enable Rx, Tx, and the USART */
 
-  cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
+  cr |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */

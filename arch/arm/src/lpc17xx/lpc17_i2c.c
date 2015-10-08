@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_i2c.c
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
@@ -39,11 +39,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -89,19 +89,19 @@
 #  define CONFIG_I2C2_FREQ 100000
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 
 #define I2C_TIMEOUT     ((20 * CLK_TCK) / 1000) /* 20 mS */
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 
 struct lpc17_i2cdev_s
 {
@@ -121,18 +121,18 @@ struct lpc17_i2cdev_s
 
 static struct lpc17_i2cdev_s i2cdevices[3];
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_start(struct lpc17_i2cdev_s *priv);
 static void i2c_stop(struct lpc17_i2cdev_s *priv);
 static int  i2c_interrupt(int irq, FAR void *context);
 static void i2c_timeout(int argc, uint32_t arg, ...);
 
-/*******************************************************************************
+/****************************************************************************
  * I2C device operations
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);
 static int      i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
@@ -151,13 +151,13 @@ struct i2c_ops_s lpc17_i2c_ops =
 #endif
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_i2c_setfrequency
  *
  * Description:
  *   Set the frequence for the next transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
 {
@@ -183,20 +183,20 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
   return frequency;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_i2c_setaddress
  *
  * Description:
  *   Set the I2C slave address for a subsequent read/write
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 {
   struct lpc17_i2cdev_s *priv = (struct lpc17_i2cdev_s *) dev;
 
   DEBUGASSERT(dev != NULL);
-  DEBUGASSERT(nbits == 7 );
+  DEBUGASSERT(nbits == 7);
 
   priv->msg.addr  = addr << 1;
   priv->msg.flags = 0 ;
@@ -204,14 +204,14 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_i2c_write
  *
  * Description:
  *   Send a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
 {
@@ -223,7 +223,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
   priv->wrcnt      = 0;
   priv->rdcnt      = 0;
   priv->msg.addr  &= ~0x01;
-  priv->msg.buffer = (uint8_t*)buffer;
+  priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
   ret = i2c_start(priv);
@@ -231,14 +231,14 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
   return ret > 0 ? OK : -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc17_i2c_read
  *
  * Description:
  *   Receive a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 {
@@ -258,13 +258,13 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
   return ret > 0 ? OK : -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_start
  *
  * Description:
  *   Perform a I2C transfer start
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_start(struct lpc17_i2cdev_s *priv)
 {
@@ -292,13 +292,13 @@ static int i2c_start(struct lpc17_i2cdev_s *priv)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_stop
  *
  * Description:
  *   Perform a I2C transfer stop
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void i2c_stop(struct lpc17_i2cdev_s *priv)
 {
@@ -310,13 +310,13 @@ static void i2c_stop(struct lpc17_i2cdev_s *priv)
   sem_post(&priv->wait);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_timeout
  *
  * Description:
  *   Watchdog timer for timeout of I2C operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void i2c_timeout(int argc, uint32_t arg, ...)
 {
@@ -328,13 +328,13 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_interrupt
  *
  * Description:
  *   The I2C Interrupt Handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_interrupt(int irq, FAR void *context)
 {
@@ -344,21 +344,21 @@ static int i2c_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_LPC17_I2C0
   if (irq == LPC17_IRQ_I2C0)
     {
-      priv=&i2cdevices[0];
+      priv = &i2cdevices[0];
     }
   else
 #endif
 #ifdef CONFIG_LPC17_I2C1
   if (irq == LPC17_IRQ_I2C1)
     {
-      priv=&i2cdevices[1];
+      priv = &i2cdevices[1];
     }
   else
 #endif
 #ifdef CONFIG_LPC17_I2C2
   if (irq == LPC17_IRQ_I2C2)
     {
-      priv=&i2cdevices[2];
+      priv = &i2cdevices[2];
     }
   else
 #endif
@@ -366,7 +366,7 @@ static int i2c_interrupt(int irq, FAR void *context)
       PANIC();
     }
 
-/* Reference UM10360 19.10.5 */
+  /* Reference UM10360 19.10.5 */
 
   state = getreg32(priv->base + LPC17_I2C_STAT_OFFSET);
   putreg32(I2C_CONCLR_SIC, priv->base + LPC17_I2C_CONCLR_OFFSET);
@@ -375,7 +375,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
   switch (state)
     {
-    case 0x00:      // Bus Error
+    case 0x00:      /* Bus Error */
     case 0x20:
     case 0x30:
     case 0x38:
@@ -383,8 +383,8 @@ static int i2c_interrupt(int irq, FAR void *context)
       i2c_stop(priv);
       break;
 
-    case 0x08:     // START
-    case 0x10:     // Repeat START
+    case 0x08:     /* START */
+    case 0x10:     /* Repeat START */
       putreg32(priv->msg.addr, priv->base + LPC17_I2C_DAT_OFFSET);
       putreg32(I2C_CONCLR_STAC, priv->base + LPC17_I2C_CONCLR_OFFSET);
       break;
@@ -396,7 +396,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
     case 0x28:
       priv->wrcnt++;
-      if (priv->wrcnt<priv->msg.length)
+      if (priv->wrcnt < priv->msg.length)
         {
           putreg32(priv->msg.buffer[priv->wrcnt], priv->base + LPC17_I2C_DAT_OFFSET);
         }
@@ -436,17 +436,17 @@ static int i2c_interrupt(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cinitialize
  *
  * Description:
  *   Initialise an I2C device
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 struct i2c_dev_s *up_i2cinitialize(int port)
 {
@@ -462,11 +462,11 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 
   flags = irqsave();
 
-  priv= &i2cdevices[port];
+  priv = &i2cdevices[port];
 #ifdef CONFIG_LPC17_I2C0
   if (port == 0)
     {
-      priv= (FAR struct lpc17_i2cdev_s *)&i2cdevices[0];
+      priv        = (FAR struct lpc17_i2cdev_s *)&i2cdevices[0];
       priv->base  = LPC17_I2C0_BASE;
       priv->irqid = LPC17_IRQ_I2C0;
 
@@ -490,7 +490,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC17_I2C1
   if (port == 1)
     {
-      priv= (FAR struct lpc17_i2cdev_s *)&i2cdevices[1];
+      priv        = (FAR struct lpc17_i2cdev_s *)&i2cdevices[1];
       priv->base  = LPC17_I2C1_BASE;
       priv->irqid = LPC17_IRQ_I2C1;
 
@@ -514,7 +514,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC17_I2C2
   if (port == 2)
     {
-      priv= (FAR struct lpc17_i2cdev_s *)&i2cdevices[2];
+      priv        = (FAR struct lpc17_i2cdev_s *)&i2cdevices[2];
       priv->base  = LPC17_I2C2_BASE;
       priv->irqid = LPC17_IRQ_I2C2;
 
@@ -566,13 +566,13 @@ struct i2c_dev_s *up_i2cinitialize(int port)
   return &priv->dev;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cuninitalize
  *
  * Description:
  *   Uninitialise an I2C device
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 {

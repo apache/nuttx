@@ -89,11 +89,11 @@
 
 int up_hardfault(int irq, FAR void *context)
 {
-  uint32_t *regs = (uint32_t*)context;
+  uint32_t *regs = (uint32_t *)context;
 
   /* Get the value of the program counter where the fault occurred */
 
-  uint16_t *pc = (uint16_t*)regs[REG_PC] - 1;
+  uint16_t *pc = (uint16_t *)regs[REG_PC] - 1;
 
   /* Check if the pc lies in known FLASH memory.
    * REVISIT:  What if the PC lies in "unknown" external memory?

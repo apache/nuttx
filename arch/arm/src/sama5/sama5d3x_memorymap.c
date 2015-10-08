@@ -81,7 +81,7 @@ const struct section_mapping_s g_section_mapping[] =
    *      0x0000:00000.   VBAR == 0x0000:0000.
    *
    *      This method is used when booting from ISRAM or NOR FLASH.  In
-   &      that case, vectors must lie at the beginning of NOFR FLASH.
+   *      that case, vectors must lie at the beginning of NOFR FLASH.
    *
    *   3. Set the Cortex-A5 VBAR register so that the vector table address
    *      is moved to a location other than 0x0000:0000.
@@ -177,7 +177,7 @@ const struct section_mapping_s g_section_mapping[] =
   },
 #endif
 
-/* SAMA5 CS1-3 External Memories */
+  /* SAMA5 CS1-3 External Memories */
 
 #ifdef CONFIG_SAMA5_EBICS1
   { SAM_EBICS1_PSECTION,   SAM_EBICS1_VSECTION,
@@ -220,13 +220,13 @@ const struct section_mapping_s g_section_mapping[] =
     SAM_SYSC_MMUFLAGS,    SAM_SYSC_NSECTIONS
   },
 
-/* LCDC Framebuffer.  This entry reprograms a part of one of the above
- * regions, making it non-cacheable and non-buffereable.
- *
- * If SDRAM will be reconfigured, then we will defer setup of the framebuffer
- * until after the SDRAM remapping (since the framebuffer problem resides) in
- * SDRAM.
- */
+  /* LCDC Framebuffer.  This entry reprograms a part of one of the above
+   * regions, making it non-cacheable and non-buffereable.
+   *
+   * If SDRAM will be reconfigured, then we will defer setup of the framebuffer
+   * until after the SDRAM remapping (since the framebuffer problem resides) in
+   * SDRAM.
+   */
 
 #if defined(CONFIG_SAMA5_LCDC) && !defined(NEED_SDRAM_REMAPPING)
   { CONFIG_SAMA5_LCDC_FB_PBASE, CONFIG_SAMA5_LCDC_FB_VBASE,

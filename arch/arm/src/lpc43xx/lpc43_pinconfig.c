@@ -103,23 +103,23 @@ int lpc43_pin_config(uint32_t pinconf)
   /* Enable/disable input buffering */
 
   if (PINCONF_INBUFFER_ENABLED(pinconf))
-   {
-     regval |= SCU_PIN_EZI; /* Set bit to enable */
-   }
+    {
+      regval |= SCU_PIN_EZI; /* Set bit to enable */
+    }
 
   /* Enable/disable glitch filtering */
 
   if (!PINCONF_GLITCH_ENABLE(pinconf))
-   {
-     regval |= SCU_PIN_ZIF; /* Set bit to disable */
-   }
+    {
+      regval |= SCU_PIN_ZIF; /* Set bit to disable */
+    }
 
   /* Only normal and high speed pins support the slew rate setting */
 
   if (PINCONF_IS_SLEW_FAST(pinconf))
-   {
-     regval |= SCU_NDPIN_EHS; /* 0=slow; 1=fast */
-   }
+    {
+      regval |= SCU_NDPIN_EHS; /* 0=slow; 1=fast */
+    }
 
   /* Only high drive pins suppose drive strength */
 

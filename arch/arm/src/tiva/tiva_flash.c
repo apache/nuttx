@@ -178,7 +178,7 @@ static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
 {
   DEBUGASSERT(startblock + nblocks <= TIVA_VIRTUAL_NPAGES);
 
-  memcpy(buf, (void*)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE),
+  memcpy(buf, (void *)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE),
          nblocks * TIVA_FLASH_PAGESIZE);
 
   return nblocks;
@@ -195,8 +195,8 @@ static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
 static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
                            FAR const uint8_t *buf)
 {
-  FAR uint32_t *src = (uint32_t*)buf;
-  FAR uint32_t *dst = (uint32_t*)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE);
+  FAR uint32_t *src = (uint32_t *)buf;
+  FAR uint32_t *dst = (uint32_t *)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE);
   int i;
 
   DEBUGASSERT(nblocks <= TIVA_VIRTUAL_NPAGES);
@@ -236,7 +236,7 @@ static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 {
   DEBUGASSERT(offset + nbytes < TIVA_VIRTUAL_NPAGES * TIVA_FLASH_PAGESIZE);
 
-  memcpy(buf, (void*)(TIVA_VIRTUAL_BASE + offset), nbytes);
+  memcpy(buf, (void *)(TIVA_VIRTUAL_BASE + offset), nbytes);
 
   return nbytes;
 }
@@ -301,7 +301,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * this case altogether and simply return -ENOTTY.
                */
 
-              *ppv = (void*)TIVA_VIRTUAL_BASE;
+              *ppv = (void *)TIVA_VIRTUAL_BASE;
               ret  = OK;
             }
         }

@@ -293,7 +293,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
       index = (brkaddr & 0x000ff000) >> 12;
 
-       /* Map the .text region virtual address to this physical address */
+      /* Map the .text region virtual address to this physical address */
 
       DEBUGASSERT(l2table[index] == 0);
       l2table[index] = paddr | MMU_L2_UDATAFLAGS;

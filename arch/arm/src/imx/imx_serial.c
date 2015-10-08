@@ -456,7 +456,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t regval;
   uint32_t ucr2;
   uint32_t div;
@@ -524,7 +524,7 @@ static int up_setup(struct uart_dev_s *dev)
       /* Set CTS trigger level */
 
       regval |= 30 << UART_UCR4_CTSTL_SHIFT;
-   }
+    }
 #endif
 
   /* i.MX reference clock (PERCLK1) is configured for 16MHz */
@@ -546,15 +546,15 @@ static int up_setup(struct uart_dev_s *dev)
    * First, select a closest value we can for the divider
    */
 
-   div = (IMX_PERCLK1_FREQ >> 4) / priv->baud;
-   if (div > 7)
-     {
-       div = 7;
-     }
-   else if (div < 1)
-     {
-       div = 1;
-     }
+  div = (IMX_PERCLK1_FREQ >> 4) / priv->baud;
+  if (div > 7)
+    {
+      div = 7;
+    }
+  else if (div < 1)
+    {
+      div = 1;
+    }
 
   /* Now find the numerator and denominator.  These must have
    * the ratio baud/(PERCLK / div / 16), but the values cannot
@@ -663,7 +663,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Disable the UART */
 
@@ -690,7 +690,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
 static int up_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -718,11 +718,11 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the UART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the UART
+       */
 
-       up_enable_irq(priv->irq);
+      up_enable_irq(priv->irq);
     }
 #endif
   return ret;
@@ -740,7 +740,7 @@ static int up_attach(struct uart_dev_s *dev)
 
 static void up_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
 #if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
   up_disable_irq(priv->rxirq);
@@ -828,13 +828,13 @@ static int up_interrupt(int irq, void *context)
   int    passes = 0;
 
   dev  = up_mapirq(irq);
-  priv = (struct up_dev_s*)dev->priv;
+  priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the current UART status and check for loop
        * termination conditions
@@ -892,7 +892,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct up_dev_s *user = (struct up_dev_s*)arg;
+         struct up_dev_s *user = (struct up_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -927,7 +927,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rxd0;
 
   rxd0    = up_serialin(priv, UART_RXD0);
@@ -945,7 +945,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Enable interrupts for data availab at Rx FIFO */
 
@@ -972,7 +972,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Return true is data is ready in the Rx FIFO */
 
@@ -989,7 +989,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_serialout(priv, UART_TXD0, (uint32_t)ch);
 }
 
@@ -1003,7 +1003,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* We won't take an interrupt until the FIFO is completely empty (although
    * there may still be a transmission in progress).
@@ -1032,7 +1032,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* When TXFULL is set, there is no space in the Tx FIFO  */
 
@@ -1049,7 +1049,7 @@ static bool up_txready(struct uart_dev_s *dev)
 
 static bool up_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* When TXDC is set, the FIFO is empty and the transmission is complete */
 
@@ -1072,50 +1072,50 @@ static bool up_txempty(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-   /* Configure and disable the UART1 */
+  /* Configure and disable the UART1 */
 
 #ifdef CONFIG_IMX_UART1
-   up_serialout(&g_uart1priv, UART_UCR1, 0);
-   up_serialout(&g_uart1priv, UART_UCR2, 0);
+  up_serialout(&g_uart1priv, UART_UCR1, 0);
+  up_serialout(&g_uart1priv, UART_UCR2, 0);
 
-   /* Configure UART1 pins: RXD, TXD, RTS, and CTS */
+  /* Configure UART1 pins: RXD, TXD, RTS, and CTS */
 
-   imxgpio_configpfoutput(GPIOC, 9);  /* Port C, pin  9: CTS */
-   imxgpio_configpfinput(GPIOC, 10);  /* Port C, pin 10: RTS */
-   imxgpio_configpfoutput(GPIOC, 11); /* Port C, pin 11: TXD */
-   imxgpio_configpfinput(GPIOC, 12);  /* Port C, pin 12: RXD */
+  imxgpio_configpfoutput(GPIOC, 9);  /* Port C, pin  9: CTS */
+  imxgpio_configpfinput(GPIOC, 10);  /* Port C, pin 10: RTS */
+  imxgpio_configpfoutput(GPIOC, 11); /* Port C, pin 11: TXD */
+  imxgpio_configpfinput(GPIOC, 12);  /* Port C, pin 12: RXD */
 #endif
 
-   /* Configure and disable the UART2 */
+  /* Configure and disable the UART2 */
 
 #ifdef CONFIG_IMX_UART2
-   up_serialout(&g_uart2priv, UART_UCR1, 0);
-   up_serialout(&g_uart2priv, UART_UCR2, 0);
+  up_serialout(&g_uart2priv, UART_UCR1, 0);
+  up_serialout(&g_uart2priv, UART_UCR2, 0);
 
-   /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
-    * supports DTR, DCD, RI, and DSR -- not configured)
-    */
+  /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
+   * supports DTR, DCD, RI, and DSR -- not configured)
+   */
 
-   imxgpio_configpfoutput(GPIOB, 28); /* Port B, pin 28: CTS */
-   imxgpio_configpfinput(GPIOB, 29);  /* Port B, pin 29: RTS */
-   imxgpio_configpfoutput(GPIOB, 30); /* Port B, pin 30: TXD */
-   imxgpio_configpfinput(GPIOB, 31);  /* Port B, pin 31: RXD */
+  imxgpio_configpfoutput(GPIOB, 28); /* Port B, pin 28: CTS */
+  imxgpio_configpfinput(GPIOB, 29);  /* Port B, pin 29: RTS */
+  imxgpio_configpfoutput(GPIOB, 30); /* Port B, pin 30: TXD */
+  imxgpio_configpfinput(GPIOB, 31);  /* Port B, pin 31: RXD */
 #endif
 
-   /* Configure and disable the UART3 */
+  /* Configure and disable the UART3 */
 
 #ifdef CONFIG_IMX_UART3
-   up_serialout(&g_uart3priv, UART_UCR1, 0);
-   up_serialout(&g_uart3priv, UART_UCR2, 0);
+  up_serialout(&g_uart3priv, UART_UCR1, 0);
+  up_serialout(&g_uart3priv, UART_UCR2, 0);
 
-   /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
-    * supports DTR, DCD, RI, and DSR -- not configured)
-    */
+  /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
+   * supports DTR, DCD, RI, and DSR -- not configured)
+   */
 
-   imxgpio_configpfoutput(GPIOC, 28); /* Port C, pin 18: CTS */
-   imxgpio_configpfinput(GPIOC, 29);  /* Port C, pin 29: RTS */
-   imxgpio_configpfoutput(GPIOC, 30); /* Port C, pin 30: TXD */
-   imxgpio_configpfinput(GPIOC, 31);  /* Port C, pin 31: RXD */
+  imxgpio_configpfoutput(GPIOC, 28); /* Port C, pin 18: CTS */
+  imxgpio_configpfinput(GPIOC, 29);  /* Port C, pin 29: RTS */
+  imxgpio_configpfoutput(GPIOC, 30); /* Port C, pin 30: TXD */
+  imxgpio_configpfinput(GPIOC, 31);  /* Port C, pin 31: RXD */
 #endif
 
   /* Then enable the console UART.  The others will be initialized
@@ -1165,7 +1165,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t ier;
 
   up_disableuartint(priv, &ier);
@@ -1211,12 +1211,11 @@ static inline void up_waittxready(void)
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
+      /* Loop until TXFULL is zero -- meaning that there is space available
+       * in the TX FIFO.
+       */
 
-     /* Loop until TXFULL is zero -- meaning that there is space available
-      * in the TX FIFO.
-      */
-
-     if ((getreg32(IMX_REGISTER_BASE + UART_UTS) & UART_UTS_TXFULL) == 0)
+      if ((getreg32(IMX_REGISTER_BASE + UART_UTS) & UART_UTS_TXFULL) == 0)
         {
           break;
         }

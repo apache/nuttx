@@ -461,7 +461,7 @@ static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
   modifyreg32(base + TIVA_GPIO_SLR_OFFSET,  slrclr,  slrset);
 
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-/* TODO: Add TM4C129 registers (TIVA_GPIO_DR12R) */
+  /* TODO: Add TM4C129 registers (TIVA_GPIO_DR12R) */
 #  if 0
   /* Set the 12-mA drive select register.  This register only appears in
    * TM4E111 and later device classes, but is a harmless write on older
@@ -506,7 +506,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
 
   /* Set the pin type. */
 
-  switch(padtype)
+  switch (padtype)
     {
       case GPIO_PADTYPE_STD:
         {

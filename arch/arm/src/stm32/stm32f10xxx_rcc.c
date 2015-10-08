@@ -71,7 +71,7 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
   putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
-  putreg32(RCC_AHBENR_FLITFEN|RCC_AHBENR_SRAMEN, STM32_RCC_AHBENR); /* FLITF and SRAM Clock ON */
+  putreg32(RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN, STM32_RCC_AHBENR); /* FLITF and SRAM Clock ON */
   putreg32(0, STM32_RCC_APB2ENR);           /* Disable APB2 Peripheral Clock */
   putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
 
@@ -80,12 +80,12 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CFGR);       /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
-  regval &= ~(RCC_CFGR_SW_MASK|RCC_CFGR_HPRE_MASK|RCC_CFGR_PPRE1_MASK|
-              RCC_CFGR_PPRE2_MASK|RCC_CFGR_ADCPRE_MASK|RCC_CFGR_MCO_MASK);
+  regval &= ~(RCC_CFGR_SW_MASK | RCC_CFGR_HPRE_MASK | RCC_CFGR_PPRE1_MASK |
+              RCC_CFGR_PPRE2_MASK | RCC_CFGR_ADCPRE_MASK | RCC_CFGR_MCO_MASK);
   putreg32(regval, STM32_RCC_CFGR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEON, CSSON and PLLON bits */
-  regval &= ~(RCC_CR_HSEON|RCC_CR_CSSON|RCC_CR_PLLON);
+  regval &= ~(RCC_CR_HSEON | RCC_CR_CSSON | RCC_CR_PLLON);
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEBYP bit */
@@ -93,9 +93,9 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CFGR);       /* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE bits */
-  regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK
+  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMUL_MASK
 #ifndef CONFIG_STM32_VALUELINE
-              |RCC_CFGR_USBPRE
+              | RCC_CFGR_USBPRE
 #endif
               );
   putreg32(regval, STM32_RCC_CFGR);
@@ -129,7 +129,7 @@ static inline void rcc_enableahb(void)
 
   /* Always enable FLITF clock and SRAM clock */
 
-  regval = RCC_AHBENR_FLITFEN|RCC_AHBENR_SRAMEN;
+  regval = RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN;
 
 #ifdef CONFIG_STM32_DMA1
   /* DMA 1 clock enable */
@@ -403,25 +403,25 @@ static inline void rcc_enableapb2(void)
   regval = getreg32(STM32_RCC_APB2ENR);
   regval |= (RCC_APB2ENR_AFIOEN
 #if STM32_NGPIO > 0
-             |RCC_APB2ENR_IOPAEN
+             | RCC_APB2ENR_IOPAEN
 #endif
 #if STM32_NGPIO > 16
-             |RCC_APB2ENR_IOPBEN
+             | RCC_APB2ENR_IOPBEN
 #endif
 #if STM32_NGPIO > 32
-             |RCC_APB2ENR_IOPCEN
+             | RCC_APB2ENR_IOPCEN
 #endif
 #if STM32_NGPIO > 48
-             |RCC_APB2ENR_IOPDEN
+             | RCC_APB2ENR_IOPDEN
 #endif
 #if STM32_NGPIO > 64
-             |RCC_APB2ENR_IOPEEN
+             | RCC_APB2ENR_IOPEEN
 #endif
 #if STM32_NGPIO > 80
-             |RCC_APB2ENR_IOPFEN
+             | RCC_APB2ENR_IOPFEN
 #endif
 #if STM32_NGPIO > 96
-             |RCC_APB2ENR_IOPGEN
+             | RCC_APB2ENR_IOPGEN
 #endif
              );
 
@@ -531,7 +531,7 @@ static void stm32_stdclockconfig(void)
 
   regval  = getreg32(STM32_FLASH_ACR);
   regval &= ~FLASH_ACR_LATENCY_MASK;
-  regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
+  regval |= (FLASH_ACR_LATENCY_2 | FLASH_ACR_PRTFBE);
   putreg32(regval, STM32_FLASH_ACR);
 
   /* Set up PLL input scaling (with source = PLL2) */
@@ -675,92 +675,92 @@ static void stm32_stdclockconfig(void)
 #  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
 # endif
 
-    /* Set the HSE prescaler */
+  /* Set the HSE prescaler */
 
-    regval = STM32_CFGR2_PREDIV1;
-    putreg32(regval, STM32_RCC_CFGR2);
+  regval = STM32_CFGR2_PREDIV1;
+  putreg32(regval, STM32_RCC_CFGR2);
 
 # endif
 #endif
 
-    /* Value-line devices don't implement flash prefetch/waitstates */
+  /* Value-line devices don't implement flash prefetch/waitstates */
 
 #ifndef CONFIG_STM32_VALUELINE
 
-    /* Enable FLASH prefetch buffer and 2 wait states */
+  /* Enable FLASH prefetch buffer and 2 wait states */
 
-    regval  = getreg32(STM32_FLASH_ACR);
-    regval &= ~FLASH_ACR_LATENCY_MASK;
-    regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
-    putreg32(regval, STM32_FLASH_ACR);
+  regval  = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval |= (FLASH_ACR_LATENCY_2 | FLASH_ACR_PRTFBE);
+  putreg32(regval, STM32_FLASH_ACR);
 
 #endif
 
-    /* Set the HCLK source/divider */
+  /* Set the HCLK source/divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_HPRE_MASK;
-    regval |= STM32_RCC_CFGR_HPRE;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_HPRE_MASK;
+  regval |= STM32_RCC_CFGR_HPRE;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Set the PCLK2 divider */
+  /* Set the PCLK2 divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_PPRE2_MASK;
-    regval |= STM32_RCC_CFGR_PPRE2;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_PPRE2_MASK;
+  regval |= STM32_RCC_CFGR_PPRE2;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Set the PCLK1 divider */
+  /* Set the PCLK1 divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_PPRE1_MASK;
-    regval |= STM32_RCC_CFGR_PPRE1;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_PPRE1_MASK;
+  regval |= STM32_RCC_CFGR_PPRE1;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* If we are using the PLL, configure and start it */
+  /* If we are using the PLL, configure and start it */
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
-    /* Set the PLL divider and multiplier */
+  /* Set the PLL divider and multiplier */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK);
-    regval |= (STM32_CFGR_PLLSRC|STM32_CFGR_PLLXTPRE|STM32_CFGR_PLLMUL);
-    putreg32(regval, STM32_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMUL_MASK);
+  regval |= (STM32_CFGR_PLLSRC | STM32_CFGR_PLLXTPRE | STM32_CFGR_PLLMUL);
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Enable the PLL */
+  /* Enable the PLL */
 
-    regval = getreg32(STM32_RCC_CR);
-    regval |= RCC_CR_PLLON;
-    putreg32(regval, STM32_RCC_CR);
+  regval = getreg32(STM32_RCC_CR);
+  regval |= RCC_CR_PLLON;
+  putreg32(regval, STM32_RCC_CR);
 
-    /* Wait until the PLL is ready */
+  /* Wait until the PLL is ready */
 
-    while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
 
 #endif
 
-    /* Select the system clock source (probably the PLL) */
+  /* Select the system clock source (probably the PLL) */
 
-    regval  = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_SW_MASK;
-    regval |= STM32_SYSCLK_SW;
-    putreg32(regval, STM32_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_SW_MASK;
+  regval |= STM32_SYSCLK_SW;
+  putreg32(regval, STM32_RCC_CFGR);
 
-    /* Wait until the selected source is used as the system clock source */
+  /* Wait until the selected source is used as the system clock source */
 
-    while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
 
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
-    /* Low speed internal clock source LSI */
+  /* Low speed internal clock source LSI */
 
-    stm32_rcc_enablelsi();
+  stm32_rcc_enablelsi();
 #endif
 
 #if defined(CONFIG_RTC_LSECLOCK)
-    /* Low speed external clock source LSE */
+  /* Low speed external clock source LSE */
 
-    stm32_rcc_enablelse();
+  stm32_rcc_enablelse();
 #endif
 }
 #endif

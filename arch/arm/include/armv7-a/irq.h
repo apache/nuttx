@@ -387,7 +387,7 @@ static inline void irqrestore(irqstate_t flags)
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

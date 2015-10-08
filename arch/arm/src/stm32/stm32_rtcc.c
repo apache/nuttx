@@ -53,6 +53,7 @@
 
 #include "stm32_rcc.h"
 #include "stm32_pwr.h"
+#include "stm32_exti.h"
 #include "stm32_rtc.h"
 
 #ifdef CONFIG_RTC
@@ -556,7 +557,7 @@ static void rtc_resume(void)
   /* Clear the RTC alarm flags */
 
   regval  = getreg32(STM32_RTC_ISR);
-  regval &= ~(RTC_ISR_ALRAF|RTC_ISR_ALRBF);
+  regval &= ~(RTC_ISR_ALRAF | RTC_ISR_ALRBF);
   putreg32(regval, STM32_RTC_ISR);
 
   /* Clear the EXTI Line 17 Pending bit (Connected internally to RTC Alarm) */
@@ -687,27 +688,27 @@ int up_rtcinitialize(void)
           modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
 
 #if defined(CONFIG_RTC_HSECLOCK)
-            /* Change to the new clock as the input to the RTC block */
+          /* Change to the new clock as the input to the RTC block */
 
-            modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
 
 #elif defined(CONFIG_RTC_LSICLOCK)
-            modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
 
 #elif defined(CONFIG_RTC_LSECLOCK)
-            modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
 #endif
 
-            putreg32(tr_bkp,STM32_RTC_TR);
-            putreg32(dr_bkp,STM32_RTC_DR);
+          putreg32(tr_bkp, STM32_RTC_TR);
+          putreg32(dr_bkp, STM32_RTC_DR);
 
-            /* Remember that the RTC is initialized */
+          /* Remember that the RTC is initialized */
 
-            putreg32(RTC_MAGIC, RTC_MAGIC_REG);
+          putreg32(RTC_MAGIC, RTC_MAGIC_REG);
 
-            /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
+          /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
 
-            modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
+          modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
         }
     }
 
@@ -873,13 +874,13 @@ int up_rtc_getdatetime(FAR struct tm *tp)
    * register.
    */
 
-  tmp = (tr & (RTC_TR_SU_MASK|RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
+  tmp = (tr & (RTC_TR_SU_MASK | RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
   tp->tm_sec = rtc_bcd2bin(tmp);
 
-  tmp = (tr & (RTC_TR_MNU_MASK|RTC_TR_MNT_MASK)) >> RTC_TR_MNU_SHIFT;
+  tmp = (tr & (RTC_TR_MNU_MASK | RTC_TR_MNT_MASK)) >> RTC_TR_MNU_SHIFT;
   tp->tm_min = rtc_bcd2bin(tmp);
 
-  tmp = (tr & (RTC_TR_HU_MASK|RTC_TR_HT_MASK)) >> RTC_TR_HU_SHIFT;
+  tmp = (tr & (RTC_TR_HU_MASK | RTC_TR_HT_MASK)) >> RTC_TR_HU_SHIFT;
   tp->tm_hour = rtc_bcd2bin(tmp);
 
   /* Now convert the RTC date to fields in struct tm format:
@@ -892,13 +893,13 @@ int up_rtc_getdatetime(FAR struct tm *tp)
    * years 2000-2099?  I'll assume so.
    */
 
-  tmp = (dr & (RTC_DR_DU_MASK|RTC_DR_DT_MASK)) >> RTC_DR_DU_SHIFT;
+  tmp = (dr & (RTC_DR_DU_MASK | RTC_DR_DT_MASK)) >> RTC_DR_DU_SHIFT;
   tp->tm_mday = rtc_bcd2bin(tmp);
 
-  tmp = (dr & (RTC_DR_MU_MASK|RTC_DR_MT)) >> RTC_DR_MU_SHIFT;
+  tmp = (dr & (RTC_DR_MU_MASK | RTC_DR_MT)) >> RTC_DR_MU_SHIFT;
   tp->tm_mon = rtc_bcd2bin(tmp) - 1;
 
-  tmp = (dr & (RTC_DR_YU_MASK|RTC_DR_YT_MASK)) >> RTC_DR_YU_SHIFT;
+  tmp = (dr & (RTC_DR_YU_MASK | RTC_DR_YT_MASK)) >> RTC_DR_YU_SHIFT;
   tp->tm_year = rtc_bcd2bin(tmp) + 100;
 
 #if defined(CONFIG_TIME_EXTENDED)

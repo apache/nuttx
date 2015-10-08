@@ -334,7 +334,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PSIZE_MASK, FLASH_CR_PSIZE_X16);
 #endif
 
-  for (addr += STM32_FLASH_BASE; count; count-=2, hword++, addr+=2)
+  for (addr += STM32_FLASH_BASE; count; count -= 2, hword++, addr += 2)
     {
       /* Write half-word and wait to complete */
 

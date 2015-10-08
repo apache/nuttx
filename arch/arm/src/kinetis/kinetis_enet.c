@@ -195,7 +195,7 @@ struct kinetis_driver_s
    * requirements.
    */
 
- uint8_t desc[NENET_NBUFFERS * sizeof(struct enet_desc_s) + 16];
+  uint8_t desc[NENET_NBUFFERS * sizeof(struct enet_desc_s) + 16];
 
   /* The DMA buffers.  Again, A unaligned uint8_t is used to allocate the
    * memory; 16 is added to assure that we can meet the descriptor alignment
@@ -394,7 +394,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   txdesc->length  = kinesis_swap16(priv->dev.d_len);
 #ifdef CONFIG_ENET_ENHANCEDBD
   txdesc->bdu     = 0x00000000;
-  txdesc->status2 = TXDESC_INT | TXDESC_TS; // | TXDESC_IINS | TXDESC_PINS;
+  txdesc->status2 = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
   txdesc->status1 = (TXDESC_R | TXDESC_L | TXDESC_TC | TXDESC_W);
 
@@ -480,7 +480,7 @@ static int kinetis_txpoll(struct net_driver_s *dev)
 
       if (kinetics_txringfull(priv))
         {
-           return -EBUSY;
+          return -EBUSY;
         }
     }
 
@@ -523,7 +523,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
        */
 
       priv->dev.d_len = kinesis_swap16(priv->rxdesc[priv->rxtail].length);
-      priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
+      priv->dev.d_buf = (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
 
       /* Doing this here could cause corruption! */
 
@@ -603,7 +603,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -680,7 +680,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
           priv->txtail = 0;
         }
 
-        /* Update statistics */
+      /* Update statistics */
 
       EMAC_STAT(priv, tx_done);
     }
@@ -883,7 +883,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize ENET buffers */
 
@@ -1060,13 +1060,13 @@ static int kinetis_txavail(struct net_driver_s *dev)
        * packet.
        */
 
-       if (!kinetics_txringfull(priv))
-         {
-           /* No, there is space for another transfer.  Poll uIP for new
-            * XMIT data.
-            */
+      if (!kinetics_txringfull(priv))
+        {
+          /* No, there is space for another transfer.  Poll uIP for new
+           * XMIT data.
+           */
 
-           (void)devif_poll(&priv->dev, kinetis_txpoll);
+          (void)devif_poll(&priv->dev, kinetis_txpoll);
         }
     }
 
@@ -1417,7 +1417,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
     {
       priv->txdesc[i].status1 = 0;
       priv->txdesc[i].length  = 0;
-      priv->txdesc[i].data    = (uint8_t*)kinesis_swap32((uint32_t)addr);
+      priv->txdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
 #ifdef CONFIG_ENET_ENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
@@ -1430,7 +1430,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
     {
       priv->rxdesc[i].status1 = RXDESC_E;
       priv->rxdesc[i].length  = 0;
-      priv->rxdesc[i].data    = (uint8_t*)kinesis_swap32((uint32_t)addr);
+      priv->rxdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
 #ifdef CONFIG_ENET_ENHANCEDBD
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
@@ -1619,7 +1619,7 @@ int kinetis_netinitialize(int intf)
   priv->dev.d_addmac  = kinetis_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = kinetis_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = (void*)g_enet;    /* Used to recover private state from dev */
+  priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 

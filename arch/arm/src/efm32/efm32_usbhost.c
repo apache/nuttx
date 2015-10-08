@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_usbhost.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -69,12 +69,11 @@
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_EFM32_OTGFS)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 /* Configuration ***************************************************************/
-/*
- * EFM32 USB OTG FS Host Driver Support
+/* EFM32 USB OTG FS Host Driver Support
  *
  * Pre-requisites
  *
@@ -164,9 +163,9 @@
 
 #define TRENTRY(id,fmt1,string) {string}
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 
 /* The following enumeration represents the various states of the USB host
  * state machine (for debug purposes only)
@@ -291,9 +290,9 @@ struct efm32_usbhost_trace_s
 };
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -482,9 +481,9 @@ static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv);
 static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv);
 static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 
 /* In this driver implementation, support is provided for only a single a single
  * USB device.  All status information can be simply retained in a single global
@@ -564,21 +563,21 @@ static const struct efm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 };
 #endif /* HAVE_USBHOST_TRACE */
 
-/*******************************************************************************
+/****************************************************************************
  * Public Data
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_printreg
  *
  * Description:
  *   Print the contents of an EFM32xx register operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -587,13 +586,13 @@ static void efm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_checkreg
  *
  * Description:
  *   Get the contents of an EFM32 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -651,13 +650,13 @@ static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_getreg
  *
  * Description:
  *   Get the contents of an EFM32 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static uint32_t efm32_getreg(uint32_t addr)
@@ -673,13 +672,13 @@ static uint32_t efm32_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_putreg
  *
  * Description:
  *   Set the contents of an EFM32 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_putreg(uint32_t addr, uint32_t val)
@@ -694,13 +693,13 @@ static void efm32_putreg(uint32_t addr, uint32_t val)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_modifyreg
  *
  * Description:
  *   Modify selected bits of an EFM32 register.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_modifyreg(uint32_t addr, uint32_t clrbits, uint32_t setbits)
 {
@@ -714,7 +713,7 @@ static inline void efm32_modifyreg(uint32_t addr, uint32_t clrbits, uint32_t set
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_takesem(sem_t *sem)
 {
@@ -736,20 +735,20 @@ static void efm32_takesem(sem_t *sem)
  * Description:
  *   Get a (possibly unaligned) 16-bit little endian value.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t efm32_getle16(const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_alloc
  *
  * Description:
  *   Allocate a channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_chan_alloc(FAR struct efm32_usbhost_s *priv)
 {
@@ -775,13 +774,13 @@ static int efm32_chan_alloc(FAR struct efm32_usbhost_s *priv)
   return -EBUSY;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_free
  *
  * Description:
  *   Free a previoiusly allocated channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_chan_free(FAR struct efm32_usbhost_s *priv, int chidx)
 {
@@ -796,27 +795,27 @@ static void efm32_chan_free(FAR struct efm32_usbhost_s *priv, int chidx)
   priv->chan[chidx].inuse = false;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_freeall
  *
  * Description:
  *   Free all channels.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_chan_freeall(FAR struct efm32_usbhost_s *priv)
 {
-   uint8_t chidx;
+  uint8_t chidx;
 
-   /* Free all host channels */
+  /* Free all host channels */
 
-   for (chidx = 2; chidx < EFM32_NHOST_CHANNELS; chidx ++)
-     {
-       efm32_chan_free(priv, chidx);
-     }
+  for (chidx = 2; chidx < EFM32_NHOST_CHANNELS; chidx ++)
+    {
+      efm32_chan_free(priv, chidx);
+    }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_configure
  *
  * Description:
@@ -824,7 +823,7 @@ static inline void efm32_chan_freeall(FAR struct efm32_usbhost_s *priv)
  *   when endpoint is allocated and EP0 (only) is re-configured with the
  *   max packet size or device address changes.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 {
@@ -977,14 +976,14 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
   efm32_putreg(EFM32_USB_HCn_CHAR(chidx), regval);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_halt
  *
  * Description:
  *   Halt the channel associated with 'chidx' by setting the CHannel DISable
  *   (CHDIS) bit in in the HCCHAR register.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
                             enum efm32_chreason_e chreason)
@@ -1062,7 +1061,7 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
   efm32_putreg(EFM32_USB_HCn_CHAR(chidx), hcchar);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_waitsetup
  *
  * Description:
@@ -1074,7 +1073,7 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
  * Assumptions:
  *   Called from a normal thread context BEFORE the transfer has been started.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_chan_waitsetup(FAR struct efm32_usbhost_s *priv,
                                 FAR struct efm32_chan_s *chan)
@@ -1102,7 +1101,7 @@ static int efm32_chan_waitsetup(FAR struct efm32_usbhost_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_asynchsetup
  *
  * Description:
@@ -1114,7 +1113,7 @@ static int efm32_chan_waitsetup(FAR struct efm32_usbhost_s *priv,
  * Assumptions:
  *   Might be called from the level of an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int efm32_chan_asynchsetup(FAR struct efm32_usbhost_s *priv,
@@ -1143,7 +1142,7 @@ static int efm32_chan_asynchsetup(FAR struct efm32_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_wait
  *
  * Description:
@@ -1152,7 +1151,7 @@ static int efm32_chan_asynchsetup(FAR struct efm32_usbhost_s *priv,
  * Assumptions:
  *   Called from a normal thread context
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_chan_wait(FAR struct efm32_usbhost_s *priv,
                            FAR struct efm32_chan_s *chan)
@@ -1198,7 +1197,7 @@ static int efm32_chan_wait(FAR struct efm32_usbhost_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_chan_wakeup
  *
  * Description:
@@ -1209,7 +1208,7 @@ static int efm32_chan_wait(FAR struct efm32_usbhost_s *priv,
  *   This function is called from the transfer complete interrupt handler for
  *   the channel.  Interrupts are disabled.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_chan_wakeup(FAR struct efm32_usbhost_s *priv,
                               FAR struct efm32_chan_s *chan)
@@ -1259,13 +1258,13 @@ static void efm32_chan_wakeup(FAR struct efm32_usbhost_s *priv,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ctrlchan_alloc
  *
  * Description:
  *   Allocate and configured channels for a control pipe.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ctrlchan_alloc(FAR struct efm32_usbhost_s *priv,
                                 uint8_t epno, uint8_t funcaddr, uint8_t speed,
@@ -1322,7 +1321,7 @@ static int efm32_ctrlchan_alloc(FAR struct efm32_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ctrlep_alloc
  *
  * Description:
@@ -1341,7 +1340,7 @@ static int efm32_ctrlchan_alloc(FAR struct efm32_usbhost_s *priv,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ctrlep_alloc(FAR struct efm32_usbhost_s *priv,
                               FAR const struct usbhost_epdesc_s *epdesc,
@@ -1455,13 +1454,13 @@ static int efm32_xfrep_alloc(FAR struct efm32_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_transfer_start
  *
  * Description:
  *   Start at transfer on the select IN or OUT channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
 {
@@ -1645,7 +1644,7 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_getframe
  *
  * Description:
@@ -1653,7 +1652,7 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
  *   when a new SOF is transmitted on the USB, and is cleared to 0 when it
  *   reaches 0x3fff.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static inline uint16_t efm32_getframe(void)
@@ -1662,13 +1661,13 @@ static inline uint16_t efm32_getframe(void)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ctrl_sendsetup
  *
  * Description:
  *   Send an IN/OUT SETUP packet.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
                                 FAR struct efm32_ctrlinfo_s *ep0,
@@ -1729,7 +1728,7 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
           return ret;
         }
 
-     /* Get the elapsed time (in frames) */
+      /* Get the elapsed time (in frames) */
 
      elapsed = clock_systimer() - start;
     }
@@ -1738,14 +1737,14 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
   return -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ctrl_senddata
  *
  * Description:
  *   Send data in the data phase of an OUT control transfer.  Or send status
  *   in the status phase of an IN control transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ctrl_senddata(FAR struct efm32_usbhost_s *priv,
                                FAR struct efm32_ctrlinfo_s *ep0,
@@ -1791,14 +1790,14 @@ static int efm32_ctrl_senddata(FAR struct efm32_usbhost_s *priv,
   return efm32_chan_wait(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ctrl_recvdata
  *
  * Description:
  *   Receive data in the data phase of an IN control transfer.  Or receive status
  *   in the status phase of an OUT control transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ctrl_recvdata(FAR struct efm32_usbhost_s *priv,
                                FAR struct efm32_ctrlinfo_s *ep0,
@@ -1832,13 +1831,13 @@ static int efm32_ctrl_recvdata(FAR struct efm32_usbhost_s *priv,
   return efm32_chan_wait(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_in_setup
  *
  * Description:
  *   Initiate an IN transfer on an bulk, interrupt, or isochronous pipe.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx)
 {
@@ -1893,13 +1892,13 @@ static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_in_transfer
  *
  * Description:
  *   Transfer 'buflen' bytes into 'buffer' from an IN channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
                                  FAR uint8_t *buffer, size_t buflen)
@@ -1950,7 +1949,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -1975,7 +1974,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
   return (ssize_t)chan->xfrd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_in_next
  *
  * Description:
@@ -1984,7 +1983,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
  * Assumptions:
  *   This function is always called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
@@ -2040,7 +2039,7 @@ static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_in_asynch
  *
  * Description:
@@ -2049,7 +2048,7 @@ static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
  * Assumptions:
  *   This function is never called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
@@ -2087,13 +2086,13 @@ static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_out_setup
  *
  * Description:
  *   Initiate an OUT transfer on an bulk, interrupt, or isochronous pipe.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
 {
@@ -2152,13 +2151,13 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_out_transfer
  *
  * Description:
  *   Transfer the 'buflen' bytes in 'buffer' through an OUT channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
                                   FAR uint8_t *buffer, size_t buflen)
@@ -2195,7 +2194,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
       ret = efm32_chan_waitsetup(priv, chan);
       if (ret < 0)
         {
-          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN,0);
+          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
           return (ssize_t)ret;
         }
 
@@ -2208,7 +2207,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
           return (ssize_t)ret;
         }
 
-     /* Wait for the transfer to complete and get the result */
+      /* Wait for the transfer to complete and get the result */
 
       ret = efm32_chan_wait(priv, chan);
 
@@ -2216,7 +2215,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2261,7 +2260,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
   return xfrd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_out_next
  *
  * Description:
@@ -2270,7 +2269,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
  * Assumptions:
  *   This function is always called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
@@ -2282,7 +2281,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK?*/
+  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2326,7 +2325,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_out_asynch
  *
  * Description:
@@ -2335,7 +2334,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
  * Assumptions:
  *   This function is never called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
@@ -2373,14 +2372,14 @@ static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_wrpacket
  *
  * Description:
  *   Transfer the 'buflen' bytes in 'buffer' to the Tx FIFO associated with
  *   'chidx' (non-DMA).
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_gint_wrpacket(FAR struct efm32_usbhost_s *priv,
                                 FAR uint8_t *buffer, int chidx, int buflen)
@@ -2413,7 +2412,7 @@ static void efm32_gint_wrpacket(FAR struct efm32_usbhost_s *priv,
   priv->chan[chidx].inflight += buflen;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_hcinisr
  *
  * Description:
@@ -2430,7 +2429,7 @@ static void efm32_gint_wrpacket(FAR struct efm32_usbhost_s *priv,
  *
  *   EBUSY in the result field indicates that the transfer has not completed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
                                       int chidx)
@@ -2674,7 +2673,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
   efm32_chan_wakeup(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_hcoutisr
  *
  * Description:
@@ -2691,7 +2690,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
  *
  *   EBUSY in the result field indicates that the transfer has not completed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
                                        int chidx)
@@ -2884,13 +2883,13 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
   efm32_chan_wakeup(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_connected
  *
  * Description:
  *   Handle a connection event.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_gint_connected(FAR struct efm32_usbhost_s *priv)
 {
@@ -2900,7 +2899,7 @@ static void efm32_gint_connected(FAR struct efm32_usbhost_s *priv)
     {
       /* Yes.. then now we are connected */
 
-      usbhost_vtrace1(USBHOST_VTRACE1_CONNECTED,0);
+      usbhost_vtrace1(USBHOST_VTRACE1_CONNECTED, 0);
       priv->connected = true;
       priv->change    = true;
       DEBUGASSERT(priv->smstate == SMSTATE_DETACHED);
@@ -2916,13 +2915,13 @@ static void efm32_gint_connected(FAR struct efm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_disconnected
  *
  * Description:
  *   Handle a disconnection event.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
 {
@@ -2932,15 +2931,15 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
     {
       /* Yes.. then we no longer connected */
 
-      usbhost_vtrace1(USBHOST_VTRACE1_DISCONNECTED,0);
+      usbhost_vtrace1(USBHOST_VTRACE1_DISCONNECTED, 0);
 
       /* Are we bound to a class driver? */
 
-      if ( priv->rhport.hport.devclass)
+      if (priv->rhport.hport.devclass)
         {
           /* Yes.. Disconnect the class driver */
 
-          CLASS_DISCONNECTED( priv->rhport.hport.devclass);
+          CLASS_DISCONNECTED(priv->rhport.hport.devclass);
            priv->rhport.hport.devclass = NULL;
         }
 
@@ -2953,9 +2952,9 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
 
       priv->rhport.hport.speed = USB_SPEED_FULL;
 
-    /* Notify any waiters that there is a change in the connection state */
+      /* Notify any waiters that there is a change in the connection state */
 
-     if (priv->pscwait)
+      if (priv->pscwait)
         {
           efm32_givesem(&priv->pscsem);
           priv->pscwait = false;
@@ -2963,13 +2962,13 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_sofisr
  *
  * Description:
  *   USB OTG FS start-of-frame interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_OTGFS_SOFINTR
 static inline void efm32_gint_sofisr(FAR struct efm32_usbhost_s *priv)
@@ -2983,13 +2982,13 @@ static inline void efm32_gint_sofisr(FAR struct efm32_usbhost_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_rxflvlisr
  *
  * Description:
  *   USB OTG FS RxFIFO non-empty interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3084,13 +3083,13 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
   efm32_putreg(EFM32_USB_GINTMSK, intmsk);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_nptxfeisr
  *
  * Description:
  *   USB OTG FS non-periodic TxFIFO empty interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3173,13 +3172,13 @@ static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_ptxfeisr
  *
  * Description:
  *   USB OTG FS periodic TxFIFO empty interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3261,13 +3260,13 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_hcisr
  *
  * Description:
  *   USB OTG FS host channels interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_hcisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3309,13 +3308,13 @@ static inline void efm32_gint_hcisr(FAR struct efm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_hprtisr
  *
  * Description:
  *   USB OTG FS host port interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3443,13 +3442,13 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
   efm32_putreg(EFM32_USB_HPRT, newhprt);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_discisr
  *
  * Description:
  *   USB OTG FS disconnect detected interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_discisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3462,13 +3461,13 @@ static inline void efm32_gint_discisr(FAR struct efm32_usbhost_s *priv)
   efm32_putreg(EFM32_USB_GINTSTS, USB_GINTSTS_DISCONNINT);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_ipxfrisr
  *
  * Description:
  *   USB OTG FS incomplete periodic interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
 {
@@ -3487,13 +3486,13 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
   efm32_putreg(EFM32_USB_GINTSTS, USB_GINTSTS_INCOMPLP);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_isr
  *
  * Description:
  *   USB OTG FS global interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_gint_isr(int irq, FAR void *context)
 {
@@ -3515,7 +3514,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
    * little interrupt handling overhead.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the unmasked bits in the GINT status */
 
@@ -3604,7 +3603,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_gint_enable and efm32_gint_disable
  *
  * Description:
@@ -3616,7 +3615,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_gint_enable(void)
 {
@@ -3640,7 +3639,7 @@ static void efm32_gint_disable(void)
   efm32_putreg(EFM32_USB_GAHBCFG, regval);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_hostinit_enable
  *
  * Description:
@@ -3652,7 +3651,7 @@ static void efm32_gint_disable(void)
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_hostinit_enable(void)
 {
@@ -3712,7 +3711,7 @@ static inline void efm32_hostinit_enable(void)
   efm32_putreg(EFM32_USB_GINTMSK, regval);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_txfe_enable
  *
  * Description:
@@ -3732,7 +3731,7 @@ static inline void efm32_hostinit_enable(void)
  *   Called from user task context.  Interrupts must be disabled to assure
  *   exclusive access to the GINTMSK register.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
 {
@@ -3769,11 +3768,11 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * USB Host Controller Operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_wait
  *
  * Description:
@@ -3796,7 +3795,7 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_wait(FAR struct usbhost_connection_s *conn,
                       FAR struct usbhost_hubport_s **hport)
@@ -3808,7 +3807,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
   /* Loop until a change in connection state is detected */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -3857,7 +3856,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_enumerate
  *
  * Description:
@@ -3883,7 +3882,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
                               FAR struct usbhost_connection_s *conn,
@@ -3902,7 +3901,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
     {
       /* No, return an error */
 
-      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN,0);
+      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
       return -ENODEV;
     }
 
@@ -4166,7 +4165,7 @@ static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_alloc
  *
  * Description:
@@ -4196,7 +4195,7 @@ static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_alloc(FAR struct usbhost_driver_s *drvr,
                        FAR uint8_t **buffer, FAR size_t *maxlen)
@@ -4220,7 +4219,7 @@ static int efm32_alloc(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_free
  *
  * Description:
@@ -4241,7 +4240,7 @@ static int efm32_alloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -4332,7 +4331,7 @@ static int efm32_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_ctrlin and efm32_ctrlout
  *
  * Description:
@@ -4365,7 +4364,7 @@ static int efm32_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
@@ -4401,7 +4400,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       ret = efm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
-       {
+        {
           usbhost_trace1(USBHOST_TRACE1_SENDSETUP, -ret);
           continue;
         }
@@ -4539,7 +4538,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_transfer
  *
  * Description:
@@ -4575,7 +4574,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                               FAR uint8_t *buffer, size_t buflen)
@@ -4607,7 +4606,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
   return nbytes;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_asynch
  *
  * Description:
@@ -4640,7 +4639,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int efm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -4813,7 +4812,7 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_disconnect
  *
  * Description:
@@ -4834,7 +4833,7 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
  *   - Only a single class bound to a single device is supported.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
@@ -4843,10 +4842,10 @@ static void efm32_disconnect(FAR struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Initialization
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: efm32_portreset
  *
  * Description:
@@ -4864,7 +4863,7 @@ static void efm32_disconnect(FAR struct usbhost_driver_s *drvr,
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_portreset(FAR struct efm32_usbhost_s *priv)
 {
@@ -4884,7 +4883,7 @@ static void efm32_portreset(FAR struct efm32_usbhost_s *priv)
   up_mdelay(20);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_flush_txfifos
  *
  * Description:
@@ -4896,7 +4895,7 @@ static void efm32_portreset(FAR struct efm32_usbhost_s *priv)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_flush_txfifos(uint32_t txfnum)
 {
@@ -4924,7 +4923,7 @@ static void efm32_flush_txfifos(uint32_t txfnum)
   up_udelay(3);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_flush_rxfifo
  *
  * Description:
@@ -4936,7 +4935,7 @@ static void efm32_flush_txfifos(uint32_t txfnum)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_flush_rxfifo(void)
 {
@@ -4963,7 +4962,7 @@ static void efm32_flush_rxfifo(void)
   up_udelay(3);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_vbusdrive
  *
  * Description:
@@ -4976,7 +4975,7 @@ static void efm32_flush_rxfifo(void)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_vbusdrive(FAR struct efm32_usbhost_s *priv, bool state)
 {
@@ -5007,7 +5006,7 @@ static void efm32_vbusdrive(FAR struct efm32_usbhost_s *priv, bool state)
   up_mdelay(200);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_host_initialize
  *
  * Description:
@@ -5022,7 +5021,7 @@ static void efm32_vbusdrive(FAR struct efm32_usbhost_s *priv, bool state)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv)
 {
@@ -5096,7 +5095,7 @@ static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv)
   efm32_hostinit_enable();
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_sw_initialize
  *
  * Description:
@@ -5108,7 +5107,7 @@ static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
 {
@@ -5177,7 +5176,7 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_hw_initialize
  *
  * Description:
@@ -5189,7 +5188,7 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv)
 {
@@ -5269,11 +5268,11 @@ static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: efm32_usbhost_initialize
  *
  * Description:
@@ -5296,7 +5295,7 @@ static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv)
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 FAR struct usbhost_connection_s *efm32_usbhost_initialize(int controller)
 {

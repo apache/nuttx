@@ -277,9 +277,9 @@ static void sam_copyvectorblock(void)
    *                      0xffff0000)
    */
 
-  src  = (uint32_t*)&_vector_start;
-  end  = (uint32_t*)&_vector_end;
-  dest = (uint32_t*)SAM_VECTOR_VSRAM;
+  src  = (uint32_t *)&_vector_start;
+  end  = (uint32_t *)&_vector_end;
+  dest = (uint32_t *)SAM_VECTOR_VSRAM;
 
   while (src < end)
     {

@@ -1541,10 +1541,10 @@ static int sam_xdmac_interrupt(int irq, void *context)
 
           if ((chpending & XDMAC_CHINT_ERRORS) != 0)
             {
-               /* Yes... Terminate the transfer with an error? */
+              /* Yes... Terminate the transfer with an error? */
 
-               dmalldbg("ERROR: DMA failed: %08x\n", chpending);
-               sam_dmaterminate(xdmach, -EIO);
+              dmalldbg("ERROR: DMA failed: %08x\n", chpending);
+              sam_dmaterminate(xdmach, -EIO);
             }
 
           /* Is the transfer complete? */

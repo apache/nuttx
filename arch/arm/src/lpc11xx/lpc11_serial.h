@@ -66,10 +66,10 @@
  */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_LPC11_UART0)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIAL_CONSOLE 1
 #else
 #  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef HAVE_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
 #endif
 
 /* We cannot allow the DLM/DLL divisor to become to small or will will lose too

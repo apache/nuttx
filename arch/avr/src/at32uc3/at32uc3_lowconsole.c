@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_lowconsole.c
  *
  *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "at32uc3_config.h"
@@ -53,9 +53,9 @@
 #include "at32uc3_usart.h"
 #include "at32uc3_pinmux.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Select USART parameters for the selected console */
 
@@ -81,33 +81,33 @@
 #  error "No CONFIG_USARTn_SERIAL_CONSOLE Setting"
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Types
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
- * Global Variables
- ******************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Private Variables
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_putreg
  *
  * Description:
  *   Write a value to a USART register
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
 static inline void usart_putreg(uintptr_t usart_base, unsigned int offset, uint32_t value)
@@ -116,13 +116,13 @@ static inline void usart_putreg(uintptr_t usart_base, unsigned int offset, uint3
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_getreg
  *
  * Description:
  *   Get a value from a USART register
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
 static inline uint32_t usart_getreg(uintptr_t usart_base, unsigned int offset)
@@ -131,13 +131,13 @@ static inline uint32_t usart_getreg(uintptr_t usart_base, unsigned int offset)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_setbaudrate
  *
  * Description:
  *   Configure the UART baud rate.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
 static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
@@ -152,7 +152,7 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
     {
       /* Select 16x oversampling mode and clear the SYNC mode bit */
 
-      mr &= ~(USART_MR_OVER|USART_MR_SYNC);
+      mr &= ~(USART_MR_OVER | USART_MR_SYNC);
 
       /* Calculate the clock divider assuming 16x oversampling */
 
@@ -186,17 +186,17 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_reset
  *
  * Description:
  *   Reset a USART.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
 void usart_reset(uintptr_t usart_base)
@@ -218,18 +218,19 @@ void usart_reset(uintptr_t usart_base)
   /* Disable RX and TX, put USART in reset, disable handshaking signals */
 
   usart_putreg(usart_base, AVR32_USART_CR_OFFSET,
-               USART_CR_RSTRX|USART_CR_RSTTX|USART_CR_RSTSTA|USART_CR_RSTIT|
-               USART_CR_RSTNACK|USART_CR_DTRDIS|USART_CR_RTSDIS);
+               USART_CR_RSTRX | USART_CR_RSTTX | USART_CR_RSTSTA |
+               USART_CR_RSTIT | USART_CR_RSTNACK | USART_CR_DTRDIS |
+               USART_CR_RTSDIS);
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_configure
  *
  * Description:
  *   Configure a USART as a RS-232 UART.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
 void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
@@ -243,7 +244,7 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 
   /* Configure STOP bits */
 
-  regval  = USART_MR_MODE_NORMAL|USART_MR_CHMODE_NORMAL;  /* Normal RS-232 mode */
+  regval  = USART_MR_MODE_NORMAL | USART_MR_CHMODE_NORMAL;  /* Normal RS-232 mode */
   regval |= stop2 ? USART_MR_NBSTOP_2 : USART_MR_NBSTOP_1;
 
   /* Configure parity */
@@ -285,12 +286,12 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
   /* Enable RX and TX */
 
   regval = usart_getreg(usart_base, AVR32_USART_CR_OFFSET);
-  regval |= (USART_CR_RXEN|USART_CR_TXEN);
+  regval |= (USART_CR_RXEN | USART_CR_TXEN);
   usart_putreg(usart_base, AVR32_USART_CR_OFFSET, regval);
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_consoleinit
  *
  * Description:
@@ -298,7 +299,7 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
  *   early in the initialization sequence to configure the serial console uart
  *   (only).
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void up_consoleinit(void)
 {
@@ -354,7 +355,7 @@ void up_consoleinit(void)
   /* Enable selected clocks (and disabled unselected clocks) */
 
   regval = getreg32(AVR32_PM_PBAMASK);
-  regval &= ~(PM_PBAMASK_USART0|PM_PBAMASK_USART1|PM_PBAMASK_USART2);
+  regval &= ~(PM_PBAMASK_USART0 | PM_PBAMASK_USART1 | PM_PBAMASK_USART2);
   regval |= pbamask;
   putreg32(regval, AVR32_PM_PBAMASK);
 
@@ -368,13 +369,13 @@ void up_consoleinit(void)
 #endif
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void up_lowputc(char ch)
 {

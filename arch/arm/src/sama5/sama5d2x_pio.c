@@ -401,7 +401,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -649,8 +649,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
     {
       lldbg("   SCDR: %08x   WPMR: %08x   WPSR: %08x  IOSSR: %08x\n",
             getreg32(SAM_SPIO_SCDR), getreg32(SAM_SPIO_WPMR),
-            getreg32(SAM_SPIO_WPSR), getreg32(base + SAM_SPIO_IOSSR_OFFSET),
-            );
+            getreg32(SAM_SPIO_WPSR), getreg32(base + SAM_SPIO_IOSSR_OFFSET));
     }
   else
     {

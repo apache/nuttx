@@ -102,7 +102,7 @@ void up_irqinitialize(void)
   putreg32(0, LPC31_INTC_PRIORITYMASK0); /* Proc interrupt request 0: IRQ */
   putreg32(0, LPC31_INTC_PRIORITYMASK1); /* Proc interrupt request 1: FIQ */
 
-  /* Disable all interrupts. Start from index 1 since 0 is unused.*/
+  /* Disable all interrupts. Start from index 1 since 0 is unused. */
 
   for (irq = 0; irq < NR_IRQS; irq++)
     {
@@ -111,8 +111,9 @@ void up_irqinitialize(void)
        */
 
       uint32_t address = LPC31_INTC_REQUEST(irq+1);
-      putreg32(INTC_REQUEST_WEACTLOW|INTC_REQUEST_WEENABLE|INTC_REQUEST_TARGET_IRQ|
-               INTC_REQUEST_PRIOLEVEL(1)|INTC_REQUEST_WEPRIO, address);
+      putreg32(INTC_REQUEST_WEACTLOW | INTC_REQUEST_WEENABLE |
+               INTC_REQUEST_TARGET_IRQ | INTC_REQUEST_PRIOLEVEL(1) |
+               INTC_REQUEST_WEPRIO, address);
 
     }
 
@@ -170,7 +171,7 @@ void up_enable_irq(int irq)
    * preserved because WE_TARGET is zero.
    */
 
-  putreg32(INTC_REQUEST_ENABLE|INTC_REQUEST_WEENABLE, address);
+  putreg32(INTC_REQUEST_ENABLE | INTC_REQUEST_WEENABLE, address);
 }
 
 /****************************************************************************
@@ -194,8 +195,8 @@ void up_ack_irq(int irq)
    * will be preserved because WE_TARGET is zero.
    */
 
-  putreg32(INTC_REQUEST_CLRSWINT|INTC_REQUEST_ENABLE|INTC_REQUEST_WEENABLE,
-           address);
+  putreg32(INTC_REQUEST_CLRSWINT | INTC_REQUEST_ENABLE |
+           INTC_REQUEST_WEENABLE, address);
 }
 
 /****************************************************************************

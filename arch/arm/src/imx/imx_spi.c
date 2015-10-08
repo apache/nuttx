@@ -139,7 +139,7 @@ struct imx_spidev_s
  * Private Function Prototypes
  ****************************************************************************/
 
- /* SPI register access */
+/* SPI register access */
 
 static inline uint32_t spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
 static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32_t value);
@@ -306,16 +306,16 @@ static void spi_txnull(struct imx_spidev_s *priv)
 
 static void spi_txuint16(struct imx_spidev_s *priv)
 {
-  uint16_t *ptr = (uint16_t*)priv->txbuffer;
+  uint16_t *ptr = (uint16_t *)priv->txbuffer;
   spi_putreg(priv, CSPI_TXD_OFFSET, *ptr++);
-  priv->txbuffer = (void*)ptr;
+  priv->txbuffer = (void *)ptr;
 }
 
 static void spi_txuint8(struct imx_spidev_s *priv)
 {
-  uint8_t *ptr = (uint8_t*)priv->txbuffer;
+  uint8_t *ptr = (uint8_t *)priv->txbuffer;
   spi_putreg(priv, CSPI_TXD_OFFSET, *ptr++);
-  priv->txbuffer = (void*)ptr;
+  priv->txbuffer = (void *)ptr;
 }
 
 /****************************************************************************
@@ -342,16 +342,16 @@ static void spi_rxnull(struct imx_spidev_s *priv)
 
 static void spi_rxuint16(struct imx_spidev_s *priv)
 {
-  uint16_t *ptr = (uint16_t*)priv->rxbuffer;
+  uint16_t *ptr = (uint16_t *)priv->rxbuffer;
   *ptr++ = (uint16_t)spi_getreg(priv, CSPI_TXD_OFFSET);
-  priv->rxbuffer = (void*)ptr;
+  priv->rxbuffer = (void *)ptr;
 }
 
 static void spi_rxuint8(struct imx_spidev_s *priv)
 {
-  uint8_t *ptr = (uint8_t*)priv->rxbuffer;
+  uint8_t *ptr = (uint8_t *)priv->rxbuffer;
   *ptr++ = (uint8_t)spi_getreg(priv, CSPI_TXD_OFFSET);
-  priv->rxbuffer = (void*)ptr;
+  priv->rxbuffer = (void *)ptr;
 }
 
 /****************************************************************************
@@ -468,11 +468,11 @@ static void spi_startxfr(struct imx_spidev_s *priv, int ntxd)
    */
 
   if (ntxd > 0)
-   {
+    {
       regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
       regval |= CSPI_CTRL_XCH;
       spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
-   }
+    }
 }
 
 /****************************************************************************
@@ -507,18 +507,18 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 
   /* Set up to perform the transfer */
 
-  priv->txbuffer     = (uint8_t*)txbuffer; /* Source buffer */
-  priv->rxbuffer     = (uint8_t*)rxbuffer; /* Destination buffer */
-  priv->ntxwords     = nwords;           /* Number of words left to send */
-  priv->nrxwords     = 0;                /* Number of words received */
-  priv->nwords       = nwords;           /* Total number of exchanges */
+  priv->txbuffer     = (uint8_t *)txbuffer; /* Source buffer */
+  priv->rxbuffer     = (uint8_t *)rxbuffer; /* Destination buffer */
+  priv->ntxwords     = nwords;              /* Number of words left to send */
+  priv->nrxwords     = 0;                   /* Number of words received */
+  priv->nwords       = nwords;              /* Total number of exchanges */
 
   /* Set up the low-level data transfer function pointers */
 
   if (priv->nbits > 8)
     {
       priv->txword = spi_txuint16;
-      priv->rxword =spi_rxuint16;
+      priv->rxword = spi_rxuint16;
     }
   else
     {
@@ -773,7 +773,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           freqbits = CSPI_CTRL_DIV256;
           actual   = IMX_PERCLK2_FREQ / 256;
         }
-      else /*if (frequency >= IMX_PERCLK2_FREQ / 512) */
+      else /* if (frequency >= IMX_PERCLK2_FREQ / 512) */
         {
           freqbits = CSPI_CTRL_DIV512;
           actual   = IMX_PERCLK2_FREQ / 512;
@@ -833,7 +833,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
          break;
 
         case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-          modebits = CSPI_CTRL_PHA|CSPI_CTRL_POL;
+          modebits = CSPI_CTRL_PHA | CSPI_CTRL_POL;
           break;
 
         default:
@@ -843,7 +843,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
       /* Then set the selected mode */
 
       regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
-      regval &= ~(CSPI_CTRL_PHA|CSPI_CTRL_POL);
+      regval &= ~(CSPI_CTRL_PHA | CSPI_CTRL_POL);
       regval |= modebits;
       spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
     }
@@ -895,7 +895,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
-  struct imx_spidev_s *priv = (struct imx_spidev_s*)dev;
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint16_t response = 0;
 
   (void)spi_transfer(priv, &wd, &response, 1);
@@ -931,7 +931,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 }
 #endif
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

@@ -1,4 +1,4 @@
-/***********************************************************************
+/****************************************************************************
  * arch/arm/src/arm/lpc2378/lpc23xx_head.S
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
@@ -35,11 +35,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***********************************************************************/
+ ****************************************************************************/
 
-/***********************************************************************
+/****************************************************************************
  * Included files
- ***********************************************************************/
+ ****************************************************************************/
 
 #include "up_arch.h"
 #include <sys/types.h>
@@ -48,17 +48,18 @@
 #include "lpc23xx_uart.h"
 #include "lpc23xx_gpio.h"
 
-/***********************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***********************************************************************/
+ ****************************************************************************/
 
-/***********************************************************************
-* Name: IO_Init()
-*
-* Descriptions: Initialize the target board before running the main()
-*
-************************************************************************/
-void IO_Init( void )
+/****************************************************************************
+ * Name: IO_Init()
+ *
+ * Descriptions: Initialize the target board before running the main()
+ *
+ ****************************************************************************/
+
+void IO_Init(void)
 {
   uint32_t regval;
 
@@ -76,20 +77,20 @@ void IO_Init( void )
   pinsel_putreg(0, PINSEL9_OFFSET);
   pinsel_putreg(0, PINSEL10_OFFSET);
 
-/*
-  regval = scb_getreg(SCB_PCONP_OFFSET) & ~(PCSDC | PCUART1 | PCI2C0 | PCSSP1 | PCEMC | );
-  scb_getreg(regval, SCB_PCONP_OFFSET );
-*/
+#if 0
+  regval = scb_getreg(SCB_PCONP_OFFSET) & ~(PCSDC | PCUART1 | PCI2C0 | PCSSP1 | PCEMC);
+  scb_getreg(regval, SCB_PCONP_OFFSET);
+#endif
 
   /* Turn off all peripheral power */
 
-  scb_putreg(0, SCB_PCONP_OFFSET );
+  scb_putreg(0, SCB_PCONP_OFFSET);
 
   /* Turn on UART0/2 / Timer0 */
   /* regval = PCUART0 | PCUART2 | PCTIM0 | PCRTC ; */
 
   regval = PCUART0 | PCUART2 | PCTIM0 ;
-  scb_putreg(regval , SCB_PCONP_OFFSET );
+  scb_putreg(regval , SCB_PCONP_OFFSET);
 
   /* Status LED P1.19 */
 

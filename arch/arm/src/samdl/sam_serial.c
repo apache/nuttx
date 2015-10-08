@@ -557,14 +557,14 @@ static void sam_disableallints(struct sam_dev_s *priv)
 
 static int sam_interrupt(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   uint8_t pending;
   uint8_t intflag;
   uint8_t inten;
 
- /* Get the set of pending USART interrupts (we are only interested in the
-  * unmasked interrupts).
-  */
+  /* Get the set of pending USART interrupts (we are only interested in the
+   * unmasked interrupts).
+   */
 
   intflag = sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET);
   inten   = sam_serialin8(priv, SAM_USART_INTENCLR_OFFSET);
@@ -591,9 +591,9 @@ static int sam_interrupt(struct uart_dev_s *dev)
 
   if ((pending & USART_INT_DRE) != 0)
     {
-       /* Transmit data register empty ... process outgoing bytes */
+      /* Transmit data register empty ... process outgoing bytes */
 
-       uart_xmitchars(dev);
+      uart_xmitchars(dev);
     }
 
   return OK;
@@ -663,7 +663,7 @@ static int sam_setup(struct uart_dev_s *dev)
 {
   int ret = 0;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   /* Configure the SERCOM as a USART.  Don't reconfigure the console UART;
    * that was already done in sam_lowputc.c.
@@ -689,7 +689,7 @@ static int sam_setup(struct uart_dev_s *dev)
 
 static void sam_shutdown(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   /* Resetting the SERCOM restores all registers to the reget state and
    * disables the SERCOM.  Ignore any requests to shutown the console
@@ -720,7 +720,7 @@ static void sam_shutdown(struct uart_dev_s *dev)
 
 static int sam_attach(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   const struct sam_usart_config_s * const config = priv->config;
   int ret;
 
@@ -729,11 +729,11 @@ static int sam_attach(struct uart_dev_s *dev)
   ret = irq_attach(config->irq, priv->handler);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the USART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the USART
+       */
 
-       up_enable_irq(config->irq);
+      up_enable_irq(config->irq);
     }
 
   return ret;
@@ -751,7 +751,7 @@ static int sam_attach(struct uart_dev_s *dev)
 
 static void sam_detach(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   const struct sam_usart_config_s * const config = priv->config;
 
   /* Disable interrupts at the SERCOM device and at the NVIC */
@@ -785,7 +785,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct sam_dev_s *user = (struct sam_dev_s*)arg;
+         struct sam_dev_s *user = (struct sam_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -818,7 +818,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int sam_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   /* Return read status */
 
@@ -839,7 +839,7 @@ static int sam_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void sam_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
   if (enable)
     {
@@ -865,7 +865,7 @@ static void sam_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool sam_rxavailable(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET) & USART_INT_RXC) != 0);
 }
 
@@ -879,7 +879,7 @@ static bool sam_rxavailable(struct uart_dev_s *dev)
 
 static void sam_send(struct uart_dev_s *dev, int ch)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   sam_serialout16(priv, SAM_USART_DATA_OFFSET, (uint16_t)ch);
 }
 
@@ -893,7 +893,7 @@ static void sam_send(struct uart_dev_s *dev, int ch)
 
 static void sam_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -934,7 +934,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
 
 static bool sam_txempty(struct uart_dev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET) & USART_INT_DRE) != 0);
 }
 

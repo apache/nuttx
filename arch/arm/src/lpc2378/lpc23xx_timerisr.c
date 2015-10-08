@@ -62,23 +62,23 @@
 
 /* T0_PCLKDIV valid values are 1,2,4 */
 
-#define T0_PCLK_DIV		1
+#define T0_PCLK_DIV         1
 
 /* PCKLSEL0 bits 3:2, 00=CCLK/4, 01=CCLK/1 , 10=CCLK/2  */
 
 #ifdef T0_PCLK_DIV
 #  if T0_PCLK_DIV == 1
-#    	define TIMER0_PCLKSEL	(0x00000004)
+#    define TIMER0_PCLKSEL  (0x00000004)
 #  elif T0_PCLK_DIV == 2
-#    	 define TIMER0_PCLKSEL	(0x00000008)
+#     define TIMER0_PCLKSEL (0x00000008)
 #  elif T0_PCLK_DIV == 4
-#    	 define TIMER0_PCLKSEL	(0x00000000)
+#     define TIMER0_PCLKSEL (0x00000000)
 #  endif
 #endif
 
-#define T0_PCLKSEL_MASK		(0x0000000C)
+#define T0_PCLKSEL_MASK     (0x0000000C)
 
-#define T0_TICKS_COUNT	( (CCLK / T0_PCLK_DIV ) / TICK_PER_SEC )
+#define T0_TICKS_COUNT      ((CCLK / T0_PCLK_DIV) / TICK_PER_SEC)
 
 /****************************************************************************
  * Private Types
@@ -89,7 +89,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

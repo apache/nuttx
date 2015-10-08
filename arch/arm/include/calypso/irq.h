@@ -35,7 +35,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_IRQ_H
 #error "This file should never be included directly! Use <nuttx/irq.h>"

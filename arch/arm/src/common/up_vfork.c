@@ -210,12 +210,12 @@ pid_t up_vfork(const struct vfork_s *context)
   svdbg("Child:  stack base:%08x SP:%08x FP:%08x\n",
         child->cmn.adj_stack_ptr, newsp, newfp);
 
- /* Update the stack pointer, frame pointer, and volatile registers.  When
-  * the child TCB was initialized, all of the values were set to zero.
-  * up_initial_state() altered a few values, but the return value in R0
-  * should be cleared to zero, providing the indication to the newly started
-  * child thread.
-  */
+  /* Update the stack pointer, frame pointer, and volatile registers.  When
+   * the child TCB was initialized, all of the values were set to zero.
+   * up_initial_state() altered a few values, but the return value in R0
+   * should be cleared to zero, providing the indication to the newly started
+   * child thread.
+   */
 
   child->cmn.xcp.regs[REG_R4]  = context->r4;  /* Volatile register r4 */
   child->cmn.xcp.regs[REG_R5]  = context->r5;  /* Volatile register r5 */

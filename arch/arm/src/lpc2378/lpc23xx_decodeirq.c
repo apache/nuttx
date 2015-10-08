@@ -136,7 +136,7 @@ static void lpc23xx_decodeirq(uint32_t *regs)
        * current_regs is also used to manage interrupt level context switches.
        */
 
-      savestate    = (uint32_t*)current_regs;
+      savestate    = (uint32_t *)current_regs;
       current_regs = regs;
 
       /* Acknowledge the interrupt */

@@ -106,7 +106,7 @@ static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See include/nutts/fs/procfs.h
@@ -222,7 +222,7 @@ static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
 
 
   mm_mallinfo(&g_ccm_heap, &mem);
-  
+
   remaining = buflen;
   totalsize = 0;
 
@@ -306,7 +306,7 @@ static int ccm_stat(const char *relpath, struct stat *buf)
       return -ENOENT;
     }
 
-  buf->st_mode    = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;

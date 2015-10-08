@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/sam_twihs.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -40,11 +40,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -74,9 +74,9 @@
 #if defined(CONFIG_SAMV7_TWIHS0) || defined(CONFIG_SAMV7_TWIHS1) || \
     defined(CONFIG_SAMV7_TWIHS2)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 /* Configuration ***************************************************************/
 
 #ifndef CONFIG_SAMV7_TWIHS0_FREQUENCY
@@ -135,9 +135,9 @@
 #  define i2cllvdbg(x...)
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 /* Invariant attributes of a TWIHS bus */
 
 struct twi_attr_s
@@ -183,9 +183,9 @@ struct twi_dev_s
 #endif
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Low-level helper functions */
 
@@ -257,9 +257,9 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv,
           uint32_t frequency);
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_TWIHS0
 static const struct twi_attr_s g_twi0attr =
@@ -485,7 +485,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
  * I2C transfer helper functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_wait
  *
  * Description:
@@ -494,7 +494,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
  * Assumptions:
  *   Interrupts are disabled
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int twi_wait(struct twi_dev_s *priv, unsigned int size)
 {
@@ -537,13 +537,13 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
   return priv->result;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_wakeup
  *
  * Description:
  *   A terminal event has occurred.  Wake-up the waiting thread
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void twi_wakeup(struct twi_dev_s *priv, int result)
 {
@@ -561,13 +561,13 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
   twi_givesem(&priv->waitsem);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_interrupt
  *
  * Description:
  *   The TWIHS Interrupt Handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int twi_interrupt(struct twi_dev_s *priv)
 {
@@ -647,7 +647,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
         }
     }
 
-  /* Byte sent*/
+  /* Byte sent */
 
   else if ((pending & TWIHS_INT_TXRDY) != 0)
     {
@@ -761,7 +761,7 @@ static int twi2_interrupt(int irq, FAR void *context)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_timeout
  *
  * Description:
@@ -770,7 +770,7 @@ static int twi2_interrupt(int irq, FAR void *context)
  * Assumptions:
  *   Called from the timer interrupt handler with interrupts disabled.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void twi_timeout(int argc, uint32_t arg, ...)
 {
@@ -780,13 +780,13 @@ static void twi_timeout(int argc, uint32_t arg, ...)
   twi_wakeup(priv, -ETIMEDOUT);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_startread
  *
  * Description:
  *   Start the next read message
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
@@ -795,7 +795,7 @@ static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   priv->result = -EBUSY;
   priv->xfrd   = 0;
 
-  /* Set STOP signal if only one byte is sent*/
+  /* Set STOP signal if only one byte is sent */
 
   if (msg->length == 1)
     {
@@ -818,13 +818,13 @@ static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   twi_putrel(priv, SAM_TWIHS_CR_OFFSET, TWIHS_CR_START);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_startwrite
  *
  * Description:
  *   Start the next write message
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
@@ -842,7 +842,7 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
   twi_putrel(priv, SAM_TWIHS_IADR_OFFSET, 0);
 
-  /* Write first byte to send.*/
+  /* Write first byte to send. */
 
   twi_putrel(priv, SAM_TWIHS_THR_OFFSET, msg->buffer[priv->xfrd++]);
 
@@ -851,13 +851,13 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   twi_putrel(priv, SAM_TWIHS_IER_OFFSET, TWIHS_INT_TXRDY | TWIHS_INT_ERRORS);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_startmessage
  *
  * Description:
  *   Start the next write message
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
@@ -871,17 +871,17 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * I2C device operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_setfrequency
  *
  * Description:
  *   Set the frequency for the next transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t twi_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
 {
@@ -901,13 +901,13 @@ static uint32_t twi_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
   return actual;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_setaddress
  *
  * Description:
  *   Set the I2C slave address for a subsequent read/write
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 {
@@ -929,14 +929,14 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_write
  *
  * Description:
  *   Send a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuflen)
 {
@@ -987,14 +987,14 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_read
  *
  * Description:
  *   Receive a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
 {
@@ -1045,12 +1045,12 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_writeread
  *
  * Description:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_WRITEREAD
 static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
@@ -1122,12 +1122,12 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_setownaddress
  *
  * Description:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_SLAVE
 static int twi_setownaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
@@ -1137,12 +1137,12 @@ static int twi_setownaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_registercallback
  *
  * Description:
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_SLAVE
 static int twi_registercallback((FAR struct i2c_dev_s *dev,
@@ -1153,7 +1153,7 @@ static int twi_registercallback((FAR struct i2c_dev_s *dev,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_transfer
  *
  * Description:
@@ -1163,7 +1163,7 @@ static int twi_registercallback((FAR struct i2c_dev_s *dev,
  * Returned Value:
  *   Returns zero on success; a negated errno value on failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER
 static int twi_transfer(FAR struct i2c_dev_s *dev,
@@ -1223,9 +1223,9 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Initialization
- *******************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: twi_enableclk
@@ -1254,13 +1254,13 @@ static void twi_enableclk(struct twi_dev_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_hw_setfrequency
  *
  * Description:
  *   Set the frequency for the next transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 {
@@ -1314,7 +1314,7 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
   return actual;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: twi_hw_initialize
  *
  * Description:
@@ -1322,7 +1322,7 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
  *   repeatable initialization after either (1) the one-time initialization, or
  *   (2) after each bus reset.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 {
@@ -1411,17 +1411,17 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cinitialize
  *
  * Description:
  *   Initialize a TWIHS device for I2C operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 struct i2c_dev_s *up_i2cinitialize(int bus)
 {
@@ -1535,13 +1535,13 @@ errout_with_irq:
   return NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cuninitalize
  *
  * Description:
  *   Uninitialize an I2C device
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 {

@@ -548,18 +548,18 @@ static void ssi_txnull(struct tiva_ssidev_s *priv)
 
 static void ssi_txuint16(struct tiva_ssidev_s *priv)
 {
-  uint16_t *ptr    = (uint16_t*)priv->txbuffer;
+  uint16_t *ptr    = (uint16_t *)priv->txbuffer;
   ssivdbg("TX: %p->%04x\n", ptr, *ptr);
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, (uint32_t)(*ptr++));
-  priv->txbuffer = (void*)ptr;
+  priv->txbuffer = (void *)ptr;
 }
 
 static void ssi_txuint8(struct tiva_ssidev_s *priv)
 {
-  uint8_t *ptr   = (uint8_t*)priv->txbuffer;
+  uint8_t *ptr   = (uint8_t *)priv->txbuffer;
   ssivdbg("TX: %p->%02x\n", ptr, *ptr);
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, (uint32_t)(*ptr++));
-  priv->txbuffer = (void*)ptr;
+  priv->txbuffer = (void *)ptr;
 }
 
 /****************************************************************************
@@ -591,18 +591,18 @@ static void ssi_rxnull(struct tiva_ssidev_s *priv)
 
 static void ssi_rxuint16(struct tiva_ssidev_s *priv)
 {
-  uint16_t *ptr    = (uint16_t*)priv->rxbuffer;
+  uint16_t *ptr    = (uint16_t *)priv->rxbuffer;
   *ptr           = (uint16_t)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   ssivdbg("RX: %p<-%04x\n", ptr, *ptr);
-  priv->rxbuffer = (void*)(++ptr);
+  priv->rxbuffer = (void *)(++ptr);
 }
 
 static void ssi_rxuint8(struct tiva_ssidev_s *priv)
 {
-  uint8_t *ptr   = (uint8_t*)priv->rxbuffer;
+  uint8_t *ptr   = (uint8_t *)priv->rxbuffer;
   *ptr           = (uint8_t)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   ssivdbg("RX: %p<-%02x\n", ptr, *ptr);
-  priv->rxbuffer = (void*)(++ptr);
+  priv->rxbuffer = (void *)(++ptr);
 }
 
 /****************************************************************************
@@ -724,7 +724,7 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
            */
 
 #ifdef CONFIG_DEBUG
-          regval |= (SSI_IM_TX|SSI_RIS_ROR);
+          regval |= (SSI_IM_TX | SSI_RIS_ROR);
 #else
           regval |= SSI_IM_TX;
 #endif
@@ -735,7 +735,7 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
            * the transfer will be driven by Rx FIFO interrupts.
            */
 
-          regval &= ~(SSI_IM_TX|SSI_RIS_ROR);
+          regval &= ~(SSI_IM_TX | SSI_RIS_ROR);
         }
       ssi_putreg(priv, TIVA_SSI_IM_OFFSET, regval);
 #endif /* CONFIG_SSI_POLLWAIT */
@@ -790,16 +790,16 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
   regval = ssi_getreg(priv, TIVA_SSI_IM_OFFSET);
   if (priv->ntxwords == 0 && priv->nrxwords < priv->nwords)
     {
-       /* There are no more outgoing words to send, but there are
-        * additional incoming words expected (I would think that this
-        * a real corner case, be we will handle it with an extra
-        * interrupt, probably an Rx timeout).
-        */
+      /* There are no more outgoing words to send, but there are
+       * additional incoming words expected (I would think that this
+       * a real corner case, be we will handle it with an extra
+       * interrupt, probably an Rx timeout).
+       */
 
 #ifdef CONFIG_DEBUG
-      regval |= (SSI_IM_RX|SSI_IM_RT|SSI_IM_ROR);
+      regval |= (SSI_IM_RX | SSI_IM_RT | SSI_IM_ROR);
 #else
-      regval |= (SSI_IM_RX|SSI_IM_RT);
+      regval |= (SSI_IM_RX | SSI_IM_RT);
 #endif
     }
   else
@@ -808,7 +808,7 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
        * have received.  Disable Rx FIFO interrupts.
        */
 
-      regval &= ~(SSI_IM_RX|SSI_IM_RT);
+      regval &= ~(SSI_IM_RX | SSI_IM_RT);
     }
   ssi_putreg(priv, TIVA_SSI_IM_OFFSET, regval);
 #endif /* CONFIG_SSI_POLLWAIT */
@@ -849,8 +849,8 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 
   /* Set up to perform the transfer */
 
-  priv->txbuffer     = (uint8_t*)txbuffer; /* Source buffer */
-  priv->rxbuffer     = (uint8_t*)rxbuffer; /* Destination buffer */
+  priv->txbuffer     = (uint8_t *)txbuffer; /* Source buffer */
+  priv->rxbuffer     = (uint8_t *)rxbuffer; /* Destination buffer */
   priv->ntxwords     = nwords;             /* Number of words left to send */
   priv->nrxwords     = 0;                  /* Number of words received */
   priv->nwords       = nwords;             /* Total number of exchanges */
@@ -1300,7 +1300,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
          break;
 
         case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-          modebits = SSI_CR0_SPH|SSI_CR0_SPO;
+          modebits = SSI_CR0_SPH | SSI_CR0_SPO;
           break;
 
         default:
@@ -1310,7 +1310,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
       /* Then set the selected mode: Freescale SPI format, mode0-3 */
 
       regval  = ssi_getreg(priv, TIVA_SSI_CR0_OFFSET);
-      regval &= ~(SSI_CR0_FRF_MASK|SSI_CR0_SPH|SSI_CR0_SPO);
+      regval &= ~(SSI_CR0_FRF_MASK | SSI_CR0_SPH | SSI_CR0_SPO);
       regval |= modebits;
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
       ssivdbg("CR0: %08x\n", regval);
@@ -1359,7 +1359,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
 
   ssidbg("nbits: %d\n", nbits);
   DEBUGASSERT(priv);
-  if (nbits != priv->nbits && nbits >=4 && nbits <= 16)
+  if (nbits != priv->nbits && nbits >= 4 && nbits <= 16)
     {
       regval  = ssi_getreg(priv, TIVA_SSI_CR0_OFFSET);
       regval &= ~SSI_CR0_DSS_MASK;
@@ -1401,7 +1401,7 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
-  struct tiva_ssidev_s *priv = (struct tiva_ssidev_s*)dev;
+  struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint16_t response = 0;
 
   (void)ssi_transfer(priv, &wd, &response, 1);
@@ -1437,7 +1437,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 }
 #endif
 
-/*************************************************************************
+/****************************************************************************
  * Name: ssi_sndblock
  *
  * Description:

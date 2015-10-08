@@ -928,9 +928,9 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
- static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
-                        bool selected)
- {
+static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool selected)
+{
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
   uint32_t regval;
@@ -1284,8 +1284,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
-  uint8_t *rxptr = (uint8_t*)rxbuffer;
-  uint8_t *txptr = (uint8_t*)txbuffer;
+  uint8_t *rxptr = (uint8_t *)rxbuffer;
+  uint8_t *txptr = (uint8_t *)txbuffer;
   uint32_t pcs;
   uint32_t data;
 
@@ -1313,7 +1313,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Get word 1;
    *   Send word 1;  Now word 1 is "in flight"
    *   nwords--;
-   *   for ( ; nwords > 0; nwords--)
+   *   for (; nwords > 0; nwords--)
    *     {
    *       Get word N.
    *       Wait for TDRE meaning that word N-1 has moved to the shift
@@ -1330,7 +1330,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Save the final word.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source) */
 
@@ -1606,7 +1606,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 }
 #endif /* CONFIG_SAMA5_SPI_DMA */
 
-/***************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:
@@ -1754,7 +1754,7 @@ struct spi_dev_s *up_spiinitialize(int port)
     }
 #endif
 
-   /* Select the SPI operations */
+  /* Select the SPI operations */
 
 #if defined(CONFIG_SAMA5_SPI0) && defined(CONFIG_SAMA5_SPI1)
   spics->spidev.ops = spino ? &g_spi1ops : &g_spi0ops;

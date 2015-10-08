@@ -84,7 +84,7 @@ static inline uint32_t up_getsp(void)
   register uint32_t sp;
   __asm__
   (
-  	"\tadd  %0, $0, $29\n"
+    "\tadd  %0, $0, $29\n"
     : "=r"(sp)
   );
   return sp;

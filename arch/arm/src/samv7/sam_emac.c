@@ -1827,17 +1827,17 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
           xfrq->rxndx = rxndx;
         }
 
-    /* Set-up to process the next fragment.  Get the RX descriptor
-     * associated with the next fragment.
-     */
+      /* Set-up to process the next fragment.  Get the RX descriptor
+       * associated with the next fragment.
+       */
 
-    rxdesc = &xfrq->rxdesc[rxndx];
+      rxdesc = &xfrq->rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+      /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    arch_invalidate_dcache((uintptr_t)rxdesc,
-                           (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-  }
+     arch_invalidate_dcache((uintptr_t)rxdesc,
+                             (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+    }
 
   /* No packet was found */
 
@@ -1949,7 +1949,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -3290,7 +3290,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && sam_getreg(priv, regoffset2) == 0)
     {
-       /* Yes.. disable all address matching */
+      /* Yes.. disable all address matching */
 
       regval  = sam_getreg(priv, SAM_EMAC_NCFGR_OFFSET);
       regval &= ~(EMAC_NCFGR_UNIHEN | EMAC_NCFGR_MTIHEN);
@@ -4072,7 +4072,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   /* Check AutoNegotiate complete */
 
   timeout = 0;
-  for (;;)
+  for (; ; )
     {
       ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
       if (ret < 0)
@@ -4382,7 +4382,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 
   if (priv->attr->emac == EMAC0_INTF)
     {
-      /* Configure PIO pins common to RMII and MII mode*/
+      /* Configure PIO pins common to RMII and MII mode */
 
        sam_configgpio(GPIO_EMAC0_TXCK);    /* Transmit Clock (or Reference Clock) */
        sam_configgpio(GPIO_EMAC0_TXEN);    /* Transmit Enable */
@@ -4395,7 +4395,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
        sam_configgpio(GPIO_EMAC0_MDC);     /* Management Data Clock */
        sam_configgpio(GPIO_EMAC0_MDIO);    /* Management Data Input/Output */
 
-      /* Configure additional PIO pins to support EMAC in MII mode*/
+      /* Configure additional PIO pins to support EMAC in MII mode */
 
       if (!priv->attr->rmii)
         {
@@ -4409,7 +4409,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
           sam_configgpio(GPIO_EMAC0_COL);  /* Collision Detect */
         }
     }
- else
+  else
 #endif
 
 #if defined(CONFIG_SAMV7_EMAC1)
@@ -4417,7 +4417,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 
   if (priv->attr->emac == EMAC1_INTF)
     {
-      /* Configure PIO pins common to RMII and MII mode*/
+      /* Configure PIO pins common to RMII and MII mode */
 
        sam_configgpio(GPIO_EMAC1_TXCK);    /* Transmit Clock (or Reference Clock) */
        sam_configgpio(GPIO_EMAC1_TXEN);    /* Transmit Enable */
@@ -4430,7 +4430,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
        sam_configgpio(GPIO_EMAC1_MDC);     /* Management Data Clock */
        sam_configgpio(GPIO_EMAC1_MDIO);    /* Management Data Input/Output */
 
-      /* Configure additional PIO pins to support EMAC in MII mode*/
+      /* Configure additional PIO pins to support EMAC in MII mode */
 
       if (!priv->attr->rmii)
         {
@@ -4446,9 +4446,9 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
     }
   else
 #endif
-   {
-     nvdbg("ERROR: emac=%d\n", priv->attr->emac);
-   }
+    {
+      nvdbg("ERROR: emac=%d\n", priv->attr->emac);
+    }
 }
 
 /****************************************************************************

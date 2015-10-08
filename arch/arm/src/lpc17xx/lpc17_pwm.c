@@ -413,7 +413,7 @@ static void pwm_set_apb_clock(FAR struct lpc17_pwmtimer_s *priv, bool on)
       modifyreg32(regaddr, en_bit, 0);
     }
 }
-#endif /*XXXXX*/
+#endif
 
 /****************************************************************************
  * Name: pwm_setup

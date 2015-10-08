@@ -98,7 +98,7 @@ struct pmecc_desc_s
 {
   uint32_t pagesize;     /*   0-3: See HSMC_PMECCFG_PAGESIZE_* definitions */
   uint32_t sparesize;    /*   4-7: The spare area size is equal to (SPARESIZE+1) bytes */
-  uint32_t sectorsz;     /*  8-11: See HSMC_PMECCFG_SECTORSZ_* definitions*/
+  uint32_t sectorsz;     /*  8-11: See HSMC_PMECCFG_SECTORSZ_* definitions */
   uint32_t bcherr;       /* 12-15: See HSMC_PMECCFG_BCHERR_* definitions */
   uint32_t eccsize;      /* 16-19: Real size in bytes of ECC in spare */
   uint32_t eccstart;     /* 20-23: The first byte address of the ECC area */
@@ -440,13 +440,13 @@ static uint32_t pmecc_getsigma(void)
 
           /* Compute degree of the new smu polynomial */
 
-          if ((lmu[i]>>1) > ((lmu[ro]>>1) + diff))
+          if ((lmu[i] >> 1) > ((lmu[ro] >> 1) + diff))
             {
               lmu[i + 1] = lmu[i];
             }
           else
             {
-              lmu[i + 1] = ((lmu[ro]>>1) + diff) * 2;
+              lmu[i + 1] = ((lmu[ro] >> 1) + diff) * 2;
             }
 
           /* Init smu[i+1] with 0 */
@@ -458,7 +458,7 @@ static uint32_t pmecc_getsigma(void)
 
           /* Compute smu[i+1] */
 
-          for (k = 0; k <= lmu[ro]>>1; k ++)
+          for (k = 0; k <= lmu[ro] >> 1; k++)
             {
               if (g_pmecc.desc.smu[ro][k] && dmu[i])
                 {
@@ -469,7 +469,7 @@ static uint32_t pmecc_getsigma(void)
                 }
             }
 
-          for (k = 0; k <= lmu[i]>>1; k ++)
+          for (k = 0; k <= lmu[i] >> 1; k++)
             {
               g_pmecc.desc.smu[i+1][k] ^= g_pmecc.desc.smu[i][k];
             }
@@ -493,11 +493,11 @@ static uint32_t pmecc_getsigma(void)
 
               /* Check if one operand of the multiplier is null, its index is -1 */
 
-              else if (g_pmecc.desc.smu[i+1][k] && si[ 2 * (i - 1) + 3 - k])
+              else if (g_pmecc.desc.smu[i + 1][k] && si[2 * (i - 1) + 3 - k])
                 {
                   dmu[i + 1] =
-                    g_pmecc.desc.alphato[(g_pmecc.desc.indexof[g_pmecc.desc.smu[ i + 1 ][ k ]] +
-                    g_pmecc.desc.indexof[si[ 2 * (i - 1) + 3 - k]]) % g_pmecc.desc.nn] ^ dmu[ i + 1];
+                    g_pmecc.desc.alphato[(g_pmecc.desc.indexof[g_pmecc.desc.smu[i + 1][k]] +
+                    g_pmecc.desc.indexof[si[2 * (i - 1) + 3 - k]]) % g_pmecc.desc.nn] ^ dmu[i + 1];
                 }
             }
         }
@@ -635,24 +635,24 @@ static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
               fdbg("Correct error bit @[Byte %d, Bit %d]\n",
                       (int)bytepos, (int)bitpos);
 
-              if (*(uint8_t*)(sectorbase + bytepos) & (1 << bitpos))
+              if (*(uint8_t *)(sectorbase + bytepos) & (1 << bitpos))
                 {
-                  *(uint8_t*)(sectorbase + bytepos) &= (0xff ^ (1 << bitpos));
+                  *(uint8_t *)(sectorbase + bytepos) &= (0xff ^ (1 << bitpos));
                 }
               else
                 {
-                  *(uint8_t*)(sectorbase + bytepos) |= (1 << bitpos);
+                  *(uint8_t *)(sectorbase + bytepos) |= (1 << bitpos);
                 }
             }
           else
             {
-              if (*(uint8_t*)(sectorbase + bytepos + eccsize)& (1 << bitpos))
+              if (*(uint8_t *)(sectorbase + bytepos + eccsize) & (1 << bitpos))
                 {
-                  *(uint8_t*)(sectorbase + bytepos + eccsize) &= (0xff ^ (1 << bitpos));
+                  *(uint8_t *)(sectorbase + bytepos + eccsize) &= (0xff ^ (1 << bitpos));
                 }
               else
                 {
-                  *(uint8_t*)(sectorbase + bytepos + eccsize) |= (1 << bitpos);
+                  *(uint8_t *)(sectorbase + bytepos + eccsize) |= (1 << bitpos);
                 }
             }
         }
@@ -775,14 +775,14 @@ static int pmecc_bcherr512(uint8_t nsectors, uint16_t eccsize)
 
   /* 7-bytes per 512 byte sector are required correctability of 4 errors */
 
-  else if (eccsize >= (7 *(unsigned int) nsectors))
+  else if (eccsize >= (7 * (unsigned int) nsectors))
     {
       return BCH_ERR4;
     }
 
   /* 4-bytes per 512 byte sector are required correctability of 2 errors */
 
-  else if (eccsize >= (4 *(unsigned int) nsectors))
+  else if (eccsize >= (4 * (unsigned int) nsectors))
     {
       return BCH_ERR2;
     }
@@ -823,14 +823,14 @@ static int pmecc_bcherr1k(uint8_t nsectors, uint16_t eccsize)
 
   /* 7-bytes per 1024 byte sector are required correctability of 4 errors */
 
-  else if (eccsize >= (7 *(unsigned int) nsectors))
+  else if (eccsize >= (7 * (unsigned int) nsectors))
     {
       return BCH_ERR4;
     }
 
   /* 4-bytes per 1024 byte sector are required correctability of 2 errors */
 
-  else if (eccsize >= (4 *(unsigned int) nsectors))
+  else if (eccsize >= (4 * (unsigned int) nsectors))
     {
       return BCH_ERR2;
     }
@@ -934,7 +934,9 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
               DEBUGASSERT(bcherr512 >= 0);
               break;
             }
-        } /* Otherwise, fall through for the 1KB sectors */
+        }
+
+      /* Otherwise, fall through for the 1KB sectors */
 
       case 2:  /* 512B sectors not possible; 1KB sectors possible */
         {
@@ -1347,7 +1349,7 @@ uint32_t pmecc_get_pagesize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PMECC_GALOIS_CUSTOM
-void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato)
+void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato)
 {
   uint32_t i;
   uint32_t mask;
@@ -1440,8 +1442,8 @@ void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato)
   /* Second
    *
    * Build elements from 0 to mm - 1.  Very easy because degree is less than
-    * mm so it is just a logical shift ! (only the remainder)
-    */
+   * mm so it is just a logical shift ! (only the remainder)
+   */
 
   mask = 1;
   for (i = 0; i < mm; i++)

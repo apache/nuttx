@@ -113,24 +113,24 @@ static int  adc_interrupt(int irq, void *context);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_reset =adc_reset,
-  .ao_setup = adc_setup,
+  .ao_reset    = adc_reset,
+  .ao_setup    = adc_setup,
   .ao_shutdown = adc_shutdown,
-  .ao_rxint = adc_rxint,
-  .ao_ioctl = adc_ioctl,
+  .ao_rxint    = adc_rxint,
+  .ao_ioctl    = adc_ioctl,
 };
 
 static struct up_dev_s g_adcpriv =
 {
-  .sps  = CONFIG_ADC0_SPS,
-  .mask = CONFIG_ADC0_MASK,
-  .irq  = LPC43_IRQ_ADC,
+  .sps         = CONFIG_ADC0_SPS,
+  .mask        = CONFIG_ADC0_MASK,
+  .irq         = LPC43_IRQ_ADC,
 };
 
 static struct adc_dev_s g_adcdev =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv,
+  .ad_ops      = &g_adcops,
+  .ad_priv     = &g_adcpriv,
 };
 
 /****************************************************************************
@@ -153,34 +153,50 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   regval |= SYSCON_PCONP_PCADC;
   putreg32(regval, LPC43_SYSCON_PCONP);
 
-  putreg32(ADC_CR_PDN,LPC43_ADC_CR);
+  putreg32(ADC_CR_PDN, LPC43_ADC_CR);
 
   regval  = getreg32(LPC43_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_ADC_MASK;
   regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
   putreg32(regval, LPC43_SYSCON_PCLKSEL0);
 
-  uint32_t clkdiv=LPC43_CCLK/8/65/priv->sps;
-  clkdiv<<=8;
-  clkdiv&=0xff00;
-  putreg32(ADC_CR_PDN|ADC_CR_BURST|clkdiv|priv->mask,LPC43_ADC_CR);
+  uint32_t clkdiv = LPC43_CCLK / 8 / 65 / priv->sps;
+  clkdiv <<= 8;
+  clkdiv &= 0xff00;
+  putreg32(ADC_CR_PDN | ADC_CR_BURST | clkdiv | priv->mask, LPC43_ADC_CR);
 
   if (priv->mask&0x01)
-    lpc43_configgpio(GPIO_AD0p0);
+    {
+      lpc43_configgpio(GPIO_AD0p0);
+    }
   else if (priv->mask&0x02)
-    lpc43_configgpio(GPIO_AD0p1);
+    {
+      lpc43_configgpio(GPIO_AD0p1);
+    }
   else if (priv->mask&0x04)
-    lpc43_configgpio(GPIO_AD0p2);
+    {
+      lpc43_configgpio(GPIO_AD0p2);
+    }
   else if (priv->mask&0x08)
-    lpc43_configgpio(GPIO_AD0p3);
+    {
+      lpc43_configgpio(GPIO_AD0p3);
+    }
   else if (priv->mask&0x10)
-    lpc43_configgpio(GPIO_AD0p4);
+    {
+      lpc43_configgpio(GPIO_AD0p4);
+    }
   else if (priv->mask&0x20)
-    lpc43_configgpio(GPIO_AD0p5);
+    {
+      lpc43_configgpio(GPIO_AD0p5);
+    }
   else if (priv->mask&0x40)
-    lpc43_configgpio(GPIO_AD0p6);
+    {
+      lpc43_configgpio(GPIO_AD0p6);
+    }
   else if (priv->mask&0x80)
-    lpc43_configgpio(GPIO_AD0p7);
+    {
+      lpc43_configgpio(GPIO_AD0p7);
+    }
 
   irqrestore(flags);
 }
@@ -196,15 +212,18 @@ static int  adc_setup(FAR struct adc_dev_s *dev)
   int i;
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
   int ret = irq_attach(priv->irq, adc_interrupt);
+
   if (ret == OK)
     {
       for (i = 0; i < 8; i++)
         {
-          priv->buf[i]=0;
-          priv->count[i]=0;
+          priv->buf[i]   = 0;
+          priv->count[i] = 0;
         }
+
       up_enable_irq(priv->irq);
     }
+
   return ret;
 }
 
@@ -253,7 +272,7 @@ static int adc_interrupt(int irq, void *context)
     {
       value = priv->buf[ch] / priv->count[ch];
       value <<= 15;
-      adc_receive(&g_adcdev,ch,value);
+      adc_receive(&g_adcdev, ch, value);
       priv->buf[ch] = 0;
       priv->count[ch] = 0;
     }

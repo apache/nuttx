@@ -574,7 +574,7 @@ static int nand_translate_address(struct sam_nandcs_s *priv,
 
 static uint32_t nand_get_acycle(int ncycles)
 {
-  switch(ncycles)
+  switch (ncycles)
     {
     case 1:
       return NFCADDR_CMD_ACYCLE_ONE;
@@ -1024,11 +1024,11 @@ static uint32_t nand_nfc_poll(void)
       g_nand.cmddone = true;
     }
 
- /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
-  * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
-  * SMC_CFG register, only rising or falling edge is detected. This flag is
-  * reset after the status read.
-  */
+  /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
+   * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
+   * SMC_CFG register, only rising or falling edge is detected. This flag is
+   * reset after the status read.
+   */
 
   if ((sr & HSMC_NFCINT_RBEDGE0) != 0)
     {
@@ -1098,11 +1098,11 @@ static int hsmc_interrupt(int irq, void *context)
       nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
     }
 
- /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
-  * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
-  * SMC_CFG register, only rising or falling edge is detected. This flag is
-  * reset after the status read.
-  */
+  /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
+   * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
+   * SMC_CFG register, only rising or falling edge is detected. This flag is
+   * reset after the status read.
+   */
 
   if (g_nand.rbedge && (imr & HSMC_NFCINT_RBEDGE0) != 0)
     {
@@ -1964,7 +1964,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   /* Configure the SMC */
 
   regval |= (HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) | HSMC_CFG_DTOMUL_1048576 |
-             HSMC_CFG_NFCSPARESIZE((sparesize -1 ) >> 2));
+             HSMC_CFG_NFCSPARESIZE((sparesize - 1) >> 2));
   nand_putreg(SAM_HSMC_CFG, regval);
 
   /* Calculate actual address of the page */
@@ -2267,7 +2267,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
     {
       nand_nfc_cleale(priv,
                       HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN,
-                      COMMAND_WRITE_1,0,  pagesize, rowaddr);
+                      COMMAND_WRITE_1, 0,  pagesize, rowaddr);
 
       ret = nand_write(priv, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)

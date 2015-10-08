@@ -799,14 +799,14 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 #if 0 /* Not used */
 static int spi_interrupt(struct sam_spidev_s *dev)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   uint8_t pending;
   uint8_t intflag;
   uint8_t inten;
 
- /* Get the set of pending SPI interrupts (we are only interested in the
-  * unmasked interrupts).
-  */
+  /* Get the set of pending SPI interrupts (we are only interested in the
+   * unmasked interrupts).
+   */
 
   intflag = sam_getreg8(priv, SAM_SPI_INTFLAG_OFFSET);
   inten   = sam_getreg8(priv, SAM_SPI_INTENCLR_OFFSET);
@@ -832,7 +832,7 @@ static int spi_interrupt(struct sam_spidev_s *dev)
 
   if ((pending & SPI_INT_DRE) != 0)
     {
-       /* Transmit data register empty ... process outgoing bytes */
+      /* Transmit data register empty ... process outgoing bytes */
 #warning Missing logic
     }
 
@@ -959,7 +959,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 {
-  struct sam_spidev_s *priv =(struct sam_spidev_s *)dev;
+  struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
   uint32_t maxfreq;
   uint32_t actual;
   uint32_t baud;
@@ -1263,7 +1263,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Get word 1;
    *   Send word 1;  Now word 1 is "in flight"
    *   nwords--;
-   *   for ( ; nwords > 0; nwords--)
+   *   for (; nwords > 0; nwords--)
    *     {
    *       Get word N.
    *       Wait for DRE:: meaning that word N-1 has moved to the shift
@@ -1280,7 +1280,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Save the final word.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source) */
 
@@ -1342,7 +1342,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
 }
 
-/***************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

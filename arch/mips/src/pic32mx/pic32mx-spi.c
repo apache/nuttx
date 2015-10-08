@@ -746,21 +746,22 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
    * receive buffer is not empty.
    */
 
- while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+  while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+
 #else
   /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
    * normal mode, the SPIRBF bit will be set when receive data is available.
    */
 
- while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+  while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
 #endif
 
- /* Return the SPI data */
+  /* Return the SPI data */
 
- return (uint16_t)spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
+  return (uint16_t)spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

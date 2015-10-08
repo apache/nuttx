@@ -128,12 +128,12 @@ struct gpio_mebiinfo_s
 
 static const struct gpio_piminfo_s piminfo[HCS12_PIM_NPORTS] =
 {
- {HCS12_PIM_PORTT_BASE, 'T', PIMPORT_FORM1}, /* Port T */
- {HCS12_PIM_PORTS_BASE, 'S', PIMPORT_FORM2}, /* Port S */
- {HCS12_PIM_PORTG_BASE, 'G', PIMPORT_FORM3}, /* Port G */
- {HCS12_PIM_PORTH_BASE, 'H', PIMPORT_FORM3}, /* Port H */
- {HCS12_PIM_PORTJ_BASE, 'J', PIMPORT_FORM3}, /* Port J */
- {HCS12_PIM_PORTL_BASE, 'L', PIMPORT_FORM2}  /* Port L */
+  {HCS12_PIM_PORTT_BASE, 'T', PIMPORT_FORM1}, /* Port T */
+  {HCS12_PIM_PORTS_BASE, 'S', PIMPORT_FORM2}, /* Port S */
+  {HCS12_PIM_PORTG_BASE, 'G', PIMPORT_FORM3}, /* Port G */
+  {HCS12_PIM_PORTH_BASE, 'H', PIMPORT_FORM3}, /* Port H */
+  {HCS12_PIM_PORTJ_BASE, 'J', PIMPORT_FORM3}, /* Port J */
+  {HCS12_PIM_PORTL_BASE, 'L', PIMPORT_FORM2}  /* Port L */
 };
 
 static const struct gpio_mebiinfo_s mebiinfo[HCS12_MEBI_NPORTS] =

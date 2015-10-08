@@ -249,10 +249,11 @@ static uint32_t can_vgetreg(uint32_t addr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return val;
         }
     }
@@ -261,20 +262,20 @@ static uint32_t can_vgetreg(uint32_t addr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -500,8 +501,8 @@ static void can_dumpfiltregs(struct stm32_can_s *priv, FAR const char *msg)
   for (i = 0; i < CAN_NFILTERS; i++)
     {
       lldbg(" F%dR1: %08x F%dR2: %08x\n",
-            i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i,1)),
-            i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i,2)));
+            i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i, 1)),
+            i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i, 2)));
     }
 }
 #endif
@@ -883,22 +884,22 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       regval = tmp << CAN_TDLR_DATA0_SHIFT;
 
       if (dlc > 1)
-       {
-         tmp    = (uint32_t)*ptr++;
-         regval |= tmp << CAN_TDLR_DATA1_SHIFT;
+        {
+          tmp    = (uint32_t)*ptr++;
+          regval |= tmp << CAN_TDLR_DATA1_SHIFT;
 
-         if (dlc > 2)
-           {
-             tmp    = (uint32_t)*ptr++;
-             regval |= tmp << CAN_TDLR_DATA2_SHIFT;
+          if (dlc > 2)
+            {
+              tmp    = (uint32_t)*ptr++;
+              regval |= tmp << CAN_TDLR_DATA2_SHIFT;
 
-             if (dlc > 3)
-               {
-                 tmp    = (uint32_t)*ptr++;
-                 regval |= tmp << CAN_TDLR_DATA3_SHIFT;
-               }
-           }
-       }
+              if (dlc > 3)
+                {
+                  tmp    = (uint32_t)*ptr++;
+                  regval |= tmp << CAN_TDLR_DATA3_SHIFT;
+                }
+            }
+        }
     }
   can_putreg(priv, STM32_CAN_TDLR_OFFSET(txmb), regval);
 
@@ -909,22 +910,22 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       regval = tmp << CAN_TDHR_DATA4_SHIFT;
 
       if (dlc > 5)
-       {
-         tmp    = (uint32_t)*ptr++;
-         regval |= tmp << CAN_TDHR_DATA5_SHIFT;
+        {
+          tmp    = (uint32_t)*ptr++;
+          regval |= tmp << CAN_TDHR_DATA5_SHIFT;
 
-         if (dlc > 6)
-           {
-             tmp    = (uint32_t)*ptr++;
-             regval |= tmp << CAN_TDHR_DATA6_SHIFT;
+          if (dlc > 6)
+            {
+              tmp    = (uint32_t)*ptr++;
+              regval |= tmp << CAN_TDHR_DATA6_SHIFT;
 
-             if (dlc > 7)
-               {
-                 tmp    = (uint32_t)*ptr++;
-                 regval |= tmp << CAN_TDHR_DATA7_SHIFT;
-               }
-           }
-       }
+              if (dlc > 7)
+                {
+                  tmp    = (uint32_t)*ptr++;
+                  regval |= tmp << CAN_TDHR_DATA7_SHIFT;
+                }
+            }
+        }
     }
   can_putreg(priv, STM32_CAN_TDHR_OFFSET(txmb), regval);
 
@@ -1357,12 +1358,12 @@ static int can_bittiming(struct stm32_can_s *priv)
       ts1 = CONFIG_CAN_TSEG1;
       ts2 = CONFIG_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA/2)) / CAN_BIT_QUANTA;
-      DEBUGASSERT(brp >=1 && brp <= CAN_BTR_BRP_MAX);
+      DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
   canllvdbg("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
 
- /* Configure bit timing.  This also does the following, less obvious
+  /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
    *
    * - Disables silent mode.
@@ -1563,13 +1564,13 @@ static int can_filterinit(struct stm32_can_s *priv)
   can_putfreg(priv,  STM32_CAN_FIR_OFFSET(priv->filter, 1), 0);
   can_putfreg(priv,  STM32_CAN_FIR_OFFSET(priv->filter, 2), 0);
 
- /* Set Id/Mask mode for the filter */
+  /* Set Id/Mask mode for the filter */
 
   regval  = can_getfreg(priv, STM32_CAN_FM1R_OFFSET);
   regval &= ~bitmask;
   can_putfreg(priv, STM32_CAN_FM1R_OFFSET, regval);
 
- /* Assign FIFO 0 for the filter */
+  /* Assign FIFO 0 for the filter */
 
   regval  = can_getfreg(priv, STM32_CAN_FFA1R_OFFSET);
   regval &= ~bitmask;

@@ -128,7 +128,7 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
        */
 
       uint32_t bit = (1 << i);
-      if ((isfr & bit ) != 0)
+      if ((isfr & bit) != 0)
         {
           /* I think that bits may be set in the ISFR for DMA activities
            * well.  So, no error is declared if there is no registered
@@ -372,7 +372,7 @@ void kinetis_pinirqenable(uint32_t pinset)
             regval |= PORT_PCR_IRQC_ZERO;
             break;
 
-          case PIN_INT_RISING : /* Interrupt on rising edge*/
+          case PIN_INT_RISING : /* Interrupt on rising edge */
             regval |= PORT_PCR_IRQC_RISING;
             break;
 

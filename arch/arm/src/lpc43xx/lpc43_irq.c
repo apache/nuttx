@@ -61,9 +61,9 @@
 /* Get a 32-bit version of the default priority */
 
 #define DEFPRIORITY32 \
-  (LPC43M4_SYSH_PRIORITY_DEFAULT << 24 |\
-   LPC43M4_SYSH_PRIORITY_DEFAULT << 16 |\
-   LPC43M4_SYSH_PRIORITY_DEFAULT << 8  |\
+  (LPC43M4_SYSH_PRIORITY_DEFAULT << 24 | \
+   LPC43M4_SYSH_PRIORITY_DEFAULT << 16 | \
+   LPC43M4_SYSH_PRIORITY_DEFAULT << 8  | \
    LPC43M4_SYSH_PRIORITY_DEFAULT)
 
 /* Given the address of a NVIC ENABLE register, this is the offset to
@@ -264,8 +264,8 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   else
     {
-       *regaddr = NVIC_SYSHCON;
-       if (irq == LPC43_IRQ_MEMFAULT)
+      *regaddr = NVIC_SYSHCON;
+      if (irq == LPC43_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
@@ -376,10 +376,10 @@ void up_irqinitialize(void)
   /* Set the priority of the SVCall interrupt */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-/* up_prioritize_irq(LPC43_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+  /* up_prioritize_irq(LPC43_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-   lpc43_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+  lpc43_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management

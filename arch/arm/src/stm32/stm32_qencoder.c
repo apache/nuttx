@@ -770,11 +770,11 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
 #if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
   if (priv->config->timid == 1 || priv->config->timid == 8)
-  {
-    /* Clear the Repetition Counter value */
+    {
+      /* Clear the Repetition Counter value */
 
-    stm32_putreg16(priv, STM32_ATIM_RCR_OFFSET, 0);
-  }
+      stm32_putreg16(priv, STM32_ATIM_RCR_OFFSET, 0);
+    }
 #endif
 
   /* Generate an update event to reload the Prescaler
@@ -807,7 +807,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Select the Input IC1=TI1 and set the filter fSAMPLING=fDTS/4, N=6 */
 
-  ccmr1 &= ~(GTIM_CCMR1_CC1S_MASK|GTIM_CCMR1_IC1F_MASK);
+  ccmr1 &= ~(GTIM_CCMR1_CC1S_MASK | GTIM_CCMR1_IC1F_MASK);
   ccmr1 |= GTIM_CCMR_CCS_CCIN1 << GTIM_CCMR1_CC1S_SHIFT;
   ccmr1 |= GTIM_CCMR_ICF_FDTSd46 << GTIM_CCMR1_IC1F_SHIFT;
 
@@ -842,7 +842,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Select the Input IC2=TI2 and set the filter fSAMPLING=fDTS/4, N=6 */
 
-  ccmr1 &= ~(GTIM_CCMR1_CC2S_MASK|GTIM_CCMR1_IC2F_MASK);
+  ccmr1 &= ~(GTIM_CCMR1_CC2S_MASK | GTIM_CCMR1_IC2F_MASK);
   ccmr1 |= GTIM_CCMR_CCS_CCIN1 << GTIM_CCMR1_CC2S_SHIFT;
   ccmr1 |= GTIM_CCMR_ICF_FDTSd46 << GTIM_CCMR1_IC2F_SHIFT;
 
@@ -1031,12 +1031,12 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Put the TI1 GPIO pin back to its default state */
 
-  pincfg = priv->config->ti1cfg & (GPIO_PORT_MASK|GPIO_PIN_MASK);
+  pincfg = priv->config->ti1cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
 
 #if defined(CONFIG_STM32_STM32F10XX)
-  pincfg |= (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT);
+  pincfg |= (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT);
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-  pincfg |= (GPIO_INPUT|GPIO_FLOAT);
+  pincfg |= (GPIO_INPUT | GPIO_FLOAT);
 #else
 #  error "Unrecognized STM32 chip"
 #endif
@@ -1045,12 +1045,12 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Put the TI2 GPIO pin back to its default state */
 
-  pincfg = priv->config->ti2cfg & (GPIO_PORT_MASK|GPIO_PIN_MASK);
+  pincfg = priv->config->ti2cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
 
 #if defined(CONFIG_STM32_STM32F10XX)
-  pincfg |= (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT);
+  pincfg |= (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT);
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-  pincfg |= (GPIO_INPUT|GPIO_FLOAT);
+  pincfg |= (GPIO_INPUT | GPIO_FLOAT);
 #else
 #  error "Unrecognized STM32 chip"
 #endif
@@ -1099,7 +1099,7 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos)
 #else
   /* Return the counter value */
 
-  *pos = (int32_t)stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET);;
+  *pos = (int32_t)stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET);
 #endif
   return OK;
 }

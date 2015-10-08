@@ -67,7 +67,7 @@
 
 /****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_STM32_BKPSRAM)
 #error Driver Requires CONFIG_STM32_BKPSRAM to be enabled
@@ -101,7 +101,7 @@ struct bbsramfh_s
                                 * starting at fileno */
   uint8_t fileno;              /* The minor number */
   uint8_t dirty;               /* Data has been written to the file */
-  uint16_t len;                /* Total Bytes in this file*/
+  uint16_t len;                /* Total Bytes in this file */
   struct timespec lastwrite;   /* Last write time */
   uint8_t  data[];             /* Data in the file */
 };
@@ -119,13 +119,17 @@ struct stm32_bbsram_s
 
 static int     stm32_bbsram_open(FAR struct file *filep);
 static int     stm32_bbsram_close(FAR struct file *filep);
-static off_t   stm32_bbsram_seek(FAR struct file *filep, off_t offset, int whence);
-static ssize_t stm32_bbsram_read(FAR struct file *, FAR char *, size_t);
-static ssize_t stm32_bbsram_write(FAR struct file *, FAR const char *, size_t);
-static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static off_t   stm32_bbsram_seek(FAR struct file *filep, off_t offset,
+                 int whence);
+static ssize_t stm32_bbsram_read(FAR struct file *filep, FAR char *buffer,
+                 size_t len);
+static ssize_t stm32_bbsram_write(FAR struct file *filep,
+                 FAR const char *buffer, size_t len);
+static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int     stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                            bool setup);
+                 bool setup);
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     stm32_bbsram_unlink(FAR struct inode *inode);
@@ -167,7 +171,7 @@ static struct stm32_bbsram_s g_bbsram[CONFIG_STM32_BBSRAM_FILES];
 #if defined(CONFIG_BBSRAM_DEBUG)
 static void stm32_bbsram_rd(void)
 {
-  memcpy(&debug,(uint8_t*)STM32_BKPSRAM_BASE,sizeof debug);
+  memcpy(&debug, (uint8_t *)STM32_BKPSRAM_BASE, sizeof debug);
 }
 #endif
 
@@ -179,7 +183,7 @@ static void stm32_bbsram_rd(void)
 static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
 {
   BBSRAM_DEBUG_READ();
-  lldbg("%s:\n",op);
+  lldbg("%s:\n", op);
   lldbg(" File Address:0x%8x\n", bbf);
   lldbg("  crc:0x%8x\n", bbf->crc);
   lldbg("  fileno:%d\n", (int) bbf->fileno);
@@ -287,7 +291,7 @@ static inline void stm32_bbsram_lock(void)
 
 static uint32_t stm32_bbsram_crc(FAR struct bbsramfh_s *pf)
 {
-  return crc32((uint8_t*)pf + BBSRAM_CRCED_OFFSET, BBSRAM_CRCED_SIZE(pf->len));
+  return crc32((uint8_t *)pf + BBSRAM_CRCED_OFFSET, BBSRAM_CRCED_SIZE(pf->len));
 }
 
 /****************************************************************************
@@ -335,7 +339,7 @@ static int stm32_bbsram_internal_close(FAR struct bbsramfh_s *bbf)
   (void)clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
   bbf->crc = stm32_bbsram_crc(bbf);
 
-  BBSRAM_DUMP(bbf,"close done");
+  BBSRAM_DUMP(bbf, "close done");
   return bbf->len;
 }
 
@@ -357,7 +361,7 @@ static int stm32_bbsram_close(FAR struct file *filep)
 
   stm32_bbsram_semtake(bbr);
 
-  BBSRAM_DUMP(bbr->bbf,"close");
+  BBSRAM_DUMP(bbr->bbf, "close");
 
   if (bbr->refs == 0)
     {
@@ -473,7 +477,7 @@ static ssize_t stm32_bbsram_read(FAR struct file *filep, FAR char *buffer,
       len = bbr->bbf->len - filep->f_pos;
     }
 
-  memcpy(buffer,&bbr->bbf->data[filep->f_pos], len);
+  memcpy(buffer, &bbr->bbf->data[filep->f_pos], len);
   filep->f_pos += len;
   stm32_bbsram_semgive(bbr);
   return len;
@@ -499,14 +503,14 @@ static ssize_t stm32_bbsram_internal_write(FAR struct bbsramfh_s *bbf,
 static ssize_t stm32_bbsram_write(FAR struct file *filep, FAR const char *buffer,
                                   size_t len)
 {
- FAR struct inode *inode = filep->f_inode;
- FAR struct stm32_bbsram_s *bbr;
- int ret = -EFBIG;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct stm32_bbsram_s *bbr;
+  int ret = -EFBIG;
 
- DEBUGASSERT(inode && inode->i_private);
- bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode && inode->i_private);
+  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
 
- /* Forbid writes past the end of the device */
+  /* Forbid writes past the end of the device */
 
   if (filep->f_pos <  bbr->bbf->len)
     {
@@ -520,17 +524,17 @@ static ssize_t stm32_bbsram_write(FAR struct file *filep, FAR const char *buffer
       ret = len; /* save number of bytes written */
 
       stm32_bbsram_semtake(bbr);
-      BBSRAM_DUMP(bbr->bbf,"write");
+      BBSRAM_DUMP(bbr->bbf, "write");
       stm32_bbsram_unlock();
       stm32_bbsram_internal_write(bbr->bbf, buffer, filep->f_pos, len);
       stm32_bbsram_lock();
       filep->f_pos += len;
-      BBSRAM_DUMP(bbr->bbf,"write done");
+      BBSRAM_DUMP(bbr->bbf, "write done");
       stm32_bbsram_semgive(bbr);
     }
 
- BBSRAM_DEBUG_READ();
- return ret;
+  BBSRAM_DEBUG_READ();
+  return ret;
 }
 
 /****************************************************************************
@@ -543,7 +547,7 @@ static int stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
           sem_post(fds->sem);
@@ -650,7 +654,7 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
 
   for (i = 0; (i < CONFIG_STM32_BBSRAM_FILES) && ent[i] && (avail > 0); i++)
     {
-      /* Validate the actual allocations against what is in the BBSRAM*/
+      /* Validate the actual allocations against what is in the BBSRAM */
 
       size = ent[i];
 
@@ -680,11 +684,11 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
 
               /* Not Valid so wipe the file in BBSRAM */
 
-              memset((uint8_t*)pf, 0, alloc);
+              memset((uint8_t *)pf, 0, alloc);
               pf->fileno = i;
               pf->len = size;
               pf->crc = stm32_bbsram_crc(pf);
-              BBSRAM_DUMP(pf,"probe reset");
+              BBSRAM_DUMP(pf, "probe reset");
             }
 
           pdev[i].bbf = pf;
@@ -769,8 +773,8 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
 
   fcnt = stm32_bbsram_probe(sizes, g_bbsram);
 
-  strncpy(path,devpath,sizeof(path));
-  strcat(path,"%d");
+  strncpy(path, devpath, sizeof(path));
+  strcat(path, "%d");
 
   for (i = 0; i < fcnt && ret >= OK; i++)
     {
@@ -785,22 +789,22 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
 }
 
 /****************************************************************************
-* Function: stm32_bbsram_savepanic
-*
-* Description:
-*   Saves the panic context in a previously allocated BBSRAM file
-*
-* Parameters:
-*   fileno  - the value returned by the ioctl STM32_BBSRAM_GETDESC_IOCTL
-*   context - Pointer to a any array of bytes to save
-*   length  - The length of the data pointed to byt context
-*
-* Returned Value:
-*   Length saved or negated errno.
-*
-* Assumptions:
-*
-****************************************************************************/
+ * Function: stm32_bbsram_savepanic
+ *
+ * Description:
+ *   Saves the panic context in a previously allocated BBSRAM file
+ *
+ * Parameters:
+ *   fileno  - the value returned by the ioctl STM32_BBSRAM_GETDESC_IOCTL
+ *   context - Pointer to a any array of bytes to save
+ *   length  - The length of the data pointed to byt context
+ *
+ * Returned Value:
+ *   Length saved or negated errno.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)

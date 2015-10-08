@@ -1189,10 +1189,10 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
     {
       if (priv->count == 0xffffffff || ++priv->count > 3)
         {
-           if (priv->count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (priv->count == 4)
+            {
+              lldbg("...\n");
+            }
 
           return regval;
         }
@@ -1202,20 +1202,20 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (priv->count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (priv->count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", priv->count - 3);
-         }
+          lldbg("[repeats %d more times]\n", priv->count - 3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       priv->regaddr = regaddr;
-       priv->regval  = regval;
-       priv->count   = 1;
+      priv->regaddr = regaddr;
+      priv->regval  = regval;
+      priv->count   = 1;
     }
 
   /* Show the register value read */
@@ -1440,7 +1440,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
        * be incremented and, hence, to be too low.
        */
 
-      for(;;)
+      for (; ; )
         {
           /* Get the current queue status and semaphore count. */
 
@@ -2716,7 +2716,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
-  dest   = (FAR uint8_t*)&txbuffer[2];
+  dest   = (FAR uint8_t *)&txbuffer[2];
   src    = msg->cm_data;
   nbytes = mcan_dlc2bytes(priv, msg->cm_hdr.ch_dlc);
 
@@ -2882,7 +2882,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  * Returned Value:
  *   True: Data is available
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not Used */
 bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
@@ -3272,7 +3272,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
        * FIFO0.
        */
 
-      for (;;)
+      for (; ; )
         {
           /* Check if there is anything in RX FIFO1 */
 

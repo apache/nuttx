@@ -660,13 +660,13 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_printreg
  *
  * Description:
  *   Print the contents of a SAMA5 UDPHS register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
@@ -675,14 +675,14 @@ static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_checkreg
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a SAMA5
  *   UDPHS register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
 static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
@@ -740,13 +740,13 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_getreg
  *
  * Description:
  *   Get the contents of an SAMA5 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr)
@@ -767,13 +767,13 @@ static inline uint32_t sam_getreg(uintptr_t regaddr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: sam_putreg
  *
  * Description:
  *   Set the contents of an SAMA5 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
 static void sam_putreg(uint32_t regval, uintptr_t regaddr)
@@ -2816,7 +2816,7 @@ static int sam_udphs_interrupt(int irq, void *context)
           sam_suspend(priv);
         }
 
-      /* SOF interrupt*/
+      /* SOF interrupt */
 
       else if ((pending & UDPHS_INT_INTSOF) != 0)
         {
@@ -3497,7 +3497,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 
 static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct sam_req_s *privreq = (struct sam_req_s*)req;
+  struct sam_req_s *privreq = (struct sam_req_s *)req;
 
 #ifdef CONFIG_DEBUG
   if (!ep || !req)
@@ -4293,7 +4293,7 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
   priv->dtdpool = (struct sam_dtd_s *)
     kmm_memalign(16, CONFIG_SAMA5_UDPHS_NDTDS * sizeof(struct sam_dtd_s));
   if (!priv->dtdpool)
-     {
+    {
       udbg("ERROR: Failed to allocate the DMA transfer descriptor pool\n");
       return NULL;
     }
@@ -4557,7 +4557,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       sam_pullup(&priv->usbdev, true);
       priv->usbdev.speed = USB_SPEED_FULL;
-   }
+    }
 
   return ret;
 }

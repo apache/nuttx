@@ -504,8 +504,7 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
       return;
     }
 
-  /*
-   * Since we don't use sequential multi-slave mode, but rather
+  /* Since we don't use sequential multi-slave mode, but rather
    * perform the transfer piecemeal by consecutive calls to
    * SPI_SEND, then we must manually assert the chip select
    * across the whole transfer
@@ -555,7 +554,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint32_t spi_clk, div, div1, div2;
 
   if (priv->frequency != frequency)
-  {
+    {
       /* The SPI clock is derived from the (main system oscillator / 2),
        * so compute the best divider from that clock */
 
@@ -580,8 +579,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       priv->slv1 = (priv->slv1 & ~(SPI_SLV_1_CLKDIV2_MASK | SPI_SLV_1_CLKDIV1_MASK)) | (div2 << SPI_SLV_1_CLKDIV2_SHIFT) | (div1 << SPI_SLV_1_CLKDIV1_SHIFT);
 
       priv->frequency = frequency;
-      priv->actual    = frequency;                // FIXME
-  }
+      priv->actual    = frequency;                /* FIXME */
+    }
 
   return priv->actual;
 }
@@ -607,7 +606,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   uint16_t setbits;
   uint16_t clrbits;
 
-/* Has the mode changed? */
+  /* Has the mode changed? */
 
   if (mode != priv->mode)
     {
@@ -617,7 +616,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* SPO=0; SPH=0 */
           setbits = 0;
-          clrbits = SPI_SLV_2_SPO|SPI_SLV_2_SPH;
+          clrbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
           break;
 
         case SPIDEV_MODE1: /* SPO=0; SPH=1 */
@@ -631,7 +630,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* SPO=1; SPH=1 */
-          setbits = SPI_SLV_2_SPO|SPI_SLV_2_SPH;
+          setbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
           clrbits = 0;
           break;
 
@@ -689,10 +688,10 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-    /* FIXME: is there anyway to determine this
-    *         it should probably be board dependant anyway */
+  /* FIXME: is there anyway to determine this
+   *        it should probably be board dependant anyway */
 
-    return SPI_STATUS_PRESENT;
+  return SPI_STATUS_PRESENT;
 }
 
 /************************************************************************************
@@ -720,7 +719,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t word)
   return spi_readword(priv);
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_exchange
  *
  * Description:
@@ -755,8 +754,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* 16-bit mode */
 
-      const uint16_t *src  = (const uint16_t*)txbuffer;;
-            uint16_t *dest = (uint16_t*)rxbuffer;
+      const uint16_t *src  = (const uint16_t *)txbuffer;
+            uint16_t *dest = (uint16_t *)rxbuffer;
             uint16_t  word;
 
       while (nwords > 0)
@@ -795,8 +794,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* 8-bit mode */
 
-      const uint8_t *src  = (const uint8_t*)txbuffer;;
-            uint8_t *dest = (uint8_t*)rxbuffer;
+      const uint8_t *src  = (const uint8_t *)txbuffer;
+            uint8_t *dest = (uint8_t *)rxbuffer;
             uint8_t  word;
 
       while (nwords > 0)
@@ -833,7 +832,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 }
 
-/*************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

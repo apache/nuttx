@@ -1091,7 +1091,7 @@ static void sam_putreg(uintptr_t address, uint32_t regval)
 
 static void sam_wait_lcdstatus(uint32_t mask, uint32_t value)
 {
-   while ((sam_getreg(SAM_LCDC_LCDSR) & mask) != value);
+  while ((sam_getreg(SAM_LCDC_LCDSR) & mask) != value);
 }
 
 /****************************************************************************
@@ -1409,7 +1409,7 @@ static int sam_setclut(struct sam_layer_s *layer,
   end = offset + len;
   if (end > (layer->offset + layer->nclut))
     {
-      layer->nclut = end - layer->offset;offset
+      layer->nclut = end - layer->offset;
     }
 
   /* Get the offset address to the first CLUT entry to modify */
@@ -2451,7 +2451,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
       imgh = 1;
     }
 
-  /* Set display buffer and mode setup*/
+  /* Set display buffer and mode setup */
 
   bytespp   = (uint32_t)layer->bpp >> 3;
   bprow     = imgw * (uint32_t)layer->bpp;
@@ -2547,7 +2547,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* Pointer to Right,Top (x1,y0) */
 
       buffer = (uint8_t *)
-        ((uint32_t)layer->framebuffer + bytespp*(imgw - 1));
+        ((uint32_t)layer->framebuffer + bytespp * (imgw - 1));
     }
 
   /* Y mirror: Left,Down -> Right,Top */
@@ -2579,7 +2579,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* Pointer to Left,Down (x0,y1) */
 
       buffer = (uint8_t *)
-        ((uintptr_t)layer->framebuffer + (bytesprow+padding)*(imgh-1));
+        ((uintptr_t)layer->framebuffer + (bytesprow + padding) * (imgh - 1));
     }
 
   /* X,Y mirror: Right,Top -> Left,Down */
@@ -2612,8 +2612,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
       buffer = (uint8_t *)
         ((uint32_t)layer->framebuffer +
-         (bytesprow + padding)*(imgh - 1) +
-         bytespp*(imgw -1 ));
+         (bytesprow + padding) * (imgh - 1) +
+         bytespp * (imgw - 1));
     }
 
   /* Rotate  90: Down,Left -> Top,Right (with w,h swap) */
@@ -2640,13 +2640,13 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* X ++ as rows */
 
       regaddr = g_layerstride[lid];
-      sam_putreg(regaddr, (bytesprow + padding)*(imgh - 1));
+      sam_putreg(regaddr, (bytesprow + padding) * (imgh - 1));
 
       /* Pointer to Bottom,Left */
 
       buffer = (uint8_t *)
         ((uint32_t)layer->framebuffer +
-         (bytesprow + padding)*(imgh - 1));
+         (bytesprow + padding) * (imgh - 1));
     }
 
   /* Rotate 270: Top,Right -> Down,Left (with w,h swap) */
@@ -2673,12 +2673,12 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* X -- as rows */
 
       regaddr = g_layerstride[lid];
-      sam_putreg(regaddr, 0 - 2*bytespp - (bytesprow + padding)*(imgh - 1));
+      sam_putreg(regaddr, 0 - 2*bytespp - (bytesprow + padding) * (imgh - 1));
 
       /* Pointer to top right */
 
       buffer = (uint8_t *)
-        ((uintptr_t)layer->framebuffer + bytespp*(imgw - 1));
+        ((uintptr_t)layer->framebuffer + bytespp * (imgw - 1));
     }
 
   /* Mirror X then Rotate 90: Down,Right -> Top,Left */
@@ -2705,20 +2705,20 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* X -- as rows */
 
       regaddr = g_layerstride[lid];
-      sam_putreg(regaddr, 0 - 2*bytespp + (bytesprow + padding)*(imgh - 1));
+      sam_putreg(regaddr, 0 - 2 * bytespp + (bytesprow + padding) * (imgh - 1));
 
       /* Pointer to down right (x1,y1) */
 
       buffer = (uint8_t *)
         ((uintptr_t)layer->framebuffer +
-         (bytesprow+padding)*(imgh - 1) +
-         (bytespp)*(imgw - 1));
+         (bytesprow + padding) * (imgh - 1) +
+         (bytespp) * (imgw - 1));
     }
 
   /* Mirror Y then Rotate 90: Top,Left -> Down,Right */
 
-  else if ((!rightleft &&  bottomup && layer->rotation ==  90)
-          ||(rightleft && !bottomup && layer->rotation == LCDC_ROT_270))
+  else if ((!rightleft &&  bottomup && layer->rotation ==  90) ||
+           ( rightleft && !bottomup && layer->rotation == LCDC_ROT_270))
     {
       /* No rotation optimization */
 
@@ -2739,7 +2739,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* X ++ as rows */
 
       regaddr = g_layerstride[lid];
-      sam_putreg(regaddr, 0 - (bytesprow + padding)*(imgh - 1));
+      sam_putreg(regaddr, 0 - (bytesprow + padding) * (imgh - 1));
 
       /* Pointer to top left (x0,y0) */
     }
@@ -2996,7 +2996,7 @@ int up_fbinitialize(void)
  * Returned value:
  *   Reference to the framebuffer object (NULL on failure)
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 struct fb_vtable_s *up_fbgetvplane(int vplane)
 {
@@ -3041,7 +3041,7 @@ void fb_uninitialize(void)
 void sam_lcdclear(nxgl_mxpixel_t color)
 {
 #if SAMA5_LCDC_BASE_BPP == 16
-  uint16_t *dest = (uint16_t*)LAYER_BASE.framebuffer;
+  uint16_t *dest = (uint16_t *)LAYER_BASE.framebuffer;
   int i;
 
   gvdbg("Clearing display: BPP=16 color=%04x framebuffer=%08x size=%d\n",
@@ -3052,7 +3052,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
       *dest++ = (uint16_t)color;
     }
 #elif SAMA5_LCDC_BASE_BPP == 24
-  uint8_t *dest = (uint8_t*)LAYER_BASE.framebuffer;
+  uint8_t *dest = (uint8_t *)LAYER_BASE.framebuffer;
   uint8_t r;
   uint8_t g;
   uint8_t b;
@@ -3072,7 +3072,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
       *dest++ = r;
     }
 #elif SAMA5_LCDC_BASE_BPP == 32
-  uint32_t *dest = (uint32_t*)LAYER_BASE.framebuffer;
+  uint32_t *dest = (uint32_t *)LAYER_BASE.framebuffer;
   int i;
 
   gvdbg("Clearing display: BPP=32 color=%08x framebuffer=%08x size=%d\n",

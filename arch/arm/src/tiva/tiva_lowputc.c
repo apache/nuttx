@@ -1,4 +1,4 @@
-/**************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/tiva_lowputc.c
  *
  *   Copyright (C) 2009-2010, 2014 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -54,9 +54,9 @@
 
 #include "tiva_lowputc.h"
 
-/**************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************/
+ ****************************************************************************/
 /* Configuration **********************************************************/
 
 /* Select UART parameters for the selected console */
@@ -200,52 +200,52 @@
  * Which should yied BAUD = 50,000,000 / (16 * (27 + 8/64)) = 115207.37
  */
 
-/**************************************************************************
+/****************************************************************************
  * Private Types
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
- * Global Variables
- **************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Variables
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Name: up_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
- **************************************************************************/
+ ****************************************************************************/
 
 void up_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while ((getreg32(TIVA_CONSOLE_BASE+TIVA_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
+  while ((getreg32(TIVA_CONSOLE_BASE + TIVA_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
 
   /* Then send the character */
 
-  putreg32((uint32_t)ch, TIVA_CONSOLE_BASE+TIVA_UART_DR_OFFSET);
+  putreg32((uint32_t)ch, TIVA_CONSOLE_BASE + TIVA_UART_DR_OFFSET);
 #endif
 }
 
-/**************************************************************************
+/****************************************************************************
  * Name: up_lowsetup
  *
  * Description:
@@ -253,7 +253,7 @@ void up_lowputc(char ch)
  *   console.  Its purpose is to get the console output availabe as soon
  *   as possible.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 void up_lowsetup(void)
 {
@@ -351,25 +351,25 @@ void up_lowsetup(void)
 
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
-  ctl = getreg32(TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
+  ctl = getreg32(TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
   ctl &= ~UART_CTL_UARTEN;
-  putreg32(ctl, TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
+  putreg32(ctl, TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
 
   /* Write the integer portion of the BRD to the UART IBRD register */
 
-  putreg32(TIVA_BRDI, TIVA_CONSOLE_BASE+TIVA_UART_IBRD_OFFSET);
+  putreg32(TIVA_BRDI, TIVA_CONSOLE_BASE + TIVA_UART_IBRD_OFFSET);
 
   /* Write the fractional portion of the BRD to the UART FBRD register */
 
-  putreg32(TIVA_DIVFRAC, TIVA_CONSOLE_BASE+TIVA_UART_FBRD_OFFSET);
+  putreg32(TIVA_DIVFRAC, TIVA_CONSOLE_BASE + TIVA_UART_FBRD_OFFSET);
 
   /* Write the desired serial parameters to the UART LCRH register */
 
-  putreg32(UART_LCRH_VALUE, TIVA_CONSOLE_BASE+TIVA_UART_LCRH_OFFSET);
+  putreg32(UART_LCRH_VALUE, TIVA_CONSOLE_BASE + TIVA_UART_LCRH_OFFSET);
 
   /* Enable the UART by setting the UARTEN bit in the UART CTL register */
 
-  ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
-  putreg32(ctl, TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
+  ctl |= (UART_CTL_UARTEN | UART_CTL_TXE | UART_CTL_RXE);
+  putreg32(ctl, TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
 #endif
 }

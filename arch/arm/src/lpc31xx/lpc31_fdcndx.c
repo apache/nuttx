@@ -1,4 +1,4 @@
-/************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_fdcndx.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
@@ -35,11 +35,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -47,9 +47,9 @@
 #include "up_arch.h"
 #include "lpc31_cgudrvr.h"
 
-/************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************/
+ ****************************************************************************/
 
 /* The select register in the ESR registers vary in width from 1-3 bits.
  * Below is a macro to select the widest case (which is OK because the
@@ -59,9 +59,9 @@
 
 #define CGU_ESRSEL(n)       (((n)>>1)&7)
 
-/************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************/
+ ****************************************************************************/
 
 static const uint8_t g_fdcbase[CGU_NDOMAINS] =
 {
@@ -79,15 +79,15 @@ static const uint8_t g_fdcbase[CGU_NDOMAINS] =
   0,                  /* Domain 11: SYSCLKO_BASE (no ESR register) */
 };
 
-/************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: lpc31_fdcndx
  *
  * Description:
@@ -95,7 +95,7 @@ static const uint8_t g_fdcbase[CGU_NDOMAINS] =
  *   corresponding fractional divider register (or FDCNDX_INVALID if
  *   there is no fractional divider associated with this clock).
  *
- ************************************************************************/
+ ****************************************************************************/
 
 int lpc31_fdcndx(enum lpc31_clockid_e clkid, enum lpc31_domainid_e dmnid)
 {
@@ -106,22 +106,22 @@ int lpc31_fdcndx(enum lpc31_clockid_e clkid, enum lpc31_domainid_e dmnid)
 
   esrndx = lpc31_esrndx(clkid);
   if (esrndx != ESRNDX_INVALID)
-  {
-    /* Read the clock's ESR to get the fractional divider */
-
-    uint32_t regval = getreg32(LPC31_CGU_ESR(esrndx));
-
-    /* Check if any fractional divider is enabled for this clock. */
-
-    if ((regval & CGU_ESR_ESREN) != 0)
     {
-      /* Yes.. The FDC index is an offset from this fractional
-       * divider base for this domain.
-       */
+      /* Read the clock's ESR to get the fractional divider */
 
-      fdcndx = CGU_ESRSEL(regval) + (int)g_fdcbase[dmnid];
+      uint32_t regval = getreg32(LPC31_CGU_ESR(esrndx));
+
+      /* Check if any fractional divider is enabled for this clock. */
+
+      if ((regval & CGU_ESR_ESREN) != 0)
+        {
+          /* Yes.. The FDC index is an offset from this fractional
+           * divider base for this domain.
+           */
+
+          fdcndx = CGU_ESRSEL(regval) + (int)g_fdcbase[dmnid];
+        }
     }
-  }
+
   return fdcndx;
 }
-

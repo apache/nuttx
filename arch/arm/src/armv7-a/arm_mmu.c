@@ -79,7 +79,7 @@
 #ifndef CONFIG_ARCH_ROMPGTABLE
 void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *l1table = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t *l1table = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
@@ -114,7 +114,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
 void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry)
 {
-  uint32_t *l1table = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t *l1table = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
 
   /* Set the encoded page table entry */
@@ -154,7 +154,7 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry)
 void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
                      uint32_t mmuflags)
 {
-  uint32_t *l2table  = (uint32_t*)l2vaddr;
+  uint32_t *l2table  = (uint32_t *)l2vaddr;
   uint32_t  index;
 
   /* The table divides a 1Mb address space up into 256 entries, each

@@ -328,6 +328,11 @@ config LPC43_I2C0
 	bool "I2C0"
 	default n
 
+config LPC43_I2C0_SUPERFAST
+	bool "I2C0 super fast mode"
+	default n
+	depends on LPC43_I2C0
+
 config LPC43_I2C1
 	bool "I2C1"
 	default n

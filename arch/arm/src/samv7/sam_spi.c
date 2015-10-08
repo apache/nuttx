@@ -87,13 +87,13 @@
 
 #ifdef CONFIG_SAMV7_SPI_DMA
 
-#  if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_DMAC0)
+#  if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_XDMAC)
 #    define SAMV7_SPI0_DMA true
 #  else
 #    define SAMV7_SPI0_DMA false
 #  endif
 
-#  if defined(CONFIG_SAMV7_SPI1_MASTER) && defined(CONFIG_SAMV7_DMAC1)
+#  if defined(CONFIG_SAMV7_SPI1_MASTER) && defined(CONFIG_SAMV7_XDMAC)
 #    define SAMV7_SPI1_DMA true
 #  else
 #    define SAMV7_SPI1_DMA false
@@ -923,9 +923,9 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
- static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
-                        bool selected)
- {
+static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool selected)
+{
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
   uint32_t regval;
@@ -1287,8 +1287,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   if (spics->nbits > 8)
     {
-      rxptr16 = (uint16_t*)rxbuffer;
-      txptr16 = (uint16_t*)txbuffer;
+      rxptr16 = (uint16_t *)rxbuffer;
+      txptr16 = (uint16_t *)txbuffer;
       rxptr8  = NULL;
       txptr8  = NULL;
     }
@@ -1296,8 +1296,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       rxptr16 = NULL;
       txptr16 = NULL;
-      rxptr8  = (uint8_t*)rxbuffer;
-      txptr8  = (uint8_t*)txbuffer;
+      rxptr8  = (uint8_t *)rxbuffer;
+      txptr8  = (uint8_t *)txbuffer;
     }
 
   /* Make sure that any previous transfer is flushed from the hardware */
@@ -1332,7 +1332,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *   Save the final word.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source). */
 
@@ -1653,7 +1653,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 }
 #endif /* CONFIG_SAMV7_SPI_DMA */
 
-/***************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:
@@ -1801,7 +1801,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
     }
 #endif
 
-   /* Select the SPI operations */
+  /* Select the SPI operations */
 
 #if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
   spics->spidev.ops = spino ? &g_spi1ops : &g_spi0ops;

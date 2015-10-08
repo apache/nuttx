@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_otghshost.c
  *
  *   Copyright (C) 2012-2015 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -69,12 +69,11 @@
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGHS)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 /* Configuration ***************************************************************/
-/*
- * STM32 USB OTG HS Host Driver Support
+/* STM32 USB OTG HS Host Driver Support
  *
  * Pre-requisites
  *
@@ -164,9 +163,9 @@
 #  define  MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Private Types
- *******************************************************************************/
+ ****************************************************************************/
 
 /* The following enumeration represents the various states of the USB host
  * state machine (for debug purposes only)
@@ -278,9 +277,9 @@ struct stm32_usbhost_s
   struct stm32_chan_s chan[STM32_MAX_TX_FIFOS];
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *******************************************************************************/
+ ****************************************************************************/
 
 /* Register operations ********************************************************/
 
@@ -469,9 +468,9 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv);
 static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv);
 static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv);
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- *******************************************************************************/
+ ****************************************************************************/
 
 /* In this driver implementation, support is provided for only a single a single
  * USB device.  All status information can be simply retained in a single global
@@ -488,21 +487,21 @@ static struct usbhost_connection_s g_usbconn =
   .enumerate        = stm32_enumerate,
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Public Data
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_printreg
  *
  * Description:
  *   Print the contents of an STM32xx register operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -511,13 +510,13 @@ static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_checkreg
  *
  * Description:
  *   Get the contents of an STM32 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
@@ -575,13 +574,13 @@ static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_getreg
  *
  * Description:
  *   Get the contents of an STM32 register
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr)
@@ -597,13 +596,13 @@ static uint32_t stm32_getreg(uint32_t addr)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_putreg
  *
  * Description:
  *   Set the contents of an STM32 register to a value
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_putreg(uint32_t addr, uint32_t val)
@@ -618,13 +617,13 @@ static void stm32_putreg(uint32_t addr, uint32_t val)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_modifyreg
  *
  * Description:
  *   Modify selected bits of an STM32 register.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits, uint32_t setbits)
 {
@@ -638,7 +637,7 @@ static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits, uint32_t set
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_takesem(sem_t *sem)
 {
@@ -660,20 +659,20 @@ static void stm32_takesem(sem_t *sem)
  * Description:
  *   Get a (possibly unaligned) 16-bit little endian value.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32_getle16(const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_alloc
  *
  * Description:
  *   Allocate a channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_chan_alloc(FAR struct stm32_usbhost_s *priv)
 {
@@ -699,13 +698,13 @@ static int stm32_chan_alloc(FAR struct stm32_usbhost_s *priv)
   return -EBUSY;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_free
  *
  * Description:
  *   Free a previoiusly allocated channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_chan_free(FAR struct stm32_usbhost_s *priv, int chidx)
 {
@@ -720,27 +719,27 @@ static void stm32_chan_free(FAR struct stm32_usbhost_s *priv, int chidx)
   priv->chan[chidx].inuse = false;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_freeall
  *
  * Description:
  *   Free all channels.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv)
 {
-   uint8_t chidx;
+  uint8_t chidx;
 
-   /* Free all host channels */
+  /* Free all host channels */
 
-   for (chidx = 2; chidx < STM32_NHOST_CHANNELS; chidx ++)
-     {
-       stm32_chan_free(priv, chidx);
-     }
+  for (chidx = 2; chidx < STM32_NHOST_CHANNELS; chidx ++)
+    {
+      stm32_chan_free(priv, chidx);
+    }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_configure
  *
  * Description:
@@ -748,7 +747,7 @@ static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv)
  *   when endpoint is allocated and EP0 (only) is re-configured with the
  *   max packet size or device address changes.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
 {
@@ -899,14 +898,14 @@ static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
   stm32_putreg(STM32_OTGHS_HCCHAR(chidx), regval);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_halt
  *
  * Description:
  *   Halt the channel associated with 'chidx' by setting the CHannel DISable
  *   (CHDIS) bit in in the HCCHAR register.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
                             enum stm32_chreason_e chreason)
@@ -984,7 +983,7 @@ static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
   stm32_putreg(STM32_OTGHS_HCCHAR(chidx), hcchar);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_waitsetup
  *
  * Description:
@@ -996,7 +995,7 @@ static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
  * Assumptions:
  *   Called from a normal thread context BEFORE the transfer has been started.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
                                 FAR struct stm32_chan_s *chan)
@@ -1024,7 +1023,7 @@ static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_asynchsetup
  *
  * Description:
@@ -1036,7 +1035,7 @@ static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
  * Assumptions:
  *   Might be called from the level of an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
@@ -1065,7 +1064,7 @@ static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_wait
  *
  * Description:
@@ -1074,7 +1073,7 @@ static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
  * Assumptions:
  *   Called from a normal thread context
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
                            FAR struct stm32_chan_s *chan)
@@ -1120,7 +1119,7 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_chan_wakeup
  *
  * Description:
@@ -1131,7 +1130,7 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
  *   This function is called from the transfer complete interrupt handler for
  *   the channel.  Interrupts are disabled.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
                               FAR struct stm32_chan_s *chan)
@@ -1181,13 +1180,13 @@ static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ctrlchan_alloc
  *
  * Description:
  *   Allocate and configured channels for a control pipe.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
                                 uint8_t epno, uint8_t funcaddr, uint8_t speed,
@@ -1244,7 +1243,7 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ctrlep_alloc
  *
  * Description:
@@ -1263,7 +1262,7 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
                               FAR const struct usbhost_epdesc_s *epdesc,
@@ -1377,13 +1376,13 @@ static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_transfer_start
  *
  * Description:
  *   Start at transfer on the select IN or OUT channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
 {
@@ -1567,7 +1566,7 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_getframe
  *
  * Description:
@@ -1575,7 +1574,7 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
  *   when a new SOF is transmitted on the USB, and is cleared to 0 when it
  *   reaches 0x3fff.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static inline uint16_t stm32_getframe(void)
@@ -1584,13 +1583,13 @@ static inline uint16_t stm32_getframe(void)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ctrl_sendsetup
  *
  * Description:
  *   Send an IN/OUT SETUP packet.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
                                 FAR struct stm32_ctrlinfo_s *ep0,
@@ -1651,23 +1650,23 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
           return ret;
         }
 
-     /* Get the elapsed time (in frames) */
+      /* Get the elapsed time (in frames) */
 
-     elapsed = clock_systimer() - start;
+      elapsed = clock_systimer() - start;
     }
   while (elapsed < STM32_SETUP_DELAY);
 
   return -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ctrl_senddata
  *
  * Description:
  *   Send data in the data phase of an OUT control transfer.  Or send status
  *   in the status phase of an IN control transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
                                FAR struct stm32_ctrlinfo_s *ep0,
@@ -1713,14 +1712,14 @@ static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
   return stm32_chan_wait(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ctrl_recvdata
  *
  * Description:
  *   Receive data in the data phase of an IN control transfer.  Or receive status
  *   in the status phase of an OUT control transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
                                FAR struct stm32_ctrlinfo_s *ep0,
@@ -1754,13 +1753,13 @@ static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
   return stm32_chan_wait(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_in_setup
  *
  * Description:
  *   Initiate an IN transfer on an bulk, interrupt, or isochronous pipe.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx)
 {
@@ -1815,13 +1814,13 @@ static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_in_transfer
  *
  * Description:
  *   Transfer 'buflen' bytes into 'buffer' from an IN channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                  FAR uint8_t *buffer, size_t buflen)
@@ -1872,7 +1871,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -1897,7 +1896,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   return (ssize_t)chan->xfrd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_in_next
  *
  * Description:
@@ -1906,7 +1905,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
  * Assumptions:
  *   This function is always called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
@@ -1962,7 +1961,7 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_in_asynch
  *
  * Description:
@@ -1971,7 +1970,7 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
  * Assumptions:
  *   This function is never called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
@@ -2009,13 +2008,13 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_out_setup
  *
  * Description:
  *   Initiate an OUT transfer on an bulk, interrupt, or isochronous pipe.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx)
 {
@@ -2074,13 +2073,13 @@ static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_out_transfer
  *
  * Description:
  *   Transfer the 'buflen' bytes in 'buffer' through an OUT channel.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                   FAR uint8_t *buffer, size_t buflen)
@@ -2117,7 +2116,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       ret = stm32_chan_waitsetup(priv, chan);
       if (ret < 0)
         {
-          usbhost_trace1(OTGHS_TRACE1_DEVDISCONN,0);
+          usbhost_trace1(OTGHS_TRACE1_DEVDISCONN, 0);
           return (ssize_t)ret;
         }
 
@@ -2130,7 +2129,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           return (ssize_t)ret;
         }
 
-     /* Wait for the transfer to complete and get the result */
+      /* Wait for the transfer to complete and get the result */
 
       ret = stm32_chan_wait(priv, chan);
 
@@ -2138,7 +2137,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       if (ret < 0)
         {
-          usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED, ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2183,7 +2182,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   return xfrd;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_out_next
  *
  * Description:
@@ -2192,7 +2191,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
  * Assumptions:
  *   This function is always called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
@@ -2204,7 +2203,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK?*/
+  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2248,7 +2247,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_out_asynch
  *
  * Description:
@@ -2257,7 +2256,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
  * Assumptions:
  *   This function is never called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
@@ -2295,14 +2294,14 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_wrpacket
  *
  * Description:
  *   Transfer the 'buflen' bytes in 'buffer' to the Tx FIFO associated with
  *   'chidx' (non-DMA).
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
                                 FAR uint8_t *buffer, int chidx, int buflen)
@@ -2335,7 +2334,7 @@ static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
   priv->chan[chidx].inflight += buflen;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_hcinisr
  *
  * Description:
@@ -2352,7 +2351,7 @@ static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
  *
  *   EBUSY in the result field indicates that the transfer has not completed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
                                       int chidx)
@@ -2596,7 +2595,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
   stm32_chan_wakeup(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_hcoutisr
  *
  * Description:
@@ -2613,7 +2612,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
  *
  *   EBUSY in the result field indicates that the transfer has not completed.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
                                        int chidx)
@@ -2821,13 +2820,13 @@ static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
   stm32_chan_wakeup(priv, chan);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_connected
  *
  * Description:
  *   Handle a connection event.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv)
 {
@@ -2837,7 +2836,7 @@ static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv)
     {
       /* Yes.. then now we are connected */
 
-      usbhost_vtrace1(OTGHS_VTRACE1_CONNECTED,0);
+      usbhost_vtrace1(OTGHS_VTRACE1_CONNECTED, 0);
       priv->connected = true;
       priv->change    = true;
       DEBUGASSERT(priv->smstate == SMSTATE_DETACHED);
@@ -2853,13 +2852,13 @@ static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_disconnected
  *
  * Description:
  *   Handle a disconnection event.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
 {
@@ -2869,15 +2868,15 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
     {
       /* Yes.. then we no longer connected */
 
-      usbhost_vtrace1(OTGHS_VTRACE1_DISCONNECTED,0);
+      usbhost_vtrace1(OTGHS_VTRACE1_DISCONNECTED, 0);
 
       /* Are we bound to a class driver? */
 
-      if ( priv->rhport.hport.devclass)
+      if (priv->rhport.hport.devclass)
         {
           /* Yes.. Disconnect the class driver */
 
-          CLASS_DISCONNECTED( priv->rhport.hport.devclass);
+          CLASS_DISCONNECTED(priv->rhport.hport.devclass);
            priv->rhport.hport.devclass = NULL;
         }
 
@@ -2890,9 +2889,9 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
 
       priv->rhport.hport.speed = USB_SPEED_FULL;
 
-    /* Notify any waiters that there is a change in the connection state */
+      /* Notify any waiters that there is a change in the connection state */
 
-     if (priv->pscwait)
+      if (priv->pscwait)
         {
           stm32_givesem(&priv->pscsem);
           priv->pscwait = false;
@@ -2900,13 +2899,13 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_sofisr
  *
  * Description:
  *   USB OTG HS start-of-frame interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_OTGHS_SOFINTR
 static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv)
@@ -2920,13 +2919,13 @@ static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv)
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_rxflvlisr
  *
  * Description:
  *   USB OTG HS RxFIFO non-empty interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3021,13 +3020,13 @@ static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
   stm32_putreg(STM32_OTGHS_GINTMSK, intmsk);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_nptxfeisr
  *
  * Description:
  *   USB OTG HS non-periodic TxFIFO empty interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3109,13 +3108,13 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_ptxfeisr
  *
  * Description:
  *   USB OTG HS periodic TxFIFO empty interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3197,13 +3196,13 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_hcisr
  *
  * Description:
  *   USB OTG HS host channels interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_hcisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3245,13 +3244,13 @@ static inline void stm32_gint_hcisr(FAR struct stm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_hprtisr
  *
  * Description:
  *   USB OTG HS host port interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3378,13 +3377,13 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
   stm32_putreg(STM32_OTGHS_HPRT, newhprt);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_discisr
  *
  * Description:
  *   USB OTG HS disconnect detected interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_discisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3397,13 +3396,13 @@ static inline void stm32_gint_discisr(FAR struct stm32_usbhost_s *priv)
   stm32_putreg(STM32_OTGHS_GINTSTS, OTGHS_GINT_DISC);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_ipxfrisr
  *
  * Description:
  *   USB OTG HS incomplete periodic interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_gint_ipxfrisr(FAR struct stm32_usbhost_s *priv)
 {
@@ -3422,13 +3421,13 @@ static inline void stm32_gint_ipxfrisr(FAR struct stm32_usbhost_s *priv)
   stm32_putreg(STM32_OTGHS_GINTSTS, OTGHS_GINT_IPXFR);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_isr
  *
  * Description:
  *   USB OTG HS global interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_gint_isr(int irq, FAR void *context)
 {
@@ -3450,7 +3449,7 @@ static int stm32_gint_isr(int irq, FAR void *context)
    * little interrupt handling overhead.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the unmasked bits in the GINT status */
 
@@ -3539,7 +3538,7 @@ static int stm32_gint_isr(int irq, FAR void *context)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_gint_enable and stm32_gint_disable
  *
  * Description:
@@ -3551,7 +3550,7 @@ static int stm32_gint_isr(int irq, FAR void *context)
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_gint_enable(void)
 {
@@ -3575,7 +3574,7 @@ static void stm32_gint_disable(void)
   stm32_putreg(STM32_OTGHS_GAHBCFG, regval);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_hostinit_enable
  *
  * Description:
@@ -3587,7 +3586,7 @@ static void stm32_gint_disable(void)
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_hostinit_enable(void)
 {
@@ -3645,7 +3644,7 @@ static inline void stm32_hostinit_enable(void)
   stm32_putreg(STM32_OTGHS_GINTMSK, regval);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_txfe_enable
  *
  * Description:
@@ -3665,7 +3664,7 @@ static inline void stm32_hostinit_enable(void)
  *   Called from user task context.  Interrupts must be disabled to assure
  *   exclusive access to the GINTMSK register.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
 {
@@ -3702,11 +3701,11 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * USB Host Controller Operations
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_wait
  *
  * Description:
@@ -3729,7 +3728,7 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_wait(FAR struct usbhost_connection_s *conn,
                       FAR struct usbhost_hubport_s **hport)
@@ -3741,7 +3740,7 @@ static int stm32_wait(FAR struct usbhost_connection_s *conn,
   /* Loop until a change in connection state is detected */
 
   flags = irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -3790,7 +3789,7 @@ static int stm32_wait(FAR struct usbhost_connection_s *conn,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_enumerate
  *
  * Description:
@@ -3816,7 +3815,7 @@ static int stm32_wait(FAR struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
                               FAR struct usbhost_connection_s *conn,
@@ -3835,7 +3834,7 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
     {
       /* No, return an error */
 
-      usbhost_trace1(OTGHS_TRACE1_DEVDISCONN,0);
+      usbhost_trace1(OTGHS_TRACE1_DEVDISCONN, 0);
       return -ENODEV;
     }
 
@@ -4098,7 +4097,7 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_alloc
  *
  * Description:
@@ -4128,7 +4127,7 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_alloc(FAR struct usbhost_driver_s *drvr,
                        FAR uint8_t **buffer, FAR size_t *maxlen)
@@ -4152,7 +4151,7 @@ static int stm32_alloc(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_free
  *
  * Description:
@@ -4173,7 +4172,7 @@ static int stm32_alloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -4264,7 +4263,7 @@ static int stm32_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_ctrlin and stm32_ctrlout
  *
  * Description:
@@ -4297,7 +4296,7 @@ static int stm32_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
@@ -4333,7 +4332,7 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       ret = stm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
-       {
+        {
           usbhost_trace1(OTGHS_TRACE1_SENDSETUP, -ret);
           continue;
         }
@@ -4471,7 +4470,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_transfer
  *
  * Description:
@@ -4507,7 +4506,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                               FAR uint8_t *buffer, size_t buflen)
@@ -4539,7 +4538,7 @@ static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
   return nbytes;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_asynch
  *
  * Description:
@@ -4572,7 +4571,7 @@ static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -4745,7 +4744,7 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_disconnect
  *
  * Description:
@@ -4768,7 +4767,7 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
  *   - Only a single class bound to a single device is supported.
  *   - Never called from an interrupt handler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
@@ -4777,10 +4776,10 @@ static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Initialization
- *******************************************************************************/
-/*******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: stm32_portreset
  *
  * Description:
@@ -4798,14 +4797,15 @@ static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_portreset(FAR struct stm32_usbhost_s *priv)
 {
   uint32_t regval;
 
   regval  = stm32_getreg(STM32_OTGHS_HPRT);
-  regval &= ~(OTGHS_HPRT_PENA|OTGHS_HPRT_PCDET|OTGHS_HPRT_PENCHNG|OTGHS_HPRT_POCCHNG);
+  regval &= ~(OTGHS_HPRT_PENA | OTGHS_HPRT_PCDET | OTGHS_HPRT_PENCHNG |
+              OTGHS_HPRT_POCCHNG);
   regval |= OTGHS_HPRT_PRST;
   stm32_putreg(STM32_OTGHS_HPRT, regval);
 
@@ -4817,7 +4817,7 @@ static void stm32_portreset(FAR struct stm32_usbhost_s *priv)
   up_mdelay(20);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_flush_txfifos
  *
  * Description:
@@ -4829,7 +4829,7 @@ static void stm32_portreset(FAR struct stm32_usbhost_s *priv)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_flush_txfifos(uint32_t txfnum)
 {
@@ -4857,7 +4857,7 @@ static void stm32_flush_txfifos(uint32_t txfnum)
   up_udelay(3);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_flush_rxfifo
  *
  * Description:
@@ -4869,7 +4869,7 @@ static void stm32_flush_txfifos(uint32_t txfnum)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_flush_rxfifo(void)
 {
@@ -4896,7 +4896,7 @@ static void stm32_flush_rxfifo(void)
   up_udelay(3);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_vbusdrive
  *
  * Description:
@@ -4909,7 +4909,7 @@ static void stm32_flush_rxfifo(void)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
 {
@@ -4922,7 +4922,8 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
   /* Turn on the Host port power. */
 
   regval = stm32_getreg(STM32_OTGHS_HPRT);
-  regval &= ~(OTGHS_HPRT_PENA|OTGHS_HPRT_PCDET|OTGHS_HPRT_PENCHNG|OTGHS_HPRT_POCCHNG);
+  regval &= ~(OTGHS_HPRT_PENA | OTGHS_HPRT_PCDET | OTGHS_HPRT_PENCHNG |
+              OTGHS_HPRT_POCCHNG);
 
   if (((regval & OTGHS_HPRT_PPWR) == 0) && state)
     {
@@ -4939,7 +4940,7 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
   up_mdelay(200);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_host_initialize
  *
  * Description:
@@ -4954,7 +4955,7 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
 {
@@ -5028,7 +5029,7 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
   stm32_hostinit_enable();
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_sw_initialize
  *
  * Description:
@@ -5040,7 +5041,7 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
  * Returned Value:
  *   None.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
 {
@@ -5109,7 +5110,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_hw_initialize
  *
  * Description:
@@ -5121,7 +5122,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
 {
@@ -5132,7 +5133,7 @@ static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
    * transceiver: "This bit is always 1 with write-only access"
    */
 
-  regval = stm32_getreg(STM32_OTGHS_GUSBCFG);;
+  regval = stm32_getreg(STM32_OTGHS_GUSBCFG);
   regval |= OTGHS_GUSBCFG_PHYSEL;
   stm32_putreg(STM32_OTGHS_GUSBCFG, regval);
 
@@ -5196,11 +5197,11 @@ static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_otghshost_initialize
  *
  * Description:
@@ -5223,7 +5224,7 @@ static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 FAR struct usbhost_connection_s *stm32_otghshost_initialize(int controller)
 {

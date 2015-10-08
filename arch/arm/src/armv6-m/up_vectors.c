@@ -85,16 +85,16 @@ extern char _ebss;
  */
 
 unsigned _vectors[] __attribute__((section(".vectors"))) =
-  {
-    /* Initial stack */
+{
+  /* Initial stack */
 
-    IDLE_STACK,
+  IDLE_STACK,
 
-    /* Reset exception handler */
+  /* Reset exception handler */
 
-    (unsigned)&__start,
+  (unsigned)&__start,
 
-    /* Vectors 2 - n point directly at the generic handler */
+  /* Vectors 2 - n point directly at the generic handler */
 
-    [2 ... (15 + ARMV6M_PERIPHERAL_INTERRUPTS)] = (unsigned)&exception_common
-  };
+  [2 ... (15 + ARMV6M_PERIPHERAL_INTERRUPTS)] = (unsigned)&exception_common
+};

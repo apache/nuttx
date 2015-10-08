@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_i2c.c
  *
  *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
@@ -44,11 +44,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -153,13 +153,13 @@ struct i2c_ops_s lpc23xx_i2c_ops =
 #endif
 };
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc23xx_i2c_setfrequency
  *
  * Description:
  *   Set the frequence for the next transfer
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
 {
@@ -189,13 +189,13 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
   return frequency;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc23xx_i2c_setaddress
  *
  * Description:
  *   Set the I2C slave address for a subsequent read/write
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 {
@@ -210,14 +210,14 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   return OK;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc23xx_i2c_write
  *
  * Description:
  *   Send a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
 {
@@ -229,22 +229,22 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
   priv->wrcnt = 0;
   priv->rdcnt = 0;
   priv->msg.addr &= ~0x01;
-  priv->msg.buffer = (uint8_t*)buffer;
+  priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
   ret = i2c_start (priv);
 
-  return ret >0 ? OK : -ETIMEDOUT;
+  return ret > 0 ? OK : -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc23xx_i2c_read
  *
  * Description:
  *   Receive a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 {
@@ -264,13 +264,13 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
   return ret > 0 ? OK : -ETIMEDOUT;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_start
  *
  * Description:
  *   Perform a I2C transfer start
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_start (struct lpc23xx_i2cdev_s *priv)
 {
@@ -290,41 +290,41 @@ static int i2c_start (struct lpc23xx_i2cdev_s *priv)
 
   if (priv-> state == 0x18 || priv->state == 0x28)
     {
-      ret=priv->wrcnt;
+      ret = priv->wrcnt;
     }
   else if (priv-> state == 0x50 || priv->state == 0x58)
     {
-      ret=priv->rdcnt;
+      ret = priv->rdcnt;
     }
 
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_stop
  *
  * Description:
  *   Perform a I2C transfer stop
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void i2c_stop (struct lpc23xx_i2cdev_s *priv)
 {
   if (priv->state != 0x38)
-   {
-     putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + I2C_CONSET_OFFSET);
-   }
+    {
+      putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + I2C_CONSET_OFFSET);
+    }
 
   sem_post (&priv->wait);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_timeout
  *
  * Description:
  *   Watchdog timer for timeout of I2C operation
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void i2c_timeout (int argc, uint32_t arg, ...)
 {
@@ -336,13 +336,13 @@ static void i2c_timeout (int argc, uint32_t arg, ...)
   irqrestore(flags);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: i2c_interrupt
  *
  * Description:
  *   The I2C Interrupt Handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int i2c_interrupt (int irq, FAR void *context)
 {
@@ -397,15 +397,15 @@ static int i2c_interrupt (int irq, FAR void *context)
         break;
 
       case 0x18:
-        priv->wrcnt=0;
+        priv->wrcnt = 0;
         putreg32(priv->msg.buffer[0], priv->base + I2C_DAT_OFFSET);
         break;
 
       case 0x28:
         priv->wrcnt++;
-        if (priv->wrcnt<priv->msg.length)
+        if (priv->wrcnt < priv->msg.length)
           {
-            putreg32(priv->msg.buffer[priv->wrcnt],priv->base+I2C_DAT_OFFSET);
+            putreg32(priv->msg.buffer[priv->wrcnt], priv->base + I2C_DAT_OFFSET);
           }
         else
           {
@@ -421,12 +421,12 @@ static int i2c_interrupt (int irq, FAR void *context)
 
       case 0x50:
         priv->rdcnt++;
-        if (priv->rdcnt<priv->msg.length)
+        if (priv->rdcnt < priv->msg.length)
           {
             priv->msg.buffer[priv->rdcnt] = getreg32(priv->base + I2C_DAT_OFFSET);
           }
 
-        if (priv->rdcnt>=priv->msg.length-1)
+        if (priv->rdcnt >= priv->msg.length-1)
           {
             putreg32(I2C_CONCLR_AAC | I2C_CONCLR_SIC, priv->base + I2C_CONCLR_OFFSET);
           }
@@ -447,13 +447,13 @@ static int i2c_interrupt (int irq, FAR void *context)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cinitialize
  *
  * Description:
  *   Initialise an I2C device
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 struct i2c_dev_s *up_i2cinitialize(int port)
 {
@@ -501,7 +501,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC2378_I2C1
   if (port == 1)
     {
-      priv= (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[1];
+      priv        = (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[1];
       priv->base  = I2C1_BASE_ADDR;
       priv->irqid = I2C1_IRQ;
 
@@ -529,7 +529,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 #ifdef CONFIG_LPC2378_I2C2
   if (port == 2)
     {
-      priv= (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[2];
+      priv        = (FAR struct lpc23xx_i2cdev_s *)&i2cdevices[2];
       priv->base  = I2C2_BASE_ADDR;
       priv->irqid = I2C2_IRQ;
 
@@ -559,7 +559,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       return NULL;
     }
 
-  putreg32(I2C_CONSET_I2EN,priv->base+I2C_CONSET_OFFSET);
+  putreg32(I2C_CONSET_I2EN, priv->base + I2C_CONSET_OFFSET);
 
   sem_init (&priv->mutex, 0, 1);
   sem_init (&priv->wait, 0, 0);
@@ -586,19 +586,19 @@ struct i2c_dev_s *up_i2cinitialize(int port)
   return &priv->dev;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_i2cuninitalize
  *
  * Description:
  *   Uninitialise an I2C device
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 {
   struct lpc23xx_i2cdev_s *priv = (struct lpc23xx_i2cdev_s *)dev;
 
-  putreg32(I2C_CONCLRT_I2ENC,priv->base+I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLRT_I2ENC, priv->base + I2C_CONCLR_OFFSET);
   up_disable_irq(priv->irqid);
   irq_detach(priv->irqid);
   return OK;

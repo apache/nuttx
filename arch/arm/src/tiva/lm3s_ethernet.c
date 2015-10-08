@@ -189,7 +189,7 @@ struct tiva_statistics_s
   uint32_t rx_ovrerrors;   /* Number of Rx FIFO overrun errors */
   uint32_t tx_int;         /* Number of Tx interrupts received */
   uint32_t tx_packets;     /* Number of Tx packets queued */
-  uint32_t tx_errors;      /* Number of Tx errors (transmission error)*/
+  uint32_t tx_errors;      /* Number of Tx errors (transmission error) */
   uint32_t tx_timeouts;    /* Number of Tx timeout errors */
 };
 #  define EMAC_STAT(priv,name) priv->ld_stat.name++
@@ -364,14 +364,14 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   flags   = irqsave();
   regval  = getreg32(TIVA_SYSCON_RCGC2);
-  regval |= (SYSCON_RCGC2_EMAC0|SYSCON_RCGC2_EPHY0);
+  regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
   nllvdbg("RCGC2: %08x\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
-  regval = getreg32(TIVA_SYSCON_SRCR2);
-  regval |= (SYSCON_SRCR2_EMAC0|SYSCON_SRCR2_EPHY0);
+  regval  = getreg32(TIVA_SYSCON_SRCR2);
+  regval |= (SYSCON_SRCR2_EMAC0 | SYSCON_SRCR2_EPHY0);
   putreg32(regval, TIVA_SYSCON_SRCR2);
 
   /* Wait just a bit.  This is a much longer delay than necessary */
@@ -380,7 +380,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   /* Then take the Ethernet controller out of the reset state */
 
-  regval &= ~(SYSCON_SRCR2_EMAC0|SYSCON_SRCR2_EPHY0);
+  regval &= ~(SYSCON_SRCR2_EMAC0 | SYSCON_SRCR2_EPHY0);
   putreg32(regval, TIVA_SYSCON_SRCR2);
   nllvdbg("SRCR2: %08x\n", regval);
 
@@ -545,7 +545,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
            * buffer may be un-aligned.
            */
 
-          tiva_ethout(priv, TIVA_MAC_DATA_OFFSET, *(uint32_t*)dbuf);
+          tiva_ethout(priv, TIVA_MAC_DATA_OFFSET, *(uint32_t *)dbuf);
         }
 
       /* Write the last, partial word in the FIFO */
@@ -756,7 +756,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
            * buffer may be un-aligned.
            */
 
-          *(uint32_t*)dbuf = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
+          *(uint32_t *)dbuf = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
         }
 
       /* Handle the last, partial word in the FIFO (0-3 bytes) and discard
@@ -1016,7 +1016,7 @@ static int tiva_interrupt(int irq, FAR void *context)
 
   if ((ris & MAC_RIS_TXEMP) != 0)
     {
-       /* Handle the complete of the transmission */
+      /* Handle the complete of the transmission */
 
       EMAC_STAT(priv, tx_int);
       tiva_txdone(priv);
@@ -1135,7 +1135,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   nlldbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Enable and reset the Ethernet controller */
 
@@ -1289,7 +1289,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
 
   nlldbg("Taking down: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -1489,7 +1489,8 @@ static inline int tiva_ethinitialize(int intf)
 #if TIVA_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"
 #else
-  DEBUGASSERT((getreg32(TIVA_SYSCON_DC4) & (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0)) == (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0));
+  DEBUGASSERT((getreg32(TIVA_SYSCON_DC4) & (SYSCON_DC4_EMAC0 | SYSCON_DC4_EPHY0)) ==
+              (SYSCON_DC4_EMAC0 | SYSCON_DC4_EPHY0));
 #endif
   DEBUGASSERT((unsigned)intf < TIVA_NETHCONTROLLERS);
 
@@ -1503,7 +1504,7 @@ static inline int tiva_ethinitialize(int intf)
   priv->ld_dev.d_addmac  = tiva_addmac;   /* Add multicast MAC address */
   priv->ld_dev.d_rmmac   = tiva_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->ld_dev.d_private = (void*)priv; /* Used to recover private state from dev */
+  priv->ld_dev.d_private = (void *)priv;  /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

@@ -199,7 +199,7 @@ static int rtc_setup(void)
   putreg32((uint32_t)0xff, LPC17_RTC_AMR);
   putreg32((uint32_t)0x00, LPC17_RTC_CALIB);
 
- /* Enable power to the RTC module */
+  /* Enable power to the RTC module */
 
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCRTC;
@@ -291,7 +291,7 @@ int up_rtcinitialize(void)
     {
       up_enable_irq(LPC17_IRQ_RTC);
     }
-#endif /*CONFIG_RTC_ALARM*/
+#endif /* CONFIG_RTC_ALARM */
 
   /* Perform the one-time setup of the RTC */
 

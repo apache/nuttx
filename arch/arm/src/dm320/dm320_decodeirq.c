@@ -71,7 +71,7 @@
  * Public Functions
  ********************************************************************************/
 
-void up_decodeirq(uint32_t* regs)
+void up_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lowsyslog(LOG_ERR, "Unexpected IRQ\n");
@@ -124,7 +124,7 @@ void up_decodeirq(uint32_t* regs)
 #ifdef CONFIG_ARCH_FPU
               /* Restore floating point registers */
 
-              up_restorefpu((uint32_t*)current_regs);
+              up_restorefpu((uint32_t *)current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

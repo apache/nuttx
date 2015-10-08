@@ -446,7 +446,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -1067,9 +1067,9 @@ static inline void sam_flash_config(uint32_t cpuclock, uint32_t psm, bool fastwk
             }
         }
 
-     /* The is below the threshold that requires one wait state.  But we
-      * have to check a few more things.
-      */
+      /* The is below the threshold that requires one wait state.  But we
+       * have to check a few more things.
+       */
 
       else
         {

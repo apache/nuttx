@@ -126,12 +126,12 @@ uint32_t sam_pllack_frequency(uint32_t mainclk)
     }
 #endif
 
- /* Get the PLLA multiplier (MULA)
-  *
-  *   MULA = 0: PLLA is deactivated
-  *   MULA > 0: The PLLA Clock frequency is the PLLA input frequency
-  *              multiplied by MULA + 1.
-  */
+  /* Get the PLLA multiplier (MULA)
+   *
+   *   MULA = 0: PLLA is deactivated
+   *   MULA > 0: The PLLA Clock frequency is the PLLA input frequency
+   *              multiplied by MULA + 1.
+   */
 
   mula = (regval & PMC_CKGR_PLLAR_MUL_MASK) >> PMC_CKGR_PLLAR_MUL_SHIFT;
   if (mula > 0)

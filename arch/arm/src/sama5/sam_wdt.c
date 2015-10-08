@@ -196,10 +196,11 @@ static uint32_t sam_getreg(uintptr_t regaddr)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
+          if (count == 4)
+            {
+              lldbg("...\n");
+            }
+
           return regval;
         }
     }
@@ -208,20 +209,20 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
-         }
+          lldbg("[repeats %d more times]\n", count-3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = regaddr;
-       preval   = regval;
-       count    = 1;
+      prevaddr = regaddr;
+      preval   = regval;
+      count    = 1;
     }
 
   /* Show the register value read */

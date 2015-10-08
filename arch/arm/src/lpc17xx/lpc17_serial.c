@@ -478,7 +478,7 @@ static uart_dev_t g_uart3port =
 #      undef TTYS3_DEV                      /* No ttyS3 */
 #    endif
 #  endif
-#endif /*HAVE_CONSOLE*/
+#endif /* HAVE_CONSOLE */
 
 /************************************************************************************
  * Inline Functions
@@ -609,7 +609,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 16 / MinDL
    */
 
-  if (baud < (LPC17_CCLK / 16 / UART_MINDL ))
+  if (baud < (LPC17_CCLK / 16 / UART_MINDL))
     {
       return SYSCON_PCLKSEL_CCLK;
     }
@@ -625,7 +625,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 8 / MinDL
    */
 
-  else if (baud < (LPC17_CCLK / 8 / UART_MINDL ))
+  else if (baud < (LPC17_CCLK / 8 / UART_MINDL))
     {
       return SYSCON_PCLKSEL_CCLK2;
     }
@@ -641,7 +641,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 4 / MinDL
    */
 
-  else if (baud < (LPC17_CCLK / 4 / UART_MINDL ))
+  else if (baud < (LPC17_CCLK / 4 / UART_MINDL))
     {
       return SYSCON_PCLKSEL_CCLK4;
     }
@@ -657,7 +657,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD <= CCLK / 2 / MinDL
    */
 
-  else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL )) */
+  else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL)) */
     {
       return SYSCON_PCLKSEL_CCLK8;
     }
@@ -877,17 +877,17 @@ static inline uint32_t lpc17_uartdl(uint32_t baud)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint16_t dl;
   uint32_t lcr;
 
   /* Clear fifos */
 
-  up_serialout(priv, LPC17_UART_FCR_OFFSET, (UART_FCR_RXRST|UART_FCR_TXRST));
+  up_serialout(priv, LPC17_UART_FCR_OFFSET, (UART_FCR_RXRST | UART_FCR_TXRST));
 
   /* Set trigger */
 
-  up_serialout(priv, LPC17_UART_FCR_OFFSET, (UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8));
+  up_serialout(priv, LPC17_UART_FCR_OFFSET, (UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8));
 
   /* Set up the IER */
 
@@ -913,11 +913,11 @@ static int up_setup(struct uart_dev_s *dev)
 
   if (priv->parity == 1)
     {
-      lcr |= (UART_LCR_PE|UART_LCR_PS_ODD);
+      lcr |= (UART_LCR_PE | UART_LCR_PS_ODD);
     }
   else if (priv->parity == 2)
     {
-      lcr |= (UART_LCR_PE|UART_LCR_PS_EVEN);
+      lcr |= (UART_LCR_PE | UART_LCR_PS_EVEN);
     }
 
   /* Enter DLAB=1 */
@@ -941,7 +941,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* Configure the FIFOs */
 
   up_serialout(priv, LPC17_UART_FCR_OFFSET,
-               (UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN));
+               (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST | UART_FCR_RXRST |
+                UART_FCR_FIFOEN));
 
   /* Enable Auto-RTS and Auto-CS Flow Control in the Modem Control Register */
 
@@ -949,7 +950,7 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->uartbase == LPC17_UART1_BASE)
     {
 #if defined(CONFIG_UART1_IFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
-      up_serialout(priv, LPC17_UART_MCR_OFFSET, (UART_MCR_RTSEN|UART_MCR_CTSEN));
+      up_serialout(priv, LPC17_UART_MCR_OFFSET, (UART_MCR_RTSEN | UART_MCR_CTSEN));
 #elif defined(CONFIG_UART1_IFLOWCONTROL)
       up_serialout(priv, LPC17_UART_MCR_OFFSET, UART_MCR_RTSEN);
 #else
@@ -972,7 +973,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disableuartint(priv, NULL);
 }
 
@@ -993,7 +994,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
 static int up_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -1001,11 +1002,11 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the UART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the UART
+       */
 
-       up_enable_irq(priv->irq);
+      up_enable_irq(priv->irq);
     }
 
   return ret;
@@ -1023,7 +1024,7 @@ static int up_attach(struct uart_dev_s *dev)
 
 static void up_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -1078,7 +1079,7 @@ static int up_interrupt(int irq, void *context)
     {
       PANIC();
     }
-  priv = (struct up_dev_s*)dev->priv;
+  priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -1172,7 +1173,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
+  struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
   int                ret    = OK;
 
   switch (cmd)
@@ -1180,7 +1181,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-        struct up_dev_s *user = (struct up_dev_s*)arg;
+        struct up_dev_s *user = (struct up_dev_s *)arg;
         if (!user)
           {
             ret = -EINVAL;
@@ -1213,7 +1214,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
-        struct termios *termiosp = (struct termios*)arg;
+        struct termios *termiosp = (struct termios *)arg;
 
         if (!termiosp)
           {
@@ -1233,7 +1234,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios *termiosp = (struct termios*)arg;
+        struct termios *termiosp = (struct termios *)arg;
         uint32_t           lcr;  /* Holds current values of line control register */
         uint16_t           dl;   /* Divisor latch */
 
@@ -1256,7 +1257,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          * and reset the divider in the CLKSEL0/1 register.
          */
 
-#if 0 // ifdef LPC176x
+#if 0 /* ifdef LPC176x */
         priv->cclkdiv = lpc17_uartcclkdiv(priv->baud);
 #endif
         /* DLAB open latch */
@@ -1302,7 +1303,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rbr;
 
   *status = up_serialin(priv, LPC17_UART_LSR_OFFSET);
@@ -1320,7 +1321,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1345,7 +1346,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, LPC17_UART_LSR_OFFSET) & UART_LSR_RDR) != 0);
 }
 
@@ -1359,7 +1360,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_serialout(priv, LPC17_UART_THR_OFFSET, (uint32_t)ch);
 }
 
@@ -1373,7 +1374,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -1409,7 +1410,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, LPC17_UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
 }
 
@@ -1423,7 +1424,7 @@ static bool up_txready(struct uart_dev_s *dev)
 
 static bool up_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, LPC17_UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
 }
 
@@ -1536,7 +1537,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t ier;
   up_disableuartint(priv, &ier);
 #endif

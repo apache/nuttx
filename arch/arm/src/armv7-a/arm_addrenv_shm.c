@@ -285,19 +285,19 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
        flags = irqsave();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
-       /* Get the virtual address corresponding to the physical page\
-        * address.
-        */
+      /* Get the virtual address corresponding to the physical page
+       * address.
+       */
 
-       l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+      l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
 #else
-       /* Temporarily map the page into the virtual address space */
+      /* Temporarily map the page into the virtual address space */
 
-       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-       mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
-                       MMU_MEMFLAGS);
-       l2table = (FAR uint32_t *)
-         (ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
+      mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
+                      MMU_MEMFLAGS);
+      l2table = (FAR uint32_t *)
+        (ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
 #endif
 
       /* Unmap this virtual page address.

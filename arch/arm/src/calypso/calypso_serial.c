@@ -73,7 +73,9 @@
 
 #if UART_FCR_OFFS == UART_EFR_OFFS
 # define UART_MULTIPLEX_REGS
-// HW flow control not supported yet
+
+/* HW flow control not supported yet */
+
 # undef  CONFIG_UART_HWFLOWCONTROL
 #endif
 
@@ -300,7 +302,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint16_t *ier)
 
 static inline void up_restoreuartint(struct up_dev_s *priv, uint16_t ier)
 {
-  priv->regs.ier |= ier & (UART_IER_RECVINT|UART_IER_XMITINT);
+  priv->regs.ier |= ier & (UART_IER_RECVINT | UART_IER_XMITINT);
   up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
 }
 
@@ -417,11 +419,11 @@ static int up_setup(struct uart_dev_s *dev)
 
   if (priv->parity == 1)   /* Odd parity */
     {
-      cval |= (UART_LCR_PAREN|UART_LCR_PARODD);
+      cval |= (UART_LCR_PAREN | UART_LCR_PARODD);
     }
   else if (priv->parity == 2)  /* Even parity */
     {
-      cval |= (UART_LCR_PAREN|UART_LCR_PAREVEN);
+      cval |= (UART_LCR_PAREN | UART_LCR_PAREVEN);
     }
 
   /* Both the IrDA and MODEM UARTs support RESET and UART mode. */
@@ -460,7 +462,7 @@ static int up_setup(struct uart_dev_s *dev)
 #ifdef UART_MULTIPLEX_REGS
   priv->regs.lcr = 0x80;
   up_serialout(priv, UART_LCR_OFFS, priv->regs.lcr);
-  //up_serialout(priv, UART_MCR_OFFS, 1<<4);              /* loopback */
+  //up_serialout(priv, UART_MCR_OFFS, 1 << 4);          /* loopback */
 #endif
 
   up_serialout(priv, UART_TFCR_OFFS, 0);                /* Reset to 0 */
@@ -524,7 +526,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   up_disableuartint(priv, NULL);
 }
 
@@ -545,7 +547,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
 static int up_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -553,11 +555,11 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the UART
-        */
+      /* Enable the interrupt (RX and TX interrupts are still disabled
+       * in the UART
+       */
 
-       up_enable_irq(priv->irq);
+      up_enable_irq(priv->irq);
     }
 
   return ret;
@@ -575,7 +577,7 @@ static int up_attach(struct uart_dev_s *dev)
 
 static void up_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -611,7 +613,7 @@ static int up_interrupt(int irq, void *context)
     {
       PANIC();
     }
-  priv = (struct up_dev_s*)dev->priv;
+  priv = (struct up_dev_s *)dev->priv;
 
   cause = up_inserial(priv, UART_ISR_OFFS) & 0x0000003f;
 
@@ -622,31 +624,31 @@ static int up_interrupt(int irq, void *context)
       /* Is this an interrupt from the IrDA UART? */
 
       if (irq == UART_IRQ_IRDA)
-         {
-           /* Save the currently enabled IrDA UART interrupts
-            * so that we can restore the IrDA interrupt state
-            * below.
-            */
+        {
+          /* Save the currently enabled IrDA UART interrupts
+           * so that we can restore the IrDA interrupt state
+           * below.
+           */
 
-           ier_val = up_inserial(priv, UART_IER_OFFS);
+          ier_val = up_inserial(priv, UART_IER_OFFS);
 
-           /* Then disable all IrDA UART interrupts */
+          /* Then disable all IrDA UART interrupts */
 
-           up_serialout(priv, UART_IER_OFFS, 0);
-         }
+          up_serialout(priv, UART_IER_OFFS, 0);
+        }
 
       /* Receive characters from the RX fifo */
 
 #ifdef CONFIG_SERCOMM_CONSOLE
       if (priv->sercomm)
-         {
-           sercomm_recvchars(dev);
-         }
+        {
+          sercomm_recvchars(dev);
+        }
       else
 #endif
-         {
-           uart_recvchars(dev);
-         }
+        {
+          uart_recvchars(dev);
+        }
 
       /* read UART_RHR to clear int condition
        * toss = up_inserialchar(priv,&status);
@@ -655,38 +657,38 @@ static int up_interrupt(int irq, void *context)
       /* Is this an interrupt from the IrDA UART? */
 
       if (irq == UART_IRQ_IRDA)
-         {
-           /* Restore the IrDA UART interrupt enables */
+        {
+          /* Restore the IrDA UART interrupt enables */
 
-           up_serialout(priv, UART_IER_OFFS, ier_val);
-         }
+          up_serialout(priv, UART_IER_OFFS, ier_val);
+        }
     }
   else if ((cause & 0x0000000c) == 0x00000004)
     {
 #ifdef CONFIG_SERCOMM_CONSOLE
       if (priv->sercomm)
-         {
-           sercomm_recvchars(dev);
-         }
+        {
+          sercomm_recvchars(dev);
+        }
       else
 #endif
-         {
-           uart_recvchars(dev);
-         }
+        {
+          uart_recvchars(dev);
+        }
     }
 
   if ((cause & 0x00000002) != 0)
     {
 #ifdef CONFIG_SERCOMM_CONSOLE
       if (priv->sercomm)
-         {
-           sercomm_xmitchars(dev);
-         }
+        {
+          sercomm_xmitchars(dev);
+        }
       else
 #endif
-         {
-           uart_xmitchars(dev);
-         }
+        {
+          uart_xmitchars(dev);
+        }
     }
 
   return OK;
@@ -704,7 +706,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
+  struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
   int                ret    = OK;
 
   switch (cmd)
@@ -712,7 +714,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct up_dev_s *user = (struct up_dev_s*)arg;
+         struct up_dev_s *user = (struct up_dev_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
@@ -762,7 +764,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rhr;
   uint32_t lsr;
 
@@ -790,7 +792,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -815,7 +817,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return up_inserial(priv, UART_LSR_OFFS) & UART_RX_FIFO_NOEMPTY;
 }
 
@@ -829,7 +831,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_serialout(priv, UART_THR_OFFS, (uint8_t)ch);
 }
 
@@ -843,7 +845,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -868,7 +870,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return (up_inserial(priv, UART_SSR_OFFS) & UART_SSR_TXFULL) == 0;
 }
 
@@ -882,7 +884,7 @@ static bool up_txready(struct uart_dev_s *dev)
 
 static bool up_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return (up_inserial(priv, UART_LSR_OFFS) & UART_LSR_TREF) != 0;
 }
 
@@ -921,7 +923,7 @@ void up_earlyserialinit(void)
 void up_serialinit(void)
 {
 #ifdef CONFIG_SERCOMM_CONSOLE
-  ((struct up_dev_s*)TTYS0_DEV.priv)->sercomm = true;
+  ((struct up_dev_s *)TTYS0_DEV.priv)->sercomm = true;
   (void)sercomm_register("/dev/console", &TTYS0_DEV);
   (void)uart_register("/dev/ttyS0", &TTYS1_DEV);
 #else
@@ -942,7 +944,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint16_t  ier;
 
   up_disableuartint(priv, &ier);

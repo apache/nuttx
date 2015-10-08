@@ -124,7 +124,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      uint32_t *ptr = (uint32_t*)stack;
+      uint32_t *ptr = (uint32_t *)stack;
       lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -187,7 +187,7 @@ static inline void up_registerdump(void)
 
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
-          uint32_t *ptr = (uint32_t*)&current_regs[regs];
+          uint32_t *ptr = (uint32_t *)&current_regs[regs];
           lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -232,7 +232,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
   uint32_t sp   = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -365,18 +365,18 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || ((struct tcb_s*)g_readytorun.head)->pid == 0)
+  if (current_regs || ((struct tcb_s *)g_readytorun.head)->pid == 0)
     {
-       (void)irqsave();
-        for (;;)
-          {
+      (void)irqsave();
+      for (; ; )
+        {
 #ifdef CONFIG_ARCH_LEDS
-            board_led_on(LED_PANIC);
-            up_mdelay(250);
-            board_led_off(LED_PANIC);
-            up_mdelay(250);
+          board_led_on(LED_PANIC);
+          up_mdelay(250);
+          board_led_off(LED_PANIC);
+          up_mdelay(250);
 #endif
-          }
+        }
     }
   else
     {
@@ -395,7 +395,7 @@ static void _up_assert(int errorcode)
 void up_assert(const uint8_t *filename, int lineno)
 {
 #ifdef CONFIG_PRINT_TASKNAME
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
 #endif
   board_led_on(LED_ASSERTION);
 

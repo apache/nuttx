@@ -240,7 +240,7 @@ struct usbdev_s;
 void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: lpc31_ehci_initialize
  *
  * Description:
@@ -263,7 +263,7 @@ void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;

@@ -113,7 +113,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    */
 
 
-  savestate    = (uint32_t*)current_regs;
+  savestate    = (uint32_t *)current_regs;
 #endif
   current_regs = regs;
 

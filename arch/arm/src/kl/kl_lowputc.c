@@ -1,4 +1,4 @@
-/**************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/kl_lowputc.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,9 +57,9 @@
 #include "chip/kl_uart.h"
 #include "chip/kl_pinmux.h"
 
-/**************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************/
+ ****************************************************************************/
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
@@ -84,37 +84,37 @@
 
 #define OVER_SAMPLE 16
 
-/**************************************************************************
+/****************************************************************************
  * Private Types
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
- * Global Variables
- **************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Variables
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Name: up_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
- **************************************************************************/
+ ****************************************************************************/
 
 void kl_lowputc(uint32_t ch)
 {
@@ -136,14 +136,14 @@ void kl_lowputc(uint32_t ch)
 
   while ((getreg8(CONSOLE_BASE+KL_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
 
- /* Then write the character to the UART data register */
+  /* Then write the character to the UART data register */
 
   putreg8((uint8_t)ch, CONSOLE_BASE+KL_UART_D_OFFSET);
 
 #endif
 }
 
-/**************************************************************************
+/****************************************************************************
  * Name: kl_lowsetup
  *
  * Description:
@@ -151,65 +151,65 @@ void kl_lowputc(uint32_t ch)
  *   console.  Its purpose is to get the console output availabe as soon
  *   as possible.
  *
- **************************************************************************/
+ ****************************************************************************/
 void kl_lowsetup(void)
 {
-   uint32_t regval;
-   uint8_t regval8;
+  uint32_t regval;
+  uint8_t regval8;
 
 #if 0
-   regval = getreg32(KL_SIM_SOPT2);
-   regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_UART0SRC_MCGCLK ;
-   putreg32(regval, KL_SIM_SOPT2);
+  regval = getreg32(KL_SIM_SOPT2);
+  regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_UART0SRC_MCGCLK ;
+  putreg32(regval, KL_SIM_SOPT2);
 #endif
 
-   regval = getreg32(KL_SIM_SCGC4);
+  regval = getreg32(KL_SIM_SCGC4);
 #ifdef CONFIG_KL_UART0
-   regval |= SIM_SCGC4_UART0;
+  regval |= SIM_SCGC4_UART0;
 #endif
 #ifdef CONFIG_KL_UART1
-   regval |= SIM_SCGC4_UART1;
+  regval |= SIM_SCGC4_UART1;
 #endif
 #ifdef CONFIG_KL_UART2
-   regval |= SIM_SCGC4_UART2;
+  regval |= SIM_SCGC4_UART2;
 #endif
-   putreg32(regval, KL_SIM_SCGC4);
+  putreg32(regval, KL_SIM_SCGC4);
 
-   regval = getreg32(KL_SIM_SOPT2);
-   regval &= ~(SIM_SOPT2_UART0SRC_MASK);
-   putreg32(regval, KL_SIM_SOPT2);
+  regval = getreg32(KL_SIM_SOPT2);
+  regval &= ~(SIM_SOPT2_UART0SRC_MASK);
+  putreg32(regval, KL_SIM_SOPT2);
 
-   regval = getreg32(KL_SIM_SOPT2);
-   regval |= SIM_SOPT2_UART0SRC_MCGCLK;
-   putreg32(regval, KL_SIM_SOPT2);
+  regval = getreg32(KL_SIM_SOPT2);
+  regval |= SIM_SOPT2_UART0SRC_MCGCLK;
+  putreg32(regval, KL_SIM_SOPT2);
 
-   putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR1);
-   putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR2);
+  putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR1);
+  putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR2);
 
-   /* Disable UART before changing registers */
+  /* Disable UART before changing registers */
 
-   putreg8(0, KL_UART0_C2);
-   putreg8(0, KL_UART0_C1);
-   putreg8(0, KL_UART0_C3);
-   putreg8(0, KL_UART0_S2);
+  putreg8(0, KL_UART0_C2);
+  putreg8(0, KL_UART0_C1);
+  putreg8(0, KL_UART0_C3);
+  putreg8(0, KL_UART0_S2);
 
-   /* Set the baud rate divisor */
+  /* Set the baud rate divisor */
 
-   uint16_t divisor = (CONSOLE_FREQ / OVER_SAMPLE) / CONSOLE_BAUD;
-   regval8 = OVER_SAMPLE - 1;
-   putreg8(regval8, KL_UART0_C4);
+  uint16_t divisor = (CONSOLE_FREQ / OVER_SAMPLE) / CONSOLE_BAUD;
+  regval8 = OVER_SAMPLE - 1;
+  putreg8(regval8, KL_UART0_C4);
 
-   regval8 = (divisor >> 8) & UART_BDH_SBR_MASK;
-   putreg8(regval8, KL_UART0_BDH);
+  regval8 = (divisor >> 8) & UART_BDH_SBR_MASK;
+  putreg8(regval8, KL_UART0_BDH);
 
-   regval8 = (divisor & UART_BDL_SBR_MASK);
-   putreg8(regval8, KL_UART0_BDL);
+  regval8 = (divisor & UART_BDL_SBR_MASK);
+  putreg8(regval8, KL_UART0_BDL);
 
-   /* Enable UART before changing registers */
+  /* Enable UART before changing registers */
 
-   regval8 = getreg8(KL_UART0_C2);
-   regval8 |= (UART_C2_RE | UART_C2_TE);
-   putreg8(regval8, KL_UART0_C2);
+  regval8 = getreg8(KL_UART0_C2);
+  regval8 |= (UART_C2_RE | UART_C2_TE);
+  putreg8(regval8, KL_UART0_C2);
 
   /* Configure the console (only) now.  Other UARTs will be configured
    * when the serial driver is opened.
@@ -222,13 +222,13 @@ void kl_lowsetup(void)
 #endif
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: kl_uartreset
  *
  * Description:
  *   Reset a UART.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void kl_uartreset(uintptr_t uart_base)
@@ -243,13 +243,13 @@ void kl_uartreset(uintptr_t uart_base)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: kl_uartconfigure
  *
  * Description:
  *   Configure a UART as a RS-232 UART.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
@@ -262,7 +262,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
   regval = getreg8(uart_base+KL_UART_C2_OFFSET);
-  regval &= ~(UART_C2_RE|UART_C2_TE);
+  regval &= ~(UART_C2_RE | UART_C2_TE);
   putreg8(regval, uart_base+KL_UART_C2_OFFSET);
 
   /* Configure number of bits, stop bits and parity */

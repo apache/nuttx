@@ -108,13 +108,13 @@ void up_decodeirq(uint32_t *regs)
 
   if (irq < NR_IRQS)
     {
-      uint32_t* savestate;
+      uint32_t *savestate;
 
       /* Current regs non-zero indicates that we are processing an interrupt;
        * current_regs is also used to manage interrupt level context switches.
        */
 
-      savestate     = (uint32_t*)current_regs;
+      savestate     = (uint32_t *)current_regs;
       current_regs = regs;
 
       /* Acknowledge the interrupt */

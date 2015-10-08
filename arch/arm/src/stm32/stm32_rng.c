@@ -90,7 +90,7 @@ static const struct file_operations g_rngops =
   0,               /* seek */
   0                /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  ,0               /* poll */
+  , 0              /* poll */
 #endif
 };
 
@@ -193,7 +193,7 @@ static int stm32_interrupt(int irq, void *context)
   if (g_rngdev.rd_buflen >= 4)
     {
       g_rngdev.rd_buflen -= 4;
-      *(uint32_t*)&g_rngdev.rd_buf[g_rngdev.rd_buflen] = data;
+      *(uint32_t *)&g_rngdev.rd_buf[g_rngdev.rd_buflen] = data;
     }
   else
     {

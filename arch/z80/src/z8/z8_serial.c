@@ -77,15 +77,15 @@ extern uint32_t get_freq(void);
 
 struct z8_uart_s
 {
-  uint8_t volatile far* uartbase;		/* Base address of UART registers */
-  uint32_t     baud;		/* Configured baud */
-  bool         rxenabled;	/* RX interrupt enabled */
-  bool         txenabled;	/* TX interrupt enabled */
-  uint8_t      rxirq;		/* RX IRQ associated with this UART */
-  uint8_t      txirq;		/* RX IRQ associated with this UART */
-  uint8_t      parity;		/* 0=none, 1=odd, 2=even */
-  bool         stopbits2;	/* true: Configure with 2 stop bits
-							 * (instead of 1) */
+  uint8_t volatile far* uartbase; /* Base address of UART registers */
+  uint32_t     baud;              /* Configured baud */
+  bool         rxenabled;         /* RX interrupt enabled */
+  bool         txenabled;         /* TX interrupt enabled */
+  uint8_t      rxirq;             /* RX IRQ associated with this UART */
+  uint8_t      txirq;             /* RX IRQ associated with this UART */
+  uint8_t      parity;            /* 0=none, 1=odd, 2=even */
+  bool         stopbits2;         /* true: Configure with 2 stop bits
+                                   * (instead of 1) */
 };
 
 /****************************************************************************

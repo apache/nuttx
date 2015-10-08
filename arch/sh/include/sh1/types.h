@@ -90,7 +90,7 @@ typedef unsigned long      irqstate_t;
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_SH_INCLUDE_SH1_TYPES_H */

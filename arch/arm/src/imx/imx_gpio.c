@@ -106,7 +106,7 @@ void imxgpio_configpfoutput(int port, int bit)
 {
   imxgpio_configinput(port, bit);            /* Same as input except: */
   imxgpio_peripheralfunc(port, bit);         /*   Use as peripheral */
-  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function*/
+  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function */
   imxgpio_dirout(port, bit);                 /*   Make output */
 }
 
@@ -118,5 +118,5 @@ void imxgpio_configpfinput(int port, int bit)
 {
   imxgpio_configinput(port, bit);            /* Same as input except: */
   imxgpio_peripheralfunc(port, bit);         /*   Use as peripheral */
-  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function*/
+  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function */
 }

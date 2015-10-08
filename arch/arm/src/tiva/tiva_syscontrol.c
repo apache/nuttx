@@ -319,13 +319,11 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
         }
     }
 #elif defined(CONFIG_ARCH_CHIP_CC3200)
-  {
 #if 0
-    /* NOTE: we do this in up_earlyconsoleinit() */
+  /* NOTE: we do this in up_earlyconsoleinit() */
 
-    cc3200_init();
+  cc3200_init();
 #endif
-  }
 #else
   if (((rcc & SYSCON_RCC_MOSCDIS) != 0 && (newrcc & SYSCON_RCC_MOSCDIS) == 0) ||
       ((rcc & SYSCON_RCC_IOSCDIS) != 0 && (newrcc & SYSCON_RCC_IOSCDIS) == 0))

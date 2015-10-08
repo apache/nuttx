@@ -1,4 +1,4 @@
-/**************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_lowputc.c
  *
  *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,9 +54,9 @@
 #include "lpc17_lowputc.h"
 #include "lpc17_serial.h"
 
-/**************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************/
+ ****************************************************************************/
 
 /* Select UART parameters for the selected console */
 
@@ -229,37 +229,37 @@
 
 #define CONSOLE_DL (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4))
 
-/**************************************************************************
+/****************************************************************************
  * Private Types
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
- * Global Variables
- **************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Variables
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Name: up_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
- **************************************************************************/
+ ****************************************************************************/
 
 void up_lowputc(char ch)
 {
@@ -274,7 +274,7 @@ void up_lowputc(char ch)
 #endif
 }
 
-/**************************************************************************
+/****************************************************************************
  * Name: lpc17_lowsetup
  *
  * Description:
@@ -302,7 +302,7 @@ void up_lowputc(char ch)
  *   7. DMA: UART transmit and receive functions can operate with the
  *      GPDMA controller.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 void lpc17_lowsetup(void)
 {
@@ -314,8 +314,8 @@ void lpc17_lowsetup(void)
    */
 
   regval  = getreg32(LPC17_SYSCON_PCONP);
-  regval &= ~(SYSCON_PCONP_PCUART0|SYSCON_PCONP_PCUART1|
-              SYSCON_PCONP_PCUART2|SYSCON_PCONP_PCUART3);
+  regval &= ~(SYSCON_PCONP_PCUART0 | SYSCON_PCONP_PCUART1 |
+              SYSCON_PCONP_PCUART2 | SYSCON_PCONP_PCUART3);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= SYSCON_PCONP_PCUART0;
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -333,7 +333,7 @@ void lpc17_lowsetup(void)
 
 #ifdef LPC176x
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
-  regval &= ~(SYSCON_PCLKSEL0_UART0_MASK|SYSCON_PCLKSEL0_UART1_MASK);
+  regval &= ~(SYSCON_PCLKSEL0_UART0_MASK | SYSCON_PCLKSEL0_UART1_MASK);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL0_UART0_SHIFT);
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -342,7 +342,7 @@ void lpc17_lowsetup(void)
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
-  regval &= ~(SYSCON_PCLKSEL1_UART2_MASK|SYSCON_PCLKSEL1_UART3_MASK);
+  regval &= ~(SYSCON_PCLKSEL1_UART2_MASK | SYSCON_PCLKSEL1_UART3_MASK);
 #if defined(CONFIG_UART2_SERIAL_CONSOLE)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART2_SHIFT);
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
@@ -381,31 +381,34 @@ void lpc17_lowsetup(void)
 
   /* Clear fifos */
 
-  putreg32(UART_FCR_RXRST|UART_FCR_TXRST, CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
+  putreg32(UART_FCR_RXRST | UART_FCR_TXRST,
+           CONSOLE_BASE + LPC17_UART_FCR_OFFSET);
 
   /* Set trigger */
 
-  putreg32(UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8, CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
+  putreg32(UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8,
+           CONSOLE_BASE + LPC17_UART_FCR_OFFSET);
 
   /* Set up the LCR and set DLAB=1 */
 
-  putreg32(CONSOLE_LCR_VALUE|UART_LCR_DLAB, CONSOLE_BASE+LPC17_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE | UART_LCR_DLAB,
+           CONSOLE_BASE + LPC17_UART_LCR_OFFSET);
 
   /* Set the BAUD divisor */
 
-  putreg32(CONSOLE_DL >> 8, CONSOLE_BASE+LPC17_UART_DLM_OFFSET);
-  putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE+LPC17_UART_DLL_OFFSET);
+  putreg32(CONSOLE_DL >> 8, CONSOLE_BASE + LPC17_UART_DLM_OFFSET);
+  putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE + LPC17_UART_DLL_OFFSET);
 
   /* Clear DLAB */
 
-  putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE+LPC17_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE + LPC17_UART_LCR_OFFSET);
 
   /* Configure the FIFOs */
 
-  putreg32(UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN,
-           CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
+  putreg32(UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST | UART_FCR_RXRST |
+           UART_FCR_FIFOEN,
+           CONSOLE_BASE + LPC17_UART_FCR_OFFSET);
 #endif
 #endif /* HAVE_UART */
 }
-
 

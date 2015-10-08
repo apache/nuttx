@@ -92,8 +92,7 @@
 #  error "Cannot represent this timer frequency"
 #endif
 
-/*
- * Eg. CPU_CLOCK = 8MHz, CLOCKS_PER_SEC = 100
+/* Eg. CPU_CLOCK = 8MHz, CLOCKS_PER_SEC = 100
  *
  *   MATCH1      ((8000000 + 50) / 100) = 80,000  FREQ=100.0Hz
  *   MATCH8      ((1000000 + 50) / 100) = 10,000  FREQ=100.0Hz <-- this one
@@ -111,7 +110,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -125,10 +124,10 @@
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************

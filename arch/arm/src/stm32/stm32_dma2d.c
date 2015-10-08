@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_dma2d.c
  *
  *   Copyright (C) 2014-2015 Marco Krahl. All rights reserved.
@@ -34,11 +34,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -63,9 +63,9 @@
 #include "chip/stm32_ccm.h"
 #include "stm32_dma2d.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* output, foreground and background layer */
 
@@ -158,9 +158,9 @@
 # error "Enable CONFIG_STM32_CCMEXCLUDE from the heap allocation"
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Types
- ******************************************************************************/
+ ****************************************************************************/
 
 /* DMA2D General layer information */
 
@@ -275,9 +275,9 @@ static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
   STM32_DMA2D_BGCMAR
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Private functions */
 
@@ -348,9 +348,9 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
 static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
                             FAR const struct ltdc_area_s *area, uint32_t color);
 
-/******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Remember the layer references for alloc/deallocation */
 
@@ -384,15 +384,15 @@ static struct stm32_interrupt_s g_interrupt =
   .sem     = &g_semirq
 };
 
-/******************************************************************************
+/****************************************************************************
  * Public Data
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_control
  *
  * Description:
@@ -477,7 +477,7 @@ static int stm32_dma2dirq(int irq, void *context)
   return OK;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_waitforirq
  *
  * Description:
@@ -522,7 +522,7 @@ static int stm32_dma2d_waitforirq(void)
 
 
 #ifdef CONFIG_STM32_DMA2D_L8
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_loadclut
  *
  * Description:
@@ -568,7 +568,7 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_start
  *
  * Description:
@@ -610,7 +610,7 @@ static int stm32_dma2d_start(void)
   return ret;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_memaddress
  *
  * Description:
@@ -622,7 +622,7 @@ static int stm32_dma2d_start(void)
  * Return:
  *   memory address
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t stm32_dma2d_memaddress(FAR const struct stm32_dma2d_s *layer,
                                         fb_coord_t xpos, fb_coord_t ypos)
@@ -636,7 +636,7 @@ static uint32_t stm32_dma2d_memaddress(FAR const struct stm32_dma2d_s *layer,
   return ((uint32_t) pinfo->fbmem) + offset;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lineoffset
  *
  * Description:
@@ -648,7 +648,7 @@ static uint32_t stm32_dma2d_memaddress(FAR const struct stm32_dma2d_s *layer,
  * Return:
  *   line offset
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static fb_coord_t stm32_dma2d_lineoffset(FAR const struct stm32_dma2d_s *layer,
                                           FAR const struct ltdc_area_s *area)
@@ -659,7 +659,7 @@ static fb_coord_t stm32_dma2d_lineoffset(FAR const struct stm32_dma2d_s *layer,
   return layer->vinfo.xres - area->xres;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_pixelformat
  *
  * Description:
@@ -673,7 +673,7 @@ static fb_coord_t stm32_dma2d_lineoffset(FAR const struct stm32_dma2d_s *layer,
  *   On success - OK
  *   On error   - -EINVAL
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
 {
@@ -693,7 +693,7 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
    * A4
    */
 
-  switch(fmt)
+  switch (fmt)
     {
 #ifdef CONFIG_STM32_DMA2D_RGB565
       case FB_FMT_RGB16_565:
@@ -718,7 +718,7 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
   return OK;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_bpp
  *
  * Description:
@@ -732,13 +732,13 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
  *   On success - OK
  *   On error   - -EINVAL
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
 {
   gvdbg("fmt=%d, bpp=%p\n", fmt, bpp);
 
-  switch(fmt)
+  switch (fmt)
     {
 #ifdef CONFIG_STM32_DMA2D_RGB565
       case FB_FMT_RGB16_565:
@@ -763,7 +763,7 @@ static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
   return OK;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lfreelid
  *
  * Description:
@@ -773,7 +773,7 @@ static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
  *   The number of the free layer
  *   -1 if no free layer is available
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2d_lfreelid(void)
 {
@@ -790,7 +790,7 @@ static int stm32_dma2d_lfreelid(void)
   return -1;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lalloc
  *
  * Description:
@@ -799,7 +799,7 @@ static int stm32_dma2d_lfreelid(void)
  * Return:
  *   A new allocated layer structure or NULL on error.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct stm32_dma2d_s * stm32_dma2d_lalloc(void)
 {
@@ -823,7 +823,7 @@ static FAR struct stm32_dma2d_s * stm32_dma2d_lalloc(void)
   return layer;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lfree
  *
  * Description:
@@ -832,7 +832,7 @@ static FAR struct stm32_dma2d_s * stm32_dma2d_lalloc(void)
  * Input Parameters:
  *   A previous allocated layer structure
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_dma2d_lfree(FAR struct stm32_dma2d_s *layer)
 {
@@ -853,13 +853,13 @@ static void stm32_dma2d_lfree(FAR struct stm32_dma2d_s *layer)
     }
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_llayerscleanup
  *
  * Description:
  *   Cleanup all allocated layers
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_dma2d_llayerscleanup(void)
 {
@@ -879,7 +879,7 @@ static void stm32_dma2d_llayerscleanup(void)
     }
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lvalidate
  *
  * Description:
@@ -888,7 +888,7 @@ static void stm32_dma2d_llayerscleanup(void)
  * Return:
  *   true if validates otherwise false
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline bool stm32_dma2d_lvalidate(FAR const struct stm32_dma2d_s *layer)
 {
@@ -921,7 +921,7 @@ static bool stm32_dma2d_lvalidatesize(FAR const struct stm32_dma2d_s *layer,
                 area->xres * area->yres);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_linit
  *
  * Description:
@@ -930,7 +930,7 @@ static bool stm32_dma2d_lvalidatesize(FAR const struct stm32_dma2d_s *layer,
  * Parameter:
  *
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void stm32_dma2d_linit(FAR struct stm32_dma2d_s *layer,
                                 int lid, uint8_t fmt)
@@ -968,7 +968,7 @@ static void stm32_dma2d_linit(FAR struct stm32_dma2d_s *layer,
   layer->lock         = &g_lock;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lfifo
  *
  * Description:
@@ -992,7 +992,7 @@ static void stm32_dma2d_lfifo(FAR const struct stm32_dma2d_s *layer, int lid,
   putreg32(stm32_dma2d_lineoffset(layer, area), stm32_or_layer_t[lid]);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lcolor
  *
  * Description:
@@ -1010,7 +1010,7 @@ static void stm32_dma2d_lcolor(FAR const struct stm32_dma2d_s *layer,
   putreg32(color, stm32_color_layer_t[lid]);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_llnr
  *
  * Description:
@@ -1030,11 +1030,11 @@ static void stm32_dma2d_llnr(FAR struct stm32_dma2d_s *layer,
   gvdbg("pixel per line: %d, number of lines: %d\n", area->xres, area->yres);
 
   nlrreg = getreg32(STM32_DMA2D_NLR);
-  nlrreg = (DMA2D_NLR_PL(area->xres)|DMA2D_NLR_NL(area->yres));
+  nlrreg = (DMA2D_NLR_PL(area->xres) | DMA2D_NLR_NL(area->yres));
   putreg32(nlrreg, STM32_DMA2D_NLR);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_loutpfc
  *
  * Description:
@@ -1067,7 +1067,7 @@ static int stm32_dma2d_loutpfc(FAR const struct stm32_dma2d_s *layer)
   return OK;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2d_lpfc
  *
  * Description:
@@ -1147,11 +1147,11 @@ static void stm32_dma2d_lpfc(FAR const struct stm32_dma2d_s *layer,
   putreg32(pfccrreg, stm32_pfccr_layer_t[lid]);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dgetvideoinfo
  *
  * Description:
@@ -1165,7 +1165,7 @@ static void stm32_dma2d_lpfc(FAR const struct stm32_dma2d_s *layer,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
                             FAR struct fb_videoinfo_s *vinfo)
@@ -1187,7 +1187,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
   return -ENOSYS;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dgetplaneinfo
  *
  * Description:
@@ -1202,7 +1202,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
                               FAR struct fb_planeinfo_s *pinfo)
@@ -1224,7 +1224,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dgetlid
  *
  * Description:
@@ -1238,7 +1238,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
 {
@@ -1259,7 +1259,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
 }
 
 #ifdef CONFIG_STM32_DMA2D_L8
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dsetclut
  *
  * Description:
@@ -1274,7 +1274,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
                             const FAR struct fb_cmap_s *cmap)
@@ -1315,7 +1315,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
           sem_post(priv->lock);
 
           return ret;
-      }
+        }
 #endif
 
       if (priv->fmt != DMA2D_PF_L8)
@@ -1342,7 +1342,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
               /* Update the layer clut entry */
 
 #ifndef CONFIG_FB_TRANSPARENCY
-              uint8_t  *clut888 = (uint8_t*)clut;
+              uint8_t  *clut888 = (uint8_t *)clut;
               uint16_t offset   = 3 * n;
 
               clut888[offset]     = cmap->blue[n];
@@ -1378,7 +1378,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dgetclut
  *
  * Description:
@@ -1393,7 +1393,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
                             FAR struct fb_cmap_s *cmap)
@@ -1431,7 +1431,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
           for (n = cmap->first; n < cmap->len && n < STM32_DMA2D_NCLUT; n++)
             {
 #ifndef CONFIG_FB_TRANSPARENCY
-              uint8_t  *clut888 = (uint8_t*)clut;
+              uint8_t  *clut888 = (uint8_t *)clut;
               uint16_t offset   = 3 * n;
 
               cmap->blue[n]   = clut888[offset];
@@ -1466,7 +1466,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dsetalpha
  *
  * Description:
@@ -1485,7 +1485,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
  *   On success - OK
  *   On error - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
 {
@@ -1506,7 +1506,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dgetalpha
  *
  * Description:
@@ -1520,7 +1520,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
  *   On success - OK
  *   On error - -EINVAL
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
 {
@@ -1541,7 +1541,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dsetblendmode
  *
  * Description:
@@ -1570,7 +1570,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
  *     the constant alpha value. This is only useful for ARGB8888
  *     color format.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
                                     uint32_t mode)
@@ -1592,7 +1592,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_getblendmode
  *
  * Description:
@@ -1606,7 +1606,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
  *   On success - OK
  *   On error - -EINVAL
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
                                     uint32_t *mode)
@@ -1628,7 +1628,7 @@ static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dblit
  *
  * Description:
@@ -1927,7 +1927,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: up_dma2dgetlayer
  *
  * Description:
@@ -1940,7 +1940,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
  *   Reference to the dma2d layer control structure on success or Null if no
  *   related exist.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
 {
@@ -1959,7 +1959,7 @@ FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
   return NULL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_dma2dcreatelayer
  *
  * Description:
@@ -1977,7 +1977,7 @@ FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
  *                -ENOMEM if no memory available or exceeds
  *                 CONFIG_STM32_DMA2D_NLAYERS
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
                                               fb_coord_t height,
@@ -2088,7 +2088,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
   return (FAR struct dma2d_layer_s *)layer;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_dma2dremovelayer
  *
  * Description:
@@ -2101,7 +2101,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
  *   On success - OK
  *   On error   - -EINVAL
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
 {
@@ -2133,7 +2133,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
   return ret;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_dma2dinitialize
  *
  * Description:
@@ -2143,7 +2143,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
  *   OK - On success
  *   An error if initializing failed.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int up_dma2dinitialize(void)
 {
@@ -2155,9 +2155,9 @@ int up_dma2dinitialize(void)
 
       up_dma2duninitialize();
 
-     /* Enable dma2d is done in rcc_enableahb1, see
-      * arch/arm/src/stm32/stm32f40xxx_rcc.c
-      */
+      /* Enable dma2d is done in rcc_enableahb1, see
+       * arch/arm/src/stm32/stm32f40xxx_rcc.c
+       */
 
       /* Initialize the DMA2D semaphore that enforces mutually exclusive access
        * to the driver
@@ -2172,13 +2172,13 @@ int up_dma2dinitialize(void)
 #ifdef CONFIG_STM32_DMA2D_L8
       /* Enable dma2d transfer and clut loading interrupts only */
 
-      stm32_dma2d_control(DMA2D_CR_TCIE|DMA2D_CR_CTCIE, DMA2D_CR_TEIE|
-                            DMA2D_CR_TWIE|DMA2D_CR_CAEIE||DMA2D_CR_CEIE);
+      stm32_dma2d_control(DMA2D_CR_TCIE | DMA2D_CR_CTCIE, DMA2D_CR_TEIE |
+                          DMA2D_CR_TWIE | DMA2D_CR_CAEIE | DMA2D_CR_CEIE);
 #else
       /* Enable dma transfer interrupt only */
 
-      stm32_dma2d_control(DMA2D_CR_TCIE, DMA2D_CR_TEIE|DMA2D_CR_TWIE|
-                            DMA2D_CR_CAEIE|DMA2D_CR_CTCIE|DMA2D_CR_CEIE);
+      stm32_dma2d_control(DMA2D_CR_TCIE, DMA2D_CR_TEIE | DMA2D_CR_TWIE |
+                          DMA2D_CR_CAEIE | DMA2D_CR_CTCIE | DMA2D_CR_CEIE);
 #endif
 
       /* Attach DMA2D interrupt vector */
@@ -2207,13 +2207,13 @@ int up_dma2dinitialize(void)
   return OK;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_dma2duninitialize
  *
  * Description:
  *   Uninitialize the dma2d controller
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void up_dma2duninitialize(void)
 {
@@ -2236,7 +2236,7 @@ void up_dma2duninitialize(void)
 }
 
 #ifdef CONFIG_STM32_LTDC_INTERFACE
-/******************************************************************************
+/****************************************************************************
  * Name: stm32_dma2dinitltdc
  *
  * Description:
@@ -2256,7 +2256,7 @@ void up_dma2duninitialize(void)
  *   On error   - NULL and errno is set to
  *                -EINVAL if one of the parameter is invalid
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
 {

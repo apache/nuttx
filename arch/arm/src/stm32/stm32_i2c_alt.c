@@ -215,9 +215,9 @@ static const uint16_t I2CEVENT_NONE = 0;                   /* No events have occ
 static const uint16_t I2CEVENT_STATE_ERROR = 1000;         /* No correct state detected, diver cannot handle state */
 static const uint16_t I2CEVENT_ISR_SHUTDOWN = 1001;        /* ISR gets shutdown */
 static const uint16_t I2CEVENT_ISR_EMPTY_CALL = 1002;      /* ISR gets called but no I2C logic comes into play */
-static const uint16_t I2CEVENT_MSG_HANDLING = 1003;        /* Message Handling 1/1: advances the msg processing param = msgc*/
+static const uint16_t I2CEVENT_MSG_HANDLING = 1003;        /* Message Handling 1/1: advances the msg processing param = msgc */
 static const uint16_t I2CEVENT_POLL_DEV_NOT_RDY = 1004;    /* During polled operation if device is not ready yet */
-static const uint16_t I2CEVENT_ISR_CALL = 1111;            /* ISR called*/
+static const uint16_t I2CEVENT_ISR_CALL = 1111;            /* ISR called */
 
 static const uint16_t I2CEVENT_SENDADDR = 5;               /* Start/Master bit set and address sent, param = priv->msgv->addr(EV5 in reference manual) */
 static const uint16_t I2CEVENT_ADDR_HDL_READ_1 = 51;       /* Read of length 1 address handling, param = 0 */
@@ -1029,7 +1029,7 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
 
       /* Set DUTY and fast speed bits */
 
-      ccr |= (I2C_CCR_DUTY|I2C_CCR_FS);
+      ccr |= (I2C_CCR_DUTY | I2C_CCR_FS);
 #else
       /* Fast mode speed calculation with Tlow/Thigh = 2 */
 
@@ -1113,7 +1113,7 @@ static inline void stm32_i2c_clrstart(FAR struct stm32_i2c_priv_s *priv)
    */
 
   stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET,
-                      I2C_CR1_START|I2C_CR1_STOP|I2C_CR1_PEC, 0);
+                      I2C_CR1_START | I2C_CR1_STOP | I2C_CR1_PEC, 0);
 }
 
 /************************************************************************************
@@ -1428,7 +1428,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
    * received the address is valid and transmission can continue.
    */
 
-  /* Check for NACK after an address*/
+  /* Check for NACK after an address */
 
 #ifndef CONFIG_I2C_POLLED
   /* When polling the i2c ISR it's not possible to determine when
@@ -1475,7 +1475,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
     }
 #endif
 
-    /* ACK in read mode, ACK in write mode is handled separately */
+  /* ACK in read mode, ACK in write mode is handled separately */
 
   else if ((priv->flags & I2C_M_READ) != 0 && (status & I2C_SR1_ADDR) != 0 &&
            priv->check_addr_ACK)
@@ -1545,8 +1545,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
    * begin immediately after.
    */
 
-   else if ((priv->flags & (I2C_M_READ)) == 0 &&
-            (status & (I2C_SR1_ADDR | I2C_SR1_TXE)) != 0)
+  else if ((priv->flags & (I2C_M_READ)) == 0 &&
+           (status & (I2C_SR1_ADDR | I2C_SR1_TXE)) != 0)
     {
       /* The has cleared(ADDR is set, ACK was received after the address)
        * or the transmit buffer is empty flag has been set(TxE) then we can
@@ -1627,7 +1627,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             {
               /* Set condition to get to next message */
 
-              priv->dcnt =- 1;
+              priv->dcnt = -1;
               stm32_i2c_traceevent(priv, I2CEVENT_WRITE_NO_RESTART, priv->dcnt);
             }
           else
@@ -1674,7 +1674,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
   else if ((priv->flags & (I2C_M_READ)) != 0 && (status & I2C_SR1_RXNE) != 0)
     {
       /* When read flag is set and the receive buffer is not empty
-       *(RXNE is set) then the driver can read from the data register.
+       * (RXNE is set) then the driver can read from the data register.
        */
 
       i2cvdbg("Entering read mode dcnt = %i msgc = %i, status %i\n",
@@ -1727,7 +1727,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         {
           /* If the shift register is still empty (i.e. BTF is low)
            * then do nothing and wait for it to fill in the next ISR.
-           *(should not happen in ISR mode, but if using polled mode
+           * (should not happen in ISR mode, but if using polled mode
            * this should be able to handle it).
            */
 
@@ -2382,9 +2382,10 @@ static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
     },
     {
       .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags | ((buflen>0) ? I2C_M_READ : I2C_M_NORESTART),
+      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags |
+                ((buflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
       .buffer = buffer,
-      .length = (buflen>0) ? buflen : -buflen
+      .length = (buflen > 0) ? buflen : -buflen
     }
   };
 

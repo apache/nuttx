@@ -80,7 +80,7 @@ void up_addregion(void)
   /* Disable watchdog in first non-common function */
   wdog_enable(0);
 #endif
-  // XXX: change to initialization of extern memory with save defaults
+  /* XXX: change to initialization of extern memory with save defaults */
   /* Configure memory interface */
   calypso_mem_cfg(CALYPSO_nCS0, 3, CALYPSO_MEM_16bit, 1);
   calypso_mem_cfg(CALYPSO_nCS1, 3, CALYPSO_MEM_16bit, 1);
@@ -96,6 +96,6 @@ void up_addregion(void)
   /* Configure the RHEA bridge with some sane default values */
   calypso_rhea_cfg(0, 0, 0xff, 0, 1, 0, 0);
 
-  kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  kmm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 }
 #endif

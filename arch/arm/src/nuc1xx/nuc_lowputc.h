@@ -95,7 +95,7 @@ void nuc_lowsetup(void);
  * Here we assume that the default clock source for the UART modules is
  * the external high speed crystal.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_UART
 void nuc_setbaud(uintptr_t base, uint32_t baud);
@@ -107,7 +107,7 @@ void nuc_setbaud(uintptr_t base, uint32_t baud);
  * Description:
  *   Output one character to the UART using a simple polling method.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
 void nuc_lowputc(uint32_t ch);

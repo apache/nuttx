@@ -94,14 +94,14 @@ static inline uint32_t gpio_baseaddress(unsigned int irq)
   if (irq < __IRQ_GPIO_PB0)
     {
       return AVR32_GPIO0_BASE;
-	}
+    }
   else
 #endif
 #if CONFIG_AVR32_GPIOIRQSETB != 0
   if (irq < NR_GPIO_IRQS)
     {
       return AVR32_GPIO1_BASE;
-	}
+    }
   else
 #endif
     {
@@ -132,7 +132,7 @@ static inline int gpio_pin(unsigned int irq)
     {
       pinset = CONFIG_AVR32_GPIOIRQSETA;
       pinirq = __IRQ_GPIO_PA0;
-	}
+    }
   else
 #endif
 #if CONFIG_AVR32_GPIOIRQSETB != 0
@@ -140,7 +140,7 @@ static inline int gpio_pin(unsigned int irq)
     {
       pinset = CONFIG_AVR32_GPIOIRQSETB;
       pinirq = __IRQ_GPIO_PB0;
-	}
+    }
   else
 #endif
     {
@@ -157,25 +157,25 @@ static inline int gpio_pin(unsigned int irq)
       /* Is this pin at bit 0 configured for interrupt support? */
 
       if ((pinset & 1) != 0)
-         {
-           /* Is it the on IRQ we are looking for? */
+        {
+          /* Is it the on IRQ we are looking for? */
 
-           if (pinirq == irq)
-             {
-               /* Yes, return the associated pin number */
+          if (pinirq == irq)
+            {
+              /* Yes, return the associated pin number */
 
-               return pin;
-             }
+              return pin;
+            }
 
-           /* No.. Increment the IRQ number for the next configured pin */
+          /* No.. Increment the IRQ number for the next configured pin */
 
-            pinirq++;
-         }
+           pinirq++;
+        }
 
-       /* Shift the next pin to position bit 0 */
+      /* Shift the next pin to position bit 0 */
 
-       pinset >>= 1;
-     }
+      pinset >>= 1;
+    }
 
   return -EINVAL;
 }
@@ -209,10 +209,10 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
 
       uint32_t bit = (1 << pin);
       if ((irqset & bit) != 0)
-         {
-           /* Is an interrupt pending on this pin? */
+        {
+          /* Is an interrupt pending on this pin? */
 
-           if ((ifr & bit) != 0)
+          if ((ifr & bit) != 0)
             {
               /* Yes.. Clear the pending interrupt */
 
@@ -231,16 +231,16 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
                   lldbg("No handler: pin=%d ifr=%08x irqset=%08x",
                         pin, ifr, irqset);
                 }
-             }
+            }
 
-           /* Increment the IRQ number on all configured pins */
+          /* Increment the IRQ number on all configured pins */
 
-            irq++;
-         }
+          irq++;
+        }
 
-       /* Not configured.  An interrupt on this pin would be an error. */
+      /* Not configured.  An interrupt on this pin would be an error. */
 
-       else if ((ifr & bit) != 0)
+      else if ((ifr & bit) != 0)
         {
           /* Clear the pending interrupt */
 
