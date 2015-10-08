@@ -89,7 +89,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
 
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct file *parent;
   FAR struct file *child;
   int i;
@@ -102,7 +102,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
    * accordingly above.
    */
 
-   /* Get pointers to the parent and child task file lists */
+  /* Get pointers to the parent and child task file lists */
 
   parent = rtcb->group->tg_filelist.fl_files;
   child  = tcb->cmn.group->tg_filelist.fl_files;
@@ -147,7 +147,7 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
 
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct socket *parent;
   FAR struct socket *child;
   int i;

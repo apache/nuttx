@@ -100,7 +100,7 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
     {
       /* Get the current value of the semaphore */
 
-      if (sem_getvalue((sem_t*)&cond->sem, &sval) != OK)
+      if (sem_getvalue((FAR sem_t *)&cond->sem, &sval) != OK)
         {
           ret = EINVAL;
         }
@@ -125,7 +125,7 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
           if (sval < 0)
             {
               sdbg("Signalling...\n");
-              ret = pthread_givesemaphore((sem_t*)&cond->sem);
+              ret = pthread_givesemaphore((FAR sem_t *)&cond->sem);
             }
         }
     }

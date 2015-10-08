@@ -132,7 +132,7 @@ int pthread_cancel(pthread_t thread)
    * same as pthread_exit(PTHREAD_CANCELED).
    */
 
-  if (tcb == (struct tcb_s*)g_readytorun.head)
+  if (tcb == (struct tcb_s *)g_readytorun.head)
     {
       pthread_exit(PTHREAD_CANCELED);
     }

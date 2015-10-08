@@ -88,7 +88,7 @@ FAR sigq_t *sig_allocatependingsigaction(void)
     {
       /* Try to get the pending signal action structure from the free list */
 
-      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
+      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
 
       /* If so, then try the special list of structures reserved for
        * interrupt handlers
@@ -96,7 +96,7 @@ FAR sigq_t *sig_allocatependingsigaction(void)
 
       if (!sigq)
         {
-          sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingirqaction);
+          sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingirqaction);
         }
     }
 
@@ -108,7 +108,7 @@ FAR sigq_t *sig_allocatependingsigaction(void)
       /* Try to get the pending signal action structure from the free list */
 
       saved_state = irqsave();
-      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
+      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
       irqrestore(saved_state);
 
       /* Check if we got one. */

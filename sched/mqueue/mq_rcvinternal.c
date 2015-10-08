@@ -166,7 +166,7 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
 
   /* Get the message from the head of the queue */
 
-  while ((rcvmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&msgq->msglist)) == NULL)
+  while ((rcvmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist)) == NULL)
     {
       /* The queue is empty!  Should we block until there the above condition
        * has been satisfied?
@@ -176,7 +176,7 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
         {
           /* Yes.. Block and try again */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = (FAR struct tcb_s *)g_readytorun.head;
           rtcb->msgwaitq = msgq;
           msgq->nwaitnotempty++;
 
@@ -259,7 +259,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
   /* Copy the message into the caller's buffer */
 
-  memcpy(ubuffer, (const void*)mqmsg->mail, rcvmsglen);
+  memcpy(ubuffer, (FAR const void *)mqmsg->mail, rcvmsglen);
 
   /* Copy the message priority as well (if a buffer is provided) */
 
@@ -284,7 +284,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
        */
 
       saved_state = irqsave();
-      for (btcb = (FAR struct tcb_s*)g_waitingformqnotfull.head;
+      for (btcb = (FAR struct tcb_s *)g_waitingformqnotfull.head;
            btcb && btcb->msgwaitq != msgq;
            btcb = btcb->flink);
 

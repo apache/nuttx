@@ -160,8 +160,8 @@ int task_restart(pid_t pid)
        */
 
       state = irqsave();
-      dq_rem((FAR dq_entry_t*)tcb,
-             (dq_queue_t*)g_tasklisttable[tcb->cmn.task_state].list);
+      dq_rem((FAR dq_entry_t *)tcb,
+             (FAR dq_queue_t *)g_tasklisttable[tcb->cmn.task_state].list);
       tcb->cmn.task_state = TSTATE_TASK_INVALID;
       irqrestore(state);
 
@@ -190,7 +190,7 @@ int task_restart(pid_t pid)
 
       /* Add the task to the inactive task list */
 
-      dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
+      dq_addfirst((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
       tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
 
       /* Activate the task */

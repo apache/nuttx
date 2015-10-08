@@ -164,8 +164,8 @@ static struct timespec g_stop_time;
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 {
-  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
-  FAR struct tcb_s *ntcb  = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb  = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *ntcb  = (FAR struct tcb_s *)g_readytorun.head;
   uint32_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
@@ -212,15 +212,15 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
    * the new task at the head of the ready to run list.
    */
 
-  ntcb = (FAR struct tcb_s*)g_readytorun.head;
+  ntcb = (FAR struct tcb_s *)g_readytorun.head;
 
   /* Check if the new task at the head of the ready-to-run has changed. */
 
   if (rtcb != ntcb)
     {
-       /* Recurse just to get the correct return value */
+      /* Recurse just to get the correct return value */
 
-       return sched_process_scheduler(0, true);
+      return sched_process_scheduler(0, true);
     }
 
   /* Returning zero means that there is no interesting event to be timed */
@@ -355,9 +355,9 @@ static void sched_timer_start(unsigned int ticks)
       ret = up_alarm_start(&ts);
 
 #else
-       /* [Re-]start the interval timer */
+      /* [Re-]start the interval timer */
 
-       ret = up_timer_start(&ts);
+      ret = up_timer_start(&ts);
 #endif
 
       if (ret < 0)

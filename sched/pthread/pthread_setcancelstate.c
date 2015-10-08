@@ -75,7 +75,7 @@
 
 int pthread_setcancelstate(int state, FAR int *oldstate)
 {
-  struct tcb_s *tcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *tcb = (struct tcb_s *)g_readytorun.head;
   int ret = OK;
 
   /* Suppress context changes for a bit so that the flags are stable. (the
@@ -106,7 +106,7 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
 
       /* Clear the non-cancelable and cancel pending flags */
 
-      tcb->flags &= ~(TCB_FLAG_NONCANCELABLE|TCB_FLAG_CANCEL_PENDING);
+      tcb->flags &= ~(TCB_FLAG_NONCANCELABLE | TCB_FLAG_CANCEL_PENDING);
 
       /* If the cancel was pending, then just exit as requested */
 

@@ -93,7 +93,7 @@
 static void sig_timeout(int argc, wdparm_t itcb)
 {
   /* On many small machines, pointers are encoded and cannot be simply cast
-   * from uint32_t to struct tcb_s*.  The following union works around this
+   * from uint32_t to struct tcb_s *.  The following union works around this
    * (see wdogparm_t).  This odd logic could be conditioned on
    * CONFIG_CAN_CAST_POINTERS, but it is not too bad in any case.
    */
@@ -175,7 +175,7 @@ static void sig_timeout(int argc, wdparm_t itcb)
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                  FAR const struct timespec *timeout)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
   irqstate_t saved_state;
@@ -351,8 +351,8 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
         }
 
       irqrestore(saved_state);
-   }
+    }
 
-   sched_unlock();
-   return ret;
+  sched_unlock();
+  return ret;
 }

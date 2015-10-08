@@ -144,7 +144,7 @@ int sem_post(FAR sem_t *sem)
            * that we want.
            */
 
-          for (stcb = (FAR struct tcb_s*)g_waitingforsemaphore.head;
+          for (stcb = (FAR struct tcb_s *)g_waitingforsemaphore.head;
                (stcb && stcb->waitsem != sem);
                stcb = stcb->flink);
 

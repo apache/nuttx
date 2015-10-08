@@ -100,7 +100,7 @@
 
 bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   bool ret;
 
   /* Check if pre-emption is disabled for the current running task and if
@@ -114,14 +114,14 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * g_pendingtasks task list for now.
        */
 
-      sched_addprioritized(btcb, (FAR dq_queue_t*)&g_pendingtasks);
+      sched_addprioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
       ret = false;
     }
 
   /* Otherwise, add the new task to the ready-to-run task list */
 
-  else if (sched_addprioritized(btcb, (FAR dq_queue_t*)&g_readytorun))
+  else if (sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun))
     {
       /* Inform the instrumentation logic that we are switching tasks */
 

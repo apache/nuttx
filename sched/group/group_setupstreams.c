@@ -88,9 +88,9 @@ int group_setupstreams(FAR struct task_tcb_s *tcb)
    * fd = 2 is stderr (write-only, append)
    */
 
-  (void)fs_fdopen(0, O_RDONLY,       (FAR struct tcb_s *)tcb);
-  (void)fs_fdopen(1, O_WROK|O_CREAT, (FAR struct tcb_s *)tcb);
-  (void)fs_fdopen(2, O_WROK|O_CREAT, (FAR struct tcb_s *)tcb);
+  (void)fs_fdopen(0, O_RDONLY,         (FAR struct tcb_s *)tcb);
+  (void)fs_fdopen(1, O_WROK | O_CREAT, (FAR struct tcb_s *)tcb);
+  (void)fs_fdopen(2, O_WROK | O_CREAT, (FAR struct tcb_s *)tcb);
 
   return OK;
 }

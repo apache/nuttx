@@ -165,9 +165,9 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
 
 static void pthread_start(void)
 {
-  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s*)g_readytorun.head;
+  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)g_readytorun.head;
   FAR struct task_group_s *group = ptcb->cmn.group;
-  FAR struct join_s *pjoin = (FAR struct join_s*)ptcb->joininfo;
+  FAR struct join_s *pjoin = (FAR struct join_s *)ptcb->joininfo;
   pthread_addr_t exit_status;
 
   DEBUGASSERT(group && pjoin);
@@ -280,7 +280,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Allocate a detachable structure to support pthread_join logic */
 
-  pjoin = (FAR struct join_s*)kmm_zalloc(sizeof(struct join_s));
+  pjoin = (FAR struct join_s *)kmm_zalloc(sizeof(struct join_s));
   if (!pjoin)
     {
       sdbg("ERROR: Failed to allocate join\n");
@@ -509,7 +509,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   else
     {
       sched_unlock();
-      dq_rem((FAR dq_entry_t*)ptcb, (dq_queue_t*)&g_inactivetasks);
+      dq_rem((FAR dq_entry_t *)ptcb, (FAR dq_queue_t *)&g_inactivetasks);
       (void)sem_destroy(&pjoin->data_sem);
       (void)sem_destroy(&pjoin->exit_sem);
 

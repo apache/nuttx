@@ -99,7 +99,7 @@ void sig_releasependingsignal(FAR sigpendq_t *sigpend)
        */
 
       saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingsignal);
+      sq_addlast((FAR sq_entry_t *)sigpend, &g_sigpendingsignal);
       irqrestore(saved_state);
     }
 
@@ -114,7 +114,7 @@ void sig_releasependingsignal(FAR sigpendq_t *sigpend)
        */
 
       saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingirqsignal);
+      sq_addlast((FAR sq_entry_t *)sigpend, &g_sigpendingirqsignal);
       irqrestore(saved_state);
     }
 

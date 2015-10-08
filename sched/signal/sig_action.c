@@ -88,7 +88,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
   /* Try to get the signal action structure from the free list */
 
-  sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
+  sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
 
   /* Check if we got one. */
 
@@ -100,7 +100,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
       /* And try again */
 
-      sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
+      sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
       ASSERT(sigact);
     }
 
@@ -165,7 +165,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
 int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR sigactq_t *sigact;
 
   /* Since sigactions can only be installed from the running thread of
@@ -254,7 +254,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
         {
           /* Yes.. Remove it from sigactionq */
 
-          sq_rem((FAR sq_entry_t*)sigact, &rtcb->sigactionq);
+          sq_rem((FAR sq_entry_t *)sigact, &rtcb->sigactionq);
 
           /* And deallocate it */
 
@@ -279,10 +279,10 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
           /* An error has occurred if we could not allocate the sigaction */
 
           if (!sigact)
-           {
+            {
               set_errno(ENOMEM);
               return ERROR;
-           }
+            }
 
           /* Put the signal number in the queue entry */
 
@@ -290,7 +290,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
           /* Add the new sigaction to sigactionq */
 
-          sq_addlast((FAR sq_entry_t*)sigact, &rtcb->sigactionq);
+          sq_addlast((FAR sq_entry_t *)sigact, &rtcb->sigactionq);
         }
 
       /* Set the new sigaction */
@@ -313,5 +313,5 @@ void sig_releaseaction(FAR sigactq_t *sigact)
 {
   /* Just put it back on the free list */
 
-  sq_addlast((FAR sq_entry_t*)sigact, &g_sigfreeaction);
+  sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
 }

@@ -100,7 +100,7 @@
 
 void task_start(void)
 {
-  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s*)g_readytorun.head;
+  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)g_readytorun.head;
   int exitcode;
   int argc;
 

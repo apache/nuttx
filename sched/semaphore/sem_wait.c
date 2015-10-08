@@ -96,7 +96,7 @@
 
 int sem_wait(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   irqstate_t saved_state;
   int ret  = ERROR;
 

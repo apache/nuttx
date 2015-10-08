@@ -170,7 +170,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
 {
 #ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast from
-   * wdparm_t to struct tcb_s*.  The following union works around this (see wdogparm_t).
+   * wdparm_t to struct tcb_s *.  The following union works around this (see wdogparm_t).
    */
 
   union

@@ -80,7 +80,7 @@ uint16_t g_wdnfree;
  ****************************************************************************/
 
 /* g_wdpool is a list of pre-allocated watchdogs. The number of watchdogs
-* in the pool is a configuration item.
+ * in the pool is a configuration item.
  */
 
 static struct wdog_s g_wdpool[CONFIG_PREALLOC_WDOGS];
@@ -128,7 +128,7 @@ void wd_initialize(void)
 
   for (i = 0; i < CONFIG_PREALLOC_WDOGS; i++)
     {
-      sq_addlast((FAR sq_entry_t*)wdog++, &g_wdfreelist);
+      sq_addlast((FAR sq_entry_t *)wdog++, &g_wdfreelist);
     }
 
   /* All watchdogs are free */

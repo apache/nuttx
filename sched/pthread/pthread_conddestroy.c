@@ -75,9 +75,9 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
       ret = EINVAL;
     }
 
-   /* Destroy the semaphore contained in the structure */
+  /* Destroy the semaphore contained in the structure */
 
-  else if (sem_destroy((sem_t*)&cond->sem) != OK)
+  else if (sem_destroy((FAR sem_t *)&cond->sem) != OK)
     {
       ret = EINVAL;
     }

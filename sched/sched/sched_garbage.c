@@ -91,18 +91,18 @@ static inline void sched_kucleanup(void)
    irqstate_t flags;
    FAR void *address;
 
-   /* Test if the delayed deallocation queue is empty.  No special protection
-    * is needed because this is an atomic test.
-    */
+  /* Test if the delayed deallocation queue is empty.  No special protection
+   * is needed because this is an atomic test.
+   */
 
-   while (g_delayed_kufree.head)
+  while (g_delayed_kufree.head)
     {
       /* Remove the first delayed deallocation.  This is not atomic and so
        * we must disable interrupts around the queue operation.
        */
 
       flags = irqsave();
-      address = (FAR void*)sq_remfirst((FAR sq_queue_t*)&g_delayed_kufree);
+      address = (FAR void *)sq_remfirst((FAR sq_queue_t *)&g_delayed_kufree);
       irqrestore(flags);
 
       /* The address should always be non-NULL since that was checked in the
@@ -137,21 +137,21 @@ static inline void sched_kucleanup(void)
      defined(CONFIG_MM_KERNEL_HEAP)
 static inline void sched_kcleanup(void)
 {
-   irqstate_t flags;
-   FAR void *address;
+  irqstate_t flags;
+  FAR void *address;
 
-   /* Test if the delayed deallocation queue is empty.  No special protection
-    * is needed because this is an atomic test.
-    */
+  /* Test if the delayed deallocation queue is empty.  No special protection
+   * is needed because this is an atomic test.
+   */
 
-   while (g_delayed_kfree.head)
+  while (g_delayed_kfree.head)
     {
       /* Remove the first delayed deallocation.  This is not atomic and so
        * we must disable interrupts around the queue operation.
        */
 
       flags = irqsave();
-      address = (FAR void*)sq_remfirst((FAR sq_queue_t*)&g_delayed_kfree);
+      address = (FAR void *)sq_remfirst((FAR sq_queue_t *)&g_delayed_kfree);
       irqrestore(flags);
 
       /* The address should always be non-NULL since that was checked in the

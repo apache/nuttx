@@ -174,12 +174,12 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
     {
       /* Try the general free list */
 
-      mqmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&g_msgfree);
+      mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
       if (!mqmsg)
         {
           /* Try the free list reserved for interrupt handlers */
 
-          mqmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&g_msgfreeirq);
+          mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfreeirq);
         }
     }
 
@@ -192,7 +192,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
        */
 
       saved_state = irqsave();
-      mqmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&g_msgfree);
+      mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
       irqrestore(saved_state);
 
       /* If we cannot a message from the free list, then we will have to allocate one. */
@@ -278,7 +278,7 @@ int mq_waitsend(mqd_t mqdes)
                * When we are unblocked, we will try again
                */
 
-              rtcb = (FAR struct tcb_s*)g_readytorun.head;
+              rtcb = (FAR struct tcb_s *)g_readytorun.head;
               rtcb->msgwaitq = msgq;
               msgq->nwaitnotfull++;
 
@@ -293,7 +293,7 @@ int mq_waitsend(mqd_t mqdes)
 
               if (get_errno() != OK)
                 {
-                   return ERROR;
+                  return ERROR;
                 }
             }
         }
@@ -346,7 +346,7 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
 
   /* Copy the message data into the message */
 
-  memcpy((void*)mqmsg->mail, (FAR const void*)msg, msglen);
+  memcpy((FAR void *)mqmsg->mail, (FAR const void *)msg, msglen);
 
   /* Insert the new message in the message queue */
 
@@ -356,7 +356,7 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
    * message. Each is list is maintained in ascending priority order.
    */
 
-  for (prev = NULL, next = (FAR struct mqueue_msg_s*)msgq->msglist.head;
+  for (prev = NULL, next = (FAR struct mqueue_msg_s *)msgq->msglist.head;
        next && prio <= next->priority;
        prev = next, next = next->next);
 
@@ -364,12 +364,12 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
 
   if (prev)
     {
-      sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)mqmsg,
+      sq_addafter((FAR sq_entry_t *)prev, (FAR sq_entry_t *)mqmsg,
                   &msgq->msglist);
     }
   else
     {
-      sq_addfirst((FAR sq_entry_t*)mqmsg, &msgq->msglist);
+      sq_addfirst((FAR sq_entry_t *)mqmsg, &msgq->msglist);
     }
 
   /* Increment the count of messages in the queue */
@@ -422,7 +422,7 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
        * interrupts should never cause a change in this list
        */
 
-      for (btcb = (FAR struct tcb_s*)g_waitingformqnotempty.head;
+      for (btcb = (FAR struct tcb_s *)g_waitingformqnotempty.head;
            btcb && btcb->msgwaitq != msgq;
            btcb = btcb->flink);
 

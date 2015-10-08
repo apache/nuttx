@@ -272,7 +272,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Give up the mutex */
 
                   mutex->pid = -1;
-                  ret = pthread_givesemaphore((sem_t*)&mutex->sem);
+                  ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
                   if (ret)
                     {
                       /* Restore interrupts  (pre-emption will be enabled when
@@ -294,7 +294,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                        * are started atomically.
                        */
 
-                      status = sem_wait((sem_t*)&cond->sem);
+                      status = sem_wait((FAR sem_t *)&cond->sem);
 
                       /* Did we get the condition semaphore. */
 
@@ -328,7 +328,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Reacquire the mutex (retaining the ret). */
 
                   sdbg("Re-locking...\n");
-                  status = pthread_takesemaphore((sem_t*)&mutex->sem);
+                  status = pthread_takesemaphore((FAR sem_t *)&mutex->sem);
                   if (!status)
                     {
                       mutex->pid = mypid;

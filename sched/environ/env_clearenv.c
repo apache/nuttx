@@ -74,7 +74,7 @@
 
 int clearenv(void)
 {
-  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
   DEBUGASSERT(tcb->group);
 
   env_release(tcb->group);

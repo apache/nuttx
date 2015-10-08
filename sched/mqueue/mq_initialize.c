@@ -130,7 +130,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
    * configured number of messages.
    */
 
-  mqmsgblock = (FAR struct mqueue_msg_s*)
+  mqmsgblock = (FAR struct mqueue_msg_s *)
     kmm_malloc(sizeof(struct mqueue_msg_s) * nmsgs);
 
   if (mqmsgblock)
@@ -141,7 +141,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
       for (i = 0; i < nmsgs; i++)
         {
           mqmsg->type = alloc_type;
-          sq_addlast((FAR sq_entry_t*)mqmsg++, queue);
+          sq_addlast((FAR sq_entry_t *)mqmsg++, queue);
         }
     }
 
@@ -225,13 +225,13 @@ void mq_desblockalloc(void)
        * we ever need to reclaim the memory.
        */
 
-      sq_addlast((FAR sq_entry_t*)&mqdesblock->queue, &g_desalloc);
+      sq_addlast((FAR sq_entry_t *)&mqdesblock->queue, &g_desalloc);
 
       /* Then add each message queue descriptor to the free list */
 
       for (i = 0; i < NUM_MSG_DESCRIPTORS; i++)
         {
-          sq_addlast((FAR sq_entry_t*)&mqdesblock->mqdes[i], &g_desfree);
+          sq_addlast((FAR sq_entry_t *)&mqdesblock->mqdes[i], &g_desfree);
         }
     }
 }

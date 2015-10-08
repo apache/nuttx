@@ -168,7 +168,8 @@ int task_terminate(pid_t pid, bool nonblocking)
   /* Remove the task from the OS's tasks lists. */
 
   saved_state = irqsave();
-  dq_rem((FAR dq_entry_t*)dtcb, (dq_queue_t*)g_tasklisttable[dtcb->task_state].list);
+  dq_rem((FAR dq_entry_t *)dtcb,
+         (FAR dq_queue_t *)g_tasklisttable[dtcb->task_state].list);
   dtcb->task_state = TSTATE_TASK_INVALID;
   irqrestore(saved_state);
 

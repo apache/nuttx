@@ -100,7 +100,7 @@ int putenv(FAR const char *string)
       goto errout;
     }
 
-  pequal = strchr( pname, '=');
+  pequal = strchr(pname, '=');
   if (pequal)
     {
       /* Then let setenv do all of the work */

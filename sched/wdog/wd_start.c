@@ -180,7 +180,7 @@ static inline void wd_expiration(void)
               case 4:
                 (*((wdentry4_t)(wdog->func)))(4,
                                 wdog->parm[0], wdog->parm[1],
-                                wdog->parm[2] ,wdog->parm[3]);
+                                wdog->parm[2], wdog->parm[3]);
                 break;
 #endif
             }
@@ -301,7 +301,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
     {
       /* Add the watchdog to the head == tail of the queue. */
 
-      sq_addlast((FAR sq_entry_t*)wdog, &g_wdactivelist);
+      sq_addlast((FAR sq_entry_t *)wdog, &g_wdactivelist);
     }
 
   /* There are other active watchdogs in the timer queue */
@@ -322,11 +322,11 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
       /* Advance past shorter delays */
 
       while (now <= delay && curr->next)
-       {
-         prev = curr;
-         curr = curr->next;
-         now += curr->lag;
-       }
+        {
+          prev = curr;
+          curr = curr->next;
+          now += curr->lag;
+        }
 
       /* Check if the new wdog must be inserted before the curr. */
 
@@ -368,13 +368,13 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
           delay -= now;
           if (!curr->next)
             {
-              sq_addlast((FAR sq_entry_t*)wdog, &g_wdactivelist);
+              sq_addlast((FAR sq_entry_t *)wdog, &g_wdactivelist);
             }
           else
             {
               next = curr->next;
               next->lag -= delay;
-              sq_addafter((FAR sq_entry_t*)curr, (FAR sq_entry_t*)wdog,
+              sq_addafter((FAR sq_entry_t *)curr, (FAR sq_entry_t *)wdog,
                           &g_wdactivelist);
             }
         }

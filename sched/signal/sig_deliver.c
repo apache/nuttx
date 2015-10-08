@@ -101,7 +101,7 @@ void sig_deliver(FAR struct tcb_s *stcb)
    */
 
   saved_errno = stcb->pterrno;
-  for (sigq = (FAR sigq_t*)stcb->sigpendactionq.head; (sigq); sigq = next)
+  for (sigq = (FAR sigq_t *)stcb->sigpendactionq.head; (sigq); sigq = next)
     {
       next = sigq->flink;
       sdbg("Sending signal sigq=0x%x\n", sigq);
@@ -112,8 +112,8 @@ void sig_deliver(FAR struct tcb_s *stcb)
        */
 
       saved_state = irqsave();
-      sq_rem((FAR sq_entry_t*)sigq, &(stcb->sigpendactionq));
-      sq_addlast((FAR sq_entry_t*)sigq, &(stcb->sigpostedq));
+      sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpendactionq));
+      sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
       irqrestore(saved_state);
 
       /* Call the signal handler (unless the signal was cancelled)
@@ -173,13 +173,13 @@ void sig_deliver(FAR struct tcb_s *stcb)
       /* Remove the signal from the sigpostedq */
 
       saved_state = irqsave();
-      sq_rem((FAR sq_entry_t*)sigq, &(stcb->sigpostedq));
+      sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
       irqrestore(saved_state);
 
       /* Then deallocate it */
 
       sig_releasependingsigaction(sigq);
-   }
+    }
 
   stcb->pterrno = saved_errno;
   sched_unlock();

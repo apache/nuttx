@@ -249,7 +249,7 @@ static inline bool pg_dequeue(void)
     {
       /* Remove the TCB from the head of the list (if any) */
 
-      g_pftcb = (FAR struct tcb_s *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
+      g_pftcb = (FAR struct tcb_s *)dq_remfirst((dq_queue_t *)&g_waitingforfill);
       pgllvdbg("g_pftcb: %p\n", g_pftcb);
       if (g_pftcb != NULL)
         {
@@ -538,7 +538,7 @@ int pg_worker(int argc, char *argv[])
 
   pglldbg("Started\n");
   (void)irqsave();
-  for (;;)
+  for (; ; )
     {
       /* Wait awhile.  We will wait here until either the configurable timeout
        * elapses or until we are awakened by a signal (which terminates the
@@ -585,7 +585,7 @@ int pg_worker(int argc, char *argv[])
                */
 
               pglldbg("Restarting TCB: %p\n", g_pftcb);
-              up_unblock_task(g_pftcb);;
+              up_unblock_task(g_pftcb);
 
               /* Yes .. Start the next asynchronous fill.  Check the return
                * value to see a fill was actually started (false means that
@@ -638,7 +638,7 @@ int pg_worker(int argc, char *argv[])
        * pending fills have been processed.
        */
 
-      for (;;)
+      for (; ; )
         {
           /* Yes .. Start the fill and block until the fill completes.
            * Check the return value to see a fill was actually performed.
@@ -648,9 +648,9 @@ int pg_worker(int argc, char *argv[])
           pgllvdbg("Calling pg_startfill\n");
           if (!pg_startfill())
             {
-               /* Break out of the loop -- there is nothing more to do */
+              /* Break out of the loop -- there is nothing more to do */
 
-               break;
+              break;
             }
 
           /* Handle the page fill complete event by restarting the
@@ -661,7 +661,7 @@ int pg_worker(int argc, char *argv[])
            */
 
           pgllvdbg("Restarting TCB: %p\n", g_pftcb);
-          up_unblock_task(g_pftcb);;
+          up_unblock_task(g_pftcb);
         }
 
       /* All queued fills have been processed */

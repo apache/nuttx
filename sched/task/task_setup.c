@@ -82,7 +82,7 @@ static const char g_noname[] = "<noname>";
  * Private Function Prototypes
  ****************************************************************************/
 
-static int task_assignpid(FAR struct tcb_s* tcb);
+static int task_assignpid(FAR struct tcb_s * tcb);
 
 /****************************************************************************
  * Private Functions
@@ -183,7 +183,7 @@ static int task_assignpid(FAR struct tcb_s *tcb)
 #ifdef CONFIG_SCHED_HAVE_PARENT
 static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_SCHED_CHILD_STATUS)
   DEBUGASSERT(tcb && tcb->group && rtcb->group);
@@ -288,7 +288,7 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 #ifdef CONFIG_PIC
 static inline void task_dupdspace(FAR struct tcb_s *tcb)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   if (rtcb->dspace != NULL)
     {
       /* Copy the D-Space structure reference and increment the reference
@@ -390,7 +390,7 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
       /* Add the task to the inactive task list */
 
       sched_lock();
-      dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
+      dq_addfirst((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
       tcb->task_state = TSTATE_TASK_INACTIVE;
       sched_unlock();
     }
@@ -499,7 +499,7 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
           strtablen += (strlen(argv[argc]) + 1);
           if (strtablen >= tcb->cmn.adj_stack_size)
             {
-               return -ENAMETOOLONG;
+              return -ENAMETOOLONG;
             }
 
           /* Increment the number of args.  Here is a sanity check to
@@ -520,7 +520,7 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
    * task name plus a NULL argv[] entry to terminate the list.
    */
 
-  argvlen   = (argc + 2)*sizeof(FAR char*);
+  argvlen   = (argc + 2) * sizeof(FAR char *);
   stackargv = (FAR char **)up_stack_frame(&tcb->cmn, argvlen + strtablen);
 
   DEBUGASSERT(stackargv != NULL);

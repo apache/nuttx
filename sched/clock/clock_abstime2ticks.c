@@ -85,7 +85,7 @@ static long compare_timespec(FAR const struct timespec *a,
   if (a->tv_sec > b->tv_sec)
     {
       return 1;
-     }
+    }
 
   return (long)a->tv_nsec -(long)b->tv_nsec;
 }

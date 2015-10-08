@@ -109,7 +109,7 @@ int sched_setscheduler(pid_t pid, int policy,
 
   /* Check if the task to modify the calling task */
 
-  if (pid == 0 )
+  if (pid == 0)
     {
       pid = getpid();
     }

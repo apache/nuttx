@@ -127,7 +127,8 @@ void sched_ufree(FAR void *address)
 
       /* Delay the deallocation until a more appropriate time. */
 
-      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayed_kufree);
+      sq_addlast((FAR sq_entry_t *)address,
+                 (FAR sq_queue_t *)&g_delayed_kufree);
 
       /* Signal the worker thread that is has some clean up to do */
 
@@ -167,7 +168,8 @@ void sched_kfree(FAR void *address)
 
       /* Delay the deallocation until a more appropriate time. */
 
-      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayed_kfree);
+      sq_addlast((FAR sq_entry_t *)address,
+                 (FAR sq_queue_t *)&g_delayed_kfree);
 
       /* Signal the worker thread that is has some clean up to do */
 

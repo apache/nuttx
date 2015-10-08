@@ -89,9 +89,9 @@ void sig_releasependingsigaction(FAR sigq_t *sigq)
        * list from interrupt handlers. */
 
       saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingaction);
+      sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingaction);
       irqrestore(saved_state);
-   }
+    }
 
   /* If this is a message pre-allocated for interrupts,
    * then put it back in the correct  free list.
@@ -103,7 +103,7 @@ void sig_releasependingsigaction(FAR sigq_t *sigq)
        * list from interrupt handlers. */
 
       saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingirqaction);
+      sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingirqaction);
       irqrestore(saved_state);
     }
 

@@ -109,7 +109,7 @@ FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
 
   /* Allocate memory for the new message queue. */
 
-  msgq = (FAR struct mqueue_inode_s*)
+  msgq = (FAR struct mqueue_inode_s *)
     kmm_zalloc(sizeof(struct mqueue_inode_s));
 
   if (msgq)

@@ -114,17 +114,17 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sched_lock();
       mutex->pid = -1;
-      ret = pthread_givesemaphore((sem_t*)&mutex->sem);
+      ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
 
       /* Take the semaphore */
 
-      ret |= pthread_takesemaphore((sem_t*)&cond->sem);
+      ret |= pthread_takesemaphore((FAR sem_t *)&cond->sem);
       sched_unlock();
 
       /* Reacquire the mutex */
 
       sdbg("Reacquire mutex...\n");
-      ret |= pthread_takesemaphore((sem_t*)&mutex->sem);
+      ret |= pthread_takesemaphore((FAR sem_t *)&mutex->sem);
       if (!ret)
         {
           mutex->pid = getpid();

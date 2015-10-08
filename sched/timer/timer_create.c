@@ -78,15 +78,15 @@
 
 static struct posix_timer_s *timer_allocate(void)
 {
-  struct posix_timer_s *ret;
-  irqstate_t            flags;
-  uint8_t               pt_flags;
+  FAR struct posix_timer_s *ret;
+  irqstate_t flags;
+  uint8_t pt_flags;
 
   /* Try to get a preallocated timer from the free list */
 
 #if CONFIG_PREALLOC_TIMERS > 0
   flags = irqsave();
-  ret   = (struct posix_timer_s*)sq_remfirst((sq_queue_t*)&g_freetimers);
+  ret   = (FAR struct posix_timer_s *)sq_remfirst((FAR sq_queue_t *)&g_freetimers);
   irqrestore(flags);
 
   /* Did we get one? */
@@ -100,7 +100,7 @@ static struct posix_timer_s *timer_allocate(void)
     {
       /* Allocate a new timer from the heap */
 
-      ret      = (struct posix_timer_s*)kmm_malloc(sizeof(struct posix_timer_s));
+      ret      = (FAR struct posix_timer_s *)kmm_malloc(sizeof(struct posix_timer_s));
       pt_flags = 0;
     }
 
@@ -116,7 +116,7 @@ static struct posix_timer_s *timer_allocate(void)
       /* And add it to the end of the list of allocated timers */
 
       flags = irqsave();
-      sq_addlast((sq_entry_t*)ret, (sq_queue_t*)&g_alloctimers);
+      sq_addlast((FAR sq_entry_t *)ret, (FAR sq_queue_t *)&g_alloctimers);
       irqrestore(flags);
     }
 

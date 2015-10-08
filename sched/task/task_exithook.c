@@ -529,8 +529,8 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
         {
           /* Yes.. Wakeup any tasks waiting for this task to exit */
 
-         group->tg_statloc = NULL;
-         while (group->tg_exitsem.semcount < 0)
+          group->tg_statloc = NULL;
+          while (group->tg_exitsem.semcount < 0)
             {
               /* Wake up the thread */
 

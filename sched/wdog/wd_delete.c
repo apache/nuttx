@@ -142,7 +142,7 @@ int wd_delete(WDOG_ID wdog)
        * timers, all with interrupts disabled.
        */
 
-      sq_addlast((FAR sq_entry_t*)wdog, &g_wdfreelist);
+      sq_addlast((FAR sq_entry_t *)wdog, &g_wdfreelist);
       g_wdnfree++;
       DEBUGASSERT(g_wdnfree <= CONFIG_PREALLOC_WDOGS);
       irqrestore(state);

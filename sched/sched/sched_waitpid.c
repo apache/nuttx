@@ -353,11 +353,11 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       /* Does this task retain child status? */
 
-       if (retains)
+      if (retains)
         {
-           /* Check if this specific pid has allocated child status? */
+          /* Check if this specific pid has allocated child status? */
 
-           if (group_findchild(rtcb->group, pid) == NULL)
+          if (group_findchild(rtcb->group, pid) == NULL)
             {
               err = ECHILD;
               goto errout_with_errno;
@@ -376,7 +376,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
     }
   else if (pid != (pid_t)-1)
     {
-     /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure it is our child. */
 
       ctcb = sched_gettcb(pid);
 #ifdef HAVE_GROUP_MEMBERS
@@ -394,7 +394,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Loop until the child that we are waiting for dies */
 
-  for (;;)
+  for (; ; )
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Check if the task has already died. Signals are not queued in

@@ -166,7 +166,7 @@ mqd_t mq_descreate(FAR struct tcb_s *mtcb, FAR struct mqueue_inode_s *msgq,
 
       /* And add it to the specified task's TCB */
 
-      sq_addlast((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
+      sq_addlast((FAR sq_entry_t *)mqdes, &group->tg_msgdesq);
     }
 
   return mqdes;

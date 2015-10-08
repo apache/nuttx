@@ -147,19 +147,19 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
 static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
                                  uint8_t sigtype)
 {
-  sigq_t *sigqalloc;
-  sigq_t *sigq;
-  int     i;
+  FAR sigq_t *sigqalloc;
+  FAR sigq_t *sigq;
+  int i;
 
   /* Allocate a block of pending signal actions */
 
-  sigqalloc = (sigq_t*)kmm_malloc((sizeof(sigq_t)) * nsigs);
+  sigqalloc = (FAR sigq_t *)kmm_malloc((sizeof(sigq_t)) * nsigs);
 
   sigq = sigqalloc;
   for (i = 0; i < nsigs; i++)
     {
       sigq->type = sigtype;
-      sq_addlast((FAR sq_entry_t*)sigq++, siglist);
+      sq_addlast((FAR sq_entry_t *)sigq++, siglist);
     }
 
   return sigqalloc;
@@ -177,20 +177,20 @@ static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
 static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
                                                   uint16_t nsigs, uint8_t sigtype)
 {
-  sigpendq_t *sigpendalloc;
-  sigpendq_t *sigpend;
+  FAR sigpendq_t *sigpendalloc;
+  FAR sigpendq_t *sigpend;
   int i;
 
   /* Allocate a block of pending signal structures  */
 
   sigpendalloc =
-     (sigpendq_t*)kmm_malloc((sizeof(sigpendq_t)) * nsigs);
+     (FAR sigpendq_t *)kmm_malloc((sizeof(sigpendq_t)) * nsigs);
 
   sigpend = sigpendalloc;
   for (i = 0; i < nsigs; i++)
     {
       sigpend->type = sigtype;
-      sq_addlast((FAR sq_entry_t*)sigpend++, siglist);
+      sq_addlast((FAR sq_entry_t *)sigpend++, siglist);
     }
 
   return sigpendalloc;
@@ -254,17 +254,17 @@ void sig_initialize(void)
 
 void sig_allocateactionblock(void)
 {
-  sigactq_t *sigact;
+  FAR sigactq_t *sigact;
   int i;
 
   /* Allocate a block of signal actions */
 
   g_sigactionalloc =
-     (sigactq_t*)kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
+     (FAR sigactq_t *)kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
 
   sigact = g_sigactionalloc;
   for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
     {
-      sq_addlast((FAR sq_entry_t*)sigact++, &g_sigfreeaction);
+      sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
     }
 }

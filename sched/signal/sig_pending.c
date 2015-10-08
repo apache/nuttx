@@ -89,7 +89,7 @@
 
 int sigpending(FAR sigset_t *set)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   int ret = ERROR;
 
   if (set)
@@ -121,7 +121,7 @@ sigset_t sig_pendingset(FAR struct tcb_s *stcb)
   sigpendset = NULL_SIGNAL_SET;
 
   saved_state = irqsave();
-  for (sigpend = (FAR sigpendq_t*)group->sigpendingq.head;
+  for (sigpend = (FAR sigpendq_t *)group->sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
       sigaddset(&sigpendset, sigpend->info.si_signo);

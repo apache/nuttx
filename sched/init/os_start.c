@@ -311,7 +311,7 @@ void os_start(void)
    * that has pid == 0 and sched_priority == 0.
    */
 
-  bzero((void*)&g_idletcb, sizeof(struct task_tcb_s));
+  bzero((void *)&g_idletcb, sizeof(struct task_tcb_s));
   g_idletcb.cmn.task_state = TSTATE_TASK_RUNNING;
   g_idletcb.cmn.entry.main = (main_t)os_start;
   g_idletcb.cmn.flags      = TCB_FLAG_TTYPE_KERNEL;
@@ -341,7 +341,7 @@ void os_start(void)
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 
-  dq_addfirst((FAR dq_entry_t*)&g_idletcb, (FAR dq_queue_t*)&g_readytorun);
+  dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_readytorun);
 
   /* Initialize the processor-specific portion of the TCB */
 
@@ -550,7 +550,7 @@ void os_start(void)
   /* When control is return to this point, the system is idle. */
 
   sdbg("Beginning Idle Loop\n");
-  for (;;)
+  for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker
        * thread).  This cleans-up memory de-allocations that were queued

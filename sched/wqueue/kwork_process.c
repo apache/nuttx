@@ -239,20 +239,20 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
    * period will be non-zero and equal to wqueue->delay.
    */
 
-   if (period == 0)
-     {
-       sigset_t set;
+  if (period == 0)
+    {
+      sigset_t set;
 
-       /* Wait indefinitely until signalled with SIGWORK */
+      /* Wait indefinitely until signalled with SIGWORK */
 
-       sigemptyset(&set);
-       sigaddset(&set, SIGWORK);
+      sigemptyset(&set);
+      sigaddset(&set, SIGWORK);
 
-       wqueue->worker[wndx].busy = false;
-       DEBUGVERIFY(sigwaitinfo(&set, NULL));
+      wqueue->worker[wndx].busy = false;
+      DEBUGVERIFY(sigwaitinfo(&set, NULL));
        wqueue->worker[wndx].busy = true;
-     }
-   else
+    }
+  else
 #endif
     {
       /* Get the delay (in clock ticks) since we started the sampling */

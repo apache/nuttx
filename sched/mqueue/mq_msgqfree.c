@@ -92,7 +92,7 @@ void mq_msgqfree(FAR struct mqueue_inode_s *msgq)
 
   /* Deallocate any stranded messages in the message queue. */
 
-  curr = (FAR struct mqueue_msg_s*)msgq->msglist.head;
+  curr = (FAR struct mqueue_msg_s *)msgq->msglist.head;
   while (curr)
     {
       /* Deallocate the message structure. */

@@ -103,7 +103,7 @@
 
 int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   tstate_t task_state;
   irqstate_t saved_state;
 
@@ -204,7 +204,8 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
           {
             /* Remove the TCB from the prioritized task list */
 
-            dq_rem((FAR dq_entry_t*)tcb, (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+            dq_rem((FAR dq_entry_t *)tcb,
+                   (FAR dq_queue_t *)g_tasklisttable[task_state].list);
 
             /* Change the task priority */
 
@@ -214,7 +215,8 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
              * position
              */
 
-            sched_addprioritized(tcb, (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+            sched_addprioritized(tcb,
+                                 (FAR dq_queue_t *)g_tasklisttable[task_state].list);
           }
 
         /* CASE 3b. The task resides in a non-prioritized list. */

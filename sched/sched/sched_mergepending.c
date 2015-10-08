@@ -102,11 +102,11 @@ bool sched_mergepending(void)
 
   /* Initialize the inner search loop */
 
-  rtrtcb = (FAR struct tcb_s*)g_readytorun.head;
+  rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
 
   /* Process every TCB in the g_pendingtasks list */
 
-  for (pndtcb = (FAR struct tcb_s*)g_pendingtasks.head; pndtcb; pndtcb = pndnext)
+  for (pndtcb = (FAR struct tcb_s *)g_pendingtasks.head; pndtcb; pndtcb = pndnext)
     {
       pndnext = pndtcb->flink;
 
@@ -142,7 +142,7 @@ bool sched_mergepending(void)
           pndtcb->flink      = rtrtcb;
           pndtcb->blink      = NULL;
           rtrtcb->blink      = pndtcb;
-          g_readytorun.head  = (FAR dq_entry_t*)pndtcb;
+          g_readytorun.head  = (FAR dq_entry_t *)pndtcb;
           rtrtcb->task_state = TSTATE_TASK_READYTORUN;
           pndtcb->task_state = TSTATE_TASK_RUNNING;
           ret                = true;

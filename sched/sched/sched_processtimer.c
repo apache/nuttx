@@ -92,7 +92,7 @@
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static inline void sched_process_scheduler(void)
 {
-  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb  = (FAR struct tcb_s *)g_readytorun.head;
 
 #if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */

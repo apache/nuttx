@@ -116,7 +116,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
         {
           /* Destroy the semaphore */
 
-          status = sem_destroy((sem_t*)&mutex->sem);
+          status = sem_destroy((FAR sem_t *)&mutex->sem);
           if (status != OK)
             {
               ret = EINVAL;

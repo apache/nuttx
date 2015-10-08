@@ -143,7 +143,7 @@ int wd_cancel(WDOG_ID wdog)
         {
           /* Remove the watchdog from mid- or end-of-queue */
 
-          (void)sq_remafter((FAR sq_entry_t*)prev, &g_wdactivelist);
+          (void)sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist);
         }
       else
         {

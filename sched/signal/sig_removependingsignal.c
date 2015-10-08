@@ -95,7 +95,7 @@ FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
 
   saved_state = irqsave();
 
-  for (prevsig = NULL, currsig = (FAR sigpendq_t*)group->sigpendingq.head;
+  for (prevsig = NULL, currsig = (FAR sigpendq_t *)group->sigpendingq.head;
        (currsig && currsig->info.si_signo != signo);
        prevsig = currsig, currsig = currsig->flink);
 
@@ -103,7 +103,7 @@ FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
     {
       if (prevsig)
         {
-          sq_remafter((FAR sq_entry_t*)prevsig, &group->sigpendingq);
+          sq_remafter((FAR sq_entry_t *)prevsig, &group->sigpendingq);
         }
       else
         {

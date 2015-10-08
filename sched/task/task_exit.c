@@ -106,7 +106,7 @@
 
 int task_exit(void)
 {
-  FAR struct tcb_s *dtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *dtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct tcb_s *rtcb;
   int ret;
 
@@ -119,7 +119,7 @@ int task_exit(void)
    */
 
   (void)sched_removereadytorun(dtcb);
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s *)g_readytorun.head;
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-

@@ -768,16 +768,16 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
    * sporadic scheduling parameters and state data.
    */
 
-   sporadic = (FAR struct sporadic_s *)kmm_zalloc(sizeof(struct sporadic_s));
-   if (sporadic == NULL)
-     {
-       slldbg("ERROR: Failed to allocate sporadic data structure\n");
-       return -ENOMEM;
-     }
+  sporadic = (FAR struct sporadic_s *)kmm_zalloc(sizeof(struct sporadic_s));
+  if (sporadic == NULL)
+    {
+      slldbg("ERROR: Failed to allocate sporadic data structure\n");
+      return -ENOMEM;
+    }
 
-   /* The initialize required is to set the back pointer to the TCB in
-    * each of the replenishment structures.
-    */
+  /* The initialize required is to set the back pointer to the TCB in
+   * each of the replenishment structures.
+   */
 
   for (i = 0; i < CONFIG_SCHED_SPORADIC_MAXREPL; i++)
     {
@@ -1145,7 +1145,7 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb)
  *
  * Input Parameters:
  *   tcb        - The TCB of the thread that is beginning sporadic
-                  scheduling.
+ *                scheduling.
  *   ticks      - The number of elapsed ticks since the last time this
  *                function was called.
  *   noswitches - We are running in a context where context switching is

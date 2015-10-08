@@ -105,7 +105,7 @@
 
 void mq_desclose(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)sched_self();
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct mqueue_inode_s *msgq;
 
@@ -115,7 +115,7 @@ void mq_desclose(mqd_t mqdes)
    * descriptors.
    */
 
-  sq_rem((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
+  sq_rem((FAR sq_entry_t *)mqdes, &group->tg_msgdesq);
 
   /* Find the message queue associated with the message descriptor */
 
@@ -135,8 +135,8 @@ void mq_desclose(mqd_t mqdes)
     }
 #endif
 
-   /* Deallocate the message descriptor */
+  /* Deallocate the message descriptor */
 
-   mq_desfree(mqdes);
+  mq_desfree(mqdes);
 }
 

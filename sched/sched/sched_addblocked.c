@@ -105,14 +105,14 @@ void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state)
       /* Add the task to a prioritized list */
 
       sched_addprioritized(btcb,
-                           (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+                           (FAR dq_queue_t *)g_tasklisttable[task_state].list);
     }
   else
     {
       /* Add the task to a non-prioritized list */
 
-      dq_addlast((FAR dq_entry_t*)btcb,
-                 (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+      dq_addlast((FAR dq_entry_t *)btcb,
+                 (FAR dq_queue_t *)g_tasklisttable[task_state].list);
     }
 
   /* Make sure the TCB's state corresponds to the list */

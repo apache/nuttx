@@ -124,7 +124,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
        */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-     if (timer_deleteall != NULL)
+      if (timer_deleteall != NULL)
 #endif
         {
           timer_deleteall(tcb->pid);

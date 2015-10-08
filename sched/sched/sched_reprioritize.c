@@ -112,16 +112,16 @@ int sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
   int ret = sched_setpriority(tcb, sched_priority);
   if (ret == 0)
     {
-       /* Reset the base_priority -- the priority that the thread would return
-        * to once it posts the semaphore.
-        */
+      /* Reset the base_priority -- the priority that the thread would return
+       * to once it posts the semaphore.
+       */
 
-       tcb->base_priority  = (uint8_t)sched_priority;
+      tcb->base_priority  = (uint8_t)sched_priority;
 
-       /* Discard any pending reprioritizations as well */
+      /* Discard any pending reprioritizations as well */
 
 #if CONFIG_SEM_NNESTPRIO > 0
-       tcb->npend_reprio   = 0;
+      tcb->npend_reprio   = 0;
 #endif
     }
 

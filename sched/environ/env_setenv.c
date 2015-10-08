@@ -124,7 +124,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   /* Get a reference to the thread-private environ in the TCB. */
 
   sched_lock();
-  rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb  = (FAR struct tcb_s *)g_readytorun.head;
   group = rtcb->group;
   DEBUGASSERT(group);
 

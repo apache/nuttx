@@ -188,7 +188,7 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 
       /* The TCB was added to the active task list by task_schedsetup() */
 
-      dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
+      dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
       goto errout_with_tcb;
     }
 

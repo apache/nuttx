@@ -458,7 +458,7 @@ void task_vforkabort(FAR struct task_tcb_s *child, int errcode)
 {
   /* The TCB was added to the active task list by task_schedsetup() */
 
-  dq_rem((FAR dq_entry_t*)child, (dq_queue_t*)&g_inactivetasks);
+  dq_rem((FAR dq_entry_t *)child, (FAR dq_queue_t *)&g_inactivetasks);
 
   /* Release the TCB */
 

@@ -127,7 +127,7 @@ static int work_lpthread(int argc, char *argv[])
 
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
 #if CONFIG_SCHED_LPNTHREADS > 0
       /* Thread 0 is special.  Only thread 0 performs period garbage collection */
@@ -147,14 +147,14 @@ static int work_lpthread(int argc, char *argv[])
 #endif
         {
           /* Perform garbage collection.  This cleans-up memory de-allocations
-          * that were queued because they could not be freed in that execution
-          * context (for example, if the memory was freed from an interrupt handler).
-          * NOTE: If the work thread is disabled, this clean-up is performed by
-          * the IDLE thread (at a very, very low priority).
-          *
-          * In the event of multiple low priority threads, on index == 0 will do
-          * the garbage collection.
-          */
+           * that were queued because they could not be freed in that execution
+           * context (for example, if the memory was freed from an interrupt handler).
+           * NOTE: If the work thread is disabled, this clean-up is performed by
+           * the IDLE thread (at a very, very low priority).
+           *
+           * In the event of multiple low priority threads, on index == 0 will do
+           * the garbage collection.
+           */
 
           sched_garbagecollection();
 

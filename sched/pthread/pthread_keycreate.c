@@ -108,10 +108,11 @@
  *
  ****************************************************************************/
 
-int pthread_key_create(FAR pthread_key_t *key, CODE void (*destructor)(void*))
+int pthread_key_create(FAR pthread_key_t *key,
+                       CODE void (*destructor)(FAR void *))
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
   int ret = EAGAIN;
 

@@ -312,7 +312,7 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
       /* Does this member have the matching pid */
 
       if (group->tg_members[i] == pid)
-       {
+        {
           /* Remove the member from the array of members.  This must be an
            * atomic operation because the member array may be accessed from
            * interrupt handlers (read-only).

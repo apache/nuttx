@@ -115,7 +115,7 @@ static void group_assigngid(FAR struct task_group_s *group)
 
   /* Loop until we create a unique ID */
 
-  for (;;)
+  for (; ; )
     {
       /* Increment the ID counter.  This is global data so be extra paranoid. */
 

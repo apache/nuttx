@@ -106,7 +106,7 @@ static int work_hpthread(int argc, char *argv[])
 {
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
 #ifndef CONFIG_SCHED_LPWORK
       /* First, perform garbage collection.  This cleans-up memory

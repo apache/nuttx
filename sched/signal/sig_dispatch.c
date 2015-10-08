@@ -117,15 +117,15 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
         {
           /* Populate the new signal queue element */
 
-           sigq->action.sighandler = sigact->act.sa_u._sa_sigaction;
-           sigq->mask = sigact->act.sa_mask;
-           memcpy(&sigq->info, info, sizeof(siginfo_t));
+          sigq->action.sighandler = sigact->act.sa_u._sa_sigaction;
+          sigq->mask = sigact->act.sa_mask;
+          memcpy(&sigq->info, info, sizeof(siginfo_t));
 
-           /* Put it at the end of the pending signals list */
+          /* Put it at the end of the pending signals list */
 
-           saved_state = irqsave();
-           sq_addlast((FAR sq_entry_t*)sigq, &(stcb->sigpendactionq));
-           irqrestore(saved_state);
+          saved_state = irqsave();
+          sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpendactionq));
+          irqrestore(saved_state);
         }
     }
 
@@ -152,7 +152,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
     {
       /* Try to get the pending signal structure from the free list */
 
-      sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
+      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
       if (!sigpend)
         {
           /* If no pending signal structure is available in the free list,
@@ -160,7 +160,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
            * interrupt handlers
            */
 
-          sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingirqsignal);
+          sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingirqsignal);
         }
     }
 
@@ -172,7 +172,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
       /* Try to get the pending signal structure from the free list */
 
       saved_state = irqsave();
-      sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
+      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
       irqrestore(saved_state);
 
       /* Check if we got one. */
@@ -220,7 +220,7 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
 
   /* Seach the list for a sigpendion on this signal */
 
-  for (sigpend = (FAR sigpendq_t*)group->sigpendingq.head;
+  for (sigpend = (FAR sigpendq_t *)group->sigpendingq.head;
        (sigpend && sigpend->info.si_signo != signo);
        sigpend = sigpend->flink);
 
@@ -274,7 +274,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
           /* Add the structure to the pending signal list */
 
           saved_state = irqsave();
-          sq_addlast((FAR sq_entry_t*)sigpend, &group->sigpendingq);
+          sq_addlast((FAR sq_entry_t *)sigpend, &group->sigpendingq);
           irqrestore(saved_state);
         }
     }
