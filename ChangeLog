@@ -11015,4 +11015,6 @@
 	  From  Pierre-noel Bouteville (2015-10-07).
 	* fs/tmpfs:  Created a directory that will eventually hold a trivial
 	  temporary RAM file file system (2015-10-0i8).
+	* tools/: Add crappy style checking tool nxstyle.c.  See thee tools/
+	  README file for more info (2015-10-08).
 
