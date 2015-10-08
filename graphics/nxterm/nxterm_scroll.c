@@ -136,7 +136,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   /* Finally, clear the vacated part of the display */
 
   rect.pt1.y = bottom;
-  rect.pt2.y = priv->wndo.wsize.h- 1;
+  rect.pt2.y = priv->wndo.wsize.h - 1;
 
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)

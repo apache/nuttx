@@ -214,7 +214,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   attr.mq_msgsize = NX_MXSVRMSGLEN;
   attr.mq_flags   = 0;
 
-  fe->conn.crdmq = mq_open(mqname, O_RDONLY|O_CREAT, 0666, &attr);
+  fe->conn.crdmq = mq_open(mqname, O_RDONLY | O_CREAT, 0666, &attr);
   if (fe->conn.crdmq == (mqd_t)-1)
     {
       gdbg("mq_open(%s) failed: %d\n", mqname, errno);
@@ -245,7 +245,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   /* Initialize the non-NULL elements of the background window */
 
   fe->be.bkgd.conn = &fe->conn;
-  fe->be.bkgd.be   = (FAR struct nxbe_state_s*)fe;
+  fe->be.bkgd.be   = (FAR struct nxbe_state_s *)fe;
 
   fe->be.bkgd.bounds.pt2.x = fe->be.vinfo.xres - 1;
   fe->be.bkgd.bounds.pt2.y = fe->be.vinfo.yres - 1;
@@ -325,7 +325,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
   /* Then loop forever processing incoming messages */
 
-  for (;;)
+  for (; ; )
     {
        /* Receive the next server message */
 

@@ -100,7 +100,7 @@ void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
     {
       /* Mark bits in the first GAT entry */
 
-      gatmask =0xffffffff << gatbit;
+      gatmask = 0xffffffff << gatbit;
       DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
 
       priv->gat[gatidx] |= gatmask;

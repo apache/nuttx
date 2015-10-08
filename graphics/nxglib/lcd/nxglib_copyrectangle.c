@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
+void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
 (FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
  FAR const void *src, FAR const struct nxgl_point_s *origin,
  unsigned int srcstride)
@@ -103,7 +103,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
   /* Set up to copy the image */
 
   xoffset = dest->pt1.x - origin->x;
-  sline = (const uint8_t*)src + NXGL_SCALEX(xoffset) + (dest->pt1.y - origin->y) * srcstride;
+  sline = (FAR const uint8_t *)src + NXGL_SCALEX(xoffset) + (dest->pt1.y - origin->y) * srcstride;
 #if NXGLIB_BITSPERPIXEL < 8
   remainder = NXGL_REMAINDERX(xoffset);
 #endif
@@ -119,7 +119,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 
       if (remainder != 0)
         {
-          NXGL_FUNCNAME(nxgl_copyrun,NXGLIB_SUFFIX)(sline, pinfo->buffer, remainder, ncols);
+          NXGL_FUNCNAME(nxgl_copyrun, NXGLIB_SUFFIX)(sline, pinfo->buffer, remainder, ncols);
           (void)pinfo->putrun(row, dest->pt1.x, pinfo->buffer, ncols);
         }
       else

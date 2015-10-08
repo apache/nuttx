@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
+void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
   (FAR struct lcd_planeinfo_s *pinfo,
    FAR const struct nxgl_rect_s *rect,
    NXGL_PIXEL_T color)
@@ -98,7 +98,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 
   /* Fill the run buffer with the selected color */
 
-  NXGL_FUNCNAME(nxgl_fillrun,NXGLIB_SUFFIX)((NXGLIB_RUNTYPE*)pinfo->buffer, color, ncols);
+  NXGL_FUNCNAME(nxgl_fillrun, NXGLIB_SUFFIX)((NXGLIB_RUNTYPE *)pinfo->buffer, color, ncols);
 
   /* Then fill the rectangle line-by-line */
 

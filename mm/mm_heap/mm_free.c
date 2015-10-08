@@ -88,12 +88,12 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Map the memory chunk into a free node */
 
-  node = (FAR struct mm_freenode_s *)((char*)mem - SIZEOF_MM_ALLOCNODE);
+  node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
   node->preceding &= ~MM_ALLOC_BIT;
 
   /* Check if the following node is free and, if so, merge it */
 
-  next = (FAR struct mm_freenode_s *)((char*)node + node->size);
+  next = (FAR struct mm_freenode_s *)((FAR char *)node + node->size);
   if ((next->preceding & MM_ALLOC_BIT) == 0)
     {
       FAR struct mm_allocnode_s *andbeyond;
@@ -103,7 +103,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        * index past the tail chunk because it is always allocated.
        */
 
-      andbeyond = (FAR struct mm_allocnode_s*)((char*)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + next->size);
 
       /* Remove the next node.  There must be a predecessor,
        * but there may not be a successor node.
@@ -127,7 +127,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
    * it with this node
    */
 
-  prev = (FAR struct mm_freenode_s *)((char*)node - node->preceding);
+  prev = (FAR struct mm_freenode_s *)((FAR char *)node - node->preceding);
   if ((prev->preceding & MM_ALLOC_BIT) == 0)
     {
       /* Remove the node.  There must be a predecessor, but there may

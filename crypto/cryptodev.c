@@ -96,11 +96,11 @@ static ssize_t cryptodev_write(FAR struct file *filep, FAR const char *buffer,
 
 static int cryptodev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  switch(cmd)
+  switch (cmd)
   {
   case CIOCGSESSION:
     {
-      struct session_op *ses = (struct session_op*)arg;
+      FAR struct session_op *ses = (FAR struct session_op *)arg;
       ses->ses = (uint32_t)ses;
       return OK;
     }
@@ -112,8 +112,8 @@ static int cryptodev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   case CIOCCRYPT:
     {
-      FAR struct crypt_op *op = (struct crypt_op*)arg;
-      FAR struct session_op *ses = (struct session_op*)op->ses;
+      FAR struct crypt_op *op    = (FAR struct crypt_op *)arg;
+      FAR struct session_op *ses = (FAR struct session_op *)op->ses;
       int encrypt;
 
       switch (op->op)

@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 #ifndef NULL
-#  define NULL ((void*)0)
+#  define NULL ((void *)0)
 #endif
 
 /****************************************************************************
@@ -164,11 +164,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
         {
           /* Get a pointer to the next node in physical memory */
 
-          next = (FAR struct mm_freenode_s*)(((char*)node) + node->size);
+          next = (FAR struct mm_freenode_s *)(((FAR char *)node) + node->size);
 
           /* Create the remainder node */
 
-          remainder = (FAR struct mm_freenode_s*)(((char*)node) + size);
+          remainder = (FAR struct mm_freenode_s *)(((FAR char *)node) + size);
           remainder->size = remaining;
           remainder->preceding = size;
 
@@ -190,7 +190,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       /* Handle the case of an exact size match */
 
       node->preceding |= MM_ALLOC_BIT;
-      ret = (void*)((char*)node + SIZEOF_MM_ALLOCNODE);
+      ret = (void *)((FAR char *)node + SIZEOF_MM_ALLOCNODE);
     }
 
   mm_givesemaphore(heap);

@@ -96,7 +96,7 @@ FAR struct nxterm_state_s *
   priv->ops     = ops;
   priv->handle  = handle;
   priv->minor   = minor;
-  memcpy(&priv->wndo, wndo, sizeof( struct nxterm_window_s));
+  memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
   sem_init(&priv->exclsem, 0, 1);
 #ifdef CONFIG_DEBUG

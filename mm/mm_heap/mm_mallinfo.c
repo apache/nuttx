@@ -71,7 +71,7 @@
 
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
-  struct mm_allocnode_s *node;
+  FAR struct mm_allocnode_s *node;
   size_t mxordblk = 0;
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
@@ -98,7 +98,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
       for (node = heap->mm_heapstart[region];
            node < heap->mm_heapend[region];
-           node = (struct mm_allocnode_s *)((char*)node + node->size))
+           node = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size))
         {
           mvdbg("region=%d node=%p size=%p preceding=%p (%c)\n",
                 region, node, node->size, (node->preceding & ~MM_ALLOC_BIT),

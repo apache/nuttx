@@ -115,7 +115,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Map the memory chunk into an allocated node structure */
 
-  oldnode = (FAR struct mm_allocnode_s *)((FAR char*)oldmem - SIZEOF_MM_ALLOCNODE);
+  oldnode = (FAR struct mm_allocnode_s *)((FAR char *)oldmem - SIZEOF_MM_ALLOCNODE);
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
@@ -146,13 +146,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
    * best decision
    */
 
-  next = (FAR struct mm_freenode_s *)((FAR char*)oldnode + oldnode->size);
+  next = (FAR struct mm_freenode_s *)((FAR char *)oldnode + oldnode->size);
   if ((next->preceding & MM_ALLOC_BIT) == 0)
     {
       nextsize = next->size;
     }
 
-  prev = (FAR struct mm_freenode_s *)((FAR char*)oldnode - (oldnode->preceding & ~MM_ALLOC_BIT));
+  prev = (FAR struct mm_freenode_s *)((FAR char *)oldnode - (oldnode->preceding & ~MM_ALLOC_BIT));
   if ((prev->preceding & MM_ALLOC_BIT) == 0)
     {
       prevsize = prev->size;
@@ -240,7 +240,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
           /* Extend the node into the previous free chunk */
 
-          newnode = (FAR struct mm_allocnode_s *)((FAR char*)oldnode - takeprev);
+          newnode = (FAR struct mm_allocnode_s *)((FAR char *)oldnode - takeprev);
 
           /* Did we consume the entire preceding chunk? */
 
@@ -277,7 +277,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
            * should be save for this.
            */
 
-          newmem = (FAR void*)((FAR char*)newnode + SIZEOF_MM_ALLOCNODE);
+          newmem = (FAR void *)((FAR char *)newnode + SIZEOF_MM_ALLOCNODE);
           memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
         }
 
@@ -292,7 +292,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
            * chunk)
            */
 
-          andbeyond = (FAR struct mm_allocnode_s*)((char*)next + nextsize);
+          andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + nextsize);
 
           /* Remove the next node.  There must be a predecessor, but there
            * may not be a successor node.
@@ -308,7 +308,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           /* Extend the node into the next chunk */
 
           oldnode->size = oldsize + takenext;
-          newnode       = (FAR struct mm_freenode_s *)((char*)oldnode + oldnode->size);
+          newnode       = (FAR struct mm_freenode_s *)((FAR char *)oldnode + oldnode->size);
 
           /* Did we consume the entire preceding chunk? */
 
@@ -347,7 +347,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        */
 
       mm_givesemaphore(heap);
-      newmem = (FAR void*)mm_malloc(heap, size);
+      newmem = (FAR void *)mm_malloc(heap, size);
       if (newmem)
         {
           memcpy(newmem, oldmem, oldsize);

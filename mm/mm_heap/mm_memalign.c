@@ -119,7 +119,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * the allocation.
    */
 
-  node = (FAR struct mm_allocnode_s*)(rawchunk - SIZEOF_MM_ALLOCNODE);
+  node = (FAR struct mm_allocnode_s *)(rawchunk - SIZEOF_MM_ALLOCNODE);
 
   /* Find the aligned subregion */
 
@@ -135,7 +135,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
       /* Get the node the next node after the allocation. */
 
-      next = (FAR struct mm_allocnode_s*)((char*)node + node->size);
+      next = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size);
 
       /* Make sure that there is space to convert the preceding mm_allocnode_s
        * into an mm_freenode_s.  I think that this should always be true
@@ -143,7 +143,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
       DEBUGASSERT(alignedchunk >= rawchunk + 8);
 
-      newnode = (FAR struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
+      newnode = (FAR struct mm_allocnode_s *)(alignedchunk - SIZEOF_MM_ALLOCNODE);
 
       /* Preceding size is full size of the new 'node,' including
        * SIZEOF_MM_ALLOCNODE
@@ -162,7 +162,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       if (precedingsize < SIZEOF_MM_FREENODE)
         {
           alignedchunk += alignment;
-          newnode       = (FAR struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
+          newnode       = (FAR struct mm_allocnode_s *)(alignedchunk - SIZEOF_MM_ALLOCNODE);
           precedingsize = (size_t)newnode - (size_t)node;
         }
 
@@ -210,5 +210,5 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
     }
 
   mm_givesemaphore(heap);
-  return (FAR void*)alignedchunk;
+  return (FAR void *)alignedchunk;
 }
