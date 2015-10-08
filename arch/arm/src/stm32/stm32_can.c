@@ -554,7 +554,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 
   /* Disable interrupts momentary to stop any ongoing CAN event processing and
    * to prevent any concurrent access to the AHB1RSTR register.
-  */
+   */
 
   flags = irqsave();
 
