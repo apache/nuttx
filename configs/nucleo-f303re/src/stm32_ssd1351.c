@@ -136,4 +136,5 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   return NULL;
 }
+
 #endif /* CONFIG_LCD_SSD1351 */

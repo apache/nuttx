@@ -41,8 +41,9 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,10 +65,5 @@
 
 int board_app_initialize(void)
 {
-#ifdef CONFIG_CANUTILS_UAVCAN
-  (void)stm32_configgpio(GPIO_CAN1_RX);
-  (void)stm32_configgpio(GPIO_CAN1_TX);
-#endif
-
   return OK;
 }

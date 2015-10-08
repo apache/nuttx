@@ -86,6 +86,11 @@ void stm32_boardinitialize(void)
     }
 #endif
 
+#ifdef CONFIG_CANUTILS_UAVCAN
+  (void)stm32_configgpio(GPIO_CAN1_RX);
+  (void)stm32_configgpio(GPIO_CAN1_TX);
+#endif
+
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
