@@ -129,7 +129,7 @@ struct tmpfs_file_s
   uint8_t  tfo_data[1];  /* File data starts here */
 };
 
-#define SIZEOF_TMPFS_DIRECTORY(n) (sizeof(struct tmpfs_file_s) + (n) - 1)
+#define SIZEOF_TMPFS_FILE(n) (sizeof(struct tmpfs_file_s) + (n) - 1)
 
 /* This structure represents one instance of a TMPFS file system */
 
