@@ -52,6 +52,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* This is the block size reported by stat() */
+
+#define TMPFS_BLOCKSIZE   512
+
+/* Bit definitions for file object flags */
 
 #define TFO_FLAG_UNLINKED (1 << 0)  /* Bit 0: File is unlinked */
 
