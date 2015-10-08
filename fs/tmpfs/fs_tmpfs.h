@@ -137,9 +137,9 @@ struct tmpfs_s
 {
   /* The root directory */
 
-  FAR struct tmpfs_directory_s *r_root;
+  FAR struct tmpfs_directory_s *tfs_root;
 
-  sem_t r_exclsem;       /* Supports exclusive access to the file system */
+  sem_t tfs_exclsem;     /* Supports exclusive access to the file system */
 };
 
 /****************************************************************************
