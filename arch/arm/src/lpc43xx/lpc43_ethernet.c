@@ -2975,7 +2975,8 @@ static int lpc43_ioctl(struct net_driver_s *dev, int cmd, long arg)
  * Function: lpc43_phyintenable
  *
  * Description:
-*  Enable link up/down PHY interrupts.  The interrupt protocol is like this:
+ *  Enable link up/down PHY interrupts.  The interrupt protocol is like
+ *  this:
  *
  *  - Interrupt status is cleared when the interrupt is enabled.
  *  - Interrupt occurs.  Interrupt is disabled (at the processor level) when

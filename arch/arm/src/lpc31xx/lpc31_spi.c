@@ -606,7 +606,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   uint16_t setbits;
   uint16_t clrbits;
 
-/* Has the mode changed? */
+  /* Has the mode changed? */
 
   if (mode != priv->mode)
     {
