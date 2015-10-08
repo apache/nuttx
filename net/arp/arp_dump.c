@@ -86,7 +86,7 @@
 void arp_dump(FAR struct arp_hdr_s *arp)
 {
   nlldbg("  HW type: %04x Protocol: %04x\n",
-         arp->ah_hwtype, arp->ah_protocol);\
+         arp->ah_hwtype, arp->ah_protocol);
   nlldbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
          arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
   nlldbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",

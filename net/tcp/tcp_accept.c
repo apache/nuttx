@@ -96,7 +96,7 @@ struct accept_s
  *
  * Assumptions:
  *   Running at the interrupt level
-*
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
@@ -291,7 +291,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       /* Set up the callback in the connection */
 
-      conn->accept_private  = (void*)&state;
+      conn->accept_private  = (FAR void *)&state;
       conn->accept          = accept_interrupt;
 
       /* Wait for the send to complete or an error to occur:  NOTES: (1)

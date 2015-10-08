@@ -805,7 +805,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
        * access is ignored.
        */
 
-      if ((oflags & (O_TRUNC|O_WRONLY)) == (O_TRUNC|O_WRONLY))
+      if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
         {
           /* Truncate the file to zero length (if it is not already
            * zero length)

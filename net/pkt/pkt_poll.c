@@ -114,7 +114,7 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 
       if (dev->d_sndlen > 0)
         {
-//        devif_pkt_send(dev, conn);
+          //devif_pkt_send(dev, conn);
           return;
         }
     }

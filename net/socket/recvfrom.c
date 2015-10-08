@@ -450,12 +450,12 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
           goto out;
         }
 
-      if ( 0
+      if (0
 #ifdef CONFIG_NET_IPv6
-           || src_addr_size == sizeof(struct sockaddr_in6)
+          || src_addr_size == sizeof(struct sockaddr_in6)
 #endif
 #ifdef CONFIG_NET_IPv4
-           || src_addr_size == sizeof(struct sockaddr_in)
+          || src_addr_size == sizeof(struct sockaddr_in)
 #endif
         )
         {
@@ -845,11 +845,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
             }
 
 #ifdef CONFIG_NET_SOCKOPTS
-            /* Reset the timeout.  We will want a short timeout to terminate
-             * the TCP receive.
-             */
+          /* Reset the timeout.  We will want a short timeout to terminate
+           * the TCP receive.
+           */
 
-            pstate->rf_starttime = clock_systimer();
+          pstate->rf_starttime = clock_systimer();
 #endif
         }
 
@@ -1017,7 +1017,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
       if (infrom)
         {
 #ifdef CONFIG_NET_IPv6
-          FAR struct udp_conn_s *conn = (FAR struct udp_conn_s*)pstate->rf_sock->s_conn;
+          FAR struct udp_conn_s *conn =
+            (FAR struct udp_conn_s *)pstate->rf_sock->s_conn;
 
           /* Hybrid dual-stack IPv6/IPv4 implementations recognize a special
            * class of addresses, the IPv4-mapped IPv6 addresses.
@@ -1426,7 +1427,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (state.rf_cb)
     {
       state.rf_cb->flags  = (PKT_NEWDATA | PKT_POLL);
-      state.rf_cb->priv   = (void*)&state;
+      state.rf_cb->priv   = (FAR void *)&state;
       state.rf_cb->event  = recvfrom_pktinterrupt;
 
       /* Notify the device driver of the receive call */
@@ -1567,7 +1568,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
           /* Set up the callback in the connection */
 
           state.rf_cb->flags   = (UDP_NEWDATA | UDP_POLL | NETDEV_DOWN);
-          state.rf_cb->priv    = (void*)&state;
+          state.rf_cb->priv    = (FAR void *)&state;
           state.rf_cb->event   = recvfrom_udp_interrupt;
 
           /* Notify the device driver of the receive call */
@@ -1749,7 +1750,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       if (state.rf_cb)
         {
           state.rf_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
-          state.rf_cb->priv    = (void*)&state;
+          state.rf_cb->priv    = (FAR void *)&state;
           state.rf_cb->event   = recvfrom_tcpinterrupt;
 
           /* Wait for either the receive to complete or for an error/timeout

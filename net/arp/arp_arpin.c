@@ -116,7 +116,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
   dev->d_len = 0;
 
   ipaddr = net_ip4addr_conv32(arp->ah_dipaddr);
-  switch(arp->ah_opcode)
+  switch (arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
         nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);

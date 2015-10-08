@@ -228,7 +228,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
           if ((tcp->tcpoffset & 0xf0) > 0x50)
             {
-              for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ;)
+              for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ; )
                 {
                   opt = dev->d_buf[hdrlen + i];
                   if (opt == TCP_OPT_END)
@@ -520,7 +520,7 @@ found:
 
             if ((tcp->tcpoffset & 0xf0) > 0x50)
               {
-                for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ;)
+                for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ; )
                   {
                     opt = dev->d_buf[hdrlen + i];
                     if (opt == TCP_OPT_END)
@@ -682,7 +682,8 @@ found:
           {
             dev->d_urglen   = 0;
 #else /* CONFIG_NET_TCPURGDATA */
-            dev->d_appdata  = ((uint8_t*)dev->d_appdata) + ((tcp->urgp[0] << 8) | tcp->urgp[1]);
+            dev->d_appdata  = ((FAR uint8_t *)dev->d_appdata) + ((tcp->urgp[0] << 8) |
+                               tcp->urgp[1]);
             dev->d_len     -= (tcp->urgp[0] << 8) | tcp->urgp[1];
 #endif /* CONFIG_NET_TCPURGDATA */
           }

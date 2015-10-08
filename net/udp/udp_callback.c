@@ -174,7 +174,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
    * any failure to allocated, the entire I/O buffer chain will be discarded.
    */
 
-  ret = iob_trycopyin(iob, (FAR const uint8_t*)&src_addr_size,
+  ret = iob_trycopyin(iob, (FAR const uint8_t *)&src_addr_size,
                       sizeof(uint8_t), 0, true);
   if (ret < 0)
     {
@@ -187,7 +187,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
       return 0;
     }
 
-  ret = iob_trycopyin(iob, (FAR const uint8_t*)src_addr, src_addr_size,
+  ret = iob_trycopyin(iob, (FAR const uint8_t *)src_addr, src_addr_size,
                       sizeof(uint8_t), true);
   if (ret < 0)
     {

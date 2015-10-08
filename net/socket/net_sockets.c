@@ -297,7 +297,7 @@ FAR struct socket *sockfd_socket(int sockfd)
   FAR struct socketlist *list;
   int ndx = sockfd - __SOCKFD_OFFSET;
 
-  if (ndx >=0 && ndx < CONFIG_NSOCKET_DESCRIPTORS)
+  if (ndx >= 0 && ndx < CONFIG_NSOCKET_DESCRIPTORS)
     {
       list = sched_getsockets();
       if (list)

@@ -293,9 +293,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
       abstime.tv_nsec -= 1000000000;
     }
 
-   /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
-    * the wrong error code.
-    */
+  /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
+   * the wrong error code.
+   */
 
   (void)net_timedwait(&notify->rn_sem, &abstime);
   ret = notify->rn_result;

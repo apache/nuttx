@@ -93,7 +93,7 @@ struct route_match_ipv6_s
 #ifdef CONFIG_NET_IPv4
 static int net_match(FAR struct net_route_s *route, FAR void *arg)
 {
-  FAR struct route_match_s *match = ( FAR struct route_match_s *)arg;
+  FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
@@ -133,7 +133,7 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
 #ifdef CONFIG_NET_IPv6
 static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 {
-  FAR struct route_match_ipv6_s *match = ( FAR struct route_match_ipv6_s *)arg;
+  FAR struct route_match_ipv6_s *match = (FAR struct route_match_ipv6_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.

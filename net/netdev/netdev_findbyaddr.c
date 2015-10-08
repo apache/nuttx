@@ -289,12 +289,12 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
    */
 
 #ifndef CONFIG_NETDEV_MULTINIC
-   /* If there is only a single, registered network interface, then the
-    * decision is pretty easy.  Use that device and its default router
-    * address.
-    */
+  /* If there is only a single, registered network interface, then the
+   * decision is pretty easy.  Use that device and its default router
+   * address.
+   */
 
-   dev = g_netdevices;
+  dev = g_netdevices;
 #endif
 
   /* If we will did not find the network device, then we might as well fail
@@ -407,12 +407,12 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
    */
 
 #ifndef CONFIG_NETDEV_MULTINIC
-   /* If there is only a single, registered network interface, then the
-    * decision is pretty easy.  Use that device and its default router
-    * address.
-    */
+  /* If there is only a single, registered network interface, then the
+   * decision is pretty easy.  Use that device and its default router
+   * address.
+   */
 
-   dev = g_netdevices;
+  dev = g_netdevices;
 #endif
 
   /* If we will did not find the network device, then we might as well fail

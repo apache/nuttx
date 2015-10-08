@@ -141,7 +141,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
   FAR struct udp_conn_s *conn;
   int i;
 
-  /* Now search each connection structure.*/
+  /* Now search each connection structure. */
 
   for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
     {

@@ -168,7 +168,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
   conn->lc_outfd = -1;
 
 errout_with_halfduplex:
-  /* Release our reference to the half duplex FIFO*/
+  /* Release our reference to the half duplex FIFO */
 
   (void)local_release_halfduplex(conn);
   return nsent;

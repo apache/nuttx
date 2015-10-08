@@ -141,9 +141,9 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
            * a macro will do.
            */
 
-          optionset    = psock->s_options;
-          *(int*)value = _SO_GETOPT(optionset, option);
-          *value_len   = sizeof(int);
+          optionset         = psock->s_options;
+          *(FAR int *)value = _SO_GETOPT(optionset, option);
+          *value_len        = sizeof(int);
         }
         break;
 
@@ -161,8 +161,8 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           /* Return the socket type */
 
-          *(int*)value = psock->s_type;
-          *value_len   = sizeof(int);
+          *(FAR int *)value = psock->s_type;
+          *value_len        = sizeof(int);
         }
         break;
 

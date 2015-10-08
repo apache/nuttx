@@ -117,17 +117,17 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
 
   if (pstate)
     {
-     /* Yes Check for a timeout configured via setsockopts(SO_LINGER).
-      * If none... we well let the send wait forever.
-      */
+      /* Yes Check for a timeout configured via setsockopts(SO_LINGER).
+       * If none... we well let the send wait forever.
+       */
 
-     psock = pstate->cl_psock;
-     if (psock && psock->s_linger != 0)
-       {
-         /* Check if the configured timeout has elapsed */
+      psock = pstate->cl_psock;
+      if (psock && psock->s_linger != 0)
+        {
+          /* Check if the configured timeout has elapsed */
 
-         return net_timeo(pstate->cl_start, psock->s_linger);
-       }
+          return net_timeo(pstate->cl_start, psock->s_linger);
+        }
     }
 
   /* No timeout */
@@ -179,7 +179,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
       /* The disconnection is complete */
 
 #ifdef CONFIG_NET_SOLINGER
-      /* pstate non-NULL means that we are performing a LINGERing close.*/
+      /* pstate non-NULL means that we are performing a LINGERing close. */
 
       if (pstate)
         {

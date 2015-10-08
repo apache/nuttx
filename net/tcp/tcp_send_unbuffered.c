@@ -399,17 +399,17 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-   /* Check if the outgoing packet is available (it may have been claimed
-    * by a sendto interrupt serving a different thread).
-    */
+  /* Check if the outgoing packet is available (it may have been claimed
+   * by a sendto interrupt serving a different thread).
+   */
 
 #if 0 /* We can't really support multiple senders on the same TCP socket */
-   else if (dev->d_sndlen > 0)
-     {
-       /* Another thread has beat us sending data, wait for the next poll */
+  else if (dev->d_sndlen > 0)
+    {
+      /* Another thread has beat us sending data, wait for the next poll */
 
-         return flags;
-      }
+      return flags;
+    }
 #endif
 
   /* We get here if (1) not all of the data has been ACKed, (2) we have been

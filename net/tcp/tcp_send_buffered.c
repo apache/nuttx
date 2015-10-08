@@ -131,13 +131,13 @@
 static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
                                  FAR sq_queue_t *q)
 {
-  sq_entry_t *entry = (sq_entry_t*)wrb;
-  sq_entry_t *insert = NULL;
+  FAR sq_entry_t *entry = (FAR sq_entry_t *)wrb;
+  FAR sq_entry_t *insert = NULL;
 
-  sq_entry_t *itr;
+  FAR sq_entry_t *itr;
   for (itr = sq_peek(q); itr; itr = sq_next(itr))
     {
-      FAR struct tcp_wrbuffer_s *wrb0 = (FAR struct tcp_wrbuffer_s*)itr;
+      FAR struct tcp_wrbuffer_s *wrb0 = (FAR struct tcp_wrbuffer_s *)itr;
       if (WRB_SEQNO(wrb0) < WRB_SEQNO(wrb))
         {
           insert = itr;
@@ -403,7 +403,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
           /* Check of some or all of this write buffer has been ACKed. */
 
           next = sq_next(entry);
-          wrb = (FAR struct tcp_wrbuffer_s*)entry;
+          wrb = (FAR struct tcp_wrbuffer_s *)entry;
 
           /* If the ACKed sequence number is greater than the start
            * sequence number of the write buffer, then some or all of
@@ -469,7 +469,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
        * before the entire write buffer has even been sent.
        */
 
-      wrb = (FAR struct tcp_wrbuffer_s*)sq_peek(&conn->write_q);
+      wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
       if (wrb && WRB_SENT(wrb) > 0 && ackno > WRB_SEQNO(wrb))
         {
           uint32_t nacked;
@@ -597,7 +597,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
       while ((entry = sq_remlast(&conn->unacked_q)) != NULL)
         {
-          wrb = (FAR struct tcp_wrbuffer_s*)entry;
+          wrb = (FAR struct tcp_wrbuffer_s *)entry;
           uint16_t sent;
 
           /* Reset the number of bytes sent sent from the write buffer */
@@ -1036,7 +1036,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       psock->s_sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
                                TCP_DISCONN_EVENTS);
-      psock->s_sndcb->priv  = (void*)psock;
+      psock->s_sndcb->priv  = (FAR void *)psock;
       psock->s_sndcb->event = psock_send_interrupt;
 
       /* Initialize the write buffer */

@@ -320,7 +320,7 @@ static inline bool sendfile_addrcheck(FAR struct tcp_conn_s *conn)
 static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
                                    FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s*)pvconn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
   int ret;
 
@@ -720,7 +720,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   /* Set up the ACK callback in the connection */
 
   state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_DISCONN_EVENTS);
-  state.snd_ackcb->priv  = (void*)&state;
+  state.snd_ackcb->priv  = (FAR void *)&state;
   state.snd_ackcb->event = ack_interrupt;
 
   /* Perform the TCP send operation */
@@ -728,7 +728,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   do
     {
       state.snd_datacb->flags = TCP_POLL;
-      state.snd_datacb->priv  = (void*)&state;
+      state.snd_datacb->priv  = (FAR void *)&state;
       state.snd_datacb->event = sendfile_interrupt;
 
       /* Notify the device driver of the availability of TX data */

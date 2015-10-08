@@ -713,7 +713,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
         {
           ret = -ENOTTY;
         }
-        break;;
+        break;
     }
 
   return ret;
@@ -964,18 +964,18 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
 
   /* Execute the command */
 
-  ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq*)((uintptr_t)arg));
+  ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
 #ifdef CONFIG_NET_IGMP
   if (ret == -ENOTTY)
     {
 
-      ret = netdev_imsfioctl(psock, cmd, (FAR struct ip_msfilter*)((uintptr_t)arg));
+      ret = netdev_imsfioctl(psock, cmd, (FAR struct ip_msfilter *)((uintptr_t)arg));
     }
 #endif
 #ifdef CONFIG_NET_ROUTE
   if (ret == -ENOTTY)
     {
-      ret = netdev_rtioctl(psock, cmd, (FAR struct rtentry*)((uintptr_t)arg));
+      ret = netdev_rtioctl(psock, cmd, (FAR struct rtentry *)((uintptr_t)arg));
     }
 #endif
 

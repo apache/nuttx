@@ -147,7 +147,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 
           /* Get the value.  Is the option being set or cleared? */
 
-          setting = *(int*)value;
+          setting = *(FAR int *)value;
 
           /* Disable interrupts so that there is no conflict with interrupt
            * level access to options.

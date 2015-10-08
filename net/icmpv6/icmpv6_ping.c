@@ -456,7 +456,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
   if (state.png_cb)
     {
       state.png_cb->flags   = (ICMPv6_POLL | ICMPv6_ECHOREPLY);
-      state.png_cb->priv    = (void*)&state;
+      state.png_cb->priv    = (FAR void *)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 

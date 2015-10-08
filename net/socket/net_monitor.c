@@ -117,7 +117,7 @@ static void connection_closed(FAR struct socket *psock, uint16_t flags)
        * be reported as an ENOTCONN error.
        */
 
-      psock->s_flags &= ~(_SF_CONNECTED |_SF_CLOSED);
+      psock->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
     }
 }
 
@@ -262,7 +262,7 @@ int net_startmonitor(FAR struct socket *psock)
   if (cb != NULL)
     {
       cb->event = connection_event;
-      cb->priv  = (void*)psock;
+      cb->priv  = (FAR void *)psock;
       cb->flags = NETDEV_DOWN;
     }
 
@@ -270,7 +270,7 @@ int net_startmonitor(FAR struct socket *psock)
 
   /* Set up to receive callbacks on connection-related events */
 
-  conn->connection_private = (void*)psock;
+  conn->connection_private = (FAR void *)psock;
   conn->connection_event   = connection_event;
 
   net_unlock(save);

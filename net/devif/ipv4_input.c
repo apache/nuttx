@@ -130,7 +130,9 @@ static uint8_t g_reassembly_buffer[TCP_REASS_BUFSIZE];
 static uint8_t g_reassembly_bitmap[TCP_REASS_BUFSIZE / (8 * 8)];
 
 static const uint8_t g_bitmap_bits[8] =
-  {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+{
+  0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01
+};
 
 static uint16_t g_reassembly_len;
 static uint8_t g_reassembly_flags;
@@ -202,93 +204,97 @@ static uint8_t devif_reassembly(void)
 
       memcpy(&g_reassembly_buffer[IPv4_HDRLEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
 
-    /* Update the bitmap. */
+      /* Update the bitmap. */
 
-    if (offset / (8 * 8) == (offset + len) / (8 * 8))
-      {
-        /* If the two endpoints are in the same byte, we only update that byte. */
+      if (offset / (8 * 8) == (offset + len) / (8 * 8))
+        {
+          /* If the two endpoints are in the same byte, we only update that byte. */
 
-        g_reassembly_bitmap[offset / (8 * 8)] |=
-          g_bitmap_bits[(offset / 8 ) & 7] & ~g_bitmap_bits[((offset + len) / 8 ) & 7];
+          g_reassembly_bitmap[offset / (8 * 8)] |=
+            g_bitmap_bits[(offset / 8) & 7] &
+              ~g_bitmap_bits[((offset + len) / 8) & 7];
 
-      }
-    else
-      {
-        /* If the two endpoints are in different bytes, we update the bytes
-         * in the endpoints and fill the stuff inbetween with 0xff.
-         */
+        }
+      else
+        {
+          /* If the two endpoints are in different bytes, we update the bytes
+           * in the endpoints and fill the stuff inbetween with 0xff.
+           */
 
-        g_reassembly_bitmap[offset / (8 * 8)] |= g_bitmap_bits[(offset / 8 ) & 7];
-        for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i)
-          {
-            g_reassembly_bitmap[i] = 0xff;
-          }
+          g_reassembly_bitmap[offset / (8 * 8)] |=
+            g_bitmap_bits[(offset / 8) & 7];
 
-        g_reassembly_bitmap[(offset + len) / (8 * 8)] |=
-          ~g_bitmap_bits[((offset + len) / 8 ) & 7];
-      }
+          for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i)
+            {
+              g_reassembly_bitmap[i] = 0xff;
+            }
 
-    /* If this fragment has the More Fragments flag set to zero, we know that
-     * this is the last fragment, so we can calculate the size of the entire
-     * packet. We also set the IP_REASS_FLAG_LASTFRAG flag to indicate that
-     * we have received the final fragment.
-     */
+          g_reassembly_bitmap[(offset + len) / (8 * 8)] |=
+            ~g_bitmap_bits[((offset + len) / 8) & 7];
+        }
 
-    if ((pbuf->ipoffset[0] & IP_MF) == 0)
-      {
-        g_reassembly_flags |= TCP_REASS_LASTFRAG;
-        g_reassembly_len = offset + len;
-      }
+      /* If this fragment has the More Fragments flag set to zero, we know that
+       * this is the last fragment, so we can calculate the size of the entire
+       * packet. We also set the IP_REASS_FLAG_LASTFRAG flag to indicate that
+       * we have received the final fragment.
+       */
 
-    /* Finally, we check if we have a full packet in the buffer. We do this
-     * by checking if we have the last fragment and if all bits in the bitmap
-     * are set.
-     */
+      if ((pbuf->ipoffset[0] & IP_MF) == 0)
+        {
+          g_reassembly_flags |= TCP_REASS_LASTFRAG;
+          g_reassembly_len = offset + len;
+        }
 
-    if (g_reassembly_flags & TCP_REASS_LASTFRAG)
-      {
-        /* Check all bytes up to and including all but the last byte in
-         * the bitmap.
-         */
+      /* Finally, we check if we have a full packet in the buffer. We do this
+       * by checking if we have the last fragment and if all bits in the bitmap
+       * are set.
+       */
 
-        for (i = 0; i < g_reassembly_len / (8 * 8) - 1; ++i)
-          {
-            if (g_reassembly_bitmap[i] != 0xff)
-              {
-                goto nullreturn;
-              }
-          }
+      if (g_reassembly_flags & TCP_REASS_LASTFRAG)
+        {
+          /* Check all bytes up to and including all but the last byte in
+           * the bitmap.
+           */
 
-        /* Check the last byte in the bitmap. It should contain just the
-         * right amount of bits.
-         */
+          for (i = 0; i < g_reassembly_len / (8 * 8) - 1; ++i)
+            {
+              if (g_reassembly_bitmap[i] != 0xff)
+                {
+                  goto nullreturn;
+                }
+            }
 
-        if (g_reassembly_bitmap[g_reassembly_len / (8 * 8)] != (uint8_t)~g_bitmap_bits[g_reassembly_len / 8 & 7])
-          {
-            goto nullreturn;
-          }
+          /* Check the last byte in the bitmap. It should contain just the
+           * right amount of bits.
+           */
 
-        /* If we have come this far, we have a full packet in the buffer,
-         * so we allocate a pbuf and copy the packet into it. We also reset
-         * the timer.
-         */
+          if (g_reassembly_bitmap[g_reassembly_len / (8 * 8)] !=
+              (uint8_t)~g_bitmap_bits[g_reassembly_len / 8 & 7])
+            {
+              goto nullreturn;
+            }
 
-        g_reassembly_timer = 0;
-        memcpy(pbuf, pfbuf, g_reassembly_len);
+          /* If we have come this far, we have a full packet in the buffer,
+           * so we allocate a pbuf and copy the packet into it. We also reset
+           * the timer.
+           */
 
-        /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
-         * now on.
-         */
+          g_reassembly_timer = 0;
+          memcpy(pbuf, pfbuf, g_reassembly_len);
 
-        pbuf->ipoffset[0] = pbuf->ipoffset[1] = 0;
-        pbuf->len[0] = g_reassembly_len >> 8;
-        pbuf->len[1] = g_reassembly_len & 0xff;
-        pbuf->ipchksum = 0;
-        pbuf->ipchksum = ~(ipv4_chksum(dev));
+          /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
+           * now on.
+           */
 
-        return g_reassembly_len;
-      }
-  }
+          pbuf->ipoffset[0] = pbuf->ipoffset[1] = 0;
+          pbuf->len[0] = g_reassembly_len >> 8;
+          pbuf->len[1] = g_reassembly_len & 0xff;
+          pbuf->ipchksum = 0;
+          pbuf->ipchksum = ~(ipv4_chksum(dev));
+
+          return g_reassembly_len;
+        }
+    }
 
 nullreturn:
   return 0;
@@ -379,11 +385,11 @@ int ipv4_input(FAR struct net_driver_s *dev)
     }
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
-   /* If IP broadcast support is configured, we check for a broadcast
-    * UDP packet, which may be destined to us (even if there is no IP
-    * address yet assigned to the device as is the case when we are
-    * negotiating over DHCP for an address).
-    */
+  /* If IP broadcast support is configured, we check for a broadcast
+   * UDP packet, which may be destined to us (even if there is no IP
+   * address yet assigned to the device as is the case when we are
+   * negotiating over DHCP for an address).
+   */
 
   if (pbuf->proto == IP_PROTO_UDP &&
       net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr),

@@ -143,7 +143,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
       return -ECONNREFUSED;
     }
 
-  /* Increment the number of pending server connection s*/
+  /* Increment the number of pending server connection s */
 
   server->u.server.lc_pending++;
   DEBUGASSERT(server->u.server.lc_pending != 0);
@@ -271,7 +271,7 @@ int psock_local_connect(FAR struct socket *psock,
   /* Find the matching server connection */
 
   state = net_lock();
-  for(conn = (FAR struct local_conn_s *)g_local_listeners.head;
+  for (conn = (FAR struct local_conn_s *)g_local_listeners.head;
       conn;
       conn = (FAR struct local_conn_s *)dq_next(&conn->lc_node))
     {

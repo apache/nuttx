@@ -266,7 +266,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
           /* Set up the callback in the connection */
 
           state.snd_cb->flags = PKT_POLL;
-          state.snd_cb->priv  = (void*)&state;
+          state.snd_cb->priv  = (FAR void *)&state;
           state.snd_cb->event = psock_send_interrupt;
 
           /* Notify the device driver that new TX data is available. */

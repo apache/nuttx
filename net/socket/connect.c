@@ -121,7 +121,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
       pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
                                 TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
-      pstate->tc_cb->priv    = (void*)pstate;
+      pstate->tc_cb->priv    = (FAR void *)pstate;
       pstate->tc_cb->event   = psock_connect_interrupt;
       ret                    = OK;
     }
@@ -217,7 +217,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_TIMEDOUT) != 0)
         {
-          /* Indicate that the connection timedout?)*/
+          /* Indicate that the connection timedout?) */
 
           pstate->tc_result = -ETIMEDOUT;
         }

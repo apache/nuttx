@@ -247,10 +247,10 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       else if (dev->d_sndlen > 0 || (flags & UDP_NEWDATA) != 0)
         {
-           /* Another thread has beat us sending data or the buffer is busy,
-            * Check for a timeout.  If not timed out, wait for the next
-            * polling cycle and check again.
-            */
+          /* Another thread has beat us sending data or the buffer is busy,
+           * Check for a timeout.  If not timed out, wait for the next
+           * polling cycle and check again.
+           */
 
 #ifdef CONFIG_NET_SENDTO_TIMEOUT
           if (send_timeout(pstate))
@@ -441,7 +441,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   if (state.st_cb)
     {
       state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
-      state.st_cb->priv    = (void*)&state;
+      state.st_cb->priv    = (FAR void *)&state;
       state.st_cb->event   = sendto_interrupt;
 
       /* Notify the device driver of the availability of TX data */

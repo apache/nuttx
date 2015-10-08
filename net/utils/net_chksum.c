@@ -413,7 +413,7 @@ uint16_t udp_ipv6_chksum(FAR struct net_driver_s *dev)
 uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 {
   FAR struct icmp_iphdr_s *icmp = ICMPBUF;
-  return net_chksum((uint16_t*)&icmp->type, len);
+  return net_chksum((FAR uint16_t *)&icmp->type, len);
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 

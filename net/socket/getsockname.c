@@ -228,14 +228,14 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   /* Check if enough space has been provided for the full address */
 
   if (*addrlen < sizeof(struct sockaddr_in6))
-  {
-    /* This function is supposed to return the partial address if
-     * a smaller buffer has been provided.  This support has not
-     * been implemented.
-     */
+    {
+      /* This function is supposed to return the partial address if
+       * a smaller buffer has been provided.  This support has not
+       * been implemented.
+       */
 
-    return -ENOSYS;
-  }
+     return -ENOSYS;
+   }
 
   /* Set the port number */
 

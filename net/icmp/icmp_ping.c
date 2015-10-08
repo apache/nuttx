@@ -390,7 +390,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   if (state.png_cb)
     {
       state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY | NETDEV_DOWN);
-      state.png_cb->priv    = (void*)&state;
+      state.png_cb->priv    = (FAR void *)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 

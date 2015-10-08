@@ -123,7 +123,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 
       /* Then add all of the pre-allocated containers to the free list */
 
-      blc = (FAR struct tcp_blcontainer_s*)(((FAR uint8_t*)bls) + offset);
+      blc = (FAR struct tcp_blcontainer_s *)(((FAR uint8_t *)bls) + offset);
       for (i = 0; i < nblg; i++)
         {
           sq_addfirst(&blc->bc_node, &bls->bl_free);
@@ -189,7 +189,7 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 
        /* Handle any pending connections in the backlog */
 
-       while ((blc = (FAR struct tcp_blcontainer_s*)sq_remfirst(&blg->bl_pending)) != NULL)
+       while ((blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&blg->bl_pending)) != NULL)
          {
            blconn = blc->bc_conn;
            if (blconn)
@@ -242,25 +242,26 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
   bls = conn->backlog;
   if (bls && blconn)
     {
-       /* Allocate a container for the connection from the free list */
+      /* Allocate a container for the connection from the free list */
 
-       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
-       if (!blc)
-         {
-           nlldbg("Failed to allocate container\n");
-           ret = -ENOMEM;
-         }
-       else
-         {
-           /* Save the connection reference in the container and put the
-            * container at the end of the pending connection list (FIFO).
-            */
+      blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
+      if (!blc)
+        {
+          nlldbg("Failed to allocate container\n");
+          ret = -ENOMEM;
+        }
+      else
+        {
+          /* Save the connection reference in the container and put the
+           * container at the end of the pending connection list (FIFO).
+           */
 
-           blc->bc_conn = blconn;
-           sq_addlast(&blc->bc_node, &bls->bl_pending);
-           ret = OK;
-         }
+          blc->bc_conn = blconn;
+          sq_addlast(&blc->bc_node, &bls->bl_pending);
+          ret = OK;
+        }
     }
+
   return ret;
 }
 
@@ -311,21 +312,21 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
   bls = conn->backlog;
   if (bls)
     {
-       /* Remove the a container at the head of the pending connection list
-        * (FIFO)
-        */
+      /* Remove the a container at the head of the pending connection list
+       * (FIFO)
+       */
 
-       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_pending);
-       if (blc)
-         {
-           /* Extract the connection reference from the container and put
-            * container in the free list
-            */
+      blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_pending);
+      if (blc)
+        {
+          /* Extract the connection reference from the container and put
+           * container in the free list
+           */
 
-           blconn       = blc->bc_conn;
-           blc->bc_conn = NULL;
-           sq_addlast(&blc->bc_node, &bls->bl_free);
-         }
+          blconn       = blc->bc_conn;
+          blc->bc_conn = NULL;
+          sq_addlast(&blc->bc_node, &bls->bl_free);
+        }
     }
 
   nllvdbg("conn=%p, returning %p\n", conn, blconn);
@@ -364,41 +365,41 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
   bls = conn->backlog;
   if (bls)
     {
-       /* Find the container hold the connection */
+      /* Find the container hold the connection */
 
-       for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&bls->bl_pending), prev = NULL;
-            blc;
-            prev = blc, blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
-         {
-            if (blc->bc_conn == blconn)
-              {
-                if (prev)
-                  {
-                    /* Remove the a container from the middle of the list of
-                     * pending connections
-                      */
+      for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&bls->bl_pending), prev = NULL;
+           blc;
+           prev = blc, blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
+        {
+          if (blc->bc_conn == blconn)
+            {
+              if (prev)
+                {
+                  /* Remove the a container from the middle of the list of
+                   * pending connections
+                   */
 
-                    (void)sq_remafter(&prev->bc_node, &bls->bl_pending);
-                  }
-                else
-                  {
-                    /* Remove the a container from the head of the list of
-                     * pending connections
-                     */
+                  (void)sq_remafter(&prev->bc_node, &bls->bl_pending);
+                }
+              else
+                {
+                  /* Remove the a container from the head of the list of
+                   * pending connections
+                   */
 
-                    (void)sq_remfirst(&bls->bl_pending);
-                  }
+                  (void)sq_remfirst(&bls->bl_pending);
+                }
 
-                /* Put container in the free list */
+              /* Put container in the free list */
 
-                blc->bc_conn = NULL;
-                sq_addlast(&blc->bc_node, &bls->bl_free);
-                return OK;
-              }
-          }
+              blc->bc_conn = NULL;
+              sq_addlast(&blc->bc_node, &bls->bl_free);
+              return OK;
+            }
+        }
 
-        nlldbg("Failed to find pending connection\n");
-        return -EINVAL;
+      nlldbg("Failed to find pending connection\n");
+      return -EINVAL;
     }
 
   return OK;

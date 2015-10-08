@@ -294,7 +294,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
         }
 #endif
 
-      snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum );
+      snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum);
 
       /* Add the device to the list of known network devices */
 

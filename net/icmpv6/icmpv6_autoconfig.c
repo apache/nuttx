@@ -398,7 +398,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    */
 
   lladdr[0] = HTONS(0xfe80);                        /* 10-bit address + 6 zeroes */
-  memset(&lladdr[1], 0, 4* sizeof(uint16_t));       /* 64 more zeroes */
+  memset(&lladdr[1], 0, 4 * sizeof(uint16_t));      /* 64 more zeroes */
   memcpy(&lladdr[5], dev->d_mac.ether_addr_octet,
         sizeof(struct ether_addr));                 /* 48-bit Ethernet address */
 
@@ -546,9 +546,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    first step.
    */
 
-   /* On success, the new address was already set (in icmpv_rnotify()).  We
-    * need only to bring the network back to the up state and return success.
-    */
+  /* On success, the new address was already set (in icmpv_rnotify()).  We
+   * need only to bring the network back to the up state and return success.
+   */
 
   netdev_ifup(dev);
   net_unlock(save);

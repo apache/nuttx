@@ -60,7 +60,7 @@ struct route_ipv4_devmatch_s
 {
   FAR struct net_driver_s *dev; /* The route must use this device */
   in_addr_t target;             /* Target IPv4 address on an external network to match */
-  in_addr_t router;             /* IPv6 address of the router on one of our networks*/
+  in_addr_t router;             /* IPv6 address of the router on one of our networks */
 };
 #endif
 
@@ -69,7 +69,7 @@ struct route_ipv6_devmatch_s
 {
   FAR struct net_driver_s *dev; /* The route must use this device */
   net_ipv6addr_t target;        /* Target IPv4 address on an external network to match */
-  net_ipv6addr_t router;        /* IPv6 address of the router on one of our networks*/
+  net_ipv6addr_t router;        /* IPv6 address of the router on one of our networks */
 };
 #endif
 
