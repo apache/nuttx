@@ -196,7 +196,7 @@ static inline void rcc_enableahb1(void)
 #ifdef CONFIG_STM32_ETHMAC
   /* Ethernet MAC clocking */
 
-  regval  | = (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN);
+  regval |= (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN);
 
 #ifdef CONFIG_STM32_ETH_PTP
   /* Precision Time Protocol (PTP) */
