@@ -107,6 +107,10 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_CANUTILS_UAVCAN
   (void)stm32_configgpio(GPIO_CAN1_RX);
   (void)stm32_configgpio(GPIO_CAN1_TX);
+#  if CONFIG_UAVCAN_STM32_NUM_IFACES > 1
+  (void)stm32_configgpio(GPIO_CAN2_RX);
+  (void)stm32_configgpio(GPIO_CAN2_TX);
+#  endif
 #endif
 
 #ifdef CONFIG_ARCH_LEDS
