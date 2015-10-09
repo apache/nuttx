@@ -590,17 +590,19 @@ static FAR struct tmpfs_file_s *tmpfs_alloc_file(void)
       return NULL;
     }
 
-  /* Initialize the new file object */
+  /* Initialize the new file object.  NOTE that the initial state is
+   * locked with one reference count.
+   */
 
   tfo->tfo_alloc = allocsize;
   tfo->tfo_type  = TMPFS_REGULAR;
-  tfo->tfo_refs  = 0;
+  tfo->tfo_refs  = 1;
   tfo->tfo_flags = 0;
   tfo->tfo_size  = 0;
 
-  tfo->tfo_exclsem.ts_holder = TMPFS_NO_HOLDER;
-  tfo->tfo_exclsem.ts_count  = 0;
-  sem_init(&tfo->tfo_exclsem.ts_sem, 0, 1);
+  tfo->tfo_exclsem.ts_holder = getpid();
+  tfo->tfo_exclsem.ts_count  = 1;
+  sem_init(&tfo->tfo_exclsem.ts_sem, 0, 0);
 
   return tfo;
 }
@@ -677,7 +679,9 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
       goto errout_with_parent;
     }
 
-  /* Allocate an empty file */
+  /* Allocate an empty file.  The initial state of the file is locked with one
+   * reference count.
+   */
 
   newtfo = tmpfs_alloc_file();
   if (newtfo == NULL)
@@ -826,7 +830,9 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
       goto errout_with_parent;
     }
 
-  /* Allocate an empty directory */
+  /* Allocate an empty directory object.  There is no reference on the new
+   * directory and the object is not locked.
+   */
 
   newtdo = tmpfs_alloc_directory();
   if (newtdo == NULL)
@@ -1373,7 +1379,9 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
            goto errout_with_fslock;
        }
 
-      /* Yes.. create the file object. */
+      /* Yes.. create the file object.  There will be a reference and a lock
+       * on the new file object.
+       */
 
       ret = tmpfs_create_file(fs, relpath, &tfo);
       if (ret < 0)
@@ -1393,7 +1401,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
 
   filep->f_priv = tfo;
 
-  /* Unlock the file object, but retain the reference count */
+  /* Unlock the file file object, but retain the reference count */
 
   tmpfs_unlock_file(tfo);
   tmpfs_unlock(fs);
@@ -1674,7 +1682,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   tfo = oldp->f_inode->i_private;
   DEBUGASSERT(tfo != NULL);
 
-  /* Increment the reference count */
+  /* Increment the reference count (atomically)*/
 
   tmpfs_lock_file(tfo);
   tfo->tfo_refs++;
@@ -1685,7 +1693,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * structures so there is not really much to the dup operation.
    */
 
-  oldp->f_inode->i_private = tfo;
+  newp->f_inode->i_private = tfo;
   return OK;
 }
 
@@ -1940,6 +1948,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   off_t blkused;
   int ret;
 
+  fvdbg("mountpt: %p buf: %p\n", mountpt, buf);
   DEBUGASSERT(mountpt != NULL && buf != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2001,6 +2010,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   FAR const char *name;
   int ret;
 
+  fvdbg("mountpt: %p relpath: %s\n", mountpt, relpath);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2100,6 +2110,7 @@ static int tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct tmpfs_s *fs;
   int ret;
 
+  fvdbg("mountpt: %p relpath: %s mode: %04x\n", mountpt, relpath, mode);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2132,6 +2143,7 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   FAR const char *name;
   int ret;
 
+  fvdbg("mountpt: %p relpath: %s\n", mountpt, relpath);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2232,6 +2244,8 @@ static int tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   FAR char *copy;
   int ret;
 
+  fvdbg("mountpt: %p oldrelpath: %s newrelpath: %s\n",
+        mountpt, oldrelpath, newrelpath);
   DEBUGASSERT(mountpt != NULL && oldrelpath != NULL && newrelpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2369,6 +2383,7 @@ static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   size_t objsize;
   int ret;
 
+  fvdbg("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
   DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
 
   /* Get the file system structure from the inode reference. */
