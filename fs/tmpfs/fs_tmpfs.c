@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
+#include <sys/statfs.h>
 #include <stdint.h>
 #include <semaphore.h>
 
@@ -98,6 +100,12 @@ static int tmpfs_find_directory(FAR struct tmpfs_s *fs,
             FAR const char *relpath,
             FAR struct tmpfs_directory_s **tdo,
             FAR struct tmpfs_directory_s **parent);
+static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
+            unsigned int index, FAR void *arg);
+static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
+            unsigned int index, FAR void *arg);
+static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
+            tmpfs_foreach_t callout);
 
 /* File system operations */
 
@@ -346,12 +354,12 @@ static int tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
 
   /* Free the object name */
 
-  if (tdo_entry[index].rde_name != NULL)
+  if (tdo->tdo_entry[index].rde_name != NULL)
     {
-      kmm_free(tdo_entry[index].rde_name);
+      kmm_free(tdo->tdo_entry[index].rde_name);
     }
 
-  /* Remove be replace this entry with the final directory entry */
+  /* Remove by replacing this entry with the final directory entry */
 
   last = tdo->tdo_nentries - 1;
   if (index != last)
@@ -759,6 +767,192 @@ static int tmpfs_find_directory(FAR struct tmpfs_s *fs,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * name: tmpfs_statfs_callout
+ ****************************************************************************/
+
+static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
+                                unsigned int index, FAR void *arg)
+{
+  FAR struct tmpfs_object_s *to;
+  FAR struct tmpfs_statfs_s *tmpbuf;
+
+  DEBUASSERT(tdo != NULL && arg != NULL);
+
+  to     = &tdo->tdo_entry[index];
+  tmpbuf = (FAR struct tmpfs_statfs_s *)arg;
+
+  /* Accumulate statistics.  Save the total memory allocted for this object. */
+
+  tmpbuf.tsf_alloc += to->to_alloc;
+
+  /* Is this directory entry a file object? */
+
+  if (to->to_type = TMPFS_REGULAR)
+    {
+      FAR struct tmpfs_object_s *tmptfo;
+
+      /* It is a file object.  Increment the number of files and update the
+       * amount of memory in use.
+       */
+
+      tmptfo            = (FAR struct tmpfs_file_s *)to;
+      tmpbuf.tsf_inuse += tmptfo->tfo_size;
+      tmpbuf.tsf_files++;
+    }
+  else /* if (to->to_type = TMPFS_DIRECTORY) */
+    {
+      FAR struct tmpfs_object_s *tmptdo;
+      size_t inuse;
+      size_t avail;
+
+      /* It is a directory object.  Update the amount of memory in use
+       * for the directory and estimate the number of free directory nodes.
+       */
+
+      tmptdo = (FAR struct tmpfs_directory_s *)to;
+      inuse  = SIZEOF_TMPFS_DIRECTORY(tdo->tdo_nentries);
+      avail  = tdo->tdo_alloc - inuse;
+
+      tmpbuf.tsf_inuse += inuse;
+      tmpbuf.tsf_ffree += avail / sizeof(struct tmpfs_dirent_s);
+    }
+
+  return TMPFS_CONTINUE;
+}
+
+/****************************************************************************
+ * name: tmpfs_free_callout
+ ****************************************************************************/
+
+static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
+                              unsigned int index, FAR void *arg)
+{
+  FAR struct tmpfs_object_s *to;
+  FAR struct tmpfs_object_s *tmp;
+  FAR struct tmpfs_file_s *tfo;
+  unsigned int last;
+
+  /* Free the object name */
+
+  if (tdo->tdo_entry[index].rde_name != NULL)
+    {
+      kmm_free(tdo->tdo_entry[index].rde_name);
+    }
+
+  /* Remove by replacing this entry with the final directory entry */
+
+  to   = &tdo->tdo_entry[index];
+  last = tdo->tdo_nentries - 1;
+
+  if (index != last)
+    {
+      tmp            = &tdo->tdo_entry[last];
+      to->rde_object = tmp->rde_object;
+      to->rde_name   = tmp->rde_name;
+    }
+
+  /* And decrement the count of directory entries */
+
+  tdo->tdo_entries = last;
+
+  /* Is this directory entry a file object? */
+
+  if (to->to_type = TMPFS_REGULAR)
+    {
+      tfo = (FAR struct tmpfs_file_s *)to;
+
+      /* Are there references to the file? */
+
+      if (tfo->tfo_refs > 0)
+        {
+          /* Yes.. We cannot delete the file now.  Just mark it as unlinked. */
+
+          tfo->tfo_flags |= TFO_FLAG_UNLINKED;
+          return TMPFS_UNLINKED;
+        }
+    }
+
+  /* Free the object now */
+
+  sem_destroy(&to->to_excsem);
+  kmm_free(to);
+  return TMPFS_DELETED;
+}
+
+/****************************************************************************
+ * name: tmpfs_foreach
+ ****************************************************************************/
+
+static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
+                         tmpfs_foreach_t callout)
+{
+  FAR struct tmpfs_object_s *to;
+  unsigned int index;
+  int ret;
+
+  /* Visit each directory entry */
+
+  for (index = 0; ; index < tdo->tdo_nentries)
+    {
+      /* Lock the object and take a reference */
+
+      tmpfs_lock_object(to);
+      to->to_refs++;
+
+      /* Is the next entry a directory? */
+
+      to = tdo->tdo_entry[index].tde_object;
+      if (to->to_type == TMPFS_DIRECTORY)
+        {
+          FAR struct tmpfs_directory_s *next =
+            (FAR struct tmpfs_directory_s *)to;
+
+          /* Yes.. traverse its children first in the case the the final
+           * action will be to delete the directory.
+           */
+
+          ret = tmpfs_foreach(next, tmpfs_free_callout, NULL);
+          if (ret < 0)
+            {
+              return -ECANCELED;
+            }
+        }
+
+      /* Perform the callout */
+
+      ret = callout(tdo, index);
+      switch (ret)
+        {
+         case TMPFS_CONTINUE:    /* Continue enumeration */
+           /* Release the object and index to the next entry */
+
+           to->to_refs--;
+           tmpfs_unlock_object(to);
+           index++;
+           break;
+
+         case TMPFS_HALT:        /* Stop enumeration */
+           /* Release the object and cancel the traversal */
+
+           to->to_refs--;
+           tmpfs_unlock_object(to);
+           return -ECANCELED;
+
+         case TTMPFS_UNLINKED:   /* Only the directory entry was deleted */
+           /* Release the object and continue with the same index */
+
+           to->to_refs--;
+           tmpfs_unlock_object(to);
+
+         case TMPFS_DELETED:     /* Object and directory entry deleted */
+           break;                /* Continue with the same index */
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1370,6 +1564,7 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                         unsigned int flags)
 {
   FAR struct tmpfs_s *fs = (FAR struct tmpfs_s *fs)handle;
+  int ret;
 
   DEBUGSSERT(blkdriver == NULL && handle != NULL);
 
@@ -1377,14 +1572,15 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   tmpfs_lock(fs);
 
-  /* Traverse all directory entries (recursively), freeing all resource */
-#warning Missing logic
+  /* Traverse all directory entries (recursively), freeing all resources. */
+
+  ret = tmpfs_foreach(fs->tfs_root, tmpfs_free_callout);
 
   /* Now we can destroy the filesystem itself. */
 
   sem_destroy(&fs->tfs_exclsem);
   kmm_free(fs);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1393,28 +1589,62 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
 static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 {
-  FAR struct inode *inode;
   FAR struct tmpfs_s *fs;
-  FAR struct tmpfs_file_s *tfo;
+  FAR struct tmpfs_directory_s *tdo;
+  struct tmpfs_statfs_s tmpbuf;
+  size_t inuse;
+  size_t avail;
+  off_t blkalloc;
+  off_t blkused;
 
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(mountpt != NULL && buf != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * mountpoint private data from the inode structure
    */
 
-  inode = filep->f_inode;
-  fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  fs = mountpt->i_private;
+  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
 
   /* Get exclusive access to the file system */
-#warning Missing logic
-  /* Traverse the file system to accurmulate statistics */
-#warning Missing logic
-  /* Release the lock on the file system */
-#warning Missing logic
 
+  tmpfs_lock(fs);
+
+  /* Traverse the file system to accurmulate statistics */
+
+  tdo              = fs->tfs_root;
+  inuse            = SIZEOF_TMPFS_DIRECTORY(tdo->tdo_nentries);
+  avail            = tdo->tdo_alloc - inuse;
+
+  tmpbuf.tsf_alloc = tdo->tdo_alloc;
+  tmpbuf.tsf_inuse = inuse;
+  tmpbuf.tsf_files = 0;
+  tmpbuf.tsf_ffree = avail / sizeof(struct tmpfs_dirent_s);
+
+  ret = tmpfs_foreach(fs->tfs_root, tmpfs_statfs_callout,
+                      (FAR void *)&tmpbuf);
+  if (ret < 0)
+    {
+      return -ECANCELED;
+    }
+
+  /* Return something for the file system description */
+
+  blkalloc        = (tmpbuf.tsf_alloc + TMPFS_BLOCKSIZE - 1) / TMPFS_BLOCKSIZE;
+  blkused         = (tmpbuf.tsf_inuse + TMPFS_BLOCKSIZE - 1) / TMPFS_BLOCKSIZE;
+
+  buf->f_type     = TMPFS_MAGIC;
+  buf->f_namelen  = NAME_MAX;
+  buf->f_bsize    = TMPFS_BLOCKSIZE;
+  buf->f_blocks   = blkalloc;
+  buf->f_bfree    = blkalloc - blkused;
+  buf->f_bavail   = blkalloc - blkused;
+  buf->f_files    = tmpbuf.tsf_files;
+  buf->f_ffree    = tmpbuf.tsf_free;
+
+  /* Release the lock on the file system */
+
+  tmpfs_unlock(fs);
   return OK;
 }
 

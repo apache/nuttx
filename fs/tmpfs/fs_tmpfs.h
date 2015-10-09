@@ -72,6 +72,16 @@ enum tmpfs_objtype_e
   TMPFS_REGULAR         /* Regular file */
 };
 
+/* Values returned by tmpfs_foreach() */
+
+enum tmpfs_foreach_e
+{
+  TMPFS_CONTINUE = 0,    /* Continue enumeration */
+  TMPFS_HALT,            /* Stop enumeration */
+  TMPFS_DELETED,         /* Object and directory entry deleted */
+  TMPFS_UNLINKED         /* Only the directory entry was deleted */
+};
+
 /* The generic form of a TMPFS memory object */
 
 struct tmpfs_object_s
@@ -146,6 +156,21 @@ struct tmpfs_s
 
   sem_t tfs_exclsem;     /* Supports exclusive access to the file system */
 };
+
+/* This is the type used the tmpfs_statfs_callout to accumulate memory usage */
+
+struct tmpfs_statfs_s
+{
+  size_t tsf_alloc;      /* Total memory allocated */
+  size_t tsf_inuse;      /* Total memory in use */
+  off_t  tsf_files;      /* Total file nodes in the file system */
+  off_t  tsf_ffree;      /* Free directory nodes in the file system */
+};
+
+/* This is the type of the for tmpfs_foreach callback */
+
+typedef int (*tmpfs_foreach_t)(FAR struct tmpfs_directory_s *tdo,
+                               unsigned int index, FAR void *arg);
 
 /****************************************************************************
  * Public Data
