@@ -1961,8 +1961,7 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   fvdbg("handle: %p blkdriver: %p flags: %02x\n",
         handle, blkdriver, flags);
-  DEBUGASSERT(blkdriver == NULL && handle != NULL);
-  DEBUGASSERT(fs == NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
 
   /* Lock the file system */
 
