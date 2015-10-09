@@ -237,11 +237,16 @@
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
-/* CAN1 */
+/* CAN */
 
 #ifndef CONFIG_STM32_FSMC
 #  define GPIO_CAN1_RX GPIO_CAN1_RX_3
 #  define GPIO_CAN1_TX GPIO_CAN1_TX_3
+#endif
+
+#ifndef CONFIG_STM32_ETHMAC
+#  define GPIO_CAN2_RX GPIO_CAN2_RX_1
+#  define GPIO_CAN2_TX GPIO_CAN2_TX_1
 #endif
 
 /* UART2:
