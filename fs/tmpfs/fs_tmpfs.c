@@ -63,6 +63,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if CONFIG_FS_TMPFS_DIRECTORY_FREEGUARD <= CONFIG_FS_TMPFS_DIRECTORY_ALLOCGUARD
+#  warning CONFIG_FS_TMPFS_DIRECTORY_FREEGUARD needs to be > ALLOCGUARD
+#endif
+
+#if CONFIG_FS_TMPFS_FILE_FREEGUARD <= CONFIG_FS_TMPFS_FILE_ALLOCGUARD
+#  warning CONFIG_FS_TMPFS_FILE_FREEGUARD needs to be > ALLOCGUARD
+#endif
+
 #define tmpfs_lock_file(tfo) \
            (tmpfs_lock_object((FAR struct tmpfs_object_s *)tfo))
 #define tmpfs_lock_directory(tdo) \
@@ -308,10 +316,12 @@ static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
   objsize = SIZEOF_TMPFS_DIRECTORY(nentries);
   if (objsize <= oldtdo->tdo_alloc)
     {
-      /* Already big enough */
+      /* Already big enough.
+       * REVISIT: Missing logic to shrink directory objects.
+       */
 
       oldtdo->tdo_nentries = nentries;
-      return OK;
+      return ret;
     }
 
   /* Added some additional amount to the new size to account frequent
@@ -361,15 +371,9 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
 
   objsize = SIZEOF_TMPFS_FILE(newsize);
 
-  /* Added some additional amount to the new size to account frequent
-   * reallocations.
-   */
-
-  allocsize = objsize + CONFIG_FS_TMPFS_FILE_ALLOCGUARD;
-
   /* Are we growing or shrinking the object? */
 
-  if (allocsize <= oldtfo->tfo_alloc)
+  if (objsize <= oldtfo->tfo_alloc)
     {
       /* Shrinking ... Shrink unconditionally if the size is shrinking to
        * zero.
@@ -381,8 +385,8 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
            * lot.
            */
 
-          delta = oldtfo->tfo_alloc - allocsize;
-          if (delta <= CONFIG_FS_TMPFS_FILE_ALLOCGUARD)
+          delta = oldtfo->tfo_alloc - objsize;
+          if (delta <= CONFIG_FS_TMPFS_FILE_FREEGUARD)
             {
               /* Hasn't shrunk enough.. Return doing nothing for now */
 
@@ -391,6 +395,12 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
             }
         }
     }
+
+  /* Added some additional amount to the new size to account frequent
+   * reallocations.
+   */
+
+  allocsize = objsize + CONFIG_FS_TMPFS_FILE_ALLOCGUARD;
 
   /* Realloc the file object */
 
@@ -512,8 +522,22 @@ static int tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
   last = tdo->tdo_nentries - 1;
   if (index != last)
     {
-      tdo->tdo_entry[index].tde_object = tdo->tdo_entry[last].tde_object;
-      tdo->tdo_entry[index].tde_name = tdo->tdo_entry[last].tde_name;
+      FAR struct tmpfs_dirent_s *newtde;
+      FAR struct tmpfs_dirent_s *oldtde;
+      FAR struct tmpfs_object_s *to;
+
+      /* Move the directory entry */
+
+      newtde             = &tdo->tdo_entry[index];
+      oldtde             = &tdo->tdo_entry[last];
+      to                 = oldtde->tde_object;
+
+      newtde->tde_object = to;
+      newtde->tde_name   = oldtde->tde_name;
+
+      /* Reset the backward link to the directory entry */
+
+      to->to_dirent      = newtde;
     }
 
   /* And decrement the count of directory entries */
@@ -532,6 +556,7 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
 {
   FAR struct tmpfs_directory_s *oldtdo;
   FAR struct tmpfs_directory_s *newtdo;
+  FAR struct tmpfs_dirent_s *tde;
   FAR char *newname;
   unsigned int nentries;
   int index;
@@ -562,13 +587,14 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
 
   /* Save the new object info in the new directory entry */
 
-  newtdo = *tdo;
-  newtdo->tdo_entry[index].tde_object = to;
-  newtdo->tdo_entry[index].tde_name   = newname;
+  newtdo          = *tdo;
+  tde             = &newtdo->tdo_entry[index];
+  tde->tde_object = to;
+  tde->tde_name   = newname;
 
   /* Add backward link to the directory entry to the object */
 
-  to->to_dirent = &newtdo->tdo_entry[index];
+  to->to_dirent  = tde;
   return OK;
 }
 
@@ -1176,11 +1202,20 @@ static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
 
   if (index != last)
     {
-      FAR struct tmpfs_dirent_s *tmp;
+      FAR struct tmpfs_dirent_s *oldtde;
+      FAR struct tmpfs_object_s *oldto;
 
-      tmp             = &tdo->tdo_entry[last];
-      tde->tde_object = tmp->tde_object;
-      tde->tde_name   = tmp->tde_name;
+      /* Move the directory entry */
+
+      oldtde           = &tdo->tdo_entry[last];
+      oldto            = oldtde->tde_object;
+
+      tde->tde_object  = oldto;
+      tde->tde_name    = oldtde->tde_name;
+
+      /* Reset the backward link to the directory entry */
+
+      oldto->to_dirent = tde;
     }
 
   /* And decrement the count of directory entries */
@@ -1506,6 +1541,7 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
   /* Copy data from the memory object to the user buffer */
 
   memcpy(buffer, &tfo->tfo_data, nread);
+  filep->f_pos += nread;
 
   /* Release the lock on the file */
 
@@ -1560,6 +1596,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
   /* Copy data from the memory object to the user buffer */
 
   memcpy(&tfo->tfo_data, buffer, nwritten);
+  filep->f_pos += nwritten;
 
   /* Release the lock on the file */
 
