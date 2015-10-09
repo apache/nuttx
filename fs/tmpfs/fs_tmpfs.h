@@ -118,7 +118,7 @@ struct tmpfs_directory_s
 };
 
 #define SIZEOF_TMPFS_DIRECTORY(n) \
-  (sizeof(struct tmpfs_directory_s) + ((n) - 1)*sizeof(struct tmpfs_dirent_s))
+  (sizeof(struct tmpfs_directory_s) + ((n) - 1) * sizeof(struct tmpfs_dirent_s))
 
 /* The form of a regular file memory object
  *
