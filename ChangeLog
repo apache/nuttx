@@ -11017,4 +11017,7 @@
 	  temporary RAM file file system (2015-10-0i8).
 	* tools/: Add crappy style checking tool nxstyle.c.  See thee tools/
 	  README file for more info (2015-10-08).
-
+	* stm32 F4:  Fix some TIM12 pin mappings.  From Max Kriegleder
+	  (2015-10-9).
+	* fs/tmpfs: TMPFS file system is code complete, but not yet functional
+	  (2015-10-9).

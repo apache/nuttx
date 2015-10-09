@@ -64,6 +64,7 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 include mount/Make.defs
 include fat/Make.defs
 include romfs/Make.defs
+include tmpfs/Make.defs
 include nxffs/Make.defs
 include nfs/Make.defs
 include smartfs/Make.defs

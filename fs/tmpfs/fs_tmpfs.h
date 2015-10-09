@@ -47,14 +47,16 @@
 
 #include <nuttx/fs/fs.h>
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* This is the block size reported by stat() */
 
 #define TMPFS_BLOCKSIZE   512
+
+/* Indicates that there is no holder of the re-entrant semaphore */
+
+#define TMPFS_NO_HOLDER   -1
 
 /* Bit definitions for file object flags */
 
@@ -82,22 +84,33 @@ enum tmpfs_foreach_e
   TMPFS_UNLINKED         /* Only the directory entry was deleted */
 };
 
-/* The generic form of a TMPFS memory object */
+/* Re-entrant semaphore */
 
-struct tmpfs_object_s
+struct tmpfs_sem_s
 {
-  size_t   to_alloc;     /* Allocated size of the memory object */
-  uint8_t  to_type;      /* See enum tmpfs_objtype_e */
-  uint8_t  to_refs;      /* Reference count */
-  sem_t    to_exclsem;   /* Supports exclusive access to the object */
+  sem_t    ts_sem;       /* The actual semaphore */
+  pid_t    ts_holder;    /* Current older (-1 if not held) */
+  uint16_t ts_count;     /* Number of counts held */
 };
 
 /* The form of one directory entry */
 
 struct tmpfs_dirent_s
 {
-  FAR struct tmpfs_object_s *rde_object;
-  FAR char *rde_name;
+  FAR struct tmpfs_object_s *tde_object;
+  FAR char *tde_name;
+};
+
+/* The generic form of a TMPFS memory object */
+
+struct tmpfs_object_s
+{
+  FAR struct tmpfs_dirent_s *to_dirent;
+  struct tmpfs_sem_s to_exclsem;
+
+  size_t   to_alloc;     /* Allocated size of the memory object */
+  uint8_t  to_type;      /* See enum tmpfs_objtype_e */
+  uint8_t  to_refs;      /* Reference count */
 };
 
 /* The form of a directory memory object */
@@ -106,10 +119,12 @@ struct tmpfs_directory_s
 {
   /* First fields must match common TMPFS object layout */
 
+  FAR struct tmpfs_dirent_s *tdo_dirent;
+  struct tmpfs_sem_s tdo_exclsem;
+
   size_t   tdo_alloc;    /* Allocated size of the directory object */
   uint8_t  tdo_type;     /* See enum tmpfs_objtype_e */
   uint8_t  tdo_refs;     /* Reference count */
-  sem_t    tdo_exclsem;  /* Supports exclusive access to the directory */
 
   /* Remaining fields are unique to a directory object */
 
@@ -132,10 +147,12 @@ struct tmpfs_file_s
 {
   /* First fields must match common TMPFS object layout */
 
+  FAR struct tmpfs_dirent_s *tfo_dirent;
+  struct tmpfs_sem_s tfo_exclsem;
+
   size_t   tfo_alloc;    /* Allocated size of the file object */
   uint8_t  tfo_type;     /* See enum tmpfs_objtype_e */
   uint8_t  tfo_refs;     /* Reference count */
-  sem_t    tfo_exclsem;  /* Supports exclusive access to the file */
 
   /* Remaining fields are unique to a directory object */
 
@@ -153,8 +170,7 @@ struct tmpfs_s
   /* The root directory */
 
   FAR struct tmpfs_directory_s *tfs_root;
-
-  sem_t tfs_exclsem;     /* Supports exclusive access to the file system */
+  struct tmpfs_sem_s tfs_exclsem;
 };
 
 /* This is the type used the tmpfs_statfs_callout to accumulate memory usage */
