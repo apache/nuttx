@@ -198,7 +198,7 @@ static void elf_dumpentrypt(FAR struct binary_s *binp,
     }
 #endif
 
-  elf_dumpbuffer("Entry code", (FAR const uint8_t*)binp->entrypt,
+  elf_dumpbuffer("Entry code", (FAR const uint8_t *)binp->entrypt,
                  MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
 
 #ifdef CONFIG_ARCH_ADDRENV

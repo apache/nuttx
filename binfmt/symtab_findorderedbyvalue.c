@@ -100,7 +100,7 @@ symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
        */
 
       mid = (low + high) >> 1;
-      if ( value < symtab[mid].sym_value)
+      if (value < symtab[mid].sym_value)
         {
           high = mid - 1;
         }

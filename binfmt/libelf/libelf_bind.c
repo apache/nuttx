@@ -113,7 +113,7 @@ static inline int elf_readrel(FAR struct elf_loadinfo_s *loadinfo,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return elf_read(loadinfo, (FAR uint8_t*)rel, sizeof(Elf32_Rel), offset);
+  return elf_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
 }
 
 /****************************************************************************

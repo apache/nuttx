@@ -157,8 +157,8 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
   bvdbg("Loaded sections:\n");
-  text = (FAR uint8_t*)loadinfo->textalloc;
-  data = (FAR uint8_t*)loadinfo->dataalloc;
+  text = (FAR uint8_t *)loadinfo->textalloc;
+  data = (FAR uint8_t *)loadinfo->dataalloc;
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {

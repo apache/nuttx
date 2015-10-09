@@ -163,7 +163,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
         {
           /* Allocate memory to hold a copy of the .ctor section */
 
-          loadinfo->ctoralloc = (binfmt_ctor_t*)kumm_malloc(ctorsize);
+          loadinfo->ctoralloc = (binfmt_ctor_t *)kumm_malloc(ctorsize);
           if (!loadinfo->ctoralloc)
             {
               bdbg("Failed to allocate memory for .ctors\n");
@@ -174,7 +174,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 
           /* Read the section header table into memory */
 
-          ret = elf_read(loadinfo, (FAR uint8_t*)loadinfo->ctors, ctorsize,
+          ret = elf_read(loadinfo, (FAR uint8_t *)loadinfo->ctors, ctorsize,
                          shdr->sh_offset);
           if (ret < 0)
             {
@@ -206,7 +206,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
            * will be relocated via the normal mechanism.
            */
 
-          loadinfo->ctors = (binfmt_ctor_t*)shdr->sh_addr;
+          loadinfo->ctors = (binfmt_ctor_t *)shdr->sh_addr;
         }
     }
 

@@ -187,7 +187,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
    */
 
   binp->entrypt   = (main_t)(loadinfo.ispace + loadinfo.entryoffs);
-  binp->mapped    = (void*)loadinfo.ispace;
+  binp->mapped    = (FAR void *)loadinfo.ispace;
   binp->mapsize   = loadinfo.isize;
   binp->stacksize = loadinfo.stacksize;
 
@@ -202,7 +202,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
 #ifdef CONFIG_ARCH_ADDRENV
 #  warning "REVISIT"
 #else
-  binp->alloc[0]  = (void*)loadinfo.dspace;
+  binp->alloc[0]  = (FAR void *)loadinfo.dspace;
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -213,7 +213,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   up_addrenv_clone(&loadinfo.addrenv, &binp->addrenv);
 #endif
 
-  nxflat_dumpbuffer("Entry code", (FAR const uint8_t*)binp->entrypt,
+  nxflat_dumpbuffer("Entry code", (FAR const uint8_t *)binp->entrypt,
                     MIN(loadinfo.isize - loadinfo.entryoffs, 512));
 
   nxflat_uninit(&loadinfo);

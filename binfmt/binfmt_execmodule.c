@@ -159,7 +159,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR struct task_tcb_s*)kmm_zalloc(sizeof(struct task_tcb_s));
+  tcb = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
       err = ENOMEM;
@@ -189,7 +189,7 @@ int exec_module(FAR const struct binary_s *binp)
    * will need to change if/when we want to support dynamic stack allocation.
    */
 
-  stack = (FAR uint32_t*)kumm_malloc(binp->stacksize);
+  stack = (FAR uint32_t *)kumm_malloc(binp->stacksize);
   if (!stack)
     {
       err = ENOMEM;

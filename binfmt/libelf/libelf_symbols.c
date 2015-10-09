@@ -107,7 +107,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
 
   bytesread = 0;
 
-  for (;;)
+  for (; ; )
     {
       /* Get the number of bytes to read */
 
@@ -239,7 +239,7 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return elf_read(loadinfo, (FAR uint8_t*)sym, sizeof(Elf32_Sym), offset);
+  return elf_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
 }
 
 /****************************************************************************

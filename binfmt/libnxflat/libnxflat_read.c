@@ -69,9 +69,9 @@
  ****************************************************************************/
 
 #if defined(NXFLAT_DUMP_READDATA)
-static inline void nxflat_dumpreaddata(char *buffer, int buflen)
+static inline void nxflat_dumpreaddata(FAR char *buffer, int buflen)
 {
-  uint32_t *buf32 = (uint32_t*)buffer;
+  FAR uint32_t *buf32 = (FAR uint32_t *)buffer;
   int i;
   int j;
 

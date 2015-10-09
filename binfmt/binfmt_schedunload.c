@@ -84,7 +84,7 @@ FAR struct binary_s *g_unloadhead;
  *   pid - The task ID of the child task
  *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads
-
+ *
  *
  * Returned Value:
  *   None

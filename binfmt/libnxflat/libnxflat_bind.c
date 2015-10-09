@@ -102,14 +102,14 @@
 static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
                                     uint32_t offset)
 {
-  uint32_t *addr;
+  FAR uint32_t *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32I Offset: %08x I-Space: %p\n",
         offset, loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
   if (offset < loadinfo->dsize)
     {
-      addr = (uint32_t*)(offset + loadinfo->dspace->region);
+      addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
      *addr += (uint32_t)(loadinfo->ispace + sizeof(struct nxflat_hdr_s));
       bvdbg("  After: %08x\n", *addr);
@@ -141,14 +141,14 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
 static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
                                     uint32_t offset)
 {
-  uint32_t *addr;
+  FAR uint32_t *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
         offset, loadinfo->dspace->region);
 
   if (offset < loadinfo->dsize)
     {
-      addr = (uint32_t*)(offset + loadinfo->dspace->region);
+      addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
      *addr += (uint32_t)(loadinfo->dspace->region);
       bvdbg("  After: %08x\n", *addr);
@@ -183,14 +183,14 @@ static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
 static inline int nxflat_bindrel32id(FAR struct nxflat_loadinfo_s *loadinfo,
                                      uint32_t offset)
 {
-  uint32_t *addr;
+  FAR uint32_t *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
         offset, loadinfo->dspace->region);
 
   if (offset < loadinfo->dsize)
     {
-      addr = (uint32_t*)(offset + loadinfo->dspace->region);
+      addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
      *addr += ((uint32_t)loadinfo->ispace - (uint32_t)(loadinfo->dspace->region));
       bvdbg("  After: %08x\n", *addr);
@@ -231,7 +231,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
   /* The NXFLAT header is the first thing at the beginning of the ISpace. */
 
-  hdr = (FAR struct nxflat_hdr_s*)loadinfo->ispace;
+  hdr = (FAR struct nxflat_hdr_s *)loadinfo->ispace;
 
   /* From this, we can get the offset to the list of relocation entries */
 
@@ -348,8 +348,8 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
   if (ret == OK && nrelocs > 0)
     {
-      relocs = (FAR struct nxflat_reloc_s*)(offset - loadinfo->isize + loadinfo->dspace->region);
-      nxflat_dumpbuffer("GOT", (FAR const uint8_t*)relocs, nrelocs * sizeof(struct nxflat_reloc_s));
+      relocs = (FAR struct nxflat_reloc_s *)(offset - loadinfo->isize + loadinfo->dspace->region);
+      nxflat_dumpbuffer("GOT", (FAR const uint8_t *)relocs, nrelocs * sizeof(struct nxflat_reloc_s));
     }
 #endif
 
@@ -397,7 +397,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
   /* The NXFLAT header is the first thing at the beginning of the ISpace. */
 
-  hdr = (FAR struct nxflat_hdr_s*)loadinfo->ispace;
+  hdr = (FAR struct nxflat_hdr_s *)loadinfo->ispace;
 
   /* From this, we can get the offset to the list of symbols imported by
    * this module and the number of symbols imported by this module.
@@ -440,7 +440,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
       DEBUGASSERT(offset >= loadinfo->isize &&
                   offset < loadinfo->isize + loadinfo->dsize);
 
-      imports = (struct nxflat_import_s*)
+      imports = (FAR struct nxflat_import_s *)
         (offset - loadinfo->isize + loadinfo->dspace->region);
 
       /* Now, traverse the list of imported symbols and attempt to bind
@@ -462,7 +462,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
           offset = imports[i].i_funcname;
           DEBUGASSERT(offset < loadinfo->isize);
 
-          symname = (char*)(offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
+          symname = (FAR char *)(offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
           /* Find the exported symbol value for this this symbol name. */
 
@@ -494,7 +494,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
   if (nimports > 0)
     {
-      nxflat_dumpbuffer("Imports", (FAR const uint8_t*)imports, nimports * sizeof(struct nxflat_import_s));
+      nxflat_dumpbuffer("Imports", (FAR const uint8_t *)imports, nimports * sizeof(struct nxflat_import_s));
     }
 #endif
 
@@ -549,7 +549,7 @@ static inline int nxflat_clearbss(FAR struct nxflat_loadinfo_s *loadinfo)
 
   /* Zero the BSS area */
 
-   memset((void*)(loadinfo->dspace->region + loadinfo->datasize), 0,
+   memset((FAR void *)(loadinfo->dspace->region + loadinfo->datasize), 0,
           loadinfo->bsssize);
 
   /* Restore the original address environment */

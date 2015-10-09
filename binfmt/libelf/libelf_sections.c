@@ -117,7 +117,7 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
   buffer    = loadinfo->iobuffer;
   bytesread = 0;
 
-  for (;;)
+  for (; ; )
     {
       /* Get the number of bytes to read */
 
@@ -211,16 +211,18 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold a working copy of the sector header table */
 
-  loadinfo->shdr = (FAR Elf32_Shdr*)kmm_malloc(shdrsize);
+  loadinfo->shdr = (FAR FAR Elf32_Shdr *)kmm_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
-      bdbg("Failed to allocate the section header table. Size: %ld\n", (long)shdrsize);
+      bdbg("Failed to allocate the section header table. Size: %ld\n",
+           (long)shdrsize);
       return -ENOMEM;
     }
 
   /* Read the section header table into memory */
 
-  ret = elf_read(loadinfo, (FAR uint8_t*)loadinfo->shdr, shdrsize, loadinfo->ehdr.e_shoff);
+  ret = elf_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
+                 loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
       bdbg("Failed to read section header table: %d\n", ret);
