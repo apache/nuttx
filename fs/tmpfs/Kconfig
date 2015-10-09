@@ -6,7 +6,7 @@
 config FS_TMPFS
 	bool "TMPFS file system"
 	default n
-	depends on !DISABLE_MOUNTPOINT && EXPERIMENTAL
+	depends on !DISABLE_MOUNTPOINT
 	select FS_READABLE
 	select FS_WRITABLE
 	---help---

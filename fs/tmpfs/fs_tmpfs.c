@@ -667,6 +667,8 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
       name   = copy;
       parent = fs->tfs_root;
 
+      /* Lock the root directory to emulate the behavior of tmpfs_find_directory() */
+
       tmpfs_lock_directory(parent);
       parent->tdo_refs++;
     }
@@ -677,7 +679,7 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
       *name++ = '\0';
 
       /* Locate the parent directory that should contain this name.
-       * On success, tmpfs_find_directory() will lockthe parent
+       * On success, tmpfs_find_directory() will lock the parent
        * directory and increment the reference count.
        */
 
@@ -723,6 +725,11 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
     {
       goto errout_with_file;
     }
+
+  /* Release the reference and lock on the parent directory */
+
+  parent->tdo_refs--;
+  tmpfs_unlock_directory(parent);
 
   /* Free the copy of the relpath and return success */
 
@@ -856,8 +863,8 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
       goto errout_with_parent;
     }
 
-  /* Allocate an empty directory object.  There is no reference on the new
-   * directory and the object is not locked.
+  /* Allocate an empty directory object.  NOTE that there is no reference on
+   * the new directory and the object is not locked.
    */
 
   newtdo = tmpfs_alloc_directory();
@@ -883,7 +890,13 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
   tmpfs_unlock_directory(parent);
   kmm_free(copy);
 
-  *tdo = newtdo;
+  /* Return the (unlocked, unreferenced) directory object to the caller */
+
+  if (tdo != NULL)
+    {
+      *tdo = newtdo;
+    }
+
   return OK;
 
 /* Error exits */
@@ -1263,12 +1276,12 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
     {
       /* Lock the object and take a reference */
 
+      to = tdo->tdo_entry[index].tde_object;
       tmpfs_lock_object(to);
       to->to_refs++;
 
       /* Is the next entry a directory? */
 
-      to = tdo->tdo_entry[index].tde_object;
       if (to->to_type == TMPFS_DIRECTORY)
         {
           FAR struct tmpfs_directory_s *next =
@@ -2159,9 +2172,7 @@ static int tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   tmpfs_lock(fs);
 
-  /* Create the directory.  This will lock the newly directory with a
-   * a reference count of one.
-   */
+  /* Create the directory. */
 
   ret = tmpfs_create_directory(fs, relpath, NULL);
   tmpfs_unlock(fs);
