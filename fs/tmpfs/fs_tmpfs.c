@@ -2009,16 +2009,20 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   tmpfs_lock(fs);
 
-  /* Traverse the file system to accurmulate statistics */
+  /* Set up the memory use for the file system and root directory object */
 
   tdo              = fs->tfs_root;
-  inuse            = SIZEOF_TMPFS_DIRECTORY(tdo->tdo_nentries);
-  avail            = tdo->tdo_alloc - inuse;
+  inuse            = sizeof(struct tmpfs_s) +
+                     SIZEOF_TMPFS_DIRECTORY(tdo->tdo_nentries);
+  avail            = sizeof(struct tmpfs_s) +
+                     tdo->tdo_alloc - inuse;
 
   tmpbuf.tsf_alloc = tdo->tdo_alloc;
   tmpbuf.tsf_inuse = inuse;
   tmpbuf.tsf_files = 0;
   tmpbuf.tsf_ffree = avail / sizeof(struct tmpfs_dirent_s);
+
+  /* Traverse the file system to accurmulate statistics */
 
   ret = tmpfs_foreach(fs->tfs_root, tmpfs_statfs_callout,
                       (FAR void *)&tmpbuf);
@@ -2029,12 +2033,14 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Return something for the file system description */
 
-  blkalloc        = (tmpbuf.tsf_alloc + TMPFS_BLOCKSIZE - 1) / TMPFS_BLOCKSIZE;
-  blkused         = (tmpbuf.tsf_inuse + TMPFS_BLOCKSIZE - 1) / TMPFS_BLOCKSIZE;
+  blkalloc        = (tmpbuf.tsf_alloc + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
+                     CONFIG_FS_TMPFS_BLOCKSIZE;
+  blkused         = (tmpbuf.tsf_inuse + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
+                     CONFIG_FS_TMPFS_BLOCKSIZE;
 
   buf->f_type     = TMPFS_MAGIC;
   buf->f_namelen  = NAME_MAX;
-  buf->f_bsize    = TMPFS_BLOCKSIZE;
+  buf->f_bsize    = CONFIG_FS_TMPFS_BLOCKSIZE;
   buf->f_blocks   = blkalloc;
   buf->f_bfree    = blkalloc - blkused;
   buf->f_bavail   = blkalloc - blkused;
@@ -2487,8 +2493,9 @@ static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   /* Fake the rest of the information */
 
   buf->st_size    = objsize;
-  buf->st_blksize = TMPFS_BLOCKSIZE;
-  buf->st_blocks  = (objsize + TMPFS_BLOCKSIZE - 1) / TMPFS_BLOCKSIZE;
+  buf->st_blksize = CONFIG_FS_TMPFS_BLOCKSIZE;
+  buf->st_blocks  = (objsize + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
+                    CONFIG_FS_TMPFS_BLOCKSIZE;
 
   /* No... unlock the object and return success */
 

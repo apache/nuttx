@@ -50,10 +50,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* This is the block size reported by stat() */
-
-#define TMPFS_BLOCKSIZE   512
-
 /* Indicates that there is no holder of the re-entrant semaphore */
 
 #define TMPFS_NO_HOLDER   -1
