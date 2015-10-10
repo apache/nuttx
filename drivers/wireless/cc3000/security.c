@@ -131,7 +131,7 @@ void expandKey(uint8_t *expandedKey, uint8_t *key)
       expandedKey[ii * 16 + 0] = sbox[expandedKey[ii *16 - 3]] ^ expandedKey[(ii - 1) * 16 + 0] ^ Rcon[ii];
       expandedKey[ii * 16 + 1] = sbox[expandedKey[ii *16 - 2]] ^ expandedKey[(ii - 1) * 16 + 1];
       expandedKey[ii * 16 + 2] = sbox[expandedKey[ii *16 - 1]] ^ expandedKey[(ii - 1) * 16 + 2];
-      expandedKey[ii * 16 + 3] = sbox[buf1] ^ expandedKey[(ii - 1) *1 6 + 3];
+      expandedKey[ii * 16 + 3] = sbox[buf1] ^ expandedKey[(ii - 1) * 16 + 3];
       expandedKey[ii * 16 + 4] = expandedKey[(ii - 1) * 16 + 4] ^ expandedKey[ii * 16 + 0];
       expandedKey[ii * 16 + 5] = expandedKey[(ii - 1) * 16 + 5] ^ expandedKey[ii * 16 + 1];
       expandedKey[ii * 16 + 6] = expandedKey[(ii - 1) * 16 + 6] ^ expandedKey[ii * 16 + 2];
