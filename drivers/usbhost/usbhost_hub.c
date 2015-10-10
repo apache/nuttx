@@ -356,7 +356,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 

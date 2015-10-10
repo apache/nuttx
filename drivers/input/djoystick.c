@@ -143,7 +143,8 @@ static void    djoy_sample(FAR struct djoy_upperhalf_s *priv);
 
 static int     djoy_open(FAR struct file *filep);
 static int     djoy_close(FAR struct file *filep);
-static ssize_t djoy_read(FAR struct file *, FAR char *, size_t);
+static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
 static int     djoy_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
@@ -585,7 +586,7 @@ static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
   lower = priv->du_lower;
   DEBUGASSERT(lower && lower->dl_sample);
   priv->du_sample = lower->dl_sample(lower);
-  *(djoy_buttonset_t*)buffer = priv->du_sample;
+  *(FAR djoy_buttonset_t *)buffer = priv->du_sample;
   ret = sizeof(djoy_buttonset_t);
 
   djoy_givesem(&priv->du_exclsem);

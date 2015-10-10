@@ -267,7 +267,7 @@ static void composite_freereq(FAR struct usbdev_ep_s *ep,
 static int composite_bind(FAR struct usbdevclass_driver_s *driver,
                           FAR struct usbdev_s *dev)
 {
-  FAR struct composite_dev_s *priv = ((FAR struct composite_driver_s*)driver)->dev;
+  FAR struct composite_dev_s *priv = ((FAR struct composite_driver_s *)driver)->dev;
   int ret;
 
   usbtrace(TRACE_CLASSBIND, 0);
@@ -352,7 +352,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -417,7 +417,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   /* Extract a reference to private data */
 
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -562,7 +562,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
         case USB_REQ_GETINTERFACE:
           {
-            if (ctrl->type == (USB_DIR_IN|USB_REQ_RECIPIENT_INTERFACE) &&
+            if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                 priv->config == COMPOSITE_CONFIGIDNONE)
               {
                 ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
@@ -651,7 +651,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -704,7 +704,7 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -746,7 +746,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -798,7 +798,7 @@ FAR void *composite_initialize(void)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct composite_alloc_s*)kmm_malloc(sizeof(struct composite_alloc_s));
+  alloc = (FAR struct composite_alloc_s *)kmm_malloc(sizeof(struct composite_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_ALLOCDEVSTRUCT), 0);

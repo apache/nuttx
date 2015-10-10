@@ -438,7 +438,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_SETCHARACTERISTICS:
         {
-          FAR const struct pwm_info_s *info = (FAR const struct pwm_info_s*)((uintptr_t)arg);
+          FAR const struct pwm_info_s *info = (FAR const struct pwm_info_s *)((uintptr_t)arg);
           DEBUGASSERT(info != NULL && lower->ops->start != NULL);
 
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -475,7 +475,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_GETCHARACTERISTICS:
         {
-          FAR struct pwm_info_s *info = (FAR struct pwm_info_s*)((uintptr_t)arg);
+          FAR struct pwm_info_s *info = (FAR struct pwm_info_s *)((uintptr_t)arg);
           DEBUGASSERT(info != NULL);
 
           memcpy(info, &upper->info, sizeof(struct pwm_info_s));

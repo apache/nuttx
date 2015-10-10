@@ -285,7 +285,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   *tags = result & 0xF;
-  result >>= 4; // Get rid of tags
+  result >>= 4; /* Get rid of tags */
 
   ivdbg("cmd:%02x response:%04x\n", cmd, result);
   return result;
@@ -359,7 +359,7 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct max11802_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct max11802_sample_s));
 
       /* Now manage state transitions */
 
@@ -980,10 +980,10 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
-        * last positional data.
-        */
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
+       * last positional data.
+       */
 
       if (sample.valid)
         {

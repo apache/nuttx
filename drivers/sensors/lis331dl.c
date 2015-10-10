@@ -249,7 +249,7 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_dev_s *i2c,
         {
           /* Copy LIS331DL registers to our private structure and power-up device */
 
-          if (lis331dl_readregs(dev)==OK && lis331dl_powerup(dev) == OK)
+          if (lis331dl_readregs(dev) == OK && lis331dl_powerup(dev) == OK)
             {
               /* Normal exit point */
 

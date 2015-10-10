@@ -67,8 +67,9 @@
 
 static int     adc_open(FAR struct file *filep);
 static int     adc_close(FAR struct file *filep);
-static ssize_t adc_read(FAR struct file *, FAR char *, size_t);
-static int     adc_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static ssize_t adc_read(FAR struct file *fielp, FAR char *buffer,
+                        size_t buflen);
+static int     adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data

@@ -147,17 +147,17 @@ static struct up_dev_s g_adcpriv =
 {
   .mux  = (const uint8_t [])
   {
-    CONFIG_ADS1255_MUX,0
+    CONFIG_ADS1255_MUX, 0
   },
-  .sps  = CONFIG_ADS1255_SPS,
+  .sps     = CONFIG_ADS1255_SPS,
   .channel = 0,
-  .irq  = CONFIG_ADS1255_IRQ,
+  .irq     = CONFIG_ADS1255_IRQ,
 };
 
 static struct adc_dev_s g_adcdev =
 {
-  .ad_ops = &g_adcops,
-  .ad_priv= &g_adcpriv,
+  .ad_ops  = &g_adcops,
+  .ad_priv = &g_adcpriv,
 };
 
 /****************************************************************************
@@ -166,12 +166,12 @@ static struct adc_dev_s g_adcdev =
 
 static uint8_t getspsreg(uint16_t sps)
 {
-  static const unsigned short sps_tab[]=
+  static const unsigned short sps_tab[] =
   {
       3,     7,     12,    20,    27,    40,    55,    80,
     300,   750,   1500,  3000,  5000, 10000, 20000, 65535,
   };
-  static const unsigned char sps_reg[]=
+  static const unsigned char sps_reg[] =
   {
     0x03,  0x13,  0x23,  0x33,  0x43,  0x53,  0x63,  0x72,
     0x82,  0x92,  0xa1,  0xb0,  0xc0,  0xd0,  0xe0,  0xf0,
@@ -206,9 +206,9 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
   usleep(1000);
   SPI_SELECT(spi, priv->devno, true);
-  SPI_SEND(spi,ADS125X_WREG+0x03);    /* WRITE SPS REG */
-  SPI_SEND(spi,0x00);                 /* count=1 */
-  SPI_SEND(spi,0x63);
+  SPI_SEND(spi, ADS125X_WREG + 0x03);    /* WRITE SPS REG */
+  SPI_SEND(spi, 0x00);                 /* count=1 */
+  SPI_SEND(spi, 0x63);
   SPI_SELECT(spi, priv->devno, false);
 }
 
@@ -227,22 +227,22 @@ static int  adc_setup(FAR struct adc_dev_s *dev)
   if (ret == OK)
     {
       SPI_SELECT(spi, priv->devno, true);
-      SPI_SEND(spi,ADS125X_WREG);         /* WRITE REG from 0 */
-      SPI_SEND(spi,0x03);                 /* count=4+1 */
+      SPI_SEND(spi, ADS125X_WREG);         /* WRITE REG from 0 */
+      SPI_SEND(spi, 0x03);                 /* count=4+1 */
       if (priv->buf)
         {
-          SPI_SEND(spi,ADS125X_BUFON);    /* REG0 STATUS BUFFER ON */
+          SPI_SEND(spi, ADS125X_BUFON);    /* REG0 STATUS BUFFER ON */
         }
       else
         {
-          SPI_SEND(spi,ADS125X_BUFOFF);
+          SPI_SEND(spi, ADS125X_BUFOFF);
         }
 
-      SPI_SEND(spi,priv->mux[0]);
-      SPI_SEND(spi,priv->pga);            /* REG2 ADCON PGA=2 */
-      SPI_SEND(spi,getspsreg(priv->sps));
+      SPI_SEND(spi, priv->mux[0]);
+      SPI_SEND(spi, priv->pga);            /* REG2 ADCON PGA=2 */
+      SPI_SEND(spi, getspsreg(priv->sps));
       usleep(1000);
-      SPI_SEND(spi,ADS125X_SELFCAL);
+      SPI_SEND(spi, ADS125X_SELFCAL);
       SPI_SELECT(spi, priv->devno, false);
       up_enable_irq(priv->irq);
     }
@@ -292,30 +292,30 @@ static int adc_interrupt(int irq, void *context)
   unsigned char ch;
 
   SPI_SELECT(spi, priv->devno, true);
-  SPI_SEND(spi,ADS125X_RDATA);
+  SPI_SEND(spi, ADS125X_RDATA);
   up_udelay(10);
-  buf[3]=SPI_SEND(spi,0xff);
-  buf[2]=SPI_SEND(spi,0xff);
-  buf[1]=SPI_SEND(spi,0xff);
-  buf[0]=0;
+  buf[3] = SPI_SEND(spi, 0xff);
+  buf[2] = SPI_SEND(spi, 0xff);
+  buf[1] = SPI_SEND(spi, 0xff);
+  buf[0] = 0;
 
   priv->channel++;
   ch = priv->mux[priv->channel];
-  if ( ch == 0 )
+  if (ch == 0)
     {
-      priv->channel=0;
+      priv->channel = 0;
       ch = priv->mux[0];
     }
 
-  SPI_SEND(spi,ADS125X_WREG+0x01);
-  SPI_SEND(spi,0x00);
-  SPI_SEND(spi,ch);
-  SPI_SEND(spi,ADS125X_SYNC);
+  SPI_SEND(spi, ADS125X_WREG + 0x01);
+  SPI_SEND(spi, 0x00);
+  SPI_SEND(spi, ch);
+  SPI_SEND(spi, ADS125X_SYNC);
   up_udelay(2);
-  SPI_SEND(spi,ADS125X_WAKEUP);
+  SPI_SEND(spi, ADS125X_WAKEUP);
   SPI_SELECT(spi, priv->devno, false);
 
-  adc_receive(&g_adcdev,priv->channel,*(int32_t *)buf);
+  adc_receive(&g_adcdev, priv->channel, *(int32_t *)buf);
   return OK;
 }
 

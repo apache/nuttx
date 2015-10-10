@@ -169,7 +169,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
       if (fds)
         {
 #ifdef CONFIG_SERIAL_REMOVABLE
-          fds->revents |= ((fds->events | (POLLERR|POLLHUP)) & eventset);
+          fds->revents |= ((fds->events | (POLLERR | POLLHUP)) & eventset);
 #else
           fds->revents |= (fds->events & eventset);
 #endif
@@ -207,7 +207,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
   /* Loop until we are able to add the character to the TX buffer */
 
-  for (;;)
+  for (; ; )
     {
       if (nexthead != dev->xmit.tail)
         {
@@ -270,9 +270,9 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           if (ret < 0)
             {
-             /* A signal received while waiting for the xmit buffer to become
-              * non-full will abort the transfer.
-              */
+              /* A signal received while waiting for the xmit buffer to become
+               * non-full will abort the transfer.
+               */
 
               return -EINTR;
             }
@@ -898,7 +898,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           case TCGETS:
             {
-              FAR struct termios *termiosp = (struct termios*)arg;
+              FAR struct termios *termiosp = (FAR struct termios *)arg;
 
               if (!termiosp)
                 {
@@ -916,7 +916,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCSETS:
             {
-              FAR struct termios *termiosp = (struct termios*)arg;
+              FAR struct termios *termiosp = (FAR struct termios *)arg;
 
               if (!termiosp)
                 {
@@ -1044,7 +1044,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       if (dev->disconnected)
         {
-           eventset |= (POLLERR|POLLHUP);
+           eventset |= (POLLERR | POLLHUP);
         }
 #endif
 
@@ -1437,7 +1437,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
 
       /* Notify all poll/select waiters that a hangup occurred */
 
-      uart_pollnotify(dev, (POLLERR|POLLHUP));
+      uart_pollnotify(dev, (POLLERR | POLLHUP));
     }
 
   irqrestore(flags);

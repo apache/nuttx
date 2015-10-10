@@ -203,7 +203,7 @@
 #  define enc_cmddump(c) \
    lowsyslog(LOG_DEBUG, "ENC28J60: CMD: %02x\n", c);
 #  define enc_bmdump(c,b,s) \
-   lowsyslog(LOG_DEBUG, "ENC28J60: CMD: %02x buffer: %p length: %d\n", c,b,s);
+   lowsyslog(LOG_DEBUG, "ENC28J60: CMD: %02x buffer: %p length: %d\n", c, b, s);
 #else
 #  define enc_wrdump(a,v)
 #  define enc_rddump(a,v)
@@ -478,7 +478,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the read command and collect the data.  The sequence requires
    * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
@@ -521,7 +521,7 @@ static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the write command and data.  The sequence requires 16-clocks:
    * 8 to clock out the cmd + 8 to clock out the data.
@@ -565,7 +565,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the system reset command. */
 
@@ -612,7 +612,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
 
 static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
 {
-  /* Check if the bank setting has changed*/
+  /* Check if the bank setting has changed */
 
   if (bank != priv->bank)
     {
@@ -662,7 +662,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   /* Re-select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the RCR command and collect the data.  How we collect the data
    * depends on if this is a PHY/CAN or not.  The normal sequence requires
@@ -719,7 +719,7 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 
   /* Re-select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the WCR command and data.  The sequence requires 16-clocks:
    * 8 to clock out the cmd + 8 to clock out the data.
@@ -823,8 +823,8 @@ static void enc_rxdump(FAR struct enc_driver_s *priv)
 static void enc_txdump(FAR struct enc_driver_s *priv)
 {
   lowsyslog(LOG_DEBUG, "Tx Registers:\n");
-  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x ESTAT:    %02x\n",
-            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR),);
+  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
+            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
   lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
             enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
   lowsyslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
@@ -873,7 +873,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the read buffer memory command (ignoring the response) */
 
@@ -918,7 +918,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    * "The WBM command is started by lowering the CS pin. ..."
    */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the write buffer memory command (ignoring the response)
    *
@@ -1591,7 +1591,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   else
     {
-      /* Save the packet length (without the 4 byte CRC) in priv->dev.d_len*/
+      /* Save the packet length (without the 4 byte CRC) in priv->dev.d_len */
 
       priv->dev.d_len = pktlen - 4;
 
@@ -2100,7 +2100,7 @@ static int enc_ifup(struct net_driver_s *dev)
 
   nlldbg("Bringing up: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2171,7 +2171,7 @@ static int enc_ifdown(struct net_driver_s *dev)
 
   nlldbg("Taking down: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 

@@ -523,7 +523,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -547,7 +547,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 
@@ -1300,7 +1300,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
     {
       /* Return a copy of the sampled data. */
 
-      memcpy(sample, &priv->sample, sizeof(struct mouse_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct mouse_sample_s));
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
       /* Now manage state transitions */
@@ -1405,7 +1405,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
 
   ivdbg("Sampled\n");
 
-   /* Re-acquire the semaphore that manages mutually exclusive access to
+  /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
@@ -1484,7 +1484,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 

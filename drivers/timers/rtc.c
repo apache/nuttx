@@ -79,7 +79,8 @@ static int     rtc_open(FAR struct file *filep);
 static int     rtc_close(FAR struct file *filep);
 #endif
 
-static ssize_t rtc_read(FAR struct file *filep, FAR char *, size_t);
+static ssize_t rtc_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen);
 static ssize_t rtc_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);

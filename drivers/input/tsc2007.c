@@ -309,7 +309,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s));
 
       /* Now manage state transitions */
 
@@ -539,10 +539,10 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
        return ret;
      }
 
-   /* Get the MS 8 bits from the first byte and the remaining LS 4 bits from
-    * the second byte.  The valid range of data is then from 0 to 4095 with
-    * the LSB unit corresponding to Vref/4096.
-    */
+  /* Get the MS 8 bits from the first byte and the remaining LS 4 bits from
+   * the second byte.  The valid range of data is then from 0 to 4095 with
+   * the LSB unit corresponding to Vref/4096.
+   */
 
    ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
    ivdbg("data: 0x%04x\n", ret);
@@ -971,8 +971,8 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
        * last positional data.
        */
 

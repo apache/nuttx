@@ -663,7 +663,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -687,7 +687,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 
@@ -921,7 +921,7 @@ static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
 
   /* Is either shift key pressed? */
 
-  if ((modifier & (USBHID_MODIFER_LSHIFT|USBHID_MODIFER_RSHIFT)) != 0)
+  if ((modifier & (USBHID_MODIFER_LSHIFT | USBHID_MODIFER_RSHIFT)) != 0)
     {
       return ucmap[scancode];
     }
@@ -1062,7 +1062,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        */
 
       ctrlreq       = (struct usb_ctrlreq_s *)priv->tbuffer;
-      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+      ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
       ctrlreq->req  = USBHID_REQUEST_GETREPORT;
 
       usbhost_putle16(ctrlreq->value, (USBHID_REPORTTYPE_INPUT << 8));
@@ -1155,7 +1155,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                        * a valid, NUL character.
                        */
 
-                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL|USBHID_MODIFER_RCTRL)) != 0)
+                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL | USBHID_MODIFER_RCTRL)) != 0)
                         {
                           keycode &= 0x1f;
                         }
@@ -1363,7 +1363,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 

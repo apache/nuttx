@@ -182,7 +182,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv);
 #endif
 
 static int tun_dev_init(FAR struct tun_device_s *priv,
-                        FAR struct file *filep, FAR const char* devfmt);
+                        FAR struct file *filep, FAR const char *devfmt);
 static int tun_dev_uninit(FAR struct tun_device_s *priv);
 
 /* File interface */
@@ -296,7 +296,6 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
   if (eventset != 0)
     {
       fds->revents |= eventset;
-      //fvdbg("Report events: %02x\n", fds->revents);
       sem_post(fds->sem);
     }
 }
@@ -458,8 +457,8 @@ static void tun_receive(FAR struct tun_device_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-        * sent out on the network, the field  d_len will set to a value > 0.
-        */
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
 
       if (priv->dev.d_len > 0)
         {
@@ -789,8 +788,6 @@ static int tun_txavail(struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  //FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
-
   /* Add the MAC address to the hardware multicast routing table */
 
   return OK;
@@ -818,8 +815,6 @@ static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int tun_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  //FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
-
   /* Add the MAC address to the hardware multicast routing table */
 
   return OK;
@@ -864,7 +859,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv)
  ****************************************************************************/
 
 static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
-                        FAR const char* devfmt)
+                        FAR const char *devfmt)
 {
   int ret;
 
@@ -878,7 +873,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
   priv->dev.d_addmac  = tun_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = tun_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = (void*)priv;   /* Used to recover private state from dev */
+  priv->dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Initialize the wait semaphore */
 
@@ -1187,7 +1182,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       uint8_t free_tuns;
       int intf;
-      FAR struct ifreq *ifr = (FAR struct ifreq*)arg;
+      FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
 
       if (!ifr || (ifr->ifr_flags & IFF_MASK) != IFF_TUN)
         {

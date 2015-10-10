@@ -375,10 +375,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = ug2864ambag01_putrun,    /* Put a run into LCD memory */
-  .getrun = ug2864ambag01_getrun,    /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer,   /* Run scratch buffer */
-  .bpp    = UG2864AMBAG01_BPP,       /* Bits-per-pixel */
+  .putrun = ug2864ambag01_putrun,         /* Put a run into LCD memory */
+  .getrun = ug2864ambag01_getrun,         /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer,   /* Run scratch buffer */
+  .bpp    = UG2864AMBAG01_BPP,            /* Bits-per-pixel */
 };
 
 /* This is the OLED driver instance (only a single device is supported for now) */
@@ -1099,7 +1099,7 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
   SPI_SEND(spi, SH1101A_STARTLINE(0));    /* Set display start line */
   SPI_SEND(spi, SH1101A_PAGEADDR(0));     /* Set page address */
   SPI_SEND(spi, SH1101A_CONTRAST_MODE);   /* Contrast control */
-  SPI_SEND(spi ,UG2864AMBAG01_CONTRAST);  /*   Default contrast */
+  SPI_SEND(spi, UG2864AMBAG01_CONTRAST);  /* Default contrast */
   SPI_SEND(spi, SH1101A_REMAPPLEFT);      /* Set segment remap left */
   SPI_SEND(spi, SH1101A_EDISPOFF);        /* Normal display */
   SPI_SEND(spi, SH1101A_NORMAL);          /* Normal (un-reversed) display mode */
@@ -1109,7 +1109,7 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
   SPI_SEND(spi, SH1101A_DISPOFFS_MODE);   /* Set display offset */
   SPI_SEND(spi, SH1101A_DISPOFFS(0));
   SPI_SEND(spi, SH1101A_CLKDIV_SET);      /* Set clock divider */
-  SPI_SEND(spi, SH1101A_CLKDIV(0,0));
+  SPI_SEND(spi, SH1101A_CLKDIV(0, 0));
   SPI_SEND(spi, SH1101A_CMNPAD_CONFIG);   /* Set common pads */
   SPI_SEND(spi, SH1101A_CMNPAD(0x10));
   SPI_SEND(spi, SH1101A_VCOM_SET);

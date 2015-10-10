@@ -307,7 +307,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
       if (ret < 0)
         {
 #ifdef CONFIG_DEBUG
-          // Sample the errno (debug output could change it)
+          /* Sample the errno (debug output could change it) */
 
           int errval = errno;
 
@@ -577,11 +577,11 @@ errout:
 
 /****************************************************************************
  * Name: stmpe811_ioctl
-  *
+ *
  * Description:
  *   Standard character driver ioctl method.
  *
-****************************************************************************/
+ ****************************************************************************/
 
 static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -860,7 +860,7 @@ static inline void stmpe811_tscinitialize(FAR struct stmpe811_dev_s *priv)
   stmpe811_putreg8(priv, STMPE811_TSC_IDRIVE, TSC_IDRIVE_50MA);
 
   /* Enable the TSC.  Use no tracking index, touch-screen controller
-  * operation mode (XYZ).
+   * operation mode (XYZ).
    */
 
   stmpe811_putreg8(priv, STMPE811_TSC_CTRL, TSC_CTRL_EN);
@@ -1019,7 +1019,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   /* The pen is down... check for data in the FIFO */
 
-  else if ((intsta & (INT_FIFO_TH|INT_FIFO_OFLOW)) != 0)
+  else if ((intsta & (INT_FIFO_TH | INT_FIFO_OFLOW)) != 0)
     {
       /* Read the next x and y positions from the FIFO. */
 

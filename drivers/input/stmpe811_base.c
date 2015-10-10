@@ -101,7 +101,7 @@ static void stmpe811_worker(FAR void *arg)
   /* Check for a touchscreen interrupt */
 
 #ifndef CONFIG_STMPE811_TSC_DISABLE
-  if ((regval & (INT_TOUCH_DET|INT_FIFO_TH|INT_FIFO_OFLOW)) != 0)
+  if ((regval & (INT_TOUCH_DET | INT_FIFO_TH | INT_FIFO_OFLOW)) != 0)
     {
       /* Dispatch the touchscreen interrupt if it was brought into the link */
 
@@ -112,8 +112,9 @@ static void stmpe811_worker(FAR void *arg)
            stmpe811_tscworker(priv, regval);
         }
 
-      stmpe811_putreg8(priv, STMPE811_INT_STA, (INT_TOUCH_DET|INT_FIFO_TH|INT_FIFO_OFLOW));
-      regval &= ~(INT_TOUCH_DET|INT_FIFO_TH|INT_FIFO_OFLOW);
+      stmpe811_putreg8(priv, STMPE811_INT_STA,
+                       (INT_TOUCH_DET | INT_FIFO_TH | INT_FIFO_OFLOW));
+      regval &= ~(INT_TOUCH_DET | INT_FIFO_TH | INT_FIFO_OFLOW);
     }
 #endif
 

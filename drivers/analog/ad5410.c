@@ -141,9 +141,9 @@ static int  dac_setup(FAR struct dac_dev_s *dev)
   FAR struct spi_dev_s *spi = priv->spi;
 
   SPI_SELECT(spi, priv->devno, true);
-  SPI_SEND(spi,AD5410_REG_CMD);
-  SPI_SEND(spi,(AD5410_CMD_OUTEN|AD5410_CMD_420MA)>>8);
-  SPI_SEND(spi,AD5410_CMD_OUTEN|AD5410_CMD_420MA);
+  SPI_SEND(spi, AD5410_REG_CMD);
+  SPI_SEND(spi, (AD5410_CMD_OUTEN | AD5410_CMD_420MA) >> 8);
+  SPI_SEND(spi, AD5410_CMD_OUTEN | AD5410_CMD_420MA);
   SPI_SELECT(spi, priv->devno, false);
   return OK;
 }
@@ -167,10 +167,10 @@ static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
   FAR struct spi_dev_s *spi = priv->spi;
 
-  SPI_SELECT(spi, priv->devno, true);
-  SPI_SEND(spi,AD5410_REG_WR);
-  SPI_SEND(spi,(uint8_t)(msg->am_data>>24));
-  SPI_SEND(spi,(uint8_t)(msg->am_data>>16));
+  SPI_SELECT(spi,  priv->devno,  true);
+  SPI_SEND(spi, AD5410_REG_WR);
+  SPI_SEND(spi, (uint8_t)(msg->am_data >> 24));
+  SPI_SEND(spi, (uint8_t)(msg->am_data >> 16));
   SPI_SELECT(spi, priv->devno, false);
   dac_txdone(&g_dacdev);
   return 0;
@@ -207,8 +207,8 @@ FAR struct dac_dev_s *up_ad5410initialize(FAR struct spi_dev_s *spi,
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_dacdev.ad_priv;
 
-  priv->spi=spi;
-  priv->devno=devno;
+  priv->spi   = spi;
+  priv->devno = devno;
   return &g_dacdev;
 }
 #endif

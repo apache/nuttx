@@ -144,7 +144,8 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv);
 
 static int bmp180_open(FAR struct file *filep);
 static int bmp180_close(FAR struct file *filep);
-static ssize_t bmp180_read(FAR struct file *, FAR char *, size_t);
+static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen);
 static ssize_t bmp180_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 
@@ -523,7 +524,7 @@ static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
       return -1;
     }
 
-  if ( buflen != 4)
+  if (buflen != 4)
     {
       sndbg("You can't read something other than 32 bits (4 bytes)\n");
       return -1;

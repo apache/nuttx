@@ -86,7 +86,8 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv);
 
 static int     mpl115a_open(FAR struct file *filep);
 static int     mpl115a_close(FAR struct file *filep);
-static ssize_t mpl115a_read(FAR struct file *, FAR char *, size_t);
+static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
 static ssize_t mpl115a_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
@@ -249,8 +250,8 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
 
   /* Check if coefficient data were read correctly */
 
-  if ( (priv->mpl115a_cal_a0 == 0) || (priv->mpl115a_cal_b1 == 0) ||
-       (priv->mpl115a_cal_b2 == 0) || (priv->mpl115a_cal_c12 == 0) )
+  if ((priv->mpl115a_cal_a0 == 0) || (priv->mpl115a_cal_b1 == 0) ||
+      (priv->mpl115a_cal_b2 == 0) || (priv->mpl115a_cal_c12 == 0))
     {
       mpl115a_updatecaldata(priv);
     }
@@ -324,7 +325,7 @@ static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer, size_t buf
       return -1;
     }
 
-  if ( buflen != 2)
+  if (buflen != 2)
     {
       sndbg("You can't read something other than 16 bits (2 bytes)\n");
       return -1;

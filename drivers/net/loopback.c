@@ -540,7 +540,7 @@ int localhost_initialize(void)
 #ifdef CONFIG_NET_MULTIBUFFER
   priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
 #endif
-  priv->lo_dev.d_private = (void*)priv;  /* Used to recover private state from dev */
+  priv->lo_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

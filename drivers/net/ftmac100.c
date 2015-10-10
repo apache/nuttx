@@ -283,9 +283,9 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
   FAR struct ftmac100_txdes_s *txdes;
   int len = priv->ft_dev.d_len;
-//  irqstate_t flags;
-//  flags = irqsave();
-//  nvdbg("flags=%08x\n", flags);
+//irqstate_t flags;
+//flags = irqsave();
+//nvdbg("flags=%08x\n", flags);
 
   txdes = ftmac100_current_txdes(priv);
 
@@ -300,7 +300,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
 
   /* Send the packet: address=priv->ft_dev.d_buf, length=priv->ft_dev.d_len */
 
-//  memcpy((void *)txdes->txdes2, priv->ft_dev.d_buf, len);
+//memcpy((void *)txdes->txdes2, priv->ft_dev.d_buf, len);
   txdes->txdes2  = (unsigned int)priv->ft_dev.d_buf;
   txdes->txdes1 &= FTMAC100_TXDES1_EDOTR;
   txdes->txdes1 |= (FTMAC100_TXDES1_FTS |
@@ -316,7 +316,8 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   priv->tx_pending++;
 
   /* Enable Tx polling */
-  // FIXME: enable interrupts
+  /* FIXME: enable interrupts */
+
   putreg32(1, &iobase->txpd);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
@@ -324,7 +325,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   (void)wd_start(priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
                  ftmac100_txtimeout_expiry, 1, (uint32_t)priv);
 
-//  irqrestore(flags);
+//irqrestore(flags);
   return OK;
 }
 
@@ -482,10 +483,10 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
       rxdes[i].rxdes0 = FTMAC100_RXDES0_RXDMA_OWN;
       rxdes[i].rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
       rxdes[i].rxdes2 = (unsigned int)(kmem + i * RX_BUF_SIZE);
-      rxdes[i].rxdes3 = (unsigned int)(rxdes + i + 1); // next ring
+      rxdes[i].rxdes3 = (unsigned int)(rxdes + i + 1); /* Next ring */
     }
 
-  rxdes[CONFIG_FTMAC100_RX_DESC - 1].rxdes3 = (unsigned int)rxdes; // next ring
+  rxdes[CONFIG_FTMAC100_RX_DESC - 1].rxdes3 = (unsigned int)rxdes; /* Next ring */
 
   for (i = 0; i < CONFIG_FTMAC100_TX_DESC; i++)
     {
@@ -495,11 +496,11 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
       txdes[i].txdes1 = 0;
       txdes[i].txdes2 = 0;
       txdes[i].txdes3 = 0;
-//    txdes[i].txdes3 = (unsigned int)(txdes + i + 1); // next ring
+//    txdes[i].txdes3 = (unsigned int)(txdes + i + 1); /* Next ring */
     }
 
   txdes[CONFIG_FTMAC100_TX_DESC - 1].txdes1 = FTMAC100_TXDES1_EDOTR;
-//  txdes[CONFIG_FTMAC100_TX_DESC - 1].txdes3 = (unsigned int)txdes; // next ring
+//txdes[CONFIG_FTMAC100_TX_DESC - 1].txdes3 = (unsigned int)txdes; /* Next ring */
 
   /* transmit ring */
 
@@ -513,7 +514,7 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 
   /* set RXINT_THR and TXINT_THR */
 
-//  putreg32 (FTMAC100_ITC_RXINT_THR(1) | FTMAC100_ITC_TXINT_THR(1), &iobase->itc);
+//putreg32 (FTMAC100_ITC_RXINT_THR(1) | FTMAC100_ITC_TXINT_THR(1), &iobase->itc);
 
   /* poll receive descriptor automatically */
 
@@ -526,8 +527,8 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
             FTMAC100_DBLAC_RXFIFO_HTHR(6) |
             FTMAC100_DBLAC_RX_THR_EN, &iobase->dblac);
 
-//  putreg32 (getreg32(&iobase->fcr) | 0x1, &iobase->fcr);
-//  putreg32 (getreg32(&iobase->bpr) | 0x1, &iobase->bpr);
+//putreg32 (getreg32(&iobase->fcr) | 0x1, &iobase->fcr);
+//putreg32 (getreg32(&iobase->bpr) | 0x1, &iobase->bpr);
 #endif
 
   /* enable transmitter, receiver */
@@ -971,16 +972,16 @@ static void ftmac100_interrupt_work(FAR void *arg)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
   net_lock_t state;
-//  irqstate_t flags;
+//irqstate_t flags;
 
   /* Process pending Ethernet interrupts */
 
   state = net_lock();
-//  flags = irqsave();
+//flags = irqsave();
 
   ftmac100_interrupt_process(priv);
 
-//  irqrestore(flags);
+//irqrestore(flags);
   net_unlock(state);
 
   /* Re-enable Ethernet interrupts */
@@ -1536,8 +1537,7 @@ static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   hash_value = crc32part(mac, 6, ~0L);
 
-  /*
-   * The HASH Table  is a register array of 2 32-bit registers.
+  /* The HASH Table  is a register array of 2 32-bit registers.
    * It is treated like an array of 64 bits.  We want to set
    * bit BitArray[hash_value]. So we figure out what register
    * the bit is in, read it, OR in the new bit, then write
@@ -1728,12 +1728,12 @@ int ftmac100_initialize(int intf)
   priv->ft_dev.d_addmac  = ftmac100_addmac;   /* Add multicast MAC address */
   priv->ft_dev.d_rmmac   = ftmac100_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->ft_dev.d_private = (void*)g_ftmac100; /* Used to recover private state from dev */
+  priv->ft_dev.d_private = (FAR void *)g_ftmac100; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->ft_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->ft_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->ft_txpoll       = wd_create();        /* Create periodic poll timer */
+  priv->ft_txtimeout    = wd_create();        /* Create TX timeout timer */
 
   priv->iobase          = CONFIG_FTMAC100_BASE;
 

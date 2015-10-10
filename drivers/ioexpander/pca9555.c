@@ -215,7 +215,7 @@ static int pca9555_getbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
 static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                              int direction)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_setbit(pca->i2c, PCA9555_REG_CONFIG, pin,
                         (direction == IOEXPANDER_DIRECTION_IN));
 }
@@ -231,7 +231,7 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           int opt, void *val)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   int ival = (int)val;
 
   if (opt == IOEXPANDER_OPTION_INVERT)
@@ -253,7 +253,7 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_write(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                          bool value)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_setbit(pca->i2c, PCA9555_REG_OUTPUT, pin, value);
 }
 
@@ -268,7 +268,7 @@ static int pca9555_write(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                            FAR bool *value)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_getbit(pca->i2c, PCA9555_REG_INPUT, pin, value);
 }
 
@@ -283,7 +283,7 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                            FAR bool *value)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_getbit(pca->i2c, PCA9555_REG_OUTPUT, pin, value);
 }
 
@@ -348,7 +348,7 @@ static int pca9555_multiwrite(FAR struct ioexpander_dev_s *dev,
                               FAR uint8_t *pins, FAR bool *values,
                               int count)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   uint8_t addr = PCA9555_REG_OUTPUT;
   uint8_t buf[3];
   int ret;
@@ -410,7 +410,7 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
                                 FAR uint8_t *pins, FAR bool *values,
                                 int count)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_getmultibits(pca->i2c, PCA9555_REG_INPUT,
                               pins, values, count);
 }
@@ -427,7 +427,7 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
                                 FAR uint8_t *pins, FAR bool *values,
                                 int count)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_getmultibits(pca->i2c, PCA9555_REG_OUTPUT,
                               pins, values, count);
 }
@@ -447,7 +447,7 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 static int pca9555_attach(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           ioexpander_handler_t handler)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)dev;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return 0;
 }
 

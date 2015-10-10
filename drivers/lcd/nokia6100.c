@@ -435,10 +435,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = nokia_putrun,           /* Put a run into LCD memory */
-  .getrun = nokia_getrun,           /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer,  /* Run scratch buffer */
-  .bpp    = NOKIA_BPP,              /* Bits-per-pixel */
+  .putrun = nokia_putrun,                /* Put a run into LCD memory */
+  .getrun = nokia_getrun,                /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer,  /* Run scratch buffer */
+  .bpp    = NOKIA_BPP,                   /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -477,21 +477,21 @@ static struct nokia_dev_s g_lcddev =
 #if 1 // CONFIG_NOKIA6100_BPP == 12
 static const uint8_t g_disctl[] =
 {
-  S1D15G10_DISCTL,                  /* Display control */
-  DISCTL_CLDIV_2|DISCTL_PERIOD_8,   /* P1: Divide clock by 2; switching period = 8 */
-//DISCTL_CLDIV_NONE|DISCTL_PERIOD_8, /* P1: No clock division; switching period = 8 */
-  32,                               /* P2: nlines/4 - 1 = 132/4 - 1 = 32 */
-  0,                                /* P3: No inversely highlighted lines */
-  0                                 /* P4: No disperion */
+  S1D15G10_DISCTL,                     /* Display control */
+  DISCTL_CLDIV_2 | DISCTL_PERIOD_8,    /* P1: Divide clock by 2; switching period = 8 */
+//DISCTL_CLDIV_NONE | DISCTL_PERIOD_8, /* P1: No clock division; switching period = 8 */
+  32,                                  /* P2: nlines/4 - 1 = 132/4 - 1 = 32 */
+  0,                                   /* P3: No inversely highlighted lines */
+  0                                    /* P4: No disperion */
 };
 #else /* CONFIG_NOKIA6100_BPP == 8 */
 static const uint8_t g_disctl[] =
 {
-  S1D15G10_DISCTL,                  /* Display control */
-  DISCTL_CLDIV_2|DISCTL_PERIOD_FLD, /* P1: Divide clock by 2; switching period = field */
-  32,                               /* P2: nlines/4 - 1 = 132/4 - 1 = 32 */
-  0,                                /* P3: No inversely highlighted lines */
-  0                                 /* P4: No disperion */
+  S1D15G10_DISCTL,                     /* Display control */
+  DISCTL_CLDIV_2 | DISCTL_PERIOD_FLD,  /* P1: Divide clock by 2; switching period = field */
+  32,                                  /* P2: nlines/4 - 1 = 132/4 - 1 = 32 */
+  0,                                   /* P3: No inversely highlighted lines */
+  0                                    /* P4: No disperion */
 };
 #endif
 
@@ -501,8 +501,8 @@ static const uint8_t g_disctl[] =
 
 static const uint8_t g_comscn[] =
 {
-  S1D15G10_COMSCN,                  /* Common scan direction */
-  1                                 /* 0x01 = Scan 1->68, 132<-69 */
+  S1D15G10_COMSCN,                     /* Common scan direction */
+  1                                    /* 0x01 = Scan 1->68, 132<-69 */
 };
 
 /* Power control:
@@ -513,7 +513,7 @@ static const uint8_t g_comscn[] =
 static const uint8_t g_pwrctr[] =
 {
   S1D15G10_PWRCTR,                  /* Power control */
-  PWCTR_REFVOLTAGE|PWCTR_REGULATOR|PWCTR_BOOSTER2|PWCTR_BOOSTER1
+  PWCTR_REFVOLTAGE | PWCTR_REGULATOR | PWCTR_BOOSTER2 | PWCTR_BOOSTER1
 };
 
 /* Data control:
@@ -528,13 +528,13 @@ static const uint8_t g_datctl[] =
   S1D15G10_DATCTL,                  /* Data control */
   0
 #if CONFIG_NOKIA6100_MY != 0        /* Display row direction */
-  |DATCTL_PGADDR_INV                /* Page address inverted */
+  | DATCTL_PGADDR_INV               /* Page address inverted */
 #endif
 #if CONFIG_NOKIA6100_MX != 0        /* Display column direction */
-  |DATCTL_COLADDR_REV               /* Column address reversed */
+  | DATCTL_COLADDR_REV              /* Column address reversed */
 #endif
 #if CONFIG_NOKIA6100_V != 0         /* Display address direction */
-  |DATCTL_ADDR_PGDIR                /* Address scan in page direction */
+  | DATCTL_ADDR_PGDIR               /* Address scan in page direction */
 #endif
   ,
 #if CONFIG_NOKIA6100_RGBORD != 0
@@ -617,22 +617,22 @@ static const uint8_t g_colmod[] =
 
 static const uint8_t g_madctl[] =
 {
-  PCF8833_MADCTL,                   /* Memory data access control*/
+  PCF8833_MADCTL,                   /* Memory data access control */
   0
 #ifdef CONFIG_NOKIA6100_RGBORD != 0
-  |MADCTL_RGB                      /* RGB->BGR */
+  | MADCTL_RGB                      /* RGB->BGR */
 #endif
-#ifdef CONFIG_NOKIA6100_MY != 0    /* Display row direction */
-  |MADCTL_MY                       /* Mirror Y */
+#ifdef CONFIG_NOKIA6100_MY != 0     /* Display row direction */
+  | MADCTL_MY                       /* Mirror Y */
 #endif
-#ifdef CONFIG_NOKIA6100_MX != 0    /* Display column direction */
-  |MADCTL_MX                       /* Mirror X */
+#ifdef CONFIG_NOKIA6100_MX != 0     /* Display column direction */
+  | MADCTL_MX                       /* Mirror X */
 #endif
-#ifdef CONFIG_NOKIA6100_V != 0     /* Display address direction */
-  |MADCTL_V                        /* ertical RAM write; in Y direction */
+#ifdef CONFIG_NOKIA6100_V != 0      /* Display address direction */
+  | MADCTL_V                        /* ertical RAM write; in Y direction */
 #endif
-#ifdef CONFIG_NOKIA6100_ML != 0    /* Display scan direction */
-  |MADCTL_LAO                      /* Line address order bottom to top */
+#ifdef CONFIG_NOKIA6100_ML != 0     /* Display scan direction */
+  | MADCTL_LAO                      /* Line address order bottom to top */
 #endif
 };
 
@@ -931,7 +931,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 #if NOKIA_YBIAS > 0
   row += NOKIA_YBIAS;
 #endif
-  DEBUGASSERT(buffer && col >=0 && (col + npixels) <= NOKIA_XRES && row >= 0 && row < NOKIA_YRES);
+  DEBUGASSERT(buffer && col >= 0 && (col + npixels) <= NOKIA_XRES && row >= 0 && row < NOKIA_YRES);
 
   /* Set up to write the run. */
 

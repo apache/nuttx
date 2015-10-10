@@ -315,17 +315,17 @@ static const struct fb_videoinfo_s g_videoinfo =
   .fmt     = ST7567_COLORFMT,    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
   .xres    = ST7567_XRES,        /* Horizontal resolution in pixel columns */
   .yres    = ST7567_YRES,        /* Vertical resolution in pixel rows */
-  .nplanes = 1,              /* Number of color planes supported */
+  .nplanes = 1,                  /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = st7567_putrun,             /* Put a run into LCD memory */
-  .getrun = st7567_getrun,             /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = ST7567_BPP,                /* Bits-per-pixel */
+  .putrun = st7567_putrun,              /* Put a run into LCD memory */
+  .getrun = st7567_getrun,              /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = ST7567_BPP,                 /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */

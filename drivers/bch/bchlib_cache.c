@@ -91,13 +91,16 @@ static void bch_xor(uint32_t *R, uint32_t *A, uint32_t *B)
 static int bch_cypher(FAR struct bchlib_s *bch, int encrypt)
 {
   int blocks = bch->sectsize / 16;
-  uint32_t *buffer = (uint32_t*)bch->buffer;
+  FAR uint32_t *buffer = (FAR uint32_t *)bch->buffer;
   int i;
 
   for (i = 0; i < blocks; i++, buffer += 16 / sizeof(uint32_t) )
     {
       uint32_t T[4];
-      uint32_t X[4] = {bch->sector, 0, 0, i};
+      uint32_t X[4] =
+      {
+        bch->sector, 0, 0, i
+      };
 
       aes_cypher(X, X, 16, NULL, bch->key, CONFIG_BCH_ENCRYPTION_KEY_SIZE,
                  AES_MODE_ECB, CYPHER_ENCRYPT);

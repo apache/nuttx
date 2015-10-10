@@ -219,9 +219,9 @@ static uint16_t cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
 #endif
     }
 
-    /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
-     * I/O ports that in the host system's I/O space.
-     */
+  /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
+   * I/O ports that in the host system's I/O space.
+   */
 
   else
 #endif
@@ -253,9 +253,9 @@ static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16_t v
 #endif
     }
 
-    /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
-     * I/O ports that in the host system's I/O space.
-     */
+  /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
+   * I/O ports that in the host system's I/O space.
+   */
 
   else
 #endif
@@ -397,9 +397,9 @@ static int cs89x0_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
+static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 {
-  uint16_t *dest;
+  FAR uint16_t *dest;
   uint16_t rxlength;
   int nbytes;
 
@@ -422,7 +422,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
       if (isq & RX_CRC_ERROR) != 0)
         {
-          if (!(isq & (RX_EXTRA_DATA|RX_RUNT)))
+          if (!(isq & (RX_EXTRA_DATA | RX_RUNT)))
             {
               cd89x0->cs_stats.rx_crcerrors++;
             }
@@ -451,7 +451,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
    * amount of data in cs89x0->cs_dev.d_len
    */
 
-  dest = (uint16_t*)cs89x0->cs_dev.d_buf;
+  dest = (FAR uint16_t *)cs89x0->cs_dev.d_buf;
   for (nbytes = 0; nbytes < rxlength; nbytes += sizeof(uint16_t))
     {
       *dest++ = cs89x0_getreg(PPR_RXFRAMELOCATION);
@@ -549,16 +549,16 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_ARP
   if (BUF->type == htons(ETHTYPE_ARP))
     {
-       arp_arpin(&cs89x0->cs_dev);
+      arp_arpin(&cs89x0->cs_dev);
 
-       /* If the above function invocation resulted in data that should be
-        * sent out on the network, the field  d_len will set to a value > 0.
-        */
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
 
-       if (cs89x0->cs_dev.d_len > 0)
-         {
-           cs89x0_transmit(cs89x0);
-         }
+      if (cs89x0->cs_dev.d_len > 0)
+        {
+          cs89x0_transmit(cs89x0);
+        }
     }
   else
 #endif
@@ -720,13 +720,13 @@ static int cs89x0_interrupt(int irq, FAR void *context)
 
         case ISQ_RXMISSEVENT:
 #ifdef CONFIG_C89x0_STATISTICS
-            cd89x0->cs_stats.rx_missederrors += (isq >>6);
+            cd89x0->cs_stats.rx_missederrors += (isq >> 6);
 #endif
             break;
 
         case ISQ_TXCOLEVENT:
 #ifdef CONFIG_C89x0_STATISTICS
-            cd89x0->cs_stats.collisions += (isq >>6);
+            cd89x0->cs_stats.collisions += (isq >> 6);
 #endif
             break;
         }
@@ -823,7 +823,7 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize the Ethernet interface */
 #warning "Missing logic"
@@ -1033,20 +1033,20 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 
   /* Initialize the driver structure */
 
-  g_cs89x[devno]           = cs89x0;          /* Used to map IRQ back to instance */
-  cs89x0->cs_dev.d_ifup    = cs89x0_ifup;     /* I/F down callback */
-  cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;   /* I/F up (new IP address) callback */
-  cs89x0->cs_dev.d_txavail = cs89x0_txavail;  /* New TX data callback */
+  g_cs89x[devno]           = cs89x0;             /* Used to map IRQ back to instance */
+  cs89x0->cs_dev.d_ifup    = cs89x0_ifup;        /* I/F down callback */
+  cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;      /* I/F up (new IP address) callback */
+  cs89x0->cs_dev.d_txavail = cs89x0_txavail;     /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  cs89x0->cs_dev.d_addmac  = cs89x0_addmac;   /* Add multicast MAC address */
-  cs89x0->cs_dev.d_rmmac   = cs89x0_rmmac;    /* Remove multicast MAC address */
+  cs89x0->cs_dev.d_addmac  = cs89x0_addmac;      /* Add multicast MAC address */
+  cs89x0->cs_dev.d_rmmac   = cs89x0_rmmac;       /* Remove multicast MAC address */
 #endif
-  cs89x0->cs_dev.d_private = (void*)cs89x0;   /* Used to recover private state from dev */
+  cs89x0->cs_dev.d_private = (FAR void *)cs89x0; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  cs89x0->cs_txpoll       = wd_create();   /* Create periodic poll timer */
-  cs89x0->cs_txtimeout    = wd_create();   /* Create TX timeout timer */
+  cs89x0->cs_txpoll       = wd_create();         /* Create periodic poll timer */
+  cs89x0->cs_txtimeout    = wd_create();         /* Create TX timeout timer */
 
   /* Read the MAC address from the hardware into cs89x0->cs_dev.d_mac.ether_addr_octet */
 

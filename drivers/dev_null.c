@@ -50,11 +50,13 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *, FAR char *, size_t);
-static ssize_t devnull_write(FAR struct file *, FAR const char *, size_t);
+static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
 #ifndef CONFIG_DISABLE_POLL
 static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                            bool setup);
+                 bool setup);
 #endif
 
 /****************************************************************************
@@ -106,7 +108,7 @@ static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
           sem_post(fds->sem);

@@ -101,7 +101,7 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
 
   /* Loop until we find a valid device address */
 
-  for (;;)
+  for (; ; )
     {
       /* Try the next device address */
 

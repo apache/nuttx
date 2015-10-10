@@ -101,7 +101,7 @@ static int      null_start(FAR struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      null_stop(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 #else
 static int      null_stop(FAR struct audio_lowerhalf_s *dev);
 #endif
@@ -109,9 +109,9 @@ static int      null_stop(FAR struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      null_pause(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 static int      null_resume(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 #else
 static int      null_pause(FAR struct audio_lowerhalf_s *dev);
 static int      null_resume(FAR struct audio_lowerhalf_s *dev);
@@ -432,7 +432,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
   while (!priv->terminate)
 #else
-  for (;;)
+  for (; ; )
 #endif
     {
       /* Wait for messages from our message queue */
@@ -573,7 +573,7 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int null_stop(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int null_stop(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int null_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -611,7 +611,7 @@ static int null_stop(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int null_pause(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int null_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int null_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -630,7 +630,7 @@ static int null_pause(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int null_resume(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int null_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int null_resume(FAR struct audio_lowerhalf_s *dev)
 #endif

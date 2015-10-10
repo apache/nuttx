@@ -328,39 +328,39 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
 
   /* JEDEC manufacturer ID */
 
-  onfi->manufacturer = *(uint8_t *)(parmtab + 64);
+  onfi->manufacturer = *(FAR uint8_t *)(parmtab + 64);
 
   /* Bus width */
 
-  onfi->buswidth = (*(uint8_t *)(parmtab + 6)) & 0x01;
+  onfi->buswidth = (*(FAR uint8_t *)(parmtab + 6)) & 0x01;
 
   /* Get number of data bytes per page (bytes 80-83 in the param table) */
 
-  onfi->pagesize =  *(uint32_t *)(void*)(parmtab + 80);
+  onfi->pagesize =  *(FAR uint32_t *)(FAR void *)(parmtab + 80);
 
   /* Get number of spare bytes per page (bytes 84-85 in the param table) */
 
-  onfi->sparesize =  *(uint16_t *)(void*)(parmtab + 84);
+  onfi->sparesize =  *(FAR uint16_t *)(FAR voidFAR *)(parmtab + 84);
 
   /* Number of pages per block. */
 
-  onfi->pagesperblock = *(uint32_t *)(void*)(parmtab + 92);
+  onfi->pagesperblock = *(FAR uint32_t *)(FAR void *)(parmtab + 92);
 
   /* Number of blocks per logical unit (LUN). */
 
-  onfi->blocksperlun = *(uint32_t *)(void*)(parmtab + 96);
+  onfi->blocksperlun = *(FAR uint32_t *)(FAR void *)(parmtab + 96);
 
   /* Number of logical units. */
 
-  onfi->luns = *(uint8_t *)(parmtab + 100);
+  onfi->luns = *(FAR uint8_t *)(parmtab + 100);
 
   /* Number of bits of ECC correction */
 
-  onfi->eccsize = *(uint8_t *)(parmtab + 112);
+  onfi->eccsize = *(FAR uint8_t *)(parmtab + 112);
 
   /* Device model */
 
-  onfi->model= *(uint8_t *)(parmtab + 49);
+  onfi->model = *(FAR uint8_t *)(parmtab + 49);
 
   fvdbg("Returning:\n");
   fvdbg("  manufacturer:  0x%02x\n", onfi->manufacturer);
@@ -483,7 +483,7 @@ bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr,
           ids[2] = READ_NAND(dataaddr);
           ids[3] = READ_NAND(dataaddr);
 
-          for (i = 0; i< NAND_NMODELS ; i++)
+          for (i = 0; i < NAND_NMODELS ; i++)
             {
               if (g_nandmodels[i].devid == ids[1])
                 {

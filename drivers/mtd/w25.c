@@ -657,7 +657,7 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
   /* Wait for any preceding write or erase operation to complete. */
 
   status = w25_waitwritecomplete(priv);
-  DEBUGASSERT((status & (W25_SR_WEL|W25_SR_BP_MASK)) == 0);
+  DEBUGASSERT((status & (W25_SR_WEL | W25_SR_BP_MASK)) == 0);
 
   /* Make sure that writing is disabled */
 
@@ -715,7 +715,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
       /* Wait for any preceding write or erase operation to complete. */
 
       status = w25_waitwritecomplete(priv);
-      DEBUGASSERT((status & (W25_SR_WEL|W25_SR_BP_MASK)) == 0);
+      DEBUGASSERT((status & (W25_SR_WEL | W25_SR_BP_MASK)) == 0);
 
       /* Enable write access to the FLASH */
 

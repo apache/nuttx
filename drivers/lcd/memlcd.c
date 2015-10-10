@@ -333,15 +333,13 @@ static inline void memlcd_select(FAR struct spi_dev_s *spi)
 #else
 static void memlcd_select(FAR struct spi_dev_s *spi)
 {
-  /*
-   * Select memlcd (locking the SPI bus in case there are multiple
+  /* Select memlcd (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
-  /*
-   * Now make sure that the SPI bus is configured for the memlcd (it
+  /* Now make sure that the SPI bus is configured for the memlcd (it
    * might have gotten configured for a different device while unlocked)
    */
   SPI_SETMODE(spi, MEMLCD_SPI_MODE);
@@ -435,9 +433,8 @@ static int memlcd_extcominisr(int irq, FAR void *context)
   struct memlcd_dev_s *mlcd = &g_memlcddev;
 #ifdef CONFIG_MEMLCD_EXTCOMIN_MODE_HW
 #  error "CONFIG_MEMLCD_EXTCOMIN_MODE_HW unsupported yet!"
-  /*
-   * start a worker thread, do it in bottom half?
-   */
+  /* Start a worker thread, do it in bottom half? */
+
 #else
   pol = !pol;
   mlcd->priv->setpolarity(pol);

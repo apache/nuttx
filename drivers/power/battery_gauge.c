@@ -72,7 +72,8 @@
 
 static int     bat_gauge_open(FAR struct file *filep);
 static int     bat_gauge_close(FAR struct file *filep);
-static ssize_t bat_gauge_read(FAR struct file *, FAR char *, size_t nbytes);
+static ssize_t bat_gauge_read(FAR struct file *filep, FAR char *buflen,
+                 size_t buflen);
 static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     bat_gauge_ioctl(FAR struct file *filep, int cmd,

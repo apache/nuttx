@@ -511,7 +511,7 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
     }
 
   irqrestore(flags);
-  uvdbg("Allocated: %p\n", entry);;
+  uvdbg("Allocated: %p\n", entry);
   return (FAR struct usbhost_cdcacm_s *)entry;
 }
 #else
@@ -525,7 +525,7 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_cdcacm_s *)kmm_malloc(sizeof(struct usbhost_cdcacm_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 #endif
@@ -569,7 +569,7 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
    * from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 #endif
@@ -850,8 +850,8 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
           delay = USBHOST_CDCACM_NTDELAY;
         }
 
-     /* Make sure that the  work structure available.  There is a remote
-      * chance that this may collide with a device disconnection event.
+      /* Make sure that the  work structure available.  There is a remote
+       * chance that this may collide with a device disconnection event.
        */
 
       if (work_available(&priv->ntwork))
@@ -1333,7 +1333,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -1723,11 +1723,11 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
   /* Allocate buffer for sending line coding data. */
 
   ret = DRVR_IOALLOC(hport->drvr, &priv->linecode,
-                     sizeof( struct cdc_linecoding_s));
+                     sizeof(struct cdc_linecoding_s));
   if (ret < 0)
     {
       udbg("ERROR: DRVR_IOALLOC of line coding failed: %d (%d bytes)\n",
-           ret, sizeof( struct cdc_linecoding_s));
+           ret, sizeof(struct cdc_linecoding_s));
       goto errout;
     }
 
@@ -2386,7 +2386,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
         case TCGETS:
           {
-            FAR struct termios *termiosp = (FAR struct termios*)arg;
+            FAR struct termios *termiosp = (FAR struct termios *)arg;
 
             if (!termiosp)
               {
@@ -2432,7 +2432,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         case TCSETS:
           {
-            FAR struct termios *termiosp = (FAR struct termios*)arg;
+            FAR struct termios *termiosp = (FAR struct termios *)arg;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
             bool iflow;
 #endif

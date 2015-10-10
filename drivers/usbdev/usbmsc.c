@@ -255,7 +255,7 @@ static void usbmsc_freereq(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
                        FAR struct usbdev_s *dev)
 {
-  FAR struct usbmsc_dev_s *priv = ((FAR struct usbmsc_driver_s*)driver)->dev;
+  FAR struct usbmsc_dev_s *priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
   FAR struct usbmsc_req_s *reqcontainer;
   irqstate_t flags;
   int ret = OK;
@@ -361,7 +361,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->callback = usbmsc_wrcomplete;
 
       flags = irqsave();
-      sq_addlast((sq_entry_t*)reqcontainer, &priv->wrreqlist);
+      sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->wrreqlist);
       irqrestore(flags);
     }
 
@@ -413,7 +413,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct usbmsc_driver_s*)driver)->dev;
+  priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -699,7 +699,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 
         case USB_REQ_GETINTERFACE:
           {
-            if (ctrl->type == (USB_DIR_IN|USB_REQ_RECIPIENT_INTERFACE) &&
+            if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                 priv->config == USBMSC_CONFIGIDNONE)
               {
                 if (index != USBMSC_INTERFACEID)
@@ -1083,13 +1083,13 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Extract references to private data */
 
-  priv    = (FAR struct usbmsc_dev_s*)ep->priv;
+  priv    = (FAR struct usbmsc_dev_s *)ep->priv;
   privreq = (FAR struct usbmsc_req_s *)req->priv;
 
   /* Return the write request to the free list */
 
   flags = irqsave();
-  sq_addlast((sq_entry_t*)privreq, &priv->wrreqlist);
+  sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
   irqrestore(flags);
 
   /* Process the received data unless this is some unusual condition */
@@ -1144,7 +1144,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Extract references to private data */
 
-  priv    = (FAR struct usbmsc_dev_s*)ep->priv;
+  priv    = (FAR struct usbmsc_dev_s *)ep->priv;
   privreq = (FAR struct usbmsc_req_s *)req->priv;
 
   /* Process the received data unless this is some unusual condition */
@@ -1158,7 +1158,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
         /* Add the filled read request from the rdreqlist */
 
         flags = irqsave();
-        sq_addlast((sq_entry_t*)privreq, &priv->rdreqlist);
+        sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
         irqrestore(flags);
 
         /* Signal the worker thread that there is received data to be processed */
@@ -1326,7 +1326,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct usbmsc_alloc_s*)kmm_malloc(sizeof(struct usbmsc_alloc_s));
+  alloc = (FAR struct usbmsc_alloc_s *)kmm_malloc(sizeof(struct usbmsc_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -1347,7 +1347,9 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Allocate the LUN table */
 
-  priv->luntab = (struct usbmsc_lun_s*)kmm_malloc(priv->nluns*sizeof(struct usbmsc_lun_s));
+  priv->luntab = (FAR struct usbmsc_lun_s *)
+    kmm_malloc(priv->nluns*sizeof(struct usbmsc_lun_s));
+
   if (!priv->luntab)
     {
       ret = -ENOMEM;
@@ -1369,7 +1371,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Return the handle and success */
 
-  *handle = (FAR void*)alloc;
+  *handle = (FAR void *)alloc;
   return OK;
 
 errout:
@@ -1489,7 +1491,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   if (!priv->iobuffer)
     {
-      priv->iobuffer = (uint8_t*)kmm_malloc(geo.geo_sectorsize);
+      priv->iobuffer = (FAR uint8_t *)kmm_malloc(geo.geo_sectorsize);
       if (!priv->iobuffer)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCIOBUFFER), geo.geo_sectorsize);
@@ -1501,14 +1503,14 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   else if (priv->iosize < geo.geo_sectorsize)
     {
       void *tmp;
-      tmp = (uint8_t*)kmm_realloc(priv->iobuffer, geo.geo_sectorsize);
+      tmp = (FAR uint8_t *)kmm_realloc(priv->iobuffer, geo.geo_sectorsize);
       if (!tmp)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_REALLOCIOBUFFER), geo.geo_sectorsize);
           return -ENOMEM;
         }
 
-      priv->iobuffer = (uint8_t*)tmp;
+      priv->iobuffer = (FAR uint8_t *)tmp;
       priv->iosize   = geo.geo_sectorsize;
     }
 
@@ -1701,7 +1703,6 @@ errout_with_lock:
  *
  * Returned Value:
  *   0 on success; a negated errno on failure
-
  *
  ****************************************************************************/
 

@@ -368,7 +368,7 @@ static int cs2100_refclk(FAR const struct cs2100_config_s *config)
 
   /* Set the minimum loop bandwidth */
 
-  DEBUGASSERT(config->loopbw >=1 && config->loopbw <= 128);
+  DEBUGASSERT(config->loopbw >= 1 && config->loopbw <= 128);
 
   if (config->loopbw < 2)
     {

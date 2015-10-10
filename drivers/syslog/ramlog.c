@@ -108,8 +108,10 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
-static ssize_t ramlog_read(FAR struct file *, FAR char *, size_t);
-static ssize_t ramlog_write(FAR struct file *, FAR const char *, size_t);
+static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen);
+static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
+                            size_t buflen);
 #ifndef CONFIG_DISABLE_POLL
 static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
@@ -468,7 +470,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
 
       /* Then output the character */
 
-      ret = ramlog_addchar(priv,ch);
+      ret = ramlog_addchar(priv, ch);
       if (ret < 0)
         {
           /* The buffer is full and nothing was saved. Break out of the

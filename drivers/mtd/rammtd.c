@@ -395,7 +395,7 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             {
               /* Return (void*) base address of device memory */
 
-              *ppv = (FAR void*)priv->start;
+              *ppv = (FAR void *)priv->start;
               ret  = OK;
             }
         }

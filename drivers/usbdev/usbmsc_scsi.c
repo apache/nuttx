@@ -482,7 +482,7 @@ static inline int usbmsc_cmdrequestsense(FAR struct usbmsc_dev_s *priv,
 
       memset(response, 0, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
 
-      response->code  = SCSIRESP_SENSEDATA_RESPVALID|SCSIRESP_SENSEDATA_CURRENTFIXED;
+      response->code  = SCSIRESP_SENSEDATA_RESPVALID | SCSIRESP_SENSEDATA_CURRENTFIXED;
       response->flags = (uint8_t)(sd >> 16);
       usbmsc_putbe32(response->info, sdinfo);
       response->len   = SCSIRESP_FIXEDSENSEDATA_SIZEOF - 7;
@@ -506,7 +506,7 @@ static inline int usbmsc_cmdrequestsense(FAR struct usbmsc_dev_s *priv,
 
 static inline int usbmsc_cmdread6(FAR struct usbmsc_dev_s *priv)
 {
-  FAR struct scsicmd_read6_s *read6 = (FAR struct scsicmd_read6_s*)priv->cdb;
+  FAR struct scsicmd_read6_s *read6 = (FAR struct scsicmd_read6_s *)priv->cdb;
   FAR struct usbmsc_lun_s *lun = priv->lun;
   int ret;
 
@@ -647,7 +647,7 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
     {
       if (!priv->lun)
         {
-          response->qualtype = SCSIRESP_INQUIRYPQ_NOTCAPABLE|SCSIRESP_INQUIRYPD_UNKNOWN;
+          response->qualtype = SCSIRESP_INQUIRYPQ_NOTCAPABLE | SCSIRESP_INQUIRYPD_UNKNOWN;
          }
       else if ((inquiry->flags != 0) || (inquiry->pagecode != 0))
         {
@@ -994,7 +994,7 @@ static int inline usbmsc_cmdreadcapacity10(FAR struct usbmsc_dev_s *priv,
 
 static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
 {
-  struct scsicmd_read10_s *read10 = (struct scsicmd_read10_s*)priv->cdb;
+  struct scsicmd_read10_s *read10 = (struct scsicmd_read10_s *)priv->cdb;
   FAR struct usbmsc_lun_s *lun = priv->lun;
   int ret;
 
@@ -1009,7 +1009,7 @@ static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
 
       /* Verify that we can support this read command */
 
-      if ((read10->flags & ~(SCSICMD_READ10FLAGS_DPO|SCSICMD_READ10FLAGS_FUA)) != 0)
+      if ((read10->flags & ~(SCSICMD_READ10FLAGS_DPO | SCSICMD_READ10FLAGS_FUA)) != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_READ10FLAGS), 0);
           lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -1071,7 +1071,7 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
 
       /* Verify that we can support this write command */
 
-      if ((write10->flags & ~(SCSICMD_WRITE10FLAGS_DPO|SCSICMD_WRITE10FLAGS_FUA)) != 0)
+      if ((write10->flags & ~(SCSICMD_WRITE10FLAGS_DPO | SCSICMD_WRITE10FLAGS_FUA)) != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRITE10FLAGS), 0);
           lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -1315,7 +1315,7 @@ static int inline usbmsc_cmdmodesense10(FAR struct usbmsc_dev_s *priv,
 
 static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
 {
-  struct scsicmd_read12_s *read12 = (struct scsicmd_read12_s*)priv->cdb;
+  struct scsicmd_read12_s *read12 = (struct scsicmd_read12_s *)priv->cdb;
   FAR struct usbmsc_lun_s *lun = priv->lun;
   int ret;
 
@@ -1330,7 +1330,7 @@ static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
 
       /* Verify that we can support this read command */
 
-      if ((read12->flags & ~(SCSICMD_READ12FLAGS_DPO|SCSICMD_READ12FLAGS_FUA)) != 0)
+      if ((read12->flags & ~(SCSICMD_READ12FLAGS_DPO | SCSICMD_READ12FLAGS_FUA)) != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_READ12FLAGS), 0);
           lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -1392,7 +1392,7 @@ static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
 
       /* Verify that we can support this write command */
 
-      if ((write12->flags & ~(SCSICMD_WRITE12FLAGS_DPO|SCSICMD_WRITE12FLAGS_FUA)) != 0)
+      if ((write12->flags & ~(SCSICMD_WRITE12FLAGS_DPO | SCSICMD_WRITE12FLAGS_FUA)) != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRITE12FLAGS), 0);
           lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -1652,7 +1652,7 @@ static int usbmsc_idlestate(FAR struct usbmsc_dev_s *priv)
 
   /* Handle the CBW */
 
-  usbmsc_dumpdata("SCSCI CBW", (uint8_t*)cbw, USBMSC_CBW_SIZEOF - USBMSC_MAXCDBLEN);
+  usbmsc_dumpdata("SCSCI CBW", (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF - USBMSC_MAXCDBLEN);
   usbmsc_dumpdata("      CDB", cbw->cdb, MIN(cbw->cdblen, USBMSC_MAXCDBLEN));
 
   /* Check for properly formatted CBW? */
@@ -2541,7 +2541,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
     }
 
   req = privreq->req;
-  csw = (struct usbmsc_csw_s*)req->buf;
+  csw = (FAR struct usbmsc_csw_s *)req->buf;
 
   /* Extract the sense data from the LUN structure */
 
@@ -2578,7 +2578,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
   usbmsc_putle32(csw->residue, priv->residue);
   csw->status       = status;
 
-  usbmsc_dumpdata("SCSCI CSW", (uint8_t*)csw, USBMSC_CSW_SIZEOF);
+  usbmsc_dumpdata("SCSCI CSW", (FAR uint8_t *)csw, USBMSC_CSW_SIZEOF);
 
   req->len       = USBMSC_CSW_SIZEOF;
   req->callback  = usbmsc_wrcomplete;
@@ -2590,7 +2590,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SNDSTATUSSUBMIT), (uint16_t)-ret);
       flags = irqsave();
-      (void)sq_addlast((sq_entry_t*)privreq, &priv->wrreqlist);
+      (void)sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
       irqrestore(flags);
     }
 
@@ -2701,8 +2701,8 @@ int usbmsc_scsi_main(int argc, char *argv[])
        * drive the state machine.
        */
 
-      if ((eventset & (USBMSC_EVENT_DISCONNECT|USBMSC_EVENT_RESET|USBMSC_EVENT_CFGCHANGE|
-                       USBMSC_EVENT_IFCHANGE|USBMSC_EVENT_ABORTBULKOUT)) != 0)
+      if ((eventset & (USBMSC_EVENT_DISCONNECT | USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE |
+                       USBMSC_EVENT_IFCHANGE | USBMSC_EVENT_ABORTBULKOUT)) != 0)
         {
           /* These events require that the current configuration be reset */
 
@@ -2720,7 +2720,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
 
           /* These events required that we send a deferred EP0 setup response */
 
-          if ((eventset & (USBMSC_EVENT_RESET|USBMSC_EVENT_CFGCHANGE|USBMSC_EVENT_IFCHANGE)) != 0)
+          if ((eventset & (USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE | USBMSC_EVENT_IFCHANGE)) != 0)
             {
               usbmsc_deferredresponse(priv, false);
             }

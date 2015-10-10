@@ -990,14 +990,16 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   st7565_reset(priv, true);
 
   /* it seems too long but written in NHD‐C12864KGZ DISPLAY
-   * INITIALIZATION... */
+   * INITIALIZATION...
+   */
 
   up_mdelay(150);
 
   st7565_reset(priv, false);
 
   /* it seems too long but written in NHD‐C12864KGZ DISPLAY
-   * INITIALIZATION... */
+   * INITIALIZATION...
+   */
 
   up_mdelay(150);
 
@@ -1009,7 +1011,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   st7565_cmddata(priv, true);
 
-  /* reset by command in case of st7565_reset not implemeted */
+  /* Reset by command in case of st7565_reset not implemeted */
 
   (void)st7565_send_one_data(priv, ST7565_EXIT_SOFTRST);
 

@@ -89,8 +89,10 @@ static int lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf);
 
 static int     lm75_open(FAR struct file *filep);
 static int     lm75_close(FAR struct file *filep);
-static ssize_t lm75_read(FAR struct file *, FAR char *, size_t);
-static ssize_t lm75_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
+static ssize_t lm75_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen);
 static int     lm75_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
 
 /****************************************************************************
@@ -338,7 +340,7 @@ static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen
       ret = lm75_readtemp(priv, &temp);
       if (ret < 0)
         {
-          sndbg("lm75_readtemp failed: %d\n",ret);
+          sndbg("lm75_readtemp failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -387,7 +389,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITECONF:
         ret = lm75_writeconf(priv, (uint8_t)arg);
-        sndbg("conf: %02x ret: %d\n", *(uint8_t*)arg, ret);
+        sndbg("conf: %02x ret: %d\n", *(FAR uint8_t *)arg, ret);
         break;
 
       /* Shutdown the LM75, Arg: None */

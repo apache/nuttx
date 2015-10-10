@@ -250,7 +250,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -276,7 +276,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
    * executing from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   kmm_free(usbclass);
 }
 
@@ -438,7 +438,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 

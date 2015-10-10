@@ -251,12 +251,18 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg);
 /* Chip erase sequence */
 
 #define CHIP_ERASE_SIZE 4
-static const uint8_t g_chiperase[CHIP_ERASE_SIZE] = {0xc7, 0x94, 0x80, 0x9a};
+static const uint8_t g_chiperase[CHIP_ERASE_SIZE] =
+{
+  0xc7, 0x94, 0x80, 0x9a
+};
 
 /* Sequence to program the device to binary page sizes{256, 512, 1024} */
 
 #define BINPGSIZE_SIZE 4
-static const uint8_t g_binpgsize[BINPGSIZE_SIZE] = {0x3d, 0x2a, 0x80, 0xa6};
+static const uint8_t g_binpgsize[BINPGSIZE_SIZE] =
+{
+  0x3d, 0x2a, 0x80, 0xa6
+};
 
 /************************************************************************************
  * Private Functions
@@ -270,7 +276,7 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
 {
   /* On SPI buses where there are multiple devices, it will be necessary to lock SPI
    * to have exclusive access to the buses for a sequence of transfers.  The bus
-   & should be locked before the chip is selected.
+   * should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive access to
    * the SPI bus.  We will retain that exclusive access until the bus is unlocked.

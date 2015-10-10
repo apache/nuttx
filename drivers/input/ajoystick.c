@@ -143,7 +143,8 @@ static void    ajoy_sample(FAR struct ajoy_upperhalf_s *priv);
 
 static int     ajoy_open(FAR struct file *filep);
 static int     ajoy_close(FAR struct file *filep);
-static ssize_t ajoy_read(FAR struct file *, FAR char *, size_t);
+static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
 static int     ajoy_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL

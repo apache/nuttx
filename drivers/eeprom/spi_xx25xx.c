@@ -173,10 +173,10 @@
 
 struct ee25xx_geom_s
 {
-  uint8_t bytes    : 4; /*power of two of 128 bytes (0:128 1:256 2:512 etc) */
-  uint8_t pagesize : 4; /*power of two of   8 bytes (0:8 1:16 2:32 3:64 etc)*/
-  uint8_t addrlen  : 4; /*number of bytes in command address field */
-  uint8_t flags    : 4; /*special address management for 25xx040, 1=A8 in inst*/
+  uint8_t bytes    : 4; /* Power of two of 128 bytes (0:128 1:256 2:512 etc) */
+  uint8_t pagesize : 4; /* Power of two of   8 bytes (0:8 1:16 2:32 3:64 etc) */
+  uint8_t addrlen  : 4; /* Number of bytes in command address field */
+  uint8_t flags    : 4; /* Special address management for 25xx040, 1=A8 in inst */
 };
 
 /* Private data attached to the inode */
@@ -219,29 +219,29 @@ static const struct ee25xx_geom_s g_ee25xx_devices[] =
 {
   /* Microchip devices */
 
-  { 0, 1, 1, 0}, /* 25xx010A     128   16     1*/
-  { 1, 1, 1, 0}, /* 25xx020A     256   16     1*/
-  { 2, 1, 1, 1}, /* 25xx040      512   16     1+bit*/
-  { 3, 1, 1, 0}, /* 25xx080     1024   16     1*/
-  { 3, 2, 2, 0}, /* 25xx080B    1024   32     2*/
-  { 4, 1, 2, 0}, /* 25xx160     2048   16     2*/
-  { 4, 2, 2, 0}, /* 25xx160B/D  2048   32     2*/
-  { 5, 2, 2, 0}, /* 25xx320     4096   32     2*/
-  { 6, 2, 2, 0}, /* 25xx640     8192   32     2*/
-  { 7, 3, 2, 0}, /* 25xx128    16384   64     2*/
-  { 8, 3, 2, 0}, /* 25xx256    32768   64     2*/
-  { 9, 4, 2, 0}, /* 25xx512    65536  128     2*/
-  {10, 5, 3, 0}, /* 25xx1024  131072  256     3*/
+  { 0, 1, 1, 0}, /* 25xx010A     128   16     1 */
+  { 1, 1, 1, 0}, /* 25xx020A     256   16     1 */
+  { 2, 1, 1, 1}, /* 25xx040      512   16     1+bit */
+  { 3, 1, 1, 0}, /* 25xx080     1024   16     1 */
+  { 3, 2, 2, 0}, /* 25xx080B    1024   32     2 */
+  { 4, 1, 2, 0}, /* 25xx160     2048   16     2 */
+  { 4, 2, 2, 0}, /* 25xx160B/D  2048   32     2 */
+  { 5, 2, 2, 0}, /* 25xx320     4096   32     2 */
+  { 6, 2, 2, 0}, /* 25xx640     8192   32     2 */
+  { 7, 3, 2, 0}, /* 25xx128    16384   64     2 */
+  { 8, 3, 2, 0}, /* 25xx256    32768   64     2 */
+  { 9, 4, 2, 0}, /* 25xx512    65536  128     2 */
+  {10, 5, 3, 0}, /* 25xx1024  131072  256     3 */
 
   /* Atmel devices */
 
-  { 0, 0, 1, 0}, /* AT25010B     128    8     1*/
-  { 1, 0, 1, 0}, /* AT25020B     256    8     1*/
-  { 2, 0, 1, 1}, /* AT25040B     512    8     1+bit*/
+  { 0, 0, 1, 0}, /* AT25010B     128    8     1 */
+  { 1, 0, 1, 0}, /* AT25020B     256    8     1 */
+  { 2, 0, 1, 1}, /* AT25040B     512    8     1+bit */
 
   /* STM devices */
 
-  {11, 5, 3, 0}, /* M95M02    262144  256     3*/
+  {11, 5, 3, 0}, /* M95M02    262144  256     3 */
 };
 
 /* Driver operations */
@@ -337,7 +337,7 @@ static void ee25xx_sendcmd(FAR struct spi_dev_s *spi, uint8_t cmd,
 
   buf[cmdlen++]   =  addr        & 0xff;
 
-  SPI_SNDBLOCK(spi,buf,cmdlen);
+  SPI_SNDBLOCK(spi, buf, cmdlen);
 }
 
 /****************************************************************************
@@ -488,7 +488,7 @@ static int ee25xx_open(FAR struct file *filep)
 
   /* Increment the reference count */
 
-  if ( (eedev->refs + 1) == 0)
+  if ((eedev->refs + 1) == 0)
     {
       ret = -EMFILE;
     }
@@ -678,7 +678,7 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Clamp len to avoid crossing the end of the memory */
 
-  if ( (len + filep->f_pos) > eedev->size)
+  if ((len + filep->f_pos) > eedev->size)
     {
       len = eedev->size - filep->f_pos;
     }
@@ -807,7 +807,7 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
   eedev->size     = 128 << g_ee25xx_devices[devtype].bytes;
   eedev->pgsize   =   8 << g_ee25xx_devices[devtype].pagesize;
   eedev->addrlen  =        g_ee25xx_devices[devtype].addrlen << 3;
-  if ( (g_ee25xx_devices[devtype].flags & 1))
+  if ((g_ee25xx_devices[devtype].flags & 1))
     {
       eedev->addrlen = 9;
     }

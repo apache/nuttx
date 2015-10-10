@@ -295,7 +295,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
           /* Then invalidate in cached data */
 
-         ret = rwb_invalidate(&priv->rwb,0, priv->rwb.nblocks);
+         ret = rwb_invalidate(&priv->rwb, 0, priv->rwb.nblocks);
          if (ret < 0)
            {
               fdbg("ERROR: rwb_invalidate failed: %d\n", ret);

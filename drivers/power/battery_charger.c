@@ -72,8 +72,8 @@
 
 static int     bat_charger_open(FAR struct file *filep);
 static int     bat_charger_close(FAR struct file *filep);
-static ssize_t bat_charger_read(FAR struct file *, FAR char *,
-                 size_t nbytes);
+static ssize_t bat_charger_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
 static ssize_t bat_charger_write(FAR struct file *filep,
                  FAR const char *buffer, size_t buflen);
 static int     bat_charger_ioctl(FAR struct file *filep, int cmd,

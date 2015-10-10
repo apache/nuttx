@@ -92,8 +92,8 @@
  */
 
 #define MXT_GETUINT16(p) \
-  (((uint16_t)(((FAR uint8_t*)(p))[1]) << 8) | \
-    (uint16_t)(((FAR uint8_t*)(p))[0]))
+  (((uint16_t)(((FAR uint8_t *)(p))[1]) << 8) | \
+    (uint16_t)(((FAR uint8_t *)(p))[0]))
 
 /****************************************************************************
  * Private Types
@@ -1368,7 +1368,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
       memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(ncontacts));
       report->npoints = ncontacts;
 
-      for (i = 0, j= 0; i < priv->nslots && j < ncontacts; i++)
+      for (i = 0, j = 0; i < priv->nslots && j < ncontacts; i++)
         {
           FAR struct mxt_sample_s *sample = &priv->sample[i];
 

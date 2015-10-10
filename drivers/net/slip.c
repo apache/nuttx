@@ -474,7 +474,7 @@ static void slip_txtask(int argc, FAR char *argv[])
   /* Loop forever */
 
   msec_start = clock_systimer() * MSEC_PER_TICK;
-  for (;;)
+  for (;  ; )
     {
       /* Wait for the timeout to expire (or until we are signaled by by  */
 
@@ -579,7 +579,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
    */
 
   nvdbg("Receiving packet\n");
-  for (;;)
+  for (; ; )
     {
       /* Get the next character in the stream. */
 
@@ -696,7 +696,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
       /* Wait for the next character to be available on the input stream. */
 
@@ -802,7 +802,7 @@ static int slip_ifup(FAR struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Mark the interface up */
 

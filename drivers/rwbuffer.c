@@ -561,7 +561,7 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
       rhbend = rwb->rhblockstart + rwb->rhnblocks;
       invend = startblock + blockcount;
 
-      if (rhbend <= startblock || rwb->rhblockstart >= invend )
+      if (rhbend <= startblock || rwb->rhblockstart >= invend)
         {
           ret = OK;
         }
@@ -640,7 +640,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
   /* Setup so that rwb_uninitialize can handle a failure */
 
 #ifdef CONFIG_DRVR_WRITEBUFFER
-  DEBUGASSERT(rwb->wrflush!= NULL);
+  DEBUGASSERT(rwb->wrflush != NULL);
   rwb->wrbuffer = NULL;
 #endif
 #ifdef CONFIG_DRVR_READAHEAD
@@ -785,7 +785,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
       /* Loop until we have read all of the requested blocks */
 
       rwb_semtake(&rwb->rhsem);
-      for (remaining = nblocks; remaining > 0;)
+      for (remaining = nblocks; remaining > 0; )
         {
           /* Is there anything in the read-ahead buffer? */
 

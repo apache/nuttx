@@ -376,7 +376,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
     }
 
   irqrestore(flags);
-  ullvdbg("Allocated: %p\n", entry);;
+  ullvdbg("Allocated: %p\n", entry);
   return (FAR struct usbhost_state_s *)entry;
 }
 #else
@@ -390,7 +390,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 #endif
@@ -434,7 +434,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
    * from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 #endif
@@ -687,7 +687,7 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
   uvdbg("Request maximum logical unit number\n");
 
   memset(req, 0, sizeof(struct usb_ctrlreq_s));
-  req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+  req->type    = USB_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
   req->req     = USBMSC_REQ_GETMAXLUN;
   usbhost_putle16(req->len, 1);
 
@@ -729,7 +729,7 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
 
   usbhost_testunitreadycbw(cbw);
   nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                        (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
+                        (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF);
   if (nbytes >= 0)
     {
       /* Receive the CSW */
@@ -767,7 +767,7 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
 
   usbhost_requestsensecbw(cbw);
   nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                        (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
+                        (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF);
   if (nbytes >= 0)
     {
       /* Receive the sense data response */
@@ -813,7 +813,7 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
 
   usbhost_readcapacitycbw(cbw);
   nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                        (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
+                        (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF);
   if (nbytes >= 0)
     {
       /* Receive the read capacity CBW IN response */
@@ -864,7 +864,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
 
   usbhost_inquirycbw(cbw);
   nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                         (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
+                         (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF);
   if (nbytes >= 0)
     {
       /* Receive the CBW IN response */
@@ -1019,7 +1019,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -2028,7 +2028,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
 
               usbhost_readcbw(startsector, priv->blocksize, nsectors, cbw);
               nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                                     (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
+                                     (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF);
               if (nbytes >= 0)
                 {
                   /* Receive the user data */
@@ -2056,7 +2056,8 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
                         }
                     }
                 }
-            } while (nbytes == -EAGAIN);
+            }
+          while (nbytes == -EAGAIN);
         }
 
       usbhost_givesem(&priv->exclsem);
@@ -2126,13 +2127,13 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
 
           usbhost_writecbw(startsector, priv->blocksize, nsectors, cbw);
           nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                                 (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
+                                 (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF);
           if (nbytes >= 0)
             {
               /* Send the user data */
 
               nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                                     (uint8_t*)buffer, priv->blocksize * nsectors);
+                                     (FAR uint8_t *)buffer, priv->blocksize * nsectors);
               if (nbytes >= 0)
                 {
                   /* Receive the CSW */

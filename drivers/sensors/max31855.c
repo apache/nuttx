@@ -37,7 +37,7 @@
 /* NOTE: Some Maxim MAX31855 chips have an issue it report value 25% lower
  * of real temperature, for more info read this thread:
  * http://www.eevblog.com/forum/projects/max31855-temperature-error/
-*/
+ */
 
 /****************************************************************************
  * Included Files
@@ -87,7 +87,8 @@ struct max31855_dev_s
 
 static int     max31855_open(FAR struct file *filep);
 static int     max31855_close(FAR struct file *filep);
-static ssize_t max31855_read(FAR struct file *, FAR char *, size_t);
+static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer,
+                             size_t buflen);
 static ssize_t max31855_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
 

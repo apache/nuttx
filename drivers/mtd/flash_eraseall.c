@@ -87,7 +87,7 @@ int flash_eraseall(FAR const char *driver)
 
   /* Open the block driver */
 
-  ret = open_blockdriver(driver ,0, &inode);
+  ret = open_blockdriver(driver, 0, &inode);
   if (ret < 0)
     {
       fdbg("ERROR: Failed to open '%s': %d\n", driver, ret);

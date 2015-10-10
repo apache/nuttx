@@ -62,8 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
- * This is the generic lcd driver interface for the ili9341 Single Chip LCD
+/* This is the generic lcd driver interface for the ili9341 Single Chip LCD
  * driver. The driver supports multiple displays, each connected with an own
  * ili9341 Single Chip LCD driver. The communication with the LCD single chip
  * driver must be provide by a subdriver accessable trough the ili9341_dev_s
@@ -157,8 +156,7 @@
 
 /* Memory access control (MADCTL) */
 
-/*
- * Landscape:   00100000 / 00101000 / h28
+/* Landscape:   00100000 / 00101000 / h28
  *
  * MY:          0
  * MX:          0
@@ -186,8 +184,7 @@
                                         ILI9341_MADCTL_LANDSCAPE_BGR | \
                                         ILI9341_MADCTL_LANDSCAPE_MH)
 
-/*
- * Portrait:    00000000 / 00001000 / h08
+/* Portrait:    00000000 / 00001000 / h08
  *
  * MY:          0
  * MX:          0
@@ -214,8 +211,7 @@
                                         ILI9341_MADCTL_PORTRAIT_ML | \
                                         ILI9341_MADCTL_PORTRAIT_BGR | \
                                         ILI9341_MADCTL_PORTRAIT_MH)
-/*
- * RLandscape:  01100000 / 01101000 / h68
+/* RLandscape:  01100000 / 01101000 / h68
  *
  * MY:          0
  * MX:          1
@@ -244,8 +240,7 @@
                                         ILI9341_MADCTL_RLANDSCAPE_BGR | \
                                         ILI9341_MADCTL_RLANDSCAPE_MH)
 
-/*
- * RPortrait:   11000000 / 11001000 / hc8
+/* RPortrait:   11000000 / 11001000 / hc8
  *
  * MY:          1
  * MX:          1
@@ -292,8 +287,7 @@
 #define ILI9341_PIXSET_16BITMCU_PARAM1  (ILI9341_PIXSET_16BITDPI | \
                                         ILI9341_PIXSET_16BITDBI)
 
-/*
- * 18-bit MCU:  01100110 / h66 (not supported by nuttx until now)
+/* 18-bit MCU:  01100110 / h66 (not supported by nuttx until now)
  *
  * DPI:         6  (RGB18-666 RGB interface)
  * DBI:         6  (RGB18-666 MCU interface)
@@ -387,8 +381,7 @@
  * Private Type Definition
  ****************************************************************************/
 
-/*
- * Each single connected ili9341 LCD driver needs an own driver instance
+/* Each single connected ili9341 LCD driver needs an own driver instance
  * to provide a unique getrun and putrun method. Also store fundamental
  * parameter in driver internal structure. This minimal overhead should be
  * acceptable.
@@ -453,14 +446,14 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
 static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
                          FAR uint8_t * buffer, size_t npixels);
 #endif
-/*
- * Definition of the public visible getrun / putrun methods
+
+/* Definition of the public visible getrun / putrun methods
  * each for a single LCD driver
  */
 
 #ifdef CONFIG_LCD_ILI9341_IFACE0
 static int ili9341_putrun0(fb_coord_t row, fb_coord_t col,
-                            FAR const uint8_t * buffer, size_t npixsels);
+                           FAR const uint8_t *buffer, size_t npixsels);
 #endif
 #ifdef CONFIG_LCD_ILI9341_IFACE1
 static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
@@ -659,7 +652,7 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
 {
   FAR struct ili9341_dev_s *dev = &g_lcddev[devno];
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
-  FAR const uint16_t *src = (const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
@@ -720,7 +713,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
 {
   FAR struct ili9341_dev_s *dev = &g_lcddev[devno];
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
-  FAR uint16_t *dest = (uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
 
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
@@ -994,7 +987,7 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
       pinfo->getrun = priv->getrun;
 #endif
       pinfo->bpp    = priv->bpp;
-      pinfo->buffer = (uint8_t*)priv->runbuffer;  /* Run scratch buffer */
+      pinfo->buffer = (FAR uint8_t *)priv->runbuffer;  /* Run scratch buffer */
 
       lcdvdbg("planeno: %d bpp: %d\n", planeno, pinfo->bpp);
 

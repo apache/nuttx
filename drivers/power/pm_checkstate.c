@@ -129,24 +129,25 @@ enum pm_state_e pm_checkstate(void)
    now = clock_systimer();
    if (now - g_pmglobals.stime >= TIME_SLICE_TICKS)
     {
-       int16_t accum;
+      int16_t accum;
 
-       /* Sample the count, reset the time and count, and assess the PM
-        * state.  This is an atomic operation because interrupts are
-        * still disabled.
-        */
+      /* Sample the count, reset the time and count, and assess the PM
+       * state.  This is an atomic operation because interrupts are
+       * still disabled.
+       */
 
-       accum             = g_pmglobals.accum;
-       g_pmglobals.stime = now;
-       g_pmglobals.accum = 0;
+      accum             = g_pmglobals.accum;
+      g_pmglobals.stime = now;
+      g_pmglobals.accum = 0;
 
-       /* Reassessing the PM state may require some computation.  However,
-        * the work will actually be performed on a worker thread at a user-
-        * controlled priority.
-        */
+      /* Reassessing the PM state may require some computation.  However,
+       * the work will actually be performed on a worker thread at a user-
+       * controlled priority.
+       */
 
-       (void)pm_update(accum);
+      (void)pm_update(accum);
     }
+
   irqrestore(flags);
 
   /* Return the recommended state.  Assuming that we are called from the

@@ -1204,12 +1204,12 @@ int skel_initialize(int intf)
   priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
   priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->sk_dev.d_private = (void*)g_skel; /* Used to recover private state from dev */
+  priv->sk_dev.d_private = (FAR void *)g_skel; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->sk_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->sk_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->sk_txpoll       = wd_create();    /* Create periodic poll timer */
+  priv->sk_txtimeout    = wd_create();    /* Create TX timeout timer */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling skel_ifdown().

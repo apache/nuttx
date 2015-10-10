@@ -395,7 +395,7 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct ads7843e_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct ads7843e_sample_s));
 
       /* Now manage state transitions */
 
@@ -480,7 +480,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
 
   ivdbg("Sampled\n");
 
-   /* Re-acquire the semaphore that manages mutually exclusive access to
+  /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
@@ -974,10 +974,10 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
-        * last positional data.
-        */
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
+       * last positional data.
+       */
 
       if (sample.valid)
         {

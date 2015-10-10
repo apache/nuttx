@@ -199,7 +199,7 @@
 #  define enc_cmddump(c) \
    lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x\n", c);
 #  define enc_bmdump(c,b,s) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x buffer: %p length: %d\n", c,b,s);
+   lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x buffer: %p length: %d\n", c, b, s);
 #else
 #  define enc_wrdump(a,v)
 #  define enc_rddump(a,v)
@@ -344,8 +344,8 @@ static int  enc_txpoll(struct net_driver_s *dev);
 /* Common RX logic */
 
 static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv);
-static void enc_rxldpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr);
-static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr);
+static void enc_rxldpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *descr);
+static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *descr);
 static void enc_rxdispatch(FAR struct enc_driver_s *priv);
 
 /* Interrupt handling */
@@ -499,7 +499,7 @@ static void enc_cmd(FAR struct enc_driver_s *priv, uint8_t cmd, uint16_t arg)
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   (void)SPI_SEND(priv->spi, cmd);          /* Clock out the command */
   (void)SPI_SEND(priv->spi, arg & 0xff);   /* Clock out the low byte */
@@ -533,7 +533,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Send the system reset command. */
 
@@ -651,7 +651,7 @@ static void enc_wrreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
   DEBUGASSERT(priv && priv->spi);
   DEBUGASSERT((ctrlreg & 0xe0) == 0); /* banked regeitsers only */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
@@ -729,7 +729,7 @@ static void enc_bfs(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Set the bank */
 
@@ -774,7 +774,7 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   /* Set the bank */
 
@@ -842,8 +842,8 @@ static void enc_rxdump(FAR struct enc_driver_s *priv)
 static void enc_txdump(FAR struct enc_driver_s *priv)
 {
   lowsyslog(LOG_DEBUG, "Tx Registers:\n");
-  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x ESTAT:    %02x\n",
-            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR),);
+  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
+            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
   lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
             enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
   lowsyslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
@@ -932,7 +932,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
 {
   DEBUGASSERT(priv && priv->spi);
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
   SPI_SEND(priv->spi, ENC_WGPDATA);
   SPI_SNDBLOCK(priv->spi, buffer, buflen);
@@ -1071,11 +1071,11 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
 static int enc_transmit(FAR struct enc_driver_s *priv)
 {
-  struct enc_descr_s *descr;
+  FAR struct enc_descr_s *descr;
 
   /* dequeue next packet to transmit */
 
-  descr = (struct enc_descr_s*)sq_remfirst(&priv->txqueue);
+  descr = (FAR struct enc_descr_s *)sq_remfirst(&priv->txqueue);
 
   DEBUGASSERT(descr != NULL);
 
@@ -1110,7 +1110,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 
   /* free the descriptor */
 
-  sq_addlast((sq_entry_t*)descr, &priv->txfreedescr);
+  sq_addlast((FAR sq_entry_t *)descr, &priv->txfreedescr);
 
   return OK;
 }
@@ -1137,7 +1137,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 static int enc_txenqueue(FAR struct enc_driver_s *priv)
 {
   int ret = OK;
-  struct enc_descr_s *descr;
+  FAR struct enc_descr_s *descr;
 
   DEBUGASSERT(priv->dev.d_len > 0);
 
@@ -1147,7 +1147,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
   priv->stats.txrequests++;
 #endif
 
-  descr = (struct enc_descr_s*)sq_remfirst(&priv->txfreedescr);
+  descr = (FAR struct enc_descr_s *)sq_remfirst(&priv->txfreedescr);
 
   if (descr != NULL)
     {
@@ -1167,7 +1167,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
 
       /* enqueue packet */
 
-      sq_addlast((sq_entry_t*)descr, &priv->txqueue);
+      sq_addlast((FAR sq_entry_t *)descr, &priv->txqueue);
 
       /* if currently no transmission is active, trigger the transmission */
 
@@ -1367,7 +1367,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
  ****************************************************************************/
 
 static void enc_rxldpkt(FAR struct enc_driver_s *priv,
-                        struct enc_descr_s *descr)
+                        FAR struct enc_descr_s *descr)
 {
   DEBUGASSERT(priv != NULL && descr != NULL);
 
@@ -1414,10 +1414,10 @@ static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv)
 
       /* Packets are held in the enc's SRAM until the space is needed */
 
-      enc_rxrmpkt(priv, (struct enc_descr_s*)sq_peek(&priv->rxqueue));
+      enc_rxrmpkt(priv, (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue));
     }
 
-  return (struct enc_descr_s*)sq_remfirst(&priv->rxfreedescr);
+  return (FAR struct enc_descr_s *)sq_remfirst(&priv->rxfreedescr);
 }
 
 /****************************************************************************
@@ -1439,7 +1439,7 @@ static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv)
  *
  ****************************************************************************/
 
-static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr)
+static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *descr)
 {
   uint16_t addr;
 
@@ -1452,7 +1452,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr
 
   if (descr != NULL)
     {
-      if (descr == (struct enc_descr_s*)sq_peek(&priv->rxqueue))
+      if (descr == (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue))
         {
           /* Wrap address properly around */
           addr = (descr->addr - PKTMEM_RX_START + descr->len - 2 + PKTMEM_RX_SIZE)
@@ -1472,10 +1472,10 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr
         {
           /* Remove packet from RX queue */
 
-          sq_rem((sq_entry_t*)descr, &priv->rxqueue);
+          sq_rem((FAR sq_entry_t *)descr, &priv->rxqueue);
         }
 
-      sq_addlast((sq_entry_t*)descr, &priv->rxfreedescr);
+      sq_addlast((FAR sq_entry_t *)descr, &priv->rxfreedescr);
     }
 }
 
@@ -1498,14 +1498,14 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr
 
 static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 {
-  struct enc_descr_s *descr;
+  FAR struct enc_descr_s *descr;
   struct enc_descr_s *next;
 
   int ret = ERROR;
 
   /* Process the RX queue */
 
-  descr = (struct enc_descr_s*)sq_peek(&priv->rxqueue);
+  descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   while (descr != NULL)
     {
@@ -1513,7 +1513,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
        * flink to NULL
        */
 
-      next = (struct enc_descr_s*)sq_next(descr);
+      next = (FAR struct enc_descr_s *)sq_next(descr);
 
       /* Load the packet from the enc's SRAM */
 
@@ -1674,7 +1674,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
 static void enc_pktif(FAR struct enc_driver_s *priv)
 {
-  struct enc_descr_s *descr;
+  FAR struct enc_descr_s *descr;
   uint8_t  rsv[8];
   uint16_t pktlen;
   uint32_t rxstat;
@@ -1736,7 +1736,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       descr->addr = curpkt + 8;
       descr->len = pktlen;
-      sq_addlast((sq_entry_t*)descr, &priv->rxqueue);
+      sq_addlast((FAR sq_entry_t *)descr, &priv->rxqueue);
 
       /* Check if the packet was received OK */
 
@@ -1810,7 +1810,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
 static void enc_rxabtif(FAR struct enc_driver_s *priv)
 {
-  struct enc_descr_s *descr;
+  FAR struct enc_descr_s *descr;
 
 #if 0
   /* Free the last received packet from the RX queue */
@@ -1821,18 +1821,18 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
   nlldbg("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
   nlldbg("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
 
-  descr = (struct enc_descr_s*)sq_peek(&priv->rxqueue);
+  descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   while (descr != NULL)
     {
       nlldbg("addr: %04x len: %d\n", descr->addr, descr->len);
-      descr = (struct enc_descr_s*)sq_next(descr);
+      descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
   DEBUGASSERT(false);
 #endif
 
-  descr = (struct enc_descr_s*)sq_peek(&priv->rxqueue);
+  descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   if (descr != NULL)
     {
@@ -2278,7 +2278,7 @@ static int enc_ifup(struct net_driver_s *dev)
 
   nlldbg("Bringing up: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2300,7 +2300,7 @@ static int enc_ifup(struct net_driver_s *dev)
       enc_bfc(priv, ENC_EIR, EIR_ALLINTS);
       enc_bfs(priv, ENC_EIE, EIE_INTIE  | EIE_LINKIE  |
                              EIE_PKTIE  | EIE_RXABTIE |
-                             EIE_TXIE   );
+                             EIE_TXIE);
 
 #ifdef CONFIG_ENCX24J600_STATS
       enc_bfs(priv, ENC_EIE, EIE_TXABTIE);
@@ -2353,7 +2353,7 @@ static int enc_ifdown(struct net_driver_s *dev)
 
   nlldbg("Taking down: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2739,14 +2739,14 @@ static void enc_resetbuffers(FAR struct enc_driver_s *priv)
   for (i = 0; i < ENC_NTXDESCR; i++)
     {
       priv->txdescralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
-      sq_addlast((sq_entry_t*)&priv->txdescralloc[i], &priv->txfreedescr);
+      sq_addlast((FAR sq_entry_t *)&priv->txdescralloc[i], &priv->txfreedescr);
     }
 
   /* Receive descriptors addresses are set on reception */
 
   for (i = 0; i < CONFIG_ENCX24J600_NRXDESCR; i++)
     {
-      sq_addlast((sq_entry_t*)&priv->rxdescralloc[i], &priv->rxfreedescr);
+      sq_addlast((FAR sq_entry_t *)&priv->rxdescralloc[i], &priv->rxfreedescr);
     }
 }
 

@@ -322,7 +322,7 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_BCH_ENCRYPTION)
   else if (cmd == DIOC_SETKEY)
     {
-      memcpy(bch->key, (void*)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
+      memcpy(bch->key, (FAR void *)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
       ret = OK;
     }
 #endif

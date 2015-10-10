@@ -115,11 +115,13 @@ struct mtdconfig_header_s
 
 static int     mtdconfig_open(FAR struct file *filep);
 static int     mtdconfig_close(FAR struct file *filep);
-static ssize_t mtdconfig_read(FAR struct file *, FAR char *, size_t);
-static ssize_t mtdconfig_ioctl(FAR struct file *, int, unsigned long);
+static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
+                  size_t buflen);
+static ssize_t mtdconfig_ioctl(FAR struct file *filep, int cmd,
+                  unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                              bool setup);
+                  bool setup);
 #endif
 
 /****************************************************************************
@@ -645,8 +647,6 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
               /* Now Write the item to the current dst_offset location */
 
-              //printf("REL HDR: ID=%04X,%02X  Len=%4d  Off=%5d  Src off=%4d\n",
-              //  phdr->id, phdr->instance, phdr->len, dst_offset, src_offset);
               ret = mtdconfig_writebytes(dev, dst_offset, (uint8_t *) phdr,
                                          sizeof(hdr));
               if (ret < 0)
@@ -815,8 +815,6 @@ retry_relocate:
 
               /* Copy this entry to the destination */
 
-              //printf("REL HDR: ID=%04X,%02X  Len=%4d  Off=%5d  Src off=%4d\n",
-              //  hdr.id, hdr.instance, hdr.len, dst_offset, src_offset);
               mtdconfig_writebytes(dev, dst_offset, (uint8_t *) &hdr, sizeof(hdr));
               src_offset += sizeof(hdr);
               dst_offset += sizeof(hdr);
@@ -850,7 +848,7 @@ retry_relocate:
 
           src_offset += sizeof(hdr) + hdr.len;
           if (src_offset + sizeof(hdr) >= (src_block + 1) * dev->erasesize ||
-              src_offset == (src_block +1 ) * dev->erasesize)
+              src_offset == (src_block + 1) * dev->erasesize)
             {
               /* No room left at end of source block */
 
@@ -1181,8 +1179,7 @@ retry_find:
       hdr.instance = pdata->instance;
       hdr.len = pdata->len;
       hdr.flags = MTD_ERASED_FLAGS;
-      //printf("SAV HDR: ID=%04X,%02X  Len=%4d  Off=%5d\n",
-      //    hdr.id, hdr.instance, hdr.len, offset);
+
       mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
       bytes = mtdconfig_writebytes(dev, offset + sizeof(hdr), pdata->configdata,
                                    pdata->len);
@@ -1311,7 +1308,7 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
           sem_post(fds->sem);

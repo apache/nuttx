@@ -148,7 +148,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
    * directly from the user buffer.
    */
 
-  if (len >= bch->sectsize )
+  if (len >= bch->sectsize)
     {
       nsectors = len / bch->sectsize;
       if (sector + nsectors > bch->nsectors)

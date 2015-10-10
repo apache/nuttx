@@ -274,7 +274,7 @@ static const uint32_t g_transpeedru[8] =
      10000,   /*  0:   10 Kbit/sec / 10 */
     100000,   /*  1:    1 Mbit/sec / 10 */
    1000000,   /*  2:   10 Mbit/sec / 10 */
-  10000000,   /*  3:  100 Mbit/sec / 10*/
+  10000000,   /*  3:  100 Mbit/sec / 10 */
 
   0, 0, 0, 0  /* 4-7: Reserved values */
 };
@@ -316,7 +316,7 @@ static const uint16_t g_taactu[8] =
       1, /* 3:   1 us 1,000 ns */
      10, /* 4:  10 us 10,000 ns */
     100, /* 5: 100 us 100,000 ns */
-   1000, /* 6:   1 ms 1,000,000 ns*/
+   1000, /* 6:   1 ms 1,000,000 ns */
   10000, /* 7:  10 ms 10,000,000 ns */
 };
 
@@ -677,7 +677,7 @@ static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
 {
   int tundx;
 
-  /*The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value (TV).
+  /* The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value (TV).
    * TAAC is in units of time; NSAC is in units of SPI clocks.
    * The access time we need is then given by:
    *
@@ -1532,7 +1532,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   /* Then return the card geometry */
 
   geometry->geo_available =
-    ((slot->state & (MMCSD_SLOTSTATUS_NOTREADY|MMCSD_SLOTSTATUS_NODISK)) == 0);
+    ((slot->state & (MMCSD_SLOTSTATUS_NOTREADY | MMCSD_SLOTSTATUS_NODISK)) == 0);
   geometry->geo_mediachanged =
     ((slot->state & MMCSD_SLOTSTATUS_MEDIACHGD) != 0);
 #if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
@@ -1713,7 +1713,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
                   if ((slot->ocr & MMCSD_OCR_CCS) != 0)
                     {
                       fdbg("Identified SD ver2 card/with block access\n");
-                      slot->type = MMCSD_CARDTYPE_SDV2|MMCSD_CARDTYPE_BLOCK;
+                      slot->type = MMCSD_CARDTYPE_SDV2 | MMCSD_CARDTYPE_BLOCK;
                     }
                   else
                     {
@@ -1862,7 +1862,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
 static void mmcsd_mediachanged(void *arg)
 {
-  struct mmcsd_slot_s *slot = (struct mmcsd_slot_s*)arg;
+  FAR struct mmcsd_slot_s *slot = (FAR struct mmcsd_slot_s *)arg;
   FAR struct spi_dev_s *spi;
   uint8_t oldstate;
   int ret;
@@ -1892,7 +1892,7 @@ static void mmcsd_mediachanged(void *arg)
       /* Media is not present */
 
       fdbg("No card present\n");
-      slot->state |= (MMCSD_SLOTSTATUS_NODISK|MMCSD_SLOTSTATUS_NOTREADY);
+      slot->state |= (MMCSD_SLOTSTATUS_NODISK | MMCSD_SLOTSTATUS_NOTREADY);
 
       /* Was media removed? */
 
@@ -1906,7 +1906,7 @@ static void mmcsd_mediachanged(void *arg)
    * ready, then try re-initializing it
    */
 
-  else if ((oldstate & (MMCSD_SLOTSTATUS_NODISK|MMCSD_SLOTSTATUS_NOTREADY)) != 0)
+  else if ((oldstate & (MMCSD_SLOTSTATUS_NODISK | MMCSD_SLOTSTATUS_NOTREADY)) != 0)
     {
       /* (Re-)initialize for the media in the slot */
 
@@ -2014,7 +2014,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
    * removal of cards.
    */
 
-  (void)SPI_REGISTERCALLBACK(spi, mmcsd_mediachanged, (void*)slot);
+  (void)SPI_REGISTERCALLBACK(spi, mmcsd_mediachanged, (FAR void *)slot);
   return OK;
 }
 

@@ -384,7 +384,7 @@ static ssize_t lm92_read(FAR struct file *filep, FAR char *buffer,
       ret = lm92_readtemp(priv, &temp);
       if (ret < 0)
         {
-          sndbg("lm92_readtemp failed: %d\n",ret);
+          sndbg("lm92_readtemp failed: %d\n", ret);
           return (ssize_t)ret;
         }
 

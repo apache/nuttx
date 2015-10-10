@@ -795,7 +795,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        */
 
       case CANIOC_RTR:
-        ret = can_rtrread(dev, (struct canioc_rtr_s*)((uintptr_t)arg));
+        ret = can_rtrread(dev, (FAR struct canioc_rtr_s *)((uintptr_t)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this

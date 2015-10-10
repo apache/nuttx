@@ -133,7 +133,7 @@ static int      wm8904_start(FAR struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 #else
 static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev);
 #endif
@@ -141,9 +141,9 @@ static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 #else
 static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev);
 static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev);
@@ -232,7 +232,10 @@ const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
 #ifndef CONFIG_WM8904_CLKDEBUG
 static
 #endif
-const uint8_t g_fllratio[WM8904_NFLLRATIO] = {1, 2, 4, 8, 16};
+const uint8_t g_fllratio[WM8904_NFLLRATIO] =
+{
+  1, 2, 4, 8, 16
+};
 
 /****************************************************************************
  * Private Functions
@@ -726,7 +729,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   minfout = WM8904_FVCO_MAX / WM8904_MAXOUTDIV;
   divndx = 0;
 
-  for (;;)
+  for (; ; )
     {
       /* Calculate the new value of Fout that we would need to provide
        * with this SYSCLK divider in place.
@@ -1585,7 +1588,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_stop(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int wm8904_stop(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -1622,7 +1625,7 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_pause(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int wm8904_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -1651,7 +1654,7 @@ static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_resume(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int wm8904_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int wm8904_resume(FAR struct audio_lowerhalf_s *dev)
 #endif

@@ -322,7 +322,7 @@ struct st25fl1_dev_s
 
 #ifdef CONFIG_ST25FL1_SECTOR512
   uint8_t                flags;       /* Buffered sector flags */
-  uint16_t               esectno;     /* Erase sector number in the cache*/
+  uint16_t               esectno;     /* Erase sector number in the cache */
   FAR uint8_t           *sector;      /* Allocated sector data */
 #endif
 };

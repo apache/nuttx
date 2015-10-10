@@ -142,7 +142,10 @@ struct e1000_dev_head
  * Private Data
  ****************************************************************************/
 
-static struct e1000_dev_head e1000_list = {0};
+static struct e1000_dev_head e1000_list =
+{
+  0
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -195,24 +198,24 @@ void e1000_reset(struct e1000_dev *dev)
   /* Reset the network controller hardware */
 
   dev_control = 0;
-  dev_control |= (1<<0);   /* FD-bit (Full Duplex) */
-  dev_control |= (0<<2);   /* GIOMD-bit (GIO Master Disable) */
-  dev_control |= (1<<3);   /* LRST-bit (Link Reset) */
-  dev_control |= (1<<6);   /* SLU-bit (Set Link Up) */
-  dev_control |= (2<<8);   /* SPEED=2 (1000Mbps) */
-  dev_control |= (0<<11);  /* FRCSPD-bit (Force Speed) */
-  dev_control |= (0<<12);  /* FRCDPLX-bit (Force Duplex) */
-  dev_control |= (0<<20);  /* ADVD3WUC-bit (Advertise D3 Wake Up Cap) */
-  dev_control |= (1<<26);  /* RST-bit (Device Reset) */
-  dev_control |= (1<<27);  /* RFCE-bit (Receive Flow Control Enable) */
-  dev_control |= (1<<28);  /* TFCE-bit (Transmit Flow Control Enable) */
-  dev_control |= (0<<30);  /* VME-bit (VLAN Mode Enable) */
-  dev_control |= (0<<31);  /* PHY_RST-bit (PHY Reset) */
+  dev_control |= (1 << 0);   /* FD-bit (Full Duplex) */
+  dev_control |= (0 << 2);   /* GIOMD-bit (GIO Master Disable) */
+  dev_control |= (1 << 3);   /* LRST-bit (Link Reset) */
+  dev_control |= (1 << 6);   /* SLU-bit (Set Link Up) */
+  dev_control |= (2 << 8);   /* SPEED=2 (1000Mbps) */
+  dev_control |= (0 << 11);  /* FRCSPD-bit (Force Speed) */
+  dev_control |= (0 << 12);  /* FRCDPLX-bit (Force Duplex) */
+  dev_control |= (0 << 20);  /* ADVD3WUC-bit (Advertise D3 Wake Up Cap) */
+  dev_control |= (1 << 26);  /* RST-bit (Device Reset) */
+  dev_control |= (1 << 27);  /* RFCE-bit (Receive Flow Control Enable) */
+  dev_control |= (1 << 28);  /* TFCE-bit (Transmit Flow Control Enable) */
+  dev_control |= (0 << 30);  /* VME-bit (VLAN Mode Enable) */
+  dev_control |= (0 << 31);  /* PHY_RST-bit (PHY Reset) */
 
   e1000_outl(dev, E1000_IMC, 0xFFFFFFFF);
   e1000_outl(dev, E1000_STATUS, 0x00000000);
   e1000_outl(dev, E1000_CTRL, dev_control);
-  dev_control &= ~(1<<26);  /* clear RST-bit (Device Reset) */
+  dev_control &= ~(1 << 26);  /* clear RST-bit (Device Reset) */
   e1000_outl(dev, E1000_CTRL, dev_control);
   up_mdelay(10);
   e1000_outl(dev, E1000_CTRL_EXT, 0x001401C0);
@@ -228,13 +231,13 @@ void e1000_turn_on(struct e1000_dev *dev)
   /* turn on the controller's receive engine */
 
   rx_control = e1000_inl(dev, E1000_RCTL);
-  rx_control |= (1<<1);
+  rx_control |= (1 << 1);
   e1000_outl(dev, E1000_RCTL, rx_control);
 
   /* turn on the controller's transmit engine */
 
   tx_control = e1000_inl(dev, E1000_TCTL);
-  tx_control |= (1<<1);
+  tx_control |= (1 << 1);
   e1000_outl(dev, E1000_TCTL, tx_control);
 
   /* enable the controller's interrupts */
@@ -242,11 +245,11 @@ void e1000_turn_on(struct e1000_dev *dev)
   e1000_outl(dev, E1000_ICR, 0xFFFFFFFF);
   e1000_outl(dev, E1000_IMC, 0xFFFFFFFF);
 
-  ims |= 1<<0;      /* TXDW */
-  ims |= 1<<1;      /* TXQE */
-  ims |= 1<<2;      /* LSC */
-  ims |= 1<<4;      /* RXDMT0 */
-  ims |= 1<<7;      /* RXT0 */
+  ims |= 1 << 0;      /* TXDW */
+  ims |= 1 << 1;      /* TXQE */
+  ims |= 1 << 2;      /* LSC */
+  ims |= 1 << 4;      /* RXDMT0 */
+  ims |= 1 << 7;      /* RXT0 */
   e1000_outl(dev, E1000_IMS, ims);
 }
 
@@ -258,13 +261,13 @@ void e1000_turn_off(struct e1000_dev *dev)
   /* turn off the controller's receive engine */
 
   rx_control = e1000_inl(dev, E1000_RCTL);
-  rx_control &= ~(1<<1);
+  rx_control &= ~(1 << 1);
   e1000_outl(dev, E1000_RCTL, rx_control);
 
   /* turn off the controller's transmit engine */
 
   tx_control = e1000_inl(dev, E1000_TCTL);
-  tx_control &= ~(1<<1);
+  tx_control &= ~(1 << 1);
   e1000_outl(dev, E1000_TCTL, tx_control);
 
   /* turn off the controller's interrupts */
@@ -287,39 +290,39 @@ void e1000_init(struct e1000_dev *dev)
   /* configure the controller's 'receive' engine */
 
   rx_control = 0;
-  rx_control |= (0<<1);   /* EN-bit (Enable) */
-  rx_control |= (0<<2);   /* SPB-bit (Store Bad Packets) */
-  rx_control |= (0<<3);   /* UPE-bit (Unicast Promiscuous Mode) */
-  rx_control |= (1<<4);   /* MPE-bit (Multicast Promiscuous Mode) */
-  rx_control |= (0<<5);   /* LPE-bit (Long Packet Enable) */
-  rx_control |= (0<<6);   /* LBM=0 (Loop-Back Mode) */
-  rx_control |= (0<<8);   /* RDMTS=0 (Rx Descriptor Min Threshold Size) */
-  rx_control |= (0<<10);  /* DTYPE=0 (Descriptor Type) */
-  rx_control |= (0<<12);  /* MO=0 (Multicast Offset) */
-  rx_control |= (1<<15);  /* BAM-bit (Broadcast Address Mode) */
-  rx_control |= (0<<16);  /* BSIZE=0 (Buffer Size = 2048) */
-  rx_control |= (0<<18);  /* VLE-bit (VLAN filter Enable) */
-  rx_control |= (0<<19);  /* CFIEN-bit (Canonical Form Indicator Enable) */
-  rx_control |= (0<<20);  /* CFI-bit (Canonical Form Indicator) */
-  rx_control |= (1<<22);  /* DPF-bit (Discard Pause Frames) */
-  rx_control |= (0<<23);  /* PMCF-bit (Pass MAC Control Frames) */
-  rx_control |= (0<<25);  /* BSEX=0 (Buffer Size EXtension) */
-  rx_control |= (1<<26);  /* SECRC-bit (Strip Ethernet CRC) */
-  rx_control |= (0<<27);  /* FLEXBUF=0 (Flexible Buffer size) */
+  rx_control |= (0 << 1);   /* EN-bit (Enable) */
+  rx_control |= (0 << 2);   /* SPB-bit (Store Bad Packets) */
+  rx_control |= (0 << 3);   /* UPE-bit (Unicast Promiscuous Mode) */
+  rx_control |= (1 << 4);   /* MPE-bit (Multicast Promiscuous Mode) */
+  rx_control |= (0 << 5);   /* LPE-bit (Long Packet Enable) */
+  rx_control |= (0 << 6);   /* LBM=0 (Loop-Back Mode) */
+  rx_control |= (0 << 8);   /* RDMTS=0 (Rx Descriptor Min Threshold Size) */
+  rx_control |= (0 << 10);  /* DTYPE=0 (Descriptor Type) */
+  rx_control |= (0 << 12);  /* MO=0 (Multicast Offset) */
+  rx_control |= (1 << 15);  /* BAM-bit (Broadcast Address Mode) */
+  rx_control |= (0 << 16);  /* BSIZE=0 (Buffer Size = 2048) */
+  rx_control |= (0 << 18);  /* VLE-bit (VLAN filter Enable) */
+  rx_control |= (0 << 19);  /* CFIEN-bit (Canonical Form Indicator Enable) */
+  rx_control |= (0 << 20);  /* CFI-bit (Canonical Form Indicator) */
+  rx_control |= (1 << 22);  /* DPF-bit (Discard Pause Frames) */
+  rx_control |= (0 << 23);  /* PMCF-bit (Pass MAC Control Frames) */
+  rx_control |= (0 << 25);  /* BSEX=0 (Buffer Size EXtension) */
+  rx_control |= (1 << 26);  /* SECRC-bit (Strip Ethernet CRC) */
+  rx_control |= (0 << 27);  /* FLEXBUF=0 (Flexible Buffer size) */
   e1000_outl(dev, E1000_RCTL, rx_control);
 
   /* configure the controller's 'transmit' engine */
 
   tx_control = 0;
-  tx_control |= (0<<1);    /* EN-bit (Enable) */
-  tx_control |= (1<<3);    /* PSP-bit (Pad Short Packets) */
-  tx_control |= (15<<4);   /* CT=15 (Collision Threshold) */
-  tx_control |= (63<<12);  /* COLD=63 (Collision Distance) */
-  tx_control |= (0<<22);   /* SWXOFF-bit (Software XOFF) */
-  tx_control |= (1<<24);   /* RTLC-bit (Re-Transmit on Late Collision) */
-  tx_control |= (0<<25);   /* UNORTX-bit (Underrun No Re-Transmit) */
-  tx_control |= (0<<26);   /* TXCSCMT=0 (TxDesc Mininum Threshold) */
-  tx_control |= (0<<28);   /* MULR-bit (Multiple Request Support) */
+  tx_control |= (0 << 1);    /* EN-bit (Enable) */
+  tx_control |= (1 << 3);    /* PSP-bit (Pad Short Packets) */
+  tx_control |= (15 << 4);   /* CT=15 (Collision Threshold) */
+  tx_control |= (63 << 12);  /* COLD=63 (Collision Distance) */
+  tx_control |= (0 << 22);   /* SWXOFF-bit (Software XOFF) */
+  tx_control |= (1 << 24);   /* RTLC-bit (Re-Transmit on Late Collision) */
+  tx_control |= (0 << 25);   /* UNORTX-bit (Underrun No Re-Transmit) */
+  tx_control |= (0 << 26);   /* TXCSCMT=0 (TxDesc Mininum Threshold) */
+  tx_control |= (0 << 28);   /* MULR-bit (Multiple Request Support) */
   e1000_outl(dev, E1000_TCTL, tx_control);
 
   /* hardware flow control */
@@ -328,27 +331,27 @@ void e1000_init(struct e1000_dev *dev)
 
   /* get receive FIFO size */
 
-  pba = (pba & 0x000000ff)<<10;
+  pba = (pba & 0x000000ff) << 10;
   e1000_outl(dev, E1000_FCAL, 0x00C28001);
   e1000_outl(dev, E1000_FCAH, 0x00000100);
   e1000_outl(dev, E1000_FCT, 0x00008808);
   e1000_outl(dev, E1000_FCTTV, 0x00000680);
-  e1000_outl(dev, E1000_FCRTL, (pba*8/10)|0x80000000);
-  e1000_outl(dev, E1000_FCRTH, pba*9/10);
+  e1000_outl(dev, E1000_FCRTL, (pba * 8 / 10) | 0x80000000);
+  e1000_outl(dev, E1000_FCRTH, pba * 9 / 10);
 
   /* setup tx rings */
 
   txd_phys = PADDR((uintptr_t)dev->tx_ring.desc);
   kmem_phys = PADDR((uintptr_t)dev->tx_ring.buf);
-  for (i=0; i<CONFIG_E1000_N_TX_DESC; i++,kmem_phys+=CONFIG_E1000_BUFF_SIZE)
+  for (i = 0; i < CONFIG_E1000_N_TX_DESC; i++, kmem_phys += CONFIG_E1000_BUFF_SIZE)
     {
-      dev->tx_ring.desc[i].base_address = kmem_phys;
+      dev->tx_ring.desc[i].base_address  = kmem_phys;
       dev->tx_ring.desc[i].packet_length = 0;
-      dev->tx_ring.desc[i].cksum_offset = 0;
-      dev->tx_ring.desc[i].cksum_origin = 0;
-      dev->tx_ring.desc[i].desc_status = 1;
-      dev->tx_ring.desc[i].desc_command = (1<<0)|(1<<1)|(1<<3);
-      dev->tx_ring.desc[i].special_info = 0;
+      dev->tx_ring.desc[i].cksum_offset  = 0;
+      dev->tx_ring.desc[i].cksum_origin  = 0;
+      dev->tx_ring.desc[i].desc_status   = 1;
+      dev->tx_ring.desc[i].desc_command  = (1 << 0) | (1 << 1) | (1 << 3);
+      dev->tx_ring.desc[i].special_info  = 0;
     }
 
   dev->tx_ring.tail = 0;
@@ -359,14 +362,14 @@ void e1000_init(struct e1000_dev *dev)
 
   e1000_outl(dev, E1000_TDBAL, txd_phys);
   e1000_outl(dev, E1000_TDBAH, 0x00000000);
-  e1000_outl(dev, E1000_TDLEN, CONFIG_E1000_N_TX_DESC*16);
+  e1000_outl(dev, E1000_TDLEN, CONFIG_E1000_N_TX_DESC * 16);
   e1000_outl(dev, E1000_TXDCTL, 0x01010000);
 
   /* setup rx rings */
 
   rxd_phys = PADDR((uintptr_t)dev->rx_ring.desc);
   kmem_phys = PADDR((uintptr_t)dev->rx_ring.buf);
-  for (i=0; i<CONFIG_E1000_N_RX_DESC; i++,kmem_phys+=CONFIG_E1000_BUFF_SIZE)
+  for (i = 0; i < CONFIG_E1000_N_RX_DESC; i++, kmem_phys += CONFIG_E1000_BUFF_SIZE)
     {
       dev->rx_ring.desc[i].base_address = kmem_phys;
       dev->rx_ring.desc[i].packet_length = 0;
@@ -440,7 +443,7 @@ static int e1000_transmit(struct e1000_dev *e1000)
 
   /* prepare the transmit-descriptor */
 
-  e1000->tx_ring.desc[tail].packet_length = count<60 ? 60:count;
+  e1000->tx_ring.desc[tail].packet_length = count < 60 ? 60 : count;
   e1000->tx_ring.desc[tail].desc_status = 0;
 
   /* give ownership of this descriptor to the network controller */
@@ -803,7 +806,7 @@ static int e1000_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
@@ -993,7 +996,7 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
   /* Link status change */
 
-  if (intr_cause & (1<<2))
+  if (intr_cause & (1 << 2))
     {
       if (e1000_inl(e1000, E1000_STATUS) & 2)
         {
@@ -1009,14 +1012,14 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
   /* Rx-descriptor Timer expired */
 
-  if (intr_cause & (1<<7))
+  if (intr_cause & (1 << 7))
     {
       e1000_receive(e1000);
     }
 
   /* Tx queue empty */
 
-  if (intr_cause & (1<<1))
+  if (intr_cause & (1 << 1))
     {
       wd_cancel(e1000->txtimeout);
     }
@@ -1028,7 +1031,7 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
   /* Tx-descriptor Written back */
 
-  if (intr_cause & (1<<0))
+  if (intr_cause & (1 << 0))
     {
       devif_poll(&e1000->netdev, e1000_txpoll);
     }
@@ -1036,7 +1039,7 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
   /* Rx-Descriptors Low */
 
-  if (intr_cause & (1<<4))
+  if (intr_cause & (1 << 4))
     {
       int tail;
 
@@ -1054,12 +1057,42 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
 static pci_id_t e1000_id_table[] =
 {
-  {.sep = {INTEL_VENDERID, E1000_82573L}},
-  {.sep = {INTEL_VENDERID, E1000_82540EM}},
-  {.sep = {INTEL_VENDERID, E1000_82574L}},
-  {.sep = {INTEL_VENDERID, E1000_82567LM}},
-  {.sep = {INTEL_VENDERID, E1000_82541PI}},
-  {.sep = {0,0}}
+  {
+    .sep =
+    {
+      INTEL_VENDERID, E1000_82573L
+    }
+  },
+  {
+    .sep =
+    {
+      INTEL_VENDERID, E1000_82540EM
+    }
+  },
+  {
+    .sep =
+    {
+      INTEL_VENDERID, E1000_82574L
+    }
+  },
+  {
+    .sep =
+    {
+      INTEL_VENDERID, E1000_82567LM
+    }
+  },
+  {
+    .sep =
+    {
+      INTEL_VENDERID, E1000_82541PI
+    }
+  },
+  {
+    .sep =
+    {
+      0, 0
+    }
+  }
 };
 
 static int e1000_probe(uint16_t addr, pci_id_t id)
@@ -1149,14 +1182,14 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   /* alloc memory for tx ring */
 
-  dev->tx_ring.desc = (struct tx_desc*)kmem;
+  dev->tx_ring.desc = (FAR struct tx_desc *)kmem;
   kmem += CONFIG_E1000_N_TX_DESC * sizeof(struct tx_desc);
   dev->tx_ring.buf = kmem;
   kmem += CONFIG_E1000_N_TX_DESC * CONFIG_E1000_BUFF_SIZE;
 
   /* alloc memory for rx rings */
 
-  dev->rx_ring.desc = (struct rx_desc*)kmem;
+  dev->rx_ring.desc = (FAR struct rx_desc *)kmem;
   kmem += CONFIG_E1000_N_RX_DESC * sizeof(struct rx_desc);
   dev->rx_ring.buf = kmem;
 
@@ -1235,7 +1268,7 @@ void e1000_mod_exit(void)
         CONFIG_E1000_N_RX_DESC * CONFIG_E1000_BUFF_SIZE;
   size = ROUNDUP(size, PGSIZE);
 
-  for (dev=e1000_list.next; dev!=NULL; dev=dev->next)
+  for (dev = e1000_list.next; dev != NULL; dev = dev->next)
     {
       netdev_unregister(&dev->netdev);
       e1000_reset(dev);

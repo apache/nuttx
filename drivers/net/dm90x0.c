@@ -194,8 +194,8 @@
 #define DM9X_ISR_IOMODE16  (0 << 6) /*   IO mode = 16 bit */
 #define DM9X_ISR_IOMODE32  (1 << 6) /*   IO mode = 32 bit */
 
-#define DM9X_IMRENABLE     (DM9X_INT_PR|DM9X_INT_PT|DM9X_INT_LNKCHG|DM9X_IMR_PAR)
-#define DM9X_IMRRXDISABLE  (DM9X_INT_PT|DM9X_INT_LNKCHG|DM9X_IMR_PAR)
+#define DM9X_IMRENABLE     (DM9X_INT_PR | DM9X_INT_PT | DM9X_INT_LNKCHG | DM9X_IMR_PAR)
+#define DM9X_IMRRXDISABLE  (DM9X_INT_PT | DM9X_INT_LNKCHG | DM9X_IMR_PAR)
 #define DM9X_IMRDISABLE    (DM9X_IMR_PAR)
 
 /* EEPROM/PHY control regiser bits */
@@ -224,7 +224,7 @@
 #define DM9X_RXC_WTDIS     (1 << 6) /* Disable watchdog timer */
 #define DM9X_RXC_HASHALL   (1 << 7) /* Filter all addresses in hash table */
 
-#define DM9X_RXCSETUP      (DM9X_RXC_DISCRC|DM9X_RXC_DISLONG)
+#define DM9X_RXCSETUP      (DM9X_RXC_DISCRC | DM9X_RXC_DISLONG)
 
 /* EEPHY bit settings */
 
@@ -458,7 +458,7 @@ static void putreg(int reg, uint8_t value)
  *
  ****************************************************************************/
 
-static void read8(uint8_t *ptr, int len)
+static void read8(FAR uint8_t *ptr, int len)
 {
   nvdbg("Read %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
@@ -467,9 +467,10 @@ static void read8(uint8_t *ptr, int len)
     }
 }
 
-static void read16(uint8_t *ptr, int len)
+static void read16(FAR uint8_t *ptr, int len)
 {
-  register uint16_t *ptr16 = (uint16_t*)ptr;
+  FAR uint16_t *ptr16 = (FAR uint16_t *)ptr;
+
   nvdbg("Read %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16_t))
     {
@@ -477,9 +478,10 @@ static void read16(uint8_t *ptr, int len)
     }
 }
 
-static void read32(uint8_t *ptr, int len)
+static void read32(FARuint8_t *ptr, int len)
 {
-  register uint32_t *ptr32 = (uint32_t*)ptr;
+  FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
+
   nvdbg("Read %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32_t))
     {
@@ -548,9 +550,10 @@ static void discard32(int len)
  *
  ****************************************************************************/
 
-static void write8(const uint8_t *ptr, int len)
+static void write8(FAR const uint8_t *ptr, int len)
 {
   nvdbg("Write %d bytes (8-bit mode)\n", len);
+
   for (; len > 0; len--)
     {
       DM9X_DATA = (*ptr++ & 0xff);
@@ -559,7 +562,8 @@ static void write8(const uint8_t *ptr, int len)
 
 static void write16(const uint8_t *ptr, int len)
 {
-  register uint16_t *ptr16 = (uint16_t*)ptr;
+  FAR uint16_t *ptr16 = (FAR uint16_t *)ptr;
+
   nvdbg("Write %d bytes (16-bit mode)\n", len);
 
   for (; len > 0; len -= sizeof(uint16_t))
@@ -568,10 +572,12 @@ static void write16(const uint8_t *ptr, int len)
     }
 }
 
-static void write32(const uint8_t *ptr, int len)
+static void write32(FAR const uint8_t *ptr, int len)
 {
-  register uint32_t *ptr32 = (uint32_t*)ptr;
+  FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
+
   nvdbg("Write %d bytes (32-bit mode)\n", len);
+
   for (; len > 0; len -= sizeof(uint32_t))
     {
       DM9X_DATA = *ptr32++;
@@ -602,7 +608,7 @@ static uint16_t dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset)
   putreg(DM9X_EEPHYC, DM9X_EEPHYC_ERPRR);
   up_udelay(200);
   putreg(DM9X_EEPHYC, 0x00);
-  return (getreg(DM9X_EEPHYDL) + (getreg(DM9X_EEPHYDH) << 8) );
+  return (getreg(DM9X_EEPHYDL) + (getreg(DM9X_EEPHYDH) << 8));
 }
 #endif
 
@@ -632,7 +638,7 @@ static uint16_t dm9x_phyread(struct dm9x_driver_s *dm9x, int reg)
 
   /* Issue PHY read command pulse in the EEPROM/PHY control register */
 
-  putreg(DM9X_EEPHYC, (DM9X_EEPHYC_ERPRR|DM9X_EEPHYC_EPOS));
+  putreg(DM9X_EEPHYC, (DM9X_EEPHYC_ERPRR | DM9X_EEPHYC_EPOS));
   up_udelay(100);
   putreg(DM9X_EEPHYC, 0x00);
 
@@ -654,7 +660,7 @@ static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16_t value)
 
   /* Issue PHY write command pulse in the EEPROM/PHY control register */
 
-  putreg(DM9X_EEPHYC, (DM9X_EEPHYC_ERPRW|DM9X_EEPHYC_EPOS));
+  putreg(DM9X_EEPHYC, (DM9X_EEPHYC_ERPRW | DM9X_EEPHYC_EPOS));
   up_udelay(500);
   putreg(DM9X_EEPHYC, 0x0);
 }
@@ -803,7 +809,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
 #if !defined(CONFIG_DM9X_ETRANS)
       /* Issue TX polling command */
 
-      putreg(DM9X_TXC, 0x1); /* Cleared after TX complete*/
+      putreg(DM9X_TXC, 0x1); /* Cleared after TX complete */
 #endif
 
       /* Clear count of back-to-back RX packet transfers */
@@ -914,7 +920,7 @@ static int dm9x_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void dm9x_receive(struct dm9x_driver_s *dm9x)
+static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 {
   union rx_desc_u rx;
   bool bchecksumready;
@@ -946,7 +952,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
       /* Read packet status & length */
 
-      dm9x->dm_read((uint8_t*)&rx, 4);
+      dm9x->dm_read((FAR uint8_t *)&rx, 4);
 
       /* Check if any errors were reported by the hardware */
 
@@ -1025,9 +1031,9 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
               arp_ipin(&dm9x->dm_dev);
               ipv4_input(&dm9x->dm_dev);
 
-             /* If the above function invocation resulted in data that should be
-              * sent out on the network, the field  d_len will set to a value > 0.
-              */
+              /* If the above function invocation resulted in data that should be
+               * sent out on the network, the field  d_len will set to a value > 0.
+               */
 
               if (dm9x->dm_dev.d_len > 0)
                 {
@@ -1062,9 +1068,9 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
               ipv6_input(&dm9x->dm_dev);
 
-             /* If the above function invocation resulted in data that should be
-              * sent out on the network, the field  d_len will set to a value > 0.
-              */
+              /* If the above function invocation resulted in data that should be
+               * sent out on the network, the field  d_len will set to a value > 0.
+               */
 
               if (dm9x->dm_dev.d_len > 0)
                {
@@ -1095,9 +1101,9 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
             {
               arp_arpin(&dm9x->dm_dev);
 
-             /* If the above function invocation resulted in data that should be
-              * sent out on the network, the field  d_len will set to a value > 0.
-              */
+              /* If the above function invocation resulted in data that should be
+               * sent out on the network, the field  d_len will set to a value > 0.
+               */
 
               if (dm9x->dm_dev.d_len > 0)
                 {
@@ -1230,8 +1236,8 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
       for (i = 0; i < 500; i++)
         {
-          dm9x_phyread(dm9x,0x1);
-          if (dm9x_phyread(dm9x,0x1) & 0x4) /*Link OK*/
+          dm9x_phyread(dm9x, 0x1);
+          if (dm9x_phyread(dm9x, 0x1) & 0x4) /* Link OK */
             {
               /* Wait to get detected speed */
 
@@ -1413,7 +1419,7 @@ static inline void dm9x_phymode(struct dm9x_driver_s *dm9x)
 
 #ifdef CONFIG_DM9X_MODE_AUTO
   phyreg0 = 0x1200;  /* Auto-negotiation & Restart Auto-negotiation */
-  phyreg4 = 0x01e1;  /* Default flow control disable*/
+  phyreg4 = 0x01e1;  /* Default flow control disable */
 #elif defined(CONFIG_DM9X_MODE_10MHD)
   phyreg4 = 0x21;
   phyreg0 = 0x1000;
@@ -1459,7 +1465,7 @@ static int dm9x_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initilize DM90x0 chip */
 
@@ -1688,9 +1694,9 @@ static void dm9x_bringup(struct dm9x_driver_s *dm9x)
    * in 10us; 20us guarantees completion of the reset
    */
 
-  putreg(DM9X_NETC, (DM9X_NETC_RST|DM9X_NETC_LBK1));
+  putreg(DM9X_NETC, (DM9X_NETC_RST | DM9X_NETC_LBK1));
   up_udelay(20);
-  putreg(DM9X_NETC, (DM9X_NETC_RST|DM9X_NETC_LBK1));
+  putreg(DM9X_NETC, (DM9X_NETC_RST | DM9X_NETC_LBK1));
   up_udelay(20);
 
   /* Configure I/O mode */
@@ -1729,7 +1735,7 @@ static void dm9x_bringup(struct dm9x_driver_s *dm9x)
   putreg(DM9X_TXC, 0x00);         /* Clear TX Polling */
   putreg(DM9X_BPTHRES, 0x3f);     /* Less 3kb, 600us */
   putreg(DM9X_SMODEC, 0x00);      /* Special mode */
-  putreg(DM9X_NETS, (DM9X_NETS_WAKEST|DM9X_NETS_TX1END|DM9X_NETS_TX2END)); /* Clear TX status */
+  putreg(DM9X_NETS, (DM9X_NETS_WAKEST | DM9X_NETS_TX1END | DM9X_NETS_TX2END)); /* Clear TX status */
   putreg(DM9X_ISR, DM9X_INT_ALL); /* Clear interrupt status */
 
 #if defined(CONFIG_DM9X_CHECKSUM)
@@ -1794,7 +1800,7 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
   dm9x->dm_b100M = false;
   for (i = 0; i < 1000; i++)
     {
-      if (dm9x_phyread(dm9x,0x1) & 0x4)
+      if (dm9x_phyread(dm9x, 0x1) & 0x4)
         {
           if (dm9x_phyread(dm9x, 0) &0x2000)
             {
@@ -1874,12 +1880,12 @@ int dm9x_initialize(void)
   g_dm9x[0].dm_dev.d_addmac  = dm9x_addmac;   /* Add multicast MAC address */
   g_dm9x[0].dm_dev.d_rmmac   = dm9x_rmmac;    /* Remove multicast MAC address */
 #endif
-  g_dm9x[0].dm_dev.d_private = (void*)g_dm9x; /* Used to recover private state from dev */
+  g_dm9x[0].dm_dev.d_private = (FAR void *)g_dm9x; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_dm9x[0].dm_txpoll       = wd_create();   /* Create periodic poll timer */
-  g_dm9x[0].dm_txtimeout    = wd_create();   /* Create TX timeout timer */
+  g_dm9x[0].dm_txpoll       = wd_create();    /* Create periodic poll timer */
+  g_dm9x[0].dm_txtimeout    = wd_create();    /* Create TX timeout timer */
 
   /* Read the MAC address */
 
