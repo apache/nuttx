@@ -138,7 +138,7 @@ void cc3000_resume(void)
 long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0);
-  return write(spiconf.cc3000fd,pUserBuffer,usLength) == usLength ? 0 : -errno;
+  return write(spiconf.cc3000fd, pUserBuffer, usLength) == usLength ? 0 : -errno;
 }
 
 /****************************************************************************
@@ -159,7 +159,7 @@ long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
 long cc3000_read(uint8_t *pUserBuffer, uint16_t usLength)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0);
-  return read(spiconf.cc3000fd,pUserBuffer,usLength);
+  return read(spiconf.cc3000fd, pUserBuffer, usLength);
 }
 
 /****************************************************************************
@@ -211,19 +211,19 @@ static void *unsoliced_thread_func(void *parameter)
   DEBUGASSERT(spiconf.queue != (mqd_t) -1);
   DEBUGASSERT(SEM_NAMELEN == QUEUE_NAMELEN);
   snprintf(buff, SEM_NAMELEN, SEM_FORMAT, minor);
-  spiconf.done = sem_open(buff,O_RDONLY);
+  spiconf.done = sem_open(buff, O_RDONLY);
   DEBUGASSERT(spiconf.done != (sem_t *)-1);
 
   sem_post(&spiconf.unsoliced_thread_wakesem);
 
   while (spiconf.run)
     {
-      memset(&spiconf.rx_buffer,0,sizeof(spiconf.rx_buffer));
+      memset(&spiconf.rx_buffer, 0, sizeof(spiconf.rx_buffer));
       nbytes = mq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
                           sizeof(spiconf.rx_buffer), 0);
       if (nbytes > 0)
         {
-          nlldbg("%d Processed\n",nbytes);
+          nlldbg("%d Processed\n", nbytes);
           spiconf.pfRxHandler(spiconf.rx_buffer.pbuffer);
         }
     }
@@ -255,7 +255,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
 
   DEBUGASSERT(spiconf.cc3000fd == -1);
 
-  fd = open("/dev/wireless0",O_RDWR|O_BINARY);
+  fd = open("/dev/wireless0", O_RDWR | O_BINARY);
   if (fd >= 0)
     {
       spiconf.pfRxHandler = pfRxHandler;
@@ -308,7 +308,7 @@ void cc3000_close(void)
       spiconf.run = false;
 
       pthread_cancel(spiconf.unsoliced_thread);
-      pthread_join(spiconf.unsoliced_thread, (pthread_addr_t*)&status);
+      pthread_join(spiconf.unsoliced_thread, (FAR pthread_addr_t *)&status);
 
       close(spiconf.cc3000fd);
 

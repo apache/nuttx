@@ -220,8 +220,7 @@
 
 #define CC1101_MCSM0_XOSC_FORCE_ON  0x01
 
-/*
- * Chip Status Byte
+/* Chip Status Byte
  */
 
 /* Bit fields in the chip status byte */
@@ -273,9 +272,7 @@
 #define CC1101_PARTNUM_VALUE                    0x00
 #define CC1101_VERSION_VALUE                    0x04
 
-/*
- *  Others ...
- */
+/*  Others ... */
 
 #define CC1101_LQI_CRC_OK_BM                    0x80
 #define CC1101_LQI_EST_BM                       0x7F
@@ -357,7 +354,7 @@ int cc1101_access(FAR struct cc1101_dev_s * dev, uint8_t addr,
 
   cc1101_access_begin(dev);
 
-  if (length>1 || length < -1)
+  if (length > 1 || length < -1)
     {
       SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_BURST);
     }
@@ -453,7 +450,11 @@ void cc1101_dumpregs(struct cc1101_dev_s * dev, uint8_t addr, uint8_t length)
   cc1101_access(dev, addr, (FAR uint8_t *)buf, length);
 
   printf("CC1101[%2x]: ", addr);
-  for (i=0; i<length; i++) printf(" %2x,", buf[i]);
+  for (i = 0; i < length; i++)
+    {
+      printf(" %2x,", buf[i]);
+    }
+
   printf("\n");
 }
 
@@ -485,14 +486,13 @@ void cc1101_setpacketctrl(struct cc1101_dev_s * dev)
   values[1] = 0x00;   /* Clear channel if RSSI < thr && !receiving;
                        * TX -> RX, RX -> RX: 0x3F */
   values[2] = CC1101_MCSM0_VALUE;   /* Calibrate on IDLE -> RX/TX, OSC Timeout = ~500 us
-                         TODO: has XOSC_FORCE_ON */
+                       * TODO: has XOSC_FORCE_ON */
   cc1101_access(dev, CC1101_MCSM2, values, -3);
 
   /* Wake-On Radio Control */
+  /* Not used yet. */
 
-  // Not used yet.
-
-  // WOREVT1:WOREVT0 - 16-bit timeout register
+  /* WOREVT1:WOREVT0 - 16-bit timeout register */
 }
 
 /****************************************************************************
@@ -777,9 +777,9 @@ int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size)
 {
   ASSERT(dev);
 
-  if (buf==NULL)
+  if (buf == NULL)
     {
-      if (size==0)
+      if (size == 0)
         {
           return 64;
         }

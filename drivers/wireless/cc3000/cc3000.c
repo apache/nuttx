@@ -350,7 +350,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t* psem)
+static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t *psem)
 {
   int ret;
 
@@ -404,7 +404,7 @@ static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t* psem)
 
 static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
 {
-  return cc3000_wait(priv,&priv->irqsem);
+  return cc3000_wait(priv, &priv->irqsem);
 }
 
 /****************************************************************************
@@ -426,7 +426,7 @@ static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
 
 static inline int cc3000_wait_ready(FAR struct cc3000_dev_s *priv)
 {
-  return cc3000_wait(priv,&priv->readysem);
+  return cc3000_wait(priv, &priv->readysem);
 }
 
 /****************************************************************************
@@ -531,7 +531,7 @@ static void * select_thread_func(FAR void *arg)
                         {
                           /* Release the waiting threads */
 
-                          waitlldbg("Closed Signaled %d\n",count);
+                          waitlldbg("Closed Signaled %d\n", count);
                           sem_post(&priv->sockets[s].semwait);
                         }
                     }
@@ -631,12 +631,12 @@ static void * cc3000_worker(FAR void *arg)
 
   ASSERT(priv != NULL && priv->config != NULL);
 
-  /* We have started  release our creator*/
+  /* We have started, release our creator */
 
   sem_post(&priv->readysem);
   while (1)
     {
-      PROBE(0,1);
+      PROBE(0, 1);
       CHECK_GUARD(priv);
       cc3000_devtake(priv);
 
@@ -644,8 +644,8 @@ static void * cc3000_worker(FAR void *arg)
 
       if ((cc3000_wait_irq(priv) != -EINTR) && (priv->workertid != -1))
         {
-          PROBE(0,0);
-          nllvdbg("State%d\n",priv->state);
+          PROBE(0, 0);
+          nllvdbg("State%d\n", priv->state);
           switch (priv->state)
             {
             case eSPI_STATE_POWERUP:
@@ -672,7 +672,7 @@ static void * cc3000_worker(FAR void *arg)
 
                 cc3000_lock_and_select(priv->spi); /* Assert CS */
                 priv->state = eSPI_STATE_READ_PROCEED;
-                SPI_EXCHANGE(priv->spi,spi_readCommand, priv->rx_buffer.pbuffer,
+                SPI_EXCHANGE(priv->spi, spi_readCommand, priv->rx_buffer.pbuffer,
                              ARRAY_SIZE(spi_readCommand));
 
                /* Extract Length bytes from Rx Buffer.  Here we need to convert
@@ -738,7 +738,7 @@ static void * cc3000_worker(FAR void *arg)
                             priv->state, priv->config->irq_read(priv->config));
 
                     sem_getvalue(&priv->irqsem, &count);
-                    if (priv->config->irq_read(priv->config) && count==0)
+                    if (priv->config->irq_read(priv->config) && count == 0)
                       {
                         sem_post(&priv->irqsem);
                       }
@@ -754,7 +754,7 @@ static void * cc3000_worker(FAR void *arg)
               break;
 
             default:
-              nllvdbg("default: State%d\n",priv->state);
+              nllvdbg("default: State%d\n", priv->state);
               break;
             }
         }
@@ -787,9 +787,9 @@ static int cc3000_interrupt(int irq, FAR void *context)
 
   /* Run the worker thread */
 
-  PROBE(1,0);
+  PROBE(1, 0);
   sem_post(&priv->irqsem);
-  PROBE(1,1);
+  PROBE(1, 1);
 
   /* Clear any pending interrupts and return success */
 
@@ -867,7 +867,7 @@ static int cc3000_open(FAR struct file *filep)
         }
 #endif
 
-      /* Ensure the power is off  so we get the falling edge of IRQ*/
+      /* Ensure the power is off  so we get the falling edge of IRQ */
 
       priv->config->power_enable(priv->config, false);
 
@@ -887,7 +887,7 @@ static int cc3000_open(FAR struct file *filep)
        */
 
       snprintf(queuename, QUEUE_NAMELEN, QUEUE_FORMAT, priv->minor);
-      priv->queue = mq_open(queuename, O_WRONLY|O_CREAT, 0666, &attr);
+      priv->queue = mq_open(queuename, O_WRONLY | O_CREAT, 0666, &attr);
       if (priv->queue < 0)
         {
           ret = -errno;
@@ -1195,7 +1195,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (nread > 0)
     {
-      memcpy(buffer,priv->rx_buffer.pbuffer,priv->rx_buffer.len);
+      memcpy(buffer, priv->rx_buffer.pbuffer, priv->rx_buffer.len);
       priv->rx_buffer.len = 0;
      }
 
@@ -1235,7 +1235,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
 
   size_t tx_len = (len & 1) ? len : len +1;
 
-  nllvdbg("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len );
+  nllvdbg("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len);
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1431,7 +1431,7 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           rv = priv->rx_buffer_max_len;
           flags = irqsave();
           priv->rx_buffer_max_len = *psize;
-          priv->rx_buffer.pbuffer = kmm_realloc(priv->rx_buffer.pbuffer,*psize);
+          priv->rx_buffer.pbuffer = kmm_realloc(priv->rx_buffer.pbuffer, *psize);
           irqrestore(flags);
           DEBUGASSERT(priv->rx_buffer.pbuffer);
           *psize = rv;
@@ -1606,7 +1606,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
 
   (void)snprintf(semname, SEM_NAMELEN, SEM_FORMAT, minor);
-  priv->wrkwaitsem = sem_open(semname,O_CREAT,0,0); /* Initialize  Worker Wait semaphore */
+  priv->wrkwaitsem = sem_open(semname, O_CREAT, 0, 0); /* Initialize  Worker Wait semaphore */
 
 #ifdef CONFIG_CC3000_MT
   pthread_mutex_init(&g_cc3000_mut, NULL);

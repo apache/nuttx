@@ -167,7 +167,7 @@ int cc3000_socket(int domain, int type, int protocol)
 
   cc3000_lib_lock();
   type = bsd2ti_types[type];
-  sd = cc3000_socket_impl(domain,type,protocol);
+  sd = cc3000_socket_impl(domain, type, protocol);
 #ifdef CONFIG_CC3000_MT
   cc3000_add_socket(sd);
 #endif
@@ -271,12 +271,12 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
      return -errno;
    }
 
-  memset(addr,0,*addrlen);
-  return cc3000_accept_socket(sockfd,addr,addrlen);
+  memset(addr, 0, *addrlen);
+  return cc3000_accept_socket(sockfd, addr, addrlen);
 }
 #else
 {
-  cc3000_accept_socket(sockfd,0);
+  cc3000_accept_socket(sockfd, 0);
   short nonBlocking = CC3000_SOCK_OFF;
 
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
@@ -286,7 +286,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
      return -errno;
    }
 
-  return cc3000_do_accept(int sockfd, addr, addrlen);;
+  return cc3000_do_accept(sockfd, addr, addrlen);
 }
 #endif
 
@@ -352,7 +352,7 @@ int cc3000_listen(int sockfd, int backlog)
   int ret;
 
   cc3000_lib_lock();
-  ret = cc3000_listen_impl(sockfd,backlog);
+  ret = cc3000_listen_impl(sockfd, backlog);
   cc3000_lib_unlock();
   return ret;
 }
@@ -436,8 +436,8 @@ int cc3000_connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrle
  *
  ****************************************************************************/
 
-int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
-           struct timeval *timeout)
+int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,
+                  fd_set *exceptfds, struct timeval *timeout)
 {
   int ret;
 
@@ -765,8 +765,10 @@ ssize_t cc3000_sendto(int sockfd, FAR const void *buf, size_t len, int flags,
  ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
-// TODO: Standard is struct hostent *gethostbyname(const char *name);
-int cc3000_gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out_ip_addr)
+/* REVISIT: Standard is struct hostent *gethostbyname(const char *name); */
+
+int cc3000_gethostbyname(char *hostname, uint16_t usNameLen,
+                         unsigned long *out_ip_addr)
 {
   int ret;
 

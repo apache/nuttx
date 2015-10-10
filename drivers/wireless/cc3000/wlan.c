@@ -222,7 +222,7 @@ void wlan_init(size_t max_tx_len,
   /* Init I/O callback */
   /* Init asynchronous events callback */
 
-  tSLInformation.sWlanCB= sWlanCB;
+  tSLInformation.sWlanCB = sWlanCB;
 
   /* By default TX Complete events are routed to host too */
 
@@ -624,7 +624,7 @@ long wlan_add_profile(unsigned long ulSecType, uint8_t *ucSsid,
                       unsigned long ulPriority,
                       unsigned long ulPairwiseCipher_Or_TxKeyLen,
                       unsigned long ulGroupCipher_TxKeyIndex,
-                      unsigned long ulKeyMgmt, uint8_t* ucPf_OrKey,
+                      unsigned long ulKeyMgmt, uint8_t *ucPf_OrKey,
                       unsigned long ulPassPhraseLen)
 {
   uint16_t arg_len = 0;
@@ -702,7 +702,7 @@ long wlan_add_profile(unsigned long ulSecType, uint8_t *ucSsid,
       }
       break;
 
-    /*WPA, WPA2 */
+    /* WPA, WPA2 */
 
     case WLAN_SEC_WPA:
     case WLAN_SEC_WPA2:
@@ -907,7 +907,8 @@ long wlan_ioctl_set_scan_params(unsigned long uiEnable,
                                 unsigned long uiMinDwellTime,
                                 unsigned long uiMaxDwellTime,
                                 unsigned long uiNumOfProbeRequests,
-                                unsigned long uiChannelMask,long iRSSIThreshold,
+                                unsigned long uiChannelMask,
+                                long iRSSIThreshold,
                                 unsigned long uiSNRThreshold,
                                 unsigned long uiDefaultTxPower,
                                 unsigned long *aiIntervalList)
@@ -1163,7 +1164,7 @@ long wlan_smart_config_stop(void)
  *
  ****************************************************************************/
 
-long wlan_smart_config_set_prefix(char* cNewPrefix)
+long wlan_smart_config_set_prefix(FAR char *cNewPrefix)
 {
   long ret;
   uint8_t *ptr;

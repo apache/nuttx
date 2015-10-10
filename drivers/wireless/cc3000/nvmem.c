@@ -165,7 +165,7 @@ signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
   args = UINT32_TO_STREAM(args, ulEntryOffset);
 
   memcpy((ptr + SPI_HEADER_SIZE + HCI_DATA_CMD_HEADER_SIZE +
-          NVMEM_WRITE_PARAMS_LEN),buff,ulLength);
+          NVMEM_WRITE_PARAMS_LEN), buff, ulLength);
 
   /* Initiate a HCI command but it will come on data channel */
 
@@ -241,9 +241,9 @@ uint8_t nvmem_get_mac_address(uint8_t *mac)
 uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
                           const uint8_t *spData)
 {
-  uint8_t   status = 0;
-  uint16_t  offset = 0;
-  uint8_t  *spDataPtr = (uint8_t*)spData;
+  FAR uint8_t *spDataPtr = (FAR uint8_t *)spData;
+  uint8_t status = 0;
+  uint16_t offset = 0;
 
   while ((status == 0) && (spLength >= SP_PORTION_SIZE))
     {
@@ -253,7 +253,7 @@ uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
       spDataPtr += SP_PORTION_SIZE;
     }
 
-  if (status !=0)
+  if (status != 0)
     {
       /* NVMEM error occurred */
 
@@ -349,14 +349,14 @@ signed long nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen)
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
-  /*( Fill in HCI packet structure */
+  /* Fill in HCI packet structure */
 
   args = UINT32_TO_STREAM(args, ulFileId);
   args = UINT32_TO_STREAM(args, ulNewLen);
 
   /* Initiate a HCI command */
 
-  hci_command_send(HCI_CMND_NVMEM_CREATE_ENTRY,ptr, NVMEM_CREATE_PARAMS_LEN);
+  hci_command_send(HCI_CMND_NVMEM_CREATE_ENTRY, ptr, NVMEM_CREATE_PARAMS_LEN);
 
   SimpleLinkWaitEvent(HCI_CMND_NVMEM_CREATE_ENTRY, &retval);
 

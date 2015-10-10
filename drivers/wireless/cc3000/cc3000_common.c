@@ -117,7 +117,7 @@ uint8_t *UINT16_TO_STREAM_f(uint8_t *p, uint16_t u16)
  *
  ****************************************************************************/
 
-uint16_t STREAM_TO_UINT16_f(char* p, uint16_t offset)
+uint16_t STREAM_TO_UINT16_f(FAR char *p, uint16_t offset)
 {
   return (uint16_t)((uint16_t)((uint16_t)
          (*(p + offset + 1)) << 8) + (uint16_t)(*(p + offset)));
@@ -139,7 +139,7 @@ uint16_t STREAM_TO_UINT16_f(char* p, uint16_t offset)
  *
  ****************************************************************************/
 
-unsigned long STREAM_TO_UINT32_f(char* p, uint16_t offset)
+unsigned long STREAM_TO_UINT32_f(FAR char *p, uint16_t offset)
 {
   return (unsigned long)((unsigned long)((unsigned long)
          (*(p + offset + 3)) << 24) + (unsigned long)((unsigned long)

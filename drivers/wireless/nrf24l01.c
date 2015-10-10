@@ -325,7 +325,7 @@ static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
    * As we own the SPI bus this method is called just once.
    */
 
-  SPI_SELECT(spi, SPIDEV_WIRELESS, true);  // Useful ?
+  SPI_SELECT(spi, SPIDEV_WIRELESS, true);  /* Useful ? */
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
   SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
@@ -663,7 +663,7 @@ static void nrf24l01_tostate(struct nrf24l01_dev_s *dev, nrf24l01_state_t state)
 
   /* Entering new state */
 
-  switch(state)
+  switch (state)
     {
     case ST_UNKNOWN:
       /* Power down the module here... */
@@ -980,7 +980,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case NRF24L01IOC_GETRETRCFG:  /* Get retransmit params. arg: Pointer to nrf24l01_retrcfg_t */
-        result = -ENOSYS;  /* TODO !*/
+        result = -ENOSYS;  /* TODO */
         break;
 
       case NRF24L01IOC_SETPIPESCFG:
@@ -1053,7 +1053,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
 
       case NRF24L01IOC_GETDATARATE:
-        result = -ENOSYS;  /* TODO !*/
+        result = -ENOSYS;  /* TODO */
         break;
 
       case NRF24L01IOC_SETADDRWIDTH:
@@ -1351,7 +1351,8 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev)
 
   /* Clear interrupt sources (useful ?) */
 
-  nrf24l01_writeregbyte(dev, NRF24L01_STATUS, NRF24L01_RX_DR|NRF24L01_TX_DS|NRF24L01_MAX_RT);
+  nrf24l01_writeregbyte(dev, NRF24L01_STATUS,
+                        NRF24L01_RX_DR | NRF24L01_TX_DS | NRF24L01_MAX_RT);
 
 out:
   nrf24l01_unlock(dev->spi);
@@ -1523,7 +1524,7 @@ int nrf24l01_settxpower(FAR struct nrf24l01_dev_s *dev, int outpower)
    * '11' – 0dBm
    */
 
-  switch(outpower)
+  switch (outpower)
     {
     case 0:
       hwpow = 3 << NRF24L01_RF_PWR_SHIFT;

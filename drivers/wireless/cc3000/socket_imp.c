@@ -514,7 +514,8 @@ long cc3000_listen_impl(long sd, long backlog)
  ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
-int cc3000_gethostbyname_impl(char * hostname, uint16_t usNameLen, unsigned long* out_ip_addr)
+int cc3000_gethostbyname_impl(char *hostname, uint16_t usNameLen,
+                              unsigned long *out_ip_addr)
 {
   tBsdGethostbynameParams ret;
   uint8_t *ptr, *args;
@@ -546,7 +547,7 @@ int cc3000_gethostbyname_impl(char * hostname, uint16_t usNameLen, unsigned long
 
   set_errno(ret.retVal);
 
-  (*((long*)out_ip_addr)) = ret.outputAddress;
+  (*((FAR long *)out_ip_addr)) = ret.outputAddress;
 
   return ret.retVal;
 }
@@ -680,9 +681,9 @@ int cc3000_select_impl(long nfds, TICC3000fd_set *readsds, TICC3000fd_set *write
   args = UINT32_TO_STREAM(args, 0x00000014);
   args = UINT32_TO_STREAM(args, 0x00000014);
   args = UINT32_TO_STREAM(args, is_blocking);
-  args = UINT32_TO_STREAM(args, ((readsds) ? *(unsigned long*)readsds : 0));
-  args = UINT32_TO_STREAM(args, ((writesds) ? *(unsigned long*)writesds : 0));
-  args = UINT32_TO_STREAM(args, ((exceptsds) ? *(unsigned long*)exceptsds : 0));
+  args = UINT32_TO_STREAM(args, ((readsds) ? *(FAR unsigned long *)readsds : 0));
+  args = UINT32_TO_STREAM(args, ((writesds) ? *(FAR unsigned long *)writesds : 0));
+  args = UINT32_TO_STREAM(args, ((exceptsds) ? *(FAR unsigned long *)exceptsds : 0));
 
   if (timeout)
     {
@@ -1078,7 +1079,7 @@ int simple_link_send(long sd, const void *buf, long len, long flags,
 
   /* Update the offset of data and parameters according to the command */
 
-  switch(opcode)
+  switch (opcode)
     {
     case HCI_CMND_SENDTO:
       {
@@ -1119,18 +1120,18 @@ int simple_link_send(long sd, const void *buf, long len, long flags,
 
   /* Copy the data received from user into the TX Buffer */
 
-  ARRAY_TO_STREAM(pDataPtr, ((uint8_t *)buf), len);
+  ARRAY_TO_STREAM(pDataPtr, ((FAR uint8_t *)buf), len);
 
   /* In case we are using SendTo, copy the to parameters */
 
   if (opcode == HCI_CMND_SENDTO)
     {
-      ARRAY_TO_STREAM(pDataPtr, ((uint8_t *)to), tolen);
+      ARRAY_TO_STREAM(pDataPtr, ((FAR uint8_t *)to), tolen);
     }
 
   /* Initiate a HCI command */
 
-  hci_data_send(opcode, ptr, uArgSize, len,(uint8_t*)to, tolen);
+  hci_data_send(opcode, ptr, uArgSize, len, (FAR uint8_t *)to, tolen);
 
   if (opcode == HCI_CMND_SENDTO)
     {

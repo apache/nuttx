@@ -129,11 +129,11 @@ long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
 
   /* Fill in temporary command buffer */
 
-  ARRAY_TO_STREAM(args,aucIP,4);
-  ARRAY_TO_STREAM(args,aucSubnetMask,4);
-  ARRAY_TO_STREAM(args,aucDefaultGateway,4);
+  ARRAY_TO_STREAM(args, aucIP, 4);
+  ARRAY_TO_STREAM(args, aucSubnetMask, 4);
+  ARRAY_TO_STREAM(args, aucDefaultGateway, 4);
   args = UINT32_TO_STREAM(args, 0);
-  ARRAY_TO_STREAM(args,aucDNSServer,4);
+  ARRAY_TO_STREAM(args, aucDNSServer, 4);
 
   /* Initiate a HCI command */
 
