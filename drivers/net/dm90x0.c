@@ -478,7 +478,7 @@ static void read16(FAR uint8_t *ptr, int len)
     }
 }
 
-static void read32(FARuint8_t *ptr, int len)
+static void read32(FAR uint8_t *ptr, int len)
 {
   FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
 
