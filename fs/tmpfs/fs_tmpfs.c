@@ -349,6 +349,11 @@ static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
   newtdo->tdo_nentries = nentries;
   *tdo                 = newtdo;
 
+  /* Adjust the reference in the parent directory entry */
+
+  DEBUGASSERT(newtdo->tdo_dirent);
+  newtdo->tdo_dirent->tde_object = (FAR struct tmpfs_object_s *)newtdo;
+
   /* Return the index to the first, newly allocated directory entry */
 
   return ret;
@@ -413,7 +418,7 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
   /* Adjust the reference in the parent directory entry */
 
   DEBUGASSERT(newtfo->tfo_dirent);
-  newtfo->tfo_dirent->tde_object = (FAR struct tmpfs_object_s *)tfo;
+  newtfo->tfo_dirent->tde_object = (FAR struct tmpfs_object_s *)newtfo;
 
   /* Return the new address of the reallocated file object */
 
@@ -665,7 +670,7 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
       /* No subdirectories... use the root directory */
 
       name   = copy;
-      parent = fs->tfs_root;
+      parent = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
 
       /* Lock the root directory to emulate the behavior of tmpfs_find_directory() */
 
@@ -823,7 +828,7 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
       /* No subdirectories... use the root directory */
 
       name   = copy;
-      parent = fs->tfs_root;
+      parent = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
 
       tmpfs_lock_directory(parent);
       parent->tdo_refs++;
@@ -942,8 +947,8 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
 
   /* Traverse the file system for any object with the matching name */
 
-  to       = (FAR struct tmpfs_object_s *)fs->tfs_root;
-  next_tdo = fs->tfs_root;
+  to       = fs->tfs_root.tde_object;
+  next_tdo = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
 
   for (segment =  strtok_r(copy, "/", &tkptr);
        segment != NULL;
@@ -1351,7 +1356,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
   inode = filep->f_inode;
   fs    = inode->i_private;
 
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 
@@ -1765,7 +1770,7 @@ static int tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Get the mountpoint private data from the inode structure */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 
@@ -1914,6 +1919,7 @@ static int tmpfs_rewinddir(FAR struct inode *mountpt,
 static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                       FAR void **handle)
 {
+  FAR struct tmpfs_directory_s *tdo;
   FAR struct tmpfs_s *fs;
 
   fvdbg("blkdriver: %p data: %p handle: %p\n", blkdriver, data, handle);
@@ -1927,14 +1933,23 @@ static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       return -ENOMEM;
     }
 
-  /* Create a root file system */
+  /* Create a root file system.  This is like a single directory entry in
+   * the file system structure.
+   */
 
-  fs->tfs_root = tmpfs_alloc_directory();
-  if (fs->tfs_root == NULL)
+  tdo = tmpfs_alloc_directory();
+  if (tdo == NULL)
     {
       kmm_free(fs);
       return -ENOMEM;
     }
+
+  fs->tfs_root.tde_object = (FAR struct tmpfs_object_s *)tdo;
+  fs->tfs_root.tde_name   = "";
+
+  /* Set up the backward link (to support reallocation) */
+
+  tdo->tdo_dirent         = &fs->tfs_root;
 
   /* Initialize the file system state */
 
@@ -1961,7 +1976,7 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   fvdbg("handle: %p blkdriver: %p flags: %02x\n",
         handle, blkdriver, flags);
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Lock the file system */
 
@@ -1969,7 +1984,7 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Traverse all directory entries (recursively), freeing all resources. */
 
-  tdo = fs->tfs_root;
+  tdo = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
   ret = tmpfs_foreach(tdo, tmpfs_free_callout, NULL);
 
   /* Now we can destroy the root file system and the file system itself. */
@@ -2003,7 +2018,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   /* Get the file system structure from the inode reference. */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 
@@ -2011,7 +2026,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Set up the memory use for the file system and root directory object */
 
-  tdo              = fs->tfs_root;
+  tdo              = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
   inuse            = sizeof(struct tmpfs_s) +
                      SIZEOF_TMPFS_DIRECTORY(tdo->tdo_nentries);
   avail            = sizeof(struct tmpfs_s) +
@@ -2024,8 +2039,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Traverse the file system to accurmulate statistics */
 
-  ret = tmpfs_foreach(fs->tfs_root, tmpfs_statfs_callout,
-                      (FAR void *)&tmpbuf);
+  ret = tmpfs_foreach(tdo, tmpfs_statfs_callout, (FAR void *)&tmpbuf);
   if (ret < 0)
     {
       return -ECANCELED;
@@ -2071,7 +2085,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   /* Get the file system structure from the inode reference. */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 
@@ -2171,7 +2185,7 @@ static int tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Get the file system structure from the inode reference. */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 
@@ -2202,7 +2216,7 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   /* Get the file system structure from the inode reference. */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 
@@ -2304,7 +2318,7 @@ static int tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   /* Get the file system structure from the inode reference. */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Duplicate the newpath variable so that we can modify it */
 
@@ -2328,7 +2342,7 @@ static int tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
       /* No subdirectories... use the root directory */
 
       newname   = copy;
-      newparent = fs->tfs_root;
+      newparent = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
 
       tmpfs_lock_directory(newparent);
       newparent->tdo_refs++;
@@ -2442,7 +2456,7 @@ static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   /* Get the file system structure from the inode reference. */
 
   fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root != NULL);
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
   /* Get exclusive access to the file system */
 

@@ -165,7 +165,7 @@ struct tmpfs_s
 {
   /* The root directory */
 
-  FAR struct tmpfs_directory_s *tfs_root;
+  FAR struct tmpfs_dirent_s tfs_root;
   struct tmpfs_sem_s tfs_exclsem;
 };
 
