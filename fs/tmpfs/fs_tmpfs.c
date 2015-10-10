@@ -409,7 +409,7 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
 
   /* Realloc the file object */
 
-  newtfo = (FAR struct tmpfs_file_s *)kmm_realloc(oldtfo, objsize);
+  newtfo = (FAR struct tmpfs_file_s *)kmm_realloc(oldtfo, allocsize);
   if (newtfo == NULL)
     {
       return -ENOMEM;
@@ -423,7 +423,7 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
   /* Return the new address of the reallocated file object */
 
   newtfo->tfo_alloc = allocsize;
-  newtfo->tfo_size  = objsize;
+  newtfo->tfo_size  = newsize;
   *tfo              = newtfo;
   return OK;
 }
@@ -1558,7 +1558,7 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Copy data from the memory object to the user buffer */
 
-  memcpy(buffer, &tfo->tfo_data, nread);
+  memcpy(buffer, &tfo->tfo_data[startpos], nread);
   filep->f_pos += nread;
 
   /* Release the lock on the file */
@@ -1613,7 +1613,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Copy data from the memory object to the user buffer */
 
-  memcpy(&tfo->tfo_data, buffer, nwritten);
+  memcpy(&tfo->tfo_data[startpos], buffer, nwritten);
   filep->f_pos += nwritten;
 
   /* Release the lock on the file */
