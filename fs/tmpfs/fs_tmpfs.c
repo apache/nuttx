@@ -1734,7 +1734,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Recover our private data from the struct file instance */
 
-  tfo = oldp->f_inode->i_private;
+  tfo = oldp->f_priv;
   DEBUGASSERT(tfo != NULL);
 
   /* Increment the reference count (atomically)*/
@@ -1748,7 +1748,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * structures so there is not really much to the dup operation.
    */
 
-  newp->f_inode->i_private = tfo;
+  newp->f_priv = tfo;
   return OK;
 }
 
