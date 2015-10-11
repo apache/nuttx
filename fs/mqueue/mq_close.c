@@ -164,25 +164,25 @@ void mq_inode_release(FAR struct inode *inode)
    * the inode now.
    */
 
-   if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
-     {
-       FAR struct mqueue_inode_s *msgq = inode->u.i_mqueue;
-       DEBUGASSERT(msgq);
+  if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
+    {
+      FAR struct mqueue_inode_s *msgq = inode->u.i_mqueue;
+      DEBUGASSERT(msgq);
 
-       /* Free the message queue (and any messages left in it) */
+      /* Free the message queue (and any messages left in it) */
 
-       mq_msgqfree(msgq);
-       inode->u.i_mqueue = NULL;
+      mq_msgqfree(msgq);
+      inode->u.i_mqueue = NULL;
 
-       /* Release and free the inode container.  If it has been properly
-        * unlinked, then the peer pointer should be NULL.
-        */
+      /* Release and free the inode container.  If it has been properly
+       * unlinked, then the peer pointer should be NULL.
+       */
 
-       inode_semgive();
+      inode_semgive();
 
-       DEBUGASSERT(inode->i_peer == NULL);
-       inode_free(inode);
-       return;
+      DEBUGASSERT(inode->i_peer == NULL);
+      inode_free(inode);
+      return;
     }
 
   inode_semgive();

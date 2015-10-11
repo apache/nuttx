@@ -149,16 +149,16 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
       return ERROR;
     }
 
-   spaceleft = (blkinfo->nblocks - blkinfo->block) * blkinfo->geo.blocksize;
-   spaceleft -= (offset + SIZEOF_NXFFS_BLOCK_HDR);
-   if (datlen > spaceleft)
-     {
-       /* The data length is greater than what would fit in the rest of FLASH
-        * (even ignoring block and data header sizes.
-        */
+  spaceleft = (blkinfo->nblocks - blkinfo->block) * blkinfo->geo.blocksize;
+  spaceleft -= (offset + SIZEOF_NXFFS_BLOCK_HDR);
+  if (datlen > spaceleft)
+    {
+      /* The data length is greater than what would fit in the rest of FLASH
+       * (even ignoring block and data header sizes.
+       */
 
-       return ERROR;
-     }
+      return ERROR;
+    }
 
   /* The name begins after the inode header.  Does it begin in this block? */
 

@@ -101,7 +101,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
        * signature and position in the operations vtable.
        */
 
-      ret = (int)inode->u.i_ops->read(filep, (char*)buf, (size_t)nbytes);
+      ret = (int)inode->u.i_ops->read(filep, (FAR char *)buf, (size_t)nbytes);
     }
 
   /* If an error occurred, set errno and return -1 (ERROR) */

@@ -238,7 +238,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
           if (readfds)
             {
-              if (pollset[ndx].revents & (POLLIN|POLLHUP))
+              if (pollset[ndx].revents & (POLLIN | POLLHUP))
                 {
                   FD_SET(pollset[ndx].fd, readfds);
                   ret++;

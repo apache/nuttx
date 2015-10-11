@@ -93,7 +93,7 @@ int mksmartfs(FAR const char *pathname, uint8_t nrootdirs)
 int mksmartfs(FAR const char *pathname)
 #endif
 {
-  struct inode* inode;
+  FAR struct inode *inode;
   struct smart_format_s fmt;
   int ret;
   int x;

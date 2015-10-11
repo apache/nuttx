@@ -647,33 +647,33 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
               /* Test if we skipped this entry */
 
               if (name != NULL)
-              {
-                /* This entry is okay to report. Test if it has a duplicate
-                 * first level name as the one we just reported.  This could
-                 * happen in the event of procfs_entry_s such as:
-                 *
-                 *    fs/smartfs
-                 *    fs/nfs
-                 *    fs/nxffs
-                 */
+                {
+                  /* This entry is okay to report. Test if it has a duplicate
+                   * first level name as the one we just reported.  This could
+                   * happen in the event of procfs_entry_s such as:
+                   *
+                   *    fs/smartfs
+                   *    fs/nfs
+                   *    fs/nxffs
+                   */
 
-                name = g_procfsentries[index - priv->nentries].pathpattern;
-                if (!level0->lastlen || (strncmp(name, level0->lastread,
+                  name = g_procfsentries[index - priv->nentries].pathpattern;
+                  if (!level0->lastlen || (strncmp(name, level0->lastread,
                       level0->lastlen) != 0))
-                  {
-                    /* Not a duplicate, return the first segment of this
-                     * entry
-                     */
+                    {
+                      /* Not a duplicate, return the first segment of this
+                       * entry
+                       */
 
-                    break;
-                  }
-                else
-                  {
-                    /* Skip this entry ... duplicate 1st level name found */
+                      break;
+                    }
+                  else
+                    {
+                      /* Skip this entry ... duplicate 1st level name found */
 
-                    index++;
-                  }
-              }
+                      index++;
+                    }
+                }
             }
 
           /* Test if we are at the end of the directory */
@@ -915,7 +915,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
       /* The path refers to the top level directory */
       /* It's a read-only directory */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
       ret = OK;
     }
   else
@@ -945,7 +945,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
             {
               /* It's an internal subdirectory */
 
-              buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+              buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
               ret = OK;
               break;
             }

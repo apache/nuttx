@@ -127,23 +127,23 @@ int sem_close(FAR sem_t *sem)
    * now.
    */
 
-   if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
-     {
-       /* Destroy the semaphore and free the container */
+  if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
+    {
+      /* Destroy the semaphore and free the container */
 
-       sem_destroy(&nsem->ns_sem);
-       group_free(NULL, nsem);
+      sem_destroy(&nsem->ns_sem);
+      group_free(NULL, nsem);
 
-       /* Release and free the inode container.  If it has been properly
-        * unlinked, then the peer pointer should be NULL.
-        */
+      /* Release and free the inode container.  If it has been properly
+       * unlinked, then the peer pointer should be NULL.
+       */
 
-       inode_semgive();
+      inode_semgive();
 
-       DEBUGASSERT(inode->i_peer == NULL);
-       inode_free(inode);
-       return OK;
-     }
+      DEBUGASSERT(inode->i_peer == NULL);
+      inode_free(inode);
+      return OK;
+    }
 
   inode_semgive();
   return OK;

@@ -385,7 +385,7 @@ void files_release(int fd)
   list = sched_getfiles();
   DEBUGASSERT(list);
 
-  if (fd >=0 && fd < CONFIG_NFILE_DESCRIPTORS)
+  if (fd >= 0 && fd < CONFIG_NFILE_DESCRIPTORS)
     {
       _files_semtake(list);
       list->fl_files[fd].f_oflags  = 0;

@@ -441,7 +441,7 @@ static int skel_stat(const char *relpath, struct stat *buf)
    *        or a directory and set it's permissions.
    */
 
-  buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
   ret = OK;
 
   /* File/directory size, access block size */

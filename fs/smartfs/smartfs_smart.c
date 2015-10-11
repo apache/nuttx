@@ -236,7 +236,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
       /* It would be an error if we are asked to create it exclusively */
 
-      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
           /* Already exists -- can't create it exclusively */
 
@@ -435,7 +435,7 @@ static int smartfs_close(FAR struct file *filep)
 
   /* Now free the pointer */
 
-  filep->f_priv = NULL;;
+  filep->f_priv = NULL;
   if (sf->entry.name != NULL)
     {
       /* Free the space for the name too */
@@ -1532,7 +1532,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
       return ret;
     }
 
-  *handle = (void*)fs;
+  *handle = (FAR void *)fs;
   smartfs_semgive(fs);
   return OK;
 }
@@ -1548,7 +1548,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
 static int smartfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                           unsigned int flags)
 {
-  struct smartfs_mountpt_s *fs = (struct smartfs_mountpt_s*)handle;
+  FAR struct smartfs_mountpt_s *fs = (FAR struct smartfs_mountpt_s *)handle;
   int ret;
 
   if (!fs)
@@ -2105,7 +2105,8 @@ static int smartfs_stat(struct inode *mountpt, const char *relpath, struct stat 
     {
       /* It's directory name of the mount point */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IWOTH|S_IWGRP|S_IWUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
+                     S_IWGRP | S_IWUSR;
       ret = OK;
       goto errout_with_semaphore;
     }

@@ -90,7 +90,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
 
   /* Loop until the name is successfully parsed or an error occurs */
 
-  for (;;)
+  for (; ; )
     {
       /* Get the next byte from the path */
 
@@ -102,7 +102,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
         {
           /* This logic just suppors "//" sequences in the path name */
 
-          if (ch == '\0' || nbytes > 0 )
+          if (ch == '\0' || nbytes > 0)
             {
               /* NULL terminate the parsed path segment */
 
@@ -433,7 +433,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
    * to the path is found.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Extract the next path segment name. */
 
@@ -494,7 +494,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
  * Desciption:
  *   Given a path to something that may or may not be in the file system,
  *   return the handle of the entry of the directory containing the requested
-*    object.
+ *   object.
  *
  * Return Value:
  *   Zero on success; a positive errno value on failure.
@@ -527,7 +527,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
 
   /* Loop until the directory entry containing the path is found. */
 
-  for (;;)
+  for (; ; )
     {
       /* Extract the next path segment name. */
 

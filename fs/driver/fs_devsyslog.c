@@ -108,7 +108,10 @@ struct syslog_dev_s
 /* This is the device structure for the console or syslogging function. */
 
 static struct syslog_dev_s g_sysdev;
-static const uint8_t       g_syscrlf[2]  = { '\r', '\n' };
+static const uint8_t g_syscrlf[2] =
+{
+  '\r', '\n'
+};
 
 /****************************************************************************
  * Private Functions

@@ -229,7 +229,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
       /* It would be an error if we are asked to create it exclusively */
 
-      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
           /* Already exists -- can't create it exclusively */
 
@@ -256,7 +256,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
        * access is ignored.
        */
 
-      if ((oflags & (O_TRUNC|O_WRONLY)) == (O_TRUNC|O_WRONLY))
+      if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
         {
           /* Truncate the file to zero length */
 
@@ -314,7 +314,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  ff = (struct fat_file_s *)kmm_zalloc(sizeof(struct fat_file_s));
+  ff = (FAR struct fat_file_s *)kmm_zalloc(sizeof(struct fat_file_s));
   if (!ff)
     {
       ret = -ENOMEM;
@@ -323,7 +323,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Create a file buffer to support partial sector accesses */
 
-  ff->ff_buffer = (uint8_t*)fat_io_alloc(fs->fs_hwsectorsize);
+  ff->ff_buffer = (FAR uint8_t *)fat_io_alloc(fs->fs_hwsectorsize);
   if (!ff->ff_buffer)
     {
       ret = -ENOMEM;
@@ -366,7 +366,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
   /* In write/append mode, we need to set the file pointer to the end of the file */
 
-  if ((oflags & (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
+  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
     {
       off_t offset = fat_seek(filep, ff->ff_size, SEEK_SET);
       if (offset < 0)
@@ -482,7 +482,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
   unsigned int nsectors;
   size_t bytesleft;
   int32_t cluster;
-  FAR uint8_t *userbuffer = (uint8_t*)buffer;
+  FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
   int sectorindex;
   int ret;
   bool force_indirect = false;
@@ -710,7 +710,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
   unsigned int byteswritten;
   unsigned int writesize;
   unsigned int nsectors;
-  FAR uint8_t *userbuffer = (uint8_t*)buffer;
+  FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
   int sectorindex;
   int ret;
   bool force_indirect = false;
@@ -970,7 +970,7 @@ fat_write_restart:
            */
 
           memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
-          ff->ff_bflags |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
+          ff->ff_bflags |= (FFBUFF_DIRTY | FFBUFF_VALID | FFBUFF_MODIFIED);
         }
 
       /* Set up for the next write */
@@ -1119,7 +1119,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
        */
 
       clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
-      for (;;)
+      for (; ; )
         {
           /* Skip over clusters prior to the one containing
            * the requested position.
@@ -1436,7 +1436,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newff = (struct fat_file_s *)kmm_malloc(sizeof(struct fat_file_s));
+  newff = (FAR struct fat_file_s *)kmm_malloc(sizeof(struct fat_file_s));
   if (!newff)
     {
       ret = -ENOMEM;
@@ -1445,7 +1445,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Create a file buffer to support partial sector accesses */
 
-  newff->ff_buffer = (uint8_t*)fat_io_alloc(fs->fs_hwsectorsize);
+  newff->ff_buffer = (FAR uint8_t *)fat_io_alloc(fs->fs_hwsectorsize);
   if (!newff->ff_buffer)
     {
       ret = -ENOMEM;
@@ -1873,7 +1873,7 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
       return ret;
     }
 
-  *handle = (void*)fs;
+  *handle = (FAR void *)fs;
   fat_semgive(fs);
   return OK;
 }
@@ -1889,7 +1889,7 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
 static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
                       unsigned int flags)
 {
-  FAR struct fat_mountpt_s *fs = (FAR struct fat_mountpt_s*)handle;
+  FAR struct fat_mountpt_s *fs = (FAR struct fat_mountpt_s *)handle;
 
   if (!fs)
     {
@@ -2525,7 +2525,8 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
     {
       /* It's directory name of the mount point */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IWOTH|S_IWGRP|S_IWUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
+                     S_IWGRP | S_IWUSR;
       ret = OK;
       goto errout_with_semaphore;
     }
@@ -2544,10 +2545,10 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
    * by everyone but may be writeable by no-one.
    */
 
-  buf->st_mode = S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
   if ((attribute & FATATTR_READONLY) == 0)
     {
-      buf->st_mode |= S_IWOTH|S_IWGRP|S_IWUSR;
+      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
     }
 
   /* We will report only types file or directory */

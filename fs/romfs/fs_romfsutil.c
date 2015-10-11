@@ -108,7 +108,7 @@ static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
 {
   /* Extract the value */
 
-  uint32_t value = *(uint32_t*)&rm->rm_buffer[ndx];
+  uint32_t value = *(FAR uint32_t *)&rm->rm_buffer[ndx];
 
   /* Value is begin endian -- return the native host endian-ness. */
 #ifdef CONFIG_ENDIAN_BIG
@@ -228,7 +228,7 @@ int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
         }
       else
         {
-          /* In non-XIP mode, we will have to read the new sector.*/
+          /* In non-XIP mode, we will have to read the new sector. */
 
           ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
           if (ret < 0)
@@ -477,7 +477,7 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
         }
       else
         {
-          /* In non-XIP mode, we will have to read the new sector.*/
+          /* In non-XIP mode, we will have to read the new sector. */
 
           fvdbg("Calling romfs_hwread\n");
           ret = romfs_hwread(rm, rf->rf_buffer, sector, 1);
@@ -560,7 +560,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   /* Allocate the device cache buffer for normal sector accesses */
 
-  rm->rm_buffer = (uint8_t*)kmm_malloc(rm->rm_hwsectorsize);
+  rm->rm_buffer = (FAR uint8_t *)kmm_malloc(rm->rm_hwsectorsize);
   if (!rm->rm_buffer)
     {
       return -ENOMEM;
@@ -608,7 +608,7 @@ int romfs_fsconfigure(struct romfs_mountpt_s *rm)
 
   /* The root directory entry begins right after the header */
 
-  name              = (const char*)&rm->rm_buffer[ROMFS_VHDR_VOLNAME];
+  name              = (FAR const char *)&rm->rm_buffer[ROMFS_VHDR_VOLNAME];
   rm->rm_rootoffset = ROMFS_ALIGNUP(ROMFS_VHDR_VOLNAME + strlen(name) + 1);
 
   /* and return success */
@@ -648,7 +648,7 @@ int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
 
       /* Create a file buffer to support partial sector accesses */
 
-      rf->rf_buffer = (uint8_t*)kmm_malloc(rm->rm_hwsectorsize);
+      rf->rf_buffer = (FAR uint8_t *)kmm_malloc(rm->rm_hwsectorsize);
       if (!rf->rf_buffer)
         {
           return -ENOMEM;
@@ -738,7 +738,7 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm,
   entryname    = path;
   terminator = NULL;
 
-  for (;;)
+  for (; ; )
     {
       /* Find the start of the next path component */
 
@@ -876,7 +876,7 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
    */
 
   offset += ROMFS_FHDR_NAME;
-  for (namelen = 0, done = false; namelen < NAME_MAX && !done;)
+  for (namelen = 0, done = false; namelen < NAME_MAX && !done; )
     {
       /* Read the sector into memory */
 
@@ -892,7 +892,7 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
         {
           /* Yes.. then this chunk is less than 16 */
 
-          chunklen = strlen((char*)&rm->rm_buffer[ndx]);
+          chunklen = strlen((FAR char *)&rm->rm_buffer[ndx]);
           done     = true;
         }
       else
@@ -948,7 +948,7 @@ int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
   /* Loop until the header size is obtained. */
 
   offset += ROMFS_FHDR_NAME;
-  for (;;)
+  for (; ; )
     {
       /* Read the sector into memory */
 

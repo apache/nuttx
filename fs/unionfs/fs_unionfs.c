@@ -2085,7 +2085,8 @@ static int unionfs_unlink(FAR struct inode *mountpt,
     }
 
   /* Check if some exists at this path on file system 1.  This might be
-   * a file or a directory*/
+   * a file or a directory
+   */
 
   um  = &ui->ui_fs[0];
   ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
@@ -2612,7 +2613,6 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 errout_with_semaphore:
   inode_semgive();
 
-//errout_with_prefix2:
   if (ui->ui_fs[1].um_prefix != NULL)
     {
       kmm_free(ui->ui_fs[1].um_prefix);

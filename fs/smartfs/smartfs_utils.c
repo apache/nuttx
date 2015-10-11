@@ -74,7 +74,7 @@
 
 #if defined(CONFIG_SMARTFS_MULTI_ROOT_DIRS) || \
   (defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS))
-static struct smartfs_mountpt_s* g_mounthead = NULL;
+static struct smartfs_mountpt_s *g_mounthead = NULL;
 #endif
 
 /****************************************************************************
@@ -840,11 +840,11 @@ errout:
  *
  ****************************************************************************/
 
-int smartfs_createentry(struct smartfs_mountpt_s *fs,
-        uint16_t parentdirsector, const char* filename,
-        uint16_t type,
-        mode_t mode, struct smartfs_entry_s *direntry,
-        uint16_t sectorno, FAR struct smartfs_ofile_s *sf)
+int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
+                        uint16_t parentdirsector, FAR const char *filename,
+                        uint16_t type,  mode_t mode,
+                        FAR struct smartfs_entry_s *direntry,
+                        uint16_t sectorno, FAR struct smartfs_ofile_s *sf)
 {
   struct    smart_read_write_s readwrite;
   int       ret;
@@ -908,9 +908,9 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
           if ((entry->flags == SMARTFS_ERASEDSTATE_16BIT) ||
               ((entry->flags &
 #endif
-                (SMARTFS_DIRENT_EMPTY | SMARTFS_DIRENT_ACTIVE) ) ==
+                (SMARTFS_DIRENT_EMPTY | SMARTFS_DIRENT_ACTIVE)) ==
                (~SMARTFS_ERASEDSTATE_16BIT &
-                (SMARTFS_DIRENT_EMPTY | SMARTFS_DIRENT_ACTIVE) )))
+                (SMARTFS_DIRENT_EMPTY | SMARTFS_DIRENT_ACTIVE))))
             {
               /* We found an empty entry.  Use it. */
 
@@ -1034,7 +1034,8 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
           ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
           if (ret < 0)
             {
-              fdbg("Error %d setting new sector type for sector %d\n",ret,  nextsector);
+              fdbg("Error %d setting new sector type for sector %d\n",
+                   ret, nextsector);
               goto errout;
             }
         }
@@ -1122,7 +1123,7 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
   struct smart_read_write_s       readwrite;
 
   /* Okay, delete the file.  Loop through each sector and release them
-
+   *
    * TODO:  We really should walk the list backward to avoid lost
    *        sectors in the event we lose power. However this requires
    *        allocating a buffer to build the sector list since we don't
@@ -1493,7 +1494,7 @@ int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
     }
 
   /* Now deal with the first sector in the event we are using a sector buffer
-     like we would be if CRC is enabled.
+   * like we would be if CRC is enabled.
    */
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
@@ -1531,7 +1532,7 @@ errout:
  ****************************************************************************/
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-struct smartfs_mountpt_s* smartfs_get_first_mount(void)
+FAR struct smartfs_mountpt_s *smartfs_get_first_mount(void)
 {
   return g_mounthead;
 }

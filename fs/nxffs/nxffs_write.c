@@ -227,7 +227,7 @@ static inline int nxffs_wralloc(FAR struct nxffs_volume_s *volume,
    */
 
   packed = false;
-  for (;;)
+  for (; ; )
     {
       size_t mindata = MIN(NXFFS_MINDATA, size);
 

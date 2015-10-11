@@ -74,7 +74,7 @@ FAR const char *inode_basename(FAR const char *name)
 {
   FAR const char *basename = NULL;
 
-  for (;;)
+  for (; ; )
     {
       /* Get the name for the next path segment */
 

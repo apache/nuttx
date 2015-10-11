@@ -158,7 +158,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
        * create a new mqueue with this name.
        */
 
-      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
           errcode = EEXIST;
           goto errout_with_inode;
@@ -186,13 +186,13 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
           goto errout_with_lock;
         }
 
-     /* Create the mqueue.  First we have to extract the additional
-      * parameters from the variable argument list.
-      */
+      /* Create the mqueue.  First we have to extract the additional
+       * parameters from the variable argument list.
+       */
 
       va_start(ap, oflags);
       mode = va_arg(ap, mode_t);
-      attr = va_arg(ap, FAR struct mq_attr*);
+      attr = va_arg(ap, FAR struct mq_attr *);
       va_end(ap);
 
       /* Create an inode in the pseudo-filesystem at this path */
@@ -211,7 +211,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
        * be created with a reference count of zero.
        */
 
-      msgq = (FAR struct mqueue_inode_s*)mq_msgqalloc(mode, attr);
+      msgq = (FAR struct mqueue_inode_s *)mq_msgqalloc(mode, attr);
       if (!msgq)
         {
           errcode = ENOSPC;

@@ -322,9 +322,9 @@ uint32_t fat_getuint32(uint8_t *ptr)
  * Name: fat_putuint16
  ****************************************************************************/
 
-void fat_putuint16(uint8_t *ptr, uint16_t value16)
+void fat_putuint16(FAR uint8_t *ptr, uint16_t value16)
 {
-  uint8_t *val = (uint8_t*)&value16;
+  FAR uint8_t *val = (FAR uint8_t *)&value16;
 
 #ifdef CONFIG_ENDIAN_BIG
   /* If the target is big-endian then the bytes always have to be swapped so
@@ -348,9 +348,9 @@ void fat_putuint16(uint8_t *ptr, uint16_t value16)
  * Name: fat_putuint32
  ****************************************************************************/
 
-void fat_putuint32(uint8_t *ptr, uint32_t value32)
+void fat_putuint32(FAR uint8_t *ptr, uint32_t value32)
 {
-  uint16_t *val = (uint16_t*)&value32;
+  FAR uint16_t *val = (FAR uint16_t *)&value32;
 
 #ifdef CONFIG_ENDIAN_BIG
   /* If the target is big-endian then the bytes always have to be swapped so
@@ -554,7 +554,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
   /* Allocate a buffer to hold one hardware sector */
 
-  fs->fs_buffer = (uint8_t*)fat_io_alloc(fs->fs_hwsectorsize);
+  fs->fs_buffer = (FAR uint8_t *)fat_io_alloc(fs->fs_hwsectorsize);
   if (!fs->fs_buffer)
     {
       ret = -ENOMEM;
@@ -585,12 +585,12 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
        * indexed by 16x the partition number.
        */
 
-       int i;
-       for (i = 0; i < 4; i++)
-         {
-           /* Check if the partition exists and, if so, get the bootsector for that
-            * partition and see if we can find the boot record there.
-            */
+      int i;
+      for (i = 0; i < 4; i++)
+        {
+          /* Check if the partition exists and, if so, get the bootsector for that
+           * partition and see if we can find the boot record there.
+           */
 
           uint8_t part = PART_GETTYPE(i, fs->fs_buffer);
           fvdbg("Partition %d, offset %d, type %d\n", i, PART_ENTRY(i), part);
@@ -748,7 +748,7 @@ int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  off_t sector,
                unsigned int nsectors)
 {
   int ret = -ENODEV;
-  if (fs && fs->fs_blkdriver )
+  if (fs && fs->fs_blkdriver)
     {
       struct inode *inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->read)
@@ -781,7 +781,7 @@ int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, off_t sector,
                 unsigned int nsectors)
 {
   int ret = -ENODEV;
-  if (fs && fs->fs_blkdriver )
+  if (fs && fs->fs_blkdriver)
     {
       struct inode *inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->write)
@@ -811,7 +811,7 @@ int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, off_t sector,
  *
  ****************************************************************************/
 
-off_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster )
+off_t fat_cluster2sector(FAR struct fat_mountpt_s *fs,  uint32_t cluster)
 {
   cluster -= 2;
   if (cluster >= fs->fs_nclusters - 2)
@@ -993,7 +993,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
 
               /* Make sure that the sector at this offset is in the cache */
 
-              if (fat_fscacheread(fs, fatsector)< 0)
+              if (fat_fscacheread(fs, fatsector) < 0)
                 {
                   /* Read error */
 
@@ -1239,7 +1239,7 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
    */
 
   newcluster = startcluster;
-  for (;;)
+  for (; ; )
     {
       /* Examine the next cluster in the FAT */
 
@@ -1303,7 +1303,7 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
       return ret;
     }
 
-  /* And link if to the start cluster (if any)*/
+  /* And link if to the start cluster (if any) */
 
   if (cluster)
     {
@@ -1563,29 +1563,29 @@ int fat_fscacheread(struct fat_mountpt_s *fs, off_t sector)
    * we do nothing. Otherwise, we will have to read the new sector.
    */
 
-    if (fs->fs_currentsector != sector)
-      {
-        /* We will need to read the new sector.  First, flush the cached
-         * sector if it is dirty.
-         */
+  if (fs->fs_currentsector != sector)
+    {
+      /* We will need to read the new sector.  First, flush the cached
+       * sector if it is dirty.
+       */
 
-        ret = fat_fscacheflush(fs);
-        if (ret < 0)
-          {
-              return ret;
-          }
+      ret = fat_fscacheflush(fs);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-        /* Then read the specified sector into the cache */
+      /* Then read the specified sector into the cache */
 
-        ret = fat_hwread(fs, fs->fs_buffer, sector, 1);
-        if (ret < 0)
-          {
-            return ret;
-          }
+      ret = fat_hwread(fs, fs->fs_buffer, sector, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-        /* Update the cached sector number */
+      /* Update the cached sector number */
 
-        fs->fs_currentsector = sector;
+      fs->fs_currentsector = sector;
     }
 
   return OK;
@@ -1608,7 +1608,8 @@ int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff)
    */
 
   if (ff->ff_cachesector &&
-      (ff->ff_bflags & (FFBUFF_DIRTY|FFBUFF_VALID)) == (FFBUFF_DIRTY|FFBUFF_VALID))
+      (ff->ff_bflags & (FFBUFF_DIRTY | FFBUFF_VALID)) ==
+       (FFBUFF_DIRTY | FFBUFF_VALID))
     {
       /* Write the dirty sector */
 
@@ -1875,7 +1876,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 {
   int sectoroffset;
 
-  if (position <= ff->ff_size )
+  if (position <= ff->ff_size)
     {
       /* sectoroffset is the sector number offset into the current cluster */
 
@@ -1883,7 +1884,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
       /* The current cluster is the first sector of the cluster plus
        * the sector offset
-        */
+       */
 
       ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
                            + sectoroffset;

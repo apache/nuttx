@@ -450,7 +450,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
        * exclusively.
        */
 
-      else if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      else if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
           fdbg("ERROR: File exists, can't create O_EXCL\n");
           ret = -EEXIST;
@@ -462,7 +462,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
        * we will not re-create the file unless O_CREAT is also specified.
        */
 
-      else if ((oflags & (O_CREAT|O_TRUNC)) == (O_CREAT|O_TRUNC))
+      else if ((oflags & (O_CREAT | O_TRUNC)) == (O_CREAT | O_TRUNC))
         {
           /* Just schedule the removal the file and fall through to re-create it.
            * Note that the old file of the same name will not actually be removed
@@ -546,7 +546,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    */
 
   packed = false;
-  for (;;)
+  for (; ; )
     {
       /* File a valid location to position the inode header.  Start with the
        * first byte in the free FLASH region.
@@ -600,7 +600,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * Note that nothing is written to FLASH.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* File a valid location to position the inode name.  Start with the
        * first byte in the free FLASH region.
@@ -853,7 +853,7 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
    */
 
 #ifdef CONFIG_NXFFS_PREALLOCATED
-  if ((FAR struct nxffs_wrfile_s*)ofile != &g_wrfile)
+  if ((FAR struct nxffs_wrfile_s *)ofile != &g_wrfile)
 #endif
     {
       kmm_free(ofile);
@@ -1022,7 +1022,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
    * file structure
    */
 
-  volume = (FAR struct nxffs_volume_s*)filep->f_inode->i_private;
+  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
 #ifdef CONFIG_FILE_MODE
@@ -1036,7 +1036,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
    * extension is supported.
    */
 
-   switch (oflags & (O_WROK|O_RDOK))
+   switch (oflags & (O_WROK | O_RDOK))
      {
        case 0:
        default:
@@ -1051,7 +1051,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
          ret = nxffs_rdopen(volume, relpath, &ofile);
          break;
 
-       case O_WROK|O_RDOK:
+       case O_WROK | O_RDOK:
          fdbg("ERROR: O_RDWR is not supported\n");
          return -ENOSYS;
      }
@@ -1092,7 +1092,7 @@ int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * file structure
    */
 
-  volume = (FAR struct nxffs_volume_s*)oldp->f_inode->i_private;
+  volume = (FAR struct nxffs_volume_s *)oldp->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 #endif
 

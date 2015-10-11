@@ -351,7 +351,7 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int uptime_stat(const char *relpath, struct stat *buf)
+static int uptime_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   /* "uptime" is the only acceptable value for the relpath */
 
@@ -363,7 +363,7 @@ static int uptime_stat(const char *relpath, struct stat *buf)
 
   /* "uptime" is the name for a read-only file */
 
-  buf->st_mode    = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;

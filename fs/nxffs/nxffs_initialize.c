@@ -110,17 +110,26 @@ const struct mountpt_operations nxffs_operations =
  * block
  */
 
-const uint8_t g_blockmagic[NXFFS_MAGICSIZE] = { 'B', 'l', 'c', 'k' };
+const uint8_t g_blockmagic[NXFFS_MAGICSIZE] =
+{
+  'B', 'l', 'c', 'k'
+};
 
 /* The magic number that appears that the beginning of each NXFFS inode */
 
-const uint8_t g_inodemagic[NXFFS_MAGICSIZE] = { 'I', 'n', 'o', 'd' };
+const uint8_t g_inodemagic[NXFFS_MAGICSIZE] =
+{
+  'I', 'n', 'o', 'd'
+};
 
 /* The magic number that appears that the beginning of each NXFFS inode
  * data block.
  */
 
-const uint8_t g_datamagic[NXFFS_MAGICSIZE] = { 'D', 'a', 't', 'a' };
+const uint8_t g_datamagic[NXFFS_MAGICSIZE] =
+{
+  'D', 'a', 't', 'a'
+};
 
 /* If CONFIG_NXFFS_PREALLOCATED is defined, then this is the single, pre-
  * allocated NXFFS volume instance.
@@ -427,7 +436,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
 
   nxffs_ioseek(volume, offset);
   nerased = 0;
-  for (;;)
+  for (; ; )
     {
       int ch = nxffs_getc(volume, 1);
       if (ch < 0)

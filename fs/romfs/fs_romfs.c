@@ -167,7 +167,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * structure
    */
 
-  rm = (FAR struct romfs_mountpt_s*)filep->f_inode->i_private;
+  rm = (FAR struct romfs_mountpt_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 
@@ -344,7 +344,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
   uint32_t                    offset;
   size_t                      bytesleft;
   off_t                       sector;
-  FAR uint8_t                *userbuffer = (FAR uint8_t*)buffer;
+  FAR uint8_t                *userbuffer = (FAR uint8_t *)buffer;
   int                         sectorndx;
   int                         ret;
 
@@ -586,7 +586,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * the file.
        */
 
-      *ppv = (void*)(rm->rm_xipbase + rf->rf_startoffset);
+      *ppv = (FAR void *)(rm->rm_xipbase + rf->rf_startoffset);
       return OK;
     }
 
@@ -617,7 +617,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * structure
    */
 
-  rm = (FAR struct romfs_mountpt_s*)newp->f_inode->i_private;
+  rm = (FAR struct romfs_mountpt_s *)newp->f_inode->i_private;
   DEBUGASSERT(rm != NULL);
 
   /* Check if the mount is still healthy */
@@ -789,7 +789,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
 
   /* Loop, skipping over unsupported items in the file system */
 
-  for (;;)
+  for (; ; )
     {
       /* Have we reached the end of the directory */
 
@@ -955,7 +955,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Mounted! */
 
-  *handle = (void*)rm;
+  *handle = (FAR void *)rm;
   romfs_semgive(rm);
   return OK;
 
@@ -982,7 +982,7 @@ errout_with_sem:
 static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                         unsigned int flags)
 {
-  FAR struct romfs_mountpt_s *rm = (FAR struct romfs_mountpt_s*)handle;
+  FAR struct romfs_mountpt_s *rm = (FAR struct romfs_mountpt_s *)handle;
   int ret;
 
   fvdbg("Entry\n");
@@ -1159,20 +1159,20 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
     {
       /* It's a read-only directory name */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
       if (IS_EXECUTABLE(dirinfo.rd_next))
         {
-          buf->st_mode |= S_IXOTH|S_IXGRP|S_IXUSR;
+          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
         }
     }
   else if (IS_FILE(dirinfo.rd_next))
     {
       /* It's a read-only file name */
 
-      buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
       if (IS_EXECUTABLE(dirinfo.rd_next))
         {
-          buf->st_mode |= S_IXOTH|S_IXGRP|S_IXUSR;
+          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
         }
     }
   else

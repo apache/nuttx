@@ -68,7 +68,7 @@ static inline void seekpseudodir(struct fs_dirent_s *idir, off_t offset)
    * "rewind" to the root dir.
    */
 
-  if ( offset < idir->fd_position )
+  if (offset < idir->fd_position)
     {
       pos  = 0;
       curr = idir->fd_root;
@@ -126,7 +126,7 @@ static inline void seekmountptdir(struct fs_dirent_s *idir, off_t offset)
    */
 
   inode = idir->fd_root;
-  if ( offset < idir->fd_position )
+  if (offset < idir->fd_position)
     {
       if (inode->u.i_mops && inode->u.i_mops->rewinddir)
         {

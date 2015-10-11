@@ -299,9 +299,9 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
   /* Allocate a buffer that will be working sector memory */
 
 #ifdef CONFIG_FAT_DMAMEMORY
-  var.fv_sect = (uint8_t*)fat_dma_alloc(var.fv_sectorsize);
+  var.fv_sect = (FAR uint8_t *)fat_dma_alloc(var.fv_sectorsize);
 #else
-  var.fv_sect = (uint8_t*)kmm_malloc(var.fv_sectorsize);
+  var.fv_sect = (FAR uint8_t *)kmm_malloc(var.fv_sectorsize);
 #endif
 
   if (!var.fv_sect)

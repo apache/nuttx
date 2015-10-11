@@ -1455,7 +1455,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
     {
       /* Yes ... It's a read-only directory */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
 
   /* Verify that the process ID is followed by valid path segment delimiter */
@@ -1492,11 +1492,11 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
       if (node->dtype == DTYPE_FILE)
         {
-          buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+          buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
         }
       else
         {
-          buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+          buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
         }
     }
 
