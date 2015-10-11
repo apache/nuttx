@@ -1346,6 +1346,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct inode *inode;
   FAR struct tmpfs_s *fs;
   FAR struct tmpfs_file_s *tfo;
+  off_t offset;
   int ret;
 
   fvdbg("filep: %p\n", filep);
@@ -1455,6 +1456,18 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Save the struct tmpfs_file_s instance as the file private data */
 
   filep->f_priv = tfo;
+
+  /* In write/append mode, we need to set the file pointer to the end of the
+   * file.
+   */
+
+  offset = 0;
+  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
+    {
+      offset = tfo->tfo_size;
+    }
+
+  filep->f_pos = offset;
 
   /* Unlock the file file object, but retain the reference count */
 
