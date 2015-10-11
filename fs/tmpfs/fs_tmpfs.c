@@ -974,6 +974,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
         {
           /* No object with this name exists in the directory. */
 
+          kmm_free(copy);
           return index;
         }
 
@@ -993,10 +994,11 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
             }
 
           /* No, this was not the final segement of the relpath.
-           * We cannot continue the search if any of the intermidate
-           * segements do no correspond to directories.
+           * We cannot continue the search if any of the intermediate
+           * segments do no correspond to directories.
            */
 
+          kmm_free(copy);
           return -ENOTDIR;
         }
 
