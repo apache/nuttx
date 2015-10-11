@@ -2437,6 +2437,7 @@ errout_with_newparent:
 
 errout_with_lock:
   tmpfs_unlock(fs);
+  kmm_free(copy);
   return ret;
 }
 
