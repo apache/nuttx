@@ -107,11 +107,11 @@
 #  define USB_SOF_INTERRUPT 0
 #endif
 
-#define ERROR_INTERRUPTS  (USB_EINT_PID|USB_EINT_CRC5|USB_EINT_EOF|\
-                           USB_EINT_CRC16|USB_EINT_DFN8|USB_EINT_BTO|\
+#define ERROR_INTERRUPTS  (USB_EINT_PID | USB_EINT_CRC5 | USB_EINT_EOF | \
+                           USB_EINT_CRC16 | USB_EINT_DFN8 | USB_EINT_BTO | \
                            USB_EINT_BTS)
-#define NORMAL_INTERRUPTS (USB_INT_URST|USB_INT_UERR|USB_SOF_INTERRUPT|\
-                           USB_INT_TRN|USB_INT_IDLE|USB_INT_STALL)
+#define NORMAL_INTERRUPTS (USB_INT_URST | USB_INT_UERR | USB_SOF_INTERRUPT | \
+                           USB_INT_TRN | USB_INT_IDLE | USB_INT_STALL)
 
 /* Endpoints ****************************************************************/
 /* Endpoint identifiers. The PIC32MX supports up to 16 mono-directional or 8
@@ -401,7 +401,7 @@ struct pic32mx_ep_s
   uint8_t                  txnullpkt:1;      /* Null packet needed at end of TX transfer */
   uint8_t                  txdata1:1;        /* Data0/1 of next TX transfer */
   uint8_t                  rxdata1:1;        /* Data0/1 of next RX transfer */
-  volatile struct usbotg_bdtentry_s *bdtin;  /* BDT entry for the IN transaction*/
+  volatile struct usbotg_bdtentry_s *bdtin;  /* BDT entry for the IN transaction */
   volatile struct usbotg_bdtentry_s *bdtout; /* BDT entry for the OUT transaction */
 };
 
@@ -1853,11 +1853,11 @@ static void pic32mx_ep0rdcomplete(struct pic32mx_usbdev_s *priv)
       physaddr      = PHYS_ADDR(&priv->ctrl);
 
       bdt           = &g_bdt[EP0_OUT_EVEN];
-      bdt->addr     = (uint8_t*)physaddr;
+      bdt->addr     = (uint8_t *)physaddr;
       bdt->status   = (USB_BDT_UOWN | bytecount);
 
       bdt           = &g_bdt[EP0_OUT_ODD];
-      bdt->addr     = (uint8_t*)physaddr;
+      bdt->addr     = (uint8_t *)physaddr;
       bdt->status   = (USB_BDT_UOWN | bytecount);
 
       priv->ep0done = 1;
@@ -2058,7 +2058,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
 
             else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
               {
-                /* Disable HNP support*/
+                /* Disable HNP support */
 #warning Missing Logic
               }
 
@@ -2711,7 +2711,7 @@ static int pic32mx_interrupt(int irq, void *context)
       /* Make sure that the USE reset and IDLE detect interrupts are enabled */
 
       regval = pic32mx_getreg(PIC32MX_USB_IE);
-      regval |= (USB_INT_URST|USB_INT_IDLE);
+      regval |= (USB_INT_URST | USB_INT_IDLE);
       pic32mx_putreg(regval, PIC32MX_USB_IE);
 
       /* Now were are in the powered state */
@@ -3301,7 +3301,7 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
    * 32-bit words per BDT.
    */
 
-  ptr = (uint32_t*)&g_bdt[EP(epno, EP_DIR_OUT, EP_PP_EVEN)];
+  ptr = (uint32_t *)&g_bdt[EP(epno, EP_DIR_OUT, EP_PP_EVEN)];
   for (i = 0; i < USB_BDT_WORD_SIZE * USB_NBDTS_PER_EP; i++)
     {
       *ptr++ = 0;
@@ -3345,7 +3345,7 @@ static struct usbdev_req_s *pic32mx_epallocreq(struct usbdev_ep_s *ep)
 
 static void pic32mx_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct pic32mx_req_s *privreq = (struct pic32mx_req_s*)req;
+  struct pic32mx_req_s *privreq = (struct pic32mx_req_s *)req;
 
 #ifdef CONFIG_DEBUG
   if (!ep || !req)
@@ -3567,12 +3567,12 @@ static int pic32mx_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
 
           /* Configure the other BDT to receive a SETUP command. */
 
-          otherbdt->addr     = (uint8_t*)physaddr;
+          otherbdt->addr     = (uint8_t *)physaddr;
           otherbdt->status   = (USB_BDT_UOWN | bytecount);
 
           /* Configure the current BDT to receive a SETUP command. */
 
-          bdt->addr          = (uint8_t*)physaddr;
+          bdt->addr          = (uint8_t *)physaddr;
           bdt->status        = (USB_BDT_UOWN | bytecount);
 
           bdtdbg("EP0 BDT IN [%p] {%08x, %08x}\n",
@@ -3812,13 +3812,13 @@ static int pic32mx_getframe(struct usbdev_s *dev)
 
   do
     {
-       /* Loop until we can be sure that there was no wrap from the FRML
-        * to the FRMH register.
-        */
+      /* Loop until we can be sure that there was no wrap from the FRML
+       * to the FRMH register.
+       */
 
-       frmh = pic32mx_getreg(PIC32MX_USB_FRMH) & USB_FRMH_MASK;
-       frml = pic32mx_getreg(PIC32MX_USB_FRML) & USB_FRML_MASK;
-       tmp  = pic32mx_getreg(PIC32MX_USB_FRMH) & USB_FRMH_MASK;
+      frmh = pic32mx_getreg(PIC32MX_USB_FRMH) & USB_FRMH_MASK;
+      frml = pic32mx_getreg(PIC32MX_USB_FRML) & USB_FRML_MASK;
+      tmp  = pic32mx_getreg(PIC32MX_USB_FRMH) & USB_FRMH_MASK;
     }
   while (frmh != tmp);
 
@@ -4128,7 +4128,7 @@ static void pic32mx_hwreset(struct pic32mx_usbdev_s *priv)
 
   /* Clear all of the buffer descriptor table (BDT) entries */
 
-  memset((void*)g_bdt, 0, sizeof(g_bdt));
+  memset((void *)g_bdt, 0, sizeof(g_bdt));
 
   /* Power up the USB module */
 

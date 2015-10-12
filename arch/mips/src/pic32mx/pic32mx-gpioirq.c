@@ -240,12 +240,12 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
         }
       else
         {
-           /* Make sure that any further interrupts are disabled.
-            * (disable the pull-up as well).
-            */
+          /* Make sure that any further interrupts are disabled.
+           * (disable the pull-up as well).
+           */
 
-           putreg32(1 << cn, PIC32MX_IOPORT_CNENCLR);
-           putreg32(1 << cn, PIC32MX_IOPORT_CNPUECLR);
+          putreg32(1 << cn, PIC32MX_IOPORT_CNENCLR);
+          putreg32(1 << cn, PIC32MX_IOPORT_CNPUECLR);
         }
 
       /* Set the new handler (perhaps NULLifying the current handler) */

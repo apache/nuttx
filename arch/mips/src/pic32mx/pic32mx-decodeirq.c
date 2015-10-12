@@ -105,7 +105,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    */
 
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
-  savestate = (uint32_t*)current_regs;
+  savestate = (uint32_t *)current_regs;
 #else
   DEBUGASSERT(current_regs == NULL);
 #endif
@@ -113,7 +113,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
 
   /* Loop while there are pending interrupts with priority greater than zero */
 
-  for (;;)
+  for (; ; )
     {
       /* Read the INTSTAT register.  This register contains both the priority
        * and the interrupt vector number.
@@ -146,7 +146,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t*)current_regs;
+  regs = (uint32_t *)current_regs;
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
@@ -161,7 +161,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t*)current_regs);
+      up_restorefpu((uint32_t *)current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

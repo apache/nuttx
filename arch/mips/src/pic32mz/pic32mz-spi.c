@@ -977,7 +977,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
        */
 
       regval = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
-      regval &= ~(SPI_CON_CKP|SPI_CON_CKE);
+      regval &= ~(SPI_CON_CKP | SPI_CON_CKE);
 
       switch (mode)
         {
@@ -993,7 +993,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SPI_CON_CKP|SPI_CON_CKE);
+          regval |= (SPI_CON_CKP | SPI_CON_CKE);
           break;
 
         default:

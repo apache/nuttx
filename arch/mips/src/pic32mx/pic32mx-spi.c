@@ -611,7 +611,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
        */
 
       regval = spi_getreg(priv, PIC32MX_SPI_CON_OFFSET);
-      regval &= ~(SPI_CON_CKP|SPI_CON_CKE);
+      regval &= ~(SPI_CON_CKP | SPI_CON_CKE);
 
       switch (mode)
         {
@@ -627,7 +627,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SPI_CON_CKP|SPI_CON_CKE);
+          regval |= (SPI_CON_CKP | SPI_CON_CKE);
           break;
 
         default:
@@ -783,7 +783,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
   FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint32_t regval;
   uint8_t data;
 
@@ -840,7 +840,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
   FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
   spivdbg("nwords: %d\n", nwords);
   while (nwords)
