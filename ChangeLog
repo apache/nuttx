@@ -11021,3 +11021,6 @@
 	  (2015-10-9).
 	* fs/tmpfs: TMPFS file system is code complete and bascially functional
 	  although it has not been heavilay tested (2015-10-9).
+	* drivers/input/buttons/c and include/nuttx/input/buttons.h:  Add a
+	  driver to support application access to board buttons (2015-10-12).
+ 

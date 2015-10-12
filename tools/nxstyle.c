@@ -688,6 +688,8 @@ int main(int argc, char **argv, char **envp)
 
                     else if (line[n+1] == ')')
                       {
+                        /* REVISIT: This gives false alarms on syntax like *--ptr */
+
                         if (line[n-1] != ' ')
                           {
                             fprintf(stderr,
@@ -747,6 +749,8 @@ int main(int argc, char **argv, char **envp)
                         next++;
                         n++;
                       }
+
+                    /* REVISIT: This gives false alarms on syntax like *--ptr */
 
                     if (line[curr] != '-' && line[next] != ' ' && line[next] != '\n')
                       {

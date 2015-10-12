@@ -77,7 +77,8 @@
 #define _RTCBASE        (0x1800) /* RTC ioctl commands */
 #define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
 #define _CANBASE        (0x1a00) /* CAN ioctl commands */
-#define _BOARDBASE      (0x1b00) /* boardctl ioctl commands */
+#define _BTNBASE        (0x1b00) /* Button ioctl commands */
+#define _BOARDBASE      (0x1c00) /* boardctl ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -335,6 +336,12 @@
 
 #define _CANIOCVALID(c)     (_IOC_TYPE(c)==_CANBASE)
 #define _CANIOC(nr)         _IOC(_CANBASE,nr)
+
+/* Button driver ioctl definitions ******************************************/
+/* (see nuttx/can.h */
+
+#define _BTNIOCVALID(c)     (_IOC_TYPE(c)==_BTNBASE)
+#define _BTNIOC(nr)         _IOC(_BTNBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

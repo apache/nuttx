@@ -322,6 +322,22 @@ config STMPE811_REGDEBUG
 
 endif # INPUT_STMPE811
 
+config BUTTONS
+	bool "Button Inputs"
+	default n
+	depends on ARCH_BUTTONS
+	---help---
+		Enable standard button upper half driver.
+
+if BUTTONS
+
+config BUTTONS_NPOLLWAITERS
+	int "Max Number of Poll Waiters"
+	default 2
+	depends on !DISABLE_POLL
+
+endif # BUTTONS
+
 config DJOYSTICK
 	bool "Discrete Joystick"
 	default n
