@@ -73,7 +73,7 @@ struct btn_upperhalf_s
 
   btn_buttonset_t bu_enabled; /* Set of currently enabled button interrupts */
   btn_buttonset_t bu_sample;  /* Last sampled button states */
-  sem_t bu_exclsem;          /* Supports exclusive access to the device */
+  sem_t bu_exclsem;           /* Supports exclusive access to the device */
 
   /* The following is a singly linked list of open references to the
    * button device.
@@ -128,7 +128,7 @@ static inline int btn_takesem(sem_t *sem);
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void    btn_enable(FAR struct btn_upperhalf_s *priv);
 static void    btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
-                              FAR void *arg);
+                             FAR void *arg);
 #endif
 
 /* Sampling */
@@ -140,12 +140,12 @@ static void    btn_sample(FAR struct btn_upperhalf_s *priv);
 static int     btn_open(FAR struct file *filep);
 static int     btn_close(FAR struct file *filep);
 static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
-                         size_t buflen);
+                        size_t buflen);
 static int     btn_ioctl(FAR struct file *filep, int cmd,
-                          unsigned long arg);
+                         unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int     btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                         bool setup);
+                        bool setup);
 #endif
 
 /****************************************************************************
@@ -272,7 +272,7 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
-                           FAR void *arg)
+                          FAR void *arg)
 {
   FAR struct btn_upperhalf_s *priv = (FAR struct btn_upperhalf_s *)arg;
 
@@ -546,7 +546,7 @@ errout_with_exclsem:
  ****************************************************************************/
 
 static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
-                         size_t len)
+                        size_t len)
 {
   FAR struct inode *inode;
   FAR struct btn_upperhalf_s *priv;
@@ -727,7 +727,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 #ifndef CONFIG_DISABLE_POLL
 static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                     bool setup)
+                    bool setup)
 {
   FAR struct inode *inode;
   FAR struct btn_upperhalf_s *priv;
@@ -832,7 +832,7 @@ errout_with_dusem:
  ****************************************************************************/
 
 int btn_register(FAR const char *devname,
-                  FAR const struct btn_lowerhalf_s *lower)
+                 FAR const struct btn_lowerhalf_s *lower)
 
 {
   FAR struct btn_upperhalf_s *priv;
