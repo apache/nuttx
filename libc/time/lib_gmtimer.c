@@ -169,7 +169,8 @@ static void clock_utc2julian(time_t jd, int *year, int *month, int *day)
 
 /* Only handles dates since Jan 1, 1970 */
 
-static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
+static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
+                               FAR int *day)
 {
   int  value;
   int  min;
@@ -181,13 +182,13 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
    * following:
    */
 
-  value   = days  / (4*365 + 1);  /* Number of 4-years periods since the epoch*/
-  days   -= value * (4*365 + 1);  /* Remaining days */
-  value <<= 2;                    /* Years since the epoch */
+  value   = days  / (4 * 365 + 1); /* Number of 4-years periods since the epoch */
+  days   -= value * (4 * 365 + 1); /* Remaining days */
+  value <<= 2;                     /* Years since the epoch */
 
   /* Then we will brute force the next 0-3 years */
 
-  for (;;)
+  for (; ; )
     {
       /* Is this year a leap year (we'll need this later too) */
 
@@ -231,7 +232,7 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 
       /* Get the number of days that occurred before the beginning of the month
        * following the midpoint.
-      */
+       */
 
       tmp = clock_daysbeforemonth(value + 1, leapyear);
 

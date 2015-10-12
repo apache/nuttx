@@ -111,7 +111,7 @@ float rintf(float x)
 
       if (fremainder == -0.5)
         {
-          linteger = ((linteger+1)&~1);
+          linteger = ((linteger + 1) & ~1);
         }
       else if (fremainder < -0.5)
         {
@@ -124,7 +124,7 @@ float rintf(float x)
 
       if (fremainder == 0.5)
         {
-          linteger = ((linteger+1)&~1);
+          linteger = ((linteger + 1) & ~1);
         }
       else if (fremainder > 0.5)
         {

@@ -46,10 +46,10 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_STRCMP
-int strcmp(const char *cs, const char *ct)
+int strcmp(FAR const char *cs, FAR const char *ct)
 {
   register signed char result;
-  for (;;)
+  for (; ; )
     {
       if ((result = *cs - *ct++) != 0 || !*cs++)
       break;

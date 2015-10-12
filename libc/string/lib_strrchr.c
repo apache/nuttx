@@ -49,7 +49,7 @@
  * occurrence of the character c in the string s.
  */
 
-char *strrchr(const char *s, int c)
+FAR char *strrchr(FAR const char *s, int c)
 {
   if (s)
     {
@@ -58,7 +58,7 @@ char *strrchr(const char *s, int c)
         {
           if (*p == c)
             {
-              return (char*)p;
+              return (FAR char *)p;
             }
         }
     }

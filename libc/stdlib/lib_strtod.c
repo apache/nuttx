@@ -168,7 +168,7 @@ double_t strtod(const char *str, char **endptr)
       /* Handle optional sign */
 
       negative = 0;
-      switch(*++p)
+      switch (*++p)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */

@@ -61,7 +61,7 @@
 /* Check if character is any kind of white space (except for newline) */
 
 #define lib_isspace(c) \
-  ((c) == ' '  || (c) == '\t' || (c) == '\r' || (c) == '\f' || c== '\v')
+  ((c) == ' '  || (c) == '\t' || (c) == '\r' || (c) == '\f' || c == '\v')
 
 /****************************************************************************
  * Private Type Definitions

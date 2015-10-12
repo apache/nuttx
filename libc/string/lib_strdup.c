@@ -47,12 +47,12 @@
  * Public Functions
  ****************************************************************************/
 
-FAR char *strdup(const char *s)
+FAR char *strdup(FAR const char *s)
 {
   FAR char *news = NULL;
   if (s)
     {
-      news = (FAR char*)lib_malloc(strlen(s) + 1);
+      news = (FAR char *)lib_malloc(strlen(s) + 1);
       if (news)
         {
           strcpy(news, s);

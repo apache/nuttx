@@ -111,7 +111,7 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
   numoffset = 0;
   ndots     = 0;
 
-  for (;;)
+  for (; ; )
     {
       ch = (uint8_t)src[srcoffset++];
 
@@ -225,7 +225,7 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
   nrsep     = 0;
   rtime     = false;
 
-  for (;;)
+  for (; ; )
     {
       ch = (uint8_t)src[srcoffset++];
 

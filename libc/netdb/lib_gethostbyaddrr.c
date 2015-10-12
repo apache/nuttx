@@ -191,36 +191,32 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
       return -ERANGE;
     }
 
+  info             = (FAR struct hostent_info_s *)buf;
+  dest             = info->hi_data;
+  buflen          -= (sizeof(struct hostent_info_s) - 1);
 
-      info             = (FAR struct hostent_info_s *)buf;
-      dest             = info->hi_data;
-      buflen          -= (sizeof(struct hostent_info_s) - 1);
+  memset(host, 0, sizeof(struct hostent));
+  memset(info, 0, sizeof(struct hostent_info_s));
+  memcpy(dest, src, addrlen);
 
-      memset(host, 0, sizeof(struct hostent));
-      memset(info, 0, sizeof(struct hostent_info_s));
-      memcpy(dest, src, addrlen);
+  info->hi_addrlist[0] = dest;
+  host->h_addr_list    = info->hi_addrlist;
+  host->h_length       = addrlen;
 
-      info->hi_addrlist[0] = dest;
-      host->h_addr_list    = info->hi_addrlist;
-      host->h_length       = addrlen;
+  dest                += addrlen;
+  buflen              -= addrlen;
 
-      dest                += addrlen;
-      buflen              -= addrlen;
+  /* And copy localhost host name */
 
-      /* And copy localhost host name */
-
-      namelen = strlen(g_lo_hostname);
-      if (addrlen + namelen + 1 > buflen)
-        {
-          herrnocode = ERANGE;
-          goto errorout_with_herrnocode;
-        }
-
-      strncpy(dest, g_lo_hostname, buflen);
-      return 0;
+  namelen = strlen(g_lo_hostname);
+  if (addrlen + namelen + 1 > buflen)
+    {
+      herrnocode = ERANGE;
+      goto errorout_with_herrnocode;
     }
 
-  return 1;
+  strncpy(dest, g_lo_hostname, buflen);
+  return 0;
 
 errorout_with_herrnocode:
   if (h_errnop)

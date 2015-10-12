@@ -534,11 +534,11 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
     int d = 64;
     nameptr = dns_parse_name((uint8_t *)buffer + 12) + 4;
 
-    for (;;)
+    for (; ; )
       {
         ndbg("%02X %02X %02X %02X %02X %02X %02X %02X \n",
-             nameptr[0],nameptr[1],nameptr[2],nameptr[3],
-             nameptr[4],nameptr[5],nameptr[6],nameptr[7]);
+             nameptr[0], nameptr[1], nameptr[2], nameptr[3],
+             nameptr[4], nameptr[5], nameptr[6], nameptr[7]);
 
         nameptr += 8;
         d -= 8;
@@ -589,10 +589,10 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
           ans->u.ipv4.s_addr = *(FAR uint32_t *)(nameptr + 10);
 
           nvdbg("IPv4 address: %d.%d.%d.%d\n",
-                (ans->u.ipv4.s_addr       ) & 0xff,
-                (ans->u.ipv4.s_addr >> 8  ) & 0xff,
-                (ans->u.ipv4.s_addr >> 16 ) & 0xff,
-                (ans->u.ipv4.s_addr >> 24 ) & 0xff);
+                (ans->u.ipv4.s_addr      ) & 0xff,
+                (ans->u.ipv4.s_addr >> 8 ) & 0xff,
+                (ans->u.ipv4.s_addr >> 16) & 0xff,
+                (ans->u.ipv4.s_addr >> 24) & 0xff);
 
           if (*addrlen >= sizeof(struct sockaddr_in))
             {

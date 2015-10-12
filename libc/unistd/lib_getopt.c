@@ -187,82 +187,82 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
           g_optptr++;
         }
 
-        /* Special case handling of "-" and "-:" */
+      /* Special case handling of "-" and "-:" */
 
-        if (!*g_optptr)
-          {
-             optopt = '\0'; /* We'll fix up g_optptr the next time we are called */
-             return '?';
-          }
+      if (!*g_optptr)
+        {
+           optopt = '\0'; /* We'll fix up g_optptr the next time we are called */
+           return '?';
+        }
 
-        /* Handle the case of "-:" */
+      /* Handle the case of "-:" */
 
-        if (*g_optptr == ':')
-          {
-            optopt = ':';
-            g_optptr++;
-            return '?';
-          }
+      if (*g_optptr == ':')
+        {
+          optopt = ':';
+          g_optptr++;
+          return '?';
+        }
 
-        /* g_optptr now points at the next option and it is not something crazy.
-         * check if the option is in the list of valid options.
-         */
+      /* g_optptr now points at the next option and it is not something crazy.
+       * check if the option is in the list of valid options.
+       */
 
-        optchar = strchr(optstring, *g_optptr);
-        if (!optchar)
-          {
-            /* No this character is not in the list of valid options */
+      optchar = strchr(optstring, *g_optptr);
+      if (!optchar)
+        {
+          /* No this character is not in the list of valid options */
 
-            optopt = *g_optptr;
-            g_optptr++;
-            return '?';
-          }
+          optopt = *g_optptr;
+          g_optptr++;
+          return '?';
+        }
 
-        /* Yes, the character is in the list of valid options.  Does it have an
-         * required argument?
-         */
+      /* Yes, the character is in the list of valid options.  Does it have an
+       * required argument?
+       */
 
-        if (optchar[1] != ':')
-          {
-            /* No, no arguments. Just return the character that we found */
+      if (optchar[1] != ':')
+        {
+          /* No, no arguments. Just return the character that we found */
 
-            g_optptr++;
-            return *optchar;
-          }
+          g_optptr++;
+          return *optchar;
+        }
 
-        /* Yes, it has a required argument.  Is the required argument
-         * immediately after the command in this same argument?
-         */
+      /* Yes, it has a required argument.  Is the required argument
+       * immediately after the command in this same argument?
+       */
 
-        if (g_optptr[1] != '\0')
-          {
-              /* Yes, return a pointer into the current argument */
+      if (g_optptr[1] != '\0')
+        {
+          /* Yes, return a pointer into the current argument */
 
-              optarg = &g_optptr[1];
-              optind++;
-              g_optptr = NULL;
-              return *optchar;
-          }
+          optarg = &g_optptr[1];
+          optind++;
+          g_optptr = NULL;
+          return *optchar;
+        }
 
-        /* No.. is the optional argument the next argument in argv[] ? */
+      /* No.. is the optional argument the next argument in argv[] ? */
 
-        if (argv[optind+1] && *argv[optind+1] != '-')
-          {
-            /* Yes.. return that */
+      if (argv[optind+1] && *argv[optind+1] != '-')
+        {
+          /* Yes.. return that */
 
-            optarg = argv[optind+1];
-            optind += 2;
-            g_optptr = NULL;
-            return *optchar;
-          }
+          optarg = argv[optind+1];
+          optind += 2;
+          g_optptr = NULL;
+          return *optchar;
+        }
 
-        /* No argument was supplied */
+      /* No argument was supplied */
 
-        g_optptr = NULL;
-        optarg = NULL;
-        optopt = *optchar;
-        optind++;
-        return noarg_ret;
+      g_optptr = NULL;
+      optarg = NULL;
+      optopt = *optchar;
+      optind++;
+      return noarg_ret;
     }
 
   /* Restore the initial, uninitialized state */

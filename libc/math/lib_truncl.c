@@ -58,7 +58,10 @@ union ldshape
 
 long double truncl(long double x)
 {
-  union ldshape u = {x};
+  union ldshape u =
+  {
+    x
+  };
   int e = u.i.se & 0x7fff;
   int s = u.i.se >> 15;
   long double y;

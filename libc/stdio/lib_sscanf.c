@@ -168,7 +168,7 @@ int sscanf(FAR const char *buf, FAR const char *fmt, ...)
   int     count;
 
   va_start(ap, fmt);
-  count = vsscanf((FAR const char*)buf, fmt, ap);
+  count = vsscanf((FAR const char *)buf, fmt, ap);
   va_end(ap);
   return count;
 }
@@ -274,7 +274,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
               tv = NULL;      /* To avoid warnings about begin uninitialized */
               if (!noassign)
                 {
-                  tv    = va_arg(ap, char*);
+                  tv    = va_arg(ap, FAR char *);
                   tv[0] = '\0';
                 }
 
@@ -330,7 +330,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
               tv = NULL;      /* To avoid warnings about beign uninitialized */
               if (!noassign)
                 {
-                  tv    = va_arg(ap, char*);
+                  tv    = va_arg(ap, FAR char *);
                   tv[0] = '\0';
                 }
 
@@ -389,12 +389,12 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   if (lflag)
                     {
-                      plong = va_arg(ap, long*);
+                      plong = va_arg(ap, FAR long *);
                       *plong = 0;
                     }
                   else
                     {
-                      pint = va_arg(ap, int*);
+                      pint = va_arg(ap, FAR int *);
                       *pint = 0;
                     }
                 }
@@ -540,13 +540,13 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #ifdef CONFIG_HAVE_DOUBLE
                   if (lflag)
                     {
-                      pd  = va_arg(ap, double_t*);
+                      pd  = va_arg(ap, FAR double_t *);
                       *pd = 0.0;
                     }
                   else
 #endif
                     {
-                      pf  = va_arg(ap, float*);
+                      pf  = va_arg(ap, FAR float *);
                       *pf = 0.0;
                     }
                 }
@@ -644,12 +644,12 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   if (lflag)
                     {
-                      FAR long *plong = va_arg(ap, long*);
+                      FAR long *plong = va_arg(ap, FAR long *);
                       *plong = (long)nchars;
                     }
                   else
                     {
-                      FAR int *pint = va_arg(ap, int*);
+                      FAR int *pint = va_arg(ap, FAR int *);
                       *pint = (int)nchars;
                     }
                 }

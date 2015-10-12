@@ -37,7 +37,7 @@
  * - The values must be right-shifted by eight bits by the updcrc logic; the shift must
  *   be u_(bring in zeroes).  On some hardware you could probably optimize the shift in
  *   assembler by using byte-swap instructions polynomial $edb88320
-  ************************************************************************************************/
+ ************************************************************************************************/
 
 /************************************************************************************************
  * Included Files

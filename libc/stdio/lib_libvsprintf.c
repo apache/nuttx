@@ -1291,7 +1291,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list a
               /* Accumulate the field width integer. */
 
               int n = ((int)(FMT_CHAR)) - (int)'0';
-              for (;;)
+              for (; ; )
                 {
                   FMT_NEXT;
                   if (FMT_CHAR >= '0' && FMT_CHAR <= '9')
@@ -1363,10 +1363,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list a
 #endif
           /* Get the string to output */
 
-          ptmp = va_arg(ap, char *);
+          ptmp = va_arg(ap, FAR char *);
           if (!ptmp)
             {
-              ptmp = (char*)g_nullstring;
+              ptmp = (FAR char *)g_nullstring;
             }
 
           /* Get the width of the string and perform right-justification

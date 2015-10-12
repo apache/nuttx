@@ -52,11 +52,14 @@
 #ifndef CONFIG_ARCH_MEMMOVE
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 {
-  char *tmp, *s;
+  FAR char *tmp;
+  FAR char *s;
+
   if (dest <= src)
     {
-      tmp = (char*) dest;
-      s   = (char*) src;
+      tmp = (FAR char *) dest;
+      s   = (FAR char *) src;
+
       while (count--)
         {
           *tmp++ = *s++;
@@ -64,8 +67,9 @@ FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
     }
   else
     {
-      tmp = (char*) dest + count;
-      s   = (char*) src + count;
+      tmp = (FAR char *) dest + count;
+      s   = (FAR char *) src + count;
+
       while (count--)
         {
           *--tmp = *--s;

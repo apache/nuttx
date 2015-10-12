@@ -305,7 +305,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 
   /* Attach our signal handler */
 
-  printf("waiter_main: Registering signal handler\n" );
+  printf("waiter_main: Registering signal handler\n");
   act.sa_sigaction = lio_sighandler;
   act.sa_flags = SA_SIGINFO;
 
@@ -352,7 +352,7 @@ static int lio_waitall(FAR struct aiocb * const *list, int nent)
 
   /* Loop until all I/O completes */
 
-  for (;;)
+  for (; ; )
     {
       /* Check if all I/O has completed */
 

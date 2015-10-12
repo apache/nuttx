@@ -111,7 +111,7 @@ long double rintl(long double x)
 
       if (fremainder == -0.5)
         {
-          llinteger = ((llinteger+1)&~1);
+          llinteger = ((llinteger + 1) & ~1);
         }
       else if (fremainder < -0.5)
         {
@@ -124,7 +124,7 @@ long double rintl(long double x)
 
       if (fremainder == 0.5)
         {
-          llinteger = ((llinteger+1)&~1);
+          llinteger = ((llinteger + 1) & ~1);
         }
       else if (fremainder > 0.5)
         {

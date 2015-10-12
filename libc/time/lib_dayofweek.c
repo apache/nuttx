@@ -104,6 +104,7 @@ int clock_dayoftheweek(int mday, int month, int year)
     }
 
   month -= 2;
-  return (mday + year + year/4 - year/100 + year/400 + ( 31 * month) / 12) % 7;
+  return (mday + year + year / 4 - year / 100 + year / 400 +
+         (31 * month) / 12) % 7;
 }
 #endif /* CONFIG_TIME_EXTENDED */

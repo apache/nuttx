@@ -137,7 +137,7 @@ static int lib_mode2oflags(FAR const char *mode)
               {
                 /* Write to the end of the file */
 
-                oflags = O_WROK|O_CREAT|O_APPEND;
+                oflags = O_WROK | O_CREAT | O_APPEND;
                 state  = MODE_A;
               }
             else

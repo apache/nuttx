@@ -310,10 +310,10 @@ typedef uint32_t            UIntN;
  *
  ****************************************************************************/
 
-void *memcpy(void *dest, const void *src, size_t count)
+FAR void *memcpy(FAR void *dest, FAR const void *src, size_t count)
 {
-  uint8_t *dst8 = (uint8_t*)dest;
-  uint8_t *src8 = (uint8_t*)src;
+  FAR uint8_t *dst8 = (FAR uint8_t *)dest;
+  FAR uint8_t *src8 = (FAR uint8_t *)src;
 
   if (count < 8)
     {

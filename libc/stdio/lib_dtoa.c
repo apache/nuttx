@@ -427,7 +427,10 @@ static Bigint *pow5mult(Bigint * b, int k)
 {
   Bigint *b1, *p5, *p51;
   int i;
-  static int p05[3] = { 5, 25, 125 };
+  static int p05[3] =
+  {
+    5, 25, 125
+  };
 
   if ((i = k & 3))
     b = multadd(b, p05[i - 1], 0);
@@ -444,7 +447,7 @@ static Bigint *pow5mult(Bigint * b, int k)
       p5->next = 0;
     }
 
-  for (;;)
+  for (; ; )
     {
       if (k & 1)
         {
@@ -574,7 +577,8 @@ static int cmp(Bigint * a, Bigint * b)
   xa = xa0 + j;
   xb0 = b->x;
   xb = xb0 + j;
-  for (;;)
+
+  for (; ; )
     {
       if (*--xa != *--xb)
         {
@@ -807,13 +811,27 @@ static const double tens[] =
 };
 
 #ifdef IEEE_Arith
-static const double bigtens[] = { 1e16, 1e32, 1e64, 1e128, 1e256 };
-static const double tinytens[] = { 1e-16, 1e-32, 1e-64, 1e-128, 1e-256 };
+static const double bigtens[] =
+{
+  1e16, 1e32, 1e64, 1e128, 1e256
+};
+
+static const double tinytens[] =
+{
+  1e-16, 1e-32, 1e-64, 1e-128, 1e-256
+};
 
 #  define n_bigtens 5
 #else
-static const double bigtens[] = { 1e16, 1e32 };
-static const double tinytens[] = { 1e-16, 1e-32 };
+static const double bigtens[] =
+{
+  1e16, 1e32
+};
+
+static const double tinytens[] =
+{
+  1e-16, 1e-32
+};
 
 #  define n_bigtens 2
 #endif
@@ -1284,7 +1302,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
           /* Use Steele & White method of only generating digits needed. */
 
           eps = 0.5 / tens[ilim - 1] - eps;
-          for (i = 0;;)
+          for (i = 0; ; )
             {
               L = (int)d;
               d -= L;
@@ -1314,7 +1332,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
           /* Generate ilim digits, then fix them up. */
 
           eps *= tens[ilim - 1];
-          for (i = 1;; i++, d *= 10.)
+          for (i = 1; ; i++, d *= 10.)
             {
               L = (int)d;
               d -= L;
@@ -1363,7 +1381,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
           goto one_digit;
         }
 
-      for (i = 1;; i++)
+      for (i = 1; ; i++)
         {
           L = (int)(d / ds);
           d -= L * ds;
@@ -1586,7 +1604,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
           mhi = lshift(mhi, Log2P);
         }
 
-      for (i = 1;; i++)
+      for (i = 1; ; i++)
         {
           dig = quorem(b, S) + '0';
           /* Do we yet have the shortest decimal string that will round to d? */
@@ -1634,8 +1652,10 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
           if (j_1 > 0)
             {
               if (dig == '9')
-                {               /* possible if i == 1 */
-                round_9_up:
+                {
+                  /* possible if i == 1 */
+
+                  round_9_up:
                   *s++ = '9';
                   goto roundoff;
                 }
@@ -1664,7 +1684,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
     }
   else
     {
-      for (i = 1;; i++)
+      for (i = 1; ; i++)
         {
           *s++ = dig = quorem(b, S) + '0';
           if (i >= ilim)
@@ -1713,7 +1733,9 @@ ret:
 ret1:
   Bfree(b);
   if (s == s0)
-    {                           /* Don't return empty string */
+    {
+      /* Don't return empty string */
+
       *s++ = '0';
       k = 0;
     }

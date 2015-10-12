@@ -59,7 +59,7 @@
  *
  *   The shutdown() function disables subsequent send and/or receive
  *   operations on a socket, depending on the value of the how argument.
-
+ *
  * Input Paramteers:
  *   sockfd - Specifies the file descriptor of the socket.
  *   how    - Specifies the type of shutdown. The values are as follows: 
@@ -71,7 +71,7 @@
  * Returned Value:
  *   Upon successful completion, shutdown() will return 0; otherwise, -1 will
  *   be returned and errno set to indicate the error.
-
+ *
  *     EBADF     - The socket argument is not a valid file descriptor.
  *     EINVAL    - The how argument is invalid.
  *     ENOTCONN  - The socket is not connected.

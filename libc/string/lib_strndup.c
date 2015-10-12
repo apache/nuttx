@@ -74,7 +74,7 @@ FAR char *strndup(FAR const char *s, size_t size)
 
       /* Allocate the new string, adding 1 for the NUL terminator */
 
-      news = (FAR char*)lib_malloc(allocsize + 1);
+      news = (FAR char *)lib_malloc(allocsize + 1);
       if (news)
         {
           /* Copy the string into the allocated memory and add a NUL

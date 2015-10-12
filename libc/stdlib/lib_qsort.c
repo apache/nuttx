@@ -115,8 +115,8 @@ static inline FAR char *med3(FAR char *a, FAR char *b, FAR char *c,
                              FAR const void *))
 {
   return compar(a, b) < 0 ?
-         (compar(b, c) < 0 ? b : (compar(a, c) < 0 ? c : a ))
-              :(compar(b, c) > 0 ? b : (compar(a, c) < 0 ? a : c ));
+         (compar(b, c) < 0 ? b : (compar(a, c) < 0 ? c : a)) :
+         (compar(b, c) > 0 ? b : (compar(a, c) < 0 ? a : c));
 }
 
 /****************************************************************************
@@ -218,7 +218,7 @@ loop:
   pa = pb = (FAR char *)base + width;
 
   pc = pd = (FAR char *)base + (nel - 1) * width;
-  for (;;)
+  for (; ; )
     {
       while (pb <= pc && (r = compar(pb, base)) <= 0)
         {

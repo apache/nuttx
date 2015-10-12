@@ -304,7 +304,7 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
 {
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
       /* Then process queued work.  We need to keep the work queue locked
        * while we process items in the work list.

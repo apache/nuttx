@@ -112,7 +112,7 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue, FAR struct work_s *work
 
       DEBUGASSERT(work->dq.flink != NULL ||
                   (FAR dq_entry_t *)work == wqueue->q.tail);
-      DEBUGASSERT(work->dq.blink != NULL ||i
+      DEBUGASSERT(work->dq.blink != NULL ||
                   (FAR dq_entry_t *)work == wqueue->q.head);
 
       /* Remove the entry from the work queue and make sure that it is
