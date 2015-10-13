@@ -47,6 +47,8 @@
 #include <nuttx/input/buttons.h>
 
 #include <arch/irq.h>
+
+#undef __KERNEL__
 #include <arch/board/board.h>
 
 #if CONFIG_BUTTONS_LOWER

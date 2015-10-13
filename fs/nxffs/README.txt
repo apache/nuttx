@@ -175,6 +175,6 @@ Things to Do
   done.  That garbarge collection should search for valid blocks that no
   longer contain valid data.  It should pre-erase them, put them in
   a good but empty state... all ready for file system re-organization.
-
-
+- And worse, when NXFSS reorganization the FLASH a power cycle can
+  damage the file system content if it happens at the wrong time.
 
