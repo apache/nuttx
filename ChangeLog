@@ -11021,6 +11021,9 @@
 	  (2015-10-9).
 	* fs/tmpfs: TMPFS file system is code complete and bascially functional
 	  although it has not been heavilay tested (2015-10-9).
-	* drivers/input/buttons/c and include/nuttx/input/buttons.h:  Add a
+	* drivers/input/button_upper.c and include/nuttx/input/buttons.h:  Add a
 	  driver to support application access to board buttons (2015-10-12).
- 
+	* drivers/input/button_lower.c:  Add a generic lower half button driver.
+	  This lower half driver is only usable in a limited number of
+	  situations, but can still serve as a module for the lower half button
+	  driver.  (2015-10-13).
