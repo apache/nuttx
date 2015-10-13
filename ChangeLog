@@ -11030,3 +11030,6 @@
 	* drivers/sensors/zerocross.c and include/nuttx/sensors/zerocross.h:
 	  Add Zero Cross device driver support.  From Alan Carvalho de Assis
 	  (2015-10-13).
+	* configs/stm32f4discovery/src/stm32_zerocross.c: Add low level support
+	  for the Zero Cross driver for the STM32F4-Discovery.  From Alan
+	  Carvalho de Assis (2015-10-13).
