@@ -123,3 +123,7 @@ config LM92
 config QENCODER
 	bool "Qencoder"
 	default n
+
+config ZEROCROSS
+	bool "Zero Cross Sensor"
+	default n

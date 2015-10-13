@@ -101,6 +101,12 @@ ifeq ($(CONFIG_QENCODER),y)
   CSRCS += qencoder.c
 endif
 
+# Zero Cross upper half
+
+ifeq ($(CONFIG_ZEROCROSS),y)
+  CSRCS += zerocross.c
+endif
+
 # Include sensor driver build support
 
 DEPPATH += --dep-path sensors

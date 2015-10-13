@@ -11027,3 +11027,6 @@
 	  This lower half driver is only usable in a limited number of
 	  situations, but can still serve as a module for the lower half button
 	  driver.  (2015-10-13).
+	* drivers/sensors/zerocross.c and include/nuttx/sensors/zerocross.h:
+	  Add Zero Cross device driver support.  From Alan Carvalho de Assis
+	  (2015-10-13).
