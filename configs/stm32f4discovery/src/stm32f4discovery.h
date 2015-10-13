@@ -191,6 +191,10 @@
 
 #define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 
+/* ZERO CROSS pin definiton */
+
+#define GPIO_ZEROCROSS  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
+
 /* PWM
  *
  * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
@@ -513,6 +517,18 @@ int stm32_sdio_initialize(void);
 
 #ifdef HAVE_NETMONITOR
 void weak_function stm32_netinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_zerocross_initialize
+ *
+ * Description:
+ *   Initialize and register the zero cross driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ZEROCROSS
+int stm32_zerocross_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

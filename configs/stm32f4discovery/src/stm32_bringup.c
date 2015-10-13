@@ -97,6 +97,10 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
+#ifdef CONFIG_ZEROCROSS
+  stm32_zerocross_initialize();
+#endif
+
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
 
