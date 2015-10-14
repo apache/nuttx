@@ -132,7 +132,7 @@ static void *simuart_thread(void *arg)
 
   /* Now loop, collecting a buffering data from stdin forever */
 
-  for (;;)
+  for (; ; )
     {
       /* Read one character from stdin */
 
@@ -280,7 +280,7 @@ int simuart_getc(void)
    */
 
   sched_lock();
-  for (;;)
+  for (; ; )
     {
       /* Wait for a byte to become available */
 

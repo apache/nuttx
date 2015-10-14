@@ -64,7 +64,7 @@
 
 void up_release_pending(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 
   sdbg("From TCB=%p\n", rtcb);
 
@@ -92,7 +92,7 @@ void up_release_pending(void)
            * of the g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (FAR struct tcb_s *)g_readytorun.head;
           sdbg("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of

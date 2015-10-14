@@ -56,11 +56,13 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devconsole_read(struct file *, char *, size_t);
-static ssize_t devconsole_write(struct file *, const char *, size_t);
+static ssize_t devconsole_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t devconsole_write(FAR struct file *filep,
+                 FAR const char *buffer, size_t buflen);
 #ifndef CONFIG_DISABLE_POLL
 static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                               bool setup);
+                 bool setup);
 #endif
 
 /****************************************************************************

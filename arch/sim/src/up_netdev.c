@@ -68,7 +68,7 @@
  * Public Functions
  ****************************************************************************/
 
-unsigned long up_getwalltime( void )
+unsigned long up_getwalltime(void)
 {
   struct timeval tm;
   (void)gettimeofday(&tm, NULL);

@@ -120,9 +120,9 @@ static inline int up_x11createframe(void)
   XStringListToTextProperty(&winName, 1, &winprop);
   XStringListToTextProperty(&iconName, 1, &iconprop);
 
-  hints.flags = PSize | PMinSize | PMaxSize;
-  hints.width = hints.min_width  = hints.max_width  = g_fbpixelwidth;
-  hints.height= hints.min_height = hints.max_height = g_fbpixelheight;
+  hints.flags  = PSize | PMinSize | PMaxSize;
+  hints.width  = hints.min_width  = hints.max_width  = g_fbpixelwidth;
+  hints.height = hints.min_height = hints.max_height = g_fbpixelheight;
 
   XSetWMProperties(g_display, g_window, &winprop, &iconprop, argv, 1,
                    &hints, NULL, NULL);
@@ -133,10 +133,11 @@ static inline int up_x11createframe(void)
 
 #if defined(CONFIG_SIM_AJOYSTICK)
   XSelectInput(g_display, g_window,
-               ButtonPressMask|ButtonReleaseMask|PointerMotionMask);
+               ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
 #else
   XSelectInput(g_display, g_window,
-               ButtonPressMask|ButtonReleaseMask|PointerMotionMask|KeyPressMask);
+               ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
+               KeyPressMask);
 #endif
 
   /* Release queued events on the display */
@@ -147,7 +148,7 @@ static inline int up_x11createframe(void)
   /* Grab mouse button 1, enabling mouse-related events */
 
   (void)XGrabButton(g_display, Button1, AnyModifier, g_window, 1,
-                    ButtonPressMask|ButtonReleaseMask|ButtonMotionMask,
+                    ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
                     GrabModeAsync, GrabModeAsync, None, None);
 #endif
 
@@ -188,7 +189,7 @@ static void up_x11traperrors(void)
 #ifndef CONFIG_SIM_X11NOSHM
 static int up_x11untraperrors(void)
 {
-  XSync(g_display,0);
+  XSync(g_display, 0);
   XSetErrorHandler(NULL);
   return g_xerror;
 }
@@ -291,7 +292,7 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
         }
       if (!g_image)
         {
-          fprintf(stderr,"Unable to create g_image.");
+          fprintf(stderr, "Unable to create g_image.");
           return -1;
         }
       g_shmcheckpoint++;
@@ -337,10 +338,10 @@ shmerror:
 #endif
       b_useshm = 0;
 
-      g_framebuffer = (unsigned char*)malloc(fblen);
+      g_framebuffer = (unsigned char *)malloc(fblen);
 
-      g_image = XCreateImage(g_display, DefaultVisual(g_display,g_screen), depth,
-                             ZPixmap, 0, (char*)g_framebuffer, g_fbpixelwidth, g_fbpixelheight,
+      g_image = XCreateImage(g_display, DefaultVisual(g_display, g_screen), depth,
+                             ZPixmap, 0, (char *)g_framebuffer, g_fbpixelwidth, g_fbpixelheight,
                              8, 0);
 
       if (g_image == NULL)
@@ -416,7 +417,7 @@ int up_x11initialize(unsigned short width, unsigned short height,
       g_x11initialized = 1;
     }
 
-  *fbmem  = (void*)g_framebuffer;
+  *fbmem  = (void *)g_framebuffer;
   return 0;
 }
 
@@ -440,8 +441,9 @@ int up_x11cmap(unsigned short first, unsigned short len,
     {
       XColor color;
 
-     /* Convert to RGB.  In the NuttX cmap, each component
-      * ranges from 0-255; for X11 the range is 0-65536 */
+      /* Convert to RGB.  In the NuttX cmap, each component
+       * ranges from 0-255; for X11 the range is 0-65536
+       */
 
      color.red   = (short)(*red++) << 8;
      color.green = (short)(*green++) << 8;
@@ -478,5 +480,6 @@ void up_x11update(void)
       XPutImage(g_display, g_window, g_gc, g_image, 0, 0, 0, 0,
                 g_fbpixelwidth, g_fbpixelheight);
     }
+
   XSync(g_display, 0);
 }
