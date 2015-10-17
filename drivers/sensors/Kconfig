@@ -99,6 +99,13 @@ config MAX31855
 	---help---
 		Enables support for the MAX31855 driver
 
+config MAX6675
+	bool "Maxim MAX6675 Driver"
+	default n
+	select SPI
+	---help---
+		Enables support for the MAX6675 driver
+
 config I2C_LM75
 	bool
 	default y if LM75

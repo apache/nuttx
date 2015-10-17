@@ -90,6 +90,10 @@ ifeq ($(CONFIG_MAX31855),y)
   CSRCS += max31855.c
 endif
 
+ifeq ($(CONFIG_MAX6675),y)
+  CSRCS += max6675.c
+endif
+
 ifeq ($(CONFIG_MPL115A),y)
   CSRCS += mpl115a.c
 endif
