@@ -100,6 +100,9 @@ void weak_function stm32_spiinitialize(void)
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_MAX31855)
   (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
 #endif
+#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_MAX6675)
+  (void)stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
+#endif
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
     defined(CONFIG_LCD_SSD1351)
   (void)stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
@@ -170,6 +173,12 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   if (devid == SPIDEV_TEMPERATURE)
     {
       stm32_gpiowrite(GPIO_MAX31855_CS, !selected);
+    }
+#endif
+#if defined(CONFIG_MAX6675)
+  if (devid == SPIDEV_TEMPERATURE)
+    {
+      stm32_gpiowrite(GPIO_MAX6675_CS, !selected);
     }
 #endif
 }

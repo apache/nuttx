@@ -212,6 +212,9 @@
 #define GPIO_MAX31855_CS  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
 
+#define GPIO_MAX6675_CS  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
+
 /* USB OTG FS
  *
  * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
@@ -529,6 +532,18 @@ void weak_function stm32_netinitialize(void);
 
 #ifdef CONFIG_ZEROCROSS
 int stm32_zerocross_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_max6675initialize
+ *
+ * Description:
+ *   Initialize and register the max6675 driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MAX6675
+int stm32_max6675initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */
