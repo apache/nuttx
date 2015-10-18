@@ -2435,8 +2435,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           DEBUGASSERT(bt != NULL);
           DEBUGASSERT(bt->bt_baud < SAMV7_MCANCLK_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 16);
-          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
-          DEBUGASSERT(bt->bt_tseg2 > 1 && bt->bt_tseg2 <= 64);
+          DEBUGASSERT(bt->bt_tseg1 > 1 && bt->bt_tseg1 <= 64);
+          DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <= 16);
 
           /* Extract bit timing data */
 
@@ -2642,11 +2642,11 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   DEBUGASSERT(config->ntxfifoq > 0);
 
   /* Reserve a buffer for the transmission, waiting if necessary.  When
-   * mcan_buffer_reserve() returns, we are guaranteed the the TX FIFOQ is
+   * mcan_buffer_reserve() returns, we are guaranteed that the TX FIFOQ is
    * not full and cannot become full at least until we add our packet to
    * the FIFO.
    *
-   * We can't get exclusive access to MAN resource here because that
+   * We can't get exclusive access to MCAN resources here because that
    * lock the MCAN while we wait for a free buffer.  Instead, the
    * scheduler is locked here momentarily.  See discussion in
    * mcan_buffer_reserve() for an explanation.
@@ -2747,8 +2747,8 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * course, the transfer is not complete, but this early notification
    * allows the upper half logic to free resources sooner.
    *
-   * REVISTI:  Should we disable interrupts?  can_txdone() was designed to
-   * be called from and interrupt handler and, hence, may be unsafe when
+   * REVISIT:  Should we disable interrupts?  can_txdone() was designed to
+   * be called from an interrupt handler and, hence, may be unsafe when
    * called from the tasking level.
    */
 
