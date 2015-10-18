@@ -11033,3 +11033,8 @@
 	* configs/stm32f4discovery/src/stm32_zerocross.c: Add low level support
 	  for the Zero Cross driver for the STM32F4-Discovery.  From Alan
 	  Carvalho de Assis (2015-10-13).
+	* drivers/sensors/max6675.c and include/nuttx/sensors/max6675.h:  Add
+	  support to Thermocouple-to-Digital converter MAX6675.  From Alan
+	  Carvalho de Assis (2015-10-18).
+	* configs/stm32f4discovery/src: Add board config to support MAX6675.
+	  From Alan Carvalho de Assis (2015-10-18).
