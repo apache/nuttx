@@ -54,6 +54,7 @@
 
 #include "chip/sam_uart.h"
 #include "chip/sam_pinmap.h"
+#include "chip/sam_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -353,6 +354,13 @@ void sam_lowsetup(void)
 #ifdef CONFIG_USART1_IFLOWCONTROL
   (void)sam_configgpio(GPIO_USART1_RTS);
 #endif
+  /* To use the USART1 as an USART, the SYSIO Pin4 must be bound to PB4
+   * instead of TDI
+   */
+
+  uint32_t sysioreg = getreg32(SAM_MATRIX_CCFG_SYSIO);
+  sysioreg |= MATRIX_CCFG_SYSIO_SYSIO4;
+  putreg32(sysioreg, SAM_MATRIX_CCFG_SYSIO);
 #endif
 
 #ifdef CONFIG_SAMV7_USART2
