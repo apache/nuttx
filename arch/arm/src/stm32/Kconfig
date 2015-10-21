@@ -4307,3 +4307,71 @@ endmenu
 endmenu
 endif # STM32_DMA2D
 
+menu "QEncoder Driver"
+	depends on QENCODER
+	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
+
+config STM32_QENCODER_FILTER
+	bool "Enable filtering on STM32 QEncoder input"
+	default y
+
+choice
+	depends on STM32_QENCODER_FILTER
+	prompt "Input channel sampling frequency"
+	default STM32_QENCODER_SAMPLE_FDTS_4
+
+config STM32_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config STM32_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config STM32_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config STM32_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config STM32_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config STM32_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config STM32_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	depends on STM32_QENCODER_FILTER
+	prompt "Input channel event count"
+	default STM32_QENCODER_SAMPLE_EVENT_6
+
+config STM32_QENCODER_SAMPLE_EVENT_1
+	depends on STM32_QENCODER_SAMPLE_FDTS
+	bool "1"
+
+config STM32_QENCODER_SAMPLE_EVENT_2
+	depends on STM32_QENCODER_SAMPLE_CKINT
+	bool "2"
+
+config STM32_QENCODER_SAMPLE_EVENT_4
+	depends on STM32_QENCODER_SAMPLE_CKINT
+	bool "4"
+
+config STM32_QENCODER_SAMPLE_EVENT_5
+	depends on STM32_QENCODER_SAMPLE_FDTS_16 || STM32_QENCODER_SAMPLE_FDTS_32
+	bool "5"
+
+config STM32_QENCODER_SAMPLE_EVENT_6
+	depends on !STM32_QENCODER_SAMPLE_FDTS && !STM32_QENCODER_SAMPLE_CKINT
+	bool "6"
+
+config STM32_QENCODER_SAMPLE_EVENT_8
+	depends on !STM32_QENCODER_SAMPLE_FDTS
+	bool "8"
+
+endchoice
+
+endmenu
