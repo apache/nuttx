@@ -11040,3 +11040,7 @@
 	  From Alan Carvalho de Assis (2015-10-18).
 	* arch/arm/src/samv7/sam_lowputc.c: Reconfigure System I/O when using
 	  USART1.  From Frank Benkert (2015-10-20).
+	* fs/semaphore: Named semaphores:  Bad cast in sem_close().  Fixed by
+	  reordering fields of struct nsem_inode_s so that the cast will work
+	  (2015-10-22).
+
