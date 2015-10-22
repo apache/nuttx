@@ -309,6 +309,14 @@ config AT24XX_EXTSIZE
 
 		Other, block-oriented access are not effected by this setting
 
+config AT24XX_FREQUENCY
+	int "AT24xx I2C bus frequency"
+	default 100000
+	---help---
+	   Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
+	   must represent a valid I2C speed (normally less than 400.000) or the driver
+	   might fail.
+
 endif
 
 config MTD_AT25

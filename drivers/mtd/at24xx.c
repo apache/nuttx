@@ -78,11 +78,26 @@
 #  warning "Assuming AT24 address of 0x50"
 #  define CONFIG_AT24XX_ADDR 0x50
 #endif
+#ifndef CONFIG_AT24XX_FREQUENCY
+#  define CONFIG_AT24XX_FREQUENCY 100000
+#endif
 
 /* Get the part configuration based on the size configuration */
 
-#if CONFIG_AT24XX_SIZE == 2       /* AT24C32: 2Kbits = 256; 16 * 16 =  256 */
+#if CONFIG_AT24XX_SIZE == 2       /* AT24C02: 2Kbits = 256; 16 * 16 =  256 */
 #  define AT24XX_NPAGES     16
+#  define AT24XX_PAGESIZE   16
+#  define AT24XX_ADDRSIZE   1
+#elif CONFIG_AT24XX_SIZE == 4     /* AT24C04: 4Kbits = 512B; 32 * 16 = 512 */
+#  define AT24XX_NPAGES     32
+#  define AT24XX_PAGESIZE   16
+#  define AT24XX_ADDRSIZE   1
+#elif CONFIG_AT24XX_SIZE == 8     /* AT24C08: 8Kbits = 1KiB; 64 * 16 = 1024 */
+#  define AT24XX_NPAGES     64
+#  define AT24XX_PAGESIZE   16
+#  define AT24XX_ADDRSIZE   1
+#elif CONFIG_AT24XX_SIZE == 16    /* AT24C16: 16Kbits = 2KiB; 128 * 16 = 2048 */
+#  define AT24XX_NPAGES     128
 #  define AT24XX_PAGESIZE   16
 #  define AT24XX_ADDRSIZE   1
 #elif CONFIG_AT24XX_SIZE == 32    /* AT24C32: 32Kbits = 4KiB; 128 * 32 =  4096 */
@@ -181,16 +196,17 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
 
   memset(&buf[AT24XX_ADDRSIZE], 0xff, priv->pagesize);
   I2C_SETADDRESS(priv->dev, priv->addr, 7);
-  I2C_SETFREQUENCY(priv->dev, 100000);
+  I2C_SETFREQUENCY(priv->dev, CONFIG_AT24XX_FREQUENCY);
 
   for (startblock = 0; startblock < priv->npages; startblock++)
     {
-#if AT24XX_ADDRSIZE == 2
       uint16_t offset = startblock * priv->pagesize;
+#if AT24XX_ADDRSIZE == 2
       buf[1] = offset & 0xff;
       buf[0] = (offset >> 8) & 0xff;
 #else
-      buf[0] = startblock * priv->pagesize;
+      buf[0] = offset & 0xff;
+      I2C_SETADDRESS(priv->dev, priv->addr | ((offset >> 8) & 0x07), 7);
 #endif
 
       while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
@@ -228,8 +244,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
   fvdbg("offset: %lu nbytes: %lu address: %02x\n",
         (unsigned long)offset, (unsigned long)nbytes, address);
 
-  I2C_SETADDRESS(priv->dev, address, 7);
-  I2C_SETFREQUENCY(priv->dev, 100000);
+  I2C_SETFREQUENCY(priv->dev, CONFIG_AT24XX_FREQUENCY);
 
   /* "Random Read: A Random Read requires a dummy byte write sequence to load in the
    *  data word address. Once the device address word and data word address are clocked
@@ -247,8 +262,12 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
 #if AT24XX_ADDRSIZE == 2
   buf[1] = offset & 0xff;
   buf[0] = (offset >> 8) & 0xff;
+
+  I2C_SETADDRESS(priv->dev, address, 7);
 #else
-  buf[0] = (uint8_t)offset;
+  buf[0] = offset & 0xff;
+
+  I2C_SETADDRESS(priv->dev, address | ((offset >> 8) & 0x07), 7);
 #endif
 
   while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
@@ -352,16 +371,18 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
   I2C_SETADDRESS(priv->dev, priv->addr, 7);
-  I2C_SETFREQUENCY(priv->dev, 100000);
+  I2C_SETFREQUENCY(priv->dev, CONFIG_AT24XX_FREQUENCY);
 
   while (blocksleft-- > 0)
     {
-#if AT24XX_ADDRSIZE == 2
       uint16_t offset = startblock * priv->pagesize;
+#if AT24XX_ADDRSIZE == 2
       buf[1] = offset & 0xff;
       buf[0] = (offset >> 8) & 0xff;
 #else
-      buf[0] = startblock * priv->pagesize;
+      buf[0] = offset & 0xff;
+
+      I2C_SETADDRESS(priv->dev, address | ((offset >> 8) & 0x07), 7);
 #endif
 
       while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
