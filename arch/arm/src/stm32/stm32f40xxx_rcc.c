@@ -751,12 +751,16 @@ static void stm32_stdclockconfig(void)
       /* Configure PLLSAI */
 
       regval = getreg32(STM32_RCC_PLLSAICFGR);
+      regval &= ~(RCC_PLLSAICFGR_PLLSAIN_MASK
+                 | RCC_PLLSAICFGR_PLLSAIR_MASK
+                 | RCC_PLLSAICFGR_PLLSAIQ_MASK);
       regval |= (STM32_RCC_PLLSAICFGR_PLLSAIN
                 | STM32_RCC_PLLSAICFGR_PLLSAIR
                 | STM32_RCC_PLLSAICFGR_PLLSAIQ);
       putreg32(regval, STM32_RCC_PLLSAICFGR);
 
       regval = getreg32(STM32_RCC_DCKCFGR);
+      regval &= ~RCC_DCKCFGR_PLLSAIDIVR_MASK;
       regval |= STM32_RCC_DCKCFGR_PLLSAIDIVR;
       putreg32(regval, STM32_RCC_DCKCFGR);
 
