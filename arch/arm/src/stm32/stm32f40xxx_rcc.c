@@ -160,6 +160,12 @@ static inline void rcc_enableahb1(void)
 #if STM32_NGPIO > 128
              | RCC_AHB1ENR_GPIOIEN
 #endif
+#if STM32_NGPIO > 144
+             |RCC_AHB1ENR_GPIOJEN
+#endif
+#if STM32_NGPIO > 160
+             |RCC_AHB1ENR_GPIOKEN
+#endif
              );
 #endif
 
