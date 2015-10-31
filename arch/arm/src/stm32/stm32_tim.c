@@ -145,6 +145,49 @@
 #  undef CONFIG_STM32_TIM14
 #endif
 
+#if defined(CONFIG_STM32_TIM1) 
+#  if defined(GPIO_TIM1_CH1OUT) ||defined(GPIO_TIM1_CH2OUT)||\
+      defined(GPIO_TIM1_CH3OUT) ||defined(GPIO_TIM1_CH4OUT)
+#    define HAVE_TIM1_PWM_OUTPUT 1
+#endif
+#endif
+
+#if defined(CONFIG_STM32_TIM2) 
+#  if defined(GPIO_TIM2_CH1OUT) ||defined(GPIO_TIM2_CH2OUT)||\
+      defined(GPIO_TIM2_CH3OUT) ||defined(GPIO_TIM2_CH4OUT)
+#    define HAVE_TIM2_PWM_OUTPUT 1
+#endif
+#endif
+
+#if defined(CONFIG_STM32_TIM3) 
+#  if defined(GPIO_TIM3_CH1OUT) ||defined(GPIO_TIM3_CH2OUT)||\
+      defined(GPIO_TIM3_CH3OUT) ||defined(GPIO_TIM3_CH4OUT)
+#    define HAVE_TIM3_PWM_OUTPUT 1
+#endif
+#endif
+
+#if defined(CONFIG_STM32_TIM4) 
+#  if defined(GPIO_TIM4_CH1OUT) ||defined(GPIO_TIM4_CH2OUT)||\
+      defined(GPIO_TIM4_CH3OUT) ||defined(GPIO_TIM4_CH4OUT)
+#    define HAVE_TIM4_PWM_OUTPUT 1
+#endif
+#endif
+
+#if defined(CONFIG_STM32_TIM5) 
+#  if defined(GPIO_TIM5_CH1OUT) ||defined(GPIO_TIM5_CH2OUT)||\
+      defined(GPIO_TIM5_CH3OUT) ||defined(GPIO_TIM5_CH4OUT)
+#    define HAVE_TIM5_PWM_OUTPUT 1
+#endif
+#endif
+
+#if defined(CONFIG_STM32_TIM8) 
+#  if defined(GPIO_TIM8_CH1OUT) ||defined(GPIO_TIM8_CH2OUT)||\
+      defined(GPIO_TIM8_CH3OUT) ||defined(GPIO_TIM8_CH4OUT)
+#    define HAVE_TIM8_PWM_OUTPUT 1
+#endif
+#endif
+
+
 /* This module then only compiles if there are enabled timers that are not intended for
  * some other purpose.
  */
@@ -245,6 +288,9 @@ static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
   stm32_tim_disable(dev);
 }
 
+#if defined(HAVE_TIM1_PWM_OUTPUT)||defined(HAVE_TIM2_PWM_OUTPUT)||\
+    defined(HAVE_TIM3_PWM_OUTPUT)||defined(HAVE_TIM4_PWM_OUTPUT)||\
+    defined(HAVE_TIM5_PWM_OUTPUT)||defined(HAVE_TIM8_PWM_OUTPUT)
 static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
 {
   /* TODO: Add support for input capture and bipolar dual outputs for TIM8 */
@@ -258,6 +304,7 @@ static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
       stm32_unconfiggpio(cfg);
     }
 }
+#endif
 
 /************************************************************************************
  * Basic Functions
