@@ -382,7 +382,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 #else
       buf[0] = offset & 0xff;
 
-      I2C_SETADDRESS(priv->dev, address | ((offset >> 8) & 0x07), 7);
+      I2C_SETADDRESS(priv->dev, priv->addr | ((offset >> 8) & 0x07), 7);
 #endif
 
       while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
