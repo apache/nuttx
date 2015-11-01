@@ -174,7 +174,7 @@ void board_autoled_on(int led)
  * Name: up_ledoff
  ****************************************************************************/
 
-void board_led_off(int led)
+void board_autoled_off(int led)
 {
   switch (led)
     {

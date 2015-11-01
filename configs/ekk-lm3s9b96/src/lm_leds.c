@@ -135,10 +135,10 @@ void board_autoled_on(int led)
 }
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_led_off(int led)
+void board_autoled_off(int led)
 {
   switch (led)
     {
@@ -155,9 +155,9 @@ void board_led_off(int led)
       case LED_PANIC:
         if (--g_nest <= 0)
           {
-            led_dumpgpio("board_led_off: before tiva_gpiowrite()");
+            led_dumpgpio("board_autoled_off: before tiva_gpiowrite()");
             tiva_gpiowrite(LED_GPIO, true);
-            led_dumpgpio("board_led_off: after tiva_gpiowrite()");
+            led_dumpgpio("board_autoled_off: after tiva_gpiowrite()");
           }
         break;
     }

@@ -180,11 +180,11 @@ void board_autoled_on(int led)
 #endif
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: board_autoled_off
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_off(int led)
+void board_autoled_off(int led)
 {
   switch (led)
     {

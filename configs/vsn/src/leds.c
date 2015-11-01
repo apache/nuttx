@@ -94,7 +94,7 @@ void board_autoled_on(int led)
     }
 }
 
-void board_led_off(int led)
+void board_autoled_off(int led)
 {
   if (led == LED_IDLE)
     {

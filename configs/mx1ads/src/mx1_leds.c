@@ -96,10 +96,10 @@ void board_autoled_on(int led)
 }
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_led_off(int led)
+void board_autoled_off(int led)
 {
   imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
 }

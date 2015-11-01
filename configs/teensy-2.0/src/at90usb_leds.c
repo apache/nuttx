@@ -147,10 +147,10 @@ void board_autoled_on(int led)
 }
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_led_off(int led)
+void board_autoled_off(int led)
 {
   /*                         ON      OFF
    * LED_STARTED        0    OFF     ON  (never happens)
