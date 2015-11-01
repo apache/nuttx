@@ -128,7 +128,7 @@
  *   --- ------------
  */
 
-/* LED index values for use with tiva_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED_D1      0
 #define BOARD_LED_D2      1
@@ -136,7 +136,7 @@
 #define BOARD_LED_D4      3
 #define BOARD_NLEDS       4
 
-/* LED bits for use with tiva_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED_D1_BIT  (1 << BOARD_LED_D1)
 #define BOARD_LED_D2_BIT  (1 << BOARD_LED_D2)
@@ -205,22 +205,6 @@
  ************************************************************************************/
 
 void tiva_boardinitialize(void);
-
-/************************************************************************************
- * Name:  tiva_ledinit, tiva_setled, and tiva_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LED.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-void tiva_ledinit(void);
-void tiva_setled(int led, bool ledon);
-void tiva_setleds(uint8_t ledset);
-#endif
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H */

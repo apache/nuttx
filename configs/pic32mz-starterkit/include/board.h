@@ -185,14 +185,14 @@
  *   RH2  LED2  High illuminates (GREEN)
  */
 
-/* LED index values for use with pic32mz_setled() */
+/* LED index values for use with board_userled() */
 
 #define PIC32MZ_STARTERKIT_LED1     0
 #define PIC32MZ_STARTERKIT_LED2     1
 #define PIC32MZ_STARTERKIT_LED3     2
 #define PIC32MZ_STARTERKIT_NLEDS    3
 
-/* LED bits for use with pic32mz_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define PIC32MZ_STARTERKIT_LED1_BIT (1 << PIC32MZ_STARTERKIT_LED1)
 #define PIC32MZ_STARTERKIT_LED2_BIT (1 << PIC32MZ_STARTERKIT_LED2)
@@ -295,10 +295,6 @@
  * Inline Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -308,20 +304,8 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name:  pic32mz_ledinit and pic32mz_setled
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the following interfaces
- *   are available to control the LEDs from user applications.
- *
+ * Public Function Prototypes
  ****************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-void pic32mz_ledinit(void);
-void pic32mz_setled(int led, bool ledon);
-void pic32mz_setleds(uint8_t ledset);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

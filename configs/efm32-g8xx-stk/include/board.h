@@ -170,7 +170,7 @@
  * any way.  The following definitions are used to access individual LEDs.
  */
 
-/* LED index values for use with efm32_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED0        0
 #define BOARD_LED1        1
@@ -178,7 +178,7 @@
 #define BOARD_LED3        3
 #define BOARD_NLEDS       4
 
-/* LED bits for use with efm32_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED0_BIT    (1 << BOARD_LED0)
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
@@ -223,21 +223,5 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name:  efm32_ledinit, efm32_setled, and efm32_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the following interfaces
- *   are available to control the LEDs from user applications.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-void efm32_ledinit(void);
-void efm32_setled(int led, bool ledon);
-void efm32_setleds(uint8_t ledset);
-#endif
 
 #endif /* __CONFIGS_EFM32_G8XX_STK_INCLUDE_BOARD_H */

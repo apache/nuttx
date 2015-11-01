@@ -141,13 +141,13 @@
  * LED2            -- Connected to P0[4]
  */
 
-/* LED index values for use with lpc17_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED1                0
 #define BOARD_LED2                1
 #define BOARD_NLEDS               2
 
-/* LED bits for use with lpc17_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT            (1 << BOARD_LED1)
 #define BOARD_LED2_BIT            (1 << BOARD_LED2)
@@ -380,23 +380,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void lpc17_boardinitialize(void);
-
-/************************************************************************************
- * Name:  lpc17_ledinit, lpc17_setled, and lpc17_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfacesare available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-EXTERN void lpc17_ledinit(void);
-EXTERN void lpc17_setled(int led, bool ledon);
-EXTERN void lpc17_setleds(uint8_t ledset);
-#endif
+void lpc17_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

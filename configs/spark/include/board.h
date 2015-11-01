@@ -153,7 +153,7 @@
  * way.  The following definitions are used to access individual LEDs.
  */
 
-/* LED index values for use with stm32_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED1           0    /* Tied to LED_USR */
 #define BOARD_LED2           1    /* Tied to LED_RGB RED */
@@ -166,7 +166,7 @@
 #define BOARD_RGB_LED_GREEN  BOARD_LED4
 #define BOARD_RGB_LED_BLUE   BOARD_LED2
 
-/* LED bits for use with stm32_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_USR_LED_BIT    (1 << BOARD_USR_LED_BLUE)
 #define BOARD_RED_LED_BIT    (1 << BOARD_RGB_LED_RED)
@@ -225,23 +225,6 @@ extern "C"
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-
-/************************************************************************************
- * Name:  board_autoled_initialize, up_setled, and up_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfacesare available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-#undef board_autoled_initialize // Remove macro definition to reuse name
-void board_autoled_initialize(void);
-void up_setled(int led, bool ledon);
-void up_setleds(uint8_t ledset, uint8_t led_states_set);
-#endif
 
 /************************************************************************************
  * Name: stm32_boardinitialize

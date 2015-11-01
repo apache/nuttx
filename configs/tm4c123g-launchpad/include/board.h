@@ -117,14 +117,14 @@
  *   BOARD_LED_B    -- Connected to PF2
  */
 
-/* LED index values for use with tm4c_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED_R               0
 #define BOARD_LED_G               1
 #define BOARD_LED_B               2
 #define BOARD_NLEDS               3
 
-/* LED bits for use with tm4c_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT            (1 << BOARD_LED1)
 #define BOARD_LED2_BIT            (1 << BOARD_LED2)
@@ -201,22 +201,6 @@
  ************************************************************************************/
 
 void tiva_boardinitialize(void);
-
-/************************************************************************************
- * Name:  tm4c_ledinit, tm4c_setled, and tm4c_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LED.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-void tm4c_ledinit(void);
-void tm4c_setled(int led, bool ledon);
-void tm4c_setleds(uint8_t ledset);
-#endif
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_TMC4C123G_LAUNCHPAD_INCLUDE_BOARD_H */

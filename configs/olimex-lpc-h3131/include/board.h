@@ -104,13 +104,13 @@
  * way.  The following definitions are used to access individual LEDs.
  */
 
-/* LED index values for use with lpc31_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED1        0
 #define BOARD_LED2        1
 #define BOARD_NLEDS       2
 
-/* LED bits for use with lpc31_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
@@ -177,24 +177,6 @@ void lpc31_boardinitialize(void);
 #if defined(__cplusplus)
 }
 #endif
-
-/************************************************************************************
- * Name:  lpc31_setled, and lpc31_setleds
- *
- * Description:
- *   These interfaces allow user control of the board LEDs.
- *
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
- *   until the completion of boot.  The it will continue to control LED1; LED2 is
- *   avaiable for application use.
- *
- *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
- *   use.
- *
- ************************************************************************************/
-
-void lpc31_setled(int led, bool ledon);
-void lpc31_setleds(uint8_t ledset);
 
 /************************************************************************************
  * Name: lpc31_setup_overcurrent

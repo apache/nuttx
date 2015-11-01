@@ -106,13 +106,13 @@
  * controllable from software.
  */
 
- /* LED index values for use with pic32mx_setled() */
+ /* LED index values for use with board_userled() */
 
 #define PIC32MX_MIRTOO_LED0     0
 #define PIC32MX_MIRTOO_LED1     1
 #define PIC32MX_MIRTOO_NLEDS    2
 
-/* LED bits for use with pic32mx_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define PIC32MX_MIRTOO_LED0_BIT (1 << PIC32MX_MIRTOO_LED0)
 #define PIC32MX_MIRTOO_LED1_BIT (1 << PIC32MX_MIRTOO_LED1)
@@ -154,32 +154,17 @@
  * Inline Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /****************************************************************************
- * Name: pic32mx_ledinit, pic32mx_setled, and pic32mx_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the following interfaces
- *   are available to control the LEDs from user applicaitons.
- *
+ * Public Function Prototypes
  ****************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
-EXTERN void pic32mx_setled(int led, bool ledon);
-EXTERN void pic32mx_setleds(uint8_t ledset);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

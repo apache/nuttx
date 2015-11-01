@@ -155,14 +155,14 @@
  * GPIO output to low.
  */
 
-/* LED index values for use with sam_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED_L       0
 #define BOARD_LED_RX      1
 #define BOARD_LED_TX      2
 #define BOARD_NLEDS       3
 
-/* LED bits for use with sam_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED_L_BIT   (1 << BOARD_LED_L)
 #define BOARD_LED_RX_BIT  (1 << BOARD_LED_RX)

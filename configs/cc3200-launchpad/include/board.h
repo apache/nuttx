@@ -113,14 +113,14 @@
  *   BOARD_LED_Y    -- Connected to PF2
  */
 
-/* LED index values for use with cc3200_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED_R               1
 #define BOARD_LED_G               2
 #define BOARD_LED_Y               3
 #define BOARD_NLEDS               3
 
-/* LED bits for use with cc3200_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT            (1 << BOARD_LED1)
 #define BOARD_LED2_BIT            (1 << BOARD_LED2)
@@ -191,23 +191,6 @@
  ************************************************************************************/
 
 void tiva_boardinitialize(void);
-
-/************************************************************************************
- * Name:  cc3200_ledinit, cc3200_setled, and cc3200_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LED.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-void cc3200_ledinit(void);
-
-#ifndef CONFIG_ARCH_LEDS
-void cc3200_setled(int led, unsigned char ledon);
-void cc3200_setleds(unsigned char ledset);
-#endif
 
 /************************************************************************************
  * Name: up_buttoninit

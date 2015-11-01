@@ -129,7 +129,7 @@
 
 /* Leds *************************************************************************/
 
-/* LED index values for use with board_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED1                0
 #define BOARD_LED_GREEN           BOARD_LED1
@@ -137,7 +137,7 @@
 #define BOARD_LED_YELLOW          BOARD_LED2
 #define BOARD_NLEDS               2
 
-/* LED bits for use with board_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED_GREEN_BIT     (1 << BOARD_LED_GREEN)
 #define BOARD_LED_YELLOW_BIT    (1 << BOARD_LED_YELLOW)
@@ -201,22 +201,6 @@ void stm32_boardinitialize(void);
 #undef EXTERN
 #if defined(__cplusplus)
 }
-#endif
-
-/************************************************************************************
- * Name: stm32_ledinit, stm32_setled, and stm32_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-void stm32_led_initialize(void);
-void stm32_setled(int led, bool ledon);
-void stm32_setleds(uint8_t ledset);
 #endif
 
 #endif /* __ASSEMBLY__ */

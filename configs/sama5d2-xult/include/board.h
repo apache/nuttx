@@ -118,24 +118,24 @@
  */
 
 #ifndef CONFIG_ARCH_LEDS
-/* LED index values for use with sam_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_GREEN       0
 #define BOARD_BLUE        1
 #define BOARD_NLEDS       2
 
-/* LED bits for use with sam_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_GREEN_BIT  (1 << BOARD_GREEN)
 #define BOARD_BLUE_BIT   (1 << BOARD_BLUE)
 
 #else
-/* LED index values for use with sam_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_BLUE        0
 #define BOARD_NLEDS       1
 
-/* LED bits for use with sam_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_BLUE_BIT   (1 << BOARD_BLUE)
 #endif
@@ -296,20 +296,6 @@ extern "C"
  ************************************************************************************/
 
 void sam_boardinitialize(void);
-
-/************************************************************************************
- * Name:  sam_ledinit, sam_setled, and sam_setleds
- *
- * Description:
- *   The following interfaces are available to control the LEDs from user
- *   applications.  If CONFIG_ARCH_LEDS is defined, then NuttX will control the
- *   green LEDs.
- *
- ************************************************************************************/
-
-void sam_ledinit(void);
-void sam_setled(int led, bool ledon);
-void sam_setleds(uint8_t ledset);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -216,13 +216,13 @@
  *
  * A low output illuminates the LED.
  *
- * LED index values for use with lpc43_setled()
+ * LED index values for use with board_userled()
  */
 
 #define BOARD_LED         0
 #define BOARD_NLEDS       1
 
-/* LED bits for use with lpc43_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED _BIT    (1 << BOARD_LED)
 
@@ -243,9 +243,9 @@
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
- *  void lpc43_ledinit(void);
- *  void lpc43_setled(int led, bool ledon);
- *  void lpc43_setleds(uint8_t ledset);
+ *  void board_userled_initialize(void);
+ *  void board_userled(int led, bool ledon);
+ *  void board_userled_all(uint8_t ledset);
  */
 
 /* Button definitions *******************************************************/
@@ -299,7 +299,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -318,23 +319,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void lpc43_boardinitialize(void);
-
-/****************************************************************************
- * Name:  lpc43_ledinit, lpc43_setled, and lpc43_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the following interfaces
- *   are available to control the LEDs from user applications.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-EXTERN void lpc43_ledinit(void);
-EXTERN void lpc43_setled(int led, bool ledon);
-EXTERN void lpc43_setleds(uint8_t ledset);
-#endif
+void lpc43_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

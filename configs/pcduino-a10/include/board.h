@@ -67,14 +67,14 @@
  *   4. LED4 TX_LED    LCD1_D15/ATAD11/KP_IN5/SMC_VPPPP/EINT15/CSI1_D15/PH15
  */
 
-/* LED index values for use with a1x_setled() */
+/* LED index values for use with board_userled() */
 
 #define BOARD_LED1        0
 #define BOARD_LED3        1
 #define BOARD_LED4        2
 #define BOARD_NLEDS       3
 
-/* LED bits for use with a1x_setleds() */
+/* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
@@ -185,21 +185,6 @@ extern "C" {
  ************************************************************************************/
 
 void a1x_boardinitialize(void);
-
-/************************************************************************************
- * Name:  a1x_setled, and a1x_setleds
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
- *   control the LEDs from user applications.
- *
- ************************************************************************************/
-
-#ifndef CONFIG_ARCH_LEDS
-void a1x_setled(int led, bool ledon);
-void a1x_setleds(uint8_t ledset);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
