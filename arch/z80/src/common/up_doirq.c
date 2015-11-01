@@ -74,7 +74,7 @@
 
 FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
 {
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
 

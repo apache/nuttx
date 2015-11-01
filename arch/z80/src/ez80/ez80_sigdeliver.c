@@ -93,7 +93,7 @@ void up_sigdeliver(void)
 
   int saved_errno = rtcb->pterrno;
 
-  board_led_on(LED_SIGNAL);
+  board_autoled_on(LED_SIGNAL);
 
   sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);

@@ -94,7 +94,7 @@ uint32_t *pic32mz_exception(uint32_t *regs)
    * processing an interrupt.
    */
 
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
 
 #ifdef CONFIG_DEBUG
   /* Get the cause of the exception from the CAUSE register */

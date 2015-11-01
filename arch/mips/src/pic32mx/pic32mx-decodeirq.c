@@ -97,7 +97,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * processing an interrupt.
    */
 
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
 
   /* Save the current value of current_regs (to support nested interrupt
    * handling).  Then set current_regs to regs, indicating that this is

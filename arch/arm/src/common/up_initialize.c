@@ -275,5 +275,5 @@ void up_initialize(void)
   /* Initialize the L2 cache if present and selected */
 
   up_l2ccinitialize();
-  board_led_on(LED_IRQSENABLED);
+  board_autoled_on(LED_IRQSENABLED);
 }

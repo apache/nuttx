@@ -98,7 +98,7 @@ static void _up_assert(int errorcode) /* noreturn_function */
         for (;;)
           {
 #ifdef CONFIG_ARCH_LEDS
-            board_led_on(LED_PANIC);
+            board_autoled_on(LED_PANIC);
             up_mdelay(250);
             board_led_off(LED_PANIC);
             up_mdelay(250);
@@ -154,7 +154,7 @@ void up_assert(void)
   struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 #endif
 
-  board_led_on(LED_ASSERTION);
+  board_autoled_on(LED_ASSERTION);
 
 #ifdef CONFIG_HAVE_FILENAME
 #if CONFIG_TASK_NAME_SIZE > 0

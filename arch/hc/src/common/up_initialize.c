@@ -210,5 +210,5 @@ void up_initialize(void)
 
   up_usbinitialize();
 
-  board_led_on(LED_IRQSENABLED);
+  board_autoled_on(LED_IRQSENABLED);
 }

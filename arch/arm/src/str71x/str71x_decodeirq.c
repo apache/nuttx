@@ -90,7 +90,7 @@
 void up_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
   lowsyslog(LOG_ERR, "Unexpected IRQ\n");
   current_regs = regs;
   PANIC();
@@ -101,7 +101,7 @@ void up_decodeirq(uint32_t *regs)
    * info from CIC register without the setup).
    */
 
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
   irq = getreg32(STR71X_EIC_IVR);
 
   /* Verify that the resulting IRQ number is valid */

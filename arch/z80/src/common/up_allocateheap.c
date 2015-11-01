@@ -101,7 +101,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   *heap_start = (FAR void*)CONFIG_HEAP1_BASE;
   *heap_size = CONFIG_HEAP1_END - CONFIG_HEAP1_BASE;
-  board_led_on(LED_HEAPALLOCATE);
+  board_autoled_on(LED_HEAPALLOCATE);
 }
 
 /****************************************************************************
