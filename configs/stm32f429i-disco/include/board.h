@@ -2,7 +2,7 @@
  * configs/stm32f429i-disco/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -229,6 +229,12 @@
 #define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
 #define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
 #define GPIO_SPI4_SCK  GPIO_SPI4_SCK_1
+
+/* FSMC - SDRAM */
+
+#define GPIO_FSMC_SDCKE1 GPIO_FSMC_SDCKE1_1
+#define GPIO_FSMC_SDNE1  GPIO_FSMC_SDNE1_1
+#define GPIO_FSMC_SDNWE  GPIO_FSMC_SDNWE_1
 
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 

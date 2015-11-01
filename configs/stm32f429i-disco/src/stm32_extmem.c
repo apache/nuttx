@@ -43,8 +43,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-
 #include "chip.h"
 #include "up_arch.h"
 
@@ -52,6 +50,8 @@
 #include "stm32_gpio.h"
 #include "stm32.h"
 #include "stm32f429i-disco.h"
+
+#include <arch/board/board.h>
 
 /************************************************************************************
  * Pre-processor Definitions
