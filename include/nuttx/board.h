@@ -432,7 +432,7 @@ void board_autoled_on(int led);
 #endif
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: board_autoled_off
  *
  * Description:
  *   Set the LED configuration into the OFF condition for the state provided
@@ -457,9 +457,9 @@ void board_autoled_on(int led);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_off(int led);
+void board_autoled_off(int led);
 #else
-# define board_led_off(led)
+# define board_autoled_off(led)
 #endif
 
 /****************************************************************************
