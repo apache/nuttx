@@ -11043,4 +11043,10 @@
 	* fs/semaphore: Named semaphores:  Bad cast in sem_close().  Fixed by
 	  reordering fields of struct nsem_inode_s so that the cast will work
 	  (2015-10-22).
+	* Many files: Rename board_led_* functions to board_autoled_* functions.
+	  This makes room in the namespace to handler user LED functions
+	  (2015-11-01).
+	* Many files: Standardize naming of the user LED interface functions.
+	  The new user LED interface functions are now prototyped in only in
+	  include/nuttx/board.h and have name like board_userled_* (2015-11-01).
 
