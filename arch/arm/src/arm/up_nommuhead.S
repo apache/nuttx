@@ -125,7 +125,7 @@ __start:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	bl		board_led_initialize
+	bl		board_autoled_initialize
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
