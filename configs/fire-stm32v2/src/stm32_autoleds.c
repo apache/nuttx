@@ -349,10 +349,10 @@ void board_autoled_initialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   led_setonoff(ON_BITS(g_ledbits[led]));
 }
@@ -378,7 +378,7 @@ void up_ledpminitialize(void)
   int ret = pm_register(&g_ledscb);
   if (ret != OK)
   {
-      board_led_on(LED_ASSERTION);
+      board_autoled_on(LED_ASSERTION);
     }
 }
 #endif /* CONFIG_PM */

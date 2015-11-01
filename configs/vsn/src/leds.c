@@ -85,7 +85,7 @@ void board_autoled_initialize(void)
    stm32_configgpio(GPIO_LED);
 }
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   if (led == LED_IDLE)
     {

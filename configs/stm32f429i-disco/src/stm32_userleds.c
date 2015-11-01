@@ -233,7 +233,7 @@ void stm32_ledpminitialize(void)
   int ret = pm_register(&g_ledscb);
   if (ret != OK)
   {
-      board_led_on(LED_ASSERTION);
+      board_autoled_on(LED_ASSERTION);
     }
 }
 #endif /* CONFIG_PM */

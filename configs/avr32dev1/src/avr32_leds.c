@@ -73,10 +73,10 @@ void board_autoled_initializeialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   at32uc3_gpiowrite(PINMUX_GPIO_LED1, (led != 0));
   at32uc3_gpiowrite(PINMUX_GPIO_LED2, (led == 2));

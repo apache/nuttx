@@ -85,10 +85,10 @@ static const uint32_t g_ledcfg[BOARD_NLEDS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_onoff
+ * Name: board_autoled_onoff
  ****************************************************************************/
 
-void board_led_onoff(int led, bool state)
+void board_autoled_onoff(int led, bool state)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -117,12 +117,12 @@ void board_autoled_initialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
-  board_led_onoff(led, true);
+  board_autoled_onoff(led, true);
 }
 
 /****************************************************************************
@@ -131,7 +131,7 @@ void board_led_on(int led)
 
 void board_led_off(int led)
 {
-  board_led_onoff(led, false);
+  board_autoled_onoff(led, false);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

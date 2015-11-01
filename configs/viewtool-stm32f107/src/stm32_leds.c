@@ -158,7 +158,7 @@ void stm32_ledinit(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  *
  * Description:
  *   Select the "logical" ON state:
@@ -179,7 +179,7 @@ void stm32_ledinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   switch (led)
     {

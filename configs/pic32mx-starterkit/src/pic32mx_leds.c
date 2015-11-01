@@ -238,11 +238,11 @@ void pic32mx_setleds(uint8_t ledset)
 #endif
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {

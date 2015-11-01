@@ -134,7 +134,7 @@
  * Name: up_ledon
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   switch (led)
     {

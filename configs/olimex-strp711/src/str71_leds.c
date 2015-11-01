@@ -129,10 +129,10 @@ void board_autoled_initialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   /* The Olimex board has only two LEDs, so following states are faked as
    * follows

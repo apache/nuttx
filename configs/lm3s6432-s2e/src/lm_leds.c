@@ -108,10 +108,10 @@ void board_autoled_initialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   switch (led)
     {
@@ -127,9 +127,9 @@ void board_led_on(int led)
         g_nest++;
       case LED_IRQSENABLED:
       case LED_STACKCREATED:
-        led_dumpgpio("board_led_on: before tiva_gpiowrite()");
+        led_dumpgpio("board_autoled_on: before tiva_gpiowrite()");
         tiva_gpiowrite(LED1_GPIO, false);
-        led_dumpgpio("board_led_on: after tiva_gpiowrite()");
+        led_dumpgpio("board_autoled_on: after tiva_gpiowrite()");
         break;
     }
 }

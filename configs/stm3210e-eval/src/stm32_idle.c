@@ -68,7 +68,7 @@
  */
 
 #if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
-#  define BEGIN_IDLE() board_led_on(LED_IDLE)
+#  define BEGIN_IDLE() board_autoled_on(LED_IDLE)
 #  define END_IDLE()   board_led_off(LED_IDLE)
 #else
 #  define BEGIN_IDLE()

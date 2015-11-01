@@ -97,10 +97,10 @@ void board_autoled_initialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   putled8(~(LEDBIT(led)), LED_MASK_OFFSET);
   putled8(LEDBIT(led), LED_SET_OFFSET);

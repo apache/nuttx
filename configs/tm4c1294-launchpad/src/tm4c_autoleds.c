@@ -70,10 +70,10 @@ void tm4c_ledinit(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
 /* --------------- ------- ----- ----- ----- ----- ----------
  * STATE           VALUE   LED1  LED2  LED3  LED4

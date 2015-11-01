@@ -82,10 +82,10 @@ void board_autoled_initialize(void)
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_led_on(int led)
+void board_autoled_on(int led)
 {
   if ((unsigned)led <= 7)
     {
@@ -101,7 +101,7 @@ void board_led_off(int led)
 {
   if (led >= 1)
     {
-      board_led_on(led-1);
+      board_autoled_on(led-1);
     }
 }
 #endif /* CONFIG_ARCH_LEDS */
