@@ -85,7 +85,7 @@ void sam_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
+  board_autoled_initialize();
 #endif
 
   /* Setup SD card-related PIOs if 1) HSMCI is selected and 2) the weak

@@ -63,10 +63,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initializeialize
+ * Name: board_autoled_initializeialize
  ****************************************************************************/
 
-void board_led_initializeialize(void)
+void board_autoled_initializeialize(void)
 {
   at32uc3_configgpio(PINMUX_GPIO_LED1);
   at32uc3_configgpio(PINMUX_GPIO_LED2);

@@ -136,14 +136,14 @@ static void led_dumppins(FAR const char *msg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* Configure all LED pins as GPIO outputs */
 
-  led_dumppins("board_led_initialize() Entry)");
+  led_dumppins("board_autoled_initialize() Entry)");
 
   /* Configure LED pins as GPIOs, then configure GPIOs as outputs */
 
@@ -153,7 +153,7 @@ void board_led_initialize(void)
   lpc43_pin_config(PINCONFIG_LED2);
   lpc43_gpio_config(GPIO_LED2);
 
-  led_dumppins("board_led_initialize() Exit");
+  led_dumppins("board_autoled_initialize() Exit");
 }
 
 /****************************************************************************

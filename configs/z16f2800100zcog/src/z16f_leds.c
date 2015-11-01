@@ -69,11 +69,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* The following is performed up_lowinit() as well */
 

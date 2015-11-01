@@ -90,19 +90,19 @@
 static uint8_t g_nest;
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   leddbg("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
-  led_dumpgpio("board_led_initialize before tiva_configgpio()");
+  led_dumpgpio("board_autoled_initialize before tiva_configgpio()");
   tiva_configgpio(LED_GPIO);
-  led_dumpgpio("board_led_initialize after tiva_configgpio()");
+  led_dumpgpio("board_autoled_initialize after tiva_configgpio()");
   g_nest = 0;
 }
 

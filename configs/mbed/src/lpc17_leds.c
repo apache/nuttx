@@ -119,21 +119,21 @@ static int  g_nestcount;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("board_led_initialize() Entry)");
+  led_dumpgpio("board_autoled_initialize() Entry)");
 
   lpc17_configgpio(MBED_LED1);
   lpc17_configgpio(MBED_LED2);
   lpc17_configgpio(MBED_LED3);
   lpc17_configgpio(MBED_LED4);
 
-  led_dumpgpio("board_led_initialize() Exit");
+  led_dumpgpio("board_autoled_initialize() Exit");
 }
 
 /****************************************************************************

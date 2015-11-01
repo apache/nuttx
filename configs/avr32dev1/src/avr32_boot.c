@@ -79,6 +79,6 @@ void at32uc3_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  board_led_initializeialize();
+  board_autoled_initializeialize();
 #endif
 }

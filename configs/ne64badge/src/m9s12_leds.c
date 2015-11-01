@@ -89,23 +89,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   Configure and initialize on-board LEDs
  *
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("board_led_initialize() Entry)");
+  led_dumpgpio("board_autoled_initialize() Entry)");
 
   hcs12_configgpio(NE64BADGE_LED1);
   hcs12_configgpio(NE64BADGE_LED2);
 
-  led_dumpgpio("board_led_initialize() Exit");
+  led_dumpgpio("board_autoled_initialize() Exit");
 }
 
 /****************************************************************************

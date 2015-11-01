@@ -108,7 +108,7 @@ static uint8_t g_nestlevel;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ************************************************************************************/
 
 static void up_setleds(uint8_t gybits, uint8_t rbit)
@@ -131,10 +131,10 @@ static void up_setleds(uint8_t gybits, uint8_t rbit)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ************************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   register uint8_t regval;
 

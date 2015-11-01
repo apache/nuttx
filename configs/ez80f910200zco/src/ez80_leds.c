@@ -214,11 +214,11 @@ static int8_t  g_intcount         = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   g_currglyph  = g_chspace;
   g_prevglyph  = g_chspace;

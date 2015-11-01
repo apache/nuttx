@@ -75,7 +75,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   Configure and initialize on-board LEDs
@@ -83,7 +83,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
 }
 

@@ -99,23 +99,23 @@ static bool g_uninitialized = true;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_ledinit/board_led_initialize
+ * Name: lpc17_ledinit/board_autoled_initialize
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
 void lpc17_ledinit(void) /* Name when invoked externally */
 #else
-void board_led_initialize(void)    /* Name when invoked via lpc17_boot.c */
+void board_autoled_initialize(void)    /* Name when invoked via lpc17_boot.c */
 #endif
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("board_led_initialize() Entry)");
+  led_dumpgpio("board_autoled_initialize() Entry)");
 
   lpc17_configgpio(LPC1766STK_LED1);
   lpc17_configgpio(LPC1766STK_LED2);
 
-  led_dumpgpio("board_led_initialize() Exit");
+  led_dumpgpio("board_autoled_initialize() Exit");
 }
 
 /****************************************************************************

@@ -80,7 +80,7 @@ irqstate_t irqidle_mask;
  * Public Functions
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
    stm32_configgpio(GPIO_LED);
 }

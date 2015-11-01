@@ -65,14 +65,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   Initialize LED GPIOs so that LEDs can be controlled.
  *
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   kinetis_pinconfig(GPIO_LED);
 }

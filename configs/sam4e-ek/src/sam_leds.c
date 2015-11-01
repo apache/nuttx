@@ -185,10 +185,10 @@ static void sam_setleds(uint8_t state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   (void)sam_configgpio(GPIO_D3);
   (void)sam_configgpio(GPIO_D2);

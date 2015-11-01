@@ -227,7 +227,7 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
- * Name:  board_led_initialize, up_setled, and up_setleds
+ * Name:  board_autoled_initialize, up_setled, and up_setleds
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
@@ -237,8 +237,8 @@ extern "C"
  ************************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-#undef board_led_initialize // Remove macro definition to reuse name
-void board_led_initialize(void);
+#undef board_autoled_initialize // Remove macro definition to reuse name
+void board_autoled_initialize(void);
 void up_setled(int led, bool ledon);
 void up_setleds(uint8_t ledset, uint8_t led_states_set);
 #endif

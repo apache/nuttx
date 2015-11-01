@@ -118,7 +118,7 @@ void lpc31_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
+  board_autoled_initialize();
 #endif
 
   /* Set up mass storage device to support on demand paging */

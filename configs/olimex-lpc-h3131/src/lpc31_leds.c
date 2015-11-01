@@ -82,14 +82,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
  *
  ****************************************************************************/
 
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* Turn off both LEDs */
 

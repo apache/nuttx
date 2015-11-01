@@ -207,11 +207,11 @@ static void led_setonoff(unsigned int bits)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* Configure LED1 & LED2 GPIOs for output */
   stm32_configgpio(GPIO_LED1);

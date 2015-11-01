@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   Initialize LED GPIOs so that LEDs can be controlled.
@@ -80,7 +80,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
 }

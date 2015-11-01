@@ -199,11 +199,11 @@ static void z8_putarray(FAR const struct z8_ledarray_s *array)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
   putreg8(0x00, PEAF);          /* PE Alt func = Port */
   putreg8(0x00, PGAF);          /* PG Alt func = Port */

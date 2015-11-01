@@ -223,7 +223,7 @@ static void led_setonoff(unsigned int bits)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   Initialize LED GPIOs so that LEDs can be controlled.
@@ -231,7 +231,7 @@ static void led_setonoff(unsigned int bits)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_autoled_initialize(void)
 {
    /* Configure LED1-4 GPIOs for output */
 
