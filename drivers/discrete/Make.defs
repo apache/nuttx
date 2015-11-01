@@ -46,6 +46,10 @@ ifeq ($(CONFIG_USERLED_LOWER),y)
 endif
 endif
 
+# Include buttion driver
+# Although it makes sense for button drivers to be in the discrete driver
+# directory, the button drivers current reside in the input dirver directory.
+
 # Check if I/O expander support is enabled
 
 ifeq ($(CONFIG_IOEXPANDER),y)
