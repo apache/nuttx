@@ -4152,13 +4152,13 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
 </p>
 <ul><pre>
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-void board_led_on(int led);
-void board_led_off(int led);
+void board_autoled_initialize(void);
+void board_autoled_on(int led);
+void board_autoled_off(int led);
 #else
-# define board_led_initialize()
-# define board_led_on(led)
-# define board_led_off(led)
+# define board_autoled_initialize()
+# define board_autoled_on(led)
+# define board_autoled_off(led)
 #endif
 </pre></ul>
 <p>
@@ -4167,10 +4167,10 @@ void board_led_off(int led);
 <ul>
   <li>
   <p>
-    <code>void board_led_initialize(void)</code> is called early in power-up initialization to initialize the LED hardware.
+    <code>void board_autoled_initialize(void)</code> is called early in power-up initialization to initialize the LED hardware.
   </p>
   <small><blockquote>
-    <b>NOTE:</b> In most architectures, <code>board_led_initialize()</code> is called from board-specific initialization logic.
+    <b>NOTE:</b> In most architectures, <code>board_autoled_initialize()</code> is called from board-specific initialization logic.
     But there are a few architectures where this initialization function is still called from common chip architecture logic.
     This interface is nott, however, a common board interface in any event.
   </blockquote>
@@ -4181,13 +4181,13 @@ void board_led_off(int led);
   </li>
   <li>
   <p>
-    <code>board_led_on(int led)</code> is called to instantiate the LED presentation of the event.
+    <code>board_autoled_on(int led)</code> is called to instantiate the LED presentation of the event.
     The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
   </p>
   </li>
   <p>
   <li>
-    <code>board_led_off(int led</code>is called to terminate the LED presentation of the event.
+    <code>board_autoled_off(int led</code>is called to terminate the LED presentation of the event.
     The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
     Note that only <code>LED_INIRQ</code>, <code>LED_SIGNAL</code>, <code>LED_ASSERTION</code>, and <code>LED_PANIC</code>
     indications are terminated.
