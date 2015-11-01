@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/mirtoo/src/mirtoo-internal.h
+ * configs/mirtoo/src/mirtoo.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_MIRTOO_SRC_MIRTOO_INTERNAL_H
-#define __CONFIGS_MIRTOO_SRC_MIRTOO_INTERNAL_H
+#ifndef __CONFIGS_MIRTOO_SRC_MIRTOO_H
+#define __CONFIGS_MIRTOO_SRC_MIRTOO_H
 
 /****************************************************************************
  * Included Files
@@ -82,7 +82,7 @@ void weak_function pic32mx_spi2initialize(void);
 #endif
 
 /************************************************************************************
- * Name: pic32mx_autoled_initialize
+ * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -90,7 +90,7 @@ void weak_function pic32mx_spi2initialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void pic32mx_autoled_initialize(void);
+void pic32mx_led_initialize(void);
 #endif
 
 /****************************************************************************
@@ -111,4 +111,4 @@ void pic32mx_autoled_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MIRTOO_SRC_MIRTOO_INTERNAL_H */
+#endif /* __CONFIGS_MIRTOO_SRC_MIRTOO_H */

@@ -47,7 +47,7 @@
 #include <arch/board/board.h>
 
 #include "pic32mx-internal.h"
-#include "mirtoo-internal.h"
+#include "mirtoo.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -232,11 +232,11 @@ void board_userled_all(uint8_t ledset)
 #endif
 
 /****************************************************************************
- * Name: pic32mx_autoled_initialize
+ * Name: pic32mx_led_initialize
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_LEDS
-void pic32mx_autoled_initialize(void)
+#ifdef CONFIG_ARCH_LEDS
+void pic32mx_led_initialize(void)
 {
   /* Configure output pins */
 

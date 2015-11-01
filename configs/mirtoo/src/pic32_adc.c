@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include "pic32mx-internal.h"
-#include "mirtoo-internal.h"
+#include "mirtoo.h"
 
 #ifdef CONFIG_PIC32MX_ADC
 

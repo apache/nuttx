@@ -50,7 +50,7 @@
 #include "chip.h"
 #include "pic32mx-internal.h"
 #include "pic32mx-pps.h"
-#include "mirtoo-internal.h"
+#include "mirtoo.h"
 
 #ifdef CONFIG_PIC32MX_SPI2
 
