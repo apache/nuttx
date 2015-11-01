@@ -2486,14 +2486,136 @@ config STM32_TIM1_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM1_PWM
+
+config STM32_TIM1_MODE
+	int "TIM1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM1_CHANNEL1
+	bool "TIM1 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM1_CHANNEL1
+
+config STM32_TIM1_CH1MODE
+	int "TIM1 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM1_CHANNEL1
+
+config STM32_TIM1_CHANNEL2
+	bool "TIM1 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM1_CHANNEL2
+
+config STM32_TIM1_CH2MODE
+	int "TIM1 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM1_CHANNEL2
+
+config STM32_TIM1_CHANNEL3
+	bool "TIM1 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM1_CHANNEL3
+
+config STM32_TIM1_CH3MODE
+	int "TIM1 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM1_CHANNEL3
+
+config STM32_TIM1_CHANNEL4
+	bool "TIM1 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM1_CHANNEL4
+
+config STM32_TIM1_CH4MODE
+	int "TIM1 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM1_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM1_CHANNEL
 	int "TIM1 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM1_PWM
 	---help---
 		If TIM1 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM1_CHMODE
+	int "TIM1 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM1_PWM
 
 config STM32_TIM2_PWM
 	bool "TIM2 PWM"
@@ -2508,14 +2630,136 @@ config STM32_TIM2_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM2_PWM
+
+config STM32_TIM2_MODE
+	int "TIM2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM2_CHANNEL1
+	bool "TIM2 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM2_CHANNEL1
+
+config STM32_TIM2_CH1MODE
+	int "TIM2 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM2_CHANNEL1
+
+config STM32_TIM2_CHANNEL2
+	bool "TIM2 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM2_CHANNEL2
+
+config STM32_TIM2_CH2MODE
+	int "TIM2 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM2_CHANNEL2
+
+config STM32_TIM2_CHANNEL3
+	bool "TIM2 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM2_CHANNEL3
+
+config STM32_TIM2_CH3MODE
+	int "TIM2 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM2_CHANNEL3
+
+config STM32_TIM2_CHANNEL4
+	bool "TIM2 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM2_CHANNEL4
+
+config STM32_TIM2_CH4MODE
+	int "TIM2 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM2_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM2_CHANNEL
 	int "TIM2 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM2_PWM
 	---help---
 		If TIM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM2_CHMODE
+	int "TIM2 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM2_PWM
 
 config STM32_TIM3_PWM
 	bool "TIM3 PWM"
@@ -2530,14 +2774,136 @@ config STM32_TIM3_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM3_PWM
+
+config STM32_TIM3_MODE
+	int "TIM3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM3_CHANNEL1
+	bool "TIM3 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM3_CHANNEL1
+
+config STM32_TIM3_CH1MODE
+	int "TIM3 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM3_CHANNEL1
+
+config STM32_TIM3_CHANNEL2
+	bool "TIM3 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM3_CHANNEL2
+
+config STM32_TIM3_CH2MODE
+	int "TIM3 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM3_CHANNEL2
+
+config STM32_TIM3_CHANNEL3
+	bool "TIM3 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM3_CHANNEL3
+
+config STM32_TIM3_CH3MODE
+	int "TIM3 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM3_CHANNEL3
+
+config STM32_TIM3_CHANNEL4
+	bool "TIM3 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM3_CHANNEL4
+
+config STM32_TIM3_CH4MODE
+	int "TIM3 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM3_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM3_CHANNEL
 	int "TIM3 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM3_PWM
 	---help---
 		If TIM3 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM3_CHMODE
+	int "TIM3 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM3_PWM
 
 config STM32_TIM4_PWM
 	bool "TIM4 PWM"
@@ -2552,14 +2918,136 @@ config STM32_TIM4_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM4_PWM
+
+config STM32_TIM4_MODE
+	int "TIM4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM4_CHANNEL1
+	bool "TIM4 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM4_CHANNEL1
+
+config STM32_TIM4_CH1MODE
+	int "TIM4 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM4_CHANNEL1
+
+config STM32_TIM4_CHANNEL2
+	bool "TIM4 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM4_CHANNEL2
+
+config STM32_TIM4_CH2MODE
+	int "TIM4 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM4_CHANNEL2
+
+config STM32_TIM4_CHANNEL3
+	bool "TIM4 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM4_CHANNEL3
+
+config STM32_TIM4_CH3MODE
+	int "TIM4 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM4_CHANNEL3
+
+config STM32_TIM4_CHANNEL4
+	bool "TIM4 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM4_CHANNEL4
+
+config STM32_TIM4_CH4MODE
+	int "TIM4 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM4_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM4_CHANNEL
 	int "TIM4 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM4_PWM
 	---help---
 		If TIM4 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM4_CHMODE
+	int "TIM4 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM4_PWM
 
 config STM32_TIM5_PWM
 	bool "TIM5 PWM"
@@ -2574,14 +3062,136 @@ config STM32_TIM5_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM5_PWM
+
+config STM32_TIM5_MODE
+	int "TIM5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM5_CHANNEL1
+	bool "TIM5 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM5_CHANNEL1
+
+config STM32_TIM5_CH1MODE
+	int "TIM5 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM5_CHANNEL1
+
+config STM32_TIM5_CHANNEL2
+	bool "TIM5 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM5_CHANNEL2
+
+config STM32_TIM5_CH2MODE
+	int "TIM5 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM5_CHANNEL2
+
+config STM32_TIM5_CHANNEL3
+	bool "TIM5 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM5_CHANNEL3
+
+config STM32_TIM5_CH3MODE
+	int "TIM5 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM5_CHANNEL3
+
+config STM32_TIM5_CHANNEL4
+	bool "TIM5 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM5_CHANNEL4
+
+config STM32_TIM5_CH4MODE
+	int "TIM5 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM5_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM5_CHANNEL
 	int "TIM5 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM5_PWM
 	---help---
 		If TIM5 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM5_CHMODE
+	int "TIM5 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM5_PWM
 
 config STM32_TIM8_PWM
 	bool "TIM8 PWM"
@@ -2596,14 +3206,136 @@ config STM32_TIM8_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM8_PWM
+
+config STM32_TIM8_MODE
+	int "TIM8 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM8_CHANNEL1
+	bool "TIM8 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM8_CHANNEL1
+
+config STM32_TIM8_CH1MODE
+	int "TIM8 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM8_CHANNEL1
+
+config STM32_TIM8_CHANNEL2
+	bool "TIM8 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM8_CHANNEL2
+
+config STM32_TIM8_CH2MODE
+	int "TIM8 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM8_CHANNEL2
+
+config STM32_TIM8_CHANNEL3
+	bool "TIM8 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM8_CHANNEL3
+
+config STM32_TIM8_CH3MODE
+	int "TIM8 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM8_CHANNEL3
+
+config STM32_TIM8_CHANNEL4
+	bool "TIM8 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM8_CHANNEL4
+
+config STM32_TIM8_CH4MODE
+	int "TIM8 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM8_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM8_CHANNEL
 	int "TIM8 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM8_PWM
 	---help---
 		If TIM8 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM8_CHMODE
+	int "TIM8 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM8_PWM
 
 config STM32_TIM9_PWM
 	bool "TIM9 PWM"
@@ -2618,14 +3350,129 @@ config STM32_TIM9_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM9_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM9_CHANNEL1
+	bool "TIM9 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM9_CHANNEL1
+
+config STM32_TIM9_CH1MODE
+	int "TIM9 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH1OUT
+	bool "TIM9 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM9_CHANNEL1
+
+config STM32_TIM9_CHANNEL2
+	bool "TIM9 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM9_CHANNEL2
+
+config STM32_TIM9_CH2MODE
+	int "TIM9 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH2OUT
+	bool "TIM9 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM9_CHANNEL2
+
+config STM32_TIM9_CHANNEL3
+	bool "TIM9 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM9_CHANNEL3
+
+config STM32_TIM9_CH3MODE
+	int "TIM9 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH3OUT
+	bool "TIM9 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM9_CHANNEL3
+
+config STM32_TIM9_CHANNEL4
+	bool "TIM9 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM9_CHANNEL4
+
+config STM32_TIM9_CH4MODE
+	int "TIM9 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH4OUT
+	bool "TIM9 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM9_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM9_CHANNEL
 	int "TIM9 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM9_PWM
 	---help---
 		If TIM9 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM9_CHMODE
+	int "TIM9 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM9_PWM
 
 config STM32_TIM10_PWM
 	bool "TIM10 PWM"
@@ -2640,14 +3487,129 @@ config STM32_TIM10_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM10_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM10_CHANNEL1
+	bool "TIM10 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM10_CHANNEL1
+
+config STM32_TIM10_CH1MODE
+	int "TIM10 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH1OUT
+	bool "TIM10 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM10_CHANNEL1
+
+config STM32_TIM10_CHANNEL2
+	bool "TIM10 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM10_CHANNEL2
+
+config STM32_TIM10_CH2MODE
+	int "TIM10 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH2OUT
+	bool "TIM10 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM10_CHANNEL2
+
+config STM32_TIM10_CHANNEL3
+	bool "TIM10 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM10_CHANNEL3
+
+config STM32_TIM10_CH3MODE
+	int "TIM10 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH3OUT
+	bool "TIM10 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM10_CHANNEL3
+
+config STM32_TIM10_CHANNEL4
+	bool "TIM10 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM10_CHANNEL4
+
+config STM32_TIM10_CH4MODE
+	int "TIM10 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH4OUT
+	bool "TIM10 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM10_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM10_CHANNEL
 	int "TIM10 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM10_PWM
 	---help---
 		If TIM10 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM10_CHMODE
+	int "TIM10 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM10_PWM
 
 config STM32_TIM11_PWM
 	bool "TIM11 PWM"
@@ -2662,14 +3624,129 @@ config STM32_TIM11_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM11_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM11_CHANNEL1
+	bool "TIM11 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM11_CHANNEL1
+
+config STM32_TIM11_CH1MODE
+	int "TIM11 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH1OUT
+	bool "TIM11 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM11_CHANNEL1
+
+config STM32_TIM11_CHANNEL2
+	bool "TIM11 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM11_CHANNEL2
+
+config STM32_TIM11_CH2MODE
+	int "TIM11 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH2OUT
+	bool "TIM11 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM11_CHANNEL2
+
+config STM32_TIM11_CHANNEL3
+	bool "TIM11 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM11_CHANNEL3
+
+config STM32_TIM11_CH3MODE
+	int "TIM11 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH3OUT
+	bool "TIM11 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM11_CHANNEL3
+
+config STM32_TIM11_CHANNEL4
+	bool "TIM11 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM11_CHANNEL4
+
+config STM32_TIM11_CH4MODE
+	int "TIM11 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH4OUT
+	bool "TIM11 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM11_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM11_CHANNEL
 	int "TIM11 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM11_PWM
 	---help---
 		If TIM11 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM11_CHMODE
+	int "TIM11 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM11_PWM
 
 config STM32_TIM12_PWM
 	bool "TIM12 PWM"
@@ -2684,14 +3761,129 @@ config STM32_TIM12_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM12_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM12_CHANNEL1
+	bool "TIM12 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM12_CHANNEL1
+
+config STM32_TIM12_CH1MODE
+	int "TIM12 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH1OUT
+	bool "TIM12 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM12_CHANNEL1
+
+config STM32_TIM12_CHANNEL2
+	bool "TIM12 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM12_CHANNEL2
+
+config STM32_TIM12_CH2MODE
+	int "TIM12 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH2OUT
+	bool "TIM12 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM12_CHANNEL2
+
+config STM32_TIM12_CHANNEL3
+	bool "TIM12 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM12_CHANNEL3
+
+config STM32_TIM12_CH3MODE
+	int "TIM12 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH3OUT
+	bool "TIM12 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM12_CHANNEL3
+
+config STM32_TIM12_CHANNEL4
+	bool "TIM12 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM12_CHANNEL4
+
+config STM32_TIM12_CH4MODE
+	int "TIM12 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH4OUT
+	bool "TIM12 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM12_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM12_CHANNEL
 	int "TIM12 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM12_PWM
 	---help---
 		If TIM12 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM12_CHMODE
+	int "TIM12 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM12_PWM
 
 config STM32_TIM13_PWM
 	bool "TIM13 PWM"
@@ -2706,14 +3898,129 @@ config STM32_TIM13_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM13_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM13_CHANNEL1
+	bool "TIM13 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM13_CHANNEL1
+
+config STM32_TIM13_CH1MODE
+	int "TIM13 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH1OUT
+	bool "TIM13 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM13_CHANNEL1
+
+config STM32_TIM13_CHANNEL2
+	bool "TIM13 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM13_CHANNEL2
+
+config STM32_TIM13_CH2MODE
+	int "TIM13 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH2OUT
+	bool "TIM13 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM13_CHANNEL2
+
+config STM32_TIM13_CHANNEL3
+	bool "TIM13 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM13_CHANNEL3
+
+config STM32_TIM13_CH3MODE
+	int "TIM13 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH3OUT
+	bool "TIM13 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM13_CHANNEL3
+
+config STM32_TIM13_CHANNEL4
+	bool "TIM13 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM13_CHANNEL4
+
+config STM32_TIM13_CH4MODE
+	int "TIM13 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH4OUT
+	bool "TIM13 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM13_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM13_CHANNEL
 	int "TIM13 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM13_PWM
 	---help---
 		If TIM13 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM13_CHMODE
+	int "TIM13 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM13_PWM
 
 config STM32_TIM14_PWM
 	bool "TIM14 PWM"
@@ -2728,14 +4035,129 @@ config STM32_TIM14_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM14_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM14_CHANNEL1
+	bool "TIM14 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM14_CHANNEL1
+
+config STM32_TIM14_CH1MODE
+	int "TIM14 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH1OUT
+	bool "TIM14 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM14_CHANNEL1
+
+config STM32_TIM14_CHANNEL2
+	bool "TIM14 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM14_CHANNEL2
+
+config STM32_TIM14_CH2MODE
+	int "TIM14 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH2OUT
+	bool "TIM14 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM14_CHANNEL2
+
+config STM32_TIM14_CHANNEL3
+	bool "TIM14 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM14_CHANNEL3
+
+config STM32_TIM14_CH3MODE
+	int "TIM14 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH3OUT
+	bool "TIM14 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM14_CHANNEL3
+
+config STM32_TIM14_CHANNEL4
+	bool "TIM14 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM14_CHANNEL4
+
+config STM32_TIM14_CH4MODE
+	int "TIM14 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH4OUT
+	bool "TIM14 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM14_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM14_CHANNEL
 	int "TIM14 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM14_PWM
 	---help---
 		If TIM14 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM14_CHMODE
+	int "TIM14 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM14_PWM
 
 config STM32_TIM15_PWM
 	bool "TIM15 PWM"
@@ -2749,14 +4171,81 @@ config STM32_TIM15_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM15_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM15_CHANNEL1
+	bool "TIM15 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM15_CHANNEL1
+
+config STM32_TIM15_CH1MODE
+	int "TIM15 Channel 1 Mode"
+	default 0
+	range 0 3 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM15_CHANNEL1
+
+config STM32_TIM15_CHANNEL2
+	bool "TIM15 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM15_CHANNEL2
+
+config STM32_TIM15_CH2MODE
+	int "TIM15 Channel 2 Mode"
+	default 0
+	range 0 3 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM15_CHANNEL2
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM15_CHANNEL
 	int "TIM15 PWM Output Channel"
 	default 1
 	range 1 2
-	depends on STM32_TIM15_PWM
 	---help---
 		If TIM15 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,2}
+
+config STM32_TIM15_CHMODE
+	int "TIM15 Channel Mode"
+	default 0
+	range 0 3 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM15_PWM
 
 config STM32_TIM16_PWM
 	bool "TIM16 PWM"
@@ -2770,14 +4259,55 @@ config STM32_TIM16_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM16_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM16_CHANNEL1
+	bool "TIM16 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM16_CHANNEL1
+
+config STM32_TIM16_CH1MODE
+	int "TIM16 Channel 1 Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM16_CHANNEL1
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM16_CHANNEL
 	int "TIM16 PWM Output Channel"
 	default 1
 	range 1 1
-	depends on STM32_TIM16_PWM
 	---help---
 		If TIM16 is enabled for PWM usage, you also need specifies the timer output
 		channel {1}
+
+config STM32_TIM16_CHMODE
+	int "TIM16 Channel Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM16_PWM
 
 config STM32_TIM17_PWM
 	bool "TIM17 PWM"
@@ -2791,14 +4321,64 @@ config STM32_TIM17_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM17_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM17_CHANNEL1
+	bool "TIM17 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM17_CHANNEL1
+
+config STM32_TIM17_CH1MODE
+	int "TIM17 Channel 1 Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM17_CHANNEL1
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM17_CHANNEL
 	int "TIM17 PWM Output Channel"
 	default 1
 	range 1 1
-	depends on STM32_TIM17_PWM
 	---help---
 		If TIM17 is enabled for PWM usage, you also need specifies the timer output
 		channel {1}
+
+config STM32_TIM17_CHMODE
+	int "TIM17 Channel Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM17_PWM
+
+config STM32_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+	depends on STM32_TIM1_PWM || STM32_TIM2_PWM || STM32_TIM3_PWM || STM32_TIM4_PWM || STM32_TIM5_PWM || STM32_TIM8_PWM || STM32_TIM9_PWM || STM32_TIM10_PWM || STM32_TIM11_PWM || STM32_TIM12_PWM || STM32_TIM13_PWM || STM32_TIM14_PWM || STM32_TIM15_PWM || STM32_TIM16_PWM || STM32_TIM17_PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Specifies that the PWM driver supports multiple output
+		channels per timer.
 
 config STM32_TIM1_ADC
 	bool "TIM1 ADC"
