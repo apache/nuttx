@@ -397,7 +397,7 @@ void board_autoled_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  *
  * Description:
  *   Set the LED configuration into the ON condition for the state provided
@@ -426,9 +426,9 @@ void board_autoled_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_on(int led);
+void board_autoled_on(int led);
 #else
-# define board_led_on(led)
+# define board_autoled_on(led)
 #endif
 
 /****************************************************************************
