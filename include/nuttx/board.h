@@ -362,7 +362,7 @@ void board_lcd_uninitialize(void);
 #endif
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
  *   This functions is called very early in initialization to perform board-
@@ -370,12 +370,12 @@ void board_lcd_uninitialize(void);
  *   things as, for example, configure GPIO pins to drive the LEDs and also
  *   putting the LEDs in their correct initial state.
  *
- *   NOTE: In most architectures, board_led_initialize() is called from
+ *   NOTE: In most architectures, board_autoled_initialize() is called from
  *   board-specific initialization logic.  But there are a few architectures
  *   where this initialization function is still called from common chip
  *   architecture logic.  This interface is not, however, a common board
  *   interface in any event and, hence, the usage of the name
- *   board_led_initialize is deprecated.
+ *   board_autoled_initialize is deprecated.
  *
  *   WARNING: This interface name will eventually be removed; do not use it
  *   in new board ports.  New implementations should use the naming
@@ -391,9 +391,9 @@ void board_lcd_uninitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
+void board_autoled_initialize(void);
 #else
-# define board_led_initialize()
+# define board_autoled_initialize()
 #endif
 
 /****************************************************************************
