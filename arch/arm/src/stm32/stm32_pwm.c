@@ -582,7 +582,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   pwmvdbg("TIM%d channel: %d frequency: %d duty: %08x\n",
           priv->timid, priv->channel, info->frequency, info->duty);
 #endif
-  DEBUGASSERT(info->frequency > 0 && info->duty > 0 &&
+  DEBUGASSERT(info->frequency > 0 && info->duty >= 0 &&
               info->duty < uitoub16(100));
 
   /* Disable all interrupts and DMA requests, clear all pending status */
