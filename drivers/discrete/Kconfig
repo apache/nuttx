@@ -65,7 +65,7 @@ config USERLED_LOWER
 		1. The board implementation must provide the LED
 		   interfaces as defined in include/nuttx/board.h
 		2. The board.h header file must provide the definition
-		   NUM_USERLED, and
+		   BOARD_NLEDS, and
 		3. The board.h header file must not include any other
 		   header files that are not accessibble in this context
 		   (such as those in arch/<arch>/src/<chip>) UNLESS those

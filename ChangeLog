@@ -11052,4 +11052,10 @@
 	* Rename ioexpander/ directories to discrete/.  This expands the
 	  namespace so that other discrete I/O drivers can reside there as
 	  well (2015-11-01).
+	* drivers/discrete/userled_upper.c and include/discrete/userled.h:  Add
+	  a generic character driver that may be used by applications to write
+	  to board LEDs (2015-11-01).
+	* drivers/discrete/userled_lower.c:  Add a generic lower-half user LED
+	  driver that may be used by any board that supports the standard
+	  board user LED interfaces (2015-11-01).
 

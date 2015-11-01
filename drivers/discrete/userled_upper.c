@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/button_upper.c
+ * drivers/discrete/userled_upper.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

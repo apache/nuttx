@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
+#ifdef CONFIG_ARCH_HAVE_LEDS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -177,9 +179,23 @@ extern "C"
 int userled_register(FAR const char *devname,
                      FAR const struct userled_lowerhalf_s *lower);
 
+/****************************************************************************
+ * Name: userled_lower_initialize
+ *
+ * Description:
+ *   Initialize the generic LED lower half driver, bind it and register
+ *   it with the upper half LED driver as devname.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USERLED_LOWER
+int userled_lower_initialize(FAR const char *devname);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
+#endif /* CONFIG_ARCH_HAVE_LEDS */
 #endif /* __INCLUDE_NUTTX_DISCRETE_USERLED_H */
