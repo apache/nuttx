@@ -86,6 +86,22 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
+/* PWM definitions **********************************************************/
+/* The Nucleo F303RE has no real on-board PWM devices, but the board can be
+ * configured to output a pulse train using variously unused pins on the
+ * board for PWM output (see board.h for details of pins).
+ */
+
+#ifdef CONFIG_PWM
+#  if defined(CONFIG_STM32_TIM2_PWM)
+#    define NUCLEO_F303RE_PWMTIMER 2
+#  elif defined(CONFIG_STM32_TIM3_PWM)
+#    define NUCLEO_F303RE_PWMTIMER 3
+#  elif defined(CONFIG_STM32_TIM4_PWM)
+#    define NUCLEO_F303RE_PWMTIMER 4
+#  endif
+#endif
+
 /* OLED display definitions *************************************************/
 
 #ifdef CONFIG_LCD_SSD1351
