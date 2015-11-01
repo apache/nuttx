@@ -548,6 +548,16 @@ config DEBUG_INPUT
 		this debug option is board-specific and may not be available for
 		some boards.
 
+config DEBUG_DISCRETE
+	bool "Discrete I/O Debug Output"
+	default n
+	depends on DISCRETE_IO
+	---help---
+		Enable low level debug SYSLOG output from the discrete I/O device
+		drivers such as LEDs and I/O expanders (disabled by default).
+		Support for this debug option is board-specific and may not be
+		available for some boards.
+
 config DEBUG_ANALOG
 	bool "Analog Device Debug Output"
 	default n

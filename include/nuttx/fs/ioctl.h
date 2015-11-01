@@ -78,8 +78,12 @@
 #define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
 #define _CANBASE        (0x1a00) /* CAN ioctl commands */
 #define _BTNBASE        (0x1b00) /* Button ioctl commands */
-#define _ZCBASE         (0x1c00) /* Zero Cross ioctl commands */
-#define _BOARDBASE      (0x1d00) /* boardctl ioctl commands */
+#define _ULEDBASE       (0x1c00) /* User LED ioctl commands */
+#define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
+
+/* boardctl commands share the same number space */
+
+#define _BOARDBASE      (0xff00) /* boardctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -339,10 +343,16 @@
 #define _CANIOC(nr)       _IOC(_CANBASE,nr)
 
 /* Button driver ioctl definitions ******************************************/
-/* (see nuttx/can.h */
+/* (see nuttx/input/buttons.h */
 
 #define _BTNIOCVALID(c)   (_IOC_TYPE(c)==_BTNBASE)
 #define _BTNIOC(nr)       _IOC(_BTNBASE,nr)
+
+/* User LED driver ioctl definitions ****************************************/
+/* (see nuttx/discrete/userled.h */
+
+#define _ULEDIOCVALID(c)   (_IOC_TYPE(c)==_ULEDBASE)
+#define _ULEDIOC(nr)       _IOC(_ULEDBASE,nr)
 
 /* Zero Cross driver ioctl definitions **************************************/
 /* (see nuttx/include/sensor/zerocross.h */

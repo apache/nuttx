@@ -33,17 +33,31 @@
 #
 ############################################################################
 
-# Don't build anything if there is no support for io expander devices
+# Don't build anything if there is no support for discrete devices
+
+ifeq ($(CONFIG_DISCRETE_IO),y)
+
+# Include user LED driver
+
+ifeq ($(CONFIG_USERLED),y)
+  CSRCS += userled_upper.c
+ifeq ($(CONFIG_USERLED_LOWER),y)
+  CSRCS += userled_lower.c
+endif
+endif
+
+# Check if I/O expander support is enabled
 
 ifeq ($(CONFIG_IOEXPANDER),y)
 
-# Include the selected io expander drivers
+# Include the selected I/O expander drivers
 
 ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif
+endif
 
-# Include io expander device driver build support
+# Include discrete I/O device driver build support
 
 DEPPATH += --dep-path discrete
 VPATH += :discrete

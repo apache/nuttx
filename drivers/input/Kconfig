@@ -354,7 +354,7 @@ config BUTTONS_LOWER
 		   will undefine __KERNEL__ before included board.h.
 
 		If your board does not meet these requirements, then the
-		board_lower.c file can still be copied to your your
+		button_lower.c file can still be copied to your your
 		board src/ directory and modified for your specific board
 		requirements.
 
