@@ -189,7 +189,7 @@ void weak_function pic32mz_spiinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: pic32mz_ledinit
+ * Name: pic32mz_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -197,7 +197,7 @@ void weak_function pic32mz_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void pic32mz_ledinit(void);
+void pic32mz_led_initialize(void);
 #endif
 
 /****************************************************************************

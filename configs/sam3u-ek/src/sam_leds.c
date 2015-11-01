@@ -123,10 +123,10 @@ static const uint8_t g_ledoff[8] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_setled
+ * Name: sam_setled
  ****************************************************************************/
 
-static void up_setled(uint16_t pinset, uint8_t state)
+static void sam_setled(uint16_t pinset, uint8_t state)
 {
   /* Assume active high.  Initial state == 0 means active high */
 
@@ -148,14 +148,14 @@ static void up_setled(uint16_t pinset, uint8_t state)
 }
 
 /****************************************************************************
- * Name: up_setleds
+ * Name: sam_setleds
  ****************************************************************************/
 
-static void up_setleds(uint8_t state)
+static void sam_setleds(uint8_t state)
 {
-  up_setled(GPIO_LED0, (state >> LED0_SHIFT) & LED_MASK);
-  up_setled(GPIO_LED1, (state >> LED1_SHIFT) & LED_MASK);
-  up_setled(GPIO_LED2, (state >> LED2_SHIFT) & LED_MASK);
+  sam_setled(GPIO_LED0, (state >> LED0_SHIFT) & LED_MASK);
+  sam_setled(GPIO_LED1, (state >> LED1_SHIFT) & LED_MASK);
+  sam_setled(GPIO_LED2, (state >> LED2_SHIFT) & LED_MASK);
 }
 
 /****************************************************************************
@@ -179,7 +179,7 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  up_setleds(g_ledon[led & 7]);
+  sam_setleds(g_ledon[led & 7]);
 }
 
 /****************************************************************************
@@ -188,7 +188,7 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  up_setleds(g_ledoff[led & 7]);
+  sam_setleds(g_ledoff[led & 7]);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

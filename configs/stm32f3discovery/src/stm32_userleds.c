@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f3discovery/src/stm32_userleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,26 +79,14 @@ static const uint32_t g_ledcfg[BOARD_NLEDS] =
 };
 
 /****************************************************************************
- * Private Function Protototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void board_userled_initialize(void)
 {
   int i;
 
@@ -111,10 +99,10 @@ void stm32_ledinit(void)
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -123,10 +111,10 @@ void stm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: stm32_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   int i;
 

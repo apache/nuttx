@@ -225,7 +225,7 @@ void board_autoled_off(int led)
 #endif
 
 /************************************************************************************
- * Name:  a1x_setled and a1x_setleds
+ * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
  *   These interfaces allow user control of the board LEDs.
@@ -239,7 +239,12 @@ void board_autoled_off(int led)
  *
  ************************************************************************************/
 
-void a1x_setled(int led, bool ledon)
+void board_userled_initialize(void)
+{
+  /* Initialization already performed in a1x_led_initialize */
+}
+
+void board_userled(int led, bool ledon)
 {
   switch (led)
     {
@@ -259,11 +264,11 @@ void a1x_setled(int led, bool ledon)
     }
 }
 
-void a1x_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  a1x_setled(BOARD_LED1, (ledset & BOARD_LED1) != 0);
-  a1x_setled(BOARD_LED3, (ledset & BOARD_LED3) != 0);
+  board_userled(BOARD_LED1, (ledset & BOARD_LED1) != 0);
+  board_userled(BOARD_LED3, (ledset & BOARD_LED3) != 0);
 #ifndef CONFIG_ARCH_LEDS
-  a1x_setled(BOARD_LED4, (ledset & BOARD_LED4) != 0);
+  board_userled(BOARD_LED4, (ledset & BOARD_LED4) != 0);
 #endif
 }

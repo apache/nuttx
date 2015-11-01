@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpc4330-xplorer/src/lpc43_userleds.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,14 +113,14 @@ static void led_dumppins(FAR const char *msg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void lpc43_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure all LED GPIO lines */
 
-  led_dumppins("lpc43_ledinit() Entry)");
+  led_dumppins("board_userled_initialize() Entry)");
 
   /* Configure LED pins as GPIOs, then configure GPIOs as outputs */
 
@@ -130,24 +130,24 @@ void lpc43_ledinit(void)
   lpc43_pin_config(PINCONFIG_LED2);
   lpc43_gpio_config(GPIO_LED2);
 
-  led_dumppins("lpc43_ledinit() Exit");
+  led_dumppins("board_userled_initialize() Exit");
 }
 
 /****************************************************************************
- * Name: lpc43_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void lpc43_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   uint16_t gpiocfg = (led == BOARD_LED1 ? GPIO_LED1 : GPIO_LED2);
   lpc43_gpio_write(gpiocfg, !ledon);
 }
 
 /****************************************************************************
- * Name: lpc43_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void lpc43_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   lpc43_gpio_write(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
   lpc43_gpio_write(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);

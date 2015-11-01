@@ -189,10 +189,10 @@ static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void board_userled_initialize(void)
 {
    /* Configure LED1-4 GPIOs for output */
 
@@ -203,10 +203,10 @@ void stm32_ledinit(void)
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -215,10 +215,10 @@ void stm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: stm32_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
   stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);

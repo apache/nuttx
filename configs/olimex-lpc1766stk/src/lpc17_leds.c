@@ -99,31 +99,31 @@ static bool g_uninitialized = true;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_ledinit/board_autoled_initialize
+ * Name: board_userled_initialize/board_autoled_initialize
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void lpc17_ledinit(void) /* Name when invoked externally */
+void board_userled_initialize(void) /* Name when invoked externally */
 #else
-void board_autoled_initialize(void)    /* Name when invoked via lpc17_boot.c */
+void board_autoled_initialize(void) /* Name when invoked via lpc17_boot.c */
 #endif
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("board_autoled_initialize() Entry)");
+  led_dumpgpio("board_*led_initialize() Entry)");
 
   lpc17_configgpio(LPC1766STK_LED1);
   lpc17_configgpio(LPC1766STK_LED2);
 
-  led_dumpgpio("board_autoled_initialize() Exit");
+  led_dumpgpio("board_*led_initialize() Exit");
 }
 
 /****************************************************************************
- * Name: lpc17_setled
+ * Name: board_userled
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void lpc17_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED1)
     {
@@ -137,11 +137,11 @@ void lpc17_setled(int led, bool ledon)
 #endif
 
 /****************************************************************************
- * Name: lpc17_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void lpc17_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   lpc17_gpiowrite(LPC1766STK_LED1, (ledset & BOARD_LED1_BIT) == 0);
   lpc17_gpiowrite(LPC1766STK_LED2, (ledset & BOARD_LED2_BIT) == 0);

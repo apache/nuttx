@@ -114,7 +114,7 @@ void weak_function nuc_usbinitialize(void);
 #endif
 
 /****************************************************************************************************
- * Name: nuc_ledinit
+ * Name: nuc_led_initialize
  *
  * Description:
  *   Initialize the on-board LED
@@ -122,7 +122,7 @@ void weak_function nuc_usbinitialize(void);
  ****************************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void nuc_ledinit(void);
+void nuc_led_initialize(void);
 #endif
 
 

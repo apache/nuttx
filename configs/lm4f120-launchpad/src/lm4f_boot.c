@@ -88,6 +88,6 @@ void tiva_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  lm4f_ledinit();
+  lm4f_led_initialize();
 #endif
 }

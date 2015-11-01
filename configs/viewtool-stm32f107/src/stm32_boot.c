@@ -93,5 +93,5 @@ void stm32_boardinitialize(void)
 
   /* Configure on-board LEDs (unconditionally). */
 
-  stm32_ledinit();
+  stm32_led_initialize();
 }

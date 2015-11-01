@@ -91,31 +91,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_ledinit
+ * Name: board_userled_initialize
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_ledinit() is
- *   available to initialize the LED from user application logic.
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
+ *   board_userled_initialize() is available to initialize the LED from user
+ *   application logic.
  *
  ****************************************************************************/
 
-void sam_ledinit(void)
+void board_userled_initialize(void)
 {
   (void)sam_configport(PORT_STATUS_LED);
 }
 
 /****************************************************************************
- * Name: sam_setled
+ * Name: board_userled
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setled() is
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
  *  available to control the LED from user application logic.
  *
  ****************************************************************************/
 
-void sam_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_STATUS_LED)
     {
@@ -124,19 +125,19 @@ void sam_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: sam_setled
+ * Name: board_userled_all
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setleds() is
- *  available to control the LED from user application logic.  NOTE:  since
- *  there is only a single LED on-board, this is function is not very useful.
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
+ *   available to control the LED from user application logic.  NOTE:  since
+ *   there is only a single LED on-board, this is function is not very useful.
  *
  ****************************************************************************/
 
-void sam_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  sam_setled(BOARD_STATUS_LED, (ledset & BOARD_STATUS_LED_BIT) != 0);
+  board_userled(BOARD_STATUS_LED, (ledset & BOARD_STATUS_LED_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

@@ -143,10 +143,10 @@ static const struct led_setting_s g_ledoffvalues[LED_NVALUES] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_setleds
+ * Name: pic32mx_setleds
  ****************************************************************************/
 
-void up_setleds(FAR const struct led_setting_s *setting)
+static void pic32mx_setleds(FAR const struct led_setting_s *setting)
 {
   if (setting->usb != LED_NC)
     {
@@ -174,10 +174,10 @@ void up_setleds(FAR const struct led_setting_s *setting)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pic32mx_ledinit
+ * Name: pic32mx_led_initialize
  ****************************************************************************/
 
-void pic32mx_ledinit(void)
+void pic32mx_led_initialize(void)
 {
   /* Configure output pins */
 
@@ -195,7 +195,7 @@ void board_autoled_on(int led)
 {
   if (led < LED_NVALUES)
     {
-      up_setleds(&g_ledonvalues[led]);
+      pic32mx_setleds(&g_ledonvalues[led]);
     }
 }
 
@@ -207,7 +207,7 @@ void board_autoled_off(int led)
 {
   if (led < LED_NVALUES)
     {
-      up_setleds(&g_ledoffvalues[led]);
+      pic32mx_setleds(&g_ledoffvalues[led]);
     }
 }
 #endif /* CONFIG_ARCH_LEDS */

@@ -87,6 +87,6 @@ void at90usb_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  at90usb_ledinit();
+  at90usb_led_initialize();
 #endif
 }

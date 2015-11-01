@@ -84,7 +84,7 @@ void pic32mz_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  pic32mz_ledinit();
+  pic32mz_led_initialize();
 #endif
 }
 

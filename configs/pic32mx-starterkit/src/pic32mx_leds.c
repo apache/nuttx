@@ -198,10 +198,11 @@ static void pic32mx_setleds(FAR const struct led_setting_s *setting)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pic32mx_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void pic32mx_ledinit(void)
+#ifndef CONFIG_ARCH_LEDS
+void board_userled_initialize(void)
 {
   /* Configure output pins */
 
@@ -209,13 +210,14 @@ void pic32mx_ledinit(void)
   pic32mx_configgpio(GPIO_LED_2);
   pic32mx_configgpio(GPIO_LED_3);
 }
+#endif
 
 /****************************************************************************
- * Name: pic32mx_setled
+ * Name: board_userled
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void pic32mx_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < PIC32MX_STARTERKIT_NLEDS)
     {
@@ -225,15 +227,30 @@ void pic32mx_setled(int led, bool ledon)
 #endif
 
 /****************************************************************************
- * Name: pic32mx_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void pic32mx_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  pic32mx_setled(PIC32MX_STARTERKIT_LED1, (ledset & PIC32MX_STARTERKIT_LED1_BIT) != 0);
-  pic32mx_setled(PIC32MX_STARTERKIT_LED2, (ledset & PIC32MX_STARTERKIT_LED2_BIT) != 0);
-  pic32mx_setled(PIC32MX_STARTERKIT_LED3, (ledset & PIC32MX_STARTERKIT_LED3_BIT) != 0);
+  board_userled(PIC32MX_STARTERKIT_LED1, (ledset & PIC32MX_STARTERKIT_LED1_BIT) != 0);
+  board_userled(PIC32MX_STARTERKIT_LED2, (ledset & PIC32MX_STARTERKIT_LED2_BIT) != 0);
+  board_userled(PIC32MX_STARTERKIT_LED3, (ledset & PIC32MX_STARTERKIT_LED3_BIT) != 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: pic32mx_led_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void pic32mx_led_initialize(void)
+{
+  /* Configure output pins */
+
+  pic32mx_configgpio(GPIO_LED_1);
+  pic32mx_configgpio(GPIO_LED_2);
+  pic32mx_configgpio(GPIO_LED_3);
 }
 #endif
 

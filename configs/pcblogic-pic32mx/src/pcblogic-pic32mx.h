@@ -81,7 +81,7 @@ EXTERN void weak_function pic32mx_spiinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: pic32mx_ledinit
+ * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -89,7 +89,7 @@ EXTERN void weak_function pic32mx_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
+EXTERN void pic32mx_led_initialize(void);
 #endif
 
 #undef EXTERN

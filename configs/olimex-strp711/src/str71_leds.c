@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-strp711/src/str71_leds.c
  *
- *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,10 +74,10 @@ static uint16_t g_led2clr;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_setleds
+ * Name: str71_setleds
  ****************************************************************************/
 
-static void up_setleds(uint16_t setbits, uint16_t clearbits)
+static void str71_setleds(uint16_t setbits, uint16_t clearbits)
 {
   uint16_t reg16;
 
@@ -154,23 +154,23 @@ void board_autoled_on(int led)
     {
     default:
     case LED_STARTED:
-      up_setleds(0, STR71X_LED1GPIO1_BIT|STR71X_LED2GPIO1_BIT); /* Clear LED1&2 */
+      str71_setleds(0, STR71X_LED1GPIO1_BIT|STR71X_LED2GPIO1_BIT); /* Clear LED1&2 */
       break;
 
     case LED_HEAPALLOCATE:
     case LED_IRQSENABLED:
     case LED_STACKCREATED:
-      up_setleds(STR71X_LED1GPIO1_BIT, STR71X_LED2GPIO1_BIT); /* Set LED1, clear LED2 */
+      str71_setleds(STR71X_LED1GPIO1_BIT, STR71X_LED2GPIO1_BIT); /* Set LED1, clear LED2 */
       break;
 
     case LED_INIRQ:
     case LED_SIGNAL:
     case LED_ASSERTION:
-      up_setleds(STR71X_LED1GPIO1_BIT|STR71X_LED2GPIO1_BIT, 0); /* Set LED1&2 */
+      str71_setleds(STR71X_LED1GPIO1_BIT|STR71X_LED2GPIO1_BIT, 0); /* Set LED1&2 */
       break;
 
     case LED_PANIC:
-      up_setleds(STR71X_LED2GPIO1_BIT|g_led2set, g_led2set); /* Set LED1, preserve LED2 */
+      str71_setleds(STR71X_LED2GPIO1_BIT|g_led2set, g_led2set); /* Set LED1, preserve LED2 */
       break;
     }
 }
@@ -209,11 +209,11 @@ void board_autoled_off(int led)
     case LED_INIRQ:
     case LED_SIGNAL:
     case LED_ASSERTION:
-      up_setleds(STR71X_LED1GPIO1_BIT, STR71X_LED2GPIO1_BIT); /* Set LED1, clear LED2 */
+      str71_setleds(STR71X_LED1GPIO1_BIT, STR71X_LED2GPIO1_BIT); /* Set LED1, clear LED2 */
       break;
 
     case LED_PANIC:
-      up_setleds(g_led2set, STR71X_LED1GPIO1_BIT|g_led2clr); /* Clear LED1, preserve LED2 */
+      str71_setleds(g_led2set, STR71X_LED1GPIO1_BIT|g_led2clr); /* Clear LED1, preserve LED2 */
       break;
     }
 }

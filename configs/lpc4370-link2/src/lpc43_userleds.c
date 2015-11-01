@@ -106,28 +106,28 @@ static void led_dumppins(FAR const char *msg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void lpc43_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure LED pin as a GPIO outputs */
 
-  led_dumppins("lpc43_ledinit() Entry)");
+  led_dumppins("board_userled_initialize() Entry)");
 
   /* Configure LED pin as a GPIO, then configure GPIO as an outputs */
 
   lpc43_pin_config(PINCONFIG_LED);
   lpc43_gpio_config(GPIO_LED);
 
-  led_dumppins("lpc43_ledinit() Exit");
+  led_dumppins("board_userled_initialize() Exit");
 }
 
 /****************************************************************************
- * Name: lpc43_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void lpc43_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED)
     {
@@ -136,10 +136,10 @@ void lpc43_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: lpc43_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void lpc43_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   lpc43_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) == 0);
 }

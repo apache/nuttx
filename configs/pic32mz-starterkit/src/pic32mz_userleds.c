@@ -105,10 +105,10 @@ static const uint16_t g_ledpincfg[PIC32MZ_STARTERKIT_NLEDS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pic32mz_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void pic32mz_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure output pins */
 
@@ -118,10 +118,10 @@ void pic32mz_ledinit(void)
 }
 
 /****************************************************************************
- * Name: pic32mz_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void pic32mz_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < PIC32MZ_STARTERKIT_NLEDS)
     {
@@ -130,17 +130,17 @@ void pic32mz_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: pic32mz_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void pic32mz_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  pic32mz_setled(PIC32MZ_STARTERKIT_LED1,
-                 (ledset & PIC32MZ_STARTERKIT_LED1_BIT) != 0);
-  pic32mz_setled(PIC32MZ_STARTERKIT_LED2,
-                 (ledset & PIC32MZ_STARTERKIT_LED2_BIT) != 0);
-  pic32mz_setled(PIC32MZ_STARTERKIT_LED3,
-                 (ledset & PIC32MZ_STARTERKIT_LED3_BIT) != 0);
+  board_userled(PIC32MZ_STARTERKIT_LED1,
+                (ledset & PIC32MZ_STARTERKIT_LED1_BIT) != 0);
+  board_userled(PIC32MZ_STARTERKIT_LED2,
+                (ledset & PIC32MZ_STARTERKIT_LED2_BIT) != 0);
+  board_userled(PIC32MZ_STARTERKIT_LED3,
+                (ledset & PIC32MZ_STARTERKIT_LED3_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

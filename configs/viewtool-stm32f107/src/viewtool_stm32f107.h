@@ -302,14 +302,14 @@
 void weak_function stm32_spiinitialize(void);
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: stm32_led_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
  *
  ****************************************************************************/
 
-void stm32_ledinit(void);
+void stm32_led_initialize(void);
 
 /****************************************************************************
  * Name: stm32_usbdev_initialize

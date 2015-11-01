@@ -99,7 +99,7 @@ void kl_boardinitialize(void)
   /* Configure on-board LED if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  kl_ledinit();
+  kl_led_initialize();
 #endif
 }
 

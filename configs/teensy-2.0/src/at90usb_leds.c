@@ -88,10 +88,10 @@ static bool g_ncoff;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: at90usb_ledinit
+ * Name: at90usb_led_initialize
  ****************************************************************************/
 
-void at90usb_ledinit(void)
+void at90usb_led_initialize(void)
 {
   /* The Teensy's single LED is on Port D, Pin 6.  Configur this pin as an
    * output and turn it OFF.  The "other" side of the LED is onnected to

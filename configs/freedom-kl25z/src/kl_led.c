@@ -118,14 +118,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kl_ledinit
+ * Name: kl_led_initialize
  *
  * Description:
  *   Initialize the on-board LED
  *
  ****************************************************************************/
 
-void kl_ledinit(void)
+void kl_led_initialize(void)
 {
   kl_configgpio(GPIO_LED_R);
   kl_configgpio(GPIO_LED_G);

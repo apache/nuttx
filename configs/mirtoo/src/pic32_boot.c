@@ -155,6 +155,6 @@ void pic32mx_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  pic32mx_ledinit();
+  pic32mx_autoled_initialize();
 #endif
 }

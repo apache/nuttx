@@ -130,11 +130,11 @@ extern "C" {
 
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
-EXTERN void weak_function pic32mx_spiinitialize(void);
+void weak_function pic32mx_spiinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: pic32mx_ledinit
+ * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -142,7 +142,7 @@ EXTERN void weak_function pic32mx_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
+void pic32mx_led_initialize(void);
 #endif
 
 /****************************************************************************
@@ -155,7 +155,7 @@ EXTERN void pic32mx_ledinit(void);
  *
  ****************************************************************************/
 
-EXTERN void pic32mx_lcdinitialize(void);
+void pic32mx_lcdinitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

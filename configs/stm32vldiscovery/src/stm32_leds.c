@@ -75,11 +75,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: stm32_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void stm32_ledinit(void)
+void stm32_led_initialize(void)
 {
   stm32_configgpio(GPIO_LED1);    /* Configure LED1 GPIO for output */
 }

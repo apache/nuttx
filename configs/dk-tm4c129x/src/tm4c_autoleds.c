@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tm4c_ledinit
+ * Name: tm4c_led_initialize
  *
  * Description:
  *   Called to initialize the on-board LEDs.
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void tm4c_ledinit(void)
+void tm4c_led_initialize(void)
 {
   /* Configure LED PIOs for output */
 

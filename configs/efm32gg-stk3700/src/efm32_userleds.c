@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/efm32gg-stk3700/include/efm32_userleds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,30 +83,14 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void efm32_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
@@ -115,10 +99,10 @@ void efm32_ledinit(void)
 }
 
 /****************************************************************************
- * Name: efm32_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void efm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
@@ -139,12 +123,12 @@ void efm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: efm32_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void efm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  /* Hight illuminates */
+  /* High illuminates */
 
   efm32_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) != 0);
   efm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);

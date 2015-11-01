@@ -140,14 +140,14 @@ static void led_offbits(unsigned int clrbits)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: stm32_led_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
  *
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void stm32_led_initialize(void)
 {
   /* Configure LED1-4 GPIOs for output.  Initial state is OFF */
 
@@ -250,7 +250,7 @@ void board_autoled_off(int led)
 #endif
 
 /************************************************************************************
- * Name:  stm32_setled, and stm32_setleds
+ * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
  *   These interfaces allow user control of the board LEDs.
@@ -264,7 +264,12 @@ void board_autoled_off(int led)
  *
  ************************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void board_userled_initialize(void)
+{
+  /* Already initialized by stm32_led_initialize */
+}
+
+void board_userled(int led, bool ledon)
 {
   uint32_t pinset;
 
@@ -294,7 +299,7 @@ void stm32_setled(int led, bool ledon)
   stm32_gpiowrite(pinset, !ledon);
 }
 
-void stm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
 #ifdef CONFIG_ARCH_LEDS
   led_onbits(ledset & ~BOARD_LED4_BIT);

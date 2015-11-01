@@ -82,7 +82,7 @@ void weak_function atmega_spiinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: atmega_ledinit
+ * Name: atmega_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -90,7 +90,7 @@ void weak_function atmega_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void atmega_ledinit(void);
+void atmega_led_initialize(void);
 #endif
 
 #undef EXTERN

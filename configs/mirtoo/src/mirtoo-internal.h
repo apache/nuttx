@@ -63,7 +63,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -77,11 +78,11 @@ extern "C" {
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI2
-EXTERN void weak_function pic32mx_spi2initialize(void);
+void weak_function pic32mx_spi2initialize(void);
 #endif
 
 /************************************************************************************
- * Name: pic32mx_ledinit
+ * Name: pic32mx_autoled_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -89,7 +90,7 @@ EXTERN void weak_function pic32mx_spi2initialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
+void pic32mx_autoled_initialize(void);
 #endif
 
 /****************************************************************************
@@ -101,7 +102,7 @@ EXTERN void pic32mx_ledinit(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_ADC
-/* EXTERN int pic32mx_adcinitialize(void); not used */
+/* int pic32mx_adcinitialize(void); not used */
 #endif
 
 #undef EXTERN

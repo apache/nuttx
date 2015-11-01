@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f746g-disco/src/stm32_userleds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,31 +68,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: board_userled_initialize
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the stm32_ledinit() is
- *   available to initialize the LED from user application logic.
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
+ *   board_userled_initialize() is available to initialize the LED from user
+ *   application logic.
  *
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void board_userled_initialize(void)
 {
   stm32_configgpio(GPIO_LD1);
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: board_userled
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the stm32_setled() is
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
  *  available to control the LED from user application logic.
  *
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_STATUS_LED)
     {
@@ -101,17 +102,17 @@ void stm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: board_userled_all
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the stm32_setleds() is
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
  *  available to control the LED from user application logic.  NOTE:  since
  *  there is only a single LED on-board, this is function is not very useful.
  *
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   stm32_gpiowrite(GPIO_LD1, (ledset & BOARD_STATUS_LED_BIT) != 0);
 }

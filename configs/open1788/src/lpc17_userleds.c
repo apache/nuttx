@@ -2,7 +2,7 @@
  * configs/open1788/src/lpc17_userleds.c
  * arch/arm/src/board/lpc17_userleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,26 +95,14 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
 };
 
 /****************************************************************************
- * Private Function Protototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void lpc17_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure LED1-4 GPIOs for output */
 
@@ -125,10 +113,10 @@ void lpc17_ledinit(void)
 }
 
 /****************************************************************************
- * Name: lpc17_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void lpc17_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -137,10 +125,10 @@ void lpc17_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: lpc17_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void lpc17_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   lpc17_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
   lpc17_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);

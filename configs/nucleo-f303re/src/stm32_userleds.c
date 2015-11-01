@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-f303re/src/stm32_userleds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -69,26 +69,14 @@
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure LED1 GPIO for output */
 
@@ -96,10 +84,10 @@ void stm32_ledinit(void)
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED1)
     {
@@ -108,10 +96,10 @@ void stm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: stm32_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);
 }

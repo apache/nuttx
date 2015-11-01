@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/spark/src/stm32_userleds.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,32 +81,28 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
 };
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_autoled_initialize(void)
+void board_userled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************
- * Name: up_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void up_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -116,7 +112,7 @@ void up_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: up_setleds
+ * Name: board_userled_all
  * Description:
  *   This function will be called to set the state of the Leds on the board
  *
@@ -128,7 +124,7 @@ void up_setled(int led, bool ledon)
  *
  ****************************************************************************/
 
-void up_setleds(uint8_t ledset, uint8_t led_states_set)
+void board_userled_all(uint8_t ledset, uint8_t led_states_set)
 {
   led_states_set ^= LED_ACTIVE_LOW;
   if ((ledset & BOARD_USR_LED_BIT) == 0)

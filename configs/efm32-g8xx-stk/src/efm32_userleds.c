@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/efm32-g8xx-stk/src/efm32_userleds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -188,10 +188,10 @@ static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void efm32_ledinit(void)
+void board_userled_initialize(void)
 {
    /* Configure LED0-4 GPIOs for output */
 
@@ -202,10 +202,10 @@ void efm32_ledinit(void)
 }
 
 /****************************************************************************
- * Name: efm32_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void efm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -214,10 +214,10 @@ void efm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: efm32_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void efm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   efm32_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) != 0);
   efm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);

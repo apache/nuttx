@@ -177,10 +177,10 @@ static void pic32mz_setleds(FAR const struct led_setting_s *setting)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pic32mz_ledinit
+ * Name: pic32mz_led_initialize
  ****************************************************************************/
 
-void pic32mz_ledinit(void)
+void pic32mz_led_initialize(void)
 {
   /* Configure output pins */
 

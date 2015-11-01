@@ -580,9 +580,9 @@ LED and Pushbuttons
   control of the application.  The following interfaces are then available
   for application control of the LEDs:
 
-    void lpc43_ledinit(void);
-    void lpc43_setled(int led, bool ledon);
-    void lpc43_setleds(uint8_t ledset);
+    void board_userled_initialize(void);
+    void board_userled(int led, bool ledon);
+    void board_userled_all(uint8_t ledset);
 
   Pushbuttons
   -----------

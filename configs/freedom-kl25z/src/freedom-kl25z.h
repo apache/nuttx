@@ -126,7 +126,7 @@ void weak_function kl_usbinitialize(void);
 #endif
 
 /****************************************************************************************************
- * Name: kl_ledinit
+ * Name: kl_led_initialize
  *
  * Description:
  *   Initialize the on-board LED
@@ -134,7 +134,7 @@ void weak_function kl_usbinitialize(void);
  ****************************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void kl_ledinit(void);
+void kl_led_initialize(void);
 #endif
 
 

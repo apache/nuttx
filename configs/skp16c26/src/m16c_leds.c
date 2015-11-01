@@ -108,10 +108,10 @@ static uint8_t g_nestlevel;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_autoled_initialize
+ * Name: m16c_setleds
  ************************************************************************************/
 
-static void up_setleds(uint8_t gybits, uint8_t rbit)
+static void m16c_setleds(uint8_t gybits, uint8_t rbit)
 {
   uint8_t regval;
 
@@ -174,14 +174,14 @@ void board_autoled_on(int led)
   if (led == LED_ASSERTION)
     {
       ledset = g_ledstate[g_prevled[g_nestlevel]];
-      up_setleds(ledset & GREENYELLOW_LED_MASK, RED_LED_ON);
+      m16c_setleds(ledset & GREENYELLOW_LED_MASK, RED_LED_ON);
     }
   else if (led < LED_ASSERTION)
     {
       /* Otherwise, just show the LEDs corresponding to this state */
 
       ledset = g_ledstate[led];
-      up_setleds(ledset & GREENYELLOW_LED_MASK, ledset & RED_LED_MASK);
+      m16c_setleds(ledset & GREENYELLOW_LED_MASK, ledset & RED_LED_MASK);
 
       /* If this was a nested states (INIRQ, SIGNAL, or ASSERTION) then
        * stack up the previous value.
@@ -220,7 +220,8 @@ void board_autoled_off(int led)
         {
           ledset = g_ledstate[g_prevled[0]];
         }
-      up_setleds(ledset & GREENYELLOW_LED_MASK, RED_LED_OFF);
+
+      m16c_setleds(ledset & GREENYELLOW_LED_MASK, RED_LED_OFF);
     }
   else if (led > 0 && led < LED_ASSERTION)
     {
@@ -241,7 +242,7 @@ void board_autoled_off(int led)
         }
 
       ledset = g_ledstate[led];
-      up_setleds(ledset & GREENYELLOW_LED_MASK, ledset & RED_LED_MASK);
+      m16c_setleds(ledset & GREENYELLOW_LED_MASK, ledset & RED_LED_MASK);
       g_prevled[g_nestlevel]= led;
     }
 }

@@ -19,10 +19,10 @@
 #define LED3_GPIO              11
 
 /****************************************************************************
- * Name: cc3200_ledinit
+ * Name: cc3200_led_initialize
  ****************************************************************************/
 
-void cc3200_ledinit(void)
+void cc3200_led_initialize(void)
 {
   uint32_t led1_port;
   uint8_t  led1_pin;

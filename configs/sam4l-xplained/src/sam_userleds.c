@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4l-xplained/src/sam_userleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,43 +79,36 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_ledinit
+ * Name: board_userled_initialize
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_ledinit() is
- *   available to initialize the LED0 from user application logic.
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
+ *   board_userled_initialize() is available to initialize the LED0 from
+ *   user application logic.
  *
  ****************************************************************************/
 
-void sam_ledinit(void)
+void board_userled_initialize(void)
 {
   (void)sam_configgpio(GPIO_LED0);
 }
 
 /****************************************************************************
- * Name: sam_setled
+ * Name: board_userled
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setled() is
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
  *  available to control the LED0 from user application logic.
  *
  ****************************************************************************/
 
-void sam_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED0)
     {
@@ -124,19 +117,19 @@ void sam_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: sam_setled
+ * Name: board_userled_all
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setleds() is
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
  *  available to control the LED0 from user application logic.  NOTE:  since
  *  there is only a single LED on-board, this is function is not very useful.
  *
  ****************************************************************************/
 
-void sam_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  sam_setled(BOARD_LED0, (ledset & BOARD_LED0_BIT) != 0);
+  board_userled(BOARD_LED0, (ledset & BOARD_LED0_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

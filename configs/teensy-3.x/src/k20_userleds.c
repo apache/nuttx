@@ -48,27 +48,23 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kinetis_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void kinetis_ledinit(void)
+void board_userled_initialize(void)
 {
   kinetis_pinconfig(GPIO_LED);
 }
 
 /****************************************************************************
- * Name: kinetis_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void kinetis_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED)
     {
@@ -77,10 +73,10 @@ void kinetis_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: kinetis_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void kinetis_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   kinetis_gpiowrite(GPIO_LED, (ledset & BOARD_LED_BIT) != 0);
 }

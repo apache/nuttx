@@ -113,14 +113,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nuc_ledinit
+ * Name: nuc_led_initialize
  *
  * Description:
  *   Initialize the on-board LED
  *
  ****************************************************************************/
 
-void nuc_ledinit(void)
+void nuc_led_initialize(void)
 {
   led_dumpgpio("Before configuration");
   nuc_configgpio(GPIO_LED);

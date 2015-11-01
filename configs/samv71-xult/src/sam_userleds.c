@@ -59,11 +59,12 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
- * Name: sam_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void sam_ledinit(void)
+void board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
@@ -72,10 +73,10 @@ void sam_ledinit(void)
 }
 
 /****************************************************************************
- * Name: sam_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void sam_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
@@ -96,10 +97,10 @@ void sam_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: sam_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void sam_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 

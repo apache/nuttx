@@ -103,7 +103,7 @@ void board_initialize(void)
 #ifndef CONFIG_ARCH_LEDS
   /* Initialize user led */
 
-  sam_ledinit();
+  sam_led_initialize();
 #endif
 
 #ifdef CONFIG_TIMER

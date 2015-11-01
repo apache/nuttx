@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/shenzhou/src/stm32_userleds.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,32 +80,28 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
 };
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void board_userled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: board_userled
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
@@ -114,10 +110,10 @@ void stm32_setled(int led, bool ledon)
 }
 
 /****************************************************************************
- * Name: stm32_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
   stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
   stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);

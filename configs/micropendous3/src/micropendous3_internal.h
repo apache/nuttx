@@ -81,7 +81,7 @@ EXTERN void weak_function at90usb_spiinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: at90usb_ledinit
+ * Name: at90usb_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -89,7 +89,7 @@ EXTERN void weak_function at90usb_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void at90usb_ledinit(void);
+EXTERN void at90usb_led_initialize(void);
 #endif
 
 #undef EXTERN

@@ -99,8 +99,6 @@ void stm32_boardinitialize(void)
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   stm32_usbinitialize();
 #endif
-
-
 }
 
 /****************************************************************************

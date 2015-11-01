@@ -137,7 +137,7 @@
 void weak_function lm4f_ssiinitialize(void);
 
 /****************************************************************************
- * Name: lm4f_ledinit
+ * Name: lm4f_led_initialize
  *
  * Description:
  *   Called to initialize the on-board LEDs.
@@ -145,7 +145,7 @@ void weak_function lm4f_ssiinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void lm4f_ledinit(void);
+void lm4f_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -137,7 +137,7 @@
 void weak_function tm4c_ssiinitialize(void);
 
 /****************************************************************************
- * Name: tm4c_ledinit
+ * Name: tm4c_led_initialize
  *
  * Description:
  *   Called to initialize the on-board LEDs.
@@ -145,7 +145,7 @@ void weak_function tm4c_ssiinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void tm4c_ledinit(void);
+void tm4c_led_initialize(void);
 #endif
 
 /****************************************************************************

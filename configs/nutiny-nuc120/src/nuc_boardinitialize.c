@@ -97,6 +97,6 @@ void nuc_boardinitialize(void)
   /* Configure on-board LED if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  nuc_ledinit();
+  nuc_led_initialize();
 #endif
 }

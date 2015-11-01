@@ -130,7 +130,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lm4f_ledinit
+ * Name: lm4f_led_initialize
  *
  * Description:
  *   Called to initialize the on-board LEDs.
@@ -138,17 +138,17 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void lm4f_ledinit(void)
+void lm4f_led_initialize(void)
 {
   leddbg("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
-  led_dumpgpio("lm4f_ledinit before tiva_configgpio()");
+  led_dumpgpio("lm4f_led_initialize before tiva_configgpio()");
   tiva_configgpio(GPIO_LED_R);
   tiva_configgpio(GPIO_LED_G);
   tiva_configgpio(GPIO_LED_B);
-  led_dumpgpio("lm4f_ledinit after tiva_configgpio()");
+  led_dumpgpio("lm4f_led_initialize after tiva_configgpio()");
 }
 
 /****************************************************************************

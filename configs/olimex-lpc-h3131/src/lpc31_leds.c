@@ -182,7 +182,7 @@ void board_autoled_off(int led)
 #endif
 
 /************************************************************************************
- * Name:  lpc31_setled, and lpc31_setleds
+ * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
  *   These interfaces allow user control of the board LEDs.
@@ -196,7 +196,12 @@ void board_autoled_off(int led)
  *
  ************************************************************************************/
 
-void lpc31_setled(int led, bool ledon)
+void board_userled_initialize(void)
+{
+  /* All initialization performed in board_autoled_initialize() */
+}
+
+void board_userled(int led, bool ledon)
 {
   uint32_t bit;
 
@@ -226,10 +231,10 @@ void lpc31_setled(int led, bool ledon)
     }
 }
 
-void lpc31_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
 #ifndef CONFIG_ARCH_LEDS
-  lpc31_setled(BOARD_LED1, (ledset & BOARD_LED1_BIT) != 0);
+  board_userled(BOARD_LED1, (ledset & BOARD_LED1_BIT) != 0);
 #endif
-  lpc31_setled(BOARD_LED2, (ledset & BOARD_LED2_BIT) != 0);
+  board_userled(BOARD_LED2, (ledset & BOARD_LED2_BIT) != 0);
 }

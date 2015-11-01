@@ -88,10 +88,10 @@ static bool g_ncoff;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: atmega_ledinit
+ * Name: atmega_led_initialize
  ****************************************************************************/
 
-void atmega_ledinit(void)
+void atmega_led_initialize(void)
 {
   /* The MoteinoMEGA's single LED is on Port D, Pin 7.  Configure this pin as an
    * output and turn it OFF.  The "other" side of the LED is onnected to

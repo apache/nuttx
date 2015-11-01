@@ -173,11 +173,11 @@ static const uint16_t g_ledpincfg[PIC32MX_PIC32MX7MMB_NLEDS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_setleds
+ * Name: pic32mx_setleds
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_setleds(FAR const struct led_setting_s *setting)
+static void pic32mx_setleds(FAR const struct led_setting_s *setting)
 {
   /* LEDs are pulled up so writing a low value (false) illuminates them */
 
@@ -203,10 +203,11 @@ void up_setleds(FAR const struct led_setting_s *setting)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pic32mx_ledinit
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void pic32mx_ledinit(void)
+#ifndef CONFIG_ARCH_LEDS
+void board_userled_initialize(void)
 {
   /* Configure output pins */
 
@@ -214,13 +215,14 @@ void pic32mx_ledinit(void)
   pic32mx_configgpio(GPIO_LED_1);
   pic32mx_configgpio(GPIO_LED_2);
 }
+#endif
 
 /****************************************************************************
- * Name: pic32mx_setled
+ * Name: board_userled
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void pic32mx_setled(int led, bool ledon)
+void board_userled(int led, bool ledon)
 {
   /* LEDs are pulled up so writing a low value (false) illuminates them */
 
@@ -232,17 +234,32 @@ void pic32mx_setled(int led, bool ledon)
 #endif
 
 /****************************************************************************
- * Name: pic32mx_setleds
+ * Name: board_userled_all
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void pic32mx_setleds(uint8_t ledset)
+void board_userled_all(uint8_t ledset)
 {
-  /* Call pic32mx_setled() with ledon == true to illuminated the LED */
+  /* Call board_userled() with ledon == true to illuminated the LED */
 
-  pic32mx_setled(PIC32MX_PIC32MX7MMB_LED0, (ledset & PIC32MX_PIC32MX7MMB_LED0_BIT) != 0);
-  pic32mx_setled(PIC32MX_PIC32MX7MMB_LED1, (ledset & PIC32MX_PIC32MX7MMB_LED1_BIT) != 0);
-  pic32mx_setled(PIC32MX_PIC32MX7MMB_LED2, (ledset & PIC32MX_PIC32MX7MMB_LED2_BIT) != 0);
+  board_userled(PIC32MX_PIC32MX7MMB_LED0, (ledset & PIC32MX_PIC32MX7MMB_LED0_BIT) != 0);
+  board_userled(PIC32MX_PIC32MX7MMB_LED1, (ledset & PIC32MX_PIC32MX7MMB_LED1_BIT) != 0);
+  board_userled(PIC32MX_PIC32MX7MMB_LED2, (ledset & PIC32MX_PIC32MX7MMB_LED2_BIT) != 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: pic32mx_led_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void pic32mx_led_initialize(void)
+{
+  /* Configure output pins */
+
+  pic32mx_configgpio(GPIO_LED_0);
+  pic32mx_configgpio(GPIO_LED_1);
+  pic32mx_configgpio(GPIO_LED_2);
 }
 #endif
 
@@ -255,7 +272,7 @@ void board_autoled_on(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {
-      up_setleds(&g_ledonvalues[led]);
+      pic32mx_setleds(&g_ledonvalues[led]);
     }
 }
 #endif
@@ -269,7 +286,7 @@ void board_autoled_off(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {
-      up_setleds(&g_ledoffvalues[led]);
+      pic32mx_setleds(&g_ledoffvalues[led]);
     }
 }
 #endif
