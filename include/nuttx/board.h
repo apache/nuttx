@@ -365,7 +365,7 @@ void board_lcd_uninitialize(void);
  * Name: board_autoled_initialize
  *
  * Description:
- *   This functions is called very early in initialization to perform board-
+ *   This function is called very early in initialization to perform board-
  *   specific initialization of LED-related resources.  This includes such
  *   things as, for example, configure GPIO pins to drive the LEDs and also
  *   putting the LEDs in their correct initial state.
@@ -460,6 +460,82 @@ void board_autoled_on(int led);
 void board_autoled_off(int led);
 #else
 # define board_autoled_off(led)
+#endif
+
+/****************************************************************************
+ * Name:  board_userled_initialize
+ *
+ * Description:
+ *   This function may called from application-specific logic during its
+ *   to perform board-specific initialization of LED resources.  This
+ *   includes such things as, for example, configure GPIO pins to drive the
+ *   LEDs and also putting the LEDs in their correct initial state.
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to control the LEDs directly from user board logic or
+ *   indirectly user applications (via the common LED charater driver).
+ *
+ *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   used by the NuttX LED logic exclusively and may not be available for
+ *   use by user logic if CONFIG_ARCH_LEDS=y.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_LEDS
+void board_userled_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name:  board_userled
+ *
+ * Description:
+ *   This interface may be used by application specific logic to set the
+ *   state of a single LED.  Definitions for the led identification are
+ *   provided in the board-specific board.h header file that may be included
+ *   like:
+ *
+ *     #included <arch/board/board.h>
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to control the LEDs directly from user board logic or
+ *   indirectly user applications (via the common LED charater driver).
+ *
+ *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   used by the NuttX LED logic exclusively and may not be available for
+ *   use by user logic if CONFIG_ARCH_LEDS=y.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_LEDS
+void board_userled(int led, bool ledon);
+#endif
+
+/****************************************************************************
+ * Name:  board_userled_all
+ *
+ * Description:
+ *   This interface may be used by application specific logic to set the
+ *   state of all board LED.  Definitions for the led set member
+ *   identification is provided in the board-specific board.h header file
+ *   that may be includedlike:
+ *
+ *     #included <arch/board/board.h>
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to control the LEDs directly from user board logic or
+ *   indirectly user applications (via the common LED charater driver).
+ *
+ *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   used by the NuttX LED logic exclusively and may not be available for
+ *   use by user logic if CONFIG_ARCH_LEDS=y.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_LEDS
+void board_userled_all(uint8_t ledset);
 #endif
 
 /****************************************************************************
