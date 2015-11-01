@@ -92,7 +92,7 @@ void up_idle(void)
     }
   else if (g_ledtoggle == 0x00)
     {
-      board_led_off(LED_IDLE);
+      board_autoled_off(LED_IDLE);
     }
 #endif
 

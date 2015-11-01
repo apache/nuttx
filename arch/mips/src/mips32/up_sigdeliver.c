@@ -136,7 +136,7 @@ void up_sigdeliver(void)
    * execution.
    */
 
-  board_led_off(LED_SIGNAL);
+  board_autoled_off(LED_SIGNAL);
   up_fullcontextrestore(regs);
 
   /* up_fullcontextrestore() should not return but could if the software

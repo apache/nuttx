@@ -135,7 +135,7 @@ void up_sigdeliver(void)
    * execution.
    */
 
-  board_led_off(LED_SIGNAL);
+  board_autoled_off(LED_SIGNAL);
   ez80_restorecontext(regs);
 #endif
 }

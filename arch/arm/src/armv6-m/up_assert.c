@@ -373,7 +373,7 @@ static void _up_assert(int errorcode)
 #ifdef CONFIG_ARCH_LEDS
           board_autoled_on(LED_PANIC);
           up_mdelay(250);
-          board_led_off(LED_PANIC);
+          board_autoled_off(LED_PANIC);
           up_mdelay(250);
 #endif
         }

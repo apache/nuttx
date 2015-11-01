@@ -133,7 +133,7 @@ void up_sigdeliver(void)
 
   /* Then restore the correct state for this thread of execution. */
 
-  board_led_off(LED_SIGNAL);
+  board_autoled_off(LED_SIGNAL);
   up_fullcontextrestore(regs);
 #endif
 }

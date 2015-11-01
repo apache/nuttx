@@ -124,7 +124,7 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
       current_regs = savestate;
     }
 
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
 #endif
 
   return ret;

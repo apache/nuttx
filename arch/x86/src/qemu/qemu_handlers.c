@@ -173,7 +173,7 @@ uint32_t *isr_handler(uint32_t *regs)
 
   board_autoled_on(LED_INIRQ);
   ret = common_handler((int)regs[REG_IRQNO], regs);
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
   return ret;
 #endif
 }
@@ -220,7 +220,7 @@ uint32_t *irq_handler(uint32_t *regs)
   /* Dispatch the interrupt */
 
   ret = common_handler(irq, regs);
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
   return ret;
 #endif
 }

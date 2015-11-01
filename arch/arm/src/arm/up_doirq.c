@@ -130,5 +130,5 @@ void up_doirq(int irq, uint32_t *regs)
 
   current_regs = NULL;
 #endif
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
 }

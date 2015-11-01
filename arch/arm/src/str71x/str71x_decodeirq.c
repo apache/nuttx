@@ -138,6 +138,6 @@ void up_decodeirq(uint32_t *regs)
       PANIC(); /* Normally never happens */
     }
 #endif
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
 #endif
 }

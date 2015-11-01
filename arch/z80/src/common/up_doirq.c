@@ -129,7 +129,7 @@ FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
       IRQ_LEAVE(irq);
     }
 
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
   return regs;
 #endif
 }

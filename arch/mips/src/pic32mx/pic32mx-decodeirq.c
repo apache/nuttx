@@ -189,11 +189,11 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
   current_regs = savestate;
   if (current_regs == NULL)
     {
-      board_led_off(LED_INIRQ);
+      board_autoled_off(LED_INIRQ);
     }
 #else
   current_regs = NULL;
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
 #endif
 
   return regs;

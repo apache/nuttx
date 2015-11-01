@@ -112,7 +112,7 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs)
 
   current_regs = savestate;
 #endif
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
   return regs;
 }
 
