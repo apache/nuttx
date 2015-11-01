@@ -53,7 +53,7 @@ include analog$(DELIM)Make.defs
 include audio$(DELIM)Make.defs
 include bch$(DELIM)Make.defs
 include input$(DELIM)Make.defs
-include ioexpander$(DELIM)Make.defs
+include discrete$(DELIM)Make.defs
 include lcd$(DELIM)Make.defs
 include mmcsd$(DELIM)Make.defs
 include mtd$(DELIM)Make.defs

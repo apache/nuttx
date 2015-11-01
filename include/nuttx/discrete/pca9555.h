@@ -1,5 +1,5 @@
 /********************************************************************************************
- * include/nuttx/ioexpander/pca9555.h
+ * include/nuttx/discrete/pca9555.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
-#define __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
+#ifndef __INCLUDE_NUTTX_DISCRETE_PCA9555_H
+#define __INCLUDE_NUTTX_DISCRETE_PCA9555_H
 
 #include <nuttx/i2c.h>
 
@@ -120,4 +120,4 @@ FAR struct ioexpander_dev_s* pca9555_initialize(FAR struct i2c_dev_s *dev,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H */
+#endif /* __INCLUDE_NUTTX_DISCRETE_PCA9555_H */

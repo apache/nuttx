@@ -1,5 +1,5 @@
 /********************************************************************************************
- * drivers/ioexpander/pca9555.h
+ * drivers/discrete/pca9555.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __DRIVERS_IOEXPANDER_PCA9555_H
-#define __DRIVERS_IOEXPANDER_PCA9555_H
+#ifndef __DRIVERS_DISCRETE_PCA9555_H
+#define __DRIVERS_DISCRETE_PCA9555_H
 
 /********************************************************************************************
  * Included Files
@@ -49,8 +49,8 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/ioexpander/ioexpander.h>
-#include <nuttx/ioexpander/pca9555.h>
+#include <nuttx/discrete/ioexpander.h>
+#include <nuttx/discrete/pca9555.h>
 
 #include <nuttx/i2c.h>
 #include <nuttx/irq.h>
@@ -139,4 +139,4 @@ struct pca9555_dev_s
 };
 
 #endif /* CONFIG_IOEXPANDER && CONFIG_IOEXPANDER_PCA9555 */
-#endif /* __DRIVERS_IOEXPANDER_PCA9555_H */
+#endif /* __DRIVERS_DISCRETE_PCA9555_H */

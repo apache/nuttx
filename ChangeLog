@@ -11049,4 +11049,7 @@
 	* Many files: Standardize naming of the user LED interface functions.
 	  The new user LED interface functions are now prototyped in only in
 	  include/nuttx/board.h and have name like board_userled_* (2015-11-01).
+	* Rename ioexpander/ directories to discrete/.  This expands the
+	  namespace so that other discrete I/O drivers can reside there as
+	  well (2015-11-01).
 
