@@ -545,7 +545,7 @@ int up_timer_gettime (FAR struct timespec *ts)
     return OK;
   }
 
-# ifdef CONFIG_SCHED_TICKLESS_ALARM
+
 int up_alarm_cancel (FAR struct timespec *ts)
   {
     lpc43_tl_sync_up();
@@ -571,7 +571,7 @@ int up_alarm_start (FAR const struct timespec *ts)
 
     lpc43_tl_init_timer_vars ();
 
-    uint64_t alarm_time = lpc43_tl_ts2tick (ts);
+    alarm_time = lpc43_tl_ts2tick (ts);
     int64_t toSet = alarm_time - base;
     uint32_t curr = lpc43_tl_get_counter ();
 
@@ -607,7 +607,7 @@ int up_alarm_start (FAR const struct timespec *ts)
     return OK;
   }
 
-# else
+#ifndef CONFIG_SCHED_TICKLESS_ALARM
 
 int up_timer_cancel(FAR struct timespec *ts)
   {
@@ -647,10 +647,10 @@ int up_timer_start(FAR const struct timespec *ts)
     struct timespec tmp_ts;
     up_timer_gettime(&tmp_ts);
 
-    tmp_ts->tv_sec += ts->tv_sec;
-    tmp_ts->tv_nsec += ts->tv_nsec;
+    tmp_ts.tv_sec += ts->tv_sec;
+    tmp_ts.tv_nsec += ts->tv_nsec;
 
-    up_alarm_start(tmp_ts);
+    up_alarm_start(&tmp_ts);
 
     lpc43_tl_sync_down();
     return OK;

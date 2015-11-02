@@ -539,15 +539,15 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
   union
   {
-    FAR uint8_t  *p8;
-    FAR uint16_t *p16;
-    FAR void     *pv;
+    FAR uint8_t    *p8;
+    FAR uint16_t   *p16;
+    FAR const void *pv;
   } tx;
   union
   {
-    FAR uint8_t  *p8;
-    FAR uint16_t *p16;
-    FAR void     *pv;
+    FAR uint8_t    *p8;
+    FAR uint16_t   *p16;
+    FAR const void *pv;
   } rx;
   uint32_t data;
   uint32_t datadummy = (priv->nbits > 8)?0xffff:0xff;
