@@ -123,13 +123,13 @@
 #  elif defined(CONFIG_SAMV7_UART4)
 #    define TTYS0_DEV           g_uart4port  /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_SAMV7_USART0)
+#  elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART)
 #    define TTYS0_DEV           g_usart0port /* USART0 is ttyS0 */
 #    define USART0_ASSIGNED     1
-#  elif defined(CONFIG_SAMV7_USART1)
+#  elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART)
 #    define TTYS0_DEV           g_usart1port /* USART1 is ttyS0 */
 #    define USART1_ASSIGNED     1
-#  elif defined(CONFIG_SAMV7_USART2)
+#  elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART)
 #    define TTYS0_DEV           g_usart2port /* USART2 is ttyS0 */
 #    define USART2_ASSIGNED     1
 #  endif
@@ -154,13 +154,16 @@
 #elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS1_DEV           g_uart4port  /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART) && \
+     !defined(USART0_ASSIGNED)
 #  define TTYS1_DEV           g_usart0port /* USART0 is ttyS1 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+     !defined(USART1_ASSIGNED)
 #  define TTYS1_DEV           g_usart1port /* USART1 is ttyS1 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS1_DEV           g_usart2port /* USART2 is ttyS1 */
 #  define USART2_ASSIGNED     1
 #endif
@@ -182,13 +185,16 @@
 #elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port  /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART) && \
+     !defined(USART0_ASSIGNED)
 #  define TTYS2_DEV           g_usart0port /* USART0 is ttyS2 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+     !defined(USART1_ASSIGNED)
 #  define TTYS2_DEV           g_usart1port /* USART1 is ttyS2 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS2_DEV           g_usart2port /* USART2 is ttyS2 */
 #  define USART2_ASSIGNED     1
 #endif
@@ -207,13 +213,16 @@
 #elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart4port  /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART) && \
+     !defined(USART0_ASSIGNED)
 #  define TTYS3_DEV           g_usart0port /* USART0 is ttyS3 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+     !defined(USART1_ASSIGNED)
 #  define TTYS3_DEV           g_usart1port /* USART1 is ttyS3 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS3_DEV           g_usart2port /* USART2 is ttyS3 */
 #  define USART2_ASSIGNED     1
 #endif
@@ -229,13 +238,16 @@
 #elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port  /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART) && \
+     !defined(USART0_ASSIGNED)
 #  define TTYS4_DEV           g_usart0port /* USART0 is ttyS4 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+     !defined(USART1_ASSIGNED)
 #  define TTYS4_DEV           g_usart1port /* USART1 is ttyS4 */
 #  define USART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS4_DEV           g_usart2port /* USART2 is ttyS4 */
 #  define USART2_ASSIGNED      1
 #endif
@@ -248,13 +260,16 @@
 #if defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port  /* UART4 is ttyS5 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART) && \
+     !defined(USART0_ASSIGNED)
 #  define TTYS5_DEV           g_usart0port /* USART0 is ttyS5 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+     !defined(USART1_ASSIGNED)
 #  define TTYS5_DEV           g_usart1port /* USART1 is ttyS5 */
 #  define USART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS5_DEV           g_usart2port /* USART2 is ttyS5 */
 #  define USART2_ASSIGNED      1
 #endif
@@ -264,13 +279,16 @@
  * One of USART0-2 could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
+#if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART) && \
+   !defined(USART0_ASSIGNED)
 #  define TTYS6_DEV           g_usart0port /* USART0 is ttyS6 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+     !defined(USART1_ASSIGNED)
 #  define TTYS6_DEV           g_usart1port /* USART1 is ttyS6 */
 #  define USART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS6_DEV           g_usart2port /* USART2 is ttyS6 */
 #  define USART2_ASSIGNED      1
 #endif
@@ -280,10 +298,12 @@
  * One of of USART1-2 could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_USART1) && !defined(USART1_ASSIGNED)
+#if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART) && \
+   !defined(USART1_ASSIGNED)
 #  define TTYS7_DEV           g_usart1port /* USART1 is ttyS7 */
 #  define USART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_USART2) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART) && \
+     !defined(USART2_ASSIGNED)
 #  define TTYS7_DEV           g_usart2port /* USART2 is ttyS7 */
 #  define USART2_ASSIGNED      1
 #endif
@@ -349,13 +369,13 @@ static int  sam_uart3_interrupt(int irq, void *context);
 #ifdef CONFIG_SAMV7_UART4
 static int  sam_uart4_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_SAMV7_USART0
+#if defined(CONFIG_SAMV7_USART0) &&  defined(CONFIG_USART0_ISUART)
 static int  sam_usart0_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_SAMV7_USART1
+#if defined(CONFIG_SAMV7_USART1) &&  defined(CONFIG_USART1_ISUART)
 static int  sam_usart1_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_SAMV7_USART2
+#if defined(CONFIG_SAMV7_USART2) &&  defined(CONFIG_USART2_ISUART)
 static int  sam_usart2_interrupt(int irq, void *context);
 #endif
 static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
@@ -412,15 +432,15 @@ static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_USART0
+#if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART)
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_USART1
+#if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART)
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_USART2
+#if defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART)
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
@@ -582,7 +602,7 @@ static uart_dev_t g_uart4port =
 
 /* This describes the state of the USART0 port. */
 
-#ifdef CONFIG_SAMV7_USART0
+#if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART)
 static struct sam_dev_s g_usart0priv =
 {
   .usartbase      = SAM_USART0_BASE,
@@ -616,7 +636,7 @@ static uart_dev_t g_usart0port =
 
 /* This describes the state of the USART1 port. */
 
-#ifdef CONFIG_SAMV7_USART1
+#if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART)
 static struct sam_dev_s g_usart1priv =
 {
   .usartbase      = SAM_USART1_BASE,
@@ -650,7 +670,7 @@ static uart_dev_t g_usart1port =
 
 /* This describes the state of the USART2 port. */
 
-#ifdef CONFIG_SAMV7_USART2
+#if defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART)
 static struct sam_dev_s g_usart2priv =
 {
   .usartbase      = SAM_USART2_BASE,
@@ -1095,19 +1115,19 @@ static int  sam_uart4_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_USART0
+#if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_ISUART)
 static int  sam_usart0_interrupt(int irq, void *context)
 {
   return sam_interrupt(&g_usart0port);
 }
 #endif
-#ifdef CONFIG_SAMV7_USART1
+#if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_ISUART)
 static int  sam_usart1_interrupt(int irq, void *context)
 {
   return sam_interrupt(&g_usart1port);
 }
 #endif
-#ifdef CONFIG_SAMV7_USART2
+#if defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_ISUART)
 static int  sam_usart2_interrupt(int irq, void *context)
 {
   return sam_interrupt(&g_usart2port);
