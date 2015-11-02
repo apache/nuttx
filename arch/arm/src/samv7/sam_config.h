@@ -109,18 +109,26 @@
 #endif
 
 /* USARTs *******************************************************************/
-/* If the USART is not being used as a UART, then it really isn't enabled
- * for our purposes.
+/* If the USART is not being used as a UART or for SPI, then it really isn't
+ * enabled for our purposes.
  */
 
-#ifndef CONFIG_USART0_ISUART
+#if !defined(CONFIG_USART0_ISUART) && !defined(CONFIG_USART0_ISSPI)
 #  undef CONFIG_SAMV7_USART0
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART0_IFLOWCONTROL
 #endif
-#ifndef CONFIG_USART1_ISUART
+
+#if !defined(CONFIG_USART1_ISUART) && !defined(CONFIG_USART1_ISSPI)
 #  undef CONFIG_SAMV7_USART1
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART1_IFLOWCONTROL
 #endif
-#ifndef CONFIG_USART2_ISUART
+
+#if !defined(CONFIG_USART2_ISUART) && !defined(CONFIG_USART2_ISSPI)
 #  undef CONFIG_SAMV7_USART2
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART2_IFLOWCONTROL
 #endif
 
 /* Don't enable USARTs not supported by the chip. */
@@ -153,10 +161,10 @@
 #undef CONFIG_UART3_IFLOWCONTROL
 #undef CONFIG_UART4_IFLOWCONTROL
 
-/* Hardware flow control requires using DMAC channel (not yet supported) */
+/* Hardware flow control requires using a DMAC channel (not yet supported) */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-#  warning PDC or DMAC support is required for RTS hardware flow control
+#  warning XDMAC support is required for RTS hardware flow control
 #  undef CONFIG_SERIAL_IFLOWCONTROL
 #  undef CONFIG_USART0_IFLOWCONTROL
 #  undef CONFIG_USART1_IFLOWCONTROL

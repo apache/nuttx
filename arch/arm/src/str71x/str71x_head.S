@@ -37,11 +37,11 @@
  * Included Files
  *****************************************************************************/
 
-#include <nuttx/config.h>	/* NuttX configuration settings */
+#include <nuttx/config.h>		/* NuttX configuration settings */
 #include <arch/board/board.h>	/* Board-specific settings */
 
-#include "arm.h"		/* ARM-specific settings */
-#include "chip.h"		/* Chip-specific settings */
+#include "arm.h"				/* ARM-specific settings */
+#include "chip.h"				/* Chip-specific settings */
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -59,18 +59,18 @@
  * External references
  *****************************************************************************/
 
-	.globl	str71x_prccuinit	/* Clock initialization */
-	.globl	up_lowsetup		/* Early initialization of UART */
+	.globl	str71x_prccuinit			/* Clock initialization */
+	.globl	up_lowsetup					/* Early initialization of UART */
 #ifdef USE_EARLYSERIALINIT
-	.globl	up_earlyserialinit	/* Early initialization of serial driver */
+	.globl	up_earlyserialinit			/* Early initialization of serial driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
-	.globl	board_led_initialize	/* Boot LED setup */
+	.globl	board_autoled_initialize	/* Boot LED setup */
 #endif
 #ifdef CONFIG_DEBUG
-	.globl	up_lowputc		/* Low-level debug output */
+	.globl	up_lowputc					/* Low-level debug output */
 #endif
-	.globl	os_start		/* NuttX entry point */
+	.globl	os_start					/* NuttX entry point */
 
 /*****************************************************************************
  * Macros
@@ -87,8 +87,8 @@
 
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG
-	mov	r0, #\code
-	bl	up_lowputc
+	mov		r0, #\code
+	bl		up_lowputc
 #endif
 	.endm
 
@@ -107,32 +107,32 @@
 	/* In order to use the external memory, certain GPIO pins must be
 	 * configured in the alternate function:
 	 *
-         * GPIO    ALT     Description
+	 * GPIO    ALT     Description
 	 * P2.0-3  CS.0-3  External memory chip select for banks 0,1,3,4
 	 * P2.4-7  A.20-23 External memory extended address bus (needed for
 	 *                 address space > 1Mb)
 	 */
 
 #ifdef CONFIG_STR71X_BIGEXTMEM
-#  define EXTMEM_GPIO_BITSET 0x000000ff	/* P2.0-7 */
+#  define EXTMEM_GPIO_BITSET 0x000000ff		/* P2.0-7 */
 #else
-#  define EXTMEM_GPIO_BITSET 0x0000000f	/* P2.0-3 */
+#  define EXTMEM_GPIO_BITSET 0x0000000f		/* P2.0-3 */
 #endif
 
-	ldr	\base, =STR71X_GPIO_BASE	; Configure P2.0 to P2.3/7 in AF_PP mode
-	ldr	\value, [\base, #STR71X_GPIO_PC0_OFFSET]
-	orr	\value, \value, #EXTMEM_GPIO_BITSET
-	str	\value, [\base, #STR71X_GPIO_PC0_OFFSET]
-	ldr	\value, [\base, #STR71X_GPIO_PC1_OFFSET]
-	orr	\value, \value, #EXTMEM_GPIO_BITSET
-	str	\value, [\base, #STR71X_GPIO_PC1_OFFSET]
-	ldr	\value, [\base, #STR71X_GPIO_PC2_OFFSET]
-	orr	\value, \value, #EXTMEM_GPIO_BITSET
-	str	\value, [\base, #STR71X_GPIO_PC2_OFFSET]
+	ldr		\base, =STR71X_GPIO_BASE		; Configure P2.0 to P2.3/7 in AF_PP mode
+	ldr		\value, [\base, #STR71X_GPIO_PC0_OFFSET]
+	orr		\value, \value, #EXTMEM_GPIO_BITSET
+	str		\value, [\base, #STR71X_GPIO_PC0_OFFSET]
+	ldr		\value, [\base, #STR71X_GPIO_PC1_OFFSET]
+	orr		\value, \value, #EXTMEM_GPIO_BITSET
+	str		\value, [\base, #STR71X_GPIO_PC1_OFFSET]
+	ldr		\value, [\base, #STR71X_GPIO_PC2_OFFSET]
+	orr		\value, \value, #EXTMEM_GPIO_BITSET
+	str		\value, [\base, #STR71X_GPIO_PC2_OFFSET]
 
 	/* Enable bank 0 */
 
-	ldr	\base, =STR71X_EMI_BASE
+	ldr		\base, =STR71X_EMI_BASE
 
 #ifdef CONFIG_STR71X_BANK0
 
@@ -156,11 +156,11 @@
 #    define EXTMEM_BANK0_WAITSTATES (CONFIG_STR71X_BANK0_WAITSTATES << 2)
 #  endif
 
-	ldr	\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK0_WAITSTATES|EXTMEM_BANK0_SIZE)
+	ldr		\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK0_WAITSTATES|EXTMEM_BANK0_SIZE)
 #else
-	mov	\value, #0
+	mov		\value, #0
 #endif
-	str	\value, [\base, #STR71X_EMI_BCON0_OFFSET]
+	str		\value, [\base, #STR71X_EMI_BCON0_OFFSET]
 
 	/* Enable bank 1 */
 
@@ -186,11 +186,11 @@
 #    define EXTMEM_BANK1_WAITSTATES (CONFIG_STR71X_BANK1_WAITSTATES << 2)
 #  endif
 
-	ldr	\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK1_WAITSTATES|EXTMEM_BANK1_SIZE)
+	ldr		\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK1_WAITSTATES|EXTMEM_BANK1_SIZE)
 #else
-	mov	\value, #0
+	mov		\value, #0
 #endif
-	str	\value, [\base, #STR71X_EMI_BCON1_OFFSET]
+	str		\value, [\base, #STR71X_EMI_BCON1_OFFSET]
 
 	/* Enable bank 2 */
 
@@ -216,11 +216,11 @@
 #    define EXTMEM_BANK2_WAITSTATES (CONFIG_STR71X_BANK2_WAITSTATES << 2)
 #  endif
 
-	ldr	\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK2_WAITSTATES|EXTMEM_BANK2_SIZE)
+	ldr		\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK2_WAITSTATES|EXTMEM_BANK2_SIZE)
 #else
-	mov	\value, #0
+	mov		\value, #0
 #endif
-	str	\value, [\base, #STR71X_EMI_BCON2_OFFSET]
+	str		\value, [\base, #STR71X_EMI_BCON2_OFFSET]
 
 	/* Enable bank 3 */
 
@@ -246,11 +246,11 @@
 #    define EXTMEM_BANK3_WAITSTATES (CONFIG_STR71X_BANK3_WAITSTATES << 2)
 #  endif
 
-	ldr	\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK3_WAITSTATES|EXTMEM_BANK3_SIZE)
+	ldr		\value, =(STR71X_EMIBCON_ENABLE|EXTMEM_BANK3_WAITSTATES|EXTMEM_BANK3_SIZE)
 #else
-	mov	\value, #0
+	mov		\value, #0
 #endif
-	str	\value, [\base, #STR71X_EMI_BCON3_OFFSET]
+	str		\value, [\base, #STR71X_EMI_BCON3_OFFSET]
 #endif
 	.endm
 
@@ -277,42 +277,42 @@
 	.macro	eicinit, eicbase, value, irqno, offset
 	/* Disable and clear all interrupts */
 
-	ldr	\eicbase, =STR71X_EIC_BASE
+	ldr		\eicbase, =STR71X_EIC_BASE
 
 	/* Disable FIQ and IRQ */
 
-	mov	\value, #0
-	str	\value, [\eicbase, #STR71X_EIC_ICR_OFFSET]
+	mov		\value, #0
+	str		\value, [\eicbase, #STR71X_EIC_ICR_OFFSET]
 
 	/* Disable all channel interrupts */
 
-	str	\value, [\eicbase, #STR71X_EIC_IER_OFFSET]
+	str		\value, [\eicbase, #STR71X_EIC_IER_OFFSET]
 
 	/* Clear all pending IRQs */
 
-	ldr	\value, =0xffffffff
-	str	\value, [\eicbase, #STR71X_EIC_IPR_OFFSET]
+	ldr		\value, =0xffffffff
+	str		\value, [\eicbase, #STR71X_EIC_IPR_OFFSET]
 
 	/* Disable FIQ channels/clear pending FIQs */
 
-	mov	\value, #0x0c
-	str	\value, [\eicbase, #STR71X_EIC_FIR_OFFSET]
+	mov		\value, #0x0c
+	str		\value, [\eicbase, #STR71X_EIC_FIR_OFFSET]
 
 	/* Reset the current priority register */
 
-	mov	\value, #0
-	str     \value, [\eicbase, #STR71X_EIC_CIPR_OFFSET]
+	mov		\value, #0
+	str		\value, [\eicbase, #STR71X_EIC_CIPR_OFFSET]
 
 	/* Zero IVR 31:16 */
 
-	str	\value, [\eicbase, #STR71X_EIC_IVR_OFFSET]
+	str		\value, [\eicbase, #STR71X_EIC_IVR_OFFSET]
 
 	/* Set up the loop to initialize each SIR register.  Start
 	 * with IRQ number 0 and SIR0
 	 */
 
-	mov	\irqno, #0
-	ldr	\offset, =STR71X_EIC_SIR_OFFSET
+	mov		\irqno, #0
+	ldr		\offset, =STR71X_EIC_SIR_OFFSET
 
 	/* Then loop for each EIC channel */
 eicloop:
@@ -325,22 +325,22 @@ eicloop:
 	 * are all disabled.
 	 */
 
-	mov	\value, \irqno, lsl #16
-	str	\value, [\eicbase, \offset]
+	mov		\value, \irqno, lsl #16
+	str		\value, [\eicbase, \offset]
 
 	/* Increment the offset to the next SIR register and inrement
 	 * the IRQ number.
 	 */
 
-	add	\offset, \offset, #4
-	add	\irqno, \irqno, #1
+	add		\offset, \offset, #4
+	add		\irqno, \irqno, #1
 
 	/* Continue to loop until all of the SIR registers have been
 	 * initializeed.
 	 */
 
-	cmp	\irqno, #STR71X_EIC_NCHANNELS
-	blt	eicloop	
+	cmp		\irqno, #STR71X_EIC_NCHANNELS
+	blt		eicloop	
 	.endm
 
 /*****************************************************************************
@@ -355,25 +355,26 @@ eicloop:
 #ifndef CONFIG_STR71X_DISABLE_PERIPHINIT
 	/* Set up APB1 and APB2 addresses */
 
-	ldr	\base1, =STR71X_APB1_BASE
-	ldr	\base2, =STR71X_APB2_BASE
+	ldr		\base1, =STR71X_APB1_BASE
+	ldr		\base2, =STR71X_APB2_BASE
 
 	/* Disable all APB1 peripherals */
 
-	ldr	\value, =STR71X_APB1_APB1ALL
+	ldr		\value, =STR71X_APB1_APB1ALL
 	strh	\value, [\base1, #STR71X_APB_CKDIS_OFFSET]
 
 	/* Disable all(or most) APB2 peripherals */
-	ldr	\value, =(STR71X_APB2_APB2ALL & ~STR71X_APB2_EIC)
+
+	ldr		\value, =(STR71X_APB2_APB2ALL & ~STR71X_APB2_EIC)
 	strh	\value, [\base2, #STR71X_APB_CKDIS_OFFSET]
 
 	/* Allow EMI and USB */
 
-	ldr	\base1, =STR71X_RCCU_BASE
+	ldr		\base1, =STR71X_RCCU_BASE
 #ifdef CONFIG_STR71X_USB
-	ldr	\value, =(STR71X_RCCUPER_EMI|STR71X_RCCUPER_USBKERNEL)
+	ldr		\value, =(STR71X_RCCUPER_EMI|STR71X_RCCUPER_USBKERNEL)
 #else
-	ldr	\value, =STR71X_RCCUPER_EMI
+	ldr		\value, =STR71X_RCCUPER_EMI
 #endif
 	strh	\value, [\base1, #STR71X_RCCU_PER_OFFSET]
 #endif
@@ -391,15 +392,16 @@ eicloop:
  *****************************************************************************/
 
 	.macro	remap, base, value
+
 	/* Read the PCU BOOTCR register */
 
-	ldr	\base, =STR71X_PCU_BASE
+	ldr		\base, =STR71X_PCU_BASE
 	ldrh	\value, [\base, #STR71X_PCU_BOOTCR_OFFSET]
 
 	/* Mask out the old boot mode bits and set the boot mode to FLASH */
 
-	bic	\value, \value, #STR71X_PCUBOOTCR_BOOTMASK
-	orr	\value, \value, #STR71X_PCUBOOTCR_BMFLASH
+	bic		\value, \value, #STR71X_PCUBOOTCR_BOOTMASK
+	orr		\value, \value, #STR71X_PCUBOOTCR_BMFLASH
 
 	/* Save the modified BOOTCR register */
 
@@ -426,16 +428,16 @@ eicloop:
 	.globl	_vector_table
 	.type	_vector_table, %function
 _vector_table:
-	ldr	pc, .Lresethandler		/* 0x00: Reset */
-	ldr	pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
-	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
-	.long	0				/* 0x14: Reserved vector */
-	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
-	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
+	ldr		pc, .Lresethandler			/* 0x00: Reset */
+	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
+	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
+	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
+	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
+	.long	0							/* 0x14: Reserved vector */
+	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
+	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
 
-	.globl   __start
+	.globl	__start
 	.globl	up_vectorundefinsn
 	.globl	up_vectorswi
 	.globl	up_vectorprefetch
@@ -444,7 +446,7 @@ _vector_table:
 	.globl	up_vectorfiq
 
 .Lresethandler:
-	.long   __start
+	.long	__start
 .Lundefinedhandler:
 	.long	up_vectorundefinsn
 .Lswihandler:
@@ -478,16 +480,16 @@ __start:
 	 *  the aliased copy
 	 */
 
-	ldr     pc, =__flashstart
+	ldr		pc, =__flashstart
 __flashstart:
 	.rept 9
-	nop		 /* Wait for OSC stabilization*/
+	nop				/* Wait for OSC stabilization */
 	.endr
 
 	/* Setup the initial processor mode */
 
-	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
-	msr	cpsr, r0
+	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	msr		cpsr, r0
 
 	/* Initialize the external memory interface (EMI) */
 
@@ -499,7 +501,7 @@ __flashstart:
 
 	/* Disable all peripherals except EIC */
 
-	periphinit r0, r1, r2
+	periphinit	r0, r1, r2
 
 	/* Map memory appropriately for configuration */
 
@@ -507,42 +509,42 @@ __flashstart:
 
 	/* Setup system stack (and get the BSS range) */
 
-	adr	r0, LC0
-	ldmia   r0, {r4, r5, sp}
+	adr		r0, LC0
+	ldmia	r0, {r4, r5, sp}
 
 	/* Clear system BSS section */
 
-	mov	r0, #0
-1:	cmp	r4, r5
+	mov		r0, #0
+1:	cmp		r4, r5
 	strcc	r0, [r4], #4
-	bcc	1b
+	bcc		1b
 
 	/* Copy system .data sections from FLASH to new home in RAM. */
 
-	adr	r3, LC2
+	adr		r3, LC2
 	ldmia	r3, {r0, r1, r2}
 
 2:	ldmia	r0!, {r3 - r10}
 	stmia	r1!, {r3 - r10}
-	cmp	r1, r2
-	blt	2b
+	cmp		r1, r2
+	blt		2b
 
 	/* Initialize clocking */
 
-	bl	str71x_prccuinit
+	bl		str71x_prccuinit
 
 	/* Configure the uart so that we can get debug output as soon
 	 * as possible.
 	 */
 
-        bl	up_lowsetup
+	bl		up_lowsetup
 	showprogress 'A'
 
 	/* Perform early serial initialization */
 
-	mov	fp, #0
+	mov		fp, #0
 #ifdef USE_EARLYSERIALINIT
-	bl	up_earlyserialinit
+	bl		up_earlyserialinit
 #endif
 
 	showprogress 'B'
@@ -550,17 +552,17 @@ __flashstart:
 	/* Call C++ constructors */
 
 #ifdef CONFIG_CPLUSPLUS
-	ldr 	r0, =__ctors_start__
-	ldr 	r1, =__ctors_end__
+	ldr		r0, =__ctors_start__
+	ldr		r1, =__ctors_end__
 ctor_loop:
-	cmp 	r0, r1
-	beq 	ctor_end
-	ldr 	r2, [r0], #4
-	stmfd 	sp!, {r0-r1}
-	mov 	lr, pc
-	mov 	pc, r2
-	ldmfd 	sp!, {r0-r1}
-	b 	ctor_loop
+	cmp		r0, r1
+	beq		ctor_end
+	ldr		r2, [r0], #4
+	stmfd	sp!, {r0-r1}
+	mov		lr, pc
+	mov		pc, r2
+	ldmfd	sp!, {r0-r1}
+	b		ctor_loop
 ctor_end:
 
 	showprogress 'C'
@@ -570,27 +572,27 @@ ctor_end:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	bl	board_led_initialize
+	bl		board_autoled_initialize
 #endif
 
 	/* Then jump to OS entry */
 
-	b	os_start
+	b		os_start
 
 	/* Call destructors  -- never get here */
 
 #if 0 /* CONFIG_CPLUSPLUS */
-	ldr	r0, =__dtors_start__
-	ldr	r1, =__dtors_end__
+	ldr		r0, =__dtors_start__
+	ldr		r1, =__dtors_end__
 dtor_loop:
-	cmp	r0, r1
-	beq	dtor_end
-	ldr	r2, [r0], #4
+	cmp		r0, r1
+	beq		dtor_end
+	ldr		r2, [r0], #4
 	stmfd	sp!, {r0-r1}
-	mov	lr, pc
-	mov	pc, r2
+	mov		lr, pc
+	mov		pc, r2
 	ldmfd	sp!, {r0-r1}
-	b	dtor_loop
+	b		dtor_loop
 dtor_end:
 #endif
 
@@ -626,4 +628,3 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 
 	.end
-

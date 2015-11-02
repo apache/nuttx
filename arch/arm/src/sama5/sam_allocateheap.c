@@ -258,7 +258,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * heap is at the end of BSS through the configured end of SDRAM.
    */
 
-  board_led_on(LED_HEAPALLOCATE);
+  board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void *)&_ebss;
   *heap_size  = SAMA5_PRIMARY_HEAP_END - (size_t)&_ebss;
 
@@ -267,7 +267,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * IDLE stack through the configured end of ISRAM.
    */
 
-  board_led_on(LED_HEAPALLOCATE);
+  board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void *)g_idle_topstack;
   *heap_size  = SAMA5_PRIMARY_HEAP_END - g_idle_topstack;
 #endif

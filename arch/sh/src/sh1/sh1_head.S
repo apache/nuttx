@@ -60,31 +60,32 @@
 
 /* Called functions */
 
-	.globl	_up_lowsetup		/* Early initialization of UART */
+	.globl	_up_lowsetup				/* Early initialization of UART */
 #ifdef USE_EARLYSERIALINIT
-	.globl	_up_earlyconsoleinit	/* Early initialization of console driver */
+	.globl	_up_earlyconsoleinit		/* Early initialization of console driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
-	.globl	_board_led_initialize	/* Boot LED setup */
+	.globl	_board_autoled_initialize	/* Boot LED setup */
 #endif
 #ifdef CONFIG_DEBUG
-	.globl	_up_lowputc		/* Low-level debug output */
+	.globl	_up_lowputc					/* Low-level debug output */
 #endif
-	.globl	_os_start		/* NuttX entry point */
+	.globl	_os_start					/* NuttX entry point */
 
 /* Variables set up by the linker script */
 
-	.globl	_sbss			/* Start of BSS */
-	.globl	_ebss			/* End of BSS */
-	.globl	_svect			/* Start of the new vector location */
+	.globl	_sbss						/* Start of BSS */
+	.globl	_ebss						/* End of BSS */
+	.globl	_svect						/* Start of the new vector location */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
-	.globl	_eronly			/* Where .data defaults are stored in FLASH */
-	.global	_sdata			/* Start of .data in RAM */
-	.globl	_edata			/* End of .data in RAM */
+	.globl	_eronly						/* Where .data defaults are stored in FLASH */
+	.global	_sdata						/* Start of .data in RAM */
+	.globl	_edata						/* End of .data in RAM */
 #endif
 
 /* Interrupt handlers */
+
 	.globl	_up_invalid_handler
 #ifdef CONFIG_SH1_DMAC0
 	.globl	_up_dmac0_handler
@@ -161,9 +162,9 @@
 
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG
-	mov.l   .Llowputc, r0		/* Address of up_earlyconsoleinit */
-	jsr     @r0			/* Call it */
-	mov	#\code, r4		/* Delay slot */
+	mov.l	.Llowputc, r0				/* Address of up_earlyconsoleinit */
+	jsr		@r0							/* Call it */
+	mov		#\code, r4					/* Delay slot */
 #endif
 	.endm
 
@@ -191,128 +192,128 @@ __vector_table:
 	 * vectors.
 	 */
 
-	.long	__start		/* 0-1: Power-on reset (hard, NMI high) PC & SP */
+	.long	__start						/* 0-1: Power-on reset (hard, NMI high) PC & SP */
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
-	.long	__start		/* 2-3: Manual reset (soft, NMI low) PC & SP */
+	.long	__start						/* 2-3: Manual reset (soft, NMI low) PC & SP */
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 
-	.rept SH1_NCMN_VECTORS-4
+	.rept	SH1_NCMN_VECTORS-4
 	.long	_up_invalid_handler
 	.endr
 
 	/* The remaining vectors are unique to the SH-1 703x family */
 
 #ifdef CONFIG_SH1_DMAC0
-	.long	_up_dmac0_handler		/* 72: DMAC0 DEI0 */
+	.long	_up_dmac0_handler			/* 72: DMAC0 DEI0 */
 #else
-	.long	_up_invalid_handler		/* 72: DMAC0 DEI0 */
+	.long	_up_invalid_handler			/* 72: DMAC0 DEI0 */
 #endif
-	.long	_up_invalid_handler		/* 73: Reserved */
+	.long	_up_invalid_handler			/* 73: Reserved */
 #ifdef CONFIG_SH1_DMAC1
-	.long	_up_dmac1_handler		/* 74: DMAC1 DEI1 */
+	.long	_up_dmac1_handler			/* 74: DMAC1 DEI1 */
 #else
-	.long	_up_invalid_handler		/* 74: DMAC1 DEI1 */
+	.long	_up_invalid_handler			/* 74: DMAC1 DEI1 */
 #endif
-	.long	_up_invalid_handler		/* 75: Reserved */
+	.long	_up_invalid_handler			/* 75: Reserved */
 #ifdef CONFIG_SH1_DMAC2
-	.long	_up_dmac2_handler		/* 76: DMAC2 DEI2 */
+	.long	_up_dmac2_handler			/* 76: DMAC2 DEI2 */
 #else
-	.long	_up_invalid_handler		/* 76: DMAC2 DEI2 */
+	.long	_up_invalid_handler			/* 76: DMAC2 DEI2 */
 #endif
-	.long	_up_invalid_handler		/* 77: Reserved */
+	.long	_up_invalid_handler			/* 77: Reserved */
 #ifdef CONFIG_SH1_DMAC3
-	.long	_up_dmac3_handler		/* 78: DMAC3 DEI3 */
+	.long	_up_dmac3_handler			/* 78: DMAC3 DEI3 */
 #else
-	.long	_up_invalid_handler		/* 78: DMAC3 DEI3 */
+	.long	_up_invalid_handler			/* 78: DMAC3 DEI3 */
 #endif
-	.long	_up_invalid_handler		/* 79: Reserved */
-	.long	_up_imia0_handler		/* 80: ITU0 IMIA0 */
-	.long	_up_imib0_handler		/* 81:      IMIB0 */
-	.long	_up_ovi0_handler		/* 82:      OVI0 */
-	.long	_up_invalid_handler		/* 83: Reserved */
+	.long	_up_invalid_handler			/* 79: Reserved */
+	.long	_up_imia0_handler			/* 80: ITU0 IMIA0 */
+	.long	_up_imib0_handler			/* 81:      IMIB0 */
+	.long	_up_ovi0_handler			/* 82:      OVI0 */
+	.long	_up_invalid_handler			/* 83: Reserved */
 #ifdef CONFIG_SH1_ITU1
-	.long	_up_imia1_handler		/* 84: ITU1 IMIA1 */
-	.long	_up_imib1_handler		/* 85:      IMIB1 */
-	.long	_up_ovi1_handler		/* 86:      OVI1 */
+	.long	_up_imia1_handler			/* 84: ITU1 IMIA1 */
+	.long	_up_imib1_handler			/* 85:      IMIB1 */
+	.long	_up_ovi1_handler			/* 86:      OVI1 */
 #else
-	.long	_up_invalid_handler		/* 84: ITU1 IMIA1 */
-	.long	_up_invalid_handler		/* 85:      IMIB1 */
-	.long	_up_invalid_handler		/* 86:      OVI1 */
+	.long	_up_invalid_handler			/* 84: ITU1 IMIA1 */
+	.long	_up_invalid_handler			/* 85:      IMIB1 */
+	.long	_up_invalid_handler			/* 86:      OVI1 */
 #endif
-	.long	_up_invalid_handler		/* 87: Reserved */
+	.long	_up_invalid_handler			/* 87: Reserved */
 #ifdef CONFIG_SH1_ITU2
-	.long	_up_imia2_handler		/* 88: ITU2 IMIA2 */
-	.long	_up_imib2_handler		/* 89:      IMIB2 */
-	.long	_up_ovi2_handler		/* 90:      OVI2 */
+	.long	_up_imia2_handler			/* 88: ITU2 IMIA2 */
+	.long	_up_imib2_handler			/* 89:      IMIB2 */
+	.long	_up_ovi2_handler			/* 90:      OVI2 */
 #else
-	.long	_up_invalid_handler		/* 88: ITU2 IMIA2 */
-	.long	_up_invalid_handler		/* 89:      IMIB2 */
-	.long	_up_invalid_handler		/* 90:      OVI2 */
+	.long	_up_invalid_handler			/* 88: ITU2 IMIA2 */
+	.long	_up_invalid_handler			/* 89:      IMIB2 */
+	.long	_up_invalid_handler			/* 90:      OVI2 */
 #endif
-	.long	_up_invalid_handler		/* 91: Reserved */
+	.long	_up_invalid_handler			/* 91: Reserved */
 #ifdef CONFIG_SH1_ITU3
-	.long	_up_imia3_handler		/* 92: ITU3 IMIA3 */
-	.long	_up_imib3_handler		/* 93:      IMIB3 */
-	.long	_up_ovi3_handler		/* 94:      OVI3 */
+	.long	_up_imia3_handler			/* 92: ITU3 IMIA3 */
+	.long	_up_imib3_handler			/* 93:      IMIB3 */
+	.long	_up_ovi3_handler			/* 94:      OVI3 */
 #else
-	.long	_up_invalid_handler		/* 92: ITU3 IMIA3 */
-	.long	_up_invalid_handler		/* 93:      IMIB3 */
-	.long	_up_invalid_handler		/* 94:      OVI3 */
+	.long	_up_invalid_handler			/* 92: ITU3 IMIA3 */
+	.long	_up_invalid_handler			/* 93:      IMIB3 */
+	.long	_up_invalid_handler			/* 94:      OVI3 */
 #endif
-	.long	_up_invalid_handler		/* 95: Reserved */
+	.long	_up_invalid_handler			/* 95: Reserved */
 #ifdef CONFIG_SH1_ITU4
-	.long	_up_imia4_handler		/* 96: ITU4 IMIA4 */
-	.long	_up_imib4_handler		/* 97:      IMIB4 */
-	.long	_up_ovi4_handler		/* 98:      OVI4 */
+	.long	_up_imia4_handler			/* 96: ITU4 IMIA4 */
+	.long	_up_imib4_handler			/* 97:      IMIB4 */
+	.long	_up_ovi4_handler			/* 98:      OVI4 */
 #else
-	.long	_up_invalid_handler		/* 96: ITU4 IMIA4 */
-	.long	_up_invalid_handler		/* 97:      IMIB4 */
-	.long	_up_invalid_handler		/* 98:      OVI4 */
+	.long	_up_invalid_handler			/* 96: ITU4 IMIA4 */
+	.long	_up_invalid_handler			/* 97:      IMIB4 */
+	.long	_up_invalid_handler			/* 98:      OVI4 */
 #endif
-	.long	_up_invalid_handler		/* 99: Reserved */
+	.long	_up_invalid_handler			/* 99: Reserved */
 #ifdef CONFIG_SH1_SCI0
-	.long	_up_eri0_handler		/* 100: SCI0 ERI0 */
-	.long	_up_rxi0_handler		/* 101:      RxI0 */
-	.long	_up_txi0_handler		/* 102:      TxI0 */
-	.long	_up_tei0_handler		/* 103:      TEI0 */
+	.long	_up_eri0_handler			/* 100: SCI0 ERI0 */
+	.long	_up_rxi0_handler			/* 101:      RxI0 */
+	.long	_up_txi0_handler			/* 102:      TxI0 */
+	.long	_up_tei0_handler			/* 103:      TEI0 */
 #else
-	.long	_up_invalid_handler		/* 100: SCI0 ERI0 */
-	.long	_up_invalid_handler		/* 101:      RxI0 */
-	.long	_up_invalid_handler		/* 102:      TxI0 */
-	.long	_up_invalid_handler		/* 103:      TEI0 */
+	.long	_up_invalid_handler			/* 100: SCI0 ERI0 */
+	.long	_up_invalid_handler			/* 101:      RxI0 */
+	.long	_up_invalid_handler			/* 102:      TxI0 */
+	.long	_up_invalid_handler			/* 103:      TEI0 */
 #endif
 #ifdef CONFIG_SH1_SCI1
-	.long	_up_eri1_handler		/* 104: SCI1 ERI1 */
-	.long	_up_rxi1_handler		/* 105:      RxI1 */
-	.long	_up_txi1_handler		/* 106:      TxI1 */
-	.long	_up_tei1_handler		/* 107:      TEI1 */
+	.long	_up_eri1_handler			/* 104: SCI1 ERI1 */
+	.long	_up_rxi1_handler			/* 105:      RxI1 */
+	.long	_up_txi1_handler			/* 106:      TxI1 */
+	.long	_up_tei1_handler			/* 107:      TEI1 */
 #else
-	.long	_up_invalid_handler		/* 104: SCI1 ERI1 */
-	.long	_up_invalid_handler		/* 105:      RxI1 */
-	.long	_up_invalid_handler		/* 106:      TxI1 */
-	.long	_up_invalid_handler		/* 107:      TEI1 */
+	.long	_up_invalid_handler			/* 104: SCI1 ERI1 */
+	.long	_up_invalid_handler			/* 105:      RxI1 */
+	.long	_up_invalid_handler			/* 106:      TxI1 */
+	.long	_up_invalid_handler			/* 107:      TEI1 */
 #endif
 #ifdef CONFIG_SH1_PCU
-	.long	_up_pei_handler			/* 108: Parity control unit PEI */
+	.long	_up_pei_handler				/* 108: Parity control unit PEI */
 #else
-	.long	_up_invalid_handler		/* 108: Parity control unit PEI */
+	.long	_up_invalid_handler			/* 108: Parity control unit PEI */
 #endif
 #ifdef CONFIG_SH1_AD
-	.long	_up_aditi_handler		/* 109: A/D ITI */
+	.long	_up_aditi_handler			/* 109: A/D ITI */
 #else
-	.long	_up_invalid_handler		/* 109: A/D ITI */
+	.long	_up_invalid_handler			/* 109: A/D ITI */
 #endif
-	.long	_up_invalid_handler		/* 110: Reserved */
-	.long	_up_invalid_handler		/* 111: Reserved */
+	.long	_up_invalid_handler			/* 110: Reserved */
+	.long	_up_invalid_handler			/* 111: Reserved */
 #ifdef CONFIG_SH1_WDT
-	.long	_up_wdt_handler			/* 112: WDT ITI */
+	.long	_up_wdt_handler				/* 112: WDT ITI */
 #else
-	.long	_up_invalid_handler		/* 112: WDT ITI */
+	.long	_up_invalid_handler			/* 112: WDT ITI */
 #endif
 #ifdef CONFIG_SH1_CMI
-	.long	_up_cmi_handler			/* 113: REF CMI */
+	.long	_up_cmi_handler				/* 113: REF CMI */
 #else
-	.long	_up_invalid_handler		/* 113: REF CMI */
+	.long	_up_invalid_handler			/* 113: REF CMI */
 #endif
 	.rept (SH1_LAST_VNDX-SH1_CMI_VNDX)	/* 114-255: Reserved */
 	.long	_up_invalid_handler
@@ -346,15 +347,15 @@ __start:
 	/* set up the bus controller for the EVB */
 
 	mov.l	.Lwcr1, r0
-	sub	r1,r1
+	sub		r1,r1
 	mov.w	r1, @r0
 
 	/* Configure the BSR to use /LBS, /HBS, /WR */
 
-	mov.l   .Lbcr, r0
-	mov.w   .Lbas, r1
-	bra     __start0
-	mov.w   r1, @r0
+	mov.l	.Lbcr, r0
+	mov.w	.Lbas, r1
+	bra		__start0
+	mov.w	r1, @r0
 	
 	.align 2
 .Lstack:
@@ -369,67 +370,67 @@ __start:
 __start0:
 	/* Copy the monitor vectors to a002000-a00211f */
 
-	mov	#0, r0			/* R0: Monitor vector table at address 0 in PROM */
-	mov.l	.Lsvect, r1		/* R1: Redirected vector table in SRAM */
-	mov.l	.Lvectend, r3		/* R3: Copy only up to external interrupts */
+	mov		#0, r0						/* R0: Monitor vector table at address 0 in PROM */
+	mov.l	.Lsvect, r1					/* R1: Redirected vector table in SRAM */
+	mov.l	.Lvectend, r3				/* R3: Copy only up to external interrupts */
 1:
-	mov.l	@r0, r2			/* R2: Value from mnitor monitor vector table */
-	mov.l	r2, @r1			/* Write into SRAM vector table */
-	add	#4, r0			/* R0: Address of next vector to read from monitor vector table */
-	add	#4, r1			/* R1: Address of next vector to write to SRAM vector table */
-	cmp/gt	r0, r3			/* Copy only only up to external interrupts at */
-	bt	1b			/* Continue looping until all copied */
-	nop				/* Delay slot */
+	mov.l	@r0, r2						/* R2: Value from mnitor monitor vector table */
+	mov.l	r2, @r1						/* Write into SRAM vector table */
+	add		#4, r0						/* R0: Address of next vector to read from monitor vector table */
+	add		#4, r1						/* R1: Address of next vector to write to SRAM vector table */
+	cmp/gt	r0, r3						/* Copy only only up to external interrupts at */
+	bt		1b							/* Continue looping until all copied */
+	nop									/* Delay slot */
 
 	/* Update the VBR to show new adddress of vector table */
 
-	mov.l	.Lsvect, r0		/* R0: Address of SRAM vector table */
-	ldc	r0, vbr			/* Set VBR to start of SRAM vector table */
+	mov.l	.Lsvect, r0					/* R0: Address of SRAM vector table */
+	ldc		r0, vbr						/* Set VBR to start of SRAM vector table */
 
 	/* Initialize data segement */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
-	mov.l	.Lsdata, r0		/* R0: Start of .data segment */
-	mov.l	.Ledata, r1		/* R1: End+1 of .data segment */
-	mov.l	.Leronly, r2		/* R2: Start of FLASH .data segment copy */
+	mov.l	.Lsdata, r0					/* R0: Start of .data segment */
+	mov.l	.Ledata, r1					/* R1: End+1 of .data segment */
+	mov.l	.Leronly, r2				/* R2: Start of FLASH .data segment copy */
 2:
-	mov.l	@r2, r3			/* R3: Next byte from FLASH copy */
-	mov.l	r3, @r0			/* Copy to .data */
-	add	#4, r2			/* R2: Address of next byte to read from FLASH */
-	add	#4, r0			/* R0: Address to write next byte to .data */
-	cmp/gt	r0, r1			/* End of .data? */
-	bt	2b			/* Loop until end of data */
-	nop				/* Delay slot */
+	mov.l	@r2, r3						/* R3: Next byte from FLASH copy */
+	mov.l	r3, @r0						/* Copy to .data */
+	add		#4, r2						/* R2: Address of next byte to read from FLASH */
+	add		#4, r0						/* R0: Address to write next byte to .data */
+	cmp/gt	r0, r1						/* End of .data? */
+	bt		2b							/* Loop until end of data */
+	nop									/* Delay slot */
 #endif
 
 	/* Clear BSS */
 
-	mov.l   .Lsbss, r0		/* R0: Start of BSS segment */
-	mov.l   .Lebss, r1		/* R1: End+1 of BSS segment */
-	mov	#0, r2			/* R2: Value = 0 */
+	mov.l	.Lsbss, r0					/* R0: Start of BSS segment */
+	mov.l	.Lebss, r1					/* R1: End+1 of BSS segment */
+	mov		#0, r2						/* R2: Value = 0 */
 3:
-	mov.l	r2, @r0			/* Clear the next word in BSS */
-	add	#4, r0			/* R0: Address of next byte to clear in BSS */
-	cmp/ge	r0, r1			/* End of BSS? */
-	bt	3b			/* Loop until the end of BSS */
-	nop				/* Delay slot */
+	mov.l	r2, @r0						/* Clear the next word in BSS */
+	add		#4, r0						/* R0: Address of next byte to clear in BSS */
+	cmp/ge	r0, r1						/* End of BSS? */
+	bt		3b							/* Loop until the end of BSS */
+	nop									/* Delay slot */
 
 	/* Configure the uart so that we can get debug output as soon
 	 * as possible.
 	 */
 
-	mov.l   .Llowsetup, r0		/* Address of up_lowsetup */
-	jsr     @r0			/* Call it */
-	or      r0, r0			/* Delay slot */
+	mov.l	.Llowsetup, r0				/* Address of up_lowsetup */
+	jsr		@r0							/* Call it */
+	or		r0, r0						/* Delay slot */
 
 	showprogress 'A'
 
 	/* Perform early console initialization */
 
 #ifdef USE_EARLYSERIALINIT
-	mov.l   .Learlyconsole, r0	/* Address of up_earlyconsoleinit */
-	jsr     @r0			/* Call it */
-	or      r0, r0			/* Delay slot */
+	mov.l	.Learlyconsole, r0			/* Address of up_earlyconsoleinit */
+	jsr		@r0							/* Call it */
+	or		r0, r0						/* Delay slot */
 #endif
 
 	showprogress 'B'
@@ -445,16 +446,16 @@ __start0:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	mov.l   .Lledinit, r0		/* Address of board_led_initialize */
-	jsr     @r0			/* Call it */
-	or      r0, r0			/* Delay slot */
+	mov.l	.Lledinit, r0				/* Address of board_autoled_initialize */
+	jsr		@r0							/* Call it */
+	or		r0, r0						/* Delay slot */
 #endif
 
 	/* Then jump to NuttX entry */
 
-	mov.l   .Losstart,r0
-	jsr     @r0
-	or      r0, r0
+	mov.l	.Losstart,r0
+	jsr		@r0
+	or		r0, r0
 
 	/* Shouldn't get here */
 
@@ -471,16 +472,16 @@ __start0:
 	.align 2
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 .Leronly:
-	.long   _eronly
+	.long	_eronly
 .Lsdata:
-	.long   _sdata
+	.long	_sdata
 .Ledata:
-	.long   _edata
+	.long	_edata
 #endif
 .Lsbss:
-	.long   _sbss
+	.long	_sbss
 .Lebss:
-	.long   _ebss
+	.long	_ebss
 #ifdef USE_EARLYSERIALINIT
 .Learlyconsole:
 	.long	_up_earlyconsoleinit
@@ -492,13 +493,13 @@ __start0:
 	.long	_up_lowputc
 #endif
 .Lledinit:
-	.long	_board_led_initialize
+	.long	_board_autoled_initialize
 .Losstart:
-	.long   _os_start
+	.long	_os_start
 .Lsvect:
-	.long   _svect
+	.long	_svect
 .Lvectend:
-	.long   ((4*SH1_NCMN_VECTORS)-1)
+	.long	((4*SH1_NCMN_VECTORS)-1)
 	.size	__start, .-__start
 
 /*****************************************************************************
@@ -521,4 +522,3 @@ _g_idle_topstack:
 	.size	_g_idle_topstack, .-_g_idle_topstack
 
 	.end
-
