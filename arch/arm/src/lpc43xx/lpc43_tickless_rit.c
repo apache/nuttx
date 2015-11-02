@@ -33,6 +33,15 @@
  ****************************************************************************/
 
 /****************************************************************************
+ *
+ * only controlled resets to 0 are performed, no direct set to counter
+ * working counter region is from 0 to to_end
+ * all public functions are synchronized with disabled irqs
+ *
+ ****************************************************************************/
+
+
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -40,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <errno.h>
 #include <time.h>
 
@@ -53,10 +63,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LPC43_TL_NANOS_IN_SEC (1000000000)
-
 #ifndef min
-#  define min(a,b) a < b ? a : b
+#  define min(a,b) (a < b ? a : b)
 #endif
 
 /****************************************************************************
@@ -73,9 +81,9 @@ static uint64_t base = 0; /* time base */
 
 static uint64_t alarm_time = 0; /* alarmTime to set on next interrupt, used if not already armed */
 static bool call = false; /* true if callback should be called on next interrupt */
+static bool forced_int = false; /* true if interrupt was forced with mask, no reset */
 static bool armed = false; /* true if alarm is armed for next match */
-static bool in_isr = false; /* true if inside isr */
-static uint32_t synch = 0;
+static uint32_t synch = 0; /* synch all calls, recursion is possible */
 static irqstate_t g_flags;
 
 /****************************************************************************
@@ -178,13 +186,13 @@ static inline bool lpc43_tl_get_interrupt (void)
 
 static inline uint64_t lpc43_tl_ts2tick ( FAR const struct timespec *ts)
   {
-    return (  (uint64_t)(ts->tv_sec)*LPC43_CCLK + ( (uint64_t)(ts->tv_nsec)*LPC43_CCLK/LPC43_TL_NANOS_IN_SEC) );
+    return (  (uint64_t)(ts->tv_sec)*LPC43_CCLK + ( (uint64_t)(ts->tv_nsec)*LPC43_CCLK/NSEC_PER_SEC) );
   }
 
 static inline void lpc43_tl_tick2ts (uint64_t tick, FAR struct timespec *ts)
   {
     ts->tv_sec = tick/LPC43_CCLK;
-    ts->tv_nsec = (tick%LPC43_CCLK)*LPC43_TL_NANOS_IN_SEC/LPC43_CCLK;
+    ts->tv_nsec = (tick%LPC43_CCLK)*NSEC_PER_SEC/LPC43_CCLK;
   }
 
 /* logic functions */
@@ -209,21 +217,24 @@ static void lpc43_tl_sync_down (void) {
     }
 }
 
-/* force interrupt, no reset possible */
+/* assuming safe timer state, force interrupt, no reset possible */
 
 static void lpc43_tl_force_int (void)
 {
+  forced_int = true;
   lpc43_tl_set_reset_on_match (false);
   lpc43_tl_set_mask (UINT32_MAX);
+  lpc43_tl_set_compare(UINT32_MAX);
 }
 
-/* init all vars */
+/* init all vars, forced_int should not be cleared */
 
 static void lpc43_tl_init_timer_vars (void)
 {
   alarm_time = 0;
   call = false;
   armed = false;
+
 }
 
 /* calc reset_ticks and set compare to to_reset */
@@ -246,38 +257,42 @@ static void lpc43_tl_calibrate_init (void)
 
 }
 
-/* process current and set timer in default state */
+/* process current and set timer in default safe state */
 
 static void lpc43_tl_save_timer (void)
 {
-
-  /*process reset if any*/
-
-  uint32_t match = lpc43_tl_get_compare ();
-
-  /*move to end, no resets during processing*/
-
-  lpc43_tl_set_compare (UINT32_MAX);
-  lpc43_tl_set_mask (0);
-
-  if (lpc43_tl_get_interrupt ())
+  if (forced_int) /* special case of forced interrupt by mask*/
     {
-      if (lpc43_tl_get_reset_on_match ()) /*was reset ?*/
-	{
-	  base = base + match;
-	  lpc43_tl_set_reset_on_match (false);
-	}
-      lpc43_tl_clear_interrupt ();
+	forced_int = false;
+	lpc43_tl_set_compare (UINT32_MAX);
+	lpc43_tl_set_mask (0);
+	lpc43_tl_clear_interrupt ();
+   }
+  else
+   {
 
-      int i=0;
-      while( lpc43_tl_get_interrupt () ) {
-	  i++;
+    /*process reset if any*/
+
+    uint32_t match = lpc43_tl_get_compare ();
+
+    /*move to end, no resets during processing*/
+
+    lpc43_tl_set_compare (UINT32_MAX);
+    lpc43_tl_set_mask (0);
+
+    if (lpc43_tl_get_interrupt ())
+      {
+	if (lpc43_tl_get_reset_on_match ()) /*was reset ?*/
+	  {
+	    base = base + match;
+	    lpc43_tl_set_reset_on_match (false);
+	  }
+	lpc43_tl_clear_interrupt ();
       }
-
-    }
+   }
 }
 
-/* assuming safe state, true if set, false - time is in the past */
+/* assuming safe timer state, true if set, false - time is in the past */
 
 static bool lpc43_tl_set_safe_compare (uint32_t compare_to_set)
 {
@@ -309,12 +324,15 @@ static bool lpc43_tl_set_safe_compare (uint32_t compare_to_set)
     }
   else
     {
+      lpc43_tl_set_reset_on_match (false);
+      lpc43_tl_set_compare (UINT32_MAX);
+
       return false;
     }
 
 }
 
-/* set_safe_compare in loop */
+/* assuming safe timer state, set_safe_compare in loop */
 
 static void lpc43_tl_looped_forced_set_compare (void)
 {
@@ -329,7 +347,7 @@ static void lpc43_tl_looped_forced_set_compare (void)
     };
 }
 
-/* assuming safe state, true if set, false - time is in the past */
+/* assuming safe timer state, true if set, false - time is in the past */
 
 static bool lpc43_tl_set_calc_arm (uint32_t curr, uint32_t to_set, bool arm)
 {
@@ -363,7 +381,7 @@ static bool lpc43_tl_set_calc_arm (uint32_t curr, uint32_t to_set, bool arm)
   return set;
 }
 
-/* try to set compare for normal operation */
+/* assuming safe timer state, try to set compare for normal operation */
 
 static void lpc43_tl_set_default_compare (void)
 {
@@ -381,6 +399,7 @@ static void lpc43_tl_set_default_compare (void)
 
 }
 
+/* assuming safe timer state, used by isr: sets default compare , calls alarm */
 static inline void lpc43_tl_alarm (void)
 {
   lpc43_tl_init_timer_vars ();
@@ -390,7 +409,11 @@ static inline void lpc43_tl_alarm (void)
 
   up_timer_gettime (&ts);
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
   sched_alarm_expiration (&ts);
+#else
+  sched_timer_expiration();
+#endif
 }
 
 /* interrupt handler */
@@ -399,29 +422,21 @@ static int lpc43_tl_isr (int irq, FAR void *context)
   {
     lpc43_tl_sync_up();
 
-    in_isr = true;
+    lpc43_tl_save_timer();
 
     if (call)
       {
-	/* forced call case */
-	lpc43_tl_set_mask (false);
-
-	lpc43_tl_clear_interrupt ();
-
 	lpc43_tl_alarm();
-
       }
     else
       {
-	lpc43_tl_save_timer ();
-
 	if (armed)
 	  {
-	    lpc43_tl_alarm();
+	    lpc43_tl_alarm(); /* armed - call alarm */
 	  }
 	else
 	  {
-	    if (alarm_time > 0)
+	    if (alarm_time > 0) /* need to set alarm time */
 	      {
 		int64_t toSet = alarm_time - base;
 		uint32_t curr = lpc43_tl_get_counter ();
@@ -453,7 +468,6 @@ static int lpc43_tl_isr (int irq, FAR void *context)
 	  }
       }
 
-    in_isr = false;
     lpc43_tl_sync_down();
 
     return OK;
@@ -538,9 +552,11 @@ int up_alarm_cancel (FAR struct timespec *ts)
 
     /*no reg changes, only variables logic*/
 
-    up_timer_gettime (ts);
+    if ( ts != NULL ) {
+	up_timer_gettime (ts);
+    }
 
-    /* let default setup will be done in interrupt handler or setAlarm */
+    /* let default setup will be done in interrupt handler or up_alarm_start */
     lpc43_tl_init_timer_vars ();
 
     lpc43_tl_sync_down();
@@ -551,49 +567,40 @@ int up_alarm_start (FAR const struct timespec *ts)
   {
     lpc43_tl_sync_up();
 
+    lpc43_tl_save_timer ();
+
     lpc43_tl_init_timer_vars ();
 
-    if (in_isr) {
-	alarm_time = lpc43_tl_ts2tick (ts);
-    } else {
-      lpc43_tl_save_timer ();
+    uint64_t alarm_time = lpc43_tl_ts2tick (ts);
+    int64_t toSet = alarm_time - base;
+    uint32_t curr = lpc43_tl_get_counter ();
 
-      //----calc time to set
+    if (toSet > curr)
+      {
+	if (toSet > to_end) /* future set */
+	  {
+	    lpc43_tl_set_default_compare ();
+	  }
+	else
+	  {
+	    bool set = lpc43_tl_set_calc_arm (curr, toSet, true);
+	    if (!set)
+	      {
+		/* signal call, force interrupt handler */
 
-      uint64_t time = lpc43_tl_ts2tick (ts);
-      int64_t toSet = time - base;
-      uint32_t curr = lpc43_tl_get_counter ();
+		call = true;
+		lpc43_tl_force_int ();
+	      }
 
-      if (toSet > curr)
-	{
-	  alarm_time = time;
+	  }
+      }
+    else
+      {
+	/* signal call, force interrupt handler */
 
-	  if (toSet > to_end) /* future set */
-	    {
-	      lpc43_tl_set_default_compare ();
-	    }
-	  else
-	    {
-	      bool set = lpc43_tl_set_calc_arm (curr, toSet, true);
-	      if (!set)
-		{
-		  /* signal call, force interrupt handler */
-
-		  call = true;
-		  lpc43_tl_force_int ();
-		}
-
-	    }
-
-	}
-      else
-	{
-	  /* signal call, force interrupt handler */
-
-	  call = true;
-	  lpc43_tl_force_int ();
-	}
-    }
+	call = true;
+	lpc43_tl_force_int ();
+      }
 
     lpc43_tl_sync_down();
 
@@ -604,8 +611,29 @@ int up_alarm_start (FAR const struct timespec *ts)
 
 int up_timer_cancel(FAR struct timespec *ts)
   {
-    /*TODO*/
     lpc43_tl_sync_up();
+
+    if (ts == NULL)
+      {
+	up_alarm_cancel(ts);
+      }
+    else
+      {
+	uint64_t saved_alarm_time = alarm_time;
+	up_alarm_cancel(ts);
+	int64_t diff = saved_alarm_time - lpc43_tl_ts2tick(ts);
+
+	if ( diff > 0 )
+	  {
+	     lpc43_tl_tick2ts(diff, ts);
+	  }
+	else
+	  {
+	    ts->tv_sec = 0;
+	    ts->tv_nsec = 0;
+	  }
+
+      }
 
     lpc43_tl_sync_down();
     return OK;
@@ -613,8 +641,16 @@ int up_timer_cancel(FAR struct timespec *ts)
 
 int up_timer_start(FAR const struct timespec *ts)
   {
-    /*TODO*/
+
     lpc43_tl_sync_up();
+
+    struct timespec tmp_ts;
+    up_timer_gettime(&tmp_ts);
+
+    tmp_ts->tv_sec += ts->tv_sec;
+    tmp_ts->tv_nsec += ts->tv_nsec;
+
+    up_alarm_start(tmp_ts);
 
     lpc43_tl_sync_down();
     return OK;
