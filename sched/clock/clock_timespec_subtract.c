@@ -83,7 +83,7 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
     }
   else
     {
-      sec = ts1->tv_sec + ts2->tv_sec;
+      sec = ts1->tv_sec - ts2->tv_sec;
       if (ts1->tv_nsec < ts2->tv_nsec)
         {
           nsec = (ts1->tv_nsec + NSEC_PER_SEC) - ts2->tv_nsec;

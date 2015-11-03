@@ -11058,4 +11058,5 @@
 	* drivers/discrete/userled_lower.c:  Add a generic lower-half user LED
 	  driver that may be used by any board that supports the standard
 	  board user LED interfaces (2015-11-01).
-
+	* sched/clock: Fix error in clock_timespec_subtract().  Found by Lok
+	  (2015-11-03).
