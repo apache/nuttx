@@ -11060,3 +11060,13 @@
 	  board user LED interfaces (2015-11-01).
 	* sched/clock: Fix error in clock_timespec_subtract().  Found by Lok
 	  (2015-11-03).
+	* drivers/can.c and include/nuttx/can.h:  Fix a problem in the CAN
+	  upper-half driver that occurs only for CAN hardware that support a
+	  H/W FIFO of outgoing CAN messages.  In this case, there can be a
+	  hang condition if both the H/W and S/W FIFOs are both full.  In that
+	  case, there may be no event to awaken the upper half driver.  Add a
+	  new (conditional) CAN upper half interface called can_txready() that
+	  can be used by the lower half driver to avoid this hang condition
+	  (2015-11-03).
+	* arch/arm/src/samv7:  Add a call to can_txready() to the MCAN driver
+	  (2015-11-03).

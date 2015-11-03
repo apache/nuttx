@@ -554,7 +554,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
       DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail);
 
       /* Increment the FIFO queue index before sending (because dev_send()
-       * might call can_txdone().
+       * might call can_txdone()).
        */
 
       tmpndx = dev->cd_xmit.tx_queue;
@@ -634,7 +634,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
         {
           /* The transmit FIFO is full  -- was non-blocking mode selected? */
 
-          if (filep->f_oflags & O_NONBLOCK)
+          if ((filep->f_oflags & O_NONBLOCK) != 0)
             {
               if (nsent == 0)
                 {
@@ -1007,6 +1007,12 @@ int can_txdone(FAR struct can_dev_s *dev)
 
   if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
+      /* The tx_queue index is incremented each time can_xmit() queues
+       * the transmission.  When can_txdone() is called, the tx_queue
+       * index should always have been advanced beyond the current tx_head
+       * index.
+       */
+
       DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_queue);
 
       /* Remove the message at the head of the xmit FIFO */
@@ -1037,4 +1043,89 @@ int can_txdone(FAR struct can_dev_s *dev)
   return ret;
 }
 
+/****************************************************************************
+ * Name: can_txready
+ *
+ * Description:
+ *   Called from the CAN interrupt handler at the completion of a send
+ *   operation.  This interface is needed only for CAN hardware that
+ *   supports queing of outgoing messages in a H/W FIFO.
+ *
+ *   The CAN upper half driver also supports a queue of output messages in a
+ *   S/W FIFO.  Messages are added to that queue when when can_write() is
+ *   called and removed from the queue in can_txdone() when each TX message
+ *   is complete.
+ *
+ *   After each message is added to the S/W FIFO, the CAN upper half driver
+ *   will attempt to send the message by calling into the lower half driver.
+ *   That send will not be performed if the lower half driver is busy, i.e.,
+ *   if dev_txready() returns false.  In that case, the number of messages in
+ *   the S/W FIFO can grow.  If the S/W FIFO becomes full, then can_write()
+ *   will wait for space in the S/W FIFO.
+ *
+ *   If the CAN hardware does not support a H/W FIFO then busy means that
+ *   the hardware is actively sending the message and is guaranteed to
+ *   become non-busy (i.e, dev_txready()) when the send transfer completes
+ *   and can_txdone() is called.  So the call to can_txdone() means that the
+ *   transfer has completed and also that the hardware is ready to accept
+ *   another transfer.
+ *
+ *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
+ *   when the tranfer is complete, but rather when the transfer is queued in
+ *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
+ *   report false and the number of queued messages in the S/W FIFO will grow.
+ *
+ *   There is no mechanism in this case to inform the upper half driver when
+ *   the hardware is again available, when there is again space in the H/W
+ *   FIFO.  can_txdone() will not be called again.  If the S/W FIFO becomes
+ *   full, then the upper half driver will wait for space to become
+ *   available, but there is no event to awaken it and the driver will hang.
+ *
+ *   Enabling this feature adds support for the can_txready() interface.
+ *   This function is called from the lower half driver's CAN interrupt
+ *   handler each time a TX transfer completes.  This is a sure indication
+ *   that the H/W FIFO is no longer full.  can_txready() will then awaken
+ *   the can_write() logic and the hang condition is avoided.
+ *
+ * Parameters:
+ *   dev  - The specific CAN device
+ *
+ * Return:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXREADY
+int can_txready(FAR struct can_dev_s *dev)
+{
+  int ret = -ENOENT;
+
+  canllvdbg("xmit head: %d queue: %d tail: %d waiters: %d\n",
+            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
+            dev->cd_ntxwaiters);
+
+  /* Are there any threads waiting for space in the xmit FIFO? */
+
+  if (dev->cd_ntxwaiters > 0)
+    {
+      /* Verify that the xmit FIFO is not empty.
+       * REVISIT: This probably should be an assertion since we should only
+       * be waiting for space in the xmit FIFO if the xmit FIFO is full.
+       */
+
+      if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+        {
+          /* Send the next message in the FIFO, making space in the xmit FIFO */
+
+          (void)can_xmit(dev);
+        }
+
+      /* Inform one waiter that new xmit space is available */
+
+      ret = sem_post(&dev->cd_xmit.tx_sem);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_CAN_TXREADY */
 #endif /* CONFIG_CAN */
