@@ -128,6 +128,12 @@
 #  endif
 #endif
 
+/* General Configuration ****************************************************/
+
+#ifndef CONFIG_CAN_TXREADY
+#  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
+#endif
+
 /* MCAN0 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN0
@@ -3190,6 +3196,14 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           mcan_buffer_release(priv);
           handled = true;
+
+#ifdef CONFIG_CAN_TXREADY
+          /* Inform the upper half driver that we are again ready to accept
+           * data in mcan_send().
+           */
+
+          can_txready(dev);
+#endif
         }
       else if ((pending & priv->txints) != 0)
         {
