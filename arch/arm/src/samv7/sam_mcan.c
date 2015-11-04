@@ -3045,9 +3045,17 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   regval = *rxbuffer++;
   canregdbg("R0: %08x\n", regval);
 
-  hdr.ch_rtr    = 0;
   hdr.ch_error  = 0;
   hdr.ch_unused = 0;
+
+  if ((regval & BUFFER_R0_RTR) != 0)
+    {
+	  hdr.ch_rtr    = true;
+    }
+  else
+    {
+	  hdr.ch_rtr    = false;
+    }
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
@@ -3466,14 +3474,11 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   /* Global Filter Configuration:
    *
-   *   ANFS=0: Store all rejected extended frame in RX FIFO0
-   *   ANFE=0: Store all rejected extended frame in RX FIFO0
-   *   FFSE=1: Reject all remote frames with 11-bit standard IDs.
-   *   RRFE=1: Reject all remote frames with 29-bit extended IDs.
+   *   ANFS=0: Store all non matching standard frame in RX FIFO0
+   *   ANFE=0: Store all non matching extended frame in RX FIFO0
    */
 
-  regval = MCAN_GFC_RRFE | MCAN_GFC_RRFS | MCAN_GFC_ANFE_RX_FIFO0 |
-           MCAN_GFC_ANFS_RX_FIFO0;
+  regval = MCAN_GFC_ANFE_RX_FIFO0 | MCAN_GFC_ANFS_RX_FIFO0;
   mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
 
   /* Extended ID Filter AND mask  */
