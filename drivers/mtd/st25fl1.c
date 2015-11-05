@@ -319,6 +319,7 @@ struct st25fl1_dev_s
   uint8_t                sectorshift; /* Log2 of sector size */
   uint8_t                pageshift;   /* Log2 of page size */
   FAR uint8_t           *cmdbuf;      /* Allocated command buffer */
+  FAR uint8_t           *readbuf;     /* Allocated status read buffer */
 
 #ifdef CONFIG_ST25FL1_SECTOR512
   uint8_t                flags;       /* Buffered sector flags */
@@ -518,8 +519,8 @@ static int st25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 static uint8_t sf25fl1_read_status1(FAR struct st25fl1_dev_s *priv)
 {
   DEBUGVERIFY(st25fl1_command_read(priv->qspi, ST25FL1_READ_STATUS1,
-                                   (FAR void *)&priv->cmdbuf[0], 1));
-  return priv->cmdbuf[0];
+                                   (FAR void *)&priv->readbuf[0], 1));
+  return priv->readbuf[0];
 }
 
 /************************************************************************************
@@ -529,8 +530,8 @@ static uint8_t sf25fl1_read_status1(FAR struct st25fl1_dev_s *priv)
 static uint8_t sf25fl1_read_status2(FAR struct st25fl1_dev_s *priv)
 {
   DEBUGVERIFY(st25fl1_command_read(priv->qspi, ST25FL1_READ_STATUS2,
-                                   (FAR void *)&priv->cmdbuf[0], 1));
-  return priv->cmdbuf[0];
+                                   (FAR void *)&priv->readbuf[0], 1));
+  return priv->readbuf[0];
 }
 
 /************************************************************************************
@@ -540,8 +541,8 @@ static uint8_t sf25fl1_read_status2(FAR struct st25fl1_dev_s *priv)
 static uint8_t sf25fl1_read_status3(FAR struct st25fl1_dev_s *priv)
 {
   DEBUGVERIFY(st25fl1_command_read(priv->qspi, ST25FL1_READ_STATUS3,
-                                   (FAR void *)&priv->cmdbuf[0], 1));
-  return priv->cmdbuf[0];
+                                   (FAR void *)&priv->readbuf[0], 1));
+  return priv->readbuf[0];
 }
 
 /************************************************************************************
@@ -1450,13 +1451,22 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
       priv->mtd.ioctl  = st25fl1_ioctl;
       priv->qspi       = qspi;
 
-      /* Allocate a tiny buffer to support DMA command data */
+      /* Allocate a 4-byte buffer to support DMA command data */
 
       priv->cmdbuf = (FAR uint8_t *)QSPI_ALLOC(qspi, 4);
       if (priv->cmdbuf == NULL)
         {
           fdbg("ERROR Failed to allocate command buffer\n");
           goto errout_with_priv;
+        }
+
+      /* Allocate a one-byte buffer to support DMA status read data */
+
+      priv->readbuf = (FAR uint8_t *)QSPI_ALLOC(qspi, 1);
+      if (priv->readbuf == NULL)
+        {
+          fdbg("ERROR Failed to allocate read buffer\n");
+          goto errout_with_cmdbuf;
         }
 
       /* Identify the FLASH chip and get its capacity */
@@ -1467,7 +1477,7 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
           fdbg("ERROR Unrecognized QSPI device\n");
-          goto errout_with_cmdbuf;
+          goto errout_with_readbuf;
         }
 
       /* Enable quad mode */
@@ -1493,7 +1503,7 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
           /* Allocation failed! Discard all of that work we just did and return NULL */
 
           fdbg("ERROR: Sector allocation failed\n");
-          goto errout_with_cmdbuf;
+          goto errout_with_readbuf;
         }
 #endif
     }
@@ -1508,6 +1518,9 @@ FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi)
 
   fvdbg("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
+
+errout_with_readbuf:
+  QSPI_FREE(qspi, priv->readbuf);
 
 errout_with_cmdbuf:
   QSPI_FREE(qspi, priv->cmdbuf);
