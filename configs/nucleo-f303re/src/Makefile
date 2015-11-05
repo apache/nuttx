@@ -58,6 +58,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
+
 ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
