@@ -130,12 +130,14 @@
 
 /* The SAMV7x QSPI driver insists that transfers be performed in multiples
  * of 32-bits.
+ *
+ * REVISIT:  Why is this done?  This logic is here only because it is also
+ * done this way in the Atmel sample code.  But I have no idea why.
  */
 
 #define ALIGN_SHIFT       2
 #define ALIGN_MASK        3
 #define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define ALIGN_WORDS(n)    (((n)+ALIGN_MASK) >> ALIGN_SHIFT)
 #define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug *******************************************************************/
@@ -1205,8 +1207,12 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    *
    *  DLYBCT = 500 * QSPI_CLK / 1000000000 / 32
    *         = (500 * (QSPI_CLK / 1000000) / 1000 / 32
-   */
+   *
+   * REVISIT:  The following logic is conditioned out because for some
+   * inexplicable reason results in hangs -- Even though is it effectively
+   * a no-op for the default case where DLYBCT == 0.
 
+#if 0 /* REVISIT -- Causes a hang for some reason */
   regval  = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
   regval &= ~QSPI_MR_DLYBCT_MASK;
 
@@ -1216,6 +1222,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 #endif
 
   qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
+#endif
 
   /* Calculate the new actual frequency */
 
@@ -1461,17 +1468,23 @@ static int qspi_command(struct qspi_dev_s *dev,
       ifr |= QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_DATAEN |
              QSPI_IFR_NBDUM(0);
 
+      /* Read or write operation? */
+
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
-          /* Set write data operation */
+          /* Set write data operation
+           *
+           * Write the IFR to the hardware.  If the instructrion frame
+           * includes data, writing to the IFR does not trigger the
+           * instruction frame transfer.  Rather, the instruction frame
+           * is triggered by the first access to QSPI memory.
+           */
 
           ifr |= QSPI_IFR_TFRTYP_WRITE;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
-          /* Write the IFR to the hardware.  If the instructrion frame
-           * includes data, writing to the IFR does not trigger the
-           * instruction frame transfer.  Rather, the instruction frame
-           * is triggered by the first access to QSPI memory.
+          /* Read QSPI_IFR (dummy read) to synchronize APB and AHB
+           * accesses.
            */
 
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
@@ -1483,15 +1496,19 @@ static int qspi_command(struct qspi_dev_s *dev,
         }
       else
         {
-          /* Set read data operation */
+          /* Set read data operation
+           *
+           * Write the IFR to the hardware.  If the instructrion frame
+           * includes data, writing to the IFR does not trigger the
+           * instruction frame transfer.  Rather, the instruction frame
+           * is triggered by the first access to QSPI memory.
+           */
 
           ifr |= QSPI_IFR_TFRTYP_READ;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
-          /* Write the IFR to the hardware.  If the instructrion frame
-           * includes data, writing to the IFR does not trigger the
-           * instruction frame transfer.  Rather, the instruction frame
-           * is triggered by the first access to QSPI memory.
+          /* Read QSPI_IFR (dummy read) to synchronize APB and AHB
+           * accesses.
            */
 
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
@@ -1539,7 +1556,13 @@ static int qspi_command(struct qspi_dev_s *dev,
       /* If the insruction frame does not include data, writing to the IFR
        * tiggers sending of the instruction frame. Fall through to INSTRE
        * wait.
+       *
+       * REVISIT: Setting QSPI_CR_LASTXFER should not be necessary in this
+       * case.  However, I see hangs in the following wait for QSPI_SR_INSTRE
+       * if I do not do this.  No idea why.
        */
+
+      qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
     }
 
   /* When the command has been sent, Instruction End Status (INTRE) will be
@@ -1588,7 +1611,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: QSPI_ALLOC
+ * Name: qspi_alloc
  *
  * Description:
  *   Allocate a buffer suitable for DMA data transfer
