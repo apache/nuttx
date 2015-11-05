@@ -1211,6 +1211,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    * REVISIT:  The following logic is conditioned out because for some
    * inexplicable reason results in hangs -- Even though is it effectively
    * a no-op for the default case where DLYBCT == 0.
+   */
 
 #if 0 /* REVISIT -- Causes a hang for some reason */
   regval  = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
