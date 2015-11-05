@@ -208,8 +208,20 @@ int sam_bringup(void)
           SYSLOG("ERROR: st25fl1_initialize failed\n");
         }
 
+#ifdef HAVE_SMARTFS
+      /* Configure the device with no partition support */
+
+      ret = smart_initialize(0, mtd, NULL);
+      if (ret != OK)
+        {
+          SYSLOG("ERROR: Failed to initialize SmartFS: %d\n", ret);
+        }
+
+#else
       /* And now do what with the ST25FL1 MTD device? */
-#warning Missing Logic
+#  warning Missing Logic
+
+#endif
     }
 #endif
 

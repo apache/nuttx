@@ -62,6 +62,7 @@
 #define HAVE_MACADDR     1
 #define HAVE_MTDCONFIG   1
 #define HAVE_ST25FL1     1
+#define HAVE_SMARTFS     1
 #define HAVE_WM8904      1
 #define HAVE_AUDIO_NULL  1
 
@@ -186,10 +187,16 @@
 
 #ifndef CONFIG_MTD_ST25FL1
 #  undef HAVE_ST25FL1
+#  undef HAVE_SMARTFS
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI
 #  undef HAVE_ST25FL1
+#  undef HAVE_SMARTFS
+#endif
+
+#if !defined(CONFIG_MTD_SMART) || !defined(CONFIG_FS_SMARTFS)
+#  undef HAVE_SMARTFS
 #endif
 
 /* Audio */
