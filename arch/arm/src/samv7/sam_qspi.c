@@ -126,7 +126,7 @@
 
 /* QSPI memory synchronization */
 
-#define MEMORY_SYNC()     do { ARM_DSB();ARM_ISB(); } while (0)
+#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* The SAMV7x QSPI driver insists that transfers be performed in multiples
  * of 32-bits.
@@ -715,7 +715,7 @@ static int qspi_memory_enable(struct sam_qspidev_s *priv,
    *  QSPI_ICR_OPT(0)     No option
    */
 
-  regval =  QSPI_ICR_INST(meminfo->cmd) | QSPI_ICR_OPT(0);
+  regval = QSPI_ICR_INST(meminfo->cmd) | QSPI_ICR_OPT(0);
   qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
 
   /* Is memory data scrambled? */
@@ -1148,13 +1148,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
       return priv->actual;
     }
 
-  /* Configure QSPI to a frequency as close as possible to the requested frequency.
+  /* Configure QSPI to a frequency as close as possible to the requested
+   * frequency.
    *
    *   QSCK frequency = QSPI_CLK / SCBR, or SCBR = QSPI_CLK / frequency
    *
-   * Where SCBR can have the range 1 to 256 and register holds SCBR - 1.  NOTE
-   * that a "ceiling" type of calculation is performed.  'frequency' is treated
-   * as a not-to-exceed value.
+   * Where SCBR can have the range 1 to 256 and the SCR register field holds
+   * SCBR - 1.  NOTE that a "ceiling" type of calculation is performed.
+   * 'frequency' is treated as a not-to-exceed value.
    */
 
   scbr = (frequency + SAM_QSPI_CLOCK - 1) / frequency;
@@ -1344,7 +1345,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
       regval |= QSPI_MR_NBBITS(nbits);
       qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
 
-      qspivdbg("SCR%02x]=%08x\n", regval);
+      qspivdbg("MR=%08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1758,7 +1759,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
   struct sam_qspidev_s *priv;
   int ret;
 
-  /* The support SAM parts have only a single QSPI port */
+  /* The supported SAM parts have only a single QSPI port */
 
   qspivdbg("intf: %d\n", intf);
   DEBUGASSERT(intf >= 0 && intf < SAMV7_NQSPI);
