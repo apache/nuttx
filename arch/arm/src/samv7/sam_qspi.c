@@ -1203,13 +1203,8 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
    *
    *  DLYBCT = 500 * QSPI_CLK / 1000000000 / 32
    *         = (500 * (QSPI_CLK / 1000000) / 1000 / 32
-   *
-   * REVISIT:  The following logic is conditioned out because for some
-   * inexplicable reason results in hangs -- Even though is it effectively
-   * a no-op for the default case where DLYBCT == 0.
    */
 
-#if 0 /* REVISIT -- Causes a hang for some reason */
   regval  = qspi_getreg(priv, SAM_QSPI_MR_OFFSET);
   regval &= ~QSPI_MR_DLYBCT_MASK;
 
@@ -1219,7 +1214,6 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 #endif
 
   qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
-#endif
 
   /* Calculate the new actual frequency */
 
@@ -1547,13 +1541,7 @@ static int qspi_command(struct qspi_dev_s *dev,
       /* If the insruction frame does not include data, writing to the IFR
        * tiggers sending of the instruction frame. Fall through to INSTRE
        * wait.
-       *
-       * REVISIT: Setting QSPI_CR_LASTXFER should not be necessary in this
-       * case.  However, I see hangs in the following wait for QSPI_SR_INSTRE
-       * if I do not do this.  No idea why.
        */
-
-      qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
     }
 
   /* When the command has been sent, Instruction End Status (INTRE) will be
