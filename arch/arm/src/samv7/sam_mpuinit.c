@@ -98,10 +98,10 @@ void sam_mpu_initialize(void)
 #ifdef CONFIG_BUILD_PROTECTED
   /* Configure user flash and SRAM space */
 
-  mpu_userflash(USERSPACE->us_textstart,
-                USERSPACE->us_textend - USERSPACE->us_textstart);
+  mpu_user_flash(USERSPACE->us_textstart,
+                 USERSPACE->us_textend - USERSPACE->us_textstart);
 
-  mpu_userintsram(datastart, dataend - datastart);
+  mpu_user_intsram(datastart, dataend - datastart);
 #endif
 
   /* Then enable the MPU */
@@ -122,7 +122,7 @@ void sam_mpu_initialize(void)
 #ifdef CONFIG_BUILD_PROTECTED
 void sam_mpu_uheap(uintptr_t start, size_t size)
 {
-  mpu_userintsram(start, size);
+  mpu_user_intsram(start, size);
 }
 #endif
 

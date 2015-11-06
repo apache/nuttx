@@ -248,14 +248,14 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 }
 
 /****************************************************************************
- * Name: mpu_userflash
+ * Name: mpu_user_flash
  *
  * Description:
  *   Configure a region for user program flash
  *
  ****************************************************************************/
 
-static inline void mpu_userflash(uintptr_t base, size_t size)
+static inline void mpu_user_flash(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
@@ -286,14 +286,14 @@ static inline void mpu_userflash(uintptr_t base, size_t size)
 }
 
 /****************************************************************************
- * Name: mpu_privflash
+ * Name: mpu_priv_flash
  *
  * Description:
  *   Configure a region for privileged program flash
  *
  ****************************************************************************/
 
-static inline void mpu_privflash(uintptr_t base, size_t size)
+static inline void mpu_priv_flash(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
@@ -324,14 +324,14 @@ static inline void mpu_privflash(uintptr_t base, size_t size)
 }
 
 /****************************************************************************
- * Name: mpu_userintsram
+ * Name: mpu_user_intsram
  *
  * Description:
  *   Configure a region as user internal SRAM
  *
  ****************************************************************************/
 
-static inline void mpu_userintsram(uintptr_t base, size_t size)
+static inline void mpu_user_intsram(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
@@ -363,14 +363,14 @@ static inline void mpu_userintsram(uintptr_t base, size_t size)
 }
 
 /****************************************************************************
- * Name: mpu_privintsram
+ * Name: mpu_priv_intsram
  *
  * Description:
  *   Configure a region as privileged internal SRAM
  *
  ****************************************************************************/
 
-static inline void mpu_privintsram(uintptr_t base, size_t size)
+static inline void mpu_priv_intsram(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
@@ -402,14 +402,14 @@ static inline void mpu_privintsram(uintptr_t base, size_t size)
 }
 
 /****************************************************************************
- * Name: mpu_userextsram
+ * Name: mpu_user_extsram
  *
  * Description:
  *   Configure a region as user external SRAM
  *
  ****************************************************************************/
 
-static inline void mpu_userextsram(uintptr_t base, size_t size)
+static inline void mpu_user_extsram(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
@@ -442,14 +442,14 @@ static inline void mpu_userextsram(uintptr_t base, size_t size)
 }
 
 /****************************************************************************
- * Name: mpu_privextsram
+ * Name: mpu_priv_extsram
  *
  * Description:
  *   Configure a region as privileged external SRAM
  *
  ****************************************************************************/
 
-static inline void mpu_privextsram(uintptr_t base, size_t size)
+static inline void mpu_priv_extsram(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
