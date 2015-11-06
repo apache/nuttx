@@ -11070,3 +11070,5 @@
 	  (2015-11-03).
 	* arch/arm/src/samv7:  Add a call to can_txready() to the MCAN driver
 	  (2015-11-03).
+	* arch/arm/src/samv7:  Add MPU and protected build support (2015-11-06).
+
