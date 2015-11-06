@@ -248,6 +248,48 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 }
 
 /****************************************************************************
+ * Name: mpu_priv_stronglyordered
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARMV7M_HAVE_ICACHE) || defined(CONFIG_ARMV7M_DCACHE)
+static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
+{
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region | MPU_RBAR_VALID, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionceil(size);
+  subregions = mpu_subregion(base, size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region  */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size    */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions    */
+                                                          /* Not Cacheable  */
+                                                          /* Not Bufferable */
+           MPU_RASR_S                                   | /* Shareable      */
+           MPU_RASR_AP_RWNO;                              /* P:RW   U:None  */
+  putreg32(regval, MPU_RASR);
+}
+#endif
+
+/****************************************************************************
  * Name: mpu_user_flash
  *
  * Description:
