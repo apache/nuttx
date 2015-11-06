@@ -287,6 +287,8 @@ config SAMV7_PWM1
 config SAMV7_QSPI
 	bool "Quad SPI (QSPI)"
 	default n
+	select ARCH_USE_MPU
+	select ARMV7M_MPU
 
 config SAMV7_RTC
 	bool "Real Time Clock (RTC)"

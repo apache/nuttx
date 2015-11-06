@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_mpuinit.h
+ * arch/arm/src/samv7/sam_userspace.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,74 +33,70 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdint.h>
+#include <assert.h>
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+#include <nuttx/userspace.h>
 
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_mpu_initialize
- *
- * Description:
- *   Configure the MPU to permit user-space access to only unrestricted SAMV7
- *   resources.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARMV7M_MPU
-void sam_mpu_initialize(void);
-#else
-#  define sam_mpu_initialize()
-#endif
-
-/****************************************************************************
- * Name: sam_mpu_uheap
- *
- * Description:
- *  Map the user heap region.
- *
- ****************************************************************************/
+#include "sam_mpuinit.h"
+#include "sam_userspace.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
-void sam_mpu_uheap(uintptr_t start, size_t size);
-#else
-#  define sam_mpu_uheap(start,size)
-#endif
 
-#undef EXTERN
-#if defined(__cplusplus)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_userspace
+ *
+ * Description:
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
+ *
+ ****************************************************************************/
+
+void sam_userspace(void)
+{
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
+
+  /* Clear all of user-space .bss */
+
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+
+  dest = (uint8_t *)USERSPACE->us_bssstart;
+  end  = (uint8_t *)USERSPACE->us_bssend;
+
+  while (dest != end)
+    {
+      *dest++ = 0;
+    }
+
+  /* Initialize all of user-space .data */
+
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t *)USERSPACE->us_datasource;
+  dest = (uint8_t *)USERSPACE->us_datastart;
+  end  = (uint8_t *)USERSPACE->us_dataend;
+
+  while (dest != end)
+    {
+      *dest++ = *src++;
+    }
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H */
+#endif /* CONFIG_BUILD_PROTECTED */

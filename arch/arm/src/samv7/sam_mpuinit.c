@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_mpuinit.h
+ * arch/arm/src/common/sam_mpuinit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,74 +33,98 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
+#include <assert.h>
+
+#include <nuttx/userspace.h>
+
+#include "mpu.h"
+#include "sam_mpuinit.h"
+
+#ifdef CONFIG_ARMV7M_MPU
 
 /****************************************************************************
- * Inline Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#ifndef MAX
+#  define MAX(a,b) a > b ? a : b
+#endif
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#ifndef MIN
+#  define MIN(a,b) a < b ? a : b
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: sam_mpu_initialize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only unrestricted SAMV7
+ *   Configure the MPU to permit user-space access to only restricted SAM3/4
  *   resources.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_MPU
-void sam_mpu_initialize(void);
-#else
-#  define sam_mpu_initialize()
+void sam_mpu_initialize(void)
+{
+#ifdef CONFIG_BUILD_PROTECTED
+  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
+
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
+              dataend >= datastart);
 #endif
+
+  /* Show MPU information */
+
+  mpu_showtype();
+
+#ifdef CONFIG_BUILD_PROTECTED
+  /* Configure user flash and SRAM space */
+
+  mpu_userflash(USERSPACE->us_textstart,
+                USERSPACE->us_textend - USERSPACE->us_textstart);
+
+  mpu_userintsram(datastart, dataend - datastart);
+#endif
+
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
+}
 
 /****************************************************************************
  * Name: sam_mpu_uheap
  *
  * Description:
- *  Map the user heap region.
+ *  Map the user-heap region.
+ *
+ *  This logic may need an extension to handle external SDRAM).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-void sam_mpu_uheap(uintptr_t start, size_t size);
-#else
-#  define sam_mpu_uheap(start,size)
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+void sam_mpu_uheap(uintptr_t start, size_t size)
+{
+  mpu_userintsram(start, size);
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H */
+#endif /* CONFIG_ARMV7M_MPU */
+

@@ -378,6 +378,7 @@ void __start(void)
   up_earlyserialinit();
 #endif
 
+#ifdef CONFIG_ARMV7M_MPU
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
@@ -386,6 +387,14 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   sam_userspace();
+#endif
+
+  /* Configure the MPU to permit user-space access to its FLASH and RAM (for
+   * CONFIG_BUILD_PROTECTED) or to manage cache properties (for
+   * CONFIG_SAMV7_QSPI).
+   */
+
+  sam_mpu_initialize();
 #endif
 
   /* Then start NuttX */
