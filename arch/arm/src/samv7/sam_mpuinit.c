@@ -44,6 +44,9 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
+#include "cache.h"
+#include "chip/sam_memorymap.h"
+
 #include "sam_mpuinit.h"
 
 #ifdef CONFIG_ARMV7M_MPU
@@ -84,22 +87,39 @@
 void sam_mpu_initialize(void)
 {
 #ifdef CONFIG_BUILD_PROTECTED
-  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
-  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
-
-  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
-              dataend >= datastart);
+  uintptr_t datastart;
+  uintptr_t dataend;
 #endif
 
   /* Show MPU information */
 
   mpu_showtype();
 
+#ifdef CONFIG_ARMV7M_DCACHE
+  /* Memory barrier */
+
+  ARM_DMB();
+
+#ifdef CONFIG_SAMV7_QSPI
+  /* Make QSPI memory region strongly ordered */
+
+  mpu_priv_stronglyordered(SAM_QSPIMEM_BASE, SAM_QSPIMEM_SIZE);
+
+#endif
+#endif
+
 #ifdef CONFIG_BUILD_PROTECTED
   /* Configure user flash and SRAM space */
 
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart);
+
   mpu_user_flash(USERSPACE->us_textstart,
                  USERSPACE->us_textend - USERSPACE->us_textstart);
+
+  datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
+
+  DEBUGASSERT(dataend >= datastart);
 
   mpu_user_intsram(datastart, dataend - datastart);
 #endif

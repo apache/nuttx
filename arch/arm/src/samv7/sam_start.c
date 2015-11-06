@@ -55,6 +55,7 @@
 #endif
 
 #include "sam_clockconfig.h"
+#include "sam_mpuinit.h"
 #include "sam_userspace.h"
 #include "sam_start.h"
 
