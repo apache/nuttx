@@ -990,11 +990,6 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                              struct qspi_meminfo_s *meminfo)
 {
   uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
-  size_t buflen;
-
-  /* Get the length as an even multiple of 32-bit words. */
-
-  buflen = ALIGN_UP(meminfo->buflen);
 
   /* Enable the memory transfer */
 
@@ -1004,13 +999,13 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      qspi_memcpy((uint8_t *)qspimem,
-                  (const uint8_t *)meminfo->buffer, buflen);
+      qspi_memcpy((uint8_t *)qspimem, (const uint8_t *)meminfo->buffer,
+                  meminfo->buflen);
     }
   else
     {
-      qspi_memcpy((uint8_t *)meminfo->buffer,
-                  (const uint8_t *)qspimem, buflen);
+      qspi_memcpy((uint8_t *)meminfo->buffer, (const uint8_t *)qspimem,
+                  meminfo->buflen);
     }
 
   MEMORY_SYNC();
@@ -1443,14 +1438,8 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      uint16_t buflen;
-
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
       DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
-
-      /* Get the length as an even multiple of 32-bit words. */
-
-      buflen = ALIGN_UP(cmdinfo->buflen);
 
       /* Write Instruction Frame Register:
        *
@@ -1494,7 +1483,7 @@ static int qspi_command(struct qspi_dev_s *dev,
           /* Copy the data to write to QSPI_RAM */
 
           qspi_memcpy((uint8_t *)SAM_QSPIMEM_BASE,
-                      (const uint8_t *)cmdinfo->buffer, buflen);
+                      (const uint8_t *)cmdinfo->buffer, cmdinfo->buflen);
         }
       else
         {
@@ -1518,7 +1507,7 @@ static int qspi_command(struct qspi_dev_s *dev,
           /* Copy the data from QSPI memory into the user buffer */
 
           qspi_memcpy((uint8_t *)cmdinfo->buffer,
-                      (const uint8_t *)SAM_QSPIMEM_BASE, buflen);
+                      (const uint8_t *)SAM_QSPIMEM_BASE, cmdinfo->buflen);
         }
 
       MEMORY_SYNC();
