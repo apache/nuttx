@@ -129,10 +129,7 @@
 #define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* The SAMV7x QSPI driver insists that transfers be performed in multiples
- * of 32-bits.
- *
- * REVISIT:  Why is this done?  This logic is here only because it is also
- * done this way in the Atmel sample code.  But I have no idea why.
+ * of 32-bits.  The alignment requirement only applies to RX DMA data.
  */
 
 #define ALIGN_SHIFT       2
