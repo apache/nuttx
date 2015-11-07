@@ -395,18 +395,18 @@ config M25P_SUBSECTOR_ERASE
 
 endif
 
-config MTD_ST25FL1
-	bool "QuadSPI-based ST25FL1 FLASH"
+config MTD_S25FL1
+	bool "QuadSPI-based S25FL1 FLASH"
 	default n
 
-if MTD_ST25FL1
+if MTD_S25FL1
 
-config ST25FL1_QSPIMODE
-	int "ST25FL1 QuadSPI Mode"
+config S25FL1_QSPIMODE
+	int "S25FL1 QuadSPI Mode"
 	default 0
 
-config ST25FL1_QSPI_FREQUENCY
-	int "ST25FL1 QuadSPI Frequency"
+config S25FL1_QSPI_FREQUENCY
+	int "S25FL1 QuadSPI Frequency"
 	default 108000000
 	---help---
 		Per data sheet:
@@ -430,20 +430,20 @@ config ST25FL1_QSPI_FREQUENCY
 
 		In this implementation, only "Quad" reads are performed.
 
-config ST25FL1_SECTOR512
+config S25FL1_SECTOR512
 	bool "Simulate 512 byte Erase Blocks"
 	default n
 
-config ST25FL1_SCRAMBLE
+config S25FL1_SCRAMBLE
 	bool "Scramble data"
 	default n
 	---help---
 		Requires drviver support for data scrambling/descrambling.
 
-config ST25FL1_SCRAMBLE_KEY
+config S25FL1_SCRAMBLE_KEY
 	hex "Scramble key"
 	default 0x0baddead
-	depends on ST25FL1_SCRAMBLE
+	depends on S25FL1_SCRAMBLE
 
 endif
 

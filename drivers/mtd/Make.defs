@@ -92,8 +92,8 @@ ifeq ($(CONFIG_MTD_AT25),y)
 CSRCS += at25.c
 endif
 
-ifeq ($(CONFIG_MTD_ST25FL1),y)
-CSRCS += st25fl1.c
+ifeq ($(CONFIG_MTD_S25FL1),y)
+CSRCS += s25fl1.c
 endif
 
 ifeq ($(CONFIG_MTD_SMART),y)

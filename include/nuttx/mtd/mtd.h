@@ -475,7 +475,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void);
 FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
- * Name: st25fl1_initialize
+ * Name: s25fl1_initialize
  *
  * Description:
  *   Create an initialize MTD device instance for the QuadSPI-based ST24FL1
@@ -484,7 +484,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 struct qspi_dev_s; /* Forward reference */
-FAR struct mtd_dev_s *st25fl1_initialize(FAR struct qspi_dev_s *qspi);
+FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi);
 
 /****************************************************************************
  * Name: up_flashinitialize
