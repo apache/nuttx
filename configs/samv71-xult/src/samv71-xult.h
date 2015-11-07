@@ -61,7 +61,7 @@
 #define HAVE_NETWORK     1
 #define HAVE_MACADDR     1
 #define HAVE_MTDCONFIG   1
-#define HAVE_ST25FL1     1
+#define HAVE_S25FL1      1
 #define HAVE_SMARTFS     1
 #define HAVE_WM8904      1
 #define HAVE_AUDIO_NULL  1
@@ -183,15 +183,15 @@
 #  undef HAVE_MTDCONFIG
 #endif
 
-/* ST25FL1 QuadSPI FLASH */
+/* S25FL1 QuadSPI FLASH */
 
-#ifndef CONFIG_MTD_ST25FL1
-#  undef HAVE_ST25FL1
+#ifndef CONFIG_MTD_S25FL1
+#  undef HAVE_S25FL1
 #  undef HAVE_SMARTFS
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI
-#  undef HAVE_ST25FL1
+#  undef HAVE_S25FL1
 #  undef HAVE_SMARTFS
 #endif
 

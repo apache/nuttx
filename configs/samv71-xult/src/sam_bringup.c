@@ -55,7 +55,7 @@
 
 #include "samv71-xult.h"
 
-#ifdef HAVE_ST25FL1
+#ifdef HAVE_S25FL1
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
 #include "sam_qspi.h"
@@ -95,7 +95,7 @@
 
 int sam_bringup(void)
 {
-#ifdef HAVE_ST25FL1
+#ifdef HAVE_S25FL1
   FAR struct qspi_dev_s *qspi;
   FAR struct mtd_dev_s *mtd;
 #endif
@@ -188,7 +188,7 @@ int sam_bringup(void)
     }
 #endif
 
-#ifdef HAVE_ST25FL1
+#ifdef HAVE_S25FL1
   /* Create an instance of the SAMV71 QSPI device driver */
 
   qspi = sam_qspi_initialize(0);
@@ -199,13 +199,13 @@ int sam_bringup(void)
   else
     {
       /* Use the QSPI device instance to initialize the
-       * ST25FL1 device.
+       * S25FL1 device.
        */
 
-      mtd = st25fl1_initialize(qspi);
+      mtd = s25fl1_initialize(qspi);
       if (!mtd)
         {
-          SYSLOG("ERROR: st25fl1_initialize failed\n");
+          SYSLOG("ERROR: s25fl1_initialize failed\n");
         }
 
 #ifdef HAVE_SMARTFS
@@ -218,7 +218,7 @@ int sam_bringup(void)
         }
 
 #else
-      /* And now do what with the ST25FL1 MTD device? */
+      /* And now do what with the S25FL1 MTD device? */
 #  warning Missing Logic
 
 #endif
