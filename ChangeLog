@@ -10881,7 +10881,7 @@
 	  device (2015-08-24).
 	* networking:  Correct return value from psock_tcp_accept().  From
 	  SaeHie Park (2015-08-25).
-	* drivers/mtd/st25fl1.c: Add a driver for ST25L1*K QuadSPI parts
+	* drivers/mtd/s25fl1.c: Add a driver for ST25L1*K QuadSPI parts
 	  (2015-08-25).
 	* include/nuttx/spi/qspi.h:  Develop a new interface for QSPI, at
 	  least the way that QSPI is implemented on the SAMV71.  Originally
@@ -11071,4 +11071,6 @@
 	* arch/arm/src/samv7:  Add a call to can_txready() to the MCAN driver
 	  (2015-11-03).
 	* arch/arm/src/samv7:  Add MPU and protected build support (2015-11-06).
-
+	* arch/arm/src/samv7:  The QSPI FLASH driver is now functional.  This
+	  driver operates in the memory-mapped, Serial Memory Mode (SMM)
+	  (2015-11-07).

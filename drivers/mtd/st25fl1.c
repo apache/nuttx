@@ -1289,7 +1289,7 @@ static ssize_t st25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   st25fl1_unlock(priv->qspi);
 
-  return ret;
+  return ret < 0 ? ret : nblocks;
 }
 
 /************************************************************************************
