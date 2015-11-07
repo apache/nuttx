@@ -146,6 +146,10 @@ for additional issues specific to a particular configuration.
      operated in the memory mapped Serial Memory Mode (SMM).  See the
      "S25FL116K QuadSPI FLASH" section below for futher information.
 
+     There are still issues with writing correctly to the S25FL1 FLASH part.
+     It is not clear as of this writing whether this is an issue with the
+     QSPI driver or with the higher level S25FL1 driver (2015-11-07).
+
 Serial Console
 ==============
 
