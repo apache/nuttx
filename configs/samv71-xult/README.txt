@@ -17,6 +17,7 @@ Contents
   - Automounter
   - LEDs and Buttons
   - AT24MAC402 Serial EEPROM
+  - S25FL116K QuadSPI FLASH
   - Networking
   - USBHS Device Controller Driver
   - Audio Interface
@@ -102,6 +103,9 @@ for additional issues specific to a particular configuration.
        optimization issue (it could also be a timing issue or a need
        for some additional volatile qualifiers).
 
+       Update: I have switch toolchains and no longer see this issue.  This
+       is probably not a driver-related issue.
+
      - I- and D-Caches are enabled but the D-Cache must be enabled in
        write-through mode.  This is to work around issues with the RX and TX
        descriptors with are 8-bytes in size.  But the D-Cache cache line size
@@ -137,6 +141,10 @@ for additional issues specific to a particular configuration.
   8. An SPI slave driver as added on 2015-08-09 but has not been verified
      as of this writing. See discussion in include/nuttx/spi/slave.h and
      in the section entitle "SPI Slave" below.
+
+  9. A QSPI FLASH driver was added and verifed on 2015-11-07.  This driver
+     operated in the memory mapped Serial Memory Mode (SMM).  See the
+     "S25FL116K QuadSPI FLASH" section below for futher information.
 
 Serial Console
 ==============
@@ -464,6 +472,64 @@ configuration data:
   Device drivers -> Memory Technology Devices
 
 The configuration data device will appear at /dev/config.
+
+S25FL116K QuadSPI FLASH
+====================
+
+A QSPI FLASH driver was added and verifed on 2015-11-07.  This driver
+operated in the memory mapped Serial Memory Mode (SMM).  These
+configuration options were enabled to test QSPI:
+
+  CONFIG_SAMV7_QSPI=y
+  CONFIG_SAMV7_QSPI_DLYBCT=0
+  CONFIG_SAMV7_QSPI_DLYBS=0
+  CONFIG_SAMV7_QSPI_DMA=y
+  CONFIG_SAMV7_QSPI_DMATHRESHOLD=8
+
+The MPU must be enabled to use QSPI:
+
+  CONFIG_ARCH_USE_MPU=y
+  CONFIG_ARMV7M_MPU=y
+  CONFIG_ARMV7M_MPU_NREGIONS=16
+
+And there options enable the driver for the on-board S25FL116K QuadSPI
+FLASH:
+
+  CONFIG_MTD_S25FL1=y
+  CONFIG_S25FL1_QSPIMODE=0
+  CONFIG_S25FL1_QSPI_FREQUENCY=108000000
+
+I tested using the SmartFS FLASH file system.  This additional options
+enable the SmartFS:
+
+  CONFIG_FS_SMARTFS=y
+  CONFIG_SMARTFS_ERASEDSTATE=0xff
+  CONFIG_SMARTFS_MAXNAMLEN=16
+
+  CONFIG_MTD_SMART=y
+  CONFIG_MTD_SMART_SECTOR_SIZE=512
+  CONFIG_MTD_SMART_WEAR_LEVEL=y
+
+Upon boot, the on-board S25FL116k flash device will appears as:
+
+  /dev/smart0
+
+Before SmartFS can be used, it must be formatted:
+
+  nsh> mksmartfs /dev/smart0
+
+Then it can be mounted using the following NSH command:
+
+  nsh> mount -t smartfs /dev/smart0 /mnt/qspi
+
+The first time that you boot the system, there will be a long delay
+before the nsh> prompt.  That long delay is SmartFS scanning the
+large FLASH part.  Likewise, the when you format the SmartFS, you
+also expect a significant delay.
+
+A better application design would perform SmartFS initialization
+asynchronously on a separate thread to avoid the delay at the user
+interface.
 
 Networking
 ==========
