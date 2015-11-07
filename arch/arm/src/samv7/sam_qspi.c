@@ -858,7 +858,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
       /* Configure RX DMA */
 
       dmaflags |= ((uint32_t)priv->rxintf << DMACH_FLAG_PERIPHPID_SHIFT) |
-                  DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_MEMWIDTH_16BITS;
+                  DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_MEMWIDTH_32BITS;
       sam_dmaconfig(priv->dmach, dmaflags);
 
       /* Setup the RX DMA (memory-to-peripheral) */
