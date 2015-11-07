@@ -62,6 +62,9 @@
  *   Normally this just means initializing the user space .data and .bss
  *   segments.
  *
+ * Assumptions:
+ *   The D-Cache has not yet been enabled.
+ *
  ****************************************************************************/
 
 void sam_userspace(void)

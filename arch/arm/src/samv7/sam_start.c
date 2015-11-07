@@ -367,18 +367,6 @@ void __start(void)
 
   sam_boardinitialize();
 
-  /* Enable I- and D-Caches */
-
-  arch_dcache_writethrough();
-  arch_enable_icache();
-  arch_enable_dcache();
-
-  /* Perform early serial initialization */
-
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-
 #ifdef CONFIG_ARMV7M_MPU
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -396,6 +384,18 @@ void __start(void)
    */
 
   sam_mpu_initialize();
+#endif
+
+  /* Enable I- and D-Caches */
+
+  arch_dcache_writethrough();
+  arch_enable_icache();
+  arch_enable_dcache();
+
+  /* Perform early serial initialization */
+
+#ifdef USE_EARLYSERIALINIT
+  up_earlyserialinit();
 #endif
 
   /* Then start NuttX */
