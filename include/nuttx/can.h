@@ -495,12 +495,12 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev);
  * Description:
  *   Called from the CAN interrupt handler when new read data is available
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The specific CAN device
  *   hdr  - The 16-bit CAN header
  *   data - An array contain the CAN data.
  *
- * Return:
+ * Returned Value:
  *   OK on success; a negated errno on failure.
  *
  ************************************************************************************/
@@ -508,19 +508,69 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev);
 int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
                 FAR uint8_t *data);
 
-/************************************************************************************
+/****************************************************************************
  * Name: can_txdone
  *
  * Description:
- *   Called from the CAN interrupt handler at the completion of a send operation.
+ *   Called when the hardware has processed the outgoing TX message.  This
+ *   normally means that the CAN messages was sent out on the wire.  But
+ *   if the CAN hardware supports a H/W TX FIFO, then this call may mean
+ *   only that the CAN message has been added to the H/W FIFO.  In either
+ *   case, the upper-half CAN driver can remove the outgoing message from
+ *   the S/W FIFO and discard it.
  *
- * Parameters:
+ *   This function may be called in different contexts, depending upon the
+ *   nature of the underlying CAN hardware.
+ *
+ *   1. No H/W TX FIFO (CONFIG_CAN_TXREADY not defined)
+ *
+ *      This function is only called from the CAN interrupt handler at the
+ *      completion of a send operation.
+ *
+ *        can_write() -> can_xmit() -> dev_send()
+ *        CAN interrupt -> can_txdone()
+ *
+ *      If the CAN hardware is busy, then the call to dev_send() will
+ *      fail, the S/W TX FIFO will accumulate outgoing messages, and the
+ *      thread calling can_write() may eventually block waiting for space in
+ *      the S/W TX FIFO.
+ *
+ *      When the CAN hardware completes the transfer and processes the
+ *      CAN interrupt, the call to can_txdone() will make space in the S/W
+ *      TX FIFO and will awaken the waiting can_write() thread.
+ *
+ *   2a. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO not full
+ *
+ *      This function will be back from can_xmit immediately when a new CAN
+ *      message is added to H/W TX FIFO:
+ *
+ *        can_write() -> can_xmit() -> dev_send() -> can_txdone()
+ *
+ *      When the H/W TX FIFO becomes full, dev_send() will fail and
+ *      can_txdone() will not be called.  In this case the S/W TX FIFO will
+ *      accumulate outgoing messages, and the thread calling can_write() may
+ *      eventually block waiting for space in the S/W TX FIFO.
+ *
+ *   2b. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO full
+ *
+ *      In this case, the thread calling can_write() is blocked waiting for
+ *      space in the S/W TX FIFO.
+ *
+ *        CAN interrupt -> can_txready() -> can_xmit() -> dev_send() -> can_txdone()
+ *
+ *      The call dev_send() should not fail in this case and the subsequent
+ *      call to can_txdone() will make space in the S/W TX FIFO and will
+ *      awaken the waiting thread.
+ *
+ * Input Parameters:
  *   dev  - The specific CAN device
+ *   hdr  - The 16-bit CAN header
+ *   data - An array contain the CAN data.
  *
- * Return:
+ * Returned Value:
  *   OK on success; a negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int can_txdone(FAR struct can_dev_s *dev);
 
@@ -566,10 +616,10 @@ int can_txdone(FAR struct can_dev_s *dev);
  *   that the H/W FIFO is no longer full.  can_txready() will then awaken
  *   the can_write() logic and the hang condition is avoided.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The specific CAN device
  *
- * Return:
+ * Returned Value:
  *   OK on success; a negated errno on failure.
  *
  ************************************************************************************/
