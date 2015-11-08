@@ -1109,18 +1109,27 @@ int can_txready(FAR struct can_dev_s *dev)
   if (dev->cd_ntxwaiters > 0)
     {
       /* Verify that the xmit FIFO is not empty.
+       *
        * REVISIT: This probably should be an assertion since we should only
        * be waiting for space in the xmit FIFO if the xmit FIFO is full.
        */
 
       if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
         {
-          /* Send the next message in the FIFO, making space in the xmit FIFO */
+          /* Send the next message in the S/W FIFO.  In the case where the
+           * H/W TX FIFO is not empty, this should add one more CAN message
+           * to the H/W TX FIFO and can_txdone() should be called, making
+           * space in the S/W FIFO
+           */
 
           (void)can_xmit(dev);
         }
 
-      /* Inform one waiter that new xmit space is available */
+      /* Inform one waiter that new xmit space is available in the S/W FIFO.
+       * NOTE that is can_txdone() is, indeed, called twice that the tx_sem
+       * will also be posted twice.  This is a little inefficient, but not
+       * harmful.
+       */
 
       ret = sem_post(&dev->cd_xmit.tx_sem);
     }
