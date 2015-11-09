@@ -50,6 +50,7 @@
 #  include <apps/usbmonitor.h>
 #endif
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/binfmt/elf.h>
 
@@ -98,6 +99,10 @@ int sam_bringup(void)
 #ifdef HAVE_S25FL1
   FAR struct qspi_dev_s *qspi;
   FAR struct mtd_dev_s *mtd;
+#ifndef HAVE_SMARTFS
+  char blockdev[18];
+  char chardev[12];
+#endif
 #endif
   int ret;
 
@@ -211,16 +216,35 @@ int sam_bringup(void)
 #ifdef HAVE_SMARTFS
       /* Configure the device with no partition support */
 
-      ret = smart_initialize(0, mtd, NULL);
+      ret = smart_initialize(S25FL1_SMART_MINOR, mtd, NULL);
       if (ret != OK)
         {
           SYSLOG("ERROR: Failed to initialize SmartFS: %d\n", ret);
         }
 
 #else
-      /* And now do what with the S25FL1 MTD device? */
-#  warning Missing Logic
+      /* Use the FTL layer to wrap the MTD driver as a block driver */
 
+      ret = ftl_initialize(S25FL1_MTD_MINOR, mtd);
+      if (ret < 0)
+        {
+          SYSLOG("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+      /* Use the minor number to create device paths */
+
+      snprintf(blockdev, 18, "/dev/mtdblock%d", S25FL1_MTD_MINOR);
+      snprintf(chardev, 12, "/dev/mtd%d", S25FL1_MTD_MINOR);
+
+      /* Now create a character device on the block device */
+
+      ret = bchdev_register(blockdev, chardev, false);
+      if (ret < 0)
+        {
+          SYSLOG("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+          return ret;
+        }
 #endif
     }
 #endif

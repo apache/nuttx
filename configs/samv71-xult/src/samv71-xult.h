@@ -199,6 +199,19 @@
 #  undef HAVE_SMARTFS
 #endif
 
+/* If both the S25FL1 FLASH and SmartFS, then this is the minor device
+ * number of the Smart block driver (/dev/smartN)
+ */
+
+#define S25FL1_SMART_MINOR 0
+
+/* If the S25FL1 FLASH is enabled but not SmartFS, then the S25FL will be
+ * wrapped as a character device.  This is the minor number of both the
+ * block device (/dev/mtdblockN) and the character device (/dev/mtdN).
+ */
+
+#define S25FL1_MTD_MINOR 0
+
 /* Audio */
 /* PCM/WM8904 driver */
 
