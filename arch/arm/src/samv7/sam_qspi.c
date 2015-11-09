@@ -1370,14 +1370,14 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      qspivdbg("  address/length: %08lx %d\n",
+      qspivdbg("  address/length: %08lx/%d\n",
               (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       qspivdbg("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
-      qspivdbg("    buffer/length: %p %d\n", cmdinfo->buffer, cmdinfo->buflen);
+      qspivdbg("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
@@ -1571,6 +1571,14 @@ static int qspi_memory(struct qspi_dev_s *dev,
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
 
   DEBUGASSERT(priv != NULL && meminfo != NULL);
+
+  qspivdbg("Transfer:\n");
+  qspivdbg("  flags: %02x\n", meminfo->flags);
+  qspivdbg("  cmd: %04x\n", meminfo->cmd);
+  qspivdbg("  address/length: %08lx/%d\n",
+          (unsigned long)meminfo->addr, meminfo->addrlen);
+  qspivdbg("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
+  qspivdbg("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
   /* Can we perform DMA?  Should we perform DMA? */
