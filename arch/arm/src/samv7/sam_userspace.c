@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_idle.c
+ * arch/arm/src/samv7/sam_userspace.c
  *
- *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,69 +40,66 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/userspace.h>
 
-#include "up_internal.h"
+#include "sam_mpuinit.h"
+#include "sam_userspace.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-static uint8_t g_ledtoggle = 0;
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
+ * Name: sam_userspace
  *
  * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
+ * Assumptions:
+ *   The D-Cache has not yet been enabled.
  *
  ****************************************************************************/
 
-void up_idle(void)
+void sam_userspace(void)
 {
-#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-  g_ledtoggle++;
-  if (g_ledtoggle == 0x80)
-    {
-      board_autoled_on(LED_IDLE);
-    }
-  else if (g_ledtoggle == 0x00)
-    {
-      board_autoled_off(LED_IDLE);
-    }
-#endif
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
 
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts,
-   * then process "fake" timer interrupts. Hopefully, something
-   * will wake up.
-   */
+  /* Clear all of user-space .bss */
 
-  sched_process_timer();
-#endif
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+
+  dest = (uint8_t *)USERSPACE->us_bssstart;
+  end  = (uint8_t *)USERSPACE->us_bssend;
+
+  while (dest != end)
+    {
+      *dest++ = 0;
+    }
+
+  /* Initialize all of user-space .data */
+
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t *)USERSPACE->us_datasource;
+  dest = (uint8_t *)USERSPACE->us_datastart;
+  end  = (uint8_t *)USERSPACE->us_dataend;
+
+  while (dest != end)
+    {
+      *dest++ = *src++;
+    }
 }
 
+#endif /* CONFIG_BUILD_PROTECTED */

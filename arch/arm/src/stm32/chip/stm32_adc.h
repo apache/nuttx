@@ -308,24 +308,37 @@
                                                /* Bits 12-15: Reserved */
 #  define ADC_CR2_JEXTSEL_SHIFT      (16)      /* Bits 16-19: External event select for injected group */
 #  define ADC_CR2_JEXTSEL_MASK       (0x0F << ADC_CR2_JEXTSEL_SHIFT)
-#    define ADC_CR2_JEXTSEL_T1CC4    (0x0 << ADC_CR2_JEXTSEL_SHIFT)  /* 0000: Timer 1 CC4 event. For STM32L15XX: TIM9_CC1 event */
-#    define ADC_CR2_JEXTSEL_T1TRGO   (0x01 << ADC_CR2_JEXTSEL_SHIFT)  /* 0001: Timer 1 TRGO event. For STM32L15XX: TIM9_TRGO event */
-#    define ADC_CR2_JEXTSEL_T2CC1    (0x02 << ADC_CR2_JEXTSEL_SHIFT)  /* 0010: Timer 2 CC1 event. For STM32L15XX: TIM2_TRGO event */
-#    define ADC_CR2_JEXTSEL_T2TRGO   (0x03 << ADC_CR2_JEXTSEL_SHIFT)  /* 0011: Timer 2 TRGO event. For STM32L15XX: TIM2_CC1 event */
-#    define ADC_CR2_JEXTSEL_T3CC2    (0x04 << ADC_CR2_JEXTSEL_SHIFT)  /* 0100: Timer 3 CC2 event. For STM32L15XX: TIM3_CC4 event */
-#    define ADC_CR2_JEXTSEL_T3CC4    (0x05 << ADC_CR2_JEXTSEL_SHIFT)  /* 0101: Timer 3 CC4 event. For STM32L15XX: TIM4_TRGO event */
-#    define ADC_CR2_JEXTSEL_T4CC1    (0x06 << ADC_CR2_JEXTSEL_SHIFT)  /* 0110: Timer 4 CC1 event. For STM32L15XX: TIM4_CC1 event */
-#    define ADC_CR2_JEXTSEL_T4CC2    (0x07 << ADC_CR2_JEXTSEL_SHIFT)  /* 0111: Timer 4 CC2 event. For STM32L15XX: TIM4_CC2 event */
-#    define ADC_CR2_JEXTSEL_T4CC3    (0x08 << ADC_CR2_JEXTSEL_SHIFT)  /* 1000: Timer 4 CC3 event. For STM32L15XX: TIM4_CC3 event */
-#    define ADC_CR2_JEXTSEL_T4TRGO   (0x09 << ADC_CR2_JEXTSEL_SHIFT)  /* 1001: Timer 4 TRGO event. For STM32L15XX: TIM10_CC1 event */
-#    define ADC_CR2_JEXTSEL_T5CC4    (0x0A << ADC_CR2_JEXTSEL_SHIFT) /* 1010: Timer 5 CC4 event. For STM32L15XX: TIM7_TRGO event */
-#  ifndef CONFIG_STM32_STM32L15XX
-#    define ADC_CR2_JEXTSEL_T5TRGO   (0x0B << ADC_CR2_JEXTSEL_SHIFT) /* 1011: Timer 5 TRGO event. */
-#    define ADC_CR2_JEXTSEL_T8CC2    (0x0C << ADC_CR2_JEXTSEL_SHIFT) /* 1100: Timer 8 CC2 event. */
-#    define ADC_CR2_JEXTSEL_T8CC3    (0x0D << ADC_CR2_JEXTSEL_SHIFT) /* 1101: Timer 8 CC3 event. */
-#    define ADC_CR2_JEXTSEL_T8CC4    (0x0E << ADC_CR2_JEXTSEL_SHIFT) /* 1110: Timer 8 CC4 event. */
+#  ifdef CONFIG_STM32_STM32L15XX
+#    define ADC_CR2_JEXTSEL_T9CC1    (0x00 << ADC_CR2_JEXTSEL_SHIFT) /* 0000: Timer 9 CC1 event */
+#    define ADC_CR2_JEXTSEL_T9TRGO   (0x01 << ADC_CR2_JEXTSEL_SHIFT) /* 0001: Timer 9 TRGO event */
+#    define ADC_CR2_JEXTSEL_T2TRGO   (0x02 << ADC_CR2_JEXTSEL_SHIFT) /* 0010: Timer 2 TRGO event*/
+#    define ADC_CR2_JEXTSEL_T2CC1    (0x03 << ADC_CR2_JEXTSEL_SHIFT) /* 0011: Timer 2 CC1 event */
+#    define ADC_CR2_JEXTSEL_T3CC4    (0x04 << ADC_CR2_JEXTSEL_SHIFT) /* 0100: Timer 3 CC4 event */
+#    define ADC_CR2_JEXTSEL_T4TRGO   (0x05 << ADC_CR2_JEXTSEL_SHIFT) /* 0101: Timer 4 TRGO event */
+#    define ADC_CR2_JEXTSEL_T4CC1    (0x06 << ADC_CR2_JEXTSEL_SHIFT) /* 0110: Timer 4 CC1 event */
+#    define ADC_CR2_JEXTSEL_T4CC2    (0x07 << ADC_CR2_JEXTSEL_SHIFT) /* 0111: Timer 4 CC2 event */
+#    define ADC_CR2_JEXTSEL_T4CC3    (0x08 << ADC_CR2_JEXTSEL_SHIFT) /* 1000: Timer 4 CC3 event */
+#    define ADC_CR2_JEXTSEL_T10CC1   (0x09 << ADC_CR2_JEXTSEL_SHIFT) /* 1001: Timer 10 CC1 event */
+#    define ADC_CR2_JEXTSEL_T7TRGO   (0x0A << ADC_CR2_JEXTSEL_SHIFT) /* 1010: Timer 7 TRGO event */
+#    define ADC_CR2_JEXTSEL_EXTI15   (0x0F << ADC_CR2_JEXTSEL_SHIFT) /* 1111: EXTI line 15 */
+#  else
+#    define ADC_CR2_JEXTSEL_T1CC4    (0x00 << ADC_CR2_JEXTSEL_SHIFT) /* 0000: Timer 1 CC4 event */
+#    define ADC_CR2_JEXTSEL_T1TRGO   (0x01 << ADC_CR2_JEXTSEL_SHIFT) /* 0001: Timer 1 TRGO event */
+#    define ADC_CR2_JEXTSEL_T2CC1    (0x02 << ADC_CR2_JEXTSEL_SHIFT) /* 0010: Timer 2 CC1 event */
+#    define ADC_CR2_JEXTSEL_T2TRGO   (0x03 << ADC_CR2_JEXTSEL_SHIFT) /* 0011: Timer 2 TRGO event */
+#    define ADC_CR2_JEXTSEL_T3CC2    (0x04 << ADC_CR2_JEXTSEL_SHIFT) /* 0100: Timer 3 CC2 event */
+#    define ADC_CR2_JEXTSEL_T3CC4    (0x05 << ADC_CR2_JEXTSEL_SHIFT) /* 0101: Timer 3 CC4 event */
+#    define ADC_CR2_JEXTSEL_T4CC1    (0x06 << ADC_CR2_JEXTSEL_SHIFT) /* 0110: Timer 4 CC1 event */
+#    define ADC_CR2_JEXTSEL_T4CC2    (0x07 << ADC_CR2_JEXTSEL_SHIFT) /* 0111: Timer 4 CC2 event */
+#    define ADC_CR2_JEXTSEL_T4CC3    (0x08 << ADC_CR2_JEXTSEL_SHIFT) /* 1000: Timer 4 CC3 event */
+#    define ADC_CR2_JEXTSEL_T4TRGO   (0x09 << ADC_CR2_JEXTSEL_SHIFT) /* 1001: Timer 4 TRGO event */
+#    define ADC_CR2_JEXTSEL_T5CC4    (0x0A << ADC_CR2_JEXTSEL_SHIFT) /* 1010: Timer 5 CC4 event */
+#    define ADC_CR2_JEXTSEL_T5TRGO   (0x0B << ADC_CR2_JEXTSEL_SHIFT) /* 1011: Timer 5 TRGO event */
+#    define ADC_CR2_JEXTSEL_T8CC2    (0x0C << ADC_CR2_JEXTSEL_SHIFT) /* 1100: Timer 8 CC2 event */
+#    define ADC_CR2_JEXTSEL_T8CC3    (0x0D << ADC_CR2_JEXTSEL_SHIFT) /* 1101: Timer 8 CC3 event */
+#    define ADC_CR2_JEXTSEL_T8CC4    (0x0E << ADC_CR2_JEXTSEL_SHIFT) /* 1110: Timer 8 CC4 event */
+#    define ADC_CR2_JEXTSEL_EXTI15   (0x0F << ADC_CR2_JEXTSEL_SHIFT) /* 1111: EXTI line 15 */
 #  endif
-#    define ADC_CR2_JEXTSEL_EXTI     (0x0F << ADC_CR2_JEXTSEL_SHIFT) /* 1111: EXTI line15 */
 
 #  define ADC_CR2_JEXTEN_SHIFT       (20)      /* Bits 20-21: External trigger enable for injected channels */
 #  define ADC_CR2_JEXTEN_MASK        (3 << ADC_CR2_JEXTEN_SHIFT)
@@ -338,24 +351,37 @@
                                                /* Bit 23: Reserved, must be kept at reset value. */
 #  define ADC_CR2_EXTSEL_SHIFT       (24)      /* Bits 24-27: External Event Select for regular group */
 #  define ADC_CR2_EXTSEL_MASK        (0x0F << ADC_CR2_EXTSEL_SHIFT)
-#    define ADC_CR2_EXTSEL_T1CC1     (0x0 << ADC_CR2_EXTSEL_SHIFT)  /* 0000: Timer 1 CC1 event. For STM32L15XX: TIM9_CC2 event */
-#    define ADC_CR2_EXTSEL_T1CC2     (0x01 << ADC_CR2_EXTSEL_SHIFT) /* 0001: Timer 1 CC2 event. For STM32L15XX: TIM9_TRGO event */
-#    define ADC_CR2_EXTSEL_T1CC3     (0x02 << ADC_CR2_EXTSEL_SHIFT) /* 0010: Timer 1 CC3 event. For STM32L15XX: TIM2_CC3 event */
-#    define ADC_CR2_EXTSEL_T2CC2     (0x03 << ADC_CR2_EXTSEL_SHIFT) /* 0011: Timer 2 CC2 event. For STM32L15XX: TIM2_CC2 event */
-#    define ADC_CR2_EXTSEL_T2CC3     (0x04 << ADC_CR2_EXTSEL_SHIFT) /* 0100: Timer 2 CC3 event. For STM32L15XX: TIM3_TRGO event */
-#    define ADC_CR2_EXTSEL_T2CC4     (0x05 << ADC_CR2_EXTSEL_SHIFT) /* 0101: Timer 2 CC4 event. For STM32L15XX: TIM4_CC4 event */
-#    define ADC_CR2_EXTSEL_T2TRGO    (0x06 << ADC_CR2_EXTSEL_SHIFT) /* 0110: Timer 2 TRGO event. For STM32L15XX: TIM2_TRGO event */
-#    define ADC_CR2_EXTSEL_T3CC1     (0x07 << ADC_CR2_EXTSEL_SHIFT) /* 0111: Timer 3 CC1 event. For STM32L15XX: TIM3_CC1 event */
-#    define ADC_CR2_EXTSEL_T3TRGO    (0x08 << ADC_CR2_EXTSEL_SHIFT) /* 1000: Timer 3 TRGO event. For STM32L15XX: TIM3_CC3 event */
-#    define ADC_CR2_EXTSEL_T4CC4     (0x09 << ADC_CR2_EXTSEL_SHIFT) /* 1001: Timer 4 CC4 event. For STM32L15XX: TIM4_TRGO event */
-#    define ADC_CR2_EXTSEL_T5CC1     (0x0A << ADC_CR2_EXTSEL_SHIFT) /* 1010: Timer 5 CC1 event. For STM32L15XX: TIM6_TRGO event */
-#  ifndef CONFIG_STM32_STM32L15XX
+#  ifdef CONFIG_STM32_STM32L15XX
+#    define ADC_CR2_EXTSEL_T9CC2     (0x00 << ADC_CR2_EXTSEL_SHIFT) /* 0000: Timer 9 CC2 event */
+#    define ADC_CR2_EXTSEL_T9TRGO    (0x01 << ADC_CR2_EXTSEL_SHIFT) /* 0001: Timer 9 TRGO event */
+#    define ADC_CR2_EXTSEL_T2CC3     (0x02 << ADC_CR2_EXTSEL_SHIFT) /* 0010: Timer 2 CC3 event */
+#    define ADC_CR2_EXTSEL_T2CC2     (0x03 << ADC_CR2_EXTSEL_SHIFT) /* 0011: Timer 2 CC2 event */
+#    define ADC_CR2_EXTSEL_T3TRGO    (0x04 << ADC_CR2_EXTSEL_SHIFT) /* 0100: Timer 3 TRGO event */
+#    define ADC_CR2_EXTSEL_T4CC4     (0x05 << ADC_CR2_EXTSEL_SHIFT) /* 0101: Timer 4 CC4 event */
+#    define ADC_CR2_EXTSEL_T2TRGO    (0x06 << ADC_CR2_EXTSEL_SHIFT) /* 0110: Timer 2 TRGO event */
+#    define ADC_CR2_EXTSEL_T3CC1     (0x07 << ADC_CR2_EXTSEL_SHIFT) /* 0111: Timer 3 CC1 event */
+#    define ADC_CR2_EXTSEL_T3CC3     (0x08 << ADC_CR2_EXTSEL_SHIFT) /* 1000: Timer 3 CC3 event */
+#    define ADC_CR2_EXTSEL_T4TRGO    (0x09 << ADC_CR2_EXTSEL_SHIFT) /* 1001: Timer 4 TRGO event */
+#    define ADC_CR2_EXTSEL_T6TRGO    (0x0A << ADC_CR2_EXTSEL_SHIFT) /* 1010: Timer 6 TRGO event */
+#    define ADC_CR2_EXTSEL_EXTI11    (0x0F << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line 11 */
+#  else
+#    define ADC_CR2_EXTSEL_T1CC1     (0x0 << ADC_CR2_EXTSEL_SHIFT)  /* 0000: Timer 1 CC1 event */
+#    define ADC_CR2_EXTSEL_T1CC2     (0x01 << ADC_CR2_EXTSEL_SHIFT) /* 0001: Timer 1 CC2 event */
+#    define ADC_CR2_EXTSEL_T1CC3     (0x02 << ADC_CR2_EXTSEL_SHIFT) /* 0010: Timer 1 CC3 event */
+#    define ADC_CR2_EXTSEL_T2CC2     (0x03 << ADC_CR2_EXTSEL_SHIFT) /* 0011: Timer 2 CC2 event */
+#    define ADC_CR2_EXTSEL_T2CC3     (0x04 << ADC_CR2_EXTSEL_SHIFT) /* 0100: Timer 2 CC3 event */
+#    define ADC_CR2_EXTSEL_T2CC4     (0x05 << ADC_CR2_EXTSEL_SHIFT) /* 0101: Timer 2 CC4 event */
+#    define ADC_CR2_EXTSEL_T2TRGO    (0x06 << ADC_CR2_EXTSEL_SHIFT) /* 0110: Timer 2 TRGO event */
+#    define ADC_CR2_EXTSEL_T3CC1     (0x07 << ADC_CR2_EXTSEL_SHIFT) /* 0111: Timer 3 CC1 event */
+#    define ADC_CR2_EXTSEL_T3TRGO    (0x08 << ADC_CR2_EXTSEL_SHIFT) /* 1000: Timer 3 TRGO event */
+#    define ADC_CR2_EXTSEL_T4CC4     (0x09 << ADC_CR2_EXTSEL_SHIFT) /* 1001: Timer 4 CC4 event */
+#    define ADC_CR2_EXTSEL_T5CC1     (0x0A << ADC_CR2_EXTSEL_SHIFT) /* 1010: Timer 5 CC1 event */
 #    define ADC_CR2_EXTSEL_T5CC2     (0x0B << ADC_CR2_EXTSEL_SHIFT) /* 1011: Timer 5 CC2 event */
 #    define ADC_CR2_EXTSEL_T5CC3     (0x0C << ADC_CR2_EXTSEL_SHIFT) /* 1100: Timer 5 CC3 event */
 #    define ADC_CR2_EXTSEL_T8CC1     (0x0D << ADC_CR2_EXTSEL_SHIFT) /* 1101: Timer 8 CC1 event */
 #    define ADC_CR2_EXTSEL_T8TRGO    (0x0E << ADC_CR2_EXTSEL_SHIFT) /* 1110: Timer 8 TRGO event */
+#    define ADC_CR2_EXTSEL_EXTI11    (0x0F << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line 11 */
 #  endif
-#    define ADC_CR2_EXTSEL_EXTI      (0x0F << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line11 */
 
 #  define ADC_CR2_EXTEN_SHIFT        (28)      /* Bits 28-29: External trigger enable for regular channels */
 #  define ADC_CR2_EXTEN_MASK         (3 << ADC_CR2_EXTEN_SHIFT)
@@ -375,7 +401,7 @@
 #    define ADC_CR2_JEXTSEL_T2CC1    (3 << ADC_CR2_JEXTSEL_SHIFT) /* 011: Timer 2 CC1 event */
 #    define ADC_CR2_JEXTSEL_T3CC4    (4 << ADC_CR2_JEXTSEL_SHIFT) /* 100: Timer 3 CC4 event */
 #    define ADC_CR2_JEXTSEL_T4TRGO   (5 << ADC_CR2_JEXTSEL_SHIFT) /* 101: Timer 4 TRGO event */
-#    define ADC_CR2_JEXTSEL_EXTI15   (6 << ADC_CR2_JEXTSEL_SHIFT) /* 110: EXTI line15 */
+#    define ADC_CR2_JEXTSEL_EXTI15   (6 << ADC_CR2_JEXTSEL_SHIFT) /* 110: EXTI line 15 */
 #    define ADC_CR2_JEXTSEL_SWSTART  (7 << ADC_CR2_JEXTSEL_SHIFT) /* 111: JSWSTART */
 
 #  define ADC_CR2_JEXTTRIG           (1 << 15) /* Bit 15: External Trigger Conversion mode for injected channels */
@@ -387,7 +413,7 @@
 #    define ADC_CR2_EXTSEL_T2CC2     (3 << ADC_CR2_EXTSEL_SHIFT) /* 011: Timer 2 CC2 event */
 #    define ADC_CR2_EXTSEL_T3TRGO    (4 << ADC_CR2_EXTSEL_SHIFT) /* 100: Timer 3 TRGO event */
 #    define ADC_CR2_EXTSEL_T4CC4     (5 << ADC_CR2_EXTSEL_SHIFT) /* 101: Timer 4 CC4 event */
-#    define ADC_CR2_EXTSEL_EXTI11    (6 << ADC_CR2_EXTSEL_SHIFT) /* 110: EXTI line11 */
+#    define ADC_CR2_EXTSEL_EXTI11    (6 << ADC_CR2_EXTSEL_SHIFT) /* 110: EXTI line 11 */
 #    define ADC_CR2_EXTSEL_SWSTART   (7 << ADC_CR2_EXTSEL_SHIFT) /* 111: SWSTART */
 
 #  define ADC_CR2_EXTTRIG            (1 << 20) /* Bit 20: External Trigger Conversion mode for regular channels */
@@ -585,6 +611,9 @@
 #  define ADC_SQR1_L_SHIFT           (20)      /* Bits 23-20: Regular channel sequence length */
 #  define ADC_SQR1_L_MASK            (0x0f << ADC_SQR1_L_SHIFT)
 #  define ADC_SQR1_RESERVED          (0xff000000)
+#  define ADC_SQR1_FIRST             (13)
+#  define ADC_SQR1_LAST              (16)
+#  define ADC_SQR1_SQ_OFFSET         (0)
 #else
 #  define ADC_SQR1_SQ25_SHIFT        (0)       /* Bits 4-0: 25th conversion in regular sequence */
 #  define ADC_SQR1_SQ25_MASK         (0x1f << ADC_SQR1_SQ25_SHIFT)
@@ -597,6 +626,9 @@
 #  define ADC_SQR1_L_SHIFT           (20)      /* Bits 24-20: Regular channel sequence length */
 #  define ADC_SQR1_L_MASK            (0x1f << ADC_SQR1_L_SHIFT)
 #  define ADC_SQR1_RESERVED          (0xff000000)
+#  define ADC_SQR1_FIRST             (25)
+#  define ADC_SQR1_LAST              (28)
+#  define ADC_SQR1_SQ_OFFSET         (0)
 #endif
 
 /* ADC regular sequence register 2 */
@@ -615,6 +647,9 @@
 #  define ADC_SQR2_SQ12_SHIFT        (25)      /* Bits 29-25: 12th conversion in regular sequence */
 #  define ADC_SQR2_SQ12_MASK         (0x1f << ADC_SQR2_SQ12_SHIFT)
 #  define ADC_SQR2_RESERVED          (0xc0000000)
+#  define ADC_SQR2_FIRST             (7)
+#  define ADC_SQR2_LAST              (12)
+#  define ADC_SQR2_SQ_OFFSET         (0)
 #else
 #  define ADC_SQR2_SQ19_SHIFT        (0)       /* Bits 4-0: 19th conversion in regular sequence */
 #  define ADC_SQR2_SQ19_MASK         (0x1f << ADC_SQR2_SQ19_SHIFT)
@@ -629,6 +664,9 @@
 #  define ADC_SQR2_SQ24_SHIFT        (25)      /* Bits 29-25: 24th conversion in regular sequence */
 #  define ADC_SQR2_SQ24_MASK         (0x1f << ADC_SQR2_SQ24_SHIFT)
 #  define ADC_SQR2_RESERVED          (0xc0000000)
+#  define ADC_SQR2_FIRST             (19)
+#  define ADC_SQR2_LAST              (24)
+#  define ADC_SQR2_SQ_OFFSET         (0)
 #endif
 
 /* ADC regular sequence register 3 */
@@ -647,6 +685,9 @@
 #  define ADC_SQR3_SQ6_SHIFT         (25)      /* Bits 29-25: 6th conversion in regular sequence */
 #  define ADC_SQR3_SQ6_MASK          (0x1f << ADC_SQR3_SQ6_SHIFT)
 #  define ADC_SQR3_RESERVED          (0xc0000000)
+#  define ADC_SQR3_FIRST             (1)
+#  define ADC_SQR3_LAST              (6)
+#  define ADC_SQR3_SQ_OFFSET         (0)
 #else
 #  define ADC_SQR3_SQ13_SHIFT        (0)       /* Bits 4-0: 13th conversion in regular sequence */
 #  define ADC_SQR3_SQ13_MASK         (0x1f << ADC_SQR3_SQ13_SHIFT)
@@ -661,6 +702,9 @@
 #  define ADC_SQR3_SQ18_SHIFT        (25)      /* Bits 29-25: 18th conversion in regular sequence */
 #  define ADC_SQR3_SQ18_MASK         (0x1f << ADC_SQR3_SQ18_SHIFT)
 #  define ADC_SQR3_RESERVED          (0xc0000000)
+#  define ADC_SQR3_FIRST             (13)
+#  define ADC_SQR3_LAST              (18)
+#  define ADC_SQR3_SQ_OFFSET         (0)
 #endif
 
 /* ADC regular sequence register 4 */
@@ -679,6 +723,9 @@
 #  define ADC_SQR4_SQ12_SHIFT        (25)      /* Bits 29-25: 12th conversion in regular sequence */
 #  define ADC_SQR4_SQ12_MASK         (0x1f << ADC_SQR4_SQ12_SHIFT)
 #  define ADC_SQR4_RESERVED          (0xc0000000)
+#  define ADC_SQR4_FIRST             (7)
+#  define ADC_SQR4_LAST              (12)
+#  define ADC_SQR4_SQ_OFFSET         (0)
 #endif
 
 /* ADC regular sequence register 5 */
@@ -697,7 +744,14 @@
 #  define ADC_SQR5_SQ6_SHIFT         (25)      /* Bits 29-25: 6th conversion in regular sequence */
 #  define ADC_SQR5_SQ6_MASK          (0x1f << ADC_SQR5_SQ6_SHIFT)
 #  define ADC_SQR5_RESERVED          (0xc0000000)
+#  define ADC_SQR5_FIRST             (1)
+#  define ADC_SQR5_LAST              (6)
+#  define ADC_SQR5_SQ_OFFSET         (0)
 #endif
+
+/* Offset between SQ bits */
+
+#define ADC_SQ_OFFSET                (5)
 
 /* ADC injected sequence register */
 
@@ -714,15 +768,15 @@
 
 /* ADC injected data register 1-4 */
 
-#define ADC_JDR_SHIFT                (0)       /* Bits 15-0: Injected data */
-#define ADC_JDR_MASK                 (0xffff << ADC_JDR_SHIFT)
+#define ADC_JDR_JDATA_SHIFT          (0)       /* Bits 15-0: Injected data */
+#define ADC_JDR_JDATA_MASK           (0xffff << ADC_JDR_JDATA_SHIFT)
 
 /* ADC regular data register */
 
-#define ADC_DR_DATA_SHIFT            (0)       /* Bits 15-0 Regular data */
-#define ADC_DR_DATA_MASK             (0xffff << ADC_DR_DATA_SHIFT)
+#define ADC_DR_RDATA_SHIFT           (0)       /* Bits 15-0 Regular data */
+#define ADC_DR_RDATA_MASK            (0xffff << ADC_DR_RDATA_SHIFT)
 
-#ifndef CONFIG_STM32_STM32L15XX
+#ifdef CONFIG_STM32_STM32F10XX
 #  define ADC_DR_ADC2DATA_SHIFT      (16)      /* Bits 31-16: ADC2 data */
 #  define ADC_DR_ADC2DATA_MASK       (0xffff << ADC_DR_ADC2DATA_SHIFT)
 #endif
@@ -784,7 +838,7 @@
                                                /* Bits 5-7: Reserved, must be kept at reset value. */
 #  define ADC_CCR_DELAY_SHIFT        (8)       /* Bits 8-11: Delay between 2 sampling phases */
 #  define ADC_CCR_DELAY_MASK         (15 << ADC_CCR_DELAY_SHIFT)
-#    define ADC_CCR_DELAY(n)         (((5)-5) << ADC_CCR_DELAY_SHIFT) /* n * TADCCLK, n=5-20 */
+#    define ADC_CCR_DELAY(n)         (((n)-5) << ADC_CCR_DELAY_SHIFT) /* n * TADCCLK, n=5-20 */
                                                /* Bit 12 Reserved, must be kept at reset value. */
 #  define ADC_CCR_DDS                (1 << 13) /* Bit 13: DMA disable selection (for multi-ADC mode) */
 

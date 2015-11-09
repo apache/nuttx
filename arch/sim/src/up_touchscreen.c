@@ -243,7 +243,7 @@ static int up_sample(FAR struct up_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct up_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct up_sample_s));
 
       /* Now manage state transitions */
 
@@ -643,7 +643,7 @@ errout:
 
 int board_tsc_setup(int minor)
 {
-  FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -703,7 +703,7 @@ errout_with_priv:
 
 void board_tsc_teardown(void)
 {
-  FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -728,7 +728,7 @@ void board_tsc_teardown(void)
 
   g_eventloop = 0;
 
-  /* Un-register the device*/
+  /* Un-register the device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
   ivdbg("Un-registering %s\n", devname);

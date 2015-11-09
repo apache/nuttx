@@ -140,7 +140,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 
 void _exit(int status)
 {
-  struct tcb_s* tcb;
+  struct tcb_s *tcb;
 
   /* Disable interrupts.  They will be restored when the next
    * task is started.
@@ -163,7 +163,7 @@ void _exit(int status)
    * head of the list.
    */
 
-  tcb = (struct tcb_s*)g_readytorun.head;
+  tcb = (struct tcb_s *)g_readytorun.head;
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running

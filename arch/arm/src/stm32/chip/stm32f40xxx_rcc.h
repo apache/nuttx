@@ -317,6 +317,8 @@
 #define RCC_AHB1ENR_GPIOGEN         (1 << 6)  /* Bit 6:  IO port G clock enable */
 #define RCC_AHB1ENR_GPIOHEN         (1 << 7)  /* Bit 7:  IO port H clock enable */
 #define RCC_AHB1ENR_GPIOIEN         (1 << 8)  /* Bit 8:  IO port I clock enable */
+#define RCC_AHB1ENR_GPIOJEN         (1 << 9)  /* Bit 9:  IO port J clock enable */
+#define RCC_AHB1ENR_GPIOKEN         (1 << 10) /* Bit 10: IO port K clock enable */
 #define RCC_AHB1ENR_CRCEN           (1 << 12) /* Bit 12: CRC clock enable */
 #define RCC_AHB1ENR_BKPSRAMEN       (1 << 18) /* Bit 18: Backup SRAM interface clock enable */
 #define RCC_AHB1ENR_CCMDATARAMEN    (1 << 20) /* Bit 20: CCM data RAM clock enable */

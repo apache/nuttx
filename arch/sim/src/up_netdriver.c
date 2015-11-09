@@ -166,11 +166,12 @@ static int sim_txpoll(struct net_driver_s *dev)
 
 void netdriver_loop(void)
 {
-  struct eth_hdr_s *eth;
+  FAR struct eth_hdr_s *eth;
 
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
-  g_sim_dev.d_len = netdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_ETH_MTU);
+  g_sim_dev.d_len = netdev_read((FAR unsigned char *)g_sim_dev.d_buf,
+                                CONFIG_NET_ETH_MTU);
 
   /* Disable preemption through to the following so that it behaves a little more
    * like an interrupt (otherwise, the following logic gets pre-empted an behaves
@@ -210,10 +211,10 @@ void netdriver_loop(void)
               arp_ipin(&g_sim_dev);
               ipv4_input(&g_sim_dev);
 
-             /* If the above function invocation resulted in data that
-              * should be sent out on the network, the global variable
-              * d_len is set to a value > 0.
-              */
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the global variable
+               * d_len is set to a value > 0.
+               */
 
               if (g_sim_dev.d_len > 0)
                 {
@@ -248,10 +249,10 @@ void netdriver_loop(void)
 
               ipv6_input(&g_sim_dev);
 
-             /* If the above function invocation resulted in data that
-              * should be sent out on the network, the global variable
-              * d_len is set to a value > 0.
-              */
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the global variable
+               * d_len is set to a value > 0.
+               */
 
               if (g_sim_dev.d_len > 0)
                {

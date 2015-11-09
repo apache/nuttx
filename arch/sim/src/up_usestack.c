@@ -96,7 +96,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   /* This is the address of the last word in the allocation */
 
-  size_t *adj_stack_ptr = &((size_t*)stack)[adj_stack_words - 1];
+  FAR size_t *adj_stack_ptr = &((FAR size_t *)stack)[adj_stack_words - 1];
 
   /* Save the values in the TCB */
 

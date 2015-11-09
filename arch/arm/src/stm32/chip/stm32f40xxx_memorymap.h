@@ -187,6 +187,7 @@
 #define STM32_GPIOG_BASE     0x40021800     /* 0x40021800-0x40021bff: GPIO Port G */
 #define STM32_GPIOH_BASE     0x40021C00     /* 0x40021C00-0x40021fff: GPIO Port H */
 #define STM32_GPIOI_BASE     0x40022000     /* 0x40022000-0x400223ff: GPIO Port I */
+#define STM32_GPIOJ_BASE     0x40022400     /* 0x40022400-0x400227ff: GPIO Port J */
 #define STM32_GPIOK_BASE     0x40022800     /* 0x40022800-0x40022Bff: GPIO Port K */
 #define STM32_CRC_BASE       0x40023000     /* 0x40023000-0x400233ff: CRC */
 #define STM32_RCC_BASE       0x40023800     /* 0x40023800-0x40023bff: Reset and Clock control RCC */

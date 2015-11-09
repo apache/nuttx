@@ -676,7 +676,7 @@ static inline void pic32mx_bufferinit(struct pic32mx_driver_s *priv)
    {
      /* Add the buffer to the end of the list of free buffers */
 
-     sq_addlast((sq_entry_t*)buffer, &priv->pd_freebuffers);
+     sq_addlast((sq_entry_t *)buffer, &priv->pd_freebuffers);
 
      /* Get the address of the next buffer */
 
@@ -702,7 +702,7 @@ static uint8_t *pic32mx_allocbuffer(struct pic32mx_driver_s *priv)
 {
   /* Return the next free buffer from the head of the free buffer list */
 
-  return (uint8_t*)sq_remfirst(&priv->pd_freebuffers);
+  return (uint8_t *)sq_remfirst(&priv->pd_freebuffers);
 }
 
 /****************************************************************************
@@ -723,7 +723,7 @@ static void pic32mx_freebuffer(struct pic32mx_driver_s *priv, uint8_t *buffer)
 {
   /* Add the buffer to the end of the free buffer list */
 
-   sq_addlast((sq_entry_t*)buffer, &priv->pd_freebuffers);
+   sq_addlast((sq_entry_t *)buffer, &priv->pd_freebuffers);
 }
 
 /****************************************************************************
@@ -1377,7 +1377,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
    * the producer index is not equal to the consumer index.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Check if any RX descriptor has the EOWN bit cleared meaning that the
        * this descriptor is now under software control and a message was
@@ -1420,14 +1420,16 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("Too big. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
+          nlldbg("Too big. packet length: %d rxdesc: %08x\n",
+                 priv->pd_dev.d_len, rxdesc->status);
           EMAC_STAT(priv, rx_pktsize);
           pic32mx_rxreturn(rxdesc);
         }
 
       /* We don't have any logic here for reassembling packets from fragments. */
 
-      else if ((rxdesc->status & (RXDESC_STATUS_EOP|RXDESC_STATUS_SOP)) != (RXDESC_STATUS_EOP|RXDESC_STATUS_SOP))
+      else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
+               (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
           nlldbg("Fragment. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
           EMAC_STAT(priv, rx_fragment);
@@ -1439,7 +1441,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
           /* Get the Rx buffer address from the Rx descriptor */
 
-          priv->pd_dev.d_buf = (uint8_t*)VIRT_ADDR(rxdesc->address);
+          priv->pd_dev.d_buf = (uint8_t *)VIRT_ADDR(rxdesc->address);
           DEBUGASSERT(priv->pd_dev.d_buf != NULL);
 
           /* Replace the buffer in the RX descriptor with a new one */
@@ -2030,9 +2032,9 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   pic32mx_putreg((EMAC1_SUPP_RESETRMII | EMAC1_SUPP_SPEEDRMII), PIC32MX_EMAC1_SUPPCLR);
 #endif
 
-   /* Issue an MIIM block reset, by setting the RESETMGMT (EMAC1MCFG:15) bit,
-    * and then clear the reset bit.
-    */
+  /* Issue an MIIM block reset, by setting the RESETMGMT (EMAC1MCFG:15) bit,
+   * and then clear the reset bit.
+   */
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_MCFG);
   pic32mx_putreg(EMAC1_MCFG_MGMTRST, PIC32MX_EMAC1_MCFGSET);
@@ -2138,7 +2140,7 @@ static int pic32mx_ifup(struct net_driver_s *dev)
 
   /* Continue Ethernet Controller Initialization ****************************/
   /* If planning to turn on the flow control, update the PTV value
-   *(ETHCON1:16-31).
+   * (ETHCON1:16-31).
    */
 
   /* If using the auto-flow control, set the full and empty watermarks: RXFWM
@@ -3204,7 +3206,7 @@ static inline int pic32mx_ethinitialize(int intf)
   priv->pd_dev.d_addmac  = pic32mx_addmac;  /* Add multicast MAC address */
   priv->pd_dev.d_rmmac   = pic32mx_rmmac;   /* Remove multicast MAC address */
 #endif
-  priv->pd_dev.d_private = (void*)priv;   /* Used to recover private state from dev */
+  priv->pd_dev.d_private = (void *)priv;    /* Used to recover private state from dev */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"

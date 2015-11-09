@@ -195,5 +195,5 @@ void up_initialize(void)
   (void)tun_initialize();
 #endif
 
-  board_led_on(LED_IRQSENABLED);
+  board_autoled_on(LED_IRQSENABLED);
 }

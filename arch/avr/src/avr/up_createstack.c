@@ -160,7 +160,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
       tcb->adj_stack_size = stack_size;
 
-      board_led_on(LED_STACKCREATED);
+      board_autoled_on(LED_STACKCREATED);
       return OK;
     }
 

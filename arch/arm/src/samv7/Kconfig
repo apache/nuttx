@@ -223,6 +223,7 @@ config SAMV7_MCAN0
 	bool "CAN controller 0 (MCAN0)"
 	default n
 	select CAN
+	select CAN_TXREADY
 	select SAMV7_MCAN
 
 config SAMV7_MCAN1
@@ -230,6 +231,7 @@ config SAMV7_MCAN1
 	default n
 	depends on SAMV7_HAVE_MCAN1
 	select CAN
+	select CAN_TXREADY
 	select SAMV7_MCAN
 
 config SAMV7_DAC0
@@ -285,6 +287,8 @@ config SAMV7_PWM1
 config SAMV7_QSPI
 	bool "Quad SPI (QSPI)"
 	default n
+	select ARCH_USE_MPU
+	select ARMV7M_MPU
 
 config SAMV7_RTC
 	bool "Real Time Clock (RTC)"

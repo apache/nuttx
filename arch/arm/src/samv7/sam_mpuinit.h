@@ -1,5 +1,4 @@
 /****************************************************************************
- * Name: sam_mpuinitialize
  * arch/arm/src/samv7/sam_mpuinit.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -38,7 +37,6 @@
 #define __ARCH_ARM_SRC_SAMV7_SAM_MPUINIT_H
 
 /****************************************************************************
- * Name: sam_mpuinitialize
  * Included Files
  ****************************************************************************/
 
@@ -48,24 +46,12 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Name: sam_mpuinitialize
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_mpuinitialize
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_mpuinitialize
  * Inline Functions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: sam_mpuinitialize
  * Public Data
  ****************************************************************************/
 
@@ -83,7 +69,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_mpuinitialize
+ * Name: sam_mpu_initialize
  *
  * Description:
  *   Configure the MPU to permit user-space access to only unrestricted SAMV7
@@ -91,10 +77,10 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
-void sam_mpuinitialize(void);
+#ifdef CONFIG_ARMV7M_MPU
+void sam_mpu_initialize(void);
 #else
-#  define sam_mpuinitialize()
+#  define sam_mpu_initialize()
 #endif
 
 /****************************************************************************

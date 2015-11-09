@@ -58,8 +58,12 @@
 #ifdef CONFIG_DEBUG
 static const char g_portchar[STM32_NGPIO_PORTS] =
 {
-#if STM32_NGPIO_PORTS > 9
+#if STM32_NGPIO_PORTS > 11
 #  error "Additional support required for this number of GPIOs"
+#elif STM32_NGPIO_PORTS > 10
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'
+#elif STM32_NGPIO_PORTS > 9
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'
 #elif STM32_NGPIO_PORTS > 8
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'
 #elif STM32_NGPIO_PORTS > 7

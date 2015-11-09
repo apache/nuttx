@@ -189,18 +189,18 @@ void tapdev_init(void)
   gtapdevfd = open(DEVTAP, O_RDWR, 0644);
   if (gtapdevfd < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: open failed: %d\n", -gtapdevfd );
+      syslog(LOG_ERR, "TAPDEV: open failed: %d\n", -gtapdevfd);
       return;
     }
 
   /* Configure the tap device */
 
   memset(&ifr, 0, sizeof(ifr));
-  ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
+  ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
   ret = ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed: %d\n", -ret );
+      syslog(LOG_ERR, "TAPDEV: ioctl failed: %d\n", -ret);
       return;
    }
 

@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 4 June 2012 */
+/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 — 4 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -74,37 +74,37 @@
  * manager.  This gives some symmetry to all of the members of the family.
  */
 
-/* Per the user manual: UM10503, Rev. 1.2 � 8 June 2012 */
+/* Per the user manual: UM10503, Rev. 1.2 — 8 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
- * --------------------- -------- ------- ------- ------- ------- -------
- * Local SRAM            LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357
- * --------------------- -------- ------- ------- ------- ------- -------
- * BANK 0 (0x1000 0000)     96Kb    96Kb   128Kb   128Kb    32Kb    32Kb
- * BANK 1 (0x1008 0000)     40Kb    40Kb    72Kb    72Kb    40Kb    40Kb
- * --------------------- -------- ------- ------- ------- ------- -------
- * SUBTOTAL                136Kb   136Kb   200Kb   200Kb    72Kb    72Kb
- * --------------------- -------- ------- ------- ------- ------- -------
- * AHB SRAM              LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357
- * --------------------- -------- ------- ------- ------- ------- -------
- * BANK 0 (0x2000 0000)     16Kb    48Kb   48Kb    48Kb     48Kb    48Kb
- * BANK 1 (0x2000 8000)             NOTE 1 NOTE 1  NOTE 1  NOTE 1  NOTE 1
- * BANK 2 (0x2000 c000)     16Kb    16Kb   16Kb    16Kb    16Kb    16Kb
- * --------------------- -------- ------- ------- ------- ------- -------
- * SUBTOTAL                 32Kb    64Kb   64Kb    64Kb     64Kb    64Kb
- * --------------------- -------- ------- ------- ------- ------- -------
- * TOTAL                   168Kb   200Kb  264Kb   264Kb    136Kb   136Kb
- * --------------------- -------- ------- ------- ------- ------- -------
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * Local SRAM            LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * BANK 0 (0x1000 0000)     96Kb    96Kb   128Kb   128Kb    32Kb    32Kb    32Kb
+ * BANK 1 (0x1008 0000)     40Kb    40Kb    72Kb    72Kb    40Kb    40Kb    40Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * SUBTOTAL                136Kb   136Kb   200Kb   200Kb    72Kb    72Kb    72Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * AHB SRAM              LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * BANK 0 (0x2000 0000)     16Kb    48Kb   48Kb    48Kb     48Kb    48Kb    48Kb
+ * BANK 1 (0x2000 8000)             NOTE 1 NOTE 1  NOTE 1  NOTE 1  NOTE 1  NOTE 1
+ * BANK 2 (0x2000 c000)     16Kb    16Kb   16Kb    16Kb    16Kb    16Kb		 16Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * SUBTOTAL                 32Kb    64Kb   64Kb    64Kb     64Kb    64Kb    64Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * TOTAL                   168Kb   200Kb  264Kb   264Kb    136Kb   136Kb   136Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
  *
- * --------------------- -------- ------- ------- ------- ------- -------
- * FLASH                 LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357
- * --------------------- -------- ------- ------- ------- ------- -------
- * BANK A (0x1a00 0000)                                    256Kb   512Kb
- * BANK B (0x1b00 8000)                                    256Kb   512Kb
- * --------------------- -------- ------- ------- ------- ------- -------
- * TOTAL                   None    None    None    None    512Kb  1024Kb
- * --------------------- -------- ------- ------- ------- ------- -------
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * FLASH                 LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * BANK A (0x1a00 0000)                                    256Kb   512Kb   512Kb
+ * BANK B (0x1b00 8000)                                    256Kb   512Kb   512Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * TOTAL                   None    None    None    None    512Kb  1024Kb	1024Kb
+ * --------------------- -------- ------- ------- ------- ------- ------- -------
  *
  * NOTE 1: The 64Kb of AHB of SRAM on the LPC4350/30/20 span all AHB SRAM
  * banks but are treated as two banks of 48 an 16Kb by the NuttX memory
@@ -311,6 +311,32 @@
 #  define LPC43_USB1_ULPI          (1)         /* Have USB1 (Host, Device) with ULPI I/F */
 #  define LPC43_MCPWM              (1)         /* One PWM interface */
 #  define LPC43_QEI                (1)         /* One Quadrature Encoder interface */
+#  define LPC43_NUSARTS            (4)         /* Three USARTs + 1 UART */
+#  define LPC43_NSSP               (2)         /* Two SSP controllers */
+#  define LPC43_NTIMERS            (4)         /* Four Timers */
+#  define LPC43_NI2C               (2)         /* Two I2C controllers */
+#  define LPC43_NI2S               (2)         /* Two I2S controllers */
+#  define LPC43_NCAN               (2)         /* Two CAN controllers */
+#  define LPC43_NDAC               (1)         /* One 10-bit DAC */
+#  define LPC43_NADC10             (2)         /* Two 10-bit ADC controllers */
+#  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
+#  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
+#elif defined(CONFIG_ARCH_CHIP_LPC4337JBD144)
+#  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (512*1025)
+#  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)  /*  72Kb Local SRAM*/
+#  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
+#  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
+#  define LPC43_AHBSRAM_BANK1_SIZE (0)
+#  define LPC43_AHBSRAM_BANK2_SIZE (16*1024)
+#  define LPC43_EEPROM_SIZE        (16*1024)   /* 16Kb EEPROM */
+#  define LPC43_NLCD               (0)         /* Has LCD controller */
+#  define LPC43_ETHERNET           (1)         /* One Ethernet controller */
+#  define LPC43_USB0               (1)         /* Have USB0 (Host, Device, OTG) */
+#  define LPC43_USB1               (1)         /* Have USB1 (Host, Device) */
+#  define LPC43_USB1_ULPI          (0)         /* Have USB1 (Host, Device) with ULPI I/F */
+#  define LPC43_MCPWM              (1)         /* One PWM interface */
+#  define LPC43_QEI                (0)         /* One Quadrature Encoder interface */
 #  define LPC43_NUSARTS            (4)         /* Three USARTs + 1 UART */
 #  define LPC43_NSSP               (2)         /* Two SSP controllers */
 #  define LPC43_NTIMERS            (4)         /* Four Timers */
@@ -606,7 +632,6 @@
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels (per ADC)*/
 #  define LPC43_NADC12             (1)         /* ONne 12-bit ADC controllers (ADCHS)*/
->>>>>>> remotes/nuttx/arch/master
 #else
 #  error "Unsupported LPC43xx chip"
 #endif

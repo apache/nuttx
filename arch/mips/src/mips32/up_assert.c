@@ -105,15 +105,15 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || ((struct tcb_s*)g_readytorun.head)->pid == 0)
+  if (current_regs || ((struct tcb_s *)g_readytorun.head)->pid == 0)
     {
        (void)irqsave();
-        for (;;)
+        for (; ; )
           {
 #ifdef CONFIG_ARCH_LEDS
-            board_led_on(LED_PANIC);
+            board_autoled_on(LED_PANIC);
             up_mdelay(250);
-            board_led_off(LED_PANIC);
+            board_autoled_off(LED_PANIC);
             up_mdelay(250);
 #endif
           }
@@ -160,10 +160,10 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 void up_assert(const uint8_t *filename, int lineno)
 {
 #ifdef CONFIG_PRINT_TASKNAME
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
 #endif
 
-  board_led_on(LED_ASSERTION);
+  board_autoled_on(LED_ASSERTION);
 
 #ifdef CONFIG_PRINT_TASKNAME
   lldbg("Assertion failed at file:%s line: %d task: %s\n",

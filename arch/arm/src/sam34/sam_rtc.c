@@ -783,9 +783,8 @@ int up_rtc_gettime(FAR struct timespec *tp)
       rtt_val = getreg32(SAM_RTT_VR);
     }
   while (rtc_cal != getreg32(SAM_RTC_CALR) ||
-         rtc_tim != getreg32(SAM_RTC_TIMR));
-
-  (rtt_val != getreg32(SAM_RTT_VR)));
+         rtc_tim != getreg32(SAM_RTC_TIMR) ||
+         rtt_val != getreg32(SAM_RTT_VR));
 
   t.tm_sec  = rtc_bcd2bin((rtc_tim & RTC_TIMR_SEC_MASK)   >> RTC_TIMR_SEC_SHIFT);
   t.tm_min  = rtc_bcd2bin((rtc_tim & RTC_TIMR_MIN_MASK)   >> RTC_TIMR_MIN_SHIFT);

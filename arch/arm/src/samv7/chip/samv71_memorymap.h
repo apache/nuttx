@@ -159,6 +159,10 @@
 #  define SAM_EXTCS3_BASE      0x63000000 /* 0x63000000-0x6fffffff:   EBI Chip select 3 */
 #define SAM_SDRAMCS_BASE       0x70000000 /* 0x70000000-0x7fffffff: SDRAM chip select */
 
+/* QSPI memory region */
+
+#define SAM_QSPIMEM_SIZE       0x20000000 /* 0x80000000-0x9fffffff: QSPI memory */
+
 /* System memory region */
 
 #define SAM_PRIVPERIPH_BASE    0xe0000000 /* 0xe0000000-0xe00fffff: Private peripheral bus */

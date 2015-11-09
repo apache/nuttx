@@ -88,7 +88,7 @@ static void idt_outb(uint8_t val, uint16_t addr)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 static uint32_t *common_handler(int irq, uint32_t *regs)
 {
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.
@@ -163,7 +163,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
 uint32_t *isr_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
   PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
@@ -171,9 +171,9 @@ uint32_t *isr_handler(uint32_t *regs)
 
   /* Dispatch the interrupt */
 
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
   ret = common_handler((int)regs[REG_IRQNO], regs);
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
   return ret;
 #endif
 }
@@ -189,14 +189,14 @@ uint32_t *isr_handler(uint32_t *regs)
 uint32_t *irq_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
   PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
   uint32_t *ret;
   int irq;
 
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
 
   /* Get the IRQ number */
 
@@ -220,7 +220,7 @@ uint32_t *irq_handler(uint32_t *regs)
   /* Dispatch the interrupt */
 
   ret = common_handler(irq, regs);
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
   return ret;
 #endif
 }

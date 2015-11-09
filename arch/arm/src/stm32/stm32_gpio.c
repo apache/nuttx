@@ -117,6 +117,12 @@ const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 #if STM32_NGPIO_PORTS > 8
   STM32_GPIOI_BASE,
 #endif
+#if STM32_NGPIO_PORTS > 9
+  STM32_GPIOJ_BASE,
+#endif
+#if STM32_NGPIO_PORTS > 10
+  STM32_GPIOK_BASE,
+#endif
 
 #endif /* CONFIG_STM32_STM32L15XX */
 };

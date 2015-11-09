@@ -3949,7 +3949,7 @@ static int efm32_enumerate(FAR struct usbhost_connection_s *conn,
   /* If this is a connection on the root hub, then we need to go to
    * little more effort to get the device speed.  If it is a connection
    * on an external hub, then we already have that information.
-    */
+   */
 
 #ifdef CONFIG_USBHOST_HUB
   if (ROOTHUB(hport))

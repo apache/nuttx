@@ -87,7 +87,7 @@ void up_irqinitialize(void)
   /* Set masking of normal interrupts by priority.  Writing all ones
    * (or -1) to the NIMASK register sets the normal interrupt mask to
    * -1 and does not disable any normal interrupt priority levels.
-    */
+   */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   putreg32(-1, IMX_AITC_NIMASK); /* -1: No priority levels masked */

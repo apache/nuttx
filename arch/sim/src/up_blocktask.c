@@ -75,7 +75,7 @@
 
 void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   bool switch_needed;
 
   /* Verify that the context switch can be performed */
@@ -126,7 +126,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
            * of the g_readytorun task list.
            */
 
-          rtcb = (struct tcb_s*)g_readytorun.head;
+          rtcb = (FAR struct tcb_s *)g_readytorun.head;
           sdbg("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
