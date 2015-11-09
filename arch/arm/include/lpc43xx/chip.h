@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 4 June 2012 */
+/* Per the data sheet: LPC4350/30/20/10 Rev. 3.2  4 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -74,7 +74,7 @@
  * manager.  This gives some symmetry to all of the members of the family.
  */
 
-/* Per the user manual: UM10503, Rev. 1.2 � 8 June 2012 */
+/* Per the user manual: UM10503, Rev. 1.2  8 June 2012 */
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -632,7 +632,6 @@
 #  define LPC43_NDAC               (1)         /* One 10-bit DAC */
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels (per ADC)*/
 #  define LPC43_NADC12             (1)         /* ONne 12-bit ADC controllers (ADCHS)*/
->>>>>>> remotes/nuttx/arch/master
 #else
 #  error "Unsupported LPC43xx chip"
 #endif
