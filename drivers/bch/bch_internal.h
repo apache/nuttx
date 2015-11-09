@@ -61,18 +61,18 @@
 
 struct bchlib_s
 {
-  struct inode *inode; /* I-node of the block driver */
-  sem_t    sem;        /* For atomic accesses to this structure */
-  size_t   nsectors;   /* Number of sectors supported by the device */
-  size_t   sector;     /* The current sector in the buffer */
-  uint16_t sectsize;   /* The size of one sector on the device */
-  uint8_t  refs;       /* Number of references */
-  bool  dirty;         /* Data has been written to the buffer */
-  bool  readonly;      /* true:  Only read operations are supported */
-  FAR uint8_t *buffer; /* One sector buffer */
+  FAR struct inode *inode; /* I-node of the block driver */
+  sem_t sem;               /* For atomic accesses to this structure */
+  size_t nsectors;         /* Number of sectors supported by the device */
+  size_t sector;           /* The current sector in the buffer */
+  uint16_t sectsize;       /* The size of one sector on the device */
+  uint8_t refs;            /* Number of references */
+  bool dirty;              /* Data has been written to the buffer */
+  bool readonly;           /* true:  Only read operations are supported */
+  FAR uint8_t *buffer;     /* One sector buffer */
 
 #if defined(CONFIG_BCH_ENCRYPTION)
-  uint8_t   key[CONFIG_BCH_ENCRYPTION_KEY_SIZE];   /* Encryption key */
+  uint8_t key[CONFIG_BCH_ENCRYPTION_KEY_SIZE];  /* Encryption key */
 #endif
 };
 

@@ -11074,3 +11074,6 @@
 	* arch/arm/src/samv7:  The QSPI FLASH driver is now functional.  This
 	  driver operates in the memory-mapped, Serial Memory Mode (SMM)
 	  (2015-11-07).
+	* drivers/bch:  Block-to-character (BCH) driver should forward ioctl()
+	  calls to the contained block driver (2015-11-09).
+

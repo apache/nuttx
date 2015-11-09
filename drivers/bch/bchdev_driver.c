@@ -302,6 +302,8 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   bch = (FAR struct bchlib_s *)inode->i_private;
 
+  /* Is this a request to get the private data structure */
+
   if (cmd == DIOC_GETPRIV)
     {
       FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)((uintptr_t)arg);
@@ -319,13 +321,30 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       bchlib_semgive(bch);
     }
-#if defined(CONFIG_BCH_ENCRYPTION)
+
+#ifdef CONFIG_BCH_ENCRYPTION
+  /* Is this a request to set the encryption key? */
+
   else if (cmd == DIOC_SETKEY)
     {
       memcpy(bch->key, (FAR void *)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
       ret = OK;
     }
 #endif
+
+  /* Otherwise, pass the IOCTL command on to the contained block driver */
+
+  else
+    {
+      FAR struct inode *bchinode = bch->inode;
+
+      /* Does the block driver support the ioctl method? */
+
+      if (bchinode->u.i_bops->ioctl != NULL)
+        {
+          ret = bchinode->u.i_bops->ioctl(bchinode, cmd, arg);
+        }
+    }
 
   return ret;
 }
