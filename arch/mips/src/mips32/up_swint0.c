@@ -157,7 +157,7 @@ static void dispatch_syscall(void)
 
 int up_swint0(int irq, FAR void *context)
 {
-  uint32_t *regs = (uint32_t*)context;
+  uint32_t *regs = (uint32_t *)context;
   uint32_t cause;
 
   DEBUGASSERT(regs && regs == current_regs);
@@ -194,7 +194,7 @@ int up_swint0(int irq, FAR void *context)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0);
-          current_regs = (uint32_t*)regs[REG_A1];
+          current_regs = (uint32_t *)regs[REG_A1];
         }
         break;
 
@@ -217,8 +217,8 @@ int up_swint0(int irq, FAR void *context)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          up_copystate((uint32_t*)regs[REG_A1], regs);
-          current_regs = (uint32_t*)regs[REG_A2];
+          up_copystate((uint32_t *)regs[REG_A1], regs);
+          current_regs = (uint32_t *)regs[REG_A2];
         }
         break;
 
@@ -301,7 +301,7 @@ int up_swint0(int irq, FAR void *context)
   if (regs != current_regs)
     {
       swidbg("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t*)current_regs);
+      up_registerdump((const uint32_t *)current_regs);
     }
   else
     {

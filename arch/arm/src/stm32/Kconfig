@@ -190,24 +190,40 @@ config ARCH_CHIP_STM32F100C8
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100CB
 	bool "STM32F100CB"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100R8
 	bool "STM32F100R8"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100RB
 	bool "STM32F100RB"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100RC
 	bool "STM32F100RC"
@@ -215,6 +231,10 @@ config ARCH_CHIP_STM32F100RC
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100RD
 	bool "STM32F100RD"
@@ -222,6 +242,10 @@ config ARCH_CHIP_STM32F100RD
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100RE
 	bool "STM32F100RE"
@@ -229,18 +253,30 @@ config ARCH_CHIP_STM32F100RE
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100V8
 	bool "STM32F100V8"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100VB
 	bool "STM32F100VB"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100VC
 	bool "STM32F100VC"
@@ -248,6 +284,10 @@ config ARCH_CHIP_STM32F100VC
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100VD
 	bool "STM32F100VD"
@@ -255,6 +295,10 @@ config ARCH_CHIP_STM32F100VD
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F100VE
 	bool "STM32F100VE"
@@ -262,6 +306,10 @@ config ARCH_CHIP_STM32F100VE
 	select STM32_STM32F10XX
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F102CB
 	bool "STM32F102CB"
@@ -269,6 +317,8 @@ config ARCH_CHIP_STM32F102CB
 	select STM32_STM32F10XX
 	select STM32_USBACCESSLINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103T8
 	bool "STM32F103T8"
@@ -276,6 +326,7 @@ config ARCH_CHIP_STM32F103T8
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103TB
 	bool "STM32F103TB"
@@ -283,6 +334,7 @@ config ARCH_CHIP_STM32F103TB
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103C4
 	bool "STM32F103C4"
@@ -297,6 +349,8 @@ config ARCH_CHIP_STM32F103C8
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103CB
 	bool "STM32F103CB"
@@ -304,6 +358,8 @@ config ARCH_CHIP_STM32F103CB
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103R8
 	bool "STM32F103R8"
@@ -311,6 +367,8 @@ config ARCH_CHIP_STM32F103R8
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103RB
 	bool "STM32F103RB"
@@ -318,6 +376,8 @@ config ARCH_CHIP_STM32F103RB
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103RC
 	bool "STM32F103RC"
@@ -325,6 +385,10 @@ config ARCH_CHIP_STM32F103RC
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103RD
 	bool "STM32F103RD"
@@ -332,6 +396,10 @@ config ARCH_CHIP_STM32F103RD
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103RE
 	bool "STM32F103RE"
@@ -339,6 +407,10 @@ config ARCH_CHIP_STM32F103RE
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103RG
 	bool "STM32F103RG"
@@ -346,6 +418,10 @@ config ARCH_CHIP_STM32F103RG
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103V8
 	bool "STM32F103V8"
@@ -353,6 +429,8 @@ config ARCH_CHIP_STM32F103V8
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103VB
 	bool "STM32F103VB"
@@ -360,6 +438,8 @@ config ARCH_CHIP_STM32F103VB
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_MEDIUMDENSITY
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103VC
 	bool "STM32F103VC"
@@ -367,6 +447,10 @@ config ARCH_CHIP_STM32F103VC
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103VE
 	bool "STM32F103VE"
@@ -374,6 +458,10 @@ config ARCH_CHIP_STM32F103VE
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F103ZE
 	bool "STM32F103ZE"
@@ -381,18 +469,29 @@ config ARCH_CHIP_STM32F103ZE
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F105VB
 	bool "STM32F105VBT7"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_CONNECTIVITYLINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F107VC
 	bool "STM32F107VC"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_CONNECTIVITYLINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_TIM4
 
 config ARCH_CHIP_STM32F205RG
 	bool "STM32F205RG"
@@ -416,121 +515,247 @@ config ARCH_CHIP_STM32F302K6
 	bool "STM32F302K6"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_I2C3
 
 config ARCH_CHIP_STM32F302K8
 	bool "STM32F302K8"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_I2C3
 
 config ARCH_CHIP_STM32F302CB
 	bool "STM32F302CB"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_USART3
 
 config ARCH_CHIP_STM32F302CC
 	bool "STM32F302CC"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_USART3
 
 config ARCH_CHIP_STM32F302RB
 	bool "STM32F302RB"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
 
 config ARCH_CHIP_STM32F302RC
 	bool "STM32F302RC"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
 
 config ARCH_CHIP_STM32F302VB
 	bool "STM32F302VB"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
 
 config ARCH_CHIP_STM32F302VC
 	bool "STM32F302VC"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F302
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
 
 config ARCH_CHIP_STM32F303K6
 	bool "STM32F303K6"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F303K8
 	bool "STM32F303K8"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F303C6
 	bool "STM32F303C6"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_USART3
 
 config ARCH_CHIP_STM32F303C8
 	bool "STM32F303C8"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_USART3
 
 config ARCH_CHIP_STM32F303CB
 	bool "STM32F303CB"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303CC
 	bool "STM32F303CC"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303RB
 	bool "STM32F303RB"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303RC
 	bool "STM32F303RC"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303RD
 	bool "STM32F303RD"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303RE
 	bool "STM32F303RE"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303VB
 	bool "STM32F303VB"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F303VC
 	bool "STM32F303VC"
 	select ARCH_CORTEXM4
 	select STM32_STM32F30XX
+	select STM32_STM32F303
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USBDEV
 
 config ARCH_CHIP_STM32F372C8
 	bool "STM32F372C8"
@@ -882,8 +1107,13 @@ endchoice
 config STM32_STM32L15XX
 	bool
 	default n
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_RTC_SUBSECONDS if !STM32_LOWDENSITY
 
 config STM32_ENERGYLITE
@@ -904,6 +1134,7 @@ config STM32_STM32F10XX
 	select STM32_HAVE_SPI2 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_RTC_COUNTER
+	select STM32_HAVE_TIM3
 
 config STM32_VALUELINE
 	bool
@@ -1025,6 +1256,8 @@ config STM32_STM32F205
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1039,6 +1272,10 @@ config STM32_STM32F205
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_I2C3
 	select STM32_HAVE_RNG
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -1053,6 +1290,8 @@ config STM32_STM32F207
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1067,6 +1306,10 @@ config STM32_STM32F207
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_I2C3
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
 	select STM32_HAVE_SPI2
@@ -1075,25 +1318,38 @@ config STM32_STM32F207
 config STM32_STM32F30XX
 	bool
 	default n
-	select STM32_HAVE_USBDEV
-	select STM32_HAVE_CCM
+	select STM32_HAVE_CAN1
+	select STM32_HAVE_DAC1
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
 	select STM32_HAVE_TIM6
-	select STM32_HAVE_TIM7
-	select STM32_HAVE_TIM8
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
-	select STM32_HAVE_ADC2
-	select STM32_HAVE_ADC3
-	select STM32_HAVE_ADC4
-	select STM32_HAVE_CAN1
+
+config STM32_STM32F302
+	bool
+	default n
+	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_USBDEV
+
+config STM32_STM32F303
+	bool
+	default n
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_CCM
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_TIM7
 
 config STM32_STM32F37XX
 	bool
 	default n
 	select STM32_HAVE_USBDEV
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1101,14 +1357,21 @@ config STM32_STM32F37XX
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
 	select STM32_HAVE_CAN1
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
 	select STM32_HAVE_USART3
 
 config STM32_STM32F40XX
 	bool
 	default n
 	select STM32_HAVE_OTGFS
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_I2C3
 
 config STM32_STM32F401
 	bool
@@ -1119,8 +1382,6 @@ config STM32_STM32F401
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
-	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3
 
 config STM32_STM32F411
 	bool
@@ -1131,8 +1392,6 @@ config STM32_STM32F411
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
-	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 
@@ -1160,6 +1419,8 @@ config STM32_STM32F405
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 
 config STM32_STM32F407
@@ -1186,6 +1447,8 @@ config STM32_STM32F407
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
 
@@ -1216,10 +1479,10 @@ config STM32_STM32F427
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
-	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
@@ -1250,10 +1513,10 @@ config STM32_STM32F429
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
-	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
@@ -1279,8 +1542,8 @@ config STM32_STM32F446
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
-	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
 	select STM32_HAVE_SPI4
 
 config STM32_DFU
@@ -1337,6 +1600,14 @@ config STM32_HAVE_UART8
 	default n
 
 config STM32_HAVE_TIM1
+	bool
+	default n
+
+config STM32_HAVE_TIM3
+	bool
+	default n
+
+config STM32_HAVE_TIM4
 	bool
 	default n
 
@@ -1428,11 +1699,27 @@ config STM32_HAVE_CAN2
 	bool
 	default n
 
+config STM32_HAVE_DAC1
+	bool
+	default n
+
+config STM32_HAVE_DAC2
+	bool
+	default n
+
 config STM32_HAVE_RNG
 	bool
 	default n
 
 config STM32_HAVE_ETHMAC
+	bool
+	default n
+
+config STM32_HAVE_I2C2
+	bool
+	default n
+
+config STM32_HAVE_I2C3
 	bool
 	default n
 
@@ -1457,12 +1744,12 @@ config STM32_HAVE_SPI6
 	default n
 
 config STM32_HAVE_SAIPLL
-  bool
-  default n
+	bool
+	default n
 
 config STM32_HAVE_I2SPLL
-  bool
-  default n
+	bool
+	default n
 
 # These are the peripheral selections proper
 
@@ -1563,11 +1850,13 @@ config STM32_DMA2
 config STM32_DAC1
 	bool "DAC1"
 	default n
+	depends on STM32_HAVE_DAC1
 	select STM32_DAC
 
 config STM32_DAC2
 	bool "DAC2"
 	default n
+	depends on STM32_HAVE_DAC2
 	select STM32_DAC
 
 config STM32_DCMI
@@ -1600,13 +1889,13 @@ config STM32_I2C1
 config STM32_I2C2
 	bool "I2C2"
 	default n
-	depends on !(STM32_STM32F10XX && STM32_LOWDENSITY)
+	depends on STM32_HAVE_I2C2
 	select STM32_I2C
 
 config STM32_I2C3
 	bool "I2C3"
 	default n
-	depends on STM32_STM32F207 || STM32_STM32F40XX
+	depends on STM32_HAVE_I2C3
 	select STM32_I2C
 
 config STM32_LTDC
@@ -1715,10 +2004,12 @@ config STM32_TIM2
 config STM32_TIM3
 	bool "TIM3"
 	default n
+	depends on STM32_HAVE_TIM3
 
 config STM32_TIM4
 	bool "TIM4"
 	default n
+	depends on STM32_HAVE_TIM4
 
 config STM32_TIM5
 	bool "TIM5"
@@ -2195,14 +2486,136 @@ config STM32_TIM1_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM1_PWM
+
+config STM32_TIM1_MODE
+	int "TIM1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM1_CHANNEL1
+	bool "TIM1 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM1_CHANNEL1
+
+config STM32_TIM1_CH1MODE
+	int "TIM1 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM1_CHANNEL1
+
+config STM32_TIM1_CHANNEL2
+	bool "TIM1 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM1_CHANNEL2
+
+config STM32_TIM1_CH2MODE
+	int "TIM1 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM1_CHANNEL2
+
+config STM32_TIM1_CHANNEL3
+	bool "TIM1 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM1_CHANNEL3
+
+config STM32_TIM1_CH3MODE
+	int "TIM1 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM1_CHANNEL3
+
+config STM32_TIM1_CHANNEL4
+	bool "TIM1 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM1_CHANNEL4
+
+config STM32_TIM1_CH4MODE
+	int "TIM1 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM1_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM1_CHANNEL
 	int "TIM1 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM1_PWM
 	---help---
 		If TIM1 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM1_CHMODE
+	int "TIM1 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM1_PWM
 
 config STM32_TIM2_PWM
 	bool "TIM2 PWM"
@@ -2217,14 +2630,136 @@ config STM32_TIM2_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM2_PWM
+
+config STM32_TIM2_MODE
+	int "TIM2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM2_CHANNEL1
+	bool "TIM2 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM2_CHANNEL1
+
+config STM32_TIM2_CH1MODE
+	int "TIM2 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM2_CHANNEL1
+
+config STM32_TIM2_CHANNEL2
+	bool "TIM2 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM2_CHANNEL2
+
+config STM32_TIM2_CH2MODE
+	int "TIM2 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM2_CHANNEL2
+
+config STM32_TIM2_CHANNEL3
+	bool "TIM2 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM2_CHANNEL3
+
+config STM32_TIM2_CH3MODE
+	int "TIM2 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM2_CHANNEL3
+
+config STM32_TIM2_CHANNEL4
+	bool "TIM2 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM2_CHANNEL4
+
+config STM32_TIM2_CH4MODE
+	int "TIM2 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM2_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM2_CHANNEL
 	int "TIM2 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM2_PWM
 	---help---
 		If TIM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM2_CHMODE
+	int "TIM2 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM2_PWM
 
 config STM32_TIM3_PWM
 	bool "TIM3 PWM"
@@ -2239,14 +2774,136 @@ config STM32_TIM3_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM3_PWM
+
+config STM32_TIM3_MODE
+	int "TIM3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM3_CHANNEL1
+	bool "TIM3 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM3_CHANNEL1
+
+config STM32_TIM3_CH1MODE
+	int "TIM3 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM3_CHANNEL1
+
+config STM32_TIM3_CHANNEL2
+	bool "TIM3 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM3_CHANNEL2
+
+config STM32_TIM3_CH2MODE
+	int "TIM3 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM3_CHANNEL2
+
+config STM32_TIM3_CHANNEL3
+	bool "TIM3 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM3_CHANNEL3
+
+config STM32_TIM3_CH3MODE
+	int "TIM3 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM3_CHANNEL3
+
+config STM32_TIM3_CHANNEL4
+	bool "TIM3 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM3_CHANNEL4
+
+config STM32_TIM3_CH4MODE
+	int "TIM3 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM3_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM3_CHANNEL
 	int "TIM3 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM3_PWM
 	---help---
 		If TIM3 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM3_CHMODE
+	int "TIM3 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM3_PWM
 
 config STM32_TIM4_PWM
 	bool "TIM4 PWM"
@@ -2261,14 +2918,136 @@ config STM32_TIM4_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM4_PWM
+
+config STM32_TIM4_MODE
+	int "TIM4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM4_CHANNEL1
+	bool "TIM4 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM4_CHANNEL1
+
+config STM32_TIM4_CH1MODE
+	int "TIM4 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM4_CHANNEL1
+
+config STM32_TIM4_CHANNEL2
+	bool "TIM4 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM4_CHANNEL2
+
+config STM32_TIM4_CH2MODE
+	int "TIM4 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM4_CHANNEL2
+
+config STM32_TIM4_CHANNEL3
+	bool "TIM4 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM4_CHANNEL3
+
+config STM32_TIM4_CH3MODE
+	int "TIM4 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM4_CHANNEL3
+
+config STM32_TIM4_CHANNEL4
+	bool "TIM4 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM4_CHANNEL4
+
+config STM32_TIM4_CH4MODE
+	int "TIM4 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM4_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM4_CHANNEL
 	int "TIM4 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM4_PWM
 	---help---
 		If TIM4 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM4_CHMODE
+	int "TIM4 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM4_PWM
 
 config STM32_TIM5_PWM
 	bool "TIM5 PWM"
@@ -2283,14 +3062,136 @@ config STM32_TIM5_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM5_PWM
+
+config STM32_TIM5_MODE
+	int "TIM5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM5_CHANNEL1
+	bool "TIM5 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM5_CHANNEL1
+
+config STM32_TIM5_CH1MODE
+	int "TIM5 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM5_CHANNEL1
+
+config STM32_TIM5_CHANNEL2
+	bool "TIM5 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM5_CHANNEL2
+
+config STM32_TIM5_CH2MODE
+	int "TIM5 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM5_CHANNEL2
+
+config STM32_TIM5_CHANNEL3
+	bool "TIM5 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM5_CHANNEL3
+
+config STM32_TIM5_CH3MODE
+	int "TIM5 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM5_CHANNEL3
+
+config STM32_TIM5_CHANNEL4
+	bool "TIM5 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM5_CHANNEL4
+
+config STM32_TIM5_CH4MODE
+	int "TIM5 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM5_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM5_CHANNEL
 	int "TIM5 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM5_PWM
 	---help---
 		If TIM5 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM5_CHMODE
+	int "TIM5 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM5_PWM
 
 config STM32_TIM8_PWM
 	bool "TIM8 PWM"
@@ -2305,14 +3206,136 @@ config STM32_TIM8_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM8_PWM
+
+config STM32_TIM8_MODE
+	int "TIM8 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM8_CHANNEL1
+	bool "TIM8 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM8_CHANNEL1
+
+config STM32_TIM8_CH1MODE
+	int "TIM8 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM8_CHANNEL1
+
+config STM32_TIM8_CHANNEL2
+	bool "TIM8 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM8_CHANNEL2
+
+config STM32_TIM8_CH2MODE
+	int "TIM8 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM8_CHANNEL2
+
+config STM32_TIM8_CHANNEL3
+	bool "TIM8 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM8_CHANNEL3
+
+config STM32_TIM8_CH3MODE
+	int "TIM8 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM8_CHANNEL3
+
+config STM32_TIM8_CHANNEL4
+	bool "TIM8 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM8_CHANNEL4
+
+config STM32_TIM8_CH4MODE
+	int "TIM8 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM8_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM8_CHANNEL
 	int "TIM8 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM8_PWM
 	---help---
 		If TIM8 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM8_CHMODE
+	int "TIM8 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM8_PWM
 
 config STM32_TIM9_PWM
 	bool "TIM9 PWM"
@@ -2327,14 +3350,129 @@ config STM32_TIM9_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM9_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM9_CHANNEL1
+	bool "TIM9 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM9_CHANNEL1
+
+config STM32_TIM9_CH1MODE
+	int "TIM9 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH1OUT
+	bool "TIM9 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM9_CHANNEL1
+
+config STM32_TIM9_CHANNEL2
+	bool "TIM9 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM9_CHANNEL2
+
+config STM32_TIM9_CH2MODE
+	int "TIM9 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH2OUT
+	bool "TIM9 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM9_CHANNEL2
+
+config STM32_TIM9_CHANNEL3
+	bool "TIM9 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM9_CHANNEL3
+
+config STM32_TIM9_CH3MODE
+	int "TIM9 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH3OUT
+	bool "TIM9 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM9_CHANNEL3
+
+config STM32_TIM9_CHANNEL4
+	bool "TIM9 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM9_CHANNEL4
+
+config STM32_TIM9_CH4MODE
+	int "TIM9 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM9_CH4OUT
+	bool "TIM9 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM9_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM9_CHANNEL
 	int "TIM9 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM9_PWM
 	---help---
 		If TIM9 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM9_CHMODE
+	int "TIM9 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM9_PWM
 
 config STM32_TIM10_PWM
 	bool "TIM10 PWM"
@@ -2349,14 +3487,129 @@ config STM32_TIM10_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM10_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM10_CHANNEL1
+	bool "TIM10 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM10_CHANNEL1
+
+config STM32_TIM10_CH1MODE
+	int "TIM10 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH1OUT
+	bool "TIM10 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM10_CHANNEL1
+
+config STM32_TIM10_CHANNEL2
+	bool "TIM10 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM10_CHANNEL2
+
+config STM32_TIM10_CH2MODE
+	int "TIM10 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH2OUT
+	bool "TIM10 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM10_CHANNEL2
+
+config STM32_TIM10_CHANNEL3
+	bool "TIM10 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM10_CHANNEL3
+
+config STM32_TIM10_CH3MODE
+	int "TIM10 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH3OUT
+	bool "TIM10 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM10_CHANNEL3
+
+config STM32_TIM10_CHANNEL4
+	bool "TIM10 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM10_CHANNEL4
+
+config STM32_TIM10_CH4MODE
+	int "TIM10 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM10_CH4OUT
+	bool "TIM10 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM10_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM10_CHANNEL
 	int "TIM10 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM10_PWM
 	---help---
 		If TIM10 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM10_CHMODE
+	int "TIM10 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM10_PWM
 
 config STM32_TIM11_PWM
 	bool "TIM11 PWM"
@@ -2371,14 +3624,129 @@ config STM32_TIM11_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM11_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM11_CHANNEL1
+	bool "TIM11 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM11_CHANNEL1
+
+config STM32_TIM11_CH1MODE
+	int "TIM11 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH1OUT
+	bool "TIM11 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM11_CHANNEL1
+
+config STM32_TIM11_CHANNEL2
+	bool "TIM11 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM11_CHANNEL2
+
+config STM32_TIM11_CH2MODE
+	int "TIM11 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH2OUT
+	bool "TIM11 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM11_CHANNEL2
+
+config STM32_TIM11_CHANNEL3
+	bool "TIM11 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM11_CHANNEL3
+
+config STM32_TIM11_CH3MODE
+	int "TIM11 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH3OUT
+	bool "TIM11 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM11_CHANNEL3
+
+config STM32_TIM11_CHANNEL4
+	bool "TIM11 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM11_CHANNEL4
+
+config STM32_TIM11_CH4MODE
+	int "TIM11 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM11_CH4OUT
+	bool "TIM11 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM11_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM11_CHANNEL
 	int "TIM11 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM11_PWM
 	---help---
 		If TIM11 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM11_CHMODE
+	int "TIM11 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM11_PWM
 
 config STM32_TIM12_PWM
 	bool "TIM12 PWM"
@@ -2393,14 +3761,129 @@ config STM32_TIM12_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM12_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM12_CHANNEL1
+	bool "TIM12 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM12_CHANNEL1
+
+config STM32_TIM12_CH1MODE
+	int "TIM12 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH1OUT
+	bool "TIM12 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM12_CHANNEL1
+
+config STM32_TIM12_CHANNEL2
+	bool "TIM12 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM12_CHANNEL2
+
+config STM32_TIM12_CH2MODE
+	int "TIM12 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH2OUT
+	bool "TIM12 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM12_CHANNEL2
+
+config STM32_TIM12_CHANNEL3
+	bool "TIM12 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM12_CHANNEL3
+
+config STM32_TIM12_CH3MODE
+	int "TIM12 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH3OUT
+	bool "TIM12 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM12_CHANNEL3
+
+config STM32_TIM12_CHANNEL4
+	bool "TIM12 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM12_CHANNEL4
+
+config STM32_TIM12_CH4MODE
+	int "TIM12 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM12_CH4OUT
+	bool "TIM12 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM12_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM12_CHANNEL
 	int "TIM12 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM12_PWM
 	---help---
 		If TIM12 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM12_CHMODE
+	int "TIM12 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM12_PWM
 
 config STM32_TIM13_PWM
 	bool "TIM13 PWM"
@@ -2415,14 +3898,129 @@ config STM32_TIM13_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM13_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM13_CHANNEL1
+	bool "TIM13 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM13_CHANNEL1
+
+config STM32_TIM13_CH1MODE
+	int "TIM13 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH1OUT
+	bool "TIM13 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM13_CHANNEL1
+
+config STM32_TIM13_CHANNEL2
+	bool "TIM13 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM13_CHANNEL2
+
+config STM32_TIM13_CH2MODE
+	int "TIM13 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH2OUT
+	bool "TIM13 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM13_CHANNEL2
+
+config STM32_TIM13_CHANNEL3
+	bool "TIM13 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM13_CHANNEL3
+
+config STM32_TIM13_CH3MODE
+	int "TIM13 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH3OUT
+	bool "TIM13 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM13_CHANNEL3
+
+config STM32_TIM13_CHANNEL4
+	bool "TIM13 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM13_CHANNEL4
+
+config STM32_TIM13_CH4MODE
+	int "TIM13 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM13_CH4OUT
+	bool "TIM13 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM13_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM13_CHANNEL
 	int "TIM13 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM13_PWM
 	---help---
 		If TIM13 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM13_CHMODE
+	int "TIM13 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM13_PWM
 
 config STM32_TIM14_PWM
 	bool "TIM14 PWM"
@@ -2437,14 +4035,129 @@ config STM32_TIM14_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM14_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM14_CHANNEL1
+	bool "TIM14 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM14_CHANNEL1
+
+config STM32_TIM14_CH1MODE
+	int "TIM14 Channel 1 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH1OUT
+	bool "TIM14 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM14_CHANNEL1
+
+config STM32_TIM14_CHANNEL2
+	bool "TIM14 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM14_CHANNEL2
+
+config STM32_TIM14_CH2MODE
+	int "TIM14 Channel 2 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH2OUT
+	bool "TIM14 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM14_CHANNEL2
+
+config STM32_TIM14_CHANNEL3
+	bool "TIM14 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32_TIM14_CHANNEL3
+
+config STM32_TIM14_CH3MODE
+	int "TIM14 Channel 3 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH3OUT
+	bool "TIM14 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32_TIM14_CHANNEL3
+
+config STM32_TIM14_CHANNEL4
+	bool "TIM14 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32_TIM14_CHANNEL4
+
+config STM32_TIM14_CH4MODE
+	int "TIM14 Channel 4 Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM14_CH4OUT
+	bool "TIM14 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32_TIM14_CHANNEL4
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM14_CHANNEL
 	int "TIM14 PWM Output Channel"
 	default 1
 	range 1 4
-	depends on STM32_TIM14_PWM
 	---help---
 		If TIM14 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config STM32_TIM14_CHMODE
+	int "TIM14 Channel Mode"
+	default 0
+	range 0 5 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM14_PWM
 
 config STM32_TIM15_PWM
 	bool "TIM15 PWM"
@@ -2458,14 +4171,81 @@ config STM32_TIM15_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM15_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM15_CHANNEL1
+	bool "TIM15 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM15_CHANNEL1
+
+config STM32_TIM15_CH1MODE
+	int "TIM15 Channel 1 Mode"
+	default 0
+	range 0 3 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM15_CHANNEL1
+
+config STM32_TIM15_CHANNEL2
+	bool "TIM15 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32_TIM15_CHANNEL2
+
+config STM32_TIM15_CH2MODE
+	int "TIM15 Channel 2 Mode"
+	default 0
+	range 0 3 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32_TIM15_CHANNEL2
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM15_CHANNEL
 	int "TIM15 PWM Output Channel"
 	default 1
 	range 1 2
-	depends on STM32_TIM15_PWM
 	---help---
 		If TIM15 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,2}
+
+config STM32_TIM15_CHMODE
+	int "TIM15 Channel Mode"
+	default 0
+	range 0 3 if STM32_STM32F30XX
+	range 0 1 if !STM32_STM32F30XX
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM15_PWM
 
 config STM32_TIM16_PWM
 	bool "TIM16 PWM"
@@ -2479,14 +4259,55 @@ config STM32_TIM16_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM16_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM16_CHANNEL1
+	bool "TIM16 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM16_CHANNEL1
+
+config STM32_TIM16_CH1MODE
+	int "TIM16 Channel 1 Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM16_CHANNEL1
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM16_CHANNEL
 	int "TIM16 PWM Output Channel"
 	default 1
 	range 1 1
-	depends on STM32_TIM16_PWM
 	---help---
 		If TIM16 is enabled for PWM usage, you also need specifies the timer output
 		channel {1}
+
+config STM32_TIM16_CHMODE
+	int "TIM16 Channel Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM16_PWM
 
 config STM32_TIM17_PWM
 	bool "TIM17 PWM"
@@ -2500,14 +4321,64 @@ config STM32_TIM17_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
+if STM32_TIM17_PWM
+
+if STM32_PWM_MULTICHAN
+
+config STM32_TIM17_CHANNEL1
+	bool "TIM17 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32_TIM17_CHANNEL1
+
+config STM32_TIM17_CH1MODE
+	int "TIM17 Channel 1 Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32_TIM17_CHANNEL1
+
+endif # STM32_PWM_MULTICHAN
+
+if !STM32_PWM_MULTICHAN
+
 config STM32_TIM17_CHANNEL
 	int "TIM17 PWM Output Channel"
 	default 1
 	range 1 1
-	depends on STM32_TIM17_PWM
 	---help---
 		If TIM17 is enabled for PWM usage, you also need specifies the timer output
 		channel {1}
+
+config STM32_TIM17_CHMODE
+	int "TIM17 Channel Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32_PWM_MULTICHAN
+
+endif # STM32_TIM17_PWM
+
+config STM32_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+	depends on STM32_TIM1_PWM || STM32_TIM2_PWM || STM32_TIM3_PWM || STM32_TIM4_PWM || STM32_TIM5_PWM || STM32_TIM8_PWM || STM32_TIM9_PWM || STM32_TIM10_PWM || STM32_TIM11_PWM || STM32_TIM12_PWM || STM32_TIM13_PWM || STM32_TIM14_PWM || STM32_TIM15_PWM || STM32_TIM16_PWM || STM32_TIM17_PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Specifies that the PWM driver supports multiple output
+		channels per timer.
 
 config STM32_TIM1_ADC
 	bool "TIM1 ADC"
@@ -4307,3 +6178,71 @@ endmenu
 endmenu
 endif # STM32_DMA2D
 
+menu "QEncoder Driver"
+	depends on QENCODER
+	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
+
+config STM32_QENCODER_FILTER
+	bool "Enable filtering on STM32 QEncoder input"
+	default y
+
+choice
+	depends on STM32_QENCODER_FILTER
+	prompt "Input channel sampling frequency"
+	default STM32_QENCODER_SAMPLE_FDTS_4
+
+config STM32_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config STM32_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config STM32_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config STM32_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config STM32_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config STM32_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config STM32_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	depends on STM32_QENCODER_FILTER
+	prompt "Input channel event count"
+	default STM32_QENCODER_SAMPLE_EVENT_6
+
+config STM32_QENCODER_SAMPLE_EVENT_1
+	depends on STM32_QENCODER_SAMPLE_FDTS
+	bool "1"
+
+config STM32_QENCODER_SAMPLE_EVENT_2
+	depends on STM32_QENCODER_SAMPLE_CKINT
+	bool "2"
+
+config STM32_QENCODER_SAMPLE_EVENT_4
+	depends on STM32_QENCODER_SAMPLE_CKINT
+	bool "4"
+
+config STM32_QENCODER_SAMPLE_EVENT_5
+	depends on STM32_QENCODER_SAMPLE_FDTS_16 || STM32_QENCODER_SAMPLE_FDTS_32
+	bool "5"
+
+config STM32_QENCODER_SAMPLE_EVENT_6
+	depends on !STM32_QENCODER_SAMPLE_FDTS && !STM32_QENCODER_SAMPLE_CKINT
+	bool "6"
+
+config STM32_QENCODER_SAMPLE_EVENT_8
+	depends on !STM32_QENCODER_SAMPLE_FDTS
+	bool "8"
+
+endchoice
+
+endmenu

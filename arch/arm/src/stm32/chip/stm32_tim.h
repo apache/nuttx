@@ -677,8 +677,8 @@
 #define ATIM_CCMR1_OC2CE          (1 << 15) /* Bit 15: Output Compare 2 Clear Enable */
 
 #ifdef CONFIG_STM32_STM32F30XX
-#  define ATIM_CCMR1_OC1M          (1 << 16) /* Bit 16: Output Compare 1 mode - bit 3 */
-#  define ATIM_CCMR1_OC2M          (1 << 24) /* Bit 24: Output Compare 2 mode - bit 3 */
+#  define ATIM_CCMR1_OC1M         (1 << 16) /* Bit 16: Output Compare 1 mode - bit 3 */
+#  define ATIM_CCMR1_OC2M         (1 << 24) /* Bit 24: Output Compare 2 mode - bit 3 */
 #endif
 
 /* Common CCMR (unshifted) Capture/Compare Selection bit-field definitions */
@@ -698,6 +698,10 @@
 #define ATIM_CCMR_MODE_OCREFHI    (5)       /* 101: OCxREF forced high */
 #define ATIM_CCMR_MODE_PWM1       (6)       /* 110: PWM mode 1 */
 #define ATIM_CCMR_MODE_PWM2       (7)       /* 111: PWM mode 2 */
+#define ATIM_CCMR_MODE_COMBINED1  (12)      /* 1100: Combined PWM mode 1 */
+#define ATIM_CCMR_MODE_COMBINED2  (13)      /* 1101: Combined PWM mode 2 */
+#define ATIM_CCMR_MODE_ASYMMETRIC1 (14)     /* 1110: Asymmetric PWM mode 1 */
+#define ATIM_CCMR_MODE_ASYMMETRIC2 (15)     /* 1111: Asymmetric PWM mode 2 */
 
 /* Capture/compare mode register 1 -- Input capture mode */
 
@@ -764,8 +768,8 @@
 #define ATIM_CCMR2_OC4CE          (1 << 15) /* Bit 15: Output Compare 4 Clear Enable */
 
 #ifdef CONFIG_STM32_STM32F30XX
-#  define ATIM_CCMR1_OC3M         1 << 16) /* Bit 16: Output Compare 3 mode - bit 3 */
-#  define ATIM_CCMR1_OC4M         1 << 24) /* Bit 24: Output Compare 4 mode - bit 3 */
+#  define ATIM_CCMR2_OC3M         (1 << 16) /* Bit 16: Output Compare 3 mode - bit 3 */
+#  define ATIM_CCMR2_OC4M         (1 << 24) /* Bit 24: Output Compare 4 mode - bit 3 */
 #endif
 
 /* Capture/compare mode register 2 - Input Capture Mode */

@@ -145,6 +145,65 @@
 #  define HAVE_MIXEDWIDTH_TIMERS 1
 #endif
 
+/* Input filter *********************************************************************/
+#ifdef CONFIG_STM32_QENCODER_FILTER
+#  if defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_1)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
+#    endif
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_CKINT)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_2)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT2
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_4)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT4
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT8
+#    endif
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_2)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd26
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd28
+#    endif
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_4)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd46
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd48
+#    endif
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_8)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd86
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd88
+#    endif
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_16)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_5)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd165
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd166
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd168
+#    endif
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_32)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_5)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd325
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd326
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd328
+#    endif
+#  endif
+
+#  ifndef STM32_QENCODER_ICF
+#    warning "Invalid encoder filter combination, filter disabled"
+#  endif
+#endif
+
+#ifndef STM32_QENCODER_ICF
+#  define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
+#endif
+
 /* Debug ****************************************************************************/
 /* Non-standard debug that may be enabled just for testing the quadrature encoder */
 
@@ -809,7 +868,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   ccmr1 &= ~(GTIM_CCMR1_CC1S_MASK | GTIM_CCMR1_IC1F_MASK);
   ccmr1 |= GTIM_CCMR_CCS_CCIN1 << GTIM_CCMR1_CC1S_SHIFT;
-  ccmr1 |= GTIM_CCMR_ICF_FDTSd46 << GTIM_CCMR1_IC1F_SHIFT;
+  ccmr1 |= STM32_QENCODER_ICF << GTIM_CCMR1_IC1F_SHIFT;
 
   /* Select the Polarity=rising and set the CC1E Bit */
 
@@ -844,7 +903,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   ccmr1 &= ~(GTIM_CCMR1_CC2S_MASK | GTIM_CCMR1_IC2F_MASK);
   ccmr1 |= GTIM_CCMR_CCS_CCIN1 << GTIM_CCMR1_CC2S_SHIFT;
-  ccmr1 |= GTIM_CCMR_ICF_FDTSd46 << GTIM_CCMR1_IC2F_SHIFT;
+  ccmr1 |= STM32_QENCODER_ICF << GTIM_CCMR1_IC2F_SHIFT;
 
   /* Select the Polarity=rising and set the CC2E Bit */
 
@@ -963,7 +1022,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
-  */
+   */
 
   /* Disable further interrupts and stop the timer */
 

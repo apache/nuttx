@@ -60,8 +60,8 @@
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG
 	.globl	_up_lowputc
-	mov.b	r#\code1l		/* Character to print */
-	jsr.a	_up_lowputc		/* Print it */
+	mov.b	r#\code1l					/* Character to print */
+	jsr.a	_up_lowputc					/* Print it */
 #endif
 	.endm
 
@@ -71,11 +71,11 @@
 
 /* The near RAM memory map is as follows:
  *
- * 0x00400 - DATA		Size: Determined by linker
- *           BSS		Size: Determined by linker
+ * 0x00400 - DATA				Size: Determined by linker
+ *           BSS				Size: Determined by linker
  *           Interrupt stack	Size: CONFIG_ARCH_INTERRUPTSTACK
- *           Idle stack		Size: CONFIG_IDLETHREAD_STACKSIZE
- *           Heap		Size: Everything remaining
+ *           Idle stack			Size: CONFIG_IDLETHREAD_STACKSIZE
+ *           Heap				Size: Everything remaining
  * 0x00bff - (end+1)
  */
 
@@ -174,48 +174,48 @@ __start:
 /* Set the interrupt and user stack pointers */
 
 	mov.w	#_enbss, R0
-	ldc	R0, isp			/* Set the interrupt stack pointer to the end of BSS */
+	ldc		R0, isp						/* Set the interrupt stack pointer to the end of BSS */
 	add.w	#CONFIG_IDLETHREAD_STACKSIZE, R0
-	fset	U			/* Set bit 7 (U) to select the user stack pointer */
-	ldc	R0, sp			/* Set the user stack pointer */
+	fset	U							/* Set bit 7 (U) to select the user stack pointer */
+	ldc		R0, sp						/* Set the user stack pointer */
 
 /* Set BCLK speed. At reset, the processor clock  (BLCK) defaults to a divisor of 8.
  * This sets clock to F1 (divide by 1) on XIN: BCLK = XIN frequency.
  */
 
- 	mov.b	#0x01, M16C_PRCR	/* Unprotect CM0 to change clock setting */
-	mov.b	#0x08, M16C_CM0		/* enable CM17 and CM16 to set BCLK to F1
-					 * CM17 & CM16 defaults to 0 after reset and
-					 * so we only need to reset CM06 to 0 */
-	mov.b	#0x00,M16C_PRCR		/* protect CM0 */
+ 	mov.b	#0x01, M16C_PRCR			/* Unprotect CM0 to change clock setting */
+	mov.b	#0x08, M16C_CM0				/* enable CM17 and CM16 to set BCLK to F1
+										 * CM17 & CM16 defaults to 0 after reset and
+										 * so we only need to reset CM06 to 0 */
+	mov.b	#0x00,M16C_PRCR				/* protect CM0 */
 
 /* The two MS bits of the interrupt cause select register must be set to
  * enable the use of INT4 and INT5
  */
 
- 	mov.b	#0xc0, M16C_IFSR	/* Set b7 & b6 if application will use INT4 & INT5 */
-	ldc	#M16C_IRAM_BASE, sb	/* Set sb register (to what?) */
+ 	mov.b	#0xc0, M16C_IFSR			/* Set b7 & b6 if application will use INT4 & INT5 */
+	ldc		#M16C_IRAM_BASE, sb			/* Set sb register (to what?) */
 
 /* Set up INTB to point to location of variable vector table */
 
-	mov.w	_g_svarvect, r0		/* R0 = lower 16-bits */
-	mov.w	_g_svarvect+2, r1	/* R1 = upper 4-bits */
-	ldc	r1, intbh
-	ldc	r0, intbl
+	mov.w	_g_svarvect, r0				/* R0 = lower 16-bits */
+	mov.w	_g_svarvect+2, r1			/* R1 = upper 4-bits */
+	ldc		r1, intbh
+	ldc		r0, intbl
 
 /* Configure the uart so that we can get debug output as soon as possible. */
 
-	.globl	_up_lowsetup		/* Early initialization of UART */
+	.globl	_up_lowsetup				/* Early initialization of UART */
 	jsr.a	_up_lowsetup
 	showprogress 'A'
 
 /* Clear near .bss sections */
 
-	mov.b	#0x00, r0l		/* r0l: 0 */
-	mov.w	_g_snbss, a1		/* a1: start of near .bss */
-	mov.w	_g_enbss, r3		/* r3: end of near .bss */
-	sub.w	a1, r3			/* r3: size of near .bss */
-	sstr.b				/* Clear near .bss */
+	mov.b	#0x00, r0l					/* r0l: 0 */
+	mov.w	_g_snbss, a1				/* a1: start of near .bss */
+	mov.w	_g_enbss, r3				/* r3: end of near .bss */
+	sub.w	a1, r3						/* r3: size of near .bss */
+	sstr.b								/* Clear near .bss */
 
 /* Clear far .bss sections */
 
@@ -227,12 +227,12 @@ __start:
 
 /* Initialize near .data sections (.rodata is not moved) */
 
-	mov.w	_g_enronly, a0		/* a0: Low 16 bits of source address */
-	mov.b	_g_enronly+2, r1h	/* 4 MS of 20-bit source address */
-	mov.w	_g_sndata, a1		/* a1: start of near .data */
-	mov.w	_g_endata, r3		/* r3: end of near .data */
-	sub.w	a1, r3			/* r3: size of near .data */
-	smovf.b				/* Copy source to near .data */
+	mov.w	_g_enronly, a0				/* a0: Low 16 bits of source address */
+	mov.b	_g_enronly+2, r1h			/* 4 MS of 20-bit source address */
+	mov.w	_g_sndata, a1				/* a1: start of near .data */
+	mov.w	_g_endata, r3				/* r3: end of near .data */
+	sub.w	a1, r3						/* r3: size of near .data */
+	smovf.b								/* Copy source to near .data */
 
 /* Initialize far .data sections (.rodata is not moved) */
 
@@ -245,8 +245,8 @@ __start:
 /* Perform early console initialization */
 
 #ifdef USE_EARLYSERIALINIT
-	.globl	_up_earlyconsoleinit	/* Early initialization of console driver */
-	jsr.a	 _up_earlyconsoleinit	/* Call it */
+	.globl	_up_earlyconsoleinit		/* Early initialization of console driver */
+	jsr.a	_up_earlyconsoleinit		/* Call it */
 	showprogress 'D'
 #endif
 
@@ -260,8 +260,8 @@ __start:
 /* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	.globl	_board_led_initialize	/* Boot LED setup */
-	jsr.a	_board_led_initialize	/* Call it */
+	.globl	_board_autoled_initialize	/* Boot LED setup */
+	jsr.a	_board_autoled_initialize	/* Call it */
 #endif
 	showprogress '\n'
 

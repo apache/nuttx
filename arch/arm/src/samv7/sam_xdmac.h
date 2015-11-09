@@ -175,22 +175,30 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 #ifdef CONFIG_DEBUG_DMA
 struct sam_dmaregs_s
 {
-  /* Global Registers */
+  /* Global Registers.
+   *
+   * This includes all readable global XDMAC registers except for the global
+   * interrupt status register (XDMAC_GIS).  Reading from the status
+   * register could cause loss of interrupts.
+   */
 
   uint32_t gtype;   /* Global Type Register */
   uint32_t gcfg;    /* Global Configuration Register */
   uint32_t gwac;    /* Global Weighted Arbiter Configuration Register */
   uint32_t gim;     /* Global Interrupt Mask Register */
-  uint32_t gis;     /* Global Interrupt Status Register */
   uint32_t gs;      /* Global Channel Status Register */
   uint32_t grs;     /* Global Channel Read Suspend Register */
   uint32_t gws;     /* Global Channel Write Suspend Register */
   uint32_t gsws;    /* Global Channel Software Request Status Register */
 
-  /* Channel Registers */
+  /* Channel Registers
+   *
+   * This includes all readable XDMAC channel registers except for the
+   * channel interrupt status register (XDMAC_CIS).  Reading from the status
+   * register could cause loss of interrupts.
+   */
 
   uint32_t cim;     /* Channel Interrupt Mask Register */
-  uint32_t cis;     /* Channel Interrupt Status Register */
   uint32_t csa;     /* Channel Source Address Register */
   uint32_t cda;     /* Channel Destination Address Register */
   uint32_t cnda;    /* Channel Next Descriptor Address Register */

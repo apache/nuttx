@@ -2037,7 +2037,6 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->gcfg   = sam_getdmac(xdmac, SAM_XDMAC_GCFG_OFFSET);
   regs->gwac   = sam_getdmac(xdmac, SAM_XDMAC_GWAC_OFFSET);
   regs->gim    = sam_getdmac(xdmac, SAM_XDMAC_GIM_OFFSET);
-  regs->gis    = sam_getdmac(xdmac, SAM_XDMAC_GIS_OFFSET);
   regs->gs     = sam_getdmac(xdmac, SAM_XDMAC_GS_OFFSET);
   regs->grs    = sam_getdmac(xdmac, SAM_XDMAC_GRS_OFFSET);
   regs->gws    = sam_getdmac(xdmac, SAM_XDMAC_GWS_OFFSET);
@@ -2046,7 +2045,6 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   /* Sample channel registers */
 
   regs->cim    = sam_getdmach(xdmach, SAM_XDMACH_CIM_OFFSET);
-  regs->cis    = sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
   regs->csa    = sam_getdmach(xdmach, SAM_XDMACH_CSA_OFFSET);
   regs->cda    = sam_getdmach(xdmach, SAM_XDMACH_CDA_OFFSET);
   regs->cnda   = sam_getdmach(xdmach, SAM_XDMACH_CNDA_OFFSET);
@@ -2085,14 +2083,12 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   dmadbg("      GCFG[%08x]: %08x\n", SAM_XDMAC_GCFG, regs->gcfg);
   dmadbg("      GWAC[%08x]: %08x\n", SAM_XDMAC_GWAC, regs->gwac);
   dmadbg("       GIM[%08x]: %08x\n", SAM_XDMAC_GIM, regs->gim);
-  dmadbg("       GIS[%08x]: %08x\n", SAM_XDMAC_GIS, regs->gis);
   dmadbg("        GS[%08x]: %08x\n", SAM_XDMAC_GS, regs->gs);
   dmadbg("       GRS[%08x]: %08x\n", SAM_XDMAC_GRS, regs->grs);
   dmadbg("       GWS[%08x]: %08x\n", SAM_XDMAC_GWS, regs->gws);
   dmadbg("      GSWS[%08x]: %08x\n", SAM_XDMAC_GSWS, regs->gsws);
   dmadbg("  DMA Channel Registers:\n");
   dmadbg("       CIM[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CIM_OFFSET, regs->cim);
-  dmadbg("       CIS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CIS_OFFSET, regs->cis);
   dmadbg("       CSA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CSA_OFFSET, regs->csa);
   dmadbg("       CDA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDA_OFFSET, regs->cda);
   dmadbg("      CNDA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CNDA_OFFSET, regs->cnda);

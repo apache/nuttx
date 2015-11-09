@@ -224,7 +224,7 @@ char *up_deviceimage(void)
   if (ret != Z_OK)
     {
       sdbg("inflateInit FAILED: ret=%d msg=\"%s\"\n",
-           ret, strm.msg ? strm.msg : "No message" );
+           ret, strm.msg ? strm.msg : "No message");
       return NULL;
     }
 
@@ -232,12 +232,12 @@ char *up_deviceimage(void)
    * reallocate this a few times to get the size right.
    */
 
-  pbuffer = (char*)kmm_malloc(bufsize);
+  pbuffer = (char *)kmm_malloc(bufsize);
 
   /* Set up the input buffer */
 
   strm.avail_in = sizeof(g_vfatdata);
-  strm.next_in = (Bytef*)g_vfatdata;
+  strm.next_in = (Bytef *)g_vfatdata;
 
   /* Run inflate() on input until output buffer not full */
 
@@ -246,7 +246,7 @@ char *up_deviceimage(void)
       /* Set up to catch the next output chunk in the output buffer */
 
       strm.avail_out = bufsize - offset;
-      strm.next_out  = (Bytef*)&pbuffer[offset];
+      strm.next_out  = (Bytef *)&pbuffer[offset];
 
       /* inflate */
 
@@ -261,7 +261,7 @@ char *up_deviceimage(void)
           case Z_MEM_ERROR:
           case Z_STREAM_ERROR:
               sdbg("inflate FAILED: ret=%d msg=\"%s\"\n",
-                    ret, strm.msg ? strm.msg : "No message" );
+                    ret, strm.msg ? strm.msg : "No message");
               (void)inflateEnd(&strm);
               kmm_free(pbuffer);
               return NULL;
@@ -274,7 +274,7 @@ char *up_deviceimage(void)
 
       if (strm.avail_out == 0)
         {
-          int newbufsize = bufsize + 128*1024;
+          int newbufsize = bufsize + 128 * 1024;
           char *newbuffer = kmm_realloc(pbuffer, newbufsize);
           if (!newbuffer)
             {
@@ -326,42 +326,43 @@ char *up_deviceimage(void)
 #ifdef VFAT_STANDALONE
 int main(int argc, char **argv, char **envp)
 {
-    char *deviceimage;
-    int cmf;
-    int fdict;
-    int flg;
-    int check;
+  char *deviceimage;
+  int cmf;
+  int fdict;
+  int flg;
+  int check;
 
-    cmf = g_vfatdata[0];
-    printf("CMF=%02x: CM=%d CINFO=%d\n", cmf, cmf &0x0f, cmf >> 4);
+  cmf = g_vfatdata[0];
+  printf("CMF=%02x: CM=%d CINFO=%d\n", cmf, cmf &0x0f, cmf >> 4);
 
-    flg   = g_vfatdata[1];
-    fdict = (flg >> 5) & 1;
+  flg   = g_vfatdata[1];
+  fdict = (flg >> 5) & 1;
 
-    printf("FLG=%02x: FCHECK=%d FDICT=%d FLEVEL=%d\n", flg, flg &0x1f, fdict, flg >> 6);
+  printf("FLG=%02x: FCHECK=%d FDICT=%d FLEVEL=%d\n",
+         flg, flg &0x1f, fdict, flg >> 6);
 
-    /* The FCHECK value must be such that CMF and FLG, when viewed as
-     * a 16-bit unsigned integer stored in MSB order (CMF*256 + FLG),
-     * is a multiple of 31.
-     */
+  /* The FCHECK value must be such that CMF and FLG, when viewed as
+   * a 16-bit unsigned integer stored in MSB order (CMF*256 + FLG),
+   * is a multiple of 31.
+   */
 
-    check = cmf*256 + flg;
-    if (check % 31 != 0)
+  check = cmf*256 + flg;
+  if (check % 31 != 0)
     {
-        printf("Fails check: %04x is not a multiple of 31\n", check);
+      printf("Fails check: %04x is not a multiple of 31\n", check);
     }
 
-    deviceimage = up_deviceimage();
-    if (deviceimage)
+  deviceimage = up_deviceimage();
+  if (deviceimage)
     {
-        printf("Inflate SUCCEEDED\n");
-        kmm_free(deviceimage);
-        return 0;
+      printf("Inflate SUCCEEDED\n");
+      kmm_free(deviceimage);
+      return 0;
     }
-    else
+  else
     {
-        printf("Inflate FAILED\n");
-        return 1;
+      printf("Inflate FAILED\n");
+      return 1;
     }
 }
 #endif

@@ -128,6 +128,12 @@
 #  endif
 #endif
 
+/* General Configuration ****************************************************/
+
+#ifndef CONFIG_CAN_TXREADY
+#  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
+#endif
+
 /* MCAN0 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN0
@@ -2435,8 +2441,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           DEBUGASSERT(bt != NULL);
           DEBUGASSERT(bt->bt_baud < SAMV7_MCANCLK_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 16);
-          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
-          DEBUGASSERT(bt->bt_tseg2 > 1 && bt->bt_tseg2 <= 64);
+          DEBUGASSERT(bt->bt_tseg1 > 1 && bt->bt_tseg1 <= 64);
+          DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <= 16);
 
           /* Extract bit timing data */
 
@@ -2642,11 +2648,11 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   DEBUGASSERT(config->ntxfifoq > 0);
 
   /* Reserve a buffer for the transmission, waiting if necessary.  When
-   * mcan_buffer_reserve() returns, we are guaranteed the the TX FIFOQ is
+   * mcan_buffer_reserve() returns, we are guaranteed that the TX FIFOQ is
    * not full and cannot become full at least until we add our packet to
    * the FIFO.
    *
-   * We can't get exclusive access to MAN resource here because that
+   * We can't get exclusive access to MCAN resources here because that
    * lock the MCAN while we wait for a free buffer.  Instead, the
    * scheduler is locked here momentarily.  See discussion in
    * mcan_buffer_reserve() for an explanation.
@@ -2747,8 +2753,8 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * course, the transfer is not complete, but this early notification
    * allows the upper half logic to free resources sooner.
    *
-   * REVISTI:  Should we disable interrupts?  can_txdone() was designed to
-   * be called from and interrupt handler and, hence, may be unsafe when
+   * REVISIT:  Should we disable interrupts?  can_txdone() was designed to
+   * be called from an interrupt handler and, hence, may be unsafe when
    * called from the tasking level.
    */
 
@@ -3039,9 +3045,17 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   regval = *rxbuffer++;
   canregdbg("R0: %08x\n", regval);
 
-  hdr.ch_rtr    = 0;
   hdr.ch_error  = 0;
   hdr.ch_unused = 0;
+
+  if ((regval & BUFFER_R0_RTR) != 0)
+    {
+	  hdr.ch_rtr    = true;
+    }
+  else
+    {
+	  hdr.ch_rtr    = false;
+    }
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
@@ -3190,6 +3204,14 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           mcan_buffer_release(priv);
           handled = true;
+
+#ifdef CONFIG_CAN_TXREADY
+          /* Inform the upper half driver that we are again ready to accept
+           * data in mcan_send().
+           */
+
+          can_txready(dev);
+#endif
         }
       else if ((pending & priv->txints) != 0)
         {
@@ -3452,14 +3474,11 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   /* Global Filter Configuration:
    *
-   *   ANFS=0: Store all rejected extended frame in RX FIFO0
-   *   ANFE=0: Store all rejected extended frame in RX FIFO0
-   *   FFSE=1: Reject all remote frames with 11-bit standard IDs.
-   *   RRFE=1: Reject all remote frames with 29-bit extended IDs.
+   *   ANFS=0: Store all non matching standard frame in RX FIFO0
+   *   ANFE=0: Store all non matching extended frame in RX FIFO0
    */
 
-  regval = MCAN_GFC_RRFE | MCAN_GFC_RRFS | MCAN_GFC_ANFE_RX_FIFO0 |
-           MCAN_GFC_ANFS_RX_FIFO0;
+  regval = MCAN_GFC_ANFE_RX_FIFO0 | MCAN_GFC_ANFS_RX_FIFO0;
   mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
 
   /* Extended ID Filter AND mask  */

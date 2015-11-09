@@ -73,7 +73,7 @@
 
 uint32_t *up_doirq(int irq, uint32_t* regs)
 {
-  board_led_on(LED_INIRQ);
+  board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
@@ -133,7 +133,7 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
       current_regs = NULL;
     }
 
-  board_led_off(LED_INIRQ);
+  board_autoled_off(LED_INIRQ);
 #endif
   return regs;
 }

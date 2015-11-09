@@ -95,10 +95,10 @@ void stm32_mpuinitialize(void)
 
   /* Configure user flash and SRAM space */
 
-  mpu_userflash(USERSPACE->us_textstart,
-                USERSPACE->us_textend - USERSPACE->us_textstart);
+  mpu_user_flash(USERSPACE->us_textstart,
+                 USERSPACE->us_textend - USERSPACE->us_textstart);
 
-  mpu_userintsram(datastart, dataend - datastart);
+  mpu_user_intsram(datastart, dataend - datastart);
 
   /* Then enable the MPU */
 
@@ -117,7 +117,7 @@ void stm32_mpuinitialize(void)
 
 void stm32_mpu_uheap(uintptr_t start, size_t size)
 {
-  mpu_userintsram(start, size);
+  mpu_user_intsram(start, size);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARMV7M_MPU */

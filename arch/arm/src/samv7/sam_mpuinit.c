@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_idle.c
+ * arch/arm/src/common/sam_mpuinit.c
  *
- *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,25 +39,33 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <assert.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/userspace.h>
 
-#include "up_internal.h"
+#include "mpu.h"
+#include "cache.h"
+#include "chip/sam_memorymap.h"
+
+#include "sam_mpuinit.h"
+
+#ifdef CONFIG_ARMV7M_MPU
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef MAX
+#  define MAX(a,b) a > b ? a : b
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) a < b ? a : b
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-static uint8_t g_ledtoggle = 0;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -68,41 +76,75 @@ static uint8_t g_ledtoggle = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
+ * Name: sam_mpu_initialize
  *
  * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
+ *   Configure the MPU to permit user-space access to only restricted SAM3/4
+ *   resources.
  *
  ****************************************************************************/
 
-void up_idle(void)
+void sam_mpu_initialize(void)
 {
-#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-  g_ledtoggle++;
-  if (g_ledtoggle == 0x80)
-    {
-      board_autoled_on(LED_IDLE);
-    }
-  else if (g_ledtoggle == 0x00)
-    {
-      board_autoled_off(LED_IDLE);
-    }
+#ifdef CONFIG_BUILD_PROTECTED
+  uintptr_t datastart;
+  uintptr_t dataend;
 #endif
 
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts,
-   * then process "fake" timer interrupts. Hopefully, something
-   * will wake up.
-   */
+  /* Show MPU information */
 
-  sched_process_timer();
+  mpu_showtype();
+
+#ifdef CONFIG_ARMV7M_DCACHE
+  /* Memory barrier */
+
+  ARM_DMB();
+
+#ifdef CONFIG_SAMV7_QSPI
+  /* Make QSPI memory region strongly ordered */
+
+  mpu_priv_stronglyordered(SAM_QSPIMEM_BASE, SAM_QSPIMEM_SIZE);
+
 #endif
+#endif
+
+#ifdef CONFIG_BUILD_PROTECTED
+  /* Configure user flash and SRAM space */
+
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart);
+
+  mpu_user_flash(USERSPACE->us_textstart,
+                 USERSPACE->us_textend - USERSPACE->us_textstart);
+
+  datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
+
+  DEBUGASSERT(dataend >= datastart);
+
+  mpu_user_intsram(datastart, dataend - datastart);
+#endif
+
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
 }
+
+/****************************************************************************
+ * Name: sam_mpu_uheap
+ *
+ * Description:
+ *  Map the user-heap region.
+ *
+ *  This logic may need an extension to handle external SDRAM).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+void sam_mpu_uheap(uintptr_t start, size_t size)
+{
+  mpu_user_intsram(start, size);
+}
+#endif
+
+#endif /* CONFIG_ARMV7M_MPU */
 

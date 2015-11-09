@@ -68,7 +68,7 @@
 	xref	_z16f_clkinit:ROM
 	xref	_z16f_lowinit:ROM
 #ifdef CONFIG_ARCH_LEDS
-	xref	_board_led_initialize:ROM
+	xref	_board_autoled_initialize:ROM
 #endif
 	xref	_os_start:ROM
 	xref	_up_doirq:ROM

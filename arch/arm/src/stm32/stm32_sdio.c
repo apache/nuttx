@@ -1332,7 +1332,7 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Is the RX FIFO half full or more?  Is so then we must be
                * processing a receive transaction.
-              */
+               */
 
               if ((pending & SDIO_STA_RXFIFOHF) != 0)
                 {

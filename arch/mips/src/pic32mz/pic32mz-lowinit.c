@@ -248,7 +248,7 @@ static inline void pic32mz_k0cache(void)
 {
   register uint32_t regval;
 
-  /* Enable cache on KSEG 0 in the CP0 CONFIG register*/
+  /* Enable cache on KSEG 0 in the CP0 CONFIG register */
 
   asm("\tmfc0 %0,$16,0\n" :  "=r"(regval));
   regval &= ~CP0_CONFIG_K23_MASK;

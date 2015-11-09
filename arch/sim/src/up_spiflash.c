@@ -479,9 +479,9 @@ static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffe
 
   /* 8-bit mode */
 
-  const uint8_t *src  = (const uint8_t*)txbuffer;;
-        uint8_t *dest = (uint8_t*)rxbuffer;
-        uint8_t  word;
+  FAR const uint8_t *src  = (FAR const uint8_t *)txbuffer;
+  FAR uint8_t *dest = (FAR uint8_t *)rxbuffer;
+  uint8_t word;
 
   while (nwords-- > 0)
     {
