@@ -220,7 +220,8 @@ struct smart_struct_s
   uint32_t              unusedsectors;    /* Count of unused sectors (i.e. free when erased) */
   uint32_t              blockerases;      /* Count of unused sectors (i.e. free when erased) */
 #endif
-  uint16_t              neraseblocks;     /* Number of erase blocks or sub-sectors */
+  uint32_t              neraseblocks;     /* Number of erase blocks or sub-sectors */
+  uint32_t              erasesize;        /* Size of an erase block */
   uint16_t              lastallocblock;   /* Last  block we allocated a sector from */
   uint16_t              freesectors;      /* Total number of free sectors */
   uint16_t              releasesectors;   /* Total number of released sectors */
@@ -228,7 +229,6 @@ struct smart_struct_s
   uint16_t              sectorsPerBlk;    /* Number of sectors per erase block */
   uint16_t              sectorsize;       /* Sector size on device */
   uint16_t              totalsectors;     /* Total number of sectors on device */
-  uint32_t              erasesize;        /* Size of an erase block */
   FAR uint8_t          *releasecount;     /* Count of released sectors per erase block */
   FAR uint8_t          *freecount;        /* Count of free sectors per erase block */
   FAR char             *rwbuffer;         /* Our sector read/write buffer */
@@ -924,12 +924,7 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
       geometry->geo_writeenabled  = false;
 #endif
 
-      erasesize = dev->geo.erasesize;
-      if (erasesize == 0)
-        {
-          erasesize = 262144;
-        }
-
+      erasesize                   = dev->geo.erasesize;
       geometry->geo_nsectors      = dev->geo.neraseblocks * erasesize /
                                      dev->sectorsize;
       geometry->geo_sectorsize    = dev->sectorsize;
@@ -971,21 +966,12 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
       return OK;
     }
 
-  erasesize = dev->geo.erasesize;
-  dev->neraseblocks = dev->geo.neraseblocks;
-
-  /* Most FLASH devices have erase size of 64K, but geo.erasesize is only
-   * 16 bits, so it will be zero
-   */
-
-  if (erasesize == 0)
-    {
-      erasesize = 262144;
-    }
-
-  dev->erasesize = erasesize;
-  dev->sectorsize = size;
+  erasesize             = dev->geo.erasesize;
+  dev->neraseblocks     = dev->geo.neraseblocks;
+  dev->erasesize        = erasesize;
+  dev->sectorsize       = size;
   dev->mtdBlksPerSector = dev->sectorsize / dev->geo.blocksize;
+
   if (erasesize / dev->sectorsize > 256)
     {
       /* We can't throw a dbg message here becasue it is too early.
@@ -993,8 +979,8 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
        * it during mksmartfs or mount.
        */
 
-      dev->erasesize = 0;
-      dev->sectorsPerBlk = 256;
+      dev->erasesize       = 0;
+      dev->sectorsPerBlk   = 256;
       dev->availSectPerBlk = 255;
     }
   else
@@ -1014,7 +1000,7 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
   dev->unusedsectors = 0;
-  dev->blockerases = 0;
+  dev->blockerases   = 0;
 #endif
 
   /* Release any existing rwbuffer and sMap */
@@ -1033,8 +1019,8 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
       dev->sBitMap = NULL;
     }
 
-  dev->cache_entries = 0;
-  dev->cache_lastlog = 0xFFFF;
+  dev->cache_entries   = 0;
+  dev->cache_lastlog   = 0xFFFF;
   dev->cache_nextbirth = 0;
 #endif
 
