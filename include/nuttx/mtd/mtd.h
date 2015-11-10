@@ -45,6 +45,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/fs/ioctl.h>
 
@@ -484,7 +485,8 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 struct qspi_dev_s; /* Forward reference */
-FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi);
+FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
+                                        bool unprotect);
 
 /****************************************************************************
  * Name: up_flashinitialize

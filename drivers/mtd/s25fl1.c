@@ -712,7 +712,8 @@ static int s25fl1_unprotect(FAR struct s25fl1_dev_s *priv,
   priv->cmdbuf[1] = sf25fl1_read_status2(priv);
   priv->cmdbuf[2] = sf25fl1_read_status3(priv);
 
-  if ((priv->cmdbuf[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE)
+  if ((priv->cmdbuf[0] & STATUS1_BP_MASK) == STATUS1_BP_NONE &&
+      (priv->cmdbuf[1] & STATUS2_CMP_MASK) == 0)
     {
       /* Protection already disabled */
 
@@ -729,13 +730,14 @@ static int s25fl1_unprotect(FAR struct s25fl1_dev_s *priv,
       s25fl1_write_status(priv);
     }
 
-  /* Set the protection mask to zero.
+  /* Set the protection mask to zero (and not complemented).
    * REVISIT:  This logic should really just re-write the BP bits as
    * necessary to unprotect the range of sectors.
    */
 
   priv->cmdbuf[0] &= ~STATUS1_BP_MASK;
-    s25fl1_write_status(priv);
+  priv->cmdbuf[1] &= ~STATUS2_CMP_MASK;
+  s25fl1_write_status(priv);
 
   /* Check the new status */
 
@@ -1422,7 +1424,7 @@ static int s25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ************************************************************************************/
 
-FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi)
+FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprotect)
 {
   FAR struct s25fl1_dev_s *priv;
   int ret;
@@ -1492,6 +1494,17 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi)
           s25fl1_write_status(priv);
           priv->cmdbuf[1] = sf25fl1_read_status2(priv);
           usleep(50*1000);
+        }
+
+      /* Unprotect FLASH sectors if so requested. */
+
+      if (unprotect)
+        {
+          ret = s25fl1_unprotect(priv, 0, priv->nsectors - 1);
+          if (ret < 0)
+            {
+              fdbg("ERROR: Sector unprotect failed\n");
+            }
         }
 
 #ifdef CONFIG_S25FL1_SECTOR512  /* Simulate a 512 byte sector */
