@@ -1222,7 +1222,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  qspidbg("Frequency %d->%d\n", frequency, actual);
+  qspivdbg("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 

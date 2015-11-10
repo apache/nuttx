@@ -3119,7 +3119,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * for now, an* HSMCI peripheral does correspond to a slot.
    */
 
-  fdbg("slotno: %d\n", slotno);
+  fvdbg("slotno: %d\n", slotno);
 
 #ifdef CONFIG_SAMV7_HSMCI0
   if (slotno == 0)
