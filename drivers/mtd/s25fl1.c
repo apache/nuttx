@@ -302,6 +302,12 @@
 #define CLR_DIRTY(p)               do { (p)->flags &= ~S25FL1_CACHE_DIRTY; } while (0)
 #define CLR_ERASED(p)              do { (p)->flags &= ~S25FL1_CACHE_DIRTY; } while (0)
 
+/* 512 byte sector support **********************************************************/
+
+#define S25FL1_SECTOR512_SHIFT     9
+#define S25FL1_SECTOR512_SIZE      (1 << 9)
+#define S25FL1_ERASED_STATE        0xff
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -1006,9 +1012,15 @@ static int s25fl1_flush_cache(struct s25fl1_dev_s *priv)
 
   if (IS_DIRTY(priv) || IS_ERASED(priv))
     {
+      off_t address;
+
+      /* Convert the erase sector numuber into a FLASH address */
+
+      address = (off_t)priv->esectno << priv->sectorshift;
+
       /* Write entire erase block to FLASH */
 
-      ret = s25fl1_write_page(priv, priv->sector, 1 << priv->sectorshift);
+      ret = s25fl1_write_page(priv, priv->sector, address, 1 << priv->sectorshift);
       if (ret < 0)
         {
           fdbg("ERROR: s25fl1_write_page failed: %d\n", ret);
@@ -1061,8 +1073,8 @@ static FAR uint8_t *s25fl1_read_cache(struct s25fl1_dev_s *priv, off_t sector)
       /* Read the erase block into the cache */
 
       ret = s25fl1_read_byte(priv, priv->sector,
-                              (esectno << priv->sectorshift)
-                              (1 << priv->sectorshift));
+                             (esectno << priv->sectorshift),
+                             (1 << priv->sectorshift));
       if (ret < 0)
         {
           fdbg("ERROR: s25fl1_read_byte failed: %d\n", ret);
@@ -1192,6 +1204,9 @@ static int s25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblo
 {
   FAR struct s25fl1_dev_s *priv = (FAR struct s25fl1_dev_s *)dev;
   size_t blocksleft = nblocks;
+#ifdef CONFIG_S25FL1_SECTOR512
+  int ret;
+#endif
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -1232,7 +1247,9 @@ static int s25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblo
 static ssize_t s25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks, FAR uint8_t *buffer)
 {
+#ifndef CONFIG_S25FL1_SECTOR512
   FAR struct s25fl1_dev_s *priv = (FAR struct s25fl1_dev_s *)dev;
+#endif
   ssize_t nbytes;
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
@@ -1511,7 +1528,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
 #ifdef CONFIG_S25FL1_SECTOR512  /* Simulate a 512 byte sector */
       /* Allocate a buffer for the erase block cache */
 
-      priv->sector = (FAR uint8_t *)QSPI_ALLOC(1 << priv->sectorshift);
+      priv->sector = (FAR uint8_t *)QSPI_ALLOC(qspi, 1 << priv->sectorshift);
       if (priv->sector == NULL)
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */
