@@ -207,7 +207,7 @@ int sam_bringup(void)
        * S25FL1 device.
        */
 
-      mtd = s25fl1_initialize(qspi);
+      mtd = s25fl1_initialize(qspi, true);
       if (!mtd)
         {
           SYSLOG("ERROR: s25fl1_initialize failed\n");
