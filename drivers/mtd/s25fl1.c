@@ -966,6 +966,8 @@ static int s25fl1_write_page(struct s25fl1_dev_s *priv, FAR const uint8_t *buffe
 
       s25fl1_write_enable(priv);
       ret = QSPI_MEMORY(priv->qspi, &meminfo);
+      s25fl1_write_disable(priv);
+
       if (ret < 0)
         {
           fdbg("ERROR: QSPI_MEMORY failed writing address=%06x\n",
@@ -985,7 +987,6 @@ static int s25fl1_write_page(struct s25fl1_dev_s *priv, FAR const uint8_t *buffe
    */
 
   DEBUGASSERT(buflen == 0);
-  s25fl1_write_disable(priv);
   return OK;
 }
 
