@@ -546,17 +546,17 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
   /* Initial register values */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_INITIAL],
-              "RX: Initial Registers");
+              "Initial Registers");
 
   /* Register values after DMA setup */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_SETUP],
-              "RX: After DMA Setup");
+              "After DMA Setup");
 
   /* Register values after DMA start */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_START],
-              "RX: After DMA Start");
+              "After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
    * -OR- DMA timeout.
@@ -569,16 +569,16 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
   if (priv->result == -ETIMEDOUT)
     {
       sam_dmadump(priv->dmach, &priv->dmaregs[DMA_TIMEOUT],
-                  "RX: At DMA timeout");
+                  "At DMA timeout");
     }
   else
     {
       sam_dmadump(priv->dmach, &priv->dmaregs[DMA_CALLBACK],
-                  "RX: At DMA callback");
+                  "At DMA callback");
     }
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER],
-              "RX: At End-of-Transfer");
+              "At End-of-Transfer");
 }
 #endif
 
@@ -1390,7 +1390,7 @@ static int qspi_command(struct qspi_dev_s *dev,
     {
       DEBUGASSERT(cmdinfo->addrlen == 3 || cmdinfo->addrlen == 4);
 
-      /* Set the addressin the IAR.  This is required only if the
+      /* Set the address in the IAR.  This is required only if the
        * instruction frame includes an address, but no data.  When data is
        * preset, the address of the instruction is determined by the address
        * of QSPI memory accesses, and not by the content of the IAR.
