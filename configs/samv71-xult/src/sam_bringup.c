@@ -52,6 +52,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ramdisk.h>
+#include <nuttx/fs/nxffs.h>
 #include <nuttx/binfmt/elf.h>
 
 #include "samv71-xult.h"
@@ -99,7 +100,7 @@ int sam_bringup(void)
 #ifdef HAVE_S25FL1
   FAR struct qspi_dev_s *qspi;
   FAR struct mtd_dev_s *mtd;
-#ifndef HAVE_SMARTFS
+#ifndef HAVE_S25FL1_SMARTFS
   char blockdev[18];
   char chardev[12];
 #endif
@@ -213,13 +214,31 @@ int sam_bringup(void)
           SYSLOG("ERROR: s25fl1_initialize failed\n");
         }
 
-#ifdef HAVE_SMARTFS
+#ifdef HAVE_S25FL1_SMARTFS
       /* Configure the device with no partition support */
 
       ret = smart_initialize(S25FL1_SMART_MINOR, mtd, NULL);
       if (ret != OK)
         {
           SYSLOG("ERROR: Failed to initialize SmartFS: %d\n", ret);
+        }
+
+#elif defined(HAVE_S25FL1_NXFFS)
+      /* Initialize to provide NXFFS on the S25FL1 MTD interface */
+
+      ret = nxffs_initialize(mtd);
+      if (ret < 0)
+        {
+         SYSLOG("ERROR: NXFFS initialization failed: %d\n", ret);
+        }
+
+      /* Mount the file system at /mnt/s25fl1 */
+
+      ret = mount(NULL, "/mnt/s25fl1", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          SYSLOG("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          return ret;
         }
 
 #else

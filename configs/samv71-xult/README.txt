@@ -503,6 +503,8 @@ FLASH:
   CONFIG_S25FL1_QSPIMODE=0
   CONFIG_S25FL1_QSPI_FREQUENCY=108000000
 
+SmartFS
+-------
 I tested using the SmartFS FLASH file system.  This additional options
 enable the SmartFS:
 
@@ -534,6 +536,36 @@ also expect a significant delay.
 A better application design would perform SmartFS initialization
 asynchronously on a separate thread to avoid the delay at the user
 interface.
+
+Update: SmartFS support is disabled temporarily due to some
+integration issues that still need to be resolved.
+
+NXFFS
+-----
+The NXFFS file system is selected with the following settings.
+
+  CONFIG_FS_NXFFS=y
+  CONFIG_NXFFS_ERASEDSTATE=0xff
+  CONFIG_NXFFS_MAXNAMLEN=255
+  CONFIG_NXFFS_PACKTHRESHOLD=32
+  CONFIG_NXFFS_PREALLOCATED=y
+  CONFIG_NXFFS_TAILTHRESHOLD=8192
+
+The NXFFS file system is automatically mounted by logic src/sam_bringup.c when the system boots:
+
+  nsh> mount
+    /mnt/s25fl1 type nxffs
+  nsh> echo "This is a test" >/mnt/s25fl1/atest.txt
+  nsh> ls /mnt/s25fl1
+  /mnt/s25fl1:
+   atest.txt
+  nsh> cat /mnt/s25fl1/atest.txt
+  This is a test
+
+Character Driver
+----------------
+If neither SmartFS nor NXFFS are defined, then the S25FL1 driver will be
+wrapped as a character driver and available as /dev/mtd0.
 
 Networking
 ==========

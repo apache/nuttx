@@ -53,18 +53,19 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#define HAVE_HSMCI       1
-#define HAVE_AUTOMOUNTER 1
-#define HAVE_USB         1
-#define HAVE_USBDEV      1
-#define HAVE_USBMONITOR  1
-#define HAVE_NETWORK     1
-#define HAVE_MACADDR     1
-#define HAVE_MTDCONFIG   1
-#define HAVE_S25FL1      1
-#define HAVE_SMARTFS     1
-#define HAVE_WM8904      1
-#define HAVE_AUDIO_NULL  1
+#define HAVE_HSMCI          1
+#define HAVE_AUTOMOUNTER    1
+#define HAVE_USB            1
+#define HAVE_USBDEV         1
+#define HAVE_USBMONITOR     1
+#define HAVE_NETWORK        1
+#define HAVE_MACADDR        1
+#define HAVE_MTDCONFIG      1
+#define HAVE_S25FL1         1
+#define HAVE_S25FL1_NXFFS   1
+#undef  HAVE_S25FL1_SMARTFS   /* There are some issues to be resolved */
+#define HAVE_WM8904         1
+#define HAVE_AUDIO_NULL     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -187,16 +188,22 @@
 
 #ifndef CONFIG_MTD_S25FL1
 #  undef HAVE_S25FL1
-#  undef HAVE_SMARTFS
+#  undef HAVE_S25FL1_NXFFS
+#  undef HAVE_S25FL1_SMARTFS
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI
 #  undef HAVE_S25FL1
-#  undef HAVE_SMARTFS
+#  undef HAVE_S25FL1_NXFFS
+#  undef HAVE_S25FL1_SMARTFS
+#endif
+
+#ifndef CONFIG_FS_NXFFS
+#  undef HAVE_S25FL1_NXFFS
 #endif
 
 #if !defined(CONFIG_MTD_SMART) || !defined(CONFIG_FS_SMARTFS)
-#  undef HAVE_SMARTFS
+#  undef HAVE_S25FL1_SMARTFS
 #endif
 
 /* If both the S25FL1 FLASH and SmartFS, then this is the minor device
