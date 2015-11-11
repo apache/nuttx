@@ -162,8 +162,12 @@ static const struct spi_ops_s g_spi0ops =
   .cmddata           = lpc43_ssp0cmddata,  /* Provided externally */
 #endif
   .send              = ssp_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = ssp_exchange,
+#else
   .sndblock          = ssp_sndblock,
   .recvblock         = ssp_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = lpc43_ssp0register, /* Provided externally */
 #else
@@ -197,8 +201,12 @@ static const struct spi_ops_s g_spi1ops =
   .cmddata           = lpc43_ssp1cmddata,  /* Provided externally */
 #endif
   .send              = ssp_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = ssp_exchange,
+#else
   .sndblock          = ssp_sndblock,
   .recvblock         = ssp_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = lpc43_ssp1register, /* Provided externally */
 #else
@@ -526,6 +534,76 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)regval;
 }
 
+static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords) {
+  FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
+  union
+  {
+    FAR uint8_t    *p8;
+    FAR uint16_t   *p16;
+    FAR const void *pv;
+  } tx;
+  union
+  {
+    FAR uint8_t    *p8;
+    FAR uint16_t   *p16;
+    FAR const void *pv;
+  } rx;
+  uint32_t data;
+  uint32_t datadummy = (priv->nbits > 8)?0xffff:0xff;
+  uint32_t rxpending = 0;
+
+  /* While there is remaining to be sent (and no synchronization error has occurred) */
+
+  sspdbg("nwords: %d\n", nwords);
+
+  tx.pv = txbuffer;
+  rx.pv = rxbuffer;
+
+  while (nwords || rxpending)
+    {
+      /* Write data to the data register while (1) the TX FIFO is
+       * not full, (2) we have not exceeded the depth of the TX FIFO,
+       * and (3) there are more bytes to be sent.
+       */
+
+      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
+	     (rxpending < LPC43_SSP_FIFOSZ) && nwords)
+	{
+	  if (txbuffer && priv->nbits > 8)
+	    {
+	      data = (uint32_t)*tx.p16++;
+	    }
+	  else
+	    {
+	      data = (uint32_t)*tx.p8++;
+	    }
+
+	  ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
+	  nwords--;
+	  rxpending++;
+	}
+
+      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
+
+      spivdbg("RX: rxpending: %d\n", rxpending);
+      while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
+	{
+	  data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
+	  if (rxbuffer && priv->nbits > 8)
+	    {
+	      *rx.p16++ = (uint16_t)data;
+	    }
+	  else
+	    {
+	      *rx.p8++  = (uint8_t)data;
+	    }
+	  rxpending--;
+	}
+    }
+}
+
 /****************************************************************************
  * Name: ssp_sndblock
  *
@@ -547,72 +625,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
 static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
-  FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
-  union
-  {
-    FAR const uint8_t  *p8;
-    FAR const uint16_t *p16;
-    FAR const void     *pv;
-  } u;
-  uint32_t data;
-  uint32_t sr;
-
-  /* Loop while thre are bytes remaining to be sent */
-
-  sspdbg("nwords: %d\n", nwords);
-  u.pv = buffer;
-  while (nwords > 0)
-    {
-      /* While the TX FIFO is not full and there are bytes left to send */
-
-      while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) && nwords)
-        {
-          /* Fetch the data to send */
-
-          if (priv->nbits > 8)
-            {
-              data = (uint32_t)*u.p16++;
-            }
-          else
-            {
-              data = (uint32_t)*u.p8++;
-            }
-
-          /* Send the data */
-
-          ssp_putreg(priv, LPC43_SSP_DR_OFFSET, data);
-          nwords--;
-        }
-    }
-
-  /* Then discard all card responses until the RX & TX FIFOs are emptied. */
-
-  sspdbg("discarding\n");
-  do
-    {
-      /* Is there anything in the RX fifo? */
-
-      sr = ssp_getreg(priv, LPC43_SSP_SR_OFFSET);
-      if ((sr & SSP_SR_RNE) != 0)
-        {
-          /* Yes.. Read and discard */
-
-          (void)ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-        }
-
-      /* There is a race condition where TFE may go true just before
-       * RNE goes true and this loop terminates prematurely.  The nasty little
-       * delay in the following solves that (it could probably be tuned
-       * to improve performance).
-       */
-
-      else if ((sr & SSP_SR_TFE) != 0)
-        {
-          up_udelay(100);
-          sr = ssp_getreg(priv, LPC43_SSP_SR_OFFSET);
-        }
-    }
-  while ((sr & SSP_SR_RNE) != 0 || (sr & SSP_SR_TFE) == 0);
+  return ssp_exchange(dev, buffer, NULL, nwords);
 }
 
 /****************************************************************************
@@ -636,54 +649,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
 static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
-  FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
-  union
-  {
-    FAR uint8_t  *p8;
-    FAR uint16_t *p16;
-    FAR void     *pv;
-  } u;
-  uint32_t data;
-  uint32_t rxpending = 0;
-
-  /* While there is remaining to be sent (and no synchronization error has occurred) */
-
-  sspdbg("nwords: %d\n", nwords);
-  u.pv = buffer;
-  while (nwords || rxpending)
-    {
-      /* Fill the transmit FIFO with 0xffff...
-       * Write 0xff to the data register while (1) the TX FIFO is
-       * not full, (2) we have not exceeded the depth of the TX FIFO,
-       * and (3) there are more bytes to be sent.
-       */
-
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
-      while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
-             (rxpending < LPC43_SSP_FIFOSZ) && nwords)
-        {
-          ssp_putreg(priv, LPC43_SSP_DR_OFFSET, 0xffff);
-          nwords--;
-          rxpending++;
-        }
-
-      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
-
-      spivdbg("RX: rxpending: %d\n", rxpending);
-      while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
-        {
-          data = (uint8_t)ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-          if (priv->nbits > 8)
-            {
-              *u.p16++ = (uint16_t)data;
-            }
-          else
-            {
-              *u.p8++  = (uint8_t)data;
-            }
-          rxpending--;
-        }
-    }
+  return ssp_exchange(dev, NULL, buffer, nwords);
 }
 
 /****************************************************************************

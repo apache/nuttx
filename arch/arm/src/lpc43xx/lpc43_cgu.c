@@ -461,7 +461,7 @@ void lpc43_pll0usbenable(void)
    * operation and will make the lock signal high once it has regained
    * lock on the input clock
    *
-   * Wait for PLL1 to report that it is locked.
+   * Wait for PLL0 to report that it is locked.
    */
 
   while ((getreg32(LPC43_PLL0USB_STAT) & PLL0USB_STAT_LOCK) == 0);

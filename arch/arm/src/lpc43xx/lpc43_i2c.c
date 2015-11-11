@@ -206,8 +206,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(nbits == 7);
 
-  priv->msg.addr  = addr << 1;
-  priv->msg.flags = 0 ;
+  priv->msg.addr  = addr;
 
   return OK;
 }
@@ -231,7 +230,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
 
   priv->wrcnt      = 0;
   priv->rdcnt      = 0;
-  priv->msg.addr  &= ~0x01;
+  priv->msg.flags  = 0;
   priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
@@ -264,7 +263,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   priv->wrcnt = 0;
   priv->rdcnt = 0;
-  priv->msg.addr |= 0x01;
+  priv->msg.flags  = I2C_M_READ;
   priv->msg.buffer = buffer;
   priv->msg.length = buflen;
 
@@ -364,7 +363,7 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, i
   priv->msgs  = msgs;
   priv->nmsg  = count;
 
-  ret = count - i2c_start(priv);
+  ret = i2c_start(priv);
 
   return ret;
 }
@@ -428,7 +427,7 @@ static int i2c_interrupt(int irq, FAR void *context)
 
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
-      putreg32(msg->addr, priv->base + LPC43_I2C_DAT_OFFSET);  /* set address */
+      putreg32(((I2C_M_READ & msg->flags) == I2C_M_READ)?I2C_READADDR8(msg->addr):I2C_WRITEADDR8(msg->addr), priv->base + LPC43_I2C_DAT_OFFSET);  /* set address */
       putreg32(I2C_CONCLR_STAC, priv->base + LPC43_I2C_CONCLR_OFFSET); /* clear start bit */
       break;
 

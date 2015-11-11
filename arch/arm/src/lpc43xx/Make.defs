@@ -96,6 +96,8 @@ CHIP_CSRCS += lpc43_start.c lpc43_uart.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += lpc43_timerisr.c
+else
+CHIP_CSRCS += lpc43_tickless_rit.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -131,10 +133,10 @@ CHIP_CSRCS += lpc43_spifi.c
 endif
 
 ifeq ($(CONFIG_LPC43_SSP0),y)
-CHIP_CSRCS += lpc43_ssp.c
+CHIP_CSRCS += lpc43_ssp.c lpc43_spi.c
 else
 ifeq ($(CONFIG_LPC43_SSP1),y)
-CHIP_CSRCS += lpc43_ssp.c
+CHIP_CSRCS += lpc43_ssp.c lpc43_spi.c
 endif
 endif
 
