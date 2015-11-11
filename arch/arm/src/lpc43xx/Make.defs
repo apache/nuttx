@@ -133,10 +133,10 @@ CHIP_CSRCS += lpc43_spifi.c
 endif
 
 ifeq ($(CONFIG_LPC43_SSP0),y)
-CHIP_CSRCS += lpc43_ssp.c
+CHIP_CSRCS += lpc43_ssp.c lpc43_spi.c
 else
 ifeq ($(CONFIG_LPC43_SSP1),y)
-CHIP_CSRCS += lpc43_ssp.c
+CHIP_CSRCS += lpc43_ssp.c lpc43_spi.c
 endif
 endif
 
