@@ -202,11 +202,6 @@ ssize_t up_progmem_ispageerased(size_t page);
 
 ssize_t up_progmem_write(size_t addr, const void *buf, size_t count);
 
-/* TODO: Define the following functions and their options:
- *  - up_progmem_protect()
- *  - up_progmem_unprotect()
- */
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
