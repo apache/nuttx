@@ -501,8 +501,7 @@ FLASH:
 
 SmartFS
 -------
-I tested using the SmartFS FLASH file system.  This additional options
-enable the SmartFS:
+The SmartFS file system is selected with the following settings.
 
   CONFIG_FS_SMARTFS=y
   CONFIG_SMARTFS_ERASEDSTATE=0xff
@@ -516,7 +515,8 @@ Upon boot, the on-board S25FL116k flash device will appears as:
 
   /dev/smart0
 
-Before SmartFS can be used, it must be formatted:
+Before SmartFS can be used, it must be formatted. So this command
+must be used one time the first time that the system boots:
 
   nsh> mksmartfs /dev/smart0
 
@@ -532,9 +532,6 @@ also expect a significant delay.
 A better application design would perform SmartFS initialization
 asynchronously on a separate thread to avoid the delay at the user
 interface.
-
-Update: SmartFS support is disabled temporarily due to some
-integration issues that still need to be resolved.
 
 NXFFS
 -----

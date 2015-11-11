@@ -63,7 +63,7 @@
 #define HAVE_MTDCONFIG      1
 #define HAVE_S25FL1         1
 #define HAVE_S25FL1_NXFFS   1
-#undef  HAVE_S25FL1_SMARTFS   /* There are some issues to be resolved */
+#define HAVE_S25FL1_SMARTFS 1
 #define HAVE_WM8904         1
 #define HAVE_AUDIO_NULL     1
 
