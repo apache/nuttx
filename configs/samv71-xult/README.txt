@@ -142,13 +142,9 @@ for additional issues specific to a particular configuration.
      as of this writing. See discussion in include/nuttx/spi/slave.h and
      in the section entitle "SPI Slave" below.
 
-  9. A QSPI FLASH driver was added and verifed on 2015-11-07.  This driver
+  9. A QSPI FLASH driver was added and verifed on 2015-11-10.  This driver
      operated in the memory mapped Serial Memory Mode (SMM).  See the
      "S25FL116K QuadSPI FLASH" section below for futher information.
-
-     There are still issues with writing correctly to the S25FL1 FLASH part.
-     It is not clear as of this writing whether this is an issue with the
-     QSPI driver or with the higher level S25FL1 driver (2015-11-07).
 
 Serial Console
 ==============
