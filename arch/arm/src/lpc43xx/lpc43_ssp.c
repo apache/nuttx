@@ -534,8 +534,30 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)regval;
 }
 
+/****************************************************************************
+ * Name: ssp_exchange
+ *
+ * Description:
+ *   Exahange a block of data from SPI. Required.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to receive data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords) {
+                         FAR void *rxbuffer, size_t nwords)
+{
   FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
   union
   {
@@ -550,7 +572,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     FAR const void *pv;
   } rx;
   uint32_t data;
-  uint32_t datadummy = (priv->nbits > 8)?0xffff:0xff;
+  uint32_t datadummy = (priv->nbits > 8) ? 0xffff : 0xff;
   uint32_t rxpending = 0;
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
@@ -569,38 +591,39 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
-	     (rxpending < LPC43_SSP_FIFOSZ) && nwords)
-	{
-	  if (txbuffer && priv->nbits > 8)
-	    {
-	      data = (uint32_t)*tx.p16++;
-	    }
-	  else
-	    {
-	      data = (uint32_t)*tx.p8++;
-	    }
+         (rxpending < LPC43_SSP_FIFOSZ) && nwords)
+        {
+          if (txbuffer && priv->nbits > 8)
+            {
+              data = (uint32_t)*tx.p16++;
+            }
+          else
+            {
+              data = (uint32_t)*tx.p8++;
+            }
 
-	  ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
-	  nwords--;
-	  rxpending++;
-	}
+          ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
+          nwords--;
+          rxpending++;
+        }
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
       spivdbg("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
-	{
-	  data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-	  if (rxbuffer && priv->nbits > 8)
-	    {
-	      *rx.p16++ = (uint16_t)data;
-	    }
-	  else
-	    {
-	      *rx.p8++  = (uint8_t)data;
-	    }
-	  rxpending--;
-	}
+        {
+          data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
+          if (rxbuffer && priv->nbits > 8)
+            {
+              *rx.p16++ = (uint16_t)data;
+            }
+          else
+            {
+              *rx.p8++  = (uint8_t)data;
+            }
+
+          rxpending--;
+        }
     }
 }
 
@@ -616,7 +639,8 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -640,7 +664,8 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
