@@ -202,7 +202,7 @@ static int kinetis_pendsv(int irq, FAR void *context)
 static int kinetis_dbgmonitor(int irq, FAR void *context)
 {
   (void)irqsave();
-  dbg("PANIC!!! Debug Monitor receieved\n");
+  dbg("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
