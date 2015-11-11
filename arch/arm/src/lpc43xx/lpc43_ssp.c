@@ -137,6 +137,7 @@ static void     ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer
 static void     ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
 static void     ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
 #endif
+
 /* Initialization */
 
 #ifdef CONFIG_LPC43_SSP0
@@ -649,6 +650,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   None
  *
  ****************************************************************************/
+
 #ifndef CONFIG_SPI_EXCHANGE
 static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
@@ -679,10 +681,8 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   return ssp_exchange(dev, NULL, buffer, nwords);
 }
+#endif /* !CONFIG_SPI_EXCHANGE */
 
-#endif
-
-#ifdef CONFIG_LPC43_SSP0
 /****************************************************************************
  * Name: lpc43_ssp0initialize
  *
@@ -697,6 +697,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LPC43_SSP0
 static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
 {
   irqstate_t flags;
