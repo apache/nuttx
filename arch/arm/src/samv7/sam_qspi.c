@@ -1569,6 +1569,9 @@ static int qspi_memory(struct qspi_dev_s *dev,
                        struct qspi_meminfo_s *meminfo)
 {
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
+#ifdef CONFIG_SAMV7_QSPI_DMA
+  bool aligned;
+#endif
 
   DEBUGASSERT(priv != NULL && meminfo != NULL);
 
@@ -1581,9 +1584,16 @@ static int qspi_memory(struct qspi_dev_s *dev,
   qspivdbg("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
+  /* Check for attempt to do unaligned read */
+
+  aligned = IS_ALIGNED((uintptr_t)meminfo->buffer) &&
+            IS_ALIGNED(meminfo->buflen);
+
   /* Can we perform DMA?  Should we perform DMA? */
 
-  if (priv->candma && meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD)
+  if (priv->candma &&
+      meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD &&
+      aligned)
     {
       return qspi_memory_dma(priv, meminfo);
     }

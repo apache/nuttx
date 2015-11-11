@@ -42,11 +42,12 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <arch/samv7/chip.h>  /* For SAMV7_FLASH_SIZE */
-
-#include "sam_flash.h"
+#include <arch/samv7/chip.h>  /* For SAMV7_ALIGNED_FLASH_SIZE */
 
 #include "up_arch.h"
+#include "cache.h"
+
+#include "sam_flash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,10 +75,13 @@
 #define ALIGN_UP(v,m)            (((v) + (m)) & ~(m))
 #define ALIGN_DOWN(v,m)          ((v) & ~(m))
 #define SAMV7_ALIGNED_FLASH_BASE ALIGN_UP(SAMV7_FREE_FLASH_BASE)
-#define SAMV7_FREE_FLASH_SIZE    (SAMV7_FLASH_SIZE - SAMV7_ALIGNED_FLASH_BASE)
+#define SAMV7_FREE_FLASH_SIZE    (SAMV7_ALIGNED_FLASH_SIZE - SAMV7_ALIGNED_FLASH_BASE)
 #define SAMV7_ALIGNED_FLASH_SIZE ALIGN_DOWN(SAMV7_FREE_FLASH_SIZE)
 #define SAMV7_NSECTORS           (SAMV7_ALIGNED_FLASH_SIZE >> SAMV7_SECTOR_SHIFT)
 #define SAMV7_NPAGES             (SAMV7_ALIGNED_FLASH_SIZE >> SAMV7_PAGE_SHIFT)
+
+#define SAMV7_WRITE_ALIGN        (16)
+#define SAMV7_WRITE_ALIGN_MASK   (15)
 
 /****************************************************************************
  * Private Functions
@@ -102,7 +106,7 @@ static void sam_flash_unlock(void)
 
 size_t up_progmem_npages(void)
 {
-  return SAMV7_FLASH_NPAGES;
+  return SAMV7_NPAGES;
 }
 
 /****************************************************************************
@@ -128,7 +132,7 @@ bool up_progmem_isuniform(void)
 
 size_t up_progmem_pagesize(size_t page)
 {
-  return SAMV7_FLASH_PAGESIZE;
+  return SAMV7_PAGE_SIZE;
 }
 
 /****************************************************************************
@@ -138,7 +142,7 @@ size_t up_progmem_pagesize(size_t page)
  *   Address to page conversion
  *
  * Input Parameters:
- *   addr - Address with of without flash offset (absolute or aligned to page0)
+ *   addr - Address with or without flash offset (absolute or aligned to page0)
  *
  * Returned Value:
  *   Page or negative value on error.  The following errors are reported
@@ -150,17 +154,17 @@ size_t up_progmem_pagesize(size_t page)
 
 ssize_t up_progmem_getpage(size_t addr)
 {
-  if (addr >= SAMV7_FLASH_BASE)
+  if (addr >= SAMV7_ALIGNED_FLASH_BASE)
     {
-      addr -= SAMV7_FLASH_BASE;
+      addr -= SAMV7_ALIGNED_FLASH_BASE;
     }
 
-  if (addr >= SAMV7_FLASH_SIZE)
+  if (addr >= SAMV7_ALIGNED_FLASH_SIZE)
     {
       return -EFAULT;
     }
 
-  return addr / SAMV7_FLASH_PAGESIZE;
+  return addr >> SAMV7_PAGE_SHIFT;
 }
 
 /****************************************************************************
@@ -179,12 +183,12 @@ ssize_t up_progmem_getpage(size_t addr)
 
 size_t up_progmem_getaddress(size_t page)
 {
-  if (page >= SAMV7_FLASH_NPAGES)
+  if (page >= SAMV7_NPAGES)
     {
-      return SIZE_MAX;
+      return SAMV7_ALIGNED_FLASH_SIZE;
     }
 
-  return page * SAMV7_FLASH_PAGESIZE + SAMV7_FLASH_BASE;
+  return (page << SAMV7_PAGE_SHIFT) + SAMV7_ALIGNED_FLASH_BASE;
 }
 
 /****************************************************************************
@@ -201,11 +205,11 @@ size_t up_progmem_getaddress(size_t page)
  *   (errno is not set!):
  *
  *     EFAULT: On invalid page
- *     EIO: On unsuccessful erase
- *     EROFS: On access to write protected area
+ *     EIO:    On unsuccessful erase
+ *     EROFS:  On access to write protected area
  *     EACCES: Insufficient permissions (read/write protected)
- *     EPERM: If operation is not permitted due to some other constraints
- *        (i.e. some internal block is not running etc.)
+ *     EPERM:  If operation is not permitted due to some other constraints
+ *             (i.e. some internal block is not running etc.)
  *
  ****************************************************************************/
 
@@ -213,30 +217,28 @@ ssize_t up_progmem_erasepage(size_t page)
 {
   size_t page_address;
 
-  if (page >= SAMV7_FLASH_NPAGES)
+  if (page >= SAMV7_NPAGES)
     {
       return -EFAULT;
     }
 
-  /* Get flash ready and begin erasing single page */
-
-  if (!(getreg32(SAMV7_RCC_CR) & RCC_CR_HSION))
-    {
-      return -EPERM;
-    }
+  /* Erase a single page */
 
   sam_flash_unlock();
 #warning Missing logic
+
+  /* Invalidate I- and D-Cache in this address range */
+#warning Mising logic
 
   /* Verify */
 
   if (up_progmem_ispageerased(page) == 0)
     {
-      return up_progmem_pagesize(page); /* success */
+      return SAMV7_PAGE_SIZE; /* Success */
     }
   else
     {
-      return -EIO; /* failure */
+      return -EIO; /* Failure */
     }
 }
 
@@ -261,18 +263,24 @@ ssize_t up_progmem_erasepage(size_t page)
 ssize_t up_progmem_ispageerased(size_t page)
 {
   size_t addr;
-  size_t count;
-  size_t bwritten = 0;
+  size_t bwritten;
+  int count;
 
-  if (page >= SAMV7_FLASH_NPAGES)
+  if (page >= SAMV7_NPAGES)
     {
       return -EFAULT;
     }
 
-  /* Verify */
+  /* Invalidate D-Cache for this address range */
 
-  for (addr = up_progmem_getaddress(page), count = up_progmem_pagesize(page);
-       count; count--, addr++)
+  addr = up_progmem_getaddress(page);
+  arch_invalidate_dcache(addr, addr + SAMV7_PAGE_SIZE);
+
+  /* Verify that the page is erased (i.e., all 0xff) */
+
+  for (count = SAMV7_PAGE_SIZE, bwritten = 0;
+       count > 0;
+       count--, addr++)
     {
       if (getreg8(addr) != 0xff)
         {
@@ -295,61 +303,71 @@ ssize_t up_progmem_ispageerased(size_t page)
  * Input Parameters:
  *   addr  - Address with or without flash offset (absolute or aligned to page0)
  *   buf   - Pointer to buffer
- *   count - Number of bytes to write *
+ *   count - Number of bytes to write
  *
  * Returned Value:
  *   Bytes written or negative value on error.  The following errors are
  *   reported (errno is not set!)
  *
- *     EINVAL: if count is not aligned with the flash boundaries (i.e.
- *        some MCU's require per half-word or even word access)
+ *     EINVAL: If count is not aligned with the flash boundaries (i.e.
+ *             some MCU's require per half-word or even word access)
  *     EFAULT: On invalid address
- *     EIO: On unsuccessful write
- *     EROFS: On access to write protected area
+ *     EIO:    On unsuccessful write
+ *     EROFS:  On access to write protected area
  *     EACCES: Insufficient permissions (read/write protected)
- *     EPERM: If operation is not permitted due to some other constraints
- *        (i.e. some internal block is not running etc.)
+ *     EPERM:  If operation is not permitted due to some other constraints
+ *             (i.e. some internal block is not running etc.)
  *
  ****************************************************************************/
 
 ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 {
-  uint16_t *hword = (uint16_t *)buf;
+  uint8_t *src = (uint8_t *)buf;
   size_t written = count;
 
-  /* SAMV7 requires half-word access */
+  /* SAMV7 requires 128-bit/16-byte aligned access */
 
-  if (count & 1)
+  if ((addr  & SAMV7_WRITE_ALIGN_MASK) != 0 ||
+      (count & SAMV7_WRITE_ALIGN_MASK) != 0)
     {
       return -EINVAL;
     }
 
   /* Check for valid address range */
 
-  if (addr >= SAMV7_FLASH_BASE)
+  if (addr >= SAMV7_ALIGNED_FLASH_BASE)
     {
-      addr -= SAMV7_FLASH_BASE;
+      /* Convert address to an offset relative to be beginning of the
+       * writable FLASH region.
+       */
+
+      addr -= SAMV7_ALIGNED_FLASH_BASE;
     }
 
-  if ((addr+count) >= SAMV7_FLASH_SIZE)
+  if ((addr + count) >= SAMV7_ALIGNED_FLASH_SIZE)
     {
       return -EFAULT;
     }
 
-  /* Get flash ready and begin flashing */
+  /* Write the data to FLASH */
 
   sam_flash_unlock();
 #warning Missing logic
 
-  for (addr += SAMV7_FLASH_BASE; count; count -= 2, hword++, addr += 2)
+  for (addr += SAMV7_ALIGNED_FLASH_BASE;
+       count;
+       count -= SAMV7_WRITE_ALIGN, src += SAMV7_WRITE_ALIGN, addr += SAMV7_WRITE_ALIGN)
     {
-      /* Write half-word and wait to complete */
+      /* Write 128-bit/16-bytes block to FLASH and wait to complete */
+#warning Mising logic
 
+      /* Invalidate I- and D-Caches for this address range */
+#warning Mising logic
 
       /* Verify */
+#warning Mising logic
 
     }
 
-  modifyreg32(SAMV7_FLASH_CR, FLASH_CR_PG, 0);
   return written;
 }
