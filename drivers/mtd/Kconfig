@@ -114,6 +114,14 @@ config MTD_NRDBLOCKS
 
 endif # MTD_READAHEAD
 
+config MTD_PROGMEM
+	bool "Enable on-chip program FLASH MTD device"
+	default n
+	---help---
+		Enable to support an MTD device that supports the on-chip FLASH
+		using the interfaces defined in include/nuttx/progmem.  Those
+		interfaces must be exported by chip-specific logic.
+
 config MTD_CONFIG
 	bool "Enable Dev Config (MTD based) device"
 	default n

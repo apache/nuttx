@@ -134,7 +134,7 @@ size_t up_progmem_getaddress(size_t page);
  *   Erase selected page.
  *
  * Input Parameters:
- *   page -
+ *   page - The page index to be erased.
  *
  * Returned Value:
  *   Page size or negative value on error.  The following errors are reported
@@ -158,7 +158,7 @@ ssize_t up_progmem_erasepage(size_t page);
  *   Checks whether page is erased
  *
  * Input Parameters:
- *    page -
+ *   page - The page index to be checked.
  *
  * Returned Value:
  *   Returns number of bytes NOT erased or negative value on error. If it

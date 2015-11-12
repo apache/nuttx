@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mtd/skeleton.c
+ * drivers/mtd/mtd_progmem.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,8 +41,10 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 #include <errno.h>
 
+#include <nuttx/progmem.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
@@ -56,35 +58,44 @@
 
 /* This type represents the state of the MTD device.  The struct mtd_dev_s
  * must appear at the beginning of the definition so that you can freely
- * cast between pointers to struct mtd_dev_s and struct skel_dev_s.
+ * cast between pointers to struct mtd_dev_s and struct progmem_dev_s.
  */
 
-struct skel_dev_s
+struct progmem_dev_s
 {
+  /* Publically visible representation of the interface */
+
   struct mtd_dev_s mtd;
 
-  /* Other implementation specific data may follow here */
+  /* Fields unique to the progmem MTD driver */
+
+  bool    initialized;      /* True: Already initialized */
+  uint8_t blkshift;         /* Log2 of the flash block size */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Internal helper functions */
+
+static int32_t progmem_log2(size_t blocksize);
+
 /* MTD driver methods */
 
-static int     skel_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int     progmem_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                  size_t nblocks);
-static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+static ssize_t progmem_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                  size_t nblocks, FAR uint8_t *buf);
-static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+static ssize_t progmem_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                  size_t nblocks, FAR const uint8_t *buf);
-static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset,
+static ssize_t progmem_read(FAR struct mtd_dev_s *dev, off_t offset,
                  size_t nbytes, FAR uint8_t *buffer);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t skel_write(FAR struct mtd_dev_s *dev, off_t offset,
+static ssize_t progmem_write(FAR struct mtd_dev_s *dev, off_t offset,
                  size_t nbytes, FAR const uint8_t *buffer);
 #endif
-static int     skel_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+static int     progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                  unsigned long arg);
 
 /****************************************************************************
@@ -92,20 +103,18 @@ static int     skel_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  ****************************************************************************/
 /* This structure holds the state of the MTD driver */
 
-static struct skel_dev_s g_skeldev =
+static struct progmem_dev_s g_progmem =
 {
   {
-    skel_erase,
-    skel_bread,
-    skel_bwrite,
-    skel_read,
+    progmem_erase,
+    progmem_bread,
+    progmem_bwrite,
+    progmem_read,
 #ifdef CONFIG_MTD_BYTE_WRITE
-    skel_write,
+    progmem_write,
 #endif
-    skel_ioctl
-  },
-
-  /* Initialization of any other implementation specific data goes here */
+    progmem_ioctl
+  }
 };
 
 /****************************************************************************
@@ -113,116 +122,144 @@ static struct skel_dev_s g_skeldev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: skel_erase
+ * Name: progmem_erase
  *
  * Description:
  *   Erase several blocks, each of the size previously reported.
  *
  ****************************************************************************/
 
-static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock,
-                      size_t nblocks)
+static int32_t progmem_log2(uint32_t blocksize)
 {
-  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
+  uint32_t log2 = 0;
 
-  /* The interface definition assumes that all erase blocks are the same
-   * size. If that is not true for this particular device, then transform
-   * the start block and nblocks as necessary.
+  /* Search every bit in the blocksize from bit zero to bit 30 (omitting bit
+   * 31 which is the sign bit on return)
    */
 
+  for (log2 = 0; log2 < 31; log2++, blocksize >>= 1)
+    {
+      /* Is bit zero set? */
+
+      if ((blocksize & 1) != 0)
+        {
+          /* Yes... the value should be exactly one.  We do not support
+           * block sizes that are not exact powers of two.
+           */
+
+          return blocksize == 1 ? log2 : -ENOSYS;
+        }
+    }
+
+  return blocksize == 0 ? -EINVAL : -E2BIG;
+}
+
+/****************************************************************************
+ * Name: progmem_erase
+ *
+ * Description:
+ *   Erase several blocks, each of the size previously reported.
+ *
+ ****************************************************************************/
+
+static int progmem_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                         size_t nblocks)
+{
+  ssize_t result;
+
   /* Erase the specified blocks and return status (OK or a negated errno) */
+
+  while (nblocks > 0)
+    {
+      result = up_progmem_erasepage(startblock);
+      if (result < 0)
+        {
+          return (int)result;
+        }
+
+      /* Setup for the next pass through the loop */
+
+      startblock++;
+      nblocks--;
+    }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: skel_bread
+ * Name: progmem_bread
  *
  * Description:
  *   Read the specified number of blocks into the user provided buffer.
  *
  ****************************************************************************/
 
-static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buf)
+static ssize_t progmem_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                             size_t nblocks, FAR uint8_t *buffer)
 {
-  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
-
-  /* The interface definition assumes that all read/write blocks are the
-   * same size.  If that is not true for this particular device, then
-   * transform the start block and nblocks as necessary.
-   */
+  FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
+  FAR const uint8_t *src;
+  size_t offset;
 
   /* Read the specified blocks into the provided user buffer and return
    * status (The positive, number of blocks actually read or a negated
    * errno).
    */
 
-  return 0;
+  offset = startblock << priv->blkshift;
+  src    = (FAR const uint8_t *)up_progmem_getaddress(offset);
+  memcpy(buffer, src, nblocks << priv->blkshift);
+  return nblocks;
 }
 
 /****************************************************************************
- * Name: skel_bwrite
+ * Name: progmem_bwrite
  *
  * Description:
  *   Write the specified number of blocks from the user provided buffer.
  *
  ****************************************************************************/
 
-static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf)
+static ssize_t progmem_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                              size_t nblocks, FAR const uint8_t *buffer)
 {
-  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
+  FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
+  ssize_t result;
 
-  /* The interface definition assumes that all read/write blocks are the
-   * same size.  If that is not true for this particular device, then
-   * transform the start block and nblocks as necessary.
+  /* Write the specified blocks from the provided user buffer and return status
+   * (The positive, number of blocks actually written or a negated errno)
    */
 
-  /* Write the specified blocks from the provided user buffer and return
-   * status (The positive, number of blocks actually written or a negated
-   * errno)
-   */
-
-  return 0;
+  result = up_progmem_write(up_progmem_getaddress(startblock), buffer,
+                            nblocks << priv->blkshift);
+  return result < 0 ? result : nblocks;
 }
 
 /****************************************************************************
- * Name: skel_read
+ * Name: progmem_read
  *
  * Description:
  *   Read the specified number of bytes to the user provided buffer.
  *
  ****************************************************************************/
 
-static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset,
-                         size_t nbytes, FAR uint8_t *buffer)
+static ssize_t progmem_read(FAR struct mtd_dev_s *dev, off_t offset,
+                            size_t nbytes, FAR uint8_t *buffer)
 {
-  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
-
-  /* Some devices may support byte oriented read (optional).  Byte-oriented
-   * writing is inherently block oriented on most MTD devices and is not
-   * supported.  It is recommended that low-level drivers not support read()
-   * if it requires buffering -- let the higher level logic handle that.  If
-   * the read method is not implemented, just set the method pointer to NULL
-   * in the struct mtd_dev_s instance.
-   */
-
-  /* The interface definition assumes that all read/write blocks are the
-   * same size.  If that is not true for this particular device, then
-   * transform the start block and nblocks as necessary.
-   */
+  FAR const uint8_t *src;
 
   /* Read the specified bytes into the provided user buffer and return
    * status (The positive, number of bytes actually read or a negated
    * errno)
    */
 
-  return 0;
+  src = (FAR const uint8_t *)up_progmem_getaddress(offset);
+  memcpy(buffer, src, nbytes);
+  return nbytes;
 }
 
 /****************************************************************************
- * Name: skel_write
+ * Name: progmem_write
  *
  * Description:
  *   Some FLASH parts have the ability to write an arbitrary number of
@@ -231,20 +268,28 @@ static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t skel_write(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR const uint8_t *buffer)
+static ssize_t progmem_write(FAR struct mtd_dev_s *dev, off_t offset,
+                             size_t nbytes, FAR const uint8_t *buffer)
 {
-  return -ENOSYS;
+  FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
+  ssize_t result;
+
+  /* Write the specified blocks from the provided user buffer and return status
+   * (The positive, number of blocks actually written or a negated errno)
+   */
+
+  result = up_progmem_write(up_progmem_getaddress(offset), buffer, nbytes;
+  return result < 0 ? result : nbytes;
 }
 #endif
 
 /****************************************************************************
- * Name: skel_ioctl
+ * Name: progmem_ioctl
  ****************************************************************************/
 
-static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
+  FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
   switch (cmd)
@@ -263,9 +308,9 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * appear so.
                */
 
-              geo->blocksize    = 512;  /* Size of one read/write block */
-              geo->erasesize    = 4096; /* Size of one erase block */
-              geo->neraseblocks = 1024; /* Number of erase blocks */
+              geo->blocksize    = (1 << priv->blkshift);  /* Size of one read/write block */
+              geo->erasesize    = (1 << priv->blkshift);  /* Size of one erase block */
+              geo->neraseblocks = up_progmem_npages();    /* Number of erase blocks */
               ret               = OK;
           }
         }
@@ -277,12 +322,9 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
           if (ppv)
             {
-              /* If media is directly acccesible, return (void*) base address
-               * of device memory.  NULL otherwise.  It is acceptable to omit
-               * this case altogether and simply return -ENOTTY.
-               */
+              /* Return (void*) base address of FLASH memory. */
 
-              *ppv = NULL;
+              *ppv = (FAR void *)up_progmem_getaddress(0);
               ret  = OK;
             }
         }
@@ -290,9 +332,11 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
+          size_t nblocks = up_progmem_npages();
+
           /* Erase the entire device */
 
-          ret = OK;
+          ret = progmem_erase(dev, 0, nblocks);
         }
         break;
 
@@ -309,7 +353,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: skel_initialize
+ * Name: progmem_initialize
  *
  * Description:
  *   Create and initialize an MTD device instance.  MTD devices are not
@@ -319,11 +363,28 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *skel_initialize(void)
+FAR struct mtd_dev_s *progmem_initialize(void)
 {
-  /* Perform initialization as necessary */
+  FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)&g_progmem;
+  int32_t blkshift;
+
+  /* Perform initialization if necessary */
+
+  if (!g_progmem.initialized)
+    {
+      size_t nblocks = up_progmem_npages();
+      blkshift = progmem_log2(nblocks);
+
+      if (blkshift < 0)
+        {
+          return NULL;
+        }
+
+      g_progmem.blkshift    = blkshift;
+      g_progmem.initialized = true;
+    }
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  return (FAR struct mtd_dev_s *)&g_skeldev;
+  return (FAR struct mtd_dev_s *)priv;
 }
