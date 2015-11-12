@@ -3176,12 +3176,11 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            * call to man_buffer_release(), whether or not the write
            * was successful.
            *
-           * Here we force transmit complete processing just in case.
-           * This could have the side effect of pushing the semaphore
-           * count up to high.
+           * We assume that MCAN_INT_TC will be called for each
+           * message buffer. Except the transfer is cancelled.
+           * TODO: add handling for MCAN_INT_TCF
            */
 
-          pending |= MCAN_INT_TC;
           handled  = true;
         }
 
