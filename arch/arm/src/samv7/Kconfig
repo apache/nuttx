@@ -517,6 +517,24 @@ config SAMV7_GPIOE_IRQ
 
 endif # SAMV7_GPIO_IRQ
 
+menuconfig SAMV7_PROGMEM
+	bool "FLASH program memory"
+	---help---
+		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
+
+if SAMV7_PROGMEM
+
+config SAMV7_PROGMEM_NSECTORS
+	int "Number of 128KB sectors"
+	default 4
+	range 1 15
+	---help---
+		This is the number of 128KB FLASH sectors at the end of the program
+		flash memory that will be reserved for use with by the interfaces
+		prototyped in include/nuttx/progmem.h
+
+endif # SAMV7_PROGMEM
+
 menu "SDRAM Configuration"
 	depends on SAMV7_SDRAMC
 

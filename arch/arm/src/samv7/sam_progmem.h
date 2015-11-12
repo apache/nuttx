@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_flash.c
+ * arch/arm/src/samv7/sam_progmem.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_FLASH_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_FLASH_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_PROGMEM_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_PROGMEM_H
 
 /****************************************************************************
  * Included Files
@@ -42,9 +42,29 @@
 
 #include <nuttx/config.h>
 
-#include "chip.h"
+#include "up_arch.h"
 #include "chip/sam_eefc.h"
 
 #include <nuttx/progmem.h>
 
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_FLASH_H */
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_progmem_initialize
+ *
+ * Description:
+ *   Call to initialize FLASH programming memory access
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_progmem_initialize(void);
+
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_PROGMEM_H */
