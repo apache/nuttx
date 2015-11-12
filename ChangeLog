@@ -11084,4 +11084,7 @@
 	* drivers/mtd/mtd_progmem.c:  Add an upper half MTD device that can
 	  use the interfaces defined in included/nuttx/progmem.h to provide
 	  a standard MTD interface (2015-11-12).
+	* drivers/serial/serial.c, serialirq.c and include/nuttx/serial/serial.h:
+	  Implement high level DMA infrastructure for serial devices.  From
+	  Max Neklyudov (2015-11-12).
 

@@ -249,6 +249,9 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
                */
 
               dev->xmitwaiting = true;
+#ifdef CONFIG_SERIAL_DMA
+              uart_dmatxavail(dev);
+#endif
               uart_enabletxint(dev);
               ret = uart_takesem(&dev->xmitsem, true);
               uart_disabletxint(dev);
@@ -507,6 +510,9 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 
   if (dev->xmit.head != dev->xmit.tail)
     {
+#ifdef CONFIG_SERIAL_DMA
+      uart_dmatxavail(dev);
+#endif
       uart_enabletxint(dev);
     }
 
@@ -707,6 +713,20 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
                */
 
               flags = irqsave();
+
+#ifdef CONFIG_SERIAL_DMA
+              /* If RX buffer is empty move tail and head to zero position */
+
+              if (rxbuf->head == rxbuf->tail)
+                {
+                  rxbuf->head = rxbuf->tail = 0;
+                }
+
+              /* Notify DMA that there is free space in the RX buffer */
+
+              uart_dmarxfree(dev);
+#endif
+
               uart_enablerxint(dev);
 
 #ifdef CONFIG_SERIAL_REMOVABLE
@@ -777,6 +797,27 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
             }
         }
     }
+
+#ifdef CONFIG_SERIAL_DMA
+  flags = irqsave();
+
+  /* If RX buffer is empty move tail and head to zero position */
+
+  if (rxbuf->head == rxbuf->tail)
+    {
+      rxbuf->head = rxbuf->tail = 0;
+    }
+
+  irqrestore(flags);
+
+  /* Notify DMA that there is free space in the RX buffer */
+
+  uart_dmarxfree(dev);
+
+  /* RX interrupt could be disabled by RX buffer overflow. Enable it now. */
+
+  uart_enablerxint(dev);
+#endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
@@ -1279,6 +1320,12 @@ static int uart_open(FAR struct file *filep)
         {
           dev->tc_oflag = 0;
         }
+#endif
+
+#ifdef CONFIG_SERIAL_DMA
+      /* Notify DMA that there is free space in the RX buffer */
+
+      uart_dmarxfree(dev);
 #endif
 
       /* Enable the RX interrupt */
