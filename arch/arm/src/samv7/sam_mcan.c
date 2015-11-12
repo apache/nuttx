@@ -2748,6 +2748,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* And request to send the packet */
 
   mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
+  mcan_dev_unlock(priv);
 
   /* Report that the TX transfer is complete to the upper half logic.  Of
    * course, the transfer is not complete, but this early notification
@@ -2759,8 +2760,6 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
   can_txdone(dev);
-
-  mcan_dev_unlock(priv);
   return OK;
 }
 
