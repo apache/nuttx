@@ -57,10 +57,13 @@
 
 #include "samv71-xult.h"
 
+#if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
+#  include <nuttx/mtd/mtd.h>
+#endif
+
 #ifdef HAVE_S25FL1
-#include <nuttx/spi/qspi.h>
-#include <nuttx/mtd/mtd.h>
-#include "sam_qspi.h"
+#  include <nuttx/spi/qspi.h>
+#  include "sam_qspi.h"
 #endif
 
 #ifdef HAVE_ROMFS
@@ -99,11 +102,13 @@ int sam_bringup(void)
 {
 #ifdef HAVE_S25FL1
   FAR struct qspi_dev_s *qspi;
+#endif
+#if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
   FAR struct mtd_dev_s *mtd;
-#ifndef HAVE_S25FL1_SMARTFS
+#endif
+#if defined(HAVE_S25FL1_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
   char blockdev[18];
   char chardev[12];
-#endif
 #endif
   int ret;
 
@@ -241,7 +246,7 @@ int sam_bringup(void)
           return ret;
         }
 
-#else
+#else /* if  defined(HAVE_S25FL1_CHARDEV) */
       /* Use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(S25FL1_MTD_MINOR, mtd);
@@ -265,6 +270,39 @@ int sam_bringup(void)
           return ret;
         }
 #endif
+    }
+#endif
+
+#ifdef HAVE_PROGMEM_CHARDEV
+  /* Create an instance of the SAMV71 FLASH program memory device driver */
+
+  mtd = progmem_initialize();
+  if (!mtd)
+    {
+      SYSLOG("ERROR: progmem_initialize failed\n");
+    }
+
+  /* Use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(PROGMEM_MTD_MINOR, mtd);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+      return ret;
+    }
+
+  /* Use the minor number to create device paths */
+
+  snprintf(blockdev, 18, "/dev/mtdblock%d", PROGMEM_MTD_MINOR);
+  snprintf(chardev, 12, "/dev/mtd%d", PROGMEM_MTD_MINOR);
+
+  /* Now create a character device on the block device */
+
+  ret = bchdev_register(blockdev, chardev, false);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+      return ret;
     }
 #endif
 

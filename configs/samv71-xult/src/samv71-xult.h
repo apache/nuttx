@@ -53,19 +53,21 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#define HAVE_HSMCI          1
-#define HAVE_AUTOMOUNTER    1
-#define HAVE_USB            1
-#define HAVE_USBDEV         1
-#define HAVE_USBMONITOR     1
-#define HAVE_NETWORK        1
-#define HAVE_MACADDR        1
-#define HAVE_MTDCONFIG      1
-#define HAVE_S25FL1         1
-#define HAVE_S25FL1_NXFFS   1
-#define HAVE_S25FL1_SMARTFS 1
-#define HAVE_WM8904         1
-#define HAVE_AUDIO_NULL     1
+#define HAVE_HSMCI           1
+#define HAVE_AUTOMOUNTER     1
+#define HAVE_USB             1
+#define HAVE_USBDEV          1
+#define HAVE_USBMONITOR      1
+#define HAVE_NETWORK         1
+#define HAVE_MACADDR         1
+#define HAVE_MTDCONFIG       1
+#define HAVE_S25FL1          1
+#define HAVE_S25FL1_NXFFS    1
+#define HAVE_S25FL1_SMARTFS  1
+#define HAVE_S25FL1_CHARDEV  1
+#define HAVE_PROGMEM_CHARDEV 1
+#define HAVE_WM8904          1
+#define HAVE_AUDIO_NULL      1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -190,12 +192,14 @@
 #  undef HAVE_S25FL1
 #  undef HAVE_S25FL1_NXFFS
 #  undef HAVE_S25FL1_SMARTFS
+#  undef HAVE_S25FL1_CHARDEV
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI
 #  undef HAVE_S25FL1
 #  undef HAVE_S25FL1_NXFFS
 #  undef HAVE_S25FL1_SMARTFS
+#  undef HAVE_S25FL1_CHARDEV
 #endif
 
 #ifndef CONFIG_FS_NXFFS
@@ -204,6 +208,20 @@
 
 #if !defined(CONFIG_MTD_SMART) || !defined(CONFIG_FS_SMARTFS)
 #  undef HAVE_S25FL1_SMARTFS
+#endif
+
+#if defined(HAVE_S25FL1_NXFFS) && defined(HAVE_S25FL1_SMARTFS)
+#  undef HAVE_S25FL1_NXFFS
+#endif
+
+#if defined(HAVE_S25FL1_NXFFS) || defined(HAVE_S25FL1_SMARTFS)
+#  undef HAVE_S25FL1_CHARDEV
+#endif
+
+/* On-chip Programming Memory */
+
+#if !defined(CONFIG_SAMV7_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
+#  undef HAVE_PROGMEM_CHARDEV
 #endif
 
 /* If both the S25FL1 FLASH and SmartFS, then this is the minor device
@@ -218,6 +236,10 @@
  */
 
 #define S25FL1_MTD_MINOR 0
+
+/* This is the on-chip progmem memroy driver minor number */
+
+#define PROGMEM_MTD_MINOR 1
 
 /* Audio */
 /* PCM/WM8904 driver */
