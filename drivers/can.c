@@ -531,7 +531,15 @@ static int can_xmit(FAR struct can_dev_s *dev)
   if (dev->cd_xmit.tx_head == dev->cd_xmit.tx_tail)
     {
       DEBUGASSERT(dev->cd_xmit.tx_queue == dev->cd_xmit.tx_head);
+
+      /* We can disable CAN TX interrupts -- unless there is a H/W FIFO.  In
+       * that case, TX interrupts must stay enabled until the H/W FIFO is
+       * fully emptied.
+       */
+
+#ifndef CONFIG_CAN_TXREADY
       dev_txint(dev, false);
+#endif
       return -EIO;
     }
 
@@ -1171,26 +1179,27 @@ int can_txready(FAR struct can_dev_s *dev)
 
   if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
-      /* Send the next message in the S/W FIFO.  In the case where the
-       * H/W TX FIFO is not empty, this should add one more CAN message
-       * to the H/W TX FIFO and can_txdone() should be called, making
-       * space in the S/W FIFO
-       */
-
-      (void)can_xmit(dev);
-
-      /* Inform one waiter that new xmit space is available in the S/W FIFO.
-       * NOTE that is can_txdone() is, indeed, called twice that the tx_sem
-       * will also be posted twice.  This is a little inefficient, but not
-       * harmful.
-       */
-
       /* Are there any threads waiting for space in the xmit FIFO? */
 
       if (dev->cd_ntxwaiters > 0)
         {
+          /* Inform one waiter that space is now available in the S/W
+           * TX FIFO.
+           */
+
           ret = sem_post(&dev->cd_xmit.tx_sem);
         }
+    }
+  else
+    {
+      /* When the H/W FIFO has been emptied, we can disable further TX
+       * interrupts.
+       *
+       * REVISIT:  Does the fact that the S/W FIFO is empty also mean
+       * that the H/W FIFO is also empty?
+       */
+
+      dev_txint(dev, false);
     }
 
   return ret;
