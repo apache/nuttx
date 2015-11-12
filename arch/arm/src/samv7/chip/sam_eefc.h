@@ -78,8 +78,6 @@
 
 /* EEFC Flash Command Register */
 
-Start read unique identifier 0x0E STUI
-
 #define FCMD_GETD                    (0)       /* Get Flash Descriptor */
 #define FCMD_WP                      (1)       /* Write page */
 #define FCMD_WPL                     (2)       /* Write page and lock */
