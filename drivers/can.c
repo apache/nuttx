@@ -1190,17 +1190,23 @@ int can_txready(FAR struct can_dev_s *dev)
           ret = sem_post(&dev->cd_xmit.tx_sem);
         }
     }
+
+#if 0 /* REVISIT */
+  /* REVISIT:  Does the fact that the S/W FIFO is empty also mean that the
+   * H/W FIFO is also empty?  If we really want this to work this way, then
+   * we would probably need and additional parameter to tell us if the H/W
+   * FIFO is empty.
+   */
+
   else
     {
       /* When the H/W FIFO has been emptied, we can disable further TX
        * interrupts.
-       *
-       * REVISIT:  Does the fact that the S/W FIFO is empty also mean
-       * that the H/W FIFO is also empty?
        */
 
       dev_txint(dev, false);
     }
+#endif
 
   return ret;
 }
