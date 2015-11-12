@@ -356,10 +356,12 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  * Name: progmem_initialize
  *
  * Description:
- *   Create and initialize an MTD device instance.  MTD devices are not
- *   registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
- *   end).
+ *   Create and initialize an MTD device instance that can be used to access
+ *   on-chip program memory.
+ *
+ *   MTD devices are not registered in the file system, but are created as
+ *   instances that can be bound to other functions (such as a block or
+ *   character driver front end).
  *
  ****************************************************************************/
 
