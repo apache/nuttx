@@ -105,7 +105,7 @@ size_t up_progmem_pagesize(size_t page);
  *   Page or negative value on error.  The following errors are reported
  *   (errno is not set!):
  *
- *     EFAULT: On invalid address
+ *     -EFAULT: On invalid address
  *
  ****************************************************************************/
 
@@ -140,12 +140,12 @@ size_t up_progmem_getaddress(size_t page);
  *   Page size or negative value on error.  The following errors are reported
  *   (errno is not set!):
  *
- *     EFAULT: On invalid page
- *     EIO:    On unsuccessful erase
- *     EROFS:  On access to write protected area
- *     EACCES: Insufficient permissions (read/write protected)
- *     EPERM:  If operation is not permitted due to some other constraints
- *             (i.e. some internal block is not running etc.)
+ *     -EFAULT: On invalid page
+ *     -EIO:    On unsuccessful erase
+ *     -EROFS:  On access to write protected area
+ *     -EACCES: Insufficient permissions (read/write protected)
+ *     -EPERM:  If operation is not permitted due to some other constraints
+ *              (i.e. some internal block is not running etc.)
  *
  ****************************************************************************/
 
@@ -161,11 +161,11 @@ ssize_t up_progmem_erasepage(size_t page);
  *    page -
  *
  * Returned Value:
- *   Returns number of bytes written or negative value on error. If it
- *   returns zero then complete page is empty (erased).
+ *   Returns number of bytes NOT erased or negative value on error. If it
+ *   returns zero then complete page is erased.
  *
- *   The following errors are reported (errno is not set!)
- *     EFAULT: On invalid page
+ *   The following errors are reported:
+ *     -EFAULT: On invalid page
  *
  ****************************************************************************/
 

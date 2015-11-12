@@ -11076,4 +11076,9 @@
 	  (2015-11-07).
 	* drivers/bch:  Block-to-character (BCH) driver should forward ioctl()
 	  calls to the contained block driver (2015-11-09).
+	* arch/arm/samv7/sam_qspi.c: The QuadSPI driver is now functional
+	  (2015-11-10).
+	* drivers/mtd/s25fl1.c:  The S25FL1xx QuadSPI FLASH driver is now
+	  functional (2015-10-11).
+	* arch/arm/samv7:  Add an on-chip FLASH driver (2015-11-12).
 
