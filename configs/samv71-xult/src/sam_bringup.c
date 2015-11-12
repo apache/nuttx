@@ -66,6 +66,10 @@
 #  include "sam_qspi.h"
 #endif
 
+#ifdef HAVE_PROGMEM_CHARDEV
+#  include "sam_progmem.h"
+#endif
+
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
 #endif
@@ -274,6 +278,10 @@ int sam_bringup(void)
 #endif
 
 #ifdef HAVE_PROGMEM_CHARDEV
+  /* Initialize the SAMV71 FLASH programming memory library */
+
+  sam_progmem_initialize();
+
   /* Create an instance of the SAMV71 FLASH program memory device driver */
 
   mtd = progmem_initialize();
