@@ -79,12 +79,6 @@
 #  error FLASH geometry for this SAMV7 chip not known
 #endif
 
-/* Start address */
-
-#define SAMV7_PROGMEM_NBYTES     (CONFIG_SAMV7_PROGMEM_NSECTORS << SAMV7_SECTOR_SHIFT)
-#define SAMV7_PROGMEM_END        (SAM_INTFLASH_BASE + SAMV7_FLASH_SIZE)
-#define SAMV7_PROGMEM_START      (SAMV7_PROGMEM_END - SAMV7_PROGMEM_NBYTES)
-
 /* Sizes and masks */
 
 #define SAMV7_SECTOR_SIZE        (1 << SAMV7_SECTOR_SHIFT)
@@ -131,11 +125,29 @@
 #define SAMV7_LOCK_REGION_SIZE   (1 << SAMV7_LOCK_REGION_SHIFT)
 #define SAMV7_LOCK_REGION_MASK   (SAMV7_LOCK_REGION_SIZE - 1)
 
-/* Sizes of the programmable region */
+/* Total FLASH sizes */
 
-#define SAMV7_NSECTORS           (CONFIG_SAMV7_PROGMEM_NSECTORS)
-#define SAMV7_NPAGES             SAMV7_SEC2PAGE(CONFIG_SAMV7_PROGMEM_NSECTORS)
-#define SAMV7_NCLUSTERS          SAMV7_SEC2CLUST(CONFIG_SAMV7_PROGMEM_NSECTORS)
+#define SAMV7_TOTAL_NSECTORS     (SAMV7_FLASH_SIZE >> SAMV7_SECTOR_SHIFT)
+#define SAMV7_TOTAL_NPAGES       SAMV7_SEC2PAGE(SAMV7_TOTAL_NSECTORS)
+#define SAMV7_TOTAL_NCLUSTERS    SAMV7_SEC2CLUST(SAMV7_TOTAL_NSECTORS)
+
+/* Start and size of the programmable region  */
+
+#define SAMV7_PROGMEM_NBYTES     (CONFIG_SAMV7_PROGMEM_NSECTORS << SAMV7_SECTOR_SHIFT)
+#define SAMV7_PROGMEM_END        (SAM_INTFLASH_BASE + SAMV7_FLASH_SIZE)
+#define SAMV7_PROGMEM_START      (SAMV7_PROGMEM_END - SAMV7_PROGMEM_NBYTES)
+
+#define SAMV7_PROGMEM_NPAGES     SAMV7_SEC2PAGE(CONFIG_SAMV7_PROGMEM_NSECTORS)
+#define SAMV7_PROGMEM_ENDPAGE    (SAMV7_TOTAL_NPAGES)
+#define SAMV7_PROGMEM_STARTPAGE  (SAMV7_PROGMEM_ENDPAGE - SAMV7_PROGMEM_NPAGES)
+
+#define SAMV7_PROGMEM_NCLUSTERS  SAMV7_SEC2CLUST(CONFIG_SAMV7_PROGMEM_NSECTORS)
+#define SAMV7_PROGMEM_ENDCLUST   (SAMV7_TOTAL_NCLUSTERS)
+#define SAMV7_PROGMEM_STARTCLUST (SAMV7_PROGMEM_ENDCLUST - SAMV7_PROGMEM_NCLUSTERS)
+
+#define SAMV7_PROGMEM_NSECTORS   (CONFIG_SAMV7_PROGMEM_NSECTORS)
+#define SAMV7_PROGMEM_ENDSEC     (SAMV7_TOTAL_NSECTORS)
+#define SAMV7_PROGMEM_STARTSEC   (SAMV7_PROGMEM_ENDSEC - CONFIG_SAMV7_PROGMEM_NSECTORS)
 
 /* Misc stuff */
 
@@ -159,7 +171,7 @@ static sem_t g_page_sem;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: page_lock
+ * Name: page_buffer_lock
  *
  * Description:
  *   Get exclusive access to the global page buffer
@@ -172,7 +184,7 @@ static sem_t g_page_sem;
  *
  ****************************************************************************/
 
-static void page_lock(void)
+static void page_buffer_lock(void)
 {
   while (sem_wait(&g_page_sem) < 0)
     {
@@ -188,7 +200,7 @@ static void page_lock(void)
     }
 }
 
-#define page_unlock() sem_post(&g_page_sem)
+#define page_buffer_unlock() sem_post(&g_page_sem)
 
 /****************************************************************************
  * Name: efc_command
@@ -364,7 +376,7 @@ void sam_progmem_initialize(void)
 
 size_t up_progmem_npages(void)
 {
-  return SAMV7_NCLUSTERS;
+  return SAMV7_PROGMEM_NCLUSTERS;
 }
 
 /****************************************************************************
@@ -442,7 +454,7 @@ ssize_t up_progmem_getpage(size_t address)
 
 size_t up_progmem_getaddress(size_t cluster)
 {
-  if (cluster >= SAMV7_NCLUSTERS)
+  if (cluster >= SAMV7_PROGMEM_NCLUSTERS)
     {
       return SAMV7_PROGMEM_NBYTES;
     }
@@ -479,14 +491,14 @@ ssize_t up_progmem_erasepage(size_t cluster)
   uint32_t arg;
   int ret;
 
-  if (cluster >= SAMV7_NCLUSTERS)
+  if (cluster >= SAMV7_PROGMEM_NCLUSTERS)
     {
       return -EFAULT;
     }
 
   /* Get the page number of the start of the cluster */
 
-  page = SAMV7_CLUST2PAGE((uint32_t)cluster);
+  page = SAMV7_CLUST2PAGE((uint32_t)cluster) + SAMV7_PROGMEM_STARTPAGE;
 
   /* Erase all pages in the cluster */
 
@@ -503,15 +515,15 @@ ssize_t up_progmem_erasepage(size_t cluster)
    */
 
 #if SAMV7_PAGE_PER_CLUSTER == 32
-    arg   = (page << 2) | 3;   /* Not valid for small 8 KB sectors */
+    arg   = page | 3;   /* Not valid for small 8 KB sectors */
 #elif SAMV7_PAGE_PER_CLUSTER == 16
-    arg   = (page << 2) | 2;
+    arg   = page | 2;
 #elif SAMV7_PAGE_PER_CLUSTER == 8
 #  error Cluster size of 8 not suportted
-    arg   = (page << 2) | 1;   /* 0nly valid for small 8 KB sectors */
+    arg   = page | 1;   /* 0nly valid for small 8 KB sectors */
 #elif SAMV7_PAGE_PER_CLUSTER == 4
 #  error Cluster size of 4 not suportted
-    arg   = (page << 2) | 0;   /* 0nly valid for small 8 KB sectors */
+    arg   = page | 0;   /* 0nly valid for small 8 KB sectors */
 #else
 #  error Unsupported/undefined pages-per-cluster size
 #endif
@@ -563,7 +575,7 @@ ssize_t up_progmem_ispageerased(size_t cluster)
   size_t nwritten;
   int nleft;
 
-  if (cluster >= SAMV7_NCLUSTERS)
+  if (cluster >= SAMV7_PROGMEM_NCLUSTERS)
     {
       return -EFAULT;
     }
@@ -625,7 +637,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
   size_t i;
   int ret;
 
-  /* Convert the address into a FLASH offset, if necessary */
+  /* Convert the address into a FLASH byte offset, if necessary */
 
   offset = address;
   if (address >= SAMV7_PROGMEM_START)
@@ -648,12 +660,12 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
    * offset into the page.
    */
 
-  page    = offset >> SAMV7_PAGE_SHIFT;
+  page = SAMV7_BYTE2PAGE((uint32_t)offset) + SAMV7_PROGMEM_STARTPAGE;
   offset &= SAMV7_PAGE_MASK;
 
   /* Get exclusive access to the global page buffer */
 
-  page_lock();
+  page_buffer_lock();
 
   /* Make sure that the FLASH is unlocked */
 
@@ -682,11 +694,19 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
         {
           /* Yes, copy data into global page buffer */
 
-          memcpy(g_page_buffer, dest, offset);
+          if (offset > 0)
+            {
+              memcpy(g_page_buffer, dest, offset);
+            }
+
           memcpy((uint8_t *)g_page_buffer + offset, buffer, xfrsize);
-          memcpy((uint8_t *)g_page_buffer + offset + xfrsize,
-                 (const uint8_t *)dest + offset + xfrsize,
-                 SAMV7_PAGE_SIZE - offset - xfrsize);
+
+          if (offset + xfrsize < SAMV7_PAGE_SIZE)
+            {
+              memcpy((uint8_t *)g_page_buffer + offset + xfrsize,
+                     (const uint8_t *)dest + offset + xfrsize,
+                     SAMV7_PAGE_SIZE - offset - xfrsize);
+            }
 
           src = g_page_buffer;
         }
@@ -720,6 +740,6 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
       page++;
     }
 
-  page_unlock();
+  page_buffer_unlock();
   return written;
 }
