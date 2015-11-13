@@ -577,15 +577,18 @@ D-Cache must be configured in write-through mode:
 
   CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y
 
-The total FLASH is organized as 128KB/sector x 16 sectors = 2MB.  The
-sectors are all uniform (except for sector zero which will never be used
-by the driver).
+The total FLASH on the SAMV71 is organized as 128KB/sector x 16 sectors
+= 2MB.  The sectors are all uniform (except for sector zero which will
+never be used by the driver).
 
-In this configuration I have aside 8 sectors, or 8 * 128KB = 1MB of the
-FLASH for testing.  Ideally, one should also modify the linker script and
-reduce the size of the available FLASH by 1MB in this case to avoid
-difficult run-time problems.  I did not do that because I know that my
-test program is small.
+The configuration sets aside 8 sectors, or 8 * 128KB = 1MB of the FLASH
+for programmable memory (CONFIG_SAMV7_PROGMEM_NSECTORS=8).  The exact
+number of sectors set aside is optional.
+
+NOTE: Ideally, one should also modify the linker script and reduce the size
+of the available FLASH the amount set aside for program usage to avoid
+difficult run-time problems.  That would be 1MB in this configuration.  I
+did not do that only because I know that my test program is small.
 
 When the system boots, you can see the FLASH driver:
 
@@ -610,7 +613,7 @@ of 16 pages or 8KB.  In the code, I you will see that I refer to these
 groups of 16 pages as "clusters."  So the cluster is the smallest thing
 that you can perform a read/write/modify operation on.
 
-I am using 8 sectors = 16 *8 = 128 clusters (aka blocks).  You can see
+Using 8 sectors yields 16 *8 = 128 clusters (aka blocks).  You can see
 this when the apps/examples/media test runs:
 
   nsh> media
@@ -634,6 +637,12 @@ this when the apps/examples/media test runs:
   ...
   Re-read/Verify: Block 127
   nsh>
+
+NOTE: The media test can be added to the NSH configuration with:
+
+  CONFIG_EXAMPLES_MEDIA=y
+  CONFIG_EXAMPLES_MEDIA_BLOCKSIZE=8192
+  CONFIG_EXAMPLES_MEDIA_DEVPATH="/dev/mtd1"
 
 Networking
 ==========
