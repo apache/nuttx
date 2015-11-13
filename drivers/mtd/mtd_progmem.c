@@ -374,13 +374,22 @@ FAR struct mtd_dev_s *progmem_initialize(void)
 
   if (!g_progmem.initialized)
     {
-      size_t nblocks = up_progmem_npages();
-      blkshift = progmem_log2(nblocks);
+      /* Get the size of one block.  Here we assume that the block size is
+       * uniform and that the size of block0 is the same as the size of any
+       * other block.
+       */
 
+      size_t blocksize = up_progmem_pagesize(0);
+
+     /* Calculate Log2 of the flash block size */
+
+      blkshift = progmem_log2(blocksize);
       if (blkshift < 0)
         {
           return NULL;
         }
+
+      /* Save the configuration data */
 
       g_progmem.blkshift    = blkshift;
       g_progmem.initialized = true;
