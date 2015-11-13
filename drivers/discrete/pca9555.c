@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/i2c.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/discrete/ioexpander.h>
@@ -438,21 +439,6 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 #ifndef CONFIG_PCA9555_INT_DISABLE
 
 /****************************************************************************
- * Name: pca9555_gpioworker
- *
- * Description:
- *  See include/nuttx/discrete/ioexpander.h
- *
- ****************************************************************************/
-
-static int pca9555_attach(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                          ioexpander_handler_t handler)
-{
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
-  return 0;
-}
-
-/****************************************************************************
  * Name: pca9555_irqworker
  *
  * Description:
@@ -461,32 +447,46 @@ static int pca9555_attach(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  *
  ****************************************************************************/
 
-static void pca9555_irqworker(FAR struct pca9555_dev_s *priv)
+static void pca9555_irqworker(void *arg)
 {
-  uint8_t regval;
-  uint8_t pinmask;
-  int pin;
+  uint8_t addr = PCA9555_REG_INPUT;
+  uint8_t buf[2];
+  int ret;
+  FAR struct pca9555_dev_s *dev = (FAR struct pca9555_dev_s*)arg;
 
-  /* Get the set of pending GPIO interrupts */
+  /* read inputs */
+  ret = I2C_WRITEREAD(dev->i2c, &addr, 1, buf, 2);
+  dbg("> %02X %02X\n",buf[0],buf[1]);
 
-  /* Look at each pin */
-
-  for (pin = 0; pin < PCA9555_GPIO_NPINS; pin++)
-    {
-          /* Check if we have a handler for this interrupt (there should
-           * be one)
-           */
-
-              /* Interrupt is pending... dispatch the interrupt to the
-               * callback
-               */
-
-          /* Clear the pending GPIO interrupt by writing a '1' to the
-           * pin position in the status register.
-           */
-
-    }
+  /* re-enable */
+  dev->config->enable(dev->config, TRUE);
 }
+
+static int pca9555_interrupt(int irq, FAR void *context)
+{
+  /* To support multiple devices,
+   * retrieve the priv structure using the irq number */
+
+  register FAR struct pca9555_dev_s *dev = &g_pca9555;
+
+  /* In complex environments, we cannot do I2C transfers from the interrupt
+   * handler because semaphores are probably used to lock the I2C bus.  In
+   * this case, we will defer processing to the worker thread.  This is also
+   * much kinder in the use of system resources and is, therefore, probably
+   * a good thing to do in any event.
+   */
+
+  DEBUGASSERT(work_available(&dev->work));
+
+  /* Notice that further GPIO interrupts are disabled until the work is
+   * actually performed.  This is to prevent overrun of the worker thread.
+   * Interrupts are re-enabled in pca9555_irqworker() when the work is completed.
+   */
+
+  dev->config->enable(dev->config, FALSE);
+  return work_queue(HPWORK, &dev->work, pca9555_irqworker, (FAR void *)dev, 0);
+}
+
 #endif
 
 /****************************************************************************
@@ -536,6 +536,7 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_dev_s *i2cdev,
 
   pcadev->i2c     = i2cdev;
   pcadev->dev.ops = &g_pca9555_ops;
+  pcadev->config  = config;
 
   /* Set the I2C address and frequency.  REVISIT:  This logic would be
    * insufficient if we share the I2C bus with any other devices that also
@@ -545,6 +546,10 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_dev_s *i2cdev,
   I2C_SETADDRESS(i2cdev, config->address, 7);
   I2C_SETFREQUENCY(i2cdev, config->frequency);
 
+#ifndef CONFIG_PCA9555_INT_DISABLE
+  pcadev->config->attach(pcadev->config, pca9555_interrupt);
+  pcadev->config->enable(pcadev->config, TRUE);
+#endif
   return &pcadev->dev;
 }
 

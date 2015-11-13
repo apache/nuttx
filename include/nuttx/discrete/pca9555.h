@@ -63,7 +63,6 @@ struct pca9555_config_s
    */
 
 #ifndef CONFIG_PCA9555_INT_DISABLE
-/* IRQ support TODO */
 
 #ifdef CONFIG_PCA9555_MULTIPLE
   int irq;             /* IRQ number received by interrupt handler. */
@@ -75,12 +74,10 @@ struct pca9555_config_s
    *
    * attach  - Attach the PCA9555 interrupt handler to the GPIO interrupt
    * enable  - Enable or disable the GPIO interrupt
-   * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
   CODE int  (*attach)(FAR struct pca9555_config_s *state, xcpt_t isr);
   CODE void (*enable)(FAR struct pca9555_config_s *state, bool enable);
-  CODE void (*clear)(FAR struct pca9555_config_s *state);
 #endif
 };
 

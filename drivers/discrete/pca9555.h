@@ -134,7 +134,6 @@ struct pca9555_dev_s
 
 #ifndef CONFIG_PCA9555_INT_DISABLE
   struct work_s work;                  /* Supports the interrupt handling "bottom half" */
-  pca9555_handler_t handlers[PCA9555_GPIO_NPINS]; /* GPIO "interrupt handlers" */
 #endif
 };
 
