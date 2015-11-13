@@ -18,6 +18,7 @@ Contents
   - LEDs and Buttons
   - AT24MAC402 Serial EEPROM
   - S25FL116K QuadSPI FLASH
+  - Program FLASH Access
   - Networking
   - USBHS Device Controller Driver
   - Audio Interface
@@ -145,6 +146,9 @@ for additional issues specific to a particular configuration.
   9. A QSPI FLASH driver was added and verifed on 2015-11-10.  This driver
      operated in the memory mapped Serial Memory Mode (SMM).  See the
      "S25FL116K QuadSPI FLASH" section below for futher information.
+
+ 10. On-chip FLASH support as added and verified on 2015-11-13.  See the
+     "Program FLASH Access" section below for further information.
 
 Serial Console
 ==============
@@ -559,6 +563,77 @@ Character Driver
 ----------------
 If neither SmartFS nor NXFFS are defined, then the S25FL1 driver will be
 wrapped as a character driver and available as /dev/mtd0.
+
+Program FLASH Access
+====================
+An on-chip FLASH driver was added and verifed on 2015-11-13.  These
+configuration options were enabled to test the on-chip FLASH support:
+
+  CONFIG_MTD_PROGMEM=y
+  CONFIG_SAMV7_PROGMEM=y
+  CONFIG_SAMV7_PROGMEM_NSECTORS=8
+
+D-Cache must be configured in write-through mode:
+
+  CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y
+
+The total FLASH is organized as 128KB/sector x 16 sectors = 2MB.  The
+sectors are all uniform (except for sector zero which will never be used
+by the driver).
+
+In this configuration I have aside 8 sectors, or 8 * 128KB = 1MB of the
+FLASH for testing.  Ideally, one should also modify the linker script and
+reduce the size of the available FLASH by 1MB in this case to avoid
+difficult run-time problems.  I did not do that because I know that my
+test program is small.
+
+When the system boots, you can see the FLASH driver:
+
+  NuttShell (NSH) NuttX-7.12
+  nsh> ls /dev
+  /dev:
+   config
+   console
+   mmcsd0
+   mtd1
+   mtdblock1
+   null
+   ttyS0
+
+/dev/mtdblock1 is a block driver that can be used with any file system on
+the FLASH; /dev/mtd1 is the corresponding character driver used by the
+apps/examples/media test.
+
+Each of the uniform sectors is divided up into 256 512B "pages".  This is
+not really useful, however, because we can only erase a minimum of groups
+of 16 pages or 8KB.  In the code, I you will see that I refer to these
+groups of 16 pages as "clusters."  So the cluster is the smallest thing
+that you can perform a read/write/modify operation on.
+
+I am using 8 sectors = 16 *8 = 128 clusters (aka blocks).  You can see
+this when the apps/examples/media test runs:
+
+  nsh> media
+  MTD Geometry:
+    blocksize:    8192
+    erasesize:    8192
+    neraseblocks: 128
+  Using:
+    blocksize:    8192
+    nblocks:      128
+  Write/Verify: Block 0
+  Write/Verify: Block 1
+  Write/Verify: Block 2
+  Write/Verify: Block 3
+  ...
+  Write/Verify: Block 127
+  Re-read/Verify: Block 0
+  Re-read/Verify: Block 1
+  Re-read/Verify: Block 2
+  Re-read/Verify: Block 3
+  ...
+  Re-read/Verify: Block 127
+  nsh>
 
 Networking
 ==========
