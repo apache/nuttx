@@ -486,7 +486,6 @@ size_t up_progmem_getaddress(size_t cluster)
 
 ssize_t up_progmem_erasepage(size_t cluster)
 {
-  uintptr_t address;
   uint32_t page;
   uint32_t arg;
   int ret;
@@ -534,12 +533,7 @@ ssize_t up_progmem_erasepage(size_t cluster)
       return ret;
     }
 
-  /* Invalidate I- and D-Cache in this address range */
-
-  address = SAMV7_CLUST2BYTE((uintptr_t)cluster) + SAMV7_PROGMEM_START;
-  arch_invalidate_dcache(address, address + SAMV7_CLUSTER_SIZE);
-
-  /* Verify */
+  /* Verify that the cluster of pages is really erased */
 
   if (up_progmem_ispageerased(cluster) == 0)
     {
@@ -580,10 +574,10 @@ ssize_t up_progmem_ispageerased(size_t cluster)
       return -EFAULT;
     }
 
-  /* Invalidate D-Cache for this address range */
+  /* Flush and invalidate nvalidate D-Cache for this address range */
 
   address = (cluster << SAMV7_CLUSTER_SHIFT) + SAMV7_PROGMEM_START;
-  arch_invalidate_dcache(address, address + SAMV7_CLUSTER_SIZE);
+  arch_flush_dcache(address, address + SAMV7_CLUSTER_SIZE);
 
   /* Verify that the cluster is erased (i.e., all 0xff) */
 
@@ -651,7 +645,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
   /* Check for valid address range */
 
-  if ((offset + buflen) >= SAMV7_PROGMEM_NBYTES)
+  if ((offset + buflen) > SAMV7_PROGMEM_NBYTES)
     {
       return -EFAULT;
     }
