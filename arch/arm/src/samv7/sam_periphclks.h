@@ -44,6 +44,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAMV71)
 #  include "samv71_periphclks.h"
+#if defined(CONFIG_ARCH_CHIP_SAME70)
+#  include "same70_periphclks.h"
 #else
 #  error Unrecognized SAMV7 architecture
 #endif
