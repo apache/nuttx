@@ -54,6 +54,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/can.h>
 
+#ifdef CONFIG_CAN_TXREADY
+#  include <nuttx/wqueue.h>
+#endif
+
 #include <arch/irq.h>
 
 #ifdef CONFIG_CAN
@@ -61,6 +65,37 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifdef CONFIG_CAN_TXREADY
+#  if !defined(CONFIG_SCHED_WORKQUEUE)
+#    error Work queue support required in this configuration
+#    undef CONFIG_CAN_TXREADY
+#    undef CONFIG_CAN_TXREADY_LOPRI
+#    undef CONFIG_CAN_TXREADY_HIPRI
+#  elif defined(CONFIG_CAN_TXREADY_LOPRI)
+#    undef CONFIG_CAN_TXREADY_HIPRI
+#    ifdef CONFIG_SCHED_LPWORK
+#      define CANWORK LPWORK
+#    else
+#      error Low priority work queue support required in this configuration
+#      undef CONFIG_CAN_TXREADY
+#      undef CONFIG_CAN_TXREADY_LOPRI
+#    endif
+#  elif defined(CONFIG_CAN_TXREADY_HIPRI)
+#    ifdef CONFIG_SCHED_HPWORK
+#      define CANWORK HPWORK
+#    else
+#      error High priority work queue support required in this configuration
+#      undef CONFIG_CAN_TXREADY
+#      undef CONFIG_CAN_TXREADY_HIPRI
+#    endif
+#  else
+#    error No work queue selection
+#    undef CONFIG_CAN_TXREADY
+#  endif
+#endif
+
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
 
@@ -94,6 +129,9 @@
 static uint8_t        can_dlc2bytes(uint8_t dlc);
 #if 0 /* Not used */
 static uint8_t        can_bytes2dlc(uint8_t nbytes);
+#endif
+#ifdef CONFIG_CAN_TXREADY
+static void           can_txready_work(FAR void *arg);
 #endif
 
 /* Character driver methods */
@@ -243,6 +281,50 @@ static uint8_t can_bytes2dlc(FAR struct sam_can_s *priv, uint8_t nbytes)
       return 8;
     }
 #endif
+}
+#endif
+
+/****************************************************************************
+ * Name: can_txready_work
+ *
+ * Description:
+ *   This function performs deferred processing from can_txready.  See the
+ *   discription of can_txready below for additionla information.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXREADY
+static void can_txready_work(FAR void *arg)
+{
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  irqstate_t flags;
+
+  canllvdbg("xmit head: %d queue: %d tail: %d\n",
+            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
+            dev->cd_xmit.tx_tail);
+
+  /* Verify that the xmit FIFO is not empty.  The following operations must
+   * be performed with interrupt disabled.
+   */
+
+  flags = irqsave();
+  if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+    {
+      /* Send the next message in the FIFO. */
+
+      (void)can_xmit(dev);
+
+      /* Are there any threads waiting for space in the TX FIFO? */
+
+      if (dev->cd_ntxwaiters > 0)
+        {
+          /* Yes.. Inform them that new xmit space is available */
+
+          (void)sem_post(&dev->cd_xmit.tx_sem);
+        }
+    }
+
+  irqrestore(flags);
 }
 #endif
 
@@ -532,12 +614,12 @@ static int can_xmit(FAR struct can_dev_s *dev)
     {
       DEBUGASSERT(dev->cd_xmit.tx_queue == dev->cd_xmit.tx_head);
 
+#ifndef CONFIG_CAN_TXREADY
       /* We can disable CAN TX interrupts -- unless there is a H/W FIFO.  In
        * that case, TX interrupts must stay enabled until the H/W FIFO is
        * fully emptied.
        */
 
-#ifndef CONFIG_CAN_TXREADY
       dev_txint(dev, false);
 #endif
       return -EIO;
@@ -1036,9 +1118,11 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *   2b. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO full
  *
  *      In this case, the thread calling can_write() is blocked waiting for
- *      space in the S/W TX FIFO.
+ *      space in the S/W TX FIFO.  can_txdone() will be called, indirectly,
+ *      from can_txready_work() running on the thread of the work queue.
  *
- *        CAN interrupt -> can_txready() -> can_xmit() -> dev_send() -> can_txdone()
+ *        CAN interrupt -> can_txready() -> Schedule can_txready_work()
+ *        can_txready_work() -> can_xmit() -> dev_send() -> can_txdone()
  *
  *      The call dev_send() should not fail in this case and the subsequent
  *      call to can_txdone() will make space in the S/W TX FIFO and will
@@ -1179,34 +1263,49 @@ int can_txready(FAR struct can_dev_s *dev)
 
   if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
-      /* Are there any threads waiting for space in the xmit FIFO? */
+      /* Is work already scheduled? */
 
-      if (dev->cd_ntxwaiters > 0)
+      if (work_available(&dev->cd_work))
         {
-          /* Inform one waiter that space is now available in the S/W
-           * TX FIFO.
+          /* Yes... schedule to perform can_txready() work on the worker
+           * thread.  Although data structures are protected by disabling
+           * interrupts, the can_xmit() operations may involve semaphore
+           * operations and, hence, should not be done at the interrupt
+           * level.
            */
 
-          ret = sem_post(&dev->cd_xmit.tx_sem);
+          ret = work_queue(CANWORK, &dev->cd_work, can_txready_work, dev, 0);
+        }
+      else
+        {
+          ret = -EBUSY;
         }
     }
-
-#if 0 /* REVISIT */
-  /* REVISIT:  Does the fact that the S/W FIFO is empty also mean that the
-   * H/W FIFO is also empty?  If we really want this to work this way, then
-   * we would probably need and additional parameter to tell us if the H/W
-   * FIFO is empty.
-   */
-
   else
     {
+      /* There should not be any threads waiting for space in the S/W TX
+       * FIFO is it is empty.
+       *
+       * REVISIT: Assertion can fire in certain race conditions, i.e, when
+       * all waiters have been awakened but have not yet had a chance to
+       * decrement cd_ntxwaiters.
+       */
+
+      //DEBUGASSERT(dev->cd_ntxwaiters == 0);
+
+#if 0 /* REVISIT */
       /* When the H/W FIFO has been emptied, we can disable further TX
        * interrupts.
+       *
+       * REVISIT:  The fact that the S/W FIFO is empty does not mean that
+       * the H/W FIFO is also empty.  If we really want this to work this
+       * way, then we would probably need and additional parameter to tell
+       * us if the H/W FIFO is empty.
        */
 
       dev_txint(dev, false);
-    }
 #endif
+    }
 
   return ret;
 }

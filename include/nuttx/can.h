@@ -51,6 +51,10 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 
+#ifdef CONFIG_CAN_TXREADY
+#  include <nuttx/wqueue.h>
+#endif
+
 #ifdef CONFIG_CAN
 
 /************************************************************************************
@@ -70,6 +74,12 @@
  * CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
  *   mode for testing. If the driver does support loopback mode, the setting
  *   will enable it. (If the driver does not, this setting will have no effect).
+ * CONFIG_CAN_TXREADY - Add support for the can_txready() callback.  This is needed
+ *   only for CAN hardware the supports an separate H/W TX message FIFO.  The call
+ *   back is needed to keep the S/W FIFO and the H/W FIFO in sync.  Work queue
+ *   support is needed for this feature.
+ * CONFIG_CAN_TXREADY_HIPRI or CONFIG_CAN_TXREADY_LOPRI - Selects which work queue
+ *   will be used for the can_txready() processing.
  */
 
 /* Default configuration settings that may be overridden in the NuttX configuration
@@ -405,6 +415,9 @@ struct can_dev_s
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */
   struct can_rxfifo_s  cd_recv;          /* Describes receive FIFO */
+#ifdef CONFIG_CAN_TXREADY
+  struct work_s        cd_work;          /* Use to manage can_txready() work */
+#endif
                                          /* List of pending RTR requests */
   struct can_rtrwait_s cd_rtr[CONFIG_CAN_NPENDINGRTR];
   FAR const struct can_ops_s *cd_ops;    /* Arch-specific operations */
