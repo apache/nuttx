@@ -13,6 +13,42 @@ choice
 	prompt "Atmel SAMV7 Chip Selection"
 	default ARCH_CHIP_SAMV71Q21
 
+config ARCH_CHIP_SAME70Q19
+	bool "SAME70Q19"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70Q20
+	bool "SAME70Q20"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70Q21
+	bool "SAME70Q21"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70N19
+	bool "SAME70N10"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70N20
+	bool "SAME70N20"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70N21
+	bool "SAME70N21"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70J19
+	bool "SAME70J10"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAME70J20
+	bool "SAME70J20"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAME70J21
+	bool "SAME70J21"
+	select ARCH_CHIP_SAME70J
+
 config ARCH_CHIP_SAMV71Q19
 	bool "SAMV71Q19"
 	select ARCH_CHIP_SAMV71Q
@@ -51,6 +87,55 @@ config ARCH_CHIP_SAMV71J21
 
 endchoice # Atmel SAMV7 Chip Selection
 
+config ARCH_CHIP_SAME70
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+config ARCH_CHIP_SAME70Q
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAME70N
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAME70J
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
 config ARCH_CHIP_SAMV71
 	bool
 	default n
@@ -60,6 +145,7 @@ config ARCH_CHIP_SAMV71
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select SAMV7_HAVE_MEDIALB
 
 config ARCH_CHIP_SAMV71Q
 	bool
@@ -140,6 +226,10 @@ config SAMV7_HAVE_HSMCI0
 	default n
 
 config SAMV7_HAVE_ISI8
+	bool
+	default n
+
+config SAMV7_HAVE_MEDIALB
 	bool
 	default n
 
@@ -275,6 +365,7 @@ config SAMV7_ISI
 config SAMV7_MLB
 	bool "Media LB Interface"
 	default n
+	depends on SAMV7_HAVE_MEDIALB
 
 config SAMV7_PWM0
 	bool "Pulse Width Modulation Controller 0 (PWM0)"
