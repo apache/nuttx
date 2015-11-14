@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/include/samv7/samv71_irq.h
+ * arch/arm/include/samv7/same70_irq.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  * nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_SAMV7_SAMV71_IRQ_H
-#define __ARCH_ARM_INCLUDE_SAMV7_SAMV71_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_SAMV7_SAME70_IRQ_H
+#define __ARCH_ARM_INCLUDE_SAMV7_SAME70_IRQ_H
 
 /****************************************************************************************
  * Included Files
@@ -103,8 +103,8 @@
 #define SAM_PID_TC9           (50)  /* Timer Counter 9 */
 #define SAM_PID_TC10          (51)  /* Timer Counter 10 */
 #define SAM_PID_TC11          (52)  /* Timer Counter 11 */
-#define SAM_PID_MLB0          (53)  /* MediaLB IRQ 0 */
-#define SAM_PID_MLB1          (54)  /* MediaLB IRQ 1 */
+#define SAM_PID_RESERVED53    (53)  /* Reserved */
+#define SAM_PID_RESERVED54    (54)  /* Reserved */
 #define SAM_PID_RESERVED55    (55)  /* Reserved */
 #define SAM_PID_AES           (56)  /* Advanced Encryption Standard */
 #define SAM_PID_TRNG          (57)  /* True Random Number Generator */
@@ -177,8 +177,8 @@
 #define SAM_IRQ_TC9           (SAM_IRQ_EXTINT+SAM_PID_TC9)    /* Timer Counter 9 */
 #define SAM_IRQ_TC10          (SAM_IRQ_EXTINT+SAM_PID_TC10)   /* Timer Counter 10 */
 #define SAM_IRQ_TC11          (SAM_IRQ_EXTINT+SAM_PID_TC11)   /* Timer Counter 11 */
-#define SAM_IRQ_MLB0          (SAM_IRQ_EXTINT+SAM_PID_MLB0)   /* MediaLB IRQ 0 */
-#define SAM_IRQ_MLB1          (SAM_IRQ_EXTINT+SAM_PID_MLB1)   /* MediaLB IRQ 1 */
+#define SAM_IRQ_RESERVED53    (SAM_IRQ_EXTINT+SAM_PID_RESERVED53) /* Reserved */
+#define SAM_IRQ_RESERVED54    (SAM_IRQ_EXTINT+SAM_PID_RESERVED54) /* Reserved */
 #define SAM_IRQ_RESERVED55    (SAM_IRQ_EXTINT+SAM_PID_RESERVED55) /* Reserved */
 #define SAM_IRQ_AES           (SAM_IRQ_EXTINT+SAM_PID_AES)    /* AES */
 #define SAM_IRQ_TRNG          (SAM_IRQ_EXTINT+SAM_PID_TRNG)   /* True Random Number Generator */
@@ -435,4 +435,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_SAMV7_SAMV71_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_SAMV7_SAME70_IRQ_H */
