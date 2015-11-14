@@ -521,7 +521,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev);
 int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
                 FAR uint8_t *data);
 
-/****************************************************************************
+/************************************************************************************
  * Name: can_txdone
  *
  * Description:
@@ -554,8 +554,8 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *
  *   2a. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO not full
  *
- *      This function will be back from can_xmit immediately when a new CAN
- *      message is added to H/W TX FIFO:
+ *      This function will be called back from dev_send() immediately when a
+ *      new CAN message is added to H/W TX FIFO:
  *
  *        can_write() -> can_xmit() -> dev_send() -> can_txdone()
  *
@@ -567,9 +567,11 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *   2b. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO full
  *
  *      In this case, the thread calling can_write() is blocked waiting for
- *      space in the S/W TX FIFO.
+ *      space in the S/W TX FIFO.  can_txdone() will be called, indirectly,
+ *      from can_txready_work() running on the thread of the work queue.
  *
- *        CAN interrupt -> can_txready() -> can_xmit() -> dev_send() -> can_txdone()
+ *        CAN interrupt -> can_txready() -> Schedule can_txready_work()
+ *        can_txready_work() -> can_xmit() -> dev_send() -> can_txdone()
  *
  *      The call dev_send() should not fail in this case and the subsequent
  *      call to can_txdone() will make space in the S/W TX FIFO and will
@@ -583,7 +585,13 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  * Returned Value:
  *   OK on success; a negated errno on failure.
  *
- ****************************************************************************/
+ * Assumptions:
+ *   Interrupts are disabled.  This is required by can_xmit() which is called
+ *   by this function.  Interrupts are explicitly disabled when called
+ *   through can_write().  Interrupts are expected be disabled when called
+ *   from the CAN interrupt handler.
+ *
+ ************************************************************************************/
 
 int can_txdone(FAR struct can_dev_s *dev);
 
@@ -591,37 +599,39 @@ int can_txdone(FAR struct can_dev_s *dev);
  * Name: can_txready
  *
  * Description:
- *   Called from the CAN interrupt handler at the completion of a send operation.
- *   This interface is needed only for CAN hardware that supports queing of
- *   outgoing messages in a H/W FIFO.
+ *   Called from the CAN interrupt handler at the completion of a send
+ *   operation.  This interface is needed only for CAN hardware that
+ *   supports queing of outgoing messages in a H/W FIFO.
  *
- *   The CAN upper half driver also supports a queue of output messages in a S/W
- *   FIFO.  Messages are added to that queue when when can_write() is called and
- *   removed from the queue in can_txdone() when each TX message is complete.
+ *   The CAN upper half driver also supports a queue of output messages in a
+ *   S/W FIFO.  Messages are added to that queue when when can_write() is
+ *   called and removed from the queue in can_txdone() when each TX message
+ *   is complete.
  *
- *   After each message is added to the S/W FIFO, the CAN upper half driver will
- *   attempt to send the message by calling into the lower half driver.  That send
- *   will not be performed if the lower half driver is busy, i.e., if dev_txready()
- *   returns false.  In that case, the number of messages in the S/W FIFO can grow.
- *   If the S/W FIFO becomes full, then can_write() will wait for space in the
- *   S/W FIFO.
+ *   After each message is added to the S/W FIFO, the CAN upper half driver
+ *   will attempt to send the message by calling into the lower half driver.
+ *   That send will not be performed if the lower half driver is busy, i.e.,
+ *   if dev_txready() returns false.  In that case, the number of messages in
+ *   the S/W FIFO can grow.  If the S/W FIFO becomes full, then can_write()
+ *   will wait for space in the S/W FIFO.
  *
- *   If the CAN hardware does not support a H/W FIFO then busy means that the
- *   hardware is actively sending the message and is guaranteed to become non-
- *   busy (i.e, dev_txready()) when the send transfer completes and can_txdone()
- *   is called.  So the call to can_txdone() means that the transfer has
- *   completed and also that the hardware is ready to accept another transfer.
+ *   If the CAN hardware does not support a H/W FIFO then busy means that
+ *   the hardware is actively sending the message and is guaranteed to
+ *   become non-busy (i.e, dev_txready()) when the send transfer completes
+ *   and can_txdone() is called.  So the call to can_txdone() means that the
+ *   transfer has completed and also that the hardware is ready to accept
+ *   another transfer.
  *
- *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called when
- *   the tranfer is complete, but rather when the transfer is queued in the
- *   H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will report
- *   false and the number of queued messages in the S/W FIFO will grow.
+ *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
+ *   when the tranfer is complete, but rather when the transfer is queued in
+ *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
+ *   report false and the number of queued messages in the S/W FIFO will grow.
  *
  *   There is no mechanism in this case to inform the upper half driver when
  *   the hardware is again available, when there is again space in the H/W
  *   FIFO.  can_txdone() will not be called again.  If the S/W FIFO becomes
- *   full, then the upper half driver will wait for space to become available,
- *   but there is no event to awaken it and the driver will hang.
+ *   full, then the upper half driver will wait for space to become
+ *   available, but there is no event to awaken it and the driver will hang.
  *
  *   Enabling this feature adds support for the can_txready() interface.
  *   This function is called from the lower half driver's CAN interrupt
@@ -634,6 +644,10 @@ int can_txdone(FAR struct can_dev_s *dev);
  *
  * Returned Value:
  *   OK on success; a negated errno on failure.
+ *
+ * Assumptions:
+ *   Interrupts are disabled.  This is required by can_xmit() which is called
+ *   by this function.
  *
  ************************************************************************************/
 
