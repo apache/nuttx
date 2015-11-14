@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/binfmt_internal.h
+ * binfmt/binfmt.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BINFMT_BINFMT_INTERNAL_H
-#define __BINFMT_BINFMT_INTERNAL_H
+#ifndef __BINFMT_BINFMT_H
+#define __BINFMT_BINFMT_H
 
 /****************************************************************************
  * Included Files
@@ -93,6 +93,26 @@ int dump_module(FAR const struct binary_s *bin);
 #endif
 
 /****************************************************************************
+ * Name: binfmt_copyargv
+ *
+ * Description:
+ *   In the kernel build, the argv list will likely lie in the caller's
+ *   address environment and, hence, by inaccessible when we swith to the
+ *   address environment of the new process address environment.  So we
+ *   do not have any real option other than to copy the callers argv[] list.
+ *
+ * Input Parameter:
+ *   bin      - Load structure
+ *   argv     - Argument list
+ *
+ * Returned Value:
+ *   Zero (OK) on sucess; a negater erro value on failure.
+ *
+ ****************************************************************************/
+
+int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv);
+
+/****************************************************************************
  * Name: binfmt_freeargv
  *
  * Description:
@@ -117,5 +137,5 @@ void binfmt_freeargv(FAR struct binary_s *bin);
 }
 #endif
 
-#endif /* __BINFMT_BINFMT_INTERNAL_H */
+#endif /* __BINFMT_BINFMT_H */
 

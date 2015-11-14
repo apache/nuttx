@@ -53,7 +53,7 @@
 #include <nuttx/binfmt/binfmt.h>
 
 #include "sched/sched.h"
-#include "binfmt_internal.h"
+#include "binfmt.h"
 
 #ifndef CONFIG_BINFMT_DISABLE
 
