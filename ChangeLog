@@ -11087,4 +11087,6 @@
 	* drivers/serial/serial.c, serialirq.c and include/nuttx/serial/serial.h:
 	  Implement high level DMA infrastructure for serial devices.  From
 	  Max Neklyudov (2015-11-12).
+	* arch/arm/src/samv7 and arch/arm/include/samv7:  Add support for the
+	  SAME70 family of chips (2015-11-14).
 
