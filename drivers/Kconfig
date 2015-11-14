@@ -176,8 +176,7 @@ config CAN_TXREADY
 
 choice
 	prompt "TX Ready Work Queue"
-	default CAN_TXREADY_LOPRI if SCHED_LPWORK
-	default CAN_TXREADY_HIPRI if !SCHED_LPWORK
+	default CAN_TXREADY_HIPRI
 	depends on CAN_TXREADY
 
 config CAN_TXREADY_LOPRI
