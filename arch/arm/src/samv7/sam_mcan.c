@@ -2759,7 +2759,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * called from the tasking level.
    */
 
-  can_txdone(dev);
+  (void)can_txdone(dev);
   return OK;
 }
 
@@ -3208,7 +3208,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            * data in mcan_send().
            */
 
-          can_txready(dev);
+          (void)can_txready(dev);
 #endif
         }
       else if ((pending & priv->txints) != 0)
