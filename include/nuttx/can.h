@@ -646,8 +646,8 @@ int can_txdone(FAR struct can_dev_s *dev);
  *   OK on success; a negated errno on failure.
  *
  * Assumptions:
- *   Interrupts are disabled.  This is required by can_xmit() which is called
- *   by this function.
+ *   Interrupts are disabled.  This function may execute in the context of
+ *   and interrupt handler.
  *
  ************************************************************************************/
 

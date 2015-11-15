@@ -298,6 +298,7 @@ static void can_txready_work(FAR void *arg)
 {
   FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
   irqstate_t flags;
+  int ret;
 
   canllvdbg("xmit head: %d queue: %d tail: %d\n",
             dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
@@ -312,15 +313,23 @@ static void can_txready_work(FAR void *arg)
     {
       /* Send the next message in the FIFO. */
 
-      (void)can_xmit(dev);
+      ret = can_xmit(dev);
 
-      /* Are there any threads waiting for space in the TX FIFO? */
+      /* If the message was successfully queued in the H/W FIFO, then
+       * can_txdone() should have been called.  If the S/W FIFO were
+       * full before then there should now be free space in the S/W FIFO.
+       */
 
-      if (dev->cd_ntxwaiters > 0)
+      if (ret >= 0)
         {
-          /* Yes.. Inform them that new xmit space is available */
+          /* Are there any threads waiting for space in the TX FIFO? */
 
-          (void)sem_post(&dev->cd_xmit.tx_sem);
+          if (dev->cd_ntxwaiters > 0)
+            {
+              /* Yes.. Inform them that new xmit space is available */
+
+              (void)sem_post(&dev->cd_xmit.tx_sem);
+            }
         }
     }
 
@@ -745,7 +754,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           if (inactive)
             {
-              can_xmit(dev);
+              (void)can_xmit(dev);
             }
 
           /* Wait for a message to be sent */
@@ -794,7 +803,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   if (inactive)
     {
-      can_xmit(dev);
+      (void)can_xmit(dev);
     }
 
   /* Return the number of bytes that were sent */
@@ -1242,8 +1251,8 @@ int can_txdone(FAR struct can_dev_s *dev)
  *   OK on success; a negated errno on failure.
  *
  * Assumptions:
- *   Interrupts are disabled.  This is required by can_xmit() which is called
- *   by this function.
+ *   Interrupts are disabled.  This function may execute in the context of
+ *   and interrupt handler.
  *
  ****************************************************************************/
 
