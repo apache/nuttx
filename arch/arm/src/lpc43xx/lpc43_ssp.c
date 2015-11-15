@@ -131,8 +131,12 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void     ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     ssp_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t ch);
+static void     ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords);
+#ifndef CONFIG_SPI_EXCHANGE
 static void     ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
 static void     ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+#endif
 
 /* Initialization */
 
@@ -534,23 +538,45 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)regval;
 }
 
+/****************************************************************************
+ * Name: ssp_exchange
+ *
+ * Description:
+ *   Exahange a block of data from SPI. Required.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to receive data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords) {
+                         FAR void *rxbuffer, size_t nwords)
+{
   FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
   union
   {
-    FAR uint8_t    *p8;
-    FAR uint16_t   *p16;
-    FAR const void *pv;
+    FAR uint8_t  *p8;
+    FAR uint16_t *p16;
+    FAR void     *pv;
   } tx;
   union
   {
-    FAR uint8_t    *p8;
-    FAR uint16_t   *p16;
-    FAR const void *pv;
+    FAR uint8_t  *p8;
+    FAR uint16_t *p16;
+    FAR void     *pv;
   } rx;
   uint32_t data;
-  uint32_t datadummy = (priv->nbits > 8)?0xffff:0xff;
+  uint32_t datadummy = (priv->nbits > 8) ? 0xffff : 0xff;
   uint32_t rxpending = 0;
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
@@ -569,38 +595,39 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
-	     (rxpending < LPC43_SSP_FIFOSZ) && nwords)
-	{
-	  if (txbuffer && priv->nbits > 8)
-	    {
-	      data = (uint32_t)*tx.p16++;
-	    }
-	  else
-	    {
-	      data = (uint32_t)*tx.p8++;
-	    }
+         (rxpending < LPC43_SSP_FIFOSZ) && nwords)
+        {
+          if (txbuffer && priv->nbits > 8)
+            {
+              data = (uint32_t)*tx.p16++;
+            }
+          else
+            {
+              data = (uint32_t)*tx.p8++;
+            }
 
-	  ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
-	  nwords--;
-	  rxpending++;
-	}
+          ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
+          nwords--;
+          rxpending++;
+        }
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
       spivdbg("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
-	{
-	  data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-	  if (rxbuffer && priv->nbits > 8)
-	    {
-	      *rx.p16++ = (uint16_t)data;
-	    }
-	  else
-	    {
-	      *rx.p8++  = (uint8_t)data;
-	    }
-	  rxpending--;
-	}
+        {
+          data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
+          if (rxbuffer && priv->nbits > 8)
+            {
+              *rx.p16++ = (uint16_t)data;
+            }
+          else
+            {
+              *rx.p8++  = (uint8_t)data;
+            }
+
+          rxpending--;
+        }
     }
 }
 
@@ -616,13 +643,15 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SPI_EXCHANGE
 static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
   return ssp_exchange(dev, buffer, NULL, nwords);
@@ -640,7 +669,8 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -651,6 +681,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   return ssp_exchange(dev, NULL, buffer, nwords);
 }
+#endif /* !CONFIG_SPI_EXCHANGE */
 
 /****************************************************************************
  * Name: lpc43_ssp0initialize
@@ -696,7 +727,6 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
   /* Pin configuration */
 
   lpc43_pin_config(PINCONF_SSP0_SCK);
-  lpc43_pin_config(PINCONF_SSP0_SSEL);
   lpc43_pin_config(PINCONF_SSP0_MISO);
   lpc43_pin_config(PINCONF_SSP0_MOSI);
 
@@ -750,7 +780,6 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
   /* Pins configuration */
 
   lpc43_pin_config(PINCONF_SSP1_SCK);
-  lpc43_pin_config(PINCONF_SSP1_SSEL);
   lpc43_pin_config(PINCONF_SSP1_MISO);
   lpc43_pin_config(PINCONF_SSP1_MOSI);
 

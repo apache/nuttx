@@ -546,17 +546,17 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
   /* Initial register values */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_INITIAL],
-              "RX: Initial Registers");
+              "Initial Registers");
 
   /* Register values after DMA setup */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_SETUP],
-              "RX: After DMA Setup");
+              "After DMA Setup");
 
   /* Register values after DMA start */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_START],
-              "RX: After DMA Start");
+              "After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
    * -OR- DMA timeout.
@@ -569,16 +569,16 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
   if (priv->result == -ETIMEDOUT)
     {
       sam_dmadump(priv->dmach, &priv->dmaregs[DMA_TIMEOUT],
-                  "RX: At DMA timeout");
+                  "At DMA timeout");
     }
   else
     {
       sam_dmadump(priv->dmach, &priv->dmaregs[DMA_CALLBACK],
-                  "RX: At DMA callback");
+                  "At DMA callback");
     }
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER],
-              "RX: At End-of-Transfer");
+              "At End-of-Transfer");
 }
 #endif
 
@@ -1222,7 +1222,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  qspidbg("Frequency %d->%d\n", frequency, actual);
+  qspivdbg("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1370,14 +1370,14 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      qspivdbg("  address/length: %08lx %d\n",
+      qspivdbg("  address/length: %08lx/%d\n",
               (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       qspivdbg("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
-      qspivdbg("    buffer/length: %p %d\n", cmdinfo->buffer, cmdinfo->buflen);
+      qspivdbg("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
@@ -1390,7 +1390,7 @@ static int qspi_command(struct qspi_dev_s *dev,
     {
       DEBUGASSERT(cmdinfo->addrlen == 3 || cmdinfo->addrlen == 4);
 
-      /* Set the addressin the IAR.  This is required only if the
+      /* Set the address in the IAR.  This is required only if the
        * instruction frame includes an address, but no data.  When data is
        * preset, the address of the instruction is determined by the address
        * of QSPI memory accesses, and not by the content of the IAR.
@@ -1571,6 +1571,14 @@ static int qspi_memory(struct qspi_dev_s *dev,
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
 
   DEBUGASSERT(priv != NULL && meminfo != NULL);
+
+  qspivdbg("Transfer:\n");
+  qspivdbg("  flags: %02x\n", meminfo->flags);
+  qspivdbg("  cmd: %04x\n", meminfo->cmd);
+  qspivdbg("  address/length: %08lx/%d\n",
+          (unsigned long)meminfo->addr, meminfo->addrlen);
+  qspivdbg("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
+  qspivdbg("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
   /* Can we perform DMA?  Should we perform DMA? */
