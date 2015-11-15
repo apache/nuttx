@@ -47,79 +47,6 @@
 #include <nuttx/serial/serial.h>
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Name: uart_dorxflowcontrol
- *
- * Description:
- *   Handle RX flow control using watermark levels or not
- *
- ************************************************************************************/
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-static inline bool uart_dorxflowcontrol(FAR uart_dev_t *dev,
-                                        FAR struct uart_buffer_s *rxbuf,
-                                        unsigned int watermark)
-{
-  unsigned int nbuffered;
-
-  /* How many bytes are buffered */
-
-  if (rxbuf->head >= rxbuf->tail)
-    {
-      nbuffered = rxbuf->head - rxbuf->tail;
-    }
-  else
-    {
-      nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
-    }
-
-  /* Is the level now above the watermark level that we need to report? */
-
-  if (nbuffered >= watermark)
-    {
-      /* Let the lower level driver know that the watermark level has been
-       * crossed.  It will probably activate RX flow control.
-       */
-
-      if (uart_rxflowcontrol(dev, nbuffered, true))
-        {
-          /* Low-level driver activated RX flow control, exit loop now. */
-
-          return true;
-        }
-    }
-
-  return false;
-}
-#else
-static inline bool uart_dorxflowcontrol(FAR uart_dev_t *dev,
-                                        FAR struct uart_buffer_s *rxbuf,
-                                        bool is_full)
-{
-  /* Check if RX buffer is full and allow serial low-level driver to pause
-   * processing. This allows proper utilization of hardware flow control.
-   */
-
-  if (is_full)
-    {
-      if (uart_rxflowcontrol(dev, rxbuf->size, true))
-        {
-          /* Low-level driver activated RX flow control, exit loop now. */
-
-          return true;
-        }
-    }
-
-  return false;
-}
-#endif
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -199,7 +126,6 @@ void uart_recvchars(FAR uart_dev_t *dev)
   unsigned int status;
   int nexthead = rxbuf->head + 1;
   uint16_t nbytes = 0;
-  bool is_full;
 
   if (nexthead >= rxbuf->size)
     {
@@ -218,19 +144,52 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   while (uart_rxavailable(dev))
     {
-      is_full = (nexthead == rxbuf->tail);
+      bool is_full = (nexthead == rxbuf->tail);
       char ch;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-      if (uart_dorxflowcontrol(dev, rxbuf, watermark))
+      unsigned int nbuffered;
+
+      /* How many bytes are buffered */
+
+      if (rxbuf->head >= rxbuf->tail)
         {
-          break;
+          nbuffered = rxbuf->head - rxbuf->tail;
+        }
+      else
+        {
+          nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
+        }
+
+      /* Is the level now above the watermark level that we need to report? */
+
+      if (nbuffered >= watermark)
+        {
+          /* Let the lower level driver know that the watermark level has been
+           * crossed.  It will probably activate RX flow control.
+           */
+
+          if (uart_rxflowcontrol(dev, nbuffered, true))
+            {
+              /* Low-level driver activated RX flow control, exit loop now. */
+
+              break;
+            }
         }
 #else
-      if (uart_dorxflowcontrol(dev, rxbuf, is_full))
+      /* Check if RX buffer is full and allow serial low-level driver to pause
+       * processing. This allows proper utilization of hardware flow control.
+       */
+
+      if (is_full)
         {
-          break;
+          if (uart_rxflowcontrol(dev, rxbuf->size, true))
+            {
+              /* Low-level driver activated RX flow control, exit loop now. */
+
+              break;
+            }
         }
 #endif
 #endif

@@ -43,7 +43,6 @@ ifeq ($(CONFIG_SERIAL_DMA),y)
   CSRCS += serial_dma.c
 endif
 
-
 ifeq ($(CONFIG_16550_UART),y)
   CSRCS += uart_16550.c
 endif
