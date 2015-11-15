@@ -37,7 +37,12 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 # Include serial drivers
 
-CSRCS += serial.c serialirq.c lowconsole.c
+CSRCS += serial.c serial_io.c lowconsole.c
+
+ifeq ($(CONFIG_SERIAL_DMA),y)
+  CSRCS += serial_dma.c
+endif
+
 
 ifeq ($(CONFIG_16550_UART),y)
   CSRCS += uart_16550.c
