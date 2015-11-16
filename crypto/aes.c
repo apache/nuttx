@@ -1,34 +1,36 @@
 /****************************************************************************
- *  security.c  - CC3000 Host Driver Implementation.
- *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ * crypto/aes.c
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
+ *   Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ *   Extracted from the CC3000 Host Driver Implementation.
  *
- *    Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- *    Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ *   Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
  *
- *    Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ *   Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the
+ *   distribution.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *   Neither the name of Texas Instruments Incorporated nor the names of
+ *   its contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -36,9 +38,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/wireless/cc3000/security.h>
+#include <nuttx/config.h>
 
-#ifndef CC3000_UNENCRYPTED_SMART_CONFIG
+#include <stdint.h>
+
+#include <nuttx/crypto/aes.h>
 
 /****************************************************************************
  * Private Data
@@ -46,7 +50,7 @@
 
 /* Forward sbox */
 
-const uint8_t sbox[256] =
+static const uint8_t g_sbox[256] =
 {
 /*  0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F */
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, /* 0 */
@@ -69,7 +73,7 @@ const uint8_t sbox[256] =
 
 /* Inverse sbox */
 
-const uint8_t rsbox[256] =
+static const uint8_t g_rsbox[256] =
 {
   0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
   0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
@@ -91,59 +95,61 @@ const uint8_t rsbox[256] =
 
 /* Round constant */
 
-const uint8_t Rcon[11] =
+static const uint8_t g_rcon[11] =
 {
   0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
 };
 
-uint8_t aexpandedKey[176];
+static uint8_t g_expanded_key[176];
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
- * Name: expandKey
+ * Name: expand_key
  *
  * Description:
  *   Expend a 16 bytes key for AES128 implementation
  *
  * Input Parameters:
  *  key          AES128 key - 16 bytes
- *  expandedKey  expanded AES128 key
+ *  expanded_key expanded AES128 key
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-void expandKey(uint8_t *expandedKey, uint8_t *key)
+static void expand_key(FAR uint8_t *expanded_key, FAR uint8_t *key)
 {
-  uint16_t ii, buf1;
+  uint16_t buf1;
+  uint16_t ii;
 
   for (ii = 0; ii < 16; ii++)
     {
-      expandedKey[ii] = key[ii];
+      expanded_key[ii] = key[ii];
     }
 
   for (ii = 1; ii < 11; ii++)
     {
-      buf1 = expandedKey[ii*16 - 4];
-      expandedKey[ii * 16 + 0] = sbox[expandedKey[ii *16 - 3]] ^ expandedKey[(ii - 1) * 16 + 0] ^ Rcon[ii];
-      expandedKey[ii * 16 + 1] = sbox[expandedKey[ii *16 - 2]] ^ expandedKey[(ii - 1) * 16 + 1];
-      expandedKey[ii * 16 + 2] = sbox[expandedKey[ii *16 - 1]] ^ expandedKey[(ii - 1) * 16 + 2];
-      expandedKey[ii * 16 + 3] = sbox[buf1] ^ expandedKey[(ii - 1) * 16 + 3];
-      expandedKey[ii * 16 + 4] = expandedKey[(ii - 1) * 16 + 4] ^ expandedKey[ii * 16 + 0];
-      expandedKey[ii * 16 + 5] = expandedKey[(ii - 1) * 16 + 5] ^ expandedKey[ii * 16 + 1];
-      expandedKey[ii * 16 + 6] = expandedKey[(ii - 1) * 16 + 6] ^ expandedKey[ii * 16 + 2];
-      expandedKey[ii * 16 + 7] = expandedKey[(ii - 1) * 16 + 7] ^ expandedKey[ii * 16 + 3];
-      expandedKey[ii * 16 + 8] = expandedKey[(ii - 1) * 16 + 8] ^ expandedKey[ii * 16 + 4];
-      expandedKey[ii * 16 + 9] = expandedKey[(ii - 1) * 16 + 9] ^ expandedKey[ii * 16 + 5];
-      expandedKey[ii * 16 +10] = expandedKey[(ii - 1) * 16 +10] ^ expandedKey[ii * 16 + 6];
-      expandedKey[ii * 16 +11] = expandedKey[(ii - 1) * 16 +11] ^ expandedKey[ii * 16 + 7];
-      expandedKey[ii * 16 +12] = expandedKey[(ii - 1) * 16 +12] ^ expandedKey[ii * 16 + 8];
-      expandedKey[ii * 16 +13] = expandedKey[(ii - 1) * 16 +13] ^ expandedKey[ii * 16 + 9];
-      expandedKey[ii * 16 +14] = expandedKey[(ii - 1) * 16 +14] ^ expandedKey[ii * 16 +10];
-      expandedKey[ii * 16 +15] = expandedKey[(ii - 1) * 16 +15] ^ expandedKey[ii * 16 +11];
+      buf1 = expanded_key[ii*16 - 4];
+      expanded_key[ii * 16 + 0] = g_sbox[expanded_key[ii *16 - 3]] ^ expanded_key[(ii - 1) * 16 + 0] ^ g_rcon[ii];
+      expanded_key[ii * 16 + 1] = g_sbox[expanded_key[ii *16 - 2]] ^ expanded_key[(ii - 1) * 16 + 1];
+      expanded_key[ii * 16 + 2] = g_sbox[expanded_key[ii *16 - 1]] ^ expanded_key[(ii - 1) * 16 + 2];
+      expanded_key[ii * 16 + 3] = g_sbox[buf1] ^ expanded_key[(ii - 1) * 16 + 3];
+      expanded_key[ii * 16 + 4] = expanded_key[(ii - 1) * 16 + 4] ^ expanded_key[ii * 16 + 0];
+      expanded_key[ii * 16 + 5] = expanded_key[(ii - 1) * 16 + 5] ^ expanded_key[ii * 16 + 1];
+      expanded_key[ii * 16 + 6] = expanded_key[(ii - 1) * 16 + 6] ^ expanded_key[ii * 16 + 2];
+      expanded_key[ii * 16 + 7] = expanded_key[(ii - 1) * 16 + 7] ^ expanded_key[ii * 16 + 3];
+      expanded_key[ii * 16 + 8] = expanded_key[(ii - 1) * 16 + 8] ^ expanded_key[ii * 16 + 4];
+      expanded_key[ii * 16 + 9] = expanded_key[(ii - 1) * 16 + 9] ^ expanded_key[ii * 16 + 5];
+      expanded_key[ii * 16 +10] = expanded_key[(ii - 1) * 16 +10] ^ expanded_key[ii * 16 + 6];
+      expanded_key[ii * 16 +11] = expanded_key[(ii - 1) * 16 +11] ^ expanded_key[ii * 16 + 7];
+      expanded_key[ii * 16 +12] = expanded_key[(ii - 1) * 16 +12] ^ expanded_key[ii * 16 + 8];
+      expanded_key[ii * 16 +13] = expanded_key[(ii - 1) * 16 +13] ^ expanded_key[ii * 16 + 9];
+      expanded_key[ii * 16 +14] = expanded_key[(ii - 1) * 16 +14] ^ expanded_key[ii * 16 +10];
+      expanded_key[ii * 16 +15] = expanded_key[(ii - 1) * 16 +15] ^ expanded_key[ii * 16 +11];
     }
 }
 
@@ -161,7 +167,7 @@ void expandKey(uint8_t *expandedKey, uint8_t *key)
  *
  ******************************************************************************/
 
-uint8_t galois_mul2(uint8_t value)
+static uint8_t galois_mul2(uint8_t value)
 {
   if (value >> 7)
     {
@@ -189,7 +195,7 @@ uint8_t galois_mul2(uint8_t value)
  *  cycles for function calls no structuring with "for (....)" to save cycles.
  *
  * Input Parameters:
- *  expandedKey expanded AES128 key
+ *  expanded_key expanded AES128 key
  *  state       16 bytes of plain text and cipher text
  *
  * Returned Value:
@@ -197,44 +203,47 @@ uint8_t galois_mul2(uint8_t value)
  *
  ******************************************************************************/
 
-void aes_encr(uint8_t *state, uint8_t *expandedKey)
+static void aes_encr(FAR uint8_t *state, FAR uint8_t *expanded_key)
 {
-  uint8_t buf1, buf2, buf3, round;
+  uint8_t buf1;
+  uint8_t buf2;
+  uint8_t buf3;
+  uint8_t round;
 
   for (round = 0; round < 9; round ++)
     {
       /* addroundkey, sbox and shiftrows */
       /* Row 0 */
 
-      state[0]   = sbox[(state[0]  ^ expandedKey[(round * 16)])];
-      state[4]   = sbox[(state[4]  ^ expandedKey[(round * 16) +  4])];
-      state[8]   = sbox[(state[8]  ^ expandedKey[(round * 16) +  8])];
-      state[12]  = sbox[(state[12] ^ expandedKey[(round * 16) + 12])];
+      state[0]   = g_sbox[(state[0]  ^ expanded_key[(round * 16)])];
+      state[4]   = g_sbox[(state[4]  ^ expanded_key[(round * 16) +  4])];
+      state[8]   = g_sbox[(state[8]  ^ expanded_key[(round * 16) +  8])];
+      state[12]  = g_sbox[(state[12] ^ expanded_key[(round * 16) + 12])];
 
       /* Row 1 */
 
-      buf1       = state[1] ^ expandedKey[(round * 16) + 1];
-      state[1]   = sbox[(state[5]  ^ expandedKey[(round * 16) +  5])];
-      state[5]   = sbox[(state[9]  ^ expandedKey[(round * 16) +  9])];
-      state[9]   = sbox[(state[13] ^ expandedKey[(round * 16) + 13])];
-      state[13]  = sbox[buf1];
+      buf1       = state[1] ^ expanded_key[(round * 16) + 1];
+      state[1]   = g_sbox[(state[5]  ^ expanded_key[(round * 16) +  5])];
+      state[5]   = g_sbox[(state[9]  ^ expanded_key[(round * 16) +  9])];
+      state[9]   = g_sbox[(state[13] ^ expanded_key[(round * 16) + 13])];
+      state[13]  = g_sbox[buf1];
 
       /* Row 2 */
 
-      buf1       = state[2] ^ expandedKey[(round * 16) + 2];
-      buf2       = state[6] ^ expandedKey[(round * 16) + 6];
-      state[2]   = sbox[(state[10] ^ expandedKey[(round * 16) + 10])];
-      state[6]   = sbox[(state[14] ^ expandedKey[(round * 16) + 14])];
-      state[10]  = sbox[buf1];
-      state[14]  = sbox[buf2];
+      buf1       = state[2] ^ expanded_key[(round * 16) + 2];
+      buf2       = state[6] ^ expanded_key[(round * 16) + 6];
+      state[2]   = g_sbox[(state[10] ^ expanded_key[(round * 16) + 10])];
+      state[6]   = g_sbox[(state[14] ^ expanded_key[(round * 16) + 14])];
+      state[10]  = g_sbox[buf1];
+      state[14]  = g_sbox[buf2];
 
       /* Row 3 */
 
-      buf1       = state[15] ^ expandedKey[(round * 16) + 15];
-      state[15]  = sbox[(state[11] ^ expandedKey[(round * 16) + 11])];
-      state[11]  = sbox[(state[7]  ^ expandedKey[(round * 16) +  7])];
-      state[7]   = sbox[(state[3]  ^ expandedKey[(round * 16) +  3])];
-      state[3]   = sbox[buf1];
+      buf1       = state[15] ^ expanded_key[(round * 16) + 15];
+      state[15]  = g_sbox[(state[11] ^ expanded_key[(round * 16) + 11])];
+      state[11]  = g_sbox[(state[7]  ^ expanded_key[(round * 16) +  7])];
+      state[7]   = g_sbox[(state[3]  ^ expanded_key[(round * 16) +  3])];
+      state[3]   = g_sbox[buf1];
 
       /* mixcolums */
       /* Col1 */
@@ -276,54 +285,54 @@ void aes_encr(uint8_t *state, uint8_t *expandedKey)
 
   /* 10th round without mixcols */
 
-  state[0]   = sbox[(state[0]  ^ expandedKey[(round * 16)])];
-  state[4]   = sbox[(state[4]  ^ expandedKey[(round * 16) +  4])];
-  state[8]   = sbox[(state[8]  ^ expandedKey[(round * 16) +  8])];
-  state[12]  = sbox[(state[12] ^ expandedKey[(round * 16) + 12])];
+  state[0]   = g_sbox[(state[0]  ^ expanded_key[(round * 16)])];
+  state[4]   = g_sbox[(state[4]  ^ expanded_key[(round * 16) +  4])];
+  state[8]   = g_sbox[(state[8]  ^ expanded_key[(round * 16) +  8])];
+  state[12]  = g_sbox[(state[12] ^ expanded_key[(round * 16) + 12])];
 
   /* Row 1 */
 
-  buf1       = state[1] ^ expandedKey[(round * 16) + 1];
-  state[1]   = sbox[(state[5]  ^ expandedKey[(round * 16) +  5])];
-  state[5]   = sbox[(state[9]  ^ expandedKey[(round * 16) +  9])];
-  state[9]   = sbox[(state[13] ^ expandedKey[(round * 16) + 13])];
-  state[13]  = sbox[buf1];
+  buf1       = state[1] ^ expanded_key[(round * 16) + 1];
+  state[1]   = g_sbox[(state[5]  ^ expanded_key[(round * 16) +  5])];
+  state[5]   = g_sbox[(state[9]  ^ expanded_key[(round * 16) +  9])];
+  state[9]   = g_sbox[(state[13] ^ expanded_key[(round * 16) + 13])];
+  state[13]  = g_sbox[buf1];
 
   /* Row 2 */
 
-  buf1       = state[2] ^ expandedKey[(round * 16) + 2];
-  buf2       = state[6] ^ expandedKey[(round * 16) + 6];
-  state[2]   = sbox[(state[10] ^ expandedKey[(round * 16) + 10])];
-  state[6]   = sbox[(state[14] ^ expandedKey[(round * 16) + 14])];
-  state[10]  = sbox[buf1];
-  state[14]  = sbox[buf2];
+  buf1       = state[2] ^ expanded_key[(round * 16) + 2];
+  buf2       = state[6] ^ expanded_key[(round * 16) + 6];
+  state[2]   = g_sbox[(state[10] ^ expanded_key[(round * 16) + 10])];
+  state[6]   = g_sbox[(state[14] ^ expanded_key[(round * 16) + 14])];
+  state[10]  = g_sbox[buf1];
+  state[14]  = g_sbox[buf2];
 
   /* Row 3 */
 
-  buf1       = state[15] ^ expandedKey[(round * 16) + 15];
-  state[15]  = sbox[(state[11] ^ expandedKey[(round * 16) + 11])];
-  state[11]  = sbox[(state[7]  ^ expandedKey[(round * 16) +  7])];
-  state[7]   = sbox[(state[3]  ^ expandedKey[(round * 16) +  3])];
-  state[3]   = sbox[buf1];
+  buf1       = state[15] ^ expanded_key[(round * 16) + 15];
+  state[15]  = g_sbox[(state[11] ^ expanded_key[(round * 16) + 11])];
+  state[11]  = g_sbox[(state[7]  ^ expanded_key[(round * 16) +  7])];
+  state[7]   = g_sbox[(state[3]  ^ expanded_key[(round * 16) +  3])];
+  state[3]   = g_sbox[buf1];
 
   /* Last addroundkey */
 
-  state[0]  ^= expandedKey[160];
-  state[1]  ^= expandedKey[161];
-  state[2]  ^= expandedKey[162];
-  state[3]  ^= expandedKey[163];
-  state[4]  ^= expandedKey[164];
-  state[5]  ^= expandedKey[165];
-  state[6]  ^= expandedKey[166];
-  state[7]  ^= expandedKey[167];
-  state[8]  ^= expandedKey[168];
-  state[9]  ^= expandedKey[169];
-  state[10] ^= expandedKey[170];
-  state[11] ^= expandedKey[171];
-  state[12] ^= expandedKey[172];
-  state[13] ^= expandedKey[173];
-  state[14] ^= expandedKey[174];
-  state[15] ^= expandedKey[175];
+  state[0]  ^= expanded_key[160];
+  state[1]  ^= expanded_key[161];
+  state[2]  ^= expanded_key[162];
+  state[3]  ^= expanded_key[163];
+  state[4]  ^= expanded_key[164];
+  state[5]  ^= expanded_key[165];
+  state[6]  ^= expanded_key[166];
+  state[7]  ^= expanded_key[167];
+  state[8]  ^= expanded_key[168];
+  state[9]  ^= expanded_key[169];
+  state[10] ^= expanded_key[170];
+  state[11] ^= expanded_key[171];
+  state[12] ^= expanded_key[172];
+  state[13] ^= expanded_key[173];
+  state[14] ^= expanded_key[174];
+  state[15] ^= expanded_key[175];
 }
 
 /******************************************************************************
@@ -341,7 +350,7 @@ void aes_encr(uint8_t *state, uint8_t *expandedKey)
  *  with "for (....)" to save cycles
  *
  * Input Parameters:
- *  expandedKey expanded AES128 key
+ *  expanded_key expanded AES128 key
  *  state       16 bytes of cipher text and plain text
  *
  * Returned Value:
@@ -349,61 +358,64 @@ void aes_encr(uint8_t *state, uint8_t *expandedKey)
  *
  ******************************************************************************/
 
-void aes_decr(uint8_t *state, uint8_t *expandedKey)
+static void aes_decr(FAR uint8_t *state, FAR uint8_t *expanded_key)
 {
-  uint8_t buf1, buf2, buf3;
+  uint8_t buf1;
+  uint8_t buf2;
+  uint8_t buf3;
   int8_t round;
+
   round = 9;
 
   /* Initial addroundkey */
 
-  state[0]  ^= expandedKey[160];
-  state[1]  ^= expandedKey[161];
-  state[2]  ^= expandedKey[162];
-  state[3]  ^= expandedKey[163];
-  state[4]  ^= expandedKey[164];
-  state[5]  ^= expandedKey[165];
-  state[6]  ^= expandedKey[166];
-  state[7]  ^= expandedKey[167];
-  state[8]  ^= expandedKey[168];
-  state[9]  ^= expandedKey[169];
-  state[10] ^= expandedKey[170];
-  state[11] ^= expandedKey[171];
-  state[12] ^= expandedKey[172];
-  state[13] ^= expandedKey[173];
-  state[14] ^= expandedKey[174];
-  state[15] ^= expandedKey[175];
+  state[0]  ^= expanded_key[160];
+  state[1]  ^= expanded_key[161];
+  state[2]  ^= expanded_key[162];
+  state[3]  ^= expanded_key[163];
+  state[4]  ^= expanded_key[164];
+  state[5]  ^= expanded_key[165];
+  state[6]  ^= expanded_key[166];
+  state[7]  ^= expanded_key[167];
+  state[8]  ^= expanded_key[168];
+  state[9]  ^= expanded_key[169];
+  state[10] ^= expanded_key[170];
+  state[11] ^= expanded_key[171];
+  state[12] ^= expanded_key[172];
+  state[13] ^= expanded_key[173];
+  state[14] ^= expanded_key[174];
+  state[15] ^= expanded_key[175];
 
   /* 10th round without mixcols */
 
-  state[0]   = rsbox[state[0]]  ^ expandedKey[(round * 16)];
-  state[4]   = rsbox[state[4]]  ^ expandedKey[(round * 16) +  4];
-  state[8]   = rsbox[state[8]]  ^ expandedKey[(round * 16) +  8];
-  state[12]  = rsbox[state[12]] ^ expandedKey[(round * 16) + 12];
+  state[0]   = g_rsbox[state[0]]  ^ expanded_key[(round * 16)];
+  state[4]   = g_rsbox[state[4]]  ^ expanded_key[(round * 16) +  4];
+  state[8]   = g_rsbox[state[8]]  ^ expanded_key[(round * 16) +  8];
+  state[12]  = g_rsbox[state[12]] ^ expanded_key[(round * 16) + 12];
 
   /* Row 1 */
 
-  buf1       = rsbox[state[13]] ^ expandedKey[(round * 16) +  1];
-  state[13]  = rsbox[state[9]]  ^ expandedKey[(round * 16) + 13];
-  state[9]   = rsbox[state[5]]  ^ expandedKey[(round * 16) +  9];
-  state[5]   = rsbox[state[1]]  ^ expandedKey[(round * 16) +  5];
+  buf1       = g_rsbox[state[13]] ^ expanded_key[(round * 16) +  1];
+  state[13]  = g_rsbox[state[9]]  ^ expanded_key[(round * 16) + 13];
+  state[9]   = g_rsbox[state[5]]  ^ expanded_key[(round * 16) +  9];
+  state[5]   = g_rsbox[state[1]]  ^ expanded_key[(round * 16) +  5];
   state[1]   = buf1;
 
   /* Row 2 */
 
-  buf1       = rsbox[state[2]]  ^ expandedKey[(round * 16) + 10];
-  buf2       = rsbox[state[6]]  ^ expandedKey[(round * 16) + 14];
-  state[2]   = rsbox[state[10]] ^ expandedKey[(round * 16) +  2];
-  state[6]   = rsbox[state[14]] ^ expandedKey[(round * 16) +  6];
+  buf1       = g_rsbox[state[2]]  ^ expanded_key[(round * 16) + 10];
+  buf2       = g_rsbox[state[6]]  ^ expanded_key[(round * 16) + 14];
+  state[2]   = g_rsbox[state[10]] ^ expanded_key[(round * 16) +  2];
+  state[6]   = g_rsbox[state[14]] ^ expanded_key[(round * 16) +  6];
   state[10]  = buf1;
   state[14]  = buf2;
 
   /* Row 3 */
 
-  buf1       = rsbox[state[3]]  ^ expandedKey[(round * 16) + 15];
-  state[3]   = rsbox[state[7]]  ^ expandedKey[(round * 16) +  3];
-  state[7]   = rsbox[state[11]] ^ expandedKey[(round * 16) +  7];
-  state[11]  = rsbox[state[15]] ^ expandedKey[(round * 16) + 11];
+  buf1       = g_rsbox[state[3]]  ^ expanded_key[(round * 16) + 15];
+  state[3]   = g_rsbox[state[7]]  ^ expanded_key[(round * 16) +  3];
+  state[7]   = g_rsbox[state[11]] ^ expanded_key[(round * 16) +  7];
+  state[11]  = g_rsbox[state[15]] ^ expanded_key[(round * 16) + 11];
   state[15]  = buf1;
 
   for (round = 8; round >= 0; round--)
@@ -485,39 +497,43 @@ void aes_decr(uint8_t *state, uint8_t *expandedKey)
       /* addroundkey, rsbox and shiftrows */
       /* Row 0 */
 
-      state[0]   = rsbox[state[0]]  ^ expandedKey[(round * 16)];
-      state[4]   = rsbox[state[4]]  ^ expandedKey[(round * 16) +  4];
-      state[8]   = rsbox[state[8]]  ^ expandedKey[(round * 16) +  8];
-      state[12]  = rsbox[state[12]] ^ expandedKey[(round * 16) + 12];
+      state[0]   = g_rsbox[state[0]]  ^ expanded_key[(round * 16)];
+      state[4]   = g_rsbox[state[4]]  ^ expanded_key[(round * 16) +  4];
+      state[8]   = g_rsbox[state[8]]  ^ expanded_key[(round * 16) +  8];
+      state[12]  = g_rsbox[state[12]] ^ expanded_key[(round * 16) + 12];
 
       /* Row 1 */
 
-      buf1       = rsbox[state[13]] ^ expandedKey[(round * 16) +  1];
-      state[13]  = rsbox[state[9]]  ^ expandedKey[(round * 16) + 13];
-      state[9]   = rsbox[state[5]]  ^ expandedKey[(round * 16) +  9];
-      state[5]   = rsbox[state[1]]  ^ expandedKey[(round * 16) +  5];
+      buf1       = g_rsbox[state[13]] ^ expanded_key[(round * 16) +  1];
+      state[13]  = g_rsbox[state[9]]  ^ expanded_key[(round * 16) + 13];
+      state[9]   = g_rsbox[state[5]]  ^ expanded_key[(round * 16) +  9];
+      state[5]   = g_rsbox[state[1]]  ^ expanded_key[(round * 16) +  5];
       state[1]   = buf1;
 
       /* Row 2 */
 
-      buf1       = rsbox[state[2]]  ^ expandedKey[(round * 16) + 10];
-      buf2       = rsbox[state[6]]  ^ expandedKey[(round * 16) + 14];
-      state[2]   = rsbox[state[10]] ^ expandedKey[(round * 16) +  2];
-      state[6]   = rsbox[state[14]] ^ expandedKey[(round * 16) +  6];
+      buf1       = g_rsbox[state[2]]  ^ expanded_key[(round * 16) + 10];
+      buf2       = g_rsbox[state[6]]  ^ expanded_key[(round * 16) + 14];
+      state[2]   = g_rsbox[state[10]] ^ expanded_key[(round * 16) +  2];
+      state[6]   = g_rsbox[state[14]] ^ expanded_key[(round * 16) +  6];
       state[10]  = buf1;
       state[14]  = buf2;
 
       /* Row 3 */
 
-      buf1       = rsbox[state[3]]  ^ expandedKey[(round * 16) + 15];
-      state[3]   = rsbox[state[7]]  ^ expandedKey[(round * 16) +  3];
-      state[7]   = rsbox[state[11]] ^ expandedKey[(round * 16) +  7];
-      state[11]  = rsbox[state[15]] ^ expandedKey[(round * 16) + 11];
+      buf1       = g_rsbox[state[3]]  ^ expanded_key[(round * 16) + 15];
+      state[3]   = g_rsbox[state[7]]  ^ expanded_key[(round * 16) +  3];
+      state[7]   = g_rsbox[state[11]] ^ expanded_key[(round * 16) +  7];
+      state[11]  = g_rsbox[state[15]] ^ expanded_key[(round * 16) + 11];
       state[15]  = buf1;
     }
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+ /****************************************************************************
  * Name: aes_encrypt
  *
  * Description:
@@ -534,12 +550,12 @@ void aes_decr(uint8_t *state, uint8_t *expandedKey)
  *
  ****************************************************************************/
 
-void aes_encrypt(uint8_t *state, uint8_t *key)
+void aes_encrypt(FAR uint8_t *state, FAR uint8_t *key)
 {
   /* Expand the key into 176 bytes */
 
-  expandKey(aexpandedKey, key);
-  aes_encr(state, aexpandedKey);
+  expand_key(g_expanded_key, key);
+  aes_encr(state, g_expanded_key);
 }
 
 /****************************************************************************
@@ -559,58 +575,8 @@ void aes_encrypt(uint8_t *state, uint8_t *key)
  *
  ****************************************************************************/
 
-void aes_decrypt(uint8_t *state, uint8_t *key)
+void aes_decrypt(FAR uint8_t *state, FAR uint8_t *key)
 {
-  expandKey(aexpandedKey, key);       /* Expand the key into 176 bytes */
-  aes_decr(state, aexpandedKey);
+  expand_key(g_expanded_key, key);       /* Expand the key into 176 bytes */
+  aes_decr(state, g_expanded_key);
 }
-
-/****************************************************************************
- * Name: aes_read_key
- *
- * Description:
- *   Reads AES128 key from EEPROM.  Reads the AES128 key from fileID #12 in
- *   EEPROM returns an error if the key does not exist.
- *
- * Input Parameters:
- *  key   AES128 key of size 16 bytes
- *
- * Returned Value
- *   On success 0, error otherwise.
- *
- ****************************************************************************/
-
-signed long aes_read_key(uint8_t *key)
-{
-  signed long  returnValue;
-
-  returnValue = nvmem_read(NVMEM_AES128_KEY_FILEID, AES128_KEY_SIZE, 0, key);
-
-  return returnValue;
-}
-
-/****************************************************************************
- * Name: aes_write_key
- *
- * Description:
- *   Writes AES128 key from EEPROM Writes the AES128 key to fileID #12 in
- *   EEPROM
- *
- * Input Parameters:
- *  key   AES128 key of size 16 bytes
- *
- * Returned Value
- *   On success 0, error otherwise.
- *
- ****************************************************************************/
-
-signed long aes_write_key(uint8_t *key)
-{
-  signed long  returnValue;
-
-  returnValue = nvmem_write(NVMEM_AES128_KEY_FILEID, AES128_KEY_SIZE, 0, key);
-
-  return returnValue;
-}
-
-#endif /* CC3000_UNENCRYPTED_SMART_CONFIG */

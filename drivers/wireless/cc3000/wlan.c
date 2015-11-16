@@ -43,11 +43,12 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/crypto/aes.h>
+
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 #include <nuttx/wireless/cc3000/wlan.h>
 #include <nuttx/wireless/cc3000/hci.h>
 #include <nuttx/wireless/cc3000/nvmem.h>
-#include <nuttx/wireless/cc3000/security.h>
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 
 #include "cc3000.h"
@@ -1203,6 +1204,58 @@ long wlan_smart_config_set_prefix(FAR char *cNewPrefix)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: aes_read_key
+ *
+ * Description:
+ *   Reads AES128 key from EEPROM.  Reads the AES128 key from fileID #12 in
+ *   EEPROM returns an error if the key does not exist.
+ *
+ * Input Parameters:
+ *  key   AES128 key of size 16 bytes
+ *
+ * Returned Value
+ *   On success 0, error otherwise.
+ *
+ ****************************************************************************/
+
+#ifndef CC3000_UNENCRYPTED_SMART_CONFIG
+signed long aes_read_key(uint8_t *key)
+{
+  signed long  returnValue;
+
+  returnValue = nvmem_read(NVMEM_AES128_KEY_FILEID, AES128_KEY_SIZE, 0, key);
+
+  return returnValue;
+}
+#endif
+
+/****************************************************************************
+ * Name: aes_write_key
+ *
+ * Description:
+ *   Writes AES128 key from EEPROM Writes the AES128 key to fileID #12 in
+ *   EEPROM
+ *
+ * Input Parameters:
+ *  key   AES128 key of size 16 bytes
+ *
+ * Returned Value
+ *   On success 0, error otherwise.
+ *
+ ****************************************************************************/
+
+#if 0 //#ifndef CC3000_UNENCRYPTED_SMART_CONFIG
+signed long aes_write_key(uint8_t *key)
+{
+  signed long  returnValue;
+
+  returnValue = nvmem_write(NVMEM_AES128_KEY_FILEID, AES128_KEY_SIZE, 0, key);
+
+  return returnValue;
+}
+#endif
 
 /****************************************************************************
  * Name: wlan_smart_config_process

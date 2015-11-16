@@ -39,4 +39,11 @@ config CRYPTO_CRYPTODEV
 	bool "cryptodev support"
 	default n
 
-endif
+config CRYPTO_SW_AES
+	bool "Software AES library"
+	default n
+	---help---
+		Enable the software AES library as described in
+		include/nuttx/crypto/aes.h
+
+endif # CRYPTO

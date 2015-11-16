@@ -490,6 +490,40 @@ long wlan_smart_config_stop(void);
 long wlan_smart_config_set_prefix(char* cNewPrefix);
 
 /****************************************************************************
+ * Name: aes_read_key
+ *
+ * Description:
+ *   Reads AES128 key from EEPROM.  Reads the AES128 key from fileID #12 in
+ *   EEPROM returns an error if the key does not exist.
+ *
+ * Input Parameters:
+ *  key   AES128 key of size 16 bytes
+ *
+ * Returned Value
+ *   On success 0, error otherwise.
+ *
+ ****************************************************************************/
+
+signed long aes_read_key(FAR uint8_t *key);
+
+/****************************************************************************
+ * Name: aes_write_key
+ *
+ * Description:
+ *   Writes AES128 key from EEPROM Writes the AES128 key to fileID #12 in
+ *   EEPROM
+ *
+ * Input Parameters:
+ *  key   AES128 key of size 16 bytes
+ *
+ * Returned Value
+ *   On success 0, error otherwise.
+ *
+ ****************************************************************************/
+
+signed long aes_write_key(FAR uint8_t *key);
+
+/****************************************************************************
  * Name: wlan_smart_config_process
  *
  * Input Parameters:
