@@ -34,6 +34,11 @@
  *
  ****************************************************************************/
 
+/* TODO: Adapt interfaces so that they are consistent with H/W AES
+ * implemenations.  This needs to support up_aesinitialize() and
+ * aes_cypher() per include/nuttx/crypto/crypto.h.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -582,7 +587,8 @@ void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key)
 
 void aes_decrypt(FAR uint8_t *state, FAR const uint8_t *key)
 {
-  expand_key(g_expanded_key, key);       /* Expand the key into 176 bytes */
+  /* Expand the key into 176 bytes */
+
+  expand_key(g_expanded_key, key);
   aes_decr(state, g_expanded_key);
 }
-
