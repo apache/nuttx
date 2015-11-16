@@ -11093,4 +11093,7 @@
 	  file calculated partition boundries based on page block sizes but
 	  mtd_partition() is expecting calculations based on erase block size.
 	  From Alan Carvalho de Assis (2015-11-16).
+	* Move rivers/wireless/cc3000/security.c to crypto/aes.c; move
+	  include/nuttx/wireless/cc3000/security.h to include/nuttx/crypto/aes.h
+	  (2015-11-16).
 

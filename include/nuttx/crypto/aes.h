@@ -67,7 +67,7 @@ extern "C"
  * Name: aes_encrypt
  *
  * Description:
- *   AES128 encryption:  Given AES128 key and  16 bytes plain text, cipher
+ *   AES128 encryption:  Given AES128 key and 16 bytes plain text, cipher
  *   text of 16 bytes is computed. The AES implementation is in mode ECB
  *   (Electronic Code Book).
  *
@@ -80,13 +80,13 @@ extern "C"
  *
  ****************************************************************************/
 
-void aes_encrypt(FAR uint8_t *state, FAR uint8_t *key);
+void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key);
 
 /****************************************************************************
  * Name: aes_decrypt
  *
  * Description:
- *   AES128 decryption: Given AES128 key and  16 bytes cipher text, plain
+ *   AES128 decryption: Given AES128 key and 16 bytes cipher text, plain
  *   text of 16 bytes is computed The AES implementation is in mode ECB
  *   (Electronic Code Book).
  *
@@ -99,7 +99,7 @@ void aes_encrypt(FAR uint8_t *state, FAR uint8_t *key);
  *
  ****************************************************************************/
 
-void aes_decrypt(FAR uint8_t *state, FAR uint8_t *key);
+void aes_decrypt(FAR uint8_t *state, FAR const uint8_t *key);
 
 #ifdef  __cplusplus
 }

@@ -121,7 +121,7 @@ static uint8_t g_expanded_key[176];
  *
  ****************************************************************************/
 
-static void expand_key(FAR uint8_t *expanded_key, FAR uint8_t *key)
+static void expand_key(FAR uint8_t *expanded_key, FAR const uint8_t *key)
 {
   uint16_t buf1;
   uint16_t ii;
@@ -185,25 +185,28 @@ static uint8_t galois_mul2(uint8_t value)
  *
  * Description:
  *  Internal implementation of AES128 encryption.
- *  Straight forward aes encryption implementation. First the group of operations
+ *  Straight forward aes encryption implementation. First the group of
+ *  operations:
+ *
  *    - addRoundKey
  *    - subbytes
  *    - shiftrows
  *    - mixcolums
+ *
  *  is executed 9 times, after this addroundkey to finish the 9th round, after
  *  that the 10th round without mixcolums no further subfunctions to save
  *  cycles for function calls no structuring with "for (....)" to save cycles.
  *
  * Input Parameters:
  *  expanded_key expanded AES128 key
- *  state       16 bytes of plain text and cipher text
+ *  state        16 bytes of plain text and cipher text
  *
  * Returned Value:
  *  None
  *
  ******************************************************************************/
 
-static void aes_encr(FAR uint8_t *state, FAR uint8_t *expanded_key)
+static void aes_encr(FAR uint8_t *state, FAR const uint8_t *expanded_key)
 {
   uint8_t buf1;
   uint8_t buf2;
@@ -342,23 +345,25 @@ static void aes_encr(FAR uint8_t *state, FAR uint8_t *expanded_key)
  *  Internal implementation of AES128 decryption.
  *  Straight forward aes decryption implementation.  The order of substeps is
  *  the exact reverse of decryption inverse functions:
+ *
  *     - addRoundKey is its own inverse
  *     - rsbox is inverse of sbox
  *     - rightshift instead of leftshift
  *     - invMixColumns = barreto + mixColumns
+ *
  *  No further subfunctions to save cycles for function calls no structuring
  *  with "for (....)" to save cycles
  *
  * Input Parameters:
  *  expanded_key expanded AES128 key
- *  state       16 bytes of cipher text and plain text
+ *  state        16 bytes of cipher text and plain text
  *
  * Returned Value:
  *  None
  *
  ******************************************************************************/
 
-static void aes_decr(FAR uint8_t *state, FAR uint8_t *expanded_key)
+static void aes_decr(FAR uint8_t *state, FAR const uint8_t *expanded_key)
 {
   uint8_t buf1;
   uint8_t buf2;
@@ -537,7 +542,7 @@ static void aes_decr(FAR uint8_t *state, FAR uint8_t *expanded_key)
  * Name: aes_encrypt
  *
  * Description:
- *   AES128 encryption:  Given AES128 key and  16 bytes plain text, cipher
+ *   AES128 encryption:  Given AES128 key and 16 bytes plain text, cipher
  *   text of 16 bytes is computed. The AES implementation is in mode ECB
  *   (Electronic Code Book).
  *
@@ -550,7 +555,7 @@ static void aes_decr(FAR uint8_t *state, FAR uint8_t *expanded_key)
  *
  ****************************************************************************/
 
-void aes_encrypt(FAR uint8_t *state, FAR uint8_t *key)
+void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key)
 {
   /* Expand the key into 176 bytes */
 
@@ -562,7 +567,7 @@ void aes_encrypt(FAR uint8_t *state, FAR uint8_t *key)
  * Name: aes_decrypt
  *
  * Description:
- *   AES128 decryption: Given AES128 key and  16 bytes cipher text, plain
+ *   AES128 decryption: Given AES128 key and 16 bytes cipher text, plain
  *   text of 16 bytes is computed The AES implementation is in mode ECB
  *   (Electronic Code Book).
  *
@@ -575,8 +580,9 @@ void aes_encrypt(FAR uint8_t *state, FAR uint8_t *key)
  *
  ****************************************************************************/
 
-void aes_decrypt(FAR uint8_t *state, FAR uint8_t *key)
+void aes_decrypt(FAR uint8_t *state, FAR const uint8_t *key)
 {
   expand_key(g_expanded_key, key);       /* Expand the key into 176 bytes */
   aes_decr(state, g_expanded_key);
 }
+
