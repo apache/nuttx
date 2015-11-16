@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f429i-disco/src/stm32_nsh.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,6 +140,7 @@ int board_app_initialize(void)
 #if defined(CONFIG_STM32_SPI4)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
+  FAR struct mtd_geometry_s geo;
 #endif
 #if defined(CONFIG_MTD_PARTITION_NAMES)
   FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
@@ -178,11 +179,22 @@ int board_app_initialize(void)
     {
       syslog(LOG_INFO, "Successfully bound SPI port 4 to the SPI FLASH driver\n");
 
+      /* Get the geometry of the FLASH device */
+
+      ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
+      if (ret < 0)
+        {
+          fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+          return ret;
+        }
+
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
       {
         int partno;
         int partsize;
         int partoffset;
+        int partszbytes;
+        int erasesize;
         const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
         const char *ptr;
         FAR struct mtd_dev_s *mtd_part;
@@ -194,13 +206,35 @@ int board_app_initialize(void)
         ptr = partstring;
         partoffset = 0;
 
+        /* Get the Flash erase size */
+
+        erasesize = geo.erasesize;
+
         while (*ptr != '\0')
           {
             /* Get the partition size */
 
             partsize = atoi(ptr);
-            mtd_part = mtd_partition(mtd, partoffset, (partsize>>2) * 16);
-            partoffset += (partsize >> 2) * 16;
+            partszbytes = (partsize << 10); /* partsize is defined in KB */
+
+            /* Check if partition size is bigger then erase block */
+
+            if (partszbytes < erasesize)
+              {
+                fdbg("ERROR: Partition size is lesser than erasesize!\n");
+                return -1;
+              }
+
+            /* Check if partition size is multiple of erase block */
+
+            if ((partszbytes % erasesize) != 0)
+              {
+                fdbg("ERROR: Partition size is not multiple of erasesize!\n");
+                return -1;
+              }
+
+            mtd_part    = mtd_partition(mtd, partoffset, partszbytes / erasesize);
+            partoffset += partszbytes / erasesize;
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
             /* Test if this is the config partition */
@@ -224,9 +258,15 @@ int board_app_initialize(void)
 #endif
               }
 
+#if defined(CONFIG_MTD_PARTITION_NAMES)
             /* Set the partition name */
 
-#if defined(CONFIG_MTD_PARTITION_NAMES)
+            if (mtd_part == NULL)
+              {
+                dbg("Error: failed to create partition %s\n", partname);
+                return -1;
+              }
+
             mtd_setpartitionname(mtd_part, partname);
 
             /* Now skip to next name.  We don't need to split the string here
@@ -241,6 +281,7 @@ int board_app_initialize(void)
 
                 partname++;
               }
+
             if (*partname == ',')
               {
                 partname++;
