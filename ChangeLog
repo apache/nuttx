@@ -11089,4 +11089,8 @@
 	  Max Neklyudov (2015-11-12).
 	* arch/arm/src/samv7 and arch/arm/include/samv7:  Add support for the
 	  SAME70 family of chips (2015-11-14).
+	* configs/stm32f429i-disco: configs/stm32f429i-disco/src/stm32_nsh.c
+	  file calculated partition boundries based on page block sizes but
+	  mtd_partition() is expecting calculations based on erase block size.
+	  From Alan Carvalho de Assis (2015-11-16).
 
