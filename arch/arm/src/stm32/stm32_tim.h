@@ -185,6 +185,26 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer);
 
 int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
 
+/****************************************************************************
+ * Name: stm32_timer_initialize
+ *
+ * Description:
+ *   Bind the configuration timer to a timer lower half instance and
+ *   register the timer drivers at 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device. This should be of the form /dev/timer0
+ *   timer - the timer number.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_TIMER
+int stm32_timer_initialize(FAR const char *devpath, int timer);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
