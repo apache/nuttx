@@ -540,7 +540,7 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  * Name: at24c_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
+ *   Create an initialized MTD device instance.  MTD devices are not registered
  *   in the file system, but are created as instances that can be bound to
  *   other functions (such as a block or character driver front end).
  *
@@ -618,4 +618,21 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
   return (FAR struct mtd_dev_s *)priv;
 }
 
+/************************************************************************************
+ * Name: at24c_uninitialize
+ *
+ * Description:
+ *   Release resources held by an allocated MTD device instance.  Resources are only
+ *   allocated for the case where multiple AT24xx devices are support.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_AT24XX_MULTI
+void at24c_uninitialize(FAR struct mtd_dev_s *mtd)
+{
+  FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)mtd;
+  DEBUGASSERT(priv != NULL);
+  kmm_free(priv);
+}
+#endif /* CONFIG_AT24XX_MULTI */
 #endif /* CONFIG_MTD_AT24XX */

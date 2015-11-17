@@ -390,6 +390,19 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev,
 FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
 #endif
 
+/************************************************************************************
+ * Name: at24c_uninitialize
+ *
+ * Description:
+ *   Release resources held by an allocated MTD device instance.  Resources are only
+ *   allocated for the case where multiple AT24xx devices are support.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_AT24XX_MULTI
+void at24c_uninitialize(FAR struct mtd_dev_s *mtd);
+#endif
+
 /****************************************************************************
  * Name: at25_initialize
  *
