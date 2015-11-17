@@ -264,70 +264,93 @@ int ds3231_rtc_initialize(FAR struct i2c_dev_s *i2c)
 
 int up_rtc_getdatetime(FAR struct tm *tp)
 {
-  struct i2c_msg_s msg[2];
-  uint8_t buffer[8];
+  struct i2c_msg_s msg[4];
+  uint8_t secaddr;
+  uint8_t buffer[7];
+  uint8_t seconds;
   int tmp;
   int ret;
 
   /* Select to begin reading at the seconds register */
 
-  buffer[0] = DS3231_TIME_SECR;
+  secaddr       = DS3231_TIME_SECR;
 
   msg[0].addr   = DS3231_I2C_ADDRESS;
   msg[0].flags  = 0;
-  msg[0].buffer = buffer;
+  msg[0].buffer = &secaddr;
   msg[0].length = 1;
 
-  /* Set up to read 7 registers: secs, min, hr, dow, date, mth, yr */
+  /* Set up to read 7 registers: secondss, minutes, hour, day-of-week, date,
+   * month, year
+   */
 
   msg[1].addr   = DS3231_I2C_ADDRESS;
   msg[1].flags  = I2C_M_READ;
-  msg[1].buffer = &buffer[1];
+  msg[1].buffer = buffer;
   msg[1].length = 7;
+
+  /* Read the seconds register again */
+
+  msg[2].addr   = DS3231_I2C_ADDRESS;
+  msg[2].flags  = 0;
+  msg[2].buffer = &secaddr;
+  msg[2].length = 1;
+
+  msg[3].addr   = DS3231_I2C_ADDRESS;
+  msg[3].flags  = I2C_M_READ;
+  msg[3].buffer = &seconds;
+  msg[3].length = 1;
 
   /* Configure I2C before using it */
 
   I2C_SETFREQUENCY(g_ds3231.i2c, CONFIG_DS3231_I2C_FREQUENCY);
 
-  /* Perform the transfer (This could be done with I2C_WRITEREAD()) */
+  /* Perform the transfer (This could be done with I2C_WRITEREAD()).  The
+   * transfer may be performed repeatedly of the seconds values decreases,
+   * meaning that that was a rollover in the seconds.
+   */
 
-  ret = I2C_TRANSFER(g_ds3231.i2c, msg, 1);
-  if (ret < 0)
+  do
     {
-      rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
-      return ret;
+      ret = I2C_TRANSFER(g_ds3231.i2c, msg, 4);
+      if (ret < 0)
+        {
+          rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          return ret;
+        }
     }
+  while (buffer[0] > seconds);
 
   /* Format the return time */
   /* Return seconds (0-61) */
 
-  tp->tm_sec = rtc_bcd2bin(buffer[1] & DS3231_TIME_SEC_BCDMASK);
+  tp->tm_sec = rtc_bcd2bin(buffer[0] & DS3231_TIME_SEC_BCDMASK);
 
   /* Return minutes (0-59) */
 
-  tp->tm_min = rtc_bcd2bin(buffer[2] & DS3231_TIME_MIN_BCDMASK);
+  tp->tm_min = rtc_bcd2bin(buffer[1] & DS3231_TIME_MIN_BCDMASK);
 
   /* Return hour (0-23).  This assumes 24-hour time was set. */
 
-  tp->tm_hour = rtc_bcd2bin(buffer[3] & DS3231_TIME_HOUR24_BCDMASK);
+  tp->tm_hour = rtc_bcd2bin(buffer[2] & DS3231_TIME_HOUR24_BCDMASK);
 
  #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   /* Return the day of the week (0-6) */
 
-  tp->tm_wday = (rtc_bcd2bin(buffer[4]) & DS3231_TIME_DAY_MASK)- 1;
+  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DS3231_TIME_DAY_MASK)- 1;
 #endif
 
   /* Return the day of the month (1-31) */
 
-  tp->tm_mday = rtc_bcd2bin(buffer[5] & DS3231_TIME_DATE_BCDMASK);
+  tp->tm_mday = rtc_bcd2bin(buffer[4] & DS3231_TIME_DATE_BCDMASK);
 
   /* Return the month (0-11) */
 
-  tp->tm_mon = rtc_bcd2bin(buffer[6] & DS3231_TIME_MONTH_BCDMASK) - 1;
+  tp->tm_mon = rtc_bcd2bin(buffer[5] & DS3231_TIME_MONTH_BCDMASK) - 1;
 
   /* Return the years since 1990 */
 
-  tmp = rtc_bcd2bin(buffer[7] & DS3231_TIME_YEAR_BCDMASK);
+  tmp = rtc_bcd2bin(buffer[5] & DS3231_TIME_YEAR_BCDMASK);
 
   if ((buffer[6] & DS3231_TIME_CENTURY_MASK) == DS3231_TIME_1900)
     {
@@ -359,10 +382,11 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
-  struct i2c_msg_s msg;
+  struct i2c_msg_s msg[3];
   struct tm newtm;
   time_t newtime;
   uint8_t buffer[8];
+  uint8_t seconds;
   uint8_t century;
   uint8_t year;
   int ret;
@@ -451,24 +475,44 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Setup the I2C message */
 
-  msg.addr   = DS3231_I2C_ADDRESS;
-  msg.flags  = 0;
-  msg.buffer = buffer;
-  msg.length = 8;
+  msg[0].addr   = DS3231_I2C_ADDRESS;
+  msg[0].flags  = 0;
+  msg[0].buffer = buffer;
+  msg[0].length = 8;
+
+  /* Read back the seconds register */
+
+  msg[1].addr   = DS3231_I2C_ADDRESS;
+  msg[1].flags  = 0;
+  msg[1].buffer = buffer;
+  msg[1].length = 1;
+
+  msg[2].addr   = DS3231_I2C_ADDRESS;
+  msg[2].flags  = I2C_M_READ;
+  msg[2].buffer = &seconds;
+  msg[2].length = 1;
 
   /* Configure I2C before using it */
 
   I2C_SETFREQUENCY(g_ds3231.i2c, CONFIG_DS3231_I2C_FREQUENCY);
 
-  /* Perform the transfer (This could be done with I2C_READ) */
+  /* Perform the transfer (This could be done with I2C_READ).  This transfer
+   * will be repeated if the seconds count rolls over to a smaller value
+    * while writing.
+    */
 
-  ret = I2C_TRANSFER(g_ds3231.i2c, &msg, 1);
-  if (ret < 0)
+  do
     {
-      rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+      ret = I2C_TRANSFER(g_ds3231.i2c, msg, 3);
+      if (ret < 0)
+        {
+          rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          return ret;
+        }
     }
+  while (buffer[1] > seconds);
 
-  return ret;
+  return OK;
 }
 
 #endif /* CONFIG_RTC_DS3231 */
