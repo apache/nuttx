@@ -46,7 +46,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 
-#include "binfmt_internal.h"
+#include "binfmt.h"
 
 #if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_SCHED_HAVE_PARENT)
 

@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 
@@ -199,15 +200,13 @@ static ssize_t progmem_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
   FAR const uint8_t *src;
-  size_t offset;
 
   /* Read the specified blocks into the provided user buffer and return
    * status (The positive, number of blocks actually read or a negated
    * errno).
    */
 
-  offset = startblock << priv->blkshift;
-  src    = (FAR const uint8_t *)up_progmem_getaddress(offset);
+  src = (FAR const uint8_t *)up_progmem_getaddress(startblock);
   memcpy(buffer, src, nblocks << priv->blkshift);
   return nblocks;
 }
