@@ -48,7 +48,6 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/wqueue.h>
 #include <nuttx/discrete/ioexpander.h>
 #include <nuttx/discrete/pca9555.h>
 
@@ -95,12 +94,6 @@
 #error "CONFIG_I2C is required by PCA9555"
 #endif
 
-#ifndef CONFIG_PCA9555_INT_DISABLE
-#ifndef CONFIG_SCHED_WORKQUEUE
-#error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
-#endif
-#endif
-
 #define PCA9555_MAXDEVS             8
 
 /* I2C frequency */
@@ -123,19 +116,15 @@
 
 struct pca9555_dev_s
 {
-  struct ioexpander_dev_s dev; /* Nested structure to allow casting as public gpio expander. */
+  struct ioexpander_dev_s      dev;    /* Nested structure to allow casting as public gpio expander. */
 
 #ifdef CONFIG_PCA9555_MULTIPLE
-  FAR struct pca9555_dev_s *flink;      /* Supports a singly linked list of drivers */
+  FAR struct pca9555_dev_s *   flink;  /* Supports a singly linked list of drivers */
 #endif
 
   FAR struct pca9555_config_s *config; /* Board configuration data */
-  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
+  FAR struct i2c_dev_s *       i2c;    /* Saved I2C driver instance */
 
-#ifndef CONFIG_PCA9555_INT_DISABLE
-  struct work_s work;                  /* Supports the interrupt handling "bottom half" */
-  pca9555_handler_t handlers[PCA9555_GPIO_NPINS]; /* GPIO "interrupt handlers" */
-#endif
 };
 
 #endif /* CONFIG_IOEXPANDER && CONFIG_IOEXPANDER_PCA9555 */
