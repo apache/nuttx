@@ -436,7 +436,7 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 
 #endif
 
-#ifndef CONFIG_PCA9555_INT_DISABLE
+#ifdef CONFIG_PCA9555_INT_ENABLE
 
 /****************************************************************************
  * Name: pca9555_irqworker
@@ -451,23 +451,54 @@ static void pca9555_irqworker(void *arg)
 {
   uint8_t addr = PCA9555_REG_INPUT;
   uint8_t buf[2];
-  int ret;
-  FAR struct pca9555_dev_s *dev = (FAR struct pca9555_dev_s*)arg;
+  int ret, bits;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)arg;
 
   /* read inputs */
-  ret = I2C_WRITEREAD(dev->i2c, &addr, 1, buf, 2);
-  dbg("> %02X %02X\n",buf[0],buf[1]);
+  ret = I2C_WRITEREAD(pca->i2c, &addr, 1, buf, 2);
+  if( ret != OK)
+    {
+      return;
+    }
 
+  bits = (buf[0]<<8) | buf[1];
+
+
+  /* if signal PID is registered, enqueue signal. */
+  if(pca->dev.sigpid)
+    {
+#ifdef CONFIG_CAN_PASS_STRUCTS
+      union sigval value;
+      value.sival_int = bits;
+      ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, value);
+#else
+      ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, (FAR void*)bits);
+#endif
+    dbg("pca signal %04X (sig %d to pid %d)\n",bits, pca->dev.sigval, pca->dev.sigpid);
+    }
+  else
+    {
+    dbg("no handler registered\n");
+    }
   /* re-enable */
-  dev->config->enable(dev->config, TRUE);
+  pca->config->enable(pca->config, TRUE);
 }
+
+/****************************************************************************
+ * Name: pca9555_interrupt
+ *
+ * Description:
+ *   Handle GPIO interrupt events (this function executes in the
+ *   context of the interrupt).
+ *
+ ****************************************************************************/
 
 static int pca9555_interrupt(int irq, FAR void *context)
 {
   /* To support multiple devices,
    * retrieve the priv structure using the irq number */
 
-  register FAR struct pca9555_dev_s *dev = &g_pca9555;
+  register FAR struct pca9555_dev_s *pca = &g_pca9555;
 
   /* In complex environments, we cannot do I2C transfers from the interrupt
    * handler because semaphores are probably used to lock the I2C bus.  In
@@ -476,15 +507,15 @@ static int pca9555_interrupt(int irq, FAR void *context)
    * a good thing to do in any event.
    */
 
-  DEBUGASSERT(work_available(&dev->work));
+  DEBUGASSERT(work_available(&pca->dev.work));
 
   /* Notice that further GPIO interrupts are disabled until the work is
    * actually performed.  This is to prevent overrun of the worker thread.
    * Interrupts are re-enabled in pca9555_irqworker() when the work is completed.
    */
 
-  dev->config->enable(dev->config, FALSE);
-  return work_queue(HPWORK, &dev->work, pca9555_irqworker, (FAR void *)dev, 0);
+  pca->config->enable(pca->config, FALSE);
+  return work_queue(HPWORK, &pca->dev.work, pca9555_irqworker, (FAR void *)pca, 0);
 }
 
 #endif
@@ -546,7 +577,7 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_dev_s *i2cdev,
   I2C_SETADDRESS(i2cdev, config->address, 7);
   I2C_SETFREQUENCY(i2cdev, config->frequency);
 
-#ifndef CONFIG_PCA9555_INT_DISABLE
+#ifdef CONFIG_PCA9555_INT_ENABLE
   pcadev->config->attach(pcadev->config, pca9555_interrupt);
   pcadev->config->enable(pcadev->config, TRUE);
 #endif

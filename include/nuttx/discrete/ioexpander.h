@@ -41,8 +41,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/wqueue.h>
 
 #if defined(CONFIG_IOEXPANDER)
+
+#ifndef CONFIG_PCA9555_INT_DISABLE
+#ifndef CONFIG_SCHED_WORKQUEUE
+#error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
+#endif
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -249,6 +256,11 @@ struct ioexpander_ops_s
 struct ioexpander_dev_s
 {
   FAR const struct ioexpander_ops_s *ops;
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  struct work_s                      work;   /* Supports the interrupt handling "bottom half" */
+  int                                sigpid; /* PID to be signaled in case of interrupt */
+  int                                sigval; /* signal to be sent in case of interrupt */
+#endif
 };
 
 #endif //CONFIG_IOEXPANDER
