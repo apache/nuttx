@@ -74,11 +74,12 @@
 #  warning "Assuming AT24 size 64"
 #  define CONFIG_AT24XX_SIZE 64
 #endif
-#ifndef CONFIG_AT24XX_ADDR
-#  warning "Assuming AT24 address of 0x50"
+#if !defined(CONFIG_AT24XX_ADDR) && !defined(CONFIG_AT24XX_MULTI)
+#  warning "Assuming AT24 I2C address of 0x50"
 #  define CONFIG_AT24XX_ADDR 0x50
 #endif
 #ifndef CONFIG_AT24XX_FREQUENCY
+#  warning "Assuming AT24 I2C frequency of 100KHz"
 #  define CONFIG_AT24XX_FREQUENCY 100000
 #endif
 
@@ -134,7 +135,7 @@
  */
 
 #ifndef CONFIG_AT24XX_MTD_BLOCKSIZE
-#  warning "Assuming driver block size is the same as the FLASH page size"
+#  warning "Assuming MTD driver block size is the same as the FLASH page size"
 #  define CONFIG_AT24XX_MTD_BLOCKSIZE AT24XX_PAGESIZE
 #endif
 
@@ -179,11 +180,13 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
  * Private Data
  ************************************************************************************/
 
-/* At present, only a signal AT24 part is supported.  In this case, a statically
- * allocated state structure may be used.
+#ifndef CONFIG_AT24XX_MULTI
+/* If only a signal AT24 part is supported then a statically allocated state
+ * structure may be used.
  */
 
 static struct at24c_dev_s g_at24c;
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -543,11 +546,16 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_AT24XX_MULTI
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev, uint8_t address)
+#else
 FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
+#endif
 {
   FAR struct at24c_dev_s *priv;
 
-  fvdbg("dev: %p\n", dev);
+#ifdef CONFIG_AT24XX_MULTI
+  fvdbg("dev: %p address: %02x\n", dev, address);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -556,12 +564,32 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
    * to be extended to handle multiple FLASH parts on the same I2C bus.
    */
 
+  priv = (FAR struct at24c_dev_s *)kmm_zalloc(sizeof(struct at24c_dev_s));
+  if (priv == NULL)
+    {
+      fdbg("ERROR: Failed to allocate device structure\n");
+      return NULL;
+    }
+
+#else
+  fvdbg("dev: %p\n", dev);
+
+  /* If only a signal AT24 part is supported then a statically allocated state
+   * structure is used.
+   */
+
   priv = &g_at24c;
+#endif
+
   if (!priv->initd)
     {
       /* Initialize the allocated structure */
 
+#ifdef CONFIG_AT24XX_MULTI
+      priv->addr       = address;
+#else
       priv->addr       = CONFIG_AT24XX_ADDR;
+#endif
       priv->pagesize   = AT24XX_PAGESIZE;
       priv->npages     = AT24XX_NPAGES;
 

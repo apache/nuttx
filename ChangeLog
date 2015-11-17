@@ -11096,4 +11096,6 @@
 	* Move rivers/wireless/cc3000/security.c to crypto/aes.c; move
 	  include/nuttx/wireless/cc3000/security.h to include/nuttx/crypto/aes.h
 	  (2015-11-16).
+	* drivers/mtd/at24xx.c:  Add support for multiple AT24xx EEPROM parts,
+	  each with unique I2C addresses, but otherwise idential (2015-11-17).
 

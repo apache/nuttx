@@ -278,6 +278,15 @@ config MTD_AT24XX
 
 if MTD_AT24XX
 
+config AT24XX_MULTI
+	bool "Multiple AT24XX devices"
+	default n
+	---help---
+		Build in additional support for multiple AT24XX devices, each with
+		dynamically allocated device structures wiath a separate I2C
+		addresses (but otherwise identical -- support for multiple, different
+		AT24xx, devices not yet supported).
+
 config AT24XX_SIZE
 	int "AT24xx size (Kbit)"
 	default 64
@@ -291,6 +300,7 @@ config AT24XX_ADDR
 	hex "AT24XX I2C address"
 	default 0x50
 	range 0x50 0x57
+	depends on !AT24XX_MULTI
 	---help---
 		The I2C address of the FLASH part.  This is should be 0b01010aaa
 		(where aaa is determined by board/pin configuration).
