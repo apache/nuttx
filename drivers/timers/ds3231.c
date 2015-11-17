@@ -220,7 +220,14 @@ static int rtc_bcd2bin(uint8_t value)
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   called once during the OS initialization sequence by board-specific logic.
+ *
+ *   After ds3231_rtc_initialize() is called, the OS function clock_synchronize()
+ *   should also be called to synchronize the system timer to a hardware RTC.  That
+ *   operation is normally performed automatically by the system during clock
+ *   initialization.  However, when an external RTC is used, the board logic will
+ *   need to explicitly re-synchronize the system timer to the RTC when the RTC
+ *   becomes available.
  *
  * Input Parameters:
  *   None
