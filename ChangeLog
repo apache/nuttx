@@ -11100,4 +11100,8 @@
 	  each with unique I2C addresses, but otherwise idential (2015-11-17).
 	* drivers/timers/ds3231.c:  Add support for the DS3231 I2C RTC.  Untested
 	  on the initial commit (2015-11-17).
-
+	* arch/arm/src/stm32/stm32_tim_lowerhalf.c:  Add a compatible lower-half
+	  timer driver for use with drivers/timers/timer.c.  From Wail Khemir
+	  (2015-11-17).
+	* drivers/sensors/ms58xx.c:  Fix some issues with initialization and with
+	  CRC calculation.  From Karim Keddam (2015-11-17).
