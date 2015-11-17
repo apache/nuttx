@@ -546,5 +546,24 @@ int stm32_zerocross_initialize(void);
 int stm32_max6675initialize(FAR const char *devpath);
 #endif
 
+/****************************************************************************
+ * Name: up_timer_init
+ *
+ * Description:
+ *   Configure the timer driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   timer   - The timer's number.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_TIMER
+int up_timer_init(FAR const char *devpath, int timer);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H */
