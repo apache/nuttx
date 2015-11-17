@@ -344,7 +344,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   /* Return the day of the week (0-6) */
 
-  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DS3231_TIME_DAY_MASK)- 1;
+  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DS3231_TIME_DAY_MASK) - 1;
 #endif
 
   /* Return the day of the month (1-31) */
@@ -505,8 +505,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Perform the transfer (This could be done with I2C_READ).  This transfer
    * will be repeated if the seconds count rolls over to a smaller value
-    * while writing.
-    */
+   * while writing.
+   */
 
   do
     {
