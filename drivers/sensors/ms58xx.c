@@ -203,11 +203,11 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
     {
       if (cnt % 2 == 1)
         {
-          n_rem ^= (uint16_t)((src[cnt>>1]) & 0x00FF);
+          n_rem ^= (uint16_t)((src[cnt >> 1]) & 0x00ff);
         }
       else
         {
-          n_rem ^= (uint16_t)(src[cnt>>1] >> 8);
+          n_rem ^= (uint16_t)(src[cnt >> 1] >> 8);
         }
 
       for (n_bit = 8; n_bit > 0; n_bit--)
