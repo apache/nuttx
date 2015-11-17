@@ -74,4 +74,8 @@ ifeq ($(CONFIG_LCD_SSD1351),y)
 CSRCS += stm32_ssd1351.c
 endif
 
+ifeq ($(CONFIG_TIMER),y)
+CSRCS += stm32_timer.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

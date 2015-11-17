@@ -133,4 +133,23 @@
 void weak_function stm32_spiinitialize(void);
 #endif
 
+/****************************************************************************
+ * Name: up_timer_init
+ *
+ * Description:
+ *   Configure the timer driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   timer   - The timer's number.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_TIMER
+int up_timer_init(FAR const char *devpath, int timer);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */
