@@ -452,35 +452,39 @@ static void pca9555_irqworker(void *arg)
   uint8_t addr = PCA9555_REG_INPUT;
   uint8_t buf[2];
   int ret, bits;
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)arg;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)arg;
 
-  /* read inputs */
+  /* Read inputs */
+
   ret = I2C_WRITEREAD(pca->i2c, &addr, 1, buf, 2);
-  if( ret != OK)
+  if (ret != OK)
     {
       return;
     }
 
-  bits = (buf[0]<<8) | buf[1];
+  bits = (buf[0] << 8) | buf[1];
 
+  /* If signal PID is registered, enqueue signal. */
 
-  /* if signal PID is registered, enqueue signal. */
-  if(pca->dev.sigpid)
+  if (pca->dev.sigpid)
     {
 #ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
       value.sival_int = bits;
       ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, value);
 #else
-      ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, (FAR void*)bits);
+      ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, (FAR void *)bits);
 #endif
-    dbg("pca signal %04X (sig %d to pid %d)\n",bits, pca->dev.sigval, pca->dev.sigpid);
+      dbg("pca signal %04X (sig %d to pid %d)\n",
+          bits, pca->dev.sigval, pca->dev.sigpid);
     }
   else
     {
-    dbg("no handler registered\n");
+      dbg("no handler registered\n");
     }
-  /* re-enable */
+
+  /* Re-enable */
+
   pca->config->enable(pca->config, TRUE);
 }
 
