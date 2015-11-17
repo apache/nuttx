@@ -553,7 +553,8 @@ int stm32_max6675initialize(FAR const char *devpath);
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
  *   timer   - The timer's number.
  *
  * Returned Values:
@@ -561,6 +562,7 @@ int stm32_max6675initialize(FAR const char *devpath);
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_TIMER
 int up_timer_init(FAR const char *devpath, int timer);
 #endif

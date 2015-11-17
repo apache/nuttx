@@ -148,6 +148,7 @@ void weak_function stm32_spiinitialize(void);
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_TIMER
 int up_timer_init(FAR const char *devpath, int timer);
 #endif

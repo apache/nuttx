@@ -35,8 +35,6 @@
  *
  ****************************************************************************/
 
-
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -66,7 +64,8 @@
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
  *   timer   - The timer's number.
  *
  * Returned Values:
@@ -74,9 +73,10 @@
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
+
 int up_timer_init(FAR const char *devpath, int timer)
 {
-	return stm32_timer_initialize(devpath, timer);
+  return stm32_timer_initialize(devpath, timer);
 }
 
 #endif

@@ -72,9 +72,10 @@
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
+
 int up_timer_init(FAR const char *devpath, int timer)
 {
-	return stm32_timer_initialize(devpath, timer);
+  return stm32_timer_initialize(devpath, timer);
 }
 
 #endif
