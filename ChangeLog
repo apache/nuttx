@@ -11098,4 +11098,6 @@
 	  (2015-11-16).
 	* drivers/mtd/at24xx.c:  Add support for multiple AT24xx EEPROM parts,
 	  each with unique I2C addresses, but otherwise idential (2015-11-17).
+	* drivers/timers/ds3231.c:  Add support for the DS3231 I2C RTC.  Untested
+	  on the initial commit (2015-11-17).
 

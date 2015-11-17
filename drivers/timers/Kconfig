@@ -117,6 +117,24 @@ config RTC_IOCTL
 		architecture-specific RTC operations to the RTC interface
 
 endif # RTC_DRIVER
+
+config RTC_DS3231
+	bool "DS3231 RTC Driver"
+	default n
+	select I2C
+	select I2C_TRANSFER
+	select RTC_DATETIME
+	---help---
+		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+
+if RTC_DS3231
+
+config DS3231_I2C_FREQUENCY
+	int "DS3231 I2C frequency"
+	default 400000
+	range 1 4000000
+
+endif # RTC_DS3231
 endif # RTC
 
 menuconfig WATCHDOG
