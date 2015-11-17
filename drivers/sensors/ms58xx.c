@@ -413,6 +413,8 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
         break;
     }
 
+  // We have to wait before the prom is ready is be read
+  up_udelay(10000);
   for (i = 0; i < len; i++)
     {
       ret = ms58xx_readu16(priv, MS58XX_PROM_REG+i*2, prom+i);
