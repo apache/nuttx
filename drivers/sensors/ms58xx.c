@@ -194,27 +194,35 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
   uint16_t n_rem;
   uint16_t crc_read;
   uint8_t n_bit;
+
   n_rem = 0x00;
   crc_read = src[crcIndex];
-  src[crcIndex] = (0xFF00 & (src[7]));
-  for(cnt=0;cnt<16;cnt++)
-  {
-    if(cnt%2==1)
-      n_rem ^= (uint16_t)((src[cnt>>1]) & 0x00FF);
-    else
-      n_rem ^= (uint16_t)(src[cnt>>1] >> 8);
-    for(n_bit=8; n_bit > 0; n_bit--)
+  src[crcIndex] = (0xff00 & (src[7]));
+
+  for (cnt = 0; cnt < 16; cnt++)
     {
-      if(n_rem & (0x8000))
-      {
-         n_rem = (n_rem << 1) ^ 0x3000;
-      }
+      if (cnt % 2 == 1)
+        {
+          n_rem ^= (uint16_t)((src[cnt>>1]) & 0x00FF);
+        }
       else
-      {
-        n_rem = (n_rem << 1);
-      }
+        {
+          n_rem ^= (uint16_t)(src[cnt>>1] >> 8);
+        }
+
+      for (n_bit = 8; n_bit > 0; n_bit--)
+        {
+          if (n_rem & (0x8000))
+            {
+              n_rem = (n_rem << 1) ^ 0x3000;
+            }
+          else
+            {
+              n_rem = (n_rem << 1);
+            }
+        }
     }
-  }
+
   n_rem = (0x000F & (n_rem >> 12));
   src[crcIndex] = crc_read;
   return (n_rem ^ 0x00);
@@ -413,11 +421,12 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
         break;
     }
 
-  // We have to wait before the prom is ready is be read
+  /* We have to wait before the prom is ready is be read */
+
   up_udelay(10000);
   for (i = 0; i < len; i++)
     {
-      ret = ms58xx_readu16(priv, MS58XX_PROM_REG+i*2, prom+i);
+      ret = ms58xx_readu16(priv, MS58XX_PROM_REG + i * 2, prom + i);
       if (ret < 0)
         {
           sndbg("ms58xx_readu16 failed: %d\n", ret);
