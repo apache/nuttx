@@ -49,11 +49,11 @@
  * Public Functions
  ****************************************************************************/
 
-char *itoa(int val, char *str, int base)
+FAR char *itoa(int val, FAR char *str, int base)
 {
-  static const char *digits = "0123456789abcdefghijklmnopqrstuvwxyz";
+  static FAR const char *digits = "0123456789abcdefghijklmnopqrstuvwxyz";
   int intval = abs(val), digit, pos, len;
-  char *buf = str;
+  FAR char *buf = str;
   char swap;
 
   if (base >= 2 && base <= 36)

@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-long strtol(const char *nptr, char **endptr, int base)
+long strtol(FAR const char *nptr, FAR char **endptr, int base)
 {
   unsigned long accum = 0;
   bool negate = false;
@@ -101,4 +101,3 @@ long strtol(const char *nptr, char **endptr, int base)
 
   return (long)accum;
 }
-
