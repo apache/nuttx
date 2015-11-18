@@ -134,16 +134,20 @@
 
 int board_app_initialize(void)
 {
-#if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
-  int ret;
-#endif
 #if defined(CONFIG_STM32_SPI4)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
   FAR struct mtd_geometry_s geo;
 #endif
+
 #if defined(CONFIG_MTD_PARTITION_NAMES)
   FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
+#endif
+
+#if defined(CONFIG_MTD) && defined(CONFIG_MTD_SST25XX)
+  int ret;
+#elif defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+  int ret;
 #endif
 
   /* Configure SPI-based devices */
