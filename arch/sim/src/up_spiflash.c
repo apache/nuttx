@@ -84,6 +84,11 @@
 #ifdef CONFIG_SIM_SPIFLASH_1M
 #  define CONFIG_SPIFLASH_SIZE        (128 * 1024)
 #  define CONFIG_SPIFLASH_CAPACITY    0x11
+
+#ifndef CONFIG_SIM_SPIFLASH_SECTORSIZE
+#  define CONFIG_SIM_SPIFLASH_SECTORSIZE    2048
+#endif
+
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH_8M
@@ -157,6 +162,7 @@
 #define SPIFLASH_STATE_READ2        14
 #define SPIFLASH_STATE_READ3        15
 #define SPIFLASH_STATE_READ4        16
+#define SPIFLASH_STATE_FREAD_WAIT   17
 
 /* Instructions */
 /*      Command            Value      N Description             Addr Dummy Data   */
@@ -666,6 +672,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
               break;
 
             case SPIFLASH_READ:
+            case SPIFLASH_FAST_READ:
               priv->state = SPIFLASH_STATE_READ1;
               break;
 
@@ -780,6 +787,18 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
 
       case SPIFLASH_STATE_READ3:
         priv->address |= data;
+        if (priv->last_cmd == SPIFLASH_FAST_READ)
+          {
+            priv->state = SPIFLASH_STATE_FREAD_WAIT;
+          }
+        else
+          {
+            priv->state = SPIFLASH_STATE_READ4;
+          }
+        break;
+
+      case SPIFLASH_STATE_FREAD_WAIT:
+        priv->read_data = 0xff;
         priv->state = SPIFLASH_STATE_READ4;
         break;
 
@@ -850,6 +869,7 @@ FAR struct spi_dev_s *up_spiflashinitialize()
   priv->state = SPIFLASH_STATE_IDLE;
   priv->read_data = 0xFF;
   priv->last_cmd = 0xFF;
+  memset(&priv->data[0], 0xFF, sizeof(priv->data));
 
   irqrestore(flags);
   return (FAR struct spi_dev_s *)priv;

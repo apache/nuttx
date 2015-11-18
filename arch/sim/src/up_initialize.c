@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ static void up_init_smartfs(void)
   FAR struct mtd_dev_s *mtd;
   FAR struct spi_dev_s *spi;
 
+#ifdef CONFIG_MTD_M25P
   /* Initialize a simulated SPI FLASH block device m25p MTD driver */
 
   spi = up_spiflashinitialize();
@@ -87,6 +88,18 @@ static void up_init_smartfs(void)
   /* Now initialize a SMART Flash block device and bind it to the MTD device */
 
   smart_initialize(0, mtd, NULL);
+#endif
+
+#ifdef CONFIG_MTD_W25
+  /* Initialize a simulated SPI FLASH block device m25p MTD driver */
+
+  spi = up_spiflashinitialize();
+  mtd = w25_initialize(spi);
+
+  /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
+  smart_initialize(0, mtd, NULL);
+#endif
 }
 #endif
 
