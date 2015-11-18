@@ -194,6 +194,32 @@ int board_reset(int status);
 #endif
 
 /****************************************************************************
+ * Name: board_uniqueid
+ *
+ * Description:
+ *   Return a unique ID associated with the board.  The meaning of this
+ *   unique ID is not specified.  It may be a chip identifying number, a
+ *   serial number, a MAC address, etc.  It may be in binary or it may be
+ *   ASCII.  The only only requirement is that the length of the unique
+ *   ID be exactly CONFIG_BOARDCTL_UNIQUEID_SIZE in length.
+ *
+ * Input Parameters:
+ *   uniqueid - A reference to a writable memory location provided by the
+ *     caller to receive the board unique ID.  The memory memory referenced
+ *     by this pointer must be at least CONFIG_BOARDCTL_UNIQUEID_SIZE in
+ *     length.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwize a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_UNIQUEID
+int board_uniqueid(FAR uint8_t *uniqueid);
+#endif
+
+/****************************************************************************
  * Name: board_tsc_setup
  *
  * Description:
