@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RTC_DS3231
+#ifdef CONFIG_RTC_DS3XXX
 
 /****************************************************************************
  * Public Function Prototypes
@@ -57,13 +57,13 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Name: ds3231_rtc_initialize
+ * Name: ds3xxx_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
  *   called once during the OS initialization sequence by board-specific logic.
  *
- *   After ds3231_rtc_initialize() is called, the OS function clock_synchronize()
+ *   After ds3xxx_rtc_initialize() is called, the OS function clock_synchronize()
  *   should also be called to synchronize the system timer to a hardware RTC.  That
  *   operation is normally performed automatically by the system during clock
  *   initialization.  However, when an external RTC is used, the board logic will
@@ -79,12 +79,12 @@ extern "C"
  ************************************************************************************/
 
 struct i2c_dev_s; /* Forward reference */
-int ds3231_rtc_initialize(FAR struct i2c_dev_s *i2c);
+int ds3xxx_rtc_initialize(FAR struct i2c_dev_s *i2c);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_RTC_DS3231 */
+#endif /* CONFIG_RTC_DS3XXX */
 #endif  /* __INCLUDE_NUTTX_TIMERS_DS3231_H */

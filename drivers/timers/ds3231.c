@@ -50,7 +50,7 @@
 
 #include "ds3231.h"
 
-#ifdef CONFIG_RTC_DS3231
+#ifdef CONFIG_RTC_DS3XXX
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -216,13 +216,13 @@ static int rtc_bcd2bin(uint8_t value)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: ds3231_rtc_initialize
+ * Name: ds3xxx_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
  *   called once during the OS initialization sequence by board-specific logic.
  *
- *   After ds3231_rtc_initialize() is called, the OS function clock_synchronize()
+ *   After ds3xxx_rtc_initialize() is called, the OS function clock_synchronize()
  *   should also be called to synchronize the system timer to a hardware RTC.  That
  *   operation is normally performed automatically by the system during clock
  *   initialization.  However, when an external RTC is used, the board logic will
@@ -237,7 +237,7 @@ static int rtc_bcd2bin(uint8_t value)
  *
  ************************************************************************************/
 
-int ds3231_rtc_initialize(FAR struct i2c_dev_s *i2c)
+int ds3xxx_rtc_initialize(FAR struct i2c_dev_s *i2c)
 {
   /* Remember the i2c device and claim that the RTC is enabled */
 
@@ -280,7 +280,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   /* Select to begin reading at the seconds register */
 
-  secaddr       = DS3231_TIME_SECR;
+  secaddr       = DS3XXX_TIME_SECR;
 
   msg[0].addr   = DS3231_I2C_ADDRESS;
   msg[0].flags  = 0;
@@ -331,35 +331,35 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   /* Format the return time */
   /* Return seconds (0-61) */
 
-  tp->tm_sec = rtc_bcd2bin(buffer[0] & DS3231_TIME_SEC_BCDMASK);
+  tp->tm_sec = rtc_bcd2bin(buffer[0] & DS3XXX_TIME_SEC_BCDMASK);
 
   /* Return minutes (0-59) */
 
-  tp->tm_min = rtc_bcd2bin(buffer[1] & DS3231_TIME_MIN_BCDMASK);
+  tp->tm_min = rtc_bcd2bin(buffer[1] & DS3XXX_TIME_MIN_BCDMASK);
 
   /* Return hour (0-23).  This assumes 24-hour time was set. */
 
-  tp->tm_hour = rtc_bcd2bin(buffer[2] & DS3231_TIME_HOUR24_BCDMASK);
+  tp->tm_hour = rtc_bcd2bin(buffer[2] & DS3XXX_TIME_HOUR24_BCDMASK);
 
  #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   /* Return the day of the week (0-6) */
 
-  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DS3231_TIME_DAY_MASK) - 1;
+  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DS3XXX_TIME_DAY_MASK) - 1;
 #endif
 
   /* Return the day of the month (1-31) */
 
-  tp->tm_mday = rtc_bcd2bin(buffer[4] & DS3231_TIME_DATE_BCDMASK);
+  tp->tm_mday = rtc_bcd2bin(buffer[4] & DS3XXX_TIME_DATE_BCDMASK);
 
   /* Return the month (0-11) */
 
-  tp->tm_mon = rtc_bcd2bin(buffer[5] & DS3231_TIME_MONTH_BCDMASK) - 1;
+  tp->tm_mon = rtc_bcd2bin(buffer[5] & DS3XXX_TIME_MONTH_BCDMASK) - 1;
 
   /* Return the years since 1990 */
 
-  tmp = rtc_bcd2bin(buffer[5] & DS3231_TIME_YEAR_BCDMASK);
+  tmp = rtc_bcd2bin(buffer[5] & DS3XXX_TIME_YEAR_BCDMASK);
 
-  if ((buffer[6] & DS3231_TIME_CENTURY_MASK) == DS3231_TIME_1900)
+  if ((buffer[6] & DS3XXX_TIME_CENTURY_MASK) == DS3XXX_TIME_1900)
     {
       tp->tm_year = tmp;
     }
@@ -429,7 +429,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Construct the message */
   /* Write starting with the seconds regiser */
 
-  buffer[0] = DS3231_TIME_SECR;
+  buffer[0] = DS3XXX_TIME_SECR;
 
   /* Save seconds (0-59) converted to BCD */
 
@@ -441,7 +441,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Save hour (0-23) with 24-hour time indicatin */
 
-  buffer[3] = rtc_bin2bcd(newtm.tm_hour) | DS3231_TIME_24;
+  buffer[3] = rtc_bin2bcd(newtm.tm_hour) | DS3XXX_TIME_24;
 
   /* Save the day of the week (1-7) */
 
@@ -461,14 +461,14 @@ int up_rtc_settime(FAR const struct timespec *tp)
     {
       /* Convert years in the range 1900-1999 */
 
-      century = DS3231_TIME_1900;
+      century = DS3XXX_TIME_1900;
       year    = newtm.tm_year;
     }
   else
     {
       /* Convert years in the range 2000-2099 */
 
-      century = DS3231_TIME_2000;
+      century = DS3XXX_TIME_2000;
       year    = newtm.tm_year - 100;
     }
 
@@ -522,4 +522,4 @@ int up_rtc_settime(FAR const struct timespec *tp)
   return OK;
 }
 
-#endif /* CONFIG_RTC_DS3231 */
+#endif /* CONFIG_RTC_DS3XXX */

@@ -11114,3 +11114,6 @@
 	* configs/boardctl.h, Kconfig, include/sys/boardctl.h, and nuttx/board.h:
 	  Add a command to the boardctl() interface to obtain a board unique ID
 	  (2015-11-18).
+	* drivers/timers/ds3231.c:  Driver extended to include support for the
+	  DS1307 RTC (2015-11-18).
+
