@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-long long strtoll(const char *nptr, char **endptr, int base)
+long long strtoll(FAR const char *nptr, FAR char **endptr, int base)
 {
   unsigned long long accum = 0;
   bool negate = false;
@@ -105,4 +105,3 @@ long long strtoll(const char *nptr, char **endptr, int base)
 }
 
 #endif
-

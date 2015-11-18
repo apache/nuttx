@@ -87,7 +87,7 @@ static inline int is_real(double x)
  *
  ****************************************************************************/
 
-double_t strtod(const char *str, char **endptr)
+double_t strtod(FAR const char *str, FAR char **endptr)
 {
   double_t number;
   int exponent;
@@ -238,4 +238,3 @@ double_t strtod(const char *str, char **endptr)
 }
 
 #endif /* CONFIG_HAVE_DOUBLE */
-

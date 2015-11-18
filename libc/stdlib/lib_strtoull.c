@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-unsigned long long strtoull(const char *nptr, char **endptr, int base)
+unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
 {
   unsigned long long accum = 0;
   int value;
@@ -96,5 +96,5 @@ unsigned long long strtoull(const char *nptr, char **endptr, int base)
     }
    return accum;
 }
-#endif
 
+#endif

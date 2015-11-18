@@ -69,7 +69,7 @@ struct mallinfo mallinfo(void)
 
 #else
 
-int mallinfo(struct mallinfo *info)
+int mallinfo(FAR struct mallinfo *info)
 {
   return mm_mallinfo(USR_HEAP, info);
 }
