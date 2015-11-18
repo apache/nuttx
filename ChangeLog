@@ -11109,3 +11109,5 @@
 	  Ken Petit (2015-11-18).
 	* drivers/mtd/smart.c: Fix a Smart wear-leveling bug. From Ken Petit
 	  (2015-11-18).
+	* arch/sim/src/up_spiflash.c:  Add support for W25 FLASH simulation.
+	  From Ken Petit (2015-11-18).
