@@ -58,7 +58,13 @@
 
 #define FILENAME_MAX _POSIX_NAME_MAX
 
-/* File system error values *************************************************/
+/* The size of the I/O buffers */
+
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+#  define BUFSIZ CONFIG_STDIO_BUFFER_SIZE
+#endif
+
+/* File system error values */
 
 #define EOF        (-1)
 
@@ -94,7 +100,7 @@
 
 #define L_tmpnam CONFIG_LIBC_MAX_TMPFILE
 
-/* the maximum number of unique temporary file names that can be generated */
+/* The maximum number of unique temporary file names that can be generated */
 
 #define TMP_MAX 56800235584ull
 
