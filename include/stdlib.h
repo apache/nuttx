@@ -180,7 +180,7 @@ unsigned long long strtoull(const char *, char **, int);
 #endif
 double_t  strtod(const char *, char **);
 
-#define atoi(nptr)  strtol((nptr), NULL, 10)
+#define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
 #define atol(nptr)  strtol((nptr), NULL, 10)
 #ifdef CONFIG_HAVE_LONG_LONG
 #define atoll(nptr) strtoll((nptr), NULL, 10)
