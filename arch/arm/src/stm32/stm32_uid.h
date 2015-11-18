@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/stm32/stm32_uid.h
+ * arch/arm/src/stm32/stm32_uid.h
  *
  *   Copyright (C) 2015 Marawan Ragab. All rights reserved.
  *   Author: Marawan Ragab <marawan31@gmail.com>
@@ -33,11 +33,19 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_STM32_UID_H
-#define __ARCH_ARM_INCLUDE_STM32_UID_H
+#ifndef __ARCH_ARM_SRC_STM32_UID_H
+#define __ARCH_ARM_SRC_STM32_UID_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 #include <stdint.h>
 
-void stm32GetUniqueID(uint8_t uniqueID[12]);
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_STM32_UID_H */
+void stm32_get_uniqueid(uint8_t uniqueid[12]);
+
+#endif /* __ARCH_ARM_SRC_STM32_UID_H */
