@@ -35,44 +35,28 @@
 
 /* LEDs
  *
- * There are two yellow LED available on the SAM E70 Xplained board that
- * can be turned on and off.  The LEDs can be activated by driving the
- * connected I/O line to GND.
- *
- *   ------ ----------- ---------------------
- *   SAME70 Function    Shared functionality
- *   PIO
- *   ------ ----------- ---------------------
- *   PA23   Yellow LED0 EDBG GPIO
- *   PC09   Yellow LED1 LCD, and Shield
- *   ------ ----------- ---------------------
+ * A single LED is available driven by PC8.
  *
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
  * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
  * OS-related events as follows:
  *
- *   -------------------  -----------------------  -------- --------
- *   SYMBOL                Meaning                     LED state
- *                                                   LED0     LED1
- *   -------------------  -----------------------  -------- --------
- *   LED_STARTED          NuttX has been started     OFF      OFF
- *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
- *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
- *   LED_STACKCREATED     Idle stack created         ON       OFF
- *   LED_INIRQ            In an interrupt              No change
- *   LED_SIGNAL           In a signal handler          No change
- *   LED_ASSERTION        An assertion failed          No change
- *   LED_PANIC            The system has crashed     N/C      Blinking
- *   LED_IDLE             MCU is is sleep mode         Not used
- *   -------------------  -----------------------  -------- --------
+ *   ------------------- ----------------------- ------
+ *   SYMBOL              Meaning                 LED
+ *   ------------------- ----------------------- ------
+ *   LED_STARTED         NuttX has been started  OFF
+ *   LED_HEAPALLOCATE    Heap has been allocated OFF
+ *   LED_IRQSENABLED     Interrupts enabled      OFF
+ *   LED_STACKCREATED    Idle stack created      ON
+ *   LED_INIRQ           In an interrupt         N/C
+ *   LED_SIGNAL          In a signal handler     N/C
+ *   LED_ASSERTION       An assertion failed     N/C
+ *   LED_PANIC           The system has crashed  FLASH
  *
- * Thus if LED0 is statically on, NuttX has successfully booted and is,
- * apparently, running normally.  If LED1 is flashing at approximately
+ * Thus is LED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  If LED is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
- *
- * NOTE: That LED0 is not used after completion of booting and may
- * be used by other board-specific logic.
  */
 
 /****************************************************************************
@@ -130,7 +114,6 @@ void board_autoled_initialize(void)
   /* Configure LED PIOs for output */
 
   sam_configgpio(GPIO_LED0);
-  sam_configgpio(GPIO_LED1);
 }
 
 /****************************************************************************
@@ -139,22 +122,9 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  switch (led)
+  if (led == 1 || led == 3)
     {
-      case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
-        break;
-
-      case 1:  /* LED_STACKCREATED */
-        sam_gpiowrite(GPIO_LED0, false); /* Low illuminates */
-        break;
-
-      default:
-      case 2:  /* LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
-        return;
-
-      case 3:  /* LED_PANIC */
-        sam_gpiowrite(GPIO_LED1, false); /* Low illuminates */
-        break;
+      sam_gpiowrite(GPIO_LED0, false); /* Low illuminates */
     }
 }
 
@@ -166,7 +136,7 @@ void board_autoled_off(int led)
 {
   if (led == 3)
     {
-      sam_gpiowrite(GPIO_LED1, true);  /* High extinguishes */
+      sam_gpiowrite(GPIO_LED0, true);  /* High extinguishes */
     }
 }
 

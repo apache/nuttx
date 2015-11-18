@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4e-ek/src/sam_buttons.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,15 +66,12 @@
 #ifdef CONFIG_ARCH_IRQBUTTONS
 
 #define HAVE_IRQBUTTONS 1
-#if !defined(CONFIG_SAMV7_GPIOA_IRQ) && !defined(CONFIG_SAMV7_GPIOB_IRQ)
+#ifndef CONFIG_SAMV7_GPIOA_IRQ
 #  undef HAVE_IRQBUTTONS
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
 static xcpt_t g_irq_sw0;
-#endif
-#ifdef CONFIG_SAMV7_GPIOB_IRQ
-static xcpt_t g_irq_sw1;
 #endif
 #endif
 
@@ -151,21 +148,9 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
 
 void board_button_initialize(void)
 {
-  uint32_t regval;
-
-  /* PB12 is set up as a system flash ERASE pin when the firmware boots. To
-   * use the SW1, PB12 has to be configured as a normal regular I/O pin in
-   * the MATRIX module. For more information see the SAM E70 datasheet.
-   */
-
-  regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
-  regval |= MATRIX_CCFG_SYSIO_SYSIO12;
-  putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
-
   /* Configure button PIOs */
 
   (void)sam_configgpio(GPIO_SW0);
-  (void)sam_configgpio(GPIO_SW1);
 }
 
 /****************************************************************************
@@ -181,12 +166,7 @@ void board_button_initialize(void)
 
 uint8_t board_buttons(void)
 {
-  uint8_t retval;
-
-  retval  = sam_gpioread(GPIO_SW0) ? 0 : BUTTON_SW0_BIT;
-  retval |= sam_gpioread(GPIO_SW1) ? 0 : BUTTON_SW1_BIT;
-
-  return retval;
+  return sam_gpioread(GPIO_SW0) ? 0 : BUTTON_SW0_BIT;
 }
 
 /****************************************************************************
@@ -211,28 +191,14 @@ uint8_t board_buttons(void)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
 #ifdef HAVE_IRQBUTTONS
-
-  switch (id)
+  if (id == BUTTON_SW0)
     {
-#ifdef CONFIG_SAMV7_GPIOA_IRQ
-      case BUTTON_SW0:
-        return board_button_irqx(GPIO_SW0, IRQ_SW0, irqhandler, &g_irq_sw0);
-#endif
-
-#ifdef CONFIG_SAMV7_GPIOB_IRQ
-      case BUTTON_SW1:
-        return board_button_irqx(GPIO_SW1, IRQ_SW1, irqhandler, &g_irq_sw1);
-#endif
-
-      default:
-        return NULL;
+      return board_button_irqx(GPIO_SW0, IRQ_SW0, irqhandler, &g_irq_sw0);
     }
-
-#else
+#endif
 
   return NULL;
 
-#endif
 }
 #endif
 

@@ -228,57 +228,27 @@
 
 /* LEDs
  *
- * There are two yellow LED available on the SAM E70 Xplained board that can
- * be turned on and off.  The LEDs can be activated by driving the connected
- * I/O line to GND.
- *
- *   ------ ----------- ---------------------
- *   SAME70 Function    Shared functionality
- *   PIO
- *   ------ ----------- ---------------------
- *   PA23   Yellow LED0 EDBG GPIO
- *   PC09   Yellow LED1 LCD, and Shield
- *   ------ ----------- ---------------------
+ * A single LED is available driven by PC8.
  */
 
 #define GPIO_LED0     (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
-                       GPIO_PORT_PIOA | GPIO_PIN23)
-#define GPIO_LED1     (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
-                       GPIO_PORT_PIOC | GPIO_PIN9)
+                       GPIO_PORT_PIOC | GPIO_PIN8)
 
 /* Buttons
  *
- * SAM E70 Xplained contains three mechanical buttons. One button is the
- * RESET button connected to the SAME70 reset line and the others are generic
- * user configurable buttons. When a button is pressed it will drive the I/O
+ * SAM E70 Xplained contains two mechanical buttons. One button is the RESET
+ * button connected to the SAM E70 reset line and the other, PA11, is a generic
+ * user configurable button. When a button is pressed it will drive the I/O
  * line to GND.
  *
- *   ------ ----------- ---------------------
- *   SAME70 Function    Shared functionality
- *   PIO
- *   ------ ----------- ---------------------
- *   RESET  RESET       Trace, Shield, and EDBG
- *   PA09   SW0         EDBG GPIO and Camera
- *   PB12   SW1         EDBG SWD and Chip Erase
- *   ------ ----------- ---------------------
- *
- * NOTES:
- *
- *   - There are no pull-up resistors connected to the generic user buttons so
- *     it is necessary to enable the internal pull-up in the SAM E70 to use the
- *     button.
- *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
- *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
- *     the MATRIX module. For more information see the SAM E70 datasheet.
+ * NOTE: There are no pull-up resistors connected to the generic user buttons
+ * so it is necessary to enable the internal pull-up in the SAM E70 to use the
+ * button.
  */
 
 #define GPIO_SW0      (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN9)
-#define GPIO_SW1      (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOB | GPIO_PIN12)
-
-#define IRQ_SW0       SAM_IRQ_PA9
-#define IRQ_SW1       SAM_IRQ_PB12
+                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN11)
+#define IRQ_SW0       SAM_IRQ_PA11
 
 /* HSMCI SD Card Detect
  *

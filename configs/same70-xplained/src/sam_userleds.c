@@ -69,7 +69,6 @@ void board_userled_initialize(void)
   /* Configure LED PIOs for output */
 
   sam_configgpio(GPIO_LED0);
-  sam_configgpio(GPIO_LED1);
 }
 
 /****************************************************************************
@@ -78,22 +77,10 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  uint32_t ledcfg;
-
   if (led == BOARD_LED0)
     {
-      ledcfg = GPIO_LED0;
+      sam_gpiowrite(GPIO_LED0, !ledon); /* Low illuminates */
     }
-  else if (led == BOARD_LED1)
-    {
-      ledcfg = GPIO_LED1;
-    }
-  else
-    {
-      return;
-    }
-
-  sam_gpiowrite(ledcfg, !ledon); /* Low illuminates */
 }
 
 /****************************************************************************
@@ -104,6 +91,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  sam_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0);
-  sam_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
+  sam_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0));
 }
