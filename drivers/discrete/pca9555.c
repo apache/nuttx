@@ -589,4 +589,3 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_dev_s *i2cdev,
 }
 
 #endif /* CONFIG_IOEXPANDER_PCA9555 */
-

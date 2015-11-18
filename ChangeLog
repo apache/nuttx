@@ -11105,3 +11105,5 @@
 	  (2015-11-17).
 	* drivers/sensors/ms58xx.c:  Fix some issues with initialization and with
 	  CRC calculation.  From Karim Keddam (2015-11-17).
+	* drivers/mtd/w25.c: Fix W25 FLASH driver page read/write logic. From
+	  Ken Petit (2015-11-18).

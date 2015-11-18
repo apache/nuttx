@@ -771,7 +771,7 @@ static void w25_cacheflush(struct w25_dev_s *priv)
     {
       /* Write entire erase block to FLASH */
 
-      w25_pagewrite(priv, priv->sector, (off_t)priv->esectno << W25_SECTOR_SHIFT,
+      w25_pagewrite(priv, priv->sector, (off_t)priv->esectno << W25_PAGE_SHIFT,
                       W25_SECTOR_SIZE);
 
       /* The case is no long dirty and the FLASH is no longer erased */
@@ -982,10 +982,10 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
       nbytes >>= W25_SECTOR512_SHIFT;
     }
 #else
-  nbytes = w25_read(dev, startblock << W25_SECTOR_SHIFT, nblocks << W25_SECTOR_SHIFT, buffer);
+  nbytes = w25_read(dev, startblock << W25_PAGE_SHIFT, nblocks << W25_PAGE_SHIFT, buffer);
   if (nbytes > 0)
     {
-      nbytes >>= W25_SECTOR_SHIFT;
+      nbytes >>= W25_PAGE_SHIFT;
     }
 #endif
 
@@ -1013,8 +1013,8 @@ static ssize_t w25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
 #if defined(CONFIG_W25_SECTOR512)
   w25_cachewrite(priv, buffer, startblock, nblocks);
 #else
-  w25_pagewrite(priv, buffer, startblock << W25_SECTOR_SHIFT,
-                  nblocks << W25_SECTOR_SHIFT);
+  w25_pagewrite(priv, buffer, startblock << W25_PAGE_SHIFT,
+                  nblocks << W25_PAGE_SHIFT);
 #endif
   w25_unlock(priv->spi);
 
@@ -1075,7 +1075,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->erasesize    = (1 << W25_SECTOR512_SHIFT);
               geo->neraseblocks = priv->nsectors << (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
 #else
-              geo->blocksize    = W25_SECTOR_SIZE;
+              geo->blocksize    = W25_PAGE_SIZE;
               geo->erasesize    = W25_SECTOR_SIZE;
               geo->neraseblocks = priv->nsectors;
 #endif
