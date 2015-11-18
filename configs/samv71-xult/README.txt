@@ -71,10 +71,11 @@ the following paragraphs.
 
 The BASIC nsh configuration is fully function (as described below under
 "Configurations").  There is also a graphics configuration (mxtxplnd), a
-a configuration for network testing (netnsh), and a graphics demo (nxwm).
-There are still open issues that need to be resolved.  General problems are
-listed below.  But see the STATUS section associated with each configuration
-for additional issues specific to a particular configuration.
+a configuration for network testing (netnsh), a graphics demo (nxwm), and
+a sample protected mode build (knsh).  There are still open issues that need
+to be resolved.  General problems are listed below.  But see the STATUS
+section associated with each configuration for additional issues specific
+to a particular configuration.
 
   1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
      transfers only because I have not yet had a chance to verify this.  The
@@ -149,6 +150,9 @@ for additional issues specific to a particular configuration.
 
  10. On-chip FLASH support as added and verified on 2015-11-13.  See the
      "Program FLASH Access" section below for further information.
+
+ 11. The knsh "protected mode" configuration was added on 2015-11-18.  The
+     configuration has not been tested as of this writing.
 
 Serial Console
 ==============
@@ -1512,11 +1516,102 @@ NOTES:
 Configuration sub-directories
 -----------------------------
 
+  knsh:
+
+    This is identical to the nsh configuration below except that NuttX
+    is built as a kernel-mode, monolithic module and the user applications
+    are built separately.  There are four very similar NSH configurations:
+
+      - knsh.  This is a somewhat simplified version of the nsh configuration
+        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
+      - nsh.  This configuration is focused on low level, command-line
+        driver testing.  It has no network.
+      - netnsh.  This configuration is focused on network testing and
+        has only limited command support.
+      - mxtxplnd.  This configuration is identical to the nsh configuration
+        but assumes that you have a maXTouch Xplained Pro LCD attached
+        and includes extra tests for the touchscreen and LCD.
+
+    It is recommends to use a special make command; not just 'make' but make
+    with the following two arguments:
+
+        make pass1 pass2
+
+    In the normal case (just 'make'), make will attempt to build both user-
+    and kernel-mode blobs more or less interleaved.  This actual works!
+    However, for me it is very confusing so I prefer the above make command:
+    Make the user-space binaries first (pass1), then make the kernel-space
+    binaries (pass2)
+
+    NOTES:
+
+    1. At the end of the build, there will be several files in the top-level
+       NuttX build directory:
+
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
+
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
+
+       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
+       formats.
+
+    2. Combining .hex files.  If you plan to use the .hex files with your
+       debugger or FLASH utility, then you may need to combine the two hex
+       files into a single .hex file.  Here is how you can do that.
+
+       a. The 'tail' of the nuttx.hex file should look something like this
+          (with my comments added):
+
+            $ tail nuttx.hex
+            # 00, data records
+            ...
+            :10 9DC0 00 01000000000800006400020100001F0004
+            :10 9DD0 00 3B005A0078009700B500D400F300110151
+            :08 9DE0 00 30014E016D0100008D
+            # 05, Start Linear Address Record
+            :04 0000 05 0800 0419 D2
+            # 01, End Of File record
+            :00 0000 01 FF
+
+          Use an editor such as vi to remove the 05 and 01 records.
+
+       b. The 'head' of the nuttx_user.hex file should look something like
+          this (again with my comments added):
+
+            $ head nuttx_user.hex
+            # 04, Extended Linear Address Record
+            :02 0000 04 0801 F1
+            # 00, data records
+            :10 8000 00 BD89 01084C800108C8110208D01102087E
+            :10 8010 00 0010 00201C1000201C1000203C16002026
+            :10 8020 00 4D80 01085D80010869800108ED83010829
+            ...
+
+          Nothing needs to be done here.  The nuttx_user.hex file should
+          be fine.
+
+       c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
+          file to produce a single combined hex file:
+
+          $ cat nuttx.hex nuttx_user.hex >combined.hex
+
+       Then use the combined.hex file with the to write the FLASH image.
+       If you do this a lot, you will probably want to invest a little time
+       to develop a tool to automate these steps.
+
   mxtxplnd:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    Configures the NuttShell (nsh) located at examples/nsh.  There are four
     very similar NSH configurations:
 
+      - knsh.  This is a somewhat simplified version of the nsh configuration
+        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
       - nsh.  This configuration is focused on low level, command-line
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
@@ -1619,9 +1714,11 @@ Configuration sub-directories
 
   netnsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    Configures the NuttShell (nsh) located at examples/nsh.  There are four
     very similar NSH configurations:
 
+      - knsh.  This is a somewhat simplified version of the nsh configuration
+        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
       - nsh.  This configuration is focused on low level, command-line
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
@@ -1730,9 +1827,11 @@ Configuration sub-directories
 
   nsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    Configures the NuttShell (nsh) located at examples/nsh.  There are four
     very similar NSH configurations:
 
+      - knsh.  This is a somewhat simplified version of the nsh configuration
+        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
       - nsh.  This configuration is focused on low level, command-line
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
