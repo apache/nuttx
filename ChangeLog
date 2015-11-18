@@ -11116,4 +11116,7 @@
 	  (2015-11-18).
 	* drivers/timers/ds3231.c:  Driver extended to include support for the
 	  DS1307 RTC (2015-11-18).
+	* configs/same70-xplained:  Add basic NSH configuration for the SAME70
+	  Xplained board.  Initial commit is just the SAMV71-XULT files with
+	  names changed appropriately (2015-11-18).
 

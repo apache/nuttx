@@ -1416,7 +1416,9 @@ nuttx/
  |   |   `- README.txt
  |   |- sam4s-xplained-pro/
  |   |   `- README.txt
- |   |- samv7i-xult/
+ |   |- same70-xplained/
+ |   |   `- README.txt
+ |   |- samv71-xult/
  |   |   `- README.txt
  |   |- sim/
  |   |   `- README.txt
