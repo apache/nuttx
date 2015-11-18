@@ -131,6 +131,23 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_UNIQUEID
+      /* CMD:           BOARDIOC_UNIQUEID
+       * DESCRIPTION:   Return a unique ID associated with the board (such
+       *                as a serial number or a MAC address).
+       * ARG:           A writable array of size CONFIG_BOARDCTL_UNIQUEID_SIZE
+       *                in which to receive the board unique ID.
+       * DEPENDENCIES:  Board logic must provide the board_uniqueid()
+       *                interface.
+       */
+
+      case BOARDIOC_UNIQUEID:
+        {
+          ret = board_uniqueid((FAR uint8_t *)arg);
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_SYMTAB
       /* CMD:           BOARDIOC_SYMTAB
        * DESCRIPTION:   Select a symbol table

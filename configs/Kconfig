@@ -1764,6 +1764,22 @@ config BOARDCTL_RESET
 		Architecture specific logic must provide the board_reset()
 		interface.
 
+config BOARDCTL_UNIQUEID
+	bool "Return board unique ID"
+	default n
+	---help---
+		Enables support for the BOARDIOC_UNIQUEID boardctl() command.
+		Architecture specific logic must provide the board_uniqueid()
+		interface.
+
+config BOARDCTL_UNIQUEID_SIZE
+	int "Size of the board unique ID (bytes)"
+	default 16
+	depends on BOARDCTL_UNIQUEID
+	---help---
+		Provides the size of the memory buffer that must be provided by the
+		caller of board_uniqueid() in which to receive the board unique ID.
+
 config BOARDCTL_SYMTAB
 	bool "Enable symbol table interfaces"
 	default n
