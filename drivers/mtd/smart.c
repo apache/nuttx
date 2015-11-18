@@ -3895,9 +3895,9 @@ static inline int smart_read_wearstatus(FAR struct smart_struct_s *dev)
       /* Calculate number of bytes to read from this sector */
 
       toread = remaining;
-      if (toread > dev->sectorsize - SMARTFS_FMT_WEAR_POS)
+      if (toread > dev->sectorsize - (SMARTFS_FMT_WEAR_POS + sizeof(struct smart_sect_header_s)))
         {
-          toread = dev->sectorsize - SMARTFS_FMT_WEAR_POS;
+          toread = dev->sectorsize - (SMARTFS_FMT_WEAR_POS + sizeof(struct smart_sect_header_s));
         }
 
       /* Setup the sector read request (we are our own client) */
@@ -4509,7 +4509,8 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
   fvdbg("Entry\n");
   req = (FAR struct smart_read_write_s *) arg;
   DEBUGASSERT(req->offset < dev->sectorsize);
-  DEBUGASSERT(req->offset+req->count < dev->sectorsize);
+  DEBUGASSERT(req->offset+req->count+ sizeof(struct smart_sect_header_s) <=
+              dev->sectorsize);
 
   /* Ensure the logical sector has been allocated */
 

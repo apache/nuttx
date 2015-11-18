@@ -11107,3 +11107,5 @@
 	  CRC calculation.  From Karim Keddam (2015-11-17).
 	* drivers/mtd/w25.c: Fix W25 FLASH driver page read/write logic. From
 	  Ken Petit (2015-11-18).
+	* drivers/mtd/smart.c: Fix a Smart wear-leveling bug. From Ken Petit
+	  (2015-11-18).
