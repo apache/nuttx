@@ -580,6 +580,9 @@ configs/sam4s-xplained
 configs/sam4s-xplained-pro
   The port of NuttX to the Atmel SAM4S-Xplained Pro development board.
 
+configs/same70-xplained
+  The port of NuttX to the Atmel SAME70 Xplained evaluation board.
+
 configs/samv71-xult
   The port of NuttX to the Atmel SAMV71 Xplained Ultra evaluation board.
 
