@@ -194,33 +194,30 @@
 
 /* Ethernet MAC.
  *
- * KSZ8061RNBVA Connections
+ * KSZ8081RNACA Connections
  * ------------------------
  *
- *   ------ --------- --------- --------------------------
- *   SAME70 SAME70    Ethernet  Shared functionality
- *   Pin    Function  Function
- *   ------ --------- --------- --------------------------
- *   PD00   GTXCK     REF_CLK   Shield
- *   PD01   GTXEN     TXEN
- *   PD02   GTX0      TXD0
- *   PD03   GTX1      TXD1
- *   PD04   GRXDV     CRS_DV    Trace
- *   PD05   GRX0      RXD0      Trace
- *   PD06   GRX1      RXD1      Trace
- *   PD07   GRXER     RXER      Trace
- *   PD08   GMDC      MDC       Trace
- *   PD09   GMDIO     MDIO
- *   PA19   GPIO      INTERRUPT EXT1, Shield
- *   PA29   GPIO      SIGDET
+ *   ------ --------- ---------
+ *   SAME70 SAME70    Ethernet
+ *   Pin    Function  Functio
+ *   ------ --------- ---------
+ *   PD0    GTXCK     REF_CLK
+ *   PD1    GTXEN     TXEN
+ *   PD2    GTX0      TXD0
+ *   PD3    GTX1      TXD1
+ *   PD4    GRXDV     CRS_DV
+ *   PD5    GRX0      RXD0
+ *   PD6    GRX1      RXD1
+ *   PD7    GRXER     RXER
+ *   PD8    GMDC      MDC
+ *   PD9    GMDIO     MDIO
+ *   PA14   GPIO      INTERRUPT
  *   PC10   GPIO      RESET
- *   ------ --------- --------- --------------------------
+ *   ------ --------- ---------
  */
 
 #define GPIO_EMAC0_INT    (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                           GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN19)
-#define GPIO_EMAC0_SIGDET (GPIO_INPUT | GPIO_CFG_DEFAULT | \
-                           GPIO_PORT_PIOA | GPIO_PIN29)
+                           GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN14)
 #define GPIO_EMAC0_RESET  (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                            GPIO_PORT_PIOC | GPIO_PIN10)
 

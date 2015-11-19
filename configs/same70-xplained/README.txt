@@ -302,15 +302,13 @@ contains a MAC address for use with the Ethernet interface.
 
 Connectivity:
 
-  ------ -------- -------- ------------------------------------------
-  SAME70 SAME70   I2C      Shared
-  Pin    Function Function Functionality
-  ------ -------- -------- ------------------------------------------
-  PA03   TWID0    SDA      EXT1, EXT2, EDBG I2C, LCD, Camera, and
-                           Shield
-  PA04   TWICK0   SCL      EXT1, EXT2, EDBG I2C, LCD, Camera, and,
-                           Shield
-  ------ -------- -------- ------------------------------------------
+  ------ -------- --------
+  SAME70 SAME70   I2C
+  Pin    Function Function
+  ------ -------- --------
+  PA03   TWID0    SDA
+  PA04   TWICK0   SCL
+  ------ -------- --------
 
 I2C address:
 
@@ -345,27 +343,26 @@ The configuration data device will appear at /dev/config.
 Networking
 ==========
 
-KSZ8061RNBVA Connections
+KSZ8081RNACA Connections
 ------------------------
 
-  ------ --------- --------- --------------------------
-  SAME70 SAME70    Ethernet  Shared functionality
-  Pin    Function  Function
-  ------ --------- --------- --------------------------
-  PD00   GTXCK     REF_CLK   Shield
-  PD01   GTXEN     TXEN
-  PD02   GTX0      TXD0
-  PD03   GTX1      TXD1
-  PD04   GRXDV     CRS_DV    Trace
-  PD05   GRX0      RXD0      Trace
-  PD06   GRX1      RXD1      Trace
-  PD07   GRXER     RXER      Trace
-  PD08   GMDC      MDC       Trace
-  PD09   GMDIO     MDIO
-  PA19   GPIO      INTERRUPT EXT1, Shield
-  PA29   GPIO      SIGDET
+  ------ --------- ---------
+  SAME70 SAME70    Ethernet
+  Pin    Function  Functio
+  ------ --------- ---------
+  PD0    GTXCK     REF_CLK
+  PD1    GTXEN     TXEN
+  PD2    GTX0      TXD0
+  PD3    GTX1      TXD1
+  PD4    GRXDV     CRS_DV
+  PD5    GRX0      RXD0
+  PD6    GRX1      RXD1
+  PD7    GRXER     RXER
+  PD8    GMDC      MDC
+  PD9    GMDIO     MDIO
+  PA14   GPIO      INTERRUPT
   PC10   GPIO      RESET
-  ------ --------- --------- --------------------------
+  ------ --------- ---------
 
 Selecting the GMAC peripheral
 -----------------------------
