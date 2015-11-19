@@ -25,7 +25,9 @@ Contents
 Status/Open Issues
 ==================
 
-To be provided
+[To be provided]
+
+See also configs/samv71-xult/README.txt
 
 Serial Console
 ==============
