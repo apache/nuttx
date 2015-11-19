@@ -70,6 +70,13 @@
 #  include "sam_progmem.h"
 #endif
 
+#ifdef HAVE_RTC_DSXXXX
+#  include <nuttx/clock.h>
+#  include <nuttx/i2c.h>
+#  include <nuttx/timers/ds3231.h>
+#  include "sam_twihs.h"
+#endif
+
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
 #endif
@@ -110,11 +117,41 @@ int sam_bringup(void)
 #if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
   FAR struct mtd_dev_s *mtd;
 #endif
+#ifdef HAVE_RTC_DSXXXX
+  FAR struct i2c_dev_s *i2c;
+#endif
 #if defined(HAVE_S25FL1_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
   char blockdev[18];
   char chardev[12];
 #endif
   int ret;
+
+#ifdef HAVE_RTC_DSXXXX
+  /* Get an instance of the TWIHS0 I2C interface */
+
+  i2c = up_i2cinitialize(DSXXXX_TWI_BUS);
+  if (i2c == NULL)
+    {
+      SYSLOG("ERROR: up_i2cinitialize(%d) failed\n", DSXXXX_TWI_BUS);
+    }
+  else
+    {
+      /* Use the I2C interface to initialize the DSXXXX timer */
+
+      ret = dsxxxx_rtc_initialize(i2c);
+      if (ret < 0)
+        {
+          SYSLOG("ERROR: dsxxxx_rtc_initialize() failed: %d\n", ret);
+        }
+      else
+        {
+          /* Synchronize the system time to the RTC time */
+
+          clock_synchronize();
+        }
+    }
+
+#endif
 
 #ifdef HAVE_MACADDR
   /* Read the Ethernet MAC address from the AT24 FLASH and configure the

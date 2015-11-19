@@ -35,6 +35,10 @@ address 0x00000000, but trying to step through with AtmelStudio 7 results
 in uninterpretble behavior.  Using the Segger J-Link, I get errors trying
 to reset and halt the board so I am unable to use that debugger either.
 
+WARNING:  This README derives heavily from the SAMV71-XULT README file and
+may still contain some logic that pertains only to that board.  This is a
+work in progress
+
 See also configs/samv71-xult/README.txt
 
 Serial Console
