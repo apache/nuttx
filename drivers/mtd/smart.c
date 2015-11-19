@@ -3,7 +3,7 @@
  *
  * Sector Mapped Allocation for Really Tiny (SMART) Flash block driver.
  *
- *   Copyright (C) 2013-2014 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013-2015 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -372,6 +372,8 @@ static int smart_findfreephyssector(FAR struct smart_struct_s *dev, uint8_t canr
 
 #ifdef CONFIG_FS_WRITABLE
 static int smart_writesector(FAR struct smart_struct_s *dev, unsigned long arg);
+static inline int smart_allocsector(FAR struct smart_struct_s *dev,
+                 unsigned long requested);
 #endif
 static int smart_readsector(FAR struct smart_struct_s *dev, unsigned long arg);
 
@@ -381,7 +383,7 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t b
 #endif
 
 static int smart_relocate_sector(FAR struct smart_struct_s *dev,
-    uint16_t oldsector, uint16_t newsector);
+                 uint16_t oldsector, uint16_t newsector);
 
 /****************************************************************************
  * Private Data
@@ -3782,9 +3784,9 @@ static int smart_write_wearstatus(struct smart_struct_s *dev)
       /* Calculate the number of bytes to write to this sector */
 
       towrite = remaining;
-      if (towrite > dev->sectorsize - SMARTFS_FMT_WEAR_POS)
+      if (towrite > dev->sectorsize - (SMARTFS_FMT_WEAR_POS + sizeof(struct smart_sect_header_s)))
         {
-          towrite = dev->sectorsize - SMARTFS_FMT_WEAR_POS;
+          towrite = dev->sectorsize - (SMARTFS_FMT_WEAR_POS + sizeof(struct smart_sect_header_s));
         }
 
       /* Setup the sector write request (we are our own client) */
@@ -3843,19 +3845,20 @@ errout:
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
 static inline int smart_read_wearstatus(FAR struct smart_struct_s *dev)
 {
-  uint16_t  sector;
-  uint16_t  remaining, toread;
   struct smart_read_write_s req;
-  int       ret;
-  uint8_t   buffer[8];
+  uint16_t sector, physsector;
+  uint16_t remaining, toread;
+  uint8_t buffer[8];
+  int ret;
 
   /* Prepare to read the total block erases and uneven wearcount values */
 
-  sector = 0;
+  sector        = 0;
   req.logsector = sector;
-  req.offset = SMARTFS_FMT_WEAR_POS - 8;
-  req.count = sizeof(buffer);
-  req.buffer = buffer;
+  req.offset    = SMARTFS_FMT_WEAR_POS - 8;
+  req.count     = sizeof(buffer);
+  req.buffer    = buffer;
+
   ret = smart_readsector(dev, (unsigned long) &req);
   if (ret != sizeof(buffer))
     {
@@ -3907,6 +3910,29 @@ static inline int smart_read_wearstatus(FAR struct smart_struct_s *dev)
       req.count = toread;
       req.buffer = &dev->wearstatus[(dev->geo.neraseblocks >> SMART_WEAR_BIT_DIVIDE) -
                     remaining];
+
+      /* Validate wear status sector has been allocated */
+
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+      physsector = dev->sMap[req.logsector];
+#else
+      physsector = smart_cache_lookup(dev, req->logsector);
+#endif
+      if ((sector != 0) && (physsector == 0xFFFF))
+        {
+#ifdef CONFIG_FS_WRITABLE
+
+          /* This logical sector does not exist yet.  We must allocate it */
+
+          ret = smart_allocsector(dev, sector);
+          if (ret != sector)
+            {
+              fdbg("Unable to allocate wear level status sector %d\n", sector);
+              ret = -EINVAL;
+              goto errout;
+            }
+#endif
+        }
 
       /* Read the sector */
 
@@ -4690,7 +4716,7 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
    * sector if it isn't already in use.
    */
 
-  if ((requested > 2) && (requested < dev->totalsectors))
+  if ((requested > 0) && (requested < dev->totalsectors))
     {
       /* Validate the sector is not already allocated */
 
@@ -5058,6 +5084,13 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
       goto ok_out;
 
     case BIOC_ALLOCSECT:
+
+      /* Ensure the FS is not trying to allocate a reserved sector */
+
+      if (arg < 3)
+        {
+          arg = (unsigned long) -1;
+        }
 
       /* Allocate a logical sector for the upper layer file system */
 

@@ -11119,4 +11119,9 @@
 	* configs/same70-xplained:  Add basic NSH configuration for the SAME70
 	  Xplained board.  Initial commit is just the SAMV71-XULT files with
 	  names changed appropriately (2015-11-18).
+	* drivers/mtd/smart.c: Fixed SmartFS wear level error that occurs when
+	  the logical sector size is too small to save all wear level status
+	  bytes in a single sector.  Logical sectors 1 and 2 were simply not
+	  being allocated and then the read_sector and write_sector routinesi
+	  were failing.  From Ken Petit (2015-11-18).
 
