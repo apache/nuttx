@@ -44,8 +44,8 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
     Pin on SAME70 Arduino Arduino SAME70
     J503   PIO    Name    Pin     Function
     ------ ------ ------- ------- --------
-      1    PD28   RX0     0       URXD3
-      2    PD30   TX0     1       UTXD3
+      1    PD28   D0/RX0  0       URXD3
+      2    PD30   D1/TX0  1       UTXD3
     ------ ------ ------- ------- --------
 
     In this configuration, an external RS232 driver can also be used
@@ -62,47 +62,49 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
     --------- -----------
 
   - Arduino Communications.  Additional UART/USART connections are available
-    on the Arduino Communications connection J505:
+    on the Arduino Communications connection J505 and J507:
 
-    ------ ------ ------- ------- --------
-    Pin on SAME70 Arduino Arduino SAME70
-    J503   PIO    Name    Pin     Function
-    ------ ------ ------- ------- --------
-      3    PD18   RX1     0       URXD4
-      4    PD19   TX1     0       UTXD4
-      5    PD15   RX2     0       RXD2
-      6    PD16   TX2     0       TXD2
-      7    PB0    RX3     0       RXD0
-      8    PB1    TX3     1       TXD0
-    ------ ------ ------- ------- --------
+    --------- ---------- --------------------------------
+    Connector SAME70     Pin Description
+    --------- ---------- --------------------------------
+    J503  1   URXD3 PD28 Standard Arduino serial (D0/RXD)
+    J503  2   UTXD3 PD30 Standard Arduino serial (D1/TXD)
+    --------- ---------- --------------------------------
+    J505  3   URXD4 PD18 Arduino D19
+    J505  4   UTXD4 PD19 Arduino D18
+    J505  5   RXD2  PD15 Arduino D17
+    J505  6   TXD2  PD16 Arduino D16
+    J505  7   RXD0  PB0  Arduino D15
+    J505  8   TXD0  PB1  Arduino D14
+    --------- ---------- --------------------------------
+    J507 27   RXD1  PA21 Arduino D46
+    J507 28   TXD1  PB4  Arduino D47
+    --------- ---------- --------------------------------
 
   - SAMV7-XULT EXTn connectors.  USART pins are also available the EXTn
     connectors.  The following are labelled in the User Guide for USART
     functionality:
 
-    ---- -------- ------ --------
-    EXT1 EXTI1    SAME70 SAME70
-    Pin  Name     PIO    Function
-    ---- -------- ------ --------
-    13   USART_RX PB00   RXD0
-    14   USART_TX PB01   TXD0
-
-    ---- -------- ------ --------
-    EXT2 EXTI2    SAME70 SAME70
-    Pin  Name     PIO    Function
-    ---- -------- ------ --------
-    13   USART_RX PA21   RXD1
-    14   USART_TX PB04   TXD1
+    SAME70 Xplained Connectors
+    --------- ---------- --------------------------------
+    Connector SAME70     Pin Description
+    --------- ---------- --------------------------------
+    J401 13   RXD0  PB0  EXT1 UART_RX
+    J401 14   TXD0  PB1  EXT1 UART_7X
+    --------- ---------- --------------------------------
+    J402 13   RXD1  PA21 EXT2 UART_RX
+    J402 14   TXD1  PB4  EXT2 UART_TX
+    --------- ---------- --------------------------------
 
   - VCOM.  The Virtual Com Port gateway is available on USART1:
 
-    ------ --------
-    SAME70 SAME70
-    PIO    Function
-    ------ --------
-    PB04   TXD1
-    PA21   RXD1
-    ------ --------
+    EDBG VCOM Interface
+    ---------------- --------- --------------------------
+    EDBG Singal      SAME70
+    ---------------- --------- --------------------------
+    EDBG_CDC_UART_RX TXD1 PB4
+    EDBG_CDC_UART_TX RXD1 PA21
+    ---------------- --------- --------------------------
 
 Any of these options can be selected as the serial console by:
 
@@ -1129,9 +1131,9 @@ Configuration sub-directories
 
     NOTES:
 
-    1. The serial console is configured by default for use with and Arduino
-       serial shield (UART3).  You will need to reconfigure if you will
-       to use a different U[S]ART.
+    1. The serial console is configured by default for use with the EDBG VCOM
+       (USART1).  You will need to reconfigure if you will to use a different
+       U[S]ART.
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
