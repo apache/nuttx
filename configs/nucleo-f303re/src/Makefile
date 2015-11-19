@@ -78,4 +78,8 @@ ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += stm32_uid.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
