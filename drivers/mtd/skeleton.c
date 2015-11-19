@@ -321,7 +321,18 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
 FAR struct mtd_dev_s *skel_initialize(void)
 {
+  /* Allocate an instance of the private data structure -- OR, if there can
+   * only be a single instance of the driver, then use a shared, global
+   * device structure.
+   */
+
   /* Perform initialization as necessary */
+
+#ifdef CONFIG_MTD_REGISTRATION
+  /* Register the MTD with the procfs system if enabled */
+
+  mtd_register(&priv->mtd, "skeleton");
+#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 
