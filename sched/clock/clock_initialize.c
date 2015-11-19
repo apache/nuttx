@@ -201,11 +201,11 @@ static void clock_inittime(void)
 
 void clock_initialize(void)
 {
+#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
   /* Initialize the internal RTC hardware.  Initialization of external RTC
    * must be deferred until the system has booted.
    */
 
-#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
   up_rtcinitialize();
 #endif
 

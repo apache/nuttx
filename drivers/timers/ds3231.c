@@ -392,9 +392,11 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       tp->tm_year = tmp + 100;
     }
 #else
-  /* No century indicator.  The RTC will hold years since 1970 */
+  /* No century indicator.  The RTC will hold years since 1968 (a leap year like
+   * 2000)
+   */
 
-  tp->tm_year = tmp + 70;
+  tp->tm_year = tmp + 68;
 #endif
 
   rtc_dumptime(tp, "Returning");
@@ -512,10 +514,10 @@ int up_rtc_settime(FAR const struct timespec *tp)
     }
 
 #else
-  /* Use years since 1970 */
+  /* Use years since 1968 (a leap year like 2000) */
 
   century = 0;
-  year    = newtm.tm_year - 70;
+  year    = newtm.tm_year - 68;
 #endif
 
   /* Save the month (1-12) with century */
