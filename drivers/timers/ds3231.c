@@ -50,7 +50,7 @@
 
 #include "ds3231.h"
 
-#ifdef CONFIG_RTC_DS3XXX
+#ifdef CONFIG_RTC_DSXXXX
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -192,7 +192,7 @@ static uint8_t rtc_bin2bcd(int value)
 }
 
 /************************************************************************************
- * Name: rtc_bin2bcd
+ * Name: rtc_bcd2bin
  *
  * Description:
  *   Convert from 2 digit BCD to binary.
@@ -216,13 +216,13 @@ static int rtc_bcd2bin(uint8_t value)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: ds3xxx_rtc_initialize
+ * Name: dsxxxx_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
  *   called once during the OS initialization sequence by board-specific logic.
  *
- *   After ds3xxx_rtc_initialize() is called, the OS function clock_synchronize()
+ *   After dsxxxx_rtc_initialize() is called, the OS function clock_synchronize()
  *   should also be called to synchronize the system timer to a hardware RTC.  That
  *   operation is normally performed automatically by the system during clock
  *   initialization.  However, when an external RTC is used, the board logic will
@@ -237,7 +237,7 @@ static int rtc_bcd2bin(uint8_t value)
  *
  ************************************************************************************/
 
-int ds3xxx_rtc_initialize(FAR struct i2c_dev_s *i2c)
+int dsxxxx_rtc_initialize(FAR struct i2c_dev_s *i2c)
 {
   /* Remember the i2c device and claim that the RTC is enabled */
 
@@ -278,9 +278,31 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   int tmp;
   int ret;
 
+  /* If this function is called before the RTC has been initialized (and it will be),
+   * then just return the data/time of the epoch, 12:00 am, Jan 1, 1970.
+   */
+
+  if (!g_rtc_enabled)
+    {
+      tp->tm_sec  = 0;
+      tp->tm_min  = 0;
+      tp->tm_hour = 0;
+
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+      /* Jan 1, 1970 was a Thursday */
+
+      tp->tm_wday = 4;
+#endif
+
+      tp->tm_mday = 1;
+      tp->tm_mon  = 0;
+      tp->tm_year = 70;
+      return -EAGAIN;
+    }
+
   /* Select to begin reading at the seconds register */
 
-  secaddr       = DS3XXX_TIME_SECR;
+  secaddr       = DSXXXX_TIME_SECR;
 
   msg[0].addr   = DS3231_I2C_ADDRESS;
   msg[0].flags  = 0;
@@ -326,40 +348,42 @@ int up_rtc_getdatetime(FAR struct tm *tp)
           return ret;
         }
     }
-  while (buffer[0] > seconds);
+  while ((buffer[0] & DSXXXX_TIME_SEC_BCDMASK) >
+         (seconds & DSXXXX_TIME_SEC_BCDMASK));
 
   /* Format the return time */
   /* Return seconds (0-61) */
 
-  tp->tm_sec = rtc_bcd2bin(buffer[0] & DS3XXX_TIME_SEC_BCDMASK);
+  tp->tm_sec = rtc_bcd2bin(buffer[0] & DSXXXX_TIME_SEC_BCDMASK);
 
   /* Return minutes (0-59) */
 
-  tp->tm_min = rtc_bcd2bin(buffer[1] & DS3XXX_TIME_MIN_BCDMASK);
+  tp->tm_min = rtc_bcd2bin(buffer[1] & DSXXXX_TIME_MIN_BCDMASK);
 
   /* Return hour (0-23).  This assumes 24-hour time was set. */
 
-  tp->tm_hour = rtc_bcd2bin(buffer[2] & DS3XXX_TIME_HOUR24_BCDMASK);
+  tp->tm_hour = rtc_bcd2bin(buffer[2] & DSXXXX_TIME_HOUR24_BCDMASK);
 
  #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   /* Return the day of the week (0-6) */
 
-  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DS3XXX_TIME_DAY_MASK) - 1;
+  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DSXXXX_TIME_DAY_MASK) - 1;
 #endif
 
   /* Return the day of the month (1-31) */
 
-  tp->tm_mday = rtc_bcd2bin(buffer[4] & DS3XXX_TIME_DATE_BCDMASK);
+  tp->tm_mday = rtc_bcd2bin(buffer[4] & DSXXXX_TIME_DATE_BCDMASK);
 
   /* Return the month (0-11) */
 
-  tp->tm_mon = rtc_bcd2bin(buffer[5] & DS3XXX_TIME_MONTH_BCDMASK) - 1;
+  tp->tm_mon = rtc_bcd2bin(buffer[5] & DSXXXX_TIME_MONTH_BCDMASK) - 1;
 
-  /* Return the years since 1990 */
+  /* Return the years since 1900 */
 
-  tmp = rtc_bcd2bin(buffer[5] & DS3XXX_TIME_YEAR_BCDMASK);
+  tmp = rtc_bcd2bin(buffer[6] & DSXXXX_TIME_YEAR_BCDMASK);
 
-  if ((buffer[6] & DS3XXX_TIME_CENTURY_MASK) == DS3XXX_TIME_1900)
+#ifdef CONFIG_RTC_DS3231
+  if ((buffer[5] & DS3231_TIME_CENTURY_MASK) == DS3231_TIME_1900)
     {
       tp->tm_year = tmp;
     }
@@ -367,6 +391,11 @@ int up_rtc_getdatetime(FAR struct tm *tp)
     {
       tp->tm_year = tmp + 100;
     }
+#else
+  /* No century indicator.  The RTC will hold years since 1970 */
+
+  tp->tm_year = tmp + 70;
+#endif
 
   rtc_dumptime(tp, "Returning");
   return OK;
@@ -397,6 +426,15 @@ int up_rtc_settime(FAR const struct timespec *tp)
   uint8_t century;
   uint8_t year;
   int ret;
+
+  /* If this function is called before the RTC has been initialized then just return
+   * an error.
+   */
+
+  if (!g_rtc_enabled)
+    {
+      return -EAGAIN;
+    }
 
   rtc_dumptime(tp, "Setting time");
 
@@ -429,7 +467,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Construct the message */
   /* Write starting with the seconds regiser */
 
-  buffer[0] = DS3XXX_TIME_SECR;
+  buffer[0] = DSXXXX_TIME_SECR;
 
   /* Save seconds (0-59) converted to BCD */
 
@@ -441,7 +479,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Save hour (0-23) with 24-hour time indicatin */
 
-  buffer[3] = rtc_bin2bcd(newtm.tm_hour) | DS3XXX_TIME_24;
+  buffer[3] = rtc_bin2bcd(newtm.tm_hour) | DSXXXX_TIME_24;
 
   /* Save the day of the week (1-7) */
 
@@ -455,22 +493,30 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   buffer[5] = rtc_bin2bcd(newtm.tm_mday);
 
+#ifdef CONFIG_RTC_DS3231
   /* Handle years in the 20th vs the 21st century */
 
   if (newtm.tm_year < 100)
     {
       /* Convert years in the range 1900-1999 */
 
-      century = DS3XXX_TIME_1900;
+      century = DS3231_TIME_1900;
       year    = newtm.tm_year;
     }
   else
     {
       /* Convert years in the range 2000-2099 */
 
-      century = DS3XXX_TIME_2000;
+      century = DS3231_TIME_2000;
       year    = newtm.tm_year - 100;
     }
+
+#else
+  /* Use years since 1970 */
+
+  century = 0;
+  year    = newtm.tm_year - 70;
+#endif
 
   /* Save the month (1-12) with century */
 
@@ -478,7 +524,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Save the year */
 
-  buffer[7] = year;
+  buffer[7] = rtc_bin2bcd(year);
 
   /* Setup the I2C message */
 
@@ -517,9 +563,10 @@ int up_rtc_settime(FAR const struct timespec *tp)
           return ret;
         }
     }
-  while (buffer[1] > seconds);
+  while ((buffer[1] & DSXXXX_TIME_SEC_BCDMASK) >
+         (seconds & DSXXXX_TIME_SEC_BCDMASK));
 
   return OK;
 }
 
-#endif /* CONFIG_RTC_DS3XXX */
+#endif /* CONFIG_RTC_DSXXXX */

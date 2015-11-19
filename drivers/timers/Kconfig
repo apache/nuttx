@@ -118,16 +118,31 @@ config RTC_IOCTL
 
 endif # RTC_DRIVER
 
-config RTC_DS3XXX
+config RTC_EXTERNAL
+	bool "External RTC Support"
+	default n
+	---help---
+		In modern MCUs, the RTC is usually implement as an internal
+		peripheral to the MCU.  An option is to use an external RTC
+		connected to the MCU typically via SPI or I2C.
+
+		If an external RTC is connect to the MCU through some bus, then the
+		RTC will not be available to the system until after the system
+		fully boots up and is able to access the bus.  In that case, this
+		setting must be included to suppress attempts to initialize the RTC
+		early in the boot sequence.
+
+config RTC_DSXXXX
 	bool "DS3231/DS1307 RTC Driver"
 	default n
 	select I2C
 	select I2C_TRANSFER
+	select RTC_EXTERNAL
 	select RTC_DATETIME
 	---help---
 		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
 
-if RTC_DS3XXX
+if RTC_DSXXXX
 
 choice
 	prompt "Maxim Integrated RTC"
@@ -150,7 +165,7 @@ config DS3231_I2C_FREQUENCY
 	default 400000
 	range 1 4000000
 
-endif # RTC_DS3XXX
+endif # RTC_DSXXXX
 endif # RTC
 
 menuconfig WATCHDOG

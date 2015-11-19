@@ -46,80 +46,85 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DS3XXX_TIME_SECR                 0x00      /* Seconds register */
-#  define DS3XXX_TIME_SEC_SHIFT          0         /* Bits 0-3: Seconds, range 0-9 */
-#  define DS3XXX_TIME_SEC_MASK           (15 << DS3XXX_TIME_SEC_SHIFT)
-#    define DS3XXX_TIME_SEC(n)           ((uint8_t)(n) << DS3XXX_TIME_SEC_SHIFT)
-#  define DS3XXX_TIME_10SEC_SHIFT        4         /* Bits 4-6: 10 seconds, range 0-5 */
-#  define DS3XXX_TIME_10SEC_MASK         (7 << DS3XXX_TIME_10SEC_SHIFT)
-#    define DS3XXX_TIME_10SEC(n)         ((uint8_t)(n) << DS3XXX_TIME_10SEC_SHIFT)
-#  define DS3XXX_TIME_SEC_BCDMASK        (DS3XXX_TIME_SEC_MASK | DS3XXX_TIME_10SEC_MASK)
+#define DSXXXX_TIME_SECR                 0x00      /* Seconds register */
+#  define DSXXXX_TIME_SEC_SHIFT          0         /* Bits 0-3: Seconds, range 0-9 */
+#  define DSXXXX_TIME_SEC_MASK           (15 << DSXXXX_TIME_SEC_SHIFT)
+#    define DSXXXX_TIME_SEC(n)           ((uint8_t)(n) << DSXXXX_TIME_SEC_SHIFT)
+#  define DSXXXX_TIME_10SEC_SHIFT        4         /* Bits 4-6: 10 seconds, range 0-5 */
+#  define DSXXXX_TIME_10SEC_MASK         (7 << DSXXXX_TIME_10SEC_SHIFT)
+#    define DSXXXX_TIME_10SEC(n)         ((uint8_t)(n) << DSXXXX_TIME_10SEC_SHIFT)
+#  define DSXXXX_TIME_SEC_BCDMASK        (DSXXXX_TIME_SEC_MASK | DSXXXX_TIME_10SEC_MASK)
+#ifdef CONFIG_RTC_DS1307
+#  define DS1307_TIME_CH                 (1 << 7)  /* Bit 7: Clock halt */
+#endif
 
-#define DS3XXX_TIME_MINR                 0x01      /* Minutes register */
-#  define DS3XXX_TIME_MIN_SHIFT          0         /* Bits 0-3: Minutes, range 0-9 */
-#  define DS3XXX_TIME_MIN_MASK           (15 << DS3XXX_TIME_MIN_SHIFT)
-#    define DS3XXX_TIME_MIN(n)           ((uint8_t)(n) << DS3XXX_TIME_MIN_SHIFT)
-#  define DS3XXX_TIME_10MIN_SHIFT        4         /* Bits 4-6: 10 minutes, range 0-5 */
-#  define DS3XXX_TIME_10MIN_MASK         (7 << DS3XXX_TIME_10MIN_SHIFT)
-#    define DS3XXX_TIME_10MIN(n)         ((uint8_t)(n) << DS3XXX_TIME_10MIN_SHIFT)
-#  define DS3XXX_TIME_MIN_BCDMASK        (DS3XXX_TIME_MIN_MASK | DS3XXX_TIME_10MIN_MASK)
+#define DSXXXX_TIME_MINR                 0x01      /* Minutes register */
+#  define DSXXXX_TIME_MIN_SHIFT          0         /* Bits 0-3: Minutes, range 0-9 */
+#  define DSXXXX_TIME_MIN_MASK           (15 << DSXXXX_TIME_MIN_SHIFT)
+#    define DSXXXX_TIME_MIN(n)           ((uint8_t)(n) << DSXXXX_TIME_MIN_SHIFT)
+#  define DSXXXX_TIME_10MIN_SHIFT        4         /* Bits 4-6: 10 minutes, range 0-5 */
+#  define DSXXXX_TIME_10MIN_MASK         (7 << DSXXXX_TIME_10MIN_SHIFT)
+#    define DSXXXX_TIME_10MIN(n)         ((uint8_t)(n) << DSXXXX_TIME_10MIN_SHIFT)
+#  define DSXXXX_TIME_MIN_BCDMASK        (DSXXXX_TIME_MIN_MASK | DSXXXX_TIME_10MIN_MASK)
 
-#define DS3XXX_TIME_HOURR                0x02      /* Hours register */
-#  define DS3XXX_TIME_HOUR_SHIFT         0         /* Bits 0-3: Hours, range 0-9 */
-#  define DS3XXX_TIME_HOUR_MASK          (15 << DS3XXX_TIME_HOUR_SHIFT)
-#    define DS3XXX_TIME_HOUR(n)          ((uint8_t)(n) << DS3XXX_TIME_HOUR_SHIFT)
-#  define DS3XXX_TIME_10HOUR12_SHIFT     4         /* Bit 4: 10 hours, range 0-1 */
-#  define DS3XXX_TIME_10HOUR12_MASK      (1 << DS3XXX_TIME_10HOUR12_SHIFT)
-#    define DS3XXX_TIME_10HOUR12(n)      ((uint8_t)(n) << DS3XXX_TIME_10HOUR12_SHIFT)
-#  define DS3XXX_TIME_10HOUR24_SHIFT     4         /* Bits 4-5: 10 hours, range 0-2 */
-#  define DS3XXX_TIME_10HOUR24_MASK      (3 << DS3XXX_TIME_10HOUR24_SHIFT)
-#    define DS3XXX_TIME_10HOUR24(n)      ((uint8_t)(n) << DS3XXX_TIME_10HOUR24_SHIFT)
-#  define DS3XXX_TIME_HOUR12_BCDMASK     (DS3XXX_TIME_HOUR_MASK | DS3XXX_TIME_10HOUR12_MASK)
-#  define DS3XXX_TIME_HOUR24_BCDMASK     (DS3XXX_TIME_HOUR_MASK | DS3XXX_TIME_10HOUR24_MASK)
-#  define DS3XXX_TIME_AMPM_SHIFT          5         /* Bit 5: AM/PM Indication */
-#  define DS3XXX_TIME_AMPM_MASK          (1 << DS3XXX_TIME_AMPM_SHIFT)
-#    define DS3XXX_TIME_AM               ((uint8_t)(0) << DS3XXX_TIME_AMPM_SHIFT)
-#    define DS3XXX_TIME_PM               ((uint8_t)(1) << DS3XXX_TIME_AMPM_SHIFT)
-#  define DS3XXX_TIME_1224_SHIFT         6         /* Bit 6: 12/24 Indication */
-#  define DS3XXX_TIME_1224_MASK          (1 << DS3XXX_TIME_1224_SHIFT)
-#    define DS3XXX_TIME_24               ((uint8_t)(0) << DS3XXX_TIME_1224_SHIFT)
-#    define DS3XXX_TIME_12               ((uint8_t)(1) << DS3XXX_TIME_1224_SHIFT)
+#define DSXXXX_TIME_HOURR                0x02      /* Hours register */
+#  define DSXXXX_TIME_HOUR_SHIFT         0         /* Bits 0-3: Hours, range 0-9 */
+#  define DSXXXX_TIME_HOUR_MASK          (15 << DSXXXX_TIME_HOUR_SHIFT)
+#    define DSXXXX_TIME_HOUR(n)          ((uint8_t)(n) << DSXXXX_TIME_HOUR_SHIFT)
+#  define DSXXXX_TIME_10HOUR12_SHIFT     4         /* Bit 4: 10 hours, range 0-1 */
+#  define DSXXXX_TIME_10HOUR12_MASK      (1 << DSXXXX_TIME_10HOUR12_SHIFT)
+#    define DSXXXX_TIME_10HOUR12(n)      ((uint8_t)(n) << DSXXXX_TIME_10HOUR12_SHIFT)
+#  define DSXXXX_TIME_10HOUR24_SHIFT     4         /* Bits 4-5: 10 hours, range 0-2 */
+#  define DSXXXX_TIME_10HOUR24_MASK      (3 << DSXXXX_TIME_10HOUR24_SHIFT)
+#    define DSXXXX_TIME_10HOUR24(n)      ((uint8_t)(n) << DSXXXX_TIME_10HOUR24_SHIFT)
+#  define DSXXXX_TIME_HOUR12_BCDMASK     (DSXXXX_TIME_HOUR_MASK | DSXXXX_TIME_10HOUR12_MASK)
+#  define DSXXXX_TIME_HOUR24_BCDMASK     (DSXXXX_TIME_HOUR_MASK | DSXXXX_TIME_10HOUR24_MASK)
+#  define DSXXXX_TIME_AMPM_SHIFT          5         /* Bit 5: AM/PM Indication */
+#  define DSXXXX_TIME_AMPM_MASK          (1 << DSXXXX_TIME_AMPM_SHIFT)
+#    define DSXXXX_TIME_AM               ((uint8_t)(0) << DSXXXX_TIME_AMPM_SHIFT)
+#    define DSXXXX_TIME_PM               ((uint8_t)(1) << DSXXXX_TIME_AMPM_SHIFT)
+#  define DSXXXX_TIME_1224_SHIFT         6         /* Bit 6: 12/24 Indication */
+#  define DSXXXX_TIME_1224_MASK          (1 << DSXXXX_TIME_1224_SHIFT)
+#    define DSXXXX_TIME_24               ((uint8_t)(0) << DSXXXX_TIME_1224_SHIFT)
+#    define DSXXXX_TIME_12               ((uint8_t)(1) << DSXXXX_TIME_1224_SHIFT)
 
-#define DS3XXX_TIME_DAYR                 0x03      /* Day of the week register */
-#  define DS3XXX_TIME_DAY_SHIFT          0         /* Bits 0-3: Day of the week, range 1-7 */
-#  define DS3XXX_TIME_DAY_MASK           (7 << DS3XXX_TIME_DAY_SHIFT)
-#    define DS3XXX_TIME_DAY(n)           ((uint8_t)(n) << DS3XXX_TIME_DAY_SHIFT)
+#define DSXXXX_TIME_DAYR                 0x03      /* Day of the week register */
+#  define DSXXXX_TIME_DAY_SHIFT          0         /* Bits 0-3: Day of the week, range 1-7 */
+#  define DSXXXX_TIME_DAY_MASK           (7 << DSXXXX_TIME_DAY_SHIFT)
+#    define DSXXXX_TIME_DAY(n)           ((uint8_t)(n) << DSXXXX_TIME_DAY_SHIFT)
 
-#define DS3XXX_TIME_DATER                0x04      /* Date register */
-#  define DS3XXX_TIME_DATE_SHIFT         0         /* Bits 0-3: Days, range 0-9 */
-#  define DS3XXX_TIME_DATE_MASK          (15 << DS3XXX_TIME_DATE_SHIFT)
-#    define DS3XXX_TIME_DATE(n)          ((uint8_t)(n) << DS3XXX_TIME_DATE_SHIFT)
-#  define DS3XXX_TIME_10DATE_SHIFT       4         /* Bits 4-5: 10 days, range 0-5 */
-#  define DS3XXX_TIME_10DATE_MASK        (3 << DS3XXX_TIME_10DATE_SHIFT)
-#    define DS3XXX_TIME_10DATE(n)        ((uint8_t)(n) << DS3XXX_TIME_10DATE_SHIFT)
-#  define DS3XXX_TIME_DATE_BCDMASK       (DS3XXX_TIME_DATE_MASK | DS3XXX_TIME_10DATE_MASK)
+#define DSXXXX_TIME_DATER                0x04      /* Date register */
+#  define DSXXXX_TIME_DATE_SHIFT         0         /* Bits 0-3: Days, range 0-9 */
+#  define DSXXXX_TIME_DATE_MASK          (15 << DSXXXX_TIME_DATE_SHIFT)
+#    define DSXXXX_TIME_DATE(n)          ((uint8_t)(n) << DSXXXX_TIME_DATE_SHIFT)
+#  define DSXXXX_TIME_10DATE_SHIFT       4         /* Bits 4-5: 10 days, range 0-5 */
+#  define DSXXXX_TIME_10DATE_MASK        (3 << DSXXXX_TIME_10DATE_SHIFT)
+#    define DSXXXX_TIME_10DATE(n)        ((uint8_t)(n) << DSXXXX_TIME_10DATE_SHIFT)
+#  define DSXXXX_TIME_DATE_BCDMASK       (DSXXXX_TIME_DATE_MASK | DSXXXX_TIME_10DATE_MASK)
 
-#define DS3XXX_TIME_MONTHR               0x05      /* Month register */
-#  define DS3XXX_TIME_MONTH_SHIFT        0         /* Bits 0-3: Month, range 0-9 */
-#  define DS3XXX_TIME_MONTH_MASK         (15 << DS3XXX_TIME_MONTH_SHIFT)
-#    define DS3XXX_TIME_MONTH(n)         ((uint8_t)(n) << DS3XXX_TIME_MONTH_SHIFT)
-#  define DS3XXX_TIME_10MONTH_SHIFT      4         /* Bit 4: 10 month, range 0-1 */
-#  define DS3XXX_TIME_10MONTH_MASK       (1 << DS3XXX_TIME_10MONTH_SHIFT)
-#    define DS3XXX_TIME_10MONTH(n)       ((uint8_t)(n) << DS3XXX_TIME_10MONTH_SHIFT)
-#  define DS3XXX_TIME_MONTH_BCDMASK      (DS3XXX_TIME_MONTH_MASK | DS3XXX_TIME_10MONTH_MASK)
-#  define DS3XXX_TIME_CENTURY_SHIFT      7         /* Bit 7: AM/PM Indication */
-#  define DS3XXX_TIME_CENTURY_MASK       (1 << DS3XXX_TIME_CENTURY_SHIFT)
-#    define DS3XXX_TIME_1900             ((uint8_t)(0) << DS3XXX_TIME_CENTURY_SHIFT)
-#    define DS3XXX_TIME_2000             ((uint8_t)(1) << DS3XXX_TIME_CENTURY_SHIFT)
+#define DSXXXX_TIME_MONTHR               0x05      /* Month register */
+#  define DSXXXX_TIME_MONTH_SHIFT        0         /* Bits 0-3: Month, range 0-9 */
+#  define DSXXXX_TIME_MONTH_MASK         (15 << DSXXXX_TIME_MONTH_SHIFT)
+#    define DSXXXX_TIME_MONTH(n)         ((uint8_t)(n) << DSXXXX_TIME_MONTH_SHIFT)
+#  define DSXXXX_TIME_10MONTH_SHIFT      4         /* Bit 4: 10 month, range 0-1 */
+#  define DSXXXX_TIME_10MONTH_MASK       (1 << DSXXXX_TIME_10MONTH_SHIFT)
+#    define DSXXXX_TIME_10MONTH(n)       ((uint8_t)(n) << DSXXXX_TIME_10MONTH_SHIFT)
+#  define DSXXXX_TIME_MONTH_BCDMASK      (DSXXXX_TIME_MONTH_MASK | DSXXXX_TIME_10MONTH_MASK)
+#ifdef CONFIG_RTC_DS3231
+#  define DS3231_TIME_CENTURY_SHIFT      7         /* Bit 7: Century Indication */
+#  define DS3231_TIME_CENTURY_MASK       (1 << DS3231_TIME_CENTURY_SHIFT)
+#    define DS3231_TIME_1900             ((uint8_t)(0) << DS3231_TIME_CENTURY_SHIFT)
+#    define DS3231_TIME_2000             ((uint8_t)(1) << DS3231_TIME_CENTURY_SHIFT)
+#endif
 
-#define DS3XXX_TIME_YEARR                0x06      /* Date register */
-#  define DS3XXX_TIME_YEAR_SHIFT         0         /* Bits 0-3: Year, range 0-9 */
-#  define DS3XXX_TIME_YEAR_MASK          (15 << DS3XXX_TIME_YEAR_SHIFT)
-#    define DS3XXX_TIME_YEAR(n)          ((uint8_t)(n) << DS3XXX_TIME_YEAR_SHIFT)
-#  define DS3XXX_TIME_10YEAR_SHIFT       4         /* Bits 4-7: 10 year, range 0-9 */
-#  define DS3XXX_TIME_10YEAR_MASK        (15 << DS3XXX_TIME_10YEAR_SHIFT)
-#    define DS3XXX_TIME_10YEAR(n)        ((uint8_t)(n) << DS3XXX_TIME_10YEAR_SHIFT)
-#  define DS3XXX_TIME_YEAR_BCDMASK       (DS3XXX_TIME_YEAR_MASK | DS3XXX_TIME_10YEAR_MASK)
+#define DSXXXX_TIME_YEARR                0x06      /* Date register */
+#  define DSXXXX_TIME_YEAR_SHIFT         0         /* Bits 0-3: Year, range 0-9 */
+#  define DSXXXX_TIME_YEAR_MASK          (15 << DSXXXX_TIME_YEAR_SHIFT)
+#    define DSXXXX_TIME_YEAR(n)          ((uint8_t)(n) << DSXXXX_TIME_YEAR_SHIFT)
+#  define DSXXXX_TIME_10YEAR_SHIFT       4         /* Bits 4-7: 10 year, range 0-9 */
+#  define DSXXXX_TIME_10YEAR_MASK        (15 << DSXXXX_TIME_10YEAR_SHIFT)
+#    define DSXXXX_TIME_10YEAR(n)        ((uint8_t)(n) << DSXXXX_TIME_10YEAR_SHIFT)
+#  define DSXXXX_TIME_YEAR_BCDMASK       (DSXXXX_TIME_YEAR_MASK | DSXXXX_TIME_10YEAR_MASK)
 
 #ifdef CONFIG_RTC_DS1307
 #  define DS1307_CR                      0x07      /* Control register */
