@@ -133,7 +133,7 @@ config RTC_EXTERNAL
 		early in the boot sequence.
 
 config RTC_DSXXXX
-	bool "DS3231/DS1307 RTC Driver"
+	bool "DS1307/DS323x RTC Driver"
 	default n
 	select I2C
 	select I2C_TRANSFER
@@ -151,17 +151,25 @@ choice
 config RTC_DS1307
 	bool "DS1307"
 	---help---
-		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+		Enables support for the Maxim Integrated DS1307 I2C RTC timer.
 
 config RTC_DS3231
 	bool "DS3231"
 	---help---
-		Enables support for the Maxim Integrated DS1307 I2C RTC timer.
+		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+
+config RTC_DS3234
+	bool "DS3234"
+	depends on EXPERIMENTAL
+	---help---
+		Enables support for the Maxim Integrated DS3234 SPI RTC timer.
+
+		Not yet implemented.
 
 endchoice # Maxim Integrated RTC
 
 config DS3231_I2C_FREQUENCY
-	int "DS3231/DS1307 I2C frequency"
+	int "DS1307/DS323x I2C frequency"
 	default 400000
 	range 1 4000000
 

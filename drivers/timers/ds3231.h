@@ -110,11 +110,11 @@
 #  define DSXXXX_TIME_10MONTH_MASK       (1 << DSXXXX_TIME_10MONTH_SHIFT)
 #    define DSXXXX_TIME_10MONTH(n)       ((uint8_t)(n) << DSXXXX_TIME_10MONTH_SHIFT)
 #  define DSXXXX_TIME_MONTH_BCDMASK      (DSXXXX_TIME_MONTH_MASK | DSXXXX_TIME_10MONTH_MASK)
-#ifdef CONFIG_RTC_DS3231
-#  define DS3231_TIME_CENTURY_SHIFT      7         /* Bit 7: Century Indication */
-#  define DS3231_TIME_CENTURY_MASK       (1 << DS3231_TIME_CENTURY_SHIFT)
-#    define DS3231_TIME_1900             ((uint8_t)(0) << DS3231_TIME_CENTURY_SHIFT)
-#    define DS3231_TIME_2000             ((uint8_t)(1) << DS3231_TIME_CENTURY_SHIFT)
+#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3234)
+#  define DS323X_TIME_CENTURY_SHIFT      7         /* Bit 7: Century Indication */
+#  define DS323X_TIME_CENTURY_MASK       (1 << DS323X_TIME_CENTURY_SHIFT)
+#    define DS323X_TIME_1900             ((uint8_t)(0) << DS323X_TIME_CENTURY_SHIFT)
+#    define DS323X_TIME_2000             ((uint8_t)(1) << DS323X_TIME_CENTURY_SHIFT)
 #endif
 
 #define DSXXXX_TIME_YEARR                0x06      /* Date register */
@@ -139,156 +139,170 @@
 #  define DS1307_RAM_BASE                0x08      /* 0x08-0x3f: 56x8 RAM */
 #endif
 
-#ifdef CONFIG_RTC_DS3231
-#  define DS3231_ALARM1_SECR             0x07      /* Alarm1 seconds register */
-#    define DS3231_ALARM1_SEC_SHIFT      0         /* Bits 0-3: Seconds, range 0-9 */
-#    define DS3231_ALARM1_SEC_MASK       (15 << DS3231_ALARM1_SEC_SHIFT)
-#      define DS3231_ALARM1_SEC(n)       ((uint8_t)(n) << DS3231_ALARM1_SEC_SHIFT)
-#    define DS3231_ALARM1_10SEC_SHIFT    4         /* Bits 4-6: 10 seconds, range 0-5 */
-#    define DS3231_ALARM1_10SEC_MASK     (7 << DS3231_ALARM1_10SEC_SHIFT)
-#      define DS3231_ALARM1_10SEC(n)     ((uint8_t)(n) << DS3231_ALARM1_10SEC_SHIFT)
-#    define DS3231_ALARM1_SEC_BCDMASK    (DS3231_ALARM1_SEC_MASK | DS3231_ALARM1_10SEC_MASK)
-#    define DS3231_ALARM1_A1M1_SHIFT     7         /* Bits 7: A1M1 mask */
-#    define DS3231_ALARM1_A1M1_MASK      (1 << DS3231_ALARM1_A1M1_SHIFT)
-#      define DS3231_ALARM1_A1M1(n)      ((uint8_t)(n) << DS3231_ALARM1_A1M1_SHIFT)
+#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3234)
+#  define DS323X_ALARM1_SECR             0x07      /* Alarm1 seconds register */
+#    define DS323X_ALARM1_SEC_SHIFT      0         /* Bits 0-3: Seconds, range 0-9 */
+#    define DS323X_ALARM1_SEC_MASK       (15 << DS323X_ALARM1_SEC_SHIFT)
+#      define DS323X_ALARM1_SEC(n)       ((uint8_t)(n) << DS323X_ALARM1_SEC_SHIFT)
+#    define DS323X_ALARM1_10SEC_SHIFT    4         /* Bits 4-6: 10 seconds, range 0-5 */
+#    define DS323X_ALARM1_10SEC_MASK     (7 << DS323X_ALARM1_10SEC_SHIFT)
+#      define DS323X_ALARM1_10SEC(n)     ((uint8_t)(n) << DS323X_ALARM1_10SEC_SHIFT)
+#    define DS323X_ALARM1_SEC_BCDMASK    (DS323X_ALARM1_SEC_MASK | DS323X_ALARM1_10SEC_MASK)
+#    define DS323X_ALARM1_A1M1_SHIFT     7         /* Bits 7: A1M1 mask */
+#    define DS323X_ALARM1_A1M1_MASK      (1 << DS323X_ALARM1_A1M1_SHIFT)
+#      define DS323X_ALARM1_A1M1(n)      ((uint8_t)(n) << DS323X_ALARM1_A1M1_SHIFT)
 
-#  define DS3231_ALARM1_MINR             0x08      /* Alarm1 minutes register */
-#    define DS3231_ALARM1_MIN_SHIFT      0         /* Bits 0-3: Minutes, range 0-9 */
-#    define DS3231_ALARM1_MIN_MASK       (15 << DS3231_ALARM1_MIN_SHIFT)
-#      define DS3231_ALARM1_MIN(n)       ((uint8_t)(n) << DS3231_ALARM1_MIN_SHIFT)
-#    define DS3231_ALARM1_10MIN_SHIFT    4         /* Bits 4-6: 10 minutes, range 0-5 */
-#    define DS3231_ALARM1_10MIN_MASK     (7 << DS3231_ALARM1_10MIN_SHIFT)
-#      define DS3231_ALARM1_10MIN(n)     ((uint8_t)(n) << DS3231_ALARM1_10MIN_SHIFT)
-#    define DS3231_ALARM1_MIN_BCDMASK    (DS3231_ALARM1_MIN_MASK | DS3231_ALARM1_10MIN_MASK)
-#    define DS3231_ALARM1_A1M2_SHIFT     7         /* Bits 7: A1M2 mask */
-#    define DS3231_ALARM1_A1M2_MASK      (1 << DS3231_ALARM1_A1M2_SHIFT)
-#      define DS3231_ALARM1_A1M2(n)      ((uint8_t)(n) << DS3231_ALARM1_A1M2_SHIFT)
+#  define DS323X_ALARM1_MINR             0x08      /* Alarm1 minutes register */
+#    define DS323X_ALARM1_MIN_SHIFT      0         /* Bits 0-3: Minutes, range 0-9 */
+#    define DS323X_ALARM1_MIN_MASK       (15 << DS323X_ALARM1_MIN_SHIFT)
+#      define DS323X_ALARM1_MIN(n)       ((uint8_t)(n) << DS323X_ALARM1_MIN_SHIFT)
+#    define DS323X_ALARM1_10MIN_SHIFT    4         /* Bits 4-6: 10 minutes, range 0-5 */
+#    define DS323X_ALARM1_10MIN_MASK     (7 << DS323X_ALARM1_10MIN_SHIFT)
+#      define DS323X_ALARM1_10MIN(n)     ((uint8_t)(n) << DS323X_ALARM1_10MIN_SHIFT)
+#    define DS323X_ALARM1_MIN_BCDMASK    (DS323X_ALARM1_MIN_MASK | DS323X_ALARM1_10MIN_MASK)
+#    define DS323X_ALARM1_A1M2_SHIFT     7         /* Bits 7: A1M2 mask */
+#    define DS323X_ALARM1_A1M2_MASK      (1 << DS323X_ALARM1_A1M2_SHIFT)
+#      define DS323X_ALARM1_A1M2(n)      ((uint8_t)(n) << DS323X_ALARM1_A1M2_SHIFT)
 
-#  define DS3231_ALARM1_HOURR            0x09      /* Alarm1 hours register */
-#    define DS3231_ALARM1_HOUR_SHIFT     0         /* Bits 0-3: Hours, range 0-9 */
-#    define DS3231_ALARM1_HOUR_MASK      (15 << DS3231_ALARM1_HOUR_SHIFT)
-#      define DS3231_ALARM1_HOUR(n)      ((uint8_t)(n) << DS3231_ALARM1_HOUR_SHIFT)
-#    define DS3231_ALARM1_10HOUR12_SHIFT 4         /* Bit 4: 10 hours, range 0-1 */
-#    define DS3231_ALARM1_10HOUR12_MASK  (1 << DS3231_ALARM1_10HOUR12_SHIFT)
-#      define DS3231_ALARM1_10HOUR12(n)  ((uint8_t)(n) << DS3231_ALARM1_10HOUR12_SHIFT)
-#    define DS3231_ALARM1_10HOUR24_SHIFT 4         /* Bits 4-5: 10 hours, range 0-2 */
-#    define DS3231_ALARM1_10HOUR24_MASK  (3 << DS3231_ALARM1_10HOUR24_SHIFT)
-#      define DS3231_ALARM1_10HOUR24(n)  ((uint8_t)(n) << DS3231_ALARM1_10HOUR24_SHIFT)
-#    define DS3231_ALARM1_HOUR12_BCDMASK (DS3231_ALARM1_HOUR_MASK | DS3231_ALARM1_10HOUR12_MASK)
-#    define DS3231_ALARM1_HOUR24_BCDMASK (DS3231_ALARM1_HOUR_MASK | DS3231_ALARM1_10HOUR24_MASK)
-#    define DS3231_ALARM1_AMPM_SHIFT     5         /* Bit 5: AM/PM Indication */
-#    define DS3231_ALARM1_AMPM_MASK      (1 << DS3231_ALARM1_AMPM_SHIFT)
-#      define DS3231_ALARM1_AM           ((uint8_t)(0) << DS3231_ALARM1_AMPM_SHIFT)
-#      define DS3231_ALARM1_PM           ((uint8_t)(1) << DS3231_ALARM1_AMPM_SHIFT)
-#    define DS3231_ALARM1_1224_SHIFT     6         /* Bit 6: 12/24 Indication */
-#    define DS3231_ALARM1_1224_MASK      (1 << DS3231_ALARM1_1224_SHIFT)
-#      define DS3231_ALARM1_12           ((uint8_t)(0) << DS3231_ALARM1_1224_SHIFT)
-#      define DS3231_ALARM1_24           ((uint8_t)(1) << DS3231_ALARM1_1224_SHIFT)
-#    define DS3231_ALARM1_A1M3_SHIFT     7         /* Bits 7: A1M3 mask */
-#    define DS3231_ALARM1_A1M3_MASK      (1 << DS3231_ALARM1_A1M3_SHIFT)
-#      define DS3231_ALARM1_A1M3(n)      ((uint8_t)(n) << DS3231_ALARM1_A1M3_SHIFT)
+#  define DS323X_ALARM1_HOURR            0x09      /* Alarm1 hours register */
+#    define DS323X_ALARM1_HOUR_SHIFT     0         /* Bits 0-3: Hours, range 0-9 */
+#    define DS323X_ALARM1_HOUR_MASK      (15 << DS323X_ALARM1_HOUR_SHIFT)
+#      define DS323X_ALARM1_HOUR(n)      ((uint8_t)(n) << DS323X_ALARM1_HOUR_SHIFT)
+#    define DS323X_ALARM1_10HOUR12_SHIFT 4         /* Bit 4: 10 hours, range 0-1 */
+#    define DS323X_ALARM1_10HOUR12_MASK  (1 << DS323X_ALARM1_10HOUR12_SHIFT)
+#      define DS323X_ALARM1_10HOUR12(n)  ((uint8_t)(n) << DS323X_ALARM1_10HOUR12_SHIFT)
+#    define DS323X_ALARM1_10HOUR24_SHIFT 4         /* Bits 4-5: 10 hours, range 0-2 */
+#    define DS323X_ALARM1_10HOUR24_MASK  (3 << DS323X_ALARM1_10HOUR24_SHIFT)
+#      define DS323X_ALARM1_10HOUR24(n)  ((uint8_t)(n) << DS323X_ALARM1_10HOUR24_SHIFT)
+#    define DS323X_ALARM1_HOUR12_BCDMASK (DS323X_ALARM1_HOUR_MASK | DS323X_ALARM1_10HOUR12_MASK)
+#    define DS323X_ALARM1_HOUR24_BCDMASK (DS323X_ALARM1_HOUR_MASK | DS323X_ALARM1_10HOUR24_MASK)
+#    define DS323X_ALARM1_AMPM_SHIFT     5         /* Bit 5: AM/PM Indication */
+#    define DS323X_ALARM1_AMPM_MASK      (1 << DS323X_ALARM1_AMPM_SHIFT)
+#      define DS323X_ALARM1_AM           ((uint8_t)(0) << DS323X_ALARM1_AMPM_SHIFT)
+#      define DS323X_ALARM1_PM           ((uint8_t)(1) << DS323X_ALARM1_AMPM_SHIFT)
+#    define DS323X_ALARM1_1224_SHIFT     6         /* Bit 6: 12/24 Indication */
+#    define DS323X_ALARM1_1224_MASK      (1 << DS323X_ALARM1_1224_SHIFT)
+#      define DS323X_ALARM1_12           ((uint8_t)(0) << DS323X_ALARM1_1224_SHIFT)
+#      define DS323X_ALARM1_24           ((uint8_t)(1) << DS323X_ALARM1_1224_SHIFT)
+#    define DS323X_ALARM1_A1M3_SHIFT     7         /* Bits 7: A1M3 mask */
+#    define DS323X_ALARM1_A1M3_MASK      (1 << DS323X_ALARM1_A1M3_SHIFT)
+#      define DS323X_ALARM1_A1M3(n)      ((uint8_t)(n) << DS323X_ALARM1_A1M3_SHIFT)
 
-#  define DS3231_ALARM1_DAYDATER         0x0a      /* Alarm1 date / day of the week register */
-#    define DS3231_ALARM1_DAY_SHIFT      0         /* Bits 0-3: Day of the week, range 1-7 */
-#    define DS3231_ALARM1_DAY_MASK       (7 << DS3231_ALARM1_DAY_SHIFT)
-#      define DS3231_ALARM1_DAY(n)       ((uint8_t)(n) << DS3231_ALARM1_DAY_SHIFT)
-#    define DS3231_ALARM1_DATE_SHIFT     0         /* Bits 0-3: Days, range 0-9 */
-#    define DS3231_ALARM1_DATE_MASK      (15 << DS3231_ALARM1_DATE_SHIFT)
-#      define DS3231_ALARM1_DATE(n)      ((uint8_t)(n) << DS3231_ALARM1_DATE_SHIFT)
-#    define DS3231_ALARM1_10DATE_SHIFT   4         /* Bits 4-5: 10 days, range 0-5 */
-#    define DS3231_ALARM1_10DATE_MASK    (3 << DS3231_ALARM1_10DATE_SHIFT)
-#      define DS3231_ALARM1_10DATE(n)    ((uint8_t)(n) << DS3231_ALARM1_10DATE_SHIFT)
-#    define DS3231_ALARM1_DATE_BCDMASK   (DS3231_ALARM1_DATE_MASK | DS3231_ALARM1_10DATE_MASK)
-#    define DS3231_ALARM1_DYDT_SHIFT     6         /* Bits 6: DY/DT */
-#    define DS3231_ALARM1_DYDT_MASK      (1 << DS3231_ALARM1_DYDT_SHIFT)
-#      define DS3231_ALARM1_DYDT_DATE    ((uint8_t)(0) << DS3231_ALARM1_DYDT_SHIFT)
-#      define DS3231_ALARM1_DYDT_DAY     ((uint8_t)(1) << DS3231_ALARM1_DYDT_SHIFT)
-#    define DS3231_ALARM1_A1M4_SHIFT     7         /* Bits 7: A1M4 mask */
-#    define DS3231_ALARM1_A1M4_MASK      (1 << DS3231_ALARM1_A1M4_SHIFT)
-#      define DS3231_ALARM1_A1M4(n)      ((uint8_t)(n) << DS3231_ALARM1_A1M4_SHIFT)
+#  define DS323X_ALARM1_DAYDATER         0x0a      /* Alarm1 date / day of the week register */
+#    define DS323X_ALARM1_DAY_SHIFT      0         /* Bits 0-3: Day of the week, range 1-7 */
+#    define DS323X_ALARM1_DAY_MASK       (7 << DS323X_ALARM1_DAY_SHIFT)
+#      define DS323X_ALARM1_DAY(n)       ((uint8_t)(n) << DS323X_ALARM1_DAY_SHIFT)
+#    define DS323X_ALARM1_DATE_SHIFT     0         /* Bits 0-3: Days, range 0-9 */
+#    define DS323X_ALARM1_DATE_MASK      (15 << DS323X_ALARM1_DATE_SHIFT)
+#      define DS323X_ALARM1_DATE(n)      ((uint8_t)(n) << DS323X_ALARM1_DATE_SHIFT)
+#    define DS323X_ALARM1_10DATE_SHIFT   4         /* Bits 4-5: 10 days, range 0-5 */
+#    define DS323X_ALARM1_10DATE_MASK    (3 << DS323X_ALARM1_10DATE_SHIFT)
+#      define DS323X_ALARM1_10DATE(n)    ((uint8_t)(n) << DS323X_ALARM1_10DATE_SHIFT)
+#    define DS323X_ALARM1_DATE_BCDMASK   (DS323X_ALARM1_DATE_MASK | DS323X_ALARM1_10DATE_MASK)
+#    define DS323X_ALARM1_DYDT_SHIFT     6         /* Bits 6: DY/DT */
+#    define DS323X_ALARM1_DYDT_MASK      (1 << DS323X_ALARM1_DYDT_SHIFT)
+#      define DS323X_ALARM1_DYDT_DATE    ((uint8_t)(0) << DS323X_ALARM1_DYDT_SHIFT)
+#      define DS323X_ALARM1_DYDT_DAY     ((uint8_t)(1) << DS323X_ALARM1_DYDT_SHIFT)
+#    define DS323X_ALARM1_A1M4_SHIFT     7         /* Bits 7: A1M4 mask */
+#    define DS323X_ALARM1_A1M4_MASK      (1 << DS323X_ALARM1_A1M4_SHIFT)
+#      define DS323X_ALARM1_A1M4(n)      ((uint8_t)(n) << DS323X_ALARM1_A1M4_SHIFT)
 
-#  define DS3231_ALARM2_MINR             0x0b      /* Alarm2 minutes register */
-#    define DS3231_ALARM2_MIN_SHIFT      0         /* Bits 0-3: Minutes, range 0-9 */
-#    define DS3231_ALARM2_MIN_MASK       (15 << DS3231_ALARM2_MIN_SHIFT)
-#      define DS3231_ALARM2_MIN(n)       ((uint8_t)(n) << DS3231_ALARM2_MIN_SHIFT)
-#    define DS3231_ALARM2_10MIN_SHIFT    4         /* Bits 4-6: 10 minutes, range 0-5 */
-#    define DS3231_ALARM2_10MIN_MASK     (7 << DS3231_ALARM2_10MIN_SHIFT)
-#      define DS3231_ALARM2_10MIN(n)     ((uint8_t)(n) << DS3231_ALARM2_10MIN_SHIFT)
-#    define DS3231_ALARM2_MIN_BCDMASK    (DS3231_ALARM2_MIN_MASK | DS3231_ALARM2_10MIN_MASK)
-#    define DS3231_ALARM2_A2M2_SHIFT     7         /* Bits 7: A2M2 mask */
-#    define DS3231_ALARM2_A2M2_MASK      (1 << DS3231_ALARM2_A2M2_SHIFT)
-#      define DS3231_ALARM2_A2M2(n)      ((uint8_t)(n) << DS3231_ALARM2_A2M2_SHIFT)
+#  define DS323X_ALARM2_MINR             0x0b      /* Alarm2 minutes register */
+#    define DS323X_ALARM2_MIN_SHIFT      0         /* Bits 0-3: Minutes, range 0-9 */
+#    define DS323X_ALARM2_MIN_MASK       (15 << DS323X_ALARM2_MIN_SHIFT)
+#      define DS323X_ALARM2_MIN(n)       ((uint8_t)(n) << DS323X_ALARM2_MIN_SHIFT)
+#    define DS323X_ALARM2_10MIN_SHIFT    4         /* Bits 4-6: 10 minutes, range 0-5 */
+#    define DS323X_ALARM2_10MIN_MASK     (7 << DS323X_ALARM2_10MIN_SHIFT)
+#      define DS323X_ALARM2_10MIN(n)     ((uint8_t)(n) << DS323X_ALARM2_10MIN_SHIFT)
+#    define DS323X_ALARM2_MIN_BCDMASK    (DS323X_ALARM2_MIN_MASK | DS323X_ALARM2_10MIN_MASK)
+#    define DS323X_ALARM2_A2M2_SHIFT     7         /* Bits 7: A2M2 mask */
+#    define DS323X_ALARM2_A2M2_MASK      (1 << DS323X_ALARM2_A2M2_SHIFT)
+#      define DS323X_ALARM2_A2M2(n)      ((uint8_t)(n) << DS323X_ALARM2_A2M2_SHIFT)
 
-#  define DS3231_ALARM2_HOURR            0x0c      /* Alarm2 hours register */
-#    define DS3231_ALARM2_HOUR_SHIFT     0         /* Bits 0-3: Hours, range 0-9 */
-#    define DS3231_ALARM2_HOUR_MASK      (15 << DS3231_ALARM2_HOUR_SHIFT)
-#      define DS3231_ALARM2_HOUR(n)      ((uint8_t)(n) << DS3231_ALARM2_HOUR_SHIFT)
-#    define DS3231_ALARM2_10HOUR12_SHIFT 4         /* Bit 4: 10 hours, range 0-1 */
-#    define DS3231_ALARM2_10HOUR12_MASK  (1 << DS3231_ALARM2_10HOUR12_SHIFT)
-#      define DS3231_ALARM2_10HOUR12(n)  ((uint8_t)(n) << DS3231_ALARM2_10HOUR12_SHIFT)
-#    define DS3231_ALARM2_10HOUR24_SHIFT 4         /* Bits 4-5: 10 hours, range 0-2 */
-#    define DS3231_ALARM2_10HOUR24_MASK  (3 << DS3231_ALARM2_10HOUR24_SHIFT)
-#      define DS3231_ALARM2_10HOUR24(n)  ((uint8_t)(n) << DS3231_ALARM2_10HOUR24_SHIFT)
-#    define DS3231_ALARM2_HOUR12_BCDMASK (DS3231_ALARM2_HOUR_MASK | DS3231_ALARM2_10HOUR12_MASK)
-#    define DS3231_ALARM2_HOUR24_BCDMASK (DS3231_ALARM2_HOUR_MASK | DS3231_ALARM2_10HOUR24_MASK)
-#    define DS3231_ALARM2_AMPM_SHIFT     5         /* Bit 5: AM/PM Indication */
-#    define DS3231_ALARM2_AMPM_MASK      (1 << DS3231_ALARM2_AMPM_SHIFT)
-#      define DS3231_ALARM2_AM           ((uint8_t)(0) << DS3231_ALARM2_AMPM_SHIFT)
-#      define DS3231_ALARM2_PM           ((uint8_t)(1) << DS3231_ALARM2_AMPM_SHIFT)
-#    define DS3231_ALARM2_1224_SHIFT     6         /* Bit 6: 12/24 Indication */
-#    define DS3231_ALARM2_1224_MASK      (1 << DS3231_ALARM2_1224_SHIFT)
-#      define DS3231_ALARM2_12           ((uint8_t)(0) << DS3231_ALARM2_1224_SHIFT)
-#      define DS3231_ALARM2_24           ((uint8_t)(1) << DS3231_ALARM2_1224_SHIFT)
-#    define DS3231_ALARM2_A2M3_SHIFT     7         /* Bits 7: A2M3 mask */
-#    define DS3231_ALARM2_A2M3_MASK      (1 << DS3231_ALARM2_A2M3_SHIFT)
-#      define DS3231_ALARM2_A2M3(n)      ((uint8_t)(n) << DS3231_ALARM2_A2M3_SHIFT)
+#  define DS323X_ALARM2_HOURR            0x0c      /* Alarm2 hours register */
+#    define DS323X_ALARM2_HOUR_SHIFT     0         /* Bits 0-3: Hours, range 0-9 */
+#    define DS323X_ALARM2_HOUR_MASK      (15 << DS323X_ALARM2_HOUR_SHIFT)
+#      define DS323X_ALARM2_HOUR(n)      ((uint8_t)(n) << DS323X_ALARM2_HOUR_SHIFT)
+#    define DS323X_ALARM2_10HOUR12_SHIFT 4         /* Bit 4: 10 hours, range 0-1 */
+#    define DS323X_ALARM2_10HOUR12_MASK  (1 << DS323X_ALARM2_10HOUR12_SHIFT)
+#      define DS323X_ALARM2_10HOUR12(n)  ((uint8_t)(n) << DS323X_ALARM2_10HOUR12_SHIFT)
+#    define DS323X_ALARM2_10HOUR24_SHIFT 4         /* Bits 4-5: 10 hours, range 0-2 */
+#    define DS323X_ALARM2_10HOUR24_MASK  (3 << DS323X_ALARM2_10HOUR24_SHIFT)
+#      define DS323X_ALARM2_10HOUR24(n)  ((uint8_t)(n) << DS323X_ALARM2_10HOUR24_SHIFT)
+#    define DS323X_ALARM2_HOUR12_BCDMASK (DS323X_ALARM2_HOUR_MASK | DS323X_ALARM2_10HOUR12_MASK)
+#    define DS323X_ALARM2_HOUR24_BCDMASK (DS323X_ALARM2_HOUR_MASK | DS323X_ALARM2_10HOUR24_MASK)
+#    define DS323X_ALARM2_AMPM_SHIFT     5         /* Bit 5: AM/PM Indication */
+#    define DS323X_ALARM2_AMPM_MASK      (1 << DS323X_ALARM2_AMPM_SHIFT)
+#      define DS323X_ALARM2_AM           ((uint8_t)(0) << DS323X_ALARM2_AMPM_SHIFT)
+#      define DS323X_ALARM2_PM           ((uint8_t)(1) << DS323X_ALARM2_AMPM_SHIFT)
+#    define DS323X_ALARM2_1224_SHIFT     6         /* Bit 6: 12/24 Indication */
+#    define DS323X_ALARM2_1224_MASK      (1 << DS323X_ALARM2_1224_SHIFT)
+#      define DS323X_ALARM2_12           ((uint8_t)(0) << DS323X_ALARM2_1224_SHIFT)
+#      define DS323X_ALARM2_24           ((uint8_t)(1) << DS323X_ALARM2_1224_SHIFT)
+#    define DS323X_ALARM2_A2M3_SHIFT     7         /* Bits 7: A2M3 mask */
+#    define DS323X_ALARM2_A2M3_MASK      (1 << DS323X_ALARM2_A2M3_SHIFT)
+#      define DS323X_ALARM2_A2M3(n)      ((uint8_t)(n) << DS323X_ALARM2_A2M3_SHIFT)
 
-#  define DS3231_ALARM2_DAYDATER         0x0d      /* Alarm2 date / day of the week register */
-#    define DS3231_ALARM2_DAY_SHIFT      0         /* Bits 0-3: Day of the week, range 1-7 */
-#    define DS3231_ALARM2_DAY_MASK       (7 << DS3231_ALARM2_DAY_SHIFT)
-#      define DS3231_ALARM2_DAY(n)       ((uint8_t)(n) << DS3231_ALARM2_DAY_SHIFT)
-#    define DS3231_ALARM2_DATE_SHIFT     0         /* Bits 0-3: Days, range 0-9 */
-#    define DS3231_ALARM2_DATE_MASK      (15 << DS3231_ALARM2_DATE_SHIFT)
-#      define DS3231_ALARM2_DATE(n)      ((uint8_t)(n) << DS3231_ALARM2_DATE_SHIFT)
-#    define DS3231_ALARM2_10DATE_SHIFT   4         /* Bits 4-5: 10 days, range 0-5 */
-#    define DS3231_ALARM2_10DATE_MASK    (3 << DS3231_ALARM2_10DATE_SHIFT)
-#      define DS3231_ALARM2_10DATE(n)    ((uint8_t)(n) << DS3231_ALARM2_10DATE_SHIFT)
-#    define DS3231_ALARM2_DATE_BCDMASK   (DS3231_ALARM2_DATE_MASK | DS3231_ALARM2_10DATE_MASK)
-#    define DS3231_ALARM2_DYDT_SHIFT     6         /* Bits 6: DY/DT */
-#    define DS3231_ALARM2_DYDT_MASK      (1 << DS3231_ALARM2_DYDT_SHIFT)
-#      define DS3231_ALARM2_DYDT_DATE    ((uint8_t)(0) << DS3231_ALARM2_DYDT_SHIFT)
-#      define DS3231_ALARM2_DYDT_DAY     ((uint8_t)(1) << DS3231_ALARM2_DYDT_SHIFT)
-#    define DS3231_ALARM2_A2M4_SHIFT     7         /* Bits 7: A2M4 mask */
-#    define DS3231_ALARM2_A2M4_MASK      (1 << DS3231_ALARM2_A2M4_SHIFT)
-#      define DS3231_ALARM2_A2M4(n)      ((uint8_t)(n) << DS3231_ALARM2_A2M4_SHIFT)
+#  define DS323X_ALARM2_DAYDATER         0x0d      /* Alarm2 date / day of the week register */
+#    define DS323X_ALARM2_DAY_SHIFT      0         /* Bits 0-3: Day of the week, range 1-7 */
+#    define DS323X_ALARM2_DAY_MASK       (7 << DS323X_ALARM2_DAY_SHIFT)
+#      define DS323X_ALARM2_DAY(n)       ((uint8_t)(n) << DS323X_ALARM2_DAY_SHIFT)
+#    define DS323X_ALARM2_DATE_SHIFT     0         /* Bits 0-3: Days, range 0-9 */
+#    define DS323X_ALARM2_DATE_MASK      (15 << DS323X_ALARM2_DATE_SHIFT)
+#      define DS323X_ALARM2_DATE(n)      ((uint8_t)(n) << DS323X_ALARM2_DATE_SHIFT)
+#    define DS323X_ALARM2_10DATE_SHIFT   4         /* Bits 4-5: 10 days, range 0-5 */
+#    define DS323X_ALARM2_10DATE_MASK    (3 << DS323X_ALARM2_10DATE_SHIFT)
+#      define DS323X_ALARM2_10DATE(n)    ((uint8_t)(n) << DS323X_ALARM2_10DATE_SHIFT)
+#    define DS323X_ALARM2_DATE_BCDMASK   (DS323X_ALARM2_DATE_MASK | DS323X_ALARM2_10DATE_MASK)
+#    define DS323X_ALARM2_DYDT_SHIFT     6         /* Bits 6: DY/DT */
+#    define DS323X_ALARM2_DYDT_MASK      (1 << DS323X_ALARM2_DYDT_SHIFT)
+#      define DS323X_ALARM2_DYDT_DATE    ((uint8_t)(0) << DS323X_ALARM2_DYDT_SHIFT)
+#      define DS323X_ALARM2_DYDT_DAY     ((uint8_t)(1) << DS323X_ALARM2_DYDT_SHIFT)
+#    define DS323X_ALARM2_A2M4_SHIFT     7         /* Bits 7: A2M4 mask */
+#    define DS323X_ALARM2_A2M4_MASK      (1 << DS323X_ALARM2_A2M4_SHIFT)
+#      define DS323X_ALARM2_A2M4(n)      ((uint8_t)(n) << DS3231_ALARM2_A2M4_SHIFT)
 
-#  define DS3231_CR                      0x0e      /* Control register */
-#    define DS3231_CR_A1IE               (1 << 0)  /* Bit 0:  Alarm 1 interrupt enable */
-#    define DS3231_CR_A2IE               (1 << 1)  /* Bit 1:  Alarm 2 interrupt enable */
-#    define DS3231_CR_INTCN              (1 << 2)  /* Bit 2:  Interrupt control */
-#    define DS3231_CR_RS_SHIFT           (3)       /* Bits 3-4:  Rate selection */
-#    define DS3231_CR_RS_MASK            (3 << DS3231_CR_RS_SHIFT)
-#      define DS3231_CR_RS_1HZ           (0 << DS3231_CR_RS_SHIFT) /* 1Hz */
-#      define DS3231_CR_RS_1KHZ          (1 << DS3231_CR_RS_SHIFT) /* 1.024kHz */
-#      define DS3231_CR_RS_4KHZ          (2 << DS3231_CR_RS_SHIFT) /* 4.096kHz */
-#      define DS3231_CR_RS_8KHZ          (3 << DS3231_CR_RS_SHIFT) /* 8.192kHz */
-#    define DS3231_CR_CONV               (1 << 5)  /* Bit 5:  Convert temperature */
-#    define DS3231_CR_BBSQW              (1 << 6)  /* Bit 6:  Battery backed square wave enable */
-#    define DS3231_CR_EOSC               (1 << 7)  /* Bit 7:  Enable oscillator */
+#  define DS323X_CR                      0x0e      /* Control register */
+#    define DS323X_CR_A1IE               (1 << 0)  /* Bit 0:  Alarm 1 interrupt enable */
+#    define DS323X_CR_A2IE               (1 << 1)  /* Bit 1:  Alarm 2 interrupt enable */
+#    define DS323X_CR_INTCN              (1 << 2)  /* Bit 2:  Interrupt control */
+#    define DS323X_CR_RS_SHIFT           (3)       /* Bits 3-4:  Rate selection */
+#    define DS323X_CR_RS_MASK            (3 << DS323X_CR_RS_SHIFT)
+#      define DS323X_CR_RS_1HZ           (0 << DS323X_CR_RS_SHIFT) /* 1Hz */
+#      define DS323X_CR_RS_1KHZ          (1 << DS323X_CR_RS_SHIFT) /* 1.024kHz */
+#      define DS323X_CR_RS_4KHZ          (2 << DS323X_CR_RS_SHIFT) /* 4.096kHz */
+#      define DS323X_CR_RS_8KHZ          (3 << DS323X_CR_RS_SHIFT) /* 8.192kHz */
+#    define DS323X_CR_CONV               (1 << 5)  /* Bit 5:  Convert temperature */
+#    define DS323X_CR_BBSQW              (1 << 6)  /* Bit 6:  Battery backed square wave enable */
+#    define DS323X_CR_EOSC               (1 << 7)  /* Bit 7:  Enable oscillator */
 
-#  define DS3231_CSR                     0x0f      /* Control/status register */
-#    define DS3231_CSR_A1F               (1 << 0)  /* Bit 0:  Alarm 1 flag */
-#    define DS3231_CSR_A2F               (1 << 1)  /* Bit 1:  Alarm 2 flag */
-#    define DS3231_CSR_BSY               (1 << 2)  /* Bit 2:  Busy */
-#    define DS3231_CSR_EN32kHz           (1 << 3)  /* Bit 3:  Enable 32kHz output */
-#    define DS3231_CSR_OSF               (1 << 7)  /* Bit 7:  Oscillator stop flag */
+#  define DS323X_CSR                     0x0f      /* Control/status register */
+#    define DS323X_CSR_A1F               (1 << 0)  /* Bit 0:  Alarm 1 flag */
+#    define DS323X_CSR_A2F               (1 << 1)  /* Bit 1:  Alarm 2 flag */
+#    define DS323X_CSR_BSY               (1 << 2)  /* Bit 2:  Busy */
+#    define DS323X_CSR_EN32kHz           (1 << 3)  /* Bit 3:  Enable 32kHz output */
+#    ifdef CONFIG_RTC_DS3234
+#      define DS3234_CSR_CRATE_SHIFT     (4)       /* Bits 4-5: Conversion rate */
+#      define DS3234_CSR_CRATE_MASK      (3 << DS3234_CSR_CRATE_SHIFT)
+#        define DS3234_CSR_CRATE_64SEC   (0 << DS3234_CSR_CRATE_SHIFT)
+#        define DS3234_CSR_CRATE_128SEC  (1 << DS3234_CSR_CRATE_SHIFT)
+#        define DS3234_CSR_CRATE_256SEC  (2 << DS3234_CSR_CRATE_SHIFT)
+#        define DS3234_CSR_CRATE_512SEC  (3 << DS3234_CSR_CRATE_SHIFT)
+#      define DS3234_CSR_BB32KHZ         (1 << 6)  /* Bit 6: Battery-Backed 32kHz Output */
+#    endif
+#    define DS323X_CSR_OSF               (1 << 7)  /* Bit 7:  Oscillator stop flag */
 
-#  define DS3231_AGINGR                  0x10      /* Aging offset register (8-bit, 2's complement) */
+#  define DS323X_AGINGR                  0x10      /* Aging offset register (8-bit, 2's complement) */
 
-#  define DS3231_TMPMR                   0x11      /* MSB of temp register (8-bit, 2's complement) */
+#  define DS323X_TMPMR                   0x11      /* MSB of temp register (8-bit, 2's complement) */
 
-#  define DS3231_TMPLR                   0x12      /* LSB of temp register (2-bits) */
-#    define DS3231_TMPLR_MASK            0xc0      /* Bits 6-7: LSB of temp register (2-bits) */
-#endif
+#  define DS323X_TMPLR                   0x12      /* LSB of temp register (2-bits) */
+#    define DS323X_TMPLR_MASK            0xc0      /* Bits 6-7: LSB of temp register (2-bits) */
+#endif /* CONFIG_RTC_DS3231 || CONFIG_RTC_DS3234 */
+
+#ifdef CONFIG_RTC_DS3234
+#  define DS3234_SRAM_ADDRR              0x98      /* SRAM address register */
+#  define DS3234_SRAM_DATAR              0x99      /* SRAM data register */
+#endif /* CONFIG_RTC_DS3234 */
 
 #endif /* __DRIVERS_TIMERS_DS3231_H */
