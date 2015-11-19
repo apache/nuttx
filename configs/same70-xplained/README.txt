@@ -25,7 +25,15 @@ Contents
 Status/Open Issues
 ==================
 
-[To be provided]
+Although this configuration is not particualarly different from the
+SAMV71-XULT board, my initial attempts to debug the board have not been
+successful.  The code is just not behaving correctly in excuting the first
+few instructions after reset.  I have very early realease boards and I am
+suspected some tool/board issue:  It appears that I write the code
+correctly to FLASH and the GPNVM is configured so that the FLASH lies at
+address 0x00000000, but trying to step through with AtmelStudio 7 results
+in uninterpretble behavior.  Using the Segger J-Link, I get errors trying
+to reset and halt the board so I am unable to use that debugger either.
 
 See also configs/samv71-xult/README.txt
 
