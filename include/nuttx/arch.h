@@ -1765,7 +1765,7 @@ size_t  up_check_intstack_remain(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_rtcinitialize
+ * Name: up_rtc_initialize
  *
  * Description:
  *   Initialize the builtin, MCU hardware RTC per the selected
@@ -1786,7 +1786,7 @@ size_t  up_check_intstack_remain(void);
  ****************************************************************************/
 
 #if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
-int up_rtcinitialize(void);
+int up_rtc_initialize(void);
 #endif
 
 /************************************************************************************

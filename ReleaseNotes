@@ -8777,7 +8777,7 @@ detailed bugfix information):
         Jussi Kivilinna.
       - STM32 RTC and clock control:  The STM32F4Discovery board doesn't
         come with a Low speed external oscillator so the default LSE source
-        for the RTC doesn't work. In stm32_rtcc.c the up_rtcinitialize()
+        for the RTC doesn't work. In stm32_rtcc.c the up_rtc_initialize()
         logic doesn't work with the LSI. The check on RTC_MAGIC on the BK0R
         register lead to rtc_setup() call that rightfully enables the LSI
         clock; but the next times, when the rtc is already setup, the

@@ -10045,7 +10045,7 @@
 	  stm32_rtcc.c, stm32_rtcounter.c, and stm32f*_rcc.c: The
 	  STM32F4Discovery board doesn't come with a Low speed external
 	  oscillator so the default LSE source for the RTC doesn't work. In
-	  stm32_rtcc.c the up_rtcinitialize() logic doesn't work with the LSI.
+	  stm32_rtcc.c the up_rtc_initialize() logic doesn't work with the LSI.
 	  The check on RTC_MAGIC on the BK0R register lead to rtc_setup() call
 	  that rightfully enables the lsi clock; but the next times, when the
 	  rtc is already setup, the rtc_resume() call does NOT start the lsi

@@ -206,7 +206,7 @@ void clock_initialize(void)
    * must be deferred until the system has booted.
    */
 
-  up_rtcinitialize();
+  up_rtc_initialize();
 #endif
 
   /* Initialize the time value to match the RTC */
