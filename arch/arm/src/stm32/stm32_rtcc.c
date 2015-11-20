@@ -594,7 +594,7 @@ static int rtc_interrupt(int irq, void *context)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_rtcinitialize
+ * Name: up_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
@@ -608,7 +608,7 @@ static int rtc_interrupt(int irq, void *context)
  *
  ************************************************************************************/
 
-int up_rtcinitialize(void)
+int up_rtc_initialize(void)
 {
   uint32_t regval;
   uint32_t tr_bkp;

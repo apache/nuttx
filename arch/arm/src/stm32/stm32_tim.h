@@ -201,6 +201,7 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_TIMER
 int stm32_timer_initialize(FAR const char *devpath, int timer);
 #endif
