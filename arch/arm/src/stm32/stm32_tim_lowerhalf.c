@@ -522,9 +522,9 @@ static int stm32_timer_handler(struct stm32_lowerhalf_s *lower)
   STM32_TIM_ACKINT(lower->tim, 0);
 
   uint32_t next_interval_us = 0;
-  int ret = (*lower->handlerUsr)(&next_interval_us);
+  bool ret = (*lower->handlerUsr)(&next_interval_us);
 
-  if (ret == OK)
+  if (ret == true)
     {
       if (next_interval_us > 0)
         {
