@@ -357,7 +357,7 @@
 #  define PCF85263_CTL_OSC_CLKIV           (1 << 7)  /* Bit 7:  Output clock inversion */
 
 #define PCF85263_CTL_BATTERY_SWITCH        0x26      /* Battery switch control register */
-#  define PCF85263_CTL_BATTERY_BSTH        (1 << 0)  /* Bit 0:
+#  define PCF85263_CTL_BATTERY_BSTH        (1 << 0)  /* Bit 0: Threshold voltage control */
 #  define PCF85263_CTL_BATTERY_BSM_SHIFT   (1)       /* Bits 1-2: Battery switch mode bits */
 #  define PCF85263_CTL_BATTERY_BSM_MASK    (3 << PCF85263_CTL_BATTERY_BSM_SHIFT)
 #    define PCF85263_CTL_BATTERY_BSM_VTH   (0 << PCF85263_CTL_BATTERY_BSM_SHIFT) /* Switching at the Vth level */
@@ -453,7 +453,7 @@
 #  define PCF85263_CTL_WDR_SHIFT           (2)       /* Bits 2-6: Watchdog register bits */
 #  define PCF85263_CTL_WDR_MASK            (31 << PCF85263_CTL_WDR_SHIFT)
 #    define PCF85263_CTL_WDR(n)            ((uint9_t)(n) << PCF85263_CTL_WDR_SHIFT)
-#  define PCF85263_CTL_WDM                 (1 << 7)  /* Bit 7:  Watchdog mode
+#  define PCF85263_CTL_WDM                 (1 << 7)  /* Bit 7:  Watchdog mode */
 
 /* Stop */
 

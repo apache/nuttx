@@ -11129,4 +11129,7 @@
 	  (2015-11-19).
 	* drivers/mtd/w25.c: Add support for byte write mode.  From Ken Peit
 	  (2015-11-20).
+	* drivers/timers/pcf85263.c and include/nuttx/times/pcf85263.h:  Add
+	  a driver for the NXP PCF85263 I2C RTC.  Untested on initial commit
+	  (2015-11-20).
 

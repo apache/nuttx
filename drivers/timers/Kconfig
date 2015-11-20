@@ -181,9 +181,28 @@ endchoice # Maxim Integrated RTC
 config DS3231_I2C_FREQUENCY
 	int "DS1307/DS323x I2C frequency"
 	default 400000
-	range 1 4000000
+	range 1 400000
 
 endif # RTC_DSXXXX
+
+config RTC_PCF85263
+	bool "PCF85263 RTC Driver"
+	default n
+	select I2C
+	select I2C_TRANSFER
+	select RTC_EXTERNAL
+	select RTC_DATETIME
+	---help---
+		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+
+if RTC_PCF85263
+
+config PCF85263_I2C_FREQUENCY
+	int "PCF85263 I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # RTC_PCF85263
 endif # RTC
 
 menuconfig WATCHDOG

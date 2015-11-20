@@ -1,5 +1,5 @@
 /************************************************************************************
- * drivers/timers/ds3231.c
+ * drivers/timers/pcf85263.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,11 +46,11 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/i2c.h>
-#include <nuttx/timers/ds3231.h>
+#include <nuttx/timers/pcf85263.h>
 
-#include "ds3231.h"
+#include "pcf85263.h"
 
-#ifdef CONFIG_RTC_DSXXXX
+#ifdef CONFIG_RTC_PCF85263
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -70,16 +70,16 @@
 #  error CONFIG_I2C_TRANSFER is required by this driver
 #endif
 
-#ifndef CONFIG_DS3231_I2C_FREQUENCY
-#  error CONFIG_DS3231_I2C_FREQUENCY is not configured
-#  define CONFIG_DS3231_I2C_FREQUENCY 400000
+#ifndef CONFIG_PCF85263_I2C_FREQUENCY
+#  error CONFIG_PCF85263_I2C_FREQUENCY is not configured
+#  define CONFIG_PCF85263_I2C_FREQUENCY 400000
 #endif
 
-#if CONFIG_DS3231_I2C_FREQUENCY > 400000
-#  error CONFIG_DS3231_I2C_FREQUENCY is out of range
+#if CONFIG_PCF85263_I2C_FREQUENCY > 400000
+#  error CONFIG_PCF85263_I2C_FREQUENCY is out of range
 #endif
 
-#define DS3231_I2C_ADDRESS 0x68
+#define PCF85263_I2C_ADDRESS 0x68
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_RTC
@@ -102,11 +102,11 @@
 /************************************************************************************
  * Priviate Types
  ************************************************************************************/
-/* This structure describes the state of the DS3231 chip.  Only a single RTC is
+/* This structure describes the state of the PCF85263 chip.  Only a single RTC is
  * supported.
  */
 
-struct ds3231_dev_s
+struct pcf85263_dev_s
 {
   FAR struct i2c_dev_s *i2c;  /* Contained reference to the I2C bus driver */
 };
@@ -122,9 +122,9 @@ volatile bool g_rtc_enabled = false;
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-/* The state of the DS3231 chip.  Only a single RTC is supported */
+/* The state of the PCF85263 chip.  Only a single RTC is supported */
 
-static struct ds3231_dev_s g_ds3231;
+static struct pcf85263_dev_s g_pcf85263;
 
 /************************************************************************************
  * Private Functions
@@ -216,13 +216,13 @@ static int rtc_bcd2bin(uint8_t value)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: dsxxxx_rtc_initialize
+ * Name: pcf85263_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
  *   called once during the OS initialization sequence by board-specific logic.
  *
- *   After dsxxxx_rtc_initialize() is called, the OS function clock_synchronize()
+ *   After pcf85263_rtc_initialize() is called, the OS function clock_synchronize()
  *   should also be called to synchronize the system timer to a hardware RTC.  That
  *   operation is normally performed automatically by the system during clock
  *   initialization.  However, when an external RTC is used, the board logic will
@@ -237,11 +237,11 @@ static int rtc_bcd2bin(uint8_t value)
  *
  ************************************************************************************/
 
-int dsxxxx_rtc_initialize(FAR struct i2c_dev_s *i2c)
+int pcf85263_rtc_initialize(FAR struct i2c_dev_s *i2c)
 {
   /* Remember the i2c device and claim that the RTC is enabled */
 
-  g_ds3231.i2c  = i2c;
+  g_pcf85263.i2c  = i2c;
   g_rtc_enabled = true;
   return OK;
 }
@@ -275,7 +275,6 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   uint8_t secaddr;
   uint8_t buffer[7];
   uint8_t seconds;
-  int tmp;
   int ret;
 
   /* If this function is called before the RTC has been initialized (and it will be),
@@ -302,9 +301,9 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   /* Select to begin reading at the seconds register */
 
-  secaddr       = DSXXXX_TIME_SECR;
+  secaddr       = PCF85263_RTC_SECONDS;
 
-  msg[0].addr   = DS3231_I2C_ADDRESS;
+  msg[0].addr   = PCF85263_I2C_ADDRESS;
   msg[0].flags  = 0;
   msg[0].buffer = &secaddr;
   msg[0].length = 1;
@@ -313,26 +312,26 @@ int up_rtc_getdatetime(FAR struct tm *tp)
    * month, year
    */
 
-  msg[1].addr   = DS3231_I2C_ADDRESS;
+  msg[1].addr   = PCF85263_I2C_ADDRESS;
   msg[1].flags  = I2C_M_READ;
   msg[1].buffer = buffer;
   msg[1].length = 7;
 
   /* Read the seconds register again */
 
-  msg[2].addr   = DS3231_I2C_ADDRESS;
+  msg[2].addr   = PCF85263_I2C_ADDRESS;
   msg[2].flags  = 0;
   msg[2].buffer = &secaddr;
   msg[2].length = 1;
 
-  msg[3].addr   = DS3231_I2C_ADDRESS;
+  msg[3].addr   = PCF85263_I2C_ADDRESS;
   msg[3].flags  = I2C_M_READ;
   msg[3].buffer = &seconds;
   msg[3].length = 1;
 
   /* Configure I2C before using it */
 
-  I2C_SETFREQUENCY(g_ds3231.i2c, CONFIG_DS3231_I2C_FREQUENCY);
+  I2C_SETFREQUENCY(g_pcf85263.i2c, CONFIG_PCF85263_I2C_FREQUENCY);
 
   /* Perform the transfer (This could be done with I2C_WRITEREAD()).  The
    * transfer may be performed repeatedly of the seconds values decreases,
@@ -341,63 +340,48 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   do
     {
-      ret = I2C_TRANSFER(g_ds3231.i2c, msg, 4);
+      ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 4);
       if (ret < 0)
         {
           rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
           return ret;
         }
     }
-  while ((buffer[0] & DSXXXX_TIME_SEC_BCDMASK) >
-         (seconds & DSXXXX_TIME_SEC_BCDMASK));
+  while ((buffer[0] & PCF85263_RTC_SECONDS_MASK) >
+         (seconds & PCF85263_RTC_SECONDS_MASK));
 
   /* Format the return time */
   /* Return seconds (0-61) */
 
-  tp->tm_sec = rtc_bcd2bin(buffer[0] & DSXXXX_TIME_SEC_BCDMASK);
+  tp->tm_sec = rtc_bcd2bin(buffer[0] & PCF85263_RTC_SECONDS_MASK);
 
   /* Return minutes (0-59) */
 
-  tp->tm_min = rtc_bcd2bin(buffer[1] & DSXXXX_TIME_MIN_BCDMASK);
+  tp->tm_min = rtc_bcd2bin(buffer[1] & PCF85263_RTC_MINUTES_MASK);
 
   /* Return hour (0-23).  This assumes 24-hour time was set. */
 
-  tp->tm_hour = rtc_bcd2bin(buffer[2] & DSXXXX_TIME_HOUR24_BCDMASK);
-
- #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  /* Return the day of the week (0-6) */
-
-  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & DSXXXX_TIME_DAY_MASK) - 1;
-#endif
+  tp->tm_hour = rtc_bcd2bin(buffer[2] & PCF85263_RTC_HOURS24_MASK);
 
   /* Return the day of the month (1-31) */
 
-  tp->tm_mday = rtc_bcd2bin(buffer[4] & DSXXXX_TIME_DATE_BCDMASK);
+  tp->tm_mday = rtc_bcd2bin(buffer[3] & PCF85263_RTC_DAYS_MASK);
+
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+  /* Return the day of the week (0-6) */
+
+  tp->tm_wday = (rtc_bcd2bin(buffer[4]) & PCF85263_RTC_WEEKDAYS_MASK);
+#endif
 
   /* Return the month (0-11) */
 
-  tp->tm_mon = rtc_bcd2bin(buffer[5] & DSXXXX_TIME_MONTH_BCDMASK) - 1;
+  tp->tm_mon = rtc_bcd2bin(buffer[5] & PCF85263_RTC_MONTHS_MASK) - 1;
 
-  /* Return the years since 1900 */
-
-  tmp = rtc_bcd2bin(buffer[6] & DSXXXX_TIME_YEAR_BCDMASK);
-
-#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232)
-  if ((buffer[5] & DS323X_TIME_CENTURY_MASK) == DS323X_TIME_1900)
-    {
-      tp->tm_year = tmp;
-    }
-  else
-    {
-      tp->tm_year = tmp + 100;
-    }
-#else
-  /* No century indicator.  The RTC will hold years since 1968 (a leap year like
-   * 2000)
+  /* Return the years since 1900.  The RTC will hold years since 1968 (a leap year
+   * like 2000).
    */
 
-  tp->tm_year = tmp + 68;
-#endif
+  tp->tm_year = rtc_bcd2bin(buffer[6]) + 68;
 
   rtc_dumptime(tp, "Returning");
   return OK;
@@ -425,8 +409,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
   time_t newtime;
   uint8_t buffer[8];
   uint8_t seconds;
-  uint8_t century;
-  uint8_t year;
   int ret;
 
   /* If this function is called before the RTC has been initialized then just return
@@ -469,7 +451,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Construct the message */
   /* Write starting with the seconds regiser */
 
-  buffer[0] = DSXXXX_TIME_SECR;
+  buffer[0] = PCF85263_RTC_SECONDS;
 
   /* Save seconds (0-59) converted to BCD */
 
@@ -481,75 +463,50 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Save hour (0-23) with 24-hour time indication */
 
-  buffer[3] = rtc_bin2bcd(newtm.tm_hour) | DSXXXX_TIME_24;
+  buffer[3] = rtc_bin2bcd(newtm.tm_hour);
+
+  /* Save the day of the month (1-31) */
+
+  buffer[4] = rtc_bin2bcd(newtm.tm_mday);
 
   /* Save the day of the week (1-7) */
 
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  buffer[4] = rtc_bin2bcd(newtm.tm_wday + 1);
+  buffer[5] = rtc_bin2bcd(newtm.tm_wday);
 #else
-  buffer[4] = 1;
+  buffer[5] = 0;
 #endif
 
-  /* Save the day of the month (1-31) */
+  /* Save the month (1-12) */
 
-  buffer[5] = rtc_bin2bcd(newtm.tm_mday);
+  buffer[6] = rtc_bin2bcd(newtm.tm_mon + 1);
 
-#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232)
-  /* Handle years in the 20th vs the 21st century */
+  /* Save the year.  Use years since 1968 (a leap year like 2000) */
 
-  if (newtm.tm_year < 100)
-    {
-      /* Convert years in the range 1900-1999 */
-
-      century = DS323X_TIME_1900;
-      year    = newtm.tm_year;
-    }
-  else
-    {
-      /* Convert years in the range 2000-2099 */
-
-      century = DS323X_TIME_2000;
-      year    = newtm.tm_year - 100;
-    }
-
-#else
-  /* Use years since 1968 (a leap year like 2000) */
-
-  century = 0;
-  year    = newtm.tm_year - 68;
-#endif
-
-  /* Save the month (1-12) with century */
-
-  buffer[6] = rtc_bin2bcd(newtm.tm_mon + 1) | century;
-
-  /* Save the year */
-
-  buffer[7] = rtc_bin2bcd(year);
+  buffer[7] = rtc_bin2bcd(newtm.tm_year - 68);
 
   /* Setup the I2C message */
 
-  msg[0].addr   = DS3231_I2C_ADDRESS;
+  msg[0].addr   = PCF85263_I2C_ADDRESS;
   msg[0].flags  = 0;
   msg[0].buffer = buffer;
   msg[0].length = 8;
 
   /* Read back the seconds register */
 
-  msg[1].addr   = DS3231_I2C_ADDRESS;
+  msg[1].addr   = PCF85263_I2C_ADDRESS;
   msg[1].flags  = 0;
   msg[1].buffer = buffer;
   msg[1].length = 1;
 
-  msg[2].addr   = DS3231_I2C_ADDRESS;
+  msg[2].addr   = PCF85263_I2C_ADDRESS;
   msg[2].flags  = I2C_M_READ;
   msg[2].buffer = &seconds;
   msg[2].length = 1;
 
   /* Configure I2C before using it */
 
-  I2C_SETFREQUENCY(g_ds3231.i2c, CONFIG_DS3231_I2C_FREQUENCY);
+  I2C_SETFREQUENCY(g_pcf85263.i2c, CONFIG_PCF85263_I2C_FREQUENCY);
 
   /* Perform the transfer (This could be done with I2C_READ).  This transfer
    * will be repeated if the seconds count rolls over to a smaller value
@@ -558,17 +515,17 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   do
     {
-      ret = I2C_TRANSFER(g_ds3231.i2c, msg, 3);
+      ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 3);
       if (ret < 0)
         {
           rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
           return ret;
         }
     }
-  while ((buffer[1] & DSXXXX_TIME_SEC_BCDMASK) >
-         (seconds & DSXXXX_TIME_SEC_BCDMASK));
+  while ((buffer[1] & PCF85263_RTC_SECONDS_MASK) >
+         (seconds & PCF85263_RTC_SECONDS_MASK));
 
   return OK;
 }
 
-#endif /* CONFIG_RTC_DSXXXX */
+#endif /* CONFIG_RTC_PCF85263 */
