@@ -462,7 +462,7 @@
 
 /* Reset */
 
-#define PCF85263_CTL_RESETS                0x2f      /*
+#define PCF85263_CTL_RESETS                0x2f      /* Software reset control register */
 #  define PCF85263_CTL_CTS                 (1 << 0)  /* Bit 0:  Clear timestamp */
 #  define PCF85263_CTL_SR                  (1 << 3)  /* Bit 3:  Software reset */
 #  define PCF85263_CTL_CPR                 (1 << 7)  /* Bit 7:  Clear prescaler */
