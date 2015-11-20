@@ -54,8 +54,8 @@
 #  define DSXXXX_TIME_10SEC_MASK         (7 << DSXXXX_TIME_10SEC_SHIFT)
 #    define DSXXXX_TIME_10SEC(n)         ((uint8_t)(n) << DSXXXX_TIME_10SEC_SHIFT)
 #  define DSXXXX_TIME_SEC_BCDMASK        (DSXXXX_TIME_SEC_MASK | DSXXXX_TIME_10SEC_MASK)
-#ifdef CONFIG_RTC_DS1307
-#  define DS1307_TIME_CH                 (1 << 7)  /* Bit 7: Clock halt */
+#if defined(CONFIG_RTC_DS1302) || defined(CONFIG_RTC_DS1307)
+#  define DS130x_TIME_CH                 (1 << 7)  /* Bit 7: Clock halt */
 #endif
 
 #define DSXXXX_TIME_MINR                 0x01      /* Minutes register */
@@ -110,7 +110,7 @@
 #  define DSXXXX_TIME_10MONTH_MASK       (1 << DSXXXX_TIME_10MONTH_SHIFT)
 #    define DSXXXX_TIME_10MONTH(n)       ((uint8_t)(n) << DSXXXX_TIME_10MONTH_SHIFT)
 #  define DSXXXX_TIME_MONTH_BCDMASK      (DSXXXX_TIME_MONTH_MASK | DSXXXX_TIME_10MONTH_MASK)
-#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3234)
+#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232) || defined(CONFIG_RTC_DS3234)
 #  define DS323X_TIME_CENTURY_SHIFT      7         /* Bit 7: Century Indication */
 #  define DS323X_TIME_CENTURY_MASK       (1 << DS323X_TIME_CENTURY_SHIFT)
 #    define DS323X_TIME_1900             ((uint8_t)(0) << DS323X_TIME_CENTURY_SHIFT)
@@ -126,6 +126,31 @@
 #    define DSXXXX_TIME_10YEAR(n)        ((uint8_t)(n) << DSXXXX_TIME_10YEAR_SHIFT)
 #  define DSXXXX_TIME_YEAR_BCDMASK       (DSXXXX_TIME_YEAR_MASK | DSXXXX_TIME_10YEAR_MASK)
 
+#ifdef CONFIG_RTC_DS1302
+#  define DS1302_CR                      0x07      /* Control register */
+#    define DS1302_CR_WP                 (1 << 7)  /* Bit 7:  Write protect */
+
+#  define DS1302_TCR                     0x08      /* Trickle charge register */
+#    define DS1302_TCR_RS_SHIFT          (0)       /* Bits 0-1: Range select */
+#    define DS1302_TCR_RS_MASK           (3 << DS1302_TCR_RS_SHIFT)
+#      define DS1302_TCR_RS(n)           ((uint8_t)(n) << DS1302_TCR_RS_SHIFT)
+#    define DS1302_TCR_DS_SHIFT          (4)       /* Bits 2-3: Diode select */
+#    define DS1302_TCR_DS_MASK           (3 << DS1302_TCR_DS_SHIFT)
+#      define DS1302_TCR_DS(n)           ((uint8_t)(n) << DS1302_TCR_DS_SHIFT)
+#    define DS1302_TCR_TCS_SHIFT         (4)       /* Bits 4-7: Trickle charge select */
+#    define DS1302_TCR_TCS_MASK          (15 << DS1302_TCR_TCS_SHIFT)
+#      define DS1302_TCR_TCS(n)          ((uint8_t)(n) << DS1302_TCR_TCS_SHIFT)
+
+#  define DS1302_TCR_DISABLED            (DS1302_TCR_RS(0) | define DS1302_TCR_DS(0) | define DS1302_TCR_TCS(0))
+#  define DS1302_TCR_1DIODE_2OHM         (DS1302_TCR_RS(1) | define DS1302_TCR_DS(1) | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_1DIODE_4OHM         (DS1302_TCR_RS(2) | define DS1302_TCR_DS(1) | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_1DIODE_8OHM         (DS1302_TCR_RS(3) | define DS1302_TCR_DS(1) | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_2DIODE_2OHM         (DS1302_TCR_RS(1) | define DS1302_TCR_DS(2) | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_2DIODE_4OHM         (DS1302_TCR_RS(2) | define DS1302_TCR_DS(2) | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_2DIODE_8OHM         (DS1302_TCR_RS(3) | define DS1302_TCR_DS(2) | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_INIT                (DS1302_TCR_RS(0) | define DS1302_TCR_DS(3) | define DS1302_TCR_TCS(5))
+#endif
+
 #ifdef CONFIG_RTC_DS1307
 #  define DS1307_CR                      0x07      /* Control register */
 #    define DS1307_CR_RS_SHIFT           (3)       /* Bits 0-1:  Rate selection */
@@ -139,7 +164,7 @@
 #  define DS1307_RAM_BASE                0x08      /* 0x08-0x3f: 56x8 RAM */
 #endif
 
-#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3234)
+#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232) || defined(CONFIG_RTC_DS3234)
 #  define DS323X_ALARM1_SECR             0x07      /* Alarm1 seconds register */
 #    define DS323X_ALARM1_SEC_SHIFT      0         /* Bits 0-3: Seconds, range 0-9 */
 #    define DS323X_ALARM1_SEC_MASK       (15 << DS323X_ALARM1_SEC_SHIFT)
@@ -281,14 +306,14 @@
 #    define DS323X_CSR_A2F               (1 << 1)  /* Bit 1:  Alarm 2 flag */
 #    define DS323X_CSR_BSY               (1 << 2)  /* Bit 2:  Busy */
 #    define DS323X_CSR_EN32kHz           (1 << 3)  /* Bit 3:  Enable 32kHz output */
-#    ifdef CONFIG_RTC_DS3234
-#      define DS3234_CSR_CRATE_SHIFT     (4)       /* Bits 4-5: Conversion rate */
-#      define DS3234_CSR_CRATE_MASK      (3 << DS3234_CSR_CRATE_SHIFT)
-#        define DS3234_CSR_CRATE_64SEC   (0 << DS3234_CSR_CRATE_SHIFT)
-#        define DS3234_CSR_CRATE_128SEC  (1 << DS3234_CSR_CRATE_SHIFT)
-#        define DS3234_CSR_CRATE_256SEC  (2 << DS3234_CSR_CRATE_SHIFT)
-#        define DS3234_CSR_CRATE_512SEC  (3 << DS3234_CSR_CRATE_SHIFT)
-#      define DS3234_CSR_BB32KHZ         (1 << 6)  /* Bit 6: Battery-Backed 32kHz Output */
+#    if defined(CONFIG_RTC_DS3232) ||  defined(CONFIG_RTC_DS3234)
+#      define DS323x_CSR_CRATE_SHIFT     (4)       /* Bits 4-5: Conversion rate */
+#      define DS323x_CSR_CRATE_MASK      (3 << DS323x_CSR_CRATE_SHIFT)
+#        define DS323x_CSR_CRATE_64SEC   (0 << DS323x_CSR_CRATE_SHIFT)
+#        define DS323x_CSR_CRATE_128SEC  (1 << DS323x_CSR_CRATE_SHIFT)
+#        define DS323x_CSR_CRATE_256SEC  (2 << DS323x_CSR_CRATE_SHIFT)
+#        define DS323x_CSR_CRATE_512SEC  (3 << DS323x_CSR_CRATE_SHIFT)
+#      define DS323x_CSR_BB32KHZ         (1 << 6)  /* Bit 6: Battery-Backed 32kHz Output */
 #    endif
 #    define DS323X_CSR_OSF               (1 << 7)  /* Bit 7:  Oscillator stop flag */
 
@@ -298,7 +323,11 @@
 
 #  define DS323X_TMPLR                   0x12      /* LSB of temp register (2-bits) */
 #    define DS323X_TMPLR_MASK            0xc0      /* Bits 6-7: LSB of temp register (2-bits) */
-#endif /* CONFIG_RTC_DS3231 || CONFIG_RTC_DS3234 */
+#endif /* CONFIG_RTC_DS3231 || CONFIG_RTC_DS3232 || CONFIG_RTC_DS3234 */
+
+#ifdef CONFIG_RTC_DS3232
+#  define DS3232_SRAM_BASE               0x14      /* 0x14-0xff: SRAM */
+#endif /* CONFIG_RTC_DS3232 */
 
 #ifdef CONFIG_RTC_DS3234
 #  define DS3234_SRAM_ADDRR              0x98      /* SRAM address register */
