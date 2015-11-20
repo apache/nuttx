@@ -407,7 +407,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   struct i2c_msg_s msg[3];
   struct tm newtm;
   time_t newtime;
-  uint8_t buffer[8];
+  uint8_t buffer[9];
   uint8_t seconds;
   int ret;
 
@@ -451,46 +451,50 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Construct the message */
   /* Write starting with the seconds regiser */
 
-  buffer[0] = PCF85263_RTC_SECONDS;
+  buffer[0] = PCF85263_RTC_100TH_SECONDS;
+
+  /* Clear the 100ths of seconds */
+
+  buffer[1] = 0;
 
   /* Save seconds (0-59) converted to BCD */
 
-  buffer[1] = rtc_bin2bcd(newtm.tm_sec);
+  buffer[2] = rtc_bin2bcd(newtm.tm_sec);
 
   /* Save minutes (0-59) converted to BCD */
 
-  buffer[2] = rtc_bin2bcd(newtm.tm_min);
+  buffer[3] = rtc_bin2bcd(newtm.tm_min);
 
   /* Save hour (0-23) with 24-hour time indication */
 
-  buffer[3] = rtc_bin2bcd(newtm.tm_hour);
+  buffer[4] = rtc_bin2bcd(newtm.tm_hour);
 
   /* Save the day of the month (1-31) */
 
-  buffer[4] = rtc_bin2bcd(newtm.tm_mday);
+  buffer[5] = rtc_bin2bcd(newtm.tm_mday);
 
   /* Save the day of the week (1-7) */
 
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  buffer[5] = rtc_bin2bcd(newtm.tm_wday);
+  buffer[6] = rtc_bin2bcd(newtm.tm_wday);
 #else
-  buffer[5] = 0;
+  buffer[6] = 0;
 #endif
 
   /* Save the month (1-12) */
 
-  buffer[6] = rtc_bin2bcd(newtm.tm_mon + 1);
+  buffer[7] = rtc_bin2bcd(newtm.tm_mon + 1);
 
   /* Save the year.  Use years since 1968 (a leap year like 2000) */
 
-  buffer[7] = rtc_bin2bcd(newtm.tm_year - 68);
+  buffer[8] = rtc_bin2bcd(newtm.tm_year - 68);
 
   /* Setup the I2C message */
 
   msg[0].addr   = PCF85263_I2C_ADDRESS;
   msg[0].flags  = 0;
   msg[0].buffer = buffer;
-  msg[0].length = 8;
+  msg[0].length = 9;
 
   /* Read back the seconds register */
 
@@ -522,7 +526,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
           return ret;
         }
     }
-  while ((buffer[1] & PCF85263_RTC_SECONDS_MASK) >
+  while ((buffer[2] & PCF85263_RTC_SECONDS_MASK) >
          (seconds & PCF85263_RTC_SECONDS_MASK));
 
   return OK;
