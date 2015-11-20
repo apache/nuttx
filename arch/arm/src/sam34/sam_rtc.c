@@ -351,7 +351,7 @@ static uint32_t rtc_sync(void)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_rtcinitialize
+ * Name: up_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
@@ -365,7 +365,7 @@ static uint32_t rtc_sync(void)
  *
  ************************************************************************************/
 
-int up_rtcinitialize(void)
+int up_rtc_initialize(void)
 {
   uint32_t ver;
 

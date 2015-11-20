@@ -350,7 +350,7 @@ static int stm32_rtc_interrupt(int irq, void *context)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_rtcinitialize
+ * Name: up_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
@@ -364,7 +364,7 @@ static int stm32_rtc_interrupt(int irq, void *context)
  *
  ************************************************************************************/
 
-int up_rtcinitialize(void)
+int up_rtc_initialize(void)
 {
   /* Enable write access to the backup domain (RTC registers, RTC backup data
    * registers and backup SRAM).
