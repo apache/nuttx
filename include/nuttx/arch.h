@@ -1768,8 +1768,14 @@ size_t  up_check_intstack_remain(void);
  * Name: up_rtcinitialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This
- *   function is called once during the OS initialization sequence
+ *   Initialize the builtin, MCU hardware RTC per the selected
+ *   configuration.  This function is called once very early in the OS
+ *   initialization sequence
+ *
+ *   NOTE that initialization of external RTC hardware that depends on the
+ *   availability of OS resources (such as SPI or I2C) must be deferred
+ *   until the system has fully booted.  Other, RTC-specific initialization
+ *   functions are used in that case.
  *
  * Input Parameters:
  *   None
@@ -1779,7 +1785,7 @@ size_t  up_check_intstack_remain(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC
+#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
 int up_rtcinitialize(void);
 #endif
 
