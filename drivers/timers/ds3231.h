@@ -169,7 +169,7 @@
 #      define DS1307_CR_RS_32KHZ         (3 << DS1307_CR_RS_SHIFT) /* 32.768kHz */
 #    define DS1307_CR_SQWE               (1 << 4)  /* Bit 4:  Square wave enable */
 #    define DS1307_CR_OUT                (1 << 7)  /* Bit 7:  Output control */
-#  define DS1307_RAM_BASE                0x08      /* 0x08-0x3f: 56x8 RAM */
+#  define DS1307_RAM_BASER               0x08      /* 0x08-0x3f: 56x8 RAM */
 #endif
 
 #if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232) || defined(CONFIG_RTC_DS3234)
@@ -334,7 +334,7 @@
 #endif /* CONFIG_RTC_DS3231 || CONFIG_RTC_DS3232 || CONFIG_RTC_DS3234 */
 
 #ifdef CONFIG_RTC_DS3232
-#  define DS3232_SRAM_BASE               0x14      /* 0x14-0xff: SRAM */
+#  define DS3232_SRAM_BASER              0x14      /* 0x14-0xff: SRAM */
 #endif /* CONFIG_RTC_DS3232 */
 
 #ifdef CONFIG_RTC_DS3234

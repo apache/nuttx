@@ -100,7 +100,7 @@ static struct skel_dev_s g_skeldev =
     skel_bwrite,
     skel_read,
 #ifdef CONFIG_MTD_BYTE_WRITE
-    skel_write,
+    skel_write,   /* Should be NULL if the byte write method is not supported */
 #endif
     skel_ioctl
   },
@@ -226,7 +226,8 @@ static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset,
  *
  * Description:
  *   Some FLASH parts have the ability to write an arbitrary number of
- *   bytes to an arbitrary offset on the device.
+ *   bytes to an arbitrary offset on the device.  This method should be
+ *   implement only for devices that support such access.
  *
  ****************************************************************************/
 

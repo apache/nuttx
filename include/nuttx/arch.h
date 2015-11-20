@@ -1770,7 +1770,7 @@ size_t  up_check_intstack_remain(void);
  * Description:
  *   Initialize the builtin, MCU hardware RTC per the selected
  *   configuration.  This function is called once very early in the OS
- *   initialization sequence
+ *   initialization sequence.
  *
  *   NOTE that initialization of external RTC hardware that depends on the
  *   availability of OS resources (such as SPI or I2C) must be deferred
@@ -1803,7 +1803,7 @@ int up_rtc_initialize(void);
  *   None
  *
  * Returned Value:
- *   The current time in seconds
+ *   The current time in seconds.
  *
  ************************************************************************************/
 
@@ -1823,7 +1823,7 @@ time_t up_rtc_time(void);
  *   tp - The location to return the high resolution time value.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
@@ -1850,7 +1850,7 @@ int up_rtc_gettime(FAR struct timespec *tp);
  *   tp - The location to return the high resolution time value.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
@@ -1869,7 +1869,7 @@ int up_rtc_getdatetime(FAR struct tm *tp);
  *   tp - the time to use
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
