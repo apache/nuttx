@@ -131,24 +131,32 @@
 #    define DS1302_CR_WP                 (1 << 7)  /* Bit 7:  Write protect */
 
 #  define DS1302_TCR                     0x08      /* Trickle charge register */
-#    define DS1302_TCR_RS_SHIFT          (0)       /* Bits 0-1: Range select */
+#    define DS1302_TCR_RS_SHIFT          (0)       /* Bits 0-1: Reistance select */
 #    define DS1302_TCR_RS_MASK           (3 << DS1302_TCR_RS_SHIFT)
 #      define DS1302_TCR_RS(n)           ((uint8_t)(n) << DS1302_TCR_RS_SHIFT)
+#      define DS1302_TCR_RS_DISABLED     (0 << DS1302_TCR_RS_SHIFT)
+#      define DS1302_TCR_RS_2OHM         (1 << DS1302_TCR_RS_SHIFT)
+#      define DS1302_TCR_RS_4OHM         (2 << DS1302_TCR_RS_SHIFT)
+#      define DS1302_TCR_RS_8OHM         (3 << DS1302_TCR_RS_SHIFT)
 #    define DS1302_TCR_DS_SHIFT          (4)       /* Bits 2-3: Diode select */
 #    define DS1302_TCR_DS_MASK           (3 << DS1302_TCR_DS_SHIFT)
 #      define DS1302_TCR_DS(n)           ((uint8_t)(n) << DS1302_TCR_DS_SHIFT)
+#      define DS1302_TCR_DS_DISABLED     (0 << DS1302_TCR_DS_SHIFT)
+#      define DS1302_TCR_DS_1DIODE       (1 << DS1302_TCR_DS_SHIFT)
+#      define DS1302_TCR_DS_2DIODE       (2 << DS1302_TCR_DS_SHIFT)
+#      define DS1302_TCR_DS_DISABLED_2   (3 << DS1302_TCR_DS_SHIFT)
 #    define DS1302_TCR_TCS_SHIFT         (4)       /* Bits 4-7: Trickle charge select */
 #    define DS1302_TCR_TCS_MASK          (15 << DS1302_TCR_TCS_SHIFT)
 #      define DS1302_TCR_TCS(n)          ((uint8_t)(n) << DS1302_TCR_TCS_SHIFT)
 
-#  define DS1302_TCR_DISABLED            (DS1302_TCR_RS(0) | define DS1302_TCR_DS(0) | define DS1302_TCR_TCS(0))
-#  define DS1302_TCR_1DIODE_2OHM         (DS1302_TCR_RS(1) | define DS1302_TCR_DS(1) | define DS1302_TCR_TCS(10))
-#  define DS1302_TCR_1DIODE_4OHM         (DS1302_TCR_RS(2) | define DS1302_TCR_DS(1) | define DS1302_TCR_TCS(10))
-#  define DS1302_TCR_1DIODE_8OHM         (DS1302_TCR_RS(3) | define DS1302_TCR_DS(1) | define DS1302_TCR_TCS(10))
-#  define DS1302_TCR_2DIODE_2OHM         (DS1302_TCR_RS(1) | define DS1302_TCR_DS(2) | define DS1302_TCR_TCS(10))
-#  define DS1302_TCR_2DIODE_4OHM         (DS1302_TCR_RS(2) | define DS1302_TCR_DS(2) | define DS1302_TCR_TCS(10))
-#  define DS1302_TCR_2DIODE_8OHM         (DS1302_TCR_RS(3) | define DS1302_TCR_DS(2) | define DS1302_TCR_TCS(10))
-#  define DS1302_TCR_INIT                (DS1302_TCR_RS(0) | define DS1302_TCR_DS(3) | define DS1302_TCR_TCS(5))
+#  define DS1302_TCR_DISABLED            (DS1302_TCR_RS_DISABLED | DS1302_TCR_DS_DISABLED   | define DS1302_TCR_TCS(0))
+#  define DS1302_TCR_1DIODE_2OHM         (DS1302_TCR_RS_2OHM     | DS1302_TCR_DS_1DIODE     | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_1DIODE_4OHM         (DS1302_TCR_RS_4OHM     | DS1302_TCR_DS_1DIODE     | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_1DIODE_8OHM         (DS1302_TCR_RS_8OHM     | DS1302_TCR_DS_1DIODE     | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_2DIODE_2OHM         (DS1302_TCR_RS_2OHM     | DS1302_TCR_DS_2DIODE     | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_2DIODE_4OHM         (DS1302_TCR_RS_4OHM     | DS1302_TCR_DS_2DIODE     | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_2DIODE_8OHM         (DS1302_TCR_RS_8OHM     | DS1302_TCR_DS_2DIODE     | define DS1302_TCR_TCS(10))
+#  define DS1302_TCR_INIT                (DS1302_TCR_RS_DISABLED | DS1302_TCR_DS_DISABLED_2 | define DS1302_TCR_TCS(5))
 #endif
 
 #ifdef CONFIG_RTC_DS1307
