@@ -273,6 +273,10 @@ static ssize_t w25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t w25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                           FAR uint8_t *buffer);
 static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+#if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
+static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                         FAR const uint8_t *buffer);
+#endif
 
 /************************************************************************************
  * Private Data
@@ -756,6 +760,53 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 #endif
 
 /************************************************************************************
+ * Name:  w25_bytewrite
+ ************************************************************************************/
+
+#if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
+static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
+                                  off_t offset, uint16_t count)
+{
+  fvdbg("offset: %08lx  count:%d\n", (long)offset, count);
+
+  /* Wait for any preceding write to complete.  We could simplify things by
+   * perform this wait at the end of each write operation (rather than at
+   * the beginning of ALL operations), but have the wait first will slightly
+   * improve performance.
+   */
+
+  w25_waitwritecomplete(priv);
+
+  /* Enable the write access to the FLASH */
+
+  w25_wren(priv);
+
+  /* Select this FLASH part */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+
+  /* Send "Page Program (PP)" command */
+
+  (void)SPI_SEND(priv->spi, W25_PP);
+
+  /* Send the page offset high byte first. */
+
+  (void)SPI_SEND(priv->spi, (offset >> 16) & 0xff);
+  (void)SPI_SEND(priv->spi, (offset >> 8) & 0xff);
+  (void)SPI_SEND(priv->spi, offset & 0xff);
+
+  /* Then write the specified number of bytes */
+
+  SPI_SNDBLOCK(priv->spi, buffer, count);
+
+  /* Deselect the FLASH: Chip Select high */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  fvdbg("Written\n");
+}
+#endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY) */
+
+/************************************************************************************
  * Name: w25_cacheflush
  ************************************************************************************/
 
@@ -1044,6 +1095,76 @@ static ssize_t w25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 }
 
 /************************************************************************************
+ * Name: w25_write
+ ************************************************************************************/
+
+#if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
+static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                         FAR const uint8_t *buffer)
+{
+  FAR struct w25_dev_s *priv = (FAR struct w25_dev_s *)dev;
+  int    startpage;
+  int    endpage;
+  int    count;
+  int    index;
+  int    bytestowrite;
+
+  fvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+
+  /* We must test if the offset + count crosses one or more pages
+   * and perform individual writes.  The devices can only write in
+   * page increments.
+   */
+
+  startpage = offset / W25_PAGE_SIZE;
+  endpage = (offset + nbytes) / W25_PAGE_SIZE;
+
+  if (startpage == endpage)
+    {
+      /* All bytes within one programmable page.  Just do the write. */
+
+      w25_bytewrite(priv, buffer, offset, nbytes);
+    }
+  else
+    {
+      /* Write the 1st partial-page */
+
+      count = nbytes;
+      bytestowrite = W25_PAGE_SIZE - (offset & (W25_PAGE_SIZE-1));
+      w25_bytewrite(priv, buffer, offset, bytestowrite);
+
+      /* Update offset and count */
+
+      offset += bytestowrite;
+      count -=  bytestowrite;
+      index = bytestowrite;
+
+      /* Write full pages */
+
+      while (count >= W25_PAGE_SIZE)
+        {
+          w25_bytewrite(priv, &buffer[index], offset, W25_PAGE_SIZE);
+
+          /* Update offset and count */
+
+          offset += W25_PAGE_SIZE;
+          count -= W25_PAGE_SIZE;
+          index += W25_PAGE_SIZE;
+        }
+
+      /* Now write any partial page at the end */
+
+      if (count > 0)
+        {
+          w25_bytewrite(priv, &buffer[index], offset, count);
+        }
+    }
+
+  return nbytes;
+}
+#endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY) */
+
+/************************************************************************************
  * Name: w25_ioctl
  ************************************************************************************/
 
@@ -1147,6 +1268,9 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
       priv->mtd.bwrite = w25_bwrite;
       priv->mtd.read   = w25_read;
       priv->mtd.ioctl  = w25_ioctl;
+#if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
+      priv->mtd.write  = w25_write;
+#endif
       priv->spi        = spi;
 
       /* Deselect the FLASH */

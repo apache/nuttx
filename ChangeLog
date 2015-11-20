@@ -11124,4 +11124,9 @@
 	  bytes in a single sector.  Logical sectors 1 and 2 were simply not
 	  being allocated and then the read_sector and write_sector routinesi
 	  were failing.  From Ken Petit (2015-11-18).
+	* drivers/timers/ds3231.c:  Untested support for DS1302 and DS3232.
+	  Also definitions for the DS3234, but that is an unsupported SPI RTC
+	  (2015-11-19).
+	* drivers/mtd/w25.c: Add support for byte write mode.  From Ken Peit
+	  (2015-11-20).
 
