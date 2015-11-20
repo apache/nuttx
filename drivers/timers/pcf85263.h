@@ -357,7 +357,7 @@
 #  define PCF85263_CTL_OSC_CLKIV           (1 << 7)  /* Bit 7:  Output clock inversion */
 
 #define PCF85263_CTL_BATTERY_SWITCH        0x26      /* Battery switch control register */
-#  define PCF85263_CTL_BATTERY_BSTH        (1 << 0)  /* Bit 0:  
+#  define PCF85263_CTL_BATTERY_BSTH        (1 << 0)  /* Bit 0:
 #  define PCF85263_CTL_BATTERY_BSM_SHIFT   (1)       /* Bits 1-2: Battery switch mode bits */
 #  define PCF85263_CTL_BATTERY_BSM_MASK    (3 << PCF85263_CTL_BATTERY_BSM_SHIFT)
 #    define PCF85263_CTL_BATTERY_BSM_VTH   (0 << PCF85263_CTL_BATTERY_BSM_SHIFT) /* Switching at the Vth level */
@@ -462,7 +462,7 @@
 
 /* Reset */
 
-#define PCF85263_CTL_RESETS                0x2f      /* 
+#define PCF85263_CTL_RESETS                0x2f      /*
 #  define PCF85263_CTL_CTS                 (1 << 0)  /* Bit 0:  Clear timestamp */
 #  define PCF85263_CTL_SR                  (1 << 3)  /* Bit 3:  Software reset */
 #  define PCF85263_CTL_CPR                 (1 << 7)  /* Bit 7:  Clear prescaler */
