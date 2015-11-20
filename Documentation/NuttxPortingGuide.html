@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 18, 2015</p>
+      <p>Last Updated: November 20, 2015</p>
     </td>
   </tr>
 </table>
@@ -2340,6 +2340,14 @@ else
   <dt><code>CONFIG_RTC</code>
   <dd>Enables general support for a hardware RTC.
       Specific architectures may require other specific settings.
+  <dt><code>CONFIG_RTC_EXTERNAL</code>
+  <dd>Most MCUs include RTC hardware built into the chip.
+      Other RTCs, <i>external</i> MCUs, may be provided as separate chips typically
+      interfacing with the MCU via a serial interface such as SPI or I2C.
+      These external RTCs differ from the builtin RTCs in that they cannot be initialized
+      until the operating system is fully booted and can support the required serial
+      communications.  <code>CONFIG_RTC_EXTERNAL</code> will configure the operating
+      system so that it defers initialization of its time facilities.
   <dt><code>CONFIG_RTC_DATETIME</code>
   <dd>There are two general types of RTC:  (1) A simple battery backed counter that keeps the time when power
      is down, and (2) A full date / time RTC the provides the date and time information, often in BCD format.
@@ -2364,8 +2372,12 @@ else
 </p>
 <ul>
   <li><code>up_rtc_initialize()</code>.
-     Initialize the hardware RTC per the selected configuration.
-     This function is called once during the OS initialization sequence
+     Initialize the builtin, MCU hardware RTC per the selected configuration.
+     This function is called once very early in the OS initialization sequence.
+     NOTE that initialization of external RTC hardware that depends on the
+     availability of OS resources (such as SPI or I2C) must be deferred
+     until the system has fully booted.  Other, RTC-specific initialization
+     functions are used in that case.
   </li>
   <li><code>up_rtc_time()</code>.
     Get the current time in seconds.  This is similar to the standard <code>time()</code> function.
