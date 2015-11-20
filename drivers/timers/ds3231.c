@@ -382,7 +382,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   tmp = rtc_bcd2bin(buffer[6] & DSXXXX_TIME_YEAR_BCDMASK);
 
-#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3234)
+#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232)
   if ((buffer[5] & DS323X_TIME_CENTURY_MASK) == DS323X_TIME_1900)
     {
       tp->tm_year = tmp;
@@ -495,7 +495,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   buffer[5] = rtc_bin2bcd(newtm.tm_mday);
 
-#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3234)
+#if defined(CONFIG_RTC_DS3231) || defined(CONFIG_RTC_DS3232)
   /* Handle years in the 20th vs the 21st century */
 
   if (newtm.tm_year < 100)
