@@ -11132,4 +11132,9 @@
 	* drivers/timers/pcf85263.c and include/nuttx/times/pcf85263.h:  Add
 	  a driver for the NXP PCF85263 I2C RTC.  Untested on initial commit
 	  (2015-11-20).
-
+	* fs/driver/fs_blockproxy.c: Add logic to create a temporary char driver
+	  using drivers/bch to mediate character oriented accessed to a block
+	  driver (2015-11-21).
+	* fs/vfs/open.c: If the use attempts to open a block driver, use
+	  block_proxy() to insert a character driver conversion layer in front
+	  of the block driver (2015-11-21).

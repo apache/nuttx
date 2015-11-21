@@ -148,12 +148,12 @@ static FAR char *unique_chardev(void)
  * Name: block_proxy
  *
  * Description:
- *   Create a temporary char driver using drivers/bch that mediate character
+ *   Create a temporary char driver using drivers/bch to mediate character
  *   oriented accessed to the block driver.
  *
  * Input parameters:
  *   blkdev - The path to the block driver
- *   mode   - Character driver access priviledges
+ *   oflags - Character driver open flags
  *
  * Returned Value:
  *   If positive, non-zero file descriptor is returned on success.  This
@@ -171,7 +171,7 @@ static FAR char *unique_chardev(void)
  *
  ****************************************************************************/
 
-int block_proxy(FAR const char *blkdev, mode_t mode)
+int block_proxy(FAR const char *blkdev, int oflags)
 {
   FAR char *chardev;
   bool readonly;
@@ -179,7 +179,7 @@ int block_proxy(FAR const char *blkdev, mode_t mode)
   int fd;
 
   DEBUGASSERT(blkdev);
-  DEBUGASSERT((mode & (O_CREAT | O_EXCL | O_APPEND | O_TRUNC)) == 0);
+  DEBUGASSERT((oflags & (O_CREAT | O_EXCL | O_APPEND | O_TRUNC)) == 0);
 
   /* Create a unique temporary file name for the character device */
 
@@ -192,7 +192,7 @@ int block_proxy(FAR const char *blkdev, mode_t mode)
 
   /* Should this character driver be read-only? */
 
-  readonly = ((mode & O_WROK) == 0);
+  readonly = ((oflags & O_WROK) == 0);
 
   /* Wrap the block driver with an instance of the BCH driver */
 
@@ -207,8 +207,8 @@ int block_proxy(FAR const char *blkdev, mode_t mode)
 
   /* Open the newly created character driver */
 
-  mode &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  fd = open(chardev, mode);
+  oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
+  fd = open(chardev, oflags);
   if (fd < 0)
     {
       ret = -errno;
