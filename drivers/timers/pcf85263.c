@@ -79,7 +79,7 @@
 #  error CONFIG_PCF85263_I2C_FREQUENCY is out of range
 #endif
 
-#define PCF85263_I2C_ADDRESS 0x68
+#define PCF85263_I2C_ADDRESS 0x51
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_RTC
