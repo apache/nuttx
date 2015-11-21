@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 24, 2015)
+NuttX TODO List (Last updated November 21, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -442,8 +442,6 @@ o Kernel/Protected Build
                losetup  losetup(), loteardown()
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
-               dd       bchlib_setup(), bchlib_read(), bchlib_write(),
-                        bchlib_teardown()
                ps       sched_foreach()
                ifup     netdev_foreach()
                ifdown   netdev_foreach()
