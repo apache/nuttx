@@ -70,10 +70,14 @@
 #  include "sam_progmem.h"
 #endif
 
-#ifdef HAVE_RTC_DSXXXX
+#if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
 #  include <nuttx/clock.h>
 #  include <nuttx/i2c.h>
+#ifdef HAVE_RTC_DSXXXX
 #  include <nuttx/timers/ds3231.h>
+#else
+#  include <nuttx/timers/pcf85263.h>
+#endif
 #  include "sam_twihs.h"
 #endif
 
@@ -117,7 +121,7 @@ int sam_bringup(void)
 #if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
   FAR struct mtd_dev_s *mtd;
 #endif
-#ifdef HAVE_RTC_DSXXXX
+#if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
   FAR struct i2c_dev_s *i2c;
 #endif
 #if defined(HAVE_S25FL1_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
@@ -126,7 +130,32 @@ int sam_bringup(void)
 #endif
   int ret;
 
-#ifdef HAVE_RTC_DSXXXX
+#if defined(HAVE_RTC_PCF85263)
+  /* Get an instance of the TWIHS0 I2C interface */
+
+  i2c = up_i2cinitialize(PCF85263_TWI_BUS);
+  if (i2c == NULL)
+    {
+      SYSLOG("ERROR: up_i2cinitialize(%d) failed\n", PCF85263_TWI_BUS);
+    }
+  else
+    {
+      /* Use the I2C interface to initialize the PCF2863 timer */
+
+      ret = pcf85263_rtc_initialize(i2c);
+      if (ret < 0)
+        {
+          SYSLOG("ERROR: pcf85263_rtc_initialize() failed: %d\n", ret);
+        }
+      else
+        {
+          /* Synchronize the system time to the RTC time */
+
+          clock_synchronize();
+        }
+    }
+
+#else /* if defined(HAVE_RTC_DSXXXX) */
   /* Get an instance of the TWIHS0 I2C interface */
 
   i2c = up_i2cinitialize(DSXXXX_TWI_BUS);
@@ -150,7 +179,6 @@ int sam_bringup(void)
           clock_synchronize();
         }
     }
-
 #endif
 
 #ifdef HAVE_MACADDR
