@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "bch_internal.h"
+#include "bch.h"
 
 /****************************************************************************
  * Pre-processor Definitions

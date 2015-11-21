@@ -47,7 +47,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "bch_internal.h"
+#include "bch.h"
 
 #if defined(CONFIG_BCH_ENCRYPTION)
 #  include <crypto/crypto.h>

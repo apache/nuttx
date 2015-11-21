@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/bch/bch_internal.h
+ * drivers/bch/bch.h
  *
- *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_BCH_INTERNAL_H
-#define __FS_BCH_INTERNAL_H
+#ifndef __DRIVERS_BCH_BCH_H
+#define __DRIVERS_BCH_BCH_H
 
 /****************************************************************************
  * Included Files
@@ -67,8 +67,9 @@ struct bchlib_s
   size_t sector;           /* The current sector in the buffer */
   uint16_t sectsize;       /* The size of one sector on the device */
   uint8_t refs;            /* Number of references */
-  bool dirty;              /* Data has been written to the buffer */
-  bool readonly;           /* true:  Only read operations are supported */
+  bool dirty;              /* true: Data has been written to the buffer */
+  bool readonly;           /* true: Only read operations are supported */
+  bool unlinked;           /* true: The driver has been unlinked */
   FAR uint8_t *buffer;     /* One sector buffer */
 
 #if defined(CONFIG_BCH_ENCRYPTION)
@@ -103,4 +104,4 @@ EXTERN int  bchlib_readsector(FAR struct bchlib_s *bch, size_t sector);
 }
 #endif
 
-#endif /* __FS_BCH_INTERNAL_H */
+#endif /* __DRIVERS_BCH_BCH_H */
