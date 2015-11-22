@@ -3951,7 +3951,7 @@ static inline int smart_read_wearstatus(FAR struct smart_struct_s *dev)
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
       physsector = dev->sMap[req.logsector];
 #else
-      physsector = smart_cache_lookup(dev, req->logsector);
+      physsector = smart_cache_lookup(dev, req.logsector);
 #endif
       if ((sector != 0) && (physsector == 0xFFFF))
         {
