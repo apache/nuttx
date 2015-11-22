@@ -188,15 +188,6 @@
 #define FS_BOPS(f)        (f)->fs_blkdriver->u.i_bops
 #define FS_IOCTL(f,c,a)   (FS_BOPS(f)->ioctl ? FS_BOPS(f)->ioctl((f)->fs_blkdriver,c,a) : (-ENOSYS))
 
-/* The logical sector number of the root directory. */
-
-#define SMARTFS_ROOT_DIR_SECTOR   3
-
-/* Defines the sector types */
-
-#define SMARTFS_SECTOR_TYPE_DIR   1
-#define SMARTFS_SECTOR_TYPE_FILE  2
-
 #ifndef CONFIG_SMARTFS_DIRDEPTH
 #  define CONFIG_SMARTFS_DIRDEPTH 8
 #endif

@@ -994,6 +994,10 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
         {
           dev->availSectPerBlk = 255;
         }
+      else if (dev->sectorsPerBlk == 0)
+        {
+          return -EINVAL;
+        }
       else
         {
           dev->availSectPerBlk = dev->sectorsPerBlk;
@@ -1442,7 +1446,7 @@ static uint16_t smart_cache_lookup(FAR struct smart_struct_s *dev, uint16_t logi
               /* Calculate the read address for this sector */
 
               readaddress = block * dev->erasesize +
-                  sector * CONFIG_MTD_SMART_SECTOR_SIZE;
+                  sector * dev->sectorsize;
 
               /* Read the header for this sector */
 
@@ -1818,6 +1822,10 @@ static int smart_scan(FAR struct smart_struct_s *dev)
       offset >>= 1;
       if (offset < 256 && sectorsize == 0xFFFF)
         {
+          /* No valid sectors found on device.  Default the
+           * sector size to the CONFIG value
+           */
+
           sectorsize = CONFIG_MTD_SMART_SECTOR_SIZE;
         }
     }
@@ -2293,6 +2301,17 @@ static int smart_scan(FAR struct smart_struct_s *dev)
   fdbg("   Erase count:  %10d\n", dev->neraseblocks);
   fdbg("   Sect/block:   %10d\n", dev->sectorsPerBlk);
   fdbg("   MTD Blk/Sect: %10d\n", dev->mtdBlksPerSector);
+
+  /* Validate the geometry */
+
+  if (dev->mtdBlksPerSector == 0 || dev->sectorsPerBlk == 0 ||
+      dev->sectorsPerBlk == 0 || dev->sectorsize == 0)
+    {
+      fdbg("Invalid Geometry!\n");
+      ret = -EINVAL;
+      goto err_out;
+    }
+
 #ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
   fdbg("   Allocations:\n");
   for (sector = 0; sector < SMART_MAX_ALLOCS; sector++)
@@ -2781,6 +2800,11 @@ static crc_t smart_calc_sector_crc(FAR struct smart_struct_s *dev)
  *               involves erasing the device and writing a valid sector
  *               zero (logical) with proper format signature.
  *
+ * Input Parameters:
+ *
+ *   arg:        Upper 16 bits contains the sector size
+ *               Lower 16 bits contains the number of root dir entries
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
@@ -2791,18 +2815,29 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
   int         x;
   int         ret;
   uint8_t     sectsize, prerelease;
+  uint16_t    sectorsize;
 
   fvdbg("Entry\n");
 
-  smart_setsectorsize(dev, CONFIG_MTD_SMART_SECTOR_SIZE);
+  /* Get the sector size from the provided arg */
+
+  sectorsize = arg >> 16;
+  if (sectorsize == 0)
+    {
+      sectorsize = CONFIG_MTD_SMART_SECTOR_SIZE;
+    }
+
+  /* Set the sector size for the device */
+
+  smart_setsectorsize(dev, sectorsize);
 
   /* Check for invalid format */
 
-  if (dev->erasesize == 0)
+  if (dev->erasesize == 0 || dev->sectorsPerBlk == 0)
     {
       dev->erasesize = dev->geo.erasesize;
 
-      dbg("ERROR:  Invalid geometery ... Sectors per erase block must be 256 or less\n");
+      dbg("ERROR:  Invalid geometery ... Sectors per erase block must be 1-256\n");
       dbg("        Erase block size    = %d\n", dev->erasesize);
       dbg("        Sector size         = %d\n", dev->sectorsize);
       dbg("        Sectors/erase block = %d\n", dev->erasesize / dev->sectorsize);
@@ -2828,18 +2863,22 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
   /* CRC enabled.  Using an 8-bit sequence number */
 
   sectorheader->seq = 0;
+
 #else
   /* CRC not enabled.  Using a 16-bit sequence number */
 
   *((FAR uint16_t *) &sectorheader->seq) = 0;
+
 #endif
 #else   /* SMART_STATUS_VERSION == 1 */
+
   sectorheader->seq = 0;
+
 #endif  /* SMART_STATUS_VERSION == 1 */
 
   /* Set the sector size of this sector */
 
-  sectsize = (CONFIG_MTD_SMART_SECTOR_SIZE >> 9) << 2;
+  sectsize = (sectorsize >> 9) << 2;
 
   /* Set the sector logical sector to zero and setup the header status */
 
@@ -2873,7 +2912,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
 
   /* Record the number of root directory entries we have */
 
-  dev->rwbuffer[SMART_FMT_ROOTDIRS_POS] = (uint8_t) arg;
+  dev->rwbuffer[SMART_FMT_ROOTDIRS_POS] = (uint8_t) (arg & 0xFF);
 
 #ifdef CONFIG_SMART_CRC_8
   sectorheader->crc8 = smart_calc_sector_crc(dev);
@@ -2900,7 +2939,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
 
   /* Now initialize our internal control variables */
 
-  ret = smart_setsectorsize(dev, CONFIG_MTD_SMART_SECTOR_SIZE);
+  ret = smart_setsectorsize(dev, sectorsize);
   if (ret != OK)
     {
       return ret;
