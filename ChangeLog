@@ -11140,8 +11140,3 @@
 	  of the block driver (2015-11-21).
 	* libc/stdio/lib_freopen.c and include/stdio.h:  Add support for
 	  freopen() (2015-11-22).
-	* drivers/mtd/smart.c:  Add option to specify logical sector size
-	  during low level format plus adds some run-time geometry tests.  From
-	  Ken Petit (2015-11-22).
-	* fs/smartfs: Remove the 'mksmartfs()' code from the kernel 'fs'
-	  directory and build.  From Ken Petit (2015-11-22).

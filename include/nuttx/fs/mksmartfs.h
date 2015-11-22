@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/fs/smart.h
- * Sector Mapped Allocation for Really Tiny (SMART) FLASH interface
+ * include/nuttx/fs/mksmartfs.h
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013, 2015 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,82 +33,34 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SMART_H
-#define __INCLUDE_NUTTX_SMART_H
+#ifndef __INCLUDE_NUTTX_SMART_MKSMARTFS_H
+#define __INCLUDE_NUTTX_SMART_MKSMARTFS_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macros to hide implementation */
-
-#define SMART_FMT_ISFORMATTED   0x01
-#define SMART_FMT_HASBYTEWRITE  0x02
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* The following defines the format information for the device.  This
- * information is retrieved via the BIOC_GETFORMAT ioctl.
- */
-
-struct smart_format_s
-{
-  uint16_t sectorsize;      /* Size of one read/write sector */
-  uint16_t availbytes;      /* Number of bytes available in each sector */
-  uint16_t nsectors;        /* Total number of sectors on device */
-  uint16_t nfreesectors;    /* Number of free sectors on device */
-  uint8_t  flags;           /* Format flags (see above) */
-  uint8_t  namesize;        /* Size of filenames on this volume */
-#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
-  uint8_t  nrootdirentries; /* Number of root directories on this device */
-  uint8_t  rootdirnum;      /* Root directory number for this dev entry */
-#endif
-};
-
-/* The following defines the information for writing a logical sector
- * to the device.
- */
-
-struct smart_read_write_s
-{
-  uint16_t logsector;     /* The logical sector number */
-  uint16_t offset;        /* Offset within the sector to write to */
-  uint16_t count;         /* Number of bytes to write */
-  const uint8_t *buffer;  /* Pointer to the data to write */
-};
-
-/* The following defines the procfs data exchange interface between the
- * SMART MTD and FS layers.
- */
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-struct smart_procfs_data_s
-{
-#ifdef CONFIG_MTD_SMART_ERASE_DEBUG
-  const uint16_t  *erasecounts;   /* Pointer to the erase counts array */
-  uint16_t        erasesize;      /* Number of entries in the erase counts array */
-#endif
-};
-#endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
@@ -118,13 +69,42 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: mksmartfs
+ *
+ * Description:
+ *   Make a SMART (Sector Mapped Allocation for Really Tiny) Flash file
+ *   system image on the specified block device (must be a SMART device).
+ *
+ * Inputs:
+ *   pathname - the full path to a registered block driver
+ *   nrootdirs - the number of Root Directory entries to support
+ *               on this device (supports multiple mount points).
+ *
+ * Return:
+ *   Zero (OK) on success; -1 (ERROR) on failure with errno set appropriately:
+ *
+ *   EINVAL - NULL block driver string
+ *   ENOENT - 'pathname' does not refer to anything in the filesystem.
+ *   ENOTBLK - 'pathname' does not refer to a block driver
+ *   EACCESS - block driver does not support write or geometry methods or
+ *             is not a SMART device
+ *
+ * Assumptions:
+ *   - The caller must assure that the block driver is not mounted and not in
+ *     use when this function is called.  The result of formatting a mounted
+ *     device is indeterminate (but likely not good).
+ *
  ****************************************************************************/
 
+#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+int mksmartfs(FAR const char *pathname, uint8_t nrootdirs);
+#else
+int mksmartfs(FAR const char *pathname);
+#endif
+
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_SMART_H */
+#endif /* __INCLUDE_NUTTX_SMART_MKSMARTFS_H */
