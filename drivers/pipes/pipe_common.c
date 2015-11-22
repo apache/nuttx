@@ -371,7 +371,7 @@ int pipecommon_close(FAR struct file *filep)
         }
     }
 
-  /* What is the buffer management policy?  Do we free the buffe when the
+  /* What is the buffer management policy?  Do we free the buffer when the
    * last client closes the pipe policy 0, or when the buffer becomes empty.
    * In the latter case, the buffer data will remain valid and can be
    * obtained when the pipe is re-opened.

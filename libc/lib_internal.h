@@ -155,7 +155,11 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign,
              char **rve);
 #endif
 
-/* Defined in lib_libwrite.c */
+/* Defined in lib_fopen.c */
+
+int lib_mode2oflags(FAR const char *mode);
+
+/* Defined in lib_libfwrite.c */
 
 ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream);
 

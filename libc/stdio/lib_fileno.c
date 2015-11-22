@@ -53,6 +53,7 @@
 int fileno(FAR FILE *stream)
 {
   int ret = -1;
+
   if (stream)
     {
       ret = stream->fs_fd;

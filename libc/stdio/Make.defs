@@ -56,14 +56,15 @@ CSRCS += lib_rawsostream.c
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 
-CSRCS += lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c
-CSRCS += lib_ftell.c lib_fsetpos.c lib_fgetpos.c lib_fgetc.c lib_fgets.c
-CSRCS += lib_gets_s.c lib_gets.c lib_libfgets.c lib_fwrite.c lib_libfwrite.c
-CSRCS += lib_fflush.c lib_libflushall.c lib_libfflush.c lib_rdflush.c
-CSRCS += lib_wrflush.c lib_fputc.c lib_puts.c lib_fputs.c lib_ungetc.c
-CSRCS += lib_vprintf.c lib_fprintf.c lib_vfprintf.c lib_stdinstream.c
-CSRCS += lib_stdoutstream.c lib_stdsistream.c lib_stdsostream.c lib_perror.c
-CSRCS += lib_feof.c lib_ferror.c lib_clearerr.c
+CSRCS += lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
+CSRCS += lib_fseek.c lib_ftell.c lib_fsetpos.c lib_fgetpos.c lib_fgetc.c
+CSRCS += lib_fgets.c lib_gets_s.c lib_gets.c lib_libfgets.c lib_fwrite.c
+CSRCS += lib_libfwrite.c lib_fflush.c lib_libflushall.c lib_libfflush.c
+CSRCS += lib_rdflush.c lib_wrflush.c lib_fputc.c lib_puts.c lib_fputs.c
+CSRCS += lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c
+CSRCS += lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
+CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
+CSRCS += lib_clearerr.c
 
 endif
 

@@ -69,18 +69,76 @@
 #define MODE_MASK (MODE_R | MODE_W | MODE_A)
 
 /****************************************************************************
- * Private Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Name: fdopen
  ****************************************************************************/
+
+FAR FILE *fdopen(int fd, FAR const char *mode)
+{
+  FAR FILE *ret = NULL;
+  int oflags;
+
+  /* Map the open mode string to open flags */
+
+  oflags = lib_mode2oflags(mode);
+  if (oflags >= 0)
+    {
+      ret = fs_fdopen(fd, oflags, NULL);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fopen
+ ****************************************************************************/
+
+FAR FILE *fopen(FAR const char *path, FAR const char *mode)
+{
+  FAR FILE *ret = NULL;
+  int oflags;
+  int fd;
+
+  /* Map the open mode string to open flags */
+
+  oflags = lib_mode2oflags(mode);
+  if (oflags < 0)
+    {
+      return NULL;
+    }
+
+  /* Open the file */
+
+  fd = open(path, oflags, 0666);
+
+  /* If the open was successful, then fdopen() the fil using the file
+   * descriptor returned by open.  If open failed, then just return the
+   * NULL stream -- open() has already set the errno.
+   */
+
+  if (fd >= 0)
+    {
+      ret = fs_fdopen(fd, oflags, NULL);
+      if (!ret)
+        {
+          /* Don't forget to close the file descriptor if any other
+           * failures are reported by fdopen().
+           */
+
+          (void)close(fd);
+        }
+    }
+  return ret;
+}
 
 /****************************************************************************
  * Name: lib_mode2oflags
  ****************************************************************************/
 
-static int lib_mode2oflags(FAR const char *mode)
+int lib_mode2oflags(FAR const char *mode)
 {
   unsigned int state;
   int oflags;
@@ -245,70 +303,4 @@ static int lib_mode2oflags(FAR const char *mode)
 errout:
   set_errno(EINVAL);
   return ERROR;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fdopen
- ****************************************************************************/
-
-FAR FILE *fdopen(int fd, FAR const char *mode)
-{
-  FAR FILE *ret = NULL;
-  int oflags;
-
-  /* Map the open mode string to open flags */
-
-  oflags = lib_mode2oflags(mode);
-  if (oflags >= 0)
-    {
-      ret = fs_fdopen(fd, oflags, NULL);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: fopen
- ****************************************************************************/
-
-FAR FILE *fopen(FAR const char *path, FAR const char *mode)
-{
-  FAR FILE *ret = NULL;
-  int oflags;
-  int fd;
-
-  /* Map the open mode string to open flags */
-
-  oflags = lib_mode2oflags(mode);
-  if (oflags < 0)
-    {
-      return NULL;
-    }
-
-  /* Open the file */
-
-  fd = open(path, oflags, 0666);
-
-  /* If the open was successful, then fdopen() the fil using the file
-   * descriptor returned by open.  If open failed, then just return the
-   * NULL stream -- open() has already set the errno.
-   */
-
-  if (fd >= 0)
-    {
-      ret = fs_fdopen(fd, oflags, NULL);
-      if (!ret)
-        {
-          /* Don't forget to close the file descriptor if any other
-           * failures are reported by fdopen().
-           */
-
-          (void)close(fd);
-        }
-    }
-  return ret;
 }

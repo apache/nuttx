@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdio.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -147,6 +147,7 @@ int    fprintf(FAR FILE *stream, FAR const char *format, ...);
 int    fputc(int c, FAR FILE *stream);
 int    fputs(FAR const char *s, FAR FILE *stream);
 size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+FAR FILE *freopen(FAR const char *path, FAR const char *mode, FAR FILE *stream);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
 long   ftell(FAR FILE *stream);

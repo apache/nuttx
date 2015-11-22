@@ -11138,3 +11138,5 @@
 	* fs/vfs/open.c: If the use attempts to open a block driver, use
 	  block_proxy() to insert a character driver conversion layer in front
 	  of the block driver (2015-11-21).
+	* libc/stdio/lib_freopen.c and include/stdio.h:  Add support for
+	  freopen() (2015-11-22).
