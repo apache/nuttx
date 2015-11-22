@@ -68,6 +68,8 @@
 #define HAVE_PROGMEM_CHARDEV 1
 #define HAVE_WM8904          1
 #define HAVE_AUDIO_NULL      1
+#define HAVE_RTC_DSXXXX      1
+#define HAVE_RTC_PCF85263    1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -296,6 +298,48 @@
 #    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
 #    undef HAVE_AUDIO_NULL
 #  endif
+#endif
+
+/* DS3231/DS1307 RTC
+ *
+ * For testing purposes, I have connected Maximum Integrated DS1307 and NXP
+ * PCF85263 I2C RTC TWIHS0 (available on either EXT or EXT2 pins 11 and 12).
+ */
+
+#ifndef CONFIG_RTC_DSXXXX
+#  undef HAVE_RTC_DSXXXX
+#endif
+
+#ifndef CONFIG_RTC_PCF85263
+#  undef HAVE_RTC_PCF85263
+#endif
+
+#ifndef CONFIG_SAMV7_TWIHS0
+#  undef HAVE_RTC_DSXXXX
+#  undef HAVE_RTC_PCF85263
+#endif
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DATETIME)
+#  undef HAVE_RTC_DSXXXX
+#  undef HAVE_RTC_PCF85263
+#endif
+
+#if defined(HAVE_RTC_DSXXXX) && defined(HAVE_RTC_PCF85263)
+#  undef HAVE_RTC_DSXXXX
+#endif
+
+#ifdef HAVE_RTC_DSXXXX
+/* The DS3231/1307 RTC communicates on TWI0, I2C address 0x68 */
+
+#  define DSXXXX_TWI_BUS       0
+#  define DSXXXX_I2C_ADDRESS   0x68
+#endif
+
+#ifdef HAVE_RTC_PCF85263
+/* The PCF85263 RTC communicates on TWI0, I2C address 0x51 */
+
+#  define PCF85263_TWI_BUS     0
+#  define PCF85263_I2C_ADDRESS 0x51
 #endif
 
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
