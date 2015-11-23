@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: July 13, 2015</p>
+      <p>Last Updated: November 23, 2015</p>
     </td>
   </tr>
 </table>
@@ -113,6 +113,12 @@
 <tr>
   <td><br></td>
   <td>
+    <a href="#cmdbasename">2.5 Extract Base File/Directory Name (basename)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <a href="#cmdbreak">2.5 Terminate a Loop (break)</a>
   </td>
 </tr>
@@ -162,6 +168,12 @@
   <td><br></td>
   <td>
     <a href="#cmddf">2.13 Show volume status (df)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmddirname">2.14 Extract Path to a File/Directory (dirname)</a>
   </td>
 </tr>
 <tr>
@@ -1086,6 +1098,23 @@ base64enc [-w] [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
+    <a name="cmdbasename"><h2>2.5 Extract Base File/Directory Name (basename)</h2></a>
+  </td>
+  </tr>
+</table>
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+basename &lt;path&gt [&lt;suffix&gt;]
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Extract the final string from a <code>&lt;path&gt;</code> by removing the preceding path
+  segments and (optionally) removing any trailing <code>&lt;suffix&gt;</code>.
+<p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
     <a name="cmdbreak"><h2>2.5 Terminate a Loop (break)</h2></a>
   </td>
   </tr>
@@ -1335,6 +1364,23 @@ nsh>
 <p>
   If <code>CONFIG_NSH_CMDOPT_DF_H</code> is defined in the NuttX configuration, then the <code>df</code> will also support an option <code>-h</code> which may be used to show the volume information in <i>human readable</i> format.
 </p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmddirname"><h2>2.14 Extract Path to a File/Directory (dirname)</h2></a>
+  </td>
+  </tr>
+</table>
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+dirname &lt;path&gt
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Extract the path string leading up to the full  <code>&lt;path&gt;</code> by removing
+  the final directory or file name.
+<p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2721,6 +2767,11 @@ nsh>
     <td><code>CONFIG_NSH_DISABLE_BASE64ENC</code></td>
   </tr>
   <tr>
+    <td><b><code>basename</code></b></td>
+    <td>&nbsp;</td>
+    <td><code>CONFIG_NSH_DISABLE_BASENAME</code></td>
+  </tr>
+  <tr>
     <td><b><code>break</code></b></td>
     <td>!<code>CONFIG_NSH_DISABLESCRIPT</code> &amp;&amp; !<code>CONFIG_NSH_DISABLE_LOOPS</code></td>
     <td>&nbsp;</td>
@@ -2764,6 +2815,11 @@ nsh>
     <td><b><code>df</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
     <td><code>CONFIG_NSH_DISABLE_DF</code></td>
+  </tr>
+  <tr>
+    <td><b><code>dirname</code></b></td>
+    <td>&nbsp;</td>
+    <td><code>CONFIG_NSH_DISABLE_DIRNAME</code></td>
   </tr>
   <tr>
     <td><b><code>echo</code></b></td>
@@ -4359,6 +4415,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custapps"><code>builtin_proto.h</code></a></li>
   <li><a href="#cmdbase64dec"><code>base64dec</code></a></li>
   <li><a href="#cmdbase64enc"><code>base64enc</code></a></li>
+  <li><a href="#cmdbasename"><code>basename</code></a></li>
   <li><a href="#cmdcat"><code>cat</code></a></li>
   <li><a href="#cmdcd"><code>cd</code></a></li>
   <li><a href="#cmdcmp"><code>cmp</code></a></li>
@@ -4432,6 +4489,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmddd"><code>dd</code></a></li>
   <li><a href="#cmdaddroute"><code>delroute</code></a></li>
   <li><a href="#cmddf"><code>df</code></a></li>
+  <li><a href="#cmddirname"><code>dirname</code></a></li>
   <li><a href="#looping"><code>do</code></a></li>
   <li><a href="#looping"><code>done</code></a></li>
   <li><a href="#cmdecho"><code>echo</code></a></li>
