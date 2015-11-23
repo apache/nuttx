@@ -65,7 +65,7 @@
  * Reference: Opengroup.org
  */
 
-#define offsetof(type, member) ((size_t)(uintptr_t)&(((type *)0)->member))
+#define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
 /****************************************************************************
  * Type Definitions

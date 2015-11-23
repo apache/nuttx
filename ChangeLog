@@ -11140,3 +11140,9 @@
 	  of the block driver (2015-11-21).
 	* libc/stdio/lib_freopen.c and include/stdio.h:  Add support for
 	  freopen() (2015-11-22).
+	* include/sys/types.h and include/nuttx/mm.h: When building on a 64-bit
+	  machine, the size of size_t should be 64-bits. In general, I believe
+	  that sizeof(size_t) should be the same as sizeof(uinptr_t).  mmsize_t
+	  should always be 32-bits in any event.  The last change to stddef has
+	  been backed out.  With these changes, the simulator builds without
+	  warnings on a 64-bit machine (2015-11-23).

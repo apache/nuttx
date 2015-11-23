@@ -186,7 +186,7 @@
    typedef uint16_t mmsize_t;
 #  define MMSIZE_MAX 0xffff
 #else
-   typedef size_t mmsize_t;
+   typedef uint32_t mmsize_t;
 #  define MMSIZE_MAX SIZE_MAX
 #endif
 
