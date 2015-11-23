@@ -55,6 +55,15 @@
 #define SMART_FMT_ISFORMATTED   0x01
 #define SMART_FMT_HASBYTEWRITE  0x02
 
+/* The logical sector number of the root directory. */
+
+#define SMARTFS_ROOT_DIR_SECTOR   3
+
+/* Defines the sector types */
+
+#define SMARTFS_SECTOR_TYPE_DIR   1
+#define SMARTFS_SECTOR_TYPE_FILE  2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
