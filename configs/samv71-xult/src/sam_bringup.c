@@ -155,7 +155,7 @@ int sam_bringup(void)
         }
     }
 
-#else /* if defined(HAVE_RTC_DSXXXX) */
+#elif defined(HAVE_RTC_DSXXXX)
   /* Get an instance of the TWIHS0 I2C interface */
 
   i2c = up_i2cinitialize(DSXXXX_TWI_BUS);
