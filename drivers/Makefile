@@ -55,6 +55,7 @@ include bch$(DELIM)Make.defs
 include input$(DELIM)Make.defs
 include discrete$(DELIM)Make.defs
 include lcd$(DELIM)Make.defs
+include loop$(DELIM)Make.defs
 include mmcsd$(DELIM)Make.defs
 include mtd$(DELIM)Make.defs
 include eeprom$(DELIM)Make.defs
@@ -76,7 +77,7 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
   CSRCS += dev_null.c dev_zero.c
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c loop.c
+  CSRCS += ramdisk.c
 ifeq ($(CONFIG_DRVR_WRITEBUFFER),y)
   CSRCS += rwbuffer.c
 else

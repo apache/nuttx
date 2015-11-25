@@ -27,13 +27,7 @@ config DEV_RANDOM
 	default n
 	depends on ARCH_HAVE_RNG
 
-config LOOP
-	bool "Enable loop device"
-	default n
-	---help---
-		Supports the standard loop device that can be used to export a
-		file (or character device) as a block device.  See losetup() and
-		loteardown() in include/nuttx/fs/fs.h.
+source drivers/loop/Kconfig
 
 menu "Buffering"
 

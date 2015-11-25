@@ -21,11 +21,6 @@ dev_null.c and dev_zero.c
   want to register these devices (devnull_register() and
   devzero_register()).
 
-loop.c
-  Supports the standard loop device that can be used to export a
-  file (or character device) as a block device.  See losetup() and
-  loteardown() in include/nuttx/fs/fs.h.
-
 pwm.c
   Provides the "upper half" of a pulse width modulation (PWM) driver.
   The "lower half" of the PWM driver is provided by device-specific
@@ -36,17 +31,9 @@ ramdisk.c
   a block driver that can be mounted as a files system.  See
   include/nuttx/fs/ramdisk.h.
 
-timer.c
-  Provides the "upper half" for a generic timer driver.  See
-  include/nuttx/timers/timer.h for more information.
-
 rwbuffer.c
   A facility that can be use by any block driver in-order to add
   writing buffering and read-ahead buffering.
-
-watchdog.c
-  Provides the "upper half" for a generic watchdog driver.  See
-  include/nuttx/timers/watchdog.h for more information.
 
 Subdirectories of this directory:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -93,6 +80,11 @@ input/
 lcd/
   Drivers for parallel and serial LCD and OLED type devices.  These
   drivers support interfaces as defined in include/nuttx/lcd/lcd.h
+
+loop/
+  Supports the standard loop device that can be used to export a
+  file (or character device) as a block device.  See losetup() and
+  loteardown() in include/nuttx/fs/fs.h.
 
 mmcsd/
   Support for MMC/SD block drivers.  MMC/SD block drivers based on
@@ -152,6 +144,17 @@ spi/
 
 syslog/
   System logging devices. See include/syslog.h and include/nuttx/syslog/syslog.h
+
+timers/
+  Includes support for various timer devices including:
+
+  - An "upper half" for a generic timer driver.  See
+    include/nuttx/timers/timer.h for more information.
+
+  - An "upper half" for a generic watchdog driver.  See
+    include/nuttx/timers/watchdog.h for more information.
+
+  - RTC drivers
 
 usbdev/
   USB device drivers.  See also include/nuttx/usb/usbdev.h
