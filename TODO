@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 21, 2015)
+NuttX TODO List (Last updated November 25, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
- (12)  Libraries (libc/, libm/)
+ (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -1217,11 +1217,6 @@ o Libraries (libc/)
                pic32).  However, as phrased, this bug cannot yet be closed since
                this "growing functionality" does not address all termios.h
                functionality and not all serial drivers support termios.
-  Status:      Open
-  Priority:    Low
-
-  Title:       DAYS OF THE WEEK
-  Description: strftime() and other timing functions do not handle days of the week.
   Status:      Open
   Priority:    Low
 

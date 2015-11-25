@@ -11148,3 +11148,5 @@
 	* fs/hostfs and arch/sim/src:  Add a special file system for use with
 	  simulator that supports access to the host file system from the
 	  simulation.  From Ken Petit (2015-11-25).
+	* libc/time/lib_strftime.c:  Add day-of-week support. (2015-11-25).
+
