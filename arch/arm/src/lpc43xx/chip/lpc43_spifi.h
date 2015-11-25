@@ -74,14 +74,14 @@
 
 /* Register addresses ***************************************************************/
 
-#define LPC43_SPIFI_CTRL     0x000
-#define LPC43_SPIFI_CMD      0x004
-#define LPC43_SPIFI_ADDR     0x008
-#define LPC43_SPIFI_IDATA    0x00C
-#define LPC43_SPIFI_CLIMIT   0x010
-#define LPC43_SPIFI_DATA     0x014
-#define LPC43_SPIFI_MCMD     0x018
-#define LPC43_SPIFI_STAT     0x01C
+#define LPC43_SPIFI_CTRL_OFFSET     0x000
+#define LPC43_SPIFI_CMD_OFFSET      0x004
+#define LPC43_SPIFI_ADDR_OFFSET     0x008
+#define LPC43_SPIFI_IDATA_OFFSET    0x00C
+#define LPC43_SPIFI_CLIMIT_OFFSET   0x010
+#define LPC43_SPIFI_DATA_OFFSET     0x014
+#define LPC43_SPIFI_MCMD_OFFSET     0x018
+#define LPC43_SPIFI_STAT_OFFSET     0x01C
 
 
 #define LPC43_SPIFI_CTRL          (LPC43_SPIFI_BASE+LPC43_SPIFI_CTRL_OFFSET)
