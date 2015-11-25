@@ -448,6 +448,28 @@ o Kernel/Protected Build
                ifconfig netdev_foreach(), g_netstats
                ping     icmp_ping()
 
+               The busybox mkfatfs does not involve any OS calls; it does
+               its job by simply opening the block driver (using open/xopen)
+               and modifying it with write operations. See:
+
+                 http://git.busybox.net/busybox/tree/util-linux/mkfs_vfat.c
+
+               Here is how the Busybox/Linux losetup works:
+
+               This is the busybox losetup():
+
+                 http://git.busybox.net/busybox/tree/util-linux/losetup.c .
+
+               You can see that it relies on query_loop(), set_loop(), and
+               del_loop() to do the really work.  query_loop() and friends
+               are here:
+
+                 http://git.busybox.net/busybox/tree/libbb/loop.c.
+
+               They each open a device and interface with it using ioctl calls.
+               That is probably how NuttX should do things as well.  But that
+               is pretty much a redesign.
+
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
