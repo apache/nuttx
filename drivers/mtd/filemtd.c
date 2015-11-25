@@ -105,28 +105,28 @@ struct file_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t filemtd_read(FAR struct file_dev_s *priv, unsigned char *buffer,
-                 size_t offsetbytes, unsigned int nbytes);
-static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset, FAR const void *src, size_t len);
+static ssize_t filemtd_read(FAR struct file_dev_s *priv,
+                 FAR unsigned char *buffer, size_t offsetbytes,
+                 unsigned int nbytes);
+static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
+                 FAR const void *src, size_t len);
 
 /* MTD driver methods */
 
-static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR uint8_t *buf);
-static ssize_t file_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buf);
+static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                 size_t nblocks);
+static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                 size_t nblocks, FAR uint8_t *buf);
+static ssize_t file_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                 size_t nblocks, FAR const uint8_t *buf);
 static ssize_t file_byteread(FAR struct mtd_dev_s *dev, off_t offset,
-                            size_t nbytes, FAR uint8_t *buf);
+                 size_t nbytes, FAR uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
 static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
-                             size_t nbytes, FAR const uint8_t *buf);
+                 size_t nbytes, FAR const uint8_t *buf);
 #endif
-static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                 unsigned long arg);
 
 /****************************************************************************
  * Private Functions
@@ -137,7 +137,7 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
  ****************************************************************************/
 
 static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset, 
-                    FAR const void *src, size_t len)
+                             FAR const void *src, size_t len)
 {
   FAR const uint8_t *pin  = (FAR const uint8_t *)src;
   FAR uint8_t       *pout;
@@ -222,8 +222,9 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
  * Name: filemtd_read
  ****************************************************************************/
 
-static ssize_t filemtd_read(FAR struct file_dev_s *priv, unsigned char *buffer,
-                 size_t offsetbytes, unsigned int nbytes)
+static ssize_t filemtd_read(FAR struct file_dev_s *priv,
+                            FAR unsigned char *buffer, size_t offsetbytes,
+                             unsigned int nbytes)
 {
   /* Set the starting location in the file */
 
@@ -236,7 +237,8 @@ static ssize_t filemtd_read(FAR struct file_dev_s *priv, unsigned char *buffer,
  * Name: file_erase
  ****************************************************************************/
 
-static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                      size_t nblocks)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
   size_t    nbytes;
@@ -288,8 +290,8 @@ static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
  * Name: file_bread
  ****************************************************************************/
 
-static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR uint8_t *buf)
+static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, FAR uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
   off_t offset;
@@ -427,7 +429,9 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+            (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -438,7 +442,7 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->erasesize    = CONFIG_FILEMTD_ERASESIZE;
               geo->neraseblocks = priv->nblocks;
               ret               = OK;
-          }
+            }
         }
         break;
 
@@ -448,10 +452,10 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
-            /* Erase the entire device */
+          /* Erase the entire device */
 
-            file_erase(dev, 0, priv->nblocks);
-            ret = OK;
+          file_erase(dev, 0, priv->nblocks);
+          ret = OK;
         }
         break;
 
@@ -587,4 +591,3 @@ void filemtd_teardown(FAR struct mtd_dev_s *dev)
 
   kmm_free(priv);
 }
-
