@@ -11159,3 +11159,7 @@
 	  convert a regular file (or driver file) to an MTD device.  This is
 	  useful for testing on the simulation using the hostfs.  From Ken
 	  Petit (2015-11-25).
+	* drivers/loop:  Add a loop character device.  losetup() and
+	  loteardown() should not be called directory from applications.
+	  Rather, these functions are now available as IOCTL commands to the
+	  loop driver (2015-11-25).

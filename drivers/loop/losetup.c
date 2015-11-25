@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/losetup.c
+ * drivers/loop/losetup.c
  *
  *   Copyright (C) 2008-2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,6 +58,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/loop.h>
 
 /****************************************************************************
  * Pre-processor Definitions

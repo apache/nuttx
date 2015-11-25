@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LOOP
+config EEV_LOOP
 	bool "Enable loop device"
 	default n
 	---help---

@@ -897,29 +897,6 @@ void devcrypto_register(void);
 
 void devzero_register(void);
 
-/* drivers/loop.c ***********************************************************/
-/****************************************************************************
- * Name: losetup
- *
- * Description:
- *   Setup the loop device so that it exports the file referenced by 'filename'
- *   as a block device.
- *
- ****************************************************************************/
-
-int losetup(FAR const char *devname, FAR const char *filename,
-            uint16_t sectsize, off_t offset, bool readonly);
-
-/****************************************************************************
- * Name: loteardown
- *
- * Description:
- *   Undo the setup performed by losetup
- *
- ****************************************************************************/
-
-int loteardown(FAR const char *devname);
-
 /* drivers/bch/bchdev_register.c ********************************************/
 /****************************************************************************
  * Name: bchdev_register

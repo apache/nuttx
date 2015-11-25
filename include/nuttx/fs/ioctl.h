@@ -80,6 +80,7 @@
 #define _BTNBASE        (0x1b00) /* Button ioctl commands */
 #define _ULEDBASE       (0x1c00) /* User LED ioctl commands */
 #define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
+#define _LOOPBASE       (0x1e00) /* Loop device commands */
 
 /* boardctl commands share the same number space */
 
@@ -359,6 +360,12 @@
 
 #define _ZCIOCVALID(c)    (_IOC_TYPE(c)==_ZCBASE)
 #define _ZCIOC(nr)        _IOC(_ZCBASE,nr)
+
+/* Loop driver ioctl definitions ********************************************/
+/* (see nuttx/include/fs/loop.h */
+
+#define _LOOPIOCVALID(c)  (_IOC_TYPE(c)==_LOOPBASE)
+#define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

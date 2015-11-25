@@ -39,8 +39,8 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
 # Include loop device support
 
-ifneq ($(CONFIG_LOOP),y)
-# CSRCS += loop.c
+ifeq ($(CONFIG_DEV_LOOP),y)
+  CSRCS += loop.c
 endif
 
 CSRCS += losetup.c
