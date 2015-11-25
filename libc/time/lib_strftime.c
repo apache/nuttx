@@ -70,7 +70,19 @@
  * Private Data
  ****************************************************************************/
 
-static const char * const g_abbrevmonthname[12] =
+#ifdef CONFIG_TIME_EXTENDED
+static const char * const g_abbrev_wdayname[7] =
+{
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
+
+static const char * const g_wdayname[7] =
+{
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+};
+#endif
+
+static const char * const g_abbrev_monthname[12] =
 {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -169,6 +181,31 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
        switch (*format++)
          {
+#ifdef CONFIG_TIME_EXTENDED
+           /* %a: A three-letter abbreviation for the day of the week. */
+
+           case 'a':
+             {
+               if (tm->tm_wday < 7)
+                 {
+                   str = g_abbrev_wdayname[tm->tm_wday];
+                   len = snprintf(dest, chleft, "%s", str);
+                 }
+             }
+             break;
+
+           /* %A: The full name for the day of the week. */
+
+           case 'A':
+             {
+               if (tm->tm_wday < 7)
+                 {
+                   str = g_wdayname[tm->tm_wday];
+                   len = snprintf(dest, chleft, "%s", str);
+                 }
+             }
+             break;
+#else
            /* %a: A three-letter abbreviation for the day of the week. */
            /* %A: The full name for the day of the week. */
 
@@ -178,6 +215,7 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                len = snprintf(dest, chleft, "Day"); /* Not supported */
              }
              break;
+#endif
 
            /* %h: Equivalent to %b */
 
@@ -189,7 +227,7 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              {
                if (tm->tm_mon < 12)
                  {
-                   str = g_abbrevmonthname[tm->tm_mon];
+                   str = g_abbrev_monthname[tm->tm_mon];
                    len = snprintf(dest, chleft, "%s", str);
                  }
              }
