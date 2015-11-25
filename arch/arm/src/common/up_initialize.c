@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/syslog/ramlog.h>
@@ -203,6 +204,9 @@ void up_initialize(void)
   devzero_register();   /* Standard /dev/zero */
 #endif
 
+#if defined(CONFIG_DEV_LOOP)
+  loop_register();      /* Standard /dev/loop */
+#endif
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
   /* Initialize the serial device driver */
