@@ -181,7 +181,7 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
        switch (*format++)
          {
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
            /* %a: A three-letter abbreviation for the day of the week. */
 
            case 'a':

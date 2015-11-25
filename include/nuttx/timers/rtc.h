@@ -291,7 +291,7 @@ struct rtc_time
   int tm_mday;    /* Day of the month (1-31) */
   int tm_mon;     /* Month (0-11) */
   int tm_year;    /* Years since 1900 */
-#ifdef CONFIG_LIBC_LOCALTIME
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   int tm_wday;    /* Day of the week (0-6) (unused) */
   int tm_yday;    /* Day of the year (0-365) (unused) */
   int tm_isdst;   /* Non-0 if daylight savings time is in effect (unused) */

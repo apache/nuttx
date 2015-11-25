@@ -205,7 +205,7 @@ FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
 size_t strftime(FAR char *s, size_t max, FAR const char *format,
                 FAR const struct tm *tm);
 
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 FAR char *asctime(FAR const struct tm *tp);
 FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);
 FAR char *ctime(FAR const time_t *timep);
