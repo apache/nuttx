@@ -4052,7 +4052,7 @@ FAR struct tm *localtime(FAR const time_t *timep);
 </p>
 <ul><pre>
 #include &lt;time.h&gt;
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 FAR char *asctime(FAR const struct tm *tp);
 #endif
 </pre></ul>
@@ -4081,7 +4081,7 @@ FAR char *asctime(FAR const struct tm *tp);
 </p>
 <ul><pre>
 #include &lt;time.h&gt;
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 FAR char *ctime(FAR const time_t *timep);
 #endif
 </pre></ul>
@@ -4172,7 +4172,7 @@ FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
 </p>
 <ul><pre>
 #include &lt;time.h&gt;
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);
 #endif
 </pre></ul>
@@ -4204,7 +4204,8 @@ FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);
 </p>
 <ul><pre>
 #include &lt;time.h&gt;
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+FAR char *ctime_r(FAR const time_t *timep, FAR char *buf);
 #endif
 </pre></ul>
 <p>
