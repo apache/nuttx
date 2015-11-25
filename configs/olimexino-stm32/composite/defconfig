@@ -581,7 +581,7 @@ CONFIG_PTHREAD_STACK_DEFAULT=464
 # CONFIG_DISABLE_POLL is not set
 CONFIG_DEV_NULL=y
 # CONFIG_DEV_ZERO is not set
-# CONFIG_LOOP is not set
+# CONFIG_DEV_LOOP is not set
 
 #
 # Buffering
