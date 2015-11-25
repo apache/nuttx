@@ -1196,6 +1196,7 @@ static int hostfs_stat(struct inode *mountpt, const char *relpath, struct stat *
     }
 
   if (host_buf.st_mode & HOST_ST_MODE_PIPE)
+    {
       buf->st_mode |= S_IFIFO;
     }
 
