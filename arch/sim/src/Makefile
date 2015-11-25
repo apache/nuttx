@@ -35,7 +35,7 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS += -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched  -D__KERNEL__
 
 ASRCS =
 
