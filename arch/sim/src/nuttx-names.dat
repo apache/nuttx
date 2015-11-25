@@ -29,6 +29,7 @@ poll           NXpoll
 printf         NXprintf
 pthread_create NXpthread_create
 read           NXread
+readdir        NXreaddir
 realloc        NXrealloc
 recv           NXrecv
 recvfrom       NXrecvfrom

@@ -69,7 +69,7 @@ ifeq ($(CONFIG_DEV_CONSOLE),y)
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += up_appinit.c
+  CSRCS += up_appinit.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
@@ -91,26 +91,36 @@ endif
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CSRCS += up_elf.c
+  CSRCS += up_elf.c
 endif
 
 ifeq ($(CONFIG_FS_FAT),y)
-CSRCS += up_blockdevice.c up_deviceimage.c
+  CSRCS += up_blockdevice.c up_deviceimage.c
 endif
 
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
-CSRCS += up_romgetc.c
+  CSRCS += up_romgetc.c
 endif
 
 ifeq ($(CONFIG_NET_ETHERNET),y)
-CSRCS += up_netdriver.c
-HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
+  CSRCS += up_netdriver.c
+  HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
 ifneq ($(HOSTOS),Cygwin)
-HOSTSRCS += up_tapdev.c up_netdev.c
+  HOSTSRCS += up_tapdev.c up_netdev.c
 else
-HOSTSRCS += up_wpcap.c up_netdev.c
-DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
+  HOSTSRCS += up_wpcap.c up_netdev.c
+  DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
 endif
+endif
+
+ifeq ($(CONFIG_FS_HOSTFS),y)
+  HOSTSRCS += up_hostfs.c
+
+up_hostfs.c: hostfs.h
+
+hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
+	@echo "CP:  $<"
+	$(Q) cp $< $@
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
@@ -260,6 +270,7 @@ distclean: clean
 	fi
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
+	$(call DELFILE, hostfs.h)
 	$(Q) rm -rf GNU
 
 -include Make.dep
