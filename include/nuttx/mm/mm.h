@@ -184,10 +184,10 @@
 
 #ifdef CONFIG_MM_SMALL
    typedef uint16_t mmsize_t;
-#  define MMSIZE_MAX 0xffff
+#  define MMSIZE_MAX UINT16_MAX
 #else
    typedef uint32_t mmsize_t;
-#  define MMSIZE_MAX SIZE_MAX
+#  define MMSIZE_MAX UINT32_MAX
 #endif
 
 /* This describes an allocated chunk.  An allocated chunk is
