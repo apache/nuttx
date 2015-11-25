@@ -11152,4 +11152,10 @@
 	* drivers/lcd/ili9432.c:  Fixed errors in orientation. Portrait,
 	  RPortrait, and RLandscript should work correly now.  They were
 	  displayed mirrored.  From  Marco Krahl (2015-11-25).
-
+	* drivers/mtd/mtd/mtd_procfs/c and include/nuttx/mtd/mtd.h:  Add an
+	  interface to un-regiser an MTD procfs entry.  From Ken Petit
+	  (2015-11-25).
+	* drivers/mtd/filemtd.c:  New new MTD conversion layer that will
+	  convert a regular file (or driver file) to an MTD device.  This is
+	  useful for testing on the simulation using the hostfs.  From Ken
+	  Petit (2015-11-25).

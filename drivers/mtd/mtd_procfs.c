@@ -363,4 +363,45 @@ int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name)
   return OK;
 }
 
+/****************************************************************************
+ * Name: mtd_unregister
+ *
+ * Description:
+ *   Un-Registers an MTD device with the procfs file system.
+ *
+ * In an embedded system, this all is really unnecessary, but is provided
+ * in the procfs system simply for information purposes (if desired).
+ *
+ ****************************************************************************/
+
+int mtd_unregister(FAR struct mtd_dev_s *mtd)
+{
+  FAR struct mtd_dev_s *plast;
+
+  /* Remove the MTD from the list of registered devices */
+
+  if (g_pfirstmtd == mtd)
+    {
+      g_pfirstmtd = mtd->pnext;
+    }
+  else
+    {
+      /* Remove from middle of list */
+
+      plast = g_pfirstmtd;
+      while (plast->pnext != mtd)
+        {
+          /* Skip to next entry as long as there is one */
+
+          plast = plast->pnext;
+        }
+
+      /* Now remove at this location */
+
+      plast->pnext = mtd->pnext;
+    }
+
+  return OK;
+}
+
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

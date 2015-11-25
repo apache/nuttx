@@ -525,6 +525,18 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
 FAR struct mtd_dev_s *up_flashinitialize(void);
 
 /****************************************************************************
+ * Name: up_flashinitialize
+ *
+ * Description:
+ *   Create a file backed MTD device.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset);
+
+void filemtd_teardown(FAR struct mtd_dev_s* mtd);
+
+/****************************************************************************
  * Name: mtd_register
  *
  * Description:
@@ -539,6 +551,21 @@ FAR struct mtd_dev_s *up_flashinitialize(void);
 
 #ifdef CONFIG_MTD_REGISTRATION
 int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: mtd_unregister
+ *
+ * Description:
+ *   Un-registers an MTD device with the procfs file system.
+ *
+ * In an embedded system, this all is really unnecessary, but is provided
+ * in the procfs system simply for information purposes (if desired).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_REGISTRATION
+int mtd_unregister(FAR struct mtd_dev_s *mtd);
 #endif
 
 #undef EXTERN
