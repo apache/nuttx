@@ -103,6 +103,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __KERNEL__
+/* These are internal OS interface and are not available to applications */
+
 /****************************************************************************
  * Name: loop_register
  *
@@ -136,6 +139,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
  ****************************************************************************/
 
 int loteardown(FAR const char *devname);
+#endif /* __KERNEL __ */
 
 #undef EXTERN
 #ifdef __cplusplus
