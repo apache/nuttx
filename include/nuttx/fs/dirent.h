@@ -177,6 +177,17 @@ struct fs_unionfsdir_s
 };
 #endif
 
+#ifdef CONFIG_FS_HOSTFS
+/* HOSTFS provides mapping to directories on the host machine in the
+ * sim environment.
+ */
+
+struct fs_hostfsdir_s
+{
+  FAR void *  fs_dir;                         /* Opaque pointer to host DIR * */
+};
+#endif
+
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 struct fs_dirent_s
@@ -242,6 +253,9 @@ struct fs_dirent_s
 #endif
 #ifdef CONFIG_FS_UNIONFS
       struct fs_unionfsdir_s unionfs;
+#endif
+#ifdef CONFIG_FS_HOSTFS
+      struct fs_hostfsdir_s  hostfs;
 #endif
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
    } u;

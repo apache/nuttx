@@ -62,6 +62,7 @@ source fs/smartfs/Kconfig
 source fs/binfs/Kconfig
 source fs/procfs/Kconfig
 source fs/unionfs/Kconfig
+source fs/hostfs/Kconfig
 
 comment "System Logging"
 

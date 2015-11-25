@@ -11145,4 +11145,7 @@
 	  that sizeof(size_t) should be the same as sizeof(uinptr_t).  mmsize_t
 	  should always be 32-bits in any event.  The last change to stddef has
 	  been backed out.  With these changes, the simulator builds without
-	  warnings on a 64-bit machine (2015-11-23).
+	* fs/hostfs:  Add a special file system for use with simulator that
+	  supports access to the host file system from the simulation.  From
+	  Ken Petit (2015-11-25).
+

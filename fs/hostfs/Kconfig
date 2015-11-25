@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_HOSTFS
+	bool "Host File System"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	depends on ARCH_SIM
+	select FS_READABLE
+	select FS_WRITABLE
+	---help---
+		The Host file system provides a mechanism to mount directories
+		from the host OS during simulation mode.  The host directory
+		to be "mounted" is specified during the mount command using
+		the -o command line switch, such as:
+
+			mount -t hostfs -o fs=/home/user/nuttx_root /host
+
+		For non-NSH operation, the option "fs=home/user/nuttx_root" would
+		be passed to the 'mount()' routine using the optional 'void *data'
+		parameter.
+
