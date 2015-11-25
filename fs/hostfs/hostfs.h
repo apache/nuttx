@@ -54,14 +54,14 @@
 /* Quasi-standard definitions */
 
 #ifndef MIN
-#  define MIN(a,b)                (a < b ? a : b)
+#  define MIN(a,b)          (a < b ? a : b)
 #endif
 
 #ifndef MAX
-#  define MAX(a,b)                (a > b ? a : b)
+#  define MAX(a,b)          (a > b ? a : b)
 #endif
 
-#define   HOSTFS_MAX_PATH   256
+#define HOSTFS_MAX_PATH     256
 
 /****************************************************************************
  * Public Types
@@ -96,7 +96,7 @@ struct hostfs_mountpt_s
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Internal function prototypes
  ****************************************************************************/
 
 /* Semaphore access for internal use */
