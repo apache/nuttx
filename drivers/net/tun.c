@@ -325,6 +325,8 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
 
 static int tun_transmit(FAR struct tun_device_s *priv)
 {
+  NETDEV_TXPACKETS(&priv->dev);
+
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is no transmission in progress.
@@ -413,6 +415,8 @@ static void tun_receive(FAR struct tun_device_s *priv)
    * data in priv->dev.d_len
    */
 
+  NETDEV_RXPACKETS(&priv->dev);
+
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
@@ -424,6 +428,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
 #ifdef CONFIG_NET_IPv4
     {
       nllvdbg("IPv4 frame\n");
+      NETDEV_RXIPV4(&priv->dev);
 
       /* Give the IPv4 packet to the network layer */
 
@@ -444,6 +449,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
           tun_pollnotify(priv, POLLOUT);
         }
     }
+  else
 #endif
 
 #if 0
@@ -451,6 +457,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
       nllvdbg("Iv6 frame\n");
+      NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */
 
@@ -482,7 +489,11 @@ static void tun_receive(FAR struct tun_device_s *priv)
           tun_transmit(priv);
         }
     }
+  else
 #endif
+    {
+      NETDEV_RXDROPPED(&priv->dev);
+    }
 #endif
 }
 
@@ -506,6 +517,8 @@ static void tun_receive(FAR struct tun_device_s *priv)
 static void tun_txdone(FAR struct tun_device_s *priv)
 {
   /* Check for errors and update statistics */
+
+  NETDEV_TXDONE(&priv->dev);
 
   /* Then poll uIP for new XMIT data */
 

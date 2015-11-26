@@ -435,8 +435,6 @@ static int e1000_transmit(struct e1000_dev *e1000)
       return -1;
     }
 
-  /* Increment statistics */
-
   /* Send the packet: address=skel->sk_dev.d_buf, length=skel->sk_dev.d_len */
 
   memcpy(cp, e1000->netdev.d_buf, e1000->netdev.d_len);
@@ -564,8 +562,6 @@ static void e1000_receive(struct e1000_dev *e1000)
 
   while (e1000->rx_ring.desc[head].desc_status)
     {
-      /* Check for errors and update statistics */
-
       /* Here we do not handle packets that exceed packet-buffer size */
 
       if ((e1000->rx_ring.desc[head].desc_status & 3) == 1)
@@ -727,8 +723,6 @@ next:
 static void e1000_txtimeout(int argc, uint32_t arg, ...)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)arg;
-
-  /* Increment statistics and dump debug info */
 
   /* Then reset the hardware */
 

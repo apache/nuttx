@@ -91,7 +91,6 @@
  * CONFIG_ENCX24J600_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENCX24J600_NINTERFACES - Specifies the number of physical ENCX24J600
  *   devices that will be supported.
- * CONFIG_ENCX24J600_STATS - Collect network statistics
  */
 
 /* The ENCX24J600 spec says that it supports SPI mode 0,0 only: "The
@@ -272,12 +271,6 @@ struct enc_driver_s
   /* This holds the information visible to uIP/NuttX */
 
   struct net_driver_s   dev;           /* Interface understood by uIP */
-
-  /* Statistics */
-
-#ifdef CONFIG_ENCX24J600_STATS
-  struct enc_stats_s    stats;
-#endif
 };
 
 /****************************************************************************
@@ -1143,9 +1136,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
 
   /* Increment statistics */
 
-#ifdef CONFIG_ENCX24J600_STATS
-  priv->stats.txrequests++;
-#endif
+  NETDEV_TXPACKETS(&priv->dev);
 
   descr = (FAR struct enc_descr_s *)sq_remfirst(&priv->txfreedescr);
 
@@ -1330,6 +1321,8 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 
 static void enc_txif(FAR struct enc_driver_s *priv)
 {
+  NETDEV_TXDONE(&priv->dev);
+
   if (sq_empty(&priv->txqueue))
     {
       /* If no further xmits are pending, then cancel the TX timeout */
@@ -1342,7 +1335,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
     }
   else
     {
-      /* process txqueue */
+      /* Process txqueue */
 
       enc_transmit(priv);
     }
@@ -1531,6 +1524,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1580,6 +1574,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1626,6 +1621,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       if (BUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP packet received (%02x)\n", BUF->type);
+          NETDEV_RXARP(&priv->dev);
+
           arp_arpin(&priv->dev);
 
           /* ARP packets are freed immediately */
@@ -1649,6 +1646,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           enc_rxrmpkt(priv, descr);
 
           nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+          NETDEV_RXDROPPED(&priv->dev);
         }
 
       descr = next;
@@ -1747,10 +1745,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
           /* Discard packet */
 
           enc_rxrmpkt(priv, descr);
-
-#ifdef CONFIG_ENCX24J600_STATS
-          priv->stats.rxnotok++;
-#endif
+          NETDEV_RXERRORS(&priv->dev);
         }
 
       /* Check for a usable packet length (4 added for the CRC) */
@@ -1762,10 +1757,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
           /* Discard packet */
 
           enc_rxrmpkt(priv, descr);
-
-#ifdef CONFIG_ENCX24J600_STATS
-          priv->stats.rxpktlen++;
-#endif
+          NETDEV_RXERRORS(&priv->dev);
         }
 
       /* Decrement PKTCNT */
@@ -1951,9 +1943,7 @@ static void enc_irqworker(FAR void *arg)
 
       if ((eir & EIR_RXABTIF) != 0) /* Receive Abort */
         {
-#ifdef CONFIG_ENCX24J600_STATS
-          priv->stats.rxerifs++;
-#endif
+          NETDEV_RXERRORS(&priv->dev);
           enc_rxabtif(priv);
           enc_bfc(priv, ENC_EIR, EIR_RXABTIF);  /* Clear the RXABTIF interrupt */
         }
@@ -1980,7 +1970,7 @@ static void enc_irqworker(FAR void *arg)
            */
         }
 
-#ifdef CONFIG_ENCX24J600_STATS
+#ifdef CONFIG_NETDEV_STATISTICS
       /* The transmit abort interrupt occurs when the transmission of a frame
        * has been aborted. An abort can occur for any of the following reasons:
        *
@@ -2004,7 +1994,7 @@ static void enc_irqworker(FAR void *arg)
 
       if ((eir & EIR_TXABTIF) != 0) /* Transmit Abort */
         {
-          priv->stats.txerifs++;
+          NETDEV_TXERRORS(&priv->dev);
           enc_bfc(priv, ENC_EIR, EIR_TXABTIF);  /* Clear the TXABTIF interrupt */
         }
 #endif
@@ -2095,9 +2085,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Increment statistics and dump debug info */
 
-#ifdef CONFIG_ENCX24J600_STATS
-  priv->stats.txtimeouts++;
-#endif
+  NETDEV_TXTIMEOUTS(&priv->dev);
 
   /* Then reset the hardware: Take the interface down, then bring it
    * back up
@@ -2302,7 +2290,7 @@ static int enc_ifup(struct net_driver_s *dev)
                              EIE_PKTIE  | EIE_RXABTIE |
                              EIE_TXIE);
 
-#ifdef CONFIG_ENCX24J600_STATS
+#ifdef CONFIG_NETDEV_STATISTICS
       enc_bfs(priv, ENC_EIE, EIE_TXABTIE);
 #endif
 
@@ -2961,41 +2949,4 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 
-/****************************************************************************
- * Function: enc_stats
- *
- * Description:
- *   Return accumulated ENCX24J600 statistics.  Statistics are cleared after
- *   being returned.
- *
- * Parameters:
- *   devno - If more than one ENCX24J600 is supported, then this is the
- *           zero based number that identifies the ENCX24J600;
- *   stats - The user-provided location to return the statistics.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ENCX24J600_STATS
-int enc_stats(unsigned int devno, struct enc_stats_s *stats)
-{
-  FAR struct enc_driver_s *priv ;
-  irqstate_t flags;
-
-  DEBUGASSERT(devno < CONFIG_ENCX24J600_NINTERFACES);
-  priv = &g_encx24j600[devno];
-
-  /* Disable the Ethernet interrupt */
-
-  flags = irqsave();
-  memcpy(stats, &priv->stats, sizeof(struct enc_stats_s));
-  memset(&priv->stats, 0, sizeof(struct enc_stats_s));
-  irqrestore(flags);
-  return OK;
-}
-#endif
 #endif /* CONFIG_NET && CONFIG_ENCX24J600_NET */

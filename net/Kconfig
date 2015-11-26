@@ -24,10 +24,12 @@ config NET_NOINTS
 	bool "Not interrupt driven"
 	default n
 	---help---
-		NET_NOINT indicates that uIP is not called from the interrupt level.
-		If NET_NOINTS is defined, critical sections will be managed with semaphores;
-		Otherwise, it assumed that uIP will be called from interrupt level handling
-		and critical sections will be managed by enabling and disabling interrupts.
+		NET_NOINT indicates that network layer is not called from the
+		interrupt level.  If NET_NOINTS is defined, critical sections
+		will be managed with semaphores; Otherwise, it assumed that
+		network layer will be called from interrupt level handling
+		and critical sections will be managed by enabling and disabling
+		interrupts.
 
 config NET_PROMISCUOUS
 	bool "Promiscuous mode"
@@ -42,12 +44,12 @@ config NET_MULTIBUFFER
 	bool "Use multiple device-side I/O buffers"
 	default n
 	---help---
-		Traditionally, uIP has used a single buffer for all incoming and
-		outgoing traffic.  If this configuration is selected, then the
-		driver can manage multiple I/O buffers and can, for example,
-		be filling one input buffer while sending another output buffer.
-		Or, as another example, the driver may support queuing of concurrent
-		input/ouput and output transfers for better performance.
+		Traditionally, the uIP stacl has used a single buffer for all
+		incoming and outgoing traffic.  If this configuration is selected,
+		then the driver can manage multiple I/O buffers and can, for
+		example, be filling one input buffer while sending another output
+		buffer.  Or, as another example, the driver may support queuing of
+		concurrent input/ouput and output transfers for better performance.
 
 config NET_ETH_MTU
 	int "Ethernet packet buffer size (MTU)"
@@ -184,10 +186,10 @@ config NET_SLIP
 		network settings: NET_NOINTS and NET_MULTIBUFFER.
 
 		SLIP supports point-to-point IP communications over a serial port.
-		The default data link layer for uIP is Ethernet. If NET_SLIP is
-		defined in the NuttX configuration file, then SLIP will be supported.
-		The basic differences between the SLIP and Ethernet configurations is
-		that when SLIP is selected:
+		The default data link layer for network layer is Ethernet. If
+		NET_SLIP is defined in the NuttX configuration file, then SLIP will
+		be supported.  The basic differences between the SLIP and Ethernet
+		configurations is that when SLIP is selected:
 
 			* The link level header (that comes before the IP header) is omitted.
 			* All MAC address processing is suppressed.
@@ -226,6 +228,7 @@ config NET_TUN
 	default n
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
+	select ARCH_HAVE_NETDEV_STATISTICS
 
 if NET_TUN
 
@@ -278,7 +281,7 @@ config NET_STATISTICS
 	bool "Collect network statistics"
 	default n
 	---help---
-		uIP statistics on or off
+		Network layer statistics on or off
 
 source "net/route/Kconfig"
 

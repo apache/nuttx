@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/cs89x0.c
  *
- *   Copyright (C) 2009-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -408,31 +408,31 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
   rxlength = cs89x0_getreg(PPR_RXLENGTH);
   if ((isq & RX_OK) == 0)
     {
-#ifdef CONFIG_C89x0_STATISTICS
-      cd89x0->cs_stats.rx_errors++;
+#ifdef CONFIG_NETDEV_STATISTICS
+      NETDEV_RXERRORS(&cd89x0->cs_dev);
+
+#if 0
       if ((isq & RX_RUNT) != 0)
         {
-          cd89x0->cs_stats.rx_lengtherrors++;
         }
 
       if ((isq & RX_EXTRA_DATA) != 0)
         {
-          cd89x0->cs_stats.rx_lengtherrors++;
         }
 
       if (isq & RX_CRC_ERROR) != 0)
         {
           if (!(isq & (RX_EXTRA_DATA | RX_RUNT)))
             {
-              cd89x0->cs_stats.rx_crcerrors++;
             }
         }
 
       if ((isq & RX_DRIBBLE) != 0)
         {
-          cd89x0->cs_stats.rx_frameerrors++;
         }
 #endif
+#endif
+
       return;
     }
 
@@ -440,10 +440,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
   if (rxlength > ???)
     {
-#ifdef CONFIG_C89x0_STATISTICS
-      cd89x0->cs_stats.rx_errors++;
-      cd89x0->cs_stats.rx_lengtherrors++;
-#endif
+      NETDEV_RXERRORS(&cd89x0->cs_dev);
       return;
     }
 
@@ -457,9 +454,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
       *dest++ = cs89x0_getreg(PPR_RXFRAMELOCATION);
     }
 
-#ifdef CONFIG_C89x0_STATISTICS
-  cd89x0->cs_stats.rx_packets++;
-#endif
+  NETDEV_RXPACKETS(&cd89x0->cs_dev);
 
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
@@ -473,6 +468,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
       nllvdbg("IPv4 frame\n");
+      NETDEV_RXIPV4(&priv->cs_dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
        * layer
@@ -513,6 +509,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
       nllvdbg("Iv6 frame\n");
+      NETDEV_RXIPV6(&priv->cs_dev);
 
       /* Give the IPv6 packet to the network layer */
 
@@ -549,6 +546,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_ARP
   if (BUF->type == htons(ETHTYPE_ARP))
     {
+      NETDEV_RXARP(&priv->cs_dev);
       arp_arpin(&cs89x0->cs_dev);
 
       /* If the above function invocation resulted in data that should be
@@ -564,6 +562,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #endif
     {
       nllvdbg("Unrecognized packet type %02x\n", BUF->type);
+      NETDEV_RXDROPPED(&priv->cs_dev);
     }
 }
 
@@ -589,28 +588,30 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
    * hold the register address causing the interrupt.  We got here because
    * those bits indicated */
 
-#ifdef CONFIG_C89x0_STATISTICS
-  cd89x0->cs_stats.tx_packets++;
+#ifdef CONFIG_NETDEV_STATISTICS
+  NETDEV_TXPACKETS(&cd89x0->cs_dev);
   if ((isq & ISQ_TXEVENT_TXOK) == 0)
     {
-      cd89x0->cs_stats.tx_errors++;
+      NETDEV_TXERRORS(&cd89x0->cs_dev);
     }
+
+#if 0
   if ((isq & ISQ_TXEVENT_LOSSOFCRS) != 0)
     {
-      cd89x0->cs_stats.tx_carriererrors++;
     }
+
   if ((isq & ISQ_TXEVENT_SQEERROR) != 0)
     {
-      cd89x0->cs_stats.tx_heartbeaterrors++;
     }
+
   if (i(sq & ISQ_TXEVENT_OUTWINDOW) != 0)
     {
-      cd89x0->cs_stats.tx_windowerrors++;
     }
+
   if (isq & TX_16_COL)
     {
-      cd89x0->cs_stats.tx_abortederrors++;
     }
+#endif
 #endif
 
   /* If no further xmits are pending, then cancel the TX timeout */
@@ -719,15 +720,11 @@ static int cs89x0_interrupt(int irq, FAR void *context)
             break;
 
         case ISQ_RXMISSEVENT:
-#ifdef CONFIG_C89x0_STATISTICS
-            cd89x0->cs_stats.rx_missederrors += (isq >> 6);
-#endif
+            NETDEV_RXERRORS(&cd89x0->cs_dev);
             break;
 
         case ISQ_TXCOLEVENT:
-#ifdef CONFIG_C89x0_STATISTICS
-            cd89x0->cs_stats.collisions += (isq >> 6);
-#endif
+            NETDEV_TXERRORS(&cd89x0->cs_dev);
             break;
         }
     }

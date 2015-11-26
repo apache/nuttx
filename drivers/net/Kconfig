@@ -10,6 +10,7 @@ config NETDEV_LOOPBACK
 	default n if !NET_LOOPBACK
 	default y if NET_LOOPBACK
 	select NET_NOINTS
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Add support for the local network loopback device, lo.  Any additional
 		networking devices that are enabled must be compatible with
@@ -24,6 +25,17 @@ config NETDEV_MULTINIC
 		multiple link layer drivers.  NOTE that the local loopback device
 		is considered to be a a link layer driver so if local loopback
 		support is used you probably need to select this option.
+
+config ARCH_HAVE_NETDEV_STATISTICS
+	bool
+	default n
+
+config NETDEV_STATISTICS
+	bool "Network device driver statistics"
+	depends on NET_STATISTICS && ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		Enable to collect statistics from the network drivers (if supported
+		by the network driver).
 
 config NETDEV_LATEINIT
 	bool "Late driver initialization"
@@ -68,6 +80,7 @@ comment "External Ethernet MAC Device Support"
 menuconfig NET_DM90x0
 	bool "Davicom dm9000/dm9010 support"
 	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		References: Davicom data sheets (DM9000-DS-F03-041906.pdf,
 		DM9010-DS-F01-103006.pdf) and looking at lots of other DM90x0
@@ -132,23 +145,21 @@ config DM9X_NINTERFACES
 	default 1
 	depends on EXPERIMENTAL
 
-config DM9X_STATS
-	bool "DM90x0 statistics"
-	default n
-
-endif #  NET_DM90x0
+endif # NET_DM90x0
 
 config NET_CS89x0
 	bool "CS89x0 support"
 	default n
 	depends on EXPERIMENTAL
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-	Under construction -- do not use
+		Under construction -- do not use
 
 menuconfig ENC28J60
 	bool "Microchip ENC28J60 support"
 	default n
 	select SPI
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		References:
 		ENC28J60 Data Sheet, Stand-Alone Ethernet Controller with SPI Interface,
@@ -180,12 +191,6 @@ config ENC28J60_FREQUENCY
 	---help---
 		Define to use a different bus frequency
 
-config ENC28J60_STATS
-	bool "Network statistics support"
-	default n
-	---help---
-		Collect network statistics
-
 config ENC28J60_HALFDUPPLEX
 	bool "Enable half dupplex"
 	default n
@@ -213,6 +218,7 @@ menuconfig ENCX24J600
 	default n
 	select SPI
 	select NET_RXAVAIL
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		References:
 		ENC424J600/624J600 Data Sheet Stand-Alone 10/100 Ethernet Controller
@@ -253,12 +259,6 @@ config ENCX24J600_NRXDESCR
 		The ENC has a relative large packet buffer of 24kB which can
 		be used to buffer multiple packets silmutaneously
 
-config ENCX24J600_STATS
-	bool "Network statistics support"
-	default n
-	---help---
-		Collect network statistics
-
 config ENCX24J600_DUMPPACKET
 	bool "Dump Packets"
 	default n
@@ -298,6 +298,7 @@ endif # NET_E1000
 menuconfig NET_SLIP
 	bool "SLIP (serial line) support"
 	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Reference: RFC 1055
 

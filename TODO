@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 25, 2015)
+NuttX TODO List (Last updated November 26, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,7 +16,7 @@ nuttx/
   (0)  Message Queues (sched/mqueue)
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (11)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -828,25 +828,6 @@ o Network (net/, drivers/net)
                INADDR_ANY(?)
   Status:      Open
   Priority:    Low
-
-  Title:       STANDARDIZE ETHERNET DRIVER STATISTICS
-  Description: Need to standardize collection of statistics from network
-               drivers.  Currently they are useless because they are not
-               accessible.  The solution is to standardize the structure
-               that holds the drivers statistics.  Then apps/nshlib
-               ifconfig command could present the driver statistics.
-
-               Currently these drivers support non-standard statistics:
-
-                 arch/arm/src/kinetis/kinetis_enet.c
-                 arch/arm/src/lpc17xx/lpc17_ethernet.c
-                 arch/arm/src/tiva/lm3s_ethernet.c
-                 arch/mips/src/pic32mx/pic32mx-ethernet.c
-                 arch/z80/src/ez80/ez80_emac.c
-
-               The other Ethernet drivers support no statistics.
-  Status:      Open
-  Priority:    Low.  This is not a bug but an enhancement idea.
 
   Title:       CONCURRENT TCP SEND OPERATIONS
   Description: At present, there cannot be two concurrent active TCP send
@@ -1728,9 +1709,9 @@ o ARM (arch/arm/)
                issues if, for example, floating point or perhaps long long operations
                were performed in an interrupt handler.
 
-               This issue exists for ARM7, ARM9, Cortex-M0, Cortex-M3, and
-               Cortex-M4 but has been addressed for the Cortex-A5.  The fix
-               is really simple can cannot be incorporated without some
+               This issue exists for ARM7, ARM9, and Cortex-M0 but has been
+               addressed for the Cortex-M3/4/7 and Cortex-A5/8.  The fix
+               is really simple but cannot be incorporated without some
                substantial testing.  For ARM, the fix is the following logic
                arround each call into C code from assembly:
 

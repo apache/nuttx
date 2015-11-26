@@ -163,6 +163,7 @@ struct ftmac100_driver_s
   uint32_t iobase;
 
   /* NuttX net data */
+
   bool ft_bifup;               /* true:ifup false:ifdown */
   WDOG_ID ft_txpoll;           /* TX poll timer */
   WDOG_ID ft_txtimeout;        /* TX timeout timer */
@@ -293,8 +294,6 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is no transmission in progress.
    */
-
-  /* Increment statistics */
 
   len = len < ETH_ZLEN ? ETH_ZLEN : len;
 
@@ -669,10 +668,6 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
       nvdbg ("RX buffer %d (%08x), %x received (%d)\n",
              priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
 
-      /* Check for errors and update statistics */
-
-      /* Check if the packet is a valid size for the uIP buffer configuration */
-
       /* Copy the data data from the hardware to priv->ft_dev.d_buf.  Set
        * amount of data in priv->ft_dev.d_len
        */
@@ -810,7 +805,7 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 {
   FAR struct ftmac100_txdes_s *txdes;
 
-  /* Check for errors and update statistics */
+  /* Check if a Tx was pending */
 
   while (priv->tx_pending)
     {
@@ -1081,8 +1076,6 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
 static inline void ftmac100_txtimeout_process(FAR struct ftmac100_driver_s *priv)
 {
-  /* Increment statistics and dump debug info */
-
   /* Then reset the hardware */
 
   nvdbg("TXTIMEOUT\n");

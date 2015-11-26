@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/enc28j60.h
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,31 +56,12 @@
  * CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
  *   devices that will be supported.
- * CONFIG_ENC28J60_STATS - Collect network statistics
  * CONFIG_ENC28J60_HALFDUPPLEX - Default is full duplex
  */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* This structure returns driver statistics (if enabled) */
-
-#ifdef CONFIG_ENC28J60_STATS
-struct enc_stats_s
-{
-  uint8_t  maxpktcnt;         /* Max. number of buffered RX packets */
-  uint32_t txrequests;        /* Number of TX packets queued */
-  uint32_t txifs;             /* TXIF completion events */
-  uint32_t txabrts;           /* TXIF completions with ESTAT.TXABRT */
-  uint32_t txerifs;           /* TXERIF error events */
-  uint32_t txtimeouts;        /* S/W detected TX timeouts */
-  uint32_t pktifs;            /* PKTIF RX completion events */
-  uint32_t rxnotok;           /* PKTIF without RXSTAT_OK */
-  uint32_t rxpktlen;          /* PKTIF with bad pktlen */
-  uint32_t rxerifs;           /* RXERIF error evernts */
-};
-#endif
 
 /* The ENC28J60 normal provides interrupts to the MCU via a GPIO pin.  The
  * following structure provides an MCU-independent mechanixm for controlling
@@ -150,29 +131,6 @@ extern "C"
 struct spi_dev_s; /* see nuttx/spi/spi.h */
 int enc_initialize(FAR struct spi_dev_s *spi,
                    FAR const struct enc_lower_s *lower, unsigned int devno);
-
-/****************************************************************************
- * Function: enc_stats
- *
- * Description:
- *   Return accumulated ENC28J60 statistics.  Statistics are cleared after
- *   being returned.
- *
- * Parameters:
- *   devno - If more than one ENC28J60 is supported, then this is the
- *           zero based number that identifies the ENC28J60;
- *   stats - The user-provided location to return the statistics.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ENC28J60_STATS
-int enc_stats(unsigned int devno, struct enc_stats_s *stats);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -85,7 +85,6 @@
  * CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
  *   devices that will be supported.
- * CONFIG_ENC28J60_STATS - Collect network statistics
  * CONFIG_ENC28J60_HALFDUPPLEX - Default is full duplex
  */
 
@@ -257,12 +256,6 @@ struct enc_driver_s
   /* This holds the information visible to uIP/NuttX */
 
   struct net_driver_s   dev;          /* Interface understood by uIP */
-
-  /* Statistics */
-
-#ifdef CONFIG_ENC28J60_STATS
-  struct enc_stats_s    stats;
-#endif
 };
 
 /****************************************************************************
@@ -1113,9 +1106,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
   /* Increment statistics */
 
   nllvdbg("Sending packet, pktlen: %d\n", priv->dev.d_len);
-#ifdef CONFIG_ENC28J60_STATS
-  priv->stats.txrequests++;
-#endif
+  NETDEV_TXPACKETS(&priv->dev);
 
   /* Verify that the hardware is ready to send another packet.  The driver
    * starts a transmission process by setting ECON1.TXRTS. When the packet is
@@ -1290,13 +1281,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 {
   /* Update statistics */
 
-#ifdef CONFIG_ENC28J60_STATS
-  priv->stats.txifs++;
-  if (enc_rdgreg(priv, ENC_ESTAT) & ESTAT_TXABRT)
-    {
-      priv->stats.txabrts++;
-    }
-#endif
+  NETDEV_TXDONE(&priv->dev);
 
   /* Clear the request to send bit */
 
@@ -1331,9 +1316,7 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
 {
   /* Update statistics */
 
-#ifdef CONFIG_ENC28J60_STATS
-  priv->stats.txerifs++;
-#endif
+  NETDEV_TXERRORS(&priv->dev);
 
   /* Reset TX */
 
@@ -1375,11 +1358,7 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
 
 static void enc_rxerif(FAR struct enc_driver_s *priv)
 {
-  /* Update statistics */
-
-#ifdef CONFIG_ENC28J60_STATS
-  priv->stats.rxerifs++;
-#endif
+  /* REVISIT: Update statistics */
 }
 
 /****************************************************************************
@@ -1413,6 +1392,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
       nllvdbg("IPv4 frame\n");
+      NETDEV_RXIPV4(&priv->dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
        * layer
@@ -1453,6 +1433,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
       nllvdbg("Iv6 frame\n");
+      NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */
 
@@ -1490,6 +1471,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   if (BUF->type == htons(ETHTYPE_ARP))
     {
       nllvdbg("ARP packet received (%02x)\n", BUF->type);
+      NETDEV_RXARP(&priv->dev);
+
       arp_arpin(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
@@ -1505,6 +1488,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #endif
     {
       nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+      NETDEV_RXDROPPED(&priv->dev);
     }
 }
 
@@ -1533,9 +1517,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   /* Update statistics */
 
-#ifdef CONFIG_ENC28J60_STATS
-  priv->stats.pktifs++;
-#endif
+  NETDEV_RXPACKETS(&priv->dev);
 
   /* Set the read pointer to the start of the received packet (ERDPT) */
 
@@ -1572,9 +1554,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   if ((rxstat & RXSTAT_OK) == 0)
     {
       nlldbg("ERROR: RXSTAT: %04x\n", rxstat);
-#ifdef CONFIG_ENC28J60_STATS
-      priv->stats.rxnotok++;
-#endif
+      NETDEV_RXERRORS(&priv->dev);
     }
 
   /* Check for a usable packet length (4 added for the CRC) */
@@ -1582,9 +1562,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
     {
       nlldbg("Bad packet size dropped (%d)\n", pktlen);
-#ifdef CONFIG_ENC28J60_STATS
-      priv->stats.rxpktlen++;
-#endif
+      NETDEV_RXERRORS(&priv->dev);
     }
 
   /* Otherwise, read and process the packet */
@@ -1787,18 +1765,13 @@ static void enc_irqworker(FAR void *arg)
 
       /* Ignore PKTIF because is unreliable. Use EPKTCNT instead */
       /* if ((eir & EIR_PKTIF) != 0) */
+
         {
           uint8_t pktcnt = enc_rdbreg(priv, ENC_EPKTCNT);
           if (pktcnt > 0)
             {
               nllvdbg("EPKTCNT: %02x\n", pktcnt);
 
-#ifdef CONFIG_ENC28J60_STATS
-              if (pktcnt > priv->stats.maxpktcnt)
-                {
-                  priv->stats.maxpktcnt = pktcnt;
-                }
-#endif
               /* Handle packet receipt */
 
               enc_pktif(priv);
@@ -1917,9 +1890,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Increment statistics and dump debug info */
 
-#ifdef CONFIG_ENC28J60_STATS
-  priv->stats.txtimeouts++;
-#endif
+  NETDEV_TXTIMEOUTS(&priv->dev);
 
   /* Then reset the hardware: Take the interface down, then bring it
    * back up
@@ -2693,42 +2664,4 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 
-/****************************************************************************
- * Function: enc_stats
- *
- * Description:
- *   Return accumulated ENC28J60 statistics.  Statistics are cleared after
- *   being returned.
- *
- * Parameters:
- *   devno - If more than one ENC28J60 is supported, then this is the
- *           zero based number that identifies the ENC28J60;
- *   stats - The user-provided location to return the statistics.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ENC28J60_STATS
-int enc_stats(unsigned int devno, struct enc_stats_s *stats)
-{
-  FAR struct enc_driver_s *priv ;
-  irqstate_t flags;
-
-  DEBUGASSERT(devno < CONFIG_ENC28J60_NINTERFACES);
-  priv = &g_enc28j60[devno];
-
-  /* Disable the Ethernet interrupt */
-
-  flags = irqsave();
-  memcpy(stats, &priv->stats, sizeof(struct enc_stats_s));
-  memset(&priv->stats, 0, sizeof(struct enc_stats_s));
-  irqrestore(flags);
-  return OK;
-}
-#endif
 #endif /* CONFIG_NET && CONFIG_ENC28J60_NET */
-

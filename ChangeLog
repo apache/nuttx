@@ -11163,3 +11163,13 @@
 	  loteardown() should not be called directory from applications.
 	  Rather, these functions are now available as IOCTL commands to the
 	  loop driver (2015-11-25).
+	* include/nuttx/net/netdev.h and several Ethernet drivers in arch/:
+	  Most network drivers to not support statistics.  Those that do only
+	  support them when DEBUG is enabled.  Each driver collects an
+	  architecture specific set of statistics and there is no mechanism in
+	  place to view those statistics.  Thus, the driver feature was mostly
+	  useless.  This change standardizes the driver statistics and puts the
+	  definition in the common network device structure defined in netdev.h
+	  where they can be accessed by network applications.  All Ethernet
+	  drivers that collect statistics have been adapted to use these common
+	  statistics (2015-11-26).

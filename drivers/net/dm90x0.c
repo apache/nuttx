@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/dm9x.c
  *
- *   Copyright (C) 2007-2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Davicom data sheets (DM9000-DS-F03-041906.pdf,
@@ -310,20 +310,6 @@ struct dm9x_driver_s
   void (*dm_write)(const uint8_t *ptr, int len);
   void (*dm_discard)(int len);
 
-#if defined(CONFIG_DM9X_STATS)
-  uint32_t dm_ntxpackets;      /* Count of packets sent */
-  uint32_t dm_ntxbytes;        /* Count of bytes sent */
-  uint32_t dm_ntxerrors;       /* Count of TX errors */
-  uint32_t dm_nrxpackets;      /* Count of packets received */
-  uint32_t dm_nrxbytes;        /* Count of bytes received */
-  uint32_t dm_nrxfifoerrors;   /* Count of RX FIFO overflow errors */
-  uint32_t dm_nrxcrcerrors;    /* Count of RX CRC errors */
-  uint32_t dm_nrxlengtherrors; /* Count of RX length errors */
-  uint32_t dm_nphyserrors;     /* Count of physical layer errors */
-  uint32_t dm_nresets;         /* Counts number of resets */
-  uint32_t dm_ntxtimeouts;     /* Counts resets caused by TX timeouts */
-#endif
-
   /* This holds the information visible to uIP/NuttX */
 
   struct net_driver_s dm_dev;
@@ -358,18 +344,6 @@ static void write32(const uint8_t *ptr, int len);
 /* static uint16_t dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset); */
 static uint16_t dm9x_phyread(struct dm9x_driver_s *dm9x, int reg);
 static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16_t value);
-
-#if defined(CONFIG_DM9X_STATS)
-static void dm9x_resetstatistics(struct dm9x_driver_s *dm9x);
-#else
-# define dm9x_resetstatistics(dm9x)
-#endif
-
-#if defined(CONFIG_DM9X_STATS) && defined(CONFIG_DEBUG)
-static void dm9x_dumpstatistics(struct dm9x_driver_s *dm9x);
-#else
-# define dm9x_dumpstatistics(dm9x)
-#endif
 
 #if defined(CONFIG_DM9X_CHECKSUM)
 static bool dm9x_rxchecksumready(uint8_t);
@@ -666,72 +640,6 @@ static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16_t value)
 }
 
 /****************************************************************************
- * Function: dm9x_resetstatistics
- *
- * Description:
- *   Reset all DM90x0 statistics
- *
- * Parameters:
- *   dm9x  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DM9X_STATS)
-static void dm9x_resetstatistics(struct dm9x_driver_s *dm9x)
-{
-  dm9x->dm_ntxpackets      = 0; /* Count of packets sent */
-  dm9x->dm_ntxbytes        = 0; /* Count of bytes sent */
-  dm9x->dm_ntxerrors       = 0; /* Count of TX errors */
-  dm9x->dm_nrxpackets      = 0; /* Count of packets received */
-  dm9x->dm_nrxbytes        = 0; /* Count of bytes received */
-  dm9x->dm_nrxfifoerrors   = 0; /* Count of RX FIFO overflow errors */
-  dm9x->dm_nrxcrcerrors    = 0; /* Count of RX CRC errors */
-  dm9x->dm_nrxlengtherrors = 0; /* Count of RX length errors */
-  dm9x->dm_nphyserrors     = 0; /* Count of physical layer errors */
-  dm9x->dm_nresets         = 0; /* Counts number of resets */
-  dm9x->dm_ntxtimeouts     = 0; /* Counts resets caused by TX timeouts */
-}
-#endif
-
-/****************************************************************************
- * Function: dm9x_dumpstatistics
- *
- * Description:
- *   Print the current value of all DM90x0 statistics
- *
- * Parameters:
- *   dm9x  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DM9X_STATS) && defined(CONFIG_DEBUG)
-static void dm9x_dumpstatistics(struct dm9x_driver_s *dm9x)
-{
-  ndbg("TX packets:            %d\n", dm9x->dm_ntxpackets);
-  ndbg("   bytes:              %d\n", dm9x->dm_ntxbytes);
-  ndbg("   errors:             %d\n", dm9x->dm_ntxerrors);
-  ndbg("RX packets:            %d\n", dm9x->dm_nrxpackets);
-  ndbg("   bytes:              %d\n", dm9x->dm_nrxbytes);
-  ndbg("   FIFO overflows:     %d\n", dm9x->dm_nrxfifoerrors);
-  ndbg("   CRC errors:         %d\n", dm9x->dm_nrxcrcerrors);
-  ndbg("   length errors:      %d\n", dm9x->dm_nrxlengtherrors);
-  ndbg("Physical layer errors: %d\n", dm9x->dm_nphyserrors);
-  ndbg("Resets:                %d\n", dm9x->dm_nresets);
-  ndbg("TX timeout resets:     %d\n", dm9x->dm_ntxtimeouts);
-}
-#endif
-
-/****************************************************************************
  * Function: dm9x_rxchecksumready
  *
  * Description:
@@ -787,10 +695,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
       /* Increment count of packets transmitted */
 
       dm9x->dm_ntxpending++;
-#if defined(CONFIG_DM9X_STATS)
-      dm9x->dm_ntxpackets++;
-      dm9x->dm_ntxbytes += dm9x->dm_dev.d_len;
-#endif
+      NETDEV_TXPACKETS(&dm9x0->dm_dev);
 
       /* Disable all DM90x0 interrupts */
 
@@ -960,33 +865,9 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
         {
           /* Bad RX packet... update statistics */
 
-#if defined(CONFIG_DM9X_STATS)
-          if (rx.desc.rx_status & 0x01)
-            {
-              dm9x->dm_nrxfifoerrors++;
-              ndbg("RX FIFO error: %d\n", dm9x->dm_nrxfifoerrors);
-            }
-
-          if (rx.desc.rx_status & 0x02)
-            {
-              dm9x->dm_nrxcrcerrors++;
-              ndbg("RX CRC error: %d\n", dm9x->dm_nrxcrcerrors);
-            }
-
-          if (rx.desc.rx_status & 0x80)
-            {
-              dm9x->dm_nrxlengtherrors++;
-              ndbg("RX length error: %d\n", dm9x->dm_nrxlengtherrors);
-            }
-
-          if (rx.desc.rx_status & 0x08)
-            {
-              dm9x->dm_nphyserrors++;
-              ndbg("Physical Layer error: %d\n", dm9x->dm_nphyserrors);
-            }
-#else
           ndbg("Received packet with errors: %02x\n", rx.desc.rx_status);
-#endif
+          NETDEV_RXERRORS(&dm9x->dm_dev);
+
           /* Drop this packet and continue to check the next packet */
 
           dm9x->dm_discard(rx.desc.rx_len);
@@ -996,10 +877,9 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 
       else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_MTU + 2))
         {
-#if defined(CONFIG_DM9X_STATS)
-          dm9x->dm_nrxlengtherrors++;
-          ndbg("RX length error: %d\n", dm9x->dm_nrxlengtherrors);
-#endif
+          ndbg("RX length error\n");
+          NETDEV_RXERRORS(&dm9x->dm_dev);
+
           /* Drop this packet and continue to check the next packet */
 
           dm9x->dm_discard(rx.desc.rx_len);
@@ -1023,6 +903,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
               nllvdbg("IPv4 frame\n");
+              NETDEV_RXIPV4(&priv->dm_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
                * layer
@@ -1063,6 +944,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
               nllvdbg("Iv6 frame\n");
+              NETDEV_RXIPV6(&priv->dm_dev);
 
               /* Give the IPv6 packet to the network layer */
 
@@ -1100,6 +982,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
           if (BUF->type == htons(ETHTYPE_ARP))
             {
               arp_arpin(&dm9x->dm_dev);
+              NETDEV_RXARP(&priv->dm_dev);
 
               /* If the above function invocation resulted in data that should be
                * sent out on the network, the field  d_len will set to a value > 0.
@@ -1111,12 +994,13 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
                 }
             }
 #endif
+          else
+            {
+              NETDEV_RXDROPPED(&priv->dm_dev);
+            }
         }
 
-#if defined(CONFIG_DM9X_STATS)
-      dm9x->dm_nrxpackets++;
-      dm9x->dm_nrxbytes += rx.desc.rx_len;
-#endif
+      NETDEV_RXPACKETS(&dm9x->dm_dev);
       dm9x->ncrxpackets++;
     }
   while ((rxbyte & 0x01) == DM9X_PKTRDY && dm9x->ncrxpackets < DM9X_CRXTHRES);
@@ -1326,15 +1210,9 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...)
 
   /* Increment statistics and dump debug info */
 
-#if defined(CONFIG_DM9X_STATS)
-  dm9x->dm_ntxtimeouts++;
-  dm9x->dm_ntxerrors++;
-#endif
+  NETDEV_TXTIMEOUTS(dm9x->dm_dev);
 
   ndbg("  TX packet count:           %d\n", dm9x->dm_ntxpending);
-#if defined(CONFIG_DM9X_STATS)
-  ndbg("  TX timeouts:               %d\n", dm9x->dm_ntxtimeouts);
-#endif
   ndbg("  TX read pointer address:   0x%02x:%02x\n",
        getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
   ndbg("  Memory data write address: 0x%02x:%02x (DM9010)\n",
@@ -1549,10 +1427,6 @@ static int dm9x_ifdown(struct net_driver_s *dev)
 
   dm9x->dm_bifup = false;
   irqrestore(flags);
-
-  /* Dump statistics */
-
-  dm9x_dumpstatistics(dm9x);
   return OK;
 }
 
@@ -1751,7 +1625,7 @@ static void dm9x_bringup(struct dm9x_driver_s *dm9x)
 
   dm9x->ncrxpackets   = 0; /* Number of continuous RX packets  */
   dm9x->dm_ntxpending = 0; /* Number of pending TX packets */
-  dm9x_resetstatistics(dm9x);
+  NETDEV_RESET_STATISTICS(&dm9x->dm_dev);
 
   /* Activate DM9000A/DM9010 */
 
@@ -1789,10 +1663,6 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
   /* Save previous register address */
 
   save = (uint8_t)DM9X_INDEX;
-
-#if defined(CONFIG_DM9X_STATS)
-  dm9x->dm_nresets++;
-#endif
   dm9x_bringup(dm9x);
 
   /* Wait up to 1 second for the link to be OK */

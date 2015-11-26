@@ -177,8 +177,6 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
    * must have assured that there is not transmission in progress.
    */
 
-  /* Increment statistics */
-
   /* Send the packet: address=vnet->sk_dev.d_buf, length=vnet->sk_dev.d_len */
 
   err = vnet_xmit(vnet->vnet, (char *)vnet->sk_dev.d_buf, vnet->sk_dev.d_len);
@@ -476,11 +474,7 @@ static void vnet_txtimeout(int argc, uint32_t arg, ...)
 {
   FAR struct vnet_driver_s *vnet = (FAR struct vnet_driver_s *)arg;
 
-  /* Increment statistics and dump debug info */
-
-  /* Then reset the hardware */
-
-  /* Then poll the network for new XMIT data */
+  /* Poll the network for new XMIT data */
 
   (void)devif_poll(&vnet->sk_dev, vnet_txpoll);
 }

@@ -174,6 +174,9 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 
   while (priv->lo_dev.d_len > 0)
     {
+       NETDEV_TXPACKETS(&priv->lo_dev);
+       NETDEV_RXPACKETS(&priv->lo_dev);
+
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
@@ -186,6 +189,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
       if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->lo_dev);
           ipv4_input(&priv->lo_dev);
         }
       else
@@ -194,16 +198,19 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->lo_dev);
           ipv6_input(&priv->lo_dev);
         }
       else
 #endif
         {
           ndbg("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
+          NETDEV_RXDROPPED(&priv->lo_dev);
           priv->lo_dev.d_len = 0;
         }
 
       priv->lo_txdone = true;
+      NETDEV_TXDONE(&priv->lo_dev);
     }
 
   return 0;

@@ -130,27 +130,9 @@
 #define SLIP_WDDELAY   (1*1000000)
 #define SLIP_POLLHSEC  (1*2)
 
-/* Statistics helper */
-
-#ifdef CONFIG_NET_STATISTICS
-#  define SLIP_STAT(p,f) (p->stats.f)++
-#else
-#  define SLIP_STAT(p,f)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* Driver statistics */
-
-#ifdef CONFIG_NET_STATISTICS
-struct slip_statistics_s
-{
-  uint32_t transmitted;     /* Number of packets transmitted */
-  uint32_t received         /* Number of packets received */
-};
-#endif
 
 /* The slip_driver_s encapsulates all state information for a single hardware
  * interface
@@ -165,12 +147,6 @@ struct slip_driver_s
   pid_t         rxpid;      /* Receiver thread ID */
   pid_t         txpid;      /* Transmitter thread ID */
   sem_t         waitsem;    /* Mutually exclusive access to uIP */
-
-  /* Driver statistics */
-
-#ifdef CONFIG_NET_STATISTICS
-  struct slip_statistics_s stats;
-#endif
 
   /* This holds the information visible to uIP/NuttX */
 
@@ -312,7 +288,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
   /* Increment statistics */
 
   nvdbg("Sending packet size %d\n", priv->dev.d_len);
-  SLIP_STAT(priv, transmitted);
+  NETDEV_TXPACKETS(&priv->dev);
 
   /* Send an initial END character to flush out any data that may have
    * accumulated in the receiver due to line noise
@@ -393,6 +369,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
   /* And send the END token */
 
   slip_putc(priv, SLIP_END);
+  NETDEV_TXDONE(&priv->dev);
   priv->txnodelay = true;
   return OK;
 }
@@ -736,7 +713,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
        */
 
       slip_receive(priv);
-      SLIP_STAT(priv, received);
+      NETDEV_RXPACKETS(&priv->dev);
 
       /* All packets are assumed to be IP packets (we don't have a choice..
        * there is no Ethernet header containing the EtherType).  So pass the
@@ -746,6 +723,8 @@ static int slip_rxtask(int argc, FAR char *argv[])
 
       if (priv->rxlen >= IPv4_HDRLEN)
         {
+          NETDEV_RXIPV4(&priv->dev);
+
           /* Handle the IP input.  Get exclusive access to uIP. */
 
           slip_semtake(priv);
@@ -770,7 +749,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
         }
       else
         {
-          SLIP_STAT(priv, rxsmallpacket);
+          NETDEV_RXERRORS(&priv->dev);
         }
     }
 

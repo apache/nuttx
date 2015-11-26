@@ -208,6 +208,8 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
 
   /* Increment statistics */
 
+  NETDEV_TXPACKETS(priv->sk_dev);
+
   /* Send the packet: address=priv->sk_dev.d_buf, length=priv->sk_dev.d_len */
 
   /* Enable Tx interrupts */
@@ -334,6 +336,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->sk_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -374,6 +377,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->sk_dev);
 
           /* Give the IPv6 packet to the network layer */
 
@@ -411,6 +415,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&priv->sk_dev);
+          NETDEV_RXARP(&priv->sk_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -422,6 +427,10 @@ static void skel_receive(FAR struct skel_driver_s *priv)
             }
         }
 #endif
+      else
+        {
+          NETDEV_RXDROPPED(&priv->sk_dev);
+        }
     }
   while (); /* While there are more packets to be processed */
 }
@@ -446,6 +455,8 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 static void skel_txdone(FAR struct skel_driver_s *priv)
 {
   /* Check for errors and update statistics */
+
+  NETDEV_TXDONE(priv->sk_dev);
 
   /* If no further xmits are pending, then cancel the TX timeout and
    * disable further Tx interrupts.
@@ -606,6 +617,8 @@ static int skel_interrupt(int irq, FAR void *context)
 static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)
 {
   /* Increment statistics and dump debug info */
+
+  NETDEV_TXTIMEOUTS(priv->sk_dev);
 
   /* Then reset the hardware */
 
