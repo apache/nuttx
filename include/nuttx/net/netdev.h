@@ -157,7 +157,7 @@ struct netdev_statistics_s
   /* Tx Status */
 
   uint32_t tx_packets;     /* Number of Tx packets queued */
-  unit32_t tx_done;        /* Number of packets completed */
+  uint32_t tx_done;        /* Number of packets completed */
   uint32_t tx_errors;      /* Number of receive errors (incl timeouts) */
   uint32_t tx_timeouts;    /* Number of Tx timeout errors */
 
