@@ -72,7 +72,7 @@
 #  define NETDEV_RESET_STATISTICS(dev) \
      memset(&(dev)->d_statistics, 0, sizeof(struct netdev_statistics_s))
 
-#  define _NETDEV_STATISTIC(dev,name) ((dev)->d_statistics.name)
+#  define _NETDEV_STATISTIC(dev,name) ((dev)->d_statistics.name++)
 #  define _NETDEV_ERROR(dev,name) \
      do \
        { \
