@@ -169,7 +169,9 @@ void stm32_usbinitialize(void)
 int stm32_usbhost_initialize(void)
 {
   int pid;
+#if defined(CONFIG_USBHOST_HUB) || defined(CONFIG_USBHOST_MSC) || defined(CONFIG_USBHOST_CDCACM)
   int ret;
+#endif
 
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:
