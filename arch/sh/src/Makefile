@@ -36,8 +36,9 @@
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
-KDEFINE = ${shell $(TOPDIR)/tools/define.sh "$(CC)" __KERNEL__}
-CFLAGS += $(KDEFINE)
+CPPFLAGS += $(EXTRADEFINES)
+CFLAGS += $(EXTRADEFINES)
+CXXFLAGS += $(EXTRADEFINES)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
