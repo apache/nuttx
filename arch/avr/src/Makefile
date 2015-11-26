@@ -71,6 +71,9 @@ CFLAGS += $(INCLUDES)
 CXXFLAGS += $(INCLUDES)
 AFLAGS += $(INCLUDES)
 
+KDEFINE = ${shell $(TOPDIR)/tools/define.sh "$(CC)" __KERNEL__}
+CFLAGS += $(KDEFINE)
+
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
 STARTUP_OBJS ?= $(HEAD_OBJ)
 

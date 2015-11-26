@@ -40,6 +40,9 @@ ifeq ($(CONFIG_ARCH_I486),y)
 ARCH_SUBDIR = i486
 endif
 
+KDEFINE = ${shell $(TOPDIR)/tools/define.sh "$(CC)" __KERNEL__}
+CFLAGS += $(KDEFINE)
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
   NUTTX = $(TOPDIR)\nuttx$(EXEEXT)
