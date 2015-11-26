@@ -139,6 +139,7 @@ config LPC17_ETHERNET
 	bool "Ethernet"
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
 	default n
 
 config LPC17_LCD

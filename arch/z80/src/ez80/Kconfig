@@ -26,6 +26,7 @@ config EZ80_EMAC
 	bool "Ethernet MAC"
 	default n
 	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Enables support for ez80 EMAC driver.
 

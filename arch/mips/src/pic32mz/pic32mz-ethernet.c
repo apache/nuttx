@@ -308,42 +308,6 @@
  * Private Types
  ****************************************************************************/
 
-/* EMAC statistics (debug only) */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-struct pic32mz_statistics_s
-{
-  uint32_t rx_done;        /* Rx done interrupts */
-  uint32_t rx_errors;      /* Number of Rx error interrupts */
-  uint32_t rx_ovflw;       /*   Number of Rx overflow error interrupts */
-  uint32_t rx_bufna;       /*   Number of Rx buffer not available errors */
-  uint32_t rx_buse;        /*   Number of Rx BVCI bus errors */
-  uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-#ifdef CONFIG_NET_IPv4
-  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
-#endif
-#ifdef CONFIG_NET_IPv6
-  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
-#endif
-  uint32_t rx_arp;         /*   Number of Rx ARP packets received */
-  uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
-  uint32_t rx_pkterr;      /*   Number of dropped, error in Rx descriptor */
-  uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
-  uint32_t rx_fragment;    /*   Number of dropped, packet fragments */
-  uint32_t tx_done;        /* Tx done interrupts */
-  uint32_t tx_errors;      /* Number of Tx error interrupts (OR of other errors) */
-  uint32_t tx_abort;       /*   Number of Tx abort interrupts */
-  uint32_t tx_buse;        /*   Number of Tx bus errors */
-  uint32_t tx_packets;     /* Number of Tx packets queued */
-  uint32_t tx_pending;     /* Number of Tx packets that had to wait for a TxDesc */
-  uint32_t tx_unpend;      /* Number of pending Tx packets that were sent */
-  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
-};
-#  define EMAC_STAT(priv,name) priv->pd_stat.name++
-#else
-#  define EMAC_STAT(priv,name)
-#endif
-
 /* The pic32mz_driver_s encapsulates all state information for a single hardware
  * interface
  */
@@ -373,10 +337,6 @@ struct pic32mz_driver_s
   WDOG_ID    pd_txtimeout;      /* TX timeout timer */
 
   sq_queue_t pd_freebuffers;    /* The free buffer list */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  struct pic32mz_statistics_s pd_stat;
-#endif
 
   /* This holds the information visible to uIP/NuttX */
 
@@ -1069,7 +1029,7 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
 
   /* Increment statistics and dump the packet (if so configured) */
 
-  EMAC_STAT(priv, tx_packets);
+  NETDEV_TXPACKETS(&priv->pd_dev);
   pic32mz_dumppacket("Transmit packet", priv->pd_dev.d_buf, priv->pd_dev.d_len);
 
   /* In order to transmit a message:
@@ -1366,7 +1326,6 @@ static void pic32mz_response(struct pic32mz_driver_s *priv)
        priv->pd_txpending = true;
        priv->pd_inten    &= ~ETH_RXINTS;
        pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
-       EMAC_STAT(priv, tx_pending);
     }
 }
 
@@ -1415,7 +1374,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       /* Update statistics */
 
-      EMAC_STAT(priv, rx_packets);
+      NETDEV_RXPACKETS(&priv->pd_dev);
 
       /* Get the packet length */
 
@@ -1426,7 +1385,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
           nlldbg("ERROR. rsv1: %08x rsv2: %08x\n", rxdesc->rsv1, rxdesc->rsv2);
-          EMAC_STAT(priv, rx_pkterr);
+          NETDEV_RXERRORS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
 
@@ -1439,7 +1398,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("Too big. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
-          EMAC_STAT(priv, rx_pktsize);
+          NETDEV_RXERRORS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
 
@@ -1449,7 +1408,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
           nlldbg("Fragment. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
-          EMAC_STAT(priv, rx_fragment);
+          NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
       else
@@ -1487,12 +1446,12 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
               nllvdbg("IPv4 frame\n");
+              NETDEV_RXIPV4(&priv->pd_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
                * layer
                */
 
-              EMAC_STAT(priv, rx_ip);
               arp_ipin(&priv->pd_dev);
               ipv4_input(&priv->pd_dev);
 
@@ -1529,10 +1488,10 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
               nllvdbg("Iv6 frame\n");
+              NETDEV_RXIPV6(&priv->pd_dev);
 
               /* Give the IPv6 packet to the network layer */
 
-              EMAC_STAT(priv, rx_ipv6);
               ipv6_input(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
@@ -1569,7 +1528,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
             {
               /* Handle the incoming ARP packet */
 
-              EMAC_STAT(priv, rx_arp);
+              NETDEV_RXARP(&priv->pd_dev);
               arp_arpin(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
@@ -1588,7 +1547,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
               /* Unrecognized... drop it. */
 
               nlldbg("Unrecognized packet type dropped: %04x\n", ntohs(BUF->type));
-              EMAC_STAT(priv, rx_dropped);
+              NETDEV_RXDROPPED(&priv->pd_dev);
             }
 
           /* Discard any buffers still attached to the device structure */
@@ -1686,7 +1645,6 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
       /* Clear the pending condition, send the packet, and restore Rx interrupts */
 
       priv->pd_txpending = false;
-      EMAC_STAT(priv, tx_unpend);
 
       pic32mz_transmit(priv);
 
@@ -1750,9 +1708,8 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-           nlldbg("RX Overrun. status: %08x\n", status);
-           EMAC_STAT(priv, rx_errors);
-           EMAC_STAT(priv, rx_ovflw);
+          nlldbg("RX Overrun. status: %08x\n", status);
+          NETDEV_RXERRORS(&priv->pd_dev);
         }
 
       /* RXBUFNA: Receive Buffer Not Available Interrupt.  This bit is set by
@@ -1763,8 +1720,7 @@ static int pic32mz_interrupt(int irq, void *context)
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
           nlldbg("RX buffer descriptor overrun. status: %08x\n", status);
-          EMAC_STAT(priv, rx_errors);
-          EMAC_STAT(priv, rx_bufna);
+          NETDEV_RXERRORS(&priv->pd_dev);
         }
 
       /* RXBUSE: Receive BVCI Bus Error Interrupt.  This bit is set when the
@@ -1775,8 +1731,7 @@ static int pic32mz_interrupt(int irq, void *context)
       if ((status & ETH_INT_RXBUSE) != 0)
         {
           nlldbg("RX BVCI bus error. status: %08x\n", status);
-          EMAC_STAT(priv, rx_errors);
-          EMAC_STAT(priv, rx_buse);
+          NETDEV_RXERRORS(&priv->pd_dev);
         }
 
       /* Receive Normal Events **********************************************/
@@ -1798,8 +1753,6 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXDONE) != 0)
         {
-          EMAC_STAT(priv, rx_done);
-
           /* We have received at least one new incoming packet. */
 
           pic32mz_rxdone(priv);
@@ -1821,8 +1774,7 @@ static int pic32mz_interrupt(int irq, void *context)
       if ((status & ETH_INT_TXABORT) != 0)
         {
           nlldbg("TX abort. status: %08x\n", status);
-          EMAC_STAT(priv, tx_errors);
-          EMAC_STAT(priv, tx_abort);
+          NETDEV_TXERRORS(&priv->pd_dev);
         }
 
       /* TXBUSE: Transmit BVCI Bus Error Interrupt. This bit is set when the
@@ -1833,8 +1785,7 @@ static int pic32mz_interrupt(int irq, void *context)
       if ((status & ETH_INT_TXBUSE) != 0)
         {
           nlldbg("TX BVCI bus error. status: %08x\n", status);
-          EMAC_STAT(priv, tx_errors);
-          EMAC_STAT(priv, tx_buse);
+          NETDEV_TXERRORS(&priv->pd_dev);
         }
 
       /* TXDONE: Transmit Done Interrupt.  This bit is set when the currently
@@ -1846,7 +1797,7 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXDONE) != 0)
         {
-          EMAC_STAT(priv, tx_done);
+          NETDEV_TXDONE(&priv->pd_dev);
 
           /* A packet transmission just completed */
 
@@ -1906,7 +1857,7 @@ static void pic32mz_txtimeout(int argc, uint32_t arg, ...)
 
   /* Increment statistics and dump debug info */
 
-  EMAC_STAT(priv, tx_timeouts);
+  NETDEV_TXTIMEOUTS(&priv->pd_dev);
   if (priv->pd_ifup)
     {
       /* Then reset the hardware. ifup() will reset the interface, then bring
