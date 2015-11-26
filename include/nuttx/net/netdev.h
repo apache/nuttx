@@ -109,6 +109,7 @@
 #  define NETDEV_ERRORS(dev)      _NETDEV_STATISTIC(dev,errors)
 
 #else
+#  define NETDEV_RESET_STATISTICS(dev)
 #  define NETDEV_RXPACKETS(dev)
 #  define NETDEV_RXFRAGMENTS(dev)
 #  define NETDEV_RXERRORS(dev)
