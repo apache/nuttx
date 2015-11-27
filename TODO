@@ -442,9 +442,6 @@ o Kernel/Protected Build
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
                ps       sched_foreach()
-               ifup     netdev_foreach()
-               ifdown   netdev_foreach()
-               ifconfig netdev_foreach()
                ping     icmp_ping()
 
                The busybox mkfatfs does not involve any OS calls; it does
