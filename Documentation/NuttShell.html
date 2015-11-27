@@ -2859,17 +2859,17 @@ nsh>
   </tr>
   <tr>
     <td><b><code>ifconfig</code></b></td>
-    <td><code>CONFIG_NET</code></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_FS_PROCFS</code> &amp;&amp; !<code>CONFIG_FS_PROCFS_EXCLUDE_NET</code></td>
     <td><code>CONFIG_NSH_DISABLE_IFCONFIG</code></td>
   </tr>
   <tr>
     <td><b><code>ifdown</code></b></td>
-    <td><code>CONFIG_NET</code></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_FS_PROCFS</code> &amp;&amp; !<code>CONFIG_FS_PROCFS_EXCLUDE_NET</code></td>
     <td><code>CONFIG_NSH_DISABLE_IFUPDOWN</code></td>
   </tr>
   <tr>
     <td><b><code>ifup</code></b></td>
-    <td><code>CONFIG_NET</code></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_FS_PROCFS</code> &amp;&amp; !<code>CONFIG_FS_PROCFS_EXCLUDE_NET</code></td>
     <td><code>CONFIG_NSH_DISABLE_IFUPDOWN</code></td>
   </tr>
   <tr>
