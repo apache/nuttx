@@ -1364,6 +1364,8 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
   uint32_t status;
   uint16_t txhead;
 
+  NETDEV_TXPACKETS(&priv->dev);
+
   /* Check parameter */
 
   if (dev->d_len > EMAC_TX_UNITSIZE)
@@ -1642,6 +1644,8 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
+      NETDEV_RXFRAGMENTS(&priv->dev);
+
       /* The start of frame bit indicates the beginning of a frame.  Discard
        * any previous fragments.
        */
@@ -1722,6 +1726,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                 }
               while (rxndx != xfrq->rxndx);
 
+              NETDEV_RXERRORS(&priv->dev);
               return -EIO;
             }
 
@@ -1796,6 +1801,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                 {
                   nlldbg("ERROR: Buffer size %d; frame size %d\n",
                          dev->d_len, pktlen);
+                  NETDEV_RXERRORS(&priv->dev);
                   return -E2BIG;
                 }
 
@@ -1876,6 +1882,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
   while (sam_recvframe(priv, qid) == OK)
     {
       sam_dumppacket("Received packet", dev->d_buf, dev->d_len);
+      NETDEV_RXPACKETS(&priv->dev);
 
       /* Check if the packet is a valid size for the network buffer
        * configuration (this should not happen)
@@ -1884,6 +1891,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          NETDEV_RXERRORS(&priv->dev);
           continue;
         }
 
@@ -1899,6 +1907,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1939,6 +1948,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1976,6 +1986,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
       if (BUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP frame\n");
+          NETDEV_RXARP(&priv->dev);
 
           /* Handle ARP packet */
 
@@ -1994,6 +2005,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 #endif
         {
           nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          NETDEV_RXDROPPED(&priv->dev);
         }
     }
 }
@@ -2051,6 +2063,8 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
 
           break;
         }
+
+      NETDEV_TXDONE(&priv->dev);
 
       /* Process all buffers of the current transmitted frame */
 
@@ -2120,6 +2134,8 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
   struct sam_queue_s *xfrq;
   uint32_t regval;
   uint16_t tail;
+
+  NETDEV_TXERRORS(&priv->dev);
 
   /* Clear TXEN bit into the Network Configuration Register.  This is a
    * workaround to recover from TX lockups that occur on sama5d3 gmac
@@ -2360,6 +2376,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
       if ((tsr & EMAC_TSR_COL) != 0)
         {
           nlldbg("ERROR: Collision occurred TSR: %08x\n", tsr);
+          NETDEV_TXERRORS(&priv->dev);
         }
 
       /* Check Transmit Frame Corruption due to AHB error (TFC) */
@@ -2367,6 +2384,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
       if ((tsr & EMAC_TSR_TFC) != 0)
         {
           nlldbg("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
+          NETDEV_TXERRORS(&priv->dev);
         }
 
       /* Clear status */
@@ -2562,6 +2580,7 @@ static int sam_emac1_interrupt(int irq, void *context)
 static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
 {
   nlldbg("Timeout!\n");
+  NETDEV_TXTIMEOUTS(&priv->dev);
 
   /* Reset the hardware.  Just take the interface down, then back up again. */
 
