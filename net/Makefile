@@ -42,6 +42,12 @@ ifeq ($(CONFIG_NET),y)
 NET_ASRCS   =
 NET_CSRCS   = net_initialize.c
 
+ifeq ($(CONFIG_FS_PROCFS),y)
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_NET),y)
+NET_CSRCS  += net_procfs.c
+endif
+endif
+
 # Socket support
 
 SOCK_ASRCS  =

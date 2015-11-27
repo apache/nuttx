@@ -39,6 +39,11 @@ config FS_PROCFS_EXCLUDE_MOUNTS
 	default n
 	depends on !DISABLE_MOUNTPOINT
 
+config FS_PROCFS_EXCLUDE_NET
+	bool "Exclude network"
+	depends on NET
+	default n
+
 config FS_PROCFS_EXCLUDE_MTD
 	bool "Exclude mtd"
 	depends on MTD

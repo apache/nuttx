@@ -453,6 +453,9 @@ o Kernel/Protected Build
 
                  http://git.busybox.net/busybox/tree/util-linux/mkfs_vfat.c
 
+               ps, ifup, ifdown, ifconfig should be implemented using
+               extensions to the procfs file system.
+
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
@@ -1553,6 +1556,7 @@ o Graphics subsystem (graphics/)
   Status:      Open
   Priority:    Low, not a serious issue but worth noting.  There is no plan
                to change this behavior.
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1795,7 +1799,7 @@ o NuttShell (NSH) (apps/nshlib)
                show status for the single interface on the command line; it will
                still show status for all interfaces.
   Status:      Open
-  Priority:    Low (multiple network interfaces not fully supported yet anyway).
+  Priority:    Low
 
   Title:       ARP COMMAND
   Description: Add an ARP command so that we can see and modify the contents of

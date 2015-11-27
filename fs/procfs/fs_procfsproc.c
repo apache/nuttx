@@ -125,9 +125,9 @@ struct proc_file_s
 
 struct proc_dir_s
 {
-  struct procfs_dir_priv_s  base;     /* Base directory private data */
+  struct procfs_dir_priv_s base;      /* Base directory private data */
   FAR const struct proc_node_s *node; /* Directory node description */
-  pid_t pid;                       /* ID of task/thread for attributes */
+  pid_t pid;                          /* ID of task/thread for attributes */
 };
 
 /****************************************************************************

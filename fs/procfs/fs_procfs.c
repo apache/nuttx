@@ -79,10 +79,13 @@ extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations uptime_operations;
 
-/* This is not good.  These are implemented in drivers/mtd.  Having to
- * deal with them here is not a good coupling.
+/* This is not good.  These are implemented in other sub-systems.  Having to
+ * deal with them here is not a good coupling. What is really needed is a
+ * run-time procfs registration system vs. a build time, fixed procfs
+ * configuration.
  */
 
+extern const struct procfs_operations net_procfsoperations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
@@ -115,6 +118,11 @@ static const struct procfs_entry_s g_procfsentries[] =
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 //{ "fs/smartfs",       &smartfs_procfsoperations },
   { "fs/smartfs**",     &smartfs_procfsoperations },
+#endif
+
+#if defined(CONFIG_NET) && !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
+  { "net",              &net_procfsoperations },
+  { "net/**",           &net_procfsoperations },
 #endif
 
 #if defined(CONFIG_MTD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
@@ -483,7 +491,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       level0->base.nentries = 0;
 #endif
 
-      /* Initialze lastread entries */
+      /* Initialize lastread entries */
 
       level0->lastread = "";
       level0->lastlen = 0;
@@ -533,7 +541,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
               /* Doing an intermediate directory search */
 
-              /* The path refers to the top level directory.  Allocate the level0
+              /* The path refers to the top level directory.  Allocate the level1
                * dirent structure.
                */
 
@@ -756,8 +764,8 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        */
 
       if (strncmp(g_procfsentries[level1->base.index].pathpattern,
-              g_procfsentries[level1->firstindex].pathpattern,
-              level1->subdirlen) == 0)
+                  g_procfsentries[level1->firstindex].pathpattern,
+                  level1->subdirlen) == 0)
         {
           /* This entry matches.  Report the subdir entry */
 

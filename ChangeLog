@@ -11173,3 +11173,6 @@
 	  where they can be accessed by network applications.  All Ethernet
 	  drivers that collect statistics have been adapted to use these common
 	  statistics (2015-11-26).
+	* net/net_procfs.c:  Add basic support for networking entries in the
+	  procfs (2015-11-27).
+
