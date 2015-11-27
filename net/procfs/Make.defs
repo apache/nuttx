@@ -1,7 +1,7 @@
 ############################################################################
-# net/Makefile
+# net/procfs/Make.defs
 #
-#   Copyright (C) 2007, 2008, 2011-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,83 +33,25 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Network procfs support
 
-ifeq ($(CONFIG_NET),y)
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+ifeq  ($(CONFIG_FS_PROCFS),y)
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_NET),y)
 
-# Basic networking support
+NET_CSRCS += net_procfs.c
 
-NET_ASRCS   =
-NET_CSRCS   = net_initialize.c
+# General network statistics
 
-# Socket support
-
-SOCK_ASRCS  =
-SOCK_CSRCS  =
-
-# Support for operations on network devices
-
-NETDEV_ASRCS =
-NETDEV_CSRCS =
-
-VPATH =
-DEPPATH = --dep-path .
-
-include socket/Make.defs
-include netdev/Make.defs
-include iob/Make.defs
-include arp/Make.defs
-include icmp/Make.defs
-include icmpv6/Make.defs
-include neighbor/Make.defs
-include igmp/Make.defs
-include pkt/Make.defs
-include local/Make.defs
-include tcp/Make.defs
-include udp/Make.defs
-include devif/Make.defs
-include loopback/Make.defs
-include route/Make.defs
-include procfs/Make.defs
-include utils/Make.defs
+ifeq ($(CONFIG_NET_STATISTICS),y)
+  NET_CSRCS += net_statistics.c
 endif
 
-ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+# Include packet socket build support
 
-CSRCS		= $(SOCK_CSRCS) $(NETDEV_CSRCS) $(NET_CSRCS)
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+DEPPATH += --dep-path procfs
+VPATH += :procfs
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-BIN		= libnet$(LIBEXT)
-
-all:	$(BIN)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-$(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-ifeq ($(CONFIG_NET),y)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-endif
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, $(BIN))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+endif # CONFIG_FS_PROCFS_EXCLUDE_NET
+endif # CONFIG_FS_PROCFS
+endif # CONFIG_DISABLE_MOUNTPOINT
