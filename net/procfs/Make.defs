@@ -39,7 +39,7 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 ifeq  ($(CONFIG_FS_PROCFS),y)
 ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_NET),y)
 
-NET_CSRCS += net_procfs.c
+NET_CSRCS += net_procfs.c netdev_statistics.c
 
 # General network statistics
 

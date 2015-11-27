@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/procfs/net_statisticsc
+ * net/procfs/net_statistics.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -436,7 +436,7 @@ static int netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_readstats
+ * Name: netprocfs_read_netstats
  *
  * Description:
  *   Read and format network layer statistics.
@@ -453,84 +453,10 @@ static int netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile)
  *
  ****************************************************************************/
 
-ssize_t net_readstats(FAR struct netprocfs_file_s *priv, FAR char *buffer,
-                      size_t buflen)
+ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen)
 {
-  size_t xfrsize;
-  ssize_t nreturned;
-
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
-
-  /* Is there line data already buffered? */
-
-  nreturned = 0;
-  if (priv->linesize > 0)
-    {
-      /* Yes, how much can we transfer now? */
-
-      xfrsize = priv->linesize;
-      if (xfrsize > buflen)
-        {
-          xfrsize = buflen;
-        }
-
-      /* Transfer the data to the user buffer */
-
-      memcpy(buffer, &priv->line[priv->offset], xfrsize);
-
-      /* Update pointers, sizes, and offsets */
-
-      buffer         += xfrsize;
-      buflen         -= xfrsize;
-
-      priv->linesize -= xfrsize;
-      priv->offset   += xfrsize;
-      nreturned       = xfrsize;
-    }
-
-  /* Loop until the user buffer is full or until all of the network
-   * statistics have been transferred.  At this point we know that
-   * either:
-   *
-   * 1. The user buffer is full, and/or
-   * 2. All of the current line data has been transferred.
-   */
-
-  while (buflen > 0 && priv->lineno < NSTAT_LINES)
-    {
-      int len;
-
-      /* Read the next line into the working buffer */
-
-      len = g_linegen[priv->lineno](priv);
-
-      /* Update line-related information */
-
-      priv->lineno++;
-      priv->linesize = len;
-      priv->offset = 0;
-
-      /* Transfer data to the user buffer */
-
-      xfrsize = priv->linesize;
-      if (xfrsize > buflen)
-        {
-          xfrsize = buflen;
-        }
-
-      memcpy(buffer, &priv->line[priv->offset], xfrsize);
-
-      /* Update pointers, sizes, and offsets */
-
-      buffer         += xfrsize;
-      buflen         -= xfrsize;
-
-      priv->linesize -= xfrsize;
-      priv->offset   += xfrsize;
-      nreturned      += xfrsize;
-    }
-
-  return nreturned;
+  return netprocfs_read_linegen(priv, buffer, buflen, g_linegen, NSTAT_LINES);
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&

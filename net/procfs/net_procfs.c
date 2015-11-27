@@ -47,6 +47,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -55,7 +56,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/net/netdev.h>
 
+#include "netdev/netdev.h"
 #include "procfs/procfs.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
@@ -64,6 +67,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* File system methods */
 
 static int     netprocfs_open(FAR struct file *filep, FAR const char *relpath,
@@ -120,6 +124,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
                           int oflags, mode_t mode)
 {
   FAR struct netprocfs_file_s *priv;
+  FAR struct net_driver_s *dev;
 
   fvdbg("Open '%s'\n", relpath);
 
@@ -136,15 +141,48 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "net/stat" is the only acceptable value for the relpath */
+  /* "net/stat" is an acceptable value for the relpath only if network layer
+   * statistics are enabled.
+   */
 
-  if (strcmp(relpath, "net/stat") != 0)
+#ifdef CONFIG_NET_STATISTICS
+  if (strcmp(relpath, "net/stat") == 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
+      /* A NULL network device reference is a clue that we are processing
+       * the network statistics file.
+       */
+
+      dev = NULL;
+    }
+  else
+#endif
+    {
+      FAR char *devname;
+      FAR char *copy;
+
+      /* Otherwise, we need to search the list of registered network devices
+       * to determine if the name corresponds to a network device.
+       */
+
+      copy = strdup(relpath);
+      if (copy == NULL)
+        {
+          fdbg("ERROR: strdup failed\n");
+          return -ENOMEM;
+        }
+
+      devname = basename(copy);
+      dev     = netdev_findbyname(devname);
+      kmm_free(copy);
+
+      if (dev == NULL)
+        {
+          fdbg("ERROR: relpath is '%s'\n", relpath);
+          return -ENOENT;
+        }
     }
 
-  /* Allocate a container to hold the task and attribute selection */
+  /* Allocate the open file structure */
 
   priv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!priv)
@@ -153,7 +191,13 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  /* Save the index as the open-specific state in filep->f_priv */
+  /* Initialize the open-file structure */
+
+  priv->dev = dev;
+
+  /* Save the open file structure as the open-specific state in
+   * filep->f_priv.
+   */
 
   filep->f_priv = (FAR void *)priv;
   return OK;
@@ -186,7 +230,6 @@ static int netprocfs_close(FAR struct file *filep)
 static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen)
 {
-#ifdef CONFIG_NET_STATISTICS
   FAR struct netprocfs_file_s *priv;
   ssize_t nreturned;
 
@@ -197,9 +240,24 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct netprocfs_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  /* Read the network layer statistics */
+#ifdef CONFIG_NET_STATISTICS
+  /* A NULL device structure reference is the key that we are showing the
+   * network statistics.
+   */
 
-  nreturned = net_readstats(priv, buffer, buflen);
+  if (priv->dev == NULL)
+    {
+      /* Show the network layer statistics */
+
+      nreturned = netprocfs_read_netstats(priv, buffer, buflen);
+    }
+  else
+#endif
+   {
+      /* Otherwise, we are showing device-specific statistics */
+
+      nreturned = netprocfs_read_devstats(priv, buffer, buflen);
+   }
 
   /* Update the file offset */
 
@@ -209,9 +267,6 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
     }
 
   return nreturned;
-#else
-  return 0;
-#endif
 }
 
 /****************************************************************************
@@ -265,9 +320,23 @@ static int netprocfs_opendir(FAR const char *relpath,
                              FAR struct fs_dirent_s *dir)
 {
   FAR struct netprocfs_level1_s *level1;
+  int ndevs;
 
   fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
+
+  /* "net" is the only value of relpath that is a directory */
+
+  if (strcmp(relpath, "net") != 0)
+    {
+      /* REVISIT: We really need to check if the relpath refers to a network
+       * device.  In that case, we need to return -ENOTDIR.  Otherwise, we
+       * should return -ENOENT.
+       */
+
+      fdbg("ERROR: Bad relpath: %s\n", relpath);
+      return -ENOTDIR;
+    }
 
   /* The path refers to the 1st level sbdirectory.  Allocate the level1
    * dirent structure.
@@ -282,10 +351,18 @@ static int netprocfs_opendir(FAR const char *relpath,
       return -ENOMEM;
     }
 
+  /* Count the number of network devices */
+
+  ndevs = netdev_count();
+
   /* Initialze base structure components */
 
   level1->base.level    = 1;
-  level1->base.nentries = 1;
+#ifdef CONFIG_NET_STATISTICS
+  level1->base.nentries = ndevs + 1;
+#else
+  level1->base.nentries = ndevs;
+#endif
   level1->base.index    = 0;
 
   dir->u.procfs = (FAR void *) level1;
@@ -325,46 +402,65 @@ static int netprocfs_closedir(FAR struct fs_dirent_s *dir)
 static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
 {
   FAR struct netprocfs_level1_s *level1;
+  FAR struct net_driver_s *dev;
   int index;
-  int ret;
 
   DEBUGASSERT(dir && dir->u.procfs);
   level1 = dir->u.procfs;
+  DEBUGASSERT(level1->base.level == 1);
 
   /* Have we reached the end of the directory */
 
   index = level1->base.index;
+  DEBUGASSERT(index <= level1->base.nentries);
+
   if (index >= level1->base.nentries)
     {
       /* We signal the end of the directory by returning the special
-       * error -ENOENT
+       * error -ENOENT.
        */
 
       fvdbg("Entry %d: End of directory\n", index);
-      ret = -ENOENT;
+      return -ENOENT;
     }
 
-  /* Currently only one element in the directory */
-
-  else
+#ifdef CONFIG_NET_STATISTICS
+  else if (index == 0)
     {
-      DEBUGASSERT(level1->base.level == 1);
-      DEBUGASSERT(level1->base.index <= 1);
-
-      /* Copy the one supported directory entry */
+      /* Copy the network statistics directory entry */
 
       dir->fd_dir.d_type = DTYPE_FILE;
       strncpy(dir->fd_dir.d_name, "stat", NAME_MAX + 1);
+    }
+  else
+#endif
+    {
+      int devndx = index;
 
-      /* Set up the next directory entry offset.  NOTE that we could use the
-       * standard f_pos instead of our own private index.
+#ifdef CONFIG_NET_STATISTICS
+      /* Subtract one to account for index == 0 which is used for network
+       * status.
        */
 
-      level1->base.index = index + 1;
-      ret = OK;
+      devndx--;
+#endif
+
+      /* Find the device corresponding to this device index */
+
+      dev = netdev_findbyindex(devndx);
+
+      /* Copy the device statistics file entry */
+
+      dir->fd_dir.d_type = DTYPE_FILE;
+      strncpy(dir->fd_dir.d_name, dev->d_ifname, NAME_MAX + 1);
     }
 
-  return ret;
+  /* Set up the next directory entry offset.  NOTE that we could use the
+   * standard f_pos instead of our own private index.
+   */
+
+  level1->base.index = index + 1;
+  return OK;
 }
 
 /****************************************************************************
@@ -394,26 +490,55 @@ static int netprocfs_rewinddir(FAR struct fs_dirent_s *dir)
 
 static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 {
-  /* "net" and "net/stat" are the only acceptable values for the relpath */
+  /* Check for the directory "net" */
 
   if (strcmp(relpath, "net") == 0)
     {
       buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
-  else if (strcmp(relpath, "net/stat") == 0)
+  else
+#ifdef CONFIG_NET_STATISTICS
+  /* Check for network statistics "net/stat" */
+
+  if (strcmp(relpath, "net/stat") == 0)
     {
       buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
     }
   else
+#endif
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
+      FAR struct net_driver_s *dev;
+      FAR char *devname;
+      FAR char *copy;
+
+      /* Otherwise, we need to search the list of registered network devices
+       * to determine if the name corresponds to a network device.
+       */
+
+      copy = strdup(relpath);
+      if (copy == NULL)
+        {
+          fdbg("ERROR: strdup failed\n");
+          return -ENOMEM;
+        }
+
+      devname = basename(copy);
+      dev     = netdev_findbyname(devname);
+      kmm_free(copy);
+
+      if (dev == NULL)
+        {
+          fdbg("ERROR: relpath is '%s'\n", relpath);
+          return -ENOENT;
+        }
+
+      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
     }
 
   /* File/directory size, access block size */
 
   buf->st_size    = 0;
-  buf->st_blksize = 512;
+  buf->st_blksize = 0;
   buf->st_blocks  = 0;
 
   return OK;
@@ -422,6 +547,107 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: netprocfs_read_linegen
+ *
+ * Description:
+ *   Read and format procfs data using a line generation table.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the network procfs file structure
+ *   buffer - The user-provided buffer into which device status will be
+ *            returned.
+ *   buflen - The size in bytes of the user provided buffer.
+ *   gentab - Table of line generation functions
+ *   nelems - The number of elements in the table
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+ssize_t netprocfs_read_linegen(FAR struct netprocfs_file_s *priv,
+                               FAR char *buffer, size_t buflen,
+                               FAR const linegen_t *gentab, int nelems)
+{
+  size_t xfrsize;
+  ssize_t nreturned;
+
+  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+
+  /* Is there line data already buffered? */
+
+  nreturned = 0;
+  if (priv->linesize > 0)
+    {
+      /* Yes, how much can we transfer now? */
+
+      xfrsize = priv->linesize;
+      if (xfrsize > buflen)
+        {
+          xfrsize = buflen;
+        }
+
+      /* Transfer the data to the user buffer */
+
+      memcpy(buffer, &priv->line[priv->offset], xfrsize);
+
+      /* Update pointers, sizes, and offsets */
+
+      buffer         += xfrsize;
+      buflen         -= xfrsize;
+
+      priv->linesize -= xfrsize;
+      priv->offset   += xfrsize;
+      nreturned       = xfrsize;
+    }
+
+  /* Loop until the user buffer is full or until all of the network
+   * statistics have been transferred.  At this point we know that
+   * either:
+   *
+   * 1. The user buffer is full, and/or
+   * 2. All of the current line data has been transferred.
+   */
+
+  while (buflen > 0 && priv->lineno < nelems)
+    {
+      int len;
+
+      /* Read the next line into the working buffer */
+
+      len = gentab[priv->lineno](priv);
+
+      /* Update line-related information */
+
+      priv->lineno++;
+      priv->linesize = len;
+      priv->offset = 0;
+
+      /* Transfer data to the user buffer */
+
+      xfrsize = priv->linesize;
+      if (xfrsize > buflen)
+        {
+          xfrsize = buflen;
+        }
+
+      memcpy(buffer, &priv->line[priv->offset], xfrsize);
+
+      /* Update pointers, sizes, and offsets */
+
+      buffer         += xfrsize;
+      buflen         -= xfrsize;
+
+      priv->linesize -= xfrsize;
+      priv->offset   += xfrsize;
+      nreturned      += xfrsize;
+    }
+
+  return nreturned;
+}
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
         * !CONFIG_FS_PROCFS_EXCLUDE_NET */

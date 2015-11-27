@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_findbyname.c
+ * net/netdev/netdev_findbyindex.c
  *
- *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,44 +53,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findbyname
+ * Function: netdev_findbyindex
  *
  * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
+ *   Find a previously registered network device by its position in the
+ *   list of registered devices.  NOTE that this function is not a safe way
+ *   to enumerate network devices:  There could be changes to the list of
+ *   registered device causing a given index to be meaningless (unless, of
+ *   course, the caller keeps the network locked).
  *
  * Parameters:
- *   ifname The interface name of the device of interest
+ *   index - the index of the interface to file
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *  Pointer to driver on success; NULL on failure.  This function can only
+ *  fail if there are fewer registered interfaces than could be indexed.
  *
  * Assumptions:
  *  Called from normal user mode
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
+FAR struct net_driver_s *netdev_findbyindex(int index)
 {
+#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct net_driver_s *dev;
   net_lock_t save;
+  int i;
 
-  if (ifname)
+  save = net_lock();
+  for (i = 0, dev = g_netdevices; dev; i++, dev = dev->flink)
     {
-      save = net_lock();
-      for (dev = g_netdevices; dev; dev = dev->flink)
+      if (i == index)
         {
-          if (strcmp(ifname, dev->d_ifname) == 0)
-            {
-              net_unlock(save);
-              return dev;
-            }
+          net_unlock(save);
+          return dev;
         }
-
-      net_unlock(save);
     }
 
+  net_unlock(save);
   return NULL;
+#else
+  return (index == 0) ? g_netdevices : NULL;
+#endif
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

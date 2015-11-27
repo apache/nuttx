@@ -178,7 +178,7 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* Allocate a container to hold the task and attribute selection */
+  /* Allocate the open file structure */
 
   priv = (FAR struct skel_file_s *)kmm_zalloc(sizeof(struct skel_file_s));
   if (!priv)
@@ -190,7 +190,9 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
   /* TODO: Initialize the context specific data here */
 
 
-  /* Save the index as the open-specific state in filep->f_priv */
+  /* Save the open file structure as the open-specific state in
+   * filep->f_priv.
+   */
 
   filep->f_priv = (FAR void *)priv;
   return OK;

@@ -189,6 +189,30 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr);
 #endif
 
 /****************************************************************************
+ * Function: netdev_findbyindex
+ *
+ * Description:
+ *   Find a previously registered network device by its position in the
+ *   list of registered devices.  NOTE that this function is not a safe way
+ *   to enumerate network devices:  There could be changes to the list of
+ *   registered device causing a given index to be meaningless (unless, of
+ *   course, the caller keeps the network locked).
+ *
+ * Parameters:
+ *   index - the index of the interface to file
+ *
+ * Returned Value:
+ *  Pointer to driver on success; NULL on failure.  This function can only
+ *  fail if there are fewer registered interfaces than could be indexed.
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+FAR struct net_driver_s *netdev_findbyindex(int index);
+
+/****************************************************************************
  * Function: netdev_default
  *
  * Description:

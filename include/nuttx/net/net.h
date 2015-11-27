@@ -139,7 +139,7 @@ struct socketlist
 /* Callback from netdev_foreach() */
 
 struct net_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
-typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, void *arg);
+typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, FAR void *arg);
 
 #ifdef CONFIG_NET_NOINTS
 /* Semaphore based locking for non-interrupt based logic.
@@ -1130,7 +1130,7 @@ int netdev_unregister(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int netdev_foreach(netdev_callback_t callback, void *arg);
+int netdev_foreach(netdev_callback_t callback, FAR void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus

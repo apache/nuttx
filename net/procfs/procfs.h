@@ -66,9 +66,11 @@
 
 /* This structure describes one open "file" */
 
+struct net_driver_s;                 /* Forward reference */
 struct netprocfs_file_s
 {
   struct procfs_file_s base;         /* Base open file structure */
+  FAR struct net_driver_s *dev;      /* Current network device */
   uint8_t lineno;                    /* Line number */
   uint8_t linesize;                  /* Number of valid characters in line[] */
   uint8_t offset;                    /* Offset to first valid character in line[] */
@@ -80,6 +82,7 @@ struct netprocfs_file_s
 struct netprocfs_level1_s
 {
   struct procfs_dir_priv_s  base;    /* Base directory private data */
+  char name[NAME_MAX + 1];           /* Name of last node visited */
 };
 
 /* Line generating function type */
@@ -103,7 +106,31 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_readstats
+ * Name: netprocfs_read_linegen
+ *
+ * Description:
+ *   Read and format procfs data using a line generation table.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the network procfs file structure
+ *   buffer - The user-provided buffer into which device status will be
+ *            returned.
+ *   buflen - The size in bytes of the user provided buffer.
+ *   gentab - Table of line generation functions
+ *   nelems - The number of elements in the table
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+ssize_t netprocfs_read_linegen(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen,
+                                FAR const linegen_t *gentab, int nelems);
+
+/****************************************************************************
+ * Name: netprocfs_read_netstats
  *
  * Description:
  *   Read and format network layer statistics.
@@ -121,9 +148,30 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_NET_STATISTICS
-ssize_t net_readstats(FAR struct netprocfs_file_s *priv, FAR char *buffer,
-                      size_t buflen);
+ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen);
 #endif
+
+/****************************************************************************
+ * Name: netprocfs_read_devstats
+ *
+ * Description:
+ *   Read and format network device statistics.
+ *
+ * Input Parameters:
+ *   priv - A reference to the network procfs file structure
+ *   buffer - The user-provided buffer into which device status will be
+ *            returned.
+ *   bulen  - The size in bytes of the user provided buffer.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+ssize_t netprocfs_read_devstats(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen);
 
 #undef EXTERN
 #ifdef __cplusplus
