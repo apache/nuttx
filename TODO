@@ -449,9 +449,6 @@ o Kernel/Protected Build
 
                  http://git.busybox.net/busybox/tree/util-linux/mkfs_vfat.c
 
-               ps, ifup, ifdown, ifconfig should be implemented using
-               extensions to the procfs file system.
-
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
