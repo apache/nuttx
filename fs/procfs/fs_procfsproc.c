@@ -981,9 +981,9 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   /* The node must be a file, not a directory */
 
-  if (node->dtype != DTYPE_FILE)
+  if (!DIRENT_ISFILE(node->dtype))
     {
-      fdbg("ERROR: Path \"%s\" is a directory\n", relpath);
+      fdbg("ERROR: Path \"%s\" is not a regular file\n", relpath);
       return -EISDIR;
     }
 
@@ -1238,7 +1238,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
       /* The node must be a directory, not a file */
 
-      if (node->dtype != DTYPE_DIRECTORY)
+      if (!DIRENT_ISDIRECTORY(node->dtype))
         {
           fdbg("ERROR: Path \"%s\" is not a directory\n", relpath);
           kmm_free(procdir);
