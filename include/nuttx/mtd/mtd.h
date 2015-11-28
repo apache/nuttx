@@ -525,16 +525,35 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
 FAR struct mtd_dev_s *up_flashinitialize(void);
 
 /****************************************************************************
- * Name: up_flashinitialize
+ * Name: filemtd_initialize
  *
  * Description:
  *   Create a file backed MTD device.
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset);
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+                        int16_t sectsize, int32_t erasesize);
+
+/****************************************************************************
+ * Name: filemtd_teardown
+ *
+ * Description:
+ *   Tear down a filemtd device.
+ *
+ ****************************************************************************/
 
 void filemtd_teardown(FAR struct mtd_dev_s* mtd);
+
+/****************************************************************************
+ * Name: filemtd_isfilemtd
+ *
+ * Description:
+ *   Test if MTD is a filemtd device.
+ *
+ ****************************************************************************/
+
+bool filemtd_isfilemtd(FAR struct mtd_dev_s* mtd);
 
 /****************************************************************************
  * Name: mtd_register

@@ -11175,4 +11175,5 @@
 	  statistics (2015-11-26).
 	* net/net_procfs.c:  Add basic support for networking entries in the
 	  procfs (2015-11-27).
-
+	* mtd/filemtd.c and smart.c:  Add support for a /dev/smart loop device.
+	  From Ken Petit (2015-11-28).

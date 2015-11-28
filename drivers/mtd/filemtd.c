@@ -95,10 +95,12 @@
 
 struct file_dev_s
 {
-  struct mtd_dev_s mtd;      /* MTD device */
-  int              fd;       /* File descriptor of underlying file */
-  size_t           nblocks;  /* Number of erase blocks */
-  size_t           offset;   /* Offset from start of file */
+  struct mtd_dev_s mtd;        /* MTD device */
+  int              fd;         /* File descriptor of underlying file */
+  size_t           nblocks;    /* Number of erase blocks */
+  size_t           offset;     /* Offset from start of file */
+  size_t           erasesize;  /* Offset from start of file */
+  size_t           blocksize;  /* Offset from start of file */
 };
 
 /****************************************************************************
@@ -270,8 +272,8 @@ static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock,
    * corresponding to the number of blocks.
    */
 
-  offset = startblock * CONFIG_FILEMTD_BLOCKSIZE;
-  nbytes = nblocks * CONFIG_FILEMTD_BLOCKSIZE;
+  offset = startblock * priv->blocksize;
+  nbytes = nblocks * priv->blocksize;
 
   /* Then erase the data in the file */
 
@@ -317,8 +319,8 @@ static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock,
    * corresponding to the number of blocks.
    */
 
-  offset = startblock * CONFIG_FILEMTD_BLOCKSIZE;
-  nbytes = nblocks * CONFIG_FILEMTD_BLOCKSIZE;
+  offset = startblock * priv->blocksize;
+  nbytes = nblocks * priv->blocksize;
 
   /* Then read the data from the file */
 
@@ -357,8 +359,8 @@ static ssize_t file_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
    * corresponding to the number of blocks.
    */
 
-  offset = startblock * CONFIG_FILEMTD_BLOCKSIZE;
-  nbytes = nblocks * CONFIG_FILEMTD_BLOCKSIZE;
+  offset = startblock * priv->blocksize;
+  nbytes = nblocks * priv->blocksize;
 
   /* Then write the data to the file */
 
@@ -379,7 +381,7 @@ static ssize_t file_byteread(FAR struct mtd_dev_s *dev, off_t offset,
 
   /* Don't let read read past end of buffer */
 
-  if (offset + nbytes > priv->nblocks * CONFIG_FILEMTD_ERASESIZE)
+  if (offset + nbytes > priv->nblocks * priv->erasesize)
    {
      return 0;
    }
@@ -403,7 +405,7 @@ static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
 
   /* Don't let the write exceed the original size of the file */
 
-  maxoffset = priv->nblocks * CONFIG_FILEMTD_ERASESIZE;
+  maxoffset = priv->nblocks * priv->erasesize;
   if (offset + nbytes > maxoffset)
     {
       return 0;
@@ -438,8 +440,8 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * the capacity and how to access the device.
                */
 
-              geo->blocksize    = CONFIG_FILEMTD_BLOCKSIZE;
-              geo->erasesize    = CONFIG_FILEMTD_ERASESIZE;
+              geo->blocksize    = priv->blocksize;
+              geo->erasesize    = priv->erasesize;
               geo->neraseblocks = priv->nblocks;
               ret               = OK;
             }
@@ -482,7 +484,8 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset)
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+                            int16_t sectsize, int32_t erasesize)
 {
   FAR struct file_dev_s *priv;
   struct stat sb;
@@ -527,9 +530,31 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset)
       return NULL;
     }
 
+  /* Set the block size based on the provided sectsize parameter */
+
+  if (sectsize <= 0)
+    {
+      priv->blocksize = CONFIG_FILEMTD_BLOCKSIZE;
+    }
+  else
+    {
+      priv->blocksize = sectsize;
+    }
+
+  /* Set the erase size based on the provided erasesize parameter */
+
+  if (erasesize <= 0)
+    {
+      priv->erasesize = CONFIG_FILEMTD_ERASESIZE;
+    }
+  else
+    {
+      priv->erasesize = erasesize;
+    }
+
   /* Force the size to be an even number of the erase block size */
 
-  nblocks = (filelen - offset) / CONFIG_FILEMTD_ERASESIZE;
+  nblocks = (filelen - offset) / priv->erasesize;
   if (nblocks < 3)
     {
       fdbg("Need to provide at least three full erase block\n");
@@ -590,4 +615,25 @@ void filemtd_teardown(FAR struct mtd_dev_s *dev)
   /* Free the memory */
 
   kmm_free(priv);
+}
+
+/****************************************************************************
+ * Name: filemtd_isfilemtd
+ *
+ * Description:
+ *   Tests if the provided mtd is a filemtd device.
+ *
+ * Input Parameters:
+ *   mtd - Pointer to the mtd.
+ *
+ ****************************************************************************/
+
+bool filemtd_isfilemtd(FAR struct mtd_dev_s *dev)
+{
+  FAR struct file_dev_s *priv = (FAR struct file_dev_s *) dev;
+
+  if (priv->mtd.erase == file_erase)
+    return 1;
+
+  return 0;
 }

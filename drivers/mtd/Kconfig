@@ -268,6 +268,28 @@ config RAMMTD_FLASHSIM
 
 endif
 
+config FILEMTD
+	bool "File-based MTD driver"
+	default n
+	---help---
+		Build support for a File-based MTD driver.
+
+if FILEMTD
+
+config FILEMTD_BLOCKSIZE
+	int "File MTD block size"
+	default 512
+
+config FILEMTD_ERASESIZE
+	int "File MTD erase block size"
+	default 4096
+
+config FILEMTD_ERASESTATE
+	hex "Simulated erase state"
+	default 0xff
+
+endif
+
 config MTD_AT24XX
 	bool "I2C-based AT24xx eeprom"
 	default n
@@ -478,6 +500,14 @@ config MTD_SMART
 		an erase block needs to be erased.
 
 if MTD_SMART
+
+config SMART_DEV_LOOP
+	bool "Enable SMART loop device"
+	select FILEMTD
+	default n
+	---help---
+		Supports a smart loop device that can be used to export a
+		file (or character device) as a SMART block device.
 
 config MTD_SMART_SECTOR_SIZE
 	int "SMART Device sector size"

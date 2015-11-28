@@ -45,6 +45,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,6 +64,27 @@
 
 #define SMARTFS_SECTOR_TYPE_DIR   1
 #define SMARTFS_SECTOR_TYPE_FILE  2
+
+#ifdef CONFIG_SMART_DEV_LOOP
+/* Loop device IOCTL commands */
+
+/* Command:      SMART_LOOPIOC_SETUP
+ * Description:  Setup the loop device
+ * Argument:     A pointer to a read-only instance of struct losetup_s.
+ * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
+ */
+
+/* Command:      SMART_LOOPIOC_TEARDOWN
+ * Description:  Teardown a loop device previously setup vis LOOPIOC_SETUP
+ * Argument:     A read-able pointer to the path of the device to be
+ *               torn down
+ * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
+ */
+
+#define SMART_LOOPIOC_SETUP     _LOOPIOC(0x0001)
+#define SMART_LOOPIOC_TEARDOWN  _LOOPIOC(0x0002)
+
+#endif
 
 /****************************************************************************
  * Public Types
@@ -109,6 +131,22 @@ struct smart_procfs_data_s
   const uint16_t  *erasecounts;   /* Pointer to the erase counts array */
   uint16_t        erasesize;      /* Number of entries in the erase counts array */
 #endif
+};
+#endif
+
+#ifdef CONFIG_SMART_DEV_LOOP
+/* This is the structure referred to in the argument to the LOOPIOC_SETUP
+ * IOCTL command.
+ */
+
+struct smart_losetup_s
+{
+  FAR const char *filename;     /* The file or character device to use */
+  int             minor;        /* The minor number of thedevice */
+  int             erasesize;    /* The erase size to use on the file */
+  int             sectsize;     /* The sector / page size of the file */
+  off_t           offset;       /* An offset that may be applied to the device */
+  bool            readonly;     /* True: Read access will be supported only */
 };
 #endif
 

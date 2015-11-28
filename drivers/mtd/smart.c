@@ -43,6 +43,8 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -385,6 +387,14 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t b
 static int smart_relocate_sector(FAR struct smart_struct_s *dev,
                  uint16_t oldsector, uint16_t newsector);
 
+#ifdef CONFIG_SMART_DEV_LOOP
+static ssize_t smart_loop_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t smart_loop_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     smart_loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+#endif /* CONFIG_SMART_DEV_LOOP */
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -402,6 +412,21 @@ static const struct block_operations g_bops =
   smart_geometry, /* geometry */
   smart_ioctl     /* ioctl    */
 };
+
+#ifdef CONFIG_SMART_DEV_LOOP
+static const struct file_operations g_fops =
+{
+  0,                /* open */
+  0,                /* close */
+  smart_loop_read,  /* read */
+  smart_loop_write, /* write */
+  0,                /* seek */
+  smart_loop_ioctl  /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , 0               /* poll */
+#endif
+};
+#endif /* CONFIG_SMART_DEV_LOOP */
 
 /****************************************************************************
  * Private Functions
@@ -5411,6 +5436,10 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
       smart_scan(dev);
     }
 
+#ifdef CONFIG_SMART_DEV_LOOP
+  (void)register_driver("/dev/smart", &g_fops, 0666, NULL);
+#endif
+
   return OK;
 
 errout:
@@ -5437,3 +5466,210 @@ errout:
   kmm_free(dev);
   return ret;
 }
+
+ /****************************************************************************
+ * Name: smart_losetup
+ *
+ * Description: Dynamically setups up a SMART enabled loop device that
+ *              is backed by a file.  The resulting loop device is a
+ *              MTD type block device vs. a generic block device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMART_DEV_LOOP
+static int smart_losetup(int minor, FAR const char *filename,
+                int sectsize, int erasesize, off_t offset, bool readonly)
+{
+  FAR struct mtd_dev_s *mtd;
+  struct stat           sb;
+  int                   x, ret;
+  char                  devpath[20];
+
+  /* Try to create a filemtd device using the filename provided */
+
+  mtd = filemtd_initialize(filename, offset, sectsize, erasesize);
+  if (mtd == NULL)
+    {
+      return -ENOENT;
+    }
+
+  /* Check if we need to dynamically assign a minor number */
+
+  if (minor == -1)
+    {
+      /* Start at zero and stat /dev/smartX until no entry found.
+       * Searching 0 to 256 should be sufficient.
+       */
+
+      for (x = 0; x < 256; x++)
+        {
+          snprintf(devpath, sizeof(devpath), "/dev/smart%d", x);
+          ret = stat(devpath, &sb);
+          if (ret != 0)
+            {
+              /* We can use this minor number */
+
+              minor = x;
+              break;
+            }
+        }
+    }
+
+  /* Now create a smart MTD using the filemtd backing it */
+
+  ret = smart_initialize(minor, mtd, NULL);
+
+  if (ret != OK)
+    {
+      filemtd_teardown(mtd);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_SMART_DEV_LOOP */
+
+/****************************************************************************
+ * Name: loteardown
+ *
+ * Description:
+ *   Undo the setup performed by losetup
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMART_DEV_LOOP
+static int smart_loteardown(FAR const char *devname)
+{
+  FAR struct smart_struct_s *dev;
+  FAR struct inode *inode;
+  int ret;
+
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG
+  if (!devname)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Open the block driver associated with devname so that we can get the inode
+   * reference.
+   */
+
+  ret = open_blockdriver(devname, MS_RDONLY, &inode);
+  if (ret < 0)
+    {
+      dbg("Failed to open %s: %d\n", devname, -ret);
+      return ret;
+    }
+
+  /* Inode private data is a reference to the loop device structure */
+
+  dev = (FAR struct smart_struct_s *)inode->i_private;
+
+  /* Validate this is a filemtd backended device */
+
+  if (!filemtd_isfilemtd(dev->mtd))
+    {
+      fdbg("Device is not a SMART loop: %s\n", devname);
+      return -EINVAL;
+    }
+
+  close_blockdriver(inode);
+
+  /* Now teardown the filemtd */
+
+  filemtd_teardown(dev->mtd);
+  unregister_blockdriver(devname);
+
+  kmm_free(dev);
+
+  return OK;
+}
+#endif /* CONFIG_SMART_DEV_LOOP */
+
+/****************************************************************************
+ * Name: smart_loop_read
+ ****************************************************************************/
+
+#ifdef CONFIG_SMART_DEV_LOOP
+static ssize_t smart_loop_read(FAR struct file *filep, FAR char *buffer, size_t len)
+{
+  return 0; /* Return EOF */
+}
+#endif /* CONFIG_SMART_DEV_LOOP */
+
+/****************************************************************************
+ * Name: smart_loop_write
+ ****************************************************************************/
+
+#ifdef CONFIG_SMART_DEV_LOOP
+static ssize_t smart_loop_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+{
+  return len; /* Say that everything was written */
+}
+#endif /* CONFIG_SMART_DEV_LOOP */
+
+/****************************************************************************
+ * Name: smart_loop_ioctl
+ ****************************************************************************/
+
+#ifdef CONFIG_SMART_DEV_LOOP
+static int smart_loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  int ret;
+
+  switch (cmd)
+    {
+    /* Command:      LOOPIOC_SETUP
+     * Description:  Setup the loop device
+     * Argument:     A pointer to a read-only instance of struct losetup_s.
+     * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
+     */
+
+    case SMART_LOOPIOC_SETUP:
+      {
+         FAR struct smart_losetup_s *setup = (FAR struct smart_losetup_s *)((uintptr_t)arg);
+
+        if (setup == NULL)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            ret = smart_losetup(setup->minor, setup->filename, setup->sectsize,
+                         setup->erasesize, setup->offset, setup->readonly);
+          }
+      }
+      break;
+
+    /* Command:      LOOPIOC_TEARDOWN
+     * Description:  Teardown a loop device previously setup vis LOOPIOC_SETUP
+     * Argument:     A read-able pointer to the path of the device to be
+     *               torn down
+     * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
+     */
+
+    case SMART_LOOPIOC_TEARDOWN:
+      {
+        FAR const char *devname = (FAR const char *)((uintptr_t)arg);
+
+        if (devname == NULL)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            ret = smart_loteardown(devname);
+          }
+       }
+       break;
+
+     default:
+       ret = -ENOTTY;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_SMART_DEV_LOOP */
+
