@@ -430,7 +430,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Set the appropriate scheduling policy in the TCB */
 
-  ptcb->cmn.flags &= TCB_FLAG_POLICY_MASK;
+  ptcb->cmn.flags &= ~TCB_FLAG_POLICY_MASK;
   switch (policy)
     {
       default:

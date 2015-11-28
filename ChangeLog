@@ -11177,3 +11177,8 @@
 	  procfs (2015-11-27).
 	* mtd/filemtd.c and smart.c:  Add support for a /dev/smart loop device.
 	  From Ken Petit (2015-11-28).
+	* sched/pthread/: CRITICAL BUGFIX: Logic was wiping out the indication
+	  that of the type of a pthread.  Hence, it could be confused as a
+	  task.  Found because this was causing a crash when /proc/nnn/cmdline
+	  was printed (2015-11-29).
+
