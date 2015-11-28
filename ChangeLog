@@ -9175,7 +9175,7 @@
 	  build framework and skeleton files for Tiva I2C driver.  Initial
 	  commit is just the STM32 I2C driver with name changes and STM32-
 	  specific logic removed (2014-12-9).
-	* fs/procfs/fs_procfs.c:  Add procfs write support.  From Ken Petit
+	* fs/procfs/fs_procfs.c:  Add procfs write support.  From Ken Pettit
 	  (2014-12-9).
 	* include/crc8.h, libc/misc/lib_crc8.c, and Make.defs: Add CRC8 support.
 	  From Ken Pettit (2014-12-9).
@@ -11106,11 +11106,11 @@
 	* drivers/sensors/ms58xx.c:  Fix some issues with initialization and with
 	  CRC calculation.  From Karim Keddam (2015-11-17).
 	* drivers/mtd/w25.c: Fix W25 FLASH driver page read/write logic. From
-	  Ken Petit (2015-11-18).
-	* drivers/mtd/smart.c: Fix a Smart wear-leveling bug. From Ken Petit
+	  Ken Pettit (2015-11-18).
+	* drivers/mtd/smart.c: Fix a Smart wear-leveling bug. From Ken Pettit
 	  (2015-11-18).
 	* arch/sim/src/up_spiflash.c:  Add support for W25 FLASH simulation.
-	  From Ken Petit (2015-11-18).
+	  From Ken Pettit (2015-11-18).
 	* configs/boardctl.h, Kconfig, include/sys/boardctl.h, and nuttx/board.h:
 	  Add a command to the boardctl() interface to obtain a board unique ID
 	  (2015-11-18).
@@ -11123,11 +11123,11 @@
 	  the logical sector size is too small to save all wear level status
 	  bytes in a single sector.  Logical sectors 1 and 2 were simply not
 	  being allocated and then the read_sector and write_sector routinesi
-	  were failing.  From Ken Petit (2015-11-18).
+	  were failing.  From Ken Pettit (2015-11-18).
 	* drivers/timers/ds3231.c:  Untested support for DS1302 and DS3232.
 	  Also definitions for the DS3234, but that is an unsupported SPI RTC
 	  (2015-11-19).
-	* drivers/mtd/w25.c: Add support for byte write mode.  From Ken Peit
+	* drivers/mtd/w25.c: Add support for byte write mode.  From Ken Pettit
 	  (2015-11-20).
 	* drivers/timers/pcf85263.c and include/nuttx/times/pcf85263.h:  Add
 	  a driver for the NXP PCF85263 I2C RTC.  Untested on initial commit
@@ -11147,18 +11147,18 @@
 	  been backed out.  With these changes, the simulator builds without
 	* fs/hostfs and arch/sim/src:  Add a special file system for use with
 	  simulator that supports access to the host file system from the
-	  simulation.  From Ken Petit (2015-11-25).
+	  simulation.  From Ken Pettit (2015-11-25).
 	* libc/time/lib_strftime.c:  Add day-of-week support. (2015-11-25).
 	* drivers/lcd/ili9432.c:  Fixed errors in orientation. Portrait,
 	  RPortrait, and RLandscript should work correly now.  They were
 	  displayed mirrored.  From  Marco Krahl (2015-11-25).
 	* drivers/mtd/mtd/mtd_procfs/c and include/nuttx/mtd/mtd.h:  Add an
-	  interface to un-regiser an MTD procfs entry.  From Ken Petit
+	  interface to un-regiser an MTD procfs entry.  From Ken Pettit
 	  (2015-11-25).
 	* drivers/mtd/filemtd.c:  New new MTD conversion layer that will
 	  convert a regular file (or driver file) to an MTD device.  This is
 	  useful for testing on the simulation using the hostfs.  From Ken
-	  Petit (2015-11-25).
+	  Pettit (2015-11-25).
 	* drivers/loop:  Add a loop character device.  losetup() and
 	  loteardown() should not be called directory from applications.
 	  Rather, these functions are now available as IOCTL commands to the
@@ -11176,7 +11176,7 @@
 	* net/net_procfs.c:  Add basic support for networking entries in the
 	  procfs (2015-11-27).
 	* mtd/filemtd.c and smart.c:  Add support for a /dev/smart loop device.
-	  From Ken Petit (2015-11-28).
+	  From Ken Pettit (2015-11-28).
 	* sched/pthread/: CRITICAL BUGFIX: Logic was wiping out the indication
 	  that of the type of a pthread.  Hence, it could be confused as a
 	  task.  Found because this was causing a crash when /proc/nnn/cmdline
