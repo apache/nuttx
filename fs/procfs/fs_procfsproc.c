@@ -303,17 +303,17 @@ static const struct proc_node_s * const g_groupinfo[] =
 static const char *g_statenames[] =
 {
   "Invalid",
-  "Pending unlock",
+  "Waiting,Unlock",
   "Ready",
   "Running",
   "Inactive",
-  "Semaphore wait",
-#ifndef CONFIG_DISABLE_MQUEUE
-  "Signal wait",
+  "Waiting,Semaphore",
+#ifndef CONFIG_DISABLE_SIGNALS
+  "Waiting,Signal",
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  "MQ not empty wait",
-  "MQ no full wait"
+  "Waiting,MQ empty",
+  "Waiting,MQ full"
 #endif
 };
 
@@ -321,8 +321,8 @@ static const char *g_ttypenames[4] =
 {
   "Task",
   "pthread",
-  "Kernel thread",
-  "--?--"
+  "Kthread",
+  "Invalid"
 };
 
 /****************************************************************************
@@ -354,6 +354,21 @@ static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
 
 /****************************************************************************
  * Name: proc_status
+ *
+ * Description:
+ *   Format:
+ *
+ *            111111111122222222223
+ *   123456789012345678901234567890
+ *   Name:       xxxx...            Task/thread name (See CONFIG_TASK_NAME_SIZE)
+ *   Type:       xxxxxxx            {Task, pthread, Kthread, Invalid}
+ *   State:      xxxxxxxx,xxxxxxxxx {Invalid, Waiting, Ready, Running, Inactive},
+ *                                  {Unlock, Semaphore, Signal, MQ empty, MQ full}
+ *   Flags:      xxx                N,P,X
+ *   Priority:   nnn                Decimal, 0-255
+ *   Scheduler:  xxxxxxxxxxxxxx     {SCHED_FIFO, SCHED_RR, SCHED_SPORADIC, SCHED_OTHER}
+ *   Sigmask:    nnnnnnnn           Hexadecimal, 32-bit
+ *
  ****************************************************************************/
 
 static ssize_t proc_status(FAR struct proc_file_s *procfile,
@@ -410,6 +425,24 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n", "State:",
                         g_statenames[tcb->task_state]);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Show task flags */
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%c%c%c\n", "Flags:",
+                        tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-',
+                        tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-',
+                        tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
+
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
