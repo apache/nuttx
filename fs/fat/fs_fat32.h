@@ -770,7 +770,7 @@ struct fat_file_s
   uint8_t *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 
-/* This structure holds the sequency of directory entries used by one
+/* This structure holds the sequence of directory entries used by one
  * file element (directory or file).  For short file names, this is
  * single diretory entry.  But for long file names, the is a sequence
  * of directory entries.  Long directory name entries appear in reverse

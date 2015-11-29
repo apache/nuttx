@@ -137,8 +137,8 @@ config RTC_DSXXXX
 	default n
 	select I2C
 	select I2C_TRANSFER
-	select RTC_EXTERNAL
 	select RTC_DATETIME
+	depends on RTC_EXTERNAL
 	---help---
 		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
 
@@ -190,8 +190,8 @@ config RTC_PCF85263
 	default n
 	select I2C
 	select I2C_TRANSFER
-	select RTC_EXTERNAL
 	select RTC_DATETIME
+	depends on RTC_EXTERNAL
 	---help---
 		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
 
