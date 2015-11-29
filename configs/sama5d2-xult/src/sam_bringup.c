@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
+#include <syslog.h>
 #include <debug.h>
 
 #include "sama5d2-xult.h"
@@ -67,5 +69,18 @@
 
 int sam_bringup(void)
 {
+#ifdef CONFIG_FS_PROCFS
+  int ret;
+
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             SAMA5_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
   return OK;
 }

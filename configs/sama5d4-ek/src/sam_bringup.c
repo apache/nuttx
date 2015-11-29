@@ -262,6 +262,19 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_FS_PROCFS
+  int ret;
+
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
+             SAMA5_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.

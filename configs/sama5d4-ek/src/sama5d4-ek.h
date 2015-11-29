@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d4-ek/src/sama5d4-ek.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -476,6 +476,16 @@
 
 #ifndef CONFIG_SAMA5D4EK_ROMFS_MOUNT
 #  undef HAVE_ROMFS
+#endif
+
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define SAMA5_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define SAMA5_PROCFS_MOUNTPOINT "/proc"
+#  endif
 #endif
 
 /* LEDs *****************************************************************************/

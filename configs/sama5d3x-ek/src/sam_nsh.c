@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d3x-ek/src/sam_nsh.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,9 +72,9 @@
 
 int board_app_initialize(void)
 {
-#if defined(HAVE_NAND)  || defined(HAVE_AT25)    || defined(HAVE_AT24)       || \
-    defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) ||\
-    defined(HAVE_WM8904)
+#if defined(HAVE_NAND)   || defined(HAVE_AT25)    || defined(HAVE_AT24)       || \
+    defined(HAVE_HSMCI)  || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) ||\
+    defined(HAVE_WM8904) || defined(CONFIG_FS_PROCFS)
   int ret;
 #endif
 
@@ -168,6 +168,17 @@ int board_app_initialize(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize WM8904 audio: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             SAMA5_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 

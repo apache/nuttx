@@ -55,6 +55,15 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define SAMA5_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define SAMA5_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
 
 /* LEDs *****************************************************************************/
 /* There is an RGB LED on board the SAMA5D2-XULT.  The RED component is driven by

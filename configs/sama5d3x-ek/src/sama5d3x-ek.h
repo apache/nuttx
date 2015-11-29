@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sama5d3x-ek.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -375,6 +375,16 @@
 #if defined(HAVE_CAMERA) && !defined(CONFIG_SAMA5_TWI1)
 #  warning OV2640 camera demo requires CONFIG_SAMA5_TWI1
 #  undef HAVE_CAMERA
+#endif
+
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define SAMA5_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define SAMA5_PROCFS_MOUNTPOINT "/proc"
+#  endif
 #endif
 
 /* LEDs *****************************************************************************/
