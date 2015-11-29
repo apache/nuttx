@@ -173,15 +173,17 @@ function configure {
         kconfig-tweak --file $nuttx/.config --disable CONFIG_CXX_NEWLONG
     fi
 
-    setting=`grep TOOLCHAIN $nuttx/.config | grep =y`
-    varname=`echo $setting | cut -d'=' -f1`
-    if [ ! -z "varname" ]; then
-        echo "  Disabling $varname"
-        kconfig-tweak --file $nuttx/.config --disable $varname
-    fi
+    if [ "X$toolchain" != "X" ]; then
+        setting=`grep TOOLCHAIN $nuttx/.config | grep =y`
+        varname=`echo $setting | cut -d'=' -f1`
+        if [ ! -z "varname" ]; then
+            echo "  Disabling $varname"
+            kconfig-tweak --file $nuttx/.config --disable $varname
+        fi
 
-    echo "  Enabling $toolchain"
-    kconfig-tweak --file $nuttx/.config --enable $toolchain
+        echo "  Enabling $toolchain"
+        kconfig-tweak --file $nuttx/.config --enable $toolchain
+    fi
 
     echo "  Refreshing..."
     kconfig-conf --olddefconfig Kconfig 1>/dev/null
@@ -232,10 +234,12 @@ for line in $testlist; do
         showusage
       fi
 
-      toolchain=`echo $line | cut -d',' -f2`
-      if [ -z "$toolchain" ]; then
-        echo "ERROR no tool configuration"
-        showusage
+      unset toolchain;
+      if [ "X$config" != "X$line" ]; then
+          toolchain=`echo $line | cut -d',' -f2`
+          if [ -z "$toolchain" ]; then
+            echo "  Warning: no tool configuration"
+          fi
       fi
 
       # Perform the build test
