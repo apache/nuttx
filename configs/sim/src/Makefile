@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sim/src/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,19 @@ CSRCS =
 
 ifeq ($(CONFIG_BOARD_INITIALIZE),y)
   CSRCS += sim_boot.c
+endif
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+  CSRCS += sim_appinit.c
+endif
+
+ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+  CSRCS += sim_bringup.c
+ifeq ($(CONFIG_SYSTEM_ZONEINFO_ROMFS),y)
+  CSRCS += sim_zoneinfo.c
+endif
+else ifeq ($(CONFIG_LIB_BOARDCTL),y)
+  CSRCS += sim_bringup.c
 ifeq ($(CONFIG_SYSTEM_ZONEINFO_ROMFS),y)
   CSRCS += sim_zoneinfo.c
 endif

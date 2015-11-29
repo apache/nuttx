@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/sim/src/sim_boot.c
+ * configs/sim/src/sim_appinit.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,41 +43,26 @@
 #include "sim.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_initialize
+ * Name: board_app_initialize
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
+#ifdef CONFIG_LIB_BOARDCTL
+int board_app_initialize(void)
 {
+#ifndef CONFIG_BOARD_INITIALIZE
   sim_bringup();
+#endif
+
+  return 0;
 }
-#endif /* CONFIG_BOARD_INITIALIZE */
+#endif /* CONFIG_LIB_BOARDCTL */
