@@ -117,7 +117,7 @@ static int     mtdconfig_open(FAR struct file *filep);
 static int     mtdconfig_close(FAR struct file *filep);
 static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
                   size_t buflen);
-static ssize_t mtdconfig_ioctl(FAR struct file *filep, int cmd,
+static int     mtdconfig_ioctl(FAR struct file *filep, int cmd,
                   unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
