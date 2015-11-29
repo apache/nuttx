@@ -177,5 +177,17 @@ int stm32_bringup(void)
 #ifdef CONFIG_MAX6675
   ret = stm32_max6675initialize("/dev/temp0");
 #endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      sdbg("ERROR: Failed to mount procfs at %s: %d\n",
+           STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
   return ret;
 }

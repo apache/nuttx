@@ -193,6 +193,17 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
+             SAMV71_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
 #ifdef HAVE_MTDCONFIG
   /* Create an AT24xx-based MTD configuration device for storage device
    * configuration information.

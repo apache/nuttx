@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,6 +169,16 @@
 
 #ifdef CONFIG_STM32F4DISBB
 #  undef HAVE_NETMONITOR
+#endif
+
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define STM32_PROCFS_MOUNTPOINT "/proc"
+#  endif
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/

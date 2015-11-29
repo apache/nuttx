@@ -188,6 +188,16 @@
 #  undef HAVE_MTDCONFIG
 #endif
 
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define SAMV71_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define SAMV71_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 /* S25FL1 QuadSPI FLASH */
 
 #ifndef CONFIG_MTD_S25FL1
