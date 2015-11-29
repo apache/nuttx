@@ -42,7 +42,6 @@ CONFIG_BUILD_FLAT=y
 # Debug Options
 #
 CONFIG_DEBUG=y
-# CONFIG_ARCH_HAVE_STACKCHECK is not set
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
 CONFIG_DEBUG_VERBOSE=y
 
@@ -67,6 +66,7 @@ CONFIG_DEBUG_GRAPHICS=y
 #
 # CONFIG_DEBUG_ANALOG is not set
 # CONFIG_DEBUG_GPIO is not set
+# CONFIG_ARCH_HAVE_STACKCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 # CONFIG_ARCH_HAVE_CUSTOMOPT is not set
 # CONFIG_DEBUG_NOOPT is not set
@@ -93,6 +93,8 @@ CONFIG_ARCH="sim"
 CONFIG_HOST_X86_64=y
 # CONFIG_HOST_X86 is not set
 # CONFIG_SIM_M32 is not set
+CONFIG_SIM_X8664_SYSTEMV=y
+# CONFIG_SIM_X8664_MICROSOFT is not set
 # CONFIG_SIM_WALLTIME is not set
 CONFIG_SIM_FRAMEBUFFER=y
 # CONFIG_SIM_X11FB is not set
@@ -117,6 +119,8 @@ CONFIG_SIM_FBBPP=8
 # CONFIG_ARCH_HAVE_MPU is not set
 # CONFIG_ARCH_NAND_HWECC is not set
 # CONFIG_ARCH_HAVE_EXTCLK is not set
+CONFIG_ARCH_HAVE_POWEROFF=y
+# CONFIG_ARCH_HAVE_RESET is not set
 # CONFIG_ARCH_STACKDUMP is not set
 # CONFIG_ENDIAN_BIG is not set
 # CONFIG_ARCH_IDLE_CUSTOM is not set
@@ -165,6 +169,7 @@ CONFIG_ARCH_BOARD="sim"
 #
 # Board-Specific Options
 #
+# CONFIG_LIB_BOARDCTL is not set
 
 #
 # RTOS Features
@@ -201,6 +206,7 @@ CONFIG_INIT_ENTRYPOINT=y
 # CONFIG_INIT_FILEPATH is not set
 CONFIG_USER_ENTRYPOINT="nx_main"
 CONFIG_RR_INTERVAL=0
+# CONFIG_SCHED_SPORADIC is not set
 CONFIG_TASK_NAME_SIZE=31
 CONFIG_MAX_TASKS=16
 # CONFIG_SCHED_HAVE_PARENT is not set
@@ -284,19 +290,25 @@ CONFIG_DEV_NULL=y
 # CONFIG_RAMDISK is not set
 # CONFIG_CAN is not set
 # CONFIG_ARCH_HAVE_PWM_PULSECOUNT is not set
+# CONFIG_ARCH_HAVE_PWM_MULTICHAN is not set
 # CONFIG_PWM is not set
 # CONFIG_ARCH_HAVE_I2CRESET is not set
 # CONFIG_I2C is not set
 # CONFIG_SPI is not set
 # CONFIG_I2S is not set
+
+#
+# Timer Driver Support
+#
+# CONFIG_TIMER is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
-# CONFIG_TIMER is not set
 # CONFIG_ANALOG is not set
 # CONFIG_AUDIO_DEVICES is not set
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
+# CONFIG_DISCRETE_IO is not set
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set
@@ -337,9 +349,10 @@ CONFIG_SERIAL=y
 #
 # CONFIG_MCU_SERIAL is not set
 # CONFIG_STANDARD_SERIAL is not set
-# CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 # CONFIG_SERIAL_IFLOWCONTROL is not set
 # CONFIG_SERIAL_OFLOWCONTROL is not set
+# CONFIG_SERIAL_DMA is not set
+# CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
 # CONFIG_WIRELESS is not set
@@ -352,6 +365,7 @@ CONFIG_SERIAL=y
 # System Logging
 #
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_CONSOLE is not set
 
 #
 # Networking Support
@@ -380,6 +394,7 @@ CONFIG_DISABLE_MOUNTPOINT=y
 CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 # CONFIG_FS_RAMMAP is not set
 # CONFIG_FS_PROCFS is not set
+# CONFIG_FS_UNIONFS is not set
 
 #
 # System Logging
@@ -447,6 +462,28 @@ CONFIG_NXFONT_SANS23X27=y
 # CONFIG_NXFONT_SERIF38X49B is not set
 # CONFIG_NXFONT_PIXEL_UNICODE is not set
 # CONFIG_NXFONT_PIXEL_LCD_MACHINE is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_4X6 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_5X7 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_5X8 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_6X9 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_6X10 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_6X12 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_6X13 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_6X13B is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_6X13O is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_7X13 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_7X13B is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_7X13O is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_7X14 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_7X14B is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_8X13 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_8X13B is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_8X13O is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_9X15 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_9X15B is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_9X18 is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_9X18B is not set
+# CONFIG_NXFONT_X11_MISC_FIXED_10X20 is not set
 # CONFIG_NXTERM is not set
 
 #
@@ -503,9 +540,11 @@ CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
 # CONFIG_LIBC_STRERROR is not set
 # CONFIG_LIBC_PERROR_STDOUT is not set
 CONFIG_ARCH_LOWPUTC=y
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
+# CONFIG_LIBC_NETDB is not set
 
 #
 # Non-standard Library Support
@@ -524,14 +563,12 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 
 #
-# Built-In Applications
+# CAN Utilities
 #
 
 #
 # Examples
 #
-# CONFIG_EXAMPLES_BUTTONS is not set
-# CONFIG_EXAMPLES_CAN is not set
 # CONFIG_EXAMPLES_CONFIGDATA is not set
 # CONFIG_EXAMPLES_CPUHOG is not set
 # CONFIG_EXAMPLES_DHCPD is not set
@@ -539,11 +576,11 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_EXAMPLES_FTPC is not set
 # CONFIG_EXAMPLES_FTPD is not set
 # CONFIG_EXAMPLES_HELLO is not set
-# CONFIG_EXAMPLES_HELLOXX is not set
 # CONFIG_EXAMPLES_JSON is not set
 # CONFIG_EXAMPLES_HIDKBD is not set
 # CONFIG_EXAMPLES_KEYPADTEST is not set
 # CONFIG_EXAMPLES_IGMP is not set
+# CONFIG_EXAMPLES_MEDIA is not set
 # CONFIG_EXAMPLES_MM is not set
 # CONFIG_EXAMPLES_MODBUS is not set
 # CONFIG_EXAMPLES_MOUNT is not set
@@ -558,10 +595,8 @@ CONFIG_EXAMPLES_NX_DEFAULT_FONT=y
 CONFIG_EXAMPLES_NX_BPP=8
 # CONFIG_EXAMPLES_NX_RAWWINDOWS is not set
 CONFIG_EXAMPLES_NX_TOOLBAR_HEIGHT=16
-# CONFIG_EXAMPLES_NX_EXTERNINIT is not set
 # CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXFFS is not set
-# CONFIG_EXAMPLES_NXFLAT is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
 # CONFIG_EXAMPLES_NXIMAGE is not set
 # CONFIG_EXAMPLES_NXLINES is not set
@@ -569,10 +604,10 @@ CONFIG_EXAMPLES_NX_TOOLBAR_HEIGHT=16
 # CONFIG_EXAMPLES_OSTEST is not set
 # CONFIG_EXAMPLES_PIPE is not set
 # CONFIG_EXAMPLES_POLL is not set
+# CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
 # CONFIG_EXAMPLES_QENCODER is not set
 # CONFIG_EXAMPLES_RGMP is not set
-# CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set
@@ -581,48 +616,42 @@ CONFIG_EXAMPLES_NX_TOOLBAR_HEIGHT=16
 # CONFIG_EXAMPLES_SMART is not set
 # CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
-# CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
-# CONFIG_EXAMPLES_UDP is not set
 # CONFIG_EXAMPLES_WEBSERVER is not set
 # CONFIG_EXAMPLES_USBSERIAL is not set
 # CONFIG_EXAMPLES_USBTERM is not set
 # CONFIG_EXAMPLES_WATCHDOG is not set
 
 #
+# File System Utilities
+#
+
+#
 # Graphics Support
 #
 # CONFIG_TIFF is not set
+# CONFIG_GRAPHICS_TRAVELER is not set
 
 #
 # Interpreters
 #
 # CONFIG_INTERPRETERS_FICL is not set
 # CONFIG_INTERPRETERS_PCODE is not set
-
-#
-# Network Utilities
-#
-
-#
-# Networking Utilities
-#
-# CONFIG_NETUTILS_CODECS is not set
-# CONFIG_NETUTILS_DHCPD is not set
-# CONFIG_NETUTILS_FTPC is not set
-# CONFIG_NETUTILS_FTPD is not set
-# CONFIG_NETUTILS_JSON is not set
-# CONFIG_NETUTILS_SMTP is not set
-# CONFIG_NETUTILS_TFTPC is not set
-# CONFIG_NETUTILS_THTTPD is not set
-# CONFIG_NETUTILS_NETLIB is not set
-# CONFIG_NETUTILS_WEBCLIENT is not set
+# CONFIG_INTERPRETERS_MICROPYTHON is not set
 
 #
 # FreeModBus
 #
 # CONFIG_MODBUS is not set
+
+#
+# Network Utilities
+#
+# CONFIG_NETUTILS_CODECS is not set
+# CONFIG_NETUTILS_FTPC is not set
+# CONFIG_NETUTILS_JSON is not set
+# CONFIG_NETUTILS_SMTP is not set
 
 #
 # NSH Library
@@ -641,112 +670,18 @@ CONFIG_EXAMPLES_NX_TOOLBAR_HEIGHT=16
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
 # CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# FLASH Program Installation
-#
+# CONFIG_SYSTEM_CUTERM is not set
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
-
-#
-# Intel HEX to binary conversion
-#
 # CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
-
-#
-# INI File Parser
-#
 # CONFIG_SYSTEM_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
+# CONFIG_SYSTEM_HEXED is not set
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
+# CONFIG_READLINE_HAVE_EXTMATCH is not set
 # CONFIG_SYSTEM_READLINE is not set
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
-# CONFIG_SYSTEM_POWEROFF is not set
-
-#
-# RAMTRON
-#
 # CONFIG_SYSTEM_RAMTRON is not set
-
-#
-# SD Card
-#
 # CONFIG_SYSTEM_SDCARD is not set
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
-
-#
-# VI Work-Alike Editor
-#
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set
