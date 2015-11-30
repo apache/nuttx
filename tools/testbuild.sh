@@ -49,7 +49,7 @@ function showusage {
     echo "where"
     echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
     echo "  -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin"
-    echo "  -s Use C++ long size_t in new operator. Default unsigned long"
+    echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
     echo "  -h will show this help test and terminate"
     echo "  <testlist-file> selects the list of configurations to test.  No default"
     echo ""
@@ -73,7 +73,7 @@ while [ ! -z "$1" ]; do
     wenv=cygwin
     ;;
     -n )
-    wenv=n
+    wenv=native
     ;;
     -s )
     sizet=long
@@ -142,23 +142,30 @@ function configure {
         kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_MSYS
         kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_OTHER
 
+        kconfig-tweak --file $nuttx/.config --enable CONFIG_SIM_X8664_SYSTEMV
+        kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_X8664_MICROSOFT
+        kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_M32
     else
         echo "  Select CONFIG_HOST_WINDOWS=y"
         kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_WINDOWS
         kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_LINUX
 
         if [ "X$wenv" == "Xcygwin" ]; then
-          echo "  Select CONFIG_HOST_CYGWIN=y"
+          echo "  Select CONFIG_WINDOWS_CYGWIN=y"
           kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_CYGWIN
           kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_NATIVE
         else
-          echo "  Select CONFIG_HOST_MSYS=y"
+          echo "  Select CONFIG_WINDOWS_NATIVE=y"
           kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
           kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_CYGWIN
         fi
 
         kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_MSYS
         kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_OTHER
+
+        kconfig-tweak --file $nuttx/.config --enable CONFIG_SIM_X8664_MICROSOFT
+        kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_X8664_SYSTEMV
+        kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_M32
     fi
 
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OSX
@@ -166,7 +173,6 @@ function configure {
 
     if [ "X$sizet" == "Xlong" ]; then
         echo "  Select CONFIG_CXX_NEWLONG=y"
-
         kconfig-tweak --file $nuttx/.config --enable CONFIG_CXX_NEWLONG
     else
         echo "  Disable CONFIG_CXX_NEWLONG"
