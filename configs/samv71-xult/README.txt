@@ -937,6 +937,11 @@ settings:
     CONFIG_SAMV7_USBHS_NDTDS=32               : Number of DMA transfer descriptors
     CONFIG_SAMV7_USBHS_PREALLOCATE=y          : Pre-allocate descriptors
 
+As noted above, this driver will not work correctly if the write back
+data cache is enable:
+
+    CONFIG_ARMV7M_DCACHE_WRITETHROUGH=n
+
 In order to be usable, you must all enabled some class driver(s) for the
 USBHS device controller.  Here, for example, is how to configure the CDC/ACM
 serial device class:

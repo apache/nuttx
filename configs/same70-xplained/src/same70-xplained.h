@@ -190,6 +190,16 @@
 
 #define PROGMEM_MTD_MINOR 0
 
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define SAME70_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define SAME70_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 /* SAME70-XPLD GPIO Pin Definitions *************************************************/
 
 /* Ethernet MAC.
