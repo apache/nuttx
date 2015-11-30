@@ -11181,4 +11181,6 @@
 	  that of the type of a pthread.  Hence, it could be confused as a
 	  task.  Found because this was causing a crash when /proc/nnn/cmdline
 	  was printed (2015-11-29).
-
+	* configs/same70-xplained/nsh:  The NSH configuration now seems fully
+	  functional:  serial console, LEDs, buttons, SDRAM, and HSMCI SD card
+	  (2015-11-30).
