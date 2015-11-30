@@ -137,10 +137,6 @@ void weak_function sam_netinitialize(void)
   phydbg("Configuring %08x\n", GPIO_EMAC0_INT);
   sam_configgpio(GPIO_EMAC0_INT);
 
-  /* Configure the PHY SIGDET input */
-
-  sam_configgpio(GPIO_EMAC0_SIGDET);
-
   /* Configure PHY /RESET output */
 
   sam_configgpio(GPIO_EMAC0_RESET);
