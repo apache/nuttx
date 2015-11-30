@@ -71,11 +71,12 @@
 
 struct stm32_lowerhalf_s
 {
-  const struct timer_ops_s *ops;        /* Lower half operations */
-  struct stm32_tim_dev_s   *tim;        /* stm32 timer driver */
-  tccb_t                   handlerUsr;  /* Current user interrupt handler */
-  xcpt_t                   handlerTim;  /* Current timer interrupt handler */
-  bool                     started;     /* True: Timer has been started */
+  const struct timer_ops_s *ops;            /* Lower half operations */
+  struct stm32_tim_dev_s   *tim;            /* stm32 timer driver */
+  tccb_t                   handlerUsr;      /* Current user interrupt handler */
+  const xcpt_t             handlerTim;      /* Current timer interrupt handler */
+  bool                     started;         /* True: Timer has been started */
+  const uint8_t            timerResolution; /* number of bits in the timer (16 or 32 bits) */
 };
 
 /****************************************************************************
@@ -158,47 +159,149 @@ static const struct timer_ops_s g_timer_ops =
   .ioctl      = 0,
 };
 
+
 #ifdef CONFIG_STM32_TIM1
-static struct stm32_lowerhalf_s g_tim1_lowerHalf;
+static struct stm32_lowerhalf_s g_tim1_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim1_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM2
-static struct stm32_lowerhalf_s g_tim2_lowerHalf;
+static struct stm32_lowerhalf_s g_tim2_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim2_interrupt,
+#ifdef CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F205  || CONFIG_STM32_STM32F207 || \
+       CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F37XX ||                           \
+       CONFIG_STM32_STM32F40XX || CONFIG_STM32_STM32F401  || CONFIG_STM32_STM32F411 || \
+       CONFIG_STM32_STM32F405  || CONFIG_STM32_STM32F407  || CONFIG_STM32_STM32F427 || \
+       CONFIG_STM32_STM32F429  || CONFIG_STM32_STM32F446
+
+  .timerResolution = 32,
+#else
+  .timerResolution = 16,
 #endif
+};
+#endif
+
 #ifdef CONFIG_STM32_TIM3
-static struct stm32_lowerhalf_s g_tim3_lowerHalf;
+static struct stm32_lowerhalf_s g_tim3_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim3_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM4
-static struct stm32_lowerhalf_s g_tim4_lowerHalf;
+static struct stm32_lowerhalf_s g_tim4_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim4_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM5
-static struct stm32_lowerhalf_s g_tim5_lowerHalf;
+static struct stm32_lowerhalf_s g_tim5_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim5_interrupt,
+#ifdef CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F205  || CONFIG_STM32_STM32F207 || \
+       CONFIG_STM32_STM32F37XX ||                                                      \
+       CONFIG_STM32_STM32F40XX || CONFIG_STM32_STM32F401  || CONFIG_STM32_STM32F411 || \
+       CONFIG_STM32_STM32F405  || CONFIG_STM32_STM32F407  || CONFIG_STM32_STM32F427 || \
+       CONFIG_STM32_STM32F429  || CONFIG_STM32_STM32F446
+
+  .timerResolution = 32,
+#else
+  .timerResolution = 16,
 #endif
+};
+#endif
+
 #ifdef CONFIG_STM32_TIM6
-static struct stm32_lowerhalf_s g_tim6_lowerHalf;
+static struct stm32_lowerhalf_s g_tim6_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim6_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM7
-static struct stm32_lowerhalf_s g_tim7_lowerHalf;
+static struct stm32_lowerhalf_s g_tim7_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim7_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM8
-static struct stm32_lowerhalf_s g_tim8_lowerHalf;
+static struct stm32_lowerhalf_s g_tim8_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim8_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM9
-static struct stm32_lowerhalf_s g_tim9_lowerHalf;
+static struct stm32_lowerhalf_s g_tim9_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim9_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM10
-static struct stm32_lowerhalf_s g_tim10_lowerHalf;
+static struct stm32_lowerhalf_s g_tim10_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim10_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM11
-static struct stm32_lowerhalf_s g_tim11_lowerHalf;
+static struct stm32_lowerhalf_s g_tim11_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim11_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM12
-static struct stm32_lowerhalf_s g_tim12_lowerHalf;
+static struct stm32_lowerhalf_s g_tim12_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim12_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM13
-static struct stm32_lowerhalf_s g_tim13_lowerHalf;
+static struct stm32_lowerhalf_s g_tim13_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim13_interrupt,
+  .timerResolution = 16,
+};
 #endif
+
 #ifdef CONFIG_STM32_TIM14
-static struct stm32_lowerhalf_s g_tim14_lowerHalf;
+static struct stm32_lowerhalf_s g_tim14_lowerHalf =
+{
+  .ops             = &g_timer_ops,
+  .handlerTim      = stm32_tim14_interrupt,
+  .timerResolution = 16,
+};
 #endif
 
 /****************************************************************************
@@ -300,103 +403,6 @@ static struct stm32_lowerhalf_s *stm32_get_lowerhalf(int timer)
     }
 
   return lower;
-}
-
-/****************************************************************************
- * Name: stm32_get_interrupt
- *
- * Description:
- *   Get a pointer to the interrupt handler of the corresponding timer
- *
- * Input Parameters:
- *   timer - the timer's number
- *
- * Returned Values:
- *   A pointer to the interrupt handler on success, NULL on failure
- *
- ****************************************************************************/
-
-static xcpt_t stm32_get_interrupt(int timer)
-{
-  xcpt_t intr;
-
-  switch (timer)
-    {
-#ifdef CONFIG_STM32_TIM1
-    case 1:
-      intr = stm32_tim1_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM2
-    case 2:
-      intr = stm32_tim2_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM3
-    case 3:
-      intr = stm32_tim3_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM4
-    case 4:
-      intr = stm32_tim4_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM5
-    case 5:
-      intr = stm32_tim5_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM6
-    case 6:
-      intr = stm32_tim6_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM7
-    case 7:
-      intr = stm32_tim7_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM8
-    case 8:
-      intr = stm32_tim8_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM9
-    case 9:
-      intr = stm32_tim9_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM10
-    case 10:
-      intr = stm32_tim10_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM11
-    case 11:
-      intr = stm32_tim11_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM12
-    case 12:
-      intr = stm32_tim12_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM13
-    case 13:
-      intr = stm32_tim13_interrupt;
-      break;
-#endif
-#ifdef CONFIG_STM32_TIM14
-    case 14:
-      intr = stm32_tim14_interrupt;
-      break;
-#endif
-    default:
-      intr = 0;
-    }
-
-  return intr;
 }
 
 /****************************************************************************
@@ -519,13 +525,12 @@ static int stm32_tim14_interrupt(int irq, FAR void *context)
 
 static int stm32_timer_handler(struct stm32_lowerhalf_s *lower)
 {
-  uint32_t next_interval_us = 0;
-  bool ret;
-
   STM32_TIM_ACKINT(lower->tim, 0);
 
-  ret = (*lower->handlerUsr)(&next_interval_us);
-  if (ret)
+  uint32_t next_interval_us = 0;
+  bool ret = (*lower->handlerUsr)(&next_interval_us);
+
+  if (ret == true)
     {
       if (next_interval_us > 0)
         {
@@ -561,7 +566,6 @@ static int stm32_start(struct timer_lowerhalf_s *lower)
 
   if (!priv->started)
     {
-      STM32_TIM_SETCLOCK(priv->tim, 1000000); /* 1000000 Hz = 1 microsecond */
       STM32_TIM_SETMODE(priv->tim, STM32_TIM_MODE_UP);
 
       if (priv->handlerUsr)
@@ -637,7 +641,19 @@ static int stm32_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
       return -EPERM;
     }
 
-  STM32_TIM_SETPERIOD(priv->tim, timeout);
+  uint64_t maxTimeout = (1 << priv->timerResolution) - 1;
+  if(timeout > maxTimeout)
+    {
+      uint64_t freq =  (maxTimeout * 1000000) / timeout;
+      STM32_TIM_SETCLOCK(priv->tim, freq);
+      STM32_TIM_SETPERIOD(priv->tim, maxTimeout);
+    }
+  else
+    {
+      STM32_TIM_SETCLOCK(priv->tim, 1000000);
+      STM32_TIM_SETPERIOD(priv->tim, timeout);
+    }
+
   return OK;
 }
 
@@ -675,7 +691,7 @@ static tccb_t stm32_sethandler(struct timer_lowerhalf_s *lower,
 
   priv->handlerUsr = newhandler;
 
-  if (newhandler)
+  if (newhandler && priv->started)
     {
       STM32_TIM_SETISR(priv->tim, priv->handlerTim, 0);
       STM32_TIM_ENABLEINT(priv->tim, 0);
@@ -715,12 +731,15 @@ static tccb_t stm32_sethandler(struct timer_lowerhalf_s *lower,
 int stm32_timer_initialize(FAR const char *devpath, int timer)
 {
   struct stm32_lowerhalf_s *lower = stm32_get_lowerhalf(timer);
-  memset(lower, 0, sizeof(struct stm32_lowerhalf_s));
+  if(!lower)
+    {
+      return -ENODEV;
+    }
 
-  /* Initialize the non-zero elements of lower half state structure */
+  /* Initialize the elements of lower half state structure */
 
-  lower->ops        = &g_timer_ops;
-  lower->handlerTim = stm32_get_interrupt(timer);
+  lower->started    = false;
+  lower->handlerUsr = 0;
   lower->tim        = stm32_tim_init(timer);
 
   if (!lower->tim)
