@@ -3,6 +3,7 @@
 /Cygwin-names.dat
 /Linux-names.dat
 /nuttx.rel
+/hostfs.h
 /GNU
 /chip
 /board

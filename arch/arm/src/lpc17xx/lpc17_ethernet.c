@@ -238,45 +238,6 @@
  * Private Types
  ****************************************************************************/
 
-/* EMAC statistics (debug only) */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-struct lpc17_statistics_s
-{
-#ifdef ENABLE_WOL
-  uint32_t wol;            /* Wake-up interrupts */
-#endif
-  uint32_t rx_finished;    /* Rx finished interrupts */
-  uint32_t rx_done;        /* Rx done interrupts */
-  uint32_t rx_ovrerrors;   /* Number of Rx overrun error interrupts */
-  uint32_t rx_errors;      /* Number of Rx error interrupts (OR of other errors) */
-  uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-#ifdef CONFIG_NET_IPv4
-  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
-#endif
-#ifdef CONFIG_NET_IPv6
-  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
-#endif
-  uint32_t rx_arp;         /*   Number of Rx ARP packets received */
-  uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
-  uint32_t rx_pkterr;      /*   Number of dropped, error in Rx descriptor */
-  uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
-  uint32_t rx_fragment;    /*   Number of dropped, packet fragments */
-
-  uint32_t tx_packets;     /* Number of Tx packets queued */
-  uint32_t tx_pending;     /* Number of Tx packets that had to wait for a TxDesc */
-  uint32_t tx_unpend;      /* Number of pending Tx packets that were sent */
-  uint32_t tx_finished;    /* Tx finished interrupts */
-  uint32_t tx_done;        /* Tx done interrupts */
-  uint32_t tx_underrun;    /* Number of Tx underrun error interrupts */
-  uint32_t tx_errors;      /* Number of Tx error inerrupts (OR of other errors) */
-  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
-};
-#  define EMAC_STAT(priv,name) priv->lp_stat.name++
-#else
-#  define EMAC_STAT(priv,name)
-#endif
-
 /* The lpc17_driver_s encapsulates all state information for a single hardware
  * interface
  */
@@ -308,10 +269,6 @@ struct lpc17_driver_s
   struct work_s lp_pollwork;    /* Poll work continuation */
   uint32_t status;
 #endif /* CONFIG_NET_NOINTS */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  struct lpc17_statistics_s lp_stat;
-#endif
 
   /* This holds the information visible to the NuttX networking layer */
 
@@ -647,7 +604,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   /* Increment statistics and dump the packet *if so configured) */
 
-  EMAC_STAT(priv, tx_packets);
+  NETDEV_TXPACKETS(&priv->lp_dev);
   lpc17_dumppacket("Transmit packet",
                    priv->lp_dev.d_buf, priv->lp_dev.d_len);
 
@@ -826,7 +783,6 @@ static void lpc17_response(struct lpc17_driver_s *priv)
       priv->lp_txpending = true;
       priv->lp_inten    &= ~ETH_RXINTS;
       lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
-      EMAC_STAT(priv, tx_pending);
     }
 }
 
@@ -869,7 +825,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
     {
       /* Update statistics */
 
-      EMAC_STAT(priv, rx_packets);
+      NETDEV_RXPACKETS(&priv->lp_dev);
 
       /* Get the Rx status and packet length (-4+1) */
 
@@ -884,7 +840,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
         {
           nlldbg("Error. considx: %08x prodidx: %08x rxstat: %08x\n",
                  considx, prodidx, *rxstat);
-          EMAC_STAT(priv, rx_pkterr);
+          NETDEV_RXERRORS(&priv->lp_dev);
         }
 
       /* If the pktlen is greater then the buffer, then we cannot accept
@@ -897,20 +853,20 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
         {
           nlldbg("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);
-          EMAC_STAT(priv, rx_pktsize);
+          NETDEV_RXERRORS(&priv->lp_dev);
         }
       else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
           nlldbg("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);
-          EMAC_STAT(priv, rx_fragment);
+          NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = true;
         }
       else if (fragment)
         {
           nlldbg("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);
-          EMAC_STAT(priv, rx_fragment);
+          NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = false;
         }
       else
@@ -952,12 +908,12 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
               nllvdbg("IPv4 frame\n");
+              NETDEV_RXIPV4(&priv->lp_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the
                * network layer
                */
 
-              EMAC_STAT(priv, rx_ip);
               arp_ipin(&priv->lp_dev);
               ipv4_input(&priv->lp_dev);
 
@@ -994,10 +950,10 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
               nllvdbg("Iv6 frame\n");
+              NETDEV_RXIPV6(&priv->lp_dev);
 
               /* Give the IPv6 packet to the network layer */
 
-              EMAC_STAT(priv, rx_ipv6);
               ipv6_input(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
@@ -1032,7 +988,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_ARP
           if (BUF->type == htons(ETHTYPE_ARP))
             {
-              EMAC_STAT(priv, rx_arp);
+              NETDEV_RXARP(&priv->lp_dev);
               arp_arpin(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
@@ -1050,7 +1006,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
             {
               /* Unrecognized... drop it. */
 
-              EMAC_STAT(priv, rx_dropped);
+              NETDEV_RXDROPPED(&priv->lp_dev);
             }
         }
 
@@ -1104,7 +1060,6 @@ static void lpc17_txdone_process(struct lpc17_driver_s *priv)
       /* Clear the pending condition, send the packet, and restore Rx interrupts */
 
       priv->lp_txpending = false;
-      EMAC_STAT(priv, tx_unpend);
 
       lpc17_transmit(priv);
 
@@ -1229,7 +1184,6 @@ static int lpc17_interrupt(int irq, void *context)
 #ifdef CONFIG_NET_WOL
       if ((status & ETH_INT_WKUP) != 0)
         {
-          EMAC_STAT(priv, wol);
 #         warning "Missing logic"
         }
       else
@@ -1250,13 +1204,13 @@ static int lpc17_interrupt(int irq, void *context)
           if ((status & ETH_INT_RXOVR) != 0)
             {
               nlldbg("RX Overrun. status: %08x\n", status);
-              EMAC_STAT(priv, rx_ovrerrors);
+              NETDEV_RXERRORS(&priv->lp_dev);
             }
 
           if ((status & ETH_INT_TXUNR) != 0)
             {
               nlldbg("TX Underrun. status: %08x\n", status);
-              EMAC_STAT(priv, tx_underrun);
+              NETDEV_TXERRORS(&priv->lp_dev);
             }
 
           /* ifup() will reset the EMAC and bring it back up */
@@ -1277,7 +1231,7 @@ static int lpc17_interrupt(int irq, void *context)
           if ((status & ETH_INT_RXERR) != 0)
             {
               nlldbg("RX Error. status: %08x\n", status);
-              EMAC_STAT(priv, rx_errors);
+              NETDEV_RXERRORS(&priv->lp_dev);
             }
 
           /* RX FINISHED -- Triggered when all receive descriptors have
@@ -1294,8 +1248,6 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_RXFIN) != 0 || (status & ETH_INT_RXDONE) != 0)
             {
-              EMAC_STAT(priv, rx_done);
-
               /* We have received at least one new incoming packet. */
 
 #ifdef CONFIG_NET_NOINTS
@@ -1331,9 +1283,10 @@ static int lpc17_interrupt(int irq, void *context)
           if ((status & ETH_INT_TXERR) != 0)
             {
               nlldbg("TX Error. status: %08x\n", status);
-              EMAC_STAT(priv, tx_errors);
+              NETDEV_TXERRORS(&priv->lp_dev);
             }
 
+#if 0
           /* TX FINISHED -- Triggered when all transmit descriptors have
            * been processed i.e. on the transition to the situation
            * where ProduceIndex == ConsumeIndex.
@@ -1341,8 +1294,8 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_TXFIN) != 0)
             {
-              EMAC_STAT(priv, tx_finished);
             }
+#endif
 
           /* TX DONE -- Triggered when a descriptor has been transmitted
            * while the Interrupt bit in the Control field of the
@@ -1351,7 +1304,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_TXDONE) != 0)
             {
-              EMAC_STAT(priv, tx_done);
+              NETDEV_TXDONE(&priv->lp_dev);
 
               /* A packet transmission just completed */
               /* Cancel the pending Tx timeout */
@@ -1422,7 +1375,7 @@ static void lpc17_txtimeout_process(FAR struct lpc17_driver_s *priv)
 {
   /* Increment statistics and dump debug info */
 
-  EMAC_STAT(priv, tx_timeouts);
+  NETDEV_TXTIMEOUTS(&priv->lp_dev);
   if (priv->lp_ifup)
     {
       /* Then reset the hardware. ifup() will reset the interface, then bring

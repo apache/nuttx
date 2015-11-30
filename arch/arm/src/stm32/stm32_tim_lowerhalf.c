@@ -519,12 +519,13 @@ static int stm32_tim14_interrupt(int irq, FAR void *context)
 
 static int stm32_timer_handler(struct stm32_lowerhalf_s *lower)
 {
+  uint32_t next_interval_us = 0;
+  bool ret;
+
   STM32_TIM_ACKINT(lower->tim, 0);
 
-  uint32_t next_interval_us = 0;
-  bool ret = (*lower->handlerUsr)(&next_interval_us);
-
-  if (ret == true)
+  ret = (*lower->handlerUsr)(&next_interval_us);
+  if (ret)
     {
       if (next_interval_us > 0)
         {

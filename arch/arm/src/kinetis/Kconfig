@@ -171,6 +171,7 @@ config KINETIS_ENET
 	default n
 	depends on ARCH_FAMILY_K60
 	select NET
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Support Ethernet (K60 only)
 

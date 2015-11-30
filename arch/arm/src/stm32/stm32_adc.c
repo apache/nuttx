@@ -819,12 +819,10 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 {
   uint32_t prescaler;
   uint32_t reload;
-  uint32_t regval;
   uint32_t timclk;
 
   uint16_t clrbits = 0;
   uint16_t setbits = 0;
-  uint16_t cr1;
   uint16_t cr2;
   uint16_t ccmr1;
   uint16_t ccmr2;
@@ -1060,7 +1058,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   ccer &= ~ccenable;
   tim_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
-  /* Fetch the CR2, CCMR1, and CCMR2 register (already have cr1 and ccer) */
+  /* Fetch the CR2, CCMR1, and CCMR2 register (already have ccer) */
 
   cr2   = tim_getreg(priv, STM32_GTIM_CR2_OFFSET);
   ccmr1 = tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET);

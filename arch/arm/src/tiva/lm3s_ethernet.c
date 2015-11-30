@@ -169,34 +169,6 @@
  * Private Types
  ****************************************************************************/
 
-/* EMAC statistics (debug only) */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-struct tiva_statistics_s
-{
-  uint32_t rx_int;         /* Number of Rx interrupts received */
-  uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-#ifdef CONFIG_NET_IPv4
-  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
-#endif
-#ifdef CONFIG_NET_IPv6
-  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
-#endif
-  uint32_t rx_arp;         /*   Number of Rx ARP packets received */
-  uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
-  uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
-  uint32_t rx_errors;      /* Number of Rx errors (reception error) */
-  uint32_t rx_ovrerrors;   /* Number of Rx FIFO overrun errors */
-  uint32_t tx_int;         /* Number of Tx interrupts received */
-  uint32_t tx_packets;     /* Number of Tx packets queued */
-  uint32_t tx_errors;      /* Number of Tx errors (transmission error) */
-  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
-};
-#  define EMAC_STAT(priv,name) priv->ld_stat.name++
-#else
-#  define EMAC_STAT(priv,name)
-#endif
-
 /* The tiva_driver_s encapsulates all state information for a single hardware
  * interface
  */
@@ -215,10 +187,6 @@ struct tiva_driver_s
   bool     ld_bifup;           /* true:ifup false:ifdown */
   WDOG_ID  ld_txpoll;          /* TX poll timer */
   WDOG_ID  ld_txtimeout;       /* TX timeout timer */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  struct tiva_statistics_s ld_stat;
-#endif
 
   /* This holds the information visible to uIP/NuttX */
 
@@ -518,7 +486,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
     {
       /* Increment statistics */
 
-      EMAC_STAT(priv, tx_packets);
+      NETDEV_TXPACKETS(&priv->ld_dev);
       tiva_dumppacket("Transmit packet", priv->ld_dev.d_buf, priv->ld_dev.d_len);
 
       /* Transfer the packet into the Tx FIFO.  The LS 16-bits of the first
@@ -687,7 +655,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
     {
       /* Update statistics */
 
-      EMAC_STAT(priv, rx_packets);
+      NETDEV_RXPACKETS(&priv->ld_dev);
 
       /* Copy the data data from the hardware to priv->ld_dev.d_buf.  Set
        * amount of data in priv->ld_dev.d_len
@@ -720,7 +688,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           /* We will have to drop this packet */
 
           nlldbg("Bad packet size dropped (%d)\n", pktlen);
-          EMAC_STAT(priv, rx_pktsize);
+          NETDEV_RXERRORS(&priv->ld_dev);
 
           /* The number of bytes and words left to read is pktlen - 4 (including,
            * the final, possibly partial word) because we've already read 4 bytes.
@@ -804,12 +772,12 @@ static void tiva_receive(struct tiva_driver_s *priv)
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->ld_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
            */
 
-          EMAC_STAT(priv, rx_ip);
           arp_ipin(&priv->ld_dev);
           ipv4_input(&priv->ld_dev);
 
@@ -845,10 +813,10 @@ static void tiva_receive(struct tiva_driver_s *priv)
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->ld_dev);
 
           /* Give the IPv6 packet to the network layer */
 
-          EMAC_STAT(priv, rx_ipv6);
           arp_ipin(&priv->ld_dev);
           ipv6_input(&priv->ld_dev);
 
@@ -884,7 +852,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
       if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
-          EMAC_STAT(priv, rx_arp);
+          NETDEV_RXARP(&priv->ld_dev);
 
           arp_arpin(&priv->ld_dev);
 
@@ -901,7 +869,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #endif
         {
           nlldbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
-          EMAC_STAT(priv, rx_dropped);
+          NETDEV_RXDROPPED(&priv->ld_dev);
         }
     }
 }
@@ -981,20 +949,26 @@ static int tiva_interrupt(int irq, FAR void *context)
 
   /* Check for errors */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#if defined(CONFIG_NETDEV_STATISTICS)
   if ((ris & MAC_RIS_TXER) != 0)
     {
-      EMAC_STAT(priv, tx_errors);      /* Number of Tx errors */
+      /* Tx error */
+
+      NETDEV_TXERRORS(&priv->ld_dev);
     }
 
   if ((ris & MAC_RIS_FOV) != 0)
     {
-      EMAC_STAT(priv, rx_ovrerrors);   /* Number of Rx FIFO overrun errors */
+      /* Rx FIFO overrun */
+
+      NETDEV_RXERRORS(&priv->ld_dev);
     }
 
   if ((ris & MAC_RIS_RXER) != 0)
     {
-      EMAC_STAT(priv, rx_errors);      /* Number of Rx errors */
+      /* Rx error */
+
+      NETDEV_RXERRORS(&priv->ld_dev);
     }
 #endif
 
@@ -1008,7 +982,6 @@ static int tiva_interrupt(int irq, FAR void *context)
     {
       /* Handle the incoming packet */
 
-      EMAC_STAT(priv, rx_int);
       tiva_receive(priv);
     }
 
@@ -1018,7 +991,6 @@ static int tiva_interrupt(int irq, FAR void *context)
     {
       /* Handle the complete of the transmission */
 
-      EMAC_STAT(priv, tx_int);
       tiva_txdone(priv);
     }
 
@@ -1054,7 +1026,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
   /* Increment statistics */
 
   nlldbg("Tx timeout\n");
-  EMAC_STAT(priv, tx_timeouts);
+  NETDEV_TXTIMEOUTS(&priv->ld_dev);
 
   /* Then reset the hardware */
 
