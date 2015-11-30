@@ -115,6 +115,11 @@ Any of these options can be selected as the serial console by:
   2. Configuring the peripheral in the "Drivers -> Serial Configuration"
      menu.
 
+NOTE: If USART1 is used (TXD1, RXD1), then PB4 must be reconfigured in the
+SUPC.  Normally, PB4 is TDI.  When it is reconfigured for use with USART1,
+the capability to debug is lost!  If you plan to debug you should most
+certainly not use USARTs.
+
 SD Card
 =======
 
@@ -617,6 +622,11 @@ settings:
     CONFIG_SAMV7_USBDEVHS_LOWPOWER=n          : Don't select low power mode
     CONFIG_SAMV7_USBHS_NDTDS=32               : Number of DMA transfer descriptors
     CONFIG_SAMV7_USBHS_PREALLOCATE=y          : Pre-allocate descriptors
+
+As discussed in the SAMV71-XULT README, this driver will not work correctly
+if the write back data cache is enabled. You must have:
+
+    CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y
 
 In order to be usable, you must all enabled some class driver(s) for the
 USBHS device controller.  Here, for example, is how to configure the CDC/ACM
