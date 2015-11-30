@@ -11184,3 +11184,5 @@
 	* configs/same70-xplained/nsh:  The NSH configuration now seems fully
 	  functional:  serial console, LEDs, buttons, SDRAM, and HSMCI SD card
 	  (2015-11-30).
+	* configs/same70-xplained/netnsh:  Added and verified a network-enabled
+	  NSH configuration for the SAME70-Xplained board (2015-11-20).
