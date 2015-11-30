@@ -47,7 +47,7 @@
  *   PA27   MCDA3 (DAT3)      Camera
  *   PA25   MCCK (CLK)        Shield
  *   PA28   MCCDA (CMD)
- *   PD18   Card Detect (C/D) Shield
+ *   PC16   Card Detect (C/D) Shield
  *   ------ ----------------- ---------------------
  */
 

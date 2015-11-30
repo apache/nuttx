@@ -77,10 +77,10 @@
 #  undef HAVE_HSMCI
 #endif
 
-/* We need PIO interrupts on GPIOD to support card detect interrupts */
+/* We need PIO interrupts on GPIOC to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOC_IRQ)
+#  warning PIOC interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
 
@@ -231,7 +231,7 @@
 #define GPIO_EMAC0_RESET  (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                            GPIO_PORT_PIOC | GPIO_PIN10)
 
-#define IRQ_EMAC0_INT     SAM_IRQ_PA19
+#define IRQ_EMAC0_INT     SAM_IRQ_PA14
 
 /* LEDs
  *
@@ -273,13 +273,13 @@
  *   PA27   MCDA3 (DAT3)      Camera
  *   PA25   MCCK (CLK)        Shield
  *   PA28   MCCDA (CMD)
- *   PD18   Card Detect (C/D) Shield
+ *   PC16   Card Detect (C/D) Shield
  *   ------ ----------------- ---------------------
  */
 
 #define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN18)
-#define IRQ_MCI0_CD   SAM_IRQ_PD18
+                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOC | GPIO_PIN16)
+#define IRQ_MCI0_CD   SAM_IRQ_PC16
 
 /* USB Host
  *

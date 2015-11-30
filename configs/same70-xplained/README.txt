@@ -25,15 +25,9 @@ Contents
 Status/Open Issues
 ==================
 
-Although this configuration is not particualarly different from the
-SAMV71-XULT board, my initial attempts to debug the board have not been
-successful.  The code is just not behaving correctly in excuting the first
-few instructions after reset.  I have very early realease boards and I am
-suspected some tool/board issue:  It appears that I write the code
-correctly to FLASH and the GPNVM is configured so that the FLASH lies at
-address 0x00000000, but trying to step through with AtmelStudio 7 results
-in uninterpretble behavior.  Using the Segger J-Link, I get errors trying
-to reset and halt the board so I am unable to use that debugger either.
+2015-11-30: The basic NSH configuration is function with serial console
+  via the EDBG VCOM and LED and buttons support.  SDRAM and the HSMCI
+  SD card slot also appear to be fully functional.
 
 WARNING:  This README derives heavily from the SAMV71-XULT README file and
 may still contain some logic that pertains only to that board.  This is a
@@ -144,7 +138,7 @@ E70. SD card connector:
   PA27   MCDA3 (DAT3)      Camera
   PA25   MCCK (CLK)        Shield
   PA28   MCCDA (CMD)
-  PD18   Card Detect (C/D) Shield
+  PC16   Card Detect (C/D) Shield
   ------ ----------------- ---------------------
 
 Configuration Settings
@@ -1280,19 +1274,17 @@ Configuration sub-directories
          nsh> i2c dev 3 77
               0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
          00:          -- -- -- -- -- -- -- -- -- -- -- -- --
-         10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+         10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          20: -- -- -- -- -- -- -- -- 28 -- -- -- -- -- -- --
          30: -- -- -- -- -- -- -- 37 -- -- -- -- -- -- -- --
-         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- 4e --
+         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          50: -- -- -- -- -- -- -- 57 -- -- -- -- -- -- -- 5f
          60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          70: -- -- -- -- -- -- -- --
-         nsh>
 
-       Where 0x28 is the address of TWI interface to the EDBG, 0x4e is the
-       address of the CP2100CP programmable PLL, and 0x57 and 0x5f are thei
-       addresses of the AT2 EEPROM (I am not sure what the other address,i
-       0x37, is as this writing).
+       Where 0x28 is the address of TWI interface to the EDBG and 0x57 and
+       0x5f are the addresses of the AT24 EEPROM (I am not sure what the
+       other address, 0x37, is as this writing).
 
     7. TWIHS0 is also used to support 256 byte non-volatile storage for
        configuration data using the MTD configuration as described above
