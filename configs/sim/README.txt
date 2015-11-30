@@ -341,6 +341,58 @@ Common Configuration Information
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.
 
+  3. Before building, make sure that the configuration is correct for you host platform:
+
+     a. Linux, 32-bit CPU
+
+        CONFIG_HOST_LINUX=y
+        CONFIG_HOST_WINDOWS=n
+        CONFIG_HOST_X86=y
+        CONFIG_HOST_X86_64=n
+
+     b. Linux, 64-bit CPU, 32-bit build
+
+        CONFIG_HOST_LINUX=y
+        CONFIG_HOST_WINDOWS=n
+        CONFIG_HOST_X86=n
+        CONFIG_HOST_X86_64=y
+        CONFIG_SIM_X8664_MICROSOFT=n
+        CONFIG_SIM_X8664_SYSTEMV=y
+        CONFIG_SIM_M32=y
+
+     c. Linux, 64-bit CPU, 64-bit build
+
+        CONFIG_HOST_LINUX=y
+        CONFIG_HOST_WINDOWS=n
+        CONFIG_HOST_X86=n
+        CONFIG_HOST_X86_64=y
+        CONFIG_SIM_X8664_MICROSOFT=n
+        CONFIG_SIM_X8664_SYSTEMV=y
+        CONFIG_SIM_M32=n
+
+     d. Cygwin, 32-bit
+
+        CONFIG_HOST_LINUX=n
+        CONFIG_HOST_WINDOWS=y
+        CONFIG_WINDOWS_CYGWIN=y
+        CONFIG_HOST_X86=y
+        CONFIG_HOST_X86_64=n
+
+     e. Cygwin64, 64-bit, 32-bit build
+
+        I don't believe this configuration is supported by Cygwin64
+
+     f. Cygwin64, 64-bit, 64-bit build
+
+        CONFIG_HOST_LINUX=n
+        CONFIG_HOST_WINDOWS=y
+        CONFIG_WINDOWS_CYGWIN=y
+        CONFIG_HOST_X86=n
+        CONFIG_HOST_X86_64=y
+        CONFIG_SIM_X8664_MICROSOFT=y
+        CONFIG_SIM_X8664_SYSTEMV=n
+        CONFIG_SIM_M32=n
+
 Configuration Sub-Directories
 -----------------------------
 
