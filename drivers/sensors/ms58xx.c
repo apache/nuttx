@@ -598,7 +598,7 @@ static int ms58xx_measure(FAR struct ms58xx_dev_s *priv)
       return ret;
     }
 
-  diff = (int32_t)rawtemp - (int32_t)priv->c5 / ((int32_t)1 << 8);
+  diff = (int32_t)rawtemp - (int32_t)priv->c5 * ((int32_t)1 << 8);
   temp = (int32_t)((int64_t)2000 +
                    (int64_t)diff * (int64_t)priv->c6 / ((int64_t)1 << 23));
 
