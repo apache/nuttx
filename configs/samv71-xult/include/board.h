@@ -60,6 +60,7 @@
  * There are two on-board crystals:
  */
 
+#define BOARD_HAVE_SLOWXTAL        1          /* Slow crystal is populated */
 #define BOARD_SLOWCLK_FREQUENCY    (32768)    /* 32.768 KHz slow crystal oscillator */
 #define BOARD_MAINOSC_FREQUENCY    (12000000) /* 12 MHz main oscillator */
 
