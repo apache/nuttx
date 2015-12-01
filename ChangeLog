@@ -11186,3 +11186,6 @@
 	  (2015-11-30).
 	* configs/same70-xplained/netnsh:  Added and verified a network-enabled
 	  NSH configuration for the SAME70-Xplained board (2015-11-20).
+	* net/: Remove CONFIG_NET_PINGADDRCONF.  This was a uIP way of assigning
+	  IP addresses, but is not standard and not a appropriate feature in
+	  general (2015-12-01).

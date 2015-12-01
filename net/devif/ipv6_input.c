@@ -204,10 +204,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       return udp_ipv6_input(dev);
     }
 
-  /* In most other cases, the device must be assigned a non-zero IP
-   * address.  Another exception is when CONFIG_NET_PINGADDRCONF is
-   * enabled...
-   */
+  /* In other cases, the device must be assigned a non-zero IP address. */
 
   else
 #endif

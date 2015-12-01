@@ -398,34 +398,15 @@ int ipv4_input(FAR struct net_driver_s *dev)
       return udp_ipv4_input(dev);
     }
 
-  /* In most other cases, the device must be assigned a non-zero IP
-   * address.  Another exception is when CONFIG_NET_PINGADDRCONF is
-   * enabled...
-   */
+  /* In other cases, the device must be assigned a non-zero IP address. */
 
   else
 #endif
 #ifdef CONFIG_NET_ICMP
   if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
     {
-#ifdef CONFIG_NET_PINGADDRCONF
-      /* If we are configured to use ping IP address configuration and
-       * hasn't been assigned an IP address yet, we accept all ICMP
-       * packets.
-       */
-
-      if (pbuf->proto == IP_PROTO_ICMP)
-        {
-          nlldbg("Possible ping config packet received\n");
-          icmp_input(dev);
-          goto drop;
-        }
-      else
-#endif
-        {
-          nlldbg("No IP address assigned\n");
-          goto drop;
-        }
+      nlldbg("No IP address assigned\n");
+      goto drop;
     }
 
   /* Check if the packet is destined for out IP address */

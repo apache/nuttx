@@ -117,18 +117,6 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   if (picmp->type == ICMP_ECHO_REQUEST)
     {
-      /* If we are configured to use ping IP address assignment, we use
-       * the destination IP address of this ping packet and assign it to
-       * ourself.
-       */
-
-#ifdef CONFIG_NET_PINGADDRCONF
-      if (dev->d_ipaddr == 0)
-        {
-          dev->d_ipaddr = picmp->destipaddr;
-        }
-#endif
-
       /* Change the ICMP type */
 
       picmp->type = ICMP_ECHO_REPLY;
