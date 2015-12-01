@@ -127,7 +127,7 @@ static const struct procfs_entry_s g_procfs_ccm =
 {
   "ccm",
   &ccm_procfsoperations
-},
+};
 
 /****************************************************************************
  * Private Functions
@@ -138,7 +138,7 @@ static const struct procfs_entry_s g_procfs_ccm =
  ****************************************************************************/
 
 static int ccm_open(FAR struct file *filep, FAR const char *relpath,
-                      int oflags, mode_t mode)
+                    int oflags, mode_t mode)
 {
   FAR struct ccm_file_s *priv;
 
@@ -204,7 +204,7 @@ static int ccm_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
+                        size_t buflen)
 {
   FAR struct ccm_file_s *priv;
   size_t linesize;
