@@ -101,7 +101,7 @@ static int     ccm_dup(FAR const struct file *oldp,
 static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 /* See include/nutts/fs/procfs.h
@@ -109,7 +109,7 @@ static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations ccm_procfsoperations =
+static const struct procfs_operations ccm_procfsoperations =
 {
   ccm_open,       /* open */
   ccm_close,      /* close */
@@ -123,11 +123,7 @@ const struct procfs_operations ccm_procfsoperations =
   ccm_stat        /* stat */
 };
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-const struct procfs_file_s g_procfs_ccm =
+static const struct procfs_entry_s g_procfs_ccm =
 {
   "ccm",
   &ccm_procfsoperations
