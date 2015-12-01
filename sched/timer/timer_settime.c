@@ -195,7 +195,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
 
   if (timer_release(u.timer))
     {
-      /* If this is a repetitive timer, the restart the watchdog */
+      /* If this is a repetitive timer, then restart the watchdog */
 
       timer_restart(u.timer, itimer);
     }

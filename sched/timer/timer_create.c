@@ -76,7 +76,7 @@
  *
  ********************************************************************************/
 
-static struct posix_timer_s *timer_allocate(void)
+static FAR struct posix_timer_s *timer_allocate(void)
 {
   FAR struct posix_timer_s *ret;
   irqstate_t flags;
@@ -177,8 +177,8 @@ static struct posix_timer_s *timer_allocate(void)
 
 int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid)
 {
-  struct posix_timer_s *ret;
-  WDOG_ID               wdog;
+  FAR struct posix_timer_s *ret;
+  WDOG_ID wdog;
 
   /* Sanity checks.  Also, we support only CLOCK_REALTIME */
 
