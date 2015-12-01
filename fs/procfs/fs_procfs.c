@@ -1064,7 +1064,7 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
   newsize  = newcount * sizeof(struct procfs_entry_s);
 
   sched_lock();
-  newtable = (FAR struct procfs_entry_s *)realloc(g_procfs_entries, newsize);
+  newtable = (FAR struct procfs_entry_s *)kmm_realloc(g_procfs_entries, newsize);
   if (newtable == NULL)
     {
       ret = -ENOMEM;
