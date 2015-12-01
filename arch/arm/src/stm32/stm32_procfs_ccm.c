@@ -324,14 +324,14 @@ static int ccm_stat(const char *relpath, struct stat *buf)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ccm_register
+ * Name: ccm_procfs_register
  *
  * Description:
  *   Register the CCM procfs file system entry
  *
  ****************************************************************************/
 
-int ccm_register(void)
+int ccm_procfs_register(void)
 {
   return procfs_register(&g_procfs_ccm);
 }
