@@ -47,6 +47,16 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define STM32_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 /* STM32F736G Discovery GPIOs ***********************************************************************/
 /* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the reset button, that
  * can be controlled by software (LD2 is a power indicator, LD3-6 indicate USB status, LD7 is
