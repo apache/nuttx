@@ -949,6 +949,11 @@ Configuration sub-directories
        (USART1).  You will need to reconfigure if you will to use a different
        U[S]ART.
 
+       NOTE: When USART1 is used, the pin PB4 is reconfigured.  Normally, PB4
+       is TDI.  When it is reconfigured for use with USART1, the capability to
+       debug is lost!  If you plan to debug you should most certainly not use
+       USART1.  USART3 might be a good option (the Arduino RXD/TXD)
+
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
 
@@ -1053,6 +1058,11 @@ Configuration sub-directories
     1. The serial console is configured by default for use with the EDBG VCOM
        (USART1).  You will need to reconfigure if you will to use a different
        U[S]ART.
+
+       NOTE: When USART1 is used, the pin PB4 is reconfigured.  Normally, PB4
+       is TDI.  When it is reconfigured for use with USART1, the capability to
+       debug is lost!  If you plan to debug you should most certainly not use
+       USART1.  USART3 might be a good option (the Arduino RXD/TXD)
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
