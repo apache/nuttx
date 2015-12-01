@@ -49,6 +49,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+#ifdef CONFIG_ADC_CHANLIST
+#  if !defined(CONFIG_ADC_NCHANNELS)
+#    error "CONFIG_ADC_CHANLIST must defined in this configuration"
+#  elif CONFIG_ADC_NCHANNELS < 1
+#    error "The value of CONFIG_ADC_NCHANNELS is invalid"
+#  endif
+#endif
 
 /****************************************************************************
  * Public Types

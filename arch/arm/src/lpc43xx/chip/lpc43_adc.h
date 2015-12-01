@@ -134,7 +134,7 @@
 #define ADC_GDR_VVREF_MASK       (0x03ff << ADC_GDR_VVREF_SHIFT)
                                            /* Bits 16-23: Reserved */
 #define ADC_GDR_CHAN_SHIFT       (24)      /* Bits 24-26: Channel converted */
-#define ADC_GDR_CHAN_MASK        (3 << ADC_GDR_CHN_SHIFT)
+#define ADC_GDR_CHAN_MASK        (3 << ADC_GDR_CHAN_SHIFT)
                                            /* Bits 27-29: Reserved */
 #define ADC_GDR_OVERRUN          (1 << 30) /* Bit 30: Conversion(s) lost/overwritten*/
 #define ADC_GDR_DONE             (1 << 31) /* Bit 31: A/D conversion complete*/
