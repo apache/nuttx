@@ -159,7 +159,6 @@ static const struct timer_ops_s g_timer_ops =
   .ioctl      = 0,
 };
 
-
 #ifdef CONFIG_STM32_TIM1
 static struct stm32_lowerhalf_s g_tim1_lowerHalf =
 {
