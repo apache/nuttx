@@ -180,6 +180,24 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      FAR char *dest, size_t destlen,
                      off_t *offset);
 
+/****************************************************************************
+ * Name: procfs_register
+ *
+ * Description:
+ *   Add a new entry to the procfs file system.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be registered.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+int procfs_register(FAR const struct procfs_file_s *entry);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

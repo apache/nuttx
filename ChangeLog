@@ -11189,3 +11189,9 @@
 	* net/: Remove CONFIG_NET_PINGADDRCONF.  This was a uIP way of assigning
 	  IP addresses, but is not standard and not a appropriate feature in
 	  general (2015-12-01).
+	* fs/procfs:  The procfs file system can now be configured so that it
+	  supports a runtime registration of procfs entries with
+	  CONFIG_FS_PROCFS_REGISTER=y (2015-12-01).
+	* arch/arm/src/stm32/stm32_ccm_procfs.c: Is no longer a part of the
+	  'base' procfs entries and can now only be supported via run time
+	  registration with CONFIG_FS_PROCFS_REGISTER=y (2015-12-01).
