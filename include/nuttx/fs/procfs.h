@@ -195,7 +195,7 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
  ****************************************************************************/
 
 #ifdef CONFIG_FS_PROCFS_REGISTER
-int procfs_register(FAR const struct procfs_file_s *entry);
+int procfs_register(FAR const struct procfs_entry_s *entry);
 #endif
 
 #undef EXTERN

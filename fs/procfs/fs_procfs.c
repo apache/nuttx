@@ -1047,7 +1047,7 @@ int procfs_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_FS_PROCFS_REGISTER
-int procfs_register(FAR const struct procfs_file_s *entry)
+int procfs_register(FAR const struct procfs_entry_s *entry)
 {
   FAR struct procfs_entry_s *newtable;
   unsigned int newcount;
