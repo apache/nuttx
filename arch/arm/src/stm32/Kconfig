@@ -2448,7 +2448,7 @@ config STM32_CCMEXCLUDE
 config STM32_CCM_PROCFS
 	bool "CCM PROCFS support"
 	default n
-	depends on STM32_CCMEXCLUDE && FS_PROCFS
+	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
 	---help---
 		Select to build in support for /proc/ccm.  Reading from /proc/ccm
 		will provide statistics about CCM memory use similar to what you

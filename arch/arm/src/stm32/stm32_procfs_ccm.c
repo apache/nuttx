@@ -64,19 +64,18 @@
 
 #include "stm32_ccm.h"
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
+     defined(CONFIG_FS_PROCFS_REGISTER) && defined(CONFIG_STM32_CCM_PROCFS)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #define CCM_LINELEN     64
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This enumeration identifies all of the thread attributes that can be
- * accessed via the procfs file system.
- */
 
 /* This structure describes one open "file" */
 
@@ -102,10 +101,6 @@ static int     ccm_dup(FAR const struct file *oldp,
 static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -127,6 +122,16 @@ const struct procfs_operations ccm_procfsoperations =
   NULL,           /* rewinddir */
   ccm_stat        /* stat */
 };
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+const struct procfs_file_s g_procfs_ccm =
+{
+  "ccm",
+  &ccm_procfsoperations
+},
 
 /****************************************************************************
  * Private Functions
@@ -314,4 +319,22 @@ static int ccm_stat(const char *relpath, struct stat *buf)
   return OK;
 }
 
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ccm_register
+ *
+ * Description:
+ *   Register the CCM procfs file system entry
+ *
+ ****************************************************************************/
+
+int ccm_register(void)
+{
+  return procfs_register(&g_procfs_ccm);
+}
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
+        * CONFIG_FS_PROCFS_REGISTER && CONFIG_STM32_CCM_PROCFS */

@@ -131,6 +131,18 @@ EXTERN struct mm_heap_s g_ccm_heap;
 }
 #endif
 
+/****************************************************************************
+ * Name: ccm_register
+ *
+ * Description:
+ *   Register the CCM procfs file system entry
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_CCM_PROCFS
+int ccm_register(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* HAVE_CCM_HEAP */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_CCM_H */
