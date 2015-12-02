@@ -33,7 +33,9 @@
 #
 ############################################################################
 
+VPATH += chip/spifi/src
+
 ifeq ($(CONFIG_SPIFI_LIBRARY),y)
-CHIP_CSRCS += spifi/src/spifilib_fam_standard_cmd.c
-CHIP_CSRCS += spifi/src/spifilib_dev_common.c
+CHIP_CSRCS += spifilib_fam_standard_cmd.c
+CHIP_CSRCS += spifilib_dev_common.c
 endif
