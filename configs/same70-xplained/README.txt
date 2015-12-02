@@ -898,6 +898,16 @@ Tickless OS
       CONFIG_SAMV7_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
                                        : running timer
 
+  NOTE: In most cases, the slow clock will be used as the timer/counter
+  input.  The SAME70-Xplained board has pads for a 32.768KHz crystal,
+  however, the boad ships with that position unpopulated.  So, be default
+  this will probably end up using the slow RC oscillator which will give
+  you very bad timing.
+
+  If you add a crystal to your board, you can select to use it with the
+  definition BOARD_HAVE_SLOWXTAL in the configs/same70-xplained/board.h
+  file.
+
   SAME70 Timer Usage
   ------------------
   This current implementation uses two timers:  A one-shot timer to

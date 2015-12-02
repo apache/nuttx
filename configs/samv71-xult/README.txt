@@ -1471,7 +1471,7 @@ Tickless OS
   Configuration
   -------------
   The following configuration options will enable support for the Tickless
-  OS for the SAMV7 platforms using TC0 channels 0-3 (other timers or
+  OS for the SAMV7 platforms using TC0 channels 0-1 (other timers or
   timer channels could be used making the obvious substitutions):
 
     RTOS Features -> Clocks and Timers
@@ -1490,10 +1490,8 @@ Tickless OS
                                        : running timer
 
   NOTE: In most cases, the slow clock will be used as the timer/counter
-  input.  You should enable the 32.768KHz crystal for the slow clock by
-  calling sam_sckc_enable().  Otherwise, you will be doing all system
-  timing using the RC clock!  UPDATE: This will now be selected by default
-  when you configure for TICKLESS support.
+  input.  The 32.768KHz crystal is selected by the definition
+  BOARD_HAVE_SLOWXTAL in the configs/samv71-xult/board.h file.
 
   SAMV7 Timer Usage
   -----------------
