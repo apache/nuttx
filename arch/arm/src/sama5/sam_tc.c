@@ -382,7 +382,7 @@ static const struct sam_tcconfig_s g_tc678config =
     },
     [2] =
     {
-      .base    = SAM_TC345_CHAN_BASE(5),
+      .base    = SAM_TC345_CHAN_BASE(8),
 #ifdef CONFIG_SAMA5_TC2_CLK8
       .clkset  = PIO_TC8_CLK,
 #else
