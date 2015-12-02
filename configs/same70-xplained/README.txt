@@ -581,7 +581,7 @@ Pre-requisites:
     prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
     CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
     that it supports arch_phy_irq().  This logic can be found at
-    nuttx/configs/sama5d4-ek/src/sam_ethernet.c.
+    nuttx/configs/same70-xplained/src/sam_ethernet.c.
 
   - And a few other things: UDP support is required (CONFIG_NET_UDP) and
     signals must not be disabled (CONFIG_DISABLE_SIGNALS).
@@ -886,6 +886,7 @@ Tickless OS
     RTOS Features -> Clocks and Timers
       CONFIG_SCHED_TICKLESS=y          : Configures the RTOS in tickless mode
       CONFIG_SCHED_TICKLESS_ALARM=n    : (option not implemented)
+      CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP=y
 
     System Type -> SAMV7 Peripheral Support
       CONFIG_SAMV7_TC0=y               : Enable TC0 (TC channels 0-3

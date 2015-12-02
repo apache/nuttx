@@ -1477,6 +1477,7 @@ Tickless OS
     RTOS Features -> Clocks and Timers
       CONFIG_SCHED_TICKLESS=y          : Configures the RTOS in tickless mode
       CONFIG_SCHED_TICKLESS_ALARM=n    : (option not implemented)
+      CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP=y
 
     System Type -> SAMV7 Peripheral Support
       CONFIG_SAMV7_TC0=y               : Enable TC0 (TC channels 0-3
