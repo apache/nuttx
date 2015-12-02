@@ -1038,6 +1038,10 @@ int procfs_initialize(void)
  * Description:
  *   Add a new entry to the procfs file system.
  *
+ *   NOTE: This function should be called *prior* to mounting the procfs
+ *   file system to prevent concurrency problems with the modification of
+ *   the procfs data set while it is in use.
+ *
  * Input Parameters:
  *   entry - Describes the entry to be registered.
  *
@@ -1058,7 +1062,17 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
 
   procfs_initialize();
 
-  /* realloc the procfs entries */
+  /* realloc the table of procfs entries.
+   *
+   * REVISIT:  This reallocation may free memory previously used for the
+   * procfs entry table.  If that table were actively in use, then that
+   * could cause procfs logic to use a stale memory pointer!  We avoid that
+   * problem by requiring that the procfs file be unmounted when the new
+   * entry is added.  That requirment, however, is not enforced explicitly.
+   *
+   * Locking the scheduler as done below is insufficient.  As would be just
+   * marking the entries as volatile.
+   */
 
   newcount = g_procfs_entrycount + 1;
   newsize  = newcount * sizeof(struct procfs_entry_s);
@@ -1067,11 +1081,19 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
   newtable = (FAR struct procfs_entry_s *)kmm_realloc(g_procfs_entries, newsize);
   if (newtable == NULL)
     {
+      /* Reallocation failed! */
+
       ret = -ENOMEM;
     }
   else
     {
+      /* Copy the new entry at the end of the reallocated table */
+
       memcpy(&newtable[g_procfs_entrycount], entry, sizeof(struct procfs_entry_s));
+
+      /* Instantiate the reallocated table */
+
+      g_procfs_entries    = newtable;
       g_procfs_entrycount = newcount;
       ret = OK;
     }
