@@ -186,7 +186,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 
   /* Allocate the timer/counter and select its mode of operation
    *
-   *   CMR_TCCLKS          - Returned by sam_tc_divisor
+   *   TC_CMR_TCCLKS       - Returned by sam_tc_divisor
    *   TC_CMR_CLKI=0       - Not inverted
    *   TC_CMR_BURST_NONE   - Not gated by an external signal
    *   TC_CMR_CPCSTOP=1    - Stop the clock on an RC compare event

@@ -83,6 +83,8 @@
 struct sam_chconfig_s
 {
   uintptr_t base;          /* Channel register base address */
+  uint8_t pid;             /* Peripheral ID */
+  xcpt_t handler;          /* Timer interrupt handler */
   gpio_pinset_t clkset;    /* CLK input PIO configuration */
   gpio_pinset_t tioaset;   /* Output A PIO configuration */
   gpio_pinset_t tiobset;   /* Output B PIO configuration */
@@ -93,9 +95,8 @@ struct sam_chconfig_s
 struct sam_tcconfig_s
 {
   uintptr_t base;          /* TC register base address */
-  uint8_t pid;             /* Peripheral ID */
-  uint8_t chfirst;         /* First channel number */
   uint8_t tc;              /* Timer/counter number */
+  uint8_t chfirst;         /* First channel number */
 
   /* Channels */
 
@@ -109,9 +110,9 @@ struct sam_chan_s
 {
   struct sam_tc_s *tc;     /* Parent timer/counter */
   uintptr_t base;          /* Channel register base address */
-  tc_handler_t handler;    /* Attached interrupt handler */
-  void *arg;               /* Interrupt handler argument */
-  uint8_t chan;            /* Channel number (0, 1, or 2 OR 3, 4, or 5) */
+  tc_handler_t handler;    /* User timer interrupt handler */
+  void *arg;               /* User interrupt handler argument */
+  uint8_t chan;            /* Channel number (0, 1, 2, ... 11} */
   bool inuse;              /* True: channel is in use */
 };
 
@@ -121,9 +122,8 @@ struct sam_tc_s
 {
   sem_t exclsem;           /* Assures mutually exclusive access to TC */
   uintptr_t base;          /* Register base address */
-  uint8_t pid;             /* Peripheral ID/irq number */
-  uint8_t tc;              /* Timer/channel number (0 or 1) */
-  bool initialized;        /* True: Timer data has been initialized */
+  uint8_t tc;              /* Timer/channel number {0, 1, 2, 3} */
+  bool initialized;        /* True: Timer/counter has been initialized */
 
   /* Channels */
 
@@ -169,18 +169,30 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 
 /* Interrupt Handling *******************************************************/
 
-static int sam_tc_interrupt(struct sam_tc_s *tc);
+static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan);
+
 #ifdef CONFIG_SAMV7_TC0
-static int sam_tc012_interrupt(int irq, void *context);
+static int sam_tc0_interrupt(int irq, void *context);
+static int sam_tc1_interrupt(int irq, void *context);
+static int sam_tc2_interrupt(int irq, void *context);
 #endif
+
 #ifdef CONFIG_SAMV7_TC1
-static int sam_tc345_interrupt(int irq, void *context);
+static int sam_tc3_interrupt(int irq, void *context);
+static int sam_tc4_interrupt(int irq, void *context);
+static int sam_tc5_interrupt(int irq, void *context);
 #endif
+
 #ifdef CONFIG_SAMV7_TC2
-static int sam_tc678_interrupt(int irq, void *context);
+static int sam_tc6_interrupt(int irq, void *context);
+static int sam_tc7_interrupt(int irq, void *context);
+static int sam_tc8_interrupt(int irq, void *context);
 #endif
+
 #ifdef CONFIG_SAMV7_TC3
-static int sam_tc901_interrupt(int irq, void *context);
+static int sam_tc9_interrupt(int irq, void *context);
+static int sam_tc10_interrupt(int irq, void *context);
+static int sam_tc11_interrupt(int irq, void *context);
 #endif
 
 /* Initialization ***********************************************************/
@@ -198,18 +210,20 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel);
 static const struct sam_tcconfig_s g_tc012config =
 {
   .base    = SAM_TC012_BASE,
-  .pid     = SAM_PID_TC0,
-  .chfirst = 0,
   .tc      = 0,
+  .chfirst = 0,
   .channel =
   {
     [0] =
     {
-      .base   = SAM_TC012_CHAN_BASE(0),
+      .base    = SAM_TC012_CHAN_BASE(0),
+      .handler = sam_tc0_interrupt,
+      .pid     = SAM_PID_TC0,
+
 #ifdef CONFIG_SAMV7_TC0_CLK0
-      .clkset = PIO_TC0_CLK,
+      .clkset  = PIO_TC0_CLK,
 #else
-      .clkset = 0,
+      .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOA0
       .tioaset = PIO_TC0_IOA,
@@ -225,6 +239,9 @@ static const struct sam_tcconfig_s g_tc012config =
     [1] =
     {
       .base    = SAM_TC012_CHAN_BASE(1),
+      .handler = sam_tc1_interrupt,
+      .pid     = SAM_PID_TC1,
+
 #ifdef CONFIG_SAMV7_TC0_CLK1
       .clkset  = PIO_TC1_CLK,
 #else
@@ -244,6 +261,8 @@ static const struct sam_tcconfig_s g_tc012config =
     [2] =
     {
       .base    = SAM_TC012_CHAN_BASE(2),
+      .handler = sam_tc2_interrupt,
+
 #ifdef CONFIG_SAMV7_TC0_CLK2
       .clkset  = PIO_TC2_CLK,
 #else
@@ -268,14 +287,16 @@ static const struct sam_tcconfig_s g_tc012config =
 static const struct sam_tcconfig_s g_tc345config =
 {
   .base    = SAM_TC345_BASE,
-  .pid     = SAM_PID_TC1,
-  .chfirst = 3,
   .tc      = 1,
+  .chfirst = 3,
   .channel =
   {
     [0] =
     {
       .base    = SAM_TC345_CHAN_BASE(3),
+      .handler = sam_tc3_interrupt,
+      .pid     = SAM_PID_TC3,
+
 #ifdef CONFIG_SAMV7_TC1_CLK3
       .clkset  = PIO_TC3_CLK,
 #else
@@ -295,6 +316,9 @@ static const struct sam_tcconfig_s g_tc345config =
     [1] =
     {
       .base    = SAM_TC345_CHAN_BASE(4),
+      .handler = sam_tc4_interrupt,
+      .pid     = SAM_PID_TC4,
+
 #ifdef CONFIG_SAMV7_TC1_CLK4
       .clkset  = PIO_TC4_CLK,
 #else
@@ -314,6 +338,9 @@ static const struct sam_tcconfig_s g_tc345config =
     [2] =
     {
       .base    = SAM_TC345_CHAN_BASE(5),
+      .handler = sam_tc5_interrupt,
+      .pid     = SAM_PID_TC5,
+
 #ifdef CONFIG_SAMV7_TC1_CLK5
       .clkset  = PIO_TC5_CLK,
 #else
@@ -338,14 +365,16 @@ static const struct sam_tcconfig_s g_tc345config =
 static const struct sam_tcconfig_s g_tc678config =
 {
   .base    = SAM_TC678_BASE,
-  .pid     = SAM_PID_TC2,
-  .chfirst = 6,
   .tc      = 2,
+  .chfirst = 6,
   .channel =
   {
     [0] =
     {
       .base    = SAM_TC678_CHAN_BASE(6),
+      .handler = sam_tc6_interrupt,
+      .pid     = SAM_PID_TC6,
+
 #ifdef CONFIG_SAMV7_TC2_CLK6
       .clkset  = PIO_TC6_CLK,
 #else
@@ -365,6 +394,9 @@ static const struct sam_tcconfig_s g_tc678config =
     [1] =
     {
       .base    = SAM_TC678_CHAN_BASE(7),
+      .handler = sam_tc7_interrupt,
+      .pid     = SAM_PID_TC7,
+
 #ifdef CONFIG_SAMV7_TC2_CLK7
       .clkset  = PIO_TC7_CLK,
 #else
@@ -384,6 +416,9 @@ static const struct sam_tcconfig_s g_tc678config =
     [2] =
     {
       .base    = SAM_TC345_CHAN_BASE(8),
+      .handler = sam_tc8_interrupt,
+      .pid     = SAM_PID_TC8,
+
 #ifdef CONFIG_SAMV7_TC2_CLK8
       .clkset  = PIO_TC8_CLK,
 #else
@@ -408,14 +443,16 @@ static const struct sam_tcconfig_s g_tc678config =
 static const struct sam_tcconfig_s g_tc901config =
 {
   .base    = SAM_TC901_BASE,
-  .pid     = SAM_PID_TC3,
-  .chfirst = 9,
   .tc      = 3,
+  .chfirst = 9,
   .channel =
   {
     [0] =
     {
       .base    = SAM_TC901_CHAN_BASE(9),
+      .handler = sam_tc9_interrupt,
+      .pid     = SAM_PID_TC9,
+
 #ifdef CONFIG_SAMV7_TC2_CLK9
       .clkset  = PIO_TC9_CLK,
 #else
@@ -435,6 +472,9 @@ static const struct sam_tcconfig_s g_tc901config =
     [1] =
     {
       .base    = SAM_TC901_CHAN_BASE(10),
+      .handler = sam_tc10_interrupt,
+      .pid     = SAM_PID_TC10,
+
 #ifdef CONFIG_SAMV7_TC2_CLK10
       .clkset  = PIO_TC10_CLK,
 #else
@@ -454,6 +494,9 @@ static const struct sam_tcconfig_s g_tc901config =
     [2] =
     {
       .base    = SAM_TC345_CHAN_BASE(11),
+      .handler = sam_tc11_interrupt,
+      .pid     = SAM_PID_TC11,
+
 #ifdef CONFIG_SAMV7_TC2_CLK11
       .clkset  = PIO_TC11_CLK,
 #else
@@ -755,59 +798,46 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
  *  Common timer channel interrupt handling.
  *
  * Input Parameters:
- *   tc   Timer status instance
+ *   tc   Timer/counter state instance
+ *   chan Channel state instance
  *
  * Returned Value:
- *   A pointer to the initialized timer channel structure associated with tc
- *   and channel.  NULL is returned on any failure.
- *
- *   On successful return, the caller holds the tc exclusive access semaphore.
+ *   OK on success; a negated errno value on failure
  *
  ****************************************************************************/
 
-static int sam_tc_interrupt(struct sam_tc_s *tc)
+static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
 {
-  struct sam_chan_s *chan;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
-  int i;
 
-  /* Process interrupts on each channel */
+  /* Get the interrupt status for this channel */
 
-  for (i = 0; i < 3; i++)
+  sr      = sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+  imr     = sam_chan_getreg(chan, SAM_TC_IMR_OFFSET);
+  pending = sr & imr;
+
+  /* Are there any pending interrupts for this channel? */
+
+  if (pending)
     {
-      /* Get the handy channel reference */
+      /* Yes... if we have pending interrupts then interrupts must be
+       * enabled and we must have a handler attached.
+       */
 
-      chan = &tc->channel[i];
-
-      /* Get the interrupt status for this channel */
-
-      sr      = sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
-      imr     = sam_chan_getreg(chan, SAM_TC_IMR_OFFSET);
-      pending = sr & imr;
-
-      /* Are there any pending interrupts for this channel? */
-
-      if (pending)
+      DEBUGASSERT(chan->handler);
+      if (chan->handler)
         {
-          /* Yes... if we have pending interrupts then interrupts must be
-           * enabled and we must have a handler attached.
-           */
+          /* Execute the callback */
 
-          DEBUGASSERT(chan->handler);
-          if (chan->handler)
-            {
-              /* Execute the callback */
+          chan->handler(chan, chan->arg, sr);
+        }
+      else
+        {
+          /* Should never happen */
 
-              chan->handler(chan, chan->arg, sr);
-            }
-          else
-            {
-              /* Should never happen */
-
-              sam_chan_putreg(chan, SAM_TC_IDR_OFFSET, TC_INT_ALL);
-            }
+          sam_chan_putreg(chan, SAM_TC_IDR_OFFSET, TC_INT_ALL);
         }
     }
 
@@ -833,30 +863,70 @@ static int sam_tc_interrupt(struct sam_tc_s *tc)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_TC0
-static int sam_tc012_interrupt(int irq, void *context)
+static int sam_tc0_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc012);
+  return sam_tc_interrupt(&g_tc012, &g_tc012.channel[0]);
+}
+
+static int sam_tc1_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc012, &g_tc012.channel[1]);
+}
+
+static int sam_tc2_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc012, &g_tc012.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC1
-static int sam_tc345_interrupt(int irq, void *context)
+static int sam_tc3_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc345);
+  return sam_tc_interrupt(&g_tc345, g_tc345.channel[0]);
+}
+
+static int sam_tc4_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc345, g_tc345.channel[1]);
+}
+
+static int sam_tc5_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc345, g_tc345.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC2
-static int sam_tc678_interrupt(int irq, void *context)
+static int sam_tc6_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc678);
+  return sam_tc_interrupt(&g_tc678, g_tc678.channel[0]);
+}
+
+static int sam_tc7_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc678, g_tc678.channel[1]);
+}
+
+static int sam_tc8_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc678, g_tc678.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC3
-static int sam_tc901_interrupt(int irq, void *context)
+static int sam_tc9_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc901);
+  return sam_tc_interrupt(&g_tc901, g_tc901.channel[0]);
+}
+
+static int sam_tc10_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc901, g_tc901.channel[1]);
+}
+
+static int sam_tc11_interrupt(int irq, void *context)
+{
+  return sam_tc_interrupt(&g_tc901, g_tc901.channel[2]);
 }
 #endif
 
@@ -956,10 +1026,10 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   struct sam_chan_s *chan;
   const struct sam_chconfig_s *chconfig;
   irqstate_t flags;
-  xcpt_t handler;
   uint32_t regval;
+  uint8_t tcno;
+  uint8_t chndx;
   uint8_t ch;
-  int i;
 
   /* Select the timer/counter and get the index associated with the
    * channel.
@@ -970,7 +1040,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc012;
       tcconfig = &g_tc012config;
-      handler  = sam_tc012_interrupt;
+      tcno     = 0;
     }
   else
 #endif
@@ -979,7 +1049,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc345;
       tcconfig = &g_tc345config;
-      handler  = sam_tc345_interrupt;
+      tcno     = 1;
     }
   else
 #endif
@@ -988,7 +1058,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc678;
       tcconfig = &g_tc678config;
-      handler  = sam_tc678_interrupt;
+      tcno     = 2;
     }
   else
 #endif
@@ -997,7 +1067,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc901;
       tcconfig = &g_tc901config;
-      handler  = sam_tc901_interrupt;
+      tcno     = 3;
     }
   else
 #endif
@@ -1008,7 +1078,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       return NULL;
     }
 
-  /* Has the timer counter been initialized.  We have to be careful here
+  /* Has the timer/counter been initialized.  We have to be careful here
    * because there is no semaphore protection.
    */
 
@@ -1020,46 +1090,20 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       memset(tc, 0, sizeof(struct sam_tc_s));
       sem_init(&tc->exclsem, 0, 1);
       tc->base = tcconfig->base;
-      tc->tc   = channel < 3 ? 0 : 1;
-      tc->pid  = tcconfig->pid;
+      tc->tc   = tcno;
 
       /* Initialize the channels */
 
-      for (i = 0, ch = tcconfig->chfirst; i < SAM_TC_NCHANNELS; i++)
+      for (chndx = 0, ch = tcconfig->chfirst; chndx < SAM_TC_NCHANNELS; chndx++)
         {
-          tcdbg("Initializing TC%d channel %d\n", tcconfig->tc, ch);
-
           /* Initialize the channel data structure */
 
-          chan       = &tc->channel[i];
-          chconfig   = &tcconfig->channel[i];
+          chan       = &tc->channel[chndx];
+          chconfig   = &tcconfig->channel[chndx];
 
-          chan->tc   = tc;
           chan->base = chconfig->base;
+          chan->tc   = tc;
           chan->chan = ch++;
-
-          /* Configure channel input/output pins */
-
-          if (chconfig->clkset)
-            {
-              /* Configure clock input pin */
-
-              sam_configgpio(chconfig->clkset);
-            }
-
-          if (chconfig->tioaset)
-            {
-              /* Configure output A pin */
-
-              sam_configgpio(chconfig->tioaset);
-            }
-
-          if (chconfig->tiobset)
-            {
-              /* Configure output B pin */
-
-              sam_configgpio(chconfig->tiobset);
-            }
 
           /* Disable and clear all channel interrupts */
 
@@ -1067,21 +1111,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
           (void)sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
         }
 
-      /* Set the maximum TC peripheral clock frequency */
-
-      regval  = PMC_PCR_PID(tcconfig->pid) | PMC_PCR_CMD | PMC_PCR_EN;
-      putreg32(regval, SAM_PMC_PCR);
-
-      /* Enable clocking to the timer counter */
-
-      sam_enableperiph0(tcconfig->pid);
-
-      /* Attach the timer interrupt handler and enable the timer interrupts */
-
-      (void)irq_attach(tc->pid, handler);
-      up_enable_irq(tc->pid);
-
-      /* Now the channel is initialized */
+      /* Now the timer/counter is initialized */
 
       tc->initialized = true;
     }
@@ -1091,20 +1121,67 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   sam_takesem(tc);
   irqrestore(flags);
 
-  /* Get the requested channel structure */
+  /* Is the requested channel already in-use? */
 
-  chan = &tc->channel[channel - tcconfig->chfirst];
-
-  /* Is it available? */
+  chndx = channel - tcconfig->chfirst;
+  chan  = &tc->channel[chndx];
 
   if (chan->inuse)
     {
-      /* No.. return a failure */
+      /* Yes.. return a failure */
 
-      tcdbg("Channel %d is in-used\n", channel);
+      tcdbg("Channel %d is in-use\n", channel);
       sam_givesem(tc);
       return NULL;
     }
+
+  chconfig = &tcconfig->channel[chndx];
+
+  /* Configure channel input/output pins */
+
+  if (chconfig->clkset)
+    {
+      /* Configure clock input pin */
+
+      sam_configgpio(chconfig->clkset);
+    }
+
+  if (chconfig->tioaset)
+    {
+      /* Configure output A pin */
+
+      sam_configgpio(chconfig->tioaset);
+    }
+
+  if (chconfig->tiobset)
+    {
+      /* Configure output B pin */
+
+      sam_configgpio(chconfig->tiobset);
+    }
+
+  /* Enable clocking to the timer counter */
+
+  if (chconfig->pid < 32)
+    {
+      sam_enableperiph0(chconfig->pid);
+    }
+  else
+    {
+      sam_enableperiph1(chconfig->pid);
+    }
+
+  /* Set the maximum TC peripheral clock frequency.
+   * REVISIT: This is from the SAMA5.  Does it apply here?
+   */
+
+  regval  = PMC_PCR_PID(chconfig->pid) | PMC_PCR_CMD | PMC_PCR_EN;
+  putreg32(regval, SAM_PMC_PCR);
+
+  /* Attach the timer interrupt handler and enable the timer interrupts */
+
+  (void)irq_attach(chconfig->pid, chconfig->handler);
+  up_enable_irq(chconfig->pid);
 
   /* Mark the channel "inuse" */
 

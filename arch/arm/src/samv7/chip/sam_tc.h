@@ -419,6 +419,11 @@
 #  define TC_CMR_TCCLKS_TCLK3    (2 << TC_CMR_TCCLKS_SHIFT) /* TIMER_CLOCK3 Clock selected */
 #  define TC_CMR_TCCLKS_TCLK4    (3 << TC_CMR_TCCLKS_SHIFT) /* TIMER_CLOCK4 Clock selected */
 #  define TC_CMR_TCCLKS_TCLK5    (4 << TC_CMR_TCCLKS_SHIFT) /* TIMER_CLOCK5 Clock selected */
+#  define TC_CMR_TCCLKS_PCK6     TC_CMR_TCCLKS_TCLK1        /* TIMER_CLOCK1 is PCK6 */
+#  define TC_CMR_TCCLKS_MCK8     TC_CMR_TCCLKS_TCLK2        /* TIMER_CLOCK2 is MCK/8 */
+#  define TC_CMR_TCCLKS_MCK32    TC_CMR_TCCLKS_TCLK3        /* TIMER_CLOCK3 is MCK/32 */
+#  define TC_CMR_TCCLKS_MCK128   TC_CMR_TCCLKS_TCLK4        /* TIMER_CLOCK4 is MCK/128 */
+#  define TC_CMR_TCCLKS_SLCK     TC_CMR_TCCLKS_TCLK5        /* TIMER_CLOCK5 is SLCK */
 #  define TC_CMR_TCCLKS_XC0      (5 << TC_CMR_TCCLKS_SHIFT) /* XC0 Clock selected */
 #  define TC_CMR_TCCLKS_XC1      (6 << TC_CMR_TCCLKS_SHIFT) /* XC1 Clock selected */
 #  define TC_CMR_TCCLKS_XC2      (7 << TC_CMR_TCCLKS_SHIFT) /* XC2 Clock selected */
