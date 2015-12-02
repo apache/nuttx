@@ -11199,4 +11199,6 @@
 	  to the SAMV7 (2015-12-02).
 	* arm/arm/src/samv7/sam_tickless.c:  Port the SAMA5/SAM4CM tickless
 	  logic to the SAMV7 (2015-12-02).
-
+	* fs/semaphore: Named semaphores:  Back out "fix" of 2015-10-22.  It was
+	  correct before.  The change of 2015-10-22 probably broke named
+	  semaphores (2015-12-02).
