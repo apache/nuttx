@@ -25,6 +25,7 @@ Contents
   - maXTouch Xplained Pro
   - MCAN1 Loopback Test
   - SPI Slave
+  - Tickless OS
   - Debugging
   - Configurations
 
@@ -83,11 +84,9 @@ to a particular configuration.
      very high performance SD card accesses.
 
   2. HSMCI TX DMA is currently disabled for the SAMV7.  There is some
-     issue with the TX DMA setup (HSMCI TX DMA the same driver works with
-     the SAMA5D4 which has a different DMA subsystem).  This is a bug that
-     needs to be resolved.
+     issue with the TX DMA setup.  This is a bug that needs to be resolved.
 
-     DMA is enabled by these settings in the file arch/arm/src/samvy/sam_hsmci.c:
+     DMA is enabled by these settings in the file arch/arm/src/samv7/sam_hsmci.c:
 
      #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
      #define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
@@ -899,7 +898,7 @@ Pre-requisites:
     prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
     CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
     that it supports arch_phy_irq().  This logic can be found at
-    nuttx/configs/sama5d4-ek/src/sam_ethernet.c.
+    nuttx/configs/samv71-xult/src/sam_ethernet.c.
 
   - And a few other things: UDP support is required (CONFIG_NET_UDP) and
     signals must not be disabled (CONFIG_DISABLE_SIGNALS).
@@ -1427,6 +1426,93 @@ SPI Slave
      is available.  That is not really a good idea.
 
   b) It will hog all of the CPU for the duration of the transfer).
+
+Tickless OS
+===========
+
+  Background
+  ----------
+  By default, a NuttX configuration uses a periodic timer interrupt that
+  drives all system timing. The timer is provided by architecture-specific
+  code that calls into NuttX at a rate controlled by CONFIG_USEC_PER_TICK.
+  The default value of CONFIG_USEC_PER_TICK is 10000 microseconds which
+  corresponds to a timer interrupt rate of 100 Hz.
+
+  An option is to configure NuttX to operation in a "tickless" mode. Some
+  limitations of default system timer are, in increasing order of
+  importance:
+
+  - Overhead: Although the CPU usage of the system timer interrupt at 100Hz
+    is really very low, it is still mostly wasted processing time. One most
+    timer interrupts, there is really nothing that needs be done other than
+    incrementing the counter.
+  - Resolution: Resolution of all system timing is also determined by
+    CONFIG_USEC_PER_TICK. So nothing that be time with resolution finer than
+    10 milliseconds be default. To increase this resolution,
+    CONFIG_USEC_PER_TICK an be reduced. However, then the system timer
+    interrupts use more of the CPU bandwidth processing useless interrupts.
+  - Power Usage: But the biggest issue is power usage. When the system is
+    IDLE, it enters a light, low-power mode (for ARMs, this mode is entered
+    with the wfi or wfe instructions for example). But each interrupt
+    awakens the system from this low power mode. Therefore, higher rates
+    of interrupts cause greater power consumption.
+
+  The so-called Tickless OS provides one solution to issue. The basic
+  concept here is that the periodic, timer interrupt is eliminated and
+  replaced with a one-shot, interval timer. It becomes event driven
+  instead of polled: The default system timer is a polled design. On
+  each interrupt, the NuttX logic checks if it needs to do anything
+  and, if so, it does it.
+
+  Using an interval timer, one can anticipate when the next interesting
+  OS event will occur, program the interval time and wait for it to fire.
+  When the interval time fires, then the scheduled activity is performed.
+
+  Configuration
+  -------------
+  The following configuration options will enable support for the Tickless
+  OS for the SAMV7 platforms using TC0 channels 0-3 (other timers or
+  timer channels could be used making the obvious substitutions):
+
+    RTOS Features -> Clocks and Timers
+      CONFIG_SCHED_TICKLESS=y          : Configures the RTOS in tickless mode
+      CONFIG_SCHED_TICKLESS_ALARM=n    : (option not implemented)
+
+    System Type -> SAMV7 Peripheral Support
+      CONFIG_SAMV7_TC0=y               : Enable TC0 (TC channels 0-3
+
+    System Type -> Timer/counter Configuration
+      CONFIG_SAMV7_ONESHOT=y           : Enables one-shot timer wrapper
+      CONFIG_SAMV7_FREERUN=y           : Enabled free-running timer wrapper
+      CONFIG_SAMV7_TICKLESS_ONESHOT=0  : Selects TC0 channel 0 for the one-shot
+      CONFIG_SAMV7_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
+                                       : running timer
+
+  NOTE: In most cases, the slow clock will be used as the timer/counter
+  input.  You should enable the 32.768KHz crystal for the slow clock by
+  calling sam_sckc_enable().  Otherwise, you will be doing all system
+  timing using the RC clock!  UPDATE: This will now be selected by default
+  when you configure for TICKLESS support.
+
+  SAMV7 Timer Usage
+  -----------------
+  This current implementation uses two timers:  A one-shot timer to
+  provide the timed events and a free running timer to provide the current
+  time.  Since timers are a limited resource, that could be an issue on
+  some systems.
+
+  We could do the job with a single timer if we were to keep the single
+  timer in a free-running at all times.  The SAMV7 timer/counters have
+  16-bit counters with the capability to generate a compare interrupt when
+  the timer matches a compare value but also to continue counting without
+  stopping (giving another, different interrupt when the timer rolls over
+  from 0xffff to zero).  So we could potentially just set the compare at
+  the number of ticks you want PLUS the current value of timer.  Then you
+  could have both with a single timer:  An interval timer and a free-
+  running counter with the same timer!  In this case, you would want to
+  to set CONFIG_SCHED_TICKLESS_ALARM in the NuttX configuration.
+
+  Patches are welcome!
 
 Debugging
 =========

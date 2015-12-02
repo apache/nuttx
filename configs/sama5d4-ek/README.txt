@@ -3303,7 +3303,7 @@ Tickless OS
   Background
   ----------
   By default, a NuttX configuration uses a periodic timer interrupt that
-  drives all system timing. The timer is provided by architecture-specifi
+  drives all system timing. The timer is provided by architecture-specific
   code that calls into NuttX at a rate controlled by CONFIG_USEC_PER_TICK.
   The default value of CONFIG_USEC_PER_TICK is 10000 microseconds which
   corresponds to a timer interrupt rate of 100 Hz.
