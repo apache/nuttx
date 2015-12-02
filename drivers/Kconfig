@@ -11,6 +11,9 @@ config DISABLE_POLL
 		supported.  If you do not use poll() or select(), then you can
 		select DISABLE_POLL to reduce the code footprint by a small amount.
 
+		This selection disables the poll() interface as well as interfaces
+		the derive from poll() such as select().
+
 config DEV_NULL
 	bool "Enable /dev/null"
 	default y
