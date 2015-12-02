@@ -11195,3 +11195,6 @@
 	* arch/arm/src/stm32/stm32_ccm_procfs.c: Is no longer a part of the
 	  'base' procfs entries and can now only be supported via run time
 	  registration with CONFIG_FS_PROCFS_REGISTER=y (2015-12-01).
+	* arch/arm/src/samv7/sam_tc.c:  Port the SAMA5 timer/counter driver
+	  to the SAMV7 (2015-12-02).
+
