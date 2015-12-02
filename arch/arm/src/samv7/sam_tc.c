@@ -96,7 +96,6 @@ struct sam_tcconfig_s
 {
   uintptr_t base;          /* TC register base address */
   uint8_t tc;              /* Timer/counter number */
-  uint8_t chfirst;         /* First channel number */
 
   /* Channels */
 
@@ -211,7 +210,6 @@ static const struct sam_tcconfig_s g_tc012config =
 {
   .base    = SAM_TC012_BASE,
   .tc      = 0,
-  .chfirst = 0,
   .channel =
   {
     [0] =
@@ -288,7 +286,6 @@ static const struct sam_tcconfig_s g_tc345config =
 {
   .base    = SAM_TC345_BASE,
   .tc      = 1,
-  .chfirst = 3,
   .channel =
   {
     [0] =
@@ -366,7 +363,6 @@ static const struct sam_tcconfig_s g_tc678config =
 {
   .base    = SAM_TC678_BASE,
   .tc      = 2,
-  .chfirst = 6,
   .channel =
   {
     [0] =
@@ -444,7 +440,6 @@ static const struct sam_tcconfig_s g_tc901config =
 {
   .base    = SAM_TC901_BASE,
   .tc      = 3,
-  .chfirst = 9,
   .channel =
   {
     [0] =
@@ -1027,9 +1022,9 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   const struct sam_chconfig_s *chconfig;
   irqstate_t flags;
   uint32_t regval;
-  uint8_t tcno;
-  uint8_t chndx;
-  uint8_t ch;
+  int chndx;
+  int ch;
+  int chfirst;
 
   /* Select the timer/counter and get the index associated with the
    * channel.
@@ -1040,7 +1035,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc012;
       tcconfig = &g_tc012config;
-      tcno     = 0;
+      chfirst  = 0;
     }
   else
 #endif
@@ -1049,7 +1044,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc345;
       tcconfig = &g_tc345config;
-      tcno     = 1;
+      chfirst  = 3;
     }
   else
 #endif
@@ -1058,7 +1053,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc678;
       tcconfig = &g_tc678config;
-      tcno     = 2;
+      chfirst  = 6;
     }
   else
 #endif
@@ -1067,7 +1062,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       tc       = &g_tc901;
       tcconfig = &g_tc901config;
-      tcno     = 3;
+      chfirst  = 9;
     }
   else
 #endif
@@ -1090,11 +1085,11 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       memset(tc, 0, sizeof(struct sam_tc_s));
       sem_init(&tc->exclsem, 0, 1);
       tc->base = tcconfig->base;
-      tc->tc   = tcno;
+      tc->tc   = tcconfig->tc;
 
       /* Initialize the channels */
 
-      for (chndx = 0, ch = tcconfig->chfirst; chndx < SAM_TC_NCHANNELS; chndx++)
+      for (chndx = 0, ch = chfirst; chndx < SAM_TC_NCHANNELS; chndx++)
         {
           /* Initialize the channel data structure */
 
@@ -1123,7 +1118,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   /* Is the requested channel already in-use? */
 
-  chndx = channel - tcconfig->chfirst;
+  chndx = channel - chfirst;
   chan  = &tc->channel[chndx];
 
   if (chan->inuse)
