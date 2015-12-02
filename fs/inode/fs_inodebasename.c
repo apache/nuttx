@@ -42,31 +42,15 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_nextname
+ * Name: inode_basename
  *
  * Description:
- *   Given a path with node names separated by '/', return the next node
- *   name.
+ *   Given a path with node names separated by '/', return name of last
+ *   segment in the path.  ""
  *
  ****************************************************************************/
 
@@ -84,13 +68,19 @@ FAR const char *inode_basename(FAR const char *name)
        * previous name that we saved is the basename.
        */
 
-      if (*name == '\0')
+      if (name == NULL || *name == '\0')
         {
-          return basename;
+          /* Break out of the loop with basename pointer to the final
+           * segment of the path.
+           */
+
+          break;
         }
+
+      /* Set basename to point to the remainder of the path */
+
+      basename = name;
     }
 
-  /* We won't get here */
-
-  return NULL;
+  return basename;
 }
