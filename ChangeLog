@@ -11197,4 +11197,6 @@
 	  registration with CONFIG_FS_PROCFS_REGISTER=y (2015-12-01).
 	* arch/arm/src/samv7/sam_tc.c:  Port the SAMA5 timer/counter driver
 	  to the SAMV7 (2015-12-02).
+	* arm/arm/src/samv7/sam_tickless.c:  Port the SAMA5/SAM4CM tickless
+	  logic to the SAMV7 (2015-12-02).
 
