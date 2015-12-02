@@ -243,6 +243,9 @@ static void sam_oneshot_handler(void *arg)
 
 void up_timer_initialize(void)
 {
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  uint64_t max_delay;
+#endif
   int ret;
 
   /* Initialize the one-shot timer */
@@ -255,6 +258,29 @@ void up_timer_initialize(void)
       tclldbg("ERROR: sam_oneshot_initialize failed\n");
       PANIC();
     }
+
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  /* Get the maximum delay of the one-shot timer in microseconds */
+
+  ret = sam_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
+  if (ret < 0)
+    {
+      tclldbg("ERROR: sam_oneshot_max_delay failed\n");
+      PANIC();
+    }
+
+  /* Convert this to configured clock ticks for use by the OS timer logic */
+
+  max_delay /= CONFIG_USEC_PER_TICK;
+  if (max_delay > (uint64_t)UINT32_MAX)
+    {
+      g_oneshot_maxticks = UINT32_MAX;
+    }
+  else
+    {
+      g_oneshot_maxticks = (uint32_t)max_delay;
+    }
+#endif
 
   /* Initialize the free-running timer */
 

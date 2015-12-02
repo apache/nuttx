@@ -467,7 +467,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
 int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot && usec);
