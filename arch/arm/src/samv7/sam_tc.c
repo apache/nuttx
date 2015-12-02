@@ -8,7 +8,7 @@
  *
  *   SAMV71 Series Data Sheet
  *   NuttX SAMA5 timer/counter driver
- *   Atmel NoOS sample code for the SAMA5.
+ *   Atmel NoOS sample code for the SAMA5D3.
  *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:

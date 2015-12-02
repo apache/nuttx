@@ -2138,7 +2138,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
   NETDEV_TXERRORS(&priv->dev);
 
   /* Clear TXEN bit into the Network Configuration Register.  This is a
-   * workaround to recover from TX lockups that occur on sama5d3 gmac
+   * workaround to recover from TX lockups that occurred on the sama5d3 gmac
    * (r1p24f2) when using  scatter-gather.   This issue has never been
    * seen on sama5d4 gmac (r1p31).
    */
