@@ -553,10 +553,10 @@ static struct sam_tc_s g_tc901;
 
 static const uint8_t g_log2divider[TC_NDIVIDERS] =
 {
-  1,                     /* TIMER_CLOCK1 -> div2 */
-  3,                     /* TIMER_CLOCK2 -> div8 */
-  5,                     /* TIMER_CLOCK3 -> div32 */
-  7                      /* TIMER_CLOCK4 -> div128 */
+  1,                     /* TIMER_CLOCK1 -> PCK6  REVISIT! Was MCK/2 */
+  3,                     /* TIMER_CLOCK2 -> MCK/8 */
+  5,                     /* TIMER_CLOCK3 -> MCK/32 */
+  7                      /* TIMER_CLOCK4 -> MCK/128 */
 };
 
 /* TC register lookup used by sam_tc_setregister */
@@ -1548,7 +1548,7 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
  *   Finds the best MCK divisor given the timer frequency and MCK.  The
  *   result is guaranteed to satisfy the following equation:
  *
- *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / dev)
+ *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / div)
  *
  *   where:
  *     freq  - the desired frequency
@@ -1571,6 +1571,13 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   int ndx = 0;
 
   tcvdbg("frequency=%d\n", frequency);
+
+  /* On other chips, TCCLCKS==0 corresponded to MCK/2.  But for the SAMV7,
+   * this is PCK6.  That will need to be handled differently.
+   */
+
+#warning REVISIT: PCK6 clock source not yet supported
+  ndx++;
 
   /* Satisfy lower bound.  That is, the value of the divider such that:
    *

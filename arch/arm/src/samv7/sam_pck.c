@@ -219,13 +219,77 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
 }
 
 /****************************************************************************
+ * Function: sam_pck_frequency
+ *
+ * Description:
+ *   Return the frequency if the programmable clock
+ *
+ * Input Parameters:
+ *   pckid - Identifies the programmable clock output (0, 1, .., 6)
+ *
+ * Returned Value:
+ *   The frequency of the programmable clock (which may or may not be
+ *   enabled).
+ *
+ ****************************************************************************/
+
+uint32_t sam_pck_frequency(enum pckid_e pckid)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t clkin;
+  uint32_t presc;
+
+  /* Get the programmable clock configuration */
+
+  regaddr = SAM_PMC_PCK((int)pckid);
+  regval  = getreg32(regaddr);
+
+  /* Get the frequency of the clock source */
+
+  switch (regval & PMC_PCK_CSS_MASK)
+    {
+    case PMC_PCK_CSS_SLOW: /* Slow Clock */
+      clkin = BOARD_SLOWCLK_FREQUENCY;
+      break;
+
+    case PMC_PCK_CSS_MAIN: /* Main Clock */
+      clkin = BOARD_MAINOSC_FREQUENCY;
+      break;
+
+    case PMC_PCK_CSS_PLLA: /* PLLA Clock */
+      clkin = BOARD_PLLA_FREQUENCY;
+      break;
+
+#ifdef BOARD_UPLL_FREQUENCY
+    case PMC_PCK_CSS_UPLL: /* Divided UPLL Clock */
+      clkin = BOARD_UPLL_FREQUENCY;
+      break;
+#endif
+
+    case PMC_PCK_CSS_MCK:  /* Master Clock */
+      clkin = BOARD_MCK_FREQUENCY;
+      break;
+
+    default:
+      dbg("ERROR: Unknown clock source\n");
+      return 0;
+    }
+
+  /* Get the prescaler value */
+
+  presc = (regval & PMC_PCK_PRES_MASK) >> PMC_PCK_PRES_SHIFT;
+  return clkin / (presc + 1);
+}
+
+/****************************************************************************
  * Function: sam_pck_enable
  *
  * Description:
  *   Enable or disable a programmable clock output.
  *
  * Input Parameters:
- *   pckid - Identifies the programmable clock output (0, 1, or 2)
+ *   pckid - Identifies the programmable clock output (0, 1, .., 6)
  *   enable - True: enable the clock output, False: disable the clock output
  *
  * Returned Value:
@@ -248,7 +312,34 @@ void sam_pck_enable(enum pckid_e pckid, bool enable)
 
   regaddr = enable ? SAM_PMC_SCER : SAM_PMC_SCDR;
 
-  /* And do the deead */
+  /* And do the deed */
 
   putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Function: sam_pck_isenabled
+ *
+ * Description:
+ *   Return true if the programmable clock is enabled.
+ *
+ * Input Parameters:
+ *   pckid - Identifies the programmable clock output (0, 1, .., 6)
+ *
+ * Returned Value:
+ *   True if the specified programmable clock is enabled
+ *
+ ****************************************************************************/
+
+bool sam_pck_isenabled(enum pckid_e pckid)
+{
+  uint32_t  mask;
+
+  /* Select the bit in the PMC_SCSR corresponding to the programmable clock. */
+
+  mask = PMC_PCK(pckid);
+
+  /* Return true if the bit is set */
+
+  return (getreg32(SAM_PMC_SCSR) & mask) != 0;
 }

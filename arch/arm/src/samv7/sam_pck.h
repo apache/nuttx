@@ -58,7 +58,11 @@ enum pckid_e
 {
   PCK0 = 0,
   PCK1,
-  PCK2
+  PCK2,
+  PCK3,
+  PCK4,
+  PCK5,
+  PCK6,
 };
 
 enum pckid_clksrc_e
@@ -110,13 +114,30 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
                            uint32_t frequency);
 
 /****************************************************************************
+ * Function: sam_pck_frequency
+ *
+ * Description:
+ *   Return the frequency if the programmable clock
+ *
+ * Input Parameters:
+ *   pckid - Identifies the programmable clock output (0, 1, .., 6)
+ *
+ * Returned Value:
+ *   The frequency of the programmable clock (which may or may not be
+ *   enabled).
+ *
+ ****************************************************************************/
+
+uint32_t sam_pck_frequency(enum pckid_e pckid);
+
+/****************************************************************************
  * Function: sam_pck_enable
  *
  * Description:
  *   Enable or disable a programmable clock output.
  *
  * Input Parameters:
- *   pckid - Identifies the programmable clock output (0, 1, or 2)
+ *   pckid - Identifies the programmable clock output (0, 1, .., 6)
  *   enable - True: enable the clock output, False: disable the clock output
  *
  * Returned Value:
@@ -126,6 +147,22 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
 
 void sam_pck_enable(enum pckid_e pckid, bool enable);
 
+/****************************************************************************
+ * Function: sam_pck_isenabled
+ *
+ * Description:
+ *   Return true if the programmable clock is enabled.
+ *
+ * Input Parameters:
+ *   pckid - Identifies the programmable clock output (0, 1, .., 6)
+ *
+ * Returned Value:
+ *   True if the specified programmable clock is enabled
+ *
+ ****************************************************************************/
+
+bool sam_pck_isenabled(enum pckid_e pckid);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
@@ -133,4 +170,3 @@ void sam_pck_enable(enum pckid_e pckid, bool enable);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_PCK_H */
-
