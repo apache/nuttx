@@ -113,7 +113,7 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
-CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c
+CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c
 
 # Configuration-dependent SAMV7 files
 

@@ -163,7 +163,7 @@
  */
 
 #define PMC_USBCLK                     (1 << 5)  /* Bit 5: Enable USB FS Clock */
-#define PMC_PCK(n)                     (1 << ((n) + 8)
+#define PMC_PCK(n)                     (1 << ((n) + 8))
 #  define PMC_PCK0                     (1 << 8)  /* Bit 8:  Programmable Clock 0 Output Enable */
 #  define PMC_PCK1                     (1 << 9)  /* Bit 9:  Programmable Clock 1 Output Enable */
 #  define PMC_PCK2                     (1 << 10) /* Bit 10: Programmable Clock 2 Output Enable */
