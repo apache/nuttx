@@ -2884,11 +2884,6 @@ Tickless OS
   piece has a large error in the calculation.  The cumulative error is the
   cause of the problem.
 
-  Solution:  30.518 microseconds is not representable and the value of
-  CONFIG_USEC_PER_SEC is too inaccurate;  error build-up is throwing off
-  long delays (short delays are probably still okay).  We should driver
-  the interval timer with PCK6 with a period that is exactly representable.
-
   SAMA5 Timer Usage
   -----------------
   This current implementation uses two timers:  A one-shot timer to

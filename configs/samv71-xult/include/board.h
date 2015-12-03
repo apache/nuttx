@@ -141,7 +141,7 @@
 #define BOARD_PLLA_FREQUENCY       (300000000) /* PLLACK:  25 * 12Mhz / 1 */
 #define BOARD_CPU_FREQUENCY        (300000000) /* CPU:     PLLACK / 1 */
 #define BOARD_MCK_FREQUENCY        (150000000) /* MCK:     PLLACK / 1 / 2 */
-#define BOARD_UPLL_FREQUENCY                   /* To be provided */
+#undef  BOARD_UPLL_FREQUENCY                   /* To be provided */
 
 /* HSMCI clocking
  *
