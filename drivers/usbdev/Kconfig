@@ -246,15 +246,25 @@ config PL2303_BULKIN_REQLEN
 
 config PL2303_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 513 if USBDEV_DUALSPEED
+	default 257 if !USBDEV_DUALSPEED
 	---help---
-		Size of the serial receive/transmit buffers
+		Size of the serial receive buffers.  The actual amount of data that
+		can be held in the buffer is this number minus one due to the way
+		that the circular buffer is managed.  So an RX buffer size of 257
+		will hold four full-speed, 64 byte packets; a buffer size of 513
+		will hold one high-speed, 512 byte packet.
 
 config PL2303_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 513 if USBDEV_DUALSPEED
+	default 257 if !USBDEV_DUALSPEED
 	---help---
-		Size of the serial receive/transmit buffers
+		Size of the serial transmit buffers.  The actual amount of data that
+		can be held in the buffer is this number minus one due to the way
+		that the circular buffer is managed.  So a TX buffer size of 257
+		will hold four full-speed, 64 byte packets; a buffer size of 513
+		will hold one high-speed, 512 byte packet.
 
 config PL2303_VENDORID
 	hex "Vendor ID"
@@ -421,15 +431,25 @@ config CDCACM_BULKIN_REQLEN
 
 config CDCACM_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 513 if USBDEV_DUALSPEED
+	default 257 if !USBDEV_DUALSPEED
 	---help---
-		Size of the serial receive/transmit buffers
+		Size of the serial receive buffers.  The actual amount of data that
+		can be held in the buffer is this number minus one due to the way
+		that the circular buffer is managed.  So an RX buffer size of 257
+		will hold four full-speed, 64 byte packets; a buffer size of 513
+		will hold one high-speed, 512 byte packet.
 
 config CDCACM_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 513 if USBDEV_DUALSPEED
+	default 257 if !USBDEV_DUALSPEED
 	---help---
-		Size of the serial receive/transmit buffers
+		Size of the serial transmit buffers.  The actual amount of data that
+		can be held in the buffer is this number minus one due to the way
+		that the circular buffer is managed.  So a TX buffer size of 257
+		will hold four full-speed, 64 byte packets; a buffer size of 513
+		will hold one high-speed, 512 byte packet.
 
 config CDCACM_VENDORID
 	hex "Vendor ID"
