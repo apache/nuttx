@@ -1496,22 +1496,35 @@ Tickless OS
   input.  The 32.768KHz crystal is selected by the definition
   BOARD_HAVE_SLOWXTAL in the configs/samv71-xult/board.h file.
 
-  The slow clock has a resolution of about 30.518 microseconds.  Ideally, the
-  value of CONFIG_USEC_PER_TICK should be an exact multiple of the clock
-  resolution.  Otherwise there will be cumulative timing inaccuracies.  A
+  The slow clock has a resolution of about 30.518 microseconds.  Ideally,
+  the value of CONFIG_USEC_PER_TICK should be the exact clock resolution.
+  Otherwise there will be cumulative timing inaccuracies.  But a choice
   choice of:
 
-    CONFIG_USEC_PER_TICK=61, or
-    CONFIG_USEC_PER_TICK=122
+    CONFIG_USEC_PER_TICK=31
 
-  will be close but will still have inaccuracies that will effect the time
-  due to long term error build-up.
+  will have an error of 0.6%  and will have inaccuracies that will
+  effect the time due to long term error build-up.
 
-  UPDATE: As of this writing (2015-12-02), the Tickless support is
-  functional.  However, the timing for all delays appears to be half the
-  duration that it should be.  I don't see anything wrong with the setup
-  and I am suspecting that there may be something I don't understand about
-  the counting frequency.
+  UPDATE: As of this writing (2015-12-03), the Tickless support is
+  functional.  However, there are inaccuracies  in delays.  For example,
+
+    nsh> sleep 10
+
+  results in a delay of maybe 5.4 seconds.  But the timing accuracy is
+  correct if all competing uses of the interval timer are disabled (mostly
+  from the high priority work queue).  Therefore, I conclude that this
+  inaccuracy is due to the inaccuracies in the representation of the clock
+  rate.  30.518 usec cannot be represented accurately.   Each timing
+  calculation results in a small error.  When the interval timer is very
+  busy, long delays will be divided into many small pieces and each small
+  piece has a large error in the calculation.  The cumulative error is the
+  cause of the problem.
+
+  Solution:  30.518 microseconds is not representable and the value of
+  CONFIG_USEC_PER_SEC is too inaccurate;  error build-up is throwing off
+  long delays (short delays are probably still okay).  We should driver
+  the interval timer with PCK6 with a period that is exactly representable.
 
   SAMV7 Timer Usage
   -----------------
