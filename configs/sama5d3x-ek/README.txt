@@ -2850,11 +2850,25 @@ Tickless OS
       CONFIG_SAMA5_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
                                        : running timer
 
+  The resolution of the clock is provided by the CONFIG_USEC_PER_TICK
+  setting in the configuration file.
+
   NOTE: In most cases, the slow clock will be used as the timer/counter
   input.  You should enable the 32.768KHz crystal for the slow clock by
   calling sam_sckc_enable().  Otherwise, you will be doing all system
   timing using the RC clock!  UPDATE: This will now be selected by default
   when you configure for TICKLESS support.
+
+  The slow clock has a resolution of about 30.518 microseconds.  Ideally, the
+  value of CONFIG_USEC_PER_TICK should be an exact multiple of the clock
+  resolution.  Otherwise there will be cumulative timing inaccuracies.  A
+  choice of:
+
+    CONFIG_USEC_PER_TICK=61, or
+    CONFIG_USEC_PER_TICK=122
+
+  will be close but will still have inaccuracies that will effect the time
+  due to long term error build-up.
 
   SAMA5 Timer Usage
   -----------------

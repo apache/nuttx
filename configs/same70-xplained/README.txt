@@ -898,6 +898,9 @@ Tickless OS
       CONFIG_SAMV7_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
                                        : running timer
 
+  The resolution of the clock is provided by the CONFIG_USEC_PER_TICK
+  setting in the configuration file.
+
   NOTE: In most cases, the slow clock will be used as the timer/counter
   input.  The SAME70-Xplained board has pads for a 32.768KHz crystal,
   however, the boad ships with that position unpopulated.  So, be default
@@ -907,6 +910,23 @@ Tickless OS
   If you add a crystal to your board, you can select to use it with the
   definition BOARD_HAVE_SLOWXTAL in the configs/same70-xplained/board.h
   file.
+
+  The slow clock has a resolution of about 30.518 microseconds.  Ideally, the
+  value of CONFIG_USEC_PER_TICK should be an exact multiple of the clock
+  resolution.  Otherwise there will be cumulative timing inaccuracies.  A
+  choice of:
+
+    CONFIG_USEC_PER_TICK=61, or
+    CONFIG_USEC_PER_TICK=122
+
+  will be close but will still have inaccuracies that will effect the time
+  due to long term error build-up.
+
+  UPDATE: As of this writing (2015-12-02), the Tickless support is
+  functional.  However, the timing for all delays appears to be half the
+  duration that it should be.  I don't see anything wrong with the setup
+  and I am suspecting that there may be something I don't understand about
+  the counting frequency.
 
   SAME70 Timer Usage
   ------------------
