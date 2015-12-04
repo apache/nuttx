@@ -1506,8 +1506,8 @@ Tickless OS
   will have an error of 0.6%  and will have inaccuracies that will
   effect the time due to long term error build-up.
 
-  UPDATE: As of this writing (2015-12-03), the Tickless support is
-  functional.  However, there are inaccuracies  in delays.  For example,
+  Using the slow clock clock input, the Tickless support is functional,
+  however, there are inaccuracies  in delays.  For example,
 
     nsh> sleep 10
 
@@ -1521,10 +1521,18 @@ Tickless OS
   piece has a large error in the calculation.  The cumulative error is the
   cause of the problem.
 
-  Solution:  30.518 microseconds is not representable and the value of
-  CONFIG_USEC_PER_SEC is too inaccurate;  error build-up is throwing off
-  long delays (short delays are probably still okay).  We should driver
-  the interval timer with PCK6 with a period that is exactly representable.
+  Solution:  The samv71-xult/src/sam_boot.c file has additional logic
+  to enable the programmable clock PCK6 as a clock source for the
+  timer/counters if the Tickless mode is selected.  The ideal frequency
+  would be:
+
+    frequency = 1,000,000 / CONFIG_USEC_PER_TICK
+
+  The main crystal is selected as the frequency source.  The maximum
+  prescaler value is 256 so the minimum frequency is 46,875 Hz which
+  corresponds to a period of 21.3 microseconds.  A value of
+  CONFIG_USEC_PER_TICK=20, or 50KHz, would give an exact solution with
+  a divider of 240.
 
   SAMV7 Timer Usage
   -----------------

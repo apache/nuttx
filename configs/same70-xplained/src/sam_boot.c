@@ -39,22 +39,19 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/clock.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "sam_start.h"
+#include "sam_pck.h"
 #include "same70-xplained.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -73,6 +70,37 @@
 
 void sam_boardinitialize(void)
 {
+#ifdef CONFIG_SCHED_TICKLESS
+  uint32_t frequency;
+  uint32_t actual;
+
+  /* If Tickless mode is selected then enabled PCK6 as a possible clock
+   * source for the timer/counters.  The ideal frequency could be:
+   *
+   *  frequency = 1,000,000 / CONFIG_USEC_PER_TICK
+   *
+   * The main crystal is selected as the frequency source.  The maximum
+   * prescaler value is 256 so the minimum frequency is 46,875 Hz which
+   * corresponds to a period of 21.3 microseconds.  A value of
+   * CONFIG_USEC_PER_TICK=20, or 50KHz, would give an exact solution with
+   * a divider of 240.
+   */
+
+  frequency = USEC_PER_SEC / CONFIG_USEC_PER_TICK;
+  DEBUGASSERT(frequency >= (BOARD_MAINOSC_FREQUENCY / 256));
+
+  actual = sam_pck_configure(PCK6, PCKSRC_MAINCK, frequency);
+
+  /* We expect to achieve this frequency exactly */
+
+  DEBUGASSERT(actual == frequency);
+  UNUSED(actual);
+
+  /* Enable PCK6 */
+
+  (void)sam_pck_enable(PCK6, true);
+#endif
+
 #ifdef CONFIG_SAMV7_SDRAMC
   /* Configure SDRAM if it has been enabled in the NuttX configuration.
    * Here we assume, of course, that we are not running out SDRAM.
