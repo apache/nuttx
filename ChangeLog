@@ -11204,4 +11204,7 @@
 	  semaphores (2015-12-02).
 	* arch/arm/src/samv7: Bring programmable clock logic from SAMA5 into
 	  SAMV7 (2015-12-03).
-
+	* arch/arm/src/samv7: Add PCK6 as an optional source for the timer/
+	  counter clock (2015-12-04).
+	* configs/samv7-xult/: If Tickless mode is selected then enable PCK6i
+	  as a timer/counter clock source
