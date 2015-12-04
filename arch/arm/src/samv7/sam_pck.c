@@ -139,13 +139,13 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     {
       pres = 1;
     }
-  else if (pres > (PMC_PCK_PRES_MASK + 1))
+  else if (pres > 256)
     {
-      pres = PMC_PCK_PRES_MASK + 1;
+      pres = 256;
     }
 
   regval |= PMC_PCK_PRES(pres - 1);
-  actual  = frequency / pres;
+  actual  = clkin / pres;
 
   /* Disable the programmable clock, configure the PCK output pin, then set
    * the selected configuration.
@@ -153,61 +153,61 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
 
   switch (pckid)
     {
-#ifdef GPIO_PMC_PCK0
     case PCK0:
       putreg32(PMC_PCK0, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK0
       (void)cam_configgpio(GPIO_PMC_PCK0);
+#endif
       putreg32(regval, SAM_PMC_PCK0);
       break;
-#endif
 
-#ifdef GPIO_PMC_PCK1
     case PCK1:
       putreg32(PMC_PCK1, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK1
       (void)cam_configgpio(GPIO_PMC_PCK1);
+#endif
       putreg32(regval, SAM_PMC_PCK1);
       break;
-#endif
 
-#ifdef GPIO_PMC_PCK2
     case PCK2:
       putreg32(PMC_PCK2, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK2
       (void)cam_configgpio(GPIO_PMC_PCK2);
+#endif
       putreg32(regval, SAM_PMC_PCK2);
       break;
-#endif
 
-#ifdef GPIO_PMC_PCK3
     case PCK3:
       putreg32(PMC_PCK3, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK3
       (void)cam_configgpio(GPIO_PMC_PCK3);
+#endif
       putreg32(regval, SAM_PMC_PCK3);
       break;
-#endif
 
-#ifdef GPIO_PMC_PCK4
     case PCK4:
       putreg32(PMC_PCK4, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK4
       (void)cam_configgpio(GPIO_PMC_PCK4);
+#endif
       putreg32(regval, SAM_PMC_PCK4);
       break;
-#endif
 
-#ifdef GPIO_PMC_PCK5
     case PCK5:
       putreg32(PMC_PCK5, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK5
       (void)cam_configgpio(GPIO_PMC_PCK5);
+#endif
       putreg32(regval, SAM_PMC_PCK5);
       break;
-#endif
 
-#ifdef GPIO_PMC_PCK6
     case PCK6:
       putreg32(PMC_PCK6, SAM_PMC_SCDR);
+#ifdef GPIO_PMC_PCK6
       (void)cam_configgpio(GPIO_PMC_PCK6);
+#endif
       putreg32(regval, SAM_PMC_PCK6);
       break;
-#endif
 
     default:
       return -EINVAL;

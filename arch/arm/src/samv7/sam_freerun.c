@@ -120,7 +120,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
                            uint16_t resolution)
 {
   uint32_t frequency;
-  uint32_t divisor;
+  uint32_t actual;
   uint32_t cmr;
   int ret;
 
@@ -133,20 +133,20 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
 
   /* The pre-calculate values to use when we start the timer */
 
-  ret = sam_tc_divisor(frequency, &divisor, &cmr);
+  ret = sam_tc_clockselect(frequency, &cmr, &actual);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_tc_divisor failed: %d\n", ret);
+      tcdbg("ERROR: sam_tc_clockselect failed: %d\n", ret);
       return ret;
     }
 
-  tcvdbg("frequency=%lu, divisor=%u, cmr=%08lx\n",
-         (unsigned long)frequency, (unsigned long)divisor,
+  tcvdbg("frequency=%lu, actual=%lu, cmr=%08lx\n",
+         (unsigned long)frequency, (unsigned long)actual,
          (unsigned long)cmr);
 
   /* Allocate the timer/counter and select its mode of operation
    *
-   *   TC_CMR_TCCLKS       - Returned by sam_tc_divisor
+   *   TC_CMR_TCCLKS       - Returned by sam_tc_clockselect
    *   TC_CMR_CLKI=0       - Not inverted
    *   TC_CMR_BURST_NONE   - Not gated by an external signal
    *   TC_CMR_CPCSTOP=0    - Don't stop the clock on an RC compare event

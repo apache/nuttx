@@ -303,7 +303,7 @@
 #  define PMC_PCK_CSS_MCK              (4 << PMC_PCK_CSS_SHIFT) /* Master Clock */
 #define PMC_PCK_PRES_SHIFT             (4)       /* Bits 4-11: Programmable Clock Prescaler */
 #define PMC_PCK_PRES_MASK              (0xff << PMC_PCK_PRES_SHIFT)
-#  define PMC_PCK_PRES(n)              ((uint32_t)((n)-1) << PMC_PCK_PRES_SHIFT) /* n=1..256 */
+#  define PMC_PCK_PRES(n)              ((uint32_t)(n) << PMC_PCK_PRES_SHIFT) /* n=0..255 */
 
 /* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status Register,
  * and PMC Interrupt Mask Register common bit-field definitions

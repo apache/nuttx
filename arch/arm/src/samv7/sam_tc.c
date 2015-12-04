@@ -66,6 +66,7 @@
 #include "chip/sam_pinmap.h"
 #include "chip/sam_pmc.h"
 #include "sam_gpio.h"
+#include "sam_pck.h"
 #include "sam_tc.h"
 
 #if defined(CONFIG_SAMV7_TC0) || defined(CONFIG_SAMV7_TC1) || \
@@ -139,6 +140,14 @@ struct sam_tc_s
 #endif
 };
 
+/* Type of the MCK divider lookup table */
+
+struct mck_divsrc_s
+{
+  uint8_t log2;            /* Log2 of the divider */
+  uint8_t tcclks;          /* CMR TCCLCKS setting */
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -197,8 +206,10 @@ static int sam_tc11_interrupt(int irq, void *context);
 
 /* Initialization ***********************************************************/
 
-static int sam_tc_freqdiv_lookup(uint32_t ftcin, int ndx);
-static uint32_t sam_tc_divfreq_lookup(uint32_t ftcin, int ndx);
+static uint32_t sam_tc_mckfreq_lookup(uint32_t ftcin, int ndx);
+static inline uint32_t sam_tc_tcclks_lookup(int ndx);
+static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
+                         uint32_t *actual);
 static inline struct sam_chan_s *sam_tc_initialize(int channel);
 
 /****************************************************************************
@@ -546,17 +557,18 @@ static struct sam_tc_s g_tc901;
 
 /* TC frequency data.  This table provides the frequency for each selection of TCCLK */
 
-#define TC_NDIVIDERS   4
-#define TC_NDIVOPTIONS 5
+#define TC_NDIVIDERS   3
+#define TC_NDIVOPTIONS 4
 
 /* This is the list of divider values: divider = (1 << value) */
 
-static const uint8_t g_log2divider[TC_NDIVIDERS] =
+static struct mck_divsrc_s g_log2divider[TC_NDIVOPTIONS] =
 {
-  1,                     /* TIMER_CLOCK1 -> PCK6  REVISIT! Was MCK/2 */
-  3,                     /* TIMER_CLOCK2 -> MCK/8 */
-  5,                     /* TIMER_CLOCK3 -> MCK/32 */
-  7                      /* TIMER_CLOCK4 -> MCK/128 */
+                        /* TIMER_CLOCK1(0) -> PCK6 */
+  {3, 1},               /* TIMER_CLOCK2(1) -> MCK/8 */
+  {5, 2},               /* TIMER_CLOCK3(2) -> MCK/32 */
+  {7, 3},               /* TIMER_CLOCK4(3) -> MCK/128 */
+  {0, 4},               /* TIMER_CLOCK5(4) -> SLCK (No MCK divider) */
 };
 
 /* TC register lookup used by sam_tc_setregister */
@@ -948,46 +960,12 @@ static int sam_tc11_interrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_tc_freqdiv_lookup
- *
- * Description:
- *  Given the TC input frequency (Ftcin) and a divider index, return the value of
- *  the Ftcin divider.
- *
- * Input Parameters:
- *   ftcin - TC input frequency
- *   ndx   - Divider index
- *
- * Returned Value:
- *   The Ftcin input divider value
- *
- ****************************************************************************/
-
-static int sam_tc_freqdiv_lookup(uint32_t ftcin, int ndx)
-{
-  /* The final option is to use the SLOW clock */
-
-  if (ndx >= TC_NDIVIDERS)
-    {
-      /* Not really a divider.  In this case, the board is actually driven
-       * by the 32.768KHz slow clock.  This returns a value that looks like
-       * correct divider if MCK were the input.
-       */
-
-      return ftcin / BOARD_SLOWCLK_FREQUENCY;
-    }
-  else
-    {
-      return 1 << g_log2divider[ndx];
-    }
-}
-
-/****************************************************************************
- * Name: sam_tc_divfreq_lookup
+ * Name: sam_tc_mckfreq_lookup
  *
  * Description:
  *  Given the TC input frequency (Ftcin) and a divider index, return the
- *  value of the divided frequency
+ *  value of the divided frequency.  The slow clock source is treated as
+ *  though it were a divided down MCK frequency.
  *
  * Input Parameters:
  *   ftcin - TC input frequency
@@ -998,7 +976,7 @@ static int sam_tc_freqdiv_lookup(uint32_t ftcin, int ndx)
  *
  ****************************************************************************/
 
-static uint32_t sam_tc_divfreq_lookup(uint32_t ftcin, int ndx)
+static uint32_t sam_tc_mckfreq_lookup(uint32_t ftcin, int ndx)
 {
   /* The final option is to use the SLOW clock */
 
@@ -1008,8 +986,111 @@ static uint32_t sam_tc_divfreq_lookup(uint32_t ftcin, int ndx)
     }
   else
     {
-      return ftcin >> g_log2divider[ndx];
+      return ftcin >> g_log2divider[ndx].log2;
     }
+}
+
+/****************************************************************************
+ * Name: sam_tc_tcclks_lookup
+ *
+ * Description:
+ *  Given the TC input frequency (Ftcin) and a divider index, return the
+ *  value of the divided frequency.  The slow clock source is treated as
+ *  though it were a divided down MCK frequency.
+ *
+ * Input Parameters:
+ *   ftcin - TC input frequency
+ *   ndx   - Divider index
+ *
+ * Returned Value:
+ *   The divided frequency value
+ *
+ ****************************************************************************/
+
+static inline uint32_t sam_tc_tcclks_lookup(int ndx)
+{
+  unsigned int index = g_log2divider[ndx].tcclks;
+  return TC_CMR_TCCLKS(index);
+}
+
+/****************************************************************************
+ * Name: sam_tc_mcksrc
+ *
+ * Description:
+ *   Finds the best MCK divisor given the timer frequency and MCK.  The
+ *   result is guaranteed to satisfy the following equation:
+ *
+ *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / div)
+ *
+ *   where:
+ *     freq  - the desired frequency
+ *     Ftcin - The timer/counter input frequency
+ *     div   - With DIV being the highest possible value.
+ *
+ * Input Parameters:
+ *   frequency  Desired timer frequency.
+ *   tcclks     TCCLKS field value for divisor.
+ *   actual     The actual freqency of the MCK
+ *
+ * Returned Value:
+ *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
+ *   value indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
+                         uint32_t *actual)
+{
+  uint32_t fselect;
+  uint32_t fnext;
+  int ndx = 0;
+
+  tcvdbg("frequency=%d\n", frequency);
+
+  /* Satisfy lower bound.  That is, the value of the divider such that:
+   *
+   *   frequency >= (tc_input_frequency * 65536) / divider.
+   */
+
+  for (; ndx < TC_NDIVIDERS; ndx++)
+    {
+      fselect = sam_tc_mckfreq_lookup(BOARD_MCK_FREQUENCY, ndx);
+      if (frequency >= (fselect >> 16))
+        {
+          break;
+        }
+    }
+
+  if (ndx >= TC_NDIVIDERS)
+    {
+      /* If no divisor can be found, return -ERANGE */
+
+      tcdbg("Lower bound search failed\n");
+      return -ERANGE;
+    }
+
+  /* Try to maximize DIV while still satisfying upper bound.  That the
+   * value of the divider such that:
+   *
+   *   frequency < tc_input_frequency / divider.
+   */
+
+  for (; ndx < TC_NDIVIDERS; ndx++)
+    {
+      fnext = sam_tc_mckfreq_lookup(BOARD_MCK_FREQUENCY, ndx + 1);
+      if (frequency > fnext)
+        {
+          break;
+        }
+
+      fselect = fnext;
+    }
+
+  /* Return the actual frequency and the TCCLKS selection */
+
+  *actual = fselect;
+  *tcclks = sam_tc_tcclks_lookup(ndx);
+  return OK;
 }
 
 /****************************************************************************
@@ -1538,11 +1619,24 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
 
   /* And use the TCCLKS index to calculate the timer counter frequency */
 
-  return sam_tc_divfreq_lookup(BOARD_MCK_FREQUENCY, tcclks);
+  if (tcclks == 0)
+    {
+      /* The tcclks value of 0 corresponds to PCK6 */
+
+      return sam_pck_frequency(PCK6);
+    }
+  else
+    {
+      /* Values of tcclks in the range {1,5} correspond to the divided
+       * down MCK or to the slow clock.
+       */
+
+      return sam_tc_mckfreq_lookup(BOARD_MCK_FREQUENCY, tcclks - 1);
+    }
 }
 
 /****************************************************************************
- * Name: sam_tc_divisor
+ * Name: sam_tc_clockselect
  *
  * Description:
  *   Finds the best MCK divisor given the timer frequency and MCK.  The
@@ -1557,8 +1651,8 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
  *
  * Input Parameters:
  *   frequency  Desired timer frequency.
- *   div        Divisor value.
  *   tcclks     TCCLKS field value for divisor.
+ *   actual     The actual freqency of the MCK
  *
  * Returned Value:
  *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
@@ -1566,67 +1660,99 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
  *
  ****************************************************************************/
 
-int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
+int sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks,
+                       uint32_t *actual)
 {
-  int ndx = 0;
+  uint32_t mck_actual;
+  uint32_t mck_tcclks;
+  uint32_t mck_error;
+  int ret;
 
-  tcvdbg("frequency=%d\n", frequency);
+  /* Try to satisfy the requested frequency with the MCK or slow clock */
 
-  /* On other chips, TCCLCKS==0 corresponded to MCK/2.  But for the SAMV7,
-   * this is PCK6.  That will need to be handled differently.
-   */
-
-#warning REVISIT: PCK6 clock source not yet supported
-  ndx++;
-
-  /* Satisfy lower bound.  That is, the value of the divider such that:
-   *
-   *   frequency >= (tc_input_frequency * 65536) / divider.
-   */
-
-  while (frequency < (sam_tc_divfreq_lookup(BOARD_MCK_FREQUENCY, ndx) >> 16))
+  ret = sam_tc_mcksrc(frequency, &mck_tcclks, &mck_actual);
+  if (ret < 0)
     {
-      if (++ndx > TC_NDIVOPTIONS)
-        {
-          /* If no divisor can be found, return -ERANGE */
+      mck_error = UINT32_MAX;
+    }
+  else
+    {
+      /* Get the absolute value of the frequency error */
 
-          tcdbg("Lower bound search failed\n");
-          return -ERANGE;
+      if (mck_actual > frequency)
+        {
+          mck_error = mck_actual - frequency;
+        }
+      else
+        {
+          mck_error = frequency - mck_actual;
         }
     }
 
-  /* Try to maximize DIV while still satisfying upper bound.  That the
-   * value of the divider such that:
-   *
-   *   frequency < tc_input_frequency / divider.
-   */
+  /* See if we do better with PCK6 */
 
-  for (; ndx < (TC_NDIVOPTIONS-1); ndx++)
+  if (sam_pck_isenabled(PCK6))
     {
-      if (frequency > sam_tc_divfreq_lookup(BOARD_MCK_FREQUENCY, ndx + 1))
+      uint32_t pck6_actual;
+      uint32_t pck6_error;
+
+      /* Get the absolute value of the frequency error */
+
+      pck6_actual = sam_pck_frequency(PCK6);
+      if (pck6_actual > frequency)
         {
-          break;
+          pck6_error = pck6_actual - frequency;
+        }
+      else
+        {
+          pck6_error = frequency - pck6_actual;
+        }
+
+      /* Return the PCK6 selection if the error is smaller */
+
+      if (pck6_error < mck_error)
+        {
+          /* Return the PCK selection */
+
+          if (actual)
+            {
+              tcvdbg("return actual=%lu\n", (unsigned long)fselect);
+              *actual = pck6_actual;
+            }
+
+          /* Return the TCCLKS selection */
+
+          if (tcclks)
+            {
+              tcvdbg("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS_PCK6);
+              *tcclks = TC_CMR_TCCLKS_PCK6;
+            }
+
+          /* Return success */
+
+          return OK;
         }
     }
 
-  /* Return the divider value */
+  /* Return the MCK/slow clock selection */
 
-  if (div)
+  if (actual)
     {
-      uint32_t value = sam_tc_freqdiv_lookup(BOARD_MCK_FREQUENCY, ndx);
-      tcvdbg("return div=%lu\n", (unsigned long)value);
-      *div = value;
+      tcvdbg("return actual=%lu\n", (unsigned long)mck_actual);
+      *actual = mck_actual;
     }
 
   /* Return the TCCLKS selection */
 
   if (tcclks)
     {
-      tcvdbg("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS(ndx));
-      *tcclks = TC_CMR_TCCLKS(ndx);
+      tcvdbg("return tcclks=%08lx\n", (unsigned long)mck_tcclks);
+      *tcclks = mck_tcclks;
     }
 
-  return OK;
+  /* Return success */
+
+  return ret;
 }
 
 #endif /* CONFIG_SAMV7_TC0 || CONFIG_SAMV7_TC1 || CONFIG_SAMV7_TC2 || CONFIG_SAMV7_TC3 */

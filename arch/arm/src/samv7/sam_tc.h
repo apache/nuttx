@@ -331,7 +331,7 @@ uint32_t sam_tc_infreq(void);
 uint32_t sam_tc_divfreq(TC_HANDLE handle);
 
 /****************************************************************************
- * Name: sam_tc_divisor
+ * Name: sam_tc_clockselect
  *
  * Description:
  *   Finds the best MCK divisor given the timer frequency and MCK.  The
@@ -346,8 +346,8 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle);
  *
  * Input Parameters:
  *   frequency  Desired timer frequency.
- *   div        Divisor value.
  *   tcclks     TCCLKS field value for divisor.
+ *   actual     The actual freqency of the MCK
  *
  * Returned Value:
  *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
@@ -355,7 +355,8 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle);
  *
  ****************************************************************************/
 
-int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks);
+int sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks,
+                       uint32_t *actual);
 
 #undef EXTERN
 #ifdef __cplusplus
