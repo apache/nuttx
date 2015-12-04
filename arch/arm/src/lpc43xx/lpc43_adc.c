@@ -79,6 +79,7 @@
 #ifndef CONFIG_ADC0_MASK
 #define CONFIG_ADC0_MASK     0x01
 #endif
+
 #ifndef CONFIG_ADC0_FREQ
 #define CONFIG_ADC0_FREQ      0
 #endif
@@ -227,61 +228,61 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
 /* do pin configuration if defined */
 
-#ifdef PINCONF_ADC0_C0
+#ifdef PINCONF_ADC0_CH0
   if ((priv->mask & 0x01) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C0);
+      lpc43_pin_config(PINCONF_ADC0_CH0);
     }
-#endif /* PINCONF_ADC0_C0 */
+#endif /* PINCONF_ADC0_CH0 */
 
-#ifdef PINCONF_ADC0_C1
+#ifdef PINCONF_ADC0_CH1
   if ((priv->mask & 0x02) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C1);
+      lpc43_pin_config(PINCONF_ADC0_CH1);
     }
-#endif /* PINCONF_ADC0_C1 */
+#endif /* PINCONF_ADC0_CH1 */
 
-#ifdef PINCONF_ADC0_C2
+#ifdef PINCONF_ADC0_CH2
   if ((priv->mask & 0x04) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C2);
+      lpc43_pin_config(PINCONF_ADC0_CH2);
     }
-#endif /* PINCONF_ADC0_C2 */
+#endif /* PINCONF_ADC0_CH2 */
 
-#ifdef PINCONF_ADC0_C3
+#ifdef PINCONF_ADC0_CH3
   if ((priv->mask & 0x08) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C3);
+      lpc43_pin_config(PINCONF_ADC0_CH3);
     }
-#endif /* PINCONF_ADC0_C3 */
+#endif /* PINCONF_ADC0_CH3 */
 
-#ifdef PINCONF_ADC0_C4
+#ifdef PINCONF_ADC0_CH4
   if ((priv->mask & 0x10) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C4);
+      lpc43_pin_config(PINCONF_ADC0_CH4);
     }
-#endif /* PINCONF_ADC0_C4 */
+#endif /* PINCONF_ADC0_CH4 */
 
-#ifdef PINCONF_ADC0_C5
+#ifdef PINCONF_ADC0_CH5
   if ((priv->mask & 0x20) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C5);
+      lpc43_pin_config(PINCONF_ADC0_CH5);
     }
-#endif /* PINCONF_ADC0_C5 */
+#endif /* PINCONF_ADC0_CH5 */
 
-#ifdef PINCONF_ADC0_C6
+#ifdef PINCONF_ADC0_CH6
   if ((priv->mask & 0x40) != 0)
     {
-      lpc43_pin_config(PINCONF_ADC0_C6);
+      lpc43_pin_config(PINCONF_ADC0_CH6);
     }
-#endif /* PINCONF_ADC0_C6 */
+#endif /* PINCONF_ADC0_CH6 */
 
-#ifdef PINCONF_ADC0_C7
+#ifdef PINCONF_ADC0_CH7
   if ((priv->mask & 0x80) != 0)
     {
-      lpc43_configgpio(PINCONF_ADC0_C7);
+      lpc43_configgpio(PINCONF_ADC0_CH7);
     }
-#endif /* PINCONF_ADC0_C7 */
+#endif /* PINCONF_ADC0_CH7 */
 
   irqrestore(flags);
 }
@@ -351,10 +352,10 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-  uint32_t regval = getreg32(LPC43_ADC0_CR);
 
   if (enable)
     {
+      uint32_t regval = getreg32(LPC43_ADC0_CR);
       if (priv->freq == 0)
 	{
 	  if ( priv->m_ch )
@@ -375,6 +376,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 	      putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_PC_OFFSET); /* reset prescale counter */
 	      putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_TC_OFFSET); /* reset timer counter */
 	      putreg32(TMR_TCR_EN, LPC43_TIMER2_BASE+LPC43_TMR_TCR_OFFSET); /* enable the timer */
+	      putreg32(ADC_INTEN_GLOBAL, LPC43_ADC0_INTEN);
 	    }
 	  else
 	    {
@@ -422,12 +424,12 @@ static int adc_interrupt(int irq, void *context)
 
   if( priv->timer)
     {
-      putreg32(TMR_EMR_EMC0_SET, LPC43_TIMER2_BASE+LPC43_TMR_EMR_OFFSET);
+      putreg32(TMR_EMR_EMC0_SET, LPC43_TIMER2_BASE+LPC43_TMR_EMR_OFFSET); /* clear EM0 bit by resetting default value */
     }
 
   if (priv->freq == 0 && priv->m_ch )
     {
-      regval = getreg32(LPC43_ADC0_CR);
+      regval = getreg32(LPC43_ADC0_CR); /* clear burst while single conversation */
       regval &= ~ADC_CR_BURST;
       putreg32(regval, LPC43_ADC0_CR);
     }
