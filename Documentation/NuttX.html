@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 9, 2015</p>
+      <p>Last Updated: December 5, 2015</p>
     </td>
   </tr>
 </table>
@@ -513,6 +513,14 @@
   <td>
     <p>
       <li>BINFS pseudo-filesystem support.</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>HOSTFS filesystem support (simulation only).</li>
     </p>
   </td>
 </tr>
@@ -1303,11 +1311,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.12.
-  NuttX 7.12 is the 112<sup>th</sup> release of NuttX.
-  It was released on October 1, 2015, and is available for download from the
+  The current release is NuttX 7.13.
+  NuttX 7.13 is the 113<sup>th</sup> release of NuttX.
+  It was released on December 5, 2015, and is available for download from the
   <a href="https://bitbucket.org/patacongo/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.12.tar.gz</code> and <code>apps-7.12.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.13.tar.gz</code> and <code>apps-7.13.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1316,7 +1324,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.12 are available <a href="https://bitbucket.org/patacongo/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.13 are available <a href="https://bitbucket.org/patacongo/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1324,7 +1332,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.12 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.13 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1381,7 +1389,7 @@
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (34)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (24)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (3)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (4)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1456,6 +1464,7 @@
       <li><a href="#at91sam4e">Atmel SAM4E</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4l">Atmel SAM4L</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4s">Atmel SAM4S</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#at91same70">Atmel SAME70</a> <small>(ARM Cortex-M7)</small></li>
       <li><a href="#at91samv71">Atmel SAMV71</a> <small>(ARM Cortex-M7)</small></li>
       <li><a href="#at91sama5d2">Atmel SAMA5D2</a> <small>(ARM Cortex-A5)</small></li>
       <li><a href="#at91sama5d3">Atmel SAMA5D3</a> <small>(ARM Cortex-A5)</small></li>
@@ -4168,12 +4177,37 @@ Mem:         29232       5920      23312      23312
         <li>MCAN CAN device driver (fully verified in loopback mode only).</li>
         <li>SPI slave driver.</li>
       </ul>
+      <p>
+        Additional Drivers added in NuttX-7.13 include:
+      </p>
+      <ul>
+        <li>MPU and protected build mode support.</li>
+        <li>Timer/Counter driver, one-shot timer, free-running timer support.</li>
+        <li><i>Tickless</i> mode of operation.</li>
+        <li>QuadSPI driver.</li>
+        <li>Support for programming on-chip FLASH.</li>
+      </ul>
       </p>
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/samv71-xult/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
 </tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91same70"><b>Atmel SAME70</b>.</a>
+      This port uses Atmel SAM E70 Xplained Evaluation Kit (ATSAME70-XPLD).
+      This board is essentially a lower cost version of the SAMV71-XULT board featuring the ATSAME70Q21 Cortex-M7 microcontroller.
+      See the <a href="#at91samv71">Atmel SAMV71</a> for supported features.
+      Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/same70-xplained/README.txt" target="_blank">README</a> file for further information.
+    </p>
+  </td>
 <tr>
   <td><br></td>
   <td><hr></td>
