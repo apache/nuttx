@@ -119,7 +119,7 @@ Any of these options can be selected as the serial console by:
 NOTE: If USART1 is used (TXD1, RXD1), then PB4 must be reconfigured in the
 SUPC.  Normally, PB4 is TDI.  When it is reconfigured for use with USART1,
 the capability to debug is lost!  If you plan to debug you should most
-certainly not use USARTs.
+certainly not use USART1.
 
 SD Card
 =======
@@ -137,7 +137,7 @@ E70. SD card connector:
   PA30   MCDA0 (DAT0)
   PA31   MCDA1 (DAT1)
   PA26   MCDA2 (DAT2)
-  PA27   MCDA3 (DAT3)      Camera
+  PA27   MCDA3 (DAT3)
   PA25   MCCK (CLK)        Shield
   PA28   MCCDA (CMD)
   PC16   Card Detect (C/D) Shield
@@ -1029,7 +1029,35 @@ NOTES:
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on UART3 (i.e., for the Arduino serial shield).
+     output on USART1 (the EDBG VCOM)
+
+     NOTE: When USART1 is used, the pin PB4 is reconfigured.  Normally, PB4
+     is TDI.  When it is reconfigured for use with USART1, the capability to
+     debug is lost!  If you plan to debug you should most certainly not use
+     USART1.  UART3 might be a good option (the Arduino RXD/TXD):
+
+       -CONFIG_SAMV7_USART1=y
+       -CONFIG_USART1_ISUART=y
+       -CONFIG_USART1_SERIAL_CONSOLE=y
+       -CONFIG_USART1_RXBUFSIZE=256
+       -CONFIG_USART1_TXBUFSIZE=256
+       -CONFIG_USART1_BAUD=115200
+       -CONFIG_USART1_BITS=8
+       -CONFIG_USART1_PARITY=0
+       -CONFIG_USART1_2STOP=0
+
+       +CONFIG_SAMV7_UART3=y
+       +CONFIG_UART3_SERIAL_CONSOLE=y
+       +CONFIG_UART3_RXBUFSIZE=256
+       +CONFIG_UART3_TXBUFSIZE=256
+       +CONFIG_UART3_BAUD=115200
+       +CONFIG_UART3_BITS=8
+       +CONFIG_UART3_PARITY=0
+       +CONFIG_UART3_2STOP=0
+
+     UART3 is not the default because (1) the placement of the RJ-45 connector
+     makes it difficult to install Arduino shield cards and (2) the Arduino
+     connectors are not populated on the board as it comes from the factory.
 
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
@@ -1081,12 +1109,7 @@ Configuration sub-directories
 
     1. The serial console is configured by default for use with the EDBG VCOM
        (USART1).  You will need to reconfigure if you will to use a different
-       U[S]ART.
-
-       NOTE: When USART1 is used, the pin PB4 is reconfigured.  Normally, PB4
-       is TDI.  When it is reconfigured for use with USART1, the capability to
-       debug is lost!  If you plan to debug you should most certainly not use
-       USART1.  USART3 might be a good option (the Arduino RXD/TXD)
+       U[S]ART.  See "Information Common to All Configurations" above.
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
@@ -1191,12 +1214,7 @@ Configuration sub-directories
 
     1. The serial console is configured by default for use with the EDBG VCOM
        (USART1).  You will need to reconfigure if you will to use a different
-       U[S]ART.
-
-       NOTE: When USART1 is used, the pin PB4 is reconfigured.  Normally, PB4
-       is TDI.  When it is reconfigured for use with USART1, the capability to
-       debug is lost!  If you plan to debug you should most certainly not use
-       USART1.  USART3 might be a good option (the Arduino RXD/TXD)
+       U[S]ART.  See "Information Common to All Configurations" above.
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:

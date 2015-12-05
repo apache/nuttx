@@ -238,7 +238,7 @@ Any of these options can be selected as the serial console by:
 NOTE: If USART1 is used (TXD1, RXD1), then PB4 must be reconfigured in the
 SUPC.  Normally, PB4 is TDI.  When it is reconfigured for use with USART1,
 the capability to debug is lost!  If you plan to debug you should most
-certainly not use USARTs.
+certainly not use USART1.
 
 SD Card
 =======
