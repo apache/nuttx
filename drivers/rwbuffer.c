@@ -747,10 +747,10 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
  * Name: rwb_read
  ****************************************************************************/
 
-int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
-             FAR uint8_t *rdbuffer)
+ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
+                 size_t nblocks, FAR uint8_t *rdbuffer)
 {
-  uint32_t remaining;
+  size_t remaining;
   int ret = OK;
 
   fvdbg("startblock=%ld nblocks=%ld rdbuffer=%p\n",
@@ -822,7 +822,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
               if (ret < 0)
                 {
                   fdbg("ERROR: Failed to fill the read-ahead buffer: %d\n", ret);
-                  return ret;
+                  return (ssize_t)ret;
                 }
             }
         }
@@ -846,15 +846,15 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
     }
 #endif
 
-  return ret;
+  return (ssize_t)ret;
 }
 
 /****************************************************************************
  * Name: rwb_write
  ****************************************************************************/
 
-int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
-              size_t nblocks, FAR const uint8_t *wrbuffer)
+ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
+                  size_t nblocks, FAR const uint8_t *wrbuffer)
 {
   int ret = OK;
 
@@ -917,10 +917,9 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 
       ret = rwb->wrflush(rwb->dev, wrbuffer, startblock, nblocks);
     }
-
 #endif
 
-  return ret;
+  return (ssize_t)ret;
 }
 
 /****************************************************************************

@@ -88,7 +88,7 @@ static WDOG_ID g_arptimer;           /* ARP timer */
  *
  ****************************************************************************/
 
-static void arptimer_poll(int argc, uint32_t arg, ...)
+static void arptimer_poll(int argc, wdparm_t arg, ...)
 {
   /* Call the ARP timer function every 10 seconds. */
 
