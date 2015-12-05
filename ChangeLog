@@ -11004,7 +11004,7 @@
 	  sets the queued indication and the logic that does the actual queuing
 	  must be atomic (2015-09-20).
 
-7.13 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.13 2015-12-05 Gregory Nutt <gnutt@nuttx.org>
 
 	* libc/stdlib/lib_bsearch.c and include/stdlib.h:  Add the bsearch()
 	  function from NetBSD (2015-10-02).
@@ -11020,7 +11020,7 @@
 	* stm32 F4:  Fix some TIM12 pin mappings.  From Max Kriegleder
 	  (2015-10-9).
 	* fs/tmpfs: TMPFS file system is code complete and bascially functional
-	  although it has not been heavilay tested (2015-10-9).
+	  although it has not been heavily tested (2015-10-9).
 	* drivers/input/button_upper.c and include/nuttx/input/buttons.h:  Add a
 	  driver to support application access to board buttons (2015-10-12).
 	* drivers/input/button_lower.c:  Add a generic lower half button driver.
@@ -11097,7 +11097,7 @@
 	  include/nuttx/wireless/cc3000/security.h to include/nuttx/crypto/aes.h
 	  (2015-11-16).
 	* drivers/mtd/at24xx.c:  Add support for multiple AT24xx EEPROM parts,
-	  each with unique I2C addresses, but otherwise idential (2015-11-17).
+	  each with unique I2C addresses, but otherwise identical (2015-11-17).
 	* drivers/timers/ds3231.c:  Add support for the DS3231 I2C RTC.  Untested
 	  on the initial commit (2015-11-17).
 	* arch/arm/src/stm32/stm32_tim_lowerhalf.c:  Add a compatible lower-half
@@ -11122,7 +11122,7 @@
 	* drivers/mtd/smart.c: Fixed SmartFS wear level error that occurs when
 	  the logical sector size is too small to save all wear level status
 	  bytes in a single sector.  Logical sectors 1 and 2 were simply not
-	  being allocated and then the read_sector and write_sector routinesi
+	  being allocated and then the read_sector and write_sector routines
 	  were failing.  From Ken Pettit (2015-11-18).
 	* drivers/timers/ds3231.c:  Untested support for DS1302 and DS3232.
 	  Also definitions for the DS3234, but that is an unsupported SPI RTC
@@ -11153,9 +11153,9 @@
 	  RPortrait, and RLandscript should work correly now.  They were
 	  displayed mirrored.  From  Marco Krahl (2015-11-25).
 	* drivers/mtd/mtd/mtd_procfs/c and include/nuttx/mtd/mtd.h:  Add an
-	  interface to un-regiser an MTD procfs entry.  From Ken Pettit
+	  interface to un-register an MTD procfs entry.  From Ken Pettit
 	  (2015-11-25).
-	* drivers/mtd/filemtd.c:  New new MTD conversion layer that will
+	* drivers/mtd/filemtd.c:  A new MTD conversion layer that will
 	  convert a regular file (or driver file) to an MTD device.  This is
 	  useful for testing on the simulation using the hostfs.  From Ken
 	  Pettit (2015-11-25).
@@ -11164,7 +11164,7 @@
 	  Rather, these functions are now available as IOCTL commands to the
 	  loop driver (2015-11-25).
 	* include/nuttx/net/netdev.h and several Ethernet drivers in arch/:
-	  Most network drivers to not support statistics.  Those that do only
+	  Most network drivers do not support statistics.  Those that do only
 	  support them when DEBUG is enabled.  Each driver collects an
 	  architecture specific set of statistics and there is no mechanism in
 	  place to view those statistics.  Thus, the driver feature was mostly
@@ -11206,5 +11206,7 @@
 	  SAMV7 (2015-12-03).
 	* arch/arm/src/samv7: Add PCK6 as an optional source for the timer/
 	  counter clock (2015-12-04).
-	* configs/samv7-xult/: If Tickless mode is selected then enable PCK6i
-	  as a timer/counter clock source
+	* configs/samv7-xult/: If Tickless mode is selected then enable PCK6
+	  as a timer/counter clock source (2015-12-04).
+
+7.14 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
