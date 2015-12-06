@@ -457,6 +457,7 @@ o Kernel/Protected Build
   Description: The NSH 'free' command only shows memory usage in the user
                heap only, not usage in the kernel heap.  I am thinking that
                kernel heap memory usage should be available in /proc/memory.
+               Better /proc/kmm
   Status:      Open
   Priority:    Medium/High
 

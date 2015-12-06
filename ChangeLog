@@ -11215,4 +11215,5 @@
 	  SAMV7 (2015-12-06).
 	* arch/arm/src/samv7:  Port the WDT driver from the SAMA5D3/4 to the
 	  SAMV7 (s015-12-06).
+	* arch/arm/src/samv7:  Add an RSWDT driver (2015-12-06).
 
