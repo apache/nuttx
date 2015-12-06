@@ -535,13 +535,15 @@ config SAMV7_USART2
 	select ARCH_HAVE_USART2
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_WDT0
-	bool "Watchdog Timer (WDT0)"
+config SAMV7_WDT
+	bool "Watchdog Timer (WDT)"
 	default n
+	select WATCHDOG
 
-config SAMV7_WDT1
-	bool "Watchdog Timer (WDT1)"
+config SAMV7_RSWDT
+	bool "Reinforced Safety Watchdog Timer (RSWDT)"
 	default n
+	select WATCHDOG
 
 endmenu # SAMV7 Peripheral Selection
 

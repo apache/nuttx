@@ -136,6 +136,10 @@ ifeq ($(CONFIG_SAMV7_XDMAC),y)
 CHIP_CSRCS += sam_xdmac.c
 endif
 
+ifeq ($(CONFIG_SAMV7_WDT),y)
+CHIP_CSRCS += sam_wdt.c
+endif
+
 ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
 CHIP_CSRCS += sam_spi.c
 endif
