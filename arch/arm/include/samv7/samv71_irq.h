@@ -54,7 +54,7 @@
 #define SAM_PID_RSTC           (1)  /* Reset Controller */
 #define SAM_PID_RTC            (2)  /* Real Time Clock */
 #define SAM_PID_RTT            (3)  /* Real Time Timer */
-#define SAM_PID_WDT0           (4)  /* Watchdog Timer 0 */
+#define SAM_PID_WDT            (4)  /* Watchdog Timer */
 #define SAM_PID_PMC            (5)  /* Power Management Controller */
 #define SAM_PID_EFC            (6)  /* Embedded Flash Controller */
 #define SAM_PID_UART0          (7)  /* Universal Asynchronous Receiver Transmitter 0 */
@@ -113,7 +113,7 @@
 #define SAM_PID_PWM1          (60)  /* Pulse Width Modulation Controller 1 */
 #define SAM_PID_FPU           (61)  /* ARM Floating Point Unit interrupt */
 #define SAM_PID_SDRAMC        (62)  /* SDRAM Controller */
-#define SAM_PID_WDT1          (63)  /* Watchdog Timer 1 */
+#define SAM_PID_RSWDT         (63)  /* Reinforced Safetry Watchdog Timer */
 #define SAM_PID_CCW           (64)  /* ARM Cache ECC Warning */
 #define SAM_PID_CCF           (65)  /* ARM Cache ECC Fault */
 #define SAM_PID_EMACQ1        (66)  /* EMAC Queue 1 Interrupt */
@@ -128,7 +128,7 @@
 #define SAM_IRQ_RSTC          (SAM_IRQ_EXTINT+SAM_PID_RSTC)   /* Reset Controller */
 #define SAM_IRQ_RTC           (SAM_IRQ_EXTINT+SAM_PID_RTC)    /* Real Time Clock */
 #define SAM_IRQ_RTT           (SAM_IRQ_EXTINT+SAM_PID_RTT)    /* Real Time Timer */
-#define SAM_IRQ_WDT0          (SAM_IRQ_EXTINT+SAM_PID_WDT0)   /* Watchdog Timer 0 */
+#define SAM_IRQ_WDT           (SAM_IRQ_EXTINT+SAM_PID_WDT)    /* Watchdog Timer*/
 #define SAM_IRQ_PMC           (SAM_IRQ_EXTINT+SAM_PID_PMC)    /* Power Management Controller */
 #define SAM_IRQ_EEFC0         (SAM_IRQ_EXTINT+SAM_PID_EFC)    /* Embedded Flash Controller */
 #define SAM_IRQ_UART0         (SAM_IRQ_EXTINT+SAM_PID_UART0)  /* Universal Asynchronous Receiver Transmitter 0 */
@@ -187,7 +187,7 @@
 #define SAM_IRQ_PWM1          (SAM_IRQ_EXTINT+SAM_PID_PWM1)   /* Pulse Width Modulation Controller 1 */
 #define SAM_IRQ_FPU           (SAM_IRQ_EXTINT+SAM_PID_FPU)    /* ARM Floating Point Unit interrupt */
 #define SAM_IRQ_SDRAMC        (SAM_IRQ_EXTINT+SAM_PID_SDRAMC) /* SDRAM Controller */
-#define SAM_IRQ_WDT1          (SAM_IRQ_EXTINT+SAM_PID_WDT1)   /* Watchdog Timer 1 */
+#define SAM_IRQ_RSWDT         (SAM_IRQ_EXTINT+SAM_PID_RSWDT)  /* Reinforced Safety Watchdog Timer */
 #define SAM_IRQ_CCW           (SAM_IRQ_EXTINT+SAM_PID_CCW)    /* ARM Cache ECC Warning */
 #define SAM_IRQ_CCF           (SAM_IRQ_EXTINT+SAM_PID_CCF)    /* ARM Cache ECC Fault */
 #define SAM_IRQ_EMACQ1        (SAM_IRQ_EXTINT+SAM_PID_EMACQ1) /* EMAC Queue 1 Interrupt */

@@ -576,6 +576,82 @@ config SAMV7_GPIOE_IRQ
 
 endif # SAMV7_GPIO_IRQ
 
+if SAMV7_WDT || SAMV7_RSWDT
+
+menu "Watchdog Configuration"
+
+if SAMV7_WDT
+
+comment "Watchdog Configuration"
+
+config SAMV7_WDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMV7_WDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMV7_WDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMV7_WDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endif # SAMV7_WDT
+
+if SAMV7_RSWDT
+
+comment "Reinforced Safety Watchdog Configuration"
+
+config SAMV7_RSWDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMV7_RSWDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMV7_RSWDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMV7_RSWDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endif # SAMV7_RSWDT
+
+endmenu # Watchdog configuration
+
+endif # SAMV7_WDT || SAMV7_RSWDT
+
 menuconfig SAMV7_PROGMEM
 	bool "FLASH program memory"
 	---help---

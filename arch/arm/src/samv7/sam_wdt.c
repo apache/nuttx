@@ -695,9 +695,9 @@ int up_wdginitialize(void)
   (void)irq_attach(SAM_IRQ_WDT, sam_interrupt);
 #endif
 
-  /* Register the watchdog driver as /dev/watchdog0 */
+  /* Register the watchdog driver as /dev/wdt */
 
-  (void)watchdog_register("/dev/watchdog0",
+  (void)watchdog_register("/dev/wdt",
                          (FAR struct watchdog_lowerhalf_s *)priv);
   return OK;
 }
