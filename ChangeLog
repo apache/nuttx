@@ -11210,3 +11210,7 @@
 	  as a timer/counter clock source (2015-12-04).
 
 7.14 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/samv7:  Port the TRNG driver from the SAMA5D3/4 to the
+	  SAMV7 (2015-12-06).
+
