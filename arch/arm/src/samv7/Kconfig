@@ -445,6 +445,7 @@ config SAMV7_TC3
 config SAMV7_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
+	select ARCH_HAVE_RNG
 
 config SAMV7_TWIHS0
 	bool "Two-wire Interface 0 (TWIHS0)"
