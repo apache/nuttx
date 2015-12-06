@@ -64,19 +64,18 @@
 
 #include "stm32_ccm.h"
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
+     defined(CONFIG_FS_PROCFS_REGISTER) && defined(CONFIG_STM32_CCM_PROCFS)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #define CCM_LINELEN     64
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This enumeration identifies all of the thread attributes that can be
- * accessed via the procfs file system.
- */
 
 /* This structure describes one open "file" */
 
@@ -102,11 +101,7 @@ static int     ccm_dup(FAR const struct file *oldp,
 static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 /* See include/nutts/fs/procfs.h
@@ -114,7 +109,7 @@ static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations ccm_procfsoperations =
+static const struct procfs_operations ccm_procfsoperations =
 {
   ccm_open,       /* open */
   ccm_close,      /* close */
@@ -128,6 +123,12 @@ const struct procfs_operations ccm_procfsoperations =
   ccm_stat        /* stat */
 };
 
+static const struct procfs_entry_s g_procfs_ccm =
+{
+  "ccm",
+  &ccm_procfsoperations
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -137,7 +138,7 @@ const struct procfs_operations ccm_procfsoperations =
  ****************************************************************************/
 
 static int ccm_open(FAR struct file *filep, FAR const char *relpath,
-                      int oflags, mode_t mode)
+                    int oflags, mode_t mode)
 {
   FAR struct ccm_file_s *priv;
 
@@ -203,7 +204,7 @@ static int ccm_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
+                        size_t buflen)
 {
   FAR struct ccm_file_s *priv;
   size_t linesize;
@@ -314,4 +315,22 @@ static int ccm_stat(const char *relpath, struct stat *buf)
   return OK;
 }
 
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ccm_procfs_register
+ *
+ * Description:
+ *   Register the CCM procfs file system entry
+ *
+ ****************************************************************************/
+
+int ccm_procfs_register(void)
+{
+  return procfs_register(&g_procfs_ccm);
+}
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
+        * CONFIG_FS_PROCFS_REGISTER && CONFIG_STM32_CCM_PROCFS */

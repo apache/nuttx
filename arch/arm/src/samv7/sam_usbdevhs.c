@@ -96,6 +96,14 @@
 #  define CONFIG_SAMV7_USBDEVHS_NDTDS 8
 #endif
 
+#if defined(CONFIG_USBDEV_DUALSPEED) && defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
+#  error CONFIG_USBDEV_DUALSPEED must not be defined with full-speed only support
+#endif
+
+#if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
+#  warning CONFIG_USBDEV_DUALSPEED should be defined for high speed support
+#endif
+
 /* Extremely detailed register debug that you would normally never want
  * enabled.
  */

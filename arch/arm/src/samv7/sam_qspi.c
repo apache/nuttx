@@ -126,16 +126,15 @@
 
 /* QSPI memory synchronization */
 
-#define MEMORY_SYNC()     do { ARM_DSB();ARM_ISB(); } while (0)
+#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* The SAMV7x QSPI driver insists that transfers be performed in multiples
- * of 32-bits.
+ * of 32-bits.  The alignment requirement only applies to RX DMA data.
  */
 
 #define ALIGN_SHIFT       2
 #define ALIGN_MASK        3
 #define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define ALIGN_WORDS(n)    (((n)+ALIGN_MASK) >> ALIGN_SHIFT)
 #define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug *******************************************************************/
@@ -547,17 +546,17 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
   /* Initial register values */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_INITIAL],
-              "RX: Initial Registers");
+              "Initial Registers");
 
   /* Register values after DMA setup */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_SETUP],
-              "RX: After DMA Setup");
+              "After DMA Setup");
 
   /* Register values after DMA start */
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_START],
-              "RX: After DMA Start");
+              "After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
    * -OR- DMA timeout.
@@ -570,16 +569,16 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
   if (priv->result == -ETIMEDOUT)
     {
       sam_dmadump(priv->dmach, &priv->dmaregs[DMA_TIMEOUT],
-                  "RX: At DMA timeout");
+                  "At DMA timeout");
     }
   else
     {
       sam_dmadump(priv->dmach, &priv->dmaregs[DMA_CALLBACK],
-                  "RX: At DMA callback");
+                  "At DMA callback");
     }
 
   sam_dmadump(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER],
-              "RX: At End-of-Transfer");
+              "At End-of-Transfer");
 }
 #endif
 
@@ -713,7 +712,7 @@ static int qspi_memory_enable(struct sam_qspidev_s *priv,
    *  QSPI_ICR_OPT(0)     No option
    */
 
-  regval =  QSPI_ICR_INST(meminfo->cmd) | QSPI_ICR_OPT(0);
+  regval = QSPI_ICR_INST(meminfo->cmd) | QSPI_ICR_OPT(0);
   qspi_putreg(priv, regval, SAM_QSPI_ICR_OFFSET);
 
   /* Is memory data scrambled? */
@@ -856,7 +855,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
       /* Configure RX DMA */
 
       dmaflags |= ((uint32_t)priv->rxintf << DMACH_FLAG_PERIPHPID_SHIFT) |
-                  DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_MEMWIDTH_16BITS;
+                  DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_MEMWIDTH_32BITS;
       sam_dmaconfig(priv->dmach, dmaflags);
 
       /* Setup the RX DMA (memory-to-peripheral) */
@@ -988,11 +987,6 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                              struct qspi_meminfo_s *meminfo)
 {
   uintptr_t qspimem = SAM_QSPIMEM_BASE + meminfo->addr;
-  size_t buflen;
-
-  /* Get the length as an even multiple of 32-bit words. */
-
-  buflen = ALIGN_UP(meminfo->buflen);
 
   /* Enable the memory transfer */
 
@@ -1002,13 +996,13 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      qspi_memcpy((uint8_t *)qspimem,
-                  (const uint8_t *)meminfo->buffer, buflen);
+      qspi_memcpy((uint8_t *)qspimem, (const uint8_t *)meminfo->buffer,
+                  meminfo->buflen);
     }
   else
     {
-      qspi_memcpy((uint8_t *)meminfo->buffer,
-                  (const uint8_t *)qspimem, buflen);
+      qspi_memcpy((uint8_t *)meminfo->buffer, (const uint8_t *)qspimem,
+                  meminfo->buflen);
     }
 
   MEMORY_SYNC();
@@ -1146,13 +1140,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
       return priv->actual;
     }
 
-  /* Configure QSPI to a frequency as close as possible to the requested frequency.
+  /* Configure QSPI to a frequency as close as possible to the requested
+   * frequency.
    *
    *   QSCK frequency = QSPI_CLK / SCBR, or SCBR = QSPI_CLK / frequency
    *
-   * Where SCBR can have the range 1 to 256 and register holds SCBR - 1.  NOTE
-   * that a "ceiling" type of calculation is performed.  'frequency' is treated
-   * as a not-to-exceed value.
+   * Where SCBR can have the range 1 to 256 and the SCR register field holds
+   * SCBR - 1.  NOTE that a "ceiling" type of calculation is performed.
+   * 'frequency' is treated as a not-to-exceed value.
    */
 
   scbr = (frequency + SAM_QSPI_CLOCK - 1) / frequency;
@@ -1227,7 +1222,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  qspidbg("Frequency %d->%d\n", frequency, actual);
+  qspivdbg("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1336,7 +1331,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
       regval |= QSPI_MR_NBBITS(nbits);
       qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
 
-      qspivdbg("SCR%02x]=%08x\n", regval);
+      qspivdbg("MR=%08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1375,14 +1370,14 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      qspivdbg("  address/length: %08lx %d\n",
+      qspivdbg("  address/length: %08lx/%d\n",
               (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       qspivdbg("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
-      qspivdbg("    buffer/length: %p %d\n", cmdinfo->buffer, cmdinfo->buflen);
+      qspivdbg("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
@@ -1395,7 +1390,7 @@ static int qspi_command(struct qspi_dev_s *dev,
     {
       DEBUGASSERT(cmdinfo->addrlen == 3 || cmdinfo->addrlen == 4);
 
-      /* Set the addressin the IAR.  This is required only if the
+      /* Set the address in the IAR.  This is required only if the
        * instruction frame includes an address, but no data.  When data is
        * preset, the address of the instruction is determined by the address
        * of QSPI memory accesses, and not by the content of the IAR.
@@ -1434,14 +1429,8 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      uint16_t buflen;
-
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
       DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
-
-      /* Get the length as an even multiple of 32-bit words. */
-
-      buflen = ALIGN_UP(cmdinfo->buflen);
 
       /* Write Instruction Frame Register:
        *
@@ -1461,17 +1450,23 @@ static int qspi_command(struct qspi_dev_s *dev,
       ifr |= QSPI_IFR_WIDTH_SINGLE | QSPI_IFR_INSTEN | QSPI_IFR_DATAEN |
              QSPI_IFR_NBDUM(0);
 
+      /* Read or write operation? */
+
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
-          /* Set write data operation */
+          /* Set write data operation
+           *
+           * Write the IFR to the hardware.  If the instructrion frame
+           * includes data, writing to the IFR does not trigger the
+           * instruction frame transfer.  Rather, the instruction frame
+           * is triggered by the first access to QSPI memory.
+           */
 
           ifr |= QSPI_IFR_TFRTYP_WRITE;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
-          /* Write the IFR to the hardware.  If the instructrion frame
-           * includes data, writing to the IFR does not trigger the
-           * instruction frame transfer.  Rather, the instruction frame
-           * is triggered by the first access to QSPI memory.
+          /* Read QSPI_IFR (dummy read) to synchronize APB and AHB
+           * accesses.
            */
 
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
@@ -1479,19 +1474,23 @@ static int qspi_command(struct qspi_dev_s *dev,
           /* Copy the data to write to QSPI_RAM */
 
           qspi_memcpy((uint8_t *)SAM_QSPIMEM_BASE,
-                      (const uint8_t *)cmdinfo->buffer, buflen);
+                      (const uint8_t *)cmdinfo->buffer, cmdinfo->buflen);
         }
       else
         {
-          /* Set read data operation */
+          /* Set read data operation
+           *
+           * Write the IFR to the hardware.  If the instructrion frame
+           * includes data, writing to the IFR does not trigger the
+           * instruction frame transfer.  Rather, the instruction frame
+           * is triggered by the first access to QSPI memory.
+           */
 
           ifr |= QSPI_IFR_TFRTYP_READ;
           qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
-          /* Write the IFR to the hardware.  If the instructrion frame
-           * includes data, writing to the IFR does not trigger the
-           * instruction frame transfer.  Rather, the instruction frame
-           * is triggered by the first access to QSPI memory.
+          /* Read QSPI_IFR (dummy read) to synchronize APB and AHB
+           * accesses.
            */
 
           (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
@@ -1499,7 +1498,7 @@ static int qspi_command(struct qspi_dev_s *dev,
           /* Copy the data from QSPI memory into the user buffer */
 
           qspi_memcpy((uint8_t *)cmdinfo->buffer,
-                      (const uint8_t *)SAM_QSPIMEM_BASE, buflen);
+                      (const uint8_t *)SAM_QSPIMEM_BASE, cmdinfo->buflen);
         }
 
       MEMORY_SYNC();
@@ -1573,10 +1572,21 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && meminfo != NULL);
 
+  qspivdbg("Transfer:\n");
+  qspivdbg("  flags: %02x\n", meminfo->flags);
+  qspivdbg("  cmd: %04x\n", meminfo->cmd);
+  qspivdbg("  address/length: %08lx/%d\n",
+          (unsigned long)meminfo->addr, meminfo->addrlen);
+  qspivdbg("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
+  qspivdbg("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
+
 #ifdef CONFIG_SAMV7_QSPI_DMA
   /* Can we perform DMA?  Should we perform DMA? */
 
-  if (priv->candma && meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD)
+  if (priv->candma &&
+      meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD &&
+      IS_ALIGNED((uintptr_t)meminfo->buffer) &&
+      IS_ALIGNED(meminfo->buflen))
     {
       return qspi_memory_dma(priv, meminfo);
     }
@@ -1588,7 +1598,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: QSPI_ALLOC
+ * Name: qspi_alloc
  *
  * Description:
  *   Allocate a buffer suitable for DMA data transfer
@@ -1734,7 +1744,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
   struct sam_qspidev_s *priv;
   int ret;
 
-  /* The support SAM parts have only a single QSPI port */
+  /* The supported SAM parts have only a single QSPI port */
 
   qspivdbg("intf: %d\n", intf);
   DEBUGASSERT(intf >= 0 && intf < SAMV7_NQSPI);

@@ -55,6 +55,7 @@
 #endif
 
 #include "sam_clockconfig.h"
+#include "sam_mpuinit.h"
 #include "sam_userspace.h"
 #include "sam_start.h"
 
@@ -366,6 +367,25 @@ void __start(void)
 
   sam_boardinitialize();
 
+#ifdef CONFIG_ARMV7M_MPU
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segements.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  sam_userspace();
+#endif
+
+  /* Configure the MPU to permit user-space access to its FLASH and RAM (for
+   * CONFIG_BUILD_PROTECTED) or to manage cache properties (for
+   * CONFIG_SAMV7_QSPI).
+   */
+
+  sam_mpu_initialize();
+#endif
+
   /* Enable I- and D-Caches */
 
   arch_dcache_writethrough();
@@ -376,16 +396,6 @@ void __start(void)
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
-#endif
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segements.
-   */
-
-#ifdef CONFIG_BUILD_PROTECTED
-  sam_userspace();
 #endif
 
   /* Then start NuttX */

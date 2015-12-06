@@ -78,14 +78,38 @@
 
 /* EEFC Flash Command Register */
 
+#define FCMD_GETD                    (0)       /* Get Flash Descriptor */
+#define FCMD_WP                      (1)       /* Write page */
+#define FCMD_WPL                     (2)       /* Write page and lock */
+#define FCMD_EWP                     (3)       /* Erase page and write page */
+#define FCMD_EWPL                    (4)       /* Erase page and write page then lock */
+#define FCMD_EA                      (5)       /* Erase all */
+#define FCMD_EPA                     (7)       /* Erase pages */
+#define FCMD_SLB                     (8)       /* Set Lock Bit */
+#define FCMD_CLB                     (9)       /* Clear Lock Bit */
+#define FCMD_GLB                     (10)      /* Get Lock Bit */
+#define FCMD_SGPB                    (11)      /* Set GPNVM Bit */
+#define FCMD_CGPB                    (12)      /* Clear GPNVM Bit */
+#define FCMD_GGPB                    (13)      /* Get GPNVM Bit */
+#define FCMD_STUI                    (14)      /* Start Read Unique Identifier */
+#define FCMD_SPUI                    (15)      /* Stop Read Unique Identifier */
+#define FCMD_GCALB                   (16)      /* Get CALIB Bit */
+#define FCMD_ES                      (17)      /* Erase Sector */
+#define FCMD_WUS                     (18)      /* Write User Signature */
+#define FCMD_EUS                     (19)      /* Erase User Signature */
+#define FCMD_STUS                    (20)      /* Start Read User Signature */
+#define FCMD_SPUS                    (21)      /* Stop Read User Signature */
+
 #define EEFC_FCR_FCMD_SHIFT          (0)       /* Bits 0-7:  Flash Command */
 #define EEFC_FCR_FCMD_MASK           (0xff << EEFC_FCR_FCMD_SHIFT)
+#  define EEFC_FCR_FCMD(cmd)         ((uint32_t)(cmd) << EEFC_FCR_FCMD_SHIFT)
 #  define EEFC_FCR_FCMD_GETD         (0  << EEFC_FCR_FCMD_SHIFT) /* Get Flash Descriptor */
 #  define EEFC_FCR_FCMD_WP           (1  << EEFC_FCR_FCMD_SHIFT) /* Write page */
 #  define EEFC_FCR_FCMD_WPL          (2  << EEFC_FCR_FCMD_SHIFT) /* Write page and lock */
 #  define EEFC_FCR_FCMD_EWP          (3  << EEFC_FCR_FCMD_SHIFT) /* Erase page and write page */
 #  define EEFC_FCR_FCMD_EWPL         (4  << EEFC_FCR_FCMD_SHIFT) /* Erase page and write page then lock */
 #  define EEFC_FCR_FCMD_EA           (5  << EEFC_FCR_FCMD_SHIFT) /* Erase all */
+#  define EEFC_FCR_FCMD_EPA          (7  << EEFC_FCR_FCMD_SHIFT) /* Erase pages */
 #  define EEFC_FCR_FCMD_SLB          (8  << EEFC_FCR_FCMD_SHIFT) /* Set Lock Bit */
 #  define EEFC_FCR_FCMD_CLB          (9  << EEFC_FCR_FCMD_SHIFT) /* Clear Lock Bit */
 #  define EEFC_FCR_FCMD_GLB          (10 << EEFC_FCR_FCMD_SHIFT) /* Get Lock Bit */
@@ -102,7 +126,7 @@
 #  define EEFC_FCR_FCMD_SPUS         (21 << EEFC_FCR_FCMD_SHIFT) /* Stop Read User Signature */
 #define EEFC_FCR_FARG_SHIFT          (8)       /* Bits 8-23:  Flash Command Argument */
 #define EEFC_FCR_FARG_MASK           (0xffff << EEFC_FCR_FARG_SHIFT)
-#  define EEFC_FCR_FARG(n)           ((uint32_t)(n) << EEFC_FCR_FARG_SHIFT)
+#  define EEFC_FCR_FARG(arg)         ((uint32_t)(arg) << EEFC_FCR_FARG_SHIFT)
 #define EEFC_FCR_FKEY_SHIFT          (24)      /* Bits 24-31:  Flash Writing Protection Key */
 #define EEFC_FCR_FKEY_MASK           (0xff << EEFC_FCR_FKEY_SHIFT)
 #  define EEFC_FCR_FKEY_PASSWD       (0x5a << EEFC_FCR_FKEY_SHIFT)

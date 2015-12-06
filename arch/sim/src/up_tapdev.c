@@ -167,7 +167,7 @@ static int up_setmacaddr(void)
         {
           /* Set the MAC address */
 
-          ret = netdriver_setmacaddr(&req.ifr_hwaddr.sa_data);
+          ret = netdriver_setmacaddr((unsigned char *)&req.ifr_hwaddr.sa_data);
         }
     }
 

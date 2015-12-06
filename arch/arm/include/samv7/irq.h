@@ -79,6 +79,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAMV71)
 #  include <arch/samv7/samv71_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_SAME70)
+#  include <arch/samv7/same70_irq.h>
 #else
 #  error Unrecognized SAMV7 architecture
 #endif

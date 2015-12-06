@@ -83,7 +83,7 @@
 
 /* System Bus Interfaces */
 
-#ifdef CONFIG_ARCH_CHIP_SAMV71
+#if defined(CONFIG_ARCH_CHIP_SAMV71) || defined(CONFIG_ARCH_CHIP_SAME70)
 #  define HSMCI_SYSBUS_IF  DMACH_FLAG_PERIPHAHB_AHB_IF1
 #  define MEMORY_SYSBUS_IF DMACH_FLAG_MEMAHB_AHB_IF0
 #else
@@ -3119,7 +3119,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * for now, an* HSMCI peripheral does correspond to a slot.
    */
 
-  fdbg("slotno: %d\n", slotno);
+  fvdbg("slotno: %d\n", slotno);
 
 #ifdef CONFIG_SAMV7_HSMCI0
   if (slotno == 0)

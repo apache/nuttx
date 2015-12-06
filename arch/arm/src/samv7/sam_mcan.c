@@ -128,6 +128,12 @@
 #  endif
 #endif
 
+/* General Configuration ****************************************************/
+
+#ifndef CONFIG_CAN_TXREADY
+#  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
+#endif
+
 /* MCAN0 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN0
@@ -2742,6 +2748,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* And request to send the packet */
 
   mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
+  mcan_dev_unlock(priv);
 
   /* Report that the TX transfer is complete to the upper half logic.  Of
    * course, the transfer is not complete, but this early notification
@@ -2752,9 +2759,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * called from the tasking level.
    */
 
-  can_txdone(dev);
-
-  mcan_dev_unlock(priv);
+  (void)can_txdone(dev);
   return OK;
 }
 
@@ -3039,9 +3044,17 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   regval = *rxbuffer++;
   canregdbg("R0: %08x\n", regval);
 
-  hdr.ch_rtr    = 0;
   hdr.ch_error  = 0;
   hdr.ch_unused = 0;
+
+  if ((regval & BUFFER_R0_RTR) != 0)
+    {
+	  hdr.ch_rtr    = true;
+    }
+  else
+    {
+	  hdr.ch_rtr    = false;
+    }
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
@@ -3162,12 +3175,11 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            * call to man_buffer_release(), whether or not the write
            * was successful.
            *
-           * Here we force transmit complete processing just in case.
-           * This could have the side effect of pushing the semaphore
-           * count up to high.
+           * We assume that MCAN_INT_TC will be called for each
+           * message buffer. Except the transfer is cancelled.
+           * TODO: add handling for MCAN_INT_TCF
            */
 
-          pending |= MCAN_INT_TC;
           handled  = true;
         }
 
@@ -3190,6 +3202,14 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           mcan_buffer_release(priv);
           handled = true;
+
+#ifdef CONFIG_CAN_TXREADY
+          /* Inform the upper half driver that we are again ready to accept
+           * data in mcan_send().
+           */
+
+          (void)can_txready(dev);
+#endif
         }
       else if ((pending & priv->txints) != 0)
         {
@@ -3452,14 +3472,11 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   /* Global Filter Configuration:
    *
-   *   ANFS=0: Store all rejected extended frame in RX FIFO0
-   *   ANFE=0: Store all rejected extended frame in RX FIFO0
-   *   FFSE=1: Reject all remote frames with 11-bit standard IDs.
-   *   RRFE=1: Reject all remote frames with 29-bit extended IDs.
+   *   ANFS=0: Store all non matching standard frame in RX FIFO0
+   *   ANFE=0: Store all non matching extended frame in RX FIFO0
    */
 
-  regval = MCAN_GFC_RRFE | MCAN_GFC_RRFS | MCAN_GFC_ANFE_RX_FIFO0 |
-           MCAN_GFC_ANFS_RX_FIFO0;
+  regval = MCAN_GFC_ANFE_RX_FIFO0 | MCAN_GFC_ANFS_RX_FIFO0;
   mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
 
   /* Extended ID Filter AND mask  */
@@ -3703,7 +3720,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
    * use PCK5 to derive bit rate.
    */
 
-  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER) | SAMV7_MCAN_CLKSRC;
+  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER - 1) | SAMV7_MCAN_CLKSRC;
   putreg32(regval, SAM_PMC_PCK5);
 
   /* Enable PCK5 */

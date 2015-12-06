@@ -102,7 +102,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Move up to next even word boundary if necessary */
 
-  size_t adj_stack_size = (stack_size + 3) & ~3;
+  size_t adj_stack_size  = (stack_size + 3) & ~3;
   size_t adj_stack_words = adj_stack_size >> 2;
 
   /* Allocate the memory for the stack */
@@ -115,7 +115,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     {
       /* This is the address of the last word in the allocation */
 
-      size_t *adj_stack_ptr = &stack_alloc_ptr[adj_stack_words - 1];
+      void *adj_stack_ptr = &stack_alloc_ptr[adj_stack_words - 1];
 
       /* Save the values in the TCB */
 

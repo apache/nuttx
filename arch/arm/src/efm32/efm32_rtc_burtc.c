@@ -367,7 +367,7 @@ static uint64_t efm32_get_burtc_tick(void)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_rtcinitialize
+ * Name: up_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This function is
@@ -381,7 +381,7 @@ static uint64_t efm32_get_burtc_tick(void)
  *
  ************************************************************************************/
 
-int up_rtcinitialize(void)
+int up_rtc_initialize(void)
 {
   efm32_rtc_burtc_init();
 

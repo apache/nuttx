@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/include/samv7/sam4e_irq.h
+ * arch/arm/include/samv7/samv71_irq.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

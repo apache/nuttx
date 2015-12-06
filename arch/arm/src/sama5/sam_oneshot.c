@@ -207,9 +207,9 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
    */
 
   cmr |= (TC_CMR_BURST_NONE  | TC_CMR_CPCSTOP     | TC_CMR_EEVTEDG_NONE  |
-          TC_CMR_EEVT_TIOB   | TC_CMR_WAVSEL_UPRC |  TC_CMR_WAVE         |
-          TC_CMR_ACPA_NONE   | TC_CMR_ACPC_NONE   |    TC_CMR_AEEVT_NONE |
-          TC_CMR_ASWTRG_NONE | TC_CMR_BCPB_NONE   |    TC_CMR_BCPC_NONE  |
+          TC_CMR_EEVT_TIOB   | TC_CMR_WAVSEL_UPRC | TC_CMR_WAVE          |
+          TC_CMR_ACPA_NONE   | TC_CMR_ACPC_NONE   | TC_CMR_AEEVT_NONE    |
+          TC_CMR_ASWTRG_NONE | TC_CMR_BCPB_NONE   | TC_CMR_BCPC_NONE     |
           TC_CMR_BEEVT_NONE  | TC_CMR_BSWTRG_NONE);
 
   oneshot->tch = sam_tc_allocate(chan, cmr);

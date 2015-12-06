@@ -131,7 +131,11 @@ static inline void sam_wdtsetup(void)
 
 static inline void sam_supcsetup(void)
 {
-  /* Check if the 32-kHz is already selected */
+#ifdef BOARD_HAVE_SLOWXTAL
+  /* Check if the 32-kHz is already selected.  The slow clock defaults to
+   * the RC oscillator, but the software can enable the crystal oscillator
+   * and select it as the slow clock source.
+   */
 
   if ((getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0)
     {
@@ -142,6 +146,7 @@ static inline void sam_supcsetup(void)
            (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
            delay++);
     }
+#endif
 }
 
 /****************************************************************************

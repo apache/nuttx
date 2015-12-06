@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_spi.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@
 #include "chip.h"
 #include "lpc43_pinconfig.h"
 #include "lpc43_spi.h"
+#include "lpc43_ssp.h"
 
 #ifdef CONFIG_LPC43_SPI
 
@@ -583,3 +584,39 @@ FAR struct spi_dev_s *lpc43_spiinitialize(int port)
 
 #endif /* CONFIG_LPC43_SPI */
 
+/****************************************************************************
+ * Name: up_spiinitialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *   0 - SPI
+ *   1 - SSP0
+ *   2 - SSP1
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *up_spiinitialize(int port)
+{
+  if (port)
+    {
+#if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
+      return lpc43_sspinitialize(port - 1);
+#else
+      return NULL;
+#endif
+    }
+  else
+    {
+#if defined(CONFIG_LPC43_SPI)
+      return lpc43_spiinitialize(port);
+#else
+      return NULL;
+#endif
+    }
+}

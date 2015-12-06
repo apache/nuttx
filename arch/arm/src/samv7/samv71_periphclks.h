@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samv7/sam4e_periphclks.h
+ * arch/arm/src/samv7/samv71_periphclks.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

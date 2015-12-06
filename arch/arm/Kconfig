@@ -190,6 +190,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
@@ -426,7 +427,8 @@ config ARMV7M_MPU
 
 config ARMV7M_MPU_NREGIONS
 	int "Number of MPU regions"
-	default 8
+	default 16 if ARCH_CORTEXM7
+	default 8 if !ARCH_CORTEXM7
 	depends on ARMV7M_MPU
 	---help---
 		This is the number of protection regions supported by the MPU.

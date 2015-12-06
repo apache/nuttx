@@ -1079,9 +1079,8 @@ static void lpc43_usbreset(struct lpc43_usbdev_s *priv)
 {
   int epphy;
 
-  /* Disable all endpoints */
+  /* Disable all endpoints. Control endpoint 0 is always enabled */
 
-  lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL0);
   lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL1);
   lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL2);
   lpc43_clrbits (USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL3);
@@ -2584,12 +2583,9 @@ void up_usbinitialize(void)
   struct lpc43_usbdev_s *priv = &g_usbdev;
   int i;
   uint32_t regval;
+  irqstate_t flags;
 
-  usbtrace(TRACE_DEVINIT, 0);
-
-  /* Disable USB interrupts */
-
-  lpc43_putreg(0, LPC43_USBDEV_USBINTR);
+  flags = irqsave();
 
   /* Initialize the device state structure */
 
@@ -2647,10 +2643,15 @@ void up_usbinitialize(void)
         }
     }
 
+  /* Enable PLL0 clock */
+
+  lpc43_pll0usbconfig();
+  lpc43_pll0usbenable();
+
   /* Clock */
 
   regval  = getreg32(LPC43_BASE_USB0_CLK);
-  regval &= ~BASE_USB0_CLK_CLKSEL_MASK;
+  regval &= ~(BASE_USB0_CLK_CLKSEL_MASK | BASE_USB0_CLK_PD) ;
   regval |= (BASE_USB0_CLKSEL_PLL0USB | BASE_USB0_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_USB0_CLK);
 
@@ -2660,20 +2661,11 @@ void up_usbinitialize(void)
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_M4_USB0_CFG);
 
-  /* Enable PLL0 clock */
+  //lpc43_putreg(RGU_CTRL0_USB0_RST, LPC43_RGU_CTRL0); /* Reset USB block */
 
-  lpc43_pll0usbconfig();
-  lpc43_pll0usbenable();
+  lpc43_pullup(&priv->usbdev, false); /* disconnect device */
 
-  /* Reset USB block */
-
-  regval  = lpc43_getreg(LPC43_RGU_CTRL0);
-  regval |= RGU_CTRL0_USB0_RST;
-  lpc43_putreg(regval, LPC43_RGU_CTRL0);
-
-  /* Reset the controller */
-
-  lpc43_putreg (USBDEV_USBCMD_RST, LPC43_USBDEV_USBCMD);
+  lpc43_setbits (USBDEV_USBCMD_RST, LPC43_USBDEV_USBCMD); /* Reset the controller */
   while (lpc43_getreg (LPC43_USBDEV_USBCMD) & USBDEV_USBCMD_RST)
       ;
 
@@ -2683,33 +2675,25 @@ void up_usbinitialize(void)
   regval &= ~CREG0_USB0PHY;
   putreg32(regval, LPC43_CREG0);
 
-  /* Attach USB controller interrupt handler */
-
-  if (irq_attach(LPC43M4_IRQ_USB0, lpc43_usbinterrupt) != 0)
-    {
-      usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_IRQREGISTRATION),
-               (uint16_t)LPC43M4_IRQ_USB0);
-      goto errout;
-    }
-
+  lpc43_putreg(0, LPC43_USBDEV_USBINTR); /* Disable USB interrupts */
 
   /* Program the controller to be the USB device controller */
 
   lpc43_putreg (USBDEV_USBMODE_SDIS | USBDEV_USBMODE_SLOM | USBDEV_USBMODE_CM_DEVICE,
           LPC43_USBDEV_USBMODE);
 
-  /* Disconnect device */
+  /* Attach USB controller interrupt handler */
 
-  lpc43_pullup(&priv->usbdev, false);
+  irq_attach(LPC43M4_IRQ_USB0, lpc43_usbinterrupt);
+  up_enable_irq(LPC43M4_IRQ_USB0);
+
+  irqrestore(flags);
 
   /* Reset/Re-initialize the USB hardware */
 
   lpc43_usbreset(priv);
 
   return;
-
-errout:
-  up_usbuninitialize();
 }
 
 /****************************************************************************
@@ -2742,7 +2726,7 @@ void up_usbuninitialize(void)
 
   /* Reset the controller */
 
-  lpc43_putreg (USBDEV_USBCMD_RST, LPC43_USBDEV_USBCMD);
+  lpc43_setbits (USBDEV_USBCMD_RST, LPC43_USBDEV_USBCMD);
   while (lpc43_getreg (LPC43_USBDEV_USBCMD) & USBDEV_USBCMD_RST)
       ;
 
@@ -2850,3 +2834,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   g_usbdev.driver = NULL;
   return OK;
 }
+

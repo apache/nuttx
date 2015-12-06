@@ -18,6 +18,7 @@ config ARCH_CHIP_SH7032
 config ARCH_CHIP_M30262F8
 	bool "M30262F8"
 	select ARCH_M16C
+	select MM_SMALL
 	---help---
 		Renesas M30262F8 (M16C)
 
