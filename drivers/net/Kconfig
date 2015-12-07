@@ -16,6 +16,33 @@ config NETDEV_LOOPBACK
 		networking devices that are enabled must be compatible with
 		CONFIG_NET_NOINTS.
 
+config NETDEV_TELNET
+	bool "Telnet driver"
+	default n
+	depends on NET && NET_TCP
+	---help---
+		The Telnet driver generates a character driver instance to support a
+		Telnet session.  This driver is used by the Telnet daemon.  The
+		Telnet daeman will instantiate a new Telnet driver to support
+		standard I/O on the new Telnet session.
+
+if NETDEV_TELNET
+
+config TELNET_RXBUFFER_SIZE
+	int "Telnet RX buffer size"
+	default 256
+
+config TELNET_TXBUFFER_SIZE
+	int "Telnet TX buffer size"
+	default 256
+
+config TELNET_DUMPBUFFER
+	bool "Dump Telnet buffers"
+	default n
+	depends on DEBUG_NET
+
+endif # NETDEV_TELNET
+
 config NETDEV_MULTINIC
 	bool "Multiple network interface support"
 	default n if !NETDEV_LOOPBACK

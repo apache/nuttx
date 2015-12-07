@@ -11216,4 +11216,7 @@
 	* arch/arm/src/samv7:  Port the WDT driver from the SAMA5D3/4 to the
 	  SAMV7 (s015-12-06).
 	* arch/arm/src/samv7:  Add an RSWDT driver (2015-12-06).
+	* drivers/net/telnet.c:  Move the Telnet driver from apps/netutils/telnetd
+	  to drivers/net.  It is a driver a belongs in the OS.  There are still
+	  some interface related issues, however (2015-12-07).
 
