@@ -11219,4 +11219,7 @@
 	* drivers/net/telnet.c:  Move the Telnet driver from apps/netutils/telnetd
 	  to drivers/net.  It is a driver a belongs in the OS.  There are still
 	  some interface related issues, however (2015-12-07).
+	* configs/:  Update all configurations that use the Telnet daemon; those
+	  configurations now need to separately enable the Telnet drvier
+	  (2015-12-07).
 
