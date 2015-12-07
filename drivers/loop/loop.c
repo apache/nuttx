@@ -63,7 +63,7 @@ static int     loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations loop_fops =
+static const struct file_operations g_loop_fops =
 {
   0,             /* open */
   0,             /* close */
@@ -154,6 +154,7 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
      default:
        ret = -ENOTTY;
+       break;
     }
 
   return ret;
@@ -173,7 +174,7 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 void loop_register(void)
 {
-  (void)register_driver("/dev/loop", &loop_fops, 0666, NULL);
+  (void)register_driver("/dev/loop", &g_loop_fops, 0666, NULL);
 }
 
 #endif /* CONFIG_DEV_LOOP */

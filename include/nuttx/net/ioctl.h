@@ -175,6 +175,11 @@
 #define SIOCINQ          _SIOC(0x004f) /* Returns the amount of queued unread
                                         * data in the receive */
 
+/* Telnet driver ************************************************************/
+
+#define SIOCTELNET       _SIOC(0x0050) /* Create a Telnet sessions.
+                                        * See include/nuttx/net/telnet.h */
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/

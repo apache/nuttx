@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 28, 2015)
+NuttX TODO List (Last updated December 7, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,6 +14,7 @@ nuttx/
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
+  (7)  Kernel/Protected Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (11)  Network (net/, drivers/net)
@@ -460,14 +461,6 @@ o Kernel/Protected Build
                Better /proc/kmm
   Status:      Open
   Priority:    Medium/High
-
-  Title:       TELNETD PARTITIONING.
-  Description: Telnetd is implemented as a driver that resides in the apps/
-               directory.  In the kernel/protected build modes, the driver
-               logic must be moved into the kernel part of the build (nuttx/,
-               although the application level interfaces must stay in apps/).
-  Status:      Open
-  Priority:    Medium
 
   Title:       NxTERM PARTITIONING.
   Description: NxTerm is implemented (correctly) as a driver that resides

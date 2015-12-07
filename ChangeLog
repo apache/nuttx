@@ -11222,4 +11222,9 @@
 	* configs/:  Update all configurations that use the Telnet daemon; those
 	  configurations now need to separately enable the Telnet drvier
 	  (2015-12-07).
+	* drivers/net/telnet.c:  Now works like the loop device.  A new interface
+	  called telnet_initialize() registers a telnet session "factory"
+	  device at /dev/telnet.  Via ioctl, the factory device can create
+	  instances of the telnet character devices at /dev/telnetN to support
+	  Telnet sessions (2015-12-07).
 

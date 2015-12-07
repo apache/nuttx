@@ -1,5 +1,5 @@
 /****************************************************************************
- * apps/netutils/telnet_driver.c
+ * drivers/net/telnet.c
  *
  *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,6 +46,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -62,6 +63,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/telnet.h>
+
+#ifdef CONFIG_NETDEV_TELNET
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -128,7 +131,7 @@ struct telnet_dev_s
 struct telnet_common_s
 {
   sem_t              tc_exclsem; /* Enforces exclusive access to 'minor' */
-  int                tc_minor;   /* The next minor number to use */
+  uint16_t           tc_minor;   /* The next minor number to use */
 };
 
 /****************************************************************************
@@ -152,13 +155,24 @@ static bool    telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 static void    telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                  uint8_t value);
 
-/* Character driver methods */
+/* Telnet character driver methods */
 
 static int     telnet_open(FAR struct file *filep);
 static int     telnet_close(FAR struct file *filep);
 static ssize_t telnet_read(FAR struct file *, FAR char *, size_t);
 static ssize_t telnet_write(FAR struct file *, FAR const char *, size_t);
-static int     telnet_ioctl(FAR struct file *filep, int cmd,
+
+/* Telnet session creation */
+
+static int     telnet_session(FAR struct telnet_session_s *session);
+
+/* Telnet factory driver methods */
+
+static ssize_t factory_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t factory_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     common_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
 
 /****************************************************************************
@@ -167,14 +181,27 @@ static int     telnet_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_telnet_fops =
 {
-  telnet_open,  /* open */
-  telnet_close, /* close */
-  telnet_read,  /* read */
-  telnet_write, /* write */
-  0,            /* seek */
-  telnet_ioctl  /* ioctl */
+  telnet_open,   /* open */
+  telnet_close,  /* close */
+  telnet_read,   /* read */
+  telnet_write,  /* write */
+  0,             /* seek */
+  common_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0           /* poll */
+  , 0            /* poll */
+#endif
+};
+
+static const struct file_operations g_factory_fops =
+{
+  0,             /* open */
+  0,             /* close */
+  factory_read,  /* read */
+  factory_write, /* write */
+  0,             /* seek */
+  common_ioctl  /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , 0            /* poll */
 #endif
 };
 
@@ -712,70 +739,27 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer, size
 }
 
 /****************************************************************************
- * Name: telnet_poll
- ****************************************************************************/
-
-static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-#if 0 /* No ioctl commands are yet supported */
-  struct inode        *inode = filep->f_inode;
-  struct cdcacm_dev_s *priv  = inode->i_private;
-  int                  ret   = OK;
-
-  switch (cmd)
-    {
-    /* Add ioctl commands here */
-
-    default:
-      ret = -ENOTTY;
-      break;
-    }
-
-  return ret;
-#else
-  return -ENOTTY;
-#endif
-}
-
-/****************************************************************************
- * Name: telnet_poll
- ****************************************************************************/
-
-#if 0 /* Not used by this driver */
-static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
-{
-  FAR struct inode         *inode = filep->f_inode;
-  FAR struct telnet_dev_s *priv  = inode->i_private;
-}
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: telnet_driver
+ * Name: telnet_session
  *
  * Description:
  *   Create a character driver to "wrap" the telnet session.  This function
  *   will select and return a unique path for the new telnet device.
  *
  * Parameters:
- *   sd - The socket descriptor that represents the new telnet connection.
+ *   session - On input, contains the socket descriptor that represents the
+ *   new telnet connection.  On output, it holds the path to the new Telnet driver.
  *
  * Return:
- *   An allocated string represent the full path to the created driver.  The
- *   receiver of the string must de-allocate this memory when it is no longer
- *   needed.  NULL is returned on a failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-FAR char *telnet_driver(int sd)
+static int telnet_session(FAR struct telnet_session_s *session)
 {
   FAR struct telnet_dev_s *priv;
   FAR struct socket *psock;
-  FAR char *devpath = NULL;
+  struct stat statbuf;
+  uint16_t start;
   int ret;
 
   /* Allocate instance data for this driver */
@@ -784,7 +768,7 @@ FAR char *telnet_driver(int sd)
   if (!priv)
     {
       nlldbg("Failed to allocate the driver data structure\n");
-      return NULL;
+      return -ENOMEM;
     }
 
   /* Initialize the allocated driver instance */
@@ -801,10 +785,11 @@ FAR char *telnet_driver(int sd)
    * instance resided in the daemon's task group`).
    */
 
-  psock = sockfd_socket(sd);
+  psock = sockfd_socket(session->ts_sd);
   if (!psock)
     {
-      nlldbg("Failed to convert sd=%d to a socket structure\n", sd);
+      nlldbg("Failed to convert sd=%d to a socket structure\n", session->ts_sd);
+      ret = -EINVAL;
       goto errout_with_dev;
     }
 
@@ -815,51 +800,157 @@ FAR char *telnet_driver(int sd)
       goto errout_with_dev;
     }
 
-  /* And close the original */
-
-  psock_close(psock);
-
-  /* Allocate a unique minor device number of the telnet drvier */
+  /* Allocate a unique minor device number of the telnet drvier.
+   * Get exclusive access to the minor counter.
+   */
 
   do
     {
       ret = sem_wait(&g_telnet_common.tc_exclsem);
       if (ret < 0 && errno != -EINTR)
         {
-          goto errout_with_dev;
+          goto errout_with_clone;
         }
     }
   while (ret < 0);
 
-  priv->td_minor = g_telnet_common.tc_minor;
-  g_telnet_common.tc_minor++;
-  sem_post(&g_telnet_common.tc_exclsem);
+  /* Loop until the device name is verified to be unique. */
 
-  /* Create a path and name for the driver. */
-
-  ret = asprintf(&devpath, TELNETD_DEVFMT, priv->td_minor);
-  if (ret < 0)
+  start = g_telnet_common.tc_minor;
+  do
     {
-      nlldbg("Failed to allocate the driver path\n");
-      goto errout_with_dev;
+      /* Get the next candiate minor number */
+
+      priv->td_minor = g_telnet_common.tc_minor;
+      g_telnet_common.tc_minor++;
+
+      snprintf(session->ts_devpath, TELNET_DEVPATH_MAX, TELNETD_DEVFMT,
+               priv->td_minor);
+
+      ret = stat(session->ts_devpath, &statbuf);
+      DEBUGASSERT(ret >= 0 || errno == ENOENT);
+    }
+  while (ret >= 0 && start != g_telnet_common.tc_minor);
+
+  if (ret >= 0)
+    {
+      nlldbg("ERROR: Too many sessions\n");
+      ret = -ENFILE;
+      goto errout_with_semaphore;
     }
 
   /* Register the driver */
 
-  ret = register_driver(devpath, &g_telnet_fops, 0666, priv);
+  ret = register_driver(session->ts_devpath, &g_telnet_fops, 0666, priv);
   if (ret < 0)
     {
-      nlldbg("Failed to register the driver %s: %d\n", devpath, ret);
-      goto errout_with_devpath;
+      nlldbg("ERROR: Failed to register the driver %s: %d\n",
+             session->ts_devpath, ret);
+      goto errout_with_semaphore;
     }
+
+  /* Close the original psoock (keeping the clone) */
+
+  psock_close(psock);
 
   /* Return the path to the new telnet driver */
 
-  return devpath;
+  sem_post(&g_telnet_common.tc_exclsem);
+  return OK;
 
-errout_with_devpath:
-  free(devpath);
+errout_with_semaphore:
+  sem_post(&g_telnet_common.tc_exclsem);
+
+errout_with_clone:
+  psock_close(&priv->td_psock);
+
 errout_with_dev:
   free(priv);
-  return NULL;
+  return ret;
 }
+
+/****************************************************************************
+ * Name: factory_read
+ ****************************************************************************/
+
+static ssize_t factory_read(FAR struct file *filep, FAR char *buffer,
+                            size_t len)
+{
+  return 0; /* Return EOF */
+}
+
+/****************************************************************************
+ * Name: factory_write
+ ****************************************************************************/
+
+static ssize_t factory_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t len)
+{
+  return len; /* Say that everything was written */
+}
+
+/****************************************************************************
+ * Name: common_ioctl
+ ****************************************************************************/
+
+static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  int ret;
+
+  switch (cmd)
+    {
+    /* Command:      SIOCTELNET
+     * Description:  Create a Telnet sessions.
+     * Argument:     A pointer to a write-able instance of struct
+     *               telnet_session_s.
+     * Dependencies: CONFIG_NETDEV_TELNET
+     */
+
+    case SIOCTELNET:
+      {
+         FAR struct telnet_session_s *session =
+           (FAR struct telnet_session_s *)((uintptr_t)arg);
+
+        if (session == NULL)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            ret = telnet_session(session);
+          }
+      }
+      break;
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: telnet_initialize
+ *
+ * Description:
+ *   Create the Telnet factory at /dev/telnet.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int telnet_initialize(void)
+{
+  return register_driver("/dev/telnet", &g_factory_fops, 0666, NULL);
+}
+
+#endif /* CONFIG_NETDEV_TELNET */
