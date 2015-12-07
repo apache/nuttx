@@ -597,14 +597,17 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
          (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
-          if (txbuffer && priv->nbits > 8)
-            {
-              data = (uint32_t)*tx.p16++;
-            }
-          else
-            {
-              data = (uint32_t)*tx.p8++;
-            }
+          if (txbuffer)
+		  {
+			  if (priv->nbits > 8)
+				{
+				  data = (uint32_t)*tx.p16++;
+				}
+			  else
+				{
+				  data = (uint32_t)*tx.p8++;
+				}
+		  }
 
           ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
           nwords--;
@@ -617,14 +620,17 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-          if (rxbuffer && priv->nbits > 8)
-            {
-              *rx.p16++ = (uint16_t)data;
-            }
-          else
-            {
-              *rx.p8++  = (uint8_t)data;
-            }
+          if (rxbuffer)
+          {
+				if(priv->nbits > 8)
+				{
+				  *rx.p16++ = (uint16_t)data;
+				}
+				else
+				{
+				  *rx.p8++  = (uint8_t)data;
+				}
+          }
 
           rxpending--;
         }
