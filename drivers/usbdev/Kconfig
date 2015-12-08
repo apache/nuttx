@@ -261,12 +261,12 @@ config PL2303_RXBUFSIZE
 
 config PL2303_TXBUFSIZE
 	int "Transmit buffer size"
-	default 767 if USBDEV_DUALSPEED
+	default 769 if USBDEV_DUALSPEED
 	default 193 if !USBDEV_DUALSPEED
 	---help---
 		Size of the serial transmit buffers.  The actual amount of data that
 		can be held in the buffer is this number minus one due to the way
-		that the circular buffer is managed.  So a TX buffer size of 767
+		that the circular buffer is managed.  So a TX buffer size of 769
 		will hold one request of size 768; a buffer size of 193 will hold
 		two requests of size 96 bytes.
 
@@ -450,12 +450,12 @@ config CDCACM_RXBUFSIZE
 
 config CDCACM_TXBUFSIZE
 	int "Transmit buffer size"
-	default 767 if USBDEV_DUALSPEED
+	default 769 if USBDEV_DUALSPEED
 	default 193 if !USBDEV_DUALSPEED
 	---help---
 		Size of the serial transmit buffers.  The actual amount of data that
 		can be held in the buffer is this number minus one due to the way
-		that the circular buffer is managed.  So a TX buffer size of 767
+		that the circular buffer is managed.  So a TX buffer size of 769
 		will hold one request of size 768; a buffer size of 193 will hold
 		two requests of size 96 bytes.
 
