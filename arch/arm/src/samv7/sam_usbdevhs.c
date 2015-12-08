@@ -1027,7 +1027,7 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
         {
           privreq->inflight = remaining;
 
-          /* If the size is an exact multple of full packets, then note if that
+          /* If the size is an exact multple of full packets, then note if
            * we need to send a zero length packet next.
            */
 
@@ -1284,7 +1284,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
   privep->zlpneeded = false;
   if (nbytes > privep->ep.maxpacket)
     {
-      nbytes =  privep->ep.maxpacket;
+      nbytes = privep->ep.maxpacket;
     }
   else if (nbytes == privep->ep.maxpacket)
     {
@@ -2497,6 +2497,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
+
 #if 1 /* Wait for TXINI */
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
 #else
