@@ -1187,6 +1187,11 @@ config ARCH_BOARD_CUSTOM_DIR
 		path to some location outside of the NuttX source tree (like
 		"~/projects/myboard").
 
+config ARCH_BOARD_CUSTOM_DIR_RELPATH
+	bool "Relative custom board directory"
+	---help---
+		Specifies that the board directory is relative to the NuttX directory.
+
 config BOARD_CRASHDUMP
 	bool "Enable Board level logging of crash dumps"
 	default n
