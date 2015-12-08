@@ -964,9 +964,11 @@ serial device class:
     CONFIG_CDCACM_EPBULKIN_HSSIZE=512         : High speed packet size
     CONFIG_CDCACM_NWRREQS=4                   : Number of write requests
     CONFIG_CDCACM_NRDREQS=8                   : Number of read requests
-    CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer
-    CONFIG_CDCACM_RXBUFSIZE=256               : Serial read buffer size
-    CONFIG_CDCACM_TXBUFSIZE=256               : Serial transmit buffer size
+    CONFIG_CDCACM_BULKIN_REQLEN=96            : Size of write request buffer (for full speed)
+    CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer (for high speed)
+    CONFIG_CDCACM_RXBUFSIZE=257               : Serial read buffer size
+    CONFIG_CDCACM_TXBUFSIZE=193               : Serial transmit buffer size (for full speed)
+    CONFIG_CDCACM_TXBUFSIZE=769               : Serial transmit buffer size (for high speed)
     CONFIG_CDCACM_VENDORID=0x0525             : Vendor ID
     CONFIG_CDCACM_PRODUCTID=0xa4a7            : Product ID
     CONFIG_CDCACM_VENDORSTR="NuttX"           : Vendor string
