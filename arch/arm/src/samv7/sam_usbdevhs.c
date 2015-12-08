@@ -1020,20 +1020,21 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
       if (remaining > DMA_MAX_FIFO_SIZE)
         {
           privreq->inflight = DMA_MAX_FIFO_SIZE;
+          privep->zlpneeded = false;
         }
       else
 #endif
         {
           privreq->inflight = remaining;
+
+          /* If the size is an exact multple of full packets, then note if that
+           * we need to send a zero length packet next.
+           */
+
+          privep->zlpneeded =
+            ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0 &&
+             (remaining % privep->ep.maxpacket) == 0);
         }
-
-       /* If the size is an exact multple of full packets, then note if that
-        * we need to send a zero length packet next.
-        */
-
-      privep->zlpneeded =
-        ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0 &&
-         (remaining % privep->ep.maxpacket) == 0);
 
       /* And perform the single DMA transfer.
        *
