@@ -2497,8 +2497,12 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
+#if 1 /* Wait for TXINI */
+          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
+#else
           privep->epstate = USBHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
+#endif
         }
       else if (privep->epstate == USBHS_EPSTATE_RECEIVING)
         {
@@ -2556,7 +2560,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
                   USB_ISEPOUT(privep->ep.eplog));
 
       /* Get the number of bytes transferred from the DMA status.
-        *
+       *
        * BUFF_COUNT holds the number of untransmitted bytes. In this case,
        * BUFF_COUNT should not be zero.  BUFF_COUNT was set to the
        * 'inflight' count when the DMA started so the difference will
