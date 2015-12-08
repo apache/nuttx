@@ -11227,4 +11227,6 @@
 	  device at /dev/telnet.  Via ioctl, the factory device can create
 	  instances of the telnet character devices at /dev/telnetN to support
 	  Telnet sessions (2015-12-07).
+	* arch/arm/src/samv7: In USBHS device driver, fix check if zero length
+	  packet is needed (2015-12-08).
 
