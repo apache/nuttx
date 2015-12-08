@@ -1027,6 +1027,14 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           privreq->inflight = remaining;
         }
 
+       /* If the size is an exact multple of full packets, then note if that
+        * we need to send a zero length packet next.
+        */
+
+      privep->zlpneeded =
+        ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0 &&
+         (remaining % privep->ep.maxpacket) == 0);
+
       /* And perform the single DMA transfer.
        *
        * 32.6.10.6 Bulk IN or Interrupt IN: Sending a Buffer Using DMA
@@ -1229,6 +1237,8 @@ static void sam_ep_fifocon(unsigned int epno)
 
   /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
    * have data ready to go.
+   *
+   * REVISIT: I don't think this is necessary,
    */
 
   sam_putreg(USBHS_DEVEPTINT_NAKINI, SAM_USBHS_DEVEPTICR(epno));
@@ -1270,9 +1280,19 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
    * the request.
    */
 
-  if (nbytes >= privep->ep.maxpacket)
+  privep->zlpneeded = false;
+  if (nbytes > privep->ep.maxpacket)
     {
       nbytes =  privep->ep.maxpacket;
+    }
+  else if (nbytes == privep->ep.maxpacket)
+    {
+      /* If the size is exactly a full packet, then note if we need to
+       * send a zero length packet next.
+       */
+
+      privep->zlpneeded =
+        ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0);
     }
 
   /* This is the new number of bytes "in-flight" */
@@ -1389,26 +1409,6 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
       bytesleft = privreq->req.len - privreq->req.xfrd;
       if (bytesleft > 0)
         {
-          /* If the size is exactly a full packet, then note if we need to
-           * send a zero length packet next.
-           */
-
-          if (bytesleft == privep->ep.maxpacket &&
-             (privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0)
-            {
-              /* Next time we get here, bytesleft will be zero and zlpneeded
-               * will be set.
-               */
-
-              privep->zlpneeded = true;
-            }
-          else
-            {
-              /* No zero packet is forthcoming (maybe later) */
-
-              privep->zlpneeded = false;
-            }
-
           /* The way that we handle the transfer is going to depend on
            * whether or not this endpoint supports DMA.  In either case
            * the endpoint state will transition to SENDING.
@@ -2495,6 +2495,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
            */
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
+          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
           privep->epstate = USBHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
         }
@@ -2645,9 +2646,9 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
         {
           /* Continue/resume processing the write requests. */
 
+          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
           privep->epstate = USBHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
-          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
         }
 
       /* Setting of the device address is a special case.  The address was
