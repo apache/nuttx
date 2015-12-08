@@ -72,9 +72,13 @@ ARCH_SRC = $(ARCH_DIR)/src
 ARCH_INC = $(ARCH_DIR)/include
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
-  BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
+BOARD_DIR = $(TOPDIR)$(DELIM)$(CONFIG_ARCH_BOARD_CUSTOM_DIR)
 else
-  BOARD_DIR = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)
+BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
+endif
+else
+BOARD_DIR = $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)
 endif
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
