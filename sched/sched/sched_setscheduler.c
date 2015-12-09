@@ -132,7 +132,7 @@ int sched_setscheduler(pid_t pid, int policy,
   /* Further, disable timer interrupts while we set up scheduling policy. */
 
   saved_state = irqsave();
-  tcb->flags &= TCB_FLAG_POLICY_MASK;
+  tcb->flags &= ~TCB_FLAG_POLICY_MASK;
   switch (policy)
     {
       default:
