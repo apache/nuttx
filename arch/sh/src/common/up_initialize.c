@@ -47,6 +47,7 @@
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
+#include <nuttx/net/telnet.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
 
@@ -198,6 +199,12 @@ void up_initialize(void)
   /* Initialize the TUN device */
 
   (void)tun_initialize();
+#endif
+
+#ifdef CONFIG_NETDEV_TELNET
+  /* Initialize the Telnet session factory */
+
+  (void)telnet_initialize();
 #endif
 
   /* Initialize USB */

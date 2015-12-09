@@ -136,6 +136,14 @@ ifeq ($(CONFIG_SAMV7_XDMAC),y)
 CHIP_CSRCS += sam_xdmac.c
 endif
 
+ifeq ($(CONFIG_SAMV7_WDT),y)
+CHIP_CSRCS += sam_wdt.c
+endif
+
+ifeq ($(CONFIG_SAMV7_RSWDT),y)
+CHIP_CSRCS += sam_rswdt.c
+endif
+
 ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
 CHIP_CSRCS += sam_spi.c
 endif
@@ -187,6 +195,10 @@ endif
 
 ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
 CHIP_CSRCS += sam_usbdevhs.c
+endif
+
+ifeq ($(CONFIG_SAMV7_TRNG),y)
+CHIP_CSRCS += sam_trng.c
 endif
 
 ifeq ($(CONFIG_SAMV7_PROGMEM),y)
