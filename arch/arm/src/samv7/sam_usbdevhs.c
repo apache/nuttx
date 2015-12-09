@@ -2490,20 +2490,45 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
       if (privep->epstate == USBHS_EPSTATE_SENDING)
         {
+          uint32_t byct;
+
           /* This is an IN endpoint.  Continuing processing the write
-           * request.  We must call sam_req_write in the IDLE state
-           * with the number of bytes transferred in 'inflight'
+           * request.
            */
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
 
-#if 1 /* Wait for TXINI */
-          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
-#else
-          privep->epstate = USBHS_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
-#endif
+          /* Have all of the bytes in the FIFO been transmitted to the
+           * host?
+           */
+
+          byct = (sam_getreg(SAM_USBHS_DEVEPTISR(epno)) & USBHS_DEVEPTISR_BYCT_MASK)
+                 >> USBHS_DEVEPTISR_BYCT_SHIFT;
+          if (byct > 0)
+            {
+              /* Not all of the data has been sent to the host.  A TXIN
+               * interrupt will be generated later.  Enable the TXIN
+               * interrupt now and wait for the transfer to complete.
+               *
+               * REVISIT:  How many TXIN interrupts will be generated
+               * before the tranfer completes?  This assumes one.  If
+               * there are more than one than sam_req_write() will be
+               * called too soon.
+               */
+
+              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
+            }
+          else
+            {
+              /* All bytes have been sent to the host.  We must call
+               * sam_req_write() now in the IDLE state with the number of
+               * bytes transferred in 'inflight'
+               */
+
+              privep->epstate = USBHS_EPSTATE_IDLE;
+              (void)sam_req_write(priv, privep);
+            }
         }
       else if (privep->epstate == USBHS_EPSTATE_RECEIVING)
         {
