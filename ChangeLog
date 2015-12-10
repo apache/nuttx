@@ -11229,4 +11229,8 @@
 	  Telnet sessions (2015-12-07).
 	* arch/arm/src/samv7: In USBHS device driver, fix check if zero length
 	  packet is needed (2015-12-08).
+	* sched/pthread/: CRITICAL BUGFIX: Logic was wiping out the indication
+	  that of the type of a pthread.  Hence, it could be confused as a
+	  task.  Same problem as fixed on 2015-11-29, but in different location
+	  (2015-12-09).
 
