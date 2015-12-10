@@ -161,7 +161,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_init
+ * Name: libmod_initialize
  *
  * Description:
  *   This function is called to configure the library to process an kernel
@@ -173,10 +173,11 @@ extern "C"
  *
  ****************************************************************************/
 
-int mod_init(FAR const char *filename, FAR struct mod_loadinfo_s *loadinfo);
+int libmod_initalize(FAR const char *filename,
+                     FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: mod_uninit
+ * Name: libmod_uninitialize
  *
  * Description:
  *   Releases any resources committed by mod_init().  This essentially
@@ -188,7 +189,7 @@ int mod_init(FAR const char *filename, FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int mod_uninit(FAR struct mod_loadinfo_s *loadinfo);
+int libmod_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: mod_load
@@ -336,6 +337,7 @@ int up_relocateadd(FAR const Elf32_Rela *rel,
  *   Always returns Zero (OK).
  *
  ****************************************************************************/
+
 int up_init_exidx(Elf32_Addr address, Elf32_Word size);
 #endif
 

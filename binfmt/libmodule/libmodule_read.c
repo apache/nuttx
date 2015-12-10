@@ -64,11 +64,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_dumpreaddata
+ * Name: libmod_dumpreaddata
  ****************************************************************************/
 
 #if defined(ELF_DUMP_READDATA)
-static inline void mod_dumpreaddata(FAR char *buffer, int buflen)
+static inline void libmod_dumpreaddata(FAR char *buffer, int buflen)
 {
   FAR uint32_t *buf32 = (FAR uint32_t *)buffer;
   int i;
@@ -86,7 +86,7 @@ static inline void mod_dumpreaddata(FAR char *buffer, int buflen)
     }
 }
 #else
-#  define mod_dumpreaddata(b,n)
+#  define libmod_dumpreaddata(b,n)
 #endif
 
 /****************************************************************************
@@ -94,7 +94,7 @@ static inline void mod_dumpreaddata(FAR char *buffer, int buflen)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_read
+ * Name: libmod_read
  *
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'.  The data is
@@ -106,8 +106,8 @@ static inline void mod_dumpreaddata(FAR char *buffer, int buflen)
  *
  ****************************************************************************/
 
-int mod_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
-             size_t readsize, off_t offset)
+int libmod_read(FAR struct libmod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
+                size_t readsize, off_t offset)
 {
   ssize_t nbytes;      /* Number of bytes read */
   off_t   rpos;        /* Position returned by lseek */
@@ -158,6 +158,6 @@ int mod_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
          }
     }
 
-  mod_dumpreaddata(buffer, readsize);
+  libmod_dumpreaddata(buffer, readsize);
   return OK;
 }

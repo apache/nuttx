@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_sectname
+ * Name: libmod_sectname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -74,8 +74,8 @@
  *
  ****************************************************************************/
 
-static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
-                               FAR const Elf32_Shdr *shdr)
+static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
+                                  FAR const Elf32_Shdr *shdr)
 {
   FAR Elf32_Shdr *shstr;
   FAR uint8_t *buffer;
@@ -136,7 +136,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = mod_read(loadinfo, buffer, readlen, offset);
+      ret = libmod_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
           bdbg("Failed to read section name\n");
@@ -156,10 +156,10 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
+      ret = libmod_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
       if (ret < 0)
         {
-          bdbg("mod_reallocbuffer failed: %d\n", ret);
+          bdbg("libmod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -174,7 +174,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_loadshdrs
+ * Name: libmod_loadshdrs
  *
  * Description:
  *   Loads section headers into memory.
@@ -185,7 +185,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
+int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo)
 {
   size_t shdrsize;
   int ret;
@@ -221,8 +221,8 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Read the section header table into memory */
 
-  ret = mod_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
-                 loadinfo->ehdr.e_shoff);
+  ret = libmod_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
+                    loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
       bdbg("Failed to read section header table: %d\n", ret);
@@ -232,7 +232,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_findsection
+ * Name: libmod_findsection
  *
  * Description:
  *   A section by its name.
@@ -247,8 +247,8 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
-                    FAR const char *sectname)
+int libmod_findsection(FAR struct libmod_loadinfo_s *loadinfo,
+                       FAR const char *sectname)
 {
   FAR const Elf32_Shdr *shdr;
   int ret;
@@ -261,10 +261,10 @@ int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
       /* Get the name of this section */
 
       shdr = &loadinfo->shdr[i];
-      ret  = mod_sectname(loadinfo, shdr);
+      ret  = libmod_sectname(loadinfo, shdr);
       if (ret < 0)
         {
-          bdbg("mod_sectname failed: %d\n", ret);
+          bdbg("libmod_sectname failed: %d\n", ret);
           return ret;
         }
 

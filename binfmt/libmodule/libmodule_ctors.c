@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_loadctors
+ * Name: libmod_loadctors
  *
  * Description:
  *  Load pointers to static constructors into an in-memory array.
@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-int mod_loadctors(FAR struct mod_loadinfo_s *loadinfo)
+int libmod_loadctors(FAR struct libmod_loadinfo_s *loadinfo)
 {
   FAR Elf32_Shdr *shdr;
   size_t ctorsize;
@@ -97,13 +97,13 @@ int mod_loadctors(FAR struct mod_loadinfo_s *loadinfo)
   DEBUGASSERT(loadinfo->ctors == NULL);
 
   /* Allocate an I/O buffer if necessary.  This buffer is used by
-   * mod_sectname() to accumulate the variable length symbol name.
+   * libmod_sectname() to accumulate the variable length symbol name.
    */
 
-  ret = mod_allocbuffer(loadinfo);
+  ret = libmod_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      bdbg("mod_allocbuffer failed: %d\n", ret);
+      bdbg("libmod_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -114,14 +114,14 @@ int mod_loadctors(FAR struct mod_loadinfo_s *loadinfo)
    * in either case.
    */
 
-  ctoridx = mod_findsection(loadinfo, ".ctors");
+  ctoridx = libmod_findsection(loadinfo, ".ctors");
   if (ctoridx < 0)
     {
       /* This may not be a failure.  -ENOENT indicates that the file has no
        * static constructor section.
        */
 
-      bvdbg("mod_findsection .ctors section failed: %d\n", ctoridx);
+      bvdbg("libmod_findsection .ctors section failed: %d\n", ctoridx);
       return ret == -ENOENT ? OK : ret;
     }
 
@@ -174,7 +174,7 @@ int mod_loadctors(FAR struct mod_loadinfo_s *loadinfo)
 
           /* Read the section header table into memory */
 
-          ret = mod_read(loadinfo, (FAR uint8_t *)loadinfo->ctors, ctorsize,
+          ret = libmod_read(loadinfo, (FAR uint8_t *)loadinfo->ctors, ctorsize,
                          shdr->sh_offset);
           if (ret < 0)
             {

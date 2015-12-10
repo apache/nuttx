@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libmodule/mod_verify.c
+ * binfmt/libmodule/libmodule_verify.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,7 +67,7 @@ static const char g_modmagic[EI_MAGIC_SIZE] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_verifyheader
+ * Name: libmod_verifyheader
  *
  * Description:
  *   Given the header from a possible ELF executable, verify that it
@@ -83,7 +83,7 @@ static const char g_modmagic[EI_MAGIC_SIZE] =
  *
  ****************************************************************************/
 
-int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
+int libmod_verifyheader(FAR const Elf32_Ehdr *ehdr)
 {
   if (!ehdr)
     {

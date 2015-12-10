@@ -336,6 +336,7 @@ int up_relocateadd(FAR const Elf32_Rela *rel,
  *   Always returns Zero (OK).
  *
  ****************************************************************************/
+
 int up_init_exidx(Elf32_Addr address, Elf32_Word size);
 #endif
 

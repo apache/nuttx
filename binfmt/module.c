@@ -182,34 +182,8 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 static void mod_dumpentrypt(FAR struct binary_s *binp,
                             FAR struct mod_loadinfo_s *loadinfo)
 {
-#ifdef CONFIG_ARCH_ADDRENV
-  int ret;
-
-  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
-   * space that may not be in place now.  mod_addrenv_select() will
-   * temporarily instantiate that address space.
-   */
-
-  ret = mod_addrenv_select(loadinfo);
-  if (ret < 0)
-    {
-      bdbg("ERROR: mod_addrenv_select() failed: %d\n", ret);
-      return;
-    }
-#endif
-
   mod_dumpbuffer("Entry code", (FAR const uint8_t *)binp->entrypt,
                  MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
-
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Restore the original address environment */
-
-  ret = mod_addrenv_restore(loadinfo);
-  if (ret < 0)
-    {
-      bdbg("ERROR: mod_addrenv_restore() failed: %d\n", ret);
-    }
-#endif
 }
 #else
 # define mod_dumpentrypt(b,l)
@@ -233,7 +207,7 @@ static int mod_loadbinary(FAR struct binary_s *binp)
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = mod_init(binp->filename, &loadinfo);
+  ret = libmod_initialize(binp->filename, &loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -243,7 +217,7 @@ static int mod_loadbinary(FAR struct binary_s *binp)
 
   /* Load the program binary */
 
-  ret = mod_load(&loadinfo);
+  ret = libmod_load(&loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -253,7 +227,7 @@ static int mod_loadbinary(FAR struct binary_s *binp)
 
   /* Bind the program to the exported symbol table */
 
-  ret = mod_bind(&loadinfo, binp->exports, binp->nexports);
+  ret = libmod_bind(&loadinfo, binp->exports, binp->nexports);
   if (ret != 0)
     {
       bdbg("Failed to bind symbols program binary: %d\n", ret);
@@ -273,11 +247,7 @@ static int mod_loadbinary(FAR struct binary_s *binp)
    * a memory leak?
    */
 
-#ifdef CONFIG_ARCH_ADDRENV
-#  warning "REVISIT"
-#else
   binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
-#endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   /* Save information about constructors.  NOTE:  destructors are not
@@ -293,22 +263,14 @@ static int mod_loadbinary(FAR struct binary_s *binp)
   binp->ndtors    = loadinfo.ndtors;
 #endif
 
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Save the address environment in the binfmt structure.  This will be
-   * needed when the module is executed.
-   */
-
-  up_addrenv_clone(&loadinfo.addrenv, &binp->addrenv);
-#endif
-
   mod_dumpentrypt(binp, &loadinfo);
-  mod_uninit(&loadinfo);
+  libmod_uninitialize(&loadinfo);
   return OK;
 
 errout_with_load:
-  mod_unload(&loadinfo);
+  libmod_unload(&loadinfo);
 errout_with_init:
-  mod_uninit(&loadinfo);
+  libmod_uninitialize(&loadinfo);
 errout:
   return ret;
 }

@@ -65,11 +65,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_uninit
+ * Name: libmod_uninitialize
  *
  * Description:
- *   Releases any resources committed by mod_initialize().  This essentially
- *   undoes the actions of mod_initialize.
+ *   Releases any resources committed by libmod_initialize().  This essentially
+ *   undoes the actions of libmod_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -77,11 +77,11 @@
  *
  ****************************************************************************/
 
-int mod_uninit(struct mod_loadinfo_s *loadinfo)
+int libmod_uninitialize(struct libmod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
-  mod_freebuffers(loadinfo);
+  libmod_freebuffers(loadinfo);
 
   /* Close the ELF file */
 
@@ -94,7 +94,7 @@ int mod_uninit(struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_freebuffers
+ * Name: libmod_freebuffers
  *
  * Description:
  *  Release all working buffers.
@@ -105,7 +105,7 @@ int mod_uninit(struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_freebuffers(struct mod_loadinfo_s *loadinfo)
+int libmod_freebuffers(struct libmod_loadinfo_s *loadinfo)
 {
   /* Release all working allocations  */
 

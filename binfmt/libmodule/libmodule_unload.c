@@ -64,11 +64,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_unload
+ * Name: libmod_unload
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
- *   the actions of mod_load.  It is called only under certain error
+ *   the actions of libmod_load.  It is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *
  * Returned Value:
@@ -77,11 +77,11 @@
  *
  ****************************************************************************/
 
-int mod_unload(struct mod_loadinfo_s *loadinfo)
+int libmod_unload(struct libmod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
-  mod_freebuffers(loadinfo);
+  libmod_freebuffers(loadinfo);
 
   /* Release memory holding the relocated ELF image */
 

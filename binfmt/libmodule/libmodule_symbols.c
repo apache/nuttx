@@ -67,7 +67,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_symname
+ * Name: libmod_symname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -82,8 +82,8 @@
  *
  ****************************************************************************/
 
-static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
-                       FAR const Elf32_Sym *sym)
+static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
+                          FAR const Elf32_Sym *sym)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -126,10 +126,10 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = mod_read(loadinfo, buffer, readlen, offset);
+      ret = libmod_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          bdbg("mod_read failed: %d\n", ret);
+          bdbg("libmod_read failed: %d\n", ret);
           return ret;
         }
 
@@ -146,10 +146,10 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
+      ret = libmod_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
       if (ret < 0)
         {
-          bdbg("mod_reallocbuffer failed: %d\n", ret);
+          bdbg("libmod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -164,7 +164,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_findsymtab
+ * Name: libmod_findsymtab
  *
  * Description:
  *   Find the symbol table section.
@@ -175,7 +175,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
+int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo)
 {
   int i;
 
@@ -203,7 +203,7 @@ int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_readsym
+ * Name: libmod_readsym
  *
  * Description:
  *   Read the ELFT symbol structure at the specfied index into memory.
@@ -219,8 +219,8 @@ int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                FAR Elf32_Sym *sym)
+int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
+                   FAR Elf32_Sym *sym)
 {
   FAR Elf32_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
   off_t offset;
@@ -239,11 +239,11 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return mod_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
+  return libmod_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
 }
 
 /****************************************************************************
- * Name: mod_symvalue
+ * Name: libmod_symvalue
  *
  * Description:
  *   Get the value of a symbol.  The updated value of the symbol is returned
@@ -265,8 +265,8 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
-                 FAR const struct symtab_s *exports, int nexports)
+int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
+                    FAR const struct symtab_s *exports, int nexports)
 {
   FAR const struct symtab_s *symbol;
   uintptr_t secbase;
@@ -294,7 +294,7 @@ int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* Get the name of the undefined symbol */
 
-        ret = mod_symname(loadinfo, sym);
+        ret = libmod_symname(loadinfo, sym);
         if (ret < 0)
           {
             /* There are a few relocations for a few architectures that do

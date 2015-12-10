@@ -65,9 +65,9 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define libmod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
 #else
-# define mod_dumpbuffer(m,b,n)
+# define libmod_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_filelen
+ * Name: libmod_filelen
  *
  * Description:
  *  Get the size of the ELF file
@@ -90,8 +90,8 @@
  *
  ****************************************************************************/
 
-static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
-                              FAR const char *filename)
+static inline int libmod_filelen(FAR struct libmod_loadinfo_s *loadinfo,
+                                 FAR const char *filename)
 {
   struct stat buf;
   int ret;
@@ -129,7 +129,7 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_initialize
+ * Name: libmod_initialize
  *
  * Description:
  *   This function is called to configure the library to process an ELF
@@ -141,7 +141,8 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int mod_initialize(FAR const char *filename, FAR struct mod_loadinfo_s *loadinfo)
+int libmod_initialize(FAR const char *filename,
+                      FAR struct libmod_loadinfo_s *loadinfo)
 {
   int ret;
 
@@ -149,14 +150,14 @@ int mod_initialize(FAR const char *filename, FAR struct mod_loadinfo_s *loadinfo
 
   /* Clear the load info structure */
 
-  memset(loadinfo, 0, sizeof(struct mod_loadinfo_s));
+  memset(loadinfo, 0, sizeof(struct libmod_loadinfo_s));
 
   /* Get the length of the file. */
 
-  ret = mod_filelen(loadinfo, filename);
+  ret = libmod_filelen(loadinfo, filename);
   if (ret < 0)
     {
-      bdbg("mod_filelen failed: %d\n", ret);
+      bdbg("libmod_filelen failed: %d\n", ret);
       return ret;
     }
 
@@ -172,24 +173,26 @@ int mod_initialize(FAR const char *filename, FAR struct mod_loadinfo_s *loadinfo
 
   /* Read the ELF ehdr from offset 0 */
 
-  ret = mod_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr, sizeof(Elf32_Ehdr), 0);
+  ret = libmod_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr,
+                    sizeof(Elf32_Ehdr), 0);
   if (ret < 0)
     {
       bdbg("Failed to read ELF header: %d\n", ret);
       return ret;
     }
 
-  mod_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr, sizeof(Elf32_Ehdr));
+  libmod_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
+                    sizeof(Elf32_Ehdr));
 
   /* Verify the ELF header */
 
-  ret = mod_verifyheader(&loadinfo->ehdr);
+  ret = libmod_verifyheader(&loadinfo->ehdr);
   if (ret < 0)
     {
       /* This may not be an error because we will be called to attempt loading
-       * EVERY binary.  If mod_verifyheader() does not recognize the ELF header,
+       * EVERY binary.  If libmod_verifyheader() does not recognize the ELF header,
        * it will -ENOEXEC whcih simply informs the system that the file is not an
-       * ELF file.  mod_verifyheader() will return other errors if the ELF header
+       * ELF file.  libmod_verifyheader() will return other errors if the ELF header
        * is not correctly formed.
        */
 

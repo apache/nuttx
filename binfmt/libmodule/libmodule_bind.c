@@ -68,9 +68,9 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define libmod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
 #else
-# define mod_dumpbuffer(m,b,n)
+# define libmod_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -86,16 +86,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_readrel
+ * Name: libmod_readrel
  *
  * Description:
  *   Read the ELF32_Rel structure into memory.
  *
  ****************************************************************************/
 
-static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
-                              FAR const Elf32_Shdr *relsec,
-                              int index, FAR Elf32_Rel *rel)
+static inline int libmod_readrel(FAR struct libmod_loadinfo_s *loadinfo,
+                                 FAR const Elf32_Shdr *relsec,
+                                 int index, FAR Elf32_Rel *rel)
 {
   off_t offset;
 
@@ -113,11 +113,11 @@ static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return mod_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
+  return libmod_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
 }
 
 /****************************************************************************
- * Name: mod_relocate and mod_relocateadd
+ * Name: libmod_relocate and libmod_relocateadd
  *
  * Description:
  *   Perform all relocations associated with a section.
@@ -128,8 +128,8 @@ static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
-                        FAR const struct symtab_s *exports, int nexports)
+static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
+                           FAR const struct symtab_s *exports, int nexports)
 
 {
   FAR Elf32_Shdr *relsec = &loadinfo->shdr[relidx];
@@ -153,7 +153,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
 
       /* Read the relocation entry into memory */
 
-      ret = mod_readrel(loadinfo, relsec, i, &rel);
+      ret = libmod_readrel(loadinfo, relsec, i, &rel);
       if (ret < 0)
         {
           bdbg("Section %d reloc %d: Failed to read relocation entry: %d\n",
@@ -169,7 +169,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
 
       /* Read the symbol table entry into memory */
 
-      ret = mod_readsym(loadinfo, symidx, &sym);
+      ret = libmod_readsym(loadinfo, symidx, &sym);
       if (ret < 0)
         {
           bdbg("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
@@ -179,7 +179,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
 
       /* Get the value of the symbol (in sym.st_value) */
 
-      ret = mod_symvalue(loadinfo, &sym, exports, nexports);
+      ret = libmod_symvalue(loadinfo, &sym, exports, nexports);
       if (ret < 0)
         {
           /* The special error -ESRCH is returned only in one condition:  The
@@ -230,8 +230,8 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
   return OK;
 }
 
-static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
-                           FAR const struct symtab_s *exports, int nexports)
+static int libmod_relocateadd(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
+                              FAR const struct symtab_s *exports, int nexports)
 {
   bdbg("Not implemented\n");
   return -ENOSYS;
@@ -242,7 +242,7 @@ static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_bind
+ * Name: libmod_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
@@ -254,28 +254,28 @@ static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
  *
  ****************************************************************************/
 
-int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
-             FAR const struct symtab_s *exports, int nexports)
+int libmod_bind(FAR struct libmod_loadinfo_s *loadinfo,
+                FAR const struct symtab_s *exports, int nexports)
 {
   int ret;
   int i;
 
   /* Find the symbol and string tables */
 
-  ret = mod_findsymtab(loadinfo);
+  ret = libmod_findsymtab(loadinfo);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* Allocate an I/O buffer.  This buffer is used by mod_symname() to
+  /* Allocate an I/O buffer.  This buffer is used by libmod_symname() to
    * accumulate the variable length symbol name.
    */
 
-  ret = mod_allocbuffer(loadinfo);
+  ret = libmod_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      bdbg("mod_allocbuffer failed: %d\n", ret);
+      bdbg("libmod_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -304,11 +304,11 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
 
       if (loadinfo->shdr[i].sh_type == SHT_REL)
         {
-          ret = mod_relocate(loadinfo, i, exports, nexports);
+          ret = libmod_relocate(loadinfo, i, exports, nexports);
         }
       else if (loadinfo->shdr[i].sh_type == SHT_RELA)
         {
-          ret = mod_relocateadd(loadinfo, i, exports, nexports);
+          ret = libmod_relocateadd(loadinfo, i, exports, nexports);
         }
 
       if (ret < 0)

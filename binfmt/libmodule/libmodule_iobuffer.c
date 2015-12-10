@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libmodule/mod_iobuffer.c
+ * binfmt/libmodule/libmodule_iobuffer.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_allocbuffer
+ * Name: libmod_allocbuffer
  *
  * Description:
  *   Perform the initial allocation of the I/O buffer, if it has not already
@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
+int libmod_allocbuffer(FAR struct libmod_loadinfo_s *loadinfo)
 {
   /* Has a buffer been allocated> */
 
@@ -98,7 +98,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_reallocbuffer
+ * Name: libmod_reallocbuffer
  *
  * Description:
  *   Increase the size of I/O buffer by the specified buffer increment.
@@ -109,7 +109,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
+int libmod_reallocbuffer(FAR struct libmod_loadinfo_s *loadinfo, size_t increment)
 {
   FAR void *buffer;
   size_t newsize;

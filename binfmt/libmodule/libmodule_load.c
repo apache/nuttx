@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_elfsize
+ * Name: libmod_elfsize
  *
  * Description:
  *   Calculate total memory allocation for the ELF file.
@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
+static void libmod_elfsize(struct libmod_loadinfo_s *loadinfo)
 {
   size_t textsize;
   size_t datasize;
@@ -133,7 +133,7 @@ static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_loadfile
+ * Name: libmod_loadfile
  *
  * Description:
  *   Read the section data into memory. Section addresses in the shdr[] are
@@ -145,7 +145,7 @@ static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
+static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
 {
   FAR uint8_t *text;
   FAR uint8_t *data;
@@ -192,7 +192,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
         {
           /* Read the section data from sh_offset to the memory region */
 
-          ret = mod_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
+          ret = libmod_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
               bdbg("ERROR: Failed to read section %d: %d\n", i, ret);
@@ -229,7 +229,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_load
+ * Name: libmod_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
@@ -241,7 +241,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_load(FAR struct mod_loadinfo_s *loadinfo)
+int libmod_load(FAR struct libmod_loadinfo_s *loadinfo)
 {
   size_t heapsize;
 #ifdef CONFIG_UCLIBCXX_EXCEPTION
@@ -254,16 +254,16 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Load section headers into memory */
 
-  ret = mod_loadshdrs(loadinfo);
+  ret = libmod_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: mod_loadshdrs failed: %d\n", ret);
+      bdbg("ERROR: libmod_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
   /* Determine total size to allocate */
 
-  mod_elfsize(loadinfo);
+  libmod_elfsize(loadinfo);
 
   /* Determine the heapsize to allocate. */
 
@@ -285,36 +285,36 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Load ELF section data into memory */
 
-  ret = mod_loadfile(loadinfo);
+  ret = libmod_loadfile(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: mod_loadfile failed: %d\n", ret);
+      bdbg("ERROR: libmod_loadfile failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
   /* Load static constructors and destructors. */
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-  ret = mod_loadctors(loadinfo);
+  ret = libmod_loadctors(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: mod_loadctors failed: %d\n", ret);
+      bdbg("ERROR: libmod_loadctors failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
-  ret = mod_loaddtors(loadinfo);
+  ret = libmod_loaddtors(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: mod_loaddtors failed: %d\n", ret);
+      bdbg("ERROR: libmod_loaddtors failed: %d\n", ret);
       goto errout_with_buffers;
     }
 #endif
 
 #ifdef CONFIG_UCLIBCXX_EXCEPTION
-  exidx = mod_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
+  exidx = libmod_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
   if (exidx < 0)
     {
-      bvdbg("mod_findsection: Exception Index section not found: %d\n", exidx);
+      bvdbg("libmod_findsection: Exception Index section not found: %d\n", exidx);
     }
   else
     {
@@ -327,7 +327,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
   /* Error exits */
 
 errout_with_buffers:
-  mod_unload(loadinfo);
+  libmod_unload(loadinfo);
   return ret;
 }
 
