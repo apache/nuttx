@@ -2524,6 +2524,10 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
               /* All bytes have been sent to the host.  We must call
                * sam_req_write() now in the IDLE state with the number of
                * bytes transferred in 'inflight'
+               *
+               * REVISIT: Isn't there a race condition here?  Could TXIN
+               * have fired just before calculating byct?  Could TXIN be
+               * pending here?
                */
 
               privep->epstate = USBHS_EPSTATE_IDLE;
