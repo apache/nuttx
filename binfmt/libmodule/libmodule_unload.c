@@ -93,31 +93,9 @@ int libmod_unload(struct libmod_loadinfo_s *loadinfo)
   /* Clear out all indications of the allocated address environment */
 
   loadinfo->textalloc = 0;
-  loadinfo->dataalloc = 0;
+  loadinfo->datastart = 0;
   loadinfo->textsize  = 0;
   loadinfo->datasize  = 0;
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-   /* Release memory used to hold static constructors and destructors */
-
-  if (loadinfo->ctoralloc != 0)
-    {
-      kmm_free(loadinfo->ctoralloc);
-      loadinfo->ctoralloc = NULL;
-    }
-
-   loadinfo->ctors   = NULL;
-   loadinfo->nctors  = 0;
-
-  if (loadinfo->dtoralloc != 0)
-    {
-      kmm_free(loadinfo->dtoralloc);
-      loadinfo->dtoralloc = NULL;
-    }
-
-   loadinfo->dtors   = NULL;
-   loadinfo->ndtors  = 0;
-#endif
 
   return OK;
 }

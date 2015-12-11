@@ -33,13 +33,3 @@ config MODULE_DUMPBUFFER
 	depends on DEBUG && DEBUG_VERBOSE
 	---help---
 		Dump various module buffers for debug purposes
-
-config MODULE_EXIDX_SECTNAME
-	string "Module Section Name for Exception Index"
-	default ".ARM.exidx"
-	depends on UCLIBCXX_EXCEPTION
-	---help---
-		Set the name string for the exception index section on the  modules to
-		be loaded by the module binary loader.
-
-		This is needed to support exception handling on loadable modules.

@@ -54,8 +54,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ELF_BUFFERINCR
-#  define CONFIG_ELF_BUFFERINCR 32
+#ifndef CONFIG_MODULE_BUFFERINCR
+#  define CONFIG_MODULE_BUFFERINCR 32
 #endif
 
 /****************************************************************************
@@ -146,7 +146,7 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = libmod_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
+      ret = libmod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
       if (ret < 0)
         {
           bdbg("libmod_reallocbuffer failed: %d\n", ret);

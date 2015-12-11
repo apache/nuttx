@@ -84,14 +84,14 @@ int libmod_allocbuffer(FAR struct libmod_loadinfo_s *loadinfo)
     {
       /* No.. allocate one now */
 
-      loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_ELF_BUFFERSIZE);
+      loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_MODULE_BUFFERSIZE);
       if (!loadinfo->iobuffer)
         {
           bdbg("Failed to allocate an I/O buffer\n");
           return -ENOMEM;
         }
 
-      loadinfo->buflen = CONFIG_ELF_BUFFERSIZE;
+      loadinfo->buflen = CONFIG_MODULE_BUFFERSIZE;
     }
 
   return OK;

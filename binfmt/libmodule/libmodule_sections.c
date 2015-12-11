@@ -156,7 +156,7 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = libmod_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
+      ret = libmod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
       if (ret < 0)
         {
           bdbg("libmod_reallocbuffer failed: %d\n", ret);

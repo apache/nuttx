@@ -49,7 +49,6 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/module.h>
 
 #include "libmodule/libmodule.h"
@@ -79,26 +78,6 @@
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int mod_loadbinary(FAR struct binary_s *binp);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
-static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo);
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct binfmt_s g_modbinfmt =
-{
-  NULL,             /* next */
-  mod_loadbinary,   /* load */
-  NULL,             /* unload */
-};
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -107,24 +86,16 @@ static struct binfmt_s g_modbinfmt =
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
-static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
+static void mod_dumploadinfo(FAR struct libmod_loadinfo_s *loadinfo)
 {
   int i;
 
   bdbg("LOAD_INFO:\n");
   bdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  bdbg("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
+  bdbg("  datastart:    %08lx\n", (long)loadinfo->datastart);
   bdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
   bdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
   bdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  bdbg("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
-  bdbg("  ctors:        %08lx\n", (long)loadinfo->ctors);
-  bdbg("  nctors:       %d\n",    loadinfo->nctors);
-  bdbg("  dtoralloc:    %08lx\n", (long)loadinfo->dtoralloc);
-  bdbg("  dtors:        %08lx\n", (long)loadinfo->dtors);
-  bdbg("  ndtors:       %d\n",    loadinfo->ndtors);
-#endif
   bdbg("  filfd:        %d\n",    loadinfo->filfd);
   bdbg("  symtabidx:    %d\n",    loadinfo->symtabidx);
   bdbg("  strtabidx:    %d\n",    loadinfo->strtabidx);
@@ -186,25 +157,28 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
 #endif
 
 /****************************************************************************
- * Name: mod_loadbinary
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: insmod
  *
  * Description:
- *   Verify that the file is an ELF binary and, if so, load the ELF
- *   binary into memory
+ *   Verify that the file is an ELF module binary and, if so, load the
+ *   module into kernel memory and initialize it for use.
  *
  ****************************************************************************/
 
-static int mod_loadbinary(FAR struct binary_s *binp)
+int insmod(FAR struct module_s *modp)
 {
-  struct mod_loadinfo_s loadinfo;  /* Contains globals for libmodule */
-  mod_initializer_t     initializer;
-  int                   ret;
+  struct libmod_loadinfo_s loadinfo;  /* Contains globals for libmodule */
+  int ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  bvdbg("Loading file: %s\n", modp->filename);
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = libmod_initialize(binp->filename, &loadinfo);
+  ret = libmod_initialize(modp->filename, &loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -224,7 +198,7 @@ static int mod_loadbinary(FAR struct binary_s *binp)
 
   /* Bind the program to the exported symbol table */
 
-  ret = libmod_bind(&loadinfo, binp->exports, binp->nexports);
+  ret = libmod_bind(&loadinfo, modp->exports, modp->nexports);
   if (ret != 0)
     {
       bdbg("Failed to bind symbols program binary: %d\n", ret);
@@ -233,43 +207,18 @@ static int mod_loadbinary(FAR struct binary_s *binp)
 
   /* Return the load information */
 
-  binp->entrypt   = NULL;
-  binp->stacksize = 0;
-
-  /* Add the ELF allocation to the alloc[] only if there is no address
-   * environment.  If there is an address environment, it will automatically
-   * be freed when the function exits
-   *
-   * REVISIT:  If the module is loaded then unloaded, wouldn't this cause
-   * a memory leak?
-   */
-
-  binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  /* Save information about constructors.  NOTE:  destructors are not
-   * yet supported.
-   */
-
-  binp->alloc[1]  = loadinfo.ctoralloc;
-  binp->ctors     = loadinfo.ctors;
-  binp->nctors    = loadinfo.nctors;
-
-  binp->alloc[2]  = loadinfo.dtoralloc;
-  binp->dtors     = loadinfo.dtors;
-  binp->ndtors    = loadinfo.ndtors;
-#endif
+  modp->initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+  modp->alloc       = (FAR void *)loadinfo.textalloc;
 
   /* Get the module initializer entry point */
 
-  initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
-  if (initialize)
+  if (modp->initializer)
     {
-      mod_dumpinitializer(initializer, &loadinfo);
+      mod_dumpinitializer(modp->initializer, &loadinfo);
 
       /* Call the module initializer */
 
-      ret = initializer();
+      ret = modp->initializer();
       if (ret < 0)
         {
           bdbg("Failed to initialize the module: %d\n", ret);
@@ -286,58 +235,6 @@ errout_with_init:
   libmod_uninitialize(&loadinfo);
 errout:
   return ret;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mod_initialize
- *
- * Description:
- *   ELF support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialization in order to register the ELF binary format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_initialize(void)
-{
-  int ret;
-
-  /* Register ourselves as a binfmt loader */
-
-  bvdbg("Registering ELF\n");
-
-  ret = register_binfmt(&g_modbinfmt);
-  if (ret != 0)
-    {
-      bdbg("Failed to register binfmt: %d\n", ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: mod_uninitialize
- *
- * Description:
- *   Unregister the ELF binary loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void mod_uninitialize(void)
-{
-  unregister_binfmt(&g_modbinfmt);
 }
 
 #endif /* CONFIG_MODULE */

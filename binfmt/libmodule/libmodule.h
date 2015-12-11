@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libmodule/libmodule.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,16 +49,123 @@
 #include <nuttx/binfmt/module.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* This struct provides a description of the currently loaded instantiation
+ * of the kernel module.
+ */
+
+struct libmod_loadinfo_s
+{
+  /* elfalloc is the base address of the memory that is allocated to hold the
+   * module image.
+   *
+   * The alloc[] array in struct module_s will hold memory that persists after
+   * the module has been loaded.
+   */
+
+  uintptr_t         textalloc;   /* .text memory allocated when module was loaded */
+  uintptr_t         datastart;   /* Start of.bss/.data memory in .text allocation */
+  size_t            textsize;    /* Size of the module .text memory allocation */
+  size_t            datasize;    /* Size of the module .bss/.data memory allocation */
+  off_t             filelen;     /* Length of the entire module file */
+  Elf32_Ehdr        ehdr;        /* Buffered module file header */
+  FAR Elf32_Shdr   *shdr;        /* Buffered module section headers */
+  uint8_t          *iobuffer;    /* File I/O buffer */
+
+  uint16_t          symtabidx;   /* Symbol table section index */
+  uint16_t          strtabidx;   /* String table section index */
+  uint16_t          buflen;      /* size of iobuffer[] */
+  int               filfd;       /* Descriptor for the file being loaded */
+};
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * These are APIs exported by libmodule and used by insmod
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: libmod_initialize
+ *
+ * Description:
+ *   This function is called to configure the library to process an kernel
+ *   module.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int libmod_initialize(FAR const char *filename,
+                      FAR struct libmod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: libmod_uninitialize
+ *
+ * Description:
+ *   Releases any resources committed by mod_init().  This essentially
+ *   undoes the actions of libmod_initialize.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int libmod_uninitialize(FAR struct libmod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: libmod_load
+ *
+ * Description:
+ *   Loads the binary into memory, allocating memory, performing relocations
+ *   and initializing the data and bss segments.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int libmod_load(FAR struct libmod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: libmod_bind
+ *
+ * Description:
+ *   Bind the imported symbol names in the loaded module described by
+ *   'loadinfo' using the exported symbol values provided by 'symtab'.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+struct symtab_s;
+int libmod_bind(FAR struct libmod_loadinfo_s *loadinfo,
+                FAR const struct symtab_s *exports, int nexports);
+
+/****************************************************************************
+ * Name: libmod_unload
+ *
+ * Description:
+ *   This function unloads the object from memory. This essentially undoes
+ *   the actions of mod_load.  It is called only under certain error
+ *   conditions after the module has been loaded but not yet started.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int libmod_unload(struct libmod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: libmod_verifyheader
@@ -228,43 +335,5 @@ int libmod_allocbuffer(FAR struct libmod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int libmod_reallocbuffer(FAR struct libmod_loadinfo_s *loadinfo, size_t increment);
-
-/****************************************************************************
- * Name: libmod_findctors
- *
- * Description:
- *   Find C++ static constructors.
- *
- * Input Parameters:
- *   loadinfo - Load state information
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-int libmod_loadctors(FAR struct libmod_loadinfo_s *loadinfo);
-#endif
-
-/****************************************************************************
- * Name: libmod_loaddtors
- *
- * Description:
- *  Load pointers to static destructors into an in-memory array.
- *
- * Input Parameters:
- *   loadinfo - Load state information
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-int libmod_loaddtors(FAR struct libmod_loadinfo_s *loadinfo);
-#endif
 
 #endif /* __BINFMT_LIBELF_LIBELF_H */

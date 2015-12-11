@@ -56,18 +56,18 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_ELF_DUMPBUFFER does nothing.
+ * defined or CONFIG_MODULE_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
-#  undef CONFIG_ELF_DUMPBUFFER
+#  undef CONFIG_MODULE_DUMPBUFFER
 #endif
 
-#ifndef CONFIG_ELF_BUFFERSIZE
-#  define CONFIG_ELF_BUFFERSIZE 128
+#ifndef CONFIG_MODULE_BUFFERSIZE
+#  define CONFIG_MODULE_BUFFERSIZE 128
 #endif
 
-#ifdef CONFIG_ELF_DUMPBUFFER
+#ifdef CONFIG_MODULE_DUMPBUFFER
 # define libmod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
 #else
 # define libmod_dumpbuffer(m,b,n)

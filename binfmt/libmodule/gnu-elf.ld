@@ -45,14 +45,6 @@ SECTIONS
       *(.glue_7)
       *(.glue_7t)
       *(.jcr)
-
-      /* C++ support:  The .init and .fini sections contain specific logic
-       * to manage static constructors and destructors.
-       */
-
-      *(.gnu.linkonce.t.*)
-      *(.init)             /* Old ABI */
-      *(.fini)             /* Old ABI */
       _etext = . ;
     }
 
@@ -74,30 +66,6 @@ SECTIONS
       *(.data.*)
       *(.gnu.linkonce.d*)
       _edata = . ;
-    }
-
-  /* C++ support. For each global and static local C++ object,
-   * GCC creates a small subroutine to construct the object. Pointers
-   * to these routines (not the routines themselves) are stored as
-   * simple, linear arrays in the .ctors section of the object file.
-   * Similarly, pointers to global/static destructor routines are
-   * stored in .dtors.
-   */
-
-  .ctors :
-    {
-      _sctors = . ;
-      *(.ctors)       /* Old ABI:  Unallocated */
-      *(.init_array)  /* New ABI:  Allocated */
-      _ectors = . ;
-    }
-
-  .dtors :
-    {
-      _sdtors = . ;
-      *(.dtors)       /* Old ABI:  Unallocated */
-      *(.fini_array)  /* New ABI:  Allocated */
-      _edtors = . ;
     }
 
   .bss :

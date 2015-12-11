@@ -71,6 +71,7 @@ VPATH =
 SUBDIRS =
 DEPPATH = --dep-path .
 
+include libmodule$(DELIM)Make.defs
 include libnxflat$(DELIM)Make.defs
 include libelf$(DELIM)Make.defs
 include libbuiltin$(DELIM)Make.defs

@@ -86,45 +86,6 @@
  * Public Types
  ****************************************************************************/
 
-/* This struct provides a description of the currently loaded instantiation
- * of the kernel module.
- */
-
-struct mod_loadinfo_s
-{
-  /* elfalloc is the base address of the memory that is allocated to hold the
-   * module image.
-   *
-   * The alloc[] array in struct binary_s will hold memory that persists after
-   * the module has been loaded.
-   */
-
-  uintptr_t         textalloc;   /* .text memory allocated when module was loaded */
-  uintptr_t         dataalloc;   /* .bss/.data memory allocated when module was loaded */
-  size_t            textsize;    /* Size of the module .text memory allocation */
-  size_t            datasize;    /* Size of the module .bss/.data memory allocation */
-  off_t             filelen;     /* Length of the entire module file */
-  Elf32_Ehdr        ehdr;        /* Buffered module file header */
-  FAR Elf32_Shdr    *shdr;       /* Buffered module section headers */
-  uint8_t           *iobuffer;   /* File I/O buffer */
-
-  /* Constructors and destructors */
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  FAR void          *ctoralloc;  /* Memory allocated for ctors */
-  FAR void          *dtoralloc;  /* Memory allocated dtors */
-  FAR binfmt_ctor_t *ctors;      /* Pointer to a list of constructors */
-  FAR binfmt_dtor_t *dtors;      /* Pointer to a list of destructors */
-  uint16_t           nctors;     /* Number of constructors */
-  uint16_t           ndtors;     /* Number of destructors */
-#endif
-
-  uint16_t           symtabidx;  /* Symbol table section index */
-  uint16_t           strtabidx;  /* String table section index */
-  uint16_t           buflen;     /* size of iobuffer[] */
-  int                filfd;      /* Descriptor for the file being loaded */
-};
-
 /* A NuttX module is expected to export a function called module_initialize()
  * that has the following function prototype.  This function should appear as
  * the entry point in the ELF module file and will be called bythe binfmt
@@ -145,8 +106,34 @@ struct mod_loadinfo_s
 
 typedef CODE int (*mod_initializer_t)(void);
 
+/* This describes the file to be loaded.
+ *
+ * NOTE 1: The 'filename' must be the full, absolute path to the file to be
+ * executed unless CONFIG_BINFMT_EXEPATH is defined.  In that case,
+ * 'filename' may be a relative path; a set of candidate absolute paths
+ * will be generated using the PATH environment variable and load_module()
+ * will attempt to load each file that is found at those absolute paths.
+ */
+
+struct symtab_s;
+struct module_s
+{
+  /* Information provided to insmod by the caller */
+
+  FAR const char *filename;            /* Full path to the binary to be loaded (See NOTE 1 above) */
+  FAR const struct symtab_s *exports;  /* Table of exported symbols */
+  int nexports;                        /* The number of symbols in exports[] */
+
+  /* Information provided from insmod (if successful) describing the
+   * resources used by the loaded module.
+   */
+
+  mod_initializer_t initializer;       /* Module initializer function */
+  FAR void *alloc;                     /* Allocated kernel memory */
+};
+
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -159,120 +146,15 @@ extern "C"
 #endif
 
 /****************************************************************************
- * These are APIs exported by libelf (but are used only by the binfmt logic):
- ****************************************************************************/
-
-/****************************************************************************
- * Name: libmod_initialize
+ * Name: insmod
  *
  * Description:
- *   This function is called to configure the library to process an kernel
- *   module.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   Verify that the file is an ELF module binary and, if so, load the
+ *   module into kernel memory and initialize it for use.
  *
  ****************************************************************************/
 
-int libmod_initalize(FAR const char *filename,
-                     FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: libmod_uninitialize
- *
- * Description:
- *   Releases any resources committed by mod_init().  This essentially
- *   undoes the actions of mod_init.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int libmod_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: mod_load
- *
- * Description:
- *   Loads the binary into memory, allocating memory, performing relocations
- *   and initializing the data and bss segments.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_load(FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: mod_bind
- *
- * Description:
- *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by 'symtab'.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-struct symtab_s;
-int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
-             FAR const struct symtab_s *exports, int nexports);
-
-/****************************************************************************
- * Name: mod_unload
- *
- * Description:
- *   This function unloads the object from memory. This essentially undoes
- *   the actions of mod_load.  It is called only under certain error
- *   conditions after the module has been loaded but not yet started.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_unload(struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * These are APIs used outside of binfmt by NuttX:
- ****************************************************************************/
-/****************************************************************************
- * Name: mod_initialize
- *
- * Description:
- *   Module support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialization in order to register the module binary format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_initialize(void);
-
-/****************************************************************************
- * Name: mod_uninitialize
- *
- * Description:
- *   Unregister the module loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void mod_uninitialize(void);
+int insmod(FAR struct module_s *modp);
 
 /****************************************************************************
  * These are APIs must be provided by architecture-specific logic.
@@ -322,26 +204,6 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
                 uintptr_t addr);
 int up_relocateadd(FAR const Elf32_Rela *rel,
                    FAR const Elf32_Sym *sym, uintptr_t addr);
-
-#ifdef CONFIG_UCLIBCXX_EXCEPTION
-/****************************************************************************
- * Name: up_init_exidx
- *
- * Description:
- *   Load the boundaries of the Exception Index ELF section in order to
- *   support exception handling for loaded modules.
- *
- * Input Parameters:
- *   address - The ELF section address for the Exception Index
- *   size    - The size of the ELF section.
- *
- * Returned Value:
- *   Always returns Zero (OK).
- *
- ****************************************************************************/
-
-int up_init_exidx(Elf32_Addr address, Elf32_Word size);
-#endif
 
 /****************************************************************************
  * Name: up_coherent_dcache
