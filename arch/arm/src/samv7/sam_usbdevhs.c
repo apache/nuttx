@@ -2490,6 +2490,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
       if (privep->epstate == USBHS_EPSTATE_SENDING)
         {
+          uint32_t nbusybk;
           uint32_t byct;
 
           /* This is an IN endpoint.  Continuing processing the write
@@ -2501,11 +2502,21 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           /* Have all of the bytes in the FIFO been transmitted to the
            * host?
+           *
+           * BYCT == 0    Means that all of the data has been transferred
+           *              out of the FIFO.
+           *              Warning: This field may be updated one clock cycle
+           *              after the RWALL bit changes, so the user should not
+           *              poll this field as an interrupt bit.
+           * NBUSYBK == 0 Indicates that all banks that have been sent to
+           *              the host.
            */
 
-          byct = (sam_getreg(SAM_USBHS_DEVEPTISR(epno)) & USBHS_DEVEPTISR_BYCT_MASK)
-                 >> USBHS_DEVEPTISR_BYCT_SHIFT;
-          if (byct > 0)
+          regval  = sam_getreg(SAM_USBHS_DEVEPTISR(epno));
+          byct    = (regval & USBHS_DEVEPTISR_BYCT_MASK) >> USBHS_DEVEPTISR_BYCT_SHIFT;
+          nbusybk = (regval & USBHS_DEVEPTISR_NBUSYBK_MASK) >> USBHS_DEVEPTISR_NBUSYBK_SHIFT;
+
+          if (byct > 0 || nbusybk > 0)
             {
               /* Not all of the data has been sent to the host.  A TXIN
                * interrupt will be generated later.  Enable the TXIN
