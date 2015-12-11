@@ -68,10 +68,6 @@
 #  undef CONFIG_MODULE_DUMPBUFFER
 #endif
 
-#ifndef CONFIG_MODULE_STACKSIZE
-#  define CONFIG_MODULE_STACKSIZE 2048
-#endif
-
 #ifdef CONFIG_MODULE_DUMPBUFFER
 # define mod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
 #else
@@ -175,18 +171,18 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 #endif
 
 /****************************************************************************
- * Name: mod_dumpentrypt
+ * Name: mod_dumpinitializer
  ****************************************************************************/
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-static void mod_dumpentrypt(FAR struct binary_s *binp,
-                            FAR struct mod_loadinfo_s *loadinfo)
+static void mod_dumpinitializer(mod_initializer_t initializer,
+                                FAR struct mod_loadinfo_s *loadinfo)
 {
-  mod_dumpbuffer("Entry code", (FAR const uint8_t *)binp->entrypt,
+  mod_dumpbuffer("Initializer code", (FAR const uint8_t *)initializer,
                  MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
 }
 #else
-# define mod_dumpentrypt(b,l)
+# define mod_dumpinitializer(b,l)
 #endif
 
 /****************************************************************************
@@ -201,6 +197,7 @@ static void mod_dumpentrypt(FAR struct binary_s *binp,
 static int mod_loadbinary(FAR struct binary_s *binp)
 {
   struct mod_loadinfo_s loadinfo;  /* Contains globals for libmodule */
+  mod_initializer_t     initializer;
   int                   ret;
 
   bvdbg("Loading file: %s\n", binp->filename);
@@ -236,8 +233,8 @@ static int mod_loadbinary(FAR struct binary_s *binp)
 
   /* Return the load information */
 
-  binp->entrypt   = (main_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
-  binp->stacksize = CONFIG_MODULE_STACKSIZE;
+  binp->entrypt   = NULL;
+  binp->stacksize = 0;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
    * environment.  If there is an address environment, it will automatically
@@ -263,7 +260,23 @@ static int mod_loadbinary(FAR struct binary_s *binp)
   binp->ndtors    = loadinfo.ndtors;
 #endif
 
-  mod_dumpentrypt(binp, &loadinfo);
+  /* Get the module initializer entry point */
+
+  initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+  if (initialize)
+    {
+      mod_dumpinitializer(initializer, &loadinfo);
+
+      /* Call the module initializer */
+
+      ret = initializer();
+      if (ret < 0)
+        {
+          bdbg("Failed to initialize the module: %d\n", ret);
+          goto errout_with_load;
+        }
+    }
+
   libmod_uninitialize(&loadinfo);
   return OK;
 

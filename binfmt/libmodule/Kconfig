@@ -9,13 +9,6 @@ config MODULE_ALIGN_LOG2
 	---help---
 		Align all sections to this Log2 value:  0->1, 1->2, 2->4, etc.
 
-config MODULE_STACKSIZE
-	int "Module Stack Size"
-	default 2048
-	---help---
-		This is the default stack size that will be used when starting
-		module initialization tasks.
-
 config MODULE_BUFFERSIZE
 	int "Module I/O Buffer Size"
 	default 128

@@ -95,11 +95,6 @@ struct mod_loadinfo_s
   /* elfalloc is the base address of the memory that is allocated to hold the
    * module image.
    *
-   * If CONFIG_ARCH_ADDRENV=n, elfalloc will be allocated using kmm_malloc() (or
-   * kmm_zalloc()).  If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
-   * up_addrenv_create().  In either case, there will be a unique instance
-   * of elfalloc (and stack) for each instance of a process.
-   *
    * The alloc[] array in struct binary_s will hold memory that persists after
    * the module has been loaded.
    */
@@ -124,24 +119,31 @@ struct mod_loadinfo_s
   uint16_t           ndtors;     /* Number of destructors */
 #endif
 
-  /* Address environment.
-   *
-   * addrenv - This is the handle created by up_addrenv_create() that can be
-   *   used to manage the tasks address space.
-   * oldenv  - This is a value returned by up_addrenv_select() that must be
-   *   used to restore the current address environment.
-   */
-
-#ifdef CONFIG_ARCH_ADDRENV
-  group_addrenv_t    addrenv;    /* Task group address environment */
-  save_addrenv_t     oldenv;     /* Saved address environment */
-#endif
-
   uint16_t           symtabidx;  /* Symbol table section index */
   uint16_t           strtabidx;  /* String table section index */
   uint16_t           buflen;     /* size of iobuffer[] */
   int                filfd;      /* Descriptor for the file being loaded */
 };
+
+/* A NuttX module is expected to export a function called module_initialize()
+ * that has the following function prototype.  This function should appear as
+ * the entry point in the ELF module file and will be called bythe binfmt
+ * logic after the module has been loaded into kernel memory.
+ *
+ * As an alternative using GCC, the module may mark a function with the
+ * "constructor" attribute and the module initializer will be called along
+ * with any other C++ constructors.  The "destructor" attribute may also
+ * be used to mark an module uninitialization function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure to
+ *   initialize the module.
+ */
+
+typedef CODE int (*mod_initializer_t)(void);
 
 /****************************************************************************
  * Public Functions
