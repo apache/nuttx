@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_symbols.c
+ * sched/module/mod_symbols.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 #include <nuttx/binfmt/symtab.h>
 
-#include "libmodule.h"
+#include "module.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,15 +59,11 @@
 #endif
 
 /****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_symname
+ * Name: mod_symname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -82,8 +78,8 @@
  *
  ****************************************************************************/
 
-static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
-                          FAR const Elf32_Sym *sym)
+static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
+                       FAR const Elf32_Sym *sym)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -97,7 +93,7 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
 
   if (sym->st_name == 0)
     {
-      bdbg("Symbol has no name\n");
+      sdbg("Symbol has no name\n");
       return -ESRCH;
     }
 
@@ -116,7 +112,7 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
         {
           if (loadinfo->filelen <= offset)
             {
-              bdbg("At end of file\n");
+              sdbg("At end of file\n");
               return -EINVAL;
             }
 
@@ -126,10 +122,10 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = libmod_read(loadinfo, buffer, readlen, offset);
+      ret = mod_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          bdbg("libmod_read failed: %d\n", ret);
+          sdbg("mod_read failed: %d\n", ret);
           return ret;
         }
 
@@ -146,10 +142,10 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = libmod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
+      ret = mod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
       if (ret < 0)
         {
-          bdbg("libmod_reallocbuffer failed: %d\n", ret);
+          sdbg("mod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -164,7 +160,7 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_findsymtab
+ * Name: mod_findsymtab
  *
  * Description:
  *   Find the symbol table section.
@@ -175,7 +171,7 @@ static int libmod_symname(FAR struct libmod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo)
+int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
@@ -195,7 +191,7 @@ int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo)
 
   if (loadinfo->symtabidx == 0)
     {
-      bdbg("No symbols in ELF file\n");
+      sdbg("No symbols in ELF file\n");
       return -EINVAL;
     }
 
@@ -203,7 +199,7 @@ int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: libmod_readsym
+ * Name: mod_readsym
  *
  * Description:
  *   Read the ELFT symbol structure at the specfied index into memory.
@@ -219,8 +215,8 @@ int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
-                   FAR Elf32_Sym *sym)
+int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
+                FAR Elf32_Sym *sym)
 {
   FAR Elf32_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
   off_t offset;
@@ -229,7 +225,7 @@ int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
 
   if (index < 0 || index > (symtab->sh_size / sizeof(Elf32_Sym)))
     {
-      bdbg("Bad relocation symbol index: %d\n", index);
+      sdbg("Bad relocation symbol index: %d\n", index);
       return -EINVAL;
     }
 
@@ -239,11 +235,11 @@ int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return libmod_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
+  return mod_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
 }
 
 /****************************************************************************
- * Name: libmod_symvalue
+ * Name: mod_symvalue
  *
  * Description:
  *   Get the value of a symbol.  The updated value of the symbol is returned
@@ -265,8 +261,8 @@ int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
-                    FAR const struct symtab_s *exports, int nexports)
+int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
+                 FAR const struct symtab_s *exports, int nexports)
 {
   FAR const struct symtab_s *symbol;
   uintptr_t secbase;
@@ -278,7 +274,7 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* NuttX ELF modules should be compiled with -fno-common. */
 
-        bdbg("SHN_COMMON: Re-compile with -fno-common\n");
+        sdbg("SHN_COMMON: Re-compile with -fno-common\n");
         return -ENOSYS;
       }
 
@@ -286,7 +282,7 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* st_value already holds the correct value */
 
-        bvdbg("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
+        svdbg("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
         return OK;
       }
 
@@ -294,7 +290,7 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* Get the name of the undefined symbol */
 
-        ret = libmod_symname(loadinfo, sym);
+        ret = mod_symname(loadinfo, sym);
         if (ret < 0)
           {
             /* There are a few relocations for a few architectures that do
@@ -303,7 +299,7 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
              * indicate the nameless symbol.
              */
 
-            bdbg("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
+            sdbg("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
             return ret;
           }
 
@@ -316,13 +312,13 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
 #endif
         if (!symbol)
           {
-            bdbg("SHN_UNDEF: Exported symbol \"%s\" not found\n", loadinfo->iobuffer);
+            sdbg("SHN_UNDEF: Exported symbol \"%s\" not found\n", loadinfo->iobuffer);
             return -ENOENT;
           }
 
         /* Yes... add the exported symbol value to the ELF symbol table entry */
 
-        bvdbg("SHN_ABS: name=%s %08x+%08x=%08x\n",
+        svdbg("SHN_ABS: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
@@ -334,7 +330,7 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
 
-        bvdbg("Other: %08x+%08x=%08x\n",
+        svdbg("Other: %08x+%08x=%08x\n",
               sym->st_value, secbase, sym->st_value + secbase);
 
         sym->st_value += secbase;

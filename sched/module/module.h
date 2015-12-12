@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule.h
+ * sched/module/module.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BINFMT_LIBELF_LIBELF_H
-#define __BINFMT_LIBELF_LIBELF_H
+#ifndef __SCHED_MODULE_MODULE_H
+#define __SCHED_MODULE_MODULE_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,7 @@
 #include <elf32.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 
 /****************************************************************************
  * Public Types
@@ -56,7 +56,7 @@
  * of the kernel module.
  */
 
-struct libmod_loadinfo_s
+struct mod_loadinfo_s
 {
   /* elfalloc is the base address of the memory that is allocated to hold the
    * module image.
@@ -85,11 +85,7 @@ struct libmod_loadinfo_s
  ****************************************************************************/
 
 /****************************************************************************
- * These are APIs exported by libmodule and used by insmod
- ****************************************************************************/
-
-/****************************************************************************
- * Name: libmod_initialize
+ * Name: mod_initialize
  *
  * Description:
  *   This function is called to configure the library to process an kernel
@@ -101,15 +97,15 @@ struct libmod_loadinfo_s
  *
  ****************************************************************************/
 
-int libmod_initialize(FAR const char *filename,
-                      FAR struct libmod_loadinfo_s *loadinfo);
+int mod_initialize(FAR const char *filename,
+                   FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_uninitialize
+ * Name: mod_uninitialize
  *
  * Description:
  *   Releases any resources committed by mod_init().  This essentially
- *   undoes the actions of libmod_initialize.
+ *   undoes the actions of mod_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -117,10 +113,10 @@ int libmod_initialize(FAR const char *filename,
  *
  ****************************************************************************/
 
-int libmod_uninitialize(FAR struct libmod_loadinfo_s *loadinfo);
+int mod_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_load
+ * Name: mod_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
@@ -132,10 +128,10 @@ int libmod_uninitialize(FAR struct libmod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int libmod_load(FAR struct libmod_loadinfo_s *loadinfo);
+int mod_load(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_bind
+ * Name: mod_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
@@ -148,11 +144,11 @@ int libmod_load(FAR struct libmod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 struct symtab_s;
-int libmod_bind(FAR struct libmod_loadinfo_s *loadinfo,
-                FAR const struct symtab_s *exports, int nexports);
+int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
+             FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
- * Name: libmod_unload
+ * Name: mod_unload
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
@@ -165,10 +161,10 @@ int libmod_bind(FAR struct libmod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int libmod_unload(struct libmod_loadinfo_s *loadinfo);
+int mod_unload(struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_verifyheader
+ * Name: mod_verifyheader
  *
  * Description:
  *   Given the header from a possible ELF executable, verify that it is
@@ -180,10 +176,10 @@ int libmod_unload(struct libmod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int libmod_verifyheader(FAR const Elf32_Ehdr *header);
+int mod_verifyheader(FAR const Elf32_Ehdr *header);
 
 /****************************************************************************
- * Name: libmod_read
+ * Name: mod_read
  *
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'.  The data is
@@ -195,11 +191,11 @@ int libmod_verifyheader(FAR const Elf32_Ehdr *header);
  *
  ****************************************************************************/
 
-int libmod_read(FAR struct libmod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
-                size_t readsize, off_t offset);
+int mod_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
+             size_t readsize, off_t offset);
 
 /****************************************************************************
- * Name: libmod_loadshdrs
+ * Name: mod_loadshdrs
  *
  * Description:
  *   Loads section headers into memory.
@@ -210,10 +206,10 @@ int libmod_read(FAR struct libmod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo);
+int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_findsection
+ * Name: mod_findsection
  *
  * Description:
  *   A section by its name.
@@ -228,11 +224,11 @@ int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int libmod_findsection(FAR struct libmod_loadinfo_s *loadinfo,
-                       FAR const char *sectname);
+int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
+                    FAR const char *sectname);
 
 /****************************************************************************
- * Name: libmod_findsymtab
+ * Name: mod_findsymtab
  *
  * Description:
  *   Find the symbol table section.
@@ -243,10 +239,10 @@ int libmod_findsection(FAR struct libmod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo);
+int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_readsym
+ * Name: mod_readsym
  *
  * Description:
  *   Read the ELFT symbol structure at the specfied index into memory.
@@ -262,11 +258,11 @@ int libmod_findsymtab(FAR struct libmod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
-                   FAR Elf32_Sym *sym);
+int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
+                FAR Elf32_Sym *sym);
 
 /****************************************************************************
- * Name: libmod_symvalue
+ * Name: mod_symvalue
  *
  * Description:
  *   Get the value of a symbol.  The updated value of the symbol is returned
@@ -290,11 +286,11 @@ int libmod_readsym(FAR struct libmod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
-                    FAR const struct symtab_s *exports, int nexports);
+int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
+                 FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
- * Name: libmod_freebuffers
+ * Name: mod_freebuffers
  *
  * Description:
  *  Release all working buffers.
@@ -305,10 +301,10 @@ int libmod_symvalue(FAR struct libmod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
  *
  ****************************************************************************/
 
-int libmod_freebuffers(FAR struct libmod_loadinfo_s *loadinfo);
+int mod_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_allocbuffer
+ * Name: mod_allocbuffer
  *
  * Description:
  *   Perform the initial allocation of the I/O buffer, if it has not already
@@ -320,10 +316,10 @@ int libmod_freebuffers(FAR struct libmod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int libmod_allocbuffer(FAR struct libmod_loadinfo_s *loadinfo);
+int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: libmod_reallocbuffer
+ * Name: mod_reallocbuffer
  *
  * Description:
  *   Increase the size of I/O buffer by the specified buffer increment.
@@ -334,6 +330,6 @@ int libmod_allocbuffer(FAR struct libmod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int libmod_reallocbuffer(FAR struct libmod_loadinfo_s *loadinfo, size_t increment);
+int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
 
-#endif /* __BINFMT_LIBELF_LIBELF_H */
+#endif /* __SCHED_MODULE_MODULE_H */

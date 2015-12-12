@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_verify.c
+ * include/nuttx/module.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,91 +33,115 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_MODULE_H
+#define __INCLUDE_NUTTX_MODULE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <debug.h>
-#include <errno.h>
+#include <sys/types.h>
 
-#include <nuttx/binfmt/module.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <elf32.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/binfmt/binfmt.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_MODULE_ALIGN_LOG2
+#  define CONFIG_MODULE_ALIGN_LOG2 2
+#endif
+
+#ifndef CONFIG_MODULE_STACKSIZE
+#  define CONFIG_MODULE_STACKSIZE 2048
+#endif
+
+#ifndef CONFIG_MODULE_BUFFERSIZE
+#  define CONFIG_MODULE_BUFFERSIZE 128
+#endif
+
+#ifndef CONFIG_MODULE_BUFFERINCR
+#  define CONFIG_MODULE_BUFFERINCR 32
+#endif
 
 /****************************************************************************
- * Private Constant Data
+ * Public Types
  ****************************************************************************/
 
-static const char g_modmagic[EI_MAGIC_SIZE] =
+/* A NuttX module is expected to export a function called module_initialize()
+ * that has the following function prototype.  This function should appear as
+ * the entry point in the ELF module file and will be called bythe binfmt
+ * logic after the module has been loaded into kernel memory.
+ *
+ * As an alternative using GCC, the module may mark a function with the
+ * "constructor" attribute and the module initializer will be called along
+ * with any other C++ constructors.  The "destructor" attribute may also
+ * be used to mark an module uninitialization function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure to
+ *   initialize the module.
+ */
+
+typedef CODE int (*mod_initializer_t)(void);
+
+/* This describes the file to be loaded. */
+
+struct symtab_s;
+struct module_s
 {
-    0x7f, 'E', 'L', 'F'
+  /* Information provided to insmod by the caller */
+
+  FAR const char *filename;            /* Full path to the binary to be loaded */
+  FAR const struct symtab_s *exports;  /* Table of exported symbols */
+  int nexports;                        /* The number of symbols in exports[] */
+
+  /* Information provided from insmod (if successful) describing the
+   * resources used by the loaded module.
+   */
+
+  mod_initializer_t initializer;       /* Module initializer function */
+  FAR void *alloc;                     /* Allocated kernel memory */
 };
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Name: libmod_verifyheader
+ * Name: insmod
  *
  * Description:
- *   Given the header from a possible ELF executable, verify that it
- *   is an ELF executable.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- *   -ENOEXEC  : Not an ELF file
- *   -EINVAL : Not a relocatable ELF file or not supported by the current,
- *               configured architecture.
+ *   Verify that the file is an ELF module binary and, if so, load the
+ *   module into kernel memory and initialize it for use.
  *
  ****************************************************************************/
 
-int libmod_verifyheader(FAR const Elf32_Ehdr *ehdr)
-{
-  if (!ehdr)
-    {
-      bdbg("NULL ELF header!");
-      return -ENOEXEC;
-    }
+int insmod(FAR struct module_s *modp);
 
-  /* Verify that the magic number indicates an ELF file */
-
-  if (memcmp(ehdr->e_ident, g_modmagic, EI_MAGIC_SIZE) != 0)
-    {
-      bvdbg("Not ELF magic {%02x, %02x, %02x, %02x}\n",
-            ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
-      return -ENOEXEC;
-    }
-
-  /* Verify that this is a relocatable file */
-
-  if (ehdr->e_type != ET_REL)
-    {
-      bdbg("Not a relocatable file: e_type=%d\n", ehdr->e_type);
-      return -EINVAL;
-    }
-
-  /* Verify that this file works with the currently configured architecture */
-
-  if (up_checkarch(ehdr))
-    {
-      bdbg("Not a supported architecture\n");
-      return -ENOEXEC;
-    }
-
-  /* Looks good so far... we still might find some problems later. */
-
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* __INCLUDE_NUTTX_MODULE_H */

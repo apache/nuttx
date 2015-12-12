@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_sections.c
+ * sched/module/mod_sections.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,24 +46,16 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 
-#include "libmodule.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
+#include "module.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_sectname
+ * Name: mod_sectname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -74,8 +66,8 @@
  *
  ****************************************************************************/
 
-static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
-                                  FAR const Elf32_Shdr *shdr)
+static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
+                               FAR const Elf32_Shdr *shdr)
 {
   FAR Elf32_Shdr *shstr;
   FAR uint8_t *buffer;
@@ -93,7 +85,7 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
   shstrndx = loadinfo->ehdr.e_shstrndx;
   if (shstrndx == SHN_UNDEF)
     {
-      bdbg("No section header string table\n");
+      sdbg("No section header string table\n");
       return -EINVAL;
     }
 
@@ -126,7 +118,7 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
         {
           if (loadinfo->filelen <= offset)
             {
-              bdbg("At end of file\n");
+              sdbg("At end of file\n");
               return -EINVAL;
             }
 
@@ -136,10 +128,10 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = libmod_read(loadinfo, buffer, readlen, offset);
+      ret = mod_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          bdbg("Failed to read section name\n");
+          sdbg("Failed to read section name\n");
           return ret;
         }
 
@@ -156,10 +148,10 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = libmod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
+      ret = mod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
       if (ret < 0)
         {
-          bdbg("libmod_reallocbuffer failed: %d\n", ret);
+          sdbg("mod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -174,7 +166,7 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_loadshdrs
+ * Name: mod_loadshdrs
  *
  * Description:
  *   Loads section headers into memory.
@@ -185,7 +177,7 @@ static inline int libmod_sectname(FAR struct libmod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo)
+int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 {
   size_t shdrsize;
   int ret;
@@ -196,7 +188,7 @@ int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo)
 
   if (loadinfo->ehdr.e_shnum < 1)
     {
-      bdbg("No sections(?)\n");
+      sdbg("No sections(?)\n");
       return -EINVAL;
     }
 
@@ -205,7 +197,7 @@ int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo)
   shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
-      bdbg("Insufficent space in file for section header table\n");
+      sdbg("Insufficent space in file for section header table\n");
       return -ESPIPE;
     }
 
@@ -214,25 +206,25 @@ int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo)
   loadinfo->shdr = (FAR FAR Elf32_Shdr *)kmm_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
-      bdbg("Failed to allocate the section header table. Size: %ld\n",
+      sdbg("Failed to allocate the section header table. Size: %ld\n",
            (long)shdrsize);
       return -ENOMEM;
     }
 
   /* Read the section header table into memory */
 
-  ret = libmod_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
+  ret = mod_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
                     loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
-      bdbg("Failed to read section header table: %d\n", ret);
+      sdbg("Failed to read section header table: %d\n", ret);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: libmod_findsection
+ * Name: mod_findsection
  *
  * Description:
  *   A section by its name.
@@ -247,8 +239,8 @@ int libmod_loadshdrs(FAR struct libmod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int libmod_findsection(FAR struct libmod_loadinfo_s *loadinfo,
-                       FAR const char *sectname)
+int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
+                    FAR const char *sectname)
 {
   FAR const Elf32_Shdr *shdr;
   int ret;
@@ -261,16 +253,16 @@ int libmod_findsection(FAR struct libmod_loadinfo_s *loadinfo,
       /* Get the name of this section */
 
       shdr = &loadinfo->shdr[i];
-      ret  = libmod_sectname(loadinfo, shdr);
+      ret  = mod_sectname(loadinfo, shdr);
       if (ret < 0)
         {
-          bdbg("libmod_sectname failed: %d\n", ret);
+          sdbg("mod_sectname failed: %d\n", ret);
           return ret;
         }
 
       /* Check if the name of this section is 'sectname' */
 
-      bvdbg("%d. Comparing \"%s\" and .\"%s\"\n",
+      svdbg("%d. Comparing \"%s\" and .\"%s\"\n",
             i, loadinfo->iobuffer, sectname);
 
       if (strcmp((FAR const char *)loadinfo->iobuffer, sectname) == 0)

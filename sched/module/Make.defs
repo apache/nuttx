@@ -1,7 +1,7 @@
 ############################################################################
-# binfmt/libmodule/Make.defs
+# sched/module/Make.defs
 #
-#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,19 +37,18 @@ ifeq ($(CONFIG_MODULE),y)
 
 # OS module interfaces
 
-BINFMT_CSRCS += insmod.c
+CSRCS += mod_insmod.c
 
 # loadable module library
 
-BINFMT_CSRCS += libmodule_bind.c libmodule_init.c libmodule_iobuffer.c
-BINFMT_CSRCS += libmodule_load.c libmodule_read.c libmodule_sections.c
-BINFMT_CSRCS += libmodule_symbols.c libmodule_uninit.c libmodule_unload.c
-BINFMT_CSRCS += libmodule_verify.c
+CSRCS += mod_bind.c mod_init.c mod_iobuffer.c mod_load.c mod_read.c
+CSRCS += mod_sections.c mod_symbols.c mod_uninit.c mod_unload.c
+CSRCS += mod_verify.c
 
-# Hook the libmodule subdirectory into the build
+# Hook the module subdirectory into the build
 
-VPATH += libmodule
-SUBDIRS += libmodule
-DEPPATH += --dep-path libmodule
+VPATH += module
+SUBDIRS += module
+DEPPATH += --dep-path module
 
 endif

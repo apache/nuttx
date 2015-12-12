@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_uninit.c
+ * sched/module/mod_iobuffer.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,37 +39,24 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 
-#include "libmodule.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "module.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_uninitialize
+ * Name: mod_allocbuffer
  *
  * Description:
- *   Releases any resources committed by libmod_initialize().  This essentially
- *   undoes the actions of libmod_initialize.
+ *   Perform the initial allocation of the I/O buffer, if it has not already
+ *   been allocated.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -77,27 +64,32 @@
  *
  ****************************************************************************/
 
-int libmod_uninitialize(struct libmod_loadinfo_s *loadinfo)
+int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
 {
-  /* Free all working buffers */
+  /* Has a buffer been allocated> */
 
-  libmod_freebuffers(loadinfo);
-
-  /* Close the ELF file */
-
-  if (loadinfo->filfd >= 0)
+  if (!loadinfo->iobuffer)
     {
-      close(loadinfo->filfd);
+      /* No.. allocate one now */
+
+      loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_MODULE_BUFFERSIZE);
+      if (!loadinfo->iobuffer)
+        {
+          sdbg("Failed to allocate an I/O buffer\n");
+          return -ENOMEM;
+        }
+
+      loadinfo->buflen = CONFIG_MODULE_BUFFERSIZE;
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: libmod_freebuffers
+ * Name: mod_reallocbuffer
  *
  * Description:
- *  Release all working buffers.
+ *   Increase the size of I/O buffer by the specified buffer increment.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -105,22 +97,28 @@ int libmod_uninitialize(struct libmod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int libmod_freebuffers(struct libmod_loadinfo_s *loadinfo)
+int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
 {
-  /* Release all working allocations  */
+  FAR void *buffer;
+  size_t newsize;
 
-  if (loadinfo->shdr)
+  /* Get the new size of the allocation */
+
+  newsize = loadinfo->buflen + increment;
+
+  /* And perform the reallocation */
+
+   buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
+   if (!buffer)
     {
-      kmm_free((FAR void *)loadinfo->shdr);
-      loadinfo->shdr      = NULL;
+      sdbg("Failed to reallocate the I/O buffer\n");
+      return -ENOMEM;
     }
 
-  if (loadinfo->iobuffer)
-    {
-      kmm_free((FAR void *)loadinfo->iobuffer);
-      loadinfo->iobuffer  = NULL;
-      loadinfo->buflen    = 0;
-    }
+  /* Save the new buffer info */
 
+  loadinfo->iobuffer = buffer;
+  loadinfo->buflen   = newsize;
   return OK;
 }
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/module.c
+ * sched/module/module.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,9 +49,9 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 
-#include "libmodule/libmodule.h"
+#include "module/module.h"
 
 #ifdef CONFIG_MODULE
 
@@ -86,7 +86,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
-static void mod_dumploadinfo(FAR struct libmod_loadinfo_s *loadinfo)
+static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
@@ -171,14 +171,14 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
 
 int insmod(FAR struct module_s *modp)
 {
-  struct libmod_loadinfo_s loadinfo;  /* Contains globals for libmodule */
+  struct mod_loadinfo_s loadinfo;
   int ret;
 
   bvdbg("Loading file: %s\n", modp->filename);
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = libmod_initialize(modp->filename, &loadinfo);
+  ret = mod_initialize(modp->filename, &loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -188,7 +188,7 @@ int insmod(FAR struct module_s *modp)
 
   /* Load the program binary */
 
-  ret = libmod_load(&loadinfo);
+  ret = mod_load(&loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -198,7 +198,7 @@ int insmod(FAR struct module_s *modp)
 
   /* Bind the program to the exported symbol table */
 
-  ret = libmod_bind(&loadinfo, modp->exports, modp->nexports);
+  ret = mod_bind(&loadinfo, modp->exports, modp->nexports);
   if (ret != 0)
     {
       bdbg("Failed to bind symbols program binary: %d\n", ret);
@@ -226,13 +226,13 @@ int insmod(FAR struct module_s *modp)
         }
     }
 
-  libmod_uninitialize(&loadinfo);
+  mod_uninitialize(&loadinfo);
   return OK;
 
 errout_with_load:
-  libmod_unload(&loadinfo);
+  mod_unload(&loadinfo);
 errout_with_init:
-  libmod_uninitialize(&loadinfo);
+  mod_uninitialize(&loadinfo);
 errout:
   return ret;
 }

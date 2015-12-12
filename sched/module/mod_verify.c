@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_iobuffer.c
+ * sched/module/mod_verify.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,98 +39,76 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/binfmt/module.h>
-
-#include "libmodule.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <nuttx/module.h>
 
 /****************************************************************************
  * Private Constant Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static const char g_modmagic[EI_MAGIC_SIZE] =
+{
+    0x7f, 'E', 'L', 'F'
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_allocbuffer
+ * Name: mod_verifyheader
  *
  * Description:
- *   Perform the initial allocation of the I/O buffer, if it has not already
- *   been allocated.
+ *   Given the header from a possible ELF executable, verify that it
+ *   is an ELF executable.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- ****************************************************************************/
-
-int libmod_allocbuffer(FAR struct libmod_loadinfo_s *loadinfo)
-{
-  /* Has a buffer been allocated> */
-
-  if (!loadinfo->iobuffer)
-    {
-      /* No.. allocate one now */
-
-      loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_MODULE_BUFFERSIZE);
-      if (!loadinfo->iobuffer)
-        {
-          bdbg("Failed to allocate an I/O buffer\n");
-          return -ENOMEM;
-        }
-
-      loadinfo->buflen = CONFIG_MODULE_BUFFERSIZE;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: libmod_reallocbuffer
- *
- * Description:
- *   Increase the size of I/O buffer by the specified buffer increment.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   -ENOEXEC  : Not an ELF file
+ *   -EINVAL : Not a relocatable ELF file or not supported by the current,
+ *               configured architecture.
  *
  ****************************************************************************/
 
-int libmod_reallocbuffer(FAR struct libmod_loadinfo_s *loadinfo, size_t increment)
+int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
 {
-  FAR void *buffer;
-  size_t newsize;
-
-  /* Get the new size of the allocation */
-
-  newsize = loadinfo->buflen + increment;
-
-  /* And perform the reallocation */
-
-   buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
-   if (!buffer)
+  if (!ehdr)
     {
-      bdbg("Failed to reallocate the I/O buffer\n");
-      return -ENOMEM;
+      sdbg("NULL ELF header!");
+      return -ENOEXEC;
     }
 
-  /* Save the new buffer info */
+  /* Verify that the magic number indicates an ELF file */
 
-  loadinfo->iobuffer = buffer;
-  loadinfo->buflen   = newsize;
+  if (memcmp(ehdr->e_ident, g_modmagic, EI_MAGIC_SIZE) != 0)
+    {
+      svdbg("Not ELF magic {%02x, %02x, %02x, %02x}\n",
+            ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
+      return -ENOEXEC;
+    }
+
+  /* Verify that this is a relocatable file */
+
+  if (ehdr->e_type != ET_REL)
+    {
+      sdbg("Not a relocatable file: e_type=%d\n", ehdr->e_type);
+      return -EINVAL;
+    }
+
+  /* Verify that this file works with the currently configured architecture */
+
+  if (up_checkarch(ehdr))
+    {
+      sdbg("Not a supported architecture\n");
+      return -ENOEXEC;
+    }
+
+  /* Looks good so far... we still might find some problems later. */
+
   return OK;
 }
-

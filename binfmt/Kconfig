@@ -12,16 +12,6 @@ config BINFMT_DISABLE
 
 if !BINFMT_DISABLE
 
-config MODULE
-	bool "Enable loadable OS modules"
-	default n
-	---help---
-		Enable support for loadable OS modules.  Default: n
-
-if MODULE
-source binfmt/libmodule/Kconfig
-endif
-
 config BINFMT_EXEPATH
 	bool "Support PATH variable"
 	default n

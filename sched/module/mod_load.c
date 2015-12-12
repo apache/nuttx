@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_load.c
+ * sched/module/mod_load.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,9 +51,9 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 
-#include "libmodule.h"
+#include "module.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,15 +72,11 @@
 #endif
 
 /****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_elfsize
+ * Name: mod_elfsize
  *
  * Description:
  *   Calculate total memory allocation for the ELF file.
@@ -91,7 +87,7 @@
  *
  ****************************************************************************/
 
-static void libmod_elfsize(struct libmod_loadinfo_s *loadinfo)
+static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
 {
   size_t textsize;
   size_t datasize;
@@ -134,7 +130,7 @@ static void libmod_elfsize(struct libmod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: libmod_loadfile
+ * Name: mod_loadfile
  *
  * Description:
  *   Read the section data into memory. Section addresses in the shdr[] are
@@ -146,7 +142,7 @@ static void libmod_elfsize(struct libmod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
+static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 {
   FAR uint8_t *text;
   FAR uint8_t *data;
@@ -156,7 +152,7 @@ static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
 
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
-  bvdbg("Loaded sections:\n");
+  svdbg("Loaded sections:\n");
   text = (FAR uint8_t *)loadinfo->textalloc;
   data = (FAR uint8_t *)loadinfo->datastart;
 
@@ -193,10 +189,10 @@ static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
         {
           /* Read the section data from sh_offset to the memory region */
 
-          ret = libmod_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
+          ret = mod_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
-              bdbg("ERROR: Failed to read section %d: %d\n", i, ret);
+              sdbg("ERROR: Failed to read section %d: %d\n", i, ret);
               return ret;
             }
         }
@@ -212,7 +208,7 @@ static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
 
       /* Update sh_addr to point to copy in memory */
 
-      bvdbg("%d. %08lx->%08lx\n", i,
+      svdbg("%d. %08lx->%08lx\n", i,
             (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
 
       shdr->sh_addr = (uintptr_t)*pptr;
@@ -230,7 +226,7 @@ static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_load
+ * Name: mod_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
@@ -242,25 +238,25 @@ static inline int libmod_loadfile(FAR struct libmod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int libmod_load(FAR struct libmod_loadinfo_s *loadinfo)
+int mod_load(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 
-  bvdbg("loadinfo: %p\n", loadinfo);
+  svdbg("loadinfo: %p\n", loadinfo);
   DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
 
   /* Load section headers into memory */
 
-  ret = libmod_loadshdrs(loadinfo);
+  ret = mod_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: libmod_loadshdrs failed: %d\n", ret);
+      sdbg("ERROR: mod_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
   /* Determine total size to allocate */
 
-  libmod_elfsize(loadinfo);
+  mod_elfsize(loadinfo);
 
   /* Allocate (and zero) memory for the ELF file. */
 
@@ -269,7 +265,7 @@ int libmod_load(FAR struct libmod_loadinfo_s *loadinfo)
   loadinfo->textalloc = (uintptr_t)kmm_zalloc(loadinfo->textsize + loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
-      bdbg("ERROR: Failed to allocate memory for the module\n");
+      sdbg("ERROR: Failed to allocate memory for the module\n");
       ret = -ENOMEM;
       goto errout_with_buffers;
     }
@@ -278,10 +274,10 @@ int libmod_load(FAR struct libmod_loadinfo_s *loadinfo)
 
   /* Load ELF section data into memory */
 
-  ret = libmod_loadfile(loadinfo);
+  ret = mod_loadfile(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: libmod_loadfile failed: %d\n", ret);
+      sdbg("ERROR: mod_loadfile failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -290,7 +286,6 @@ int libmod_load(FAR struct libmod_loadinfo_s *loadinfo)
   /* Error exits */
 
 errout_with_buffers:
-  libmod_unload(loadinfo);
+  mod_unload(loadinfo);
   return ret;
 }
-

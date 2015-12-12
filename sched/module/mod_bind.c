@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_bind.c
+ * sched/module/mod_bind.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,20 +46,20 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 #include <nuttx/binfmt/symtab.h>
 
-#include "libmodule.h"
+#include "module.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_MODULE_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_MODULE_DUMPBUFFER have to
+ * be defined or CONFIG_MODULE_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_MODULE_DUMPBUFFER)
 #  undef CONFIG_MODULE_DUMPBUFFER
 #endif
 
@@ -68,34 +68,26 @@
 #endif
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-# define libmod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
 #else
-# define libmod_dumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n)
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_readrel
+ * Name: mod_readrel
  *
  * Description:
  *   Read the ELF32_Rel structure into memory.
  *
  ****************************************************************************/
 
-static inline int libmod_readrel(FAR struct libmod_loadinfo_s *loadinfo,
-                                 FAR const Elf32_Shdr *relsec,
-                                 int index, FAR Elf32_Rel *rel)
+static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
+                              FAR const Elf32_Shdr *relsec,
+                              int index, FAR Elf32_Rel *rel)
 {
   off_t offset;
 
@@ -103,7 +95,7 @@ static inline int libmod_readrel(FAR struct libmod_loadinfo_s *loadinfo,
 
   if (index < 0 || index > (relsec->sh_size / sizeof(Elf32_Rel)))
     {
-      bdbg("Bad relocation symbol index: %d\n", index);
+      sdbg("Bad relocation symbol index: %d\n", index);
       return -EINVAL;
     }
 
@@ -113,11 +105,11 @@ static inline int libmod_readrel(FAR struct libmod_loadinfo_s *loadinfo,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return libmod_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
+  return mod_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
 }
 
 /****************************************************************************
- * Name: libmod_relocate and libmod_relocateadd
+ * Name: mod_relocate and mod_relocateadd
  *
  * Description:
  *   Perform all relocations associated with a section.
@@ -128,8 +120,8 @@ static inline int libmod_readrel(FAR struct libmod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
-                           FAR const struct symtab_s *exports, int nexports)
+static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
+                        FAR const struct symtab_s *exports, int nexports)
 
 {
   FAR Elf32_Shdr *relsec = &loadinfo->shdr[relidx];
@@ -153,10 +145,10 @@ static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
 
       /* Read the relocation entry into memory */
 
-      ret = libmod_readrel(loadinfo, relsec, i, &rel);
+      ret = mod_readrel(loadinfo, relsec, i, &rel);
       if (ret < 0)
         {
-          bdbg("Section %d reloc %d: Failed to read relocation entry: %d\n",
+          sdbg("Section %d reloc %d: Failed to read relocation entry: %d\n",
                relidx, i, ret);
           return ret;
         }
@@ -169,17 +161,17 @@ static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
 
       /* Read the symbol table entry into memory */
 
-      ret = libmod_readsym(loadinfo, symidx, &sym);
+      ret = mod_readsym(loadinfo, symidx, &sym);
       if (ret < 0)
         {
-          bdbg("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
+          sdbg("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
                relidx, i, symidx, ret);
           return ret;
         }
 
       /* Get the value of the symbol (in sym.st_value) */
 
-      ret = libmod_symvalue(loadinfo, &sym, exports, nexports);
+      ret = mod_symvalue(loadinfo, &sym, exports, nexports);
       if (ret < 0)
         {
           /* The special error -ESRCH is returned only in one condition:  The
@@ -194,13 +186,13 @@ static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
 
           if (ret == -ESRCH)
             {
-              bdbg("Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
+              sdbg("Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
                   relidx, i, symidx, ret);
               psym = NULL;
             }
           else
             {
-              bdbg("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
+              sdbg("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
                   relidx, i, symidx, ret);
               return ret;
             }
@@ -210,7 +202,7 @@ static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
 
       if (rel.r_offset < 0 || rel.r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
-          bdbg("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+          sdbg("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
                relidx, i, rel.r_offset, dstsec->sh_size);
           return -EINVAL;
         }
@@ -222,7 +214,7 @@ static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
       ret = up_relocate(&rel, psym, addr);
       if (ret < 0)
         {
-          bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
+          sdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
           return ret;
         }
     }
@@ -230,10 +222,10 @@ static int libmod_relocate(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
   return OK;
 }
 
-static int libmod_relocateadd(FAR struct libmod_loadinfo_s *loadinfo, int relidx,
+static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
                               FAR const struct symtab_s *exports, int nexports)
 {
-  bdbg("Not implemented\n");
+  sdbg("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -242,7 +234,7 @@ static int libmod_relocateadd(FAR struct libmod_loadinfo_s *loadinfo, int relidx
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_bind
+ * Name: mod_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
@@ -254,28 +246,28 @@ static int libmod_relocateadd(FAR struct libmod_loadinfo_s *loadinfo, int relidx
  *
  ****************************************************************************/
 
-int libmod_bind(FAR struct libmod_loadinfo_s *loadinfo,
-                FAR const struct symtab_s *exports, int nexports)
+int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
+             FAR const struct symtab_s *exports, int nexports)
 {
   int ret;
   int i;
 
   /* Find the symbol and string tables */
 
-  ret = libmod_findsymtab(loadinfo);
+  ret = mod_findsymtab(loadinfo);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* Allocate an I/O buffer.  This buffer is used by libmod_symname() to
+  /* Allocate an I/O buffer.  This buffer is used by mod_symname() to
    * accumulate the variable length symbol name.
    */
 
-  ret = libmod_allocbuffer(loadinfo);
+  ret = mod_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      bdbg("libmod_allocbuffer failed: %d\n", ret);
+      sdbg("mod_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -304,11 +296,11 @@ int libmod_bind(FAR struct libmod_loadinfo_s *loadinfo,
 
       if (loadinfo->shdr[i].sh_type == SHT_REL)
         {
-          ret = libmod_relocate(loadinfo, i, exports, nexports);
+          ret = mod_relocate(loadinfo, i, exports, nexports);
         }
       else if (loadinfo->shdr[i].sh_type == SHT_RELA)
         {
-          ret = libmod_relocateadd(loadinfo, i, exports, nexports);
+          ret = mod_relocateadd(loadinfo, i, exports, nexports);
         }
 
       if (ret < 0)

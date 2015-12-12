@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/libmodule/libmodule_unload.c
+ * sched/module/mod_uninit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,37 +39,25 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <unistd.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/binfmt/module.h>
+#include <nuttx/module.h>
 
-#include "libmodule.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "module.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: libmod_unload
+ * Name: mod_uninitialize
  *
  * Description:
- *   This function unloads the object from memory. This essentially undoes
- *   the actions of libmod_load.  It is called only under certain error
- *   conditions after the module has been loaded but not yet started.
+ *   Releases any resources committed by mod_initialize().  This essentially
+ *   undoes the actions of mod_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -77,26 +65,50 @@
  *
  ****************************************************************************/
 
-int libmod_unload(struct libmod_loadinfo_s *loadinfo)
+int mod_uninitialize(struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
-  libmod_freebuffers(loadinfo);
+  mod_freebuffers(loadinfo);
 
-  /* Release memory holding the relocated ELF image */
+  /* Close the ELF file */
 
-  if (loadinfo->textalloc != 0)
+  if (loadinfo->filfd >= 0)
     {
-      kmm_free((FAR void *)loadinfo->textalloc);
+      close(loadinfo->filfd);
     }
-
-  /* Clear out all indications of the allocated address environment */
-
-  loadinfo->textalloc = 0;
-  loadinfo->datastart = 0;
-  loadinfo->textsize  = 0;
-  loadinfo->datasize  = 0;
 
   return OK;
 }
 
+/****************************************************************************
+ * Name: mod_freebuffers
+ *
+ * Description:
+ *  Release all working buffers.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int mod_freebuffers(struct mod_loadinfo_s *loadinfo)
+{
+  /* Release all working allocations  */
+
+  if (loadinfo->shdr)
+    {
+      kmm_free((FAR void *)loadinfo->shdr);
+      loadinfo->shdr      = NULL;
+    }
+
+  if (loadinfo->iobuffer)
+    {
+      kmm_free((FAR void *)loadinfo->iobuffer);
+      loadinfo->iobuffer  = NULL;
+      loadinfo->buflen    = 0;
+    }
+
+  return OK;
+}
