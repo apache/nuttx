@@ -1743,9 +1743,10 @@ Configuration sub-directories
        If you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
-  mxtxplnd:
+  module:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are four
+    A simple stripped down configuration that was used for testing NuttX
+    OS modules.  There are five
     very similar NSH configurations:
 
       - knsh.  This is a somewhat simplified version of the nsh configuration
@@ -1754,6 +1755,25 @@ Configuration sub-directories
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
         has only limited command support.
+      - module.  A simple stripped down configuration that was used for testing
+        NuttXOS modules.
+      - mxtxplnd.  This configuration is identical to the nsh configuration
+        but assumes that you have a maXTouch Xplained Pro LCD attached
+        and includes extra tests for the touchscreen and LCD.
+
+  mxtxplnd:
+
+    Configures the NuttShell (nsh) located at examples/nsh.  There are five
+    very similar NSH configurations:
+
+      - knsh.  This is a somewhat simplified version of the nsh configuration
+        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
+      - nsh.  This configuration is focused on low level, command-line
+        driver testing.  It has no network.
+      - netnsh.  This configuration is focused on network testing and
+        has only limited command support.
+      - module.  A simple stripped down configuration that was used for testing
+        NuttXOS modules.
       - mxtxplnd.  This configuration is identical to the nsh configuration
         but assumes that you have a maXTouch Xplained Pro LCD attached
         and includes extra tests for the touchscreen and LCD.
@@ -1852,7 +1872,7 @@ Configuration sub-directories
 
   netnsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are four
+    Configures the NuttShell (nsh) located at examples/nsh.  There are five
     very similar NSH configurations:
 
       - knsh.  This is a somewhat simplified version of the nsh configuration
@@ -1861,6 +1881,8 @@ Configuration sub-directories
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
         has only limited command support.
+      - module.  A simple stripped down configuration that was used for testing
+        NuttXOS modules.
       - mxtxplnd.  This configuration is identical to the nsh configuration
         but assumes that you have a maXTouch Xplained Pro LCD attached
         and includes extra tests for the touchscreen and LCD.
@@ -1965,7 +1987,7 @@ Configuration sub-directories
 
   nsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are four
+    Configures the NuttShell (nsh) located at examples/nsh.  There are five
     very similar NSH configurations:
 
       - knsh.  This is a somewhat simplified version of the nsh configuration
@@ -1974,6 +1996,8 @@ Configuration sub-directories
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
         has only limited command support.
+      - module.  A simple stripped down configuration that was used for testing
+        NuttXOS modules.
       - mxtxplnd.  This configuration is identical to the nsh configuration
         but assumes that you have a maXTouch Xplained Pro LCD attached
         and includes extra tests for the touchscreen and LCD.
