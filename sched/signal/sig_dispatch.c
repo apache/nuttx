@@ -165,7 +165,8 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
     }
 
   /* If we were not called from an interrupt handler, then we are
-   * free to allocate pending action structures if necessary. */
+   * free to allocate pending action structures if necessary.
+   */
 
   else
     {
