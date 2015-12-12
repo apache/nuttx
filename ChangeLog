@@ -11233,6 +11233,8 @@
 	  that of the type of a pthread.  Hence, it could be confused as a
 	  task.  Same problem as fixed on 2015-11-29, but in different location
 	  (2015-12-09).
-	* binfmt/libmodule:  Add support for kernel modules.  Initial commit is
+	* sched/module:  Add support for kernel modules.  Initial commit is
 	  just the ELF module support with name changes (2015-12-10).
+	* configs/samv71-xult/module:  Add configuration for testing OS
+	  modules (2015-12-12).
 
