@@ -106,6 +106,15 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #  endif
 #endif
 
+/* The following can only be defined if we are configured to load
+ * OS modules from a file system.
+ */
+
+#ifdef CONFIG_MODULE
+  SYSCALL_LOOKUP(insmod,                  1, STUB_insmod)
+  SYSCALL_LOOKUP(rmmod,                   1, STUB_rmmod)
+#endif
+
 /* The following can only be defined if we are configured to execute
  * programs from a file system.
  */

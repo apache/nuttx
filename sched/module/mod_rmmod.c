@@ -83,15 +83,24 @@ int rmmod(FAR struct module_s *modp)
           sdbg("ERROR: Failed to uninitialize the module: %d\n", ret);
           return ret;
         }
+
+      /* Nullify so that the uninitializer cannot be called again */
+
+      modp->uninitializer = NULL;
+      modp->arg = NULL;
     }
 
-  /* Free the module memory */
-
-  /* Release memory holding the relocated ELF image */
+  /* Release resources held by the module */
 
   if (modp->alloc != 0)
     {
+      /* Free the module memory */
+
       kmm_free((FAR void *)modp->alloc);
+
+      /* Nullify so that the memory cannot be freed again */
+
+      modp->alloc = NULL;
     }
 
   return ret;

@@ -107,6 +107,15 @@ uintptr_t STUB_wait(int nbr, uintptr_t parm1);
 uintptr_t STUB_waitid(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4);
 
+/* The following can only be defined if we are configured to load
+ * OS modules from a file system.
+ */
+
+#ifdef CONFIG_MODULE
+uintptr_t STUB_insmod(int nbr, uintptr_t parm1);
+uintptr_t STUB_rmmod(int nbr, uintptr_t parm1);
+#endif
+
 /* The following can only be defined if we are configured to execute
  * programs from a file system.
  */

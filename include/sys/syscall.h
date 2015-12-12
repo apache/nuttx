@@ -152,12 +152,24 @@
 #  ifdef CONFIG_SCHED_HAVE_PARENT
 #    define SYS_wait                   (__SYS_waitpid+1)
 #    define SYS_waitid                 (__SYS_waitpid+2)
-#    define __SYS_posix_spawn          (__SYS_waitpid+3)
+#    define __SYS_insmod               (__SYS_waitpid+3)
 #  else
-#    define __SYS_posix_spawn          (__SYS_waitpid+1)
+#    define __SYS_insmod               (__SYS_waitpid+1)
 #endif
 #else
-#  define __SYS_posix_spawn            __SYS_waitpid
+#  define __SYS_insmod                 __SYS_waitpid
+#endif
+
+/* The following can only be defined if we are configured to load
+ * OS modules from a file system.
+ */
+
+#ifdef CONFIG_MODULE
+#  define SYS_insmod                   __SYS_insmod
+#  define SYS_rmmod                   (__SYS_insmod+1)
+#  define __SYS_posix_spawn           (__SYS_insmod+2)
+#else
+#  define __SYS_posix_spawn            __SYS_insmod
 #endif
 
 /* The following can only be defined if we are configured to execute
