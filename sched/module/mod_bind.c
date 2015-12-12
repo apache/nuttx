@@ -52,28 +52,6 @@
 #include "module.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_MODULE_DUMPBUFFER have to
- * be defined or CONFIG_MODULE_DUMPBUFFER does nothing.
- */
-
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_MODULE_DUMPBUFFER)
-#  undef CONFIG_MODULE_DUMPBUFFER
-#endif
-
-#ifndef CONFIG_MODULE_BUFFERSIZE
-#  define CONFIG_MODULE_BUFFERSIZE 128
-#endif
-
-#ifdef CONFIG_MODULE_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
-#else
-# define mod_dumpbuffer(m,b,n)
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 

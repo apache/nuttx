@@ -129,7 +129,7 @@ struct module_s
    * resources used by the loaded module.
    */
 
-  mod_uninitializer_t uninitializer;   /* Module initializer function */
+  mod_uninitializer_t uninitializer;   /* Module uninitializer function */
   FAR void *arg;                       /* Uninitializer argument */
   FAR void *alloc;                     /* Allocated kernel memory */
 };
