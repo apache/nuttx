@@ -316,7 +316,7 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
    */
 
   up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
-  up_coherent_dcache(loadinfo->dataalloc, loadinfo->datasize);
+  up_coherent_dcache(loadinfo->datastart, loadinfo->datasize);
 
 #endif
 
