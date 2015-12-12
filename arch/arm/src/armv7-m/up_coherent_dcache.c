@@ -90,6 +90,7 @@ void up_coherent_dcache(uintptr_t addr, size_t len)
 
       end = addr + len;
       arch_clean_dcache(addr, end);
+      UNUSED(end);
 
       /* Invalidate the entire I-Cache */
 
