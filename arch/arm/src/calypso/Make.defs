@@ -50,6 +50,8 @@ CMN_CSRCS += up_undefinedinsn.c up_usestack.c calypso_power.c up_vfork.c
 
 ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
+else ifeq ($(CONFIG_MODULE),y)
+CMN_CSRCS += up_elf.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

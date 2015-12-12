@@ -44,7 +44,7 @@
 
 #include "cp15_cacheops.h"
 
-#include <nuttx/binfmt/elf.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
