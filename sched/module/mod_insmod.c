@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/module/module.c
+ * sched/module/mod_insmod.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,8 +45,6 @@
 #include <elf32.h>
 #include <debug.h>
 #include <errno.h>
-
-#include <arpa/inet.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/module.h>
@@ -172,8 +170,10 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
 int insmod(FAR struct module_s *modp)
 {
   struct mod_loadinfo_s loadinfo;
+  mod_initializer_t initializer;
   int ret;
 
+  DEBUGASSERT(modp != NULL && modp->filename != NULL);
   bvdbg("Loading file: %s\n", modp->filename);
 
   /* Initialize the ELF library to load the program binary. */
@@ -207,23 +207,20 @@ int insmod(FAR struct module_s *modp)
 
   /* Return the load information */
 
-  modp->initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
   modp->alloc       = (FAR void *)loadinfo.textalloc;
 
   /* Get the module initializer entry point */
 
-  if (modp->initializer)
+  initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+  mod_dumpinitializer(initializer, &loadinfo);
+
+  /* Call the module initializer */
+
+  ret = initializer(&modp->uninitializer, &modp->arg);
+  if (ret < 0)
     {
-      mod_dumpinitializer(modp->initializer, &loadinfo);
-
-      /* Call the module initializer */
-
-      ret = modp->initializer();
-      if (ret < 0)
-        {
-          bdbg("Failed to initialize the module: %d\n", ret);
-          goto errout_with_load;
-        }
+      bdbg("Failed to initialize the module: %d\n", ret);
+      goto errout_with_load;
     }
 
   mod_uninitialize(&loadinfo);

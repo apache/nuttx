@@ -76,25 +76,43 @@
  * Public Types
  ****************************************************************************/
 
+/* This is the type of the function that is called to uninitialize the
+ * the loaded module.  This may mean, for example, un-registering a device
+ * driver. If the module is successfully initialized, its memory will be
+ * deallocated.
+ *
+ * Input Parameters:
+ *   arg - An opaque argument that was previously returned by the initializer
+ *         function.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure to
+ *   initialize the module.  If zero is returned, then the module memory
+ *   will be deallocated.  If the module is still in use (for example with
+ *   open driver instances), the uninitialization function should fail with
+ *   -EBUSY
+ */
+
+typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
+
 /* A NuttX module is expected to export a function called module_initialize()
  * that has the following function prototype.  This function should appear as
  * the entry point in the ELF module file and will be called bythe binfmt
  * logic after the module has been loaded into kernel memory.
  *
- * As an alternative using GCC, the module may mark a function with the
- * "constructor" attribute and the module initializer will be called along
- * with any other C++ constructors.  The "destructor" attribute may also
- * be used to mark an module uninitialization function.
- *
  * Input Parameters:
- *   None
+ *   uninitializer - The pointer to the uninitialization function.  NULL may
+ *     be returned if no uninitialization is needed (i.e, the the module
+ *     memory can be deallocated at any time).
+ *   arg - An argument that will be passed to the uninitialization function.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure to
  *   initialize the module.
  */
 
-typedef CODE int (*mod_initializer_t)(void);
+typedef CODE int (*mod_initializer_t)(mod_uninitializer_t *uninitializer,
+                                      FAR void **arg);
 
 /* This describes the file to be loaded. */
 
@@ -111,7 +129,8 @@ struct module_s
    * resources used by the loaded module.
    */
 
-  mod_initializer_t initializer;       /* Module initializer function */
+  mod_uninitializer_t uninitializer;   /* Module initializer function */
+  FAR void *arg;                       /* Uninitializer argument */
   FAR void *alloc;                     /* Allocated kernel memory */
 };
 
@@ -138,6 +157,16 @@ extern "C"
  ****************************************************************************/
 
 int insmod(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: rmmod
+ *
+ * Description:
+ *   Remove a previously installed module from memory.
+ *
+ ****************************************************************************/
+
+int rmmod(FAR struct module_s *modp);
 
 #undef EXTERN
 #if defined(__cplusplus)

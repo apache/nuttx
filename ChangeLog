@@ -11237,4 +11237,5 @@
 	  just the ELF module support with name changes (2015-12-10).
 	* configs/samv71-xult/module:  Add configuration for testing OS
 	  modules (2015-12-12).
+	* sched/module:  Add an implementation of rmmod() (2015-11-12).
 

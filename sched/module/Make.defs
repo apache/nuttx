@@ -37,7 +37,7 @@ ifeq ($(CONFIG_MODULE),y)
 
 # OS module interfaces
 
-CSRCS += mod_insmod.c
+CSRCS += mod_insmod.c mod_rmmod.c
 
 # loadable module library
 
