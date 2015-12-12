@@ -42,8 +42,16 @@ CSRCS += mod_insmod.c mod_rmmod.c
 # loadable module library
 
 CSRCS += mod_bind.c mod_init.c mod_iobuffer.c mod_load.c mod_read.c
-CSRCS += mod_sections.c mod_symbols.c mod_uninit.c mod_unload.c
-CSRCS += mod_verify.c
+CSRCS += mod_registry.c mod_sections.c mod_symbols.c mod_uninit.c
+CSRCS += mod_unload.c mod_verify.c
+
+# procfs support
+
+ifeq ($(CONFIG_FS_PROCFS),y)
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MODULE),y)
+CSRCS += mod_procfs.c
+endif
+endif
 
 # Hook the module subdirectory into the build
 

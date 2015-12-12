@@ -60,10 +60,6 @@
 #  define CONFIG_MODULE_ALIGN_LOG2 2
 #endif
 
-#ifndef CONFIG_MODULE_STACKSIZE
-#  define CONFIG_MODULE_STACKSIZE 2048
-#endif
-
 #ifndef CONFIG_MODULE_BUFFERSIZE
 #  define CONFIG_MODULE_BUFFERSIZE 128
 #endif
@@ -71,6 +67,8 @@
 #ifndef CONFIG_MODULE_BUFFERINCR
 #  define CONFIG_MODULE_BUFFERINCR 32
 #endif
+
+#define MODULENAME_MAX 16
 
 /****************************************************************************
  * Public Types
@@ -114,25 +112,12 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
 typedef CODE int (*mod_initializer_t)(mod_uninitializer_t *uninitializer,
                                       FAR void **arg);
 
-/* This describes the file to be loaded. */
+#ifdef __KERNEL__
+/* This is the type of the callback function used by mod_registry_foreach() */
 
-struct symtab_s;
-struct module_s
-{
-  /* Information provided to insmod by the caller */
-
-  FAR const char *filename;            /* Full path to the binary to be loaded */
-  FAR const struct symtab_s *exports;  /* Table of exported symbols */
-  int nexports;                        /* The number of symbols in exports[] */
-
-  /* Information provided from insmod (if successful) describing the
-   * resources used by the loaded module.
-   */
-
-  mod_uninitializer_t uninitializer;   /* Module uninitializer function */
-  FAR void *arg;                       /* Uninitializer argument */
-  FAR void *alloc;                     /* Allocated kernel memory */
-};
+struct module_s;
+typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -154,9 +139,22 @@ extern "C"
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
+ * Input Parameters:
+ *
+ *   filename   - Full path to the module binary to be loaded
+ *   modulename - The name that can be used to refer to the module after
+ *     it has been loaded.
+ *   exports    - Table of exported symbols
+ *   nexports   - The number of symbols in exports[]
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
  ****************************************************************************/
 
-int insmod(FAR struct module_s *modp);
+int insmod(FAR const char *filename, FAR const char *modulename,
+           FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
  * Name: rmmod
@@ -164,9 +162,44 @@ int insmod(FAR struct module_s *modp);
  * Description:
  *   Remove a previously installed module from memory.
  *
+ * Input Parameters:
+ *
+ *   modulename - The module name.  This is the name module name that was
+ *     provided to insmod when the module was loaded.
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
  ****************************************************************************/
 
-int rmmod(FAR struct module_s *modp);
+int rmmod(FAR const char *modulename);
+
+/****************************************************************************
+ * Name: mod_registry_foreach
+ *
+ * Description:
+ *   Visit each module in the registry.  This is an internal OS interface and
+ *   not available for use by applications.
+ *
+ * Input Parameters:
+ *   callback - This callback function was be called for each entry in the
+ *     registry.
+ *   arg - This opaque argument will be passed to the callback function.
+ *
+ * Returned Value:
+ *   This function normally returns zero (OK).  If, however, any callback
+ *   function returns a non-zero value, the traversal will be terminated and
+ *   that non-zero value will be returned.
+ *
+ * Assumptions:
+ *   The caller does NOT hold the lock on the module registry.
+ *
+ ****************************************************************************/
+
+#ifdef __KERNEL__
+int mod_registry_foreach(mod_callback_t callback, FAR void *arg);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

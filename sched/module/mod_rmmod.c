@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
@@ -60,13 +61,37 @@
  * Description:
  *   Remove a previously installed module from memory.
  *
+ * Input Parameters:
+ *
+ *   modulename - The module name.  This is the name module name that was
+ *     provided to insmod when the module was loaded.
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
  ****************************************************************************/
 
-int rmmod(FAR struct module_s *modp)
+int rmmod(FAR const char *modulename)
 {
+  FAR struct module_s *modp;
   int ret = OK;
 
-  DEBUGASSERT(modp != NULL);
+  DEBUGASSERT(modulename != NULL);
+
+  /* Get exclusive access to the module registry */
+
+  mod_registry_lock();
+
+  /* Find the module entry for this modulename in the registry */
+
+  modp = mod_registry_find(modulename);
+  if (modp == NULL)
+    {
+      sdbg("ERROR: Failed to find module %s: %d\n", modulename, ret);
+      ret = -ENOENT;
+      goto errout_with_lock;
+    }
 
   /* Is there an uninitializer? */
 
@@ -81,7 +106,7 @@ int rmmod(FAR struct module_s *modp)
       if (ret < 0)
         {
           sdbg("ERROR: Failed to uninitialize the module: %d\n", ret);
-          return ret;
+          goto errout_with_lock;
         }
 
       /* Nullify so that the uninitializer cannot be called again */
@@ -92,7 +117,7 @@ int rmmod(FAR struct module_s *modp)
 
   /* Release resources held by the module */
 
-  if (modp->alloc != 0)
+  if (modp->alloc != NULL)
     {
       /* Free the module memory */
 
@@ -101,9 +126,29 @@ int rmmod(FAR struct module_s *modp)
       /* Nullify so that the memory cannot be freed again */
 
       modp->alloc = NULL;
+      modp->size  = 0;
     }
 
-  return ret;
+  /* Remove the module from the registry */
+
+  ret = mod_registry_del(modp);
+  if (ret < 0)
+    {
+      sdbg("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      goto errout_with_lock;
+    }
+
+  mod_registry_unlock();
+
+  /* And free the registry entry */
+
+  kmm_free(modp);
+  return OK;
+
+errout_with_lock:
+  mod_registry_unlock();
+  set_errno(-ret);
+  return ERROR;
 }
 
 #endif /* CONFIG_MODULE */

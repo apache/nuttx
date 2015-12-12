@@ -60,10 +60,6 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* This enumeration identifies all of the thread attributes that can be
- * accessed via the procfs file system.
- */
-
 /* This structure describes one open "file" */
 
 struct net_driver_s;                 /* Forward reference */

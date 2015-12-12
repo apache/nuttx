@@ -52,6 +52,19 @@
  * Public Types
  ****************************************************************************/
 
+/* This describes the file to be loaded. */
+
+struct symtab_s;
+struct module_s
+{
+  FAR struct module_s *flink;          /* Supports a singly linked list */
+  FAR char modulename[MODULENAME_MAX]; /* Module name */
+  mod_uninitializer_t uninitializer;   /* Module uninitializer function */
+  FAR void *arg;                       /* Uninitializer argument */
+  FAR void *alloc;                     /* Allocated kernel memory */
+  size_t size;                         /* Size of the kernel memory allocation */
+};
+
 /* This struct provides a description of the currently loaded instantiation
  * of the kernel module.
  */
@@ -331,5 +344,96 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
+
+/****************************************************************************
+ * Name: mod_registry_lock
+ *
+ * Description:
+ *   Get exclusive access to the module registry.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mod_registry_lock(void);
+
+/****************************************************************************
+ * Name: mod_registry_unlock
+ *
+ * Description:
+ *   Relinquish the lock on the module registry
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mod_registry_unlock(void);
+
+/****************************************************************************
+ * Name: mod_registry_add
+ *
+ * Description:
+ *   Add a new entry to the module registry.
+ *
+ * Input Parameters:
+ *   modp - The module data structure to be registered.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller holds the lock on the module registry.
+ *
+ ****************************************************************************/
+
+void mod_registry_add(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: mod_registry_del
+ *
+ * Description:
+ *   Remove a module entry from the registry
+ *
+ * Input Parameters:
+ *   modp - The registry entry to be removed.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the registry entry was deleted.  Otherwise,
+ *   a negated errno value is returned.
+ *
+ * Assumptions:
+ *   The caller holds the lock on the module registry.
+ *
+ ****************************************************************************/
+
+int mod_registry_del(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: mod_registry_find
+ *
+ * Description:
+ *   Find an entry in the module registry using the name of the module.
+ *
+ * Input Parameters:
+ *   modulename - The name of the module to be found
+ *
+ * Returned Value:
+ *   If the registry entry is found, a pointer to the module entry is
+ *   returned.  NULL is returned if the they entry is not found.
+ *
+ * Assumptions:
+ *   The caller holds the lock on the module registry.
+ *
+ ****************************************************************************/
+
+FAR struct module_s *mod_registry_find(FAR const char *modulename);
 
 #endif /* __SCHED_MODULE_MODULE_H */

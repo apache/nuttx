@@ -77,6 +77,7 @@
 
 extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations cpuload_operations;
+extern const struct procfs_operations module_operations;
 extern const struct procfs_operations uptime_operations;
 
 /* This is not good.  These are implemented in other sub-systems.  Having to
@@ -117,6 +118,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
   { "cpuload",          &cpuload_operations },
+#endif
+
+#if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  { "modules",          &module_operations },
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)

@@ -47,6 +47,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 
 #include "module/module.h"
@@ -66,7 +67,7 @@
 #endif
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
 #endif
@@ -88,50 +89,50 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
-  bdbg("LOAD_INFO:\n");
-  bdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  bdbg("  datastart:    %08lx\n", (long)loadinfo->datastart);
-  bdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  bdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  bdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
-  bdbg("  filfd:        %d\n",    loadinfo->filfd);
-  bdbg("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  bdbg("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  sdbg("LOAD_INFO:\n");
+  sdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  sdbg("  datastart:    %08lx\n", (long)loadinfo->datastart);
+  sdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  sdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  sdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  sdbg("  filfd:        %d\n",    loadinfo->filfd);
+  sdbg("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  sdbg("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
-  bdbg("ELF Header:\n");
-  bdbg("  e_ident:      %02x %02x %02x %02x\n",
+  sdbg("ELF Header:\n");
+  sdbg("  e_ident:      %02x %02x %02x %02x\n",
     loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
     loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  bdbg("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  bdbg("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  bdbg("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  bdbg("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  bdbg("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  bdbg("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  bdbg("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  bdbg("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  bdbg("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  bdbg("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  bdbg("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  bdbg("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  bdbg("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  sdbg("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  sdbg("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  sdbg("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  sdbg("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  sdbg("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  sdbg("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  sdbg("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  sdbg("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  sdbg("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  sdbg("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  sdbg("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  sdbg("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  sdbg("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
-          bdbg("Sections %d:\n", i);
-          bdbg("  sh_name:      %08x\n", shdr->sh_name);
-          bdbg("  sh_type:      %08x\n", shdr->sh_type);
-          bdbg("  sh_flags:     %08x\n", shdr->sh_flags);
-          bdbg("  sh_addr:      %08x\n", shdr->sh_addr);
-          bdbg("  sh_offset:    %d\n",   shdr->sh_offset);
-          bdbg("  sh_size:      %d\n",   shdr->sh_size);
-          bdbg("  sh_link:      %d\n",   shdr->sh_link);
-          bdbg("  sh_info:      %d\n",   shdr->sh_info);
-          bdbg("  sh_addralign: %d\n",   shdr->sh_addralign);
-          bdbg("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          sdbg("Sections %d:\n", i);
+          sdbg("  sh_name:      %08x\n", shdr->sh_name);
+          sdbg("  sh_type:      %08x\n", shdr->sh_type);
+          sdbg("  sh_flags:     %08x\n", shdr->sh_flags);
+          sdbg("  sh_addr:      %08x\n", shdr->sh_addr);
+          sdbg("  sh_offset:    %d\n",   shdr->sh_offset);
+          sdbg("  sh_size:      %d\n",   shdr->sh_size);
+          sdbg("  sh_link:      %d\n",   shdr->sh_link);
+          sdbg("  sh_info:      %d\n",   shdr->sh_info);
+          sdbg("  sh_addralign: %d\n",   shdr->sh_addralign);
+          sdbg("  sh_entsize:   %d\n",   shdr->sh_entsize);
         }
     }
 }
@@ -165,26 +166,66 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
+ * Input Parameters:
+ *
+ *   filename   - Full path to the module binary to be loaded
+ *   modulename - The name that can be used to refer to the module after
+ *     it has been loaded.
+ *   exports    - Table of exported symbols
+ *   nexports   - The number of symbols in exports[]
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
  ****************************************************************************/
 
-int insmod(FAR struct module_s *modp)
+int insmod(FAR const char *filename, FAR const char *modulename,
+           FAR const struct symtab_s *exports, int nexports)
 {
   struct mod_loadinfo_s loadinfo;
+  FAR struct module_s *modp;
   mod_initializer_t initializer;
   int ret;
 
-  DEBUGASSERT(modp != NULL && modp->filename != NULL);
-  bvdbg("Loading file: %s\n", modp->filename);
+  DEBUGASSERT(filename != NULL && modulename != NULL);
+  svdbg("Loading file: %s\n", filename);
+
+  /* Get exclusive access to the module registry */
+
+  mod_registry_lock();
+
+  /* Check if this module is already installed */
+
+  if (mod_registry_find(modulename) != NULL)
+    {
+      mod_registry_unlock();
+      ret = -EEXIST;
+      goto errout_with_lock;
+    }
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = mod_initialize(modp->filename, &loadinfo);
+  ret = mod_initialize(filename, &loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      bdbg("Failed to initialize for load of ELF program: %d\n", ret);
-      goto errout;
+      sdbg("ERROR: Failed to initialize to load module: %d\n", ret);
+      goto errout_with_lock;
     }
+
+  /* Allocate a module registry entry to hold the module data */
+
+  modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
+  if (ret != 0)
+    {
+      sdbg("Failed to initialize for load of ELF program: %d\n", ret);
+      goto errout_with_loadinfo;
+    }
+
+  /* Save the module name in the registry entry */
+
+  strncpy(modp->modulename, modulename, MODULENAME_MAX);
 
   /* Load the program binary */
 
@@ -192,22 +233,23 @@ int insmod(FAR struct module_s *modp)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      bdbg("Failed to load ELF program binary: %d\n", ret);
-      goto errout_with_init;
+      sdbg("Failed to load ELF program binary: %d\n", ret);
+      goto errout_with_registry_entry;
     }
 
   /* Bind the program to the exported symbol table */
 
-  ret = mod_bind(&loadinfo, modp->exports, modp->nexports);
+  ret = mod_bind(&loadinfo, exports, nexports);
   if (ret != 0)
     {
-      bdbg("Failed to bind symbols program binary: %d\n", ret);
+      sdbg("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
   /* Return the load information */
 
   modp->alloc       = (FAR void *)loadinfo.textalloc;
+  modp->size        = loadinfo.textsize + loadinfo.datasize;
 
   /* Get the module initializer entry point */
 
@@ -219,19 +261,28 @@ int insmod(FAR struct module_s *modp)
   ret = initializer(&modp->uninitializer, &modp->arg);
   if (ret < 0)
     {
-      bdbg("Failed to initialize the module: %d\n", ret);
+      sdbg("Failed to initialize the module: %d\n", ret);
       goto errout_with_load;
     }
 
+  /* Add the new module entry to the registry */
+
+  mod_registry_add(modp);
+
   mod_uninitialize(&loadinfo);
+  mod_registry_unlock();
   return OK;
 
 errout_with_load:
   mod_unload(&loadinfo);
-errout_with_init:
+errout_with_registry_entry:
+  kmm_free(modp);
+errout_with_loadinfo:
   mod_uninitialize(&loadinfo);
-errout:
-  return ret;
+errout_with_lock:
+  mod_registry_unlock();
+  set_errno(-ret);
+  return ERROR;
 }
 
 #endif /* CONFIG_MODULE */

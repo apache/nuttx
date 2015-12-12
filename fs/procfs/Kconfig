@@ -32,6 +32,13 @@ config FS_PROCFS_EXCLUDE_PROCESS
 		This will reduce code space, but then giving access to process info
 		was kinda the whole point of procfs, but hey, whatever.
 
+config FS_PROCFS_EXCLUDE_MODULE
+	bool "Exclude module information"
+	depends on MODULE
+	default n
+	---help---
+		Causes the module information to be excluded from the procfs system.
+
 config FS_PROCFS_EXCLUDE_UPTIME
 	bool "Exclude uptime"
 	default n
