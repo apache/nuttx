@@ -87,12 +87,7 @@ struct modprocfs_file_s
   size_t remaining;                  /* Space remaining in user buffer */
   size_t totalsize;                  /* Total size returned by read() */
   off_t offset;                      /* Offset skip on output */
-
-  /* Line buffer */
-
-  uint8_t lineno;                    /* Line number */
-  uint8_t linesize;                  /* Number of valid characters in line[] */
-  char line[MOD_LINELEN];            /* Pre-allocated buffer for formatted lines */
+  char line[MOD_LINELEN];            /* Buffer for line formatting */
 };
 
 /****************************************************************************
