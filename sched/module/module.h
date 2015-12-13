@@ -59,10 +59,16 @@ struct module_s
 {
   FAR struct module_s *flink;          /* Supports a singly linked list */
   FAR char modulename[MODULENAME_MAX]; /* Module name */
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  mod_initializer_t initializer;       /* Module initializer function */
+#endif
   mod_uninitializer_t uninitializer;   /* Module uninitializer function */
   FAR void *arg;                       /* Uninitializer argument */
   FAR void *alloc;                     /* Allocated kernel memory */
-  size_t size;                         /* Size of the kernel memory allocation */
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  size_t textsize;                     /* Size of the kernel .text memory allocation */
+  size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
+#endif
 };
 
 /* This struct provides a description of the currently loaded instantiation

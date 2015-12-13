@@ -249,11 +249,17 @@ int insmod(FAR const char *filename, FAR const char *modulename,
   /* Return the load information */
 
   modp->alloc       = (FAR void *)loadinfo.textalloc;
-  modp->size        = loadinfo.textsize + loadinfo.datasize;
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  modp->textsize    = loadinfo.textsize;
+  modp->datasize    = loadinfo.datasize;
+#endif
 
   /* Get the module initializer entry point */
 
   initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  modp->initializer = initializer;
+#endif
   mod_dumpinitializer(initializer, &loadinfo);
 
   /* Call the module initializer */

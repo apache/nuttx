@@ -152,9 +152,12 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
   DEBUGASSERT(modp != NULL && arg != NULL);
   priv = (FAR struct modprocfs_file_s *)arg;
 
-  linesize = snprintf(priv->line, MOD_LINELEN, "%s,%p,%p,%p,%lu\n",
-                      modp->modulename, modp->uninitializer, modp->arg,
-                      modp->alloc, (unsigned long)modp->size);
+  linesize = snprintf(priv->line, MOD_LINELEN, "%s,%p,%p,%p,%p,%lu,%p,%lu\n",
+                      modp->modulename, modp->initializer,
+                      modp->uninitializer, modp->arg,
+                      modp->alloc, (unsigned long)modp->textsize,
+                      (FAR uint8_t *)modp->alloc + modp->textsize,
+                      (unsigned long)modp->datasize);
   copysize = procfs_memcpy(priv->line, linesize, priv->buffer,
                            priv->remaining, &priv->offset);
   priv->totalsize += copysize;

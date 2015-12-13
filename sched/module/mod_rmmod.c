@@ -111,6 +111,9 @@ int rmmod(FAR const char *modulename)
 
       /* Nullify so that the uninitializer cannot be called again */
 
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+      modp->initializer = NULL;
+#endif
       modp->uninitializer = NULL;
       modp->arg = NULL;
     }
@@ -126,7 +129,10 @@ int rmmod(FAR const char *modulename)
       /* Nullify so that the memory cannot be freed again */
 
       modp->alloc = NULL;
-      modp->size  = 0;
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+      modp->textsize  = 0;
+      modp->datasize  = 0;
+#endif
     }
 
   /* Remove the module from the registry */
