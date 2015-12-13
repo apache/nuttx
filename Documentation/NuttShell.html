@@ -1726,7 +1726,7 @@ nsh> ls -l /dev
  brw-rw-rw-       0 ram0
  crw-rw-rw-       0 ttyS0
 nsh> lsmod
-NAME                  INIT    UNINIT       ARG      TEXT     SIZE      DATA     SIZE
+NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
 nsh> insmod /mnt/romfs/chardev mydriver
 nsh> ls -l /dev
 /dev:
@@ -1736,8 +1736,8 @@ nsh> ls -l /dev
  brw-rw-rw-       0 ram0
  crw-rw-rw-       0 ttyS0
 nsh> lsmod
-NAME                  INIT    UNINIT       ARG      TEXT     SIZE      DATA     SIZE
-mydriver          20404659  20404625         0  20404580      552  204047a8        0
+NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
+mydriver         20404659 20404625        0 20404580      552 204047a8        0
 </pre></ul>
 
 <table width ="100%">
@@ -1902,8 +1902,8 @@ lsmod
 <p><b>Example:</b></p>
 <ul><pre>
 nsh> lsmod
-NAME                  INIT    UNINIT       ARG      TEXT     SIZE      DATA     SIZE
-mydriver          20404659  20404625         0  20404580      552  204047a8        0
+NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
+mydriver         20404659 20404625        0 20404580      552 204047a8        0
 </pre></ul>
 
 <table width ="100%">
@@ -2528,11 +2528,11 @@ rmmod &lt;module-name&gt;
 <p><b>Example:</b></p>
 <ul><pre>
 nsh> lsmod
-NAME                  INIT    UNINIT       ARG      TEXT     SIZE      DATA     SIZE
-mydriver          20404659  20404625         0  20404580      552  204047a8        0
+NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
+mydriver         20404659 20404625        0 20404580      552 204047a8        0
 nsh> rmmod mydriver
 nsh> lsmod
-NAME                  INIT    UNINIT       ARG      TEXT     SIZE      DATA     SIZE
+NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
 nsh>
 </pre></ul>
 
