@@ -100,6 +100,13 @@ struct mod_loadinfo_s
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+FAR const struct symtab_s *g_mod_symtab;
+FAR int g_mod_nsymbols;
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -154,7 +161,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by 'symtab'.
+ *   'loadinfo' using the exported symbol values provided by mod_setsymtab().
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -162,9 +169,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-struct symtab_s;
-int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
-             FAR const struct symtab_s *exports, int nexports);
+int mod_bind(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: mod_unload
@@ -290,8 +295,6 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  * Input Parameters:
  *   loadinfo - Load state information
  *   sym      - Symbol table entry (value might be undefined)
- *   exports  - The symbol table to use for resolving undefined symbols.
- *   nexports - Number of symbols in the symbol table.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -305,8 +308,7 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
-                 FAR const struct symtab_s *exports, int nexports);
+int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym);
 
 /****************************************************************************
  * Name: mod_freebuffers

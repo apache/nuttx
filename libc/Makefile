@@ -81,6 +81,7 @@ include dirent/Make.defs
 include termios/Make.defs
 include spawn/Make.defs
 include queue/Make.defs
+include symtab/Make.defs
 include wqueue/Make.defs
 include misc/Make.defs
 include audio/Make.defs

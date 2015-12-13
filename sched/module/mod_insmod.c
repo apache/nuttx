@@ -166,13 +166,16 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
+ *   NOTE: mod_setsymtab had to have been called in board-specific OS logic
+ *   prior to calling this function from application logic (perhaps via
+ *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
+ *   resolve symbols in the OS module.
+ *
  * Input Parameters:
  *
  *   filename   - Full path to the module binary to be loaded
  *   modulename - The name that can be used to refer to the module after
  *     it has been loaded.
- *   exports    - Table of exported symbols
- *   nexports   - The number of symbols in exports[]
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -180,8 +183,7 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *
  ****************************************************************************/
 
-int insmod(FAR const char *filename, FAR const char *modulename,
-           FAR const struct symtab_s *exports, int nexports)
+int insmod(FAR const char *filename, FAR const char *modulename)
 {
   struct mod_loadinfo_s loadinfo;
   FAR struct module_s *modp;
@@ -237,9 +239,9 @@ int insmod(FAR const char *filename, FAR const char *modulename,
       goto errout_with_registry_entry;
     }
 
-  /* Bind the program to the exported symbol table */
+  /* Bind the program to the kernel symbol table */
 
-  ret = mod_bind(&loadinfo, exports, nexports);
+  ret = mod_bind(&loadinfo);
   if (ret != 0)
     {
       sdbg("Failed to bind symbols program binary: %d\n", ret);

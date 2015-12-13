@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/symtab_findbyvalue.c
+ * sched/module/mod_symtab.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,83 +39,72 @@
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
-#include <debug.h>
 #include <assert.h>
-#include <errno.h>
 
-#include <nuttx/binfmt/symtab.h>
+#include <nuttx/symtab.h>
+#include <nuttx/module.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "module.h"
 
 /****************************************************************************
- * Private Function Prototypes
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+FAR const struct symtab_s *g_mod_symtab;
+FAR int g_mod_nsymbols;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: symtab_findbyvalue
+ * Name: mod_getsymtab
  *
  * Description:
- *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is not ordered
- *   with respect to symbol name and, hence, access time will be linear with
- *   respect to nsyms.
+ *   Get the current kernel symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The location to store the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol table.
  *
  * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
+ *   None
  *
  ****************************************************************************/
 
-FAR const struct symtab_s *
-symtab_findbyvalue(FAR const struct symtab_s *symtab,
-                   FAR void *value, int nsyms)
+void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 {
-  FAR const struct symtab_s *retval = NULL;
+  DEBUGASSERT(symtab != NULL && nsymbols != NULL);
 
-  DEBUGASSERT(symtab != NULL);
-  for (; nsyms > 0; symtab++, nsyms--)
-    {
-      /* Look for symbols of lesser or equal value (probably address) to value */
+  /* Borrow the registry lock to assure atomic access */
 
-      if (symtab->sym_value <= value)
-        {
-          /* Found one.  Is it the largest we have found so far? */
-
-          if (!retval || symtab->sym_value > retval->sym_value)
-            {
-              /* Yes, then it is the new candidate for the symbol whose value
-               * just below 'value'
-               */
-
-              retval = symtab;
-
-              /* If it is exactly equal to the search 'value', then we might as
-               * well terminate early because we can't do any better than that.
-               */
-
-              if (retval->sym_value == value)
-                {
-                  break;
-                }
-            }
-        }
-    }
-
-  return retval;
+  mod_registry_lock();
+  *symtab   = g_mod_symtab;
+  *nsymbols = g_mod_nsymbols;
+  mod_registry_lock();
 }
 
+/****************************************************************************
+ * Name: mod_setsymtab
+ *
+ * Description:
+ *   Select a new kernel symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The new symbol table.
+ *   nsymbols - The number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
+{
+  /* Borrow the registry lock to assure atomic access */
+
+  mod_registry_lock();
+  g_mod_symtab   = symtab;
+  g_mod_nsymbols = nsymbols;
+  mod_registry_lock();
+}

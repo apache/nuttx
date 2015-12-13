@@ -77,10 +77,20 @@
  *                which to receive the board unique ID.
  * DEPENDENCIES:  Board logic must provide the board_uniqueid() interface.
  *
- * CMD:           BOARDIOC_SYMTAB
- * DESCRIPTION:   Select a symbol table
+ * CMD:           BOARDIOC_APP_SYMTAB
+ * DESCRIPTION:   Select the application symbol table.  This symbol table
+ *                provides the symbol definitions exported to application
+ *                code from application space.
  * ARG:           A pointer to an instance of struct boardioc_symtab_s
- * CONFIGURATION: CONFIG_BOARDCTL_SYMTAB
+ * CONFIGURATION: CONFIG_BOARDCTL_APP_SYMTAB
+ * DEPENDENCIES:  None
+ *
+ * CMD:           BOARDIOC_OS_SYMTAB
+ * DESCRIPTION:   Select the OS symbol table.  This symbol table provides
+ *                the symbol definitions exported by the OS to kernel
+ *                modules.
+ * ARG:           A pointer to an instance of struct boardioc_symtab_s
+ * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_TSCTEST_SETUP
@@ -125,13 +135,14 @@
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
 #define BOARDIOC_RESET             _BOARDIOC(0x0003)
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0004)
-#define BOARDIOC_SYMTAB            _BOARDIOC(0x0005)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0006)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0007)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0008)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0009)
-#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000a)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000b)
+#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0005)
+#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0007)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0008)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0009)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000a)
+#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000b)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000c)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -140,7 +151,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000c)
+#define BOARDIOC_USER              _BOARDIOC(0x000d)
 
 /****************************************************************************
  * Public Type Definitions

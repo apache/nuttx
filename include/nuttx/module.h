@@ -49,6 +49,7 @@
 #include <elf32.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/symtab.h>
 #include <nuttx/binfmt/binfmt.h>
 
 /****************************************************************************
@@ -133,19 +134,60 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: mod_getsymtab
+ *
+ * Description:
+ *   Get the current kernel symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The location to store the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef __KERNEL__
+void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
+#endif
+
+/****************************************************************************
+ * Name: mod_setsymtab
+ *
+ * Description:
+ *   Select a new kernel symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The new symbol table.
+ *   nsymbols - The number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef __KERNEL__
+void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
+#endif
+
+/****************************************************************************
  * Name: insmod
  *
  * Description:
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
+ *   NOTE: mod_setsymtab had to have been called in board-specific OS logic
+ *   prior to calling this function from application logic (perhaps via
+ *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
+ *   resolve symbols in the OS module.
+ *
  * Input Parameters:
  *
  *   filename   - Full path to the module binary to be loaded
  *   modulename - The name that can be used to refer to the module after
  *     it has been loaded.
- *   exports    - Table of exported symbols
- *   nexports   - The number of symbols in exports[]
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -153,8 +195,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int insmod(FAR const char *filename, FAR const char *modulename,
-           FAR const struct symtab_s *exports, int nexports);
+int insmod(FAR const char *filename, FAR const char *modulename);
 
 /****************************************************************************
  * Name: rmmod

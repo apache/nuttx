@@ -1,5 +1,5 @@
 ############################################################################
-# sched/module/Make.defs
+# libc/symtab/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,30 +33,12 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_MODULE),y)
+# Symbol table source files
 
-# OS module interfaces
+CSRCS += symtab_findbyname.c symtab_findbyvalue.c
+CSRCS += symtab_findorderedbyname.c symtab_findorderedbyvalue.c
 
-CSRCS += mod_insmod.c mod_rmmod.c
+# Add the symtab directory to the build
 
-# loadable module library
-
-CSRCS += mod_bind.c mod_init.c mod_iobuffer.c mod_load.c mod_read.c
-CSRCS += mod_registry.c mod_sections.c mod_symbols.c mod_symtab.c
-CSRCS += mod_uninit.c mod_unload.c mod_verify.c
-
-# procfs support
-
-ifeq ($(CONFIG_FS_PROCFS),y)
-ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MODULE),y)
-CSRCS += mod_procfs.c
-endif
-endif
-
-# Hook the module subdirectory into the build
-
-VPATH += module
-SUBDIRS += module
-DEPPATH += --dep-path module
-
-endif
+DEPPATH += --dep-path symtab
+VPATH += :symtab

@@ -98,8 +98,7 @@ static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
-                        FAR const struct symtab_s *exports, int nexports)
+static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
 {
   FAR Elf32_Shdr *relsec = &loadinfo->shdr[relidx];
@@ -149,7 +148,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
 
       /* Get the value of the symbol (in sym.st_value) */
 
-      ret = mod_symvalue(loadinfo, &sym, exports, nexports);
+      ret = mod_symvalue(loadinfo, &sym);
       if (ret < 0)
         {
           /* The special error -ESRCH is returned only in one condition:  The
@@ -200,8 +199,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx,
   return OK;
 }
 
-static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
-                              FAR const struct symtab_s *exports, int nexports)
+static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 {
   sdbg("Not implemented\n");
   return -ENOSYS;
@@ -216,7 +214,7 @@ static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by 'symtab'.
+ *   'loadinfo' using the exported symbol values provided by mod_setsymtab().
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -224,8 +222,7 @@ static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx,
  *
  ****************************************************************************/
 
-int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
-             FAR const struct symtab_s *exports, int nexports)
+int mod_bind(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
   int i;
@@ -274,11 +271,11 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo,
 
       if (loadinfo->shdr[i].sh_type == SHT_REL)
         {
-          ret = mod_relocate(loadinfo, i, exports, nexports);
+          ret = mod_relocate(loadinfo, i);
         }
       else if (loadinfo->shdr[i].sh_type == SHT_RELA)
         {
-          ret = mod_relocateadd(loadinfo, i, exports, nexports);
+          ret = mod_relocateadd(loadinfo, i);
         }
 
       if (ret < 0)

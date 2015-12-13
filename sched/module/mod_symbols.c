@@ -261,8 +261,7 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
-                 FAR const struct symtab_s *exports, int nexports)
+int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
 {
   FAR const struct symtab_s *symbol;
   uintptr_t secbase;
@@ -306,9 +305,13 @@ int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
         /* Check if the base code exports a symbol of this name */
 
 #ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-        symbol = symtab_findorderedbyname(exports, (FAR char *)loadinfo->iobuffer, nexports);
+        symbol = symtab_findorderedbyname(g_mod_symtab,
+                                          (FAR char *)loadinfo->iobuffer,
+                                          g_mod_nsymbols);
 #else
-        symbol = symtab_findbyname(exports, (FAR char *)loadinfo->iobuffer, nexports);
+        symbol = symtab_findbyname(g_mod_symtab,
+                                   (FAR char *)loadinfo->iobuffer,
+                                   g_mod_nsymbols);
 #endif
         if (!symbol)
           {

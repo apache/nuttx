@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/binfmt/symtab.h
+ * libc/symtab/symtab_findbyname.c
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,61 +33,48 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_BINFMT_SYMTAB_H
-#define __INCLUDE_NUTTX_BINFMT_SYMTAB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <string.h>
+#include <debug.h>
+#include <assert.h>
+#include <errno.h>
+
 #include <nuttx/symtab.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: symtab_findbyname
+ *
+ * Description:
+ *   Find the symbol in the symbol table with the matching name.
+ *   This version assumes that table is not ordered with respect to symbol
+ *   name and, hence, access time will be linear with respect to nsyms.
+ *
+ * Returned Value:
+ *   A reference to the symbol table entry if an entry with the matching
+ *   name is found; NULL is returned if the entry is not found.
+ *
+ ****************************************************************************/
+
+FAR const struct symtab_s *
+symtab_findbyname(FAR const struct symtab_s *symtab,
+                  FAR const char *name, int nsyms)
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: exec_getsymtab
- *
- * Description:
- *   Get the current application symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
-
-/****************************************************************************
- * Name: exec_setsymtab
- *
- * Description:
- *   Select a new application symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The new symbol table.
- *   nsymbols - The number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
-
-#endif /* __INCLUDE_NUTTX_BINFMT_SYMTAB_H */
+  DEBUGASSERT(symtab != NULL && name != NULL);
+  for (; nsyms > 0; symtab++, nsyms--)
+    {
+      if (strcmp(name, symtab->sym_name) == 0)
+        {
+          return symtab;
+        }
+    }
+  return NULL;
+}

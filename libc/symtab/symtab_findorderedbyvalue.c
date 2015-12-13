@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/symtab_findorderedbyname.c
+ * libc/symtab/symtab_findorderedbyvalue.c
  *
- *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,43 +39,24 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
+#include <stddef.h>
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/binfmt/symtab.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include <nuttx/symtab.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: symtab_findorderedbyname
+ * Name: symtab_findorderedbyvalue
  *
  * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table ordered with respect to symbol name.
- *
- *   This function is a lot larger than symbtab_findbyname().  This function
- *   not be used, unless the symbol table is large and the performance
- *   benefit is worth the increased size.
+ *   Find the symbol in the symbol table whose value closest (but not greater
+ *   than), the provided value. This version assumes that table is ordered
+ *   with respect to symbol name.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -84,19 +65,18 @@
  ****************************************************************************/
 
 FAR const struct symtab_s *
-symtab_findorderedbyname(FAR const struct symtab_s *symtab,
-                         FAR const char *name, int nsyms)
+symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
+                          FAR void *value, int nsyms)
 {
   int low  = 0;
-  int high = nsyms - 1;
+  int high = nsyms -1;
   int mid;
-  int cmp;
 
   /* Loop until the range has been isolated to a single symbol table
    * entry that may or may not match the search name.
    */
 
-  DEBUGASSERT(symtab != NULL && name != NULL);
+  DEBUGASSERT(symtab != NULL);
   while (low < high)
     {
       /* Compare the name to the one in the middle.  (or just below
@@ -104,27 +84,16 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
        */
 
       mid = (low + high) >> 1;
-      cmp = strcmp(name, symtab[mid].sym_name);
-      if (cmp < 0)
+      if (value < symtab[mid].sym_value)
         {
-          /* name < symtab[mid].sym_name
-           *
-           * NOTE: Because of truncation in the calculation of 'mid'.
-           * 'mid' could be equal to 'low'
-           */
-
-          high = mid > low ? mid - 1 : low;
+          high = mid - 1;
         }
-      else if (cmp > 0)
+      else if (value > symtab[mid].sym_value)
         {
-          /* name > symtab[mid].sym_name */
-
           low = mid + 1;
         }
-      else
+      else /* if (value == symtab[mid].sym_value) */
         {
-          /* symtab[mid].sym_name == name */
-
           return &symtab[mid];
         }
     }
@@ -137,5 +106,5 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
    *   low = 2, high = 2, but symtab[2].sym_name was never tested.
    */
 
-  return strcmp(name, symtab[low].sym_name) == 0 ? &symtab[low] : NULL;
+  return value == symtab[low].sym_value ? &symtab[low] : NULL;
 }
