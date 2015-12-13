@@ -46,6 +46,7 @@
 #include <assert.h>
 
 #include <nuttx/board.h>
+#include <nuttx/module.h>
 #include <nuttx/binfmt/symtab.h>
 
 #ifdef CONFIG_LIB_BOARDCTL
@@ -148,21 +149,45 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_BOARDCTL_SYMTAB
-      /* CMD:           BOARDIOC_SYMTAB
-       * DESCRIPTION:   Select a symbol table
+#ifdef CONFIG_BOARDCTL_APP_SYMTAB
+      /* CMD:           BOARDIOC_APP_SYMTAB
+       * DESCRIPTION:   Select the application symbol table.  This symbol table
+       *                provides the symbol definitions exported to application
+       *                code from application space.
        * ARG:           A pointer to an instance of struct boardioc_symtab_s
-       * CONFIGURATION: CONFIG_BOARDCTL_SYMTAB
+       * CONFIGURATION: CONFIG_BOARDCTL_APP_SYMTAB
        * DEPENDENCIES:  None
        */
 
-      case BOARDIOC_SYMTAB:
+      case BOARDIOC_APP_SYMTAB:
         {
           FAR const struct boardioc_symtab_s *symdesc =
             (FAR const struct boardioc_symtab_s *)arg;
 
          DEBUGASSERT(symdesc != NULL);
          exec_setsymtab(symdesc->symtab, symdesc->nsymbols);
+         ret = OK;
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_OS_SYMTAB
+      /* CMD:           BOARDIOC_OS_SYMTAB
+       * DESCRIPTION:   Select the OS symbol table.  This symbol table provides
+       *                the symbol definitions exported by the OS to kernel
+       *                modules.
+       * ARG:           A pointer to an instance of struct boardioc_symtab_s
+       * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
+       * DEPENDENCIES:  None
+       */
+
+      case BOARDIOC_OS_SYMTAB:
+        {
+          FAR const struct boardioc_symtab_s *symdesc =
+            (FAR const struct boardioc_symtab_s *)arg;
+
+         DEBUGASSERT(symdesc != NULL);
+         mod_setsymtab(symdesc->symtab, symdesc->nsymbols);
          ret = OK;
         }
         break;
