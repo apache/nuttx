@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7/arm_undefinedinsn.c
+ * arch/arm/src/armv7-a/arm_undefinedinsn.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/l2cc.h
- * Non-CP15 Registers
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

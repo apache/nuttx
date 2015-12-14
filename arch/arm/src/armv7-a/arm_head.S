@@ -54,10 +54,13 @@
  * Configuration
  **********************************************************************************/
 
-#undef ALIGNMENT_TRAP
+/* Hard-coded options */
+
+#undef CPU_ALIGNMENT_TRAP
 #undef CPU_CACHE_ROUND_ROBIN
 #undef CPU_DCACHE_DISABLE
 #undef CPU_ICACHE_DISABLE
+#undef CPU_AFE_ENABLE
 
 /* There are three operational memory configurations:
  *
@@ -465,7 +468,7 @@ __start:
 	orr		r0, r0, #(SCTLR_I)
 #endif
 
-#ifdef ALIGNMENT_TRAP
+#ifdef CPU_ALIGNMENT_TRAP
 	/* Alignment abort enable
 	 *
 	 *   SCTLR_A    Bit 1:  Strict alignment enabled
@@ -474,7 +477,7 @@ __start:
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
-#ifdef CONFIG_AFE_ENABLE
+#ifdef CPU_AFE_ENABLE
 	/* AP[0:2] Permissions model
 	 *
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
