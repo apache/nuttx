@@ -11240,3 +11240,6 @@
 	* sched/module:  Add an implementation of rmmod() (2015-12-12).
 	* sched/module and fs/procfs:  Add some basic module procfs support
 	  (2015-12-12),
+	* arch/arm/src/armv7-r:  Add basic architecture support for the ARMv7-R
+	  processor family (2015-12-13).
+
