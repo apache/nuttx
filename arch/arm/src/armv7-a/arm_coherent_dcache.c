@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7/up_coherent_dcache.c
+ * arch/arm/src/armv7-a/up_coherent_dcache.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
