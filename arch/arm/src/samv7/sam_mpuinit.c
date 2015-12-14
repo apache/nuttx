@@ -49,7 +49,7 @@
 
 #include "sam_mpuinit.h"
 
-#ifdef CONFIG_ARMV7M_MPU
+#ifdef CONFIG_ARM_MPU
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -146,5 +146,5 @@ void sam_mpu_uheap(uintptr_t start, size_t size)
 }
 #endif
 
-#endif /* CONFIG_ARMV7M_MPU */
+#endif /* CONFIG_ARM_MPU */
 
