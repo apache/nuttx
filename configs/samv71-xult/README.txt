@@ -501,8 +501,8 @@ configuration options were enabled to test QSPI:
 The MPU must be enabled to use QSPI:
 
   CONFIG_ARCH_USE_MPU=y
-  CONFIG_ARMV7M_MPU=y
-  CONFIG_ARMV7M_MPU_NREGIONS=16
+  CONFIG_ARM_MPU=y
+  CONFIG_ARM_MPU_NREGIONS=16
 
 And there options enable the driver for the on-board S25FL116K QuadSPI
 FLASH:

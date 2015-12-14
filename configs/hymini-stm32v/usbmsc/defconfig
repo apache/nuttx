@@ -107,7 +107,7 @@ CONFIG_ARCH_CHIP="stm32"
 CONFIG_ARCH_HAVE_CMNVECTOR=y
 # CONFIG_ARMV7M_CMNVECTOR is not set
 # CONFIG_ARCH_HAVE_FPU is not set
-# CONFIG_ARMV7M_MPU is not set
+# CONFIG_ARM_MPU is not set
 
 #
 # ARMV7M Configuration Options

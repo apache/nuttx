@@ -589,7 +589,7 @@ TWR-K60N512-specific Configuration Options
     CONFIG_KINETIS_CRC      -- Support CRC
     CONFIG_KINETIS_PDB      -- Support the Programmable Delay Block
     CONFIG_KINETIS_PIT      -- Support Programmable Interval Timers
-    CONFIG_ARMV7M_MPU       -- Support the MPU
+    CONFIG_ARM_MPU          -- Support the MPU
 
   Kinetis interrupt priorities (Default is the mid priority).  These should
   not be set because they can cause unhandled, nested interrupts.  All
