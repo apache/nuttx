@@ -7,9 +7,7 @@
  *
  * References:
  *
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1, Copyright © 2010
- *   ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright ©
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright
  *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.b (ID072512)
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,172 +49,317 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Reference: Cortex-A5™ MPCore Paragraph 4.2, "Register summary." */
+/* CP15 c0 Registers ****************************************************************/
 
-/* Main ID Register (MIDR) */
-/* TODO: To be provided */
-
-/* Cache Type Register (CTR) */
-/* TODO: To be provided */
-
-/* TCM Type Register
- *
- * The Cortex-A5 MPCore processor does not implement instruction or data Tightly
- * Coupled Memory (TCM), so this register always Reads-As-Zero (RAZ).
- *
- * TLB Type Register
- *
- * The Cortex-A5 MPCore processor does not implement instruction or data Tightly
- * CoupledMemory (TCM), so this register always Reads-As-Zero (RAZ).
+/* Main ID Register (MIDR): CRn=c0, opc1=0, CRm=c0, opc2=0
+ * TODO: To be provided
  */
 
-/* Multiprocessor Affinity Register (MPIDR) */
-/* TODO: To be provided */
+/* Cache Type Register (CTR): CRn=c0, opc1=0, CRm=c0, opc2=1
+ * TODO: To be provided
+ */
 
-/* Processor Feature Register 0 (ID_PFR0) */
-/* TODO: To be provided */
+/* TCM Type Register (TCMTR): CRn=c0, opc1=0, CRm=c0, opc2=2
+ * Details implementation defined.
+ */
 
-/* Processor Feature Register 1 (ID_PFR1) */
-/* TODO: To be provided */
+/* Aliases of Main ID register (MIDR): CRn=c0, opc1=0, CRm=c0, opc2=3,7
+ * TODO: To be provided
+ */
 
-/* Debug Feature Register 0 (ID_DFR0) */
-/* TODO: To be provided */
+/* MPU Type Register (MPUIR): CRn=c0, opc1=0, CRm=c0, opc2=4
+ * TODO: To be provided
+ */
 
-/* Auxiliary Feature Register 0 (ID_AFR0) */
-/* TODO: To be provided */
+/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5
+ * TODO: To be provided
+ */
 
-/* Memory Model Features Register 0 (ID_MMFR0) */
-/* Memory Model Features Register 1 (ID_MMFR1) */
-/* Memory Model Features Register 2 (ID_MMFR2) */
-/* Memory Model Features Register 3 (ID_MMFR3) */
-/* TODO: To be provided */
+/* Revision ID Register (REVIDR): CRn=c0, opc1=0, CRm=c0, opc2=6
+ * TODO: To be provided
+ */
 
-/* Instruction Set Attributes Register 0 (ID_ISAR0) */
-/* Instruction Set Attributes Register 1 (ID_ISAR1) */
-/* Instruction Set Attributes Register 2 (ID_ISAR2) */
-/* Instruction Set Attributes Register 3 (ID_ISAR3) */
-/* Instruction Set Attributes Register 4 (ID_ISAR4) */
-/* Instruction Set Attributes Register 5 (ID_ISAR5) */
-/* Instruction Set Attributes Register 6-7 (ID_ISAR6-7).  Reserved. */
-/* TODO: Others to be provided */
+/* Processor Feature Register 0 (ID_PFR0): CRn=c0, opc1=0, CRm=c1, opc2=0
+ * Processor Feature Register 1 (ID_PFR1): CRn=c0, opc1=0, CRm=c1, opc2=1
+ * TODO: To be provided
+ */
 
-/* Cache Size Identification Register (CCSIDR) */
-/* TODO: To be provided */
+/* Debug Feature Register 0 (ID_DFR0): CRn=c0, opc1=0, CRm=c1, opc2=2
+ * TODO: To be provided
+ */
 
-/* Cache Level ID Register (CLIDR) */
-/* TODO: To be provided */
+/* Auxiliary Feature Register 0 (ID_AFR0): CRn=c0, opc1=0, CRm=c1, opc2=3
+ * TODO: To be provided
+ */
 
-/* Auxiliary ID Register (AIDR) */
-/* TODO: To be provided */
+/* Memory Model Features Register 0 (ID_MMFR0): CRn=c0, opc1=0, CRm=c1, opc2=4
+ * Memory Model Features Register 1 (ID_MMFR1): CRn=c0, opc1=0, CRm=c1, opc2=5
+ * Memory Model Features Register 2 (ID_MMFR2): CRn=c0, opc1=0, CRm=c1, opc2=6
+ * Memory Model Features Register 3 (ID_MMFR3): CRn=c0, opc1=0, CRm=c1, opc2=7
+ * TODO: To be provided
+ */
 
-/* Cache Size Selection Register (CSSELR) */
-/* TODO: To be provided */
+/* Instruction Set Attributes Register 0 (ID_ISAR0): CRn=c0, opc1=0, CRm=c2, opc2=0
+ * Instruction Set Attributes Register 1 (ID_ISAR1): CRn=c0, opc1=0, CRm=c2, opc2=1
+ * Instruction Set Attributes Register 2 (ID_ISAR2): CRn=c0, opc1=0, CRm=c2, opc2=2
+ * Instruction Set Attributes Register 3 (ID_ISAR3): CRn=c0, opc1=0, CRm=c2, opc2=3
+ * Instruction Set Attributes Register 4 (ID_ISAR4): CRn=c0, opc1=0, CRm=c2, opc2=4
+ * Instruction Set Attributes Register 5 (ID_ISAR5): CRn=c0, opc1=0, CRm=c2, opc2=5
+ * Instruction Set Attributes Register 6-7 (ID_ISAR6-7).  Reserved.
+ * TODO: Others to be provided
+ */
 
-/* System Control Register (SCTLR)
- *
- * NOTES:
- * (1) Always enabled on A5
- * (2) Not available on A5
+/* Reserved: CRn=c0, opc1=0, CRm=c3-c7, opc2=* */
+
+/* Cache Size Identification Register (CCSIDR): CRn=c0, opc1=1, CRm=c0, opc2=0
+ * TODO: To be provided
+ */
+
+/* Cache Level ID Register (CLIDR): CRn=c0, opc1=1, CRm=c0, opc2=1
+ * TODO: To be provided
+ */
+
+/* Auxiliary ID Register (AIDR): CRn=c0, opc1=1, CRm=c0, opc2=7
+ * TODO: To be provided
+ */
+
+/* Cache Size Selection Register (CSSELR): CRn=c0, opc1=2, CRm=c0, opc2=0
+ * TODO: To be provided
+ */
+
+/* CP15 c1 Registers ****************************************************************/
+/* System Control Register (SCTLR): CRn=c1, opc1=0, CRm=c0, opc2=0
  */
 
 #define SCTLR_A            (1 << 1)  /* Bit 1:  Enables strict alignment of data */
 #define SCTLR_C            (1 << 2)  /* Bit 2:  Determines if data can be cached */
-                                     /* Bits 3-9: Reserved */
+                                     /* Bits 3-4: Reserved */
+#define SCTLR_CCP15BEN     (1 << 5)  /* Bit 5:  CP15 barrier enable */
+                                     /* Bit 6:  Reserved */
+#define SCTLR_B            (1 << 7)  /* Bit 7:  Should be zero on ARMv7R */
+                                     /* Bits 8-9: Reserved */
 #define SCTLR_SW           (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
-#define SCTLR_Z            (1 << 11) /* Bit 11: Program flow prediction control (1) */
+#define SCTLR_Z            (1 << 11) /* Bit 11: Program flow prediction control */
 #define SCTLR_I            (1 << 12) /* Bit 12: Determines if instructions can be cached */
 #define SCTLR_V            (1 << 13) /* Bit 13: Vectors bit */
-#define SCTLR_RR           (1 << 14) /* Bit 14: Cache replacement strategy (2) */
+#define SCTLR_RR           (1 << 14) /* Bit 14: Cache replacement strategy */
                                      /* Bits 15-16: Reserved */
-#define SCTLR_HA           (1 << 17) /* Bit 17: Hardware management access disabled (2) */
-                                     /* Bits 18-24: Reserved */
+#define SCTLR_BR           (1 << 17) /* Bit 17: Background Region bit */
+                                     /* Bit 18: Reserved */
+#define SCTLR_DZ           (1 << 19) /* Bit 19: Divide by Zero fault enable bit */
+                                     /* Bit 20: Reserved */
+#define SCTLR_FI           (1 << 21) /* Bit 21: Fast interrupts configuration enable bit */
+#define SCTLR_U            (1 << 22) /* Bit 22: Unaligned access model (always one) */
+#define SCTLR_VE           (1 << 24) /* Bit 24: Interrupt Vectors Enable bit */
 #define SCTLR_EE           (1 << 25) /* Bit 25: Determines the value the CPSR.E */
-                                     /* Bits 26-27: Reserved */
-#define SCTLR_TRE          (1 << 28) /* Bit 28: TEX remap */
-#define SCTLR_AFE          (1 << 29) /* Bit 29: Access Flag Enable bit */
+#define SCTLR_NMFI         (1 << 27) /* Bit 27: Non-maskable FIQ (NMFI) support */
+                                     /* Bits 28-29: Reserved */
 #define SCTLR_TE           (1 << 30) /* Bit 30: Thumb exception enable */
-                                     /* Bit 31: Reserved */
+#define SCTLR_IE           (1 << 31) /* Bit 31: Instruction endian-ness */
 
-/* Auxiliary Control Register (ACTLR) */
-/* TODO: To be provided */
+/* Auxiliary Control Register (ACTLR): CRn=c1, opc1=0, CRm=c0, opc2=1
+ * TODO: To be provided
+ */
 
-/* Coprocessor Access Control Register (CPACR) */
-/* TODO: To be provided */
+/* Coprocessor Access Control Register (CPACR): CRn=c1, opc1=0, CRm=c0, opc2=2
+ * TODO: To be provided
+ */
 
-/* Secure Configuration Register (SCR) */
-/* TODO: To be provided */
+/* CP15 c2-c4 Registers *************************************************************/
+/* Not used on ARMv7R */
 
-/* Secure Debug Enable Register (SDER) */
-/* TODO: To be provided */
+/* CP15 c5 Registers ****************************************************************/
+/* Data Fault Status Register (DFSR): CRn=c5, opc1=0, CRm=c0, opc2=0
+ * TODO: To be provided
+ */
 
-/* Non-secure Access Control Register (NSACR) */
+/* Instruction Fault Status Register (IFSR): CRn=c5, opc1=0, CRm=c0, opc2=1
+ * TODO: To be provided
+ */
 
-                                     /* Bits 0-9: Reserved */
-#define NSACR_CP10         (1 << 10) /* Bit 10: Permission to access coprocessor 10 */
-#define NSACR_CP11         (1 << 11) /* Bit 11: Permission to access coprocessor 11 */
-                                     /* Bits 12-13: Reserved */
-#define NSACR_NSD32DIS     (1 << 14) /* Bit 14: Disable the Non-secure use of VFP D16-D31 */
-#define NSACR_NSASEDIS     (1 << 15) /* Bit 15: Disable Non-secure Advanced SIMD Extension */
-                                     /* Bits 16-17: Reserved */
-#define NSACR_NSSMP        (1 << 18) /* Bit 18: ACR SMP bit writable */
-                                     /* Bits 19-31: Reserved */
+/* Auxiliary DFSR (ADFSR): CRn=c5, opc1=0, CRm=c1, opc2=0
+ * TODO: To be provided
+ */
 
-/* Virtualization Control Register (VCR) */
-/* TODO: To be provided */
+/* Auxiliary IFSR (AIFSR): CRn=c5, opc1=0, CRm=c1, opc2=1
+ * TODO: To be provided
+ */
 
-/* Auxiliary Data Fault Status Register (ADFSR).  Not used in this implementation. */
+/* CP15 c6 Registers ****************************************************************/
 
-/* Data Fault Address Register(DFAR)
+/* Data Fault Address Register(DFAR): CRn=c6, opc1=0, CRm=c0, opc2=0
  *
  *   Holds the MVA of the faulting address when a synchronous fault occurs
- *
- * Instruction Fault Address Register(IFAR)
+ */
+
+/* Instruction Fault Address Register(IFAR): CRn=c6, opc1=0, CRm=c0, opc2=1
  *
  *   Holds the MVA of the faulting address of the instruction that caused a prefetch
  *   abort.
- *
- * NOP Register
- *
- *   The use of this register is optional and deprecated. Use the NOP instruction
- *   instead.
- *
- * Physical Address Register (PAR)
- *
- *   Holds:
- *   - the PA after a successful translation
- *   - the source of the abort for an unsuccessful translation
- *
- * Instruction Synchronization Barrier
- *
- *   The use of ISB is optional and deprecated. Use the instruction ISB instead.
- *
- * Data Memory Barrier
- *   The use of DMB is deprecated and, on Cortex-A5 MPCore, behaves as NOP. Use the
- *   instruction DMB instead.
  */
 
-/* Vector Base Address Register (VBAR) */
+/* Data Region Base Address Register (DRBAR): CRn=c6, opc1=0, CRm=c1, opc2=0
+ * TODO: To be provided
+ */
 
-#define VBAR_MASK               (0xffffffe0)
+/* Instruction Region Base Address Register (IRBAR): CRn=c6, opc1=0, CRm=c1, opc2=1
+ * TODO: To be provided
+ */
 
-/* Monitor Vector Base Address Register (MVBAR) */
-/* TODO: To be provided */
+/* Data Region Size and Enable Register (DRSR): CRn=c6, opc1=0, CRm=c1, opc2=2
+ * TODO: To be provided
+ */
 
-/* Interrupt Status Register (ISR) */
-/* TODO: To be provided */
+/* Instruction Region Size and Enable Register (IRSR): CRn=c6, opc1=0, CRm=c1, opc2=3
+ * TODO: To be provided
+ */
 
-/* Virtualization Interrupt Register (VIR) */
-/* TODO: To be provided */
+/* Data Region Access Control Register (DRACR): CRn=c6, opc1=0, CRm=c1, opc2=4
+ * TODO: To be provided
+ */
 
-/* Context ID Register (CONTEXTIDR) */
+/* Instruction Region Access Control Register (IRACR): CRn=c6, opc1=0, CRm=c1, opc2=5
+ * TODO: To be provided
+ */
 
-#define CONTEXTIDR_ASID_SHIFT   (0)   /* Bits 0-7: Address Space Identifier */
-#define CONTEXTIDR_ASID_MASK    (0xff << CONTEXTIDR_ASID_SHIFT)
-#define CONTEXTIDR_PROCID_SHIFT (8) /* Bits 8-31: Process Identifier */
-#define CONTEXTIDR_PROCID_MASK  (0x00ffffff << CONTEXTIDR_PROCID_SHIFT)
+/* MPU Region Number Register (RGNR): CRn=c6, opc1=0, CRm=c2, opc2=0
+ * TODO: To be provided
+ */
 
-/* Configuration Base Address Register (CBAR) */
-/* TODO: To be provided */
+/* CP15 c7 Registers ****************************************************************/
+/* See cp15_cacheops.h */
+
+/* CP15 c8 Registers ****************************************************************/
+/* Not used on ARMv7R */
+
+/* CP15 c9 Registers ****************************************************************/
+/* 32-bit Performance Monitors Control Register (PMCR): CRn=c9, opc1=0, CRm=c0, opc2=0
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Count Enable Set register (PMCNTENSET): CRn=c9, opc1=0, CRm=c12, opc2=1
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Count Enable Clear register (PMCNTENCLR): CRn=c9, opc1=0, CRm=c12, opc2=2
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Overflow Flag Status Register (PMOVSR): CRn=c9, opc1=0, CRm=c12, opc2=3
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Software Increment register (PMSWINC): CRn=c9, opc1=0, CRm=c12, opc2=4
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Event Counter Selection Register (PMSELR): CRn=c9, opc1=0, CRm=c12, opc2=5
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Common Event Identification (PMCEID0): CRn=c9, opc1=0, CRm=c12, opc2=6
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Common Event Identification (PMCEID1): CRn=c9, opc1=0, CRm=c12, opc2=7
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Cycle Count Register (PMCCNTR): CRn=c9, opc1=0, CRm=c13, opc2=0
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Event Type Select Register (PMXEVTYPER): CRn=c9, opc1=0, CRm=c13, opc2=1
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Event Count Register (PMXEVCNTR): CRn=c9, opc1=0, CRm=c13, opc2=2
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors User Enable Register (PMUSERENR): CRn=c9, opc1=0, CRm=c14, opc2=0
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Interrupt Enable Set register (PMINTENSET): CRn=c9, opc1=0, CRm=c14, opc2=1
+ * TODO: To be provided
+ */
+
+/* 32-bit Performance Monitors Interrupt Enable Clear register (PMINTENCLR): CRn=c9, opc1=0, CRm=c14, opc2=2
+ * TODO: To be provided
+ */
+
+/* CP15 c10 Registers ***************************************************************/
+/* Not used on ARMv7R */
+
+/* CP15 c11 Registers ***************************************************************/
+/* Reserved for implementation defined DMA functions */
+
+/* CP15 c12 Registers ***************************************************************/
+/* Not used on ARMv7R */
+
+/* CP15 c13 Registers ***************************************************************/
+
+/* Context ID Register (CONTEXTIDR): CRn=c13, opc1=0, CRm=c0, opc2=1
+ * 32-Bit ContextID value.
+ */
+
+/* User Read/Write (TPIDRURW): CRn=c13, opc1=0, CRm=c0, opc2=2
+ * TODO: To be provided
+ */
+
+/* User Read Only (TPIDRURO): CRn=c13, opc1=0, CRm=c0, opc2=3
+ * TODO: To be provided
+ */
+
+/* PL1 only (TPIDRPRW): CRn=c13, opc1=0, CRm=c0, opc2=4
+ * TODO: To be provided
+ */
+
+/* CP15 c14 Registers ***************************************************************/
+
+/* Counter Frequency register (CNTFRQ): CRn=c14, opc1=0, CRm=c0, opc2=0
+ * TODO: To be provided
+ */
+
+/* Timer PL1 Control register (CNTKCTL): CRn=c14, opc1=0, CRm=c1, opc2=0
+ * TODO: To be provided
+ */
+
+/* PL1 Physical TimerValue register (CNTP_TVAL): CRn=c14, opc1=0, CRm=c2, opc2=0
+ * TODO: To be provided
+ */
+
+/* PL1 Physical Timer Control register (CNTP_CTL): CRn=c14, opc1=0, CRm=c2, opc2=0
+ * TODO: To be provided
+ */
+
+/* Virtual TimerValue register (CNTV_TVAL): CRn=c14, opc1=0, CRm=c3, opc2=0
+ * TODO: To be provided
+ */
+
+/* Virtual Timer Control register (CNTV_CTL): CRn=c14, opc1=0, CRm=c3, opc2=0
+ * TODO: To be provided
+ */
+
+/* 64-bit Physical Count register (CNTPCT): CRn=c14, opc1=0, CRm=c14, opc2=n
+ * TODO: To be provided
+ */
+
+/* Virtual Count register (CNTVCT): CRn=c14, opc1=1, CRm=c14, opc2=n
+ * TODO: To be provided
+ */
+
+/* PL1 Physical Timer CompareValue register (CNTP_CVAL): CRn=c14, opc1=2, CRm=c14, opc2=n
+ * TODO: To be provided
+ */
+
+/* Virtual Timer CompareValue register (CNTV_CVAL): CRn=c14, opc1=3, CRm=c14, opc2=n
+ * TODO: To be provided
+ */
+
+/* CP15 c15 Registers ***************************************************************/
+/* Implementation defined */
 
 /************************************************************************************
  * Assemby Macros

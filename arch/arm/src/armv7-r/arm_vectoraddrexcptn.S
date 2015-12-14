@@ -74,8 +74,8 @@
  *
  * Description:
  *   Shouldn't happen.  This exception handler is in a separate file from
- *   other vector handlers because some processors (e.g., Cortex-A5) do not
- *   support the Address Exception vector.
+ *   other vector handlers because some processors do not support the
+ *   Address Exception vector.
  *
  ****************************************************************************/
 

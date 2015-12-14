@@ -55,7 +55,12 @@
 #undef CPU_CACHE_ROUND_ROBIN
 #undef CPU_DCACHE_DISABLE
 #undef CPU_ICACHE_DISABLE
-#undef CPU_AFE_ENABLE
+#define CPU_SCTLR_CCP15BEN 1
+#define CPU_BACKGROUND_REGION 1
+#undef CPU_DIV0_FAULT
+#undef CPU_FAST_INTERRUPT
+#undef CPU_IMPL_VECTORS
+#undef CPU_NONMASKABLE_FIQ
 
 /* There are three operational memory configurations:
  *
@@ -145,32 +150,72 @@ __start:
 	 * example, we get here via a bootloader and the control register is in some
 	 * unknown state.
 	 *
-	 *   SCTLR_A    Bit 1:  Strict alignment disabled (reset value)
-	 *   SCTLR_C    Bit 2:  DCache disabled (reset value)
+	 *   SCTLR_A        Bit 1:  Strict alignment disabled
+	 *   SCTLR_C        Bit 2:  DCache disabled
+	 *   SCTLR_CCP15BEN Bit 5:  CP15 barrier enable
+	 *   SCTLR_B        Bit 7:  Should be zero on ARMv7R */
 	 *
-	 *   SCTLR_SW   Bit 10: SWP/SWPB not enabled (reset value)
-	 *   SCTLR_I    Bit 12: ICache disabled (reset value)
-	 *   SCTLR_V    Bit 13: Assume low vectors (reset value)
-	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
-	 *                      replacement strategy.
-	 *   SCTLR_HA   Bit 17: Not supported by A5
+	 *   SCTLR_SW       Bit 10: SWP/SWPB not enabled
+	 *   SCTLR_I        Bit 12: ICache disabled
+	 *   SCTLR_V        Bit 13: Assume low vectors
+	 *   SCTLR_RR       Bit 14: Round-robin replacement strategy.
 	 *
-	 *   SCTLR_EE   Bit 25: Little endian (reset value).
-	 *   SCTLR_TRE  Bit 28: No memory region remapping (reset value)
-	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
-	 *   SCTLR_TE   Bit 30: All exceptions handled in ARM state (reset value).
+	 *   SCTLR_BR       Bit 17: Background Region bit
+	 *   SCTLR_DZ       Bit 19: Divide by Zero fault enable bit
+	 *   SCTLR_FI       Bit 21: Fast interrupts configuration enable bit
+	 *   SCTLR_U        Bit 22: Unaligned access model (always one)
+	 *
+	 *   SCTLR_VE       Bit 24: Interrupt Vectors Enable bit
+	 *   SCTLR_EE       Bit 25: Little endian.
+	 *   SCTLR_NMFI     Bit 27: Non-maskable FIQ (NMFI) support
+	 *   SCTLR_TE       Bit 30: All exceptions handled in ARM state.
+	 *   SCTLR_IE       Bit 31: Instruction endian-ness.
 	 */
 
-	bic		r0, r0, #(SCTLR_A  | SCTLR_C)
-	bic		r0, r0, #(SCTLR_SW | SCTLR_I   | SCTLR_V   | SCTLR_RR | SCTLR_HA)
-	bic		r0, r0, #(SCTLR_EE | SCTLR_TRE | SCTLR_AFE | SCTLR_TE)
+	/* Clear all configurable bits */
 
-	/* Set bits to enable the MMU
+	bic		r0, r0, #(SCTLR_A  | SCTLR_C | SCTLR_CCP15BEN | SCTLR_B)
+	bic		r0, r0, #(SCTLR_SW | SCTLR_I | SCTLR_V   | SCTLR_RR)
+	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI | SCTLR_U)
+	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE | SCLTR_IE)
+
+	/* Set configured bits */
+
+#ifdef CPU_ALIGNMENT_TRAP
+	/* Alignment abort enable
 	 *
-	 *   SCTLR_Z     Bit 11: Program flow prediction control
+	 *   SCTLR_A Bit 1:  Strict alignment enabled
 	 */
 
-	orr		r0, r0, #(SCTLR_Z)
+	orr		r0, r0, #(SCTLR_A)
+#endif
+
+#ifndef CPU_DCACHE_DISABLE
+	/* Dcache enable
+	 *
+	 *   SCTLR_C    Bit 2:  DCache enable
+	 */
+
+	orr		r0, r0, #(SCTLR_C)
+#endif
+
+#define CPU_SCTLR_CCP15BEN 1
+	/* Enable memory barriers
+	 *
+	 *  SCTLR_CCP15BEN Bit 5: CP15 barrier enable
+	 */
+
+	orr		r0, r0, #(SCTLR_CCP15BEN)
+#endif
+
+#ifndef CPU_ICACHE_DISABLE
+	/* Icache enable
+	 *
+	 *   SCTLR_I    Bit 12: ICache enable
+	 */
+
+	orr		r0, r0, #(SCTLR_I)
+#endif
 
 #ifndef CONFIG_ARCH_LOWVECTORS
 	/* Position vectors to 0xffff0000 if so configured.
@@ -184,50 +229,55 @@ __start:
 #ifdef CPU_CACHE_ROUND_ROBIN
 	/* Round Robin cache replacement
 	 *
-	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
-	 *                      replacement strategy.
+	 *   SCTLR_RR   Bit 14: Round-robin replacement strategy.
 	 */
 
 	orr		r0, r0, #(SCTLR_RR)
 #endif
 
-#ifndef CPU_DCACHE_DISABLE
-	/* Dcache enable
+#define CPU_BACKGROUND_REGION 1
+	/* Allow PL1 access to back region when MPU is enabled
 	 *
-	 *   SCTLR_C    Bit 2:  DCache enable
+	 *  SCTLR_BR Bit 17: Background Region bit
 	 */
 
-	orr		r0, r0, #(SCTLR_C)
+	orr		r0, r0, #(SCTLR_BR)
 #endif
 
-#ifndef CPU_ICACHE_DISABLE
-	/* Icache enable
+#ifdef CPU_DIV0_FAULT
+	/* Enable divide by zero faults
 	 *
-	 *   SCTLR_I    Bit 12: ICache enable
+	 *   SCTLR_DZ Bit 19: Divide by Zero fault enable bit
 	 */
 
-	orr		r0, r0, #(SCTLR_I)
+	orr		r0, r0, #(SCTLR_DZ)
 #endif
 
-#ifdef CPU_ALIGNMENT_TRAP
-	/* Alignment abort enable
+#ifdef CPU_FAST_INTERRUPT
+	/* Fast interrupts configuration enable bit
 	 *
-	 *   SCTLR_A    Bit 1:  Strict alignment enabled
+	 *   SCTLR_FI Bit 21: Fast interrupts configuration enable bit
 	 */
 
-	orr		r0, r0, #(SCTLR_A)
+	orr		r0, r0, #(SCTLR_FI)
 #endif
 
-#ifdef CPU_AFE_ENABLE
-	/* AP[0:2] Permissions model
+#ifdef CPU_IMPL_VECTORS
+	/* Implementation defined interrupt vectors
 	 *
-	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
-	 *
-	 * When AFE=1, the page table AP[0] is used as an access flag and AP[2:1]
-	 * control.  When AFE=0, AP[2:0] control access permissions.
+	 *   SCTLR_VE Bit 24: Interrupt Vectors Enable bit
 	 */
 
-	orr		r0, r0, #(SCTLR_AFE)
+	orr		r0, r0, #(SCTLR_VE)
+#endif
+
+#ifdef CPU_NONMASKABLE_FIQ
+	/* Non-maskable FIQ support
+	 *
+	 *   SCTLR_NMFI Bit 27: Non-maskable FIQ (NMFI) support
+	 */
+
+	orr		r0, r0, #(SCTLR_NMFI)
 #endif
 
 	/* Then write the configured control register */

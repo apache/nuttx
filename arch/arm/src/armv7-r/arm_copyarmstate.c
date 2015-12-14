@@ -48,22 +48,6 @@
 #ifdef CONFIG_ARCH_FPU
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_copyarmstate
  *
  * Description:
@@ -76,7 +60,7 @@ void up_copyarmstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
-  /* In the Cortex-M model, the state is copied from the stack to the TCB,
+  /* In the Cortex-R model, the state is copied from the stack to the TCB,
    * but only a reference is passed to get the state from the TCB.  So the
    * following check avoids copying the TCB save area onto itself:
    */
