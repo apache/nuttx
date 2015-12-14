@@ -447,7 +447,7 @@ void up_irqinitialize(void)
    * Fault handler.
    */
 
-#ifdef CONFIG_ARMV7M_MPU
+#ifdef CONFIG_ARM_MPU
   irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
   up_enable_irq(SAM_IRQ_MEMFAULT);
 #endif
@@ -456,7 +456,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_DEBUG
   irq_attach(SAM_IRQ_NMI, sam_nmi);
-#ifndef CONFIG_ARMV7M_MPU
+#ifndef CONFIG_ARM_MPU
   irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
 #endif
   irq_attach(SAM_IRQ_BUSFAULT, sam_busfault);
