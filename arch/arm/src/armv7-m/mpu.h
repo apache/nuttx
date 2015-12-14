@@ -86,7 +86,15 @@
 
 /* MPU Region Number Register Bit Definitions */
 
-#define MPU_RNR_MASK            (0xff)
+#ifdef CONFIG_ARM_MPU_NREGIONS <= 8
+#  define MPU_RNR_MASK            (0x00000007)
+#elif CONFIG_ARM_MPU_NREGIONS <= 16
+#  define MPU_RNR_MASK            (0x0000000f)
+#elif CONFIG_ARM_MPU_NREGIONS <= 32
+#  define MPU_RNR_MASK            (0x0000001f)
+#else
+#  error "FIXME: Unsupported number of MPU regions"
+#endif
 
 /* MPU Region Base Address Register Bit Definitions */
 

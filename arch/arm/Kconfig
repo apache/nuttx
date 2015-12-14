@@ -68,6 +68,7 @@ config ARCH_CHIP_KINETIS
 	bool "Freescale Kinetis"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RAMFUNCS
 	---help---
@@ -84,6 +85,7 @@ config ARCH_CHIP_LM
 	bool "TI/Luminary Stellaris"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	---help---
 		TI/Luminary Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
 
@@ -91,6 +93,7 @@ config ARCH_CHIP_TIVA
 	bool "TI Tiva"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	---help---
 		TI Tiva TM4C architectures (ARM Cortex-M4)
@@ -107,6 +110,7 @@ config ARCH_CHIP_LPC17XX
 	select ARCH_CORTEXM3
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	---help---
 		NXP LPC17xx architectures (ARM Cortex-M3)
 
@@ -137,6 +141,7 @@ config ARCH_CHIP_LPC43XX
 	select ARCH_HAVE_CMNVECTOR
 	select ARMV7M_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
@@ -178,6 +183,7 @@ config ARCH_CHIP_SAM34
 	bool "Atmel SAM3/SAM4"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_RAMFUNCS
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
@@ -189,6 +195,7 @@ config ARCH_CHIP_SAMV7
 	select ARMV7M_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
@@ -199,6 +206,7 @@ config ARCH_CHIP_STM32
 	bool "STMicro STM32 F1/F2/F3/F4"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
 	select ARMV7M_HAVE_STACKCHECK
@@ -211,6 +219,7 @@ config ARCH_CHIP_STM32F7
 	select ARMV7M_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
 	select ARMV7M_HAVE_STACKCHECK
@@ -415,6 +424,10 @@ config ARCH_DPFPU
 	---help---
 		Enable toolchain support for double precision (64-bit) floating
 		point if both the toolchain and the hardware support it.
+
+config ARM_HAVE_MPU_UNIFIED
+	bool
+	default n
 
 config ARM_MPU
 	bool "MPU support"
