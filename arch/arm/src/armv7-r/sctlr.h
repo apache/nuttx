@@ -8,7 +8,7 @@
  * References:
  *
  *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright
- *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.b (ID072512)
+ *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.c (ID051414)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

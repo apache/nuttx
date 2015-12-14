@@ -6,10 +6,8 @@
  *
  * References:
  *
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1, Copyright © 2010
- *   ARM. All rights reserved. ARM DDI 0434B (ID101810)
  *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright ©
- *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.b (ID072512)
+ *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.c (ID051414)
  *
  * Portions of this file derive from Atmel sample code for the SAMA5D3 Cortex-A5
  * which also has a modified BSD-style license:
@@ -62,9 +60,7 @@
 #define CP15_L1_LINESIZE 32
 
 /* CP15 Registers *******************************************************************/
-/* Reference: Cortex-A5™ MPCore Paragraph 4.1.5, "Cache Operations Registers."
- *
- * Terms:
+/* Terms:
  * 1) Point of coherency (PoC)
  *    The PoC is the point at which all agents that can access memory are guaranteed
  *    to see the same copy of a memory location
@@ -92,6 +88,10 @@
  *   Description:     Invalidate instruction cache by VA to PoU.
  *   Register Format: VA
  *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 1
+ * CP15 Register:     CP15ISB
+ *   Description:     Instruction Synchronization Barrier operation
+ *   NOTE:            Deprecated and no longer documented
+ *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 4
  * CP15 Register:     BPIALL
  *   Description:     Invalidate entire branch predictor array.
  *   Register Format: Should be zero (SBZ)
@@ -116,6 +116,14 @@
  *   Description:     Clean data cache line by Set/Way.
  *   Register Format: Set/Way
  *   Instruction:     MCR p15, 0, <Rd>, c7, c10, 2
+ * CP15 Register:     CP15DSB
+ *   Description:     Data Synchronization Barrier operation
+ *   NOTE:            Deprecated and no longer documented
+ *   Instruction:     MCR p15, 0, <Rd>, c7, c10, 4
+ * CP15 Register:     CP15DMB
+ *   Description:     Data Memory Barrier operation
+ *   NOTE:            Deprecated and no longer documented
+ *   Instruction:     MCR p15, 0, <Rd>, c7, c10, 5
  * CP15 Register:     DCCMVAU
  *   Description:     Clean data or unified cache line by VA to PoU.
  *   Register Format: VA
