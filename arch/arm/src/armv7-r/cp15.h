@@ -74,7 +74,7 @@
 #define CP15_MIDR(r)       _CP15(0, r, c0, c0, 0)   /* Main ID Register */
 #define CP15_CTR(r)        _CP15(0, r, c0, c0, 1)   /* Cache Type Register */
 #define CP15_TCMTR(r)      _CP15(0, r, c0, c0, 2)   /* TCM Type Register */
-#define CP15_MPUIDR(r)     _CP15(0, r, c0, c0, 4)   /* MPU Type Register */
+#define CP15_MPUIR(r)      _CP15(0, r, c0, c0, 4)   /* MPU Type Register */
 #define CP15_MPIDR(r)      _CP15(0, r, c0, c0, 5)   /* Multiprocessor Affinity Register */
 #define CP15_REVIDR(r)     _CP15(0, r, c0, c0, 6)   /* Revision ID register (Cortex-A9) */
 #define CP15_MID_PFR0(r)   _CP15(0, r, c0, c1, 0)   /* Processor Feature Register 0 */
@@ -107,6 +107,15 @@
 
 #define CP15_DFAR(r)       _CP15(0, r, c6, c0, 0)   /* Data Fault Address Register */
 #define CP15_IFAR(r)       _CP15(0, r, c6, c0, 2)   /* Instruction Fault Address Register */
+#define CP15_DRBAR(r)      _CP15(0, r, c6, c1, 0)  /* Data Region Base Address Register */
+#define CP15_DRSR(r)       _CP15(0, r, c6, c1, 2)  /* Data Region Size and Enable Register */
+#define CP15_DRACR(r)      _CP15(0, r, c6, c1, 4)  /* Data Region Access Control Register */
+#ifndef CONFIG_ARM_HAVE_MPU_UNIFIED
+#  define CP15_IRBAR(r)    _CP15(0, r, c6, c1, 1)  /* Instruction Region Base Address Register */
+#  define CP15_IRSR(r)     _CP15(0, r, c6, c1, 3)  /* Instruction Region Size and Enable Register */
+#  define CP15_IRACR(r)    _CP15(0, r, c6, c1, 5)  /* Instruction Region Access Control Register */
+#endif
+#define CP15_RGNR(r)       _CP15(0, r, c6, c2, 0)  /* MPU Region Number Register */
 
 #define CP15_ICIALLUIS(r)  _CP15(0, r, c7, c1, 0)   /* Cache Operations Registers */
 #define CP15_BPIALLIS(r)   _CP15(0, r, c7, c1, 6)

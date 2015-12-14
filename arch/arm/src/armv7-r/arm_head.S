@@ -150,6 +150,7 @@ __start:
 	 * example, we get here via a bootloader and the control register is in some
 	 * unknown state.
 	 *
+	 *   SCTLR_M        Bit 0:  MPU enable bit
 	 *   SCTLR_A        Bit 1:  Strict alignment disabled
 	 *   SCTLR_C        Bit 2:  DCache disabled
 	 *   SCTLR_CCP15BEN Bit 5:  CP15 barrier enable
@@ -174,7 +175,7 @@ __start:
 
 	/* Clear all configurable bits */
 
-	bic		r0, r0, #(SCTLR_A  | SCTLR_C | SCTLR_CCP15BEN | SCTLR_B)
+	bic		r0, r0, #(SCTLR_M | SCTLR_A  | SCTLR_C | SCTLR_CCP15BEN | SCTLR_B)
 	bic		r0, r0, #(SCTLR_SW | SCTLR_I | SCTLR_V   | SCTLR_RR)
 	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI | SCTLR_U)
 	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE | SCLTR_IE)

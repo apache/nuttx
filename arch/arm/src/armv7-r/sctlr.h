@@ -131,6 +131,7 @@
 /* System Control Register (SCTLR): CRn=c1, opc1=0, CRm=c0, opc2=0
  */
 
+#define SCTLR_M            (1 << 0)  /* Bit 0:  MPU enable bit */
 #define SCTLR_A            (1 << 1)  /* Bit 1:  Enables strict alignment of data */
 #define SCTLR_C            (1 << 2)  /* Bit 2:  Determines if data can be cached */
                                      /* Bits 3-4: Reserved */
