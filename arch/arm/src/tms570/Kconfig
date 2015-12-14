@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_TMS570
+
+comment "TMS570 Configuration Options"
+
+# Chip Capabilities
+
+# Summary configuratinos
+
+# Chip Selection
+
+#menu "TMS570 Peripheral Support"
+# endmenu # TMS570 Peripheral Support
+
+endif # ARCH_CHIP_TMS570
