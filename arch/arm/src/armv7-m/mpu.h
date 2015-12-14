@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H
-#define __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H
+#ifndef __ARCH_ARM_SRC_ARMV7M_MPU_H
+#define __ARCH_ARM_SRC_ARMV7M_MPU_H
 
 /************************************************************************************
  * Included Files
@@ -570,5 +570,5 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7M_MPU_H */
 
