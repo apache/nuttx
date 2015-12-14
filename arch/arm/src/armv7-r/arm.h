@@ -7,11 +7,8 @@
  *
  * References:
  *
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1,
- *   Copyright © 2010 ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
- *   Copyright © 1996-1998, 2000, 2004-2012 ARM. All rights reserved.
- *   ARM DDI 0406C.b (ID072512)
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright
+ *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.c (ID051414)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,9 +60,7 @@
 #  define PSR_MODE_FIQ    (17 << PSR_MODE_SHIFT) /* FIQ mode */
 #  define PSR_MODE_IRQ    (18 << PSR_MODE_SHIFT) /* IRQ mode */
 #  define PSR_MODE_SVC    (19 << PSR_MODE_SHIFT) /* Supervisor mode */
-#  define PSR_MODE_MON    (22 << PSR_MODE_SHIFT) /* Monitor mode */
 #  define PSR_MODE_ABT    (23 << PSR_MODE_SHIFT) /* Abort mode */
-#  define PSR_MODE_HYP    (26 << PSR_MODE_SHIFT) /* Hyp mode */
 #  define PSR_MODE_UND    (27 << PSR_MODE_SHIFT) /* Undefined mode */
 #  define PSR_MODE_SYS    (31 << PSR_MODE_SHIFT) /* System mode */
 #define PSR_T_BIT         (1 << 5)  /* Bit 5: Thumb execution state bit */
@@ -75,6 +70,8 @@
 #  define PSR_I_BIT       (1 << 7)  /* Bit 7: IRQ mask bit */
 #  define PSR_A_BIT       (1 << 8)  /* Bit 8: Asynchronous abort mask */
 #define PSR_E_BIT         (1 << 9)  /* Bit 9:  Endianness execution state bit */
+#define PSR_IT27_SHIFT    (10)      /* Bits 10-15:  If-Then execution state bits IT[2:7] */
+#define PSR_IT27_MASK     (0x3f << PSR_IT27_SHIFT)
 #define PSR_GE_SHIFT      (16)      /* Bits 16-19: Greater than or Equal flags */
 #define PSR_GE_MASK       (15 << PSR_GE_SHIFT)
                                     /* Bits 20-23: Reserved. RAZ/SBZP */
@@ -116,7 +113,11 @@ extern "C"
  * Name: arm_data_initialize
  *
  * Description:
- *   Clear all of .bss to zero; set .data to the correct initial values
+ *   Clear all of .bss to zero; set .data to the correct initial values.
+ *   This function is called automatically from ARMv7-R boot code *UNLESS*
+ *   executing from FLASH or SRAM with data is SDRAM (CONFIG_BOOT_SDRAM_DATA=y).
+ *   In that case, early board-specific logic must first initialize SDRAM
+ *   then call this function.
  *
  * Input Parameters:
  *   None
