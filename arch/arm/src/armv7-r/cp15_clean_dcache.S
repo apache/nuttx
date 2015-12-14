@@ -92,7 +92,7 @@
 
 cp15_clean_dcache:
 
-	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	mrc		CP15_CTR(r3)				/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
