@@ -239,6 +239,12 @@ config ARCH_BOARD_KWIKSTIK_K40
 		Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
 		development board.
 
+config ARCH_BOARD_LAUNCHXL_TMS57004
+	bool "TI LaunchXL-TMS57004"
+	depends on ARCH_CHIP_TMS570LS1227ZWT
+	---help---
+		TI LaunchXL-TMS57004 development board.
+
 config ARCH_BOARD_LM3S6432S2E
 	bool "Stellaris RDK-S2E Reference Design Kit"
 	depends on ARCH_CHIP_LM3S6432
@@ -1270,6 +1276,7 @@ config ARCH_BOARD
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
+	default "launchxl-tms57004"        if ARCH_BOARD_LAUNCHXL_TMS57004
 	default "lincoln60"                if ARCH_BOARD_LINCOLN60
 	default "lm3s6432-s2e"             if ARCH_BOARD_LM3S6432S2E
 	default "lm3s6965-ek"              if ARCH_BOARD_LM3S6965EK
@@ -1490,6 +1497,9 @@ source "configs/hymini-stm32v/Kconfig"
 endif
 if ARCH_BOARD_KWIKSTIK_K40
 source "configs/kwikstik-k40/Kconfig"
+endif
+if ARCH_BOARD_LAUNCHXL_TMS57004
+source "configs/launchxl-tms57004/Kconfig"
 endif
 if ARCH_BOARD_LINCOLN60
 source "configs/lincoln60/Kconfig"
