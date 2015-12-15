@@ -71,7 +71,7 @@
  * RTP/DMM         –              –              –
  */
 
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS0232PZ)
+#if defined(CONFIG_ARCH_CHIP_TMS570LS0232PZ)
 #  define TMS570_CORTEX_R4   1           /* Cortex-R4 family */
 #  undef  TMS570_CORTEX_R4F              /* Not Cortex-R4F family */
 #  undef  TMS570_CORTEX_R5               /* Not Cortex-R5 family */

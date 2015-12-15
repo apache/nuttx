@@ -233,6 +233,13 @@ config ARCH_CHIP_STR71X
 	---help---
 		STMicro STR71x architectures (ARM7TDMI).
 
+config ARCH_CHIP_TMS570
+	bool "TI TMS570"
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_RAMFUNCS
+	---help---
+		TI TMS570 family
+
 config ARCH_CHIP_MOXART
 	bool "MoxART"
 	select ARCH_ARM7TDMI
@@ -306,12 +313,58 @@ config ARCH_CORTEXA8
 	select ARCH_USE_MMU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
 
+config ARCH_CORTEXR4
+	bool
+	default n
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+
+config ARCH_CORTEXR4F
+	bool
+	default n
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+
+config ARCH_CORTEXR5
+	bool
+	default n
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+
+config ARCH_CORTEX5F
+	bool
+	default n
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+
+config ARCH_CORTEXR7
+	bool
+	default n
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+
+config ARCH_CORTEXR7F
+	bool
+	default n
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
 	default "armv6-m"	if ARCH_CORTEXM0
 	default "armv7-a"	if ARCH_CORTEXA5 || ARCH_CORTEXA8
 	default "armv7-m"	if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
+	default "armv7-r"	if ARCH_CORTEXR4 || ARCH_CORTEXR4F || ARCH_CORTEXR5 || ARCH_CORTEXR5F || ARCH_CORTEX74 || ARCH_CORTEXR7F
 
 config ARCH_CHIP
 	string
@@ -338,6 +391,7 @@ config ARCH_CHIP
 	default "stm32"		if ARCH_CHIP_STM32
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "str71x"	if ARCH_CHIP_STR71X
+	default "tms570"	if ARCH_CHIP_TMS570
 	default "moxart"	if ARCH_CHIP_MOXART
 
 config ARMV7M_USEBASEPRI
@@ -482,6 +536,9 @@ endif
 if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
 source arch/arm/src/armv7-m/Kconfig
 endif
+if ARCH_CORTEXR4 || ARCH_CORTEXR4F || ARCH_CORTEXR5 || ARCH_CORTEXR5F || ARCH_CORTEX74 || ARCH_CORTEXR7F
+source arch/arm/src/armv7-r/Kconfig
+endif
 if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
 source arch/arm/src/arm/Kconfig
 endif
@@ -553,6 +610,9 @@ source arch/arm/src/stm32f7/Kconfig
 endif
 if ARCH_CHIP_STR71X
 source arch/arm/src/str71x/Kconfig
+endif
+if ARCH_CHIP_TMS570
+source arch/arm/src/tms570/Kconfig
 endif
 if ARCH_CHIP_MOXART
 source arch/arm/src/moxart/Kconfig

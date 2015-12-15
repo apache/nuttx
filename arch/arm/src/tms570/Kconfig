@@ -9,9 +9,43 @@ comment "TMS570 Configuration Options"
 
 # Chip Capabilities
 
-# Summary configuratinos
+# Summary configurations
 
 # Chip Selection
+
+choice
+	prompt "TI TMS570 Chip Selection"
+	default ARCH_CHIP_TMS570LS1227ZWT
+
+config ARCH_CHIP_TMS570LS0232PZ
+	bool "TI TMS570LS0232PZ"
+	select ARCH_CORTEXR4
+
+config ARCH_CHIP_TMS570LS0332PZ
+	bool "TI TMS570LS0332PZ"
+	select ARCH_CORTEXR4
+
+config ARCH_CHIP_TMS570LS0432PZ
+	bool "TI TMS570LS0432PZ"
+	select ARCH_CORTEXR4
+
+config ARCH_CHIP_TMS570LS0714PZ
+	bool "TI TMS570LS0714PZ"
+	select ARCH_CORTEXR4F
+
+config ARCH_CHIP_TMS570LS0714PGE
+	bool "TI TMS570LS0714PGE"
+	select ARCH_CORTEXR4F
+
+config ARCH_CHIP_TMS570LS0714ZWT
+	bool "TI TMS570LS0714ZWT"
+	select ARCH_CORTEXR4F
+
+config ARCH_CHIP_TMS570LS1227ZWT
+	bool "TI TMS570LS1227ZWT"
+	select ARCH_CORTEXR4F
+
+endchoice # TI TMS570 Chip Selection
 
 #menu "TMS570 Peripheral Support"
 # endmenu # TMS570 Peripheral Support
