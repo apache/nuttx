@@ -302,7 +302,6 @@ CONFIG_INPUT=y
 # CONFIG_BUTTONS is not set
 # CONFIG_DJOYSTICK is not set
 # CONFIG_AJOYSTICK is not set
-# CONFIG_DISCRETE_IO is not set
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set

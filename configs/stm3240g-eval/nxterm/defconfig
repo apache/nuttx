@@ -701,7 +701,6 @@ CONFIG_RTC_DATETIME=y
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
-# CONFIG_DISCRETE_IO is not set
 CONFIG_LCD=y
 
 #

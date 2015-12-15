@@ -486,7 +486,6 @@ CONFIG_ARCH_HAVE_I2CRESET=y
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
-# CONFIG_DISCRETE_IO is not set
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set

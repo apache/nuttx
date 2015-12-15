@@ -708,7 +708,6 @@ CONFIG_INPUT=y
 # CONFIG_BUTTONS is not set
 # CONFIG_DJOYSTICK is not set
 # CONFIG_AJOYSTICK is not set
-# CONFIG_DISCRETE_IO is not set
 CONFIG_LCD=y
 
 #
