@@ -11242,4 +11242,7 @@
 	  (2015-12-12),
 	* arch/arm/src/armv7-r:  Add basic architecture support for the ARMv7-R
 	  processor family (2015-12-13).
+	* drivers/led:  Adds a driver for the PCA9635PW I2C LED driver IC which
+	  can be used to control the intensity of up to 16 LEDs.  From Alexander
+	  Entinger (2015-12-15).
 

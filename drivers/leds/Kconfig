@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "LED Support"
+
+config PCA9635PW
+	bool "PCA9635PW I2C LED Driver"
+	default n
+	select I2C
+	---help---
+		Enable support for the NXP PCA9635PW LED driver which can be
+		utilized to drive up to 16 LED's.
+
+endmenu # LED Support

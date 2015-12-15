@@ -81,6 +81,10 @@ lcd/
   Drivers for parallel and serial LCD and OLED type devices.  These
   drivers support interfaces as defined in include/nuttx/lcd/lcd.h
 
+leds/
+  Various LED-related drivers including discrete as well as PWM-
+  driven LEDs.
+
 loop/
   Supports the standard loop device that can be used to export a
   file (or character device) as a block device.  See losetup() and

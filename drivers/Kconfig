@@ -405,6 +405,8 @@ if LCD
 source drivers/lcd/Kconfig
 endif # LCD
 
+source drivers/leds/Kconfig
+
 menuconfig MMCSD
 	bool "MMC/SD Driver Support"
 	default n

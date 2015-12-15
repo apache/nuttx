@@ -1,6 +1,6 @@
 ############################################################################
-# drivers/timers/Make.defs
-# These drivers support various timer devices
+# drivers/leds/Make.defs
+# Various LED-related drivers
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,48 +34,18 @@
 #
 ############################################################################
 
-# Include timer drivers
+# Include LED drivers
 
-TMRDEPPATH =
-TMRVPATH =
+LEDDEPATH =
+LEDVPATH =
 
-ifeq ($(CONFIG_WATCHDOG),y)
-  CSRCS += watchdog.c
-  TMRDEPPATH = --dep-path timers
-  TMRVPATH = :timers
+ifeq ($(CONFIG_PCA9635PW),y)
+  CSRCS += pca9635pw.c
+  LEDDEPATH = --dep-path leds
+  LEDVPATH = :leds
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-  CSRCS += timer.c
-  TMRDEPPATH = --dep-path timers
-  TMRVPATH = :timers
-endif
+# Include LED build support (if any LED drivers were selected)
 
-ifeq ($(CONFIG_RTC_DSXXXX),y)
-  CSRCS += ds3231.c
-  TMRDEPPATH = --dep-path timers
-  TMRVPATH = :timers
-endif
-
-ifeq ($(CONFIG_RTC_PCF85263),y)
-  CSRCS += pcf85263.c
-  TMRDEPPATH = --dep-path timers
-  TMRVPATH = :timers
-endif
-
-ifeq ($(CONFIG_RTC_DRIVER),y)
-  CSRCS += rtc.c
-  TMRDEPPATH = --dep-path timers
-  TMRVPATH = :timers
-endif
-
-ifeq ($(CONFIG_TIMERS_CS2100CP),y)
-  CSRCS += cs2100-cp.c
-  TMRDEPPATH = --dep-path timers
-  TMRVPATH = :timers
-endif
-
-# Include timer build support (if any were selected)
-
-DEPPATH += $(TMRDEPPATH)
-VPATH += $(TMRVPATH)
+DEPPATH += $(LEDDEPATH)
+VPATH += $(LEDVPATH)
