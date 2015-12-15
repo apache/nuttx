@@ -62,6 +62,9 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
+#define PCA9635_I2CBUS  1
+#define PCA9635_I2CADDR 0x40
+
 /* Assume that we have everything */
 
 #define HAVE_USBDEV     1
@@ -554,6 +557,26 @@ int stm32_zerocross_initialize(void);
 
 #ifdef CONFIG_MAX6675
 int stm32_max6675initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pca9635_initialize
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   LED PWM chip.  This function will register the driver as /dev/leddrv0.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCA9635PW
+int stm32_pca9635_initialize(void);
 #endif
 
 /****************************************************************************

@@ -101,6 +101,16 @@ int stm32_bringup(void)
   stm32_zerocross_initialize();
 #endif
 
+#if defined(CONFIG_PCA9635PW)
+  /* Initialize the PCA9635 chip */
+
+  ret = stm32_pca9635_initialize();
+  if (ret < 0)
+    {
+      sdbg("ERROR: stm32_pca9635_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
 
