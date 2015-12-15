@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/discrete/userled_lower.c
+ * drivers/leds/userled_lower.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/discrete/userled.h>
+#include <nuttx/leds/userled.h>
 
 #undef __KERNEL__
 #include <arch/board/board.h>
@@ -57,6 +57,7 @@
 
 static userled_set_t userled_supported(FAR const struct userled_lowerhalf_s *lower);
 static void userled_led(FAR const struct userled_lowerhalf_s *lower,
+                        int led, bool ledon);
 static void userled_ledset(FAR const struct userled_lowerhalf_s *lower,
                            userled_set_t ledset);
 

@@ -37,15 +37,6 @@
 
 ifeq ($(CONFIG_DISCRETE_IO),y)
 
-# Include user LED driver
-
-ifeq ($(CONFIG_USERLED),y)
-  CSRCS += userled_upper.c
-ifeq ($(CONFIG_USERLED_LOWER),y)
-  CSRCS += userled_lower.c
-endif
-endif
-
 # Include buttion driver
 # Although it makes sense for button drivers to be in the discrete driver
 # directory, the button drivers current reside in the input dirver directory.

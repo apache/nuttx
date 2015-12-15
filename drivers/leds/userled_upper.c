@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/discrete/userled_upper.c
+ * drivers/leds/userled_upper.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +54,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/discrete/userled.h>
+#include <nuttx/leds/userled.h>
 
 /****************************************************************************
  * Pre-processor Definitions

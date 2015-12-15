@@ -1,5 +1,5 @@
 /************************************************************************************
- * include/nuttx/input/userled.h
+ * include/nuttx/leds/userled.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DISCRETE_USERLED_H
-#define __INCLUDE_NUTTX_DISCRETE_USERLED_H
+#ifndef __INCLUDE_NUTTX_LEDS_USERLED_H
+#define __INCLUDE_NUTTX_LEDS_USERLED_H
 
 /****************************************************************************
  * Included Files
@@ -198,4 +198,4 @@ int userled_lower_initialize(FAR const char *devname);
 #endif
 
 #endif /* CONFIG_ARCH_HAVE_LEDS */
-#endif /* __INCLUDE_NUTTX_DISCRETE_USERLED_H */
+#endif /* __INCLUDE_NUTTX_LEDS_USERLED_H */

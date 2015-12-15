@@ -11049,13 +11049,10 @@
 	* Many files: Standardize naming of the user LED interface functions.
 	  The new user LED interface functions are now prototyped in only in
 	  include/nuttx/board.h and have name like board_userled_* (2015-11-01).
-	* Rename ioexpander/ directories to discrete/.  This expands the
-	  namespace so that other discrete I/O drivers can reside there as
-	  well (2015-11-01).
-	* drivers/discrete/userled_upper.c and include/discrete/userled.h:  Add
+	* drivers/leds/usersled_upper.c and include/leds/usersled.h:  Add
 	  a generic character driver that may be used by applications to write
 	  to board LEDs (2015-11-01).
-	* drivers/discrete/userled_lower.c:  Add a generic lower-half user LED
+	* drivers/leds/usersled_lower.c:  Add a generic lower-half user LED
 	  driver that may be used by any board that supports the standard
 	  board user LED interfaces (2015-11-01).
 	* sched/clock: Fix error in clock_timespec_subtract().  Found by Lok
@@ -11245,4 +11242,3 @@
 	* drivers/led:  Adds a driver for the PCA9635PW I2C LED driver IC which
 	  can be used to control the intensity of up to 16 LEDs.  From Alexander
 	  Entinger (2015-12-15).
-

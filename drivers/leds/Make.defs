@@ -39,6 +39,17 @@
 LEDDEPATH =
 LEDVPATH =
 
+# Include user LED driver
+
+ifeq ($(CONFIG_USERLED),y)
+  CSRCS += userled_upper.c
+ifeq ($(CONFIG_USERLED_LOWER),y)
+  CSRCS += userled_lower.c
+endif
+  LEDDEPATH = --dep-path leds
+  LEDVPATH = :leds
+endif
+
 ifeq ($(CONFIG_PCA9635PW),y)
   CSRCS += pca9635pw.c
   LEDDEPATH = --dep-path leds

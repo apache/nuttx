@@ -350,7 +350,7 @@
 #define _BTNIOC(nr)       _IOC(_BTNBASE,nr)
 
 /* User LED driver ioctl definitions ****************************************/
-/* (see nuttx/discrete/userled.h */
+/* (see nuttx/leds/usersled.h */
 
 #define _ULEDIOCVALID(c)   (_IOC_TYPE(c)==_ULEDBASE)
 #define _ULEDIOC(nr)       _IOC(_ULEDBASE,nr)
