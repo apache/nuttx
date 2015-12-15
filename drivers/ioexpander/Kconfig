@@ -3,15 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig IOEXPANDER
-	bool "IO Expander Support"
-	default n
-	---help---
-		This directory holds implementations of IO expander drivers.
-		See include/nuttx/discrete/ioexpander.h for registration information.
-
-if IOEXPANDER
-
 config IOEXPANDER_PCA9555
 	bool "PCA9555 I2C IO expander"
 	default n
@@ -48,5 +39,3 @@ config IOEXPANDER_MULTIPIN
 	---help---
 		This settings enable the definition of routines for
 		optimized simultaneous access to multiple pins.
-
-endif # IOEXPANDER

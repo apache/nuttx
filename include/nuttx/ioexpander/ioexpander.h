@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/discrete/ioexpander.h
+ * include/nuttx/ioexpander/ioexpander.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DISCRETE_IOEXPANDER_H
-#define __INCLUDE_NUTTX_DISCRETE_IOEXPANDER_H
+#ifndef __INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H
+#define __INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H
 
 /****************************************************************************
  * Included Files
@@ -264,5 +264,5 @@ struct ioexpander_dev_s
 };
 
 #endif //CONFIG_IOEXPANDER
-#endif //__INCLUDE_NUTTX_DISCRETE_IOEXPANDER_H
+#endif //__INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H
 

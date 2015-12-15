@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/discrete/pca9555.c
+ * drivers/ioexpander/pca9555.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -50,7 +50,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/i2c.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/discrete/ioexpander.h>
+#include <nuttx/ioexpander/ioexpander.h>
 
 #include "pca9555.h"
 
@@ -210,7 +210,7 @@ static int pca9555_getbit(FAR struct i2c_dev_s *i2c, uint8_t addr,
  * Name: pca9555_direction
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -226,7 +226,7 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_option
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -248,7 +248,7 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_write
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -263,7 +263,7 @@ static int pca9555_write(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readpin
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -278,7 +278,7 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readbuf
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -342,7 +342,7 @@ static int pca9555_getmultibits(FAR struct i2c_dev_s *i2c, uint8_t addr,
  * Name: pca9555_multiwrite
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -404,7 +404,7 @@ static int pca9555_multiwrite(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadpin
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -421,7 +421,7 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadbuf
  *
  * Description:
- *  See include/nuttx/discrete/ioexpander.h
+ *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
@@ -499,10 +499,16 @@ static void pca9555_irqworker(void *arg)
 
 static int pca9555_interrupt(int irq, FAR void *context)
 {
+#ifdef CONFIG_PCA9555_MULTIPLE
   /* To support multiple devices,
-   * retrieve the priv structure using the irq number */
+   * retrieve the priv structure using the irq number.
+   */
 
+#  warning Missing logic
+
+#else
   register FAR struct pca9555_dev_s *pca = &g_pca9555;
+#endif
 
   /* In complex environments, we cannot do I2C transfers from the interrupt
    * handler because semaphores are probably used to lock the I2C bus.  In

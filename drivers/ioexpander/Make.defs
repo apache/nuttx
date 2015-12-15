@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/discrete/Make.defs
+# drivers/ioexpander/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -33,14 +33,6 @@
 #
 ############################################################################
 
-# Don't build anything if there is no support for discrete devices
-
-ifeq ($(CONFIG_DISCRETE_IO),y)
-
-# Include buttion driver
-# Although it makes sense for button drivers to be in the discrete driver
-# directory, the button drivers current reside in the input dirver directory.
-
 # Check if I/O expander support is enabled
 
 ifeq ($(CONFIG_IOEXPANDER),y)
@@ -50,12 +42,11 @@ ifeq ($(CONFIG_IOEXPANDER),y)
 ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif
-endif
 
-# Include discrete I/O device driver build support
+# Include ioexpander I/O device driver build support
 
-DEPPATH += --dep-path discrete
-VPATH += :discrete
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)discrete}
+DEPPATH += --dep-path ioexpander
+VPATH += :ioexpander
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)ioexpander}
 
 endif
