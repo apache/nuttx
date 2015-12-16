@@ -33,18 +33,14 @@
  *
  ****************************************************************************/
 
-/* The SAMV71Q21 has 2048Kb of FLASH beginning at address 0x0040:0000 and
- * 384Kb of SRAM beginining at 0x2040:0000
- *
- * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
- * where the code expects to begin execution by jumping to the entry point in
- * the 0x0400:0000 address range (Assuming that ITCM is not enable).
+/* The TMS570LS0432PZ has 384KB of FLASH beginning at address 0x0000:0000 and
+ * 32Kb of SRAM beginining at 0x0800:0000
  */
 
 MEMORY
 {
-	flash (rx) : ORIGIN = 0x00400000, LENGTH = 2048K
-	sram (rwx) : ORIGIN = 0x20400000, LENGTH = 384K
+	flash (rx) : ORIGIN = 0x00000000, LENGTH = 384K
+	sram (rwx) : ORIGIN = 0x08000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
