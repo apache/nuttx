@@ -82,22 +82,6 @@ config TMS570_SCI1
 	default n
 	select ARCH_HAVE_SCI1
 
-config TMS570_
-	bool ""
-	default n
-
-config TMS570_
-	bool ""
-	default n
-
-config TMS570_
-	bool ""
-	default n
-
-config TMS570_
-	bool ""
-	default n
-
 endmenu # TMS570 Peripheral Support
 
 endif # ARCH_CHIP_TMS570
