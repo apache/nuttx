@@ -9,7 +9,7 @@ comment "TMS570 Configuration Options"
 
 # Chip Capabilities
 
-# Summary configurations
+# Summary Configurations
 
 # Chip Selection
 
@@ -47,7 +47,57 @@ config ARCH_CHIP_TMS570LS1227ZWT
 
 endchoice # TI TMS570 Chip Selection
 
-#menu "TMS570 Peripheral Support"
-# endmenu # TMS570 Peripheral Support
+menu "TMS570 Peripheral Support"
+
+config TMS570_MIBADC
+	bool "MibADC"
+	default n
+
+config TMS570_DCAN1
+	bool "Controller Area Network 1 (DCAN1)"
+	default n
+
+config TMS570_DCAN2
+	bool "Controller Area Network 1 (DCAN2)"
+	default n
+
+config TMS570_QEP
+	bool "Enhanced Quadrature Encoder Unit (eQEP)"
+	default n
+
+config TMS570_N2HET
+	bool "High-End Timer (N2HET)"
+	default n
+
+config TMS570_DCAN1
+	bool "Controller Area Network 1 (D"
+	default n
+
+config TMS570_MIBASPI1
+	bool "Multi-Buffered Serial Peripheral Interface Module (MibSPI1)"
+	default n
+
+config TMS570_SCI1
+	bool "Serial Communication Interface 1 (SCI1)"
+	default n
+	select ARCH_HAVE_SCI1
+
+config TMS570_
+	bool ""
+	default n
+
+config TMS570_
+	bool ""
+	default n
+
+config TMS570_
+	bool ""
+	default n
+
+config TMS570_
+	bool ""
+	default n
+
+endmenu # TMS570 Peripheral Support
 
 endif # ARCH_CHIP_TMS570
