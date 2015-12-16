@@ -278,7 +278,8 @@ configs/kwikstik-k40.
   development board.
 
 configs/launchxl-tms57004
-  TI LaunchXL-TMS57004 development board.
+  TI LaunchXL-TMS57004 development board featuring the Hercules
+  TMS570LS0432PZ chip.
 
 configs/lincoln60
    NuttX port to the Micromint Lincoln 60 board.
