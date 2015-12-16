@@ -476,59 +476,6 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
   return OK;
 }
 
-static int stm32_tim_setcapturecfg(FAR struct stm32_tim_dev_s *dev, 
-                                   uint8_t channel, uint8_t capt_filter, 
-                                   uint8_t capt_prescaler)
-{
-  uint16_t ccmr_orig   = 0;
-  uint16_t ccmr_val    = 0;
-  uint16_t ccmr_mask   = 0xff;
-  uint8_t  ccmr_offset  = STM32_GTIM_CCMR1_OFFSET;
-
-  ASSERT(dev);
-
-  /* Further we use range as 0..3; if channel=0 it will also overflow here */
-
-  if (--channel > 4) return ERROR;
-
-#if STM32_NBTIM > 0
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE
-#endif
-#if STM32_NBTIM > 1
-      || ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE
-#endif
-#if STM32_NBTIM > 0
-  )
-    {
-      return ERROR;
-    }
-#endif
-
-  ccmr_val |=  ( capt_filter    << ATIM_CCMR1_IC1F_SHIFT    );
-  ccmr_val |=  ( capt_prescaler << ATIM_CCMR1_IC1PSC_SHIFT  );
-
-  /* Define its position (shift) and get register offset */
-
-  if (channel & 1)
-    {
-      ccmr_val  <<= 8;
-      ccmr_mask <<= 8;
-    }
-
-  if (channel > 1)
-    {
-      ccmr_offset = STM32_GTIM_CCMR2_OFFSET;
-    }
-
-  ccmr_orig  = stm32_getreg16(dev, ccmr_offset);
-  ccmr_orig &= ~ccmr_mask;
-  ccmr_orig |= ccmr_val;
-  stm32_putreg16(dev, ccmr_offset, ccmr_orig);
-
-  return OK;
-
-}
-
 static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                 stm32_tim_channel_t mode)
 {
@@ -579,6 +526,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM2_CH1IN)
               gpio_in_cfg = GPIO_TIM2_CH1IN;
+              ccmr_val |=  ( GPIO_TIM2_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM2_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 1:
@@ -587,6 +536,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM2_CH2IN)
               gpio_in_cfg = GPIO_TIM2_CH2IN;
+              ccmr_val |=  ( GPIO_TIM2_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM2_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 2:
@@ -595,6 +546,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM2_CH3IN)
               gpio_in_cfg = GPIO_TIM2_CH3IN;
+              ccmr_val |=  ( GPIO_TIM2_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM2_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 3:
@@ -603,6 +556,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM2_CH4IN)
               gpio_in_cfg = GPIO_TIM2_CH4IN;
+              ccmr_val |=  ( GPIO_TIM2_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM2_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             default:
@@ -620,6 +575,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM3_CH1IN)
               gpio_in_cfg = GPIO_TIM3_CH1IN;
+              ccmr_val |=  ( GPIO_TIM3_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM3_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 1:
@@ -628,6 +585,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM3_CH2IN)
               gpio_in_cfg = GPIO_TIM3_CH2IN;
+              ccmr_val |=  ( GPIO_TIM3_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM3_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 2:
@@ -636,6 +595,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM3_CH3IN)
               gpio_in_cfg = GPIO_TIM3_CH3IN;
+              ccmr_val |=  ( GPIO_TIM3_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM3_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 3:
@@ -644,6 +605,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM3_CH4IN)
               gpio_in_cfg = GPIO_TIM3_CH4IN;
+              ccmr_val |=  ( GPIO_TIM3_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM3_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             default:
@@ -661,6 +624,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM4_CH1IN)
               gpio_in_cfg = GPIO_TIM4_CH1IN;
+              ccmr_val |=  ( GPIO_TIM4_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM4_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 1:
@@ -669,6 +634,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM4_CH2IN)
               gpio_in_cfg = GPIO_TIM4_CH2IN;
+              ccmr_val |=  ( GPIO_TIM4_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM4_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 2:
@@ -677,6 +644,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM4_CH3IN)
               gpio_in_cfg = GPIO_TIM4_CH3IN;
+              ccmr_val |=  ( GPIO_TIM4_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM4_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 3:
@@ -685,6 +654,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM4_CH4IN)
               gpio_in_cfg = GPIO_TIM4_CH4IN;
+              ccmr_val |=  ( GPIO_TIM4_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM4_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             default: return ERROR;
@@ -701,6 +672,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM5_CH1IN)
               gpio_in_cfg = GPIO_TIM5_CH1IN;
+              ccmr_val |=  ( GPIO_TIM5_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM5_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 1:
@@ -709,6 +682,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM5_CH2IN)
               gpio_in_cfg = GPIO_TIM5_CH2IN;
+              ccmr_val |=  ( GPIO_TIM5_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM5_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 2:
@@ -717,6 +692,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM5_CH3IN)
               gpio_in_cfg = GPIO_TIM5_CH3IN;
+              ccmr_val |=  ( GPIO_TIM5_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM5_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 3:
@@ -725,6 +702,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM5_CH4IN)
               gpio_in_cfg = GPIO_TIM5_CH4IN;
+              ccmr_val |=  ( GPIO_TIM5_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM5_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             default: return ERROR;
@@ -743,6 +722,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM1_CH1IN)
               gpio_in_cfg = GPIO_TIM1_CH1IN;
+              ccmr_val |=  ( GPIO_TIM1_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM1_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 1:
@@ -751,6 +732,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM1_CH2IN)
               gpio_in_cfg = GPIO_TIM1_CH2IN;
+              ccmr_val |=  ( GPIO_TIM1_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM1_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 2:
@@ -759,6 +742,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM1_CH3IN)
               gpio_in_cfg = GPIO_TIM1_CH3IN;
+              ccmr_val |=  ( GPIO_TIM1_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM1_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 3:
@@ -767,6 +752,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM1_CH4IN)
               gpio_in_cfg = GPIO_TIM1_CH4IN;
+              ccmr_val |=  ( GPIO_TIM1_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM1_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             default: 
@@ -784,6 +771,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM8_CH1IN)
               gpio_in_cfg = GPIO_TIM8_CH1OUIN ;
+              ccmr_val |=  ( GPIO_TIM8_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM8_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 1:
@@ -792,6 +781,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM8_CH2IN)
               gpio_in_cfg = GPIO_TIM8_CH2OUIN ;
+              ccmr_val |=  ( GPIO_TIM8_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM8_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 2:
@@ -800,6 +791,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM8_CH3IN)
               gpio_in_cfg = GPIO_TIM8_CH3OUIN ;
+              ccmr_val |=  ( GPIO_TIM8_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM8_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             case 3:
@@ -808,6 +801,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 #endif
 #if defined(GPIO_TIM8_CH4IN)
               gpio_in_cfg = GPIO_TIM8_CH4OUIN ;
+              ccmr_val |=  ( GPIO_TIM8_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
+              ccmr_val |=  ( GPIO_TIM8_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
 #endif
               break;
             default:
@@ -825,10 +820,11 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
   switch (mode & STM32_TIM_CH_MODE_MASK)
     {
       case STM32_TIM_CH_DISABLED:
+        ccmr_val = 0;
         break;
 
       case STM32_TIM_CH_INCAPTURE:
-        ccmr_val  =  (ATIM_CCMR_CCS_CCIN1 << ATIM_CCMR1_CC1S_SHIFT);
+        ccmr_val |=  (ATIM_CCMR_CCS_CCIN1 << ATIM_CCMR1_CC1S_SHIFT);
         ccer_val |= ATIM_CCER_CC1E << (channel << 2);
         if ( gpio_in_cfg == 0 )
             return ERROR;
@@ -956,8 +952,7 @@ struct stm32_tim_ops_s stm32_tim_ops =
   .setisr         = &stm32_tim_setisr,
   .enableint      = &stm32_tim_enableint,
   .disableint     = &stm32_tim_disableint,
-  .ackint         = &stm32_tim_ackint,
-  .setcapturecfg  = &stm32_tim_setcapturecfg
+  .ackint         = &stm32_tim_ackint
 };
 
 #ifdef CONFIG_STM32_TIM2
