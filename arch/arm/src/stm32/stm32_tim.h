@@ -122,6 +122,7 @@ typedef enum
 
 } stm32_tim_mode_t;
 
+        
 /* TIM Channel Modes */
 
 typedef enum
@@ -135,15 +136,19 @@ typedef enum
 
   /* MODES: */
 
-  STM32_TIM_CH_MODE_MASK      = 0x06,
+  STM32_TIM_CH_MODE_OUT_MASK  = 0x06,
+  STM32_TIM_CH_MODE_IN_MASK   = 0x10,
+  STM32_TIM_CH_MODE_MASK      = 0x16,
 
   /* Output Compare Modes */
 
   STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
 //STM32_TIM_CH_OUTCOMPARE     = 0x06,
 
+  /* Input Compare Modes */
+  STM32_TIM_CH_INCAPTURE      = 0x10,
+
   // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
-//STM32_TIM_CH_INCAPTURE      = 0x10,
 //STM32_TIM_CH_INPWM          = 0x20
 //STM32_TIM_CH_DRIVE_OC   -- open collector mode
 
@@ -171,6 +176,7 @@ struct stm32_tim_ops_s
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
+  int  (*setcapturecfg)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint8_t capt_filter, uint8_t capt_prescaler);
 };
 
 /************************************************************************************
