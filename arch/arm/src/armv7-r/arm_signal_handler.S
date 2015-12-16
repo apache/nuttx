@@ -47,10 +47,13 @@
  * File info
  ****************************************************************************/
 
-	.syntax		unified
-	.thumb
-	.cpu		cortex-r4
-	.file		"arm_signal_handler.S"
+#ifdef CONFIG_ARCH_FPU
+	.cpu	cortex-r4
+#else
+	.cpu	cortex-r4f
+#endif
+	.syntax	unified
+	.file	"arm_signal_handler.S"
 
 /****************************************************************************
  * Private Functions
@@ -59,6 +62,8 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+	.text
 
 /****************************************************************************
  * Name: up_signal_handler
@@ -83,8 +88,6 @@
  *
  ****************************************************************************/
 
-	.text
-	.thumb_func
 	.globl	up_signal_handler
 	.type	up_signal_handler, function
 up_signal_handler:

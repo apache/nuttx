@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/armv7-a/syscall.h
+ * arch/arm/include/armv7-r/syscall.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * through include/syscall.h or include/sys/sycall.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_ARMV7_A_SYSCALL_H
-#define __ARCH_ARM_INCLUDE_ARMV7_A_SYSCALL_H
+#ifndef __ARCH_ARM_INCLUDE_ARMV7_R_SYSCALL_H
+#define __ARCH_ARM_INCLUDE_ARMV7_R_SYSCALL_H
 
 /****************************************************************************
  * Included Files
@@ -240,4 +240,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_INCLUDE_ARMV7_A_SYSCALL_H */
+#endif /* __ARCH_ARM_INCLUDE_ARMV7_R_SYSCALL_H */

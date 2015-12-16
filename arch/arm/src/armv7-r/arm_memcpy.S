@@ -57,12 +57,15 @@
  * Public Symbols
  ************************************************************************************/
 
-	.global		memcpy
+	.global	memcpy
 
-	.syntax		unified
-	.thumb
-
-	.file		"arm_memcpy.S"
+#ifdef CONFIG_ARCH_FPU
+	.cpu	cortex-r4
+#else
+	.cpu	cortex-r4f
+#endif
+	.syntax	unified
+	.file	"arm_memcpy.S"
 
 /************************************************************************************
  * .text
@@ -149,7 +152,6 @@ MEM_LongCopyTable:
  ************************************************************************************/
 
 	.align 4
-	.thumb_func
 
 memcpy:
 	push	{r14}
@@ -160,7 +162,6 @@ memcpy:
 
 	.align 4
 
-	.thumb_func
 _do_memcpy:
 	push    {r14}
 

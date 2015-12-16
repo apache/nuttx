@@ -58,11 +58,9 @@
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
-#include <nuttx/addrenv.h>
 
 #include "arm.h"
 #include "svcall.h"
-#include "addrenv.h"
 #include "up_internal.h"
 
 /****************************************************************************

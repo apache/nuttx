@@ -101,6 +101,15 @@
 /* Exported symbols */
 
 	.global	__start				/* Power-up/Reset entry point */
+	.globl	g_idle_topstack		/* Top of the initial/IDLE stack */
+
+#ifdef CONFIG_ARCH_FPU
+	.cpu	cortex-r4
+#else
+	.cpu	cortex-r4f
+#endif
+	.syntax	unified
+	.file	"arm_head.S"
 
 /***************************************************************************
  * .text
@@ -422,13 +431,12 @@ arm_data_initialize:
  ***************************************************************************/
 
 	/* This global variable is unsigned long g_idle_topstack and is
-	 * exported from here only because of its coupling to LCO
+	 * exported from here only because of its coupling to .Lstackpointer
 	 * above.
 	 */
 
 	.rodata
 	.align	4
-	.globl	g_idle_topstack
 	.type	g_idle_topstack, object
 g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE

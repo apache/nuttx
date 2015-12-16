@@ -52,6 +52,14 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "tms570_boot.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define HIGH_VECTOR_ADDRESS   0xffff0000
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -60,10 +68,6 @@
 
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -109,26 +113,24 @@ static void tms570_copyvectorblock(void)
   /* Copy the vectors into ISRAM at the address that will be mapped to the vector
    * address:
    *
-   *   SAM_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
-   *   SAM_VECTOR_VSRAM - Virtual address of vector table in SRAM
-   *   SAM_VECTOR_VADDR - Virtual address of vector table (0x00000000 or
-   *                      0xffff0000)
+   *   _vector_start       - Start sourcea ddress of the vector table
+   *   _vector_end         - End+1 source address of the vector table
+   *   HIGH_VECTOR_ADDRESS - Destinatino ddress of vector table in RAM
    */
 
   src  = (uint32_t *)&_vector_start;
   end  = (uint32_t *)&_vector_end;
-  dest = (uint32_t *)SAM_VECTOR_VSRAM;
+  dest = (uint32_t *)HIGH_VECTOR_ADDRESS;
 
   while (src < end)
     {
       *dest++ = *src++;
     }
 
-  /* Flush the DCache to assure that the vector data is in physical in ISRAM */
+  /* Flush the DCache to assure that the vector data is in physical in RAM */
 
-  arch_clean_dcache((uintptr_t)SAM_VECTOR_VSRAM,
-                    (uintptr_t)SAM_VECTOR_VSRAM + tms570_vectorsize());
-#endif
+  arch_clean_dcache((uintptr_t)HIGH_VECTOR_ADDRESS,
+                    (uintptr_t)HIGH_VECTOR_ADDRESS + tms570_vectorsize());
 }
 
 #else
@@ -232,14 +234,14 @@ void arm_boot(void)
   /* Perform board-specific initialization,  This must include:
    *
    * - Initialization of board-specific memory resources (e.g., SDRAM)
-   * - Configuration of board specific resources (PIOs, LEDs, etc).
+   * - Configuration of board specific resources (GPIOs, LEDs, etc).
    *
    * NOTE: We must use caution prior to this point to make sure that
    * the logic does not access any global variables that might lie
    * in SDRAM.
    */
 
-  tms570_boardinitialize();
+  tms570_board_initialize();
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
   /* If .data and .bss reside in SDRAM, then initialize the data sections
