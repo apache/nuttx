@@ -241,10 +241,10 @@ config ARCH_BOARD_KWIKSTIK_K40
 
 config ARCH_BOARD_LAUNCHXL_TMS57004
 	bool "TI LaunchXL-TMS57004"
-	depends on CONFIG_ARCH_CHIP_TMS570LS0432PZ
+	depends on ARCH_CHIP_TMS570LS0432PZ
 	---help---
-		TI LaunchXL-TMS57004 development board featuring the Hercules
-		TMS570LS0432PZ chip.
+		TI Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (LAUNCHXL-
+		TMS57004) featuring the Hercules TMS570LS0432PZ chip.
 
 config ARCH_BOARD_LM3S6432S2E
 	bool "Stellaris RDK-S2E Reference Design Kit"
