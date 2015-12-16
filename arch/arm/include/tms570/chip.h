@@ -92,15 +92,15 @@
 #  define TMS570_ECAP_NCH    0           /* No eCAP channels */
 #  define TMS570_EQEP_NCH    1           /* One eQEP channel */
 #  define TMS570_NMIBSPI     1           /* One MibSPI */
-#  define TMS570_MIBSPI0_NCS 4           /* MibSPI0: 4 chip selects */
-#  define TMS570_MIBSPI1_NCS 0           /* MibSPI1: No chip selects */
+#  define TMS570_MIBSPI1_NCS 4           /* MibSPI1: 4 chip selects */
 #  define TMS570_MIBSPI2_NCS 0           /* MibSPI2: No chip selects */
+#  define TMS570_MIBSPI3_NCS 0           /* MibSPI3: No chip selects */
 #  define TMS570_NSPI        2           /* Two SPI */
-#  define TMS570_SPI0_NCS    0           /* SPI0: No chip selects */
 #  define TMS570_SPI1_NCS    0           /* SPI1: No chip selects */
+#  define TMS570_SPI2_NCS    0           /* SPI2: No chip selects */
 #  define TMS570_NSCI        1           /* One SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        0           /* No I2C */
 #  define TMS570_NGPIOINT    8           /* 8 GPIO interrupts */
 #  define TMS570_NEMIF16     0           /* No EMIF 16-bit data */
@@ -129,15 +129,15 @@
 #  define TMS570_ECAP_NCH    0           /* No eCAP channels */
 #  define TMS570_EQEP_NCH    1           /* One eQEP channel */
 #  define TMS570_NMIBSPI     1           /* One MibSPI */
-#  define TMS570_MIBSPI0_NCS 4           /* MibSPI0: 4 chip selects */
-#  define TMS570_MIBSPI1_NCS 0           /* MibSPI1: No chip selects */
+#  define TMS570_MIBSPI1_NCS 4           /* MibSPI1: 4 chip selects */
 #  define TMS570_MIBSPI2_NCS 0           /* MibSPI2: No chip selects */
+#  define TMS570_MIBSPI3_NCS 0           /* MibSPI3: No chip selects */
 #  define TMS570_NSPI        2           /* Two SPI */
-#  define TMS570_SPI0_NCS    0           /* SPI0: No chip selects */
 #  define TMS570_SPI1_NCS    0           /* SPI1: No chip selects */
+#  define TMS570_SPI2_NCS    0           /* SPI2: No chip selects */
 #  define TMS570_NSCI        1           /* One SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        0           /* No I2C */
 #  define TMS570_NGPIOINT    9           /* 9 GPIO interrupts */
 #  define TMS570_NEMIF16     0           /* No EMIF 16-bit data */
@@ -166,15 +166,15 @@
 #  define TMS570_ECAP_NCH    0           /* No eCAP channels */
 #  define TMS570_EQEP_NCH    1           /* One eQEP channel */
 #  define TMS570_NMIBSPI     1           /* One MibSPI */
-#  define TMS570_MIBSPI0_NCS 4           /* MibSPI0: 4 chip selects */
-#  define TMS570_MIBSPI1_NCS 0           /* MibSPI1: No chip selects */
+#  define TMS570_MIBSPI1_NCS 4           /* MibSPI1: 4 chip selects */
 #  define TMS570_MIBSPI2_NCS 0           /* MibSPI2: No chip selects */
+#  define TMS570_MIBSPI3_NCS 0           /* MibSPI3: No chip selects */
 #  define TMS570_NSPI        2           /* Two SPI */
-#  define TMS570_SPI0_NCS    0           /* SPI0: No chip selects */
 #  define TMS570_SPI1_NCS    0           /* SPI1: No chip selects */
+#  define TMS570_SPI2_NCS    0           /* SPI2: No chip selects */
 #  define TMS570_NSCI        1           /* One SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        0           /* No I2C */
 #  define TMS570_NGPIOINT    8           /* 8 GPIO interrupts */
 #  define TMS570_NEMIF16     0           /* No EMIF 16-bit data */
@@ -228,15 +228,15 @@
 #  define TMS570_ECAP_NCH    4           /* 4 eCAP channels */
 #  define TMS570_EQEP_NCH    1           /* 1 eQEP channels */
 #  define TMS570_NMIBSPI     2           /* 2 MibSPI */
-#  define TMS570_MIBSPI0_NCS 5           /* MibSPI0: 5 chip selects */
-#  define TMS570_MIBSPI1_NCS 1           /* MibSPI1: 1 chip selects */
-#  define TMS570_MIBSPI2_NCS 0           /* MibSPI2: No chip selects */
+#  define TMS570_MIBSPI1_NCS 5           /* MibSPI1: 5 chip selects */
+#  define TMS570_MIBSPI2_NCS 1           /* MibSPI2: 1 chip selects */
+#  define TMS570_MIBSPI3_NCS 0           /* MibSPI3: No chip selects */
 #  define TMS570_NSPI        1           /* One SPI */
-#  define TMS570_SPI0_NCS    1           /* SPI0: One chip selects */
-#  define TMS570_SPI1_NCS    0           /* SPI1: No chip selects */
+#  define TMS570_SPI1_NCS    1           /* SPI1: One chip selects */
+#  define TMS570_SPI2_NCS    0           /* SPI2: No chip selects */
 #  define TMS570_NSCI        1           /* One SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        0           /* No I2C */
 #  define TMS570_NGPIOINT    9           /* 9 GPIO interrupts */
 #  define TMS570_NEMIF16     0           /* No EMIF 16-bit data */
@@ -265,15 +265,15 @@
 #  define TMS570_ECAP_NCH    6           /* 6 eCAP channels */
 #  define TMS570_EQEP_NCH    2           /* 2 eQEP channels */
 #  define TMS570_NMIBSPI     3           /* 3 MibSPI */
-#  define TMS570_MIBSPI0_NCS 5           /* MibSPI0: 5 chip selects */
-#  define TMS570_MIBSPI1_NCS 6           /* MibSPI1: 6 chip selects */
-#  define TMS570_MIBSPI2_NCS 4           /* MibSPI2: 4 chip selects */
+#  define TMS570_MIBSPI1_NCS 5           /* MibSPI1: 5 chip selects */
+#  define TMS570_MIBSPI2_NCS 6           /* MibSPI2: 6 chip selects */
+#  define TMS570_MIBSPI3_NCS 4           /* MibSPI3: 4 chip selects */
 #  define TMS570_NSPI        1           /* One SPI */
-#  define TMS570_SPI0_NCS    1           /* SPI0: One chip selects */
-#  define TMS570_SPI1_NCS    0           /* SPI1: No chip selects */
+#  define TMS570_SPI1_NCS    1           /* SPI1: One chip selects */
+#  define TMS570_SPI2_NCS    0           /* SPI2: No chip selects */
 #  define TMS570_NSCI        2           /* Two SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        1           /* One I2C */
 #  define TMS570_NGPIOINT    10          /* 16 GPIO interrupts */
 #  define TMS570_NEMIF16     0           /* No EMIF 16-bit data */
@@ -302,15 +302,15 @@
 #  define TMS570_ECAP_NCH    6           /* 6 eCAP channels */
 #  define TMS570_EQEP_NCH    2           /* 2 eQEP channels */
 #  define TMS570_NMIBSPI     3           /* 3 MibSPI */
-#  define TMS570_MIBSPI0_NCS 6           /* MibSPI0: 6 chip selects */
 #  define TMS570_MIBSPI1_NCS 6           /* MibSPI1: 6 chip selects */
-#  define TMS570_MIBSPI2_NCS 4           /* MibSPI2: 4 chip selects */
+#  define TMS570_MIBSPI2_NCS 6           /* MibSPI2: 6 chip selects */
+#  define TMS570_MIBSPI3_NCS 4           /* MibSPI3: 4 chip selects */
 #  define TMS570_NSPI        2           /* Two SPI */
-#  define TMS570_SPI0_NCS    2           /* SPI0: Two chip selects */
-#  define TMS570_SPI1_NCS    1           /* SPI1: One chip selects */
+#  define TMS570_SPI1_NCS    2           /* SPI1: Two chip selects */
+#  define TMS570_SPI2_NCS    1           /* SPI2: One chip selects */
 #  define TMS570_NSCI        2           /* Two SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        1           /* One I2C */
 #  define TMS570_NGPIOINT    16          /* 16 GPIO interrupts */
 #  define TMS570_NEMIF16     0           /* No EMIF 16-bit data */
@@ -339,15 +339,15 @@
 #  define TMS570_ECAP_NCH    6           /* 6 eCAP channels */
 #  define TMS570_EQEP_NCH    2           /* 2 eQEP channels */
 #  define TMS570_NMIBSPI     3           /* 3 MibSPI */
-#  define TMS570_MIBSPI0_NCS 6           /* MibSPI0: 6 chip selects */
 #  define TMS570_MIBSPI1_NCS 6           /* MibSPI1: 6 chip selects */
-#  define TMS570_MIBSPI2_NCS 4           /* MibSPI2: 4 chip selects */
+#  define TMS570_MIBSPI2_NCS 6           /* MibSPI2: 6 chip selects */
+#  define TMS570_MIBSPI3_NCS 4           /* MibSPI3: 4 chip selects */
 #  define TMS570_NSPI        2           /* Two SPI */
-#  define TMS570_SPI0_NCS    2           /* SPI0: Two chip selects */
-#  define TMS570_SPI1_NCS    1           /* SPI1: One chip selects */
+#  define TMS570_SPI1_NCS    2           /* SPI1: Two chip selects */
+#  define TMS570_SPI2_NCS    1           /* SPI2: One chip selects */
 #  define TMS570_NSCI        2           /* Two SCI */
-#  define TMS570_SCI0_LIN    1           /* SCI0: LIN supported */
-#  undef  TMS570_SCI1_LIN                /* SCI1: LIN not supported */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
 #  define TMS570_NI2C        1           /* One I2C */
 #  define TMS570_NGPIOINT    16          /* 16 GPIO interrupts */
 #  define TMS570_NEMIF16     1           /* One EMIF 16-bit data */
