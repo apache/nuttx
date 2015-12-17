@@ -333,6 +333,6 @@ void arm_boot(void)
    * driver.
    */
 
-  tms570_earlyserialinit();
+  up_earlyserialinit();
 #endif
 }
