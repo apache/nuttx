@@ -4,9 +4,9 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This is all original code.  However, some logic in this file was inspired
- * by logic from TI's Project0 which has a compatible BSD license and credit
- * should be given in any case:
+ * This is primarily original code.  However, some logic in this file was
+ * inspired/leveraged from TI's Project0 which has a compatible BSD license
+ * and credit should be given in any case:
  *
  *   Copyright (c) 2012, Texas Instruments Incorporated
  *   All rights reserved.
@@ -232,6 +232,7 @@ void arm_boot(void)
 
   tms570_event_export();
 
+#if 0 // REVISIT: Need SYS header file
   /* Read from the system exception status register to identify the cause of
    * the CPU reset.
    *
@@ -239,6 +240,27 @@ void arm_boot(void)
    * need to know the cause of the reset, here is where you would want
    * to do that.
    */
+
+  DEBUGASSERT((getreg(TMS570_SYS_SYSESR) & SYS_ESR_PORST) != 0);
+
+   /* Clear all reset status flags on successful power on reset */
+
+   putreg32(SYS_ESR_ALLRST, TMS570_SYS_SYSESR);
+#endif
+
+  /* Check if there were ESM group3 errors during power-up.
+   *
+   * These could occur during eFuse auto-load or during reads from flash OTP
+   * during power-up. Device operation is not reliable and not recommended
+   * in this case.
+   *
+   * An ESM group3 error only drives the nERROR pin low. An external circuit
+   * that monitors the nERROR pin must take the appropriate action to ensure
+   * that the system is placed in a safe state, as determined by the
+   * application.
+   */
+
+  ASSERT(getreg32(TMS570_ESM_SR3) == 0);
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct

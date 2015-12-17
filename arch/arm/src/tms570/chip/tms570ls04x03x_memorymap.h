@@ -117,8 +117,8 @@
 #define TMS570_SMF2_BASE          0xffffe100 /* 0xffffe100-0xffffe1ff: System Module - Frame 2 */
 #define TMS570_PBIST_BASE         0xffffe400 /* 0xffffe400-0xffffe5ff: PBIST */
 #define TMS570_STC_BASE           0xffffe600 /* 0xffffe600-0xffffe6ff: STC */
-#define TMS570_IOMM_BASE          0xffffeA00 /* 0xffffea00-0xffffeBff: IOMM Multiplexing */
-#define TMS570_DCC_BASE           0xffffeC00 /* 0xffffec00-0xffffeCff: DCC */
+#define TMS570_IOMM_BASE          0xffffea00 /* 0xffffea00-0xffffeBff: IOMM Multiplexing */
+#define TMS570_DCC_BASE           0xffffec00 /* 0xffffec00-0xffffeCff: DCC */
 #define TMS570_ESM_BASE           0xfffff500 /* 0xfffff500-0xfffff5ff: ESM */
 #define TMS570_CCMR4_BASE         0xfffff600 /* 0xfffff600-0xfffff6ff: CCM-R4 */
 #define TMS570_RAMECCE_BASE       0xfffff800 /* 0xfffff800-0xfffff8ff: RAM ECC even */
