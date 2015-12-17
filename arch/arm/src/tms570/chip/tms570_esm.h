@@ -131,7 +131,7 @@
 
 #define ESM_ILCR1_INT(n)          (1 << (n)) /* Bit n: Channel n interrupt level low (write) */
 
-/* ESM Status Register for groups 1, 2, and 3 */
+/* ESM Status Register for groups 1, 2, 3, and 4 */
 
 #define ESM_SR_PENDING(n)         (1 << (n)) /* Bit n: Channel n error interrupt pending (read) */
 #define ESM_SR_CLEAR(n)           (1 << (n)) /* Bit n: Channel n error interrupt clear (write) */
@@ -191,10 +191,5 @@
 /* Interrupt Level Clear/Status Register 4 */
 
 #define ESM_ILCR4_CHAN(n)         (1 << (n)) /* Bit n: Maps channel n low level interrupt */
-
-/* ESM Status Register 4 */
-
-#define ESM_SR4_PENDING(n)        (1 << (n)) /* Bit n: Channel n error interrupt pending (read) */
-#define ESM_SR4_CLEAR(n)          (1 << (n)) /* Bit n: Channel n error interrupt clear (write) */
 
 #endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_ESM_H */
