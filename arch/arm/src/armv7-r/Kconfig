@@ -7,8 +7,8 @@ comment "ARMv7-A Configuration Options"
 
 config ARMV7R_MEMINIT
 	bool
-	default y if CONFIG_BOOT_SDRAM_DATA
-	default n if !CONFIG_BOOT_SDRAM_DATA
+	default y if BOOT_SDRAM_DATA
+	default n if !BOOT_SDRAM_DATA
 	---help---
 		If this configuration *not* selected, then it is assumed that all
 		memory resources are initialized via arm_data_initialize() and
