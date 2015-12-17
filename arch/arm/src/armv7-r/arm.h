@@ -115,9 +115,10 @@ extern "C"
  * Description:
  *   Clear all of .bss to zero; set .data to the correct initial values.
  *   This function is called automatically from ARMv7-R boot code *UNLESS*
- *   executing from FLASH or SRAM with data is SDRAM (CONFIG_BOOT_SDRAM_DATA=y).
- *   In that case, early board-specific logic must first initialize SDRAM
- *   then call this function.
+ *   executing with data in some memory that requires platform-specific
+ *   initialization (such as SDRAM).  That latter case is indicated with
+ *   CONFIG_ARMV7R_MEMINIT=y.  In that case, early platform-specific logic
+ *   must first initialize then memory then call this function.
  *
  * Input Parameters:
  *   None

@@ -65,6 +65,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_ARMV7R_MEMINIT
+#  error CONFIG_ARMV7R_MEMINIT is required by this architecture.
+#endif
+
 #define HIGH_VECTOR_ADDRESS   0xffff0000
 
 /****************************************************************************
@@ -199,7 +203,7 @@ static inline void tms570_event_export(void)
  *   1.  The __start entry point in armv7-r/arm_head.S is invoked upon power-
  *       on reset.
  *   2.  __start prepares CPU for code execution.
- *   3a. If CONFIG_BOOT_SDRAM_DATA is not defined, then __start will prepare
+ *   3a. If CONFIG_ARMV7R_MEMINIT is not defined, then __start will prepare
  *       memory resources by calling arm_data_initialize() and will then
  *       call this function.
  *   3b. Otherwise, this function will be called without having initialized
@@ -287,9 +291,9 @@ void arm_boot(void)
 
   tms570_board_initialize();
 
-#ifdef CONFIG_BOOT_SDRAM_DATA
+#ifdef CONFIG_ARMV7R_MEMINIT
   /* If .data and .bss reside in SDRAM, then initialize the data sections
-   * now after SDRAM has been initialized.
+   * now after RAM has been initialized.
    */
 
   arm_data_initialize();

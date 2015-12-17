@@ -319,19 +319,19 @@ __start:
 	mcr		CP15_ACTLR(r0)			/* Write Auxiliary Control register */
 #endif
 
-#ifndef CONFIG_BOOT_SDRAM_DATA
-	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is
+#ifndef CONFIG_ARMV7R_MEMINIT
+	/* Initialize .bss and .data ONLY if .bss and .data lie in RAM that is
 	 * ready to use.  Other memory, such as SDRAM, must be initialized before
-	 * it can be used.  up_boot() will perform that memory initialization and
-	 * .bss and .data can be initialized after up_boot() returns.
+	 * it can be used.  arm_boot() will perform that memory initialization and
+	 * .bss and .data can be initialized after arm_boot() returns.
 	 */
 
 	bl		arm_data_initialize
 #endif
 
 	/* Perform early C-level, platform-specific initialization.  Logic
-	 * within arm_boot() must configure SDRAM and call arm_ram_initailize()
-	 * is CONFIG_BOOT_SDRAM_DATA=y.
+	 * within arm_boot() must configure SDRAM and call arm_data_initialize()
+	 * if CONFIG_ARMV7R_MEMINIT=y.
 	 */
 
 	bl		arm_boot
@@ -362,7 +362,7 @@ __start:
 #ifdef CONFIG_STACK_COLORATION
 	.type	.Lstkinit, %object
 .Lstkinit:
-#ifdef CONFIG_BOOT_SDRAM_DATA
+#ifdef CONFIG_ARMV7R_MEMINIT
 	.long	IDLE_STACK_BASE		/* Beginning of the IDLE stack, then words of IDLE stack */
 #else
 	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
@@ -433,7 +433,7 @@ arm_data_initialize:
 	.long	_ebss
 
 .Lstackpointer:
-#ifdef CONFIG_BOOT_SDRAM_DATA
+#ifdef CONFIG_ARMV7R_MEMINIT
 	.long	IDLE_STACK_BASE+CONFIG_IDLETHREAD_STACKSIZE-4
 #else
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4

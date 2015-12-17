@@ -137,7 +137,7 @@
                                      /* Bits 3-4: Reserved */
 #define SCTLR_CCP15BEN     (1 << 5)  /* Bit 5:  CP15 barrier enable */
                                      /* Bit 6:  Reserved */
-#define SCTLR_B            (1 << 7)  /* Bit 7:  Should be zero on ARMv7R */
+#define SCTLR_B            (1 << 7)  /* Bit 7:  Should be zero on ARMv7-R */
                                      /* Bits 8-9: Reserved */
 #define SCTLR_SW           (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
 #define SCTLR_Z            (1 << 11) /* Bit 11: Program flow prediction control */
@@ -159,7 +159,7 @@
 #define SCTLR_IE           (1 << 31) /* Bit 31: Instruction endian-ness */
 
 /* Auxiliary Control Register (ACTLR): CRn=c1, opc1=0, CRm=c0, opc2=1
- * TODO: To be provided
+ * Implementation defined
  */
 
 /* Coprocessor Access Control Register (CPACR): CRn=c1, opc1=0, CRm=c0, opc2=2
@@ -167,7 +167,7 @@
  */
 
 /* CP15 c2-c4 Registers *************************************************************/
-/* Not used on ARMv7R */
+/* Not used on ARMv7-R */
 
 /* CP15 c5 Registers ****************************************************************/
 /* Data Fault Status Register (DFSR): CRn=c5, opc1=0, CRm=c0, opc2=0
@@ -231,7 +231,7 @@
 /* See cp15_cacheops.h */
 
 /* CP15 c8 Registers ****************************************************************/
-/* Not used on ARMv7R */
+/* Not used on ARMv7-R */
 
 /* CP15 c9 Registers ****************************************************************/
 /* 32-bit Performance Monitors Control Register (PMCR): CRn=c9, opc1=0, CRm=c12, opc2=0
@@ -304,13 +304,13 @@
  */
 
 /* CP15 c10 Registers ***************************************************************/
-/* Not used on ARMv7R */
+/* Not used on ARMv7-R */
 
 /* CP15 c11 Registers ***************************************************************/
 /* Reserved for implementation defined DMA functions */
 
 /* CP15 c12 Registers ***************************************************************/
-/* Not used on ARMv7R */
+/* Not used on ARMv7-R */
 
 /* CP15 c13 Registers ***************************************************************/
 

@@ -5,6 +5,20 @@
 
 comment "ARMv7-A Configuration Options"
 
+config ARMV7R_MEMINIT
+	bool
+	default y if CONFIG_BOOT_SDRAM_DATA
+	default n if !CONFIG_BOOT_SDRAM_DATA
+	---help---
+		If this configuration *not* selected, then it is assumed that all
+		memory resources are initialized via arm_data_initialize() and
+		available at power-up reset time.  Other memories, such as SDRAM or
+		some ECC SRAM memories, require some platform-specific
+		initialization first.  In that case, this option should be selected
+		and the platform-specific implementation of arm_boot() must perform
+		the memory initialization first, then explicitly call
+		arm_data_initialize().
+
 config ARMV7R_HAVE_L2CC
 	bool
 	default n
