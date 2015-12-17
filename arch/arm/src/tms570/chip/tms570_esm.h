@@ -1,8 +1,14 @@
 /****************************************************************************************************
  * arch/arm/src/tms570/chip/tms570_esm.h
+ * Error Signalling Module Error Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * References:
+ *
+ *   TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller, Technical Reference Manual, Texas
+ *   Instruments, Literature Number: SPNU517A, September 2013
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
