@@ -237,6 +237,7 @@ config ARCH_CHIP_TMS570
 	bool "TI TMS570"
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_RAMFUNCS
+	select ARMV7R_MEMINIT
 	---help---
 		TI TMS570 family
 
