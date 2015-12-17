@@ -297,6 +297,28 @@ __start:
 	nop
 	.endr
 
+#if 0
+	/* Cortex-R/RF Errata Work-Around
+	 *
+	 * Errata 754269: Register corruption during a load-multiple instruction
+	 *                at an exception vector.
+	 * Workaround:    To workaround this erratum, set bit [7] of the
+	 *                Auxiliary Control Register to disable out-of-order
+	 *                completion for divide instructions. Code performance
+	 *                may be reduced depending on how often divide
+	 *                operations are used.
+	 * NOTE:          The ARMv7-A/R Architecture reference many lists the bits
+	 *                bits of the ACTLR as "implementation defined"
+	 *
+	 * REVISIT: I do not think this is needed because the NuttX vectors do not
+	 * begin with an LDM instruction.
+	 */
+
+	mrc		CP15_ACTLR(r0)			/* Read Auxiliary Control register */
+	orr		r0, r0, #(1 << 7)		/* Disable out-of-order completion */
+	mcr		CP15_ACTLR(r0)			/* Write Auxiliary Control register */
+#endif
+
 #ifndef CONFIG_BOOT_SDRAM_DATA
 	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is
 	 * ready to use.  Other memory, such as SDRAM, must be initialized before

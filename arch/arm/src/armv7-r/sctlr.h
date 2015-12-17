@@ -234,9 +234,22 @@
 /* Not used on ARMv7R */
 
 /* CP15 c9 Registers ****************************************************************/
-/* 32-bit Performance Monitors Control Register (PMCR): CRn=c9, opc1=0, CRm=c0, opc2=0
+/* 32-bit Performance Monitors Control Register (PMCR): CRn=c9, opc1=0, CRm=c12, opc2=0
  * TODO: To be provided
  */
+
+#define PCMR_E             (1 << 0)  /* Enable all counters */
+#define PCMR_P             (1 << 1)  /* Reset all counter eventts (except PMCCNTR) */
+#define PCMR_C             (1 << 2)  /* Reset cycle counter (PMCCNTR) to zero */
+#define PCMR_D             (1 << 3)  /* Enable cycle counter clock (PMCCNTR) divider */
+#define PCMR_X             (1 << 4)  /* Export of events is enabled */
+#define PCMR_DP            (1 << 5)  /* Disable PMCCNTR if event counting is prohibited */
+#define PCMR_N_SHIFT       (11)      /* Bits 11-15:  Number of event counters */
+#define PCMR_N_MASK        (0x1f << PCMR_N_SHIFT)
+#define PCMR_IDCODE_SHIFT  (16)      /* Bits 16-23: Identification code */
+#define PCMR_IDCODE_MASK   (0xff << PCMR_IDCODE_SHIFT)
+#define PCMR_IMP_SHIFT     (24)      /* Bits 24-31: Implementer code */
+#define PCMR_IMP_MASK      (0xff << PCMR_IMP_SHIFT)
 
 /* 32-bit Performance Monitors Count Enable Set register (PMCNTENSET): CRn=c9, opc1=0, CRm=c12, opc2=1
  * TODO: To be provided
@@ -450,29 +463,29 @@ static inline void cp15_wrsctlr(unsigned int sctlr)
     );
 }
 
-/* Read/write the vector base address register (VBAR) */
+/* Read/write the Performance Monitor Control Register (PMCR) */
 
-static inline unsigned int cp15_rdvbar(void)
+static inline unsigned int cp15_rdpmcr(void)
 {
-  unsigned int sctlr;
+  unsigned int pmcr;
   __asm__ __volatile__
     (
-      "\tmrc p15, 0, %0, c12, c0, 0\n"
-      : "=r" (sctlr)
+      "\tmrc p15, 0, %0, c9, c12, 0\n"
+      : "=r" (pmcr)
       :
       : "memory"
     );
 
-  return sctlr;
+  return pmcr;
 }
 
-static inline void cp15_wrvbar(unsigned int sctlr)
+static inline void cp15_wrpmcr(unsigned int pmcr)
 {
   __asm__ __volatile__
     (
-      "\tmcr p15, 0, %0, c12, c0, 0\n"
+      "\tmcr p15, 0, %0, c9, c12, 0\n"
       :
-      : "r" (sctlr)
+      : "r" (pmcr)
       : "memory"
     );
 }

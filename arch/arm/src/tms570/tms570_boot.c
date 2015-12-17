@@ -4,6 +4,13 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * This is all original code.  However, some logic in this file was inspired
+ * by logic from TI's Project0 which has a compatible BSD license and credit
+ * should be given in any case:
+ *
+ *   Copyright (c) 2012, Texas Instruments Incorporated
+ *   All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -157,6 +164,27 @@ static inline void tms570_wdtdisable(void)
 #endif
 
 /****************************************************************************
+ * Name: tms570_event_export
+ *
+ * Description:
+ *   Enable CPU Event Export by setting the X bit in the PMCR.  In general,
+ *   this bit enables the exporting of events to another debug device, such
+ *   as a trace macrocell, over an event bus.
+ *
+ *   For the TMS570, this allows the CPU to signal any single-bit or double
+ *   -bit errors detected by its ECC logic for accesses to program flash or
+ *   data RAM.
+ *
+ ****************************************************************************/
+
+static inline void tms570_event_export(void)
+{
+  uint32_t pmcr = cp15_rdpmcr();
+  pmcr |= PCMR_X;
+  cp15_wrpmcr(pmcr)
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -191,6 +219,22 @@ void arm_boot(void)
   const uint32_t *src;
   uint32_t *dest;
 #endif
+
+  /* Enable CPU Event Export.
+   *
+   * This allows the CPU to signal any single-bit or double-bit errors
+   * detected by its ECC logic for accesses to program flash or data RAM.
+   */
+
+  tms570_event_export();
+
+  /* Read from the system exception status register to identify the cause of
+   * the CPU reset.
+   *
+   * REVISIT: This logic is not used in the current design.  But if you
+   * need to know the cause of the reset, here is where you would want
+   * to do that.
+   */
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
