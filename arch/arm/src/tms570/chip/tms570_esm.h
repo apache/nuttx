@@ -86,7 +86,7 @@
 #define TMS570_ESM_IECR1          (TMS570_ESM_BASE+TMS570_ESM_IECR1_OFFSET)
 #define TMS570_ESM_ILSR1          (TMS570_ESM_BASE+TMS570_ESM_ILSR1_OFFSET)
 #define TMS570_ESM_ILCR1          (TMS570_ESM_BASE+TMS570_ESM_ILCR1_OFFSET)
-#define TMS570_ESM_SR1(n)         (TMS570_ESM_BASE+TMS570_ESM_SR_OFFSET(n))
+#define TMS570_ESM_SR(n)          (TMS570_ESM_BASE+TMS570_ESM_SR_OFFSET(n))
 #  define TMS570_ESM_SR1          (TMS570_ESM_BASE+TMS570_ESM_SR1_OFFSET)
 #  define TMS570_ESM_SR2          (TMS570_ESM_BASE+TMS570_ESM_SR2_OFFSET)
 #  define TMS570_ESM_SR3          (TMS570_ESM_BASE+TMS570_ESM_SR3_OFFSET)
@@ -161,7 +161,7 @@
 #define ESM_EKR_MASK              0x0000000f /* Bits 0-3: Error key value */
 #  define ESM_EKR_NORMAL          0x00000000 /*   Activates normal mode */
 #  define ESM_EKR_ERROR           0x00000005 /*   nERROR set high when LTC completes */
-#  define ESM_EKR_NORMAL          0x0000000a /*   Forces error on nERROR pin */
+#  define ESM_EKR_FORCE           0x0000000a /*   Forces error on nERROR pin */
 
 /* ESM Status Shadow Register 2 */
 

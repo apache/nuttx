@@ -56,9 +56,12 @@
 #include "arm.h"
 #include "cache.h"
 #include "fpu.h"
+#include "sctlr.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "chip/tms570_esm.h"
+#include "tms570_clockconfig.h"
 #include "tms570_boot.h"
 
 /****************************************************************************
@@ -185,7 +188,7 @@ static inline void tms570_event_export(void)
 {
   uint32_t pmcr = cp15_rdpmcr();
   pmcr |= PCMR_X;
-  cp15_wrpmcr(pmcr)
+  cp15_wrpmcr(pmcr);
 }
 
 /****************************************************************************
