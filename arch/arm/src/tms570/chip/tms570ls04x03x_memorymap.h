@@ -114,7 +114,7 @@
 #define TMS570_FWRAP_BASE         0xfff87000 /* 0xfff87000-0xfff87fff: Flash Wrapper */
 #define TMS570_EFFC_BASE          0xfff8c000 /* 0xfff8c000-0xfff8cfff: eFuse Farm Controller */
 #define TMS570_PCR_BASE           0xffffe000 /* 0xffffe000-0xffffe0ff: PCR registers */
-#define TMS570_SMF2_BASE          0xffffe100 /* 0xffffe100-0xffffe1ff: System Module - Frame 2 */
+#define TMS570_SYS2_BASE          0xffffe100 /* 0xffffe100-0xffffe1ff: System Module - Frame 2 */
 #define TMS570_PBIST_BASE         0xffffe400 /* 0xffffe400-0xffffe5ff: PBIST */
 #define TMS570_STC_BASE           0xffffe600 /* 0xffffe600-0xffffe6ff: STC */
 #define TMS570_IOMM_BASE          0xffffea00 /* 0xffffea00-0xffffeBff: IOMM Multiplexing */
@@ -126,6 +126,6 @@
 #define TMS570_RTIDWWD_BASE       0xfffffc00 /* 0xfffffc00-0xfffffcff: RTI + DWWD */
 #define TMS570_VIMPAR_BASE        0xfffffd00 /* 0xfffffd00-0xfffffdff: VIM Parity */
 #define TMS570_VIM_BASE           0xfffffe00 /* 0xfffffe00-0xfffffeff: VIM */
-#define TMS570_SMF1_BASE          0xffffff00 /* 0xffffff00-0xffffffff: System Module - Frame 1 */
+#define TMS570_SYS_BASE           0xffffff00 /* 0xffffff00-0xffffffff: System Module - Frame 1 */
 
 #endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_MEMORYMAP_H */

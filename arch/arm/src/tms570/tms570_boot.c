@@ -265,6 +265,14 @@ void arm_boot(void)
 
   ASSERT(getreg32(TMS570_ESM_SR3) == 0);
 
+  /* Disable the watchdog timer */
+
+  tms570_wdtdisable();
+
+  /* Initialize clocking to settings provided by board-specific logic */
+
+  tms570_clockconfig();
+
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
    * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
@@ -289,14 +297,6 @@ void arm_boot(void)
    */
 
   tms570_copyvectorblock();
-
-  /* Disable the watchdog timer */
-
-  tms570_wdtdisable();
-
-  /* Initialize clocking to settings provided by board-specific logic */
-
-  tms570_clockconfig();
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
