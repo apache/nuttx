@@ -463,6 +463,33 @@ static inline void cp15_wrsctlr(unsigned int sctlr)
     );
 }
 
+/* Read/write the implementation defined Auxiliary Control Regster (ACTLR) */
+
+static inline unsigned int cp15_rdactlr(void)
+{
+  unsigned int actlr;
+  __asm__ __volatile__
+    (
+      "\tmrc p15, 0, %0, c1, c0, 1\n"
+      : "=r" (actlr)
+      :
+      : "memory"
+    );
+
+  return actlr;
+}
+
+static inline void cp15_wractlr(unsigned int actlr)
+{
+  __asm__ __volatile__
+    (
+      "\tmcr p15, 0, %0, c1, c0, 1\n"
+      :
+      : "r" (actlr)
+      : "memory"
+    );
+}
+
 /* Read/write the Performance Monitor Control Register (PMCR) */
 
 static inline unsigned int cp15_rdpmcr(void)

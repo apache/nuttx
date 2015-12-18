@@ -209,14 +209,38 @@
 #define SYS_CSVSTAT_
 /* Memory Self-Test Global Control Register */
 #define SYS_MSTGCR_
+
 /* Memory Hardware Initialization Global Control Register */
-#define SYS_MINITGCR_
+
+#define SYS_MINITGCR_MASK               (0xff)    /* Bits 0-7: Memory hardware initialization key */
+#  define SYS_MINITGCR_ENABLE           (0x0a)    /*   Enable */
+#  define SYS_MINITGCR_DISABLE          (0x05)    /*   Any other value disables */
+
 /* Memory Self-Test/Initialization Enable Register */
+
 #define SYS_MSIENA_
+
+#if defined(CONFIG_ARCH_CHIP_TMS570LS0332PZ) || defined(CONFIG_ARCH_CHIP_TMS570LS0432PZ)
+  /* From TMS570LS0x32 Data Sheet */
+
+#  define SYS_MSIENA_RAM                (1 << 0)
+#  define SYS_MSIENA_VIM_RAM            (1 << 2)
+#  define SYS_MSIENA_N2HET_RAM          (1 << 3)
+#  define SYS_MSIENA_HTU_RAM            (1 << 4)
+#  define SYS_MSIENA_DCAN1_RAM          (1 << 5)
+#  define SYS_MSIENA_DCAN2_RAM          (1 << 6)
+#  define SYS_MSIENA_MIBSPI1_RAM        (1 << 7)
+#  define SYS_MSIENA_MIBADC_RAM         (1 << 8)
+#endif
+
 /* Memory Self-Test Fail Status Register */
 #define SYS_MSTFAIL_
+
 /* MSTC Global Status Register */
-#define SYS_MSTCGSTAT_
+
+#define SYS_MSTCGSTAT_MSTDONE           (1 << 0)  /* Bit 0: Memory self-test done */
+#define SYS_MSTCGSTAT_MINIDONE          (1 << 8)  /* Bit 8: Hardware initialization of all memory done */
+
 /* Memory Hardware Initialization Status Register */
 #define SYS_MINISTAT_
 /* PLL Control Register 1 */

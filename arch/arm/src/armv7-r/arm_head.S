@@ -98,6 +98,19 @@
 	.global	os_start			/* Start the operating system */
 	.global	arm_data_initialize	/* Perform C data initialization */
 
+	.global	_sbss				/* Start of .bss in RAM */
+	.global	_ebss				/* End+1 of .bss in RAM */
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+	.global	_eronly				/* Where .data defaults are stored in FLASH */
+	.global	_sdata				/* Where .data needs to reside in SDRAM */
+	.global	_edata
+#endif
+#ifdef CONFIG_ARCH_RAMFUNCS
+	.global	_framfuncs			/* Where RAM functions are stored in FLASH */
+	.global	_sramfuncs			/* Where RAM functions needs to reside in RAM */
+	.global	_eramfuncs
+#endif
+
 /* Exported symbols */
 
 	.global	__start				/* Power-up/Reset entry point */
@@ -412,9 +425,44 @@ arm_data_initialize:
 	blt		2b
 #endif
 
-	/* And return to the caller */
+#ifdef CONFIG_ARCH_RAMFUNCS
+	/* Copy any necessary code sections from FLASH to RAM.  The correct
+	 * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
+	 * temporary location is in flash after the data initialization code
+	 * at _framfuncs
+	 */
+
+	adr		r3, .Lfuncinit
+	ldmia	r3, {r0, r1, r2}
+
+3:
+	ldr		r3, [r0], #4
+	str		r3, [r1], #4
+	cmp		r1, r2
+	blt		3b
+
+#ifndef CPU_DCACHE_DISABLE
+	/* Flush the copied RAM functions into physical RAM so that will
+	 * be available when fetched into the I-Cache.
+	 *
+	 * Note that this is a branch, not a call and so will return
+	 * directly to the caller without returning here.
+	 */
+
+	adr		r3, ..Lramfunc
+	ldmia	r3, {r0, r1}
+	ldr     r3, =arch_clean_dcache
+	b		r3
+#else
+	/* Otherwise return to the caller */
 
 	bx		lr
+#endif
+#else
+	/* Return to the caller */
+
+	bx		lr
+#endif
 
 	/* .text Data:
 	 *
@@ -445,6 +493,15 @@ arm_data_initialize:
 	.long	_eronly					/* Where .data defaults are stored in FLASH */
 	.long	_sdata					/* Where .data needs to reside in SDRAM */
 	.long	_edata
+#endif
+
+#ifdef CONFIG_ARCH_RAMFUNCS
+	.type	.Lfuncinit, %object
+.Lfuncinit:
+	.long	_framfuncs				/* Where RAM functions are stored in FLASH */
+.Lramfuncs:
+	.long	_sramfuncs				/* Where RAM functions needs to reside in RAM */
+	.long	_eramfuncs
 #endif
 	.size	arm_data_initialize, . - arm_data_initialize
 

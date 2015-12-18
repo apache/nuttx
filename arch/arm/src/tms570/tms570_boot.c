@@ -60,6 +60,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "chip/tms570_sys.h"
 #include "chip/tms570_esm.h"
 #include "tms570_clockconfig.h"
 #include "tms570_boot.h"
@@ -72,103 +73,17 @@
 #  error CONFIG_ARMV7R_MEMINIT is required by this architecture.
 #endif
 
-#define HIGH_VECTOR_ADDRESS   0xffff0000
+#ifndef CONFIG_ARCH_LOWVECTORS
+#  error CONFIG_ARCH_LOWVECTORS is required by this architecture.
+#endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* Symbols defined via the linker script */
-
-extern uint32_t _vector_start; /* Beginning of vector block */
-extern uint32_t _vector_end;   /* End+1 of vector block */
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tms570_vectorsize
- *
- * Description:
- *   Return the size of the vector data
- *
- ****************************************************************************/
-
-static inline size_t tms570_vectorsize(void)
-{
-  uintptr_t src;
-  uintptr_t end;
-
-  src  = (uintptr_t)&_vector_start;
-  end  = (uintptr_t)&_vector_end;
-
-  return (size_t)(end - src);
-}
-
-/****************************************************************************
- * Name: tms570_copyvectorblock
- *
- * Description:
- *   Copy the interrupt block to its final destination.  Vectors are already
- *   positioned at the beginning of the text region and only need to be
- *   copied in the case where we are using high vectors or where the beginning
- *   of the text region cannot be remapped to address zero.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_ARCH_LOWVECTORS)
-static void tms570_copyvectorblock(void)
-{
-  uint32_t *src;
-  uint32_t *end;
-  uint32_t *dest;
-
-  /* Copy the vectors into ISRAM at the address that will be mapped to the vector
-   * address:
-   *
-   *   _vector_start       - Start sourcea ddress of the vector table
-   *   _vector_end         - End+1 source address of the vector table
-   *   HIGH_VECTOR_ADDRESS - Destinatino ddress of vector table in RAM
-   */
-
-  src  = (uint32_t *)&_vector_start;
-  end  = (uint32_t *)&_vector_end;
-  dest = (uint32_t *)HIGH_VECTOR_ADDRESS;
-
-  while (src < end)
-    {
-      *dest++ = *src++;
-    }
-
-  /* Flush the DCache to assure that the vector data is in physical in RAM */
-
-  arch_clean_dcache((uintptr_t)HIGH_VECTOR_ADDRESS,
-                    (uintptr_t)HIGH_VECTOR_ADDRESS + tms570_vectorsize());
-}
-
-#else
-/* Don't copy the vectors */
-
-#  define tms570_copyvectorblock()
-#endif
-
-/****************************************************************************
- * Name: tms570_wdtdisable
- *
- * Description:
- *   Disable the watchdog timer.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_TMS570_WDT
-static inline void tms570_wdtdisable(void)
-{
-#warning Missing logic
-}
-#else
-#  define tms570_wdtdisable()
-#endif
 
 /****************************************************************************
  * Name: tms570_event_export
@@ -189,6 +104,52 @@ static inline void tms570_event_export(void)
   uint32_t pmcr = cp15_rdpmcr();
   pmcr |= PCMR_X;
   cp15_wrpmcr(pmcr);
+}
+
+/****************************************************************************
+ * Name: tms570_enable_ramecc
+ *
+ * Description:
+ *   This function enables the CPU's ECC logic for accesses to B0TCM and
+ *   B1TCM.
+ *
+ ****************************************************************************/
+
+static inline void tms570_enable_ramecc(void)
+{
+  uint32_t actlr = cp15_rdactlr();
+  actlr |= 0x0c000000;
+  cp15_wractlr(actlr);
+}
+
+/****************************************************************************
+ * Name: tms570_memory_initialize
+ *
+ * Description:
+ *   Perform memroy initialization of selected RAMs
+ *
+ *   This function uses the system module's hardware for auto-initialization
+ *   of memories and their associated protection schemes.
+ *
+ ****************************************************************************/
+
+static void tms570_memory_initialize(uint32_t ramset)
+{
+  /* Enable Memory Hardware Initialization */
+
+  putreg32(SYS_MINITGCR_ENABLE, TMS570_SYS_MINITGCR);
+
+  /* Enable Memory Hardware Initialization for selected RAM's */
+
+  putreg32(ramset, TMS570_SYS_MSIENA);
+
+  /* Wait until Memory Hardware Initialization complete */
+
+  while((getreg32(TMS570_SYS_MSTCGSTAT) & SYS_MSTCGSTAT_MINIDONE) == 0);
+
+  /* Disable Memory Hardware Initialization */
+
+  putreg32(SYS_MINITGCR_DISABLE, TMS570_SYS_MINITGCR);
 }
 
 /****************************************************************************
@@ -265,43 +226,69 @@ void arm_boot(void)
 
   ASSERT(getreg32(TMS570_ESM_SR3) == 0);
 
-  /* Disable the watchdog timer */
-
-  tms570_wdtdisable();
-
   /* Initialize clocking to settings provided by board-specific logic */
 
   tms570_clockconfig();
 
-#ifdef CONFIG_ARCH_RAMFUNCS
-  /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
-   * temporary location is in flash after the data initialization code
-   * at _framfuncs
+#ifdef CONFIG_TMS570_BIST
+  /* Run a diagnostic check on the memory self-test controller. */
+#  warning Missing logic
+
+  /* Run PBIST on CPU RAM. */
+#  warning Missing logic
+
+  /* Disable PBIST clocks and disable memory self-test mode */
+#  warning Missing logic
+#endif /* CONFIG_TMS570_BIST */
+
+  /* Initialize CPU RAM. */
+
+  tms570_memory_initialize(SYS_MSIENA_RAM);
+
+  /* Enable ECC checking for TCRAM accesses. */
+
+  tms570_enable_ramecc();
+
+#ifdef CONFIG_TMS570_BIST
+  /* Perform PBIST on all dual-port memories */
+#warning Missing logic
+
+  /* Test the CPU ECC mechanism for RAM accesses. */
+#warning Missing logic
+
+#endif /* CONFIG_TMS570_BIST */
+
+  /* Release the MibSPI1 modules from local reset. */
+#warning Missing logic
+
+  /* Initialize all on-chip SRAMs except for MibSPIx RAMs.
+   *
+   * The MibSPIx modules have their own auto-initialization mechanism which
+   * is triggered as soon as the modules are brought out of local reset.
+   *
+   * The system module auto-init will hang on the MibSPI RAM if the module
+   * is still in local reset.
    */
 
-  for (src = &_framfuncs, dest = &_sramfuncs; dest < &_eramfuncs; )
-    {
-      *dest++ = *src++;
-    }
-
-  /* Flush the copied RAM functions into physical RAM so that will
-   * be available when fetched into the I-Cache.
-   */
-
-  arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
-#endif
-
-  /* Setup up vector block.  _vector_start and _vector_end are exported from
-   * arm_vector.S
-   */
-
-  tms570_copyvectorblock();
+  tms570_memory_initialize(SYS_MSIENA_VIM_RAM | SYS_MSIENA_N2HET_RAM |
+                           SYS_MSIENA_HTU_RAM | SYS_MSIENA_DCAN1_RAM |
+                           SYS_MSIENA_DCAN2_RAM | SYS_MSIENA_MIBADC_RAM);
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
+#endif
+
+#ifdef CONFIG_ARMV7R_MEMINIT
+  /* If .data and .bss reside in SDRAM, then initialize the data sections
+   * now after RAM has been initialized.
+   *
+   * NOTE that is SDRAM were supported, this call might have to be
+   * performed after returning from tms570_board_initialize()
+   */
+
+  arm_data_initialize();
 #endif
 
   /* Perform board-specific initialization,  This must include:
@@ -315,14 +302,6 @@ void arm_boot(void)
    */
 
   tms570_board_initialize();
-
-#ifdef CONFIG_ARMV7R_MEMINIT
-  /* If .data and .bss reside in SDRAM, then initialize the data sections
-   * now after RAM has been initialized.
-   */
-
-  arm_data_initialize();
-#endif
 
   /* Perform common, low-level chip initialization (might do nothing) */
 
