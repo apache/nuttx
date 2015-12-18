@@ -196,7 +196,6 @@ void arm_boot(void)
 
   tms570_event_export();
 
-#if 0 // REVISIT: Need SYS header file
   /* Read from the system exception status register to identify the cause of
    * the CPU reset.
    *
@@ -205,12 +204,11 @@ void arm_boot(void)
    * to do that.
    */
 
-  DEBUGASSERT((getreg(TMS570_SYS_SYSESR) & SYS_ESR_PORST) != 0);
+  DEBUGASSERT((getreg(TMS570_SYS_ESR) & SYS_ESR_PORST) != 0);
 
    /* Clear all reset status flags on successful power on reset */
 
-   putreg32(SYS_ESR_ALLRST, TMS570_SYS_SYSESR);
-#endif
+   putreg32(SYS_ESR_RSTALL, TMS570_SYS_ESR);
 
   /* Check if there were ESM group3 errors during power-up.
    *
@@ -230,7 +228,7 @@ void arm_boot(void)
 
   tms570_clockconfig();
 
-#ifdef CONFIG_TMS570_BIST
+#ifdef CONFIG_TMS570_SELFTEST
   /* Run a diagnostic check on the memory self-test controller. */
 #  warning Missing logic
 
@@ -239,7 +237,7 @@ void arm_boot(void)
 
   /* Disable PBIST clocks and disable memory self-test mode */
 #  warning Missing logic
-#endif /* CONFIG_TMS570_BIST */
+#endif /* CONFIG_TMS570_SELFTEST */
 
   /* Initialize CPU RAM. */
 
@@ -249,14 +247,14 @@ void arm_boot(void)
 
   tms570_enable_ramecc();
 
-#ifdef CONFIG_TMS570_BIST
+#ifdef CONFIG_TMS570_SELFTEST
   /* Perform PBIST on all dual-port memories */
 #warning Missing logic
 
   /* Test the CPU ECC mechanism for RAM accesses. */
 #warning Missing logic
 
-#endif /* CONFIG_TMS570_BIST */
+#endif /* CONFIG_TMS570_SELFTEST */
 
   /* Release the MibSPI1 modules from local reset. */
 #warning Missing logic

@@ -84,4 +84,10 @@ config TMS570_SCI1
 
 endmenu # TMS570 Peripheral Support
 
+config TMS570_SELFTEST
+	bool "Power-on Selftest"
+	default n
+	---help---
+		Enable power-on self-test of memories and ECC logic.
+
 endif # ARCH_CHIP_TMS570
