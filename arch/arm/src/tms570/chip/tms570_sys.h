@@ -1,6 +1,6 @@
 /****************************************************************************************************
  * arch/arm/src/tms570/chip/tms570_sys.h
- * System and Peripheral Control Register Definitions
+ * Primary System Control Register Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +54,6 @@
  ****************************************************************************************************/
 
 /* Register Offsets *********************************************************************************/
-/* Primary System Control Registers */
 
 #define TMS570_SYS_PC1_OFFSET           0x0000  /* SYS Pin Control Register 1 */
 #define TMS570_SYS_PC2_OFFSET           0x0004  /* SYS Pin Control Register 2 */
@@ -111,46 +110,7 @@
 #define TMS570_SYS_SSIVEC_OFFSET        0x00f4  /* Software Interrupt Vector Register */
 #define TMS570_SYS_SSIF_OFFSET          0x00f8  /* System Software Interrupt Flag Register */
 
-/* Secondary System Control Registers */
-
-#define TMS570_SYS2_STCCLKDIV_OFFSET    0x0008  /* CPU Logic BIST Clock Divider */
-#define TMS570_SYS2_CLKSLIP_OFFSET      0x0070  /* Clock Slip Register */
-#define TMS570_SYS2_EFC_CTLREG_OFFSET   0x00ec  /* EFUSE Controller Control Register */
-#define TMS570_SYS2_DIEDL_REG0_OFFSET   0x00f0  /* Die Identification Register Lower Word */
-#define TMS570_SYS2_DIEDH_REG1_OFFSET   0x00f4  /* Die Identification Register Upper Word */
-#define TMS570_SYS2_DIEDL_REG2_OFFSET   0x00f8  /* Die Identification Register Lower Word */
-#define TMS570_SYS2_DIEDH_REG3_OFFSET   0x00fc  /* Die Identification Register Upper Word */
-
-/* Peripheral Central Resource (PCR) Control Registers */
-
-#define TMS570_PCR_PMPROTSET0_OFFSET    0x0000  /* Peripheral Memory Protection Set Register 0 */
-#define TMS570_PCR_PMPROTSET1_OFFSET    0x0004  /* Peripheral Memory Protection Set Register 1 */
-#define TMS570_PCR_PMPROTCLR0_OFFSET    0x0010  /* Peripheral Memory Protection Clear Register 0 */
-#define TMS570_PCR_PMPROTCLR1_OFFSET    0x0014  /* Peripheral Memory Protection Clear Register 1 */
-#define TMS570_PCR_PPROTSET0_OFFSET     0x0020  /* Peripheral Protection Set Register 0 */
-#define TMS570_PCR_PPROTSET1_OFFSET     0x0024  /* Peripheral Protection Set Register 1 */
-#define TMS570_PCR_PPROTSET2_OFFSET     0x0028  /* Peripheral Protection Set Register 2 */
-#define TMS570_PCR_PPROTSET3_OFFSET     0x002c  /* Peripheral Protection Set Register 3 */
-#define TMS570_PCR_PPROTCLR0_OFFSET     0x0040  /* Peripheral Protection Clear Register 0 */
-#define TMS570_PCR_PPROTCLR1_OFFSET     0x0044  /* Peripheral Protection Clear Register 1 */
-#define TMS570_PCR_PPROTCLR2_OFFSET     0x0048  /* Peripheral Protection Clear Register 2 */
-#define TMS570_PCR_PPROTCLR3_OFFSET     0x004c  /* Peripheral Protection Clear Register 3 */
-#define TMS570_PCR_PCSPWRDWNSET0_OFFSET 0x0060  /* Peripheral Memory Power-Down Set Register 0 */
-#define TMS570_PCR_PCSPWRDWNSET1_OFFSET 0x0064  /* Peripheral Memory Power-Down Set Register 1 */
-#define TMS570_PCR_PCSPWRDWNCLR0_OFFSET 0x0070  /* Peripheral Memory Power-Down Clear Register 0 */
-#define TMS570_PCR_PCSPWRDWNCLR1_OFFSET 0x0074  /* Peripheral Memory Power-Down Clear Register 1 */
-#define TMS570_PCR_PSPWRDWNSET0_OFFSET  0x0080  /* Peripheral Power-Down Set Register 0 */
-#define TMS570_PCR_PSPWRDWNSET1_OFFSET  0x0084  /* Peripheral Power-Down Set Register 1 */
-#define TMS570_PCR_PSPWRDWNSET2_OFFSET  0x0088  /* Peripheral Power-Down Set Register 2 */
-#define TMS570_PCR_PSPWRDWNSET3_OFFSET  0x008c  /* Peripheral Power-Down Set Register 3 */
-#define TMS570_PCR_PSPWRDWNCLR0_OFFSET  0x00a0  /* Peripheral Power-Down Clear Register 0 */
-#define TMS570_PCR_PSPWRDWNCLR1_OFFSET  0x00a4  /* Peripheral Power-Down Clear Register 1 */
-#define TMS570_PCR_PSPWRDWNCLR2_OFFSET  0x00a8  /* Peripheral Power-Down Clear Register 2 */
-#define TMS570_PCR_PSPWRDWNCLR3_OFFSET  0x00ac  /* Peripheral Power-Down Clear Register 3 */
-
 /* Register Addresses *******************************************************************************/
-
-/* Primary System Control Registers */
 
 #define TMS570_SYS_PC1                  (TMS570_SYS_BASE+TMS570_SYS_PC1_OFFSET)
 #define TMS570_SYS_PC2                  (TMS570_SYS_BASE+TMS570_SYS_PC2_OFFSET)
@@ -207,46 +167,7 @@
 #define TMS570_SYS_SSIVEC               (TMS570_SYS_BASE+TMS570_SYS_SSIVEC_OFFSET)
 #define TMS570_SYS_SSIF                 (TMS570_SYS_BASE+TMS570_SYS_SSIF_OFFSET)
 
-/* Secondary System Control Registers */
-
-#define TMS570_SYS2_STCCLKDIV           (TMS570_SYS2_BASE+TMS570_SYS2_STCCLKDIV_OFFSET)
-#define TMS570_SYS2_CLKSLIP             (TMS570_SYS2_BASE+TMS570_SYS2_CLKSLIP_OFFSET)
-#define TMS570_SYS2_EFC_CTLREG          (TMS570_SYS2_BASE+TMS570_SYS2_EFC_CTLREG_OFFSET)
-#define TMS570_SYS2_DIEDL_REG0          (TMS570_SYS2_BASE+TMS570_SYS2_DIEDL_REG0_OFFSET)
-#define TMS570_SYS2_DIEDH_REG1          (TMS570_SYS2_BASE+TMS570_SYS2_DIEDH_REG1_OFFSET)
-#define TMS570_SYS2_DIEDL_REG2          (TMS570_SYS2_BASE+TMS570_SYS2_DIEDL_REG2_OFFSET)
-#define TMS570_SYS2_DIEDH_REG3          (TMS570_SYS2_BASE+TMS570_SYS2_DIEDH_REG3_OFFSET)
-
-/* Peripheral Central Resource (PCR) Control Registers */
-
-#define TMS570_PCR_PMPROTSET0           (TMS570_PCR_BASE+TMS570_PCR_PMPROTSET0_OFFSET)
-#define TMS570_PCR_PMPROTSET1           (TMS570_PCR_BASE+TMS570_PCR_PMPROTSET1_OFFSET)
-#define TMS570_PCR_PMPROTCLR0           (TMS570_PCR_BASE+TMS570_PCR_PMPROTCLR0_OFFSET)
-#define TMS570_PCR_PMPROTCLR1           (TMS570_PCR_BASE+TMS570_PCR_PMPROTCLR1_OFFSET)
-#define TMS570_PCR_PPROTSET0            (TMS570_PCR_BASE+TMS570_PCR_PPROTSET0_OFFSET)
-#define TMS570_PCR_PPROTSET1            (TMS570_PCR_BASE+TMS570_PCR_PPROTSET1_OFFSET)
-#define TMS570_PCR_PPROTSET2            (TMS570_PCR_BASE+TMS570_PCR_PPROTSET2_OFFSET)
-#define TMS570_PCR_PPROTSET3            (TMS570_PCR_BASE+TMS570_PCR_PPROTSET3_OFFSET)
-#define TMS570_PCR_PPROTCLR0            (TMS570_PCR_BASE+TMS570_PCR_PPROTCLR0_OFFSET)
-#define TMS570_PCR_PPROTCLR1            (TMS570_PCR_BASE+TMS570_PCR_PPROTCLR1_OFFSET)
-#define TMS570_PCR_PPROTCLR2            (TMS570_PCR_BASE+TMS570_PCR_PPROTCLR2_OFFSET)
-#define TMS570_PCR_PPROTCLR3            (TMS570_PCR_BASE+TMS570_PCR_PPROTCLR3_OFFSET)
-#define TMS570_PCR_PCSPWRDWNSET0        (TMS570_PCR_BASE+TMS570_PCR_PCSPWRDWNSET0_OFFSET)
-#define TMS570_PCR_PCSPWRDWNSET1        (TMS570_PCR_BASE+TMS570_PCR_PCSPWRDWNSET1_OFFSET)
-#define TMS570_PCR_PCSPWRDWNCLR0        (TMS570_PCR_BASE+TMS570_PCR_PCSPWRDWNCLR0_OFFSET)
-#define TMS570_PCR_PCSPWRDWNCLR1        (TMS570_PCR_BASE+TMS570_PCR_PCSPWRDWNCLR1_OFFSET)
-#define TMS570_PCR_PSPWRDWNSET0         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNSET0_OFFSET)
-#define TMS570_PCR_PSPWRDWNSET1         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNSET1_OFFSET)
-#define TMS570_PCR_PSPWRDWNSET2         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNSET2_OFFSET)
-#define TMS570_PCR_PSPWRDWNSET3         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNSET3_OFFSET)
-#define TMS570_PCR_PSPWRDWNCLR0         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNCLR0_OFFSET)
-#define TMS570_PCR_PSPWRDWNCLR1         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNCLR1_OFFSET)
-#define TMS570_PCR_PSPWRDWNCLR2         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNCLR2_OFFSET)
-#define TMS570_PCR_PSPWRDWNCLR3         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNCLR3_OFFSET)
-
 /* Register Bit-Field Definitions *******************************************************************/
-
-/* Primary System Control Registers */
 
 /* SYS Pin Control Register 1 */
 #define SYS_PC1_
@@ -356,73 +277,5 @@
 #define SYS_SSIVEC_
 /* System Software Interrupt Flag Register */
 #define SYS_SSIF_
-
-/* Secondary System Control Registers */
-
-/* CPU Logic BIST Clock Divider */
-#define SYS2_STCCLKDIV_
-/* Clock Slip Register */
-#define SYS2_CLKSLIP_
-/* EFUSE Controller Control Register */
-#define SYS2_EFC_CTLREG_
-/* Die Identification Register Lower Word */
-#define SYS2_DIEDL_REG0_
-/* Die Identification Register Upper Word */
-#define SYS2_DIEDH_REG1_
-/* Die Identification Register Lower Word */
-#define SYS2_DIEDL_REG2_
-/* Die Identification Register Upper Word */
-#define SYS2_DIEDH_REG3_
-
-/* Peripheral Central Resource (PCR) Control Registers */
-
-/* Peripheral Memory Protection Set Register 0 */
-#define PCR_PMPROTSET0_
-/* Peripheral Memory Protection Set Register 1 */
-#define PCR_PMPROTSET1_
-/* Peripheral Memory Protection Clear Register 0 */
-#define PCR_PMPROTCLR0_
-/* Peripheral Memory Protection Clear Register 1 */
-#define PCR_PMPROTCLR1_
-/* Peripheral Protection Set Register 0 */
-#define PCR_PPROTSET0_
-/* Peripheral Protection Set Register 1 */
-#define PCR_PPROTSET1_
-/* Peripheral Protection Set Register 2 */
-#define PCR_PPROTSET2_
-/* Peripheral Protection Set Register 3 */
-#define PCR_PPROTSET3_
-/* Peripheral Protection Clear Register 0 */
-#define PCR_PPROTCLR0_
-/* Peripheral Protection Clear Register 1 */
-#define PCR_PPROTCLR1_
-/* Peripheral Protection Clear Register 2 */
-#define PCR_PPROTCLR2_
-/* Peripheral Protection Clear Register 3 */
-#define PCR_PPROTCLR3_
-/* Peripheral Memory Power-Down Set Register 0 */
-#define PCR_PCSPWRDWNSET0_
-/* Peripheral Memory Power-Down Set Register 1 */
-#define PCR_PCSPWRDWNSET1_
-/* Peripheral Memory Power-Down Clear Register 0 */
-#define PCR_PCSPWRDWNCLR0_
-/* Peripheral Memory Power-Down Clear Register 1 */
-#define PCR_PCSPWRDWNCLR1_
-/* Peripheral Power-Down Set Register 0 */
-#define PCR_PSPWRDWNSET0_
-/* Peripheral Power-Down Set Register 1 */
-#define PCR_PSPWRDWNSET1_
-/* Peripheral Power-Down Set Register 2 */
-#define PCR_PSPWRDWNSET2_
-/* Peripheral Power-Down Set Register 3 */
-#define PCR_PSPWRDWNSET3_
-/* Peripheral Power-Down Clear Register 0 */
-#define PCR_PSPWRDWNCLR0_
-/* Peripheral Power-Down Clear Register 1 */
-#define PCR_PSPWRDWNCLR1_
-/* Peripheral Power-Down Clear Register 2 */
-#define PCR_PSPWRDWNCLR2_
-/* Peripheral Power-Down Clear Register 3 */
-#define PCR_PSPWRDWNCLR3_
 
 #endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_SYS_H */
