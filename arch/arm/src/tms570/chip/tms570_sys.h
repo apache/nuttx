@@ -52,7 +52,6 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
-
 /* Register Offsets *********************************************************************************/
 
 #define TMS570_SYS_PC1_OFFSET           0x0000  /* SYS Pin Control Register 1 */
@@ -187,18 +186,35 @@
 #define SYS_PC8_
 /* SYS Pin Control Register 9 */
 #define SYS_PC9_
-/* Clock Source Disable Register */
-#define SYS_CSDIS_
-/* Clock Source Disable Set Register */
-#define SYS_CSDISSET_
-/* Clock Source Disable Clear Register */
-#define SYS_CSDISCLR_
-/* Clock Domain Disable Register */
-#define SYS_CDDIS_
-/* Clock Domain Disable Set Register */
-#define SYS_CDDISSET_
-/* Clock Domain Disable Clear Register */
-#define SYS_CDDISCLR_
+
+/* Clock Source Disable Register, Clock Source Disable Set Register, and Clock Source
+ * Disable Clear Register
+ */
+
+#define SYS_CSDIS_CLKSR0OFF             (1 << 0)  /* Bit 0: Clock source 0 */
+#define SYS_CSDIS_CLKSR1OFF             (1 << 1)  /* Bit 1: Clock source 1 */
+#define SYS_CSDIS_CLKSR3OFF             (1 << 3)  /* Bit 3: Clock source 3 */
+#define SYS_CSDIS_CLKSR4OFF             (1 << 4)  /* Bit 4: Clock source 4 */
+#define SYS_CSDIS_CLKSR5OFF             (1 << 5)  /* Bit 5: Clock source 5 */
+
+#define SYS_CLKSRC_OSC                  SYS_CSDIS_CLKSR0OFF /* Oscillator */
+#define SYS_CLKSRC_PLL                  SYS_CSDIS_CLKSR1OFF /* PLL */
+#define SYS_CLKSRC_EXTCLKIN             SYS_CSDIS_CLKSR3OFF /* EXTCLKIN */
+#define SYS_CLKSRC_LFLPO                SYS_CSDIS_CLKSR4OFF /* Low Frequency LPO (Low Power Oscillator) clock */
+#define SYS_CLKSRC_HFLPO                SYS_CSDIS_CLKSR5OFF /* High Frequency LPO (Low Power Oscillator) clock */
+
+/* Clock Domain Disable Register, Clock Domain Disable Set Register, and Clock Domain
+ * Disable Clear Register.
+ */
+
+#define SYS_CDDIS_GCLKOFF               (1 << 0)  /* Bit 0:  GCLK domain off */
+#define SYS_CDDIS_HCLKOFF               (1 << 1)  /* Bit 1:  HCLK and VCLK_sys domains off */
+#define SYS_CDDIS_VCLKPOFF              (1 << 2)  /* Bit 2:  VCLK_periph domain off */
+#define SYS_CDDIS_VCLK2OFF              (1 << 3)  /* Bit 3:  VCLK2 domain off */
+#define SYS_CDDIS_VCLKA1OFF             (1 << 4)  /* Bit 4:  VCLKA1 domain off */
+#define SYS_CDDIS_RTICLK1OFF            (1 << 6)  /* Bit 6:  RTICLK1 domain off */
+#define SYS_CDDIS_VCLKEQEPOFF           (1 << 9)  /* Bit 9:  VCLK_EQEP_OFF domain off */
+
 /* GCLK, HCLK, VCLK, and VCLK2 Source Register */
 #define SYS_GHVSRC_
 /* Peripheral Asynchronous Clock Source Register */
@@ -243,10 +259,41 @@
 
 /* Memory Hardware Initialization Status Register */
 #define SYS_MINISTAT_
+
 /* PLL Control Register 1 */
-#define SYS_PLLCTL1_
+
+#define SYS_PLLCTL1_PLLMUL_SHIFT        (0)       /* Bits 0-15: PLL Multiplication Factor */
+#define SYS_PLLCTL1_PLLMUL_MASK         (0xffff << SYS_PLLCTL1_PLLMUL_SHIFT)
+#  define SYS_PLLCTL1_PLLMUL(n)         ((uint32_t)(n) << SYS_PLLCTL1_PLLMUL_SHIFT)
+#define SYS_PLLCTL1_REFCLKDIV_SHIFT     (16)      /* Bits 16-21: Reference Clock Divider */
+#define SYS_PLLCTL1_REFCLKDIV_MASK      (0x3f << SYS_PLLCTL1_REFCLKDIV_SHIFT)
+#  define SYS_PLLCTL1_REFCLKDIV(n)      ((uint32_t)(n) << SYS_PLLCTL1_REFCLKDIV_SHIFT)
+#define SYS_PLLCTL1_ROF                 (1 << 23) /* Bit 23:  Reset on Oscillator Fail */
+#define SYS_PLLCTL1_PLLDIV_SHIFT        (24)      /* Bits 24-28: PLL Output Clock Divider */
+#define SYS_PLLCTL1_PLLDIV_MASK         (0x1f << SYS_PLLCTL1_PLLDIV_SHIFT)
+#  define SYS_PLLCTL1_PLLDIV(n)         ((uint32_t)(n) << SYS_PLLCTL1_PLLDIV_SHIFT)
+#define SYS_PLLCTL1_MASKSLIP_SHIFT      (29)      /* Bits 29-30: Mask detection of PLL slip */
+#define SYS_PLLCTL1_MASKSLIP_MASK       (3 << SYS_PLLCTL1_MASKSLIP_SHIFT)
+#  define SYS_PLLCTL1_MASKSLIP_DISABLE  (0 << SYS_PLLCTL1_MASKSLIP_SHIFT) /* All values but 2 disable */
+#  define SYS_PLLCTL1_MASKSLIP_ENABLE   (2 << SYS_PLLCTL1_MASKSLIP_SHIFT)
+#define SYS_PLLCTL1_ROS                 (1 << 31)  /* Bit 31:  Reset on PLL Slip */
+
 /* PLL Control Register 2 */
-#define SYS_PLLCTL2_
+
+#define SYS_PLLCTL2_SPRAMOUNT_SHIFT     (0)        /* Bits 0-8:  Spreading Amount */
+#define SYS_PLLCTL2_SPRAMOUNT_MASK      (0xff << SYS_PLLCTL2_SPRAMOUNT_SHIFT)
+#  define SYS_PLLCTL2_SPRAMOUNT(n)      ((uint32_t)(n) << SYS_PLLCTL2_SPRAMOUNT_SHIFT)
+#define SYS_PLLCTL2_ODPLL_SHIFT         (9)        /* Bits 9-11:  Internal PLL Output Divider */
+#define SYS_PLLCTL2_ODPLL_MASK          (7 << SYS_PLLCTL2_ODPLL_SHIFT)
+#  define SYS_PLLCTL2_ODPLL(n)          ((uint32_t)(n) << SYS_PLLCTL2_ODPLL_SHIFT)
+#define SYS_PLLCTL2_MULMOD_SHIFT        (12)       /* Bits 12-20:  Multiplier Correction when Frequency Modulation is enabled */
+#define SYS_PLLCTL2_MULMOD_MASK         (0x1ff << SYS_PLLCTL2_MULMOD_SHIFT)
+#  define SYS_PLLCTL2_MULMOD(n)         ((uint32_t)(n) << SYS_PLLCTL2_MULMOD_SHIFT)
+#define SYS_PLLCTL2_SPRRATE_SHIFT       (22)       /* Bits 22-30:  NS = SPREADINGRATE + 1 */
+#define SYS_PLLCTL2_SPRRATE_MASK        (0x1ff << SYS_PLLCTL2_SPRRATE_SHIFT)
+#  define SYS_PLLCTL2_SPRRATE(n)        ((uint32_t)(n) << SYS_PLLCTL2_SPRRATE_SHIFT)
+#define SYS_PLLCTL2_FMENA               (1 << 31) /* Bit 31:  Frequency Modulation Enable */
+
 /* SYS Pin Control Register 10 */
 #define SYS_PC10_
 /* Die Identification Register, Lower Word */

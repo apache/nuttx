@@ -206,9 +206,9 @@ void arm_boot(void)
 
   DEBUGASSERT((getreg(TMS570_SYS_ESR) & SYS_ESR_PORST) != 0);
 
-   /* Clear all reset status flags on successful power on reset */
+  /* Clear all reset status flags on successful power on reset */
 
-   putreg32(SYS_ESR_RSTALL, TMS570_SYS_ESR);
+  putreg32(SYS_ESR_RSTALL, TMS570_SYS_ESR);
 
   /* Check if there were ESM group3 errors during power-up.
    *
