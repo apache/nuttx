@@ -55,23 +55,23 @@
 
 /* Register Offsets *********************************************************************************/
 
-#define TMS570_PBIST_RAMT_OFFSET     0x0160  /* RAM Configuration Register */
-#define TMS570_PBIST_DLR_OFFSET      0x0164  /* Datalogger Register */
-#define TMS570_PBIST_PCR_OFFSET      0x016c  /* Program Control Register */
-#define TMS570_PBIST_PACT_OFFSET     0x0180  /* PBIST Activate/ROM Clock Enable Register */
-#define TMS570_PBIST_PBISTID_OFFSET  0x0184  /* PBIST ID Register */
-#define TMS570_PBIST_OVER_OFFSET     0x0188  /* Override Register */
-#define TMS570_PBIST_FSRF0_OFFSET    0x0190  /* Fail Status Fail Register 0 */
-#define TMS570_PBIST_FSRC0_OFFSET    0x0198  /* Fail Status Count Register 0 */
-#define TMS570_PBIST_FSRC1_OFFSET    0x019c  /* Fail Status Count Register 1 */
-#define TMS570_PBIST_FSRA0_OFFSET    0x01a0  /* Fail Status Address 0 Register */
-#define TMS570_PBIST_FSRA1_OFFSET    0x01a4  /* Fail Status Address 1 Register */
-#define TMS570_PBIST_FSRDL0_OFFSET   0x01a8  /* Fail Status Data Register 0 */
-#define TMS570_PBIST_FSRDL1_OFFSET   0x01b0  /* Fail Status Data Register 1 */
-#define TMS570_PBIST_ROM_OFFSET      0x01c0  /* ROM Mask Register */
-#define TMS570_PBIST_ALGO_OFFSET     0x01c4  /* ROM Algorithm Mask Register */
-#define TMS570_PBIST_RINFOL_OFFSET   0x01c8  /* RAM Info Mask Lower Register */
-#define TMS570_PBIST_RINFOU_OFFSET   0x01cc  /* RAM Info Mask Upper Register */
+#define TMS570_PBIST_RAMT_OFFSET     0x0160 /* RAM Configuration Register */
+#define TMS570_PBIST_DLR_OFFSET      0x0164 /* Datalogger Register */
+#define TMS570_PBIST_PCR_OFFSET      0x016c /* Program Control Register */
+#define TMS570_PBIST_PACT_OFFSET     0x0180 /* PBIST Activate/ROM Clock Enable Register */
+#define TMS570_PBIST_PBISTID_OFFSET  0x0184 /* PBIST ID Register */
+#define TMS570_PBIST_OVER_OFFSET     0x0188 /* Override Register */
+#define TMS570_PBIST_FSRF0_OFFSET    0x0190 /* Fail Status Fail Register 0 */
+#define TMS570_PBIST_FSRC0_OFFSET    0x0198 /* Fail Status Count Register 0 */
+#define TMS570_PBIST_FSRC1_OFFSET    0x019c /* Fail Status Count Register 1 */
+#define TMS570_PBIST_FSRA0_OFFSET    0x01a0 /* Fail Status Address 0 Register */
+#define TMS570_PBIST_FSRA1_OFFSET    0x01a4 /* Fail Status Address 1 Register */
+#define TMS570_PBIST_FSRDL0_OFFSET   0x01a8 /* Fail Status Data Register 0 */
+#define TMS570_PBIST_FSRDL1_OFFSET   0x01b0 /* Fail Status Data Register 1 */
+#define TMS570_PBIST_ROM_OFFSET      0x01c0 /* ROM Mask Register */
+#define TMS570_PBIST_ALGO_OFFSET     0x01c4 /* ROM Algorithm Mask Register */
+#define TMS570_PBIST_RINFOL_OFFSET   0x01c8 /* RAM Info Mask Lower Register */
+#define TMS570_PBIST_RINFOU_OFFSET   0x01cc /* RAM Info Mask Upper Register */
 
 /* Register Addresses *******************************************************************************/
 
