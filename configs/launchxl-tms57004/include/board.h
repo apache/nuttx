@@ -52,6 +52,60 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* The LaunchXL-TMS57004 has a 16 MHz external crystal. */
+
+#define BOARD_FCLKIN_FREQUENCY 16000000  /* 16 MHz crystal frequency */
+
+/* The maximum frequency for the TMS570LS0432PZ is 80 MHz.
+ *
+ * REFCLKDIV controls input clock divider:
+ *
+ *  NR = REFCLKDIV+1
+ *  Fintclk = Fclkin / NR
+ *
+ * PLLMUL controls multipler on divided input clock (Fintclk):
+ *
+ *  Non-modulated:
+ *    NF = (PLLMUL + 256) / 256
+ *  Modulated:
+ *    NF = (PLLMUL + MULMOD + 256) / 256
+ *
+ *  Foutputclk = Fintclk x NF (150MHz - 550MHz)
+ *
+ * ODPLL controls internal PLL output divider:
+ *
+ *   OD = ODPLL+1
+ *   Fpostodclk = Foutputclock / OD
+ *
+ * Final divisor, R, controls PLL output:
+ *
+ *   R = PLLDIV + 1
+ *   Fpllclock = Fpostodclk / R
+ *
+ * Or:
+ *
+ *   Fpllclock = = (Fclkin / NR) x NF / OD / R
+ *
+ * For example, if the clock source is a 16MHz crystal, then
+ *
+ *   Fclkin = 16,000,000
+ *   NR     = 6   (REFCLKDIV=5)
+ *   NF     = 120 (PLLMUL = 119 * 256)
+ *   OD     = 1   (ODPLL = 0)
+ *   R      = 32  (PLLDIV=31)
+ *
+ * Then:
+ *
+ *   Fintclk      = 16 MHz / 6 = 2.667 MHz
+ *   Foutputclock = 2.667 MHz * 120 = 320 MHz
+ *   Fpostodclock = 320 MHz / 2 = 160 MHz
+ *   Fpllclock    = 160 MHz / 2 = 8 MHz
+ */
+
+#define BOARD_PLL_NR     6   /* REFCLKDIV = 5 */
+#define BOARD_PLL_NF     120 /* PLLMUL = 119 * 256 */
+#define BOARD_PLL_OD     2   /* ODPLL = 1 */
+#define BOARD_PLL_R      2   /* PLLDIV = 1 */
 
 /* LED definitions ******************************************************************/
 
