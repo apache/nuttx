@@ -145,7 +145,7 @@ static void tms570_pll_setup(void)
    * external clock remains disabled.
    */
 
-  regval = SYS_CLKSRC_EXTCLKIN;
+  regval = SYS_CSDIS_CLKSRC_EXTCLKIN;
   putreg32(regval, TMS570_SYS_CSDIS);
 }
 
@@ -225,7 +225,9 @@ static void tms570_lpo_trim(void)
   lotrim = (getreg32(TMS570_TITCM_LPOTRIM) & TMS570_TITCM_LPOTRIM_MASK) <<
     TMS570_TITCM_LPOTRIM_SHIFT;
 
-  /* Use if the LPO trim value TI OTP if programmed.  Otherwise, use the default value */
+  /* Use if the LPO trim value TI OTP if programmed.  Otherwise, use a
+   * default value.
+   */
 
   if (lotrim != 0xffff)
     {
@@ -239,6 +241,96 @@ static void tms570_lpo_trim(void)
     }
 
   putreg32(regval, TMS570_SYS_LPOMONCTL);
+}
+
+/****************************************************************************
+ * Name: tms570_clocksrc_configure
+ *
+ * Description:
+ *   Finalize PLL configuration, enable and configure clocks sources.
+ *
+ ****************************************************************************/
+
+static void tms570_clocksrc_configure(void)
+{
+  uint32_t regval;
+  uint32_t csvstat;
+  uint32_t csdis;
+
+  /* Disable / Enable clock domains.  Writing a '1' to the CDDIS register turns
+   * the clock off.
+   *
+   *   GCLK          Bit 0  On
+   *   HCLK/VCLK_sys Bit 1  On
+   *   VCLK_periph   Bit 2  On
+   *   VCLK2         Bit 3  On
+   *   VCLKA1        Bit 4  On
+   *   RTICLK1       Bit 6  On
+   *   TCLK_EQEP     Bit 9  On
+   */
+
+  putreg32(0, TMS570_SYS_CDDIS);
+
+  /* Work Around for Errata SYS#46: Errata Description: Clock Source
+   * Switching Not Qualified with Clock Source Enable And Clock Source Valid
+   * Workaround: Always check the CSDIS register to make sure the clock source
+   * is turned on and check the CSVSTAT register to make sure the clock source 
+   * is valid. Then write to GHVSRC to switch the clock.
+   */
+
+  do
+    {
+      /* Get the set of valid clocks */
+
+      csvstat = getreg32(TMS570_SYS_CSVSTAT) & SYS_MSTGCR_CLKSRVALL;
+
+      /* Get the (inverted) state of each clock.  Inverted so that '1' means
+       * ON not OFF.
+       */
+
+      csdis = (getreg32(TMS570_SYS_CSDIS) ^ SYS_CSDIS_CLKSROFFALL) &
+        SYS_CSDIS_CLKSROFFALL;
+    }
+  while ((csvstat & csdis) != csdis);
+
+
+  /* Now the PLLs are locked and the PLL outputs can be sped up.  The R-
+   * divider was programmed to be 0xF. Now this divider is changed to
+   * programmed value
+   */
+
+  regval  = getreg32(TMS570_SYS_PLLCTL1);
+  regval &= ~SYS_PLLCTL1_PLLDIV_MASK;
+  regval |= SYS_PLLCTL1_PLLDIV(BOARD_PLL_R - 1);
+  putreg32(regval, TMS570_SYS_PLLCTL1);
+
+  /* Map device clock domains to desired sources and configure top-level
+   * dividers.  All clock domains were working off the default clock sources
+   * until this point.
+   *
+   * Setup GCLK, HCLK and VCLK clock source for normal operation, power down
+   * mode and after wakeup
+   */
+
+  regval = SYS_GHVSRC_GHVSRC_PLL1 | SYS_GHVSRC_HVLPM_PLL1 |
+           SYS_GHVSRC_GHVWAKE_PLL1;
+  putreg32(regval, TMS570_SYS_GHVSRC);
+
+  /* Setup synchronous peripheral clock dividers for VCLK1, VCLK2, VCLK3 */
+
+  regval  = getreg32(TMS570_SYS_CLKCNTL);
+  regval &= ~(SYS_CLKCNTL_VCLKR2_MASK | SYS_CLKCNTL_VCLKR_MASK);
+  regval |= SYS_CLKCNTL_VCLKR2_DIV1 | SYS_CLKCNTL_VCLKR_DIV1;
+  putreg32(regval, TMS570_SYS_CLKCNTL);
+
+  /* Setup RTICLK1 and RTICLK2 clocks */
+
+  regval = SYS_RCLKSRC_RTI1SRC_VCLK | SYS_RCLKSRC_RTI1DIV_DIV2;
+  putreg32(regval, TMS570_SYS_RCLKSRC);
+
+  /* Setup asynchronous peripheral clock sources for AVCLK1 */
+
+  putreg32(SYS_VCLKASRC_VCLKA1S_VCLK, TMS570_SYS_VCLKASRC);
 }
 
 /****************************************************************************
@@ -294,9 +386,10 @@ void tms570_clockconfig(void)
 
   tms570_lpo_trim();
 
-  /* Wait for PLLs to start up and map clock domains to desired clock
-   * sources.
-   */
+  /* Finalize PLL configuration, enable and configure clocks sources. */
+
+  tms570_clocksrc_configure();
+
 #warning Missing Logic
 
   /* Set ECLK pins functional mode */

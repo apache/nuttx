@@ -204,12 +204,13 @@
 #define SYS_CSDIS_CLKSR3OFF             (1 << 3)  /* Bit 3: Clock source 3 */
 #define SYS_CSDIS_CLKSR4OFF             (1 << 4)  /* Bit 4: Clock source 4 */
 #define SYS_CSDIS_CLKSR5OFF             (1 << 5)  /* Bit 5: Clock source 5 */
+#define SYS_CSDIS_CLKSROFFALL           (0x3b)
 
-#define SYS_CLKSRC_OSC                  SYS_CSDIS_CLKSR0OFF /* Oscillator */
-#define SYS_CLKSRC_PLL                  SYS_CSDIS_CLKSR1OFF /* PLL */
-#define SYS_CLKSRC_EXTCLKIN             SYS_CSDIS_CLKSR3OFF /* EXTCLKIN */
-#define SYS_CLKSRC_LFLPO                SYS_CSDIS_CLKSR4OFF /* Low Frequency LPO (Low Power Oscillator) clock */
-#define SYS_CLKSRC_HFLPO                SYS_CSDIS_CLKSR5OFF /* High Frequency LPO (Low Power Oscillator) clock */
+#define SYS_CSDIS_CLKSRC_OSC            SYS_CSDIS_CLKSR0OFF /* Oscillator */
+#define SYS_CSDIS_CLKSRC_PLL            SYS_CSDIS_CLKSR1OFF /* PLL */
+#define SYS_CSDIS_CLKSRC_EXTCLKIN       SYS_CSDIS_CLKSR3OFF /* EXTCLKIN */
+#define SYS_CSDIS_CLKSRC_LFLPO          SYS_CSDIS_CLKSR4OFF /* Low Frequency LPO (Low Power Oscillator) clock */
+#define SYS_CSDIS_CLKSRC_HFLPO          SYS_CSDIS_CLKSR5OFF /* High Frequency LPO (Low Power Oscillator) clock */
 
 /* Clock Domain Disable Register, Clock Domain Disable Set Register, and Clock Domain
  * Disable Clear Register.
@@ -224,15 +225,144 @@
 #define SYS_CDDIS_VCLKEQEPOFF           (1 << 9)  /* Bit 9:  VCLK_EQEP_OFF domain off */
 
 /* GCLK, HCLK, VCLK, and VCLK2 Source Register */
-#define SYS_GHVSRC_
+
+#define SYS_CLKSRC_OSC                  0         /* Alias for oscillator clock Source                */
+#define SYS_CLKSRC_PLL1                 1         /* Alias for Pll1 clock Source                      */
+#define SYS_CLKSRC_EXTERNAL1            3         /* Alias for external clock Source                  */
+#define SYS_CLKSRC_LPOLOW               4         /* Alias for low power oscillator low clock Source  */
+#define SYS_CLKSRC_LPOHIGH              5         /* Alias for low power oscillator high clock Source */
+#define SYS_CLKSRC_PLL2                 6         /* Alias for Pll2 clock Source                      */
+#define SYS_CLKSRC_EXTERNAL2            7         /* Alias for external 2 clock Source                */
+#define SYS_CLKSRC_VCLK                 9         /* Alias for synchronous VCLK1 clock Source         */
+
+#define SYS_GHVSRC_GHVSRC_SHIFT         (0)       /* Bits 0-3: GCLK, HCLK, VCLK, VCLK2 current source */
+#define SYS_GHVSRC_GHVSRC_MASK          (15 << SYS_GHVSRC_GHVSRC_SHIFT)
+#  define SYS_GHVSRC_GHVSRC_SRC(n)      ((uint32_t)(n) << SYS_GHVSRC_GHVSRC_SHIFT)
+#  define SYS_GHVSRC_GHVSRC_SRC0        (0 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source0 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC1        (1 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source1 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC2        (2 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source2 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC3        (3 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source3 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC4        (4 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source4 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC5        (5 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source5 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC6        (6 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source6 for GCLK, HCLK, VCLK, VCLK2 */
+#  define SYS_GHVSRC_GHVSRC_SRC7        (7 << SYS_GHVSRC_GHVSRC_SHIFT) /* Clock source7 for GCLK, HCLK, VCLK, VCLK2 */
+
+#  define SYS_GHVSRC_GHVSRC_SRC(n)      ((uint32_t)(n) << SYS_GHVSRC_GHVSRC_SHIFT)
+#  define SYS_GHVSRC_GHVSRC_OSC         SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_OSC)
+#  define SYS_GHVSRC_GHVSRC_PLL1        SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_PLL1)
+#  define SYS_GHVSRC_GHVSRC_EXTERNAL1   SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_EXTERNAL1)
+#  define SYS_GHVSRC_GHVSRC_LPOLOW      SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_LPOLOW)
+#  define SYS_GHVSRC_GHVSRC_LPOHIGH     SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_LPOHIGH)
+#  define SYS_GHVSRC_GHVSRC_PLL2        SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_PLL2)
+#  define SYS_GHVSRC_GHVSRC_EXTERNAL2   SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_EXTERNAL2)
+#  define SYS_GHVSRC_GHVSRC_VCLK        SYS_GHVSRC_GHVSRC_SRC(SYS_CLKSRC_VCLK)
+
+#define SYS_GHVSRC_HVLPM_SHIFT          (16)      /* Bits 16-19: HCLK, VCLK, VCLK2 source on wakeup when GCLK is turned off */
+#define SYS_GHVSRC_HVLPM_MASK           (15 << SYS_GHVSRC_HVLPM_SHIFT)
+#  define SYS_GHVSRC_HVLPM_SRC0         (0 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source0 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC1         (1 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source1 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC2         (2 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source2 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC3         (3 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source3 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC4         (4 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source4 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC5         (5 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source5 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC6         (6 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source6 for HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_HVLPM_SRC7         (7 << SYS_GHVSRC_HVLPM_SHIFT) /* Clock source7 for HCLK, VCLK, VCLK2 on wakeup */
+
+#  define SYS_GHVSRC_HVLPM(n)           ((uint32_t)(n) << SYS_GHVSRC_HVLPM_SHIFT)
+#  define SYS_GHVSRC_HVLPM_OSC          SYS_GHVSRC_HVLPM(SYS_CLKSRC_OSC)
+#  define SYS_GHVSRC_HVLPM_PLL1         SYS_GHVSRC_HVLPM(SYS_CLKSRC_PLL1)
+#  define SYS_GHVSRC_HVLPM_EXTERNAL1    SYS_GHVSRC_HVLPM(SYS_CLKSRC_EXTERNAL1)
+#  define SYS_GHVSRC_HVLPM_LPOLOW       SYS_GHVSRC_HVLPM(SYS_CLKSRC_LPOLOW)
+#  define SYS_GHVSRC_HVLPM_LPOHIGH      SYS_GHVSRC_HVLPM(SYS_CLKSRC_LPOHIGH)
+#  define SYS_GHVSRC_HVLPM_PLL2         SYS_GHVSRC_HVLPM(SYS_CLKSRC_PLL2)
+#  define SYS_GHVSRC_HVLPM_EXTERNAL2    SYS_GHVSRC_HVLPM(SYS_CLKSRC_EXTERNAL2)
+#  define SYS_GHVSRC_HVLPM_VCLK         SYS_GHVSRC_HVLPM(SYS_CLKSRC_VCLK)
+
+#define SYS_GHVSRC_GHVWAKE_SHIFT        (24)      /* Bits 24-17: GCLK, HCLK, VCLK, VCLK2 source on wakeup */
+#define SYS_GHVSRC_GHVWAKE_MASK         (15 << SYS_GHVSRC_GHVWAKE_SHIFT)
+#  define SYS_GHVSRC_GHVWAKE_SRC0       (0 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source0 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC1       (1 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source1 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC2       (2 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source2 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC3       (3 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source3 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC4       (4 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source4 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC5       (5 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source5 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC6       (6 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source6 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+#  define SYS_GHVSRC_GHVWAKE_SRC7       (7 << SYS_GHVSRC_GHVWAKE_SHIFT) /* Clock source7 for GCLK, HCLK, VCLK, VCLK2 on wakeup */
+
+#  define SYS_GHVSRC_GHVWAKE(n)         ((uint32_t)(n) << SYS_GHVSRC_GHVWAKE_SHIFT)
+#  define SYS_GHVSRC_GHVWAKE_OSC        SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_OSC)
+#  define SYS_GHVSRC_GHVWAKE_PLL1       SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_PLL1)
+#  define SYS_GHVSRC_GHVWAKE_EXTERNAL1  SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_EXTERNAL1)
+#  define SYS_GHVSRC_GHVWAKE_LPOLOW     SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_LPOLOW)
+#  define SYS_GHVSRC_GHVWAKE_LPOHIGH    SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_LPOHIGH)
+#  define SYS_GHVSRC_GHVWAKE_PLL2       SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_PLL2)
+#  define SYS_GHVSRC_GHVWAKE_EXTERNAL2  SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_EXTERNAL2)
+#  define SYS_GHVSRC_GHVWAKE_VCLK       SYS_GHVSRC_GHVWAKE(SYS_CLKSRC_VCLK)
+
 /* Peripheral Asynchronous Clock Source Register */
-#define SYS_VCLKASRC_
+
+#define SYS_VCLKASRC_VCLKA1S_SHIFT        (0)      /* Bits 0-3: Peripheral asynchronous clock1 source */
+#define SYS_VCLKASRC_VCLKA1S_MASK         (15 << SYS_VCLKASRC_VCLKA1S_SHIFT)
+#  define SYS_VCLKASRC_VCLKA1S_SRC0       (0 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source0 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC1       (1 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source1 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC2       (2 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source2 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC3       (3 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source3 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC4       (4 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source4 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC5       (5 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source5 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC6       (6 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source6 for RTICLK1 */
+#  define SYS_VCLKASRC_VCLKA1S_SRC7       (7 << SYS_VCLKASRC_VCLKA1S_SHIFT) /* Clock source7 for RTICLK1 */
+
+#  define SYS_VCLKASRC_VCLKA1S(n)         ((uint32_t)(n) << SYS_VCLKASRC_VCLKA1S_SHIFT)
+#  define SYS_VCLKASRC_VCLKA1S_OSC        SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_OSC)
+#  define SYS_VCLKASRC_VCLKA1S_PLL1       SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_PLL1)
+#  define SYS_VCLKASRC_VCLKA1S_EXTERNAL1  SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_EXTERNAL1)
+#  define SYS_VCLKASRC_VCLKA1S_LPOLOW     SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_LPOLOW)
+#  define SYS_VCLKASRC_VCLKA1S_LPOHIGH    SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_LPOHIGH)
+#  define SYS_VCLKASRC_VCLKA1S_PLL2       SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_PLL2)
+#  define SYS_VCLKASRC_VCLKA1S_EXTERNAL2  SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_EXTERNAL2)
+#  define SYS_VCLKASRC_VCLKA1S_VCLK       SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_VCLK)
+
 /* RTI Clock Source Register */
-#define SYS_RCLKSRC_
+
+#define SYS_RCLKSRC_RTI1SRC_SHIFT        (0)      /* Bits 0-3: RTI clock1 source */
+#define SYS_RCLKSRC_RTI1SRC_MASK         (15 << SYS_RCLKSRC_RTI1SRC_SHIFT)
+#  define SYS_RCLKSRC_RTI1SRC_SRC0       (0 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source0 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC1       (1 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source1 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC2       (2 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source2 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC3       (3 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source3 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC4       (4 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source4 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC5       (5 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source5 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC6       (6 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source6 for RTICLK1 */
+#  define SYS_RCLKSRC_RTI1SRC_SRC7       (7 << SYS_RCLKSRC_RTI1SRC_SHIFT) /* Clock source7 for RTICLK1 */
+
+#  define SYS_RCLKSRC_RTI1SRC(n)         ((uint32_t)(n) << SYS_RCLKSRC_RTI1SRC_SHIFT)
+#  define SYS_RCLKSRC_RTI1SRC_OSC        SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_OSC)
+#  define SYS_RCLKSRC_RTI1SRC_PLL1       SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_PLL1)
+#  define SYS_RCLKSRC_RTI1SRC_EXTERNAL1  SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_EXTERNAL1)
+#  define SYS_RCLKSRC_RTI1SRC_LPOLOW     SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_LPOLOW)
+#  define SYS_RCLKSRC_RTI1SRC_LPOHIGH    SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_LPOHIGH)
+#  define SYS_RCLKSRC_RTI1SRC_PLL2       SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_PLL2)
+#  define SYS_RCLKSRC_RTI1SRC_EXTERNAL2  SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_EXTERNAL2)
+#  define SYS_RCLKSRC_RTI1SRC_VCLK       SYS_RCLKSRC_RTI1SRC(SYS_CLKSRC_VCLK)
+
+#define SYS_RCLKSRC_RTI1DIV_SHIFT        (8)      /* Bits 8-9: RTI clock 1 divider */
+#define SYS_RCLKSRC_RTI1DIV_MASK         (3 << SYS_RCLKSRC_RTI1DIV_SHIFT)
+#  define SYS_RCLKSRC_RTI1DIV_DIV1       (0 << SYS_RCLKSRC_RTI1DIV_SHIFT) /* RTICLK1 divider value is 1 */
+#  define SYS_RCLKSRC_RTI1DIV_DIV2       (1 << SYS_RCLKSRC_RTI1DIV_SHIFT) /* RTICLK1 divider value is 2 */
+#  define SYS_RCLKSRC_RTI1DIV_DIV4       (2 << SYS_RCLKSRC_RTI1DIV_SHIFT) /* RTICLK1 divider value is 4 */
+#  define SYS_RCLKSRC_RTI1DIV_DIV8       (3 << SYS_RCLKSRC_RTI1DIV_SHIFT) /* RTICLK1 divider value is 8 */
+
 /* Clock Source Valid Status Register */
 #define SYS_CSVSTAT_
+
 /* Memory Self-Test Global Control Register */
-#define SYS_MSTGCR_
+
+#define SYS_MSTGCR_CLKSR0V              (1 << 0)  /* Bit 0:  Clock source xx valid */
+#define SYS_MSTGCR_CLKSR1V              (1 << 1)  /* Bit 1:  Clock source xx valid */
+#define SYS_MSTGCR_CLKSR3V              (1 << 3)  /* Bit 3:  Clock source xx valid */
+#define SYS_MSTGCR_CLKSR4V              (1 << 4)  /* Bit 4:  Clock source xx valid */
+#define SYS_MSTGCR_CLKSR5V              (1 << 5)  /* Bit 5:  Clock source xx valid */
+#define SYS_MSTGCR_CLKSRVALL            (0x3b)
 
 /* Memory Hardware Initialization Global Control Register */
 
@@ -408,6 +538,7 @@
 #define SYS_BMMCR1_
 /* CPU Reset Control Register */
 #define SYS_CPURSTCR_
+
 /* Clock Control Register */
 
 #define SYS_CLKCNTL_PENA                (1 << 8)  /* Bit 8:  Peripheral enable bit */
