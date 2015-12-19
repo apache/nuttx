@@ -177,23 +177,40 @@
 /* Register Bit-Field Definitions *******************************************************************/
 
 /* SYS Pin Control Register 1 */
-#define SYS_PC1_
+
+#define SYS_PC1_ECPCLKFUN               (1 << 0)  /* Bit 0: ECLK function */
+
 /* SYS Pin Control Register 2 */
-#define SYS_PC2_
+
+#define SYS_PC2_ECPCLKDIR               (1 << 0)  /* Bit 0: ECLK data direction */
+
 /* SYS Pin Control Register 3 */
-#define SYS_PC3_
+
+#define SYS_PC3_ECPCLKDIN               (1 << 0)  /* Bit 0: ECLK data in */
+
 /* SYS Pin Control Register 4 */
-#define SYS_PC4_
+
+#define SYS_PC4_ECPCLKDOUT              (1 << 0)  /* Bit 0: ECLK data out write */
+
 /* SYS Pin Control Register 5 */
-#define SYS_PC5_
+
+#define SYS_PC5_ECPCLKSET               (1 << 0)  /* Bit 0: ECLK data out set */
+
 /* SYS Pin Control Register 6 */
-#define SYS_PC6_
+
+#define SYS_PC6_ECPCLKCLR               (1 << 0)  /* Bit 0: ECLK data out clear */
+
 /* SYS Pin Control Register 7 */
-#define SYS_PC7_
+
+#define SYS_PC7_ECPCLKODE               (1 << 0)  /* Bit 0: ECLK open drain enable */
+
 /* SYS Pin Control Register 8 */
-#define SYS_PC8_
+
+#define SYS_PC8_ECPCLKPUE               (1 << 0)  /* Bit 0: ECLK pull enable */
+
 /* SYS Pin Control Register 9 */
-#define SYS_PC9_
+
+#define SYS_PC9_ECPCLKPS                (1 << 0)  /* Bit 0: ECLK pull up/pull down select */
 
 /* Clock Source Disable Register, Clock Source Disable Set Register, and Clock Source
  * Disable Clear Register
@@ -434,7 +451,9 @@
 #define SYS_PLLCTL2_FMENA               (1 << 31) /* Bit 31:  Frequency Modulation Enable */
 
 /* SYS Pin Control Register 10 */
-#define SYS_PC10_
+
+#define SYS_PC10_ECLCSLEW               (1 << 0)  /* Bit 0: ECLK slew control */
+
 /* Die Identification Register, Lower Word */
 #define SYS_DIEIDL_
 /* Die Identification Register, Upper Word */
@@ -552,7 +571,18 @@
 #  define SYS_CLKCNTL_VCLKR2_DIV2       (1 << SYS_CLKCNTL_VCLKR2_SHIFT)
 
 /* ECP Control Register */
-#define SYS_ECPCNTL_
+
+#define SYS_ECPCNTL_ECPDIV_SHIFT        (0)       /* Bits 0-15: ECP divider value */
+#define SYS_ECPCNTL_ECPDIV_MASK         (0xffff << SYS_ECPCNTL_ECPDIV_SHIFT)
+#  define SYS_ECPCNTL_ECPDIV(n)         ((uint32_t)(n) << SYS_ECPCNTL_ECPDIV_SHIFT)
+#define SYS_ECPCNTL_ECPINSEL_SHIFT      (16)      /* Bits 16-17: Select ECP input clock source */
+#define SYS_ECPCNTL_ECPINSEL_MASK       (3 << SYS_ECPCNTL_ECPINSEL_SHIFT)
+#  define SYS_ECPCNTL_ECPINSEL_LOW      (0 << SYS_ECPCNTL_ECPINSEL_SHIFT) /* Tied Low */
+#  define SYS_ECPCNTL_ECPINSEL_HCLK     (1 << SYS_ECPCNTL_ECPINSEL_SHIFT) /* HCLK */
+#  define SYS_ECPCNTL_ECPINSEL_EXTCLK   (2 << SYS_ECPCNTL_ECPINSEL_SHIFT) /* External clock */
+#define SYS_ECPCNTL_ECPCOS              (1 << 23) /* Bit 23: ECP continue on suspend */
+#define SYS_ECPCNTL_ECPSSEL             (1 << 24) /* Bit 24: Select VCLK os OSCIN as for ECLK */
+
 /* DEV Parity Control Register 1 */
 #define SYS_DEVCR1_
 /* System Exception Control Register */

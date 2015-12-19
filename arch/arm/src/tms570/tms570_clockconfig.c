@@ -333,6 +333,39 @@ static void tms570_clocksrc_configure(void)
   putreg32(SYS_VCLKASRC_VCLKA1S_VCLK, TMS570_SYS_VCLKASRC);
 }
 
+static void tms570_eclk_configure(void)
+{
+  uint32_t regval;
+
+  /* Configure ECLK pins
+   *
+   * PC1 0=ECLK is in GIO mode
+   * PC4 0=ECLK pin is driven to logic low
+   * PC2 1=ECLK pin is an output
+   * PC7 0=CLK pin is configured in push/pull mode
+   * PC8 0=ECLK pull enable is active
+   * PC9 1=ECLK pull up is selected, when pull up/pull down logic is enabled
+   */
+
+  putreg32(0, TMS570_SYS_PC1);
+  putreg32(0, TMS570_SYS_PC4);
+  putreg32(SYS_PC2_ECPCLKDIR, TMS570_SYS_PC2);
+  putreg32(0, TMS570_SYS_PC7);
+  putreg32(0, TMS570_SYS_PC8);
+  putreg32(SYS_PC9_ECPCLKPS, TMS570_SYS_PC9);
+
+  /* Setup ECLK:
+   *
+   * ECPDIV=7   Bits 0-15, ECP divider value = 8
+   * ECPINSEL=0 Bits 16-17, Select ECP input clock source is tied low
+   * ECPCOS=0   Bit 23, ECLK output is disabled in suspend mode
+   * ECPINSEL=0 Bit 24, VCLK is selected as the ECP clock source
+   */
+
+  regval = SYS_ECPCNTL_ECPDIV(8-1) | SYS_ECPCNTL_ECPINSEL_LOW;
+  putreg32(regval, TMS570_SYS_ECPCNTL);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -368,7 +401,7 @@ void tms570_clockconfig(void)
   tms570_peripheral_initialize();
 
   /* Configure device-level multiplexing and I/O multiplexing */
-#  warning Missing Logic
+#warning Missing Logic
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Wait for eFuse controller self-test to complete and check results */
@@ -390,26 +423,7 @@ void tms570_clockconfig(void)
 
   tms570_clocksrc_configure();
 
-#warning Missing Logic
+  /* Configure ECLK */
 
-  /* Set ECLK pins functional mode */
-#warning Missing Logic
-
-  /* Set ECLK pins default output value */
-#warning Missing Logic
-
-  /* Set ECLK pins output direction */
-#warning Missing Logic
-
-  /* Set ECLK pins open drain enable */
-#warning Missing Logic
-
-  /* Set ECLK pins pullup/pulldown enable */
-#warning Missing Logic
-
-  /* Set ECLK pins pullup/pulldown select */
-#warning Missing Logic
-
-  /* Setup ECLK */
-#warning Missing Logic
+  tms570_eclk_configure();
 }
