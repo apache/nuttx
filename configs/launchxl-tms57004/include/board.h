@@ -107,6 +107,12 @@
 #define BOARD_PLL_OD     2   /* ODPLL = 1 */
 #define BOARD_PLL_R      2   /* PLLDIV = 1 */
 
+/* FLASH wait states */
+
+#define BOARD_ASWAIT     0   /* No address setup wait states */
+#define BOARD_RWAIT      1   /* One read access wait state */
+#define BOARD_EWAIT      4   /* Four wait states for EEPROM access */
+
 /* LED definitions ******************************************************************/
 
 /* Button definitions ***************************************************************/
