@@ -330,7 +330,17 @@
 /* CPU Reset Control Register */
 #define SYS_CPURSTCR_
 /* Clock Control Register */
-#define SYS_CLKCNTL_
+
+#define SYS_CLKCNTL_PENA                (1 << 8)  /* Bit 8:  Peripheral enable bit */
+#define SYS_CLKCNTL_VCLKR_SHIFT         (16)      /* Bits 16-19: VBUS clock ratio */
+#define SYS_CLKCNTL_VCLKR_MASK          (15 << SYS_CLKCNTL_VCLKR_SHIFT)
+#  define SYS_CLKCNTL_VCLKR_DIV1        (0 << SYS_CLKCNTL_VCLKR_SHIFT)
+#  define SYS_CLKCNTL_VCLKR_DIV2        (1 << SYS_CLKCNTL_VCLKR_SHIFT)
+#define SYS_CLKCNTL_VCLKR2_SHIFT        (24)      /* Bits 24-27: VBUS clock2 ratio */
+#define SYS_CLKCNTL_VCLKR2_MASK         (15 << SYS_CLKCNTL_VCLKR2_SHIFT)
+#  define SYS_CLKCNTL_VCLKR2_DIV1       (0 << SYS_CLKCNTL_VCLKR2_SHIFT)
+#  define SYS_CLKCNTL_VCLKR2_DIV2       (1 << SYS_CLKCNTL_VCLKR2_SHIFT)
+
 /* ECP Control Register */
 #define SYS_ECPCNTL_
 /* DEV Parity Control Register 1 */
@@ -339,15 +349,15 @@
 #define SYS_ECR_
 /* System Exception Status Register */
 
-#define SYS_ESR_MPMODE  (1 << 0)  /* Bit 0:  Current memory protection unit (MPU) mode */
-#define SYS_ESR_EXTRST  (1 << 3)  /* Bit 3:  External reset flag */
-#define SYS_ESR_SWRST   (1 << 4)  /* Bit 4:  Software reset flag */
-#define SYS_ESR_CPURST  (1 << 5)  /* Bit 5:  CPU reset flag */
-#define SYS_ESR_WDRST   (1 << 13) /* Bit 13: Watchdog reset flag */
-#define SYS_ESR_OSCRST  (1 << 14) /* Bit 14: Reset caused by an oscillator failure or PLL cycle slip */
-#define SYS_ESR_PORST   (1 << 15) /* Bit 15: Power-up reset */
+#define SYS_ESR_MPMODE                  (1 << 0)  /* Bit 0:  Current memory protection unit (MPU) mode */
+#define SYS_ESR_EXTRST                  (1 << 3)  /* Bit 3:  External reset flag */
+#define SYS_ESR_SWRST                   (1 << 4)  /* Bit 4:  Software reset flag */
+#define SYS_ESR_CPURST                  (1 << 5)  /* Bit 5:  CPU reset flag */
+#define SYS_ESR_WDRST                   (1 << 13) /* Bit 13: Watchdog reset flag */
+#define SYS_ESR_OSCRST                  (1 << 14) /* Bit 14: Reset caused by an oscillator failure or PLL cycle slip */
+#define SYS_ESR_PORST                   (1 << 15) /* Bit 15: Power-up reset */
 
-#define SYS_ESR_RSTALL  (0x0000e038)
+#define SYS_ESR_RSTALL                  (0x0000e038)
 
 /* System Test Abort Status Register */
 #define SYS_TASR_

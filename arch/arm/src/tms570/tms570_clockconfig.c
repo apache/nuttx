@@ -4,9 +4,8 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This is primarily original code.  However, some logic in this file was
- * inspired/leveraged from TI's Project0 which has a compatible BSD license
- * and credit should be given in any case:
+ * Some logic in this file was inspired/leveraged from TI's Project0 which
+ * has a compatible BSD license:
  *
  *   Copyright (c) 2012, Texas Instruments Incorporated
  *   All rights reserved.
@@ -53,10 +52,22 @@
 #include "up_arch.h"
 
 #include "chip/tms570_sys.h"
+#include "chip/tms570_pcr.h"
 #include "tms570_clockconfig.h"
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tms570_pll_setup
+ *
+ * Description:
+ *   Configure PLL control registers.  The PLL takes (127 + 1024  NR)
+ *   oscillator cycles to acquire lock.  This initialization sequence
+ *   performs all the actions that are not required to be done at full
+ *   application speed while the PLL locks.
+ *
  ****************************************************************************/
 
 static void tms570_pll_setup(void)
@@ -105,10 +116,10 @@ static void tms570_pll_setup(void)
    *
    * Then:
    *
-   *   Fintclk      = 16 MHz / 6 = 2.667 MHz
+   *   Fintclk      = 16 MHz / 6      = 2.667 MHz
    *   Foutputclock = 2.667 MHz * 120 = 320 MHz
-   *   Fpostodclock = 320 MHz / 2
-   *   Fpllclock    = 160 MHz / 2 = 80 MHz
+   *   Fpostodclock = 320 MHz / 2     = 160 MHz
+   *   Fpllclock    = 160 MHz / 2     = 80 MHz
    *
    * NOTE: That R is temporary set to the maximum (32) here.
    */
@@ -130,12 +141,73 @@ static void tms570_pll_setup(void)
   /* Enable PLL(s) to start up or Lock.
    *
    * On wakeup, only clock sources 0, 4, and 5 are enabled: Oscillator, Low
-   * and hight Frequency LPO.  Clear bit 1 to enable the PLL.  Only the
+   * and high Frequency LPO.  Clear bit 1 to enable the PLL.  Only the
    * external clock remains disabled.
    */
 
   regval = SYS_CLKSRC_EXTCLKIN;
   putreg32(regval, TMS570_SYS_CSDIS);
+}
+
+/****************************************************************************
+ * Name: tms570_pll_setup
+ *
+ * Description:
+ *   Configure PLL control registers.  The PLL takes (127 + 1024  NR)
+ *   oscillator cycles to acquire lock.  This initialization sequence
+ *   performs all the actions that are not required to be done at full
+ *   application speed while the PLL locks.
+ *
+ ****************************************************************************/
+
+static void tms570_peripheral_initialize(void)
+{
+  uint32_t regval;
+  uint32_t clkcntl;
+
+  /* Disable Peripherals by clearing the PENA bit in the CLKCNTRL register
+   * before peripheral powerup
+   */
+
+  clkcntl  = getreg32(TMS570_SYS_CLKCNTL);
+  clkcntl &= ~SYS_CLKCNTL_PENA;
+  putreg32(clkcntl, TMS570_SYS_CLKCNTL);
+
+  /* Release peripherals from reset and enable clocks to all peripherals.
+   * Power-up all peripherals by clearing the power down bit for each
+   * quadrant of each peripheral.
+   *
+   * REVISIT: Should we only enable peripherals that are configured?
+   */
+
+  regval = PCR_PSPWERDWN0_PS0_QALL  | PCR_PSPWERDWN0_PS1_QALL  |
+           PCR_PSPWERDWN0_PS2_QALL  | PCR_PSPWERDWN0_PS3_QALL  |
+           PCR_PSPWERDWN0_PS4_QALL  | PCR_PSPWERDWN0_PS5_QALL  |
+           PCR_PSPWERDWN0_PS6_QALL  | PCR_PSPWERDWN0_PS7_QALL;
+  putreg32(regval, TMS570_PCR_PSPWRDWNCLR0);
+
+  regval = PCR_PSPWERDWN1_PS8_QALL  | PCR_PSPWERDWN1_PS9_QALL  |
+           PCR_PSPWERDWN1_PS10_QALL | PCR_PSPWERDWN1_PS11_QALL |
+           PCR_PSPWERDWN1_PS12_QALL | PCR_PSPWERDWN1_PS13_QALL |
+           PCR_PSPWERDWN1_PS14_QALL | PCR_PSPWERDWN1_PS15_QALL;
+  putreg32(regval, TMS570_PCR_PSPWRDWNCLR1);
+
+  regval = PCR_PSPWERDWN2_PS16_QALL | PCR_PSPWERDWN2_PS17_QALL |
+           PCR_PSPWERDWN2_PS18_QALL | PCR_PSPWERDWN2_PS19_QALL |
+           PCR_PSPWERDWN2_PS20_QALL | PCR_PSPWERDWN2_PS21_QALL |
+           PCR_PSPWERDWN2_PS22_QALL | PCR_PSPWERDWN2_PS23_QALL;
+  putreg32(regval, TMS570_PCR_PSPWRDWNCLR2);
+
+  regval = PCR_PSPWERDWN3_PS24_QALL | PCR_PSPWERDWN3_PS25_QALL |
+           PCR_PSPWERDWN3_PS26_QALL | PCR_PSPWERDWN3_PS27_QALL |
+           PCR_PSPWERDWN3_PS28_QALL | PCR_PSPWERDWN3_PS29_QALL |
+           PCR_PSPWERDWN3_PS30_QALL | PCR_PSPWERDWN3_PS31_QALL;
+  putreg32(regval, TMS570_PCR_PSPWRDWNCLR3);
+
+  /* Enable Peripherals */
+
+  clkcntl |= SYS_CLKCNTL_PENA;
+  putreg32(clkcntl, TMS570_SYS_CLKCNTL);
 }
 
 /****************************************************************************
@@ -155,11 +227,7 @@ static void tms570_pll_setup(void)
 
 void tms570_clockconfig(void)
 {
-  /* Configure PLL control registers and enable PLLs. The PLL takes (127 +
-   * 1024  NR) oscillator cycles to acquire lock. This initialization
-   * sequence performs all the tasks that are not required to be done at
-   * full application speed while the PLL locks.
-   */
+  /* Configure PLL control registers and enable PLLs. */
 
    tms570_pll_setup();
 
@@ -173,7 +241,8 @@ void tms570_clockconfig(void)
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Enable clocks to peripherals and release peripheral reset */
-#  warning Missing Logic
+
+  tms570_peripheral_initialize();
 
   /* Configure device-level multiplexing and I/O multiplexing */
 #  warning Missing Logic
