@@ -268,9 +268,20 @@ void arm_boot(void)
    * is still in local reset.
    */
 
-  tms570_memory_initialize(SYS_MSIENA_VIM_RAM | SYS_MSIENA_N2HET_RAM |
-                           SYS_MSIENA_HTU_RAM | SYS_MSIENA_DCAN1_RAM |
-                           SYS_MSIENA_DCAN2_RAM | SYS_MSIENA_MIBADC_RAM);
+  tms570_memory_initialize(SYS_MSIENA_VIM_RAM
+#ifdef CONFIG_TMS570_N2HET
+                           | SYS_MSIENA_N2HET_RAM | SYS_MSIENA_HTU_RAM
+#endif
+#ifdef CONFIG_TMS570_DCAN1
+                           | SYS_MSIENA_DCAN1_RAM
+#endif
+#ifdef CONFIG_TMS570_DCAN2
+                           | SYS_MSIENA_DCAN2_RAM
+#endif
+#ifdef CONFIG_TMS570_MIBASPI1
+                           | SYS_MSIENA_MIBADC_RAM
+#endif
+    );
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */

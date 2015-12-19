@@ -101,7 +101,7 @@
 #define TMS570_MIBADC_BASE        0xfff7bc00 /* 0xfff7c000-0xfff7c1ff: MIBADC */
 #define TMS570_DCAN1_BASE         0xfff7dc00 /* 0xfff7dc00-0xfff7ddff: DCAN1 */
 #define TMS570_DCAN2_BASE         0xfff7de00 /* 0xfff7de00-0xfff7dfff: DCAN2 */
-#define TMS570_SCI_BASE           0xfff7e400 /* 0xfff7e400-0xfff7e4ff: SCI/LIN */
+#define TMS570_SCI1_BASE          0xfff7e400 /* 0xfff7e400-0xfff7e4ff: SCI1/LIN1 */
 #define TMS570_MIBSPI1_BASE       0xfff7f400 /* 0xfff7f400-0xfff7f5ff: MibSPI1 */
 #define TMS570_SPI2_BASE          0xfff7f600 /* 0xfff7f600-0xfff7f7ff: SPI2 */
 #define TMS570_SPI3_BASE          0xfff7f800 /* 0xfff7f800-0xfff7f9ff: SPI3 */
