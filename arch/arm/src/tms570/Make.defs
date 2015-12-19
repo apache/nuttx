@@ -99,7 +99,7 @@ CHIP_ASRCS  =
 
 # SAMA5-specific C source files
 
-CHIP_CSRCS  = tms570_boot.c
+CHIP_CSRCS  = tms570_boot.c tms570_clockconfig.c
 
 # Configuration dependent C and assembly language files
 

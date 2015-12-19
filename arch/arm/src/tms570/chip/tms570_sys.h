@@ -272,6 +272,7 @@
 #define SYS_PLLCTL1_PLLDIV_SHIFT        (24)      /* Bits 24-28: PLL Output Clock Divider */
 #define SYS_PLLCTL1_PLLDIV_MASK         (0x1f << SYS_PLLCTL1_PLLDIV_SHIFT)
 #  define SYS_PLLCTL1_PLLDIV(n)         ((uint32_t)(n) << SYS_PLLCTL1_PLLDIV_SHIFT)
+#  define SYS_PLLCTL1_PLLDIV_MAX        SYS_PLLCTL1_PLLDIV_MASK
 #define SYS_PLLCTL1_MASKSLIP_SHIFT      (29)      /* Bits 29-30: Mask detection of PLL slip */
 #define SYS_PLLCTL1_MASKSLIP_MASK       (3 << SYS_PLLCTL1_MASKSLIP_SHIFT)
 #  define SYS_PLLCTL1_MASKSLIP_DISABLE  (0 << SYS_PLLCTL1_MASKSLIP_SHIFT) /* All values but 2 disable */
