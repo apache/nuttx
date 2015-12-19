@@ -53,6 +53,7 @@
 
 #include "chip/tms570_sys.h"
 #include "chip/tms570_pcr.h"
+#include "chip/tms570_flash.h"
 #include "tms570_clockconfig.h"
 
 /****************************************************************************
@@ -244,6 +245,53 @@ static void tms570_lpo_trim(void)
 }
 
 /****************************************************************************
+ * Name: tms570_flash_setup
+ *
+ * Description:
+ *   Set up flash address and data wait states based on the target CPU clock
+ *   frequency The number of address and data wait states for the target CPU
+ *   clock frequency are specified in the specific part's datasheet.
+ *
+ ****************************************************************************/
+
+static void tms570_flash_setup(void)
+{
+  uint32_t regval;
+
+  /* Setup flash read mode, address wait states and data wait states
+   *
+   *   ENPIPE=1, Bit 0, Enable pipeline mode.
+   *   ASWSTEN=0/1, Bit 1, Address Setup Wait State is enabled/disabled.
+   *   RWAIT=BOARD_RWAIT, Bits 8-11, Wait states added to FLASH read access
+   */
+
+  regval  = FLASH_FRDCNTL_ENPIPE | FLASH_FRDCNTL_RWAIT(BOARD_RWAIT);
+#if defined(BOARD_ASWAIT) && BOARD_ASWAIT > 0
+  regval |= FLASH_FRDCNTL_ASWSTEN;
+#endif
+  putreg32(regval, TMS570_FLASH_FRDCNTL);
+
+  /* Setup flash access wait states for bank 7
+   *
+   *  AUTOSTART_GRACE=2, Bits 0-7, Auto-suspend Startup Grace Period
+   *  AUTOSUSPEN=0, Bit 8, Auto suspend is disabled.
+   *  EWAIT=4, Bits 16-19, EEPROM wait states
+   */
+
+  putreg32(FLASH_FSMWRENA_ENABLE, TMS570_FLASH_FSMWRENA);
+  regval = FLASH_EEPROMCFG_GRACE(2) | FLASH_EEPROMCFG_EWAIT(BOARD_EWAIT);
+  putreg32(regval, TMS570_FLASH_EEPROMCFG);
+  putreg32(FLASH_FSMWRENA_DISABLE, TMS570_FLASH_FSMWRENA);
+
+  /* Setup flash bank power modes */
+
+  regval = FLASH_FBFALLBACK_BANKPWR0_ACTIV |
+           FLASH_FBFALLBACK_BANKPWR1_SLEEP |
+           FLASH_FBFALLBACK_BANKPWR7_ACTIV;
+  putreg32(regval, TMS570_FLASH_FBFALLBACK);
+}
+
+/****************************************************************************
  * Name: tms570_clocksrc_configure
  *
  * Description:
@@ -333,6 +381,14 @@ static void tms570_clocksrc_configure(void)
   putreg32(SYS_VCLKASRC_VCLKA1S_VCLK, TMS570_SYS_VCLKASRC);
 }
 
+/****************************************************************************
+ * Name: tms570_eclk_configure
+ *
+ * Description:
+ *   Configure the External Clock (ECLK) pin.
+ *
+ ****************************************************************************/
+
 static void tms570_eclk_configure(void)
 {
   uint32_t regval;
@@ -409,11 +465,9 @@ void tms570_clockconfig(void)
 
 #endif
 
-  /* Set up flash address and data wait states based on the target CPU clock
-   * frequency The number of address and data wait states for the target CPU
-   * clock frequency are specified in the specific part's datasheet.
-   */
-#warning Missing Logic
+  /* Set up flash address and data wait states. */
+
+  tms570_flash_setup();
 
   /* Configure the LPO such that HF LPO is as close to 10MHz as possible */
 

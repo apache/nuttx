@@ -88,7 +88,7 @@
 #define TMS570_FLASH_FEDACSDIS2_OFFSET    0x0c0 /* Flash Error Detection and Correction Sector Disable Register 2 */
 #define TMS570_FLASH_FSMWRENA_OFFSET      0x288 /* FSM Register Write Enable */
 #define TMS570_FLASH_FSMSECTOR_OFFSET     0x2a4 /* FSM Sector Register */
-#define TMS570_FLASH_EEPROMCONFIG_OFFSET  0x2b8 /* EEPROM Emulation Configuration Register */
+#define TMS570_FLASH_EEPROMCFG_OFFSET     0x2b8 /* EEPROM Emulation Configuration Register */
 #define TMS570_FLASH_EECTRL1_OFFSET       0x308 /* EEPROM Emulation Error Detection and Correction Control Register 1 */
 #define TMS570_FLASH_EECTRL2_OFFSET       0x30c /* EEPROM Emulation Error Detection and Correction Control Register 2 */
 #define TMS570_FLASH_EECORERRCNT_OFFSET   0x310 /* EEPROM Emulation Correctable Error Count Register */
@@ -133,7 +133,7 @@
 #define TMS570_FLASH_FEDACSDIS2           (TMS570_FWRAP_BASE+TMS570_FLASH_FEDACSDIS2_OFFSET)
 #define TMS570_FLASH_FSMWRENA             (TMS570_FWRAP_BASE+TMS570_FLASH_FSMWRENA_OFFSET)
 #define TMS570_FLASH_FSMSECTOR            (TMS570_FWRAP_BASE+TMS570_FLASH_FSMSECTOR_OFFSET)
-#define TMS570_FLASH_EEPROMCONFIG         (TMS570_FWRAP_BASE+TMS570_FLASH_EEPROMCONFIG_OFFSET)
+#define TMS570_FLASH_EEPROMCFG            (TMS570_FWRAP_BASE+TMS570_FLASH_EEPROMCFG_OFFSET)
 #define TMS570_FLASH_EECTRL1              (TMS570_FWRAP_BASE+TMS570_FLASH_EECTRL1_OFFSET)
 #define TMS570_FLASH_EECTRL2              (TMS570_FWRAP_BASE+TMS570_FLASH_EECTRL2_OFFSET)
 #define TMS570_FLASH_EECORERRCNT          (TMS570_FWRAP_BASE+TMS570_FLASH_EECORERRCNT_OFFSET)
@@ -146,7 +146,13 @@
 /* Register Bit-Field Definitions *******************************************************************/
 
 /* Flash Option Control Register */
-#define FLASH_FRDCNTL_
+
+#define FLASH_FRDCNTL_ENPIPE              (1 << 0)  /* Bit 0:  Enable Pipeline Mode */
+#define FLASH_FRDCNTL_ASWSTEN             (1 << 4)  /* Bit 4:  Address Setup Wait State Enable */
+#define FLASH_FRDCNTL_RWAIT_SHIFT         (8)       /* Bits 8-11:  Random/data Read Wait State */
+#define FLASH_FRDCNTL_RWAIT_MASK          (15 << FLASH_FRDCNTL_RWAIT_SHIFT)
+#  define FLASH_FRDCNTL_RWAIT(n)          ((uint32_t)(n) << FLASH_FRDCNTL_RWAIT_SHIFT)
+
 /* Flash Error Detection and Correction Control Register 1 */
 #define FLASH_FEDACTRL1_
 /* Flash Error Detection and Correction Control Register 2 */
@@ -175,8 +181,25 @@
 #define FLASH_FBBUSY_
 /* Flash Bank Access Control Register */
 #define FLASH_FBAC_
+
 /* Flash Bank Fallback Power Register */
-#define FLASH_FBFALLBACK_
+
+#define FLASH_FBFALLBACK_BANKPWR0_SHIFT   (0)       /* Bit 0:  Bank 0 Fallback Power Mode */
+#define FLASH_FBFALLBACK_BANKPWR0_MASK    (3 << FLASH_FBFALLBACK_BANKPWR0_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR0_SLEEP (0 << FLASH_FBFALLBACK_BANKPWR0_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR0_STDBY (1 << FLASH_FBFALLBACK_BANKPWR0_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR0_ACTIV (3 << FLASH_FBFALLBACK_BANKPWR0_SHIFT)
+#define FLASH_FBFALLBACK_BANKPWR1_SHIFT   (2)       /* Bit 2:  Bank 1 Fallback Power Mode */
+#define FLASH_FBFALLBACK_BANKPWR1_MASK    (3 << FLASH_FBFALLBACK_BANKPWR1_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR1_SLEEP (0 << FLASH_FBFALLBACK_BANKPWR1_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR1_STDBY (1 << FLASH_FBFALLBACK_BANKPWR1_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR1_ACTIV (3 << FLASH_FBFALLBACK_BANKPWR1_SHIFT)
+#define FLASH_FBFALLBACK_BANKPWR7_SHIFT   (14)      /* Bit 14: Bank 7 Fallback Power Mode */
+#define FLASH_FBFALLBACK_BANKPWR7_MASK    (3 << FLASH_FBFALLBACK_BANKPWR7_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR7_SLEEP (0 << FLASH_FBFALLBACK_BANKPWR7_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR7_STDBY (1 << FLASH_FBFALLBACK_BANKPWR7_SHIFT)
+#  define FLASH_FBFALLBACK_BANKPWR7_ACTIV (3 << FLASH_FBFALLBACK_BANKPWR7_SHIFT)
+
 /* Flash Bank/Pump Ready Register */
 #define FLASH_FBPRDY_
 /* Flash Pump Access Control Register 1 */
@@ -207,12 +230,27 @@
 #define FLASH_FPAROVR_
 /* Flash Error Detection and Correction Sector Disable Register 2 */
 #define FLASH_FEDACSDIS2_
+
 /* FSM Register Write Enable */
-#define FLASH_FSMWRENA_
+
+#define FLASH_FSMWRENA_ENABLE_SHIFT     (0)       /* Bits 0-2: FSM Write Enable */
+#define FLASH_FSMWRENA_ENABLE_MASK      (7 << FLASH_FSMWRENA_ENABLE_SHIFT)
+#  define FLASH_FSMWRENA_ENABLE         (5 << FLASH_FSMWRENA_ENABLE_SHIFT) /* Enable write to FSM registers */
+#  define FLASH_FSMWRENA_DISABLE        (2 << FLASH_FSMWRENA_ENABLE_SHIFT) /* Any other value disables */
+
 /* FSM Sector Register */
 #define FLASH_FSMSECTOR_
+
 /* EEPROM Emulation Configuration Register */
-#define FLASH_EEPROMCONFIG_
+
+#define FLASH_EEPROMCFG_GRACE_SHIFT     (0)       /* Bits 0-7: Auto-suspend Startup Grace Period */
+#define FLASH_EEPROMCFG_GRACE_MASK      (0xff << FLASH_EEPROMCFG_GRACE_SHIFT)
+#  define FLASH_EEPROMCFG_GRACE(n)      ((uint32_t)(n) << FLASH_EEPROMCFG_GRACE_SHIFT)
+#define FLASH_EEPROMCFG_AUTOSUSPEN      (1 << 8)  /* Bit 8: Auto suspend enable */
+#define FLASH_EEPROMCFG_EWAIT_SHIFT     (16)      /* Bits 16-19: EEPROM Wait state Counter */
+#define FLASH_EEPROMCFG_EWAIT_MASK      (15 << FLASH_EEPROMCFG_EWAIT_SHIFT)
+#  define FLASH_EEPROMCFG_EWAIT(n)      ((uint32_t)(n) << FLASH_EEPROMCFG_EWAIT_SHIFT)
+
 /* EEPROM Emulation Error Detection and Correction Control Register 1 */
 #define FLASH_EECTRL1_
 /* EEPROM Emulation Error Detection and Correction Control Register 2 */
