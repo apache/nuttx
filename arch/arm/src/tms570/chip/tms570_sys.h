@@ -52,6 +52,14 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+
+/* The LPO trim value may be programmed into the TI OTP: */
+
+#define TMS570_TITCM_LPOTRIM_OFFSET     0x01b4
+#define TMS570_TITCM_LPOTRIM            (TMS570_TITCM_BASE+TMS570_TITCM_LPOTRIM_OFFSET)
+#  define TMS570_TITCM_LPOTRIM_SHIFT    (16)    /* Bits 16-31: LPO trim value */
+#  define TMS570_TITCM_LPOTRIM_MASK     (0xffff << TMS570_TITCM_LPOTRIM_SHIFT)
+
 /* Register Offsets *********************************************************************************/
 
 #define TMS570_SYS_PC1_OFFSET           0x0000  /* SYS Pin Control Register 1 */
@@ -302,7 +310,78 @@
 /* Die Identification Register, Upper Word */
 #define SYS_DIEIDH_
 /* LPO/Clock Monitor Control Register */
-#define SYS_LPOMONCTL_
+
+#define SYS_LPOMONCTL_LFTRIM_SHIFT      (0)       /* Bits 0-4: Low frequency oscillator trim value */
+#define SYS_LPOMONCTL_LFTRIM_MASK       (31 << SYS_LPOMONCTL_LFTRIM_SHIFT)
+#  define SYS_LPOMONCTL_20p67           (0 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 20.67% */
+#  define SYS_LPOMONCTL_25p76           (1 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 25.76% */
+#  define SYS_LPOMONCTL_30p84           (2 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 30.84% */
+#  define SYS_LPOMONCTL_35p90           (3 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 35.90% */
+#  define SYS_LPOMONCTL_40p93           (4 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 40.93% */
+#  define SYS_LPOMONCTL_45p95           (5 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 45.95% */
+#  define SYS_LPOMONCTL_50p97           (6 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 50.97% */
+#  define SYS_LPOMONCTL_55p91           (7 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 55.91% */
+#  define SYS_LPOMONCTL_60p86           (8 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 60.86% */
+#  define SYS_LPOMONCTL_65p78           (9 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 65.78% */
+#  define SYS_LPOMONCTL_70p75           (10 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 70.75% */
+#  define SYS_LPOMONCTL_75p63           (11 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 75.63% */
+#  define SYS_LPOMONCTL_80p61           (12 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 80.61% */
+#  define SYS_LPOMONCTL_85p39           (13 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 85.39% */
+#  define SYS_LPOMONCTL_90p23           (14 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 90.23% */
+#  define SYS_LPOMONCTL_95p11           (15 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 95.11% */
+#  define SYS_LPOMONCTL_100p00          (16 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 100.00% */
+#  define SYS_LPOMONCTL_104p84          (17 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 104.84% */
+#  define SYS_LPOMONCTL_109p51          (18 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 109.51% */
+#  define SYS_LPOMONCTL_114p31          (19 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 114.31% */
+#  define SYS_LPOMONCTL_119p01          (20 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 119.01% */
+#  define SYS_LPOMONCTL_123p75          (21 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 123.75% */
+#  define SYS_LPOMONCTL_128p62          (22 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 128.62% */
+#  define SYS_LPOMONCTL_133p31          (23 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 133.31% */
+#  define SYS_LPOMONCTL_138p03          (24 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 138.03% */
+#  define SYS_LPOMONCTL_142p75          (25 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 142.75% */
+#  define SYS_LPOMONCTL_147p32          (26 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 147.32% */
+#  define SYS_LPOMONCTL_152p02          (27 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 152.02% */
+#  define SYS_LPOMONCTL_156p63          (28 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 156.63% */
+#  define SYS_LPOMONCTL_161p38          (29 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 161.38% */
+#  define SYS_LPOMONCTL_165p90          (30 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 165.90% */
+#  define SYS_LPOMONCTL_170p42          (31 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 170.42% */
+#define SYS_LPOMONCTL_HFTRIM_SHIFT      (8)       /* Bits 8-12: High frequency oscillator trim value */
+#define SYS_LPOMONCTL_HFTRIM_MASK       (31 << SYS_LPOMONCTL_HFTRIM_SHIFT)
+#  define SYS_LPOMONCTL_HFTRIM_29p52    (0 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 29.52% */
+#  define SYS_LPOMONCTL_HFTRIM_34p24    (1 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 34.24% */
+#  define SYS_LPOMONCTL_HFTRIM_38p85    (2 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 38.85% */
+#  define SYS_LPOMONCTL_HFTRIM_43p45    (3 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 43.45% */
+#  define SYS_LPOMONCTL_HFTRIM_47p99    (4 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 47.99% */
+#  define SYS_LPOMONCTL_HFTRIM_52p55    (5 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 52.55% */
+#  define SYS_LPOMONCTL_HFTRIM_57p02    (6 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 57.02% */
+#  define SYS_LPOMONCTL_HFTRIM_61p46    (7 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 61.46% */
+#  define SYS_LPOMONCTL_HFTRIM_65p92    (8 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 65.92% */
+#  define SYS_LPOMONCTL_HFTRIM_70p17    (9 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 70.17% */
+#  define SYS_LPOMONCTL_HFTRIM_74p55    (10 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 74.55% */
+#  define SYS_LPOMONCTL_HFTRIM_78p92    (11 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 78.92% */
+#  define SYS_LPOMONCTL_HFTRIM_83p17    (12 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 83.17% */
+#  define SYS_LPOMONCTL_HFTRIM_87p43    (13 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 87.43% */
+#  define SYS_LPOMONCTL_HFTRIM_91p75    (14 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 91.75% */
+#  define SYS_LPOMONCTL_HFTRIM_95p89    (15 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 95.89% */
+#  define SYS_LPOMONCTL_HFTRIM_100p00   (16 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 100.00% */
+#  define SYS_LPOMONCTL_HFTRIM_104p09   (17 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 104.09% */
+#  define SYS_LPOMONCTL_HFTRIM_108p17   (18 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 108.17% */
+#  define SYS_LPOMONCTL_HFTRIM_112p32   (19 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 112.32% */
+#  define SYS_LPOMONCTL_HFTRIM_116p41   (20 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 116.41% */
+#  define SYS_LPOMONCTL_HFTRIM_120p67   (21 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 120.67% */
+#  define SYS_LPOMONCTL_HFTRIM_124p42   (22 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 124.42% */
+#  define SYS_LPOMONCTL_HFTRIM_128p38   (23 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 128.38% */
+#  define SYS_LPOMONCTL_HFTRIM_132p24   (24 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 132.24% */
+#  define SYS_LPOMONCTL_HFTRIM_136p15   (25 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 136.15% */
+#  define SYS_LPOMONCTL_HFTRIM_140p15   (26 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 140.15% */
+#  define SYS_LPOMONCTL_HFTRIM_143p94   (27 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 143.94% */
+#  define SYS_LPOMONCTL_HFTRIM_148p02   (28 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 148.02% */
+#  define SYS_LPOMONCTL_HFTRIM_151p80   (29 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 151.80% */
+#  define SYS_LPOMONCTL_HFTRIM_155p50   (30 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 155.50% */
+#  define SYS_LPOMONCTL_HFTRIM_159p35   (31 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 159.35% */
+#define SYS_LPOMONCTL_OSCFRQCONFIGCNT   (1 << 16) /* Bit 16:  Configures the counter based on OSC frequency. */
+#define SYS_LPOMONCTL_BIASENABLE        (1 << 24) /* Bit 24:  Bias enable. */
+
 /* Clock Test Register */
 #define SYS_CLKTEST_
 /* DFT Control Register */

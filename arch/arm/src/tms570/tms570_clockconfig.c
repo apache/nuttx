@@ -150,13 +150,10 @@ static void tms570_pll_setup(void)
 }
 
 /****************************************************************************
- * Name: tms570_pll_setup
+ * Name: tms570_peripheral_initialize
  *
  * Description:
- *   Configure PLL control registers.  The PLL takes (127 + 1024  NR)
- *   oscillator cycles to acquire lock.  This initialization sequence
- *   performs all the actions that are not required to be done at full
- *   application speed while the PLL locks.
+ *   Release peripherals from reset and enable clocks to all peripherals.
  *
  ****************************************************************************/
 
@@ -211,6 +208,40 @@ static void tms570_peripheral_initialize(void)
 }
 
 /****************************************************************************
+ * Name: tms570_lpo_trim
+ *
+ * Description:
+ *   Configure the LPO such that HF LPO is as close to 10MHz as possible.
+ *
+ ****************************************************************************/
+
+static void tms570_lpo_trim(void)
+{
+  uint32_t regval;
+  uint32_t lotrim;
+
+  /* The LPO trim value may be available in TI OTP */
+
+  lotrim = (getreg32(TMS570_TITCM_LPOTRIM) & TMS570_TITCM_LPOTRIM_MASK) <<
+    TMS570_TITCM_LPOTRIM_SHIFT;
+
+  /* Use if the LPO trim value TI OTP if programmed.  Otherwise, use the default value */
+
+  if (lotrim != 0xffff)
+    {
+      regval = SYS_LPOMONCTL_BIASENABLE | lotrim;
+    }
+  else
+    {
+      regval = SYS_LPOMONCTL_BIASENABLE |
+               SYS_LPOMONCTL_HFTRIM_100p00 |
+               SYS_LPOMONCTL_60p86;
+    }
+
+  putreg32(regval, TMS570_SYS_LPOMONCTL);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -260,7 +291,8 @@ void tms570_clockconfig(void)
 #warning Missing Logic
 
   /* Configure the LPO such that HF LPO is as close to 10MHz as possible */
-#warning Missing Logic
+
+  tms570_lpo_trim();
 
   /* Wait for PLLs to start up and map clock domains to desired clock
    * sources.
