@@ -86,20 +86,20 @@
  *
  *   Fpllclock = = (Fclkin / NR) x NF / OD / R
  *
- * For example, if the clock source is a 16MHz crystal, then
+ * In this case, we have:
  *
  *   Fclkin = 16,000,000
  *   NR     = 6   (REFCLKDIV=5)
  *   NF     = 120 (PLLMUL = 119 * 256)
  *   OD     = 1   (ODPLL = 0)
- *   R      = 32  (PLLDIV=31)
+ *   R      = 2   (PLLDIV=1)
  *
  * Then:
  *
- *   Fintclk      = 16 MHz / 6 = 2.667 MHz
+ *   Fintclk      = 16 MHz / 6      = 2.667 MHz
  *   Foutputclock = 2.667 MHz * 120 = 320 MHz
- *   Fpostodclock = 320 MHz / 2 = 160 MHz
- *   Fpllclock    = 160 MHz / 2 = 8 MHz
+ *   Fpostodclock = 320 MHz / 2     = 160 MHz
+ *   Fpllclock    = 160 MHz / 2     = 80 MHz
  */
 
 #define BOARD_PLL_NR     6   /* REFCLKDIV = 5 */
