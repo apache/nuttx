@@ -111,34 +111,49 @@
 
 /* Peripheral Memory Protection Set Register 0 */
 #define PCR_PMPROTSET0_
+
 /* Peripheral Memory Protection Set Register 1 */
 #define PCR_PMPROTSET1_
+
 /* Peripheral Memory Protection Clear Register 0 */
 #define PCR_PMPROTCLR0_
+
 /* Peripheral Memory Protection Clear Register 1 */
 #define PCR_PMPROTCLR1_
+
 /* Peripheral Protection Set Register 0 */
 #define PCR_PPROTSET0_
+
 /* Peripheral Protection Set Register 1 */
 #define PCR_PPROTSET1_
+
 /* Peripheral Protection Set Register 2 */
 #define PCR_PPROTSET2_
+
 /* Peripheral Protection Set Register 3 */
 #define PCR_PPROTSET3_
+
 /* Peripheral Protection Clear Register 0 */
 #define PCR_PPROTCLR0_
+
 /* Peripheral Protection Clear Register 1 */
 #define PCR_PPROTCLR1_
+
 /* Peripheral Protection Clear Register 2 */
 #define PCR_PPROTCLR2_
+
 /* Peripheral Protection Clear Register 3 */
 #define PCR_PPROTCLR3_
+
 /* Peripheral Memory Power-Down Set Register 0 */
 #define PCR_PCSPWRDWNSET0_
+
 /* Peripheral Memory Power-Down Set Register 1 */
 #define PCR_PCSPWRDWNSET1_
+
 /* Peripheral Memory Power-Down Clear Register 0 */
 #define PCR_PCSPWRDWNCLR0_
+
 /* Peripheral Memory Power-Down Clear Register 1 */
 #define PCR_PCSPWRDWNCLR1_
 

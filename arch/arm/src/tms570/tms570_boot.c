@@ -183,11 +183,6 @@ static void tms570_memory_initialize(uint32_t ramset)
 
 void arm_boot(void)
 {
-#ifdef CONFIG_ARCH_RAMFUNCS
-  const uint32_t *src;
-  uint32_t *dest;
-#endif
-
   /* Enable CPU Event Export.
    *
    * This allows the CPU to signal any single-bit or double-bit errors
@@ -290,10 +285,10 @@ void arm_boot(void)
 #endif
 
 #ifdef CONFIG_ARMV7R_MEMINIT
-  /* If .data and .bss reside in SDRAM, then initialize the data sections
+  /* Initialize the .bss and .data sections as well as RAM functions
    * now after RAM has been initialized.
    *
-   * NOTE that is SDRAM were supported, this call might have to be
+   * NOTE that if SDRAM were supported, this call might have to be
    * performed after returning from tms570_board_initialize()
    */
 
