@@ -91,17 +91,25 @@
  *    - Clear .bss section (data should be fully initialized)
  */
 
-/* Beginning (BOTTOM) and End+1 (TOP) of the IDLE stack.
+/* Beginning (BOTTOM/BASE) and End+1 (TOP) of the IDLE stack.
  *
- * REVISIT:  There are issues here.  The stack point is initialized very
- * early in the boot sequence, but in some architectures the memory supporting
- * the may not be initialized (SDRAM, for example).  In that case, ideally
- * the IDLE stack should be in some other memory that does not require
- * initialization (such as internal SRAM)
+ * The IDLE stack is the stack that is used during intialization and,
+ * eventually, becomes the stack of the IDLE task when initialization
+ * is complete.
+ *
+ * REVISIT:  There are issues here in some configurations.  The stack
+ * pointer is initialized very early in the boot sequence.  But in some
+ * architectures the memory supporting the stack may not yet be
+ * initialized (SDRAM, for example, would not be ready yet).  In that
+ * case, ideally the IDLE stack should be in some other memory that does
+ * not require initialization (such as internal SRAM)
  */
 
-#define IDLE_STACK_BASE _ebss
-#define IDLE_STACK_TOP  _ebss+CONFIG_IDLETHREAD_STACKSIZE
+#ifndef IDLE_STACK_BASE
+#  define IDLE_STACK_BASE _ebss
+#endif
+
+#define IDLE_STACK_TOP  IDLE_STACK_BASE+CONFIG_IDLETHREAD_STACKSIZE
 
 /****************************************************************************
  * Global Symbols
