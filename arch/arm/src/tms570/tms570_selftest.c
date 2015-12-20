@@ -58,6 +58,60 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tms570_memtest_selftest
+ *
+ * Description:
+ *   Run a diagnostic check on the memory self-test controller.
+ *
+ *   This function chooses a RAM test algorithm and runs it on an on-chip
+ *   ROM.  The memory self-test is expected to fail. The function ensures
+ *   that the PBIST controller is capable of detecting and indicating a
+ *   memory self-test failure.
+ *
+ ****************************************************************************/
+
+void tms570_memtest_selftest(void)
+{
+#warning Missing Logic
+}
+
+/****************************************************************************
+ * Name: tms570_memtest_start
+ *
+ * Description:
+ *   Start the memory test on the selecte set of RAMs.  This test does not
+ *   return until the memory test is completed.
+ *
+ * Input Paramters:
+ *   rinfol - The OR of each RAM grouping bit.  See the PBIST_RINFOL*
+ *     definitions in chip/tms570_pbist.h
+ *
+ ****************************************************************************/
+
+void tms570_memtest_start(uint32_t rinfol)
+{
+#warning Missing Logic
+}
+
+/****************************************************************************
+ * Name: tms570_memtest_complete
+ *
+ * Description:
+ *   Wait for memory self-test to complete and return the result.
+ *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int tms570_memtest_complete(void)
+{
+#warning Missing Logic
+  return 0;
+}
+
+/****************************************************************************
  * Name: tms570_efc_selftest_start
  *
  * Description:
@@ -77,6 +131,10 @@ void tms570_efc_selftest_start(void)
  *
  * Description:
  *   Wait for eFuse controller self-test to complete and return the result.
+ *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 

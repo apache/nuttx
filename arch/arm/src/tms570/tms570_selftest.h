@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_TMS570_SELFTEST
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -66,6 +68,49 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tms570_memtest_selftest
+ *
+ * Description:
+ *   Run a diagnostic check on the memory self-test controller.
+ *
+ *   This function chooses a RAM test algorithm and runs it on an on-chip
+ *   ROM.  The memory self-test is expected to fail. The function ensures
+ *   that the PBIST controller is capable of detecting and indicating a
+ *   memory self-test failure.
+ *
+ ****************************************************************************/
+
+void tms570_memtest_selftest(void);
+
+/****************************************************************************
+ * Name: tms570_memtest_start
+ *
+ * Description:
+ *   Start the memory test on the selected set of RAMs.
+ *
+ * Input Paramters:
+ *   rinfol - The OR of each RAM grouping bit.  See the PBIST_RINFOL*
+ *     definitions in chip/tms570_pbist.h
+ *
+ ****************************************************************************/
+
+void tms570_memtest_start(uint32_t rinfol);
+
+/****************************************************************************
+ * Name: tms570_memtest_complete
+ *
+ * Description:
+ *   Wait for memory self-test to complete and return the result.
+ *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int tms570_memtest_complete(void);
+
+/****************************************************************************
  * Name: tms570_efc_selftest_start
  *
  * Description:
@@ -75,9 +120,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TMS570_SELFTEST
 void tms570_efc_selftest_start(void);
-#endif
 
 /****************************************************************************
  * Name: tms570_efc_selftest_complete
@@ -85,11 +128,13 @@ void tms570_efc_selftest_start(void);
  * Description:
  *   Wait for eFuse controller self-test to complete and return the result.
  *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_TMS570_SELFTEST
 int tms570_efc_selftest_complete(void);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -97,4 +142,5 @@ int tms570_efc_selftest_complete(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_TMS570_SELFTEST */
 #endif /* __ARCH_ARM_SRC_TMS570_TMS570_SELFTEST_H */

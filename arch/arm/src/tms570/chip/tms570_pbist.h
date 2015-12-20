@@ -52,6 +52,31 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+/* PBIST RAM Groups */
+
+#define PBIST_PBIST_ROM_GROUP        1   /* ROM */
+#define PBIST_STC_ROM_GROUP          2   /* ROM */
+#define PBIST_DCAN1_RAM_GROUP        3   /* Dual-port */
+#define PBIST_DCAN2_RAM_GROUP        4   /* Dual-port */
+#define PBIST_ESRAM1_RAM_GROUP       6   /* Single-port */
+#define PBIST_MIBSPI1_RAM_GROUP      7   /* Dual-port */
+#define PBIST_VIM_RAM_GROUP          10  /* Dual-port */
+#define PBIST_MIBADC_RAM_GROUP       11  /* Dual-port */
+#define PBIST_N2HET_RAM_GROUP        13  /* Dual-port */
+#define PBIST_HET_TU_RAM_GROUP       14  /* Dual-port */
+
+/* RAM Group Select */
+
+#define PBIST_PBIST_ROM_RGS          1   /* ROM */
+#define PBIST_STC_ROM_RGS            2   /* ROM */
+#define PBIST_DCAN1_RAM_RGS          3   /* Dual-port */
+#define PBIST_DCAN2_RAM_RGS          4   /* Dual-port */
+#define PBIST_ESRAM1_RAM_RGS         6   /* Single-port */
+#define PBIST_MIBSPI1_RAM_RGS        7   /* Dual-port */
+#define PBIST_VIM_RAM_RGS            8   /* Dual-port */
+#define PBIST_MIBADC_RAM_RGS         9   /* Dual-port */
+#define PBIST_N2HET_RAM_RGS          11  /* Dual-port */
+#define PBIST_HET_TU_RAM_RGS         12  /* Dual-port */
 
 /* Register Offsets *********************************************************************************/
 
@@ -125,8 +150,21 @@
 #define PBIST_ROM_
 /* ROM Algorithm Mask Register */
 #define PBIST_ALGO_
+
 /* RAM Info Mask Lower Register */
-#define PBIST_RINFOL_
+
+#define PBIST_RINFOL(n)                 (1 << ((n)-1)) /* Bit n: Select RAM group n+1 */
+#  define PBIST_RINFOL_PBIST_ROM        PBIST_RINFOL(PBIST_PBIST_ROM_GROUP)
+#  define PBIST_RINFOL_STC_ROM          PBIST_RINFOL(PBIST_STC_ROM_GROUP)
+#  define PBIST_RINFOL_DCAN1_RAM        PBIST_RINFOL(PBIST_DCAN1_RAM_GROUP)
+#  define PBIST_RINFOL_DCAN2_RAM        PBIST_RINFOL(PBIST_DCAN2_RAM_GROUP)
+#  define PBIST_RINFOL_ESRAM1_RAM       PBIST_RINFOL(PBIST_ESRAM1_RAM_GROUP)
+#  define PBIST_RINFOL_MIBSPI1_RAM      PBIST_RINFOL(PBIST_MIBSPI1_RAM_GROUP)
+#  define PBIST_RINFOL_VIM_RAM          PBIST_RINFOL(PBIST_VIM_RAM_GROUP)
+#  define PBIST_RINFOL_MIBADC_RAM       PBIST_RINFOL(PBIST_MIBADC_RAM_GROUP)
+#  define PBIST_RINFOL_N2HET_RAM        PBIST_RINFOL(PBIST_N2HET_RAM_GROUP)
+#  define PBIST_RINFOL_HET_TU_RAM       PBIST_RINFOL(PBIST_HET_TU_RAM_GROUP)
+
 /* RAM Info Mask Upper Register */
 #define PBIST_RINFOU_
 
