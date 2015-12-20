@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7/up_coherent_dcache.c
+ * arch/arm/src/armv7-a/up_coherent_dcache.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 
 #include "cp15_cacheops.h"
 
-#include <nuttx/binfmt/elf.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions

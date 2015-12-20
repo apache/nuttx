@@ -77,7 +77,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_MPU
+#ifdef CONFIG_ARM_MPU
 void sam_mpu_initialize(void);
 #else
 #  define sam_mpu_initialize()

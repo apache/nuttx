@@ -46,7 +46,7 @@
 #include "mpu.h"
 #include "lpc43_mpuinit.h"
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARMV7M_MPU)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,5 +120,5 @@ void lpc43_mpu_uheap(uintptr_t start, size_t size)
   mpu_user_intsram(start, size);
 }
 
-#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARMV7M_MPU */
+#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
 

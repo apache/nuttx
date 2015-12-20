@@ -461,7 +461,7 @@ __start:
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
-#ifdef CONFIG_AFE_ENABLE
+#ifdef CPU_AFE_ENABLE
 	/* AP[0:2] Permissions model
 	 *
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).

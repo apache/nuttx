@@ -74,7 +74,7 @@
 #define _CP15(op1,rd,crn,crm,op2) p15, op1, rd, crn, crm, op2
 
 #define CP15_MIDR(r)       _CP15(0, r, c0, c0, 0)   /* Main ID Register */
-#define CP15_TR(r)         _CP15(0, r, c0, c0, 1)   /* Cache Type Register */
+#define CP15_CTR(r)        _CP15(0, r, c0, c0, 1)   /* Cache Type Register */
 #define CP15_TCMTR(r)      _CP15(0, r, c0, c0, 2)   /* TCM Type Register */
 #define CP15_TLBTR(r)      _CP15(0, r, c0, c0, 3)   /* TLB Type Register */
 #define CP15_MPIDR(r)      _CP15(0, r, c0, c0, 5)   /* Multiprocessor Affinity Register */
@@ -158,10 +158,10 @@
 #define CP15_TLBIASID(r,c) _CP15(0, r, c8, c, 2)    /* Invalidate data TLB by ASID match. CRm = c5, c6, or c7 */
 #define CP15_TLBIMVAA(r,c) _CP15(0, r, c8, c, 3)    /* Invalidate unified TLB entry by MVA and ASID. CRm = c5, c6, or c7 */
 
-#define CP15_MCR(r)        _CP15(0, r, c9, c12, 0)  /* Performance Monitor Control Register */
+#define CP15_PMCR(r)       _CP15(0, r, c9, c12, 0)  /* Performance Monitor Control Register */
 #define CP15_PMCNTENSET(r) _CP15(0, r, c9, c12, 1)  /* Count Enable Set Register */
 #define CP15_PMCNTENCLR(r) _CP15(0, r, c9, c12, 2)  /* Count Enable Clear Register */
-#define CP15_MOVSR(r)      _CP15(0, r, c9, c12, 3)  /* Overflow Flag Status Register */
+#define CP15_PMOVSR(r)     _CP15(0, r, c9, c12, 3)  /* Overflow Flag Status Register */
 #define CP15_PMSWINC(r)    _CP15(0, r, c9, c12, 4)  /* Software Increment Register */
 #define CP15_PMSELR(r)     _CP15(0, r, c9, c12, 5)  /* Event Counter Selection Register */
 #define CP15_PMCEID0(r)    _CP15(0, r, c9, c12, 6)  /* Common Event Identification Registers (Cortex-A5) */
@@ -169,7 +169,7 @@
 #define CP15_PMCCNTR(r)    _CP15(0, r, c9, c13, 0)  /* Cycle Count Register */
 #define CP15_PMXEVTYPER(r) _CP15(0, r, c9, c13, 1)  /* Event Type Select Register */
 #define CP15_PMCCFILTR(r)  _CP15(0, r, c9, c13, 1)  /* Cycle Count Filter Control Register */
-#define CP15_MXEVCNTR(r)   _CP15(0, r, c9, c13, 2)  /* Event Count Registers (Cortex-A5) */
+#define CP15_PMXEVCNTR(r)  _CP15(0, r, c9, c13, 2)  /* Event Count Registers (Cortex-A5) */
 #define CP15_PMUSERENR(r)  _CP15(0, r, c9, c14, 0)  /* User Enable Register */
 #define CP15_PMINTENSET(r) _CP15(0, r, c9, c14, 1)  /* Interrupt Enable Set Register */
 #define CP15_PMINTENCLR(r) _CP15(0, r, c9, c14, 2)  /* Interrupt Enable Clear Register */

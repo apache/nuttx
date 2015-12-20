@@ -2395,8 +2395,9 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
            * REVISIT: On the SAMV7, I found that you really need to
            * wait for the TX completion interrupt before calling
            * sam_req_write().  For the SAMV7, the logic here just
-           * enables that TX completion interrupt.  The symptom of
-           * the problem was occassional missing zero-length packets.
+           * enables that TX completion interrupt if BYCT > 0.  The
+           * symptom of the problem was occasional missing zero-length
+           * packets because sam_req_write() was called too soon.
            */
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
