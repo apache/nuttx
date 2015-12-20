@@ -122,6 +122,20 @@ typedef enum
 
 } stm32_tim_mode_t;
 
+/* TIM Sources */
+
+typedef enum
+{
+  /* One of the following */
+
+  STM32_TIM_INT_SRC_OVERFLOW    = 0x0001, 
+  STM32_TIM_INT_SRC_CAPTURE_1   = 0x0002,    
+  STM32_TIM_INT_SRC_CAPTURE_2   = 0x0004,    
+  STM32_TIM_INT_SRC_CAPTURE_3   = 0x0008,    
+  STM32_TIM_INT_SRC_CAPTURE_4   = 0x0010    
+
+} stm32_tim_source_t;
+
         
 /* TIM Channel Modes */
 
