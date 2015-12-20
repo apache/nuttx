@@ -40,6 +40,9 @@
 #include <nuttx/config.h>
 
 #include "arm.h"
+#include "cp15.h"
+#include "sctlr.h"
+
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -87,6 +90,18 @@
  *
  *    - Clear .bss section (data should be fully initialized)
  */
+
+/* Beginning (BOTTOM) and End+1 (TOP) of the IDLE stack.
+ *
+ * REVISIT:  There are issues here.  The stack point is initialized very
+ * early in the boot sequence, but in some architectures the memory supporting
+ * the may not be initialized (SDRAM, for example).  In that case, ideally
+ * the IDLE stack should be in some other memory that does not require
+ * initialization (such as internal SRAM)
+ */
+
+#define IDLE_STACK_BASE _ebss
+#define IDLE_STACK_TOP  _ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 /****************************************************************************
  * Global Symbols
@@ -147,6 +162,11 @@ __start:
 	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, r0
 
+	/* Set up the stack pointer and clear the frame pointer. */
+
+	ldr		sp, .Lstackpointer
+	mov		fp, #0
+
 	/* Invalidate caches and TLBs.
 	 *
 	 *   NOTE: "The ARMv7 Virtual Memory System Architecture (VMSA) does not
@@ -166,7 +186,7 @@ __start:
 
 	/* Configure the system control register (see sctrl.h) */
 
-	mrc		CP15_SCTLR(r0)			/* Get control register */
+	mrc		CP15_SCTLR(r0)		/* Get control register */
 
 	/* Clear bits to reset values.  This is only necessary in situations like, for
 	 * example, we get here via a bootloader and the control register is in some
@@ -176,7 +196,7 @@ __start:
 	 *   SCTLR_A        Bit 1:  Strict alignment disabled
 	 *   SCTLR_C        Bit 2:  DCache disabled
 	 *   SCTLR_CCP15BEN Bit 5:  CP15 barrier enable
-	 *   SCTLR_B        Bit 7:  Should be zero on ARMv7R */
+	 *   SCTLR_B        Bit 7:  Should be zero on ARMv7R
 	 *
 	 *   SCTLR_SW       Bit 10: SWP/SWPB not enabled
 	 *   SCTLR_I        Bit 12: ICache disabled
@@ -200,7 +220,7 @@ __start:
 	bic		r0, r0, #(SCTLR_M | SCTLR_A  | SCTLR_C | SCTLR_CCP15BEN | SCTLR_B)
 	bic		r0, r0, #(SCTLR_SW | SCTLR_I | SCTLR_V   | SCTLR_RR)
 	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI | SCTLR_U)
-	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE | SCLTR_IE)
+	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE | SCTLR_IE)
 
 	/* Set configured bits */
 
@@ -222,7 +242,7 @@ __start:
 	orr		r0, r0, #(SCTLR_C)
 #endif
 
-#define CPU_SCTLR_CCP15BEN 1
+#ifdef CPU_SCTLR_CCP15BEN
 	/* Enable memory barriers
 	 *
 	 *  SCTLR_CCP15BEN Bit 5: CP15 barrier enable
@@ -258,7 +278,7 @@ __start:
 	orr		r0, r0, #(SCTLR_RR)
 #endif
 
-#define CPU_BACKGROUND_REGION 1
+#ifdef CPU_BACKGROUND_REGION
 	/* Allow PL1 access to back region when MPU is enabled
 	 *
 	 *  SCTLR_BR Bit 17: Background Region bit
@@ -372,16 +392,15 @@ __start:
 
 	/* .text Data */
 
+.Lstackpointer:
+	.long	IDLE_STACK_TOP
+
 #ifdef CONFIG_STACK_COLORATION
 	.type	.Lstkinit, %object
 .Lstkinit:
-#ifdef CONFIG_ARMV7R_MEMINIT
 	.long	IDLE_STACK_BASE		/* Beginning of the IDLE stack, then words of IDLE stack */
-#else
-	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
-#endif
 	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
-	.long	STACK_COLOR				/* Stack coloration word */
+	.long	STACK_COLOR			/* Stack coloration word */
 #endif
 	.size	__start, .-__start
 
@@ -480,13 +499,6 @@ arm_data_initialize:
 	.long	_sbss
 	.long	_ebss
 
-.Lstackpointer:
-#ifdef CONFIG_ARMV7R_MEMINIT
-	.long	IDLE_STACK_BASE+CONFIG_IDLETHREAD_STACKSIZE-4
-#else
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
-#endif
-
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	.type	.Ldatainit, %object
 .Ldatainit:
@@ -514,11 +526,11 @@ arm_data_initialize:
 	 * above.
 	 */
 
-	.rodata
-	.align	4
-	.type	g_idle_topstack, object
+	.section	.rodata, "a"
+	.align		4
+	.type		g_idle_topstack, object
 g_idle_topstack:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
-	.size	g_idle_topstack, .-g_idle_topstack
+	.long		IDLE_STACK_TOP
+	.size		g_idle_topstack, .-g_idle_topstack
 
 	.end
