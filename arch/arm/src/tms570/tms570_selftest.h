@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tms570/tms570_clockconfig.h
+ * arch/arm/src/tms570/tms570_selftest.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,18 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_TMS570_TMS570_SELFTEST_H
+#define __ARCH_ARM_SRC_TMS570_TMS570_SELFTEST_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -62,16 +66,30 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tms570_clockconfig
+ * Name: tms570_efc_selftest_start
  *
  * Description:
- *   Called to initialize TMS570 clocking.  This does whatever setup is needed to
- *   put the SoC in a usable state.  This includes, but is not limited to, the
- *   initialization of clocking using the settings in the board.h header file.
+ *   Run eFuse controller start-up checks and start eFuse controller ECC
+ *   self-test.  This includes a check for the eFuse controller error
+ *   outputs to  be stuck-at-zero.
  *
  ****************************************************************************/
 
-void tms570_clockconfig(void);
+#ifdef CONFIG_TMS570_SELFTEST
+void tms570_efc_selftest_start(void);
+#endif
+
+/****************************************************************************
+ * Name: tms570_efc_selftest_complete
+ *
+ * Description:
+ *   Wait for eFuse controller self-test to complete and return the result.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TMS570_SELFTEST
+int tms570_efc_selftest_complete(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -79,4 +97,4 @@ void tms570_clockconfig(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_TMS570_TMS570_SELFTEST_H */

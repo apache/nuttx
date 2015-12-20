@@ -46,6 +46,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "up_arch.h"
 
@@ -54,6 +55,8 @@
 #include "chip/tms570_flash.h"
 #include "chip/tms570_iomm.h"
 #include "chip/tms570_pinmux.h"
+
+#include "tms570_selftest.h"
 #include "tms570_clockconfig.h"
 
 #include <arch/board/board.h>
@@ -253,10 +256,22 @@ static void tms570_io_multiplex(void)
 {
   int i;
 
+  /* Enable access to pin multiplexing registers */
+
+  putreg32(IOMM_KICK0_UNLOCK, TMS570_IOMM_KICK0);
+  putreg32(IOMM_KICK1_UNLOCK, TMS570_IOMM_KICK1);
+
+  /* Configure each pin selected by the board-specific logic */
+
   for (i = 0; i < NPINMUX; i++)
     {
       tms570_pin_multiplex(&g_pinmux_table[i]);
     }
+
+  /* Disable access to pin multiplexing registers */
+
+  putreg32(IOMM_KICK0_LOCK, TMS570_IOMM_KICK0);
+  putreg32(IOMM_KICK1_LOCK, TMS570_IOMM_KICK1);
 }
 
 /****************************************************************************
@@ -496,11 +511,9 @@ void tms570_clockconfig(void)
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Run eFuse controller start-up checks and start eFuse controller ECC
-   * self-test.  This includes a check for the eFuse controller error
-   * outputs to  be stuck-at-zero.
-   */
+   * self-test.*/
 
-#  warning Missing Logic
+  tms570_efc_selftest_start();
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Enable clocks to peripherals and release peripheral reset */
@@ -513,8 +526,8 @@ void tms570_clockconfig(void)
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Wait for eFuse controller self-test to complete and check results */
-#  warning Missing Logic
 
+  ASSERT(tms570_efc_selftest_complete() == 0);
 #endif
 
   /* Set up flash address and data wait states. */

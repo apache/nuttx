@@ -153,10 +153,17 @@
 #define IOMM_REVISION_
 /* Boot Mode Register */
 #define IOMM_BOOT_
+
 /* Kicker Register 0 */
-#define IOMM_KICK0_
+
+#define IOMM_KICK0_UNLOCK               0x83e70b13 /* Unlock value */
+#define IOMM_KICK0_LOCK                 0x00000000 /* Any other value locks */
+
 /* Kicker Register 1 */
-#define IOMM_KICK1_
+
+#define IOMM_KICK1_UNLOCK               0x95a4f1e0 /* Unlock value */
+#define IOMM_KICK1_LOCK                 0x00000000 /* Any other value locks */
+
 /* Error Raw Status / Set Register */
 #define IOMM_ERRRAWSTATUS_
 /* Error Enabled Status / Clear Register */

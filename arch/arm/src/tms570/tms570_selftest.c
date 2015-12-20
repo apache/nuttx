@@ -1,8 +1,14 @@
 /****************************************************************************
- * arch/arm/src/tms570/tms570_clockconfig.h
+ * arch/arm/src/tms570/tms570_selftest.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Most logic in this file was leveraged from TI's Project0 which has a
+ * compatible BSD license:
+ *
+ *   Copyright (c) 2012, Texas Instruments Incorporated
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,50 +39,51 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#include "tms570_selftest.h"
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#ifdef CONFIG_TMS570_SELFTEST
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tms570_clockconfig
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tms570_efc_selftest_start
  *
  * Description:
- *   Called to initialize TMS570 clocking.  This does whatever setup is needed to
- *   put the SoC in a usable state.  This includes, but is not limited to, the
- *   initialization of clocking using the settings in the board.h header file.
+ *   Run eFuse controller start-up checks and start eFuse controller ECC
+ *   self-test.  This includes a check for the eFuse controller error
+ *   outputs to  be stuck-at-zero.
  *
  ****************************************************************************/
 
-void tms570_clockconfig(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
+void tms570_efc_selftest_start(void)
+{
+#warning Missing Logic
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H */
+/****************************************************************************
+ * Name: tms570_efc_selftest_complete
+ *
+ * Description:
+ *   Wait for eFuse controller self-test to complete and return the result.
+ *
+ ****************************************************************************/
+
+int tms570_efc_selftest_complete(void)
+{
+#warning Missing Logic
+  return 0;
+}
+
+#endif /* CONFIG_TMS570_SELFTEST */
