@@ -165,7 +165,7 @@ config BUILD_PROTECTED
 
 config BUILD_KERNEL
 	bool "NuttX kernel build"
-	depends on ARCH_USE_MMU && ARCH_ADDRENV && EXPERIMENTAL
+	depends on ARCH_USE_MMU && ARCH_ADDRENV
 	select LIB_SYSCALL
 	---help---
 		Builds NuttX as a separately compiled kernel.  No applications are
