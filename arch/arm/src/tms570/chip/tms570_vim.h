@@ -159,9 +159,13 @@
 #define VIM_FBPARERR_
 
 /* IRQ Index Offset Vector Register */
-#define VIM_IRQINDEX_
+
+#define VIM_IRQINDEX_MASK               (0x000000ff)  /* IRQ index vector */
+
 /* FIQ Index Offset Vector Register */
-#define VIM_FIQINDEX_
+
+#define VIM_FIQINDEX_MASK               (0x000000ff)  /* FIQ index vector */
+
 /* FIQ/IRQ Program Control Register 0 */
 #define VIM_FIRQPR0_
 /* FIQ/IRQ Program Control Register 1 */

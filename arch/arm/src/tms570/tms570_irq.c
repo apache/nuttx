@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -51,6 +52,7 @@
 #include "up_internal.h"
 
 #include "chip/tms570_vim.h"
+#include "tms570_irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,27 +69,73 @@
 volatile uint32_t *current_regs;
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tms570_error_handler
+ ****************************************************************************/
+
+static void tms570_error_handler(void)
+{
+  PANIC();
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: up_irqinitialize
+
+ * The device supports three different possibilities for software to handle
+ * interrupts:
+ *
+ *   1. Index interrupts mode (compatible with TMS470R1x legacy code),
+ *   2. Register vectored interrupts (automatically provide vector address
+ *      to application)
+ *   3. Hardware vectored interrupts (automatically dispatch to ISR, IRQ
+ *      only)
+ *
+ * Only the indexed mode is supported here: After the interrupt is received
+ * by the CPU, the CPU branches to 0x18 (IRQ) or 0x1C (FIQ) to execute the
+ * main ISR. The main ISR routine reads the offset register (IRQINDEX,
+ * FIQINDEX) to determine the source of the interrupt.
+ *
+ * To use mode 2), it would only be necessary to initialize the VIM_RAM.
+ * To use mode 3), it would be necessary to initialize the VIM_RAM and also
+ * to set the vector enable (VE) bit in the CP15 R1 register.  This bit is
+ * zero on reset so that the default state after reset is backward
+ * compatible to earlier ARM CPU.
+ *
  ****************************************************************************/
 
 void up_irqinitialize(void)
 {
-  /* Disable all interrupts. */
-#warning Missing logic
+  FAR uintptr_t *vimram;
+  int i;
 
   /* Colorize the interrupt stack for debug purposes */
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  {
-    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                   intstack_size);
-  }
+  size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
+                 intstack_size);
 #endif
+
+  /* Initialize VIM RAM vectors.  These vectors are not used in the current
+   * interrupt handler logic.
+   */
+
+  vimram = (FAR uintptr_t *)TMS570_VIMRAM_BASE;
+  for (i = 0; i < (TMS570_IRQ_NCHANNELS + 1); i++)
+    {
+      *vimram++ = (uintptr_t)tms570_error_handler;
+    }
+
+  /* Set Fall-Back Address Parity Error Register (also not used) */
+
+  putreg32((uint32_t)tms570_error_handler, TMS570_VIM_FBPARERR);
 
   /* Assign all channels to IRQs */
 
@@ -111,12 +159,22 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
+#ifdef CONFIG_ARMV7R_HAVE_DECODEFIQ
+  /* By default, interrupt CHAN0 is mapped to ESM (Error Signal Module)
+   * high level interrupt and CHAN1 is reserved for other NMI. For safety
+   * reasons, these two channels are mapped to FIQ only and can NOT be
+   * disabled through ENABLE registers.
+   */
+
+#warning Missing Logic
+#endif
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_TMS570_GPIO_IRQ
   /* Initialize logic to support a second level of interrupt decoding for
    * GPIO pins.
    */
 
-#ifdef CONFIG_TMS570_GPIO_IRQ
   tms570_gpioirqinitialize();
 #endif
 
@@ -124,6 +182,27 @@ void up_irqinitialize(void)
 
   irqenable();
 #endif
+}
+
+/****************************************************************************
+ * Name: tms570_vim_channel
+ *
+ * Description:
+ *   Allocate a VIM channel and assign it to the 'request'.
+ *
+ * Input Parameters:
+ *   request - The interrupt request to be mapped to a channel
+ *
+ * Returned Value:
+ *   One sucess, the allocated channel number is returned.  A negated errno
+ *   value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int tms570_vim_channel(int request)
+{
+#warning Missing logic
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -136,15 +215,38 @@ void up_irqinitialize(void)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- *  Input parameters:
+ * Input parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
-#warning Missing Logic
-  return 0;
+  int vector;
+
+  /* Check for a VRAM parity error.  This is not to critical in this
+   * implementatin since VIM RAM is not used.
+   */
+#warning Missing logic
+
+  /* Get the interrupting vector number from the IRQINDEX register.  Zero,
+   * the "phantom" vector will returned.
+   */
+
+  vector = getreg32(TMS570_VIM_IRQINDEX) & VIM_IRQINDEX_MASK;
+  if (vector > 0)
+    {
+      /* Dispatch the interrupt.  NOTE that the IRQ number is the vector
+       * number offset by one to skip over the "phantom" vector.
+       */
+
+      regs = arm_doirq(vector - 1, regs);
+    }
+
+  /* Acknowledge interrupt */
+#warning Verify not needed
+
+  return regs;
 }
 
 /****************************************************************************
@@ -165,8 +267,31 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 #ifdef CONFIG_ARMV7R_HAVE_DECODEFIQ
 uint32_t *arm_decodefiq(FAR uint32_t *regs)
 {
-#warning Missing Logic
-  return 0;
+  int vector;
+
+  /* Check for a VRAM parity error.  This is not to critical in this
+   * implementatin since VIM RAM is not used.
+   */
+#warning Missing logic
+
+  /* Get the interrupting vector number from the FIQINDEX register.  Zero,
+   * the "phantom" vector will returned.
+   */
+
+  vector = getreg32(TMS570_VIM_FIQINDEX) & VIM_FIQINDEX_MASK;
+  if (vector > 0)
+    {
+      /* Dispatch the interrupt.  NOTE that the IRQ number is the vector
+       * number offset by one to skip over the "phantom" vector.
+       */
+
+      regs = arm_doirq(vector - 1, regs)
+    }
+
+  /* Acknowledge interrupt */
+#warning Verify not needed
+
+  return regs;
 }
 #endif
 
