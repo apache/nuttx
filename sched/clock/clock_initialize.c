@@ -110,47 +110,53 @@ struct timespec   g_basetime;
 #if defined(CONFIG_RTC_DATETIME)
 /* Initialize the system time using a broken out date/time structure */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   struct tm rtctime;
+  int ret;
 
   /* Get the broken-out time from the date/time RTC. */
 
-  (void)up_rtc_getdatetime(&rtctime);
+  ret = up_rtc_getdatetime(&rtctime);
+  if (ret >= 0)
+    {
+      /* And use the broken-out time to initialize the system time */
 
-  /* And use the broken-out time to initialize the system time */
+      tp->tv_sec  = mktime(&rtctime);
+      tp->tv_nsec = 0;
+    }
 
-  tp->tv_sec  = mktime(&rtctime);
-  tp->tv_nsec = 0;
+  return ret;
 }
 
 #elif defined(CONFIG_RTC_HIRES)
 
 /* Initialize the system time using a high-resolution structure */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   /* Get the complete time from the hi-res RTC. */
 
-  (void)up_rtc_gettime(tp);
+  return up_rtc_gettime(tp);
 }
 
 #else
 
 /* Initialize the system time using seconds only */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   /* Get the seconds (only) from the lo-resolution RTC */
 
   tp->tv_sec  = up_rtc_time();
   tp->tv_nsec = 0;
+  return OK;
 }
 
 #endif /* CONFIG_RTC_HIRES */
 #else /* CONFIG_RTC */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   time_t jdn = 0;
 
@@ -165,6 +171,7 @@ static inline void clock_basetime(FAR struct timespec *tp)
 
   tp->tv_sec  = jdn * SEC_PER_DAY;
   tp->tv_nsec = 0;
+  return OK;
 }
 
 #endif /* CONFIG_RTC */
@@ -181,7 +188,7 @@ static void clock_inittime(void)
 {
   /* (Re-)initialize the time value to match the RTC */
 
-  clock_basetime(&g_basetime);
+  (void)clock_basetime(&g_basetime);
 #ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = 0;
 #endif

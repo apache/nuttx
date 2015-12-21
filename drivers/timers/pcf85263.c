@@ -241,8 +241,8 @@ int pcf85263_rtc_initialize(FAR struct i2c_dev_s *i2c)
 {
   /* Remember the i2c device and claim that the RTC is enabled */
 
-  g_pcf85263.i2c  = i2c;
-  g_rtc_enabled = true;
+  g_pcf85263.i2c = i2c;
+  g_rtc_enabled  = true;
   return OK;
 }
 
