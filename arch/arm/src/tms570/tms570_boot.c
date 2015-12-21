@@ -245,8 +245,6 @@ void arm_boot(void)
 #ifdef CONFIG_TMS570_SELFTEST
   /* Perform PBIST on all dual-port memories */
 
-  tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM)
-
   tms570_memtest_start(PBIST_RINFOL_VIM_RAM
 #ifdef CONFIG_TMS570_DCAN1
                        | PBIST_RINFOL_DCAN1_RAM
