@@ -241,21 +241,54 @@
 
 /* Alternate function pin selections ************************************************/
 
-/* UART2:
- *
- * The STM32F3Discovery has no on-board serial devices, but the console is
- * brought out to PA2 (TX) and PA3 (RX) for connection to an external serial device.
- * (See the README.txt file for other options)
+/* USART
+ * 
+ *  USART1: Hardwired to embedded STLinkV2 hardware debugger
+ *    RX (PC5)
+ *    TX (PC4)
+ * 
+ *  USART2: Connect to an external UART<->RS232 transceiver for use as console.
+ *    RX (PA3)
+ *    TX (PA2)
  */
 
 #define GPIO_USART2_RX GPIO_USART2_RX_2
 #define GPIO_USART2_TX GPIO_USART2_TX_2
 
-/* SPI - There is a ST MEMS L3GD20 device on SPI1 using these pins: */
+/* SPI 
+ * 
+ *  SPI1: Hardwired to ST L3GD20 MEMS device 
+ *    MISO (PA6)
+ *    MSOI (PA7)
+ *    SCK (PA5) 
+ */ 
 
 #define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
+
+/* I2C
+ * 
+ * I2C1: Accessible via expansion headers
+ *   SCL (PA15)
+ *   SDA (PA14)
+ *   SMBA (PB5) 
+ * 
+ * I2C2: Accessible via expansion headers 
+ *   SCL (PA9)
+ *   SDA (PA10)
+ *   SMBA (PB12)
+ */ 
+
+#ifdef CONFIG_STM32_I2C1
+#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_1
+#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_1
+#endif
+
+#ifdef CONFIG_STM32_I2C2
+#define GPIO_I2C2_SCL  GPIO_I2C2_SCL_1
+#define GPIO_I2C2_SDA  GPIO_I2C2_SDA_1
+#endif
 
 /************************************************************************************
  * Public Data
