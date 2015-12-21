@@ -53,6 +53,9 @@
  * Pre-processor Definitions
  ****************************************************************************************************/
 
+#define VIM_REGNDX(ch)                  ((ch) >> 5)
+#define VIM_REGBIT(ch)                  ((ch) & 31)
+
 /* Register Offsets *********************************************************************************/
 
 /* Register Offsets relative to the VIM Parity Frame */
@@ -66,24 +69,30 @@
 
 #define TMS570_VIM_IRQINDEX_OFFSET      0x0000 /* IRQ Index Offset Vector Register */
 #define TMS570_VIM_FIQINDEX_OFFSET      0x0004 /* FIQ Index Offset Vector Register */
-#define TMS570_VIM_FIRQPR0_OFFSET       0x0010 /* FIQ/IRQ Program Control Register 0 */
-#define TMS570_VIM_FIRQPR1_OFFSET       0x0014 /* FIQ/IRQ Program Control Register 1 */
-#define TMS570_VIM_FIRQPR2_OFFSET       0x0018 /* FIQ/IRQ Program Control Register 2 */
-#define TMS570_VIM_INTREQ0_OFFSET       0x0020 /* Pending Interrupt Read Location Register 0 */
-#define TMS570_VIM_INTREQ1_OFFSET       0x0024 /* Pending Interrupt Read Location Register 1 */
-#define TMS570_VIM_INTREQ2_OFFSET       0x0028 /* Pending Interrupt Read Location Register 2 */
-#define TMS570_VIM_REQENASET0_OFFSET    0x0030 /* Interrupt Enable Set Register 0 */
-#define TMS570_VIM_REQENASET1_OFFSET    0x0034 /* Interrupt Enable Set Register 1 */
-#define TMS570_VIM_REQENASET2_OFFSET    0x0038 /* Interrupt Enable Set Register 2 */
-#define TMS570_VIM_REQENACLR0_OFFSET    0x0040 /* Interrupt Enable Clear Register 0 */
-#define TMS570_VIM_REQENACLR1_OFFSET    0x0044 /* Interrupt Enable Clear Register 1 */
-#define TMS570_VIM_REQENACLR2_OFFSET    0x0048 /* Interrupt Enable Clear Register 2 */
-#define TMS570_VIM_WAKEENASET0_OFFSET   0x0050 /* Wake-up Enable Set Register 0 */
-#define TMS570_VIM_WAKEENASET1_OFFSET   0x0054 /* Wake-up Enable Set Register 1 */
-#define TMS570_VIM_WAKEENASET2_OFFSET   0x0058 /* Wake-up Enable Set Register 2 */
-#define TMS570_VIM_WAKEENACLR0_OFFSET   0x0060 /* Wake-up Enable Clear Register 0 */
-#define TMS570_VIM_WAKEENACLR1_OFFSET   0x0064 /* Wake-up Enable Clear Register 1 */
-#define TMS570_VIM_WAKEENACLR2_OFFSET   0x0068 /* Wake-up Enable Clear Register 2 */
+#define TMS570_VIM_FIRQPR_OFFSET(n)     (0x0010 + ((n) << 2))
+#  define TMS570_VIM_FIRQPR0_OFFSET     0x0010 /* FIQ/IRQ Program Control Register 0 */
+#  define TMS570_VIM_FIRQPR1_OFFSET     0x0014 /* FIQ/IRQ Program Control Register 1 */
+#  define TMS570_VIM_FIRQPR2_OFFSET     0x0018 /* FIQ/IRQ Program Control Register 2 */
+#define TMS570_VIM_INTREQ_OFFSET(n)     (0x0020 + ((n) << 2))
+#  define TMS570_VIM_INTREQ0_OFFSET     0x0020 /* Pending Interrupt Read Location Register 0 */
+#  define TMS570_VIM_INTREQ1_OFFSET     0x0024 /* Pending Interrupt Read Location Register 1 */
+#  define TMS570_VIM_INTREQ2_OFFSET     0x0028 /* Pending Interrupt Read Location Register 2 */
+#define TMS570_VIM_REQENASET_OFFSET(n)  (0x0030 + ((n) << 2))
+#  define TMS570_VIM_REQENASET0_OFFSET  0x0030 /* Interrupt Enable Set Register 0 */
+#  define TMS570_VIM_REQENASET1_OFFSET  0x0034 /* Interrupt Enable Set Register 1 */
+#  define TMS570_VIM_REQENASET2_OFFSET  0x0038 /* Interrupt Enable Set Register 2 */
+#define TMS570_VIM_REQENACLR_OFFSET(n)  (0x0040 + ((n) << 2))
+#  define TMS570_VIM_REQENACLR0_OFFSET  0x0040 /* Interrupt Enable Clear Register 0 */
+#  define TMS570_VIM_REQENACLR1_OFFSET  0x0044 /* Interrupt Enable Clear Register 1 */
+#  define TMS570_VIM_REQENACLR2_OFFSET  0x0048 /* Interrupt Enable Clear Register 2 */
+#define TMS570_VIM_WAKEENASET_OFFSET(n) (0x0050 + ((n) << 2))
+#  define TMS570_VIM_WAKEENASET0_OFFSET 0x0050 /* Wake-up Enable Set Register 0 */
+#  define TMS570_VIM_WAKEENASET1_OFFSET 0x0054 /* Wake-up Enable Set Register 1 */
+#  define TMS570_VIM_WAKEENASET2_OFFSET 0x0058 /* Wake-up Enable Set Register 2 */
+#define TMS570_VIM_WAKEENACLR_OFFSET(n) (0x0060 + ((n) << 2))
+#  define TMS570_VIM_WAKEENACLR0_OFFSET 0x0060 /* Wake-up Enable Clear Register 0 */
+#  define TMS570_VIM_WAKEENACLR1_OFFSET 0x0064 /* Wake-up Enable Clear Register 1 */
+#  define TMS570_VIM_WAKEENACLR2_OFFSET 0x0068 /* Wake-up Enable Clear Register 2 */
 #define TMS570_VIM_IRQVECREG_OFFSET     0x0070 /* IRQ Interrupt Vector Register */
 #define TMS570_VIM_FIQVECREG_OFFSET     0x0074 /* FIQ Interrupt Vector Register */
 #define TMS570_VIM_CAPEVT_OFFSET        0x0078 /* Capture Event Register */
@@ -106,24 +115,30 @@
 
 #define TMS570_VIM_IRQINDEX             (TMS570_VIM_BASE+TMS570_VIM_IRQINDEX_OFFSET)
 #define TMS570_VIM_FIQINDEX             (TMS570_VIM_BASE+TMS570_VIM_FIQINDEX_OFFSET)
-#define TMS570_VIM_FIRQPR0              (TMS570_VIM_BASE+TMS570_VIM_FIRQPR0_OFFSET)
-#define TMS570_VIM_FIRQPR1              (TMS570_VIM_BASE+TMS570_VIM_FIRQPR1_OFFSET)
-#define TMS570_VIM_FIRQPR2              (TMS570_VIM_BASE+TMS570_VIM_FIRQPR2_OFFSET)
-#define TMS570_VIM_INTREQ0              (TMS570_VIM_BASE+TMS570_VIM_INTREQ0_OFFSET)
-#define TMS570_VIM_INTREQ1              (TMS570_VIM_BASE+TMS570_VIM_INTREQ1_OFFSET)
-#define TMS570_VIM_INTREQ2              (TMS570_VIM_BASE+TMS570_VIM_INTREQ2_OFFSET)
-#define TMS570_VIM_REQENASET0           (TMS570_VIM_BASE+TMS570_VIM_REQENASET0_OFFSET)
-#define TMS570_VIM_REQENASET1           (TMS570_VIM_BASE+TMS570_VIM_REQENASET1_OFFSET)
-#define TMS570_VIM_REQENASET2           (TMS570_VIM_BASE+TMS570_VIM_REQENASET2_OFFSET)
-#define TMS570_VIM_REQENACLR0           (TMS570_VIM_BASE+TMS570_VIM_REQENACLR0_OFFSET)
-#define TMS570_VIM_REQENACLR1           (TMS570_VIM_BASE+TMS570_VIM_REQENACLR1_OFFSET)
-#define TMS570_VIM_REQENACLR2           (TMS570_VIM_BASE+TMS570_VIM_REQENACLR2_OFFSET)
-#define TMS570_VIM_WAKEENASET0          (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET0_OFFSET)
-#define TMS570_VIM_WAKEENASET1          (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET1_OFFSET)
-#define TMS570_VIM_WAKEENASET2          (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET2_OFFSET)
-#define TMS570_VIM_WAKEENACLR0          (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR0_OFFSET)
-#define TMS570_VIM_WAKEENACLR1          (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR1_OFFSET)
-#define TMS570_VIM_WAKEENACLR2          (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR2_OFFSET)
+#define TMS570_VIM_FIRQPR(n)            (TMS570_VIM_BASE+TMS570_VIM_FIRQPR_OFFSET(n))
+#  define TMS570_VIM_FIRQPR0            (TMS570_VIM_BASE+TMS570_VIM_FIRQPR0_OFFSET)
+#  define TMS570_VIM_FIRQPR1            (TMS570_VIM_BASE+TMS570_VIM_FIRQPR1_OFFSET)
+#  define TMS570_VIM_FIRQPR2            (TMS570_VIM_BASE+TMS570_VIM_FIRQPR2_OFFSET)
+#define TMS570_VIM_INTREQ(n)            (TMS570_VIM_BASE+TMS570_VIM_INTREQ_OFFSET(n))
+#  define TMS570_VIM_INTREQ0            (TMS570_VIM_BASE+TMS570_VIM_INTREQ0_OFFSET)
+#  define TMS570_VIM_INTREQ1            (TMS570_VIM_BASE+TMS570_VIM_INTREQ1_OFFSET)
+#  define TMS570_VIM_INTREQ2            (TMS570_VIM_BASE+TMS570_VIM_INTREQ2_OFFSET)
+#define TMS570_VIM_REQENASET(n)         (TMS570_VIM_BASE+TMS570_VIM_REQENASET_OFFSET(n))
+#  define TMS570_VIM_REQENASET0         (TMS570_VIM_BASE+TMS570_VIM_REQENASET0_OFFSET)
+#  define TMS570_VIM_REQENASET1         (TMS570_VIM_BASE+TMS570_VIM_REQENASET1_OFFSET)
+#  define TMS570_VIM_REQENASET2         (TMS570_VIM_BASE+TMS570_VIM_REQENASET2_OFFSET)
+#define TMS570_VIM_REQENACLR(n)         (TMS570_VIM_BASE+TMS570_VIM_REQENACLR_OFFSET(n))
+#  define TMS570_VIM_REQENACLR0         (TMS570_VIM_BASE+TMS570_VIM_REQENACLR0_OFFSET)
+#  define TMS570_VIM_REQENACLR1         (TMS570_VIM_BASE+TMS570_VIM_REQENACLR1_OFFSET)
+#  define TMS570_VIM_REQENACLR2         (TMS570_VIM_BASE+TMS570_VIM_REQENACLR2_OFFSET)
+#define TMS570_VIM_WAKEENASET(n)        (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET_OFFSET(n))
+#  define TMS570_VIM_WAKEENASET0        (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET0_OFFSET)
+#  define TMS570_VIM_WAKEENASET1        (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET1_OFFSET)
+#  define TMS570_VIM_WAKEENASET2        (TMS570_VIM_BASE+TMS570_VIM_WAKEENASET2_OFFSET)
+#define TMS570_VIM_WAKEENACLR(n)        (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR_OFFSET(n))
+#  define TMS570_VIM_WAKEENACLR0        (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR0_OFFSET)
+#  define TMS570_VIM_WAKEENACLR1        (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR1_OFFSET)
+#  define TMS570_VIM_WAKEENACLR2        (TMS570_VIM_BASE+TMS570_VIM_WAKEENACLR2_OFFSET)
 #define TMS570_VIM_IRQVECREG            (TMS570_VIM_BASE+TMS570_VIM_IRQVECREG_OFFSET)
 #define TMS570_VIM_FIQVECREG            (TMS570_VIM_BASE+TMS570_VIM_FIQVECREG_OFFSET)
 #define TMS570_VIM_CAPEVT               (TMS570_VIM_BASE+TMS570_VIM_CAPEVT_OFFSET)

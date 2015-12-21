@@ -160,7 +160,7 @@ static void dispatch_syscall(void)
 uint32_t *arm_syscall(uint32_t *regs)
 {
   uint32_t cmd;
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   uint32_t cpsr;
 #endif
 
@@ -217,7 +217,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
           regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
 #endif
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
@@ -254,7 +254,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R1 = restoreregs
        */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
       case SYS_context_restore:
         {
           /* Replace 'regs' with the pointer to the register set in
@@ -280,7 +280,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R3 = argv
        */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
       case SYS_task_start:
         {
           /* Set up to return to the user-space _start function in
@@ -313,7 +313,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R2 = arg
        */
 
-#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
@@ -334,7 +334,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -399,7 +399,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_SIGNALS)
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);
@@ -465,12 +465,12 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Setup to return to dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
 
           regs[REG_PC]   = (uint32_t)dispatch_syscall;
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_SVC;
 #endif

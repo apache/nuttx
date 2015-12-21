@@ -238,6 +238,7 @@ config ARCH_CHIP_TMS570
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_RAMFUNCS
 	select ARMV7R_MEMINIT
+	select ARMV7R_HAVE_DECODEFIQ
 	---help---
 		TI TMS570 family
 
