@@ -113,6 +113,47 @@
 #define BOARD_RWAIT      1   /* One read access wait state */
 #define BOARD_EWAIT      4   /* Four wait states for EEPROM access */
 
+/* PIN Multiplexor Initializer ******************************************************/
+
+/* You may specify one alternative from each set (the first is the default and,
+ * hence, could probably be omitted):
+ *
+ *  1. {GIOA0, SPI3nCS3}
+ *  2. {GIOA1, SPI3nCS2}
+ *  3. {GIOA2, SPI3nCS1}
+ *  4. {GIOA3, SPI2nCS3}
+ *  5. {GIOA4, SPI2nCS2}
+ *  6. {GIOA5, EXTCLKIN}
+ *  7. {GIOA6, SPI2nCS1, N2HET31}
+ *  8. {GIOA7, N2HET29}
+ *  9. {MIBSPI1nCS2, N2HET20, N2HET19}
+ * 10. {SPI3CLK, EQEPA}
+ * 11. {SPI3nENA, EQEPB}
+ * 12. {SPI3nCS0, EQEPI}}
+ * 13. {MIBSPI1nCS3, N2HET26}
+ * 14. {ADEVT, N2HET28}
+ * 15. {MIBSPI1nENA, N2HET23, NHET30}
+ * 16. {MIBSPI1nCS1, EQEPS, N2HET17}
+ */
+
+#define BOARD_PINMUX_INITIALIZER \
+  PINMUX_GIOA0_PIN, \
+  PINMUX_GIOA1_PIN, \
+  PINMUX_GIOA2_PIN, \
+  PINMUX_GIOA3_PIN, \
+  PINMUX_GIOA4_PIN, \
+  PINMUX_GIOA5_PIN, \
+  PINMUX_GIOA6_PIN, \
+  PINMUX_GIOA7_PIN, \
+  PINMUX_MIBSPI1NCS2_PIN, \
+  PINMUX_SPI3CLK_PIN, \
+  PINMUX_SPI3NENA_PIN, \
+  PINMUX_SPI3NCS0_PIN, \
+  PINMUX_MIBSPI1NCS3_PIN, \
+  PINMUX_ADEVT_PIN, \
+  PINMUX_MIBSPI1NENA_PIN, \
+  PINMUX_MIBSPI1NCS1_PIN
+
 /* LED definitions ******************************************************************/
 
 /* Button definitions ***************************************************************/
