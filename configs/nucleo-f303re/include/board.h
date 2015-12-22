@@ -256,6 +256,14 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_2
 #define GPIO_USART2_TX GPIO_USART2_TX_2
 
+/* DMA channels *************************************************************/
+/* ADC */
+
+#define ADC1_DMA_CHAN DMACHAN_ADC1
+#define ADC2_DMA_CHAN DMACHAN_ADC2_1
+#define ADC3_DMA_CHAN DMACHAN_ADC3
+#define ADC4_DMA_CHAN DMACHAN_ADC4_1
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
