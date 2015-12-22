@@ -212,7 +212,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       goto errout_with_errno;
     }
 
-  /* The the task group corresponding to this PID */
+  /* Then the task group corresponding to this PID */
 
   group = ctcb->group;
   DEBUGASSERT(group);
