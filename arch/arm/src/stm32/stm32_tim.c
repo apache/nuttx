@@ -145,28 +145,7 @@
 #  undef CONFIG_STM32_TIM14
 #endif
 
-#if defined(GPIO_TIM1_CH1IN) || defined(GPIO_TIM2_CH1IN) || defined(GPIO_TIM3_CH1IN) || \
-    defined(GPIO_TIM4_CH1IN) || defined(GPIO_TIM5_CH1IN) || defined(GPIO_TIM8_CH1IN) || \
-    defined(GPIO_TIM9_CH1IN) || defined(GPIO_TIM10_CH1IN) || defined(GPIO_TIM11_CH1IN) || \
-    defined(GPIO_TIM12_CH1IN) || defined(GPIO_TIM13_CH1IN) || defined(GPIO_TIM14_CH1IN)
-#  define HAVE_CH1IN 1
-#endif
 
-#if defined(GPIO_TIM1_CH2IN) || defined(GPIO_TIM2_CH2IN) || defined(GPIO_TIM3_CH2IN) || \
-    defined(GPIO_TIM4_CH2IN) || defined(GPIO_TIM5_CH2IN) || defined(GPIO_TIM8_CH2IN) || \
-    defined(GPIO_TIM9_CH2IN) || defined(GPIO_TIM12_CH2IN)
-#  define HAVE_CH2IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH3IN) || defined(GPIO_TIM2_CH3IN) || defined(GPIO_TIM3_CH3IN) || \
-    defined(GPIO_TIM4_CH3IN) || defined(GPIO_TIM5_CH3IN) || defined(GPIO_TIM8_CH3IN)
-#  define HAVE_CH3IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH4IN) || defined(GPIO_TIM2_CH4IN) || defined(GPIO_TIM3_CH4IN) || \
-    defined(GPIO_TIM4_CH4IN) || defined(GPIO_TIM5_CH4IN) || defined(GPIO_TIM8_CH4IN)
-#  define HAVE_CH4IN 1
-#endif
 
 /* This module then only compiles if there are enabled timers that are not intended for
  * some other purpose.
@@ -411,117 +390,21 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
   return OK;
 }
 
-
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  uint16_t mask;
   ASSERT(dev);
-
-  if (source & STM32_TIM_INT_SRC_OVERFLOW)
-      regval |= ATIM_DIER_UIE;
-#ifdef HAVE_CH1IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_1)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH2IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_2)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH3IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_3)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH4IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_4)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET,0,mask);
-
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
 }
 
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  uint16_t mask;
   ASSERT(dev);
-
-  if (source & STM32_TIM_INT_SRC_OVERFLOW)
-      regval |= ATIM_DIER_UIE;
-#ifdef HAVE_CH1IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_1)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH2IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_2)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH3IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_3)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH4IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_4)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET,mask, 0);
-
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
 }
 
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  uint16_t mask = 0;
-
-  if (source & STM32_TIM_INT_SRC_OVERFLOW)
-      regval |= ATIM_SR_UIF;
-#ifdef HAVE_CH1IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_1)
-      regval |= ATIM_SR_CC1IF;
-#endif
-#ifdef HAVE_CH2IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_2)
-      regval |= ATIM_SR_CC2IF;
-#endif
-#ifdef HAVE_CH3IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_3)
-      regval |= ATIM_SR_CC3IF;
-#endif
-#ifdef HAVE_CH4IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_4)
-      regval |= ATIM_SR_CC4IF;
-#endif
-
-  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~mask);
-
-}
-
-static int stm32_tim_getintsrc(FAR struct stm32_tim_dev_s *dev, int source)
-{
-  uint16_t regval = 0;
-  int source = 0;
-
-  regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
-
-  if (regval & ATIM_SR_UIF)
-      source |= STM32_TIM_INT_SRC_OVERFLOW;
-#ifdef HAVE_CH1IN
-  if (regval & ATIM_SR_CC1IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_1;
-#endif
-#ifdef HAVE_CH2IN
-  if (regval & ATIM_SR_CC2IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_2;
-#endif
-#ifdef HAVE_CH3IN
-  if (regval & ATIM_SR_CC3IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_3;
-#endif
-#ifdef HAVE_CH4IN
-  if (regval & ATIM_SR_CC4IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_4;
-#endif
-
-  return source;
-
+  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
 }
 
 /************************************************************************************
@@ -1035,67 +918,17 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
   switch (channel)
     {
-#ifdef HAVE_CH1IN
       case 1:
         return stm32_getreg32(dev, STM32_GTIM_CCR1_OFFSET);
-#endif
-#ifdef HAVE_CH1IN
       case 2:
         return stm32_getreg32(dev, STM32_GTIM_CCR2_OFFSET);
-#endif
-#ifdef HAVE_CH1IN
       case 3:
         return stm32_getreg32(dev, STM32_GTIM_CCR3_OFFSET);
-#endif
-#ifdef HAVE_CH1IN
       case 4:
         return stm32_getreg32(dev, STM32_GTIM_CCR4_OFFSET);
-#endif
     }
 
   return ERROR;
-}
-
-static bool stm32_tim_captureoverflow(FAR struct stm32_tim_dev_s *dev, int channel,
-                                   bool clear)
-{
-  uint16_t regval;
-  uint16_t mask;
-  ASSERT(dev);
-
-  switch (channel)
-    {
-#ifdef HAVE_CH1IN
-      case 1:
-        mask = GTIM_SR_CC1OF;
-        break;
-#endif
-#ifdef HAVE_CH2IN
-      case 2:
-        mask = GTIM_SR_CC2IF;
-        break;
-#endif
-#ifdef HAVE_CH3IN
-      case 3:
-        mask = GTIM_SR_CC3IF;
-        break;
-#endif
-#ifdef HAVE_CH4IN
-      case 4:
-        mask = GTIM_SR_CC4IF;
-        break;
-#endif
-      default:
-        return ERROR;
-    }
-  regval = stm32_getreg16(dev, STM32_GTIM_SR_OFFSET);
-  if (regval & mask)
-    {
-      if (clear)
-          stm32_putreg16(dev, STM32_GTIM_SR_OFFSET, ~mask);
-      return 1;
-    }
-  return 0;
 }
 
 /************************************************************************************
@@ -1116,12 +949,10 @@ struct stm32_tim_ops_s stm32_tim_ops =
   .setchannel     = &stm32_tim_setchannel,
   .setcompare     = &stm32_tim_setcompare,
   .getcapture     = &stm32_tim_getcapture,
-  .captureoverflow= &stm32_tim_captureoverflow,
   .setisr         = &stm32_tim_setisr,
   .enableint      = &stm32_tim_enableint,
   .disableint     = &stm32_tim_disableint,
-  .ackint         = &stm32_tim_ackint,
-  .getintsrc      = &stm32_tim_getintsrc
+  .ackint         = &stm32_tim_ackint
 };
 
 #ifdef CONFIG_STM32_TIM2
