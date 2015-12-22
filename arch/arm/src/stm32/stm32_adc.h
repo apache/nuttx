@@ -280,15 +280,7 @@
 #undef ADC_HAVE_DMA
 #if defined(CONFIG_STM32_ADC1_DMA) || defined(CONFIG_STM32_ADC2_DMA) || \
     defined(CONFIG_STM32_ADC3_DMA) || defined(CONFIG_STM32_ADC4_DMA)
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#    define ADC_HAVE_DMA        1
-#  else
-#    warning "DMA is only supported for the STM32 F2/F3/F4 families"
-#    undef CONFIG_STM32_ADC1_DMA
-#    undef CONFIG_STM32_ADC2_DMA
-#    undef CONFIG_STM32_ADC3_DMA
-#    undef CONFIG_STM32_ADC4_DMA
-#  endif
+#  define ADC_HAVE_DMA  1
 #endif
 
 #ifdef CONFIG_STM32_ADC1_DMA
