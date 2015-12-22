@@ -86,7 +86,7 @@
 
 /* MPU Region Number Register Bit Definitions */
 
-#ifdef CONFIG_ARM_MPU_NREGIONS <= 8
+#if CONFIG_ARM_MPU_NREGIONS <= 8
 #  define MPU_RNR_MASK            (0x00000007)
 #elif CONFIG_ARM_MPU_NREGIONS <= 16
 #  define MPU_RNR_MASK            (0x0000000f)
