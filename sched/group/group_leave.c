@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,18 +55,6 @@
 #include "group/group.h"
 
 #ifdef HAVE_TASK_GROUP
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -271,9 +259,23 @@ static inline void group_release(FAR struct task_group_s *group)
 #  endif
 #endif
 
-  /* Release the group container itself */
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  /* If there are threads waiting for this group to be freed, then we cannot
+   * yet free the memory resources.  Instead just mark the group deleted
+   * and wait for those threads complete their waits.
+   */
 
-  sched_kfree(group);
+  if (group->tg_nwaiters > 0)
+    {
+      group->tg_flags |= GROUP_FLAG_DELETED;
+    }
+  else
+#endif
+    {
+      /* Release the group container itself */
+
+      sched_kfree(group);
+    }
 }
 
 /****************************************************************************

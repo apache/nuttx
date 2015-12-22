@@ -154,6 +154,7 @@
 #define GROUP_FLAG_NOCLDWAIT       (1 << 0) /* Bit 0: Do not retain child exit status */
 #define GROUP_FLAG_ADDRENV         (1 << 1) /* Bit 1: Group has an address environment */
 #define GROUP_FLAG_PRIVILEGED      (1 << 2) /* Bit 2: Group is privileged */
+#define GROUP_FLAG_DELETED         (1 << 3) /* Bit 3: Group has been deleted but not yet freed */
 
 /* Values for struct child_status_s ch_flags */
 
@@ -418,6 +419,7 @@ struct task_group_s
   /* waitpid support ************************************************************/
   /* Simple mechanism used only when there is no support for SIGCHLD            */
 
+  uint8_t tg_nwaiters;              /* Number of waiters                        */
   sem_t tg_exitsem;                 /* Support for waitpid                      */
   int *tg_statloc;                  /* Location to return exit status           */
 #endif

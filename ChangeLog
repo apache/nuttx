@@ -11244,4 +11244,7 @@
 	  Entinger (2015-12-15).
 	* configs/launchxl-tms57004:  Add basic board support for TI LaunchXL-
 	  TMS57004.  Not much to see there yet (2015-12-15).
+	* waitpid:  CRITICAL BUGFIX.  Add a reference count to prevent waitpid
+	  from using stale memory released by the waited-for task group
+	  (2015-12-22).
 

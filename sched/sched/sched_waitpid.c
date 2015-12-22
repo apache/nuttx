@@ -52,10 +52,6 @@
 #ifdef CONFIG_SCHED_WAITPID
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -217,6 +213,10 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   group = ctcb->group;
   DEBUGASSERT(group);
 
+  /* Lock this group so that it cannot be deleted until the wait completes */
+
+  group_addwaiter(group);
+
   /* "If more than one thread is suspended in waitpid() awaiting termination of
    * the same process, exactly one thread will return the process status at the
    * time of the target process termination."  Hmmm.. what do we return to the
@@ -236,6 +236,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       /* Don't wait if status is not available */
 
       ret = sem_trywait(&group->tg_exitsem);
+      group_delwaiter(group);
+
       if (ret < 0)
         {
           pid = 0;
@@ -246,6 +248,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       /* Wait if necessary for status to become available */
 
       ret = sem_wait(&group->tg_exitsem);
+      group_delwaiter(group);
+
       if (ret < 0)
         {
           /* Unlock pre-emption and return the ERROR (sem_wait has already set

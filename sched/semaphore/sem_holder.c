@@ -68,11 +68,7 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
                                FAR sem_t *sem, FAR void *arg);
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* Preallocated holder structures */
@@ -81,10 +77,6 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
 static struct semholder_s g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS];
 static FAR struct semholder_s *g_freeholders;
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: sem_allocholder
