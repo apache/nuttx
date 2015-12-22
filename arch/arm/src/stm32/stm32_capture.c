@@ -99,16 +99,10 @@
     defined(CONFIG_STM32_TIM9_CAP) || defined(CONFIG_STM32_TIM10_CAP) || defined(CONFIG_STM32_TIM11_CAP) || \
     defined(CONFIG_STM32_TIM12_CAP) || defined(CONFIG_STM32_TIM13_CAP) || defined(CONFIG_STM32_TIM14_CAP)
 
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
-
-struct stm32_cap_channel_s
-{
-    uint8_t ch_id;
-    uint16_t ccmr; 
-    uint32_t gpio;
-}
 
 /* TIM Device Structure */
 
@@ -120,7 +114,6 @@ struct stm32_cap_priv_s
 #define HAVE_ADANCED_TIM 1
   const int irq_of;         /* irq timer overflow is deferent in advanced timer */
 #endif
-  const stm32_cap_channel_s channels[CAP_NCHANNELS];
 };
 
 /************************************************************************************
@@ -172,6 +165,134 @@ static inline void stm32_putreg32(FAR struct stm32_cap_priv_s *priv, uint8_t off
   putreg32(value, priv->base + offset);
 }
 
+
+/************************************************************************************
+ * gpio Functions
+ ************************************************************************************/
+
+static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int channel)
+{
+
+  switch(priv->base)
+    {
+#ifdef CONFIG_STM32_TIM1
+      case STM32_TIM1_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM1_CH1IN)
+            case 0: return GPIO_TIM1_CH1IN;
+#endif
+#if defined(GPIO_TIM1_CH2IN)
+            case 1: return GPIO_TIM1_CH2IN;
+#endif
+#if defined(GPIO_TIM1_CH3IN)
+            case 2: return GPIO_TIM1_CH3IN;
+#endif
+#if defined(GPIO_TIM1_CH4IN)
+            case 3: return GPIO_TIM1_CH4IN;
+#endif
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM2
+      case STM32_TIM2_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM2_CH1IN)
+            case 0: return GPIO_TIM2_CH1IN;
+#endif
+#if defined(GPIO_TIM2_CH2IN)
+            case 1: return GPIO_TIM2_CH2IN;
+#endif
+#if defined(GPIO_TIM2_CH3IN)
+            case 2: return GPIO_TIM2_CH3IN;
+#endif
+#if defined(GPIO_TIM2_CH4IN)
+            case 3: return GPIO_TIM2_CH4IN;
+#endif
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM3
+      case STM32_TIM3_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM3_CH1IN)
+            case 0: return GPIO_TIM3_CH1IN;
+#endif
+#if defined(GPIO_TIM3_CH2IN)
+            case 1: return GPIO_TIM3_CH2IN;
+#endif
+#if defined(GPIO_TIM3_CH3IN)
+            case 2: return GPIO_TIM3_CH3IN;
+#endif
+#if defined(GPIO_TIM3_CH4IN)
+            case 3: return GPIO_TIM3_CH4IN;
+#endif
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM4
+      case STM32_TIM4_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM4_CH1IN)
+            case 0: return GPIO_TIM4_CH1IN;
+#endif
+#if defined(GPIO_TIM4_CH2IN)
+            case 1: return GPIO_TIM4_CH2IN;
+#endif
+#if defined(GPIO_TIM4_CH3IN)
+            case 2: return GPIO_TIM4_CH3IN;
+#endif
+#if defined(GPIO_TIM4_CH4IN)
+            case 3: return GPIO_TIM4_CH4IN;
+#endif
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM5
+      case STM32_TIM5_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM5_CH1IN)
+            case 0: return GPIO_TIM5_CH1IN;
+#endif
+#if defined(GPIO_TIM5_CH2IN)
+            case 1: return GPIO_TIM5_CH2IN;
+#endif
+#if defined(GPIO_TIM5_CH3IN)
+            case 2: return GPIO_TIM5_CH3IN;
+#endif
+#if defined(GPIO_TIM5_CH4IN)
+            case 3: return GPIO_TIM5_CH4IN;
+#endif
+          }
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM8
+      case STM32_TIM8_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM8_CH1IN)
+            case 0: return GPIO_TIM8_CH1OUIN ;
+#endif
+#if defined(GPIO_TIM8_CH2IN)
+            case 1: return GPIO_TIM8_CH2OUIN ;
+#endif
+#if defined(GPIO_TIM8_CH3IN)
+            case 2: return GPIO_TIM8_CH3OUIN ;
+#endif
+#if defined(GPIO_TIM8_CH4IN)
+            case 3: return GPIO_TIM8_CH4OUIN ;
+#endif
+          }
+        break;
+#endif
+    }
+  return gpio;
+}
 /************************************************************************************
  * Basic Functions
  ************************************************************************************/
@@ -408,22 +529,13 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
 
   ASSERT(dev);
 
-  i = CAP_NCHANNELS;
-  while(i--)
-    {
-      if ( priv->channels[i].ch_id == channel )
-        {
-          gpio = priv->channels[i].gpio;
-          break;
-        }
-    }
+  gpio = stm32_cap_gpio(priv,channel);
 
   if ( gpio == 0 ) 
       return ERROR;
 
   /* change to zero base index */
   channel--;
-
 
   /* Set ccer */
   switch (cfg & STM32_CAP_EDGE_MASK)
