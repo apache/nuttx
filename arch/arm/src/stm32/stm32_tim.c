@@ -145,28 +145,48 @@
 #  undef CONFIG_STM32_TIM14
 #endif
 
-#if defined(GPIO_TIM1_CH1IN) || defined(GPIO_TIM2_CH1IN) || defined(GPIO_TIM3_CH1IN) || \
-    defined(GPIO_TIM4_CH1IN) || defined(GPIO_TIM5_CH1IN) || defined(GPIO_TIM8_CH1IN) || \
-    defined(GPIO_TIM9_CH1IN) || defined(GPIO_TIM10_CH1IN) || defined(GPIO_TIM11_CH1IN) || \
-    defined(GPIO_TIM12_CH1IN) || defined(GPIO_TIM13_CH1IN) || defined(GPIO_TIM14_CH1IN)
-#  define HAVE_CH1IN 1
+#if defined(CONFIG_STM32_TIM1) 
+#  if defined(GPIO_TIM1_CH1OUT) ||defined(GPIO_TIM1_CH2OUT)||\
+      defined(GPIO_TIM1_CH3OUT) ||defined(GPIO_TIM1_CH4OUT)
+#    define HAVE_TIM1_GPIOCONFIG 1
+#endif
 #endif
 
-#if defined(GPIO_TIM1_CH2IN) || defined(GPIO_TIM2_CH2IN) || defined(GPIO_TIM3_CH2IN) || \
-    defined(GPIO_TIM4_CH2IN) || defined(GPIO_TIM5_CH2IN) || defined(GPIO_TIM8_CH2IN) || \
-    defined(GPIO_TIM9_CH2IN) || defined(GPIO_TIM12_CH2IN)
-#  define HAVE_CH2IN 1
+#if defined(CONFIG_STM32_TIM2) 
+#  if defined(GPIO_TIM2_CH1OUT) ||defined(GPIO_TIM2_CH2OUT)||\
+      defined(GPIO_TIM2_CH3OUT) ||defined(GPIO_TIM2_CH4OUT)
+#    define HAVE_TIM2_GPIOCONFIG 1
+#endif
 #endif
 
-#if defined(GPIO_TIM1_CH3IN) || defined(GPIO_TIM2_CH3IN) || defined(GPIO_TIM3_CH3IN) || \
-    defined(GPIO_TIM4_CH3IN) || defined(GPIO_TIM5_CH3IN) || defined(GPIO_TIM8_CH3IN)
-#  define HAVE_CH3IN 1
+#if defined(CONFIG_STM32_TIM3) 
+#  if defined(GPIO_TIM3_CH1OUT) ||defined(GPIO_TIM3_CH2OUT)||\
+      defined(GPIO_TIM3_CH3OUT) ||defined(GPIO_TIM3_CH4OUT)
+#    define HAVE_TIM3_GPIOCONFIG 1
+#endif
 #endif
 
-#if defined(GPIO_TIM1_CH4IN) || defined(GPIO_TIM2_CH4IN) || defined(GPIO_TIM3_CH4IN) || \
-    defined(GPIO_TIM4_CH4IN) || defined(GPIO_TIM5_CH4IN) || defined(GPIO_TIM8_CH4IN)
-#  define HAVE_CH4IN 1
+#if defined(CONFIG_STM32_TIM4) 
+#  if defined(GPIO_TIM4_CH1OUT) ||defined(GPIO_TIM4_CH2OUT)||\
+      defined(GPIO_TIM4_CH3OUT) ||defined(GPIO_TIM4_CH4OUT)
+#    define HAVE_TIM4_GPIOCONFIG 1
 #endif
+#endif
+
+#if defined(CONFIG_STM32_TIM5) 
+#  if defined(GPIO_TIM5_CH1OUT) ||defined(GPIO_TIM5_CH2OUT)||\
+      defined(GPIO_TIM5_CH3OUT) ||defined(GPIO_TIM5_CH4OUT)
+#    define HAVE_TIM5_GPIOCONFIG 1
+#endif
+#endif
+
+#if defined(CONFIG_STM32_TIM8) 
+#  if defined(GPIO_TIM8_CH1OUT) ||defined(GPIO_TIM8_CH2OUT)||\
+      defined(GPIO_TIM8_CH3OUT) ||defined(GPIO_TIM8_CH4OUT)
+#    define HAVE_TIM8_GPIOCONFIG 1
+#endif
+#endif
+
 
 /* This module then only compiles if there are enabled timers that are not intended for
  * some other purpose.
@@ -267,6 +287,24 @@ static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
   ((struct stm32_tim_priv_s *)dev)->mode = STM32_TIM_MODE_DISABLED;
   stm32_tim_disable(dev);
 }
+
+#if defined(HAVE_TIM1_GPIOCONFIG)||defined(HAVE_TIM2_GPIOCONFIG)||\
+    defined(HAVE_TIM3_GPIOCONFIG)||defined(HAVE_TIM4_GPIOCONFIG)||\
+    defined(HAVE_TIM5_GPIOCONFIG)||defined(HAVE_TIM8_GPIOCONFIG)
+static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
+{
+  /* TODO: Add support for input capture and bipolar dual outputs for TIM8 */
+
+  if (mode & STM32_TIM_CH_MODE_MASK)
+    {
+      stm32_configgpio(cfg);
+    }
+  else
+    {
+      stm32_unconfiggpio(cfg);
+    }
+}
+#endif
 
 /************************************************************************************
  * Basic Functions
@@ -411,117 +449,21 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
   return OK;
 }
 
-
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  uint16_t mask;
   ASSERT(dev);
-
-  if (source & STM32_TIM_INT_SRC_OVERFLOW)
-      regval |= ATIM_DIER_UIE;
-#ifdef HAVE_CH1IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_1)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH2IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_2)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH3IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_3)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH4IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_4)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET,0,mask);
-
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
 }
 
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  uint16_t mask;
   ASSERT(dev);
-
-  if (source & STM32_TIM_INT_SRC_OVERFLOW)
-      regval |= ATIM_DIER_UIE;
-#ifdef HAVE_CH1IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_1)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH2IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_2)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH3IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_3)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-#ifdef HAVE_CH4IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_4)
-      regval |= ATIM_DIER_CC1IE;
-#endif
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET,mask, 0);
-
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
 }
 
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  uint16_t mask = 0;
-
-  if (source & STM32_TIM_INT_SRC_OVERFLOW)
-      regval |= ATIM_SR_UIF;
-#ifdef HAVE_CH1IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_1)
-      regval |= ATIM_SR_CC1IF;
-#endif
-#ifdef HAVE_CH2IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_2)
-      regval |= ATIM_SR_CC2IF;
-#endif
-#ifdef HAVE_CH3IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_3)
-      regval |= ATIM_SR_CC3IF;
-#endif
-#ifdef HAVE_CH4IN
-  if (source & STM32_TIM_INT_SRC_CAPTURE_4)
-      regval |= ATIM_SR_CC4IF;
-#endif
-
-  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~mask);
-
-}
-
-static int stm32_tim_getintsrc(FAR struct stm32_tim_dev_s *dev, int source)
-{
-  uint16_t regval = 0;
-  int source = 0;
-
-  regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
-
-  if (regval & ATIM_SR_UIF)
-      source |= STM32_TIM_INT_SRC_OVERFLOW;
-#ifdef HAVE_CH1IN
-  if (regval & ATIM_SR_CC1IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_1;
-#endif
-#ifdef HAVE_CH2IN
-  if (regval & ATIM_SR_CC2IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_2;
-#endif
-#ifdef HAVE_CH3IN
-  if (regval & ATIM_SR_CC3IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_3;
-#endif
-#ifdef HAVE_CH4IN
-  if (regval & ATIM_SR_CC4IF)
-      source |= STM32_TIM_INT_SRC_CAPTURE_4;
-#endif
-
-  return source;
-
+  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
 }
 
 /************************************************************************************
@@ -596,8 +538,6 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
 static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                 stm32_tim_channel_t mode)
 {
-  uint32_t gpio_in_cfg = 0;
-  uint32_t gpio_out_cfg= 0;
   uint16_t ccmr_orig   = 0;
   uint16_t ccmr_val    = 0;
   uint16_t ccmr_mask   = 0xff;
@@ -631,327 +571,16 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
     }
 #endif
 
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-    {
-#ifdef CONFIG_STM32_TIM2
-      case STM32_TIM2_BASE:
-        switch (channel)
-          {
-            case 0:
-#if defined(GPIO_TIM2_CH1OUT)
-              gpio_out_cfg = GPIO_TIM2_CH1OUT;
-#endif
-#if defined(GPIO_TIM2_CH1IN)
-              gpio_in_cfg = GPIO_TIM2_CH1IN;
-              ccmr_val |=  ( GPIO_TIM2_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM2_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 1:
-#if defined(GPIO_TIM2_CH2OUT)
-              gpio_out_cfg = GPIO_TIM2_CH2OUT;
-#endif
-#if defined(GPIO_TIM2_CH2IN)
-              gpio_in_cfg = GPIO_TIM2_CH2IN;
-              ccmr_val |=  ( GPIO_TIM2_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM2_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 2:
-#if defined(GPIO_TIM2_CH3OUT)
-              gpio_out_cfg = GPIO_TIM2_CH3OUT;
-#endif
-#if defined(GPIO_TIM2_CH3IN)
-              gpio_in_cfg = GPIO_TIM2_CH3IN;
-              ccmr_val |=  ( GPIO_TIM2_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM2_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 3:
-#if defined(GPIO_TIM2_CH4OUT)
-              gpio_out_cfg = GPIO_TIM2_CH4OUT;
-#endif
-#if defined(GPIO_TIM2_CH4IN)
-              gpio_in_cfg = GPIO_TIM2_CH4IN;
-              ccmr_val |=  ( GPIO_TIM2_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM2_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            default:
-              return ERROR;
-          }
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM3
-      case STM32_TIM3_BASE:
-        switch (channel)
-          {
-            case 0:
-#if defined(GPIO_TIM3_CH1OUT)
-              gpio_out_cfg = GPIO_TIM3_CH1OUT;
-#endif
-#if defined(GPIO_TIM3_CH1IN)
-              gpio_in_cfg = GPIO_TIM3_CH1IN;
-              ccmr_val |=  ( GPIO_TIM3_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM3_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 1:
-#if defined(GPIO_TIM3_CH2OUT)
-              gpio_out_cfg = GPIO_TIM3_CH2OUT;
-#endif
-#if defined(GPIO_TIM3_CH2IN)
-              gpio_in_cfg = GPIO_TIM3_CH2IN;
-              ccmr_val |=  ( GPIO_TIM3_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM3_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 2:
-#if defined(GPIO_TIM3_CH3OUT)
-              gpio_out_cfg = GPIO_TIM3_CH3OUT;
-#endif
-#if defined(GPIO_TIM3_CH3IN)
-              gpio_in_cfg = GPIO_TIM3_CH3IN;
-              ccmr_val |=  ( GPIO_TIM3_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM3_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 3:
-#if defined(GPIO_TIM3_CH4OUT)
-              gpio_out_cfg = GPIO_TIM3_CH4OUT;
-#endif
-#if defined(GPIO_TIM3_CH4IN)
-              gpio_in_cfg = GPIO_TIM3_CH4IN;
-              ccmr_val |=  ( GPIO_TIM3_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM3_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            default:
-              return ERROR;
-          }
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM4
-      case STM32_TIM4_BASE:
-        switch (channel)
-          {
-            case 0:
-#if defined(GPIO_TIM4_CH1OUT)
-              gpio_out_cfg = GPIO_TIM4_CH1OUT;
-#endif
-#if defined(GPIO_TIM4_CH1IN)
-              gpio_in_cfg = GPIO_TIM4_CH1IN;
-              ccmr_val |=  ( GPIO_TIM4_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM4_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 1:
-#if defined(GPIO_TIM4_CH2OUT)
-              gpio_out_cfg = GPIO_TIM4_CH2OUT;
-#endif
-#if defined(GPIO_TIM4_CH2IN)
-              gpio_in_cfg = GPIO_TIM4_CH2IN;
-              ccmr_val |=  ( GPIO_TIM4_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM4_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 2:
-#if defined(GPIO_TIM4_CH3OUT)
-              gpio_out_cfg = GPIO_TIM4_CH3OUT;
-#endif
-#if defined(GPIO_TIM4_CH3IN)
-              gpio_in_cfg = GPIO_TIM4_CH3IN;
-              ccmr_val |=  ( GPIO_TIM4_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM4_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 3:
-#if defined(GPIO_TIM4_CH4OUT)
-              gpio_out_cfg = GPIO_TIM4_CH4OUT;
-#endif
-#if defined(GPIO_TIM4_CH4IN)
-              gpio_in_cfg = GPIO_TIM4_CH4IN;
-              ccmr_val |=  ( GPIO_TIM4_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM4_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            default: return ERROR;
-          }
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM5
-      case STM32_TIM5_BASE:
-        switch (channel)
-          {
-            case 0:
-#if defined(GPIO_TIM5_CH1OUT)
-              gpio_out_cfg = GPIO_TIM5_CH1OUT;
-#endif
-#if defined(GPIO_TIM5_CH1IN)
-              gpio_in_cfg = GPIO_TIM5_CH1IN;
-              ccmr_val |=  ( GPIO_TIM5_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM5_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 1:
-#if defined(GPIO_TIM5_CH2OUT)
-              gpio_out_cfg = GPIO_TIM5_CH2OUT;
-#endif
-#if defined(GPIO_TIM5_CH2IN)
-              gpio_in_cfg = GPIO_TIM5_CH2IN;
-              ccmr_val |=  ( GPIO_TIM5_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM5_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 2:
-#if defined(GPIO_TIM5_CH3OUT)
-              gpio_out_cfg = GPIO_TIM5_CH3OUT;
-#endif
-#if defined(GPIO_TIM5_CH3IN)
-              gpio_in_cfg = GPIO_TIM5_CH3IN;
-              ccmr_val |=  ( GPIO_TIM5_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM5_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 3:
-#if defined(GPIO_TIM5_CH4OUT)
-              gpio_out_cfg = GPIO_TIM5_CH4OUT;
-#endif
-#if defined(GPIO_TIM5_CH4IN)
-              gpio_in_cfg = GPIO_TIM5_CH4IN;
-              ccmr_val |=  ( GPIO_TIM5_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM5_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            default: return ERROR;
-          }
-        break;
-#endif
-
-#if STM32_NATIM > 0
-#ifdef CONFIG_STM32_TIM1
-      case STM32_TIM1_BASE:
-        switch (channel)
-          {
-            case 0:
-#if defined(GPIO_TIM1_CH1OUT)
-              gpio_out_cfg = GPIO_TIM1_CH1OUT;
-#endif
-#if defined(GPIO_TIM1_CH1IN)
-              gpio_in_cfg = GPIO_TIM1_CH1IN;
-              ccmr_val |=  ( GPIO_TIM1_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM1_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 1:
-#if defined(GPIO_TIM1_CH2OUT)
-              gpio_out_cfg = GPIO_TIM1_CH2OUT;
-#endif
-#if defined(GPIO_TIM1_CH2IN)
-              gpio_in_cfg = GPIO_TIM1_CH2IN;
-              ccmr_val |=  ( GPIO_TIM1_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM1_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 2:
-#if defined(GPIO_TIM1_CH3OUT)
-              gpio_out_cfg = GPIO_TIM1_CH3OUT;
-#endif
-#if defined(GPIO_TIM1_CH3IN)
-              gpio_in_cfg = GPIO_TIM1_CH3IN;
-              ccmr_val |=  ( GPIO_TIM1_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM1_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 3:
-#if defined(GPIO_TIM1_CH4OUT)
-              gpio_out_cfg = GPIO_TIM1_CH4OUT;
-#endif
-#if defined(GPIO_TIM1_CH4IN)
-              gpio_in_cfg = GPIO_TIM1_CH4IN;
-              ccmr_val |=  ( GPIO_TIM1_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM1_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            default: 
-              return ERROR;
-          }
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM8
-      case STM32_TIM8_BASE:
-        switch (channel)
-          {
-            case 0:
-#if defined(GPIO_TIM8_CH1OUT)
-              gpio_out_cfg = GPIO_TIM8_CH1OUT, ;
-#endif
-#if defined(GPIO_TIM8_CH1IN)
-              gpio_in_cfg = GPIO_TIM8_CH1OUIN ;
-              ccmr_val |=  ( GPIO_TIM8_CH1_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM8_CH1_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 1:
-#if defined(GPIO_TIM8_CH2OUT)
-              gpio_out_cfg = GPIO_TIM8_CH2OUT, ;
-#endif
-#if defined(GPIO_TIM8_CH2IN)
-              gpio_in_cfg = GPIO_TIM8_CH2OUIN ;
-              ccmr_val |=  ( GPIO_TIM8_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM8_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 2:
-#if defined(GPIO_TIM8_CH3OUT)
-              gpio_out_cfg = GPIO_TIM8_CH3OUT, ;
-#endif
-#if defined(GPIO_TIM8_CH3IN)
-              gpio_in_cfg = GPIO_TIM8_CH3OUIN ;
-              ccmr_val |=  ( GPIO_TIM8_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM8_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            case 3:
-#if defined(GPIO_TIM8_CH4OUT)
-              gpio_out_cfg = GPIO_TIM8_CH4OUT, ;
-#endif
-#if defined(GPIO_TIM8_CH4IN)
-              gpio_in_cfg = GPIO_TIM8_CH4OUIN ;
-              ccmr_val |=  ( GPIO_TIM8_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    );
-              ccmr_val |=  ( GPIO_TIM8_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-              break;
-            default:
-              return ERROR;
-          }
-        break;
-#endif
-#endif
-      default:
-        return ERROR;
-    }
-
   /* Decode configuration */
 
   switch (mode & STM32_TIM_CH_MODE_MASK)
     {
       case STM32_TIM_CH_DISABLED:
-        ccmr_val = 0;
-        break;
-
-      case STM32_TIM_CH_INCAPTURE:
-        ccmr_val |=  (ATIM_CCMR_CCS_CCIN1 << ATIM_CCMR1_CC1S_SHIFT);
-        ccer_val |= ATIM_CCER_CC1E << (channel << 2);
-        if ( gpio_in_cfg == 0 )
-            return ERROR;
         break;
 
       case STM32_TIM_CH_OUTPWM:
         ccmr_val  =  (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT) + ATIM_CCMR1_OC1PE;
         ccer_val |= ATIM_CCER_CC1E << (channel << 2);
-        if ( gpio_out_cfg == 0 )
-            return ERROR;
         break;
 
       default:
@@ -985,20 +614,177 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
   stm32_putreg16(dev, STM32_GTIM_CCER_OFFSET, ccer_val);
 
   /* set GPIO */
-  
-  if ( gpio_in_cfg )
+
+  switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-      if ( mode & STM32_TIM_CH_MODE_IN_MASK )
-          stm32_configgpio(gpio_in_cfg);
-      else
-          stm32_unconfiggpio(gpio_in_cfg);
-    }
-  if ( gpio_out_cfg )
-    {
-      if ( mode & STM32_TIM_CH_MODE_OUT_MASK )
-          stm32_configgpio(gpio_in_cfg);
-      else
-          stm32_unconfiggpio(gpio_out_cfg);
+#ifdef CONFIG_STM32_TIM2
+      case STM32_TIM2_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM2_CH1OUT)
+            case 0:
+              stm32_tim_gpioconfig(GPIO_TIM2_CH1OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM2_CH2OUT)
+            case 1:
+              stm32_tim_gpioconfig(GPIO_TIM2_CH2OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM2_CH3OUT)
+            case 2:
+              stm32_tim_gpioconfig(GPIO_TIM2_CH3OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM2_CH4OUT)
+            case 3:
+              stm32_tim_gpioconfig(GPIO_TIM2_CH4OUT, mode);
+              break;
+#endif
+            default:
+              return ERROR;
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM3
+      case STM32_TIM3_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM3_CH1OUT)
+            case 0:
+              stm32_tim_gpioconfig(GPIO_TIM3_CH1OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM3_CH2OUT)
+            case 1:
+              stm32_tim_gpioconfig(GPIO_TIM3_CH2OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM3_CH3OUT)
+            case 2:
+              stm32_tim_gpioconfig(GPIO_TIM3_CH3OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM3_CH4OUT)
+            case 3:
+              stm32_tim_gpioconfig(GPIO_TIM3_CH4OUT, mode);
+              break;
+#endif
+            default:
+              return ERROR;
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM4
+      case STM32_TIM4_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM4_CH1OUT)
+            case 0:
+              stm32_tim_gpioconfig(GPIO_TIM4_CH1OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM4_CH2OUT)
+            case 1:
+              stm32_tim_gpioconfig(GPIO_TIM4_CH2OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM4_CH3OUT)
+            case 2:
+              stm32_tim_gpioconfig(GPIO_TIM4_CH3OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM4_CH4OUT)
+            case 3:
+              stm32_tim_gpioconfig(GPIO_TIM4_CH4OUT, mode);
+              break;
+#endif
+            default: return ERROR;
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM5
+      case STM32_TIM5_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM5_CH1OUT)
+            case 0:
+              stm32_tim_gpioconfig(GPIO_TIM5_CH1OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM5_CH2OUT)
+            case 1:
+              stm32_tim_gpioconfig(GPIO_TIM5_CH2OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM5_CH3OUT)
+            case 2:
+              stm32_tim_gpioconfig(GPIO_TIM5_CH3OUT, mode);
+              break;
+#endif
+#if defined(GPIO_TIM5_CH4OUT)
+            case 3:
+              stm32_tim_gpioconfig(GPIO_TIM5_CH4OUT, mode);
+              break;
+#endif
+            default: return ERROR;
+          }
+        break;
+#endif
+
+#if STM32_NATIM > 0
+#ifdef CONFIG_STM32_TIM1
+      case STM32_TIM1_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM1_CH1OUT)
+            case 0:
+              stm32_tim_gpioconfig(GPIO_TIM1_CH1OUT, mode); break;
+#endif
+#if defined(GPIO_TIM1_CH2OUT)
+            case 1:
+              stm32_tim_gpioconfig(GPIO_TIM1_CH2OUT, mode); break;
+#endif
+#if defined(GPIO_TIM1_CH3OUT)
+            case 2:
+              stm32_tim_gpioconfig(GPIO_TIM1_CH3OUT, mode); break;
+#endif
+#if defined(GPIO_TIM1_CH4OUT)
+            case 3:
+              stm32_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode); break;
+#endif
+            default: return ERROR;
+          }
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM8
+      case STM32_TIM8_BASE:
+        switch (channel)
+          {
+#if defined(GPIO_TIM8_CH1OUT)
+            case 0:
+              stm32_tim_gpioconfig(GPIO_TIM8_CH1OUT, mode); break;
+#endif
+#if defined(GPIO_TIM8_CH2OUT)
+            case 1:
+              stm32_tim_gpioconfig(GPIO_TIM8_CH2OUT, mode); break;
+#endif
+#if defined(GPIO_TIM8_CH3OUT)
+            case 2:
+              stm32_tim_gpioconfig(GPIO_TIM8_CH3OUT, mode); break;
+#endif
+#if defined(GPIO_TIM8_CH4OUT)
+            case 3:
+              stm32_tim_gpioconfig(GPIO_TIM8_CH4OUT, mode); break;
+#endif
+            default:
+              return ERROR;
+          }
+        break;
+#endif
+#endif
+      default:
+        return ERROR;
     }
 
   return OK;
@@ -1035,67 +821,17 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
   switch (channel)
     {
-#ifdef HAVE_CH1IN
       case 1:
         return stm32_getreg32(dev, STM32_GTIM_CCR1_OFFSET);
-#endif
-#ifdef HAVE_CH1IN
       case 2:
         return stm32_getreg32(dev, STM32_GTIM_CCR2_OFFSET);
-#endif
-#ifdef HAVE_CH1IN
       case 3:
         return stm32_getreg32(dev, STM32_GTIM_CCR3_OFFSET);
-#endif
-#ifdef HAVE_CH1IN
       case 4:
         return stm32_getreg32(dev, STM32_GTIM_CCR4_OFFSET);
-#endif
     }
 
   return ERROR;
-}
-
-static bool stm32_tim_captureoverflow(FAR struct stm32_tim_dev_s *dev, int channel,
-                                   bool clear)
-{
-  uint16_t regval;
-  uint16_t mask;
-  ASSERT(dev);
-
-  switch (channel)
-    {
-#ifdef HAVE_CH1IN
-      case 1:
-        mask = GTIM_SR_CC1OF;
-        break;
-#endif
-#ifdef HAVE_CH2IN
-      case 2:
-        mask = GTIM_SR_CC2IF;
-        break;
-#endif
-#ifdef HAVE_CH3IN
-      case 3:
-        mask = GTIM_SR_CC3IF;
-        break;
-#endif
-#ifdef HAVE_CH4IN
-      case 4:
-        mask = GTIM_SR_CC4IF;
-        break;
-#endif
-      default:
-        return ERROR;
-    }
-  regval = stm32_getreg16(dev, STM32_GTIM_SR_OFFSET);
-  if (regval & mask)
-    {
-      if (clear)
-          stm32_putreg16(dev, STM32_GTIM_SR_OFFSET, ~mask);
-      return 1;
-    }
-  return 0;
 }
 
 /************************************************************************************
@@ -1116,12 +852,10 @@ struct stm32_tim_ops_s stm32_tim_ops =
   .setchannel     = &stm32_tim_setchannel,
   .setcompare     = &stm32_tim_setcompare,
   .getcapture     = &stm32_tim_getcapture,
-  .captureoverflow= &stm32_tim_captureoverflow,
   .setisr         = &stm32_tim_setisr,
   .enableint      = &stm32_tim_enableint,
   .disableint     = &stm32_tim_disableint,
-  .ackint         = &stm32_tim_ackint,
-  .getintsrc      = &stm32_tim_getintsrc
+  .ackint         = &stm32_tim_ackint
 };
 
 #ifdef CONFIG_STM32_TIM2

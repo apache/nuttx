@@ -55,16 +55,16 @@
  ************************************************************************************/
 /* Helpers **************************************************************************/
 
-#define STM32_TIM_SETMODE(d,mode)           ((d)->ops->setmode(d,mode))
-#define STM32_TIM_SETCLOCK(d,freq)          ((d)->ops->setclock(d,freq))
-#define STM32_TIM_SETPERIOD(d,period)       ((d)->ops->setperiod(d,period))
-#define STM32_TIM_SETCHANNEL(d,ch,mode)     ((d)->ops->setchannel(d,ch,mode))
-#define STM32_TIM_SETCOMPARE(d,ch,comp)     ((d)->ops->setcompare(d,ch,comp))
-#define STM32_TIM_GETCAPTURE(d,ch)          ((d)->ops->getcapture(d,ch))
-#define STM32_TIM_SETISR(d,hnd,s)           ((d)->ops->setisr(d,hnd,s))
-#define STM32_TIM_ENABLEINT(d,s)            ((d)->ops->enableint(d,s))
-#define STM32_TIM_DISABLEINT(d,s)           ((d)->ops->disableint(d,s))
-#define STM32_TIM_ACKINT(d,s)               ((d)->ops->ackint(d,s))
+#define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
+#define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
+#define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
+#define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
+#define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
+#define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
+#define STM32_TIM_SETISR(d,hnd,s)       ((d)->ops->setisr(d,hnd,s))
+#define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
+#define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
+#define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 
 /************************************************************************************
  * Public Types
@@ -122,21 +122,6 @@ typedef enum
 
 } stm32_tim_mode_t;
 
-/* TIM Sources */
-
-typedef enum
-{
-  /* One of the following */
-
-  STM32_TIM_INT_SRC_OVERFLOW    = 0x0001, 
-  STM32_TIM_INT_SRC_CAPTURE_1   = 0x0002,    
-  STM32_TIM_INT_SRC_CAPTURE_2   = 0x0004,    
-  STM32_TIM_INT_SRC_CAPTURE_3   = 0x0008,    
-  STM32_TIM_INT_SRC_CAPTURE_4   = 0x0010    
-
-} stm32_tim_source_t;
-
-        
 /* TIM Channel Modes */
 
 typedef enum
@@ -150,19 +135,15 @@ typedef enum
 
   /* MODES: */
 
-  STM32_TIM_CH_MODE_OUT_MASK  = 0x06,
-  STM32_TIM_CH_MODE_IN_MASK   = 0x10,
-  STM32_TIM_CH_MODE_MASK      = 0x16,
+  STM32_TIM_CH_MODE_MASK      = 0x06,
 
   /* Output Compare Modes */
 
   STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
 //STM32_TIM_CH_OUTCOMPARE     = 0x06,
 
-  /* Input Compare Modes */
-  STM32_TIM_CH_INCAPTURE      = 0x10,
-
   // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
+//STM32_TIM_CH_INCAPTURE      = 0x10,
 //STM32_TIM_CH_INPWM          = 0x20
 //STM32_TIM_CH_DRIVE_OC   -- open collector mode
 
