@@ -87,7 +87,14 @@
 #endif
 
 #if defined(CONFIG_STM32_TIM1_CAP) || defined(CONFIG_STM32_TIM1_CAP) 
-#define HAVE_ADANCED_TIM 1
+#define USE_ADVENCED_TIM 1
+#endif
+
+#if defined(GPIO_TIM1_EXT_CLK_IN) || defined(GPIO_TIM2_EXT_CLK_IN) || \
+    defined(GPIO_TIM3_EXT_CLK_IN) || defined(GPIO_TIM4_EXT_CLK_IN) || \
+    defined(GPIO_TIM5_EXT_CLK_IN) || defined(GPIO_TIM8_EXT_CLK_IN) || \
+    defined(GPIO_TIM9_EXT_CLK_IN) || defined(GPIO_TIM12_EXT_CLK_IN)
+#  define USE_EXT_CLOCK 1
 #endif
 
 /* This module then only compiles if there are enabled timers that are not intended for
@@ -110,8 +117,11 @@ struct stm32_cap_priv_s
 {
   const struct stm32_cap_ops_s *ops;
   const uint32_t base;      /* TIMn base address */
+#ifdef USE_EXT_CLOCK
+  const uint32_t gpio_clk;  /* TIMn base address */
+#endif
   const int irq;            /* irq vector */
-#define HAVE_ADANCED_TIM 1
+#ifdef USE_ADVENCED_TIM
   const int irq_of;         /* irq timer overflow is deferent in advanced timer */
 #endif
 };
@@ -122,7 +132,7 @@ struct stm32_cap_priv_s
 
 /* Get a 16-bit register value by offset */
 
-static inline uint16_t stm32_getreg16(FAR struct stm32_cap_priv_s *priv,
+static inline uint16_t stm32_getreg16(FAR const struct stm32_cap_priv_s *priv,
                                       uint8_t offset)
 {
   return getreg16(priv->base + offset);
@@ -130,7 +140,7 @@ static inline uint16_t stm32_getreg16(FAR struct stm32_cap_priv_s *priv,
 
 /* Put a 16-bit register value by offset */
 
-static inline void stm32_putreg16(FAR struct stm32_cap_priv_s *priv, uint8_t offset,
+static inline void stm32_putreg16(FAR const struct stm32_cap_priv_s *priv, uint8_t offset,
                                   uint16_t value)
 {
   putreg16(value, priv->base + offset);
@@ -138,7 +148,7 @@ static inline void stm32_putreg16(FAR struct stm32_cap_priv_s *priv, uint8_t off
 
 /* Modify a 16-bit register value by offset */
 
-static inline void stm32_modifyreg16(FAR struct stm32_cap_priv_s *priv,
+static inline void stm32_modifyreg16(FAR const struct stm32_cap_priv_s *priv,
                                      uint8_t offset, uint16_t clearbits,
                                      uint16_t setbits)
 {
@@ -149,7 +159,7 @@ static inline void stm32_modifyreg16(FAR struct stm32_cap_priv_s *priv,
  * 32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5.
  */
 
-static inline uint32_t stm32_getreg32(FAR struct stm32_cap_priv_s *priv,
+static inline uint32_t stm32_getreg32(FAR const struct stm32_cap_priv_s *priv,
                                       uint8_t offset)
 {
   return getreg32(priv->base + offset);
@@ -159,7 +169,7 @@ static inline uint32_t stm32_getreg32(FAR struct stm32_cap_priv_s *priv,
  * 32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5.
  */
 
-static inline void stm32_putreg32(FAR struct stm32_cap_priv_s *priv, uint8_t offset,
+static inline void stm32_putreg32(FAR const struct stm32_cap_priv_s *priv, uint8_t offset,
                                   uint32_t value)
 {
   putreg32(value, priv->base + offset);
@@ -169,8 +179,8 @@ static inline void stm32_putreg32(FAR struct stm32_cap_priv_s *priv, uint8_t off
 /************************************************************************************
  * gpio Functions
  ************************************************************************************/
-
-static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int channel)
+#define GPIO_CLK -1
+static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, int channel)
 {
 
   switch(priv->base)
@@ -179,6 +189,9 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
       case STM32_TIM1_BASE:
         switch (channel)
           {
+#ifdef GPIO_TIM1_EXT_CLK_IN
+            case GPIO_CLK: return GPIO_TIM1_EXT_CLK_IN;
+#endif
 #if defined(GPIO_TIM1_CH1IN)
             case 0: return GPIO_TIM1_CH1IN;
 #endif
@@ -198,6 +211,9 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
       case STM32_TIM2_BASE:
         switch (channel)
           {
+#ifdef GPIO_TIM2_EXT_CLK_IN
+            case GPIO_CLK: return GPIO_TIM2_EXT_CLK_IN;
+#endif
 #if defined(GPIO_TIM2_CH1IN)
             case 0: return GPIO_TIM2_CH1IN;
 #endif
@@ -217,6 +233,9 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
       case STM32_TIM3_BASE:
         switch (channel)
           {
+#ifdef GPIO_TIM3_EXT_CLK_IN
+            case GPIO_CLK: return GPIO_TIM3_EXT_CLK_IN;
+#endif
 #if defined(GPIO_TIM3_CH1IN)
             case 0: return GPIO_TIM3_CH1IN;
 #endif
@@ -236,6 +255,9 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
       case STM32_TIM4_BASE:
         switch (channel)
           {
+#ifdef GPIO_TIM4_EXT_CLK_IN
+            case GPIO_CLK: return GPIO_TIM4_EXT_CLK_IN;
+#endif
 #if defined(GPIO_TIM4_CH1IN)
             case 0: return GPIO_TIM4_CH1IN;
 #endif
@@ -255,6 +277,9 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
       case STM32_TIM5_BASE:
         switch (channel)
           {
+#ifdef GPIO_TIM5_EXT_CLK_IN
+            case GPIO_CLK: return GPIO_TIM5_EXT_CLK_IN;
+#endif
 #if defined(GPIO_TIM5_CH1IN)
             case 0: return GPIO_TIM5_CH1IN;
 #endif
@@ -275,6 +300,9 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
       case STM32_TIM8_BASE:
         switch (channel)
           {
+#ifdef GPIO_TIM8_EXT_CLK_IN
+            case GPIO_CLK: return GPIO_TIM8_EXT_CLK_IN;
+#endif
 #if defined(GPIO_TIM8_CH1IN)
             case 0: return GPIO_TIM8_CH1OUIN ;
 #endif
@@ -291,16 +319,110 @@ static inline uint32_t stm32_cap_gpio(FAR struct stm32_cap_priv_s *priv, int cha
         break;
 #endif
     }
-  return gpio;
+  return 0;
+}
+
+static inline int stm32_cap_set_rcc(FAR const struct stm32_cap_priv_s *priv, 
+                                    bool on)
+{
+  uint32_t offset = 0;
+  uint32_t mask   = 0;
+  
+  switch (priv->base)
+    {
+#ifdef CONFIG_STM32_TIM1_CAP
+      case 1:
+        offset = STM32_RCC_APB2ENR;
+        mask   = RCC_APB2ENR_TIM1EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM2_CAP
+      case 2:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB1ENR_TIM2EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM3_CAP
+      case 3:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB1ENR_TIM3EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM4_CAP
+      case 4:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB1ENR_TIM4EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM5_CAP
+      case 5:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB1ENR_TIM5EN;
+        break;
+#endif
+/* TIM6 and TIM7 cannot be used in cap */
+#ifdef CONFIG_STM32_TIM8_CAP
+      case 8:
+        offset = STM32_RCC_APB2ENR;
+        mask   = RCC_APB2ENR_TIM8EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM9_CAP
+      case 9:
+        offset = STM32_RCC_APB2ENR;
+        mask   = RCC_APB2ENR_TIM9EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM10_CAP
+      case 10:
+        offset = STM32_RCC_APB2ENR;
+        mask   = RCC_APB2ENR_TIM10EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM11_CAP
+      case 11:
+        offset = STM32_RCC_APB2ENR;
+        mask   = RCC_APB2ENR_TIM11EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM12_CAP
+      case 12:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB2ENR_TIM12EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM13_CAP
+      case 13:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB2ENR_TIM13EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM14_CAP
+      case 14:
+        offset = STM32_RCC_APB1ENR;
+        mask   = RCC_APB2ENR_TIM14EN;
+        break;
+#endif
+    }
+
+  if ( mask == 0 )
+      return ERROR;
+          
+  if ( on )
+    modifyreg32(offset, 0, mask);
+  else
+    modifyreg32(offset, mask, 0);
+
+  return OK;
 }
 /************************************************************************************
  * Basic Functions
  ************************************************************************************/
 
-static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_src_t clk_src, 
-                              uint32_t prescaler)
+static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t clk, 
+                              uint32_t prescaler,uint32_t max)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint16_t regval = 0;
 
   if (prescaler == 0)
@@ -321,14 +443,14 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_src
       prescaler = 0xffff;
 
 
-  switch(clk_src)
+  switch(clk)
     {
       case STM32_CAP_CLK_INT:
           regval = GTIM_SMCR_DISAB;
           break;
 
       case STM32_CAP_CLK_EXT:
-          regval = GTIM_SMCR_EXTCLK1
+          regval = GTIM_SMCR_EXTCLK1;
           break;
 
     /* TODO: Add other case */
@@ -340,7 +462,7 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_src
   stm32_modifyreg16(priv, STM32_BTIM_EGR_OFFSET, GTIM_SMCR_SMS_MASK, regval );
 
   // Set Maximum
-  stm32_putreg32(priv, STM32_BTIM_ARR_OFFSET, period);
+  stm32_putreg32(priv, STM32_BTIM_ARR_OFFSET, max);
 
   // Set prescaler
   stm32_putreg16(priv, STM32_BTIM_PSC_OFFSET, prescaler);
@@ -351,7 +473,7 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_src
   //enable timer
   stm32_modifyreg16(priv, STM32_BTIM_CR1_OFFSET,0,BTIM_CR1_CEN);
 
-#ifdef HAVE_ADANCED_TIM 
+#ifdef USE_ADVENCED_TIM 
   /* Advanced registers require Main Output Enable */
   if ((priv->base == STM32_TIM1_BASE) || (priv->base == STM32_TIM8_BASE))
     {
@@ -362,18 +484,18 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_src
   return prescaler;
 }
 
-static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler);
+static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   int irq;
-#ifdef HAVE_ADANCED_TIM 
+#ifdef USE_ADVENCED_TIM 
   int irq_of;
 #endif
 
   ASSERT(dev);
 
   irq = priv->irq;
-#ifdef HAVE_ADANCED_TIM 
+#ifdef USE_ADVENCED_TIM 
   irq_of = priv->irq_of;
 #endif
 
@@ -383,7 +505,7 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler);
     {
       up_disable_irq(irq);
       irq_detach(irq);
-#ifdef HAVE_ADANCED_TIM 
+#ifdef USE_ADVENCED_TIM 
       if (priv->irq_of)
         {
           up_disable_irq(irq_of);
@@ -398,7 +520,7 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler);
   irq_attach(irq, handler);
   up_enable_irq(irq);
 
-#ifdef HAVE_ADANCED_TIM 
+#ifdef USE_ADVENCED_TIM 
   if (priv->irq_of)
     {
       irq_attach(priv->irq_of, handler);
@@ -411,7 +533,7 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler);
 
   up_prioritize_irq(irq, NVIC_SYSH_PRIORITY_DEFAULT);
 
-#  ifdef HAVE_ADANCED_TIM 
+#  ifdef USE_ADVENCED_TIM 
   if (priv->irq_of)
     {
       up_prioritize_irq(irq_of, NVIC_SYSH_PRIORITY_DEFAULT);
@@ -427,20 +549,20 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler);
 static void stm32_cap_enableint(FAR struct stm32_cap_dev_s *dev, 
                                 stm32_cap_flags_t src, bool on)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
-  uint16_t mask;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
+  uint16_t mask = 0;
   ASSERT(dev);
 
-  if (src & STM32_TIM_FLAG_IRQ_OVERFLOW)
-      regval |= ATIM_DIER_UIE;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_1)
-      regval |= ATIM_DIER_CC1IE;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_2)
-      regval |= ATIM_DIER_CC1IE;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_3)
-      regval |= ATIM_DIER_CC1IE;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_4)
-      regval |= ATIM_DIER_CC1IE;
+  if (src & STM32_CAP_FLAG_IRG_COUNTER)
+      mask |= ATIM_DIER_UIE;
+  if (src & STM32_CAP_FLAG_IRQ_CH_1)
+      mask |= ATIM_DIER_CC1IE;
+  if (src & STM32_CAP_FLAG_IRQ_CH_2)
+      mask |= ATIM_DIER_CC1IE;
+  if (src & STM32_CAP_FLAG_IRQ_CH_3)
+      mask |= ATIM_DIER_CC1IE;
+  if (src & STM32_CAP_FLAG_IRQ_CH_4)
+      mask |= ATIM_DIER_CC1IE;
 
   /* Not IRQ on channel overflow */
 
@@ -451,66 +573,66 @@ static void stm32_cap_enableint(FAR struct stm32_cap_dev_s *dev,
 
 }
 
-static void stm32_cap_ackflags(FAR struct stm32_cap_dev_s *dev, int src)
+static void stm32_cap_ackflags(FAR struct stm32_cap_dev_s *dev, int flags)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint16_t mask = 0;
 
-  if (src & STM32_TIM_FLAG_IRQ_OVERFLOW)
-      regval |= ATIM_SR_UIF;
+  if (flags & STM32_CAP_FLAG_IRG_COUNTER)
+      mask |= ATIM_SR_UIF;
 
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_1)
-      regval |= ATIM_SR_CC1IF;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_2)
-      regval |= ATIM_SR_CC2IF;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_3)
-      regval |= ATIM_SR_CC3IF;
-  if (src & STM32_TIM_FLAG_IRQ_CAPTURE_4)
-      regval |= ATIM_SR_CC4IF;
+  if (flags & STM32_CAP_FLAG_IRQ_CH_1)
+      mask |= ATIM_SR_CC1IF;
+  if (flags & STM32_CAP_FLAG_IRQ_CH_2)
+      mask |= ATIM_SR_CC2IF;
+  if (flags & STM32_CAP_FLAG_IRQ_CH_3)
+      mask |= ATIM_SR_CC3IF;
+  if (flags & STM32_CAP_FLAG_IRQ_CH_4)
+      mask |= ATIM_SR_CC4IF;
 
-  if (src & STM32_TIM_FLAG_OF_CAPTURE_1)
-      regval |= ATIM_SR_CC1OF;
-  if (src & STM32_TIM_FLAG_OF_CAPTURE_2)
-      regval |= ATIM_SR_CC2OF;
-  if (src & STM32_TIM_FLAG_OF_CAPTURE_3)
-      regval |= ATIM_SR_CC3OF;
-  if (src & STM32_TIM_FLAG_OF_CAPTURE_4)
-      regval |= ATIM_SR_CC4OF;
+  if (flags & STM32_CAP_FLAG_OF_CH_1)
+      mask |= ATIM_SR_CC1OF;
+  if (flags & STM32_CAP_FLAG_OF_CH_2)
+      mask |= ATIM_SR_CC2OF;
+  if (flags & STM32_CAP_FLAG_OF_CH_3)
+      mask |= ATIM_SR_CC3OF;
+  if (flags & STM32_CAP_FLAG_OF_CH_4)
+      mask |= ATIM_SR_CC4OF;
 
   stm32_putreg16(priv, STM32_BTIM_SR_OFFSET, ~mask);
 
 }
 
-static stm32_cap_flags_t stm32_cap_getint(FAR struct stm32_cap_dev_s *dev)
+static stm32_cap_flags_t stm32_cap_getflags(FAR struct stm32_cap_dev_s *dev)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint16_t regval = 0;
-  stm32_cap_flags_t src = 0;
+  stm32_cap_flags_t flags = 0;
 
   regval = stm32_getreg16(priv, STM32_BTIM_SR_OFFSET);
 
   if (regval & ATIM_SR_UIF)
-      src |= STM32_TIM_FLAG_IRQ_OVERFLOW;
+      flags |= STM32_CAP_FLAG_IRG_COUNTER;
 
   if (regval & ATIM_SR_CC1IF)
-      src |= STM32_TIM_FLAG_IRQ_CAPTURE_1;
+      flags |= STM32_CAP_FLAG_IRQ_CH_1;
   if (regval & ATIM_SR_CC2IF)
-      src |= STM32_TIM_FLAG_IRQ_CAPTURE_2;
+      flags |= STM32_CAP_FLAG_IRQ_CH_2;
   if (regval & ATIM_SR_CC3IF)
-      src |= STM32_TIM_FLAG_IRQ_CAPTURE_3;
+      flags |= STM32_CAP_FLAG_IRQ_CH_3;
   if (regval & ATIM_SR_CC4IF)
-      src |= STM32_TIM_FLAG_IRQ_CAPTURE_4;
+      flags |= STM32_CAP_FLAG_IRQ_CH_4;
 
   if (regval & ATIM_SR_CC1OF)
-      src |= STM32_TIM_FLAG_OF_CAPTURE_1;
+      flags |= STM32_CAP_FLAG_OF_CH_1;
   if (regval & ATIM_SR_CC2OF)
-      src |= STM32_TIM_FLAG_OF_CAPTURE_2;
+      flags |= STM32_CAP_FLAG_OF_CH_2;
   if (regval & ATIM_SR_CC3OF)
-      src |= STM32_TIM_FLAG_OF_CAPTURE_3;
+      flags |= STM32_CAP_FLAG_OF_CH_3;
   if (regval & ATIM_SR_CC4OF)
-      src |= STM32_TIM_FLAG_OF_CAPTURE_4;
+      flags |= STM32_CAP_FLAG_OF_CH_4;
 
-  return src;
+  return flags;
 
 }
 
@@ -519,10 +641,9 @@ static stm32_cap_flags_t stm32_cap_getint(FAR struct stm32_cap_dev_s *dev)
  ************************************************************************************/
 
 static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel,
-                                stm32_cap_ch_cfg_t edge)
+                                stm32_cap_ch_cfg_t cfg)
 {
-  int i;
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint32_t gpio = 0;
   uint16_t mask;
   uint16_t regval;
@@ -556,36 +677,27 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
         return ERROR;
     }
 
-  mask = (GTIM_CCER_CC1E | GTIM_CCER_CC1P | GTIM_CCER_CC1NP) 
+  mask = (GTIM_CCER_CC1E | GTIM_CCER_CC1P | GTIM_CCER_CC1NP);
   mask   <<= (channel << 2);
   regval <<= (channel << 2);
-  stm32_modifyreg16(priv,mask,regval);
+  stm32_modifyreg16(priv,STM32_GTIM_CCER_OFFSET,mask,regval);
 
   /* Set ccmr */
 
-  ccmr_val = cfg;
-
-  if ( (ccmr_val & GTIM_CCMR1_CC1S_MASK ) == 0 )
-      return ERROR; /* configured as output */
-
-  if ( (ccmr_val & GTIM_CCMR1_CC1S_MASK ) == 3 )
-      return ERROR; /* Not implemented */
-
-  /* Define its position (shift) and get register offset */
-
-  mask = (GTIM_CCMR1_IC1F_MASK | GTIM_CCMR1_IC1PSC_MASK | GTIM_CCMR1_CC1S_MASK)
-  ccmr_val &= mask
+  regval = cfg;
+  mask = (GTIM_CCMR1_IC1F_MASK | GTIM_CCMR1_IC1PSC_MASK | GTIM_CCMR1_CC1S_MASK);
+  regval &= mask;
 
   if (channel & 1)
     {
-      ccmr_val  <<= 8;
-      ccmr_mask <<= 8;
+      regval  <<= 8;
+      mask <<= 8;
     }
 
   if (channel < 2)
-      stm32_modifyreg16(priv,STM32_GTIM_CCMR1_OFFSET,ccmr_mask,ccmr_val);
+      stm32_modifyreg16(priv,STM32_GTIM_CCMR1_OFFSET,mask,regval);
   else
-      stm32_modifyreg16(priv,STM32_GTIM_CCMR2_OFFSET,ccmr_mask,ccmr_val);
+      stm32_modifyreg16(priv,STM32_GTIM_CCMR2_OFFSET,mask,regval);
 
   /* set GPIO */
   
@@ -600,26 +712,26 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
 
 static int stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev, uint8_t channel)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   ASSERT(dev);
 
   switch (channel)
     {
 #ifdef HAVE_CH1IN
       case 1:
-        return stm32_getreg32(dev, STM32_GTIM_CCR1_OFFSET);
+        return stm32_getreg32(priv, STM32_GTIM_CCR1_OFFSET);
 #endif
 #ifdef HAVE_CH1IN
       case 2:
-        return stm32_getreg32(dev, STM32_GTIM_CCR2_OFFSET);
+        return stm32_getreg32(priv, STM32_GTIM_CCR2_OFFSET);
 #endif
 #ifdef HAVE_CH1IN
       case 3:
-        return stm32_getreg32(dev, STM32_GTIM_CCR3_OFFSET);
+        return stm32_getreg32(priv, STM32_GTIM_CCR3_OFFSET);
 #endif
 #ifdef HAVE_CH1IN
       case 4:
-        return stm32_getreg32(dev, STM32_GTIM_CCR4_OFFSET);
+        return stm32_getreg32(priv, STM32_GTIM_CCR4_OFFSET);
 #endif
     }
 
@@ -653,34 +765,58 @@ const struct stm32_cap_priv_s stm32_tim2_priv =
 {
   .ops          = &stm32_cap_ops,
   .base         = STM32_TIM2_BASE,
-  .irg          = STM32_IRQ_TIM2,
-#define HAVE_ADANCED_TIM 1
+  .irq          = STM32_IRQ_TIM2,
+#ifdef USE_ADVENCED_TIM
   .irg_of       = -1,
 #endif
-  .gpio_clk     = GPIO_TIM2_CLKIN;
-  .channels     = {
-#if defined(GPIO_TIM2_CH1IN)
-                .gpio   = GPIO_TIM2_CH1IN;
-#endif
-#if defined(GPIO_TIM2_CH2IN)
-                .gpio   = GPIO_TIM2_CH2IN;
-                .ccmr = ( GPIO_TIM2_CH2_ICF   << ATIM_CCMR1_IC1F_SHIFT    )|\
-                        ( GPIO_TIM2_CH2_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-#if defined(GPIO_TIM2_CH3IN)
-                .gpio   = GPIO_TIM2_CH3IN;
-                .ccmr = ( GPIO_TIM2_CH3_ICF   << ATIM_CCMR1_IC1F_SHIFT    )|\
-                        ( GPIO_TIM2_CH3_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-#if defined(GPIO_TIM2_CH4IN)
-                .gpio   = GPIO_TIM2_CH4IN;
-                .ccmr = ( GPIO_TIM2_CH4_ICF   << ATIM_CCMR1_IC1F_SHIFT    )|\
-                        ( GPIO_TIM2_CH4_ICPSC << ATIM_CCMR1_IC1PSC_SHIFT  );
-#endif
-  }
 };
 #endif
 
+
+static inline const struct stm32_cap_priv_s * stm32_cap_get_priv(int timer)
+{
+  switch (timer)
+    {
+#ifdef CONFIG_STM32_TIM1_CAP
+      case 1: return &stm32_tim1_priv;
+#endif
+#ifdef CONFIG_STM32_TIM2_CAP
+      case 2: return &stm32_tim2_priv;
+#endif
+#ifdef CONFIG_STM32_TIM3_CAP
+      case 3: return &stm32_tim3_priv;
+#endif
+#ifdef CONFIG_STM32_TIM4_CAP
+      case 4: return &stm32_tim4_priv;
+#endif
+#ifdef CONFIG_STM32_TIM5_CAP
+      case 5: return &stm32_tim5_priv;
+#endif
+/* TIM6 and TIM7 cannot be used in capture */
+#ifdef CONFIG_STM32_TIM8_CAP
+      case 8: return &stm32_tim8_priv;
+#endif
+#ifdef CONFIG_STM32_TIM9_CAP
+      case 9: return &stm32_tim9_priv;
+#endif
+#ifdef CONFIG_STM32_TIM10_CAP
+      case 9: return &stm32_tim10_priv;
+#endif
+#ifdef CONFIG_STM32_TIM11_CAP
+      case 9: return &stm32_tim11_priv;
+#endif
+#ifdef CONFIG_STM32_TIM12_CAP
+      case 9: return &stm32_tim12_priv;
+#endif
+#ifdef CONFIG_STM32_TIM13_CAP
+      case 9: return &stm32_tim13_priv;
+#endif
+#ifdef CONFIG_STM32_TIM14_CAP
+      case 9: return &stm32_tim14_priv;
+#endif
+    }
+  return NULL;
+}
 
 /************************************************************************************
  * Public Function - Initialization
@@ -688,64 +824,21 @@ const struct stm32_cap_priv_s stm32_tim2_priv =
 
 FAR struct stm32_cap_dev_s *stm32_cap_init(int timer)
 {
-  struct stm32_cap_priv_s *priv = NULL;
+  const struct stm32_cap_priv_s *priv = stm32_cap_get_priv(timer);
+  uint32_t gpio;
 
-  /* Get structure and enable power */
-
-  switch (timer)
+  if ( priv )
     {
-#ifdef CONFIG_STM32_TIM1_CAP
-      case 1:
-        priv = &stm32_tim1_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM1EN);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM2_CAP
-      case 2:
-        priv = &stm32_tim2_priv;
-        modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM2EN);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM3_CAP
-      case 3:
-        priv = &stm32_tim3_priv;
-        modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM3EN);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM4_CAP
-      case 4:
-        priv = &stm32_tim4_priv;
-        modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM4EN);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM5_CAP
-      case 5:
-        priv = &stm32_tim5_priv;
-        modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_TIM5EN);
-        break;
-#endif
-/* TIM6 and TIM7 cannot be used in capture */
-#ifdef CONFIG_STM32_TIM8_CAP
-      case 8:
-        priv = &stm32_tim8_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM8EN);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM9_CAP
-      case 9:
-        priv = &stm32_tim9_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM8EN);
-        break;
-#endif
-      default:
-        return NULL;
+
+      stm32_cap_set_rcc(priv,true);
+
+      gpio = stm32_cap_gpio(priv,GPIO_CLK);
+      if (gpio)
+          stm32_configgpio(gpio);
+
+      // disable timer while is not configured 
+      stm32_modifyreg16(priv, STM32_BTIM_CR1_OFFSET, ATIM_CR1_CEN, 0);
     }
-
-  if (priv->gpio_clk)
-      stm32_configgpio(priv->gpio_clk)
-
-  // disable timer while is not configured 
-  stm32_modifyreg16(priv, STM32_BTIM_CR1_OFFSET, ATIM_CR1_CEN, 0);
 
   return (struct stm32_cap_dev_s *)priv;
 }
@@ -753,50 +846,18 @@ FAR struct stm32_cap_dev_s *stm32_cap_init(int timer)
 
 int stm32_cap_deinit(FAR struct stm32_cap_dev_s * dev)
 {
-  struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  const struct stm32_cap_priv_s *priv = (struct stm32_cap_priv_s *)dev;
+  uint32_t gpio;
   ASSERT(dev);
 
   // disable timer while is not configured 
-  stm32_modifyreg16(dev, STM32_BTIM_CR1_OFFSET, ATIM_CR1_CEN, 0);
+  stm32_modifyreg16(priv, STM32_BTIM_CR1_OFFSET, ATIM_CR1_CEN, 0);
 
-  if (priv->gpio_clk)
-      stm32_unconfiggpio(priv->gpio_clk)
+  gpio = stm32_cap_gpio(priv,GPIO_CLK);
+  if (gpio)
+      stm32_unconfiggpio(gpio);
 
-  switch (priv->base)
-    {
-#ifdef CONFIG_STM32_TIM2_CAP
-      case STM32_TIM2_BASE:
-        modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM2EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM3_CAP
-      case STM32_TIM3_BASE:
-        modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM3EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM4_CAP
-      case STM32_TIM4_BASE:
-        modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM4EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM5_CAP
-      case STM32_TIM5_BASE:
-        modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_TIM5EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM1_CAP
-      case STM32_TIM1_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM8_CAP
-      case STM32_TIM8_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM8EN, 0);
-        break;
-#endif
-      default:
-        return ERROR;
-    }
+  stm32_cap_set_rcc(priv,false);
 
   return OK;
 }

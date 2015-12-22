@@ -53,13 +53,13 @@
  ************************************************************************************/
 /* Helpers **************************************************************************/
 
-#define STM32_TIM_SETCLOCK(d,freq)          ((d)->ops->setclock(d,freq))
-#define STM32_TIM_SETCHANNEL(d,ch,mode)     ((d)->ops->setchannel(d,ch,mode))
-#define STM32_TIM_GETCAPTURE(d,ch)          ((d)->ops->getcapture(d,ch))
-#define STM32_TIM_SETISR(d,hnd,s)           ((d)->ops->setisr(d,hnd,s))
-#define STM32_TIM_ENABLEINT(d,s,on)         ((d)->ops->enableint(d,s,on))
-#define STM32_TIM_ACKFLAGS(d,s)             ((d)->ops->ackflags(d,s))
-#define STM32_TIM_GETFLAGS(d)               ((d)->ops->getflags(d))
+#define STM32_CAP_SETCLOCK(d,clk_src,psc,max)   ((d)->ops->setclock(d,clk_src,psc,max))
+#define STM32_CAP_SETCHANNEL(d,ch,cfg)          ((d)->ops->setchannel(d,ch,cfg))
+#define STM32_CAP_GETCAPTURE(d,ch)              ((d)->ops->getcapture(d,ch))
+#define STM32_CAP_SETISR(d,hnd)                 ((d)->ops->setisr(d,hnd))
+#define STM32_CAP_ENABLEINT(d,s,on)             ((d)->ops->enableint(d,s,on))
+#define STM32_CAP_ACKFLAGS(d,f)                 ((d)->ops->ackflags(d,f))
+#define STM32_CAP_GETFLAGS(d)                   ((d)->ops->getflags(d))
 
 /************************************************************************************
  * Public Types
@@ -131,7 +131,7 @@ typedef enum
 
 } stm32_cap_ch_cfg_t;
 
-/* TIM clock sources */
+/* Capture clock sources */
 
 typedef enum
 {
@@ -143,13 +143,13 @@ typedef enum
   
 } stm32_cap_clk_t;
 
-/* TIM Sources */
+/* Capture flags */
 
 typedef enum
 {
   /* One of the following */
 
-  STM32_CAP_FLAG_IRQ_TIMER      = (GTIM_SR_UIF),
+  STM32_CAP_FLAG_IRG_COUNTER    = (GTIM_SR_UIF),
 
   STM32_CAP_FLAG_IRQ_CH_1       = (GTIM_SR_CC1IF),
   STM32_CAP_FLAG_IRQ_CH_2       = (GTIM_SR_CC2IF),
@@ -163,16 +163,20 @@ typedef enum
 
 } stm32_cap_flags_t;
 
+#define STM32_CAP_FLAG_IRQ_CH(ch)   (GTIM_SR_CC1IF<<((ch)-1))
+#define STM32_CAP_FLAG_OF_CH(ch)    (GTIM_SR_CC1OF<<((ch)-1))
         
-/* TIM Operations */
+/* Capture Operations */
 
 struct stm32_cap_ops_s
 {
-  int  (*setclock)(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_src_t clk_src, 
-                   uint32_t prescaler);
-  int  (*setchannel)(FAR struct stm32_cap_dev_s *dev, uint8_t channel);
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev,xcpt_t handler); 
-  void (*enableint)(FAR struct stm32_tim_dev_s *dev, stm32_cap_flags_t src, bool on );
+  int  (*setclock)(  FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t clk, uint32_t prescaler, uint32_t max);
+  int  (*setchannel)(FAR struct stm32_cap_dev_s *dev, uint8_t channel, stm32_cap_ch_cfg_t cfg);
+  int  (*getcapture)(FAR struct stm32_cap_dev_s *dev, uint8_t channel);
+  int  (*setisr)(    FAR struct stm32_cap_dev_s *dev, xcpt_t handler); 
+  void (*enableint)( FAR struct stm32_cap_dev_s *dev, stm32_cap_flags_t src, bool on );
+  void (*ackflags)(  FAR struct stm32_cap_dev_s *dev, int flags);
+  stm32_cap_flags_t (*getflags)(FAR struct stm32_cap_dev_s *dev);
 };
 
 /************************************************************************************
@@ -194,4 +198,4 @@ int stm32_cap_deinit(FAR struct stm32_cap_dev_s * dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_TIM_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_CAPTURE_H */
