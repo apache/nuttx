@@ -55,16 +55,16 @@
  ************************************************************************************/
 /* Helpers **************************************************************************/
 
-#define STM32_TIM_SETMODE(d,mode)           ((d)->ops->setmode(d,mode))
-#define STM32_TIM_SETCLOCK(d,freq)          ((d)->ops->setclock(d,freq))
-#define STM32_TIM_SETPERIOD(d,period)       ((d)->ops->setperiod(d,period))
-#define STM32_TIM_SETCHANNEL(d,ch,mode)     ((d)->ops->setchannel(d,ch,mode))
-#define STM32_TIM_SETCOMPARE(d,ch,comp)     ((d)->ops->setcompare(d,ch,comp))
-#define STM32_TIM_GETCAPTURE(d,ch)          ((d)->ops->getcapture(d,ch))
-#define STM32_TIM_SETISR(d,hnd,s)           ((d)->ops->setisr(d,hnd,s))
-#define STM32_TIM_ENABLEINT(d,s)            ((d)->ops->enableint(d,s))
-#define STM32_TIM_DISABLEINT(d,s)           ((d)->ops->disableint(d,s))
-#define STM32_TIM_ACKINT(d,s)               ((d)->ops->ackint(d,s))
+#define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
+#define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
+#define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
+#define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
+#define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
+#define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
+#define STM32_TIM_SETISR(d,hnd,s)       ((d)->ops->setisr(d,hnd,s))
+#define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
+#define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
+#define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 
 /************************************************************************************
  * Public Types
@@ -176,6 +176,7 @@ struct stm32_tim_ops_s
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
+  int  (*setcapturecfg)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint8_t capt_filter, uint8_t capt_prescaler);
 };
 
 /************************************************************************************
