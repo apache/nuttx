@@ -1433,6 +1433,7 @@ config STM32_STM32F407
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1600,6 +1601,10 @@ config STM32_HAVE_UART8
 	default n
 
 config STM32_HAVE_TIM1
+	bool
+	default n
+
+config STM32_HAVE_TIM2
 	bool
 	default n
 
@@ -5121,17 +5126,7 @@ config STM32_TIM14_DAC2
 endchoice
 
 config STM32_TIM1_CAP
-	bool "TIM1 Capture
-	default n
-	depends on STM32_HAVE_TIM1
-	---help---
-		Reserve timer 1 for use by Capture 
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32_TIM1_CAP
-	bool "TIM1 Capture
+	bool "TIM1 Capture"
 	default n
 	depends on STM32_HAVE_TIM1
 	---help---
@@ -5141,7 +5136,7 @@ config STM32_TIM1_CAP
 		to capture input.
 
 config STM32_TIM2_CAP
-	bool "TIM2 Capture
+	bool "TIM2 Capture"
 	default n
 	depends on STM32_HAVE_TIM2
 	---help---
@@ -5151,7 +5146,7 @@ config STM32_TIM2_CAP
 		to capture input.
 
 config STM32_TIM3_CAP
-	bool "TIM3 Capture
+	bool "TIM3 Capture"
 	default n
 	depends on STM32_HAVE_TIM3
 	---help---
@@ -5161,7 +5156,7 @@ config STM32_TIM3_CAP
 		to capture input.
 
 config STM32_TIM4_CAP
-	bool "TIM4 Capture
+	bool "TIM4 Capture"
 	default n
 	depends on STM32_HAVE_TIM4
 	---help---
@@ -5171,7 +5166,7 @@ config STM32_TIM4_CAP
 		to capture input.
 
 config STM32_TIM5_CAP
-	bool "TIM5 Capture
+	bool "TIM5 Capture"
 	default n
 	depends on STM32_HAVE_TIM5
 	---help---
@@ -5181,7 +5176,7 @@ config STM32_TIM5_CAP
 		to capture input.
 
 config STM32_TIM8_CAP
-	bool "TIM8 Capture
+	bool "TIM8 Capture"
 	default n
 	depends on STM32_HAVE_TIM8
 	---help---
@@ -5191,7 +5186,7 @@ config STM32_TIM8_CAP
 		to capture input.
 
 config STM32_TIM9_CAP
-	bool "TIM9 Capture
+	bool "TIM9 Capture"
 	default n
 	depends on STM32_HAVE_TIM9
 	---help---
@@ -5201,7 +5196,7 @@ config STM32_TIM9_CAP
 		to capture input.
 
 config STM32_TIM10_CAP
-	bool "TIM10 Capture
+	bool "TIM10 Capture"
 	default n
 	depends on STM32_HAVE_TIM10
 	---help---
@@ -5211,7 +5206,7 @@ config STM32_TIM10_CAP
 		to capture input.
 
 config STM32_TIM11_CAP
-	bool "TIM11 Capture
+	bool "TIM11 Capture"
 	default n
 	depends on STM32_HAVE_TIM11
 	---help---
@@ -5221,7 +5216,7 @@ config STM32_TIM11_CAP
 		to capture input.
 
 config STM32_TIM12_CAP
-	bool "TIM12 Capture
+	bool "TIM12 Capture"
 	default n
 	depends on STM32_HAVE_TIM12
 	---help---
@@ -5231,7 +5226,7 @@ config STM32_TIM12_CAP
 		to capture input.
 
 config STM32_TIM13_CAP
-	bool "TIM13 Capture
+	bool "TIM13 Capture"
 	default n
 	depends on STM32_HAVE_TIM13
 	---help---
@@ -5241,7 +5236,7 @@ config STM32_TIM13_CAP
 		to capture input.
 
 config STM32_TIM14_CAP
-	bool "TIM14 Capture
+	bool "TIM14 Capture"
 	default n
 	depends on STM32_HAVE_TIM14
 	---help---
