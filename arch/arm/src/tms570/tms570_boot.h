@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samv7/tms570_start.h
+ * arch/arm/src/tms570/tms570_boot.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_START_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_START_H
+#ifndef __ARCH_ARM_SRC_TMS570_SAM_BOOT_H
+#define __ARCH_ARM_SRC_TMS570_SAM_BOOT_H
 
 /************************************************************************************
  * Included Files
@@ -139,4 +139,4 @@ void tms570_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_START_H */
+#endif /* __ARCH_ARM_SRC_TMS570_SAM_BOOT_H */

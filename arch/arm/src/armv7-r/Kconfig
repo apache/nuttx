@@ -172,9 +172,14 @@ config ARMV7R_OABI_TOOLCHAIN
 		Most of the older buildroot toolchains are OABI and are named
 		arm-nuttx-elf- vs. arm-nuttx-eabi-
 
+config ARMV7R_HAVE_DECODEFIQ
+	bool
+	default n
+
 config ARMV7R_DECODEFIQ
 	bool "FIQ Handler"
 	default n
+	depends on ARMV7R_HAVE_DECODEFIQ
 	---help---
 		Select this option if your platform supports the function
 		arm_decodefiq().

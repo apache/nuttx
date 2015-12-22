@@ -1,8 +1,14 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/arm_signal_dispatch.c
+ * arch/arm/src/tms570/tms570_selftest.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Most logic in this file was leveraged from TI's Project0 which has a
+ * compatible BSD license:
+ *
+ *   Copyright (c) 2012, Texas Instruments Incorporated
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,25 +44,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
-#include "svcall.h"
-#include "pgalloc.h"
-#include "up_internal.h"
+#include "tms570_selftest.h"
 
-#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-      defined(CONFIG_BUILD_PROTECTED)) && !defined(CONFIG_DISABLE_SIGNALS)
+#ifdef CONFIG_TMS570_SELFTEST
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,56 +58,90 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_signal_dispatch
+ * Name: tms570_memtest_selftest
  *
  * Description:
- *   In the protected mode build, this function will be called to execute a
- *   a signal handler in user-space.  When the signal is delivered, a
- *   kernel-mode stub will first run to perform some housekeeping functions.
- *   This kernel-mode stub will then be called transfer control to the user
- *   mode signal handler by calling this function.
+ *   Run a diagnostic check on the memory self-test controller.
  *
- *   Normally the a user-mode signalling handling stub will also execute
- *   before the ultimate signal handler is called.  See
- *   arch/arm/src/armv[6\7]/up_signal_handler.  This function is the
- *   user-space, signal handler trampoline function.  It is called from
- *   up_signal_dispatch() in user-mode.
- *
- * Inputs:
- *   sighand - The address user-space signal handling function
- *   signo, info, and ucontext - Standard arguments to be passed to the
- *     signal handling function.
- *
- * Return:
- *   None.  This function does not return in the normal sense.  It returns
- *   via an architecture specific system call made by up_signal_handler().
- *   However, this will look like a normal return by the caller of
- *   up_signal_dispatch.
+ *   This function chooses a RAM test algorithm and runs it on an on-chip
+ *   ROM.  The memory self-test is expected to fail. The function ensures
+ *   that the PBIST controller is capable of detecting and indicating a
+ *   memory self-test failure.
  *
  ****************************************************************************/
 
-void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
-                        FAR siginfo_t *info, FAR void *ucontext)
+void tms570_memtest_selftest(void)
 {
-  /* We are signalling a user group, but does the signal handler lie in the
-   * user address space?  Or the kernel address space?  The OS does
-   * intercept some signals for its own purpose (such as the death-of-child
-   * signal.
-   */
-
-  if (arm_uservaddr((uintptr_t)sighand))
-    {
-      /* Yes.. Let sys_call4() do all of the work to get us into user space */
-
-      (void)sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
-                      (uintptr_t)info, (uintptr_t)ucontext);
-    }
-  else
-    {
-      /* No.. we are already in kernel mode so just call the handler */
-
-      sighand(signo, info, ucontext);
-    }
+#warning Missing Logic
 }
 
-#endif /* (CONFIG_BUILD_PROTECTED || CONFIG_BUILD_PROTECTED) && !CONFIG_DISABLE_SIGNALS */
+/****************************************************************************
+ * Name: tms570_memtest_start
+ *
+ * Description:
+ *   Start the memory test on the selecte set of RAMs.  This test does not
+ *   return until the memory test is completed.
+ *
+ * Input Paramters:
+ *   rinfol - The OR of each RAM grouping bit.  See the PBIST_RINFOL*
+ *     definitions in chip/tms570_pbist.h
+ *
+ ****************************************************************************/
+
+void tms570_memtest_start(uint32_t rinfol)
+{
+#warning Missing Logic
+}
+
+/****************************************************************************
+ * Name: tms570_memtest_complete
+ *
+ * Description:
+ *   Wait for memory self-test to complete and return the result.
+ *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int tms570_memtest_complete(void)
+{
+#warning Missing Logic
+  return 0;
+}
+
+/****************************************************************************
+ * Name: tms570_efc_selftest_start
+ *
+ * Description:
+ *   Run eFuse controller start-up checks and start eFuse controller ECC
+ *   self-test.  This includes a check for the eFuse controller error
+ *   outputs to  be stuck-at-zero.
+ *
+ ****************************************************************************/
+
+void tms570_efc_selftest_start(void)
+{
+#warning Missing Logic
+}
+
+/****************************************************************************
+ * Name: tms570_efc_selftest_complete
+ *
+ * Description:
+ *   Wait for eFuse controller self-test to complete and return the result.
+ *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int tms570_efc_selftest_complete(void)
+{
+#warning Missing Logic
+  return 0;
+}
+
+#endif /* CONFIG_TMS570_SELFTEST */

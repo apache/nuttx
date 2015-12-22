@@ -128,7 +128,7 @@ arm_vectorirq:
 	ldr		r0, .Lirqtmp			/* Points to temp storage */
 	ldmia	r0, {r3, r4}			/* Recover r3=lr_IRQ, r4=spsr_IRQ */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
@@ -204,7 +204,7 @@ arm_vectorirq:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr		spsr, r1				/* Set the return mode SPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
@@ -265,7 +265,7 @@ arm_vectorsvc:
 	mov		r3, r14					/* Save r14 as the PC as well */
 	mrs		r4, spsr				/* Get the saved CPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
@@ -333,7 +333,7 @@ arm_vectorsvc:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr		spsr, r1				/* Set the return mode SPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
@@ -407,7 +407,7 @@ arm_vectordata:
 	ldr		r0, .Ldaborttmp			/* Points to temp storage */
 	ldmia	r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
@@ -477,7 +477,7 @@ arm_vectordata:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
@@ -553,7 +553,7 @@ arm_vectorprefetch:
 	ldr		r0, .Lpaborttmp			/* Points to temp storage */
 	ldmia	r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
@@ -623,7 +623,7 @@ arm_vectorprefetch:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
@@ -696,7 +696,7 @@ arm_vectorundefinsn:
 	ldr		r0, .Lundeftmp			/* Points to temp storage */
 	ldmia	r0, {r3, r4}			/* Recover r3=lr_UND, r4=spsr_UND */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
@@ -764,7 +764,7 @@ arm_vectorundefinsn:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
@@ -839,7 +839,7 @@ arm_vectorfiq:
 	ldr		r0, .Lfiqtmp			/* Points to temp storage */
 	ldmia	r0, {r3, r4}			/* Recover r3=lr_SVC, r4=spsr_SVC */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode rr13(sp) and r14(lr).
 	 */
@@ -885,7 +885,7 @@ arm_vectorfiq:
 	stmia	r0, {r1-r4}
 #endif
 
-	/* Then call the IRQ handler with interrupts disabled. */
+	/* Then call the FIQ handler with interrupts disabled. */
 
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */
@@ -915,7 +915,7 @@ arm_vectorfiq:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr		spsr, r1				/* Set the return mode SPSR */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */

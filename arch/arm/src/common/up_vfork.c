@@ -249,6 +249,16 @@ pid_t up_vfork(const struct vfork_s *context)
             parent->xcp.syscall[index].cpsr;
 
 #  endif
+
+#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
+      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
+      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
+#  ifdef CONFIG_BUILD_PROTECTED
+
+          child->cmn.xcp.syscall[index].cpsr =
+            parent->xcp.syscall[index].cpsr;
+
+#  endif
 #elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
       defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM7)
 

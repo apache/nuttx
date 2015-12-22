@@ -225,13 +225,13 @@ void arm_boot(void)
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Run a diagnostic check on the memory self-test controller. */
-#  warning Missing logic
 
-  /* Run PBIST on CPU RAM. */
-#  warning Missing logic
+  tms570_memtest_selftest();
 
-  /* Disable PBIST clocks and disable memory self-test mode */
-#  warning Missing logic
+  /* Run the memory selftest on CPU RAM. */
+
+  tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM)
+  ASSERT(tms570_memtest_complete() == 0);
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Initialize CPU RAM. */
@@ -244,11 +244,32 @@ void arm_boot(void)
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Perform PBIST on all dual-port memories */
-#warning Missing logic
+
+  tms570_memtest_start(PBIST_RINFOL_VIM_RAM
+#ifdef CONFIG_TMS570_DCAN1
+                       | PBIST_RINFOL_DCAN1_RAM
+#endif
+#ifdef CONFIG_TMS570_DCAN2
+                       | PBIST_RINFOL_DCAN2_RAM
+#endif
+#ifdef CONFIG_TMS570_MIBASPI1
+                       | PBIST_RINFOL_MIBSPI1_RAM
+#endif
+#ifdef CONFIG_TMS570_MIBASPI1
+                       | PBIST_RINFOL_MIBADC_RAM
+#endif
+#ifdef CONFIG_TMS570_N2HET
+                       | PBIST_RINFOL_N2HET_RAM
+                       | PBIST_RINFOL_HET_TU_RAM
+#endif
+                      );
 
   /* Test the CPU ECC mechanism for RAM accesses. */
 #warning Missing logic
 
+  /* Wait for the memory test to complete */
+
+  ASSERT(tms570_memtest_complete() == 0);
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Release the MibSPI1 modules from local reset. */

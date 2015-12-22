@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tms570/tms570_clockconfig.h
+ * arch/arm/src/tms570/tms570_irq.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_TMS570_SAM_IRQ_H
+#define __ARCH_ARM_SRC_TMS570_SAM_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Public Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -62,16 +62,33 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tms570_clockconfig
+ * Name: tms570_vim_channel
  *
  * Description:
- *   Called to initialize TMS570 clocking.  This does whatever setup is needed to
- *   put the SoC in a usable state.  This includes, but is not limited to, the
- *   initialization of clocking using the settings in the board.h header file.
+ *   Allocate a VIM channel and assign it to the 'request'.
+ *
+ * Input Parameters:
+ *   request - The interrupt request to be mapped to a channel
+ *
+ * Returned Value:
+ *   One sucess, the allocated channel number is returned.  A negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 
-void tms570_clockconfig(void);
+int tms570_vim_channel(int request);
+
+/****************************************************************************
+ * Name: up_enable_fiq
+ *
+ * Description:
+ *   Enable the FIQ specified by 'channel'
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARMV7R_HAVE_DECODEFIQ
+void up_enable_fiq(int channel);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -79,4 +96,4 @@ void tms570_clockconfig(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_TMS570_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_TMS570_SAM_IRQ_H */

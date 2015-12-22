@@ -54,11 +54,11 @@
 
 /* Configuration ********************************************************************/
 /* This logic uses one system call for the syscall return.  So a minimum of one
- * syscall values must be reserved.  If CONFIG_BUILD_KERNEL is defined, then four
+ * syscall values must be reserved.  If CONFIG_BUILD_PROTECTED is defined, then four
  * more syscall values must be reserved.
  */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 #  ifndef CONFIG_SYS_RESERVED
 #    error "CONFIG_SYS_RESERVED must be defined to have the value 6"
 #  elif CONFIG_SYS_RESERVED != 6
@@ -81,7 +81,7 @@
 
 #define SYS_syscall_return        (0)
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 /* SYS call 1:
  *
  * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
@@ -120,7 +120,7 @@
 
 #define SYS_signal_handler_return (5)
 
-#endif /* CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 
 /************************************************************************************
  * Inline Functions
