@@ -100,6 +100,63 @@
 #  define localtime_r(c,r)   gmtime_r(c,r)
 #endif
 
+/* The following are non-standard interfaces in the sense that they are not
+ * in POSIX.1-2001. These interfaces are present on most BSD derivatives,
+ * however, including Linux.
+ */
+
+/* void timeradd(struct timeval *a, struct timeval *b, struct timeval *res); */
+
+#define timeradd(tvp, uvp, vvp) \
+  do \
+    { \
+      (vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec; \
+      (vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec; \
+      if ((vvp)->tv_usec >= 1000000) \
+        { \
+          (vvp)->tv_sec++; \
+          (vvp)->tv_usec -= 1000000; \
+        } \
+    } \
+  while (0)
+
+/* void timersub(struct timeval *a, struct timeval *b, struct timeval *res); */
+
+#define timersub(tvp, uvp, vvp) \
+  do \
+    { \
+      (vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec; \
+      (vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec; \
+      if ((vvp)->tv_usec < 0) \
+        { \
+          (vvp)->tv_sec--; \
+          (vvp)->tv_usec += 1000000; \
+        } \
+    } \
+  while (0)
+
+/* void timerclear(struct timeval *tvp); */
+
+#define timerclear(tvp) \
+  do \
+    { \
+      tvp)->tv_sec = 0; \
+      tvp)->tv_usec = 0; \
+    } \
+  while (0)
+
+/* int timerisset(struct timeval *tvp); */
+
+#define timerisset(tvp) \
+  ((tvp)->tv_sec != 0 || (tvp)->tv_usec != 0)
+
+/* int timercmp(struct timeval *a, struct timeval *b, CMP); */
+
+#define timercmp(tvp, uvp, cmp) \
+  (((tvp)->tv_sec == (uvp)->tv_sec) ? \
+   ((tvp)->tv_usec cmp (uvp)->tv_usec) : \
+   ((tvp)->tv_sec cmp (uvp)->tv_sec))
+
 /********************************************************************************
  * Public Types
  ********************************************************************************/

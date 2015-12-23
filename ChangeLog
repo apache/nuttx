@@ -11247,4 +11247,8 @@
 	* waitpid:  CRITICAL BUGFIX.  Add a reference count to prevent waitpid
 	  from using stale memory released by the waited-for task group
 	  (2015-12-22).
+	* time.h: Add timeradd(), timersub(), timerclear(), timerisset(),
+	  and timercmp() as macros. These are non-POSIX interfaces, but
+	  included in most BSD deriviatives, included Linux.  From Manuel Stühn
+	  (2015-12-23).
 
