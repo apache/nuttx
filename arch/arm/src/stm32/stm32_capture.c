@@ -179,7 +179,6 @@ static inline void stm32_putreg32(FAR const struct stm32_cap_priv_s *priv, uint8
 /************************************************************************************
  * gpio Functions
  ************************************************************************************/
-#define GPIO_CLK -1
 static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, int channel)
 {
 
@@ -190,19 +189,19 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, i
         switch (channel)
           {
 #ifdef GPIO_TIM1_EXT_CLK_IN
-            case GPIO_CLK: return GPIO_TIM1_EXT_CLK_IN;
+            case STM32_CAP_CHANNEL_COUNTER: return GPIO_TIM1_EXT_CLK_IN;
 #endif
-#if defined(GPIO_TIM1_CH1IN)
-            case 0: return GPIO_TIM1_CH1IN;
+#ifdef GPIO_TIM1_CH1IN
+            case 1: return GPIO_TIM1_CH1IN;
 #endif
-#if defined(GPIO_TIM1_CH2IN)
-            case 1: return GPIO_TIM1_CH2IN;
+#ifdef GPIO_TIM1_CH2IN
+            case 2: return GPIO_TIM1_CH2IN;
 #endif
-#if defined(GPIO_TIM1_CH3IN)
-            case 2: return GPIO_TIM1_CH3IN;
+#ifdef GPIO_TIM1_CH3IN
+            case 3: return GPIO_TIM1_CH3IN;
 #endif
-#if defined(GPIO_TIM1_CH4IN)
-            case 3: return GPIO_TIM1_CH4IN;
+#ifdef GPIO_TIM1_CH4IN
+            case 4: return GPIO_TIM1_CH4IN;
 #endif
           }
         break;
@@ -212,19 +211,19 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, i
         switch (channel)
           {
 #ifdef GPIO_TIM2_EXT_CLK_IN
-            case GPIO_CLK: return GPIO_TIM2_EXT_CLK_IN;
+            case STM32_CAP_CHANNEL_COUNTER: return GPIO_TIM2_EXT_CLK_IN;
 #endif
-#if defined(GPIO_TIM2_CH1IN)
-            case 0: return GPIO_TIM2_CH1IN;
+#ifdef GPIO_TIM2_CH1IN
+            case 1: return GPIO_TIM2_CH1IN;
 #endif
-#if defined(GPIO_TIM2_CH2IN)
-            case 1: return GPIO_TIM2_CH2IN;
+#ifdef GPIO_TIM2_CH2IN
+            case 2: return GPIO_TIM2_CH2IN;
 #endif
-#if defined(GPIO_TIM2_CH3IN)
-            case 2: return GPIO_TIM2_CH3IN;
+#ifdef GPIO_TIM2_CH3IN
+            case 3: return GPIO_TIM2_CH3IN;
 #endif
-#if defined(GPIO_TIM2_CH4IN)
-            case 3: return GPIO_TIM2_CH4IN;
+#ifdef GPIO_TIM2_CH4IN
+            case 4: return GPIO_TIM2_CH4IN;
 #endif
           }
         break;
@@ -234,19 +233,19 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, i
         switch (channel)
           {
 #ifdef GPIO_TIM3_EXT_CLK_IN
-            case GPIO_CLK: return GPIO_TIM3_EXT_CLK_IN;
+            case STM32_CAP_CHANNEL_COUNTER: return GPIO_TIM3_EXT_CLK_IN;
 #endif
-#if defined(GPIO_TIM3_CH1IN)
-            case 0: return GPIO_TIM3_CH1IN;
+#ifdef GPIO_TIM3_CH1IN
+            case 1: return GPIO_TIM3_CH1IN;
 #endif
-#if defined(GPIO_TIM3_CH2IN)
-            case 1: return GPIO_TIM3_CH2IN;
+#ifdef GPIO_TIM3_CH2IN
+            case 2: return GPIO_TIM3_CH2IN;
 #endif
-#if defined(GPIO_TIM3_CH3IN)
-            case 2: return GPIO_TIM3_CH3IN;
+#ifdef GPIO_TIM3_CH3IN
+            case 3: return GPIO_TIM3_CH3IN;
 #endif
-#if defined(GPIO_TIM3_CH4IN)
-            case 3: return GPIO_TIM3_CH4IN;
+#ifdef GPIO_TIM3_CH4IN
+            case 4: return GPIO_TIM3_CH4IN;
 #endif
           }
         break;
@@ -256,19 +255,19 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, i
         switch (channel)
           {
 #ifdef GPIO_TIM4_EXT_CLK_IN
-            case GPIO_CLK: return GPIO_TIM4_EXT_CLK_IN;
+            case STM32_CAP_CHANNEL_COUNTER: return GPIO_TIM4_EXT_CLK_IN;
 #endif
-#if defined(GPIO_TIM4_CH1IN)
-            case 0: return GPIO_TIM4_CH1IN;
+#ifdef GPIO_TIM4_CH1IN
+            case 1: return GPIO_TIM4_CH1IN;
 #endif
-#if defined(GPIO_TIM4_CH2IN)
-            case 1: return GPIO_TIM4_CH2IN;
+#ifdef GPIO_TIM4_CH2IN
+            case 2: return GPIO_TIM4_CH2IN;
 #endif
-#if defined(GPIO_TIM4_CH3IN)
-            case 2: return GPIO_TIM4_CH3IN;
+#ifdef GPIO_TIM4_CH3IN
+            case 3: return GPIO_TIM4_CH3IN;
 #endif
-#if defined(GPIO_TIM4_CH4IN)
-            case 3: return GPIO_TIM4_CH4IN;
+#ifdef GPIO_TIM4_CH4IN
+            case 4: return GPIO_TIM4_CH4IN;
 #endif
           }
         break;
@@ -278,19 +277,19 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, i
         switch (channel)
           {
 #ifdef GPIO_TIM5_EXT_CLK_IN
-            case GPIO_CLK: return GPIO_TIM5_EXT_CLK_IN;
+            case STM32_CAP_CHANNEL_COUNTER: return GPIO_TIM5_EXT_CLK_IN;
 #endif
-#if defined(GPIO_TIM5_CH1IN)
-            case 0: return GPIO_TIM5_CH1IN;
+#ifdef GPIO_TIM5_CH1IN
+            case 1: return GPIO_TIM5_CH1IN;
 #endif
-#if defined(GPIO_TIM5_CH2IN)
-            case 1: return GPIO_TIM5_CH2IN;
+#ifdef GPIO_TIM5_CH2IN
+            case 2: return GPIO_TIM5_CH2IN;
 #endif
-#if defined(GPIO_TIM5_CH3IN)
-            case 2: return GPIO_TIM5_CH3IN;
+#ifdef GPIO_TIM5_CH3IN
+            case 3: return GPIO_TIM5_CH3IN;
 #endif
-#if defined(GPIO_TIM5_CH4IN)
-            case 3: return GPIO_TIM5_CH4IN;
+#ifdef GPIO_TIM5_CH4IN
+            case 4: return GPIO_TIM5_CH4IN;
 #endif
           }
         break;
@@ -301,19 +300,19 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv, i
         switch (channel)
           {
 #ifdef GPIO_TIM8_EXT_CLK_IN
-            case GPIO_CLK: return GPIO_TIM8_EXT_CLK_IN;
+            case STM32_CAP_CHANNEL_COUNTER: return GPIO_TIM8_EXT_CLK_IN;
 #endif
-#if defined(GPIO_TIM8_CH1IN)
-            case 0: return GPIO_TIM8_CH1OUIN ;
+#ifdef GPIO_TIM8_CH1IN
+            case 1: return GPIO_TIM8_CH1IN ;
 #endif
-#if defined(GPIO_TIM8_CH2IN)
-            case 1: return GPIO_TIM8_CH2OUIN ;
+#ifdef GPIO_TIM8_CH2IN
+            case 2: return GPIO_TIM8_CH2IN ;
 #endif
-#if defined(GPIO_TIM8_CH3IN)
-            case 2: return GPIO_TIM8_CH3OUIN ;
+#ifdef GPIO_TIM8_CH3IN
+            case 3: return GPIO_TIM8_CH3IN ;
 #endif
-#if defined(GPIO_TIM8_CH4IN)
-            case 3: return GPIO_TIM8_CH4OUIN ;
+#ifdef GPIO_TIM8_CH4IN
+            case 4: return GPIO_TIM8_CH4IN ;
 #endif
           }
         break;
@@ -553,16 +552,16 @@ static void stm32_cap_enableint(FAR struct stm32_cap_dev_s *dev,
   uint16_t mask = 0;
   ASSERT(dev);
 
-  if (src & STM32_CAP_FLAG_IRG_COUNTER)
+  if (src & STM32_CAP_FLAG_IRQ_COUNTER)
       mask |= ATIM_DIER_UIE;
   if (src & STM32_CAP_FLAG_IRQ_CH_1)
       mask |= ATIM_DIER_CC1IE;
   if (src & STM32_CAP_FLAG_IRQ_CH_2)
-      mask |= ATIM_DIER_CC1IE;
+      mask |= ATIM_DIER_CC2IE;
   if (src & STM32_CAP_FLAG_IRQ_CH_3)
-      mask |= ATIM_DIER_CC1IE;
+      mask |= ATIM_DIER_CC3IE;
   if (src & STM32_CAP_FLAG_IRQ_CH_4)
-      mask |= ATIM_DIER_CC1IE;
+      mask |= ATIM_DIER_CC4IE;
 
   /* Not IRQ on channel overflow */
 
@@ -578,7 +577,7 @@ static void stm32_cap_ackflags(FAR struct stm32_cap_dev_s *dev, int flags)
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint16_t mask = 0;
 
-  if (flags & STM32_CAP_FLAG_IRG_COUNTER)
+  if (flags & STM32_CAP_FLAG_IRQ_COUNTER)
       mask |= ATIM_SR_UIF;
 
   if (flags & STM32_CAP_FLAG_IRQ_CH_1)
@@ -612,7 +611,7 @@ static stm32_cap_flags_t stm32_cap_getflags(FAR struct stm32_cap_dev_s *dev)
   regval = stm32_getreg16(priv, STM32_BTIM_SR_OFFSET);
 
   if (regval & ATIM_SR_UIF)
-      flags |= STM32_CAP_FLAG_IRG_COUNTER;
+      flags |= STM32_CAP_FLAG_IRQ_COUNTER;
 
   if (regval & ATIM_SR_CC1IF)
       flags |= STM32_CAP_FLAG_IRQ_CH_1;
@@ -647,6 +646,7 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
   uint32_t gpio = 0;
   uint16_t mask;
   uint16_t regval;
+  uint16_t ccer_en_bit;
 
   ASSERT(dev);
 
@@ -655,31 +655,47 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
   if ( gpio == 0 ) 
       return ERROR;
 
+  if ((cfg & STM32_CAP_MAPPED_MASK ) == 0)
+      return ERROR; /* MAPPED not selected */
+
   /* change to zero base index */
   channel--;
 
-  /* Set ccer */
+  /* Set ccer :
+   *
+   * GTIM_CCER_CCxE Is written latter to allow writing CCxS bits.
+   * 
+   */
+
   switch (cfg & STM32_CAP_EDGE_MASK)
     {
       case STM32_CAP_EDGE_DISABLED:
         regval = 0;
+        ccer_en_bit = 0;
         break;
       case STM32_CAP_EDGE_RISING:
-        regval = GTIM_CCER_CC1E;
+        ccer_en_bit = GTIM_CCER_CC1E;
+        regval      = 0;
         break;
       case STM32_CAP_EDGE_FALLING:
-        regval = GTIM_CCER_CC1E | GTIM_CCER_CC1P;
+        ccer_en_bit = GTIM_CCER_CC1E;
+        regval      = GTIM_CCER_CC1P;
         break;
       case STM32_CAP_EDGE_BOTH:
-        regval = GTIM_CCER_CC1E | GTIM_CCER_CC1P | GTIM_CCER_CC1NP;
+        ccer_en_bit = GTIM_CCER_CC1E;
+        regval      = GTIM_CCER_CC1P | GTIM_CCER_CC1NP;
         break;
       default:
         return ERROR;
     }
 
+  /* Shift all CCER bits to corresponding channel */
+
   mask = (GTIM_CCER_CC1E | GTIM_CCER_CC1P | GTIM_CCER_CC1NP);
-  mask   <<= (channel << 2);
-  regval <<= (channel << 2);
+  mask          <<= (channel << 2);
+  regval        <<= (channel << 2);
+  ccer_en_bit   <<= (channel << 2);
+
   stm32_modifyreg16(priv,STM32_GTIM_CCER_OFFSET,mask,regval);
 
   /* Set ccmr */
@@ -694,6 +710,7 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
       mask <<= 8;
     }
 
+
   if (channel < 2)
       stm32_modifyreg16(priv,STM32_GTIM_CCMR1_OFFSET,mask,regval);
   else
@@ -706,6 +723,10 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
   else
       stm32_configgpio(gpio);
 
+  /* Enable this channel timer */
+
+  stm32_modifyreg16(priv, STM32_GTIM_CCER_OFFSET, 0, ccer_en_bit);
+
   return OK;
 }
 
@@ -713,29 +734,42 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
 static int stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev, uint8_t channel)
 {
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
+  uint32_t offset;
   ASSERT(dev);
 
   switch (channel)
     {
+      case STM32_CAP_CHANNEL_COUNTER:
+        offset = STM32_GTIM_CNT_OFFSET;
 #ifdef HAVE_CH1IN
       case 1:
-        return stm32_getreg32(priv, STM32_GTIM_CCR1_OFFSET);
+        offset = STM32_GTIM_CCR1_OFFSET;
+        break;
 #endif
-#ifdef HAVE_CH1IN
+#ifdef HAVE_CH2IN
       case 2:
-        return stm32_getreg32(priv, STM32_GTIM_CCR2_OFFSET);
+        offset = STM32_GTIM_CCR2_OFFSET;
+        break;
 #endif
-#ifdef HAVE_CH1IN
+#ifdef HAVE_CH3IN
       case 3:
-        return stm32_getreg32(priv, STM32_GTIM_CCR3_OFFSET);
+        offset = STM32_GTIM_CCR3_OFFSET;
+        break;
 #endif
-#ifdef HAVE_CH1IN
+#ifdef HAVE_CH4IN
       case 4:
-        return stm32_getreg32(priv, STM32_GTIM_CCR4_OFFSET);
+        offset = STM32_GTIM_CCR4_OFFSET;
+        break;
 #endif
+      default:
+        return ERROR;
     }
 
-  return ERROR;
+  if ((priv->base == STM32_TIM2_BASE)||(priv->base == STM32_TIM2_BASE))
+      return stm32_getreg32(priv,offset);
+
+  return stm32_getreg16(priv,offset);
+
 }
 
 
@@ -832,7 +866,7 @@ FAR struct stm32_cap_dev_s *stm32_cap_init(int timer)
 
       stm32_cap_set_rcc(priv,true);
 
-      gpio = stm32_cap_gpio(priv,GPIO_CLK);
+      gpio = stm32_cap_gpio(priv,STM32_CAP_CHANNEL_COUNTER);
       if (gpio)
           stm32_configgpio(gpio);
 
@@ -853,7 +887,7 @@ int stm32_cap_deinit(FAR struct stm32_cap_dev_s * dev)
   // disable timer while is not configured 
   stm32_modifyreg16(priv, STM32_BTIM_CR1_OFFSET, ATIM_CR1_CEN, 0);
 
-  gpio = stm32_cap_gpio(priv,GPIO_CLK);
+  gpio = stm32_cap_gpio(priv,STM32_CAP_CHANNEL_COUNTER);
   if (gpio)
       stm32_unconfiggpio(gpio);
 

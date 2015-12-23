@@ -149,7 +149,7 @@ typedef enum
 {
   /* One of the following */
 
-  STM32_CAP_FLAG_IRG_COUNTER    = (GTIM_SR_UIF),
+  STM32_CAP_FLAG_IRQ_COUNTER    = (GTIM_SR_UIF),
 
   STM32_CAP_FLAG_IRQ_CH_1       = (GTIM_SR_CC1IF),
   STM32_CAP_FLAG_IRQ_CH_2       = (GTIM_SR_CC2IF),
@@ -165,6 +165,7 @@ typedef enum
 
 #define STM32_CAP_FLAG_IRQ_CH(ch)   (GTIM_SR_CC1IF<<((ch)-1))
 #define STM32_CAP_FLAG_OF_CH(ch)    (GTIM_SR_CC1OF<<((ch)-1))
+#define STM32_CAP_CHANNEL_COUNTER   0
         
 /* Capture Operations */
 
