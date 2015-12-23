@@ -108,6 +108,17 @@
 #define BOARD_PLL_R            2   /* PLLDIV = 1 */
 #define BOARD_PLL_FREQUENCY    80000000
 
+/* Clock Sources / Dividers
+ *
+ * GCLK and HCLK are both driven by PLL1.
+ * VCLK is driven by HCLK  (optionally by HCLK/2)
+ * RTICLK source is VCLK/2 (optionally from VCLK)
+ */
+
+#define BOARD_VCLK_DIVIDER     1
+#define BOARD_VCLK2_DIVIDER    1
+#define BOARD_RTICLK_DIVIDER   2
+
 /* Resulting frequencies:
  *
  * GCLK and HCLK are both driven by PLL1.
@@ -117,8 +128,8 @@
 
 #define BOARD_GCLK_FREQUENCY   BOARD_PLL_FREQUENCY
 #define BOARD_HCLK_FREQUENCY   BOARD_PLL_FREQUENCY
-#define BOARD_VCLK_FREQUENCY   BOARD_HCLK_FREQUENCY
-#define BOARD_RTICLK_FREQUENCY (BOARD_VCLK_FREQUENCY / 2)
+#define BOARD_VCLK_FREQUENCY   (BOARD_HCLK_FREQUENCY / BOARD_VCLK_DIVIDER)
+#define BOARD_RTICLK_FREQUENCY (BOARD_VCLK_FREQUENCY / BOARD_RTICLK_DIVIDER)
 
 /* FLASH wait states */
 
