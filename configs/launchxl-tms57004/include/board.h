@@ -102,16 +102,29 @@
  *   Fpllclock    = 160 MHz / 2     = 80 MHz
  */
 
-#define BOARD_PLL_NR     6   /* REFCLKDIV = 5 */
-#define BOARD_PLL_NF     120 /* PLLMUL = 119 * 256 */
-#define BOARD_PLL_OD     2   /* ODPLL = 1 */
-#define BOARD_PLL_R      2   /* PLLDIV = 1 */
+#define BOARD_PLL_NR           6   /* REFCLKDIV = 5 */
+#define BOARD_PLL_NF           120 /* PLLMUL = 119 * 256 */
+#define BOARD_PLL_OD           2   /* ODPLL = 1 */
+#define BOARD_PLL_R            2   /* PLLDIV = 1 */
+#define BOARD_PLL_FREQUENCY    80000000
+
+/* Resulting frequencies:
+ *
+ * GCLK and HCLK are both driven by PLL1.
+ * VCLK is driven by HCLK  (optionally by HCLK/2)
+ * RTICLK source is VCLK/2 (optionally from VCLK)
+ */
+
+#define BOARD_GCLK_FREQUENCY   BOARD_PLL_FREQUENCY
+#define BOARD_HCLK_FREQUENCY   BOARD_PLL_FREQUENCY
+#define BOARD_VCLK_FREQUENCY   BOARD_HCLK_FREQUENCY
+#define BOARD_RTICLK_FREQUENCY (BOARD_VCLK_FREQUENCY / 2)
 
 /* FLASH wait states */
 
-#define BOARD_ASWAIT     0   /* No address setup wait states */
-#define BOARD_RWAIT      1   /* One read access wait state */
-#define BOARD_EWAIT      4   /* Four wait states for EEPROM access */
+#define BOARD_ASWAIT           0   /* No address setup wait states */
+#define BOARD_RWAIT            1   /* One read access wait state */
+#define BOARD_EWAIT            4   /* Four wait states for EEPROM access */
 
 /* PIN Multiplexor Initializer ******************************************************/
 
