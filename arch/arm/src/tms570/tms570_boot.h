@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_SAM_BOOT_H
-#define __ARCH_ARM_SRC_TMS570_SAM_BOOT_H
+#ifndef __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H
+#define __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H
 
 /************************************************************************************
  * Included Files
@@ -139,4 +139,4 @@ void tms570_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_SAM_BOOT_H */
+#endif /* __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H */

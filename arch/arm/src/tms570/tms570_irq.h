@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_SAM_IRQ_H
-#define __ARCH_ARM_SRC_TMS570_SAM_IRQ_H
+#ifndef __ARCH_ARM_SRC_TMS570_TMS570_IRQ_H
+#define __ARCH_ARM_SRC_TMS570_TMS570_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@ void up_enable_fiq(int channel);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_SAM_IRQ_H */
+#endif /* __ARCH_ARM_SRC_TMS570_TMS570_IRQ_H */
