@@ -331,12 +331,4 @@ void arm_boot(void)
   /* Perform common, low-level chip initialization (might do nothing) */
 
   tms570_lowsetup();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  up_earlyserialinit();
-#endif
 }
