@@ -62,23 +62,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tms570_vim_channel
- *
- * Description:
- *   Allocate a VIM channel and assign it to the 'request'.
- *
- * Input Parameters:
- *   request - The interrupt request to be mapped to a channel
- *
- * Returned Value:
- *   One sucess, the allocated channel number is returned.  A negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-int tms570_vim_channel(int request);
-
-/****************************************************************************
  * Name: up_enable_fiq
  *
  * Description:

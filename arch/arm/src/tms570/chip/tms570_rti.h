@@ -137,53 +137,44 @@
 /* Register Bit-Field Definitions *******************************************************************/
 
 /* RTI Global Control Register */
-#define RTI_GCTRL_
+
+#define RTI_GCTRL_CNT0EN                (1 << 0)  /* Bit 0:  Counter 0 enable */
+#define RTI_GCTRL_CNT1EN                (1 << 1)  /* Bit 1:  Counter 1 enable */
+#define RTI_GCTRL_COS                   (1 << 15) /* Bit 15: Continue on suspend */
+
 /* RTI Capture Control Register */
-#define RTI_CAPCTRL_
+
+#define RTI_CAPCTRL_CAPCNTR0            (1 << 0)  /* Bit 0:  Capture counter 0 */
+#define RTI_CAPCTRL_CAPCNTR1            (1 << 1)  /* Bit 1:  Capture counter 1 */
+
 /* RTI Compare Control Register */
-#define RTI_COMPCTRL_
-/* RTI Free Running Counter 0 Register */
-#define RTI_FRC0_
-/* RTI Up Counter 0 Register */
-#define RTI_UC0_
-/* RTI Compare Up Counter 0 Register */
-#define RTI_CPUC0_
-/* RTI Capture Free Running Counter 0 Register */
-#define RTI_CAFRC0_
-/* RTI Capture Up Counter 0 Register */
-#define RTI_CAUC0_
-/* RTI Free Running Counter 1 Register */
-#define RTI_FRC1_
-/* RTI Up Counter 1 Register */
-#define RTI_UC1_
-/* RTI Compare Up Counter 1 Register */
-#define RTI_CPUC1_
-/* RTI Capture Free Running Counter 1 Register */
-#define RTI_CAFRC1_
-/* RTI Capture Up Counter 1 Register */
-#define RTI_CAUC1_
-/* RTI Compare 0 Register Section */
-#define RTI_COMP0_
-/* RTI Update Compare 0 Register */
-#define RTI_UDCP0_
-/* RTI Compare 1 Register */
-#define RTI_COMP1_
-/* RTI Update Compare 1 Register */
-#define RTI_UDCP1_
-/* RTI Compare 2 Register */
-#define RTI_COMP2_
-/* RTI Update Compare 2 Register */
-#define RTI_UDCP2_
-/* RTI Compare 3 Register */
-#define RTI_COMP3_
-/* RTI Update Compare 3 Register */
-#define RTI_UDCP3_
-/* RTI Set Interrupt Enable Register */
-#define RTI_SETINTENA_
-/* RTI Clear Interrupt Enable Register */
-#define RTI_CLEARINTENA_
-/* RTI Interrupt Flag Register */
-#define RTI_INTFLAG_
+
+#define RTI_COMPCTRL_COMPSEL0           (1 << 0)  /* Bit 0:  Compare select 0 */
+#define RTI_COMPCTRL_COMPSEL1           (1 << 4)  /* Bit 4:  Compare select 1 */
+#define RTI_COMPCTRL_COMPSEL2           (1 << 8)  /* Bit 8:  Compare select 2 */
+#define RTI_COMPCTRL_COMPSEL3           (1 << 12) /* Bit 12: Compare select 3 */
+
+/* RTI Free Running Counter 0/1 Register (32-bit counter value) */
+/* RTI Up Counter 0/1 Register (32-bit counter value) */
+/* RTI Compare Up Counter 0/1 Register (32-bit counter value) */
+/* RTI Capture Free Running Counter 0/1 Register (32-bit counter value) */
+/* RTI Capture Up Counter 0/1 Register (32-bit counter value) */
+/* RTI Compare 0/1/2/3 Register Section (32-bit counter value) */
+/* RTI Update Compare 0/1/2/3 Register (32-bit counter value) */
+
+/* RTI Set Interrupt Enable Register, RTI Clear Interrupt Enable Register, and
+ * RTI Interrupt Flag Register
+ */
+
+#define RTI_INT0                        (1 << 0)  /* Bit 0:  Compare interrupt 0 */
+#define RTI_INT1                        (1 << 1)  /* Bit 1:  Compare interrupt 1 */
+#define RTI_INT2                        (1 << 2)  /* Bit 2:  Compare interrupt 2 */
+#define RTI_INT3                        (1 << 3)  /* Bit 3:  Compare interrupt 3 */
+#define RTI_TBINT                       (1 << 16) /* Bit 16: Timebase interrupt */
+#define RTI_OVL0INT                     (1 << 17) /* Bit 17: Free running counter 0 overflow interrupt */
+#define RTI_OVL1INT                     (1 << 18) /* Bit 18: Free running counter 1 overflow interrupt */
+#define RTI_ALLINTS                     0x0007000f
+
 /* Digital Watchdog Control Register */
 #define RTI_DWDCTRL_
 /* Digital Watchdog Preload Register */
