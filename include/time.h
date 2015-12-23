@@ -101,11 +101,13 @@
 #endif
 
 /* The following are non-standard interfaces in the sense that they are not
- * in POSIX.1-2001. These interfaces are present on most BSD derivatives,
- * however, including Linux.
+ * in POSIX.1-2001 nor are the specifed at OpenGroup.org. These interfaces
+ * are present on most BSD derivatives, however, including Linux.
  */
 
-/* void timeradd(struct timeval *a, struct timeval *b, struct timeval *res); */
+/* void timeradd(FAR struct timeval *a, FAR struct timeval *b,
+ *               FAR struct timeval *res);
+ */
 
 #define timeradd(tvp, uvp, vvp) \
   do \
@@ -120,7 +122,9 @@
     } \
   while (0)
 
-/* void timersub(struct timeval *a, struct timeval *b, struct timeval *res); */
+/* void timersub(FAR struct timeval *a, FAR struct timeval *b,
+ *               FAR struct timeval *res);
+ */
 
 #define timersub(tvp, uvp, vvp) \
   do \
@@ -135,7 +139,7 @@
     } \
   while (0)
 
-/* void timerclear(struct timeval *tvp); */
+/* void timerclear(FAR struct timeval *tvp); */
 
 #define timerclear(tvp) \
   do \
@@ -145,12 +149,12 @@
     } \
   while (0)
 
-/* int timerisset(struct timeval *tvp); */
+/* int timerisset(FAR struct timeval *tvp); */
 
 #define timerisset(tvp) \
   ((tvp)->tv_sec != 0 || (tvp)->tv_usec != 0)
 
-/* int timercmp(struct timeval *a, struct timeval *b, CMP); */
+/* int timercmp(FAR struct timeval *a, FAR struct timeval *b, CMP); */
 
 #define timercmp(tvp, uvp, cmp) \
   (((tvp)->tv_sec == (uvp)->tv_sec) ? \
