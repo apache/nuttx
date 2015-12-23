@@ -101,7 +101,7 @@
 #endif
 
 /* The following are non-standard interfaces in the sense that they are not
- * in POSIX.1-2001 nor are the specifed at OpenGroup.org. These interfaces
+ * in POSIX.1-2001 nor are they specified at OpenGroup.org. These interfaces
  * are present on most BSD derivatives, however, including Linux.
  */
 
