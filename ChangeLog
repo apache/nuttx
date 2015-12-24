@@ -11251,4 +11251,5 @@
 	  and timercmp() as macros. These are non-POSIX interfaces, but
 	  included in most BSD deriviatives, included Linux.  From Manuel Stühn
 	  (2015-12-23).
-
+	* arch/arm/src/stm32:  Add timer input capture driver.  From Pierre-Noel
+	  Bouteville (2015-12-24).
