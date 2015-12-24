@@ -62,6 +62,50 @@
 #include <arch/board/board.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef BOARD_VCLK_DIVIDER
+#  error BOARD_VCLK_DIVIDER is not defined
+#endif
+
+#if BOARD_VCLK_DIVIDER == 1
+#  define SYS_CLKCNTL_VCLKR SYS_CLKCNTL_VCLKR_DIV1
+#elif BOARD_VCLK_DIVIDER == 2
+#  define SYS_CLKCNTL_VCLKR SYS_CLKCNTL_VCLKR_DIV2
+#else
+#  error Invalid value for BOARD_VCLK_DIVIDER
+#endif
+
+#ifndef BOARD_VCLK2_DIVIDER
+#  error BOARD_VCLK2_DIVIDER is not defined
+#endif
+
+#if BOARD_VCLK2_DIVIDER == 1
+#  define SYS_CLKCNTL_VCLKR2 SYS_CLKCNTL_VCLKR2_DIV1
+#elif BOARD_VCLK2_DIVIDER == 2
+#  define SYS_CLKCNTL_VCLKR2 SYS_CLKCNTL_VCLKR_DIV2
+#else
+#  error Invalid value for SYS_CLKCNTL_VCLKR2_DIV2
+#endif
+
+#ifndef BOARD_RTICLK_DIVIDER
+#  error BOARD_RTICLK_DIVIDER is not defined
+#endif
+
+#if BOARD_RTICLK_DIVIDER == 1
+#  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV1
+#elif BOARD_RTICLK_DIVIDER == 2
+#  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV2
+#elif BOARD_RTICLK_DIVIDER == 4
+#  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV4
+#elif BOARD_RTICLK_DIVIDER == 78
+#  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV8
+#else
+#  error Invalid value for SYS_CLKCNTL_VCLKR2_DIV2
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -434,12 +478,12 @@ static void tms570_clocksrc_configure(void)
 
   regval  = getreg32(TMS570_SYS_CLKCNTL);
   regval &= ~(SYS_CLKCNTL_VCLKR2_MASK | SYS_CLKCNTL_VCLKR_MASK);
-  regval |= SYS_CLKCNTL_VCLKR2_DIV1 | SYS_CLKCNTL_VCLKR_DIV1;
+  regval |= SYS_CLKCNTL_VCLKR2 | SYS_CLKCNTL_VCLKR;
   putreg32(regval, TMS570_SYS_CLKCNTL);
 
   /* Setup RTICLK1 and RTICLK2 clocks */
 
-  regval = SYS_RCLKSRC_RTI1SRC_VCLK | SYS_RCLKSRC_RTI1DIV_DIV2;
+  regval = SYS_RCLKSRC_RTI1SRC_VCLK | SYS_RCLKSRC_RTI1DIV;
   putreg32(regval, TMS570_SYS_RCLKSRC);
 
   /* Setup asynchronous peripheral clock sources for AVCLK1 */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tms570/tms570_boot.h
+ * arch/arm/src/tms570/tms570_lowputc.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H
-#define __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H
+#ifndef __ARCH_ARM_SRC_TMS570_TMS570_LOWPUTC_H
+#define __ARCH_ARM_SRC_TMS570_TMS570_LOWPUTC_H
 
 /************************************************************************************
  * Included Files
@@ -77,17 +77,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the linker
- * script. _ebss lies at the end of the BSS region. The idle task stack starts at
- * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread is
- * the thread that the system boots on and, eventually, becomes the IDLE, do
- * nothing task that runs only when there is nothing else to run.  The heap
- * continues from there until the end of memory.  g_idle_topstack is a read-only
- * variable the provides this computed address.
- */
-
-EXTERN const uintptr_t g_idle_topstack;
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
@@ -108,30 +97,13 @@ void tms570_lowsetup(void);
  * Name: tms570_boardinitialize
  *
  * Description:
- *   All TMS570 architectures must provide the following entry point.  This function
- *   is called near the beginning of _start.  This function is called after clocking
- *   has been configured but before caches have been enabled and before any devices
- *   have been initialized.  .data/.bss memory may or may not have been initialized
- *   (see the "special precautions" below).
- *
- *   This function must perform low level initialization including
- *
- *   - Initialization of board-specific memory resources (e.g., SDRAM)
- *   - Configuration of board specific resources (GPIOs, LEDs, etc).
- *   - Setup of the console SCI.  This SCI done early so that the serial console
- *     is available for debugging very early in the boot sequence.
- *
- *   Special precautions must be taken if .data/.bss lie in SRAM.  in that case,
- *   the boot logic cannot initialize .data or .bss.  The function must then:
- *
- *   - Take precautions to assume that logic does not access any global data that
- *     might lie in SDRAM.
- *   - Call the function arm_data_initialize() as soon as SDRAM has been
- *     properly configured for use.
+ *   All TMS570 architectures must provide the following entry point.  This entry
+ *   point is called early in the initialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void tms570_board_initialize(void);
+void tms570_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -139,4 +111,4 @@ void tms570_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H */
+#endif /* __ARCH_ARM_SRC_TMS570_TMS570_LOWPUTC_H */

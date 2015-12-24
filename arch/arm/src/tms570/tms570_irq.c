@@ -137,6 +137,10 @@ void up_irqinitialize(void)
 
   putreg32((uint32_t)tms570_error_handler, TMS570_VIM_FBPARERR);
 
+  /* Assign all interrupt requests to the VIM channel of the same value.
+   * NOTE: Nothing need be done.  That is the power-on default mapping.
+   */
+
   /* Assign all channels to IRQs */
 
   putreg32(0, TMS570_VIM_FIRQPR0);
@@ -182,27 +186,6 @@ void up_irqinitialize(void)
 
   irqenable();
 #endif
-}
-
-/****************************************************************************
- * Name: tms570_vim_channel
- *
- * Description:
- *   Allocate a VIM channel and assign it to the 'request'.
- *
- * Input Parameters:
- *   request - The interrupt request to be mapped to a channel
- *
- * Returned Value:
- *   One sucess, the allocated channel number is returned.  A negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-int tms570_vim_channel(int request)
-{
-#warning Missing logic
-  return -ENOSYS;
 }
 
 /****************************************************************************

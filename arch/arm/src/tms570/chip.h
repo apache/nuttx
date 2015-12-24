@@ -49,12 +49,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it to provide the
- * address of the L2CC-PL310 implementation.
- */
-
-#define L2CC_VBASE SAM_L2CC_VSECTION
-
 /* Cache line sizes (in bytes)for the SAVA5Dx */
 
 #define ARMV7A_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */

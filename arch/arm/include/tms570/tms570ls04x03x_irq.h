@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/include/tms570/irq.h
+ * arch/arm/include/tms570/tms570ls04x03x_irq.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,15 +37,14 @@
  * nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_TMS570_IRQ_H
-#define __ARCH_ARM_INCLUDE_TMS570_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_TMS570_TMS570LS04X03X_IRQ_H
+#define __ARCH_ARM_INCLUDE_TMS570_TMS570LS04X03X_IRQ_H
 
 /****************************************************************************************
  * Included Files
  ****************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tms570/chip.h>
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -54,33 +53,49 @@
  * channels. Channel 95 does not have a dedicated vector and shall not be used.
  */
 
-#define TMS570_VECT_PHANTOM    0  /* The first is the "phantom" interrupt */
+#define TMS570_IRQ_NCHANNELS   95  /* The "phantom" vector is followed by 95 real
+                                    * interrupt channels */
 
-/* Default channel assignments are MCU-dependent */
+/* Default request to channel assignments.  Undefined requests are reserved */
 
-#if defined(CONFIG_ARCH_CHIP_TMS570LS0232PZ)
-#  error No IRQ definitions for the TMS570LS0232PZ
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS0332PZ)
-#  include <arch/tms570/tms570ls04x03x_irq.h>
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS0432PZ)
-#  include <arch/tms570/tms570ls04x03x_irq.h>
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS0714PZ)
-#  error No IRQ definitions for the TMS570LS0714PZ
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS0714PGE)
-#  error No IRQ definitions for the TMS570LS0714PGE
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS0714ZWT)
-#  error No IRQ definitions for the TMS570LS0714ZWT
-#elif defined(CONFIG_ARCH_CHIP_TMS570LS1227ZWT)
-#  error No IRQ definitions for the TMS570LS1227ZWT
-#else
-#  error "Unrecognized Hercules chip"
-#endif
-
-/* Total number of IRQ numbers. Excluds the phantom vector.  Zero corresponds to
- * channel 0, vector 1.
- */
-
-#define NR_IRQS             (TMS570_IRQ_NCHANNELS)
+#define TMS570_REQ_ESMHIGH     0 /* ESM High level interrupt (NMI) */
+#define TMS570_REQ_RTICMP0     2 /* RTI compare interrupt 0 */
+#define TMS570_REQ_RTICMP1     3 /* RTI compare interrupt 1 */
+#define TMS570_REQ_RTICMP2     4 /* RTI compare interrupt 2 */
+#define TMS570_REQ_RTICMP3     5 /* RTI compare interrupt 3 */
+#define TMS570_REQ_RTIOVF0     6 /* RTI overflow interrupt 0 */
+#define TMS570_REQ_RTIOVF1     7 /* RTI overflow interrupt 1 */
+#define TMS570_REQ_GIOA        9 /* GIO interrupt A */
+#define TMS570_REQ_N2HET_0     10 /* N2HET level 0 interrupt */
+#define TMS570_REQ_HTU_0       11 /* HTU level 0 interrupt */
+#define TMS570_REQ_MIBSPI1_0   12 /* MIBSPI1 level 0 interrupt */
+#define TMS570_REQ_SCI_0       13 /* SCI/LIN level 0 interrupt */
+#define TMS570_REQ_MIBADCEV    14 /* MIBADC event group interrupt */
+#define TMS570_REQ_MIBADSW1    15 /* MIBADC sw group 1 interrupt */
+#define TMS570_REQ_DCAN1_0     16 /* DCAN1 level 0 interrupt */
+#define TMS570_REQ_SPI2_0      17 /* SPI2 level 0 interrupt */
+#define TMS570_REQ_ESMLO       20 /* ESM Low level interrupt */
+#define TMS570_REQ_SYSTEM      21 /* Software interrupt (SSI) */
+#define TMS570_REQ_CPU         22 /* PMU interrupt */
+#define TMS570_REQ_GIOB        23 /* GIO interrupt B */
+#define TMS570_REQ_N2HET_1     24 /* N2HET level 1 interrupt */
+#define TMS570_REQ_HTU_1       25 /* HTU level 1 interrupt */
+#define TMS570_REQ_MIBSPI1_1   26 /* MIBSPI1 level 1 interrupt */
+#define TMS570_REQ_SCI_1       27 /* SCI/LIN level 1 interrupt */
+#define TMS570_REQ_MIBADCSW2   28 /* MIBADC sw group 2 interrupt */
+#define TMS570_REQ_DCAN1_1     29 /* DCAN1 level 1 interrupt */
+#define TMS570_REQ_SPI2_1      30 /* SPI2 level 1 interrupt */
+#define TMS570_REQ_MIBADCMC    31 /* MIBADC magnitude compare interrupt */
+#define TMS570_REQ_DCAN2_0     35 /* DCAN2 level 0 interrupt */
+#define TMS570_REQ_SPI3_0      37 /* SPI3 level 0 interrupt */
+#define TMS570_REQ_SPI3_1      38 /* SPI3 level 1 interrupt */
+#define TMS570_REQ_DCAN2_1     42 /* DCAN2 level 1 interrupt */
+#define TMS570_REQ_FMC         61 /* FSM_DONE interrupt */
+#define TMS570_REQ_HWAGH       80 /* WA_INT_REQ_H */
+#define TMS570_REQ_DCC         82 /* DCC done interrupt */
+#define TMS570_REQ_EQEP        84 /* eQEP Interrupt */
+#define TMS570_REQ_PBIST       85 /* PBIST Done Interrupt */
+#define TMS570_REQ_HWAGL       88 /* HWA_INT_REQ_L */
 
 /****************************************************************************************
  * Public Types
@@ -110,5 +125,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_TMS570_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_TMS570_TMS570LS04X03X_IRQ_H */
 

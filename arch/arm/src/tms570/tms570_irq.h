@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_SAM_IRQ_H
-#define __ARCH_ARM_SRC_TMS570_SAM_IRQ_H
+#ifndef __ARCH_ARM_SRC_TMS570_TMS570_IRQ_H
+#define __ARCH_ARM_SRC_TMS570_TMS570_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -62,23 +62,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tms570_vim_channel
- *
- * Description:
- *   Allocate a VIM channel and assign it to the 'request'.
- *
- * Input Parameters:
- *   request - The interrupt request to be mapped to a channel
- *
- * Returned Value:
- *   One sucess, the allocated channel number is returned.  A negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-int tms570_vim_channel(int request);
-
-/****************************************************************************
  * Name: up_enable_fiq
  *
  * Description:
@@ -96,4 +79,4 @@ void up_enable_fiq(int channel);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TMS570_SAM_IRQ_H */
+#endif /* __ARCH_ARM_SRC_TMS570_TMS570_IRQ_H */
