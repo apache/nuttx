@@ -100,67 +100,6 @@
 #  define localtime_r(c,r)   gmtime_r(c,r)
 #endif
 
-/* The following are non-standard interfaces in the sense that they are not
- * in POSIX.1-2001 nor are they specified at OpenGroup.org. These interfaces
- * are present on most BSD derivatives, however, including Linux.
- */
-
-/* void timeradd(FAR struct timeval *a, FAR struct timeval *b,
- *               FAR struct timeval *res);
- */
-
-#define timeradd(tvp, uvp, vvp) \
-  do \
-    { \
-      (vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec; \
-      (vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec; \
-      if ((vvp)->tv_usec >= 1000000) \
-        { \
-          (vvp)->tv_sec++; \
-          (vvp)->tv_usec -= 1000000; \
-        } \
-    } \
-  while (0)
-
-/* void timersub(FAR struct timeval *a, FAR struct timeval *b,
- *               FAR struct timeval *res);
- */
-
-#define timersub(tvp, uvp, vvp) \
-  do \
-    { \
-      (vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec; \
-      (vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec; \
-      if ((vvp)->tv_usec < 0) \
-        { \
-          (vvp)->tv_sec--; \
-          (vvp)->tv_usec += 1000000; \
-        } \
-    } \
-  while (0)
-
-/* void timerclear(FAR struct timeval *tvp); */
-
-#define timerclear(tvp) \
-  do \
-    { \
-      tvp)->tv_sec = 0; \
-      tvp)->tv_usec = 0; \
-    } \
-  while (0)
-
-/* int timerisset(FAR struct timeval *tvp); */
-
-#define timerisset(tvp) \
-  ((tvp)->tv_sec != 0 || (tvp)->tv_usec != 0)
-
-/* int timercmp(FAR struct timeval *a, FAR struct timeval *b, CMP); */
-
-#define timercmp(tvp, uvp, cmp) \
-  (((tvp)->tv_sec == (uvp)->tv_sec) ? \
-   ((tvp)->tv_usec cmp (uvp)->tv_usec) : \
-   ((tvp)->tv_sec cmp (uvp)->tv_sec))
-
 /********************************************************************************
  * Public Types
  ********************************************************************************/
