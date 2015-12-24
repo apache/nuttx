@@ -250,8 +250,10 @@
 #define SCI_INT_PBE                   (1 << 30) /* Bit 30: Physical bus error interrupt */
 #define SCI_INT_BE                    (1 << 31) /* Bit 31: Bit error interrupt */
 
-#define SCI_INT_ALLERRORS             0xff000000
-#define SCI_INT_ALL                   0xff0023d3
+#define SCI_INT_ALLERRORS             0xff000001
+#define SCI_INT_LINERRORS             0xff000000
+#define SCI_INT_SCIERRORS             0x87000001
+#define SCI_INT_ALLINTS               0xff0023d3
 
 /* SCI Flags Register */
 

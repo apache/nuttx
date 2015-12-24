@@ -63,6 +63,7 @@
 #include "up_internal.h"
 
 #include "chip/tms570_sci.h"
+#include "tms570_lowputc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -131,20 +132,19 @@ struct tms570_dev_s
 {
   const uint32_t scibase;       /* Base address of SCI registers */
   struct sci_config_s config;   /* SCI configuration */
-  xcpt_t   handler;             /* Interrupt handler */
-  uint32_t sr;                  /* Saved status bits */
-  uint8_t  irq;                 /* IRQ associated with this SCI */
+  xcpt_t handler;               /* Interrupt handler */
+  uint8_t irq;                  /* IRQ associated with this SCI */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  tms570_setup(struct sci_dev_s *dev);
-static void tms570_shutdown(struct sci_dev_s *dev);
-static int  tms570_attach(struct sci_dev_s *dev);
-static void tms570_detach(struct sci_dev_s *dev);
-static int tms570_interrupt(struct sci_dev_s *dev);
+static int  tms570_setup(struct uart_dev_s *dev);
+static void tms570_shutdown(struct uart_dev_s *dev);
+static int  tms570_attach(struct uart_dev_s *dev);
+static void tms570_detach(struct uart_dev_s *dev);
+static int tms570_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_TMS570_SCI1
 static int  tms570_sci1_interrupt(int irq, void *context);
 #endif
@@ -152,19 +152,19 @@ static int  tms570_sci1_interrupt(int irq, void *context);
 static int  tms570_sci2_interrupt(int irq, void *context);
 #endif
 static int  tms570_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  tms570_receive(struct sci_dev_s *dev, uint32_t *status);
-static void tms570_rxint(struct sci_dev_s *dev, bool enable);
-static bool tms570_rxavailable(struct sci_dev_s *dev);
-static void tms570_send(struct sci_dev_s *dev, int ch);
-static void tms570_txint(struct sci_dev_s *dev, bool enable);
-static bool tms570_txready(struct sci_dev_s *dev);
-static bool tms570_txempty(struct sci_dev_s *dev);
+static int  tms570_receive(struct uart_dev_s *dev, uint32_t *status);
+static void tms570_rxint(struct uart_dev_s *dev, bool enable);
+static bool tms570_rxavailable(struct uart_dev_s *dev);
+static void tms570_send(struct uart_dev_s *dev, int ch);
+static void tms570_txint(struct uart_dev_s *dev, bool enable);
+static bool tms570_txready(struct uart_dev_s *dev);
+static bool tms570_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
-static const struct sci_ops_s g_sci_ops =
+static const struct uart_ops_s g_sci_ops =
 {
   .setup          = tms570_setup,
   .shutdown       = tms570_shutdown,
@@ -205,13 +205,13 @@ static struct tms570_dev_s g_sci1priv =
     .baud         = CONFIG_SCI1_BAUD,
     .parity       = CONFIG_SCI1_PARITY,
     .bits         = CONFIG_SCI1_BITS,
-    .stopbit      = CONFIG_SCI1_2STOP,
-  }
+    .stopbits2    = CONFIG_SCI1_2STOP,
+  },
   .handler        = tms570_sci1_interrupt,
-  .irq            = TMS570_IRQ_SCI1,
+  .irq            = TMS570_REQ_SCI1_0,
 };
 
-static sci_dev_t g_sci1port =
+static uart_dev_t g_sci1port =
 {
   .recv     =
   {
@@ -239,13 +239,13 @@ static struct tms570_dev_s g_sci2priv =
     .baud         = CONFIG_SCI2_BAUD,
     .parity       = CONFIG_SCI2_PARITY,
     .bits         = CONFIG_SCI2_BITS,
-    .stopbit      = CONFIG_SCI2_2STOP,
-  }
+    .stopbits2    = CONFIG_SCI2_2STOP,
+  },
   .handler        = tms570_sci2_interrupt,
-  .irq            = TMS570_IRQ_SCI2,
+  .irq            = TMS570_REQ_SCI2_0,
 };
 
-static sci_dev_t g_sci2port =
+static uart_dev_t g_sci2port =
 {
   .recv     =
   {
@@ -290,34 +290,34 @@ static inline void tms570_serialout(struct tms570_dev_s *priv, int offset,
  ****************************************************************************/
 
 static inline void tms570_restoresciint(struct tms570_dev_s *priv,
-                                        uint32_t imr)
+                                        uint32_t ints)
 {
   /* Restore the previous interrupt state (assuming all interrupts disabled) */
 
-  tms570_serialout(priv, TMS570_SCI_IER_OFFSET, imr);
+  tms570_serialout(priv, TMS570_SCI_SETINT_OFFSET, ints);
 }
 
 /****************************************************************************
  * Name: tms570_disableallints
  ****************************************************************************/
 
-static void tms570_disableallints(struct tms570_dev_s *priv, uint32_t *imr)
+static void tms570_disableallints(struct tms570_dev_s *priv, uint32_t *ints)
 {
   irqstate_t flags;
 
   /* The following must be atomic */
 
   flags = irqsave();
-  if (imr)
+  if (ints)
     {
-      /* Return the current interrupt mask */
+      /* Return the current enable bitsopop9 */
 
-      *imr = tms570_serialin(priv, TMS570_SCI_IMR_OFFSET);
+      *ints = tms570_serialin(priv, TMS570_SCI_SETINT_OFFSET);
     }
 
   /* Disable all interrupts */
 
-  tms570_serialout(priv, TMS570_SCI_IDR_OFFSET, SCI_INT_ALLINTS);
+  tms570_serialout(priv, TMS570_SCI_CLEARINT_OFFSET, SCI_INT_ALLINTS);
   irqrestore(flags);
 }
 
@@ -330,14 +330,14 @@ static void tms570_disableallints(struct tms570_dev_s *priv, uint32_t *imr)
  *
  ****************************************************************************/
 
-static int tms570_setup(struct sci_dev_s *dev)
+static int tms570_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_SCI_CONFIG
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 
   /* Configure baud, number of bits, stop bits, and parity */
 
-  return tms570_sci_configure(priv->base, &priv->config);
+  return tms570_sci_configure(priv->scibase, &priv->config);
 #else
   return OK;
 #endif
@@ -352,15 +352,13 @@ static int tms570_setup(struct sci_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tms570_shutdown(struct sci_dev_s *dev)
+static void tms570_shutdown(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 
   /* Reset and disable receiver and transmitter */
 
-  tms570_serialout(priv, TMS570_SCI_CR_OFFSET,
-                (SCI_CR_RSTRX | SCI_CR_RSTTX | SCI_CR_RXDIS |
-                 SCI_CR_TXDIS));
+  tms570_serialout(priv, TMS570_SCI_GCR1_OFFSET, 0);
 
   /* Disable all interrupts */
 
@@ -382,7 +380,7 @@ static void tms570_shutdown(struct sci_dev_s *dev)
  *
  ****************************************************************************/
 
-static int tms570_attach(struct sci_dev_s *dev)
+static int tms570_attach(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
   int ret;
@@ -412,7 +410,7 @@ static int tms570_attach(struct sci_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tms570_detach(struct sci_dev_s *dev)
+static void tms570_detach(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
   up_disable_irq(priv->irq);
@@ -430,7 +428,7 @@ static void tms570_detach(struct sci_dev_s *dev)
  *
  ****************************************************************************/
 
-static int tms570_interrupt(struct sci_dev_s *dev)
+static int tms570_interrupt(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv;
   uint32_t          intvec;
@@ -453,7 +451,7 @@ static int tms570_interrupt(struct sci_dev_s *dev)
       switch (intvec)
         {
           case SCI_INTVECT_NONE:    /* No interrupt */
-            return;
+            return OK;
 
           case SCI_INTVECT_WAKEUP:  /* Wake-up interrupt */
             /* SCI sets the WAKEUP flag if bus activity on the RX line
@@ -461,19 +459,24 @@ static int tms570_interrupt(struct sci_dev_s *dev)
              * line activity causes an exit from power-down mode. If
              * enabled wakeup interrupt is triggered once WAKEUP flag is
              * set.
+             *
+             * REVISIT: This interrupt is ignored because for now the
+             * break detect interrupt is never enabled.
              */
 
-#warning Missing Logic
             break;
 
-          /* SCI Errors */
+          /* SCI Errors
+           *
+           * REVISIT: These error interrupta are ignored because for now the
+           * break detect interrupt is never enabled.
+           */
 
           case SCI_INTVECT_PE:      /* Parity error interrupt */
           case SCI_INTVECT_FE:      /* Framing error interrupt */
-          case SCI_INTVECT_BRKDT:   /* Break detect interrupt */
           case SCI_INTVECT_OE:      /* Overrun error interrupt */
+          case SCI_INTVECT_BRKDT:   /* Break detect interrupt */
           case SCI_INTVECT_BE:      /* Bit error interrupt */
-#warning Missing Logic
             break;
 
           case SCI_INTVECT_RX:      /* Receive interrupt */
@@ -544,7 +547,7 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
   struct inode      *inode = filep->f_inode;
-  struct sci_dev_s *dev   = inode->i_private;
+  struct uart_dev_s *dev   = inode->i_private;
 #endif
   int                ret    = OK;
 
@@ -624,7 +627,7 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
         struct termios  *termiosp = (struct termios *)arg;
         struct tms570_dev_s *priv    = (struct tms570_dev_s *)dev->priv;
         uint32_t baud;
-        uint32_t imr;
+        uint32_t ints;
         uint8_t parity;
         uint8_t nbits;
         bool stop2;
@@ -699,12 +702,12 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            tms570_disableallints(priv, &imr);
+            tms570_disableallints(priv, &ints);
             ret = tms570_sci_configure(priv->scibase, &priv->config);
 
             /* Restore the interrupt state */
 
-            tms570_restoresciint(priv, imr);
+            tms570_restoresciint(priv, ints);
           }
       }
       break;
@@ -728,18 +731,20 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int tms570_receive(struct sci_dev_s *dev, uint32_t *status)
+static int tms570_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 
-  /* Return the error information in the saved status */
+  /* Return the error information in the saved status.
+   *
+   * REVISIT:  RX error information is not currently retained.
+   */
 
-  *status  = priv->sr;
-  priv->sr = 0;
+  *status = 0;
 
   /* Then return the actual received byte */
 
-  return (int)(tms570_serialin(priv, TMS570_SCI_RHR_OFFSET) & 0xff);
+  return (int)(tms570_serialin(priv, TMS570_SCI_RD_OFFSET) & 0xff);
 }
 
 /****************************************************************************
@@ -750,7 +755,7 @@ static int tms570_receive(struct sci_dev_s *dev, uint32_t *status)
  *
  ****************************************************************************/
 
-static void tms570_rxint(struct sci_dev_s *dev, bool enable)
+static void tms570_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 
@@ -761,12 +766,12 @@ static void tms570_rxint(struct sci_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      tms570_serialout(priv, TMS570_SCI_IER_OFFSET, SCI_INT_RXRDY);
+      tms570_serialout(priv, TMS570_SCI_SETINT_OFFSET, SCI_INT_RX);
 #endif
     }
   else
     {
-      tms570_serialout(priv, TMS570_SCI_IDR_OFFSET, SCI_INT_RXRDY);
+      tms570_serialout(priv, TMS570_SCI_CLEARINT_OFFSET, SCI_INT_RX);
     }
 }
 
@@ -778,10 +783,10 @@ static void tms570_rxint(struct sci_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static bool tms570_rxavailable(struct sci_dev_s *dev)
+static bool tms570_rxavailable(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  return ((tms570_serialin(priv, TMS570_SCI_SR_OFFSET) & SCI_INT_RXRDY) != 0);
+  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & SCI_FLR_RXRDY) != 0);
 }
 
 /****************************************************************************
@@ -792,10 +797,10 @@ static bool tms570_rxavailable(struct sci_dev_s *dev)
  *-
  ****************************************************************************/
 
-static void tms570_send(struct sci_dev_s *dev, int ch)
+static void tms570_send(struct uart_dev_s *dev, int ch)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  tms570_serialout(priv, TMS570_SCI_THR_OFFSET, (uint32_t)ch);
+  tms570_serialout(priv, TMS570_SCI_TD_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -806,7 +811,7 @@ static void tms570_send(struct sci_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void tms570_txint(struct sci_dev_s *dev, bool enable)
+static void tms570_txint(struct uart_dev_s *dev, bool enable)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
   irqstate_t flags;
@@ -819,21 +824,20 @@ static void tms570_txint(struct sci_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      tms570_serialout(priv, TMS570_SCI_IER_OFFSET, SCI_INT_TXRDY);
+      tms570_serialout(priv, TMS570_SCI_SETINT_OFFSET, SCI_INT_TX);
 
-      /* Fake a TX interrupt here by just calling sci_xmitchars() with
+      /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
 
-      sci_xmitchars(dev);
-
+      uart_xmitchars(dev);
 #endif
     }
   else
     {
       /* Disable the TX interrupt */
 
-      tms570_serialout(priv, TMS570_SCI_IDR_OFFSET, SCI_INT_TXRDY);
+      tms570_serialout(priv, TMS570_SCI_CLEARINT_OFFSET, SCI_INT_TX);
     }
 
   irqrestore(flags);
@@ -847,10 +851,10 @@ static void tms570_txint(struct sci_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static bool tms570_txready(struct sci_dev_s *dev)
+static bool tms570_txready(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  return ((tms570_serialin(priv, TMS570_SCI_SR_OFFSET) & SCI_INT_TXRDY) != 0);
+  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & SCI_FLR_TXRDY) != 0);
 }
 
 /****************************************************************************
@@ -861,10 +865,10 @@ static bool tms570_txready(struct sci_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool tms570_txempty(struct sci_dev_s *dev)
+static bool tms570_txempty(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  return ((tms570_serialin(priv, TMS570_SCI_SR_OFFSET) & SCI_INT_TXEMPTY) != 0);
+  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & SCI_FLR_TXEMPTY) != 0);
 }
 
 /****************************************************************************
@@ -896,14 +900,14 @@ void up_serialinit(void)
 
   /* Register the console */
 
-  (void)sci_register("/dev/console", &CONSOLE_DEV);
+  (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all SCIs */
 
-  (void)sci_register("/dev/ttyS0", &TTYS0_DEV);
+  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  (void)sci_register("/dev/ttyS1", &TTYS1_DEV);
+  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 }
 

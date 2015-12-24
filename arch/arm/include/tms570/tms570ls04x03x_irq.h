@@ -69,7 +69,7 @@
 #define TMS570_REQ_N2HET_0     10 /* N2HET level 0 interrupt */
 #define TMS570_REQ_HTU_0       11 /* HTU level 0 interrupt */
 #define TMS570_REQ_MIBSPI1_0   12 /* MIBSPI1 level 0 interrupt */
-#define TMS570_REQ_SCI_0       13 /* SCI/LIN level 0 interrupt */
+#define TMS570_REQ_SCI1_0      13 /* SCI1/LIN1 level 0 interrupt */
 #define TMS570_REQ_MIBADCEV    14 /* MIBADC event group interrupt */
 #define TMS570_REQ_MIBADSW1    15 /* MIBADC sw group 1 interrupt */
 #define TMS570_REQ_DCAN1_0     16 /* DCAN1 level 0 interrupt */
@@ -81,7 +81,7 @@
 #define TMS570_REQ_N2HET_1     24 /* N2HET level 1 interrupt */
 #define TMS570_REQ_HTU_1       25 /* HTU level 1 interrupt */
 #define TMS570_REQ_MIBSPI1_1   26 /* MIBSPI1 level 1 interrupt */
-#define TMS570_REQ_SCI_1       27 /* SCI/LIN level 1 interrupt */
+#define TMS570_REQ_SCI1_1      27 /* SCI1/LIN1 level 1 interrupt */
 #define TMS570_REQ_MIBADCSW2   28 /* MIBADC sw group 2 interrupt */
 #define TMS570_REQ_DCAN1_1     29 /* DCAN1 level 1 interrupt */
 #define TMS570_REQ_SPI2_1      30 /* SPI2 level 1 interrupt */
