@@ -62,7 +62,6 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "tms570_config.h"
 #include "chip/tms570_sci.h"
 
 /****************************************************************************
@@ -84,11 +83,11 @@
 #    define TTYS0_DEV           g_sci2port  /* SCI2 is ttyS0 */
 #    define SCI2_ASSIGNED       1
 #else
-#  undef CONSOLE_DEV                         /* No console */
-#  if defined(CONFIG_SAMV7_SCI1)
+#  undef CONSOLE_DEV                        /* No console */
+#  if defined(CONFIG_TMS570_SCI1)
 #    define TTYS0_DEV           g_sci1port  /* SCI1 is ttyS0 */
 #    define SCI1_ASSIGNED       1
-#  elif defined(CONFIG_SAMV7_SCI2)
+#  elif defined(CONFIG_TMS570_SCI2)
 #    define TTYS0_DEV           g_sci2port  /* SCI2 is ttyS0 */
 #    define SCI2_ASSIGNED       1
 #  endif
@@ -98,10 +97,10 @@
  * SCI.
  */
 
-#if defined(CONFIG_SAMV7_SCI1) && !defined(SCI1_ASSIGNED)
+#if defined(CONFIG_TMS570_SCI1) && !defined(SCI1_ASSIGNED)
 #  define TTYS1_DEV             g_sci1port  /* SCI1 is ttyS1 */
 #  define SCI1_ASSIGNED         1
-#elif defined(CONFIG_SAMV7_SCI2) && !defined(SCI2_ASSIGNED)
+#elif defined(CONFIG_TMS570_SCI2) && !defined(SCI2_ASSIGNED)
 #  define TTYS1_DEV             g_sci2port  /* SCI2 is ttyS1 */
 #  define SCI2_ASSIGNED         1
 #endif
@@ -130,17 +129,11 @@
 
 struct tms570_dev_s
 {
-  const uint32_t usartbase;     /* Base address of SCI registers */
+  const uint32_t scibase;       /* Base address of SCI registers */
+  struct sci_config_s config;   /* SCI configuration */
   xcpt_t   handler;             /* Interrupt handler */
-  uint32_t baud;                /* Configured baud */
   uint32_t sr;                  /* Saved status bits */
   uint8_t  irq;                 /* IRQ associated with this SCI */
-  uint8_t  parity;              /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;                /* Number of bits (5-9) */
-  bool     stopbits2;           /* true: Configure with 2 stop bits instead of 1 */
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  bool     flowc;               /* input flow control (RTS) enabled */
-#endif
 };
 
 /****************************************************************************
@@ -152,10 +145,10 @@ static void tms570_shutdown(struct sci_dev_s *dev);
 static int  tms570_attach(struct sci_dev_s *dev);
 static void tms570_detach(struct sci_dev_s *dev);
 static int tms570_interrupt(struct sci_dev_s *dev);
-#ifdef CONFIG_SAMV7_SCI1
+#ifdef CONFIG_TMS570_SCI1
 static int  tms570_sci1_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_SAMV7_SCI2
+#ifdef CONFIG_TMS570_SCI2
 static int  tms570_sci2_interrupt(int irq, void *context);
 #endif
 static int  tms570_ioctl(struct file *filep, int cmd, unsigned long arg);
@@ -192,27 +185,30 @@ static const struct sci_ops_s g_sci_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_SAMV7_SCI1
+#ifdef CONFIG_TMS570_SCI1
 static char g_sci1rxbuffer[CONFIG_SCI1_RXBUFSIZE];
 static char g_sci1txbuffer[CONFIG_SCI1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_SCI2
+#ifdef CONFIG_TMS570_SCI2
 static char g_sci2rxbuffer[CONFIG_SCI2_RXBUFSIZE];
 static char g_sci2txbuffer[CONFIG_SCI2_TXBUFSIZE];
 #endif
 
 /* This describes the state of the SCI1 port. */
 
-#ifdef CONFIG_SAMV7_SCI1
+#ifdef CONFIG_TMS570_SCI1
 static struct tms570_dev_s g_sci1priv =
 {
-  .usartbase      = TMS570_SCI1_BASE,
+  .scibase        = TMS570_SCI1_BASE,
+  .config         =
+  {
+    .baud         = CONFIG_SCI1_BAUD,
+    .parity       = CONFIG_SCI1_PARITY,
+    .bits         = CONFIG_SCI1_BITS,
+    .stopbit      = CONFIG_SCI1_2STOP,
+  }
   .handler        = tms570_sci1_interrupt,
-  .baud           = CONFIG_SCI1_BAUD,
   .irq            = TMS570_IRQ_SCI1,
-  .parity         = CONFIG_SCI1_PARITY,
-  .bits           = CONFIG_SCI1_BITS,
-  .stopbits2      = CONFIG_SCI1_2STOP,
 };
 
 static sci_dev_t g_sci1port =
@@ -234,16 +230,19 @@ static sci_dev_t g_sci1port =
 
 /* This describes the state of the SCI2 port. */
 
-#ifdef CONFIG_SAMV7_SCI2
+#ifdef CONFIG_TMS570_SCI2
 static struct tms570_dev_s g_sci2priv =
 {
-  .usartbase      = TMS570_SCI2_BASE,
+  .scibase        = TMS570_SCI2_BASE,
+  .config         =
+  {
+    .baud         = CONFIG_SCI2_BAUD,
+    .parity       = CONFIG_SCI2_PARITY,
+    .bits         = CONFIG_SCI2_BITS,
+    .stopbit      = CONFIG_SCI2_2STOP,
+  }
   .handler        = tms570_sci2_interrupt,
-  .baud           = CONFIG_SCI2_BAUD,
   .irq            = TMS570_IRQ_SCI2,
-  .parity         = CONFIG_SCI2_PARITY,
-  .bits           = CONFIG_SCI2_BITS,
-  .stopbits2      = CONFIG_SCI2_2STOP,
 };
 
 static sci_dev_t g_sci2port =
@@ -273,7 +272,7 @@ static sci_dev_t g_sci2port =
 
 static inline uint32_t tms570_serialin(struct tms570_dev_s *priv, int offset)
 {
-  return getreg32(priv->usartbase + offset);
+  return getreg32(priv->scibase + offset);
 }
 
 /****************************************************************************
@@ -282,14 +281,14 @@ static inline uint32_t tms570_serialin(struct tms570_dev_s *priv, int offset)
 
 static inline void tms570_serialout(struct tms570_dev_s *priv, int offset, uint32_t value)
 {
-  putreg32(value, priv->usartbase + offset);
+  putreg32(value, priv->scibase + offset);
 }
 
 /****************************************************************************
- * Name: tms570_restoreusartint
+ * Name: tms570_restoresciint
  ****************************************************************************/
 
-static inline void tms570_restoreusartint(struct tms570_dev_s *priv, uint32_t imr)
+static inline void tms570_restoresciint(struct tms570_dev_s *priv, uint32_t imr)
 {
   /* Restore the previous interrupt state (assuming all interrupts disabled) */
 
@@ -331,161 +330,15 @@ static void tms570_disableallints(struct tms570_dev_s *priv, uint32_t *imr)
 
 static int tms570_setup(struct sci_dev_s *dev)
 {
-  struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_SCI_CONFIG
-  uint32_t divb3;
-  uint32_t intpart;
-  uint32_t fracpart;
-  uint32_t regval;
+  struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 
-  /* Note: The logic here depends on the fact that that the SCI module
-   * was enabled and the pins were configured in tms570_lowsetup().
-   */
+  /* Configure baud, number of bits, stop bits, and parity */
 
-  /* The shutdown method will put the SCI in a known, disabled state */
-
-  tms570_shutdown(dev);
-
-  /* Set up the mode register.  Start with normal SCI mode and the MCK
-   * as the timing source
-   */
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  /* "Setting the SCI to operate with hardware handshaking is performed by
-   *  writing the SCI_MODE field in the Mode Register (US_MR) to the value
-   *  0x2. ... Using this mode requires using the PDC or DMAC channel for
-   *  reception. The transmitter can handle hardware handshaking in any case."
-   */
-
-  if (priv->flowc)
-    {
-      /* Enable hardware flow control and MCK as the timing source
-       * (the divided clock source may be reselected below).
-       */
-
-      regval = (SCI_MR_MODE_HWHS | SCI_MR_USCLKS_MCK);
-    }
-  else
-#endif
-    {
-      /* Set up the mode register.  Start with normal SCI mode and the MCK
-       * as the timing source (the divided clock source may be reselected
-       * below).
-       */
-
-      regval = (SCI_MR_MODE_NORMAL | SCI_MR_USCLKS_MCK);
-    }
-
-  /* OR in settings for the selected number of bits */
-
-  if (priv->bits == 5)
-    {
-      regval |= SCI_MR_CHRL_5BITS; /* 5 bits */
-    }
-  else if (priv->bits == 6)
-    {
-      regval |= SCI_MR_CHRL_6BITS;  /* 6 bits */
-    }
-  else if (priv->bits == 7)
-    {
-      regval |= SCI_MR_CHRL_7BITS; /* 7 bits */
-    }
-#ifdef HAVE_SCI_DEVICE
-  else if (priv->bits == 9
-#if defined(CONFIG_SAMV7_SCI1)
-           && priv->usartbase != TMS570_SCI1_BASE
-#endif
-#if defined(CONFIG_SAMV7_SCI2)
-           && priv->usartbase != TMS570_SCI2_BASE
-#endif
-          )
-    {
-      regval |= SCI_MR_MODE9; /* 9 bits */
-    }
-#endif
-  else /* if (priv->bits == 8) */
-    {
-      regval |= SCI_MR_CHRL_8BITS; /* 8 bits (default) */
-    }
-
-  /* OR in settings for the selected parity */
-
-  if (priv->parity == 1)
-    {
-      regval |= SCI_MR_PAR_ODD;
-    }
-  else if (priv->parity == 2)
-    {
-      regval |= SCI_MR_PAR_EVEN;
-    }
-  else
-    {
-      regval |= SCI_MR_PAR_NONE;
-    }
-
-  /* OR in settings for the number of stop bits */
-
-  if (priv->stopbits2)
-    {
-      regval |= SCI_MR_NBSTOP_2;
-    }
-  else
-    {
-      regval |= SCI_MR_NBSTOP_1;
-    }
-
-  /* And save the new mode register value */
-
-  tms570_serialout(priv, TMS570_SCI_MR_OFFSET, regval);
-
-  /* Configure the console baud:
-   *
-   *   Fbaud   = SCI_CLOCK / (16 * divisor)
-   *   divisor = SCI_CLOCK / (16 * Fbaud)
-   *
-   * NOTE: Oversampling by 8 is not supported. This may limit BAUD rates
-   * for lower SCI clocks.
-   */
-
-  divb3    = ((FAST_SCI_CLOCK + (priv->baud << 3)) << 3) /
-             (priv->baud << 4);
-  intpart  = divb3 >> 3;
-  fracpart = divb3 & 7;
-
-  /* Retain the fast MR peripheral clock UNLESS unless using that clock
-   * would result in an excessively large divider.
-   *
-   * REVISIT: The fractional divider is not used.
-   */
-
-  if ((intpart & ~SCI_BRGR_CD_MASK) != 0)
-    {
-      /* Use the divided SCI clock */
-
-      divb3    = ((SLOW_SCI_CLOCK + (priv->baud << 3)) << 3) /
-                 (priv->baud << 4);
-      intpart  = divb3 >> 3;
-      fracpart = divb3 & 7;
-
-      /* Re-select the clock source */
-
-      regval  = tms570_serialin(priv, TMS570_SCI_MR_OFFSET);
-      regval &= ~SCI_MR_USCLKS_MASK;
-      regval |= SCI_MR_USCLKS_MCKDIV;
-      tms570_serialout(priv, TMS570_SCI_MR_OFFSET, regval);
-    }
-
-  /* Save the BAUD divider (the fractional part is not used for SCIs) */
-
-  regval = SCI_BRGR_CD(intpart) | SCI_BRGR_FP(fracpart);
-  tms570_serialout(priv, TMS570_SCI_BRGR_OFFSET, regval);
-
-  /* Enable receiver & transmitter */
-
-  tms570_serialout(priv, TMS570_SCI_CR_OFFSET, (SCI_CR_RXEN | SCI_CR_TXEN));
-#endif
-
+  return tms570_sci_configure(priv->base, &priv->config);
+#else
   return OK;
+#endif
 }
 
 /****************************************************************************
@@ -637,13 +490,13 @@ static int tms570_interrupt(struct sci_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_SCI1
+#ifdef CONFIG_TMS570_SCI1
 static int  tms570_sci1_interrupt(int irq, void *context)
 {
   return tms570_interrupt(&g_sci1port);
 }
 #endif
-#ifdef CONFIG_SAMV7_SCI2
+#ifdef CONFIG_TMS570_SCI2
 static int  tms570_sci2_interrupt(int irq, void *context)
 {
   return tms570_interrupt(&g_sci2port);
@@ -698,25 +551,20 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Return baud */
 
-        cfsetispeed(termiosp, priv->baud);
+        cfsetispeed(termiosp, priv->config.baud);
 
         /* Return parity */
 
-        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
-                            ((priv->parity == 1) ? PARODD : 0);
+        termiosp->c_cflag = ((priv->config.parity != 0) ? PARENB : 0) |
+                            ((priv->config.parity == 1) ? PARODD : 0);
 
         /* Return stop bits */
 
-        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+        termiosp->c_cflag |= (priv->config.stopbits2) ? CSTOPB : 0;
 
-        /* Return flow control */
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
-#endif
         /* Return number of bits */
 
-        switch (priv->bits)
+        switch (priv->config.bits)
           {
           case 5:
             termiosp->c_cflag |= CS5;
@@ -751,9 +599,6 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint8_t parity;
         uint8_t nbits;
         bool stop2;
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        bool flowc;
-#endif
 
         if (!termiosp)
           {
@@ -810,34 +655,27 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         stop2 = (termiosp->c_cflag & CSTOPB) != 0;
 
-        /* Decode flow control */
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        flowc = (termiosp->c_cflag & (CCTS_OFLOW | CRTS_IFLOW)) != 0;
-#endif
         /* Verify that all settings are valid before committing */
 
         if (ret == OK)
           {
             /* Commit */
 
-            priv->baud      = baud;
-            priv->parity    = parity;
-            priv->bits      = nbits;
-            priv->stopbits2 = stop2;
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-            priv->flowc     = flowc;
-#endif
+            priv->config.baud      = baud;
+            priv->config.parity    = parity;
+            priv->config.bits      = nbits;
+            priv->config.stopbits2 = stop2;
+
             /* effect the changes immediately - note that we do not
              * implement TCSADRAIN / TCSAFLUSH
              */
 
             tms570_disableallints(priv, &imr);
-            ret = tms570_setup(dev);
+            ret = tms570_sci_configure(priv->scibase, &priv->config);
 
             /* Restore the interrupt state */
 
-            tms570_restoreusartint(priv, imr);
+            tms570_restoresciint(priv, imr);
           }
       }
       break;

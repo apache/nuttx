@@ -9,6 +9,10 @@ comment "TMS570 Configuration Options"
 
 # Chip Capabilities
 
+config TMS570_HAVE_SCI2
+	bool
+	default n
+
 # Summary Configurations
 
 # Chip Selection
@@ -32,18 +36,22 @@ config ARCH_CHIP_TMS570LS0432PZ
 config ARCH_CHIP_TMS570LS0714PZ
 	bool "TI TMS570LS0714PZ"
 	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
 
 config ARCH_CHIP_TMS570LS0714PGE
 	bool "TI TMS570LS0714PGE"
 	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
 
 config ARCH_CHIP_TMS570LS0714ZWT
 	bool "TI TMS570LS0714ZWT"
 	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
 
 config ARCH_CHIP_TMS570LS1227ZWT
 	bool "TI TMS570LS1227ZWT"
 	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
 
 endchoice # TI TMS570 Chip Selection
 
@@ -80,6 +88,12 @@ config TMS570_MIBASPI1
 config TMS570_SCI1
 	bool "Serial Communication Interface 1 (SCI1)"
 	default n
+	select ARCH_HAVE_SCI1
+
+config TMS570_SCI2
+	bool "Serial Communication Interface 2 (SCI2)"
+	default n
+	depends on TMS570_HAVE_SCI2
 	select ARCH_HAVE_SCI1
 
 endmenu # TMS570 Peripheral Support

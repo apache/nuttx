@@ -58,6 +58,16 @@
  * Public Types
  ************************************************************************************/
 
+/* This structure describes the configuration of an SCI UART */
+
+struct sci_config_s
+{
+  uint32_t baud;                /* Configured baud */
+  uint8_t  parity;              /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;                /* Number of bits (5-9) */
+  bool     stopbits2;           /* true: Configure with 2 stop bits instead of 1 */
+};
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
@@ -94,16 +104,14 @@ extern "C"
 void tms570_lowsetup(void);
 
 /************************************************************************************
- * Name: tms570_boardinitialize
+ * Name: tms570_sci_configure
  *
  * Description:
- *   All TMS570 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   Configure an SCI for non-interrupt driven operation
  *
  ************************************************************************************/
 
-void tms570_boardinitialize(void);
+int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config);
 
 #undef EXTERN
 #if defined(__cplusplus)
