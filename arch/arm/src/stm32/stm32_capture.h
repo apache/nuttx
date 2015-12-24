@@ -173,7 +173,7 @@ struct stm32_cap_ops_s
 {
   int  (*setclock)(  FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t clk, uint32_t prescaler, uint32_t max);
   int  (*setchannel)(FAR struct stm32_cap_dev_s *dev, uint8_t channel, stm32_cap_ch_cfg_t cfg);
-  int  (*getcapture)(FAR struct stm32_cap_dev_s *dev, uint8_t channel);
+  uint32_t (*getcapture)(FAR struct stm32_cap_dev_s *dev, uint8_t channel);
   int  (*setisr)(    FAR struct stm32_cap_dev_s *dev, xcpt_t handler); 
   void (*enableint)( FAR struct stm32_cap_dev_s *dev, stm32_cap_flags_t src, bool on );
   void (*ackflags)(  FAR struct stm32_cap_dev_s *dev, int flags);

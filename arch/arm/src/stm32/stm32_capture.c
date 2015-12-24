@@ -871,7 +871,7 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
 }
 
 
-static int stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev, uint8_t channel)
+static uint32_t stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev, uint8_t channel)
 {
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint32_t offset;
@@ -881,6 +881,7 @@ static int stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev, uint8_t channel
     {
       case STM32_CAP_CHANNEL_COUNTER:
         offset = STM32_GTIM_CNT_OFFSET;
+        break;
 #ifdef HAVE_CH1IN
       case 1:
         offset = STM32_GTIM_CCR1_OFFSET;
