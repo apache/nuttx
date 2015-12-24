@@ -1433,6 +1433,7 @@ config STM32_STM32F407
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1600,6 +1601,10 @@ config STM32_HAVE_UART8
 	default n
 
 config STM32_HAVE_TIM1
+	bool
+	default n
+
+config STM32_HAVE_TIM2
 	bool
 	default n
 
@@ -5119,6 +5124,126 @@ config STM32_TIM14_DAC2
 		Reserve TIM14 to trigger DAC2
 
 endchoice
+
+config STM32_TIM1_CAP
+	bool "TIM1 Capture"
+	default n
+	depends on STM32_HAVE_TIM1
+	---help---
+		Reserve timer 1 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM2_CAP
+	bool "TIM2 Capture"
+	default n
+	depends on STM32_HAVE_TIM2
+	---help---
+		Reserve timer 2 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM3_CAP
+	bool "TIM3 Capture"
+	default n
+	depends on STM32_HAVE_TIM3
+	---help---
+		Reserve timer 3 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM4_CAP
+	bool "TIM4 Capture"
+	default n
+	depends on STM32_HAVE_TIM4
+	---help---
+		Reserve timer 4 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM5_CAP
+	bool "TIM5 Capture"
+	default n
+	depends on STM32_HAVE_TIM5
+	---help---
+		Reserve timer 5 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM8_CAP
+	bool "TIM8 Capture"
+	default n
+	depends on STM32_HAVE_TIM8
+	---help---
+		Reserve timer 8 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM9_CAP
+	bool "TIM9 Capture"
+	default n
+	depends on STM32_HAVE_TIM9
+	---help---
+		Reserve timer 9 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM10_CAP
+	bool "TIM10 Capture"
+	default n
+	depends on STM32_HAVE_TIM10
+	---help---
+		Reserve timer 10 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM11_CAP
+	bool "TIM11 Capture"
+	default n
+	depends on STM32_HAVE_TIM11
+	---help---
+		Reserve timer 11 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM12_CAP
+	bool "TIM12 Capture"
+	default n
+	depends on STM32_HAVE_TIM12
+	---help---
+		Reserve timer 12 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM13_CAP
+	bool "TIM13 Capture"
+	default n
+	depends on STM32_HAVE_TIM13
+	---help---
+		Reserve timer 13 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32_TIM14_CAP
+	bool "TIM14 Capture"
+	default n
+	depends on STM32_HAVE_TIM14
+	---help---
+		Reserve timer 14 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
 
 menu "ADC Configuration"
 	depends on STM32_ADC
