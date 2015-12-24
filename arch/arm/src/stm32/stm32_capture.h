@@ -42,11 +42,9 @@
 
 #include <nuttx/config.h>
 
-
 #include "chip.h"
 #include <arch/board/board.h>
 #include "chip/stm32_tim.h"
-
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -87,28 +85,34 @@ struct stm32_cap_dev_s
 
 typedef enum
 {
+  /* Mapped */
 
-    /* Mapped */
   STM32_CAP_MAPPED_MASK         = (GTIM_CCMR1_CC1S_MASK),
   STM32_CAP_MAPPED_TI1          = (1<<GTIM_CCMR1_CC1S_SHIFT),
   STM32_CAP_MAPPED_TI2          = (2<<GTIM_CCMR1_CC1S_SHIFT),
 /*TODO STM32_CAP_MAPPED_TRC     = (3<<GTIM_CCMR1_CC1S_SHIFT),*/
                                 
-    /* Event prescaler */
+  /* Event prescaler */
+
   STM32_CAP_INPSC_MASK          = (GTIM_CCMR1_IC1PSC_MASK),
   STM32_CAP_INPSC_NO            = (0<<GTIM_CCMR1_IC1PSC_SHIFT),
   STM32_CAP_INPSC_2EVENTS       = (1<<GTIM_CCMR1_IC1PSC_SHIFT),
   STM32_CAP_INPSC_4EVENTS       = (2<<GTIM_CCMR1_IC1PSC_SHIFT),
   STM32_CAP_INPSC_8EVENTS       = (3<<GTIM_CCMR1_IC1PSC_SHIFT),
 
-    /* Event prescaler */
+  /* Event prescaler */
+
   STM32_CAP_FILTER_MASK         = (GTIM_CCMR1_IC1F_MASK),
   STM32_CAP_FILTER_NO           = (0<<GTIM_CCMR1_IC1F_SHIFT),
-  /* internal clock with N time to confirm event */
+
+  /* Internal clock with N time to confirm event */
+
   STM32_CAP_FILTER_INT_N2       = (1<<GTIM_CCMR1_IC1F_SHIFT),
   STM32_CAP_FILTER_INT_N4       = (2<<GTIM_CCMR1_IC1F_SHIFT),
   STM32_CAP_FILTER_INT_N8       = (3<<GTIM_CCMR1_IC1F_SHIFT),
+
   /* DTS clock div by D with N time to confirm event */
+
   STM32_CAP_FILTER_DTS_D2_N6    = (4<<GTIM_CCMR1_IC1F_SHIFT),
   STM32_CAP_FILTER_DTS_D2_N8    = (5<<GTIM_CCMR1_IC1F_SHIFT),
   STM32_CAP_FILTER_DTS_D4_N6    = (6<<GTIM_CCMR1_IC1F_SHIFT),
@@ -122,7 +126,8 @@ typedef enum
   STM32_CAP_FILTER_DTS_D32_N6   = (14<<GTIM_CCMR1_IC1F_SHIFT),
   STM32_CAP_FILTER_DTS_D32_N8   = (15<<GTIM_CCMR1_IC1F_SHIFT),
 
-    /* EDGE */
+  /* EDGE */
+
   STM32_CAP_EDGE_MASK           = (3<<8),
   STM32_CAP_EDGE_DISABLED       = (0<<8),
   STM32_CAP_EDGE_RISING         = (1<<8),
@@ -135,7 +140,6 @@ typedef enum
 
 typedef enum
 {
-
   STM32_CAP_CLK_INT= 0,
   STM32_CAP_CLK_EXT,
 
@@ -191,7 +195,6 @@ FAR struct stm32_cap_dev_s *stm32_cap_init(int timer);
 /* Power-down timer, mark it as unused */
 
 int stm32_cap_deinit(FAR struct stm32_cap_dev_s * dev);
-
 
 #undef EXTERN
 #if defined(__cplusplus)
