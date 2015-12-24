@@ -279,7 +279,8 @@ static inline uint32_t tms570_serialin(struct tms570_dev_s *priv, int offset)
  * Name: tms570_serialout
  ****************************************************************************/
 
-static inline void tms570_serialout(struct tms570_dev_s *priv, int offset, uint32_t value)
+static inline void tms570_serialout(struct tms570_dev_s *priv, int offset,
+                                    uint32_t value)
 {
   putreg32(value, priv->scibase + offset);
 }
@@ -288,7 +289,8 @@ static inline void tms570_serialout(struct tms570_dev_s *priv, int offset, uint3
  * Name: tms570_restoresciint
  ****************************************************************************/
 
-static inline void tms570_restoresciint(struct tms570_dev_s *priv, uint32_t imr)
+static inline void tms570_restoresciint(struct tms570_dev_s *priv,
+                                        uint32_t imr)
 {
   /* Restore the previous interrupt state (assuming all interrupts disabled) */
 
@@ -431,51 +433,78 @@ static void tms570_detach(struct sci_dev_s *dev)
 static int tms570_interrupt(struct sci_dev_s *dev)
 {
   struct tms570_dev_s *priv;
-  uint32_t          pending;
-  uint32_t          imr;
-  int               passes;
-  bool              handled;
+  uint32_t          intvec;
 
-  DEBUGASSERT(dev && dev->priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct tms570_dev_s *)dev->priv;
 
-  /* Loop until there are no characters to be transferred or, until we have
-   * been looping for a long time.
-   */
+  /* Loop until there are no further pending interrupts */
 
-  handled = true;
-  for (passes = 0; passes < 256 && handled; passes++)
+  for (; ; )
     {
-      handled = false;
-
-      /* Get the SCI status (we are only interested in the unmasked interrupts). */
-
-      priv->sr = tms570_serialin(priv, TMS570_SCI_SR_OFFSET);
-      imr      = tms570_serialin(priv, TMS570_SCI_IMR_OFFSET);
-      pending  = priv->sr & imr;
-
-      /* Handle an incoming, receive byte.  RXRDY: At least one complete character
-       * has been received and US_RHR has not yet been read.
+      /* Get the next pending interrupt.  For most interrupts, reading the
+       * INVECT0 register clears the corresonding INTFLAG.
        */
 
-      if ((pending & SCI_INT_RXRDY) != 0)
+      intvec = tms570_serialin(priv, TMS570_SCI_INTVECT0_OFFSET) & SCI_INTVECT_MASK;
+
+      /* Handle the pending interrupt */
+
+      switch (intvec)
         {
-          /* Received data ready... process incoming bytes */
+          case SCI_INTVECT_NONE:    /* No interrupt */
+            return;
 
-          sci_recvchars(dev);
-          handled = true;
-        }
+          case SCI_INTVECT_WAKEUP:  /* Wake-up interrupt */
+            /* SCI sets the WAKEUP flag if bus activity on the RX line
+             * either prevents power-down mode from being entered, or RX
+             * line activity causes an exit from power-down mode. If
+             * enabled wakeup interrupt is triggered once WAKEUP flag is
+             * set.
+             */
 
-      /* Handle outgoing, transmit bytes. TXRDY: There is no character in the
-       * US_THR.
-       */
+#warning Missing Logic
+            break;
 
-      if ((pending & SCI_INT_TXRDY) != 0)
-        {
-          /* Transmit data register empty ... process outgoing bytes */
+          /* SCI Errors */
 
-          sci_xmitchars(dev);
-          handled = true;
+          case SCI_INTVECT_PE:      /* Parity error interrupt */
+          case SCI_INTVECT_FE:      /* Framing error interrupt */
+          case SCI_INTVECT_BRKDT:   /* Break detect interrupt */
+          case SCI_INTVECT_OE:      /* Overrun error interrupt */
+          case SCI_INTVECT_BE:      /* Bit error interrupt */
+#warning Missing Logic
+            break;
+
+          case SCI_INTVECT_RX:      /* Receive interrupt */
+            {
+              /* Receive data ready... process incoming bytes */
+
+              uart_recvchars(dev);
+            }
+            break;
+
+          case SCI_INTVECT_TX:      /* Tranmit interrupt */
+            {
+              /* Transmit data register available ... process outgoing bytes */
+
+              uart_xmitchars(dev);
+            }
+            break;
+
+          /* LIN mode only.  These should never occur in SCI mode */
+
+          case SCI_INTVECT_ISFE:    /* Inconsistent synch field error interrupt */
+          case SCI_INTVECT_ID:      /* Identification interrupt */
+          case SCI_INTVECT_PBE:     /* Physical bus error interrupt */
+          case SCI_INTVECT_CE:      /* Checksum error interrupt */
+          case SCI_INTVECT_NRE:     /* No response error interrupt */
+          case SCI_INTVECT_TOAWUS:  /* Timeout after wakeup signal interrupt */
+          case SCI_INTVECT_TOA3WUS: /* Timeout after 2 Wakeup signls interrupt */
+          case SCI_INTVECT_TIMEOUT: /* Timeout interrupt */
+
+          default:
+            PANIC();
         }
     }
 

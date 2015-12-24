@@ -244,9 +244,9 @@
 #define SCI_INT_PE                    (1 << 24) /* Bit 24: Parity error interrupt */
 #define SCI_INT_OE                    (1 << 25) /* Bit 25: Overrun error interrupt */
 #define SCI_INT_FE                    (1 << 26) /* Bit 26: Framing error interrupt */
-#define SCI_INT_NRE                   (1 << 27) /* Bit 27: No respose error interrupt */
-#define SCI_INT_ISFE                  (1 << 28) /* Bit 28: Inconsistene synch field error interrupt */
-#define SCI_INT_CE                    (1 << 29) /* Bit 29: checksum error interrupt */
+#define SCI_INT_NRE                   (1 << 27) /* Bit 27: No response error interrupt */
+#define SCI_INT_ISFE                  (1 << 28) /* Bit 28: Inconsistent synch field error interrupt */
+#define SCI_INT_CE                    (1 << 29) /* Bit 29: Checksum error interrupt */
 #define SCI_INT_PBE                   (1 << 30) /* Bit 30: Physical bus error interrupt */
 #define SCI_INT_BE                    (1 << 31) /* Bit 31: Bit error interrupt */
 
@@ -272,16 +272,32 @@
 #define SCI_FLR_PE                    (1 << 24) /* Bit 24: Parity error flag */
 #define SCI_FLR_OE                    (1 << 25) /* Bit 25: Overrun error flag */
 #define SCI_FLR_FE                    (1 << 26) /* Bit 26: Framing error flag */
-#define SCI_FLR_NRE                   (1 << 27) /* Bit 27: No respose error flag */
-#define SCI_FLR_ISFE                  (1 << 28) /* Bit 28: Inconsistene synch field error flag */
+#define SCI_FLR_NRE                   (1 << 27) /* Bit 27: No response error flag */
+#define SCI_FLR_ISFE                  (1 << 28) /* Bit 28: Inconsistent synch field error flag */
 #define SCI_FLR_CE                    (1 << 29) /* Bit 29: checksum error flag */
 #define SCI_FLR_PBE                   (1 << 30) /* Bit 30: Physical bus error flag */
 #define SCI_FLR_BE                    (1 << 31) /* Bit 31: Bit error flag */
 
-/* SCI Interrupt Vector Offset 0 */
-#define SCI_INTVECT0_
-/* SCI Interrupt Vector Offset 1 */
-#define SCI_INTVECT1_
+/* SCI Interrupt Vector Offset 0/1 */
+
+#define SCI_INTVECT_MASK              (0x1f)    /* Bits 0-4: Interrupt vector offset */
+#  define SCI_INTVECT_NONE            (0)       /*   No interrupt */
+#  define SCI_INTVECT_WAKEUP          (1)       /*   Wake-up interrupt */
+#  define SCI_INTVECT_ISFE            (2)       /*   Inconsistent synch field error interrupt */
+#  define SCI_INTVECT_PE              (3)       /*   Parity error interrupt */
+#  define SCI_INTVECT_ID              (4)       /*   Identification interrupt */
+#  define SCI_INTVECT_PBE             (5)       /*   Physical bus error interrupt */
+#  define SCI_INTVECT_FE              (6)       /*   Framing error interrupt */
+#  define SCI_INTVECT_BRKDT           (7)       /*   Break detect interrupt */
+#  define SCI_INTVECT_CE              (8)       /*   Checksum error interrupt */
+#  define SCI_INTVECT_OE              (9)       /*   Overrun error interrupt */
+#  define SCI_INTVECT_BE              (10)      /*   Bit error interrupt */
+#  define SCI_INTVECT_RX              (11)      /*   Receive interrupt */
+#  define SCI_INTVECT_TX              (12)      /*   Tranmit interrupt */
+#  define SCI_INTVECT_NRE             (13)      /*   No response error interrupt */
+#  define SCI_INTVECT_TOAWUS          (14)      /*   Timeout after wakeup signal interrupt */
+#  define SCI_INTVECT_TOA3WUS         (15)      /*   Timeout after 2 Wakeup signls interrupt */
+#  define SCI_INTVECT_TIMEOUT         (16)      /*   Timeout interrupt */
 
 /* SCI Format Control Register */
 

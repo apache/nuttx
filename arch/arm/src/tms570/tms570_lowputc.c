@@ -295,7 +295,7 @@ int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
       return -ERANGE;
     }
 
-  /* Disable all interrupts */
+  /* Disable all interrupts and map them all to INT0 */
 
   putreg32(SCI_INT_ALL, base + TMS570_SCI_CLEARINT_OFFSET);
   putreg32(SCI_INT_ALL, base + TMS570_SCI_CLEARINTLVL_OFFSET);
