@@ -231,7 +231,6 @@ ifeq ($(CONFIG_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
 
-
 ifeq ($(CONFIG_CAN),y)
 CHIP_CSRCS += stm32_can.c
 endif

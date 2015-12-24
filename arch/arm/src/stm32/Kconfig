@@ -5130,7 +5130,7 @@ config STM32_TIM1_CAP
 	default n
 	depends on STM32_HAVE_TIM1
 	---help---
-		Reserve timer 1 for use by Capture 
+		Reserve timer 1 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5140,7 +5140,7 @@ config STM32_TIM2_CAP
 	default n
 	depends on STM32_HAVE_TIM2
 	---help---
-		Reserve timer 2 for use by Capture 
+		Reserve timer 2 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5150,7 +5150,7 @@ config STM32_TIM3_CAP
 	default n
 	depends on STM32_HAVE_TIM3
 	---help---
-		Reserve timer 3 for use by Capture 
+		Reserve timer 3 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5160,7 +5160,7 @@ config STM32_TIM4_CAP
 	default n
 	depends on STM32_HAVE_TIM4
 	---help---
-		Reserve timer 4 for use by Capture 
+		Reserve timer 4 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5170,7 +5170,7 @@ config STM32_TIM5_CAP
 	default n
 	depends on STM32_HAVE_TIM5
 	---help---
-		Reserve timer 5 for use by Capture 
+		Reserve timer 5 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5180,7 +5180,7 @@ config STM32_TIM8_CAP
 	default n
 	depends on STM32_HAVE_TIM8
 	---help---
-		Reserve timer 8 for use by Capture 
+		Reserve timer 8 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5190,7 +5190,7 @@ config STM32_TIM9_CAP
 	default n
 	depends on STM32_HAVE_TIM9
 	---help---
-		Reserve timer 9 for use by Capture 
+		Reserve timer 9 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5200,7 +5200,7 @@ config STM32_TIM10_CAP
 	default n
 	depends on STM32_HAVE_TIM10
 	---help---
-		Reserve timer 10 for use by Capture 
+		Reserve timer 10 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5210,7 +5210,7 @@ config STM32_TIM11_CAP
 	default n
 	depends on STM32_HAVE_TIM11
 	---help---
-		Reserve timer 11 for use by Capture 
+		Reserve timer 11 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5220,7 +5220,7 @@ config STM32_TIM12_CAP
 	default n
 	depends on STM32_HAVE_TIM12
 	---help---
-		Reserve timer 12 for use by Capture 
+		Reserve timer 12 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5230,7 +5230,7 @@ config STM32_TIM13_CAP
 	default n
 	depends on STM32_HAVE_TIM13
 	---help---
-		Reserve timer 13 for use by Capture 
+		Reserve timer 13 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
@@ -5240,7 +5240,7 @@ config STM32_TIM14_CAP
 	default n
 	depends on STM32_HAVE_TIM14
 	---help---
-		Reserve timer 14 for use by Capture 
+		Reserve timer 14 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
