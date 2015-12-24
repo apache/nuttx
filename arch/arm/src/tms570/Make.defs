@@ -40,12 +40,17 @@ HEAD_ASRC  = arm_vectortab.S
 
 # Common assembly language files
 
-CMN_ASRCS += arm_vectors.S arm_fpuconfig.S arm_head.S arm_fullcontextrestore.S
+CMN_ASRCS += arm_vectors.S arm_head.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
-CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
+CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S
+CMN_ASRCS += cp15_invalidate_dcache_all.S
 
 # Configuration dependent assembly language files
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += arm_fpuconfig.S
+endif
 
 ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += arm_memcpy.S

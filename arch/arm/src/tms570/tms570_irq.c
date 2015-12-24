@@ -170,7 +170,6 @@ void up_irqinitialize(void)
    * disabled through ENABLE registers.
    */
 
-#warning Missing Logic
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
