@@ -255,9 +255,9 @@ LEDs
 ----
 A single LED is available driven by PC8.
 
-These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
-include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+include/board.h and src/sam_autoleds.c. The LED is used to encode
 OS-related events as follows:
 
   ------------------- ----------------------- ------
@@ -272,8 +272,8 @@ OS-related events as follows:
   LED_ASSERTION       An assertion failed     N/C
   LED_PANIC           The system has crashed  FLASH
 
-Thus is LED is statically on, NuttX has successfully  booted and is,
-apparently, running normally.  If LED is flashing at approximately
+Thus if the LED is statically on, NuttX has successfully  booted and is,
+apparently, running normally.  If the LED is flashing at approximately
 2Hz, then a fatal error has been detected and the system has halted.
 
 Buttons

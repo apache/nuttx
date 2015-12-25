@@ -242,6 +242,9 @@ config ARCH_BOARD_KWIKSTIK_K40
 config ARCH_BOARD_LAUNCHXL_TMS57004
 	bool "TI LaunchXL-TMS57004"
 	depends on ARCH_CHIP_TMS570LS0432PZ
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		TI Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (LAUNCHXL-
 		TMS57004) featuring the Hercules TMS570LS0432PZ chip.
