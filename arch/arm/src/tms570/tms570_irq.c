@@ -173,12 +173,12 @@ void up_irqinitialize(void)
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-#ifdef CONFIG_TMS570_GPIO_IRQ
+#ifdef CONFIG_TMS570_GIO_IRQ
   /* Initialize logic to support a second level of interrupt decoding for
-   * GPIO pins.
+   * GIO pins.
    */
 
-  tms570_gpioirqinitialize();
+  tms570_gioirqinitialize();
 #endif
 
   /* And finally, enable interrupts */
