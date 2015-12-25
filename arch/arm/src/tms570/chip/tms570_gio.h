@@ -62,6 +62,9 @@
 #define TMS570_GIOG                    6
 #define TMS570_GIOH                    7
 
+#define TMS570_NPORTS                  8
+#define TMS570_NIRQPORTS               4
+
 /* Register Offsets *********************************************************************************/
 
 #define TMS570_GIO_GCR0_OFFSET         0x0000 /* GIO Global Control Register */
@@ -264,6 +267,10 @@
 
 /* GIO Interrupt Detect Register */
 
+#define GIO_INTDET_PORT_SHIFT(p)       ((p) << 3)
+#define GIO_INTDET_PORT_MASK(p)        (0xff << GIO_INTDET_PORT_SHIFT(p))
+#  define GIO_INTDET_PORT_PIN(p,n)     (1 << (GIO_INTDET_PORT_SHIFT(p) + (n)))
+
 #define GIO_INTDET_GIOA_SHIFT          (0)       /* Bits 0-7: Interrupt detection select for pins GIOA[7:0] */
 #define GIO_INTDET_GIOA_MASK           (0xff << GIO_INTDET_GIOA_SHIFT)
 #  define GIO_INTDET_GIOA_PIN(n)       (1 << (GIO_INTDET_GIOA_SHIFT + (n)))
@@ -278,6 +285,10 @@
 #  define GIO_INTDET_GIOD_PIN(n)       (1 << (GIO_INTDET_GIOD_SHIFT + (n)))
 
 /* GIO Interrupt Polarity Register */
+
+#define GIO_POL_PORT_SHIFT(p)          ((p) << 3)
+#define GIO_POL_PORT_MASK(p)           (0xff << GIO_POL_PORT_SHIFT(p))
+#  define GIO_POL_PORT_PIN(p,n)        (1 << (GIO_POL_PORT_SHIFT(p) + (n)))
 
 #define GIO_POL_GIOA_SHIFT             (0)       /* Bits 0-7: Interrupt polarity select for pins GIOA[7:0] */
 #define GIO_POL_GIOA_MASK              (0xff << GIO_POL_GIOA_SHIFT)
@@ -294,6 +305,10 @@
 
 /* GIO Interrupt Enable Set Register */
 
+#define GIO_ENASET_PORT_SHIFT(p)       ((p) << 3)
+#define GIO_ENASET_PORT_MASK(p)        (0xff << GIO_ENASET_PORT_SHIFT(p))
+#  define GIO_ENASET_PORT_PIN(p,n)     (1 << (GIO_ENASET_PORT_SHIFT(p) + (n)))
+
 #define GIO_ENASET_GIOA_SHIFT          (0)       /* Bits 0-7: Interrupt enable for pins GIOA[7:0] */
 #define GIO_ENASET_GIOA_MASK           (0xff << GIO_ENASET_GIOA_SHIFT)
 #  define GIO_ENASET_GIOA_PIN(n)       (1 << (GIO_ENASET_GIOA_SHIFT + (n)))
@@ -308,6 +323,10 @@
 #  define GIO_ENASET_GIOD_PIN(n)       (1 << (GIO_ENASET_GIOD_SHIFT + (n)))
 
 /* GIO Interrupt Enable Clear Register */
+
+#define GIO_ENACLR_PORT_SHIFT(p)       ((p) << 3)
+#define GIO_ENACLR_PORT_MASK(p)        (0xff << GIO_ENACLR_PORT_SHIFT(p))
+#  define GIO_ENACLR_PORT_PIN(p,n)     (1 << (GIO_ENACLR_PORT_SHIFT(p) + (n)))
 
 #define GIO_ENACLR_GIOA_SHIFT          (0)       /* Bits 0-7: Interrupt disable for pins GIOA[7:0] */
 #define GIO_ENACLR_GIOA_MASK           (0xff << GIO_ENACLR_GIOA_SHIFT)
@@ -324,6 +343,10 @@
 
 /* GIO Interrupt Priority Set Register */
 
+#define GIO_LVLSET_PORT_SHIFT(p)       ((p) << 3)
+#define GIO_LVLSET_PORT_MASK(p)        (0xff << GIO_LVLSET_PORT_SHIFT(p))
+#  define GIO_LVLSET_PORT_PIN(p,n)     (1 << (GIO_LVLSET_PORT_SHIFT(p) + (n)))
+
 #define GIO_LVLSET_GIOA_SHIFT          (0)       /* Bits 0-7: Interrupt high level select for pins GIOA[7:0] */
 #define GIO_LVLSET_GIOA_MASK           (0xff << GIO_LVLSET_GIOA_SHIFT)
 #  define GIO_LVLSET_GIOA_PIN(n)       (1 << (GIO_LVLSET_GIOA_SHIFT + (n)))
@@ -338,6 +361,10 @@
 #  define GIO_LVLSET_GIOD_PIN(n)       (1 << (GIO_LVLSET_GIOD_SHIFT + (n)))
 
 /* GIO Interrupt Priority Clear Register */
+
+#define GIO_LVLCLR_PORT_SHIFT(p)       ((p) << 3)
+#define GIO_LVLCLR_PORT_MASK(p)        (0xff << GIO_LVLCLR_PORT_SHIFT(p))
+#  define GIO_LVLCLR_PORT_PIN(p,n)     (1 << (GIO_LVLCLR_PORT_SHIFT(p) + (n)))
 
 #define GIO_LVLCLR_GIOA_SHIFT          (0)       /* Bits 0-7: Interrupt low level select for pins GIOA[7:0] */
 #define GIO_LVLCLR_GIOA_MASK           (0xff << GIO_LVLCLR_GIOA_SHIFT)
@@ -354,6 +381,10 @@
 
 /* GIO Interrupt Flag Register */
 
+#define GIO_FLG_PORT_SHIFT(p)          ((p) << 3)
+#define GIO_FLG_PORT_MASK(p)           (0xff << GIO_FLG_PORT_SHIFT(p))
+#  define GIO_FLG_PORT_PIN(p,n)        (1 << (GIO_FLG_PORT_SHIFT(p) + (n)))
+
 #define GIO_FLG_GIOA_SHIFT             (0)       /* Bits 0-7: Interrupt flag for pins GIOA[7:0] */
 #define GIO_FLG_GIOA_MASK              (0xff << GIO_FLG_GIOA_SHIFT)
 #  define GIO_FLG_GIOA_PIN(n)          (1 << (GIO_FLG_GIOA_SHIFT + (n)))
@@ -369,46 +400,46 @@
 
 /* GIO Offset 1/2 Register and GIO Emulation 1/2 Register */
 
-#define GIO_OFF_MASK                  (0x3f)    /* Bits 0-5: GIO offset */
-#  define GIO_OFF_NONE                (0x00)    /*   No interrupt pending */
-#  define GIO_OFF_GIOA0               (0x01)    /*   GIOA0 interrupt pending */
-#  define GIO_OFF_GIOA1               (0x02)    /*   GIOA1 interrupt pending */
-#  define GIO_OFF_GIOA2               (0x03)    /*   GIOA2 interrupt pending */
-#  define GIO_OFF_GIOA3               (0x04)    /*   GIOA3 interrupt pending */
-#  define GIO_OFF_GIOA4               (0x05)    /*   GIOA4 interrupt pending */
-#  define GIO_OFF_GIOA5               (0x06)    /*   GIOA5 interrupt pending */
-#  define GIO_OFF_GIOA6               (0x07)    /*   GIOA6 interrupt pending */
-#  define GIO_OFF_GIOA7               (0x08)    /*   GIOA7 interrupt pending */
-#  define GIO_OFF_GIOB0               (0x09)    /*   GIOB0 interrupt pending */
-#  define GIO_OFF_GIOB1               (0x0a)    /*   GIOB1 interrupt pending */
-#  define GIO_OFF_GIOB2               (0x0b)    /*   GIOB2 interrupt pending */
-#  define GIO_OFF_GIOB3               (0x0c)    /*   GIOB3 interrupt pending */
-#  define GIO_OFF_GIOB4               (0x0d)    /*   GIOB4 interrupt pending */
-#  define GIO_OFF_GIOB5               (0x0e)    /*   GIOB5 interrupt pending */
-#  define GIO_OFF_GIOB6               (0x0f)    /*   GIOB6 interrupt pending */
-#  define GIO_OFF_GIOB7               (0x10)    /*   GIOB7 interrupt pending */
-#  define GIO_OFF_GIOC0               (0x11)    /*   GIOC0 interrupt pending */
-#  define GIO_OFF_GIOC1               (0x12)    /*   GIOC1 interrupt pending */
-#  define GIO_OFF_GIOC2               (0x13)    /*   GIOC2 interrupt pending */
-#  define GIO_OFF_GIOC3               (0x14)    /*   GIOC3 interrupt pending */
-#  define GIO_OFF_GIOC4               (0x15)    /*   GIOC4 interrupt pending */
-#  define GIO_OFF_GIOC5               (0x16)    /*   GIOC5 interrupt pending */
-#  define GIO_OFF_GIOC6               (0x17)    /*   GIOC6 interrupt pending */
-#  define GIO_OFF_GIOC7               (0x18)    /*   GIOC7 interrupt pending */
-#  define GIO_OFF_GIOD0               (0x19)    /*   GIOD0 interrupt pending */
-#  define GIO_OFF_GIOD1               (0x1a)    /*   GIOD1 interrupt pending */
-#  define GIO_OFF_GIOD2               (0x1b)    /*   GIOD2 interrupt pending */
-#  define GIO_OFF_GIOD3               (0x1c)    /*   GIOD3 interrupt pending */
-#  define GIO_OFF_GIOD4               (0x1d)    /*   GIOD4 interrupt pending */
-#  define GIO_OFF_GIOD5               (0x1e)    /*   GIOD5 interrupt pending */
-#  define GIO_OFF_GIOD6               (0x1f)    /*   GIOD6 interrupt pending */
-#  define GIO_OFF_GIOD7               (0x20)    /*   GIOD7 interrupt pending */
+#define GIO_OFF_MASK                   (0x3f)    /* Bits 0-5: GIO offset */
+#  define GIO_OFF_NONE                 (0x00)    /*   No interrupt pending */
+#  define GIO_OFF_GIOA0                (0x01)    /*   GIOA0 interrupt pending */
+#  define GIO_OFF_GIOA1                (0x02)    /*   GIOA1 interrupt pending */
+#  define GIO_OFF_GIOA2                (0x03)    /*   GIOA2 interrupt pending */
+#  define GIO_OFF_GIOA3                (0x04)    /*   GIOA3 interrupt pending */
+#  define GIO_OFF_GIOA4                (0x05)    /*   GIOA4 interrupt pending */
+#  define GIO_OFF_GIOA5                (0x06)    /*   GIOA5 interrupt pending */
+#  define GIO_OFF_GIOA6                (0x07)    /*   GIOA6 interrupt pending */
+#  define GIO_OFF_GIOA7                (0x08)    /*   GIOA7 interrupt pending */
+#  define GIO_OFF_GIOB0                (0x09)    /*   GIOB0 interrupt pending */
+#  define GIO_OFF_GIOB1                (0x0a)    /*   GIOB1 interrupt pending */
+#  define GIO_OFF_GIOB2                (0x0b)    /*   GIOB2 interrupt pending */
+#  define GIO_OFF_GIOB3                (0x0c)    /*   GIOB3 interrupt pending */
+#  define GIO_OFF_GIOB4                (0x0d)    /*   GIOB4 interrupt pending */
+#  define GIO_OFF_GIOB5                (0x0e)    /*   GIOB5 interrupt pending */
+#  define GIO_OFF_GIOB6                (0x0f)    /*   GIOB6 interrupt pending */
+#  define GIO_OFF_GIOB7                (0x10)    /*   GIOB7 interrupt pending */
+#  define GIO_OFF_GIOC0                (0x11)    /*   GIOC0 interrupt pending */
+#  define GIO_OFF_GIOC1                (0x12)    /*   GIOC1 interrupt pending */
+#  define GIO_OFF_GIOC2                (0x13)    /*   GIOC2 interrupt pending */
+#  define GIO_OFF_GIOC3                (0x14)    /*   GIOC3 interrupt pending */
+#  define GIO_OFF_GIOC4                (0x15)    /*   GIOC4 interrupt pending */
+#  define GIO_OFF_GIOC5                (0x16)    /*   GIOC5 interrupt pending */
+#  define GIO_OFF_GIOC6                (0x17)    /*   GIOC6 interrupt pending */
+#  define GIO_OFF_GIOC7                (0x18)    /*   GIOC7 interrupt pending */
+#  define GIO_OFF_GIOD0                (0x19)    /*   GIOD0 interrupt pending */
+#  define GIO_OFF_GIOD1                (0x1a)    /*   GIOD1 interrupt pending */
+#  define GIO_OFF_GIOD2                (0x1b)    /*   GIOD2 interrupt pending */
+#  define GIO_OFF_GIOD3                (0x1c)    /*   GIOD3 interrupt pending */
+#  define GIO_OFF_GIOD4                (0x1d)    /*   GIOD4 interrupt pending */
+#  define GIO_OFF_GIOD5                (0x1e)    /*   GIOD5 interrupt pending */
+#  define GIO_OFF_GIOD6                (0x1f)    /*   GIOD6 interrupt pending */
+#  define GIO_OFF_GIOD7                (0x20)    /*   GIOD7 interrupt pending */
 
 /* GIO Data Direction Register, GIO Data Input Register, GIO Data Output Register,
  * GIO Data Set Register, GIO Data Clear Register, GIO Open Drain Register,
  * GIO Pull Disable Register, and GIO Pull Select Register
  */
 
-#define GIO_PIN(n)                    (1 << (n)) /* Bit n:  Corresponds to pin n */
+#define GIO_PIN(n)                     (1 << (n)) /* Bit n:  Corresponds to pin n */
 
 #endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_GIO_H */

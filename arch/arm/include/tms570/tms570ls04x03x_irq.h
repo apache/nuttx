@@ -58,14 +58,14 @@
 
 /* Default request to channel assignments.  Undefined requests are reserved */
 
-#define TMS570_REQ_ESMHIGH     0 /* ESM High level interrupt (NMI) */
-#define TMS570_REQ_RTICMP0     2 /* RTI compare interrupt 0 */
-#define TMS570_REQ_RTICMP1     3 /* RTI compare interrupt 1 */
-#define TMS570_REQ_RTICMP2     4 /* RTI compare interrupt 2 */
-#define TMS570_REQ_RTICMP3     5 /* RTI compare interrupt 3 */
-#define TMS570_REQ_RTIOVF0     6 /* RTI overflow interrupt 0 */
-#define TMS570_REQ_RTIOVF1     7 /* RTI overflow interrupt 1 */
-#define TMS570_REQ_GIOA        9 /* GIO interrupt A */
+#define TMS570_REQ_ESMHIGH     0  /* ESM High level interrupt (NMI) */
+#define TMS570_REQ_RTICMP0     2  /* RTI compare interrupt 0 */
+#define TMS570_REQ_RTICMP1     3  /* RTI compare interrupt 1 */
+#define TMS570_REQ_RTICMP2     4  /* RTI compare interrupt 2 */
+#define TMS570_REQ_RTICMP3     5  /* RTI compare interrupt 3 */
+#define TMS570_REQ_RTIOVF0     6  /* RTI overflow interrupt 0 */
+#define TMS570_REQ_RTIOVF1     7  /* RTI overflow interrupt 1 */
+#define TMS570_REQ_GIO_0       9  /* GIO level 0 interrupt */
 #define TMS570_REQ_N2HET_0     10 /* N2HET level 0 interrupt */
 #define TMS570_REQ_HTU_0       11 /* HTU level 0 interrupt */
 #define TMS570_REQ_MIBSPI1_0   12 /* MIBSPI1 level 0 interrupt */
@@ -77,7 +77,7 @@
 #define TMS570_REQ_ESMLO       20 /* ESM Low level interrupt */
 #define TMS570_REQ_SYSTEM      21 /* Software interrupt (SSI) */
 #define TMS570_REQ_CPU         22 /* PMU interrupt */
-#define TMS570_REQ_GIOB        23 /* GIO interrupt B */
+#define TMS570_REQ_GIO_1       23 /* GIO level 1 interrupt */
 #define TMS570_REQ_N2HET_1     24 /* N2HET level 1 interrupt */
 #define TMS570_REQ_HTU_1       25 /* HTU level 1 interrupt */
 #define TMS570_REQ_MIBSPI1_1   26 /* MIBSPI1 level 1 interrupt */

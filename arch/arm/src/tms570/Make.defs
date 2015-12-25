@@ -104,7 +104,7 @@ CHIP_ASRCS  =
 
 # SAMA5-specific C source files
 
-CHIP_CSRCS  = tms570_boot.c tms570_clockconfig.c tms570_irq.c
+CHIP_CSRCS  = tms570_boot.c tms570_clockconfig.c tms570_gio.c tms570_irq.c
 CHIP_CSRCS += tms570_lowputc.c tms570_serial.c
 
 # Configuration dependent C and assembly language files
@@ -113,6 +113,10 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += tms570_timerisr.c
 endif
 
-ifneq ($(CONFIG_TMS570_SELFTEST),y)
+ifeq ($(CONFIG_TMS570_SELFTEST),y)
 CHIP_CSRCS += tms570_selftest.c
+endif
+
+ifeq ($(CONFIG_TMS570_GIO_IRQ),y)
+CHIP_CSRCS += tms570_gioirq.c
 endif

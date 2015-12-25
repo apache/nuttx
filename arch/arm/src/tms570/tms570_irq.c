@@ -178,7 +178,7 @@ void up_irqinitialize(void)
    * GIO pins.
    */
 
-  tms570_gioirqinitialize();
+  tms570_gioirq_initialize();
 #endif
 
   /* And finally, enable interrupts */

@@ -46,6 +46,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "chip/tms570_gio.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -54,7 +56,7 @@
 
 /* 32-bit Encoding:
  *
- *   .... .... .... .... MCCC .IIV PPP. .BBB
+ *   .... .... .... .... M.CC IIOV PPP. .BBB
  */
 
 /* Input/Output mode:
@@ -70,27 +72,33 @@
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
  *
- *   .... .... .... .... .CCC .... .... ....
+ *   .... .... .... .... ..CC .... .... ....
  */
 
 #define GIO_CFG_SHIFT             (12)        /* Bits 12-14: GIO configuration bits */
-#define GIO_CFG_MASK              (7 << GIO_CFG_SHIFT)
+#define GIO_CFG_MASK              (3 << GIO_CFG_SHIFT)
 #  define GIO_CFG_DEFAULT         (0 << GIO_CFG_SHIFT) /* Default, no attribute */
 #  define GIO_CFG_PULLUP          (1 << GIO_CFG_SHIFT) /* Bit 16: Internal pull-up */
 #  define GIO_CFG_PULLDOWN        (2 << GIO_CFG_SHIFT) /* Bit 17: Internal pull-down */
-#  define GIO_CFG_OPENDRAIN       (4 << GIO_CFG_SHIFT) /* Bit 19: Open drain */
 
 /* Interrupt modes:
  *
- *   .... .... .... .... .... .II. .... ....
+ *   .... .... .... .... .... II.. .... ....
  */
 
-#define GIO_INT_SHIFT             (9)         /* Bits 9-10: GIO interrupt bits */
+#define GIO_INT_SHIFT             (10)        /* Bits 10-11: GIO interrupt bits */
 #define GIO_INT_MASK              (3 << GIO_INT_SHIFT)
 #  define GIO_INT_NONE            (0 << GIO_INT_SHIFT)
 #  define GIO_INT_RISING          (1 << GIO_INT_SHIFT)
 #  define GIO_INT_FALLING         (2 << GIO_INT_SHIFT)
 #  define GIO_INT_BOTHEDGES       (3 << GIO_INT_SHIFT)
+
+/* If the pin is an GIO output, then this selects the open drain output
+ *
+ *   .... .... .... .... .... ..O. .... ....
+ */
+
+#define GIO_OPENDRAIN             (1 << 9)    /* Bit 9: Open drain mode */
 
 /* If the pin is an GIO output, then this identifies the initial output value:
  *
@@ -170,7 +178,7 @@ extern "C"
 static inline uintptr_t tms570_gio_base(gio_pinset_t cfgset)
 {
   int port = (cfgset & GIO_PORT_MASK) >> GIO_PORT_SHIFT;
-  return TMS570_GIO_PORTBASE(n);
+  return TMS570_GIO_PORTBASE(port);
 }
 
 /****************************************************************************
@@ -216,8 +224,18 @@ static inline int tms570_gio_pinmask(gio_pinset_t cfgset)
  * Public Function Prototypes
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: tms570_gio_initialize
+ *
+ * Description:
+ *   Take the GIO block out of reset and assure that it is ready for use.
+ *
+ ****************************************************************************/
+
+int tms570_gio_initialize(void);
+
 /************************************************************************************
- * Name: tms570_gioirqinitialize
+ * Name: tms570_gioirq_initialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for GIO pins.
@@ -225,9 +243,9 @@ static inline int tms570_gio_pinmask(gio_pinset_t cfgset)
  ************************************************************************************/
 
 #ifdef CONFIG_TMS570_GIO_IRQ
-void tms570_gioirqinitialize(void);
+void tms570_gioirq_initialize(void);
 #else
-#  define tms570_gioirqinitialize()
+#  define tms570_gioirq_initialize()
 #endif
 
 /************************************************************************************
@@ -310,7 +328,7 @@ void tms570_gioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GIO
+#ifdef CONFIG_DEBUG_GPIO
 int tms570_dumpgio(uint32_t pinset, const char *msg);
 #else
 #  define tms570_dumpgio(p,m)

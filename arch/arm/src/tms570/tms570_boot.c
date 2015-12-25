@@ -63,6 +63,7 @@
 #include "chip/tms570_sys.h"
 #include "chip/tms570_esm.h"
 #include "tms570_clockconfig.h"
+#include "tms570_gio.h"
 #include "tms570_boot.h"
 
 /****************************************************************************
@@ -315,6 +316,10 @@ void arm_boot(void)
 
   arm_data_initialize();
 #endif
+
+  /* Initialize GIO for use by board initialization logic */
+
+  tms570_gio_initialize();
 
   /* Perform board-specific initialization,  This must include:
    *
