@@ -735,12 +735,9 @@ static int tms570_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
 
-  /* Return the error information in the saved status.
-   *
-   * REVISIT:  RX error information is not currently retained.
-   */
+  /* Return the error information in the saved status. */
 
-  *status = 0;
+  *status = tms570_serialin(priv, TMS570_SCI_FLR_OFFSET);
 
   /* Then return the actual received byte */
 
@@ -892,9 +889,11 @@ void up_serialinit(void)
   tms570_disableallints(TTYS1_DEV.priv, NULL);
 #endif
 
-  /* Configuration whichever one is the console */
-
 #ifdef HAVE_SERIAL_CONSOLE
+  /* Configure whichever one is the console.  NOTE: This was already done
+   * in tms570_lowsetup().
+   */
+
   CONSOLE_DEV.isconsole = true;
   tms570_setup(&CONSOLE_DEV);
 
