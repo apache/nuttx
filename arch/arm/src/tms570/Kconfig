@@ -100,6 +100,11 @@ config TMS570_SCI2
 
 endmenu # TMS570 Peripheral Support
 
+config TMS570_GIO_IRQ
+	bool "GIO pin interrupts"
+	---help---
+		Build in support for interrupting GIO pins
+
 config TMS570_SELFTEST
 	bool "Power-on Selftest"
 	default n
