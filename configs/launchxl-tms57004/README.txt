@@ -1,16 +1,37 @@
 README
-^^^^^^
+======
 
   This README provides some information about the port of NuttX to the TI
   Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (LAUNCHXL-TMS57004)
   featuring the Hercules TMS570LS0432PZ chip.
 
 Contents
-^^^^^^^^
+========
 
+  - Toolchain
   - LEDs and Buttons
   - Serial Console
+  - Debugging
   - Configurations
+
+Toolchain
+=========
+
+  All of these configurations are set up to build with Cygwin under Windows
+  using the "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+  (unless stated otherwise in the description of the configuration).
+
+    https://launchpad.net/gcc-arm-embedded
+
+  That toolchain selection can easily be reconfigured using 'make menuconfig'.
+  Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y               : Window environment
+       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
 LEDs and Buttons
 ================
@@ -59,7 +80,7 @@ LEDs and Buttons
   depressed.
 
 Serial Console
-^^^^^^^^^^^^^^
+==============
 
   This TMS570 has a single SCI.  The SCI_RX and TX pins are connected to
   the FTDI chip which provides a virtual COM port for the launchpad.
