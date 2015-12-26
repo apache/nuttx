@@ -20,9 +20,10 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * 3. Neither the name NuttX, Texas Instruments Incorporated, nor the
+ *    names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written
+ *    permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -45,8 +46,14 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 
+#include "up_arch.h"
+
+#include "chip/tms570_sys.h"
+#include "chip/tms570_pbist.h"
 #include "tms570_selftest.h"
 
 #ifdef CONFIG_TMS570_SELFTEST
@@ -54,6 +61,157 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pbist_memtest_start
+ *
+ * Description:
+ *   This function performs Memory Built-in Self test using PBIST module.
+ *
+ * Input Parameters:
+ *   rinfol - The OR of each RAM grouping bit.  See the PBIST_RINFOL*
+ *     definitions in chip/tms570_pbist.h
+ *   algomask - The list of algorithms to be run.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pbist_memtest_start(uint32_t rinfol, uint32_t algomask)
+{
+  uint32_t regval;
+  volatile int i;
+
+  /* PBIST ROM clock frequency = HCLK frequency /2 */
+
+  regval  = getreg32(TMS570_SYS_MSTGCR);
+  regval &= ~SYS_MSTGCR_ROMDIV_MASK;
+  regval |= SYS_MSTGCR_ROMDIV_DIV2;
+  putreg32(regval, TMS570_SYS_MSTGCR);
+
+  /* Enable PBIST controller */
+
+  putreg32(SYS_MSIENA_RAM, TMS570_SYS_MSIENA);
+
+  /* clear MSTGENA field */
+
+  regval = getreg32(TMS570_SYS_MSTGCR);
+  regval &= ~SYS_MSTGCR_MSTGENA_MASK;
+  putreg32(regval, TMS570_SYS_MSTGCR);
+
+  /* Enable PBIST self-test */
+
+  regval |= SYS_MSTGCR_MSTGENA_ENABLE;
+  putreg32(regval, TMS570_SYS_MSTGCR);
+
+  /* Wait for 32 VBUS clock cycles at least, based on HCLK to VCLK ratio */
+
+  for (i = 0; i < (32 + (32 * 0)); i++);
+
+  /* Enable PBIST clocks and ROM clock */
+
+  regval = (PBIST_PACT_PACT0 | PBIST_PACT_PACT1);
+  putreg32(regval, TMS570_PBIST_PACT);
+
+  /* Select all algorithms to be tested */
+
+  putreg32(algomask, TMS570_PBIST_ALGO);
+
+  /* Select RAM groups */
+
+  putreg32(rinfol, TMS570_PBIST_RINFOL);
+
+  /* Select all RAM groups */
+
+  putreg32(0, TMS570_PBIST_RINFOU);
+
+  /* ROM contents will not override RINFOx settings */
+
+  putreg32(0, TMS570_PBIST_OVER);
+
+  /* Algorithm code is loaded from ROM */
+
+  putreg32(PBIST_ROM_BOTH, TMS570_PBIST_ROM);
+
+  /* Start PBIST */
+
+  regval = (PBIST_DLR_DLR2 | PBIST_DLR_DLR4);
+  putreg32(PBIST_ROM_BOTH, TMS570_PBIST_DLR);
+}
+
+/****************************************************************************
+ * Name: pbist_test_complete
+ *
+ * Description:
+ *   Return true if the PBIST test is completed
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if the PBIST test is compelte
+ *
+ ****************************************************************************/
+
+static inline bool pbist_test_complete(void)
+{
+  return ((getreg32(TMS570_SYS_MSTCGSTAT) & SYS_MSTCGSTAT_MSTDONE) != 0);
+}
+
+/****************************************************************************
+ * Name: pbist_test_passed
+ *
+ * Description:
+ *   Return true if the PBIST test passed
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if the PBIST test passed
+ *
+ ****************************************************************************/
+
+static inline bool pbist_test_passed(void)
+{
+  return ((getreg32(TMS570_PBIST_FSRF0) & PBIST_FSRF) == 0 &&
+          (getreg32(TMS570_PBIST_FSRF1) & PBIST_FSRF) == 0);
+}
+
+/****************************************************************************
+ * Name: pbist_stop
+ *
+ * Description:
+ *   This function is called to stop PBIST after test is performed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pbist_stop(void)
+{
+  uint32_t regval;
+
+  /* Disable PBIST clocks and ROM clock */
+
+  putreg32(0, TMS570_PBIST_PACT);
+
+  regval  = getreg32(TMS570_SYS_MSTGCR);
+  regval &= ~SYS_MSTGCR_MSTGENA_MASK;
+  putreg32(regval, TMS570_SYS_MSTGCR);
+
+  regval |= SYS_MSTGCR_MSTGENA_DISABLE;
+  putreg32(regval, TMS570_SYS_MSTGCR);
+}
 
 /****************************************************************************
  * Public Functions
@@ -70,6 +228,9 @@
  *   that the PBIST controller is capable of detecting and indicating a
  *   memory self-test failure.
  *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
 void tms570_memtest_selftest(void)
@@ -84,15 +245,18 @@ void tms570_memtest_selftest(void)
  *   Start the memory test on the selecte set of RAMs.  This test does not
  *   return until the memory test is completed.
  *
- * Input Paramters:
+ * Input Parameters:
  *   rinfol - The OR of each RAM grouping bit.  See the PBIST_RINFOL*
  *     definitions in chip/tms570_pbist.h
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
 void tms570_memtest_start(uint32_t rinfol)
 {
-#warning Missing Logic
+  pbist_memtest_start(rinfol, PBIST_ALGO_March13N_SP);
 }
 
 /****************************************************************************
@@ -109,8 +273,22 @@ void tms570_memtest_start(uint32_t rinfol)
 
 int tms570_memtest_complete(void)
 {
-#warning Missing Logic
-  return 0;
+  bool pass;
+  /* Wait for the test to complete */
+
+ while (!pbist_test_complete());
+
+ /* Get the test result */
+
+ pass = pbist_test_passed();
+
+ /* Disable PBIST clocks and disable memory self-test mode */
+
+ pbist_stop();
+
+ /* Then return the test result */
+
+ return pass ? OK : ERROR;
 }
 
 /****************************************************************************

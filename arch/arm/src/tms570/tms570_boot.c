@@ -234,7 +234,7 @@ void arm_boot(void)
   /* Run the memory selftest on CPU RAM. */
 
   tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM);
-  ASSERT(tms570_memtest_complete() == 0);
+  ASSERT(tms570_memtest_complete() == OK);
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Initialize CPU RAM. */
@@ -272,7 +272,7 @@ void arm_boot(void)
 
   /* Wait for the memory test to complete */
 
-  ASSERT(tms570_memtest_complete() == 0);
+  ASSERT(tms570_memtest_complete() == OK);
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Release the MibSPI1 modules from local reset. */

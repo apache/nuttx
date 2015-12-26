@@ -440,7 +440,7 @@ static void tms570_clocksrc_configure(void)
     {
       /* Get the set of valid clocks */
 
-      csvstat = getreg32(TMS570_SYS_CSVSTAT) & SYS_MSTGCR_CLKSRVALL;
+      csvstat = getreg32(TMS570_SYS_CSVSTAT) & SYS_CSVSTAT_CLKSRVALL;
 
       /* Get the (inverted) state of each clock.  Inverted so that '1' means
        * ON not OFF.
