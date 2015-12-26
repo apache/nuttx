@@ -94,10 +94,6 @@
 #define REG_PCH          35 /* PC */
 #define REG_PCL          36
 
-/* Size of the register state save array (in bytes) */
-
-#define XCPTCONTEXT_REGS 37
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

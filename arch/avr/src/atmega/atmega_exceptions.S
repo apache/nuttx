@@ -131,6 +131,63 @@
 	HANDLER atmega_t3compa, ATMEGA_IRQ_T3COMPA, excpt_common	/* TIMER3 COMPA timer/counter3 compare match a */
 	HANDLER atmega_t3compb, ATMEGA_IRQ_T3COMPB, excpt_common	/* TIMER3 COMPB timer/counter3 compare match b */
 	HANDLER atmega_t3ovf, ATMEGA_IRQ_T3OVF, excpt_common		/* TIMER3 OVF timer/counter3 overflow */
+#elif defined(CONFIG_ARCH_CHIP_ATMEGA2560)
+	HANDLER atmega_int0, ATMEGA_IRQ_INT0, excpt_common               /* 0x0002 INT0 External Interrupt Request 0 */ 
+	HANDLER atmega_int1, ATMEGA_IRQ_INT1, excpt_common               /* 0x0004 INT1 External Interrupt Request 1 */ 
+	HANDLER atmega_int2, ATMEGA_IRQ_INT2, excpt_common               /* 0x0006 INT2 External Interrupt Request 2 */ 
+	HANDLER atmega_int3, ATMEGA_IRQ_INT3, excpt_common               /* 0x0008 INT3 External Interrupt Request 3 */ 
+	HANDLER atmega_int4, ATMEGA_IRQ_INT4, excpt_common               /* 0x000A INT4 External Interrupt Request 4 */ 
+	HANDLER atmega_int5, ATMEGA_IRQ_INT5, excpt_common               /* 0x000C INT5  External Interrupt Request 5 */
+	HANDLER atmega_int6, ATMEGA_IRQ_INT6, excpt_common               /* 0x000E INT6 External Interrupt Request 6 */ 
+	HANDLER atmega_int7, ATMEGA_IRQ_INT7, excpt_common               /* 0x0010 INT7 External Interrupt Request 7 */ 
+	HANDLER atmega_pcint0, ATMEGA_IRQ_PCINT0, excpt_common           /* 0x0012 PCINT0 Pin Change Interrupt Req 0 */
+	HANDLER atmega_pcint1, ATMEGA_IRQ_PCINT1, excpt_common           /* 0x0014 PCINT1 Pin Change Interrupt Req 1 */
+	HANDLER atmega_pcint2, ATMEGA_IRQ_PCINT2, excpt_common           /* 0x0016 PCINT2 Pin Change Interrupt Req 2 */
+	HANDLER atmega_wdt, ATMEGA_IRQ_WDT, excpt_common                 /* 0x0018 WDT Watchdog Time-out Interrupt */
+	HANDLER atmega_tim2_compa, ATMEGA_IRQ_TIM2_COMPA, excpt_common   /* 0x001A TIMER2 COMPA Timer/Counter2 Compare Match A */
+	HANDLER atmega_tim2_compb, ATMEGA_IRQ_TIM2_COMPB, excpt_common   /* 0x001C TIMER2 COMPB Timer/Counter2 Compare Match B */
+	HANDLER atmega_tim2_ovf, ATMEGA_IRQ_TIM2_OVF, excpt_common       /* 0x001E TIMER2 OVF Timer/Counter2 Overflow */
+	HANDLER atmega_tim1_capt, ATMEGA_IRQ_TIM1_CAPT, excpt_common     /* 0x0020 TIMER1 CAPT Timer/Counter1 Capture Event */
+	HANDLER atmega_tim1_compa, ATMEGA_IRQ_TIM1_COMPA, excpt_common   /* 0x0022 TIMER1 COMPA Timer/Counter1 Compare Match A */
+	HANDLER atmega_tim1_compb, ATMEGA_IRQ_TIM1_COMPB, excpt_common   /* 0x0024 TIMER1 COMPB Timer/Counter1 Compare Match B */
+	HANDLER atmega_tim1_compc, ATMEGA_IRQ_TIM1_COMPC, excpt_common   /* 0x0026 TIMER1 COMPC Timer/Counter1 Compare Match C */
+	HANDLER atmega_tim1_ovf, ATMEGA_IRQ_TIM1_OVF, excpt_common       /* 0x0028 TIMER1 OVF Timer/Counter1 Overflow */
+	HANDLER atmega_tim0_compa, ATMEGA_IRQ_TIM0_COMPA, excpt_common   /* 0x002A TIMER0 COMPA Timer/Counter0 Compare Match A */
+	HANDLER atmega_tim0_compb, ATMEGA_IRQ_TIM0_COMPB, excpt_common   /* 0x002C TIMER0 COMPB Timer/Counter0 Compare match B */
+	HANDLER atmega_tim0_ovf, ATMEGA_IRQ_TIM0_OVF, excpt_common       /* 0x002E TIMER0 OVF Timer/Counter0 Overflow */
+	HANDLER atmega_spi_stc, ATMEGA_IRQ_SPI_STC, excpt_common         /* 0x0030 SPI, STC SPI Serial Transfer Complete */
+	HANDLER atmega_usart0_rxc, ATMEGA_IRQ_USART0_RXC, excpt_common   /* 0x0032 USART0 RX USART0 Rx Complete */
+	HANDLER atmega_usart0_udre, ATMEGA_IRQ_USART0_UDRE, excpt_common /* 0x0034 USART0 UDRE USART0 Data Register Empty */
+	HANDLER atmega_usart0_txc, ATMEGA_IRQ_USART0_TXC, excpt_common   /* 0x0036 USART0 TX USART0 Tx Complete */
+	HANDLER atmega_ana_comp, ATMEGA_IRQ_ANA_COMP, excpt_common       /* 0x0038 ANALOG COMP Analog Comparator */
+	HANDLER atmega_adc, ATMEGA_IRQ_ADC, excpt_common                 /* 0x003A ADC ADC Conversion Complete */
+	HANDLER atmega_ee_rdy, ATMEGA_IRQ_EE_RDY, excpt_common           /* 0x003C EE READY EEPROM Ready */
+	HANDLER atmega_tim3_capt, ATMEGA_IRQ_TIM3_CAPT, excpt_common     /* 0x003E TIMER3 CAPT Timer/Counter3 Capture Event */
+	HANDLER atmega_tim3_compa, ATMEGA_IRQ_TIM3_COMPA, excpt_common   /* 0x0040 TIMER3 COMPA Timer/Counter3 Compare Match A */
+	HANDLER atmega_tim3_compb, ATMEGA_IRQ_TIM3_COMPB, excpt_common   /* 0x0042 TIMER3 COMPB Timer/Counter3 Compare Match B */
+	HANDLER atmega_tim3_compc, ATMEGA_IRQ_TIM3_COMPC, excpt_common   /* 0x0044 TIMER3 COMPC Timer/Counter3 Compare Match C */
+	HANDLER atmega_tim3_ovf, ATMEGA_IRQ_TIM3_OVF, excpt_common       /* 0x0046 TIMER3 OVF Timer/Counter3 Overflow */
+	HANDLER atmega_usart1_rxc, ATMEGA_IRQ_USART1_RXC, excpt_common   /* 0x0048 USART1 RX USART1 Rx Complete */
+	HANDLER atmega_usart1_udre, ATMEGA_IRQ_USART1_UDRE, excpt_common /* 0x004A USART1 UDRE USART1 Data Register Empty */
+	HANDLER atmega_usart1_txc, ATMEGA_IRQ_USART1_TXC, excpt_common   /* 0x004C USART1 TX USART1 Tx Complete */
+	HANDLER atmega_twi, ATMEGA_IRQ_TWI, excpt_common                 /* 0x004E TWI 2-wire Serial Interface */
+	HANDLER atmega_spm_rdy, ATMEGA_IRQ_SPM_RDY, excpt_common         /* 0x0050 SPM READY Store Program Memory Ready */
+	HANDLER atmega_tim4_capt, ATMEGA_IRQ_TIM4_CAPT, excpt_common     /* 0x0052 TIMER4 CAPT Timer/Counter4 Capture Event */
+	HANDLER atmega_tim4_compa, ATMEGA_IRQ_TIM4_COMPA, excpt_common   /* 0x0054 TIMER4 COMPA Timer/Counter4 Compare Match A */
+	HANDLER atmega_tim4_compb, ATMEGA_IRQ_TIM4_COMPB, excpt_common   /* 0x0056 TIMER4 COMPB Timer/Counter4 Compare Match B */
+	HANDLER atmega_tim4_compc, ATMEGA_IRQ_TIM4_COMPC, excpt_common   /* 0x0058 TIMER4 COMPC Timer/Counter4 Compare Match C */
+	HANDLER atmega_tim4_ovf, ATMEGA_IRQ_TIM4_OVF, excpt_common       /* 0x005A TIMER4 OVF Timer/Counter4 Overflow */
+	HANDLER atmega_tim5_capt, ATMEGA_IRQ_TIM5_CAPT, excpt_common     /* 0x005C TIMER5 CAPT Timer/Counter5 Capture Event */
+	HANDLER atmega_tim5_compa, ATMEGA_IRQ_TIM5_COMPA, excpt_common   /* 0x005E TIMER5 COMPA Timer/Counter5 Compare Match A */
+	HANDLER atmega_tim5_compb, ATMEGA_IRQ_TIM5_COMPB, excpt_common   /* 0x0060 TIMER5 COMPB Timer/Counter5 Compare Match B */
+	HANDLER atmega_tim5_compc, ATMEGA_IRQ_TIM5_COMPC, excpt_common   /* 0x0062 TIMER5 COMPC Timer/Counter5 Compare Match C */
+	HANDLER atmega_tim5_ovf, ATMEGA_IRQ_TIM5_OVF, excpt_common       /* 0x0064 TIMER5 OVF Timer/Counter5 Overflow */
+	HANDLER atmega_usart2_rxc, ATMEGA_IRQ_USART2_RXC, excpt_common   /* 0x0066 USART2 RX USART2 Rx Complete */
+	HANDLER atmega_usart2_udre, ATMEGA_IRQ_USART2_UDRE, excpt_common /* 0x0068 USART2 UDRE USART2 Data Register Empty */
+	HANDLER atmega_usart2_txc, ATMEGA_IRQ_USART2_TXC, excpt_common   /* 0x006A USART2 TX USART2 Tx Complete */
+	HANDLER atmega_usart3_rxc, ATMEGA_IRQ_USART3_RXC, excpt_common   /* 0x006C USART3 RX USART3 Rx Complete */
+	HANDLER atmega_usart3_udre, ATMEGA_IRQ_USART3_UDRE, excpt_common /* 0x006E USART3 UDRE USART3 Data Register Empty */
+	HANDLER atmega_usart3_txc, ATMEGA_IRQ_USART3_TXC, excpt_common   /* 0x0070 USART3 TX USART3 Tx Complete */                  
 #else
 #  error "Unrecognized chip"
 #endif

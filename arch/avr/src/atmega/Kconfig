@@ -20,6 +20,11 @@ config ARCH_CHIP_ATMEGA1284P
 	---help---
 		Atmel ATMega1284P 8-bit AVR.
 
+config ARCH_CHIP_ATMEGA2560
+	bool "ATMega2560"
+	---help---
+		Atmel ATMega2560 8-bit AVR.
+
 endchoice # ATMega Configuration Options
 
 menu "ATMega Peripheral Selections"
