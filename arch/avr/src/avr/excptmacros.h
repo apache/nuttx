@@ -514,9 +514,22 @@
 
 	ld		r0, x+
 
-	/* Restore the status register (probably re-enabling interrupts) */
+        /* The following control flow split is required to eliminate non-atomic
+           interrupt_enable - return sequence.
+        
+           NOTE: since actual returning is handled by this macro it has been removed
+                 from up_fullcontextrestore function (up_switchcontext.S) 
+        */
 
+        /* if interrupts shall be enabled go to 'restore remaining and reti' code
+           otherwise just do 'restore remaining and ret' */
+        
 	ld		r24, x+
+	bst		r24, SREG_I
+	brts		go_reti
+
+	/* Restore the status register, interrupts are disabled */
+	
 	out		_SFR_IO_ADDR(SREG), r24
 
 	/* Restore r24-r25 - The temporary and IRQ number registers */
@@ -531,6 +544,23 @@
 
 	pop		r27					/* R27 then R26 */
 	pop		r26
+	ret
+
+go_reti:
+        /* restore the Status Register with interrupts disabled
+           and exit with reti (that will set the Interrupt Enable) */
+        
+	andi		r24, ~(1 << SREG_I)	
+	out		_SFR_IO_ADDR(SREG), r24
+
+	ld		r25, x+
+	ld		r24, x+
+
+	pop		r27 
+	pop		r26
+
+	reti
+	
 	.endm
 
 /********************************************************************************************

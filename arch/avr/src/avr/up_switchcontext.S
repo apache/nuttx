@@ -130,11 +130,8 @@ up_fullcontextrestore:
 
 	TCB_RESTORE
 
-	/* And "return" to the new task (using ret not reti so that the interrupt
-	 * state that we just restored will be preserved).
-	 */
+    /* Retruning from the function is handled in TCB_RESTORE */
 
-	ret
 	.endfunc
 	.end
 
