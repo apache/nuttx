@@ -289,7 +289,7 @@ void up_disable_irq(int channel)
   uint32_t bitmask;
   unsigned int regndx;
 
-  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS)
+  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS);
 
   /* Offset to account for the "phantom" vector */
 
@@ -321,7 +321,7 @@ void up_enable_irq(int channel)
   uint32_t bitmask;
   unsigned int regndx;
 
-  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS)
+  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS);
 
   /* Offset to account for the "phantom" vector */
 
@@ -363,7 +363,7 @@ void up_enable_fiq(int channel)
   uint32_t bitmask;
   unsigned int regndx;
 
-  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS)
+  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS);
 
   /* Offset to account for the "phantom" vector */
 
@@ -398,23 +398,4 @@ void up_enable_fiq(int channel)
 
 void up_ack_irq(int irq)
 {
-#warning Missing logic
 }
-
-/****************************************************************************
- * Name: up_prioritize_irq
- *
- * Description:
- *   Set the priority of an IRQ.
- *
- *   Since this API is not supported on all architectures, it should be
- *   avoided in common implementations where possible.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQPRIO
-int up_prioritize_irq(int channel, int priority)
-{
-#warning Missing logic
-}
-#endif

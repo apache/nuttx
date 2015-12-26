@@ -202,7 +202,7 @@ void arm_boot(void)
    * to do that.
    */
 
-  DEBUGASSERT((getreg(TMS570_SYS_ESR) & SYS_ESR_PORST) != 0);
+  DEBUGASSERT((getreg32(TMS570_SYS_ESR) & SYS_ESR_PORST) != 0);
 
   /* Clear all reset status flags on successful power on reset */
 
