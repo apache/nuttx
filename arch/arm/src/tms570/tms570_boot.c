@@ -62,7 +62,9 @@
 
 #include "chip/tms570_sys.h"
 #include "chip/tms570_esm.h"
+#include "chip/tms570_pbist.h"
 #include "tms570_clockconfig.h"
+#include "tms570_selftest.h"
 #include "tms570_gio.h"
 #include "tms570_boot.h"
 
@@ -231,7 +233,7 @@ void arm_boot(void)
 
   /* Run the memory selftest on CPU RAM. */
 
-  tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM)
+  tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM);
   ASSERT(tms570_memtest_complete() == 0);
 #endif /* CONFIG_TMS570_SELFTEST */
 

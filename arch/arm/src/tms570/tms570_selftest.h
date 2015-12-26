@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 #ifdef CONFIG_TMS570_SELFTEST
 
 /****************************************************************************

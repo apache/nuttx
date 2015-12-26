@@ -52,6 +52,7 @@
 #include "up_internal.h"
 
 #include "chip/tms570_vim.h"
+#include "tms570_gio.h"
 #include "tms570_irq.h"
 
 /****************************************************************************
@@ -207,7 +208,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   int vector;
 
   /* Check for a VRAM parity error.  This is not to critical in this
-   * implementatin since VIM RAM is not used.
+   * implementation since VIM RAM is not used.
    */
 #warning Missing logic
 
@@ -224,9 +225,6 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
       regs = arm_doirq(vector - 1, regs);
     }
-
-  /* Acknowledge interrupt */
-#warning Verify not needed
 
   return regs;
 }
@@ -252,7 +250,7 @@ uint32_t *arm_decodefiq(FAR uint32_t *regs)
   int vector;
 
   /* Check for a VRAM parity error.  This is not to critical in this
-   * implementatin since VIM RAM is not used.
+   * implementation since VIM RAM is not used.
    */
 #warning Missing logic
 
@@ -267,11 +265,8 @@ uint32_t *arm_decodefiq(FAR uint32_t *regs)
        * number offset by one to skip over the "phantom" vector.
        */
 
-      regs = arm_doirq(vector - 1, regs)
+      regs = arm_doirq(vector - 1, regs);
     }
-
-  /* Acknowledge interrupt */
-#warning Verify not needed
 
   return regs;
 }

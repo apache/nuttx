@@ -104,7 +104,7 @@ static int tms3570_gio_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-void tms570_gioirqinitialize(void)
+void tms570_gioirq_initialize(void)
 {
   /* Disable all pin interrupts on the pin.  Make sure they are all level 0. */
 
