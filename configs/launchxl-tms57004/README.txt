@@ -8,8 +8,9 @@ README
 Contents
 ^^^^^^^^
 
-  LEDs and Buttons
-  Serial Console
+  - LEDs and Buttons
+  - Serial Console
+  - Configurations
 
 LEDs and Buttons
 ================
@@ -63,3 +64,62 @@ Serial Console
   This TMS570 has a single SCI.  The SCI_RX and TX pins are connected to
   the FTDI chip which provides a virtual COM port for the launchpad.
 
+Configurations
+==============
+
+Information Common to All Configurations
+----------------------------------------
+Each LaunchXL-TMS50704 configuration is maintained in a sub-directory and
+can be selected as follow:
+
+  cd tools
+  ./configure.sh launchxl-tms57004/<subdir>
+  cd -
+  . ./setenv.sh
+
+Before sourcing the setenv.sh file above, you should examine it and perform
+edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
+than holds your toolchain binaries.
+
+And then build NuttX by simply typing the following.  At the conclusion of
+the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+  make oldconfig
+  make
+
+The <subdir> that is provided above as an argument to the tools/configure.sh
+must be is one of the following.
+
+NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+    change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       see additional README.txt files in the NuttX tools repository.
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. All of these configurations are set up to build under Windows using the
+     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+     (unless stated otherwise in the description of the configuration).
+
+       https://launchpad.net/gcc-arm-embedded
+
+     That toolchain selection can easily be reconfigured using
+     'make menuconfig'.  Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y               : Window environment
+       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+Configuration sub-directories
+-----------------------------
+
+  nsh:
+
+    Configures the NuttShell (nsh) located at examples/nsh.
