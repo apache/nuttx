@@ -410,7 +410,7 @@ __start:
 	 *                      replacement strategy.
 	 *   SCTLR_HA   Bit 17: Not supported by A5
 	 *
-	 *   SCTLR_EE   Bit 25: Little endian (reset value).
+	 *   SCTLR_EE   Bit 25: 0=Little endian (reset value).
 	 *   SCTLR_TRE  Bit 28: No memory region remapping (reset value)
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
 	 *   SCTLR_TE   Bit 30: All exceptions handled in ARM state (reset value).
@@ -475,6 +475,15 @@ __start:
 	 */
 
 	orr		r0, r0, #(SCTLR_A)
+#endif
+
+#ifdef CONFIG_ENDIAN_BIG
+	/* Big endian mode
+	 *
+	 *   SCTLR_EE       Bit 25: 1=Big endian.
+	 */
+
+	orr		r0, r0, #(SCTLR_EE)
 #endif
 
 #ifdef CPU_AFE_ENABLE

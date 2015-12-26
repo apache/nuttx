@@ -217,7 +217,7 @@ __start:
 	 *   SCTLR_U        Bit 22: Unaligned access model (always one)
 	 *
 	 *   SCTLR_VE       Bit 24: Interrupt Vectors Enable bit
-	 *   SCTLR_EE       Bit 25: Little endian.
+	 *   SCTLR_EE       Bit 25: 0=Little endian.
 	 *   SCTLR_NMFI     Bit 27: Non-maskable FIQ (NMFI) support
 	 *   SCTLR_TE       Bit 30: All exceptions handled in ARM state.
 	 *   SCTLR_IE       Bit 31: Instruction endian-ness.
@@ -320,6 +320,15 @@ __start:
 	 */
 
 	orr		r0, r0, #(SCTLR_VE)
+#endif
+
+#ifdef CONFIG_ENDIAN_BIG
+	/* Big endian mode
+	 *
+	 *   SCTLR_EE       Bit 25: 1=Big endian.
+	 */
+
+	orr		r0, r0, #(SCTLR_EE)
 #endif
 
 #ifdef CPU_NONMASKABLE_FIQ
