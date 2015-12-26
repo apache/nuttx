@@ -268,15 +268,23 @@ void arm_boot(void)
                       );
 
   /* Test the CPU ECC mechanism for RAM accesses. */
-#warning Missing logic
+
+  tms570_cpuecc_selftest();
 
   /* Wait for the memory test to complete */
 
   ASSERT(tms570_memtest_complete() == OK);
 #endif /* CONFIG_TMS570_SELFTEST */
 
-  /* Release the MibSPI1 modules from local reset. */
-#warning Missing logic
+#ifdef CONFIG_TMS570_MIBASPI1
+  /* Release the MibSPI1 modules from local reset.
+   *
+   * This will cause the MibSPI1 RAMs to be initialized along with the
+   * parity memory.
+   */
+
+  putreg32(MIBSPI_GCR0_RESET, TMS570_MIBSPI_GCR0);
+#endif
 
   /* Initialize all on-chip SRAMs except for MibSPIx RAMs.
    *

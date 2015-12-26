@@ -138,6 +138,27 @@ void tms570_efc_selftest_start(void);
 
 int tms570_efc_selftest_complete(void);
 
+/****************************************************************************
+ * Name: tms570_cpuecc_selftest
+ *
+ * Description:
+ *   Test the CPU ECC mechanism for RAM accesses.
+ *
+ *   Cause single-bit and double-bit errors in TCRAM accesses by corrupting
+ *   1 or 2 bits in the ECC. Reading from the TCRAM location with a 2-bit
+ *   error in the ECC causes a data abort exception. The data abort handler
+ *   must include logic written to look for deliberately caused exception and
+ *   to return the code execution to the instruction following the one that
+ *   caused the abort.
+ *
+ * Returned Value:
+ *   Zero (OK) if the test passed; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#define tms570_cpuecc_selftest()
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -207,10 +207,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 {
   int vector;
 
-  /* Check for a VRAM parity error.  This is not to critical in this
-   * implementation since VIM RAM is not used.
+  /* Check for a VRAM parity error.
+   *
+   * REVISIT: This is not to critical in this implementation since VIM RAM
+   * is not used.
    */
-#warning Missing logic
 
   /* Get the interrupting vector number from the IRQINDEX register.  Zero,
    * the "phantom" vector will returned.
@@ -249,10 +250,11 @@ uint32_t *arm_decodefiq(FAR uint32_t *regs)
 {
   int vector;
 
-  /* Check for a VRAM parity error.  This is not to critical in this
-   * implementation since VIM RAM is not used.
+  /* Check for a VRAM parity error.
+   *
+   * REVISIT: This is not to critical in this implementation since VIM RAM
+   * is not used.
    */
-#warning Missing logic
 
   /* Get the interrupting vector number from the FIQINDEX register.  Zero,
    * the "phantom" vector will returned.
