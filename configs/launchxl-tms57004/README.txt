@@ -85,33 +85,56 @@ Serial Console
   This TMS570 has a single SCI.  The SCI_RX and TX pins are connected to
   the FTDI chip which provides a virtual COM port for the launchpad.
 
+Debugging
+=========
+
+  I used a Segger J-Link connected to the Launchpad via the JTAG connector.
+  The following table shows how I connected the 14-pin JTAG connector on
+  the Launchpad to the Segger 20-pin JTAG connector:
+
+    --- ----------- ------ ------------- --- ---------- ------ -------
+    J12  LAUCHPAD   J-LINK J-LINK        J12 LAUCHPAD   J-LINK J-LINK
+    PIN  SIGNAL     PIN    SIGNAL        PIN SIGNAL     PIN    SIGNAL
+    --- ----------- ------ ------------- --- ---------- ------ -------
+    1   TMS         7      TMS           2   TRTSN      3      nTRST
+    3   TDI         5      TDI           4   GND        2      GND
+    5   PD (+3V3)   1      VTref         6   N/C        -      N/C
+    7   TDO         13     TDO           8   JTAG_SEL** 4      GND
+    9   RTCK        11     RTCK          10  GND        6      GND
+    11  TCK         9      TCK           12  GND        8      GND
+    13  EMU0*       -      N/C           14  EMU1*      -      N/C
+    --- ----------- ------ ------------- --- ---------- ------ -------
+
+    * Pulled high on board
+    ** Needs to be grounded to select JTAG
+
 Configurations
 ==============
 
-Information Common to All Configurations
-----------------------------------------
-Each LaunchXL-TMS50704 configuration is maintained in a sub-directory and
-can be selected as follow:
+  Information Common to All Configurations
+  ----------------------------------------
+  Each LaunchXL-TMS50704 configuration is maintained in a sub-directory and
+  can be selected as follow:
 
-  cd tools
-  ./configure.sh launchxl-tms57004/<subdir>
-  cd -
-  . ./setenv.sh
+    cd tools
+    ./configure.sh launchxl-tms57004/<subdir>
+    cd -
+    . ./setenv.sh
 
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-than holds your toolchain binaries.
+  Before sourcing the setenv.sh file above, you should examine it and perform
+  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
+  than holds your toolchain binaries.
 
-And then build NuttX by simply typing the following.  At the conclusion of
-the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
 
-  make oldconfig
-  make
+    make oldconfig
+    make
 
-The <subdir> that is provided above as an argument to the tools/configure.sh
-must be is one of the following.
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
 
-NOTES:
+  NOTES:
 
   1. These configurations use the mconf-based configuration tool.  To
     change any of these configurations using that tool, you should:

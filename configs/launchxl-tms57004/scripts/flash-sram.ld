@@ -44,6 +44,7 @@ MEMORY
 }
 
 OUTPUT_ARCH(arm)
+OUTPUT_FORMAT(elf32-bigarm)
 EXTERN(_vectors)
 ENTRY(_stext)
 
