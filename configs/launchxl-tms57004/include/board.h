@@ -181,10 +181,14 @@
 /* LED definitions ******************************************************************/
 /* LEDs
  *
- * The launchpad has a four LEDs two power LEDs labeled D1 (red) that connects to
- * the TMS570's NERROR pin and D7 (blue) that indicates the XDS200 POWER_EN signal,
- * and two white, user LEDs labeled D12 that connects to the NHET08 pin and D11
- * that connects to GIOA2.
+ * The launchpad has several LEDs:
+ *
+ *   - LEd D1 (white) that connects to the USB +5V supply,
+ *   - LED D10 (red) that connects to the TMS570's NERROR pin,
+ *   - D5 (blue), D6 (blue), and D8 (blue) connect to the XDS100 FT2322,
+ *   - D7 (blue) connects to the XSD100 CPLD, and
+ *   - Two white, user LEDs labeled D12 that connects to the NHET08
+ *     pin and D11 that connects to GIOA2.
  *
  * NHET08 is one of 32 N2HET pins than can be available to the user if not used by
  * N2HET.  This implementation, however, uses only the single LED driven by GIOA2.
