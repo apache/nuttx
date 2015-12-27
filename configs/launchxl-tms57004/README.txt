@@ -18,9 +18,9 @@ Contents
 Status
 ======
 
-  The basic port to the TMS570 is complete.  Testing is, however, stalled.
-  The TMD570 hardware is big-endian and I have not yet found an ARM toolchain
-  that will support big-endian operation.
+  The basic port to the TMS570 is complete.  After a few debug attempts,
+  I think I may have damaged my board: The CPU NERROR LED illuminates, JTAG
+  no longer recognizes the part, and can't re-program the FLASH.
 
 Toolchain
 =========
