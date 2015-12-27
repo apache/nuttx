@@ -71,6 +71,16 @@ extern "C"
 
 int tms570_esm_initialize(void);
 
+/****************************************************************************
+ * Name:  tms570_esm_interrupt
+ *
+ * Description:
+ *   ESM interrupt handler
+ *
+ ****************************************************************************/
+
+int tms570_esm_interrupt(int irq, void *context);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

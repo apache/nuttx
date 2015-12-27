@@ -53,6 +53,7 @@
 
 #include "chip/tms570_vim.h"
 #include "tms570_gio.h"
+#include "tms570_esm.h"
 #include "tms570_irq.h"
 
 /****************************************************************************
@@ -182,7 +183,16 @@ void up_irqinitialize(void)
   tms570_gioirq_initialize();
 #endif
 
-  /* And finally, enable interrupts */
+  /* Attach and enable ESM interrupts.  The high level interrupt is really
+   * an NMI.
+   */
+
+  (void)irq_attach(TMS570_REQ_ESMHIGH, tms570_esm_interrupt);
+  (void)irq_attach(TMS570_REQ_ESMLO, tms570_esm_interrupt);
+  up_enable_irq(TMS570_REQ_ESMHIGH);
+  up_enable_irq(TMS570_REQ_ESMLO);
+
+  /* And finally, enable interrupts globally */
 
   irqenable();
 #endif

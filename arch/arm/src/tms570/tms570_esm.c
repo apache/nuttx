@@ -48,13 +48,15 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <debug.h>
 
+#include <arch/irq.h>
+
+#include "up_internal.h"
 #include "up_arch.h"
 
 #include "chip/tms570_esm.h"
 #include "tms570_esm.h"
-
-#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -113,12 +115,12 @@ int tms570_esm_initialize(void)
       putreg32(0, TMS570_ESM_EKR);
     }
 
-  /* Clear interrupt level */
+  /* Clear interrupt level.  All channels set to low level interrupt. */
 
   putreg32(0xffffffff, TMS570_ESM_ILCR1);
   putreg32(0xffffffff, TMS570_ESM_ILCR4);
 
-  /* Set interrupt level */
+  /* Set interrupt level (Writing zero does nothing) */
  
   putreg32(0, TMS570_ESM_ILSR1);
   putreg32(0, TMS570_ESM_ILSR4);
@@ -133,4 +135,27 @@ int tms570_esm_initialize(void)
   putreg32(0, TMS570_ESM_IESR1);
   putreg32(0, TMS570_ESM_IESR4);
   return OK;
+}
+
+/****************************************************************************
+ * Name:  tms570_esm_interrupt
+ *
+ * Description:
+ *   ESM interrupt handler
+ *
+ ****************************************************************************/
+
+int tms570_esm_interrupt(int irq, void *context)
+{
+  /* Save the saved processor context in current_regs where it can be accessed
+   * for register dumps and possibly context switching.
+   */
+
+  current_regs = (uint32_t *)context;
+
+  /* Crash -- possibly showing diagnostic debug information. */
+
+  lldbg("ESM Interrupt. PC: %08x\n", current_regs[REG_PC]);
+  PANIC();
+  return OK; /* To keep the compiler happy */
 }
