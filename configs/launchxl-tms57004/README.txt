@@ -8,23 +8,61 @@ README
 Contents
 ========
 
+  - Status
   - Toolchain
   - LEDs and Buttons
   - Serial Console
   - Debugging
   - Configurations
 
+Status
+======
+
+  The basic port to the TMS570 is complete.  Testing is, however, stalled.
+  The TMD570 hardware is big-endian and I have not yet found an ARM toolchain
+  that will support big-endian operation.
+
 Toolchain
 =========
 
+  Build Platform
+  --------------
   All of these configurations are set up to build with Cygwin under Windows
-  using the "GNU Tools for ARM Embedded Processors" that is maintained by ARM
   (unless stated otherwise in the description of the configuration).
+
+  Endian-ness Issues
+  ------------------
+  I started using the the "GNU Tools for ARM Embedded Processors" that is
+  maintained by ARM.
 
     https://launchpad.net/gcc-arm-embedded
 
-  That toolchain selection can easily be reconfigured using 'make menuconfig'.
-  Here are the relevant current settings:
+  However, that tool chain will not support the TMS570 big-endian mode.
+  Certainly the -mbig-endian options will compiler for big-endian, but the
+  final link fails because there is no big-endian version lib libgcc.
+
+  There are patches available here if you want to build that toolchain
+  from scratch:
+
+    https://launchpad.net/gcc-arm-embedded/+question/27995
+
+  I now use a version of the NuttX buildroot toolchain that can be built like
+  this:
+
+    cd buildroot/
+    cp configs/cortexr4-armeb-eabi-4.8.3-defconfig .config
+    make oldconfig
+    make
+
+  You have to have several obscure packages installed on your Linux or Cygwin
+  system to build the toolchain like this:  GMP, MPFR, MPC, and probably
+  others.  See the buildroot/README.txt file for additional important information
+  about building the toolchain.
+
+  Reconfiguring
+  -------------
+  The build configuration selections can easily be reconfigured using 'make
+  menuconfig'.  Here are the relevant current settings:
 
      Build Setup:
        CONFIG_HOST_WINDOWS=y               : Window environment
