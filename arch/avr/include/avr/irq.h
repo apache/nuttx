@@ -91,8 +91,8 @@
 
 /* The program counter is automatically pushed when the interrupt occurs */
 
-#define REG_PCH          35 /* PC */
-#define REG_PCL          36
+#define REG_PC0          35 /* PC */
+#define REG_PC1          36
 
 /****************************************************************************
  * Public Types
@@ -112,8 +112,8 @@ struct xcptcontext
 
   /* These are saved copies of PC and SR used during signal processing.*/
 
-  uint8_t saved_pcl;
-  uint8_t saved_pch;
+  uint8_t saved_pc1;
+  uint8_t saved_pc0;
   uint8_t saved_sreg;
 #endif
 

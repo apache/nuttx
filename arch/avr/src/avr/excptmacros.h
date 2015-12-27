@@ -99,16 +99,16 @@
  *	sp - Points to the top of the stack.  The PC is already on the stack.
  *	Only the stack is available for storage
  *
- *	 PCL
- *	 PCH
+ *	 PC1
+ *	 PC0
  *	 --- <- SP
  *
  * At completion:
  *	Stack pointer is incremented by one, the saved r24 is on the stack, r24 now contains the
  *	IRQ number
  *
- *	 PCL
- *	 PCH
+ *	 PC1
+ *	 PC0
  *	 R0
  *	 --- <- SP
  *
@@ -134,8 +134,8 @@
  *	sp - Points to the top of the stack
  *	Only the stack is available for storage
  *
- *	 PCL
- *	 PCH
+ *	 PC1
+ *	 PC0
  *	 R24
  *	 --- <- SP
  *
@@ -333,10 +333,10 @@
 
 	.macro	USER_SAVE
 
-	/* Pop the return address from the stack (PCH then PCL).  R18:19 are Call-used */
+	/* Pop the return address from the stack (PC0 then PC1).  R18:19 are Call-used */
 
-	pop		r19			/* r19=PCH */
-	pop		r18			/* r18=PCL */
+	pop		r19			/* r19=PC0 */
+	pop		r18			/* r18=PC1 */
 
 	/* Save the current stack pointer  as it would be after the return(SPH then SPL). */
 
@@ -399,8 +399,8 @@
 
 	/* Save the return address that we have saved in r18:19*/
 
-	st		x+, r19		/* r19=PCH */
-	st		x+, r18		/* r18=PCL */
+	st		x+, r19		/* r19=PC0 */
+	st		x+, r18		/* r18=PC1 */
 	.endm
 
 /********************************************************************************************
@@ -428,8 +428,8 @@
 	 * Y [r28:29]
 	 */
 
-	movw	r28, r26			/* Get a pointer to the PCH/PCL storage location */
-	adiw	r28, REG_PCH
+	movw	r28, r26			/* Get a pointer to the PC0/PC1 storage location */
+	adiw	r28, REG_PC0
 
 	/* Fetch and set the new stack pointer */
 
@@ -441,21 +441,21 @@
 	/* Fetch the return address and save it at the bottom of the new stack so
 	 * that we can iret to switch contexts.  The new stack is now:
 	 *
-	 *  PCL
-	 *  PCH
+	 *  PC1
+	 *  PC0
 	 *  --- <- SP
 	 */
 
-	ld		r25, y+				/* Load PCH (r25) then PCL (r24) */
+	ld		r25, y+				/* Load PC0 (r25) then PC1 (r24) */
 	ld		r24, y+
-	push	r24					/* Push PCH and PCL on the stack (PCL then PCH) */
+	push	r24					/* Push PC0 and PC1 on the stack (PC1 then PC0) */
 	push	r25
 
 	/* Then get value of X [r26:r27].  Save X on the new stack where we can
 	 * recover it later.  The new stack is now:
 	 *
-	 *  PCL
-	 *  PCH
+	 *  PC1
+	 *  PC0
 	 *  R26
 	 *  R27
 	 *  --- <- SP

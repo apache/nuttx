@@ -152,7 +152,7 @@ static inline void up_registerdump(void)
             current_regs[REG_R30], current_regs[REG_R31]);
 
       lldbg("PC:  %02x%02x  SP: %02x%02x SREG: %02x\n",
-            current_regs[REG_PCH], current_regs[REG_PCL],
+            current_regs[REG_PC0], current_regs[REG_PC1],
             current_regs[REG_SPH], current_regs[REG_SPL],
             current_regs[REG_SREG]);
     }

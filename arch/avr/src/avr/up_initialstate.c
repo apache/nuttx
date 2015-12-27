@@ -96,8 +96,8 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PCH]   = (uint8_t)((uint16_t)tcb->start >> 8);
-  xcp->regs[REG_PCL]   = (uint8_t)((uint16_t)tcb->start & 0xff);
+  xcp->regs[REG_PC0]   = (uint8_t)((uint16_t)tcb->start >> 8);
+  xcp->regs[REG_PC1]   = (uint8_t)((uint16_t)tcb->start & 0xff);
 
   /* Enable or disable interrupts, based on user configuration */
 
