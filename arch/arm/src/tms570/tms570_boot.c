@@ -66,6 +66,7 @@
 #include "tms570_clockconfig.h"
 #include "tms570_selftest.h"
 #include "tms570_gio.h"
+#include "tms570_esm.h"
 #include "tms570_boot.h"
 
 /****************************************************************************
@@ -309,6 +310,10 @@ void arm_boot(void)
                            | SYS_MSIENA_MIBADC_RAM
 #endif
     );
+
+  /* Configure system response to error conditions */
+
+  tms570_esm_initialize();
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
