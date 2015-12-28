@@ -111,6 +111,47 @@ static inline void tms570_event_export(void)
 }
 
 /****************************************************************************
+ * Name: tms570_check_reset
+ *
+ * Description:
+ *   Assert if we go here through any mechanism other than a power-on reset.
+ *
+ ****************************************************************************/
+
+static inline void tms570_check_reset(void)
+{
+#ifdef CONFIG_DEBUG
+  uint32_t regval;
+
+  /* Read from the system exception status register to identify the cause of
+   * the CPU reset.
+   */
+
+  regval = getreg32(TMS570_SYS_ESR);
+
+  /* Clear all reset status flags on normal reset */
+
+  regval = getreg32(TMS570_SYS_ESR);
+  putreg32(SYS_ESR_RSTALL, TMS570_SYS_ESR);
+
+  /* Check for abnormal reset causes:  Oscillator failures or watchdog
+   * timers. Ignore normal reset causes: External reset, software reset, CPU
+   * reset, power-on reset
+   *
+   * REVISIT: The reset cause is not used in the current design.  But if you
+   * need to know the cause of the reset, here is where you would want to
+   * do that.
+   */
+
+  ASSERT((regval & SYS_ESR_FAILALL) == 0);
+#else
+  /* Clear all reset status flags */
+
+  putreg32(SYS_ESR_RSTALL, TMS570_SYS_ESR);
+#endif
+}
+
+/****************************************************************************
  * Name: tms570_enable_ramecc
  *
  * Description:
@@ -195,19 +236,9 @@ void arm_boot(void)
 
   tms570_event_export();
 
-  /* Read from the system exception status register to identify the cause of
-   * the CPU reset.
-   *
-   * REVISIT: This logic is not used in the current design.  But if you
-   * need to know the cause of the reset, here is where you would want
-   * to do that.
-   */
+  /* Verify that we got here via a power-up reset */
 
-  DEBUGASSERT((getreg32(TMS570_SYS_ESR) & SYS_ESR_PORST) != 0);
-
-  /* Clear all reset status flags on successful power on reset */
-
-  putreg32(SYS_ESR_RSTALL, TMS570_SYS_ESR);
+  tms570_check_reset();
 
   /* Check if there were ESM group3 errors during power-up.
    *

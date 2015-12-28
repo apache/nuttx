@@ -606,6 +606,7 @@
 #define SYS_ESR_PORST                   (1 << 15) /* Bit 15: Power-up reset */
 
 #define SYS_ESR_RSTALL                  (0x0000e038)
+#define SYS_ESR_FAILALL                 (0x00006000)
 
 /* System Test Abort Status Register */
 #define SYS_TASR_
