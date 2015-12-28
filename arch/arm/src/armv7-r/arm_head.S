@@ -117,9 +117,7 @@
 
 /* Imported symbols */
 
-	.global	arm_boot			/* Called just before os_start */
-	.global	os_start			/* Start the operating system */
-	.global	arm_data_initialize	/* Perform C data initialization */
+	.global	arm_boot			/* Branch to continue initialization in C */
 
 	.global	_sbss				/* Start of .bss in RAM */
 	.global	_ebss				/* End+1 of .bss in RAM */
@@ -137,7 +135,8 @@
 /* Exported symbols */
 
 	.global	__start				/* Power-up/Reset entry point */
-	.globl	g_idle_topstack		/* Top of the initial/IDLE stack */
+	.global	arm_data_initialize	/* Perform C data initialization */
+	.global	g_idle_topstack		/* Top of the initial/IDLE stack */
 
 #ifdef CONFIG_ARCH_FPU
 	.cpu	cortex-r4
@@ -373,7 +372,8 @@ __start:
 	/* Initialize .bss and .data ONLY if .bss and .data lie in RAM that is
 	 * ready to use.  Other memory, such as SDRAM, must be initialized before
 	 * it can be used.  arm_boot() will perform that memory initialization and
-	 * .bss and .data can be initialized after arm_boot() returns.
+	 * .bss and .data can be initialized by arm_boot() by calling this
+	 * arm_data_initialize() later.
 	 */
 
 	bl		arm_data_initialize
@@ -382,43 +382,17 @@ __start:
 	/* Perform early C-level, platform-specific initialization.  Logic
 	 * within arm_boot() must configure SDRAM and call arm_data_initialize()
 	 * if CONFIG_ARMV7R_MEMINIT=y.
+	 *
+	 * This function does not return.  It must give control to os_start()
+	 * at the completion of its initialization.
 	 */
 
-	bl		arm_boot
-
-#ifdef CONFIG_STACK_COLORATION
-	/* Write a known value to the IDLE thread stack to support stack
-	 * monitoring logic
-	 */
-
-	adr		r3, .Lstkinit
-	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
-
-2:								/* Top of the loop */
-	sub		r1, r1, #1			/* R1 = Number of words remaining */
-	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4		/* Save stack color word, increment stack address */
-	bne		2b					/* Bottom of the loop */
-
-#endif
-
-	/* Finally branch to the OS entry point */
-
-	mov		lr, #0				/* LR = return address (none) */
-	b		os_start			/* Branch to os_start */
+	b		arm_boot
 
 	/* .text Data */
 
 .Lstackpointer:
 	.long	IDLE_STACK_TOP
-
-#ifdef CONFIG_STACK_COLORATION
-	.type	.Lstkinit, %object
-.Lstkinit:
-	.long	IDLE_STACK_BASE		/* Beginning of the IDLE stack, then words of IDLE stack */
-	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
-	.long	STACK_COLOR			/* Stack coloration word */
-#endif
 	.size	__start, .-__start
 
 /***************************************************************************
