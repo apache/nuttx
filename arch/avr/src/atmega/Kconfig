@@ -38,5 +38,20 @@ config AVR_USART1
 	select ARCH_HAVE_USART1
 
 endmenu # ATMega Peripheral Selections
+
+
+menu "Low level UART driver options"
+	depends on AVR_USART0 || AVR_USART1
+
+config SERIAL_TERMIOS
+	bool "Serial driver TERMIOS supported"
+	depends on AVR_USART0 || AVR_USART1
+	default n
+	---help---
+		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
+		If this is not defined, then the terminal settings (baud, parity, etc).
+		are not configurable at runtime; serial streams cannot be flushed, etc..
+
+endmenu
 endif
 

@@ -561,12 +561,13 @@ static int usart1_txinterrupt(int irq, void *context)
 #ifdef CONFIG_AVR_USART0
 static int usart0_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if 0 /* Reserved for future growth */
+#if CONFIG_SERIAL_TERMIOS
   int ret = OK;
 
   switch (cmd)
     {
-    case xxx: /* Add commands here */
+     case TCGETS:
+     case TCSETS:
       break;
 
     default:
@@ -584,12 +585,13 @@ static int usart0_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_AVR_USART1
 static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if 0 /* Reserved for future growth */
+#if CONFIG_SERIAL_TERMIOS
   int ret = OK;
 
   switch (cmd)
     {
-    case xxx: /* Add commands here */
+     case TCGETS:
+     case TCSETS:
       break;
 
     default:
