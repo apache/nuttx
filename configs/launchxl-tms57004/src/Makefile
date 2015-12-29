@@ -42,5 +42,14 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
   CSRCS += tms570_appinit.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+  CSRCS += tms570_autoleds.c
+else
+  CSRCS += tms570_userleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += tms570_buttons.c
+endif
 
 include $(TOPDIR)/configs/Board.mk

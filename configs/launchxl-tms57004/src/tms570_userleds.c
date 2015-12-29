@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/launchxl-tms57004/src/launchxl-tms57004.h
+ * configs/launchxl-tms57004/src/tms570_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,19 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
-#define __CONFIGS_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* LEDs
  *
  * The launchpad has several LEDs:
@@ -57,43 +44,61 @@
  *   - Two white, user LEDs labeled D12 that connects to the NHET08
  *     pin and D11 that connects to GIOA2.
  *
- * NHET08 is one of 32 N2HET pins than can be available to the user if not
- * used by N2HET.  This implementation, however, uses only the single LED
- * driven by GIOA2.  That LED is tied to ground and illuminated with a high
- * level output value.
+ * NHET08 is one of 32 N2HET pins than can be available to the user if
+ * not used by N2HET.  This implementation, however, uses only the single
+ * LED driven by GIOA2.  That LED is tied to ground and illuminated
+ * with a high level output value.
  */
-
-#define GIO_LED_D11   (GIO_OUTPUT | GIO_CFG_DEFAULT | GIO_OUTPUT_SET | \
-                       GIO_PORT_GIOA | GIO_PIN2)
-
-/* Buttons
- *
- * The launchpad has three mechanical buttons. Two of these are reset
- * buttons:  One button is labeled PORRST performs a power-on reset and one
- * labeled RST performs an MCU reset.  Only one button is available for
- * general software usage.  That button is labeled GIOA7 and is, obviously,
- * sensed on GIOA7.
- *
- * GIOA7 is tied to ground, but will be pulled high if the GIOA7 button is
- * depressed.
- */
-
-#define GIO_BUTTON    (GIO_INPUT | GIO_CFG_PULLUP | GIO_INT_BOTHEDGES | \
-                       GIO_PORT_GIOA | GIO_PIN7)
-#define IRQ_BUTTON     TMS570_IRQ_GIOA7
 
 /****************************************************************************
- * Public Function Prototypes
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "tms570_gio.h"
+#include "launchxl-tms57004.h"
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tms570_bringup
- *
- * Description:
- *   Bring up simulated board features
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int tms570_bringup(void);
+void board_userled_initialize(void)
+{
+  /* Configure LED PIOs for output */
 
-#endif /* __CONFIGS_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H */
+  tms570_configgio(GIO_LED_D11);
+}
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if (led == BOARD_LED_D11)
+    {
+      tms570_giowrite(GIO_LED_D11, !ledon); /* Low illuminates */
+    }
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  /* Low illuminates */
+
+  tms570_giowrite(GIO_LED_D11, (ledset & BOARD_LED_D11_BIT) == 0));
+}

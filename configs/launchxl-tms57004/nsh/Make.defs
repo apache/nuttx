@@ -68,7 +68,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS = -mcpu=cortex-r4
+ARCHCPUFLAGS = -mcpu=cortex-r4 -mbig-endian
 ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
@@ -107,8 +107,11 @@ LIBEXT = .a
 EXEEXT =
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
+ifneq ($(CROSSDEV),armeb-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
+endif
+
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
