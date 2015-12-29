@@ -52,6 +52,8 @@
 #include "up_internal.h"
 
 #include "chip/tms570_vim.h"
+#include "tms570_gio.h"
+#include "tms570_esm.h"
 #include "tms570_irq.h"
 
 /****************************************************************************
@@ -173,15 +175,24 @@ void up_irqinitialize(void)
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-#ifdef CONFIG_TMS570_GPIO_IRQ
+#ifdef CONFIG_TMS570_GIO_IRQ
   /* Initialize logic to support a second level of interrupt decoding for
-   * GPIO pins.
+   * GIO pins.
    */
 
-  tms570_gpioirqinitialize();
+  tms570_gioirq_initialize();
 #endif
 
-  /* And finally, enable interrupts */
+  /* Attach and enable ESM interrupts.  The high level interrupt is really
+   * an NMI.
+   */
+
+  (void)irq_attach(TMS570_REQ_ESMHIGH, tms570_esm_interrupt);
+  (void)irq_attach(TMS570_REQ_ESMLO, tms570_esm_interrupt);
+  up_enable_irq(TMS570_REQ_ESMHIGH);
+  up_enable_irq(TMS570_REQ_ESMLO);
+
+  /* And finally, enable interrupts globally */
 
   irqenable();
 #endif
@@ -206,10 +217,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 {
   int vector;
 
-  /* Check for a VRAM parity error.  This is not to critical in this
-   * implementatin since VIM RAM is not used.
+  /* Check for a VRAM parity error.
+   *
+   * REVISIT: This is not to critical in this implementation since VIM RAM
+   * is not used.
    */
-#warning Missing logic
 
   /* Get the interrupting vector number from the IRQINDEX register.  Zero,
    * the "phantom" vector will returned.
@@ -224,9 +236,6 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
       regs = arm_doirq(vector - 1, regs);
     }
-
-  /* Acknowledge interrupt */
-#warning Verify not needed
 
   return regs;
 }
@@ -251,10 +260,11 @@ uint32_t *arm_decodefiq(FAR uint32_t *regs)
 {
   int vector;
 
-  /* Check for a VRAM parity error.  This is not to critical in this
-   * implementatin since VIM RAM is not used.
+  /* Check for a VRAM parity error.
+   *
+   * REVISIT: This is not to critical in this implementation since VIM RAM
+   * is not used.
    */
-#warning Missing logic
 
   /* Get the interrupting vector number from the FIQINDEX register.  Zero,
    * the "phantom" vector will returned.
@@ -267,11 +277,8 @@ uint32_t *arm_decodefiq(FAR uint32_t *regs)
        * number offset by one to skip over the "phantom" vector.
        */
 
-      regs = arm_doirq(vector - 1, regs)
+      regs = arm_doirq(vector - 1, regs);
     }
-
-  /* Acknowledge interrupt */
-#warning Verify not needed
 
   return regs;
 }
@@ -292,7 +299,7 @@ void up_disable_irq(int channel)
   uint32_t bitmask;
   unsigned int regndx;
 
-  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS)
+  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS);
 
   /* Offset to account for the "phantom" vector */
 
@@ -324,7 +331,7 @@ void up_enable_irq(int channel)
   uint32_t bitmask;
   unsigned int regndx;
 
-  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS)
+  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS);
 
   /* Offset to account for the "phantom" vector */
 
@@ -366,7 +373,7 @@ void up_enable_fiq(int channel)
   uint32_t bitmask;
   unsigned int regndx;
 
-  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS)
+  DEBUGASSERT(channel >= 0 && channel < TMS570_IRQ_NCHANNELS);
 
   /* Offset to account for the "phantom" vector */
 
@@ -401,23 +408,4 @@ void up_enable_fiq(int channel)
 
 void up_ack_irq(int irq)
 {
-#warning Missing logic
 }
-
-/****************************************************************************
- * Name: up_prioritize_irq
- *
- * Description:
- *   Set the priority of an IRQ.
- *
- *   Since this API is not supported on all architectures, it should be
- *   avoided in common implementations where possible.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQPRIO
-int up_prioritize_irq(int channel, int priority)
-{
-#warning Missing logic
-}
-#endif

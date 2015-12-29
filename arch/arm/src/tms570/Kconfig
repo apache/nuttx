@@ -89,14 +89,21 @@ config TMS570_SCI1
 	bool "Serial Communication Interface 1 (SCI1)"
 	default n
 	select ARCH_HAVE_SCI1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TMS570_SCI2
 	bool "Serial Communication Interface 2 (SCI2)"
 	default n
 	depends on TMS570_HAVE_SCI2
 	select ARCH_HAVE_SCI1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 endmenu # TMS570 Peripheral Support
+
+config TMS570_GIO_IRQ
+	bool "GIO pin interrupts"
+	---help---
+		Build in support for interrupting GIO pins
 
 config TMS570_SELFTEST
 	bool "Power-on Selftest"

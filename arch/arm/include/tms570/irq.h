@@ -76,11 +76,11 @@
 #  error "Unrecognized Hercules chip"
 #endif
 
-/* Total number of IRQ numbers. Excluds the phantom vector.  Zero corresponds to
- * channel 0, vector 1.
+/* Total number of IRQ numbers. Includes all channels plus GIO second-level interrupts
+ * (if enabled).  Excluds the phantom vector.  Zero corresponds to channel 0, vector 1.
  */
 
-#define NR_IRQS             (TMS570_IRQ_NCHANNELS)
+#define NR_IRQS  (TMS570_IRQ_NCHANNELS + TMS570_NGIO_IRQS)
 
 /****************************************************************************************
  * Public Types

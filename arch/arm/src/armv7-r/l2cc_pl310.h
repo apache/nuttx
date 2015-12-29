@@ -49,7 +49,7 @@
 #include <nuttx/config.h>
 
 /* The base address of the L2CC implementation must be provided in the chip.h
- * header file as L2CC_VBASE.
+ * header file as L2CC_BASE.
  */
 
 #include "chip/chip.h"
@@ -127,43 +127,43 @@
 
 /* L2CC Register Addresses **********************************************************/
 
-#define L2CC_IDR                   (L2CC_VBASE+L2CC_IDR_OFFSET)
-#define L2CC_TYPR                  (L2CC_VBASE+L2CC_TYPR_OFFSET)
-#define L2CC_CR                    (L2CC_VBASE+L2CC_CR_OFFSET)
-#define L2CC_ACR                   (L2CC_VBASE+L2CC_ACR_OFFSET)
-#define L2CC_TRCR                  (L2CC_VBASE+L2CC_TRCR_OFFSET)
-#define L2CC_DRCR                  (L2CC_VBASE+L2CC_DRCR_OFFSET)
-#define L2CC_ECR                   (L2CC_VBASE+L2CC_ECR_OFFSET)
-#define L2CC_ECFGR1                (L2CC_VBASE+L2CC_ECFGR1_OFFSET)
-#define L2CC_ECFGR0                (L2CC_VBASE+L2CC_ECFGR0_OFFSET)
-#define L2CC_EVR1                  (L2CC_VBASE+L2CC_EVR1_OFFSET)
-#define L2CC_EVR0                  (L2CC_VBASE+L2CC_EVR0_OFFSET)
-#define L2CC_IMR                   (L2CC_VBASE+L2CC_IMR_OFFSET)
-#define L2CC_MISR                  (L2CC_VBASE+L2CC_MISR_OFFSET)
-#define L2CC_RISR                  (L2CC_VBASE+L2CC_RISR_OFFSET)
-#define L2CC_ICR                   (L2CC_VBASE+L2CC_ICR_OFFSET)
-#define L2CC_CSR                   (L2CC_VBASE+L2CC_CSR_OFFSET)
-#define L2CC_IPALR                 (L2CC_VBASE+L2CC_IPALR_OFFSET)
-#define L2CC_IWR                   (L2CC_VBASE+L2CC_IWR_OFFSET)
-#define L2CC_CPALR                 (L2CC_VBASE+L2CC_CPALR_OFFSET)
-#define L2CC_CIR                   (L2CC_VBASE+L2CC_CIR_OFFSET)
-#define L2CC_CWR                   (L2CC_VBASE+L2CC_CWR_OFFSET)
-#define L2CC_CIPALR                (L2CC_VBASE+L2CC_CIPALR_OFFSET)
-#define L2CC_CIIR                  (L2CC_VBASE+L2CC_CIIR_OFFSET)
-#define L2CC_CIWR                  (L2CC_VBASE+L2CC_CIWR_OFFSET)
-#define L2CC_DLKR(n)               (L2CC_VBASE+L2CC_DLKR_OFFSET(n))
-#define L2CC_ILKR(n)               (L2CC_VBASE+L2CC_ILKR_OFFSET(n))
+#define L2CC_IDR                   (L2CC_BASE+L2CC_IDR_OFFSET)
+#define L2CC_TYPR                  (L2CC_BASE+L2CC_TYPR_OFFSET)
+#define L2CC_CR                    (L2CC_BASE+L2CC_CR_OFFSET)
+#define L2CC_ACR                   (L2CC_BASE+L2CC_ACR_OFFSET)
+#define L2CC_TRCR                  (L2CC_BASE+L2CC_TRCR_OFFSET)
+#define L2CC_DRCR                  (L2CC_BASE+L2CC_DRCR_OFFSET)
+#define L2CC_ECR                   (L2CC_BASE+L2CC_ECR_OFFSET)
+#define L2CC_ECFGR1                (L2CC_BASE+L2CC_ECFGR1_OFFSET)
+#define L2CC_ECFGR0                (L2CC_BASE+L2CC_ECFGR0_OFFSET)
+#define L2CC_EVR1                  (L2CC_BASE+L2CC_EVR1_OFFSET)
+#define L2CC_EVR0                  (L2CC_BASE+L2CC_EVR0_OFFSET)
+#define L2CC_IMR                   (L2CC_BASE+L2CC_IMR_OFFSET)
+#define L2CC_MISR                  (L2CC_BASE+L2CC_MISR_OFFSET)
+#define L2CC_RISR                  (L2CC_BASE+L2CC_RISR_OFFSET)
+#define L2CC_ICR                   (L2CC_BASE+L2CC_ICR_OFFSET)
+#define L2CC_CSR                   (L2CC_BASE+L2CC_CSR_OFFSET)
+#define L2CC_IPALR                 (L2CC_BASE+L2CC_IPALR_OFFSET)
+#define L2CC_IWR                   (L2CC_BASE+L2CC_IWR_OFFSET)
+#define L2CC_CPALR                 (L2CC_BASE+L2CC_CPALR_OFFSET)
+#define L2CC_CIR                   (L2CC_BASE+L2CC_CIR_OFFSET)
+#define L2CC_CWR                   (L2CC_BASE+L2CC_CWR_OFFSET)
+#define L2CC_CIPALR                (L2CC_BASE+L2CC_CIPALR_OFFSET)
+#define L2CC_CIIR                  (L2CC_BASE+L2CC_CIIR_OFFSET)
+#define L2CC_CIWR                  (L2CC_BASE+L2CC_CIWR_OFFSET)
+#define L2CC_DLKR(n)               (L2CC_BASE+L2CC_DLKR_OFFSET(n))
+#define L2CC_ILKR(n)               (L2CC_BASE+L2CC_ILKR_OFFSET(n))
 
 #ifdef CONFIG_PL310_LOCKDOWN_BY_LINE
-#  define L2CC_LKLN                (L2CC_VBASE+L2CC_LKLN_OFFSET)
-#  define L2CC_UNLKW               (L2CC_VBASE+L2CC_UNLKW_OFFSET)
+#  define L2CC_LKLN                (L2CC_BASE+L2CC_LKLN_OFFSET)
+#  define L2CC_UNLKW               (L2CC_BASE+L2CC_UNLKW_OFFSET)
 #endif
 
-#define L2CC_FLSTRT                (L2CC_VBASE+L2CC_FLSTRT_OFFSET)
-#define L2CC_FLEND                 (L2CC_VBASE+L2CC_FLEND_OFFSET)
-#define L2CC_DCR                   (L2CC_VBASE+L2CC_DCR_OFFSET)
-#define L2CC_PCR                   (L2CC_VBASE+L2CC_PCR_OFFSET)
-#define L2CC_POWCR                 (L2CC_VBASE+L2CC_POWCR_OFFSET)
+#define L2CC_FLSTRT                (L2CC_BASE+L2CC_FLSTRT_OFFSET)
+#define L2CC_FLEND                 (L2CC_BASE+L2CC_FLEND_OFFSET)
+#define L2CC_DCR                   (L2CC_BASE+L2CC_DCR_OFFSET)
+#define L2CC_PCR                   (L2CC_BASE+L2CC_PCR_OFFSET)
+#define L2CC_POWCR                 (L2CC_BASE+L2CC_POWCR_OFFSET)
 
 /* L2CC Register Bit Definitions ****************************************************/
 

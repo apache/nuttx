@@ -141,7 +141,7 @@
  *
  * At completion:
  *	Register state is saved on the stack; All registers are available for usage except sp and
- *  r24 which still contains the IRQ number as set by the HANDLER macro.
+ *	r24 which still contains the IRQ number as set by the HANDLER macro.
  *
  ********************************************************************************************/
 
@@ -423,7 +423,7 @@
  * On completion:
  *	All registers restored except for the PC with now resides at the top of the new stack
  *	so that ret can be used to switch to the new context. (ret, not reti, becaue ret
- * 	will preserve the restored interrupt state).
+ *	will preserve the restored interrupt state).
  *
  ********************************************************************************************/
 
@@ -537,22 +537,23 @@
 
 	ld		r0, x+
 
-        /* The following control flow split is required to eliminate non-atomic
-           interrupt_enable - return sequence.
-        
-           NOTE: since actual returning is handled by this macro it has been removed
-                 from up_fullcontextrestore function (up_switchcontext.S) 
-        */
+	/* The following control flow split is required to eliminate non-atomic
+	 * interrupt_enable - return sequence.
+	 *
+	 * NOTE: since actual returning is handled by this macro it has been removed
+	 * from up_fullcontextrestore function (up_switchcontext.S)
+	 */
 
-        /* if interrupts shall be enabled go to 'restore remaining and reti' code
-           otherwise just do 'restore remaining and ret' */
-        
+	/* If interrupts shall be enabled go to 'restore remaining and reti' code
+	 * otherwise just do 'restore remaining and ret'
+	 */
+
 	ld		r24, x+
 	bst		r24, SREG_I
 	brts		go_reti
 
 	/* Restore the status register, interrupts are disabled */
-	
+
 	out		_SFR_IO_ADDR(SREG), r24
 
 	/* Restore r24-r25 - The temporary and IRQ number registers */
@@ -570,20 +571,21 @@
 	ret
 
 go_reti:
-        /* restore the Status Register with interrupts disabled
-           and exit with reti (that will set the Interrupt Enable) */
-        
+	/* restore the Status Register with interrupts disabled
+	 * and exit with reti (that will set the Interrupt Enable)
+	 */
+
 	andi		r24, ~(1 << SREG_I)	
 	out		_SFR_IO_ADDR(SREG), r24
 
 	ld		r25, x+
 	ld		r24, x+
 
-	pop		r27 
+	pop		r27
 	pop		r26
 
 	reti
-	
+
 	.endm
 
 /********************************************************************************************

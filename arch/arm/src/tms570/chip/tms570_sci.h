@@ -260,7 +260,7 @@
 #define SCI_FLR_BRKDT                 (1 << 0)  /* Bit 0:  Break detect flag */
 #define SCI_FLR_WAKEUP                (1 << 1)  /* Bit 1:  Wake-up flag */
 #define SCI_FLR_IDLE                  (1 << 2)  /* Bit 2:  SCI receiver in idle state */
-#define SCI_FLR_BUSY                  (1 << 3)  /* Bit 3: Bus busy flag */
+#define SCI_FLR_BUSY                  (1 << 3)  /* Bit 3:  Bus busy flag */
 #define SCI_FLR_TIMEOUT               (1 << 4)  /* Bit 4:  Timeout flag */
 #define SCI_FLR_TOAWUS                (1 << 6)  /* Bit 6:  Timeout after wakeup signal flag */
 #define SCI_FLR_TOA3WUS               (1 << 7)  /* Bit 7:  Timeout after 2 Wakeup signls flag */

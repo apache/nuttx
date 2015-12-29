@@ -323,7 +323,7 @@ int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
 
   gcr1 = (SCI_GCR1_TIMING | SCI_GCR1_CLOCK | SCI_GCR1_RXENA | SCI_GCR1_TXENA);
 
-  DEBUGASSERT(config->parity >=  && config->parity <= 2);
+  DEBUGASSERT(config->parity >= 0 && config->parity <= 2);
   if (config->parity == 1)
     {
       gcr1 |= SCI_GCR1_PARENA;

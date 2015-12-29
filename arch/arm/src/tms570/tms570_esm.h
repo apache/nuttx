@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/armv7-r/arm_prefetchabort.c
+ * arch/arm/src/tms570/tms570_esm.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,57 +33,58 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_TMS570_TMS570_ESM_H
+#define __ARCH_ARM_SRC_TMS570_TMS570_ESM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-
-#include "sched/sched.h"
-#include "up_internal.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_prefetchabort
+ * Name:  tms570_esm_initialize
  *
- * Description;
- *   This is the prefetch abort exception handler. The ARM prefetch abort
- *   exception occurs when a memory fault is detected during an an
- *   instruction fetch.
+ * Description:
+ *   Initialize the ESM.
  *
  ****************************************************************************/
 
-uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
-{
-  /* Save the saved processor context in current_regs where it can be accessed
-   * for register dumps and possibly context switching.
-   */
+int tms570_esm_initialize(void);
 
-  current_regs = regs;
+/****************************************************************************
+ * Name:  tms570_esm_interrupt
+ *
+ * Description:
+ *   ESM interrupt handler
+ *
+ ****************************************************************************/
 
-  /* Crash -- possibly showing diagnostic debug information. */
+int tms570_esm_interrupt(int irq, void *context);
 
-  lldbg("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
-        regs[REG_PC], ifar, ifsr);
-  PANIC();
-  return regs; /* To keep the compiler happy */
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_TMS570_TMS570_ESM_H */

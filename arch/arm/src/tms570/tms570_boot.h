@@ -117,7 +117,7 @@ void tms570_lowsetup(void);
  *   This function must perform low level initialization including
  *
  *   - Initialization of board-specific memory resources (e.g., SDRAM)
- *   - Configuration of board specific resources (GPIOs, LEDs, etc).
+ *   - Configuration of board specific resources (GIOs, LEDs, etc).
  *   - Setup of the console SCI.  This SCI done early so that the serial console
  *     is available for debugging very early in the boot sequence.
  *

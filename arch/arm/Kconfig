@@ -16,6 +16,7 @@ config ARCH_CHIP_A1X
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_SDRAM
 	select BOOT_RUNFROMSDRAM
@@ -157,6 +158,7 @@ config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
 	select ARCH_CORTEXA5
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_TICKLESS
@@ -235,6 +237,7 @@ config ARCH_CHIP_STR71X
 
 config ARCH_CHIP_TMS570
 	bool "TI TMS570"
+	select ENDIAN_BIG
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_RAMFUNCS
 	select ARMV7R_MEMINIT
@@ -302,7 +305,6 @@ config ARCH_CORTEXM7
 config ARCH_CORTEXA5
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
@@ -310,7 +312,6 @@ config ARCH_CORTEXA5
 config ARCH_CORTEXA8
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
@@ -318,14 +319,12 @@ config ARCH_CORTEXA8
 config ARCH_CORTEXR4
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
 
 config ARCH_CORTEXR4F
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
@@ -333,14 +332,12 @@ config ARCH_CORTEXR4F
 config ARCH_CORTEXR5
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
 
 config ARCH_CORTEX5F
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
@@ -348,14 +345,12 @@ config ARCH_CORTEX5F
 config ARCH_CORTEXR7
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
 
 config ARCH_CORTEXR7F
 	bool
 	default n
-	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE

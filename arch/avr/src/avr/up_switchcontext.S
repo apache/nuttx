@@ -132,8 +132,7 @@ up_fullcontextrestore:
 
 	TCB_RESTORE
 
-    /* Retruning from the function is handled in TCB_RESTORE */
+	/* Returning from the function is handled in TCB_RESTORE */
 
 	.endfunc
 	.end
-
