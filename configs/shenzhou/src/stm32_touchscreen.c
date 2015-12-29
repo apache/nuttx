@@ -52,7 +52,7 @@
 #include <nuttx/input/ads7843e.h>
 
 #include "stm32.h"
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 /****************************************************************************
  * Pre-processor Definitions

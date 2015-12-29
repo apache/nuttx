@@ -46,7 +46,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "ne64badge_internal.h"
+#include "ne64badge.h"
 
 #if defined(CONFIG_HCS12_SPI)
 

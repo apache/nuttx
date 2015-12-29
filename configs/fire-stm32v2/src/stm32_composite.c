@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

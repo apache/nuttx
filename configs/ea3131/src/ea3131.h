@@ -1,9 +1,8 @@
 /************************************************************************************
- * configs/hymini-stm32v/src/hymini_stm32v-internal.h
+ * configs/ea3131/src/ea3131.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010,2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_HYMINI_STM32V_INTERNAL_H
-#define __CONFIGS_HYMINI_STM32V_INTERNAL_H
+#ifndef __CONFIGS_EA3131_SRC_EA3131_H
+#define __CONFIGS_EA3131_SRC_EA3131_H
 
 /************************************************************************************
  * Included Files
@@ -45,60 +44,24 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+#include "lpc31_ioconfig.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
- * modules (others may support more -- in such case, the following must be
- * expanded).
- */
+/* EA3131L GPIOs ********************************************************************/
 
-#if STM32_NSPI < 1
-#  undef CONFIG_STM32_SPI1
-#  undef CONFIG_STM32_SPI2
-#elif STM32_NSPI < 2
-#  undef CONFIG_STM32_SPI2
-#endif
-
-/* GPIOs **************************************************************/
-/* LEDs */
-
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN0)
-#define GPIO_LED2       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+/* LEDs -- interface through an I2C GPIO expander */
 
 /* BUTTONS -- NOTE that some have EXTI interrupts configured */
 
-#define MIN_IRQBUTTON   BUTTON_KEYA
-#define MAX_IRQBUTTON   BUTTON_KEYB
-#define NUM_IRQBUTTONS  NUM_BUTTONS
+/* SPI Chip Selects */
+/* SPI NOR flash is the only device on SPI. SPI_CS_OUT0 is its chip select */
 
-/* Button A is externally pulled up */
-#define GPIO_BTN_KEYA (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_PORTC|GPIO_PIN13)
+#define SPINOR_CS IOCONFIG_SPI_CSOUT0
 
-/* Button B is externally pulled dw */
-#define GPIO_BTN_KEYB (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_PORTB|GPIO_PIN2)
-
-/* SPI touch screen (ADS7843) chip select:  PA.4 */
-
-#define GPIO_TS_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
-
-/* Touch screen (ADS7843) IRQ pin:  PB.6 */
-#define GPIO_TS_IRQ  (GPIO_INPUT|GPIO_CNF_INPULLUP|GPIO_MODE_INPUT|\
-                         GPIO_PORTB|GPIO_PIN6)
-
-/* USB Soft Connect Pullup: PB.7 */
-#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
-
-/* SD card detect pin: PD.3   (line is pulled up on board) */
-#define GPIO_SD_CD (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_PORTD|GPIO_PIN3)
+/* USB Soft Connect Pullup -- NONE */
 
 /************************************************************************************
  * Public Types
@@ -115,25 +78,77 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: lpc31_meminitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
+ *   Initialize external memory resources (sram, sdram, nand, nor, etc.)
  *
  ************************************************************************************/
 
-extern void weak_function stm32_spiinitialize(void);
+#ifdef CONFIG_LPC31_EXTDRAM
+void lpc31_meminitialize(void);
+#endif
 
 /************************************************************************************
- * Name: stm32_usbinitialize
+ * Name: lpc31_spiinitialize
  *
  * Description:
- *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
+ *   Called to configure SPI chip select GPIO pins for the EA3131 board.
  *
  ************************************************************************************/
 
-extern void weak_function stm32_usbinitialize(void);
+void weak_function lpc31_spiinitialize(void);
+
+/************************************************************************************
+ * Name: lpc31_usbdev_initialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the EA3131 board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
+void weak_function lpc31_usbdev_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: lpc31_usbhost_bootinitialize
+ *
+ * Description:
+ *   Called from lpc31_boardinitialize very early in inialization to setup USB
+ *   host-related GPIO pins for the EA3131 board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+void weak_function lpc31_usbhost_bootinitialize(void);
+#endif
+
+/***********************************************************************************
+ * Name: lpc31_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host functionality.
+ *   This function will start a thread that will monitor for device
+ *   connection/disconnection events.
+ *
+ ***********************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+int lpc31_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: lpc31_pginitialize
+ *
+ * Description:
+ *   Set up mass storage device to support on demand paging.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PAGING
+void weak_function lpc31_pginitialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_HYMINI_STM32V_INTERNAL_H */
-
+#endif /* __CONFIGS_EA3131_SRC_EA3131_H */

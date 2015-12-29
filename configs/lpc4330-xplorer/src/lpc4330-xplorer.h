@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4330-xplorer/src/xplorer_internal.h
+ * configs/lpc4330-xplorer/src/lpc4330-xplorer.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_INTERNAL_H
-#define _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_INTERNAL_H
+#ifndef _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_H
+#define _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_H
 
 /****************************************************************************
  * Included Files
@@ -125,4 +125,4 @@
 void weak_function lpc43_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_INTERNAL_H */
+#endif /* _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_H */

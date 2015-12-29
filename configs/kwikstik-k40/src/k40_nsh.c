@@ -52,7 +52,7 @@
 #endif
 
 #include "kinetis_internal.h"
-#include "kwikstik-internal.h"
+#include "kwikstik-k40.h"
 
 /****************************************************************************
  * Pre-processor Definitions

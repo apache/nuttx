@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/mbed/src/mbed_internal.h
+ * configs/stm32_tiny/src/stm32_tiny.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_MBED_SRC_MBED_INTERNAL_H
-#define _CONFIGS_MBED_SRC_MBED_INTERNAL_H
+#ifndef __CONFIGS_STM32_TINY_H
+#define __CONFIGS_STM32_TINY_H
 
 /************************************************************************************
  * Included Files
@@ -42,27 +42,62 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* MBED GPIO Pin Definitions ********************************************************/
+/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
+ * modules (others may support more -- in such case, the following must be
+ * expanded).
+ */
 
-#define MBED_LED1             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN18)
-#define MBED_LED1_OFF          MBED_LED1
-#define MBED_LED1_ON          (MBED_LED1 | GPIO_VALUE_ONE)
-#define MBED_LED2             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN20)
-#define MBED_LED2_OFF          MBED_LED2
-#define MBED_LED2_ON          (MBED_LED2 | GPIO_VALUE_ONE)
-#define MBED_LED3             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN21)
-#define MBED_LED3_OFF          MBED_LED3
-#define MBED_LED3_ON          (MBED_LED3 | GPIO_VALUE_ONE)
-#define MBED_LED4             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN23)
-#define MBED_LED4_OFF         MBED_LED4
-#define MBED_LED4_ON          (MBED_LED 4| GPIO_VALUE_ONE)
+#if STM32_NSPI < 1
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#elif STM32_NSPI < 2
+#  undef CONFIG_STM32_SPI2
+#endif
 
-#define MBED_HEARTBEAT        MBED_LED4
+/* GPIOs **************************************************************/
+/* LEDs */
+
+#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
+
+/* USB Soft Connect Pullup: PC.13 */
+
+#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
+
+/* NRF24L01 chip select:  PB.12 */
+
+#define GPIO_NRF24L01_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN12)
+
+/* NRF24L01 chip enable:  PB.1 */
+
+#define GPIO_NRF24L01_CE   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+
+/* NRF24L01 IRQ line:  PA.0 */
+
+#define GPIO_NRF24L01_IRQ  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
+/* PWM
+ *
+ * Let's use the LED.  It is connected to PB.5, which can be used as PWM output of channel 2 of timer 3
+ * (STM32_TIM3_PARTIAL_REMAP must be enabled)
+ */
+
+#ifdef CONFIG_PWM
+#  if defined(CONFIG_STM32_TIM3_PWM) && defined(CONFIG_STM32_TIM3_PARTIAL_REMAP) && CONFIG_STM32_TIM3_CHANNEL == 2
+#    define STM32TINY_PWMTIMER 3
+#  else
+#    error To use the PWM device, the timer 3 partial remap must be enabled, and the PWM device must be configured on timer 3 / channel 2
+#  endif
+#endif
 
 /************************************************************************************
  * Public Types
@@ -79,15 +114,35 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: mbed_sspinitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
+ *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
  *
  ************************************************************************************/
 
-void weak_function mbed_sspinitialize(void);
+extern void stm32_spiinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
+ *
+ ************************************************************************************/
+
+extern void stm32_usbinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_wlinitialize
+ *
+ * Description:
+ *   Called to configure wireless module (nRF24L01).
+ *
+ ************************************************************************************/
+
+extern void stm32_wlinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_MBED_SRC_MBED_INTERNAL_H */
+#endif /* __CONFIGS_HYMINI_STM32V_H */
 

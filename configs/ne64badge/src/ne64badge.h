@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/ne64badge/src/ne64badge_internal.h
+ * configs/ne64badge/src/ne64badge.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_NE64BADGE_SRC_NE64BADGE_INTERNAL_H
-#define __CONFIGS_NE64BADGE_SRC_NE64BADGE_INTERNAL_H
+#ifndef __CONFIGS_NE64BADGE_SRC_NE64BADGE_H
+#define __CONFIGS_NE64BADGE_SRC_NE64BADGE_H
 
 /************************************************************************************
  * Included Files
@@ -188,4 +188,4 @@
 void weak_function hcs12_spiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_NE64BADGE_SRC_NE64BADGE_INTERNAL_H */
+#endif /* __CONFIGS_NE64BADGE_SRC_NE64BADGE_H */

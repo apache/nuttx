@@ -48,7 +48,7 @@
 #include "up_internal.h"
 
 #include "lpc17_ssp.h"
-#include "lpcxpresso_internal.h"
+#include "lpcxpresso-lpc1768.h"
 
 /************************************************************************************
  * Pre-processor Definitions

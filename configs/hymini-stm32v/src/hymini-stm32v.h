@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/stm32_tiny/src/stm32_tiny-internal.h
+ * configs/hymini-stm32v/src/hymini-stm32v.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_STM32_TINY_INTERNAL_H
-#define __CONFIGS_STM32_TINY_INTERNAL_H
+#ifndef __CONFIGS_HYMINI_STM32V_H
+#define __CONFIGS_HYMINI_STM32V_H
 
 /************************************************************************************
  * Included Files
@@ -63,41 +64,41 @@
 /* GPIOs **************************************************************/
 /* LEDs */
 
-#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
-
-/* USB Soft Connect Pullup: PC.13 */
-
-#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
-
-/* NRF24L01 chip select:  PB.12 */
-
-#define GPIO_NRF24L01_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN12)
-
-/* NRF24L01 chip enable:  PB.1 */
-
-#define GPIO_NRF24L01_CE   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN0)
+#define GPIO_LED2       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
 
-/* NRF24L01 IRQ line:  PA.0 */
+/* BUTTONS -- NOTE that some have EXTI interrupts configured */
 
-#define GPIO_NRF24L01_IRQ  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+#define MIN_IRQBUTTON   BUTTON_KEYA
+#define MAX_IRQBUTTON   BUTTON_KEYB
+#define NUM_IRQBUTTONS  NUM_BUTTONS
 
-/* PWM
- *
- * Let's use the LED.  It is connected to PB.5, which can be used as PWM output of channel 2 of timer 3
- * (STM32_TIM3_PARTIAL_REMAP must be enabled)
- */
+/* Button A is externally pulled up */
+#define GPIO_BTN_KEYA (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                         GPIO_PORTC|GPIO_PIN13)
 
-#ifdef CONFIG_PWM
-#  if defined(CONFIG_STM32_TIM3_PWM) && defined(CONFIG_STM32_TIM3_PARTIAL_REMAP) && CONFIG_STM32_TIM3_CHANNEL == 2
-#    define STM32TINY_PWMTIMER 3
-#  else
-#    error To use the PWM device, the timer 3 partial remap must be enabled, and the PWM device must be configured on timer 3 / channel 2
-#  endif
-#endif
+/* Button B is externally pulled dw */
+#define GPIO_BTN_KEYB (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                         GPIO_PORTB|GPIO_PIN2)
+
+/* SPI touch screen (ADS7843) chip select:  PA.4 */
+
+#define GPIO_TS_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+/* Touch screen (ADS7843) IRQ pin:  PB.6 */
+#define GPIO_TS_IRQ  (GPIO_INPUT|GPIO_CNF_INPULLUP|GPIO_MODE_INPUT|\
+                         GPIO_PORTB|GPIO_PIN6)
+
+/* USB Soft Connect Pullup: PB.7 */
+#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
+
+/* SD card detect pin: PD.3   (line is pulled up on board) */
+#define GPIO_SD_CD (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                         GPIO_PORTD|GPIO_PIN3)
 
 /************************************************************************************
  * Public Types
@@ -121,7 +122,7 @@
  *
  ************************************************************************************/
 
-extern void stm32_spiinitialize(void);
+extern void weak_function stm32_spiinitialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize
@@ -131,18 +132,8 @@ extern void stm32_spiinitialize(void);
  *
  ************************************************************************************/
 
-extern void stm32_usbinitialize(void);
-
-/************************************************************************************
- * Name: stm32_wlinitialize
- *
- * Description:
- *   Called to configure wireless module (nRF24L01).
- *
- ************************************************************************************/
-
-extern void stm32_wlinitialize(void);
+extern void weak_function stm32_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_HYMINI_STM32V_INTERNAL_H */
+#endif /* __CONFIGS_HYMINI_STM32V_H */
 

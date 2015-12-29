@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/lm3s8962-ek/src/lm3s8962ek_internal.h
+ * configs/lm3s8962-ek/src/lm3s8962-ek.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_INTERNAL_H
-#define __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_INTERNAL_H
+#ifndef __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_H
+#define __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_H
 
 /************************************************************************************
  * Included Files
@@ -129,5 +129,5 @@
 void weak_function lm_ssiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_INTERNAL_H */
+#endif /* __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_H */
 

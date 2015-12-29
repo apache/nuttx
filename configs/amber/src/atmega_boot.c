@@ -47,7 +47,7 @@
 #include "up_internal.h"
 
 #include "atmega_internal.h"
-#include "amber_internal.h"
+#include "amber.h"
 
 /************************************************************************************
  * Pre-processor Definitions

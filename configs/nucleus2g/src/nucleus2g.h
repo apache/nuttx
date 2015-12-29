@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleus2g/src/nucleus2g_internal.h
+ * configs/nucleus2g/src/nucleus2g.h
  *
  *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_INTERNAL_H
-#define _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_INTERNAL_H
+#ifndef _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_H
+#define _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_H
 
 /************************************************************************************
  * Included Files
@@ -151,5 +151,5 @@ void weak_function nucleus2g_sspinitialize(void);
 void up_relayinit(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_INTERNAL_H */
+#endif /* _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_H */
 

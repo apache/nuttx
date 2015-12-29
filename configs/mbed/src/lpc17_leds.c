@@ -52,7 +52,7 @@
 
 #include "lpc17_gpio.h"
 
-#include "mbed_internal.h"
+#include "mbed.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

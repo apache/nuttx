@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "at90usb_internal.h"
-#include "teensy_internal.h"
+#include "teensy-20.h"
 
 #ifdef CONFIG_AVR_SPI
 

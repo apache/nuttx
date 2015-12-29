@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/stm3220g_eval/src/stm3220g_internal.h
+ * configs/stm3220g_eval/src/stm3220g.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM3220G_EVAL_SRC_STM3220G_INTERNAL_H
-#define __CONFIGS_STM3220G_EVAL_SRC_STM3220G_INTERNAL_H
+#ifndef __CONFIGS_STM3220G_EVAL_SRC_STM3220G_H
+#define __CONFIGS_STM3220G_EVAL_SRC_STM3220G_H
 
 /****************************************************************************************************
  * Included Files
@@ -369,5 +369,5 @@ void stm32_deselectlcd(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM3220G_EVAL_SRC_STM3220G_INTERNAL_H */
+#endif /* __CONFIGS_STM3220G_EVAL_SRC_STM3220G_H */
 

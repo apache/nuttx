@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "cloudctrl-internal.h"
+#include "cloudctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions

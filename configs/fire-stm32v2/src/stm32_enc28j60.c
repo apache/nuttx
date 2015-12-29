@@ -63,7 +63,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 #ifdef CONFIG_ENC28J60
 

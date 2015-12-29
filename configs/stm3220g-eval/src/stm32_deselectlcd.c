@@ -44,7 +44,7 @@
 
 #include "up_arch.h"
 #include "stm32_fsmc.h"
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 #ifdef CONFIG_STM32_FSMC
 

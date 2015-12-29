@@ -50,7 +50,7 @@
 #include "chip.h"
 #include "lpc17_gpio.h"
 #include "lpc17_ssp.h"
-#include "nucleus2g_internal.h"
+#include "nucleus2g.h"
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
 

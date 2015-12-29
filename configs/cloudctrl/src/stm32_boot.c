@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "cloudctrl-internal.h"
+#include "cloudctrl.h"
 
 /************************************************************************************
  * Pre-processor Definitions

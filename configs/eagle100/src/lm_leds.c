@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "tiva_gpio.h"
-#include "eagle100_internal.h"
+#include "eagle100.h"
 
 /****************************************************************************
  * Pre-processor Definitions

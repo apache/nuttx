@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "lpc31_internal.h"
-#include "ea3152_internal.h"
+#include "ea3152.h"
 
 #ifdef CONFIG_LPC31_SPI
 #if 0 /* At present, EA3152 specific logic is hard-coded in the file lpc31_spi.c

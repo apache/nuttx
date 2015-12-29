@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/fire-stm32v2/src/fire-internal.h
- * arch/arm/src/board/fire-internal.n
+ * configs/fire-stm32v2/src/fire-stm32v2.h
+ * arch/arm/src/board/fire-stm32v2.n
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_FIRE_STM32V2_SRC_FIRE_INTERNAL_H
-#define __CONFIGS_FIRE_STM32V2_SRC_FIRE_INTERNAL_H
+#ifndef __CONFIGS_FIRE_STM32V2_SRC_FIRE_H
+#define __CONFIGS_FIRE_STM32V2_SRC_FIRE_H
 
 /************************************************************************************
  * Included Files
@@ -328,5 +328,5 @@ int stm32_w25initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_FIRE_STM32V2_SRC_FIRE_INTERNAL_H */
+#endif /* __CONFIGS_FIRE_STM32V2_SRC_FIRE_H */
 

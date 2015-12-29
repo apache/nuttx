@@ -51,7 +51,7 @@
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32.h"
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 /************************************************************************************
  * Pre-processor Definitions

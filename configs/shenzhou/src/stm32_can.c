@@ -50,7 +50,7 @@
 
 #include "stm32.h"
 #include "stm32_can.h"
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 

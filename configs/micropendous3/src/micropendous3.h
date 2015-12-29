@@ -1,7 +1,7 @@
-/************************************************************************************
- * configs/eagle100/src/eagle100_internal.h
+/****************************************************************************
+ * configs/micropendous3/src/micropendous3.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,61 +31,71 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H
-#define __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H
+#ifndef __CONFIGS_MICROPENDOUS3_SRC_MICROPENDOUS3_H
+#define __CONFIGS_MICROPENDOUS3_SRC_MICROPENDOUS3_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include "chip.h"
-#include "tiva_gpio.h"
-
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
- * modules (others may support more -- in such case, the following must be
- * expanded).
- */
-
-#if TIVA_NSSI == 0
-#  undef CONFIG_TIVA_SSI0
-#  undef CONFIG_TIVA_SSI1
-#elif TIVA_NSSI == 1
-#  undef CONFIG_TIVA_SSI1
-#endif
-
-/* Eagle-100 GPIOs ******************************************************************/
-
-/* GPIO for microSD card chip select */
-
-#define SDCCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                    GPIO_VALUE_ONE | GPIO_PORTG | 1)
-#define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | 1)
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
 /************************************************************************************
- * Name: lm_ssiinitialize
+ * Name: at90usb_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Eagle100 board.
+ *   Called to configure SPI chip select GPIO pins for the Micropendous3 board.
  *
  ************************************************************************************/
 
-void weak_function lm_ssiinitialize(void);
+#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
+EXTERN void weak_function at90usb_spiinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: at90usb_led_initialize
+ *
+ * Description:
+ *   Configure on-board LEDs if LED support has been selected.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+EXTERN void at90usb_led_initialize(void);
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H */
-
+#endif /* __CONFIGS_MICROPENDOUS3_SRC_MICROPENDOUS3_H */

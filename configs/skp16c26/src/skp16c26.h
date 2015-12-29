@@ -1,7 +1,7 @@
-/****************************************************************************
- * configs/amber/src/amber-internal.h
+/************************************************************************************
+ * configs/skp16c26/src/scp16c26.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,72 +31,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifndef __CONFIGS_AMBER_SRC_AMBER_INTERNAL_H
-#define __CONFIGS_AMBER_SRC_AMBER_INTERNAL_H
+#ifndef __CONFIGS_SKP16C26_SRC_SKP16C26_H
+#define __CONFIGS_SKP16C26_SRC_SKP16C26_H
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
-#include <nuttx/config.h>
-
-/****************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+#endif
 
-/****************************************************************************
+/************************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Name: atmega_spiinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the Amber Web Server.
- *
  ************************************************************************************/
 
-#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-void weak_function atmega_spiinitialize(void);
+#ifndef __ASSEMBLY__
+
 #endif
 
-/************************************************************************************
- * Name: atmega_led_initialize
- *
- * Description:
- *   Configure on-board LEDs if LED support has been selected.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void atmega_led_initialize(void);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_AMBER_SRC_AMBER_INTERNAL_H */
+#endif  /* __CONFIGS_SKP16C26_SRC_SKP16C26_H */

@@ -45,7 +45,7 @@
 #include <nuttx/usb/usbdev.h>
 
 #include "pic32mx-internal.h"
-#include "ubw32-internal.h"
+#include "ubw32.h"
 
 #if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
 

@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/kwikstik-k40/src/kwikstik-internal.h
- * arch/arm/src/board/kwikstik-internal.h
+ * configs/kwikstik-k40/src/kwikstik-k40.h
+ * arch/arm/src/board/kwikstik-k40.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_KWIKSTK_K40_SRC_KWIKSTIK_INTERNAL_H
-#define __CONFIGS_KWIKSTK_K40_SRC_KWIKSTIK_INTERNAL_H
+#ifndef __CONFIGS_KWIKSTK_K40_SRC_KWIKSTIK_H
+#define __CONFIGS_KWIKSTK_K40_SRC_KWIKSTIK_H
 
 /************************************************************************************
  * Included Files
@@ -180,5 +180,5 @@ extern void weak_function kinetis_spiinitialize(void);
 extern void weak_function kinetis_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_KWIKSTK_K40_SRC_KWIKSTIK_INTERNAL_H */
+#endif /* __CONFIGS_KWIKSTK_K40_SRC_KWIKSTIK_H */
 

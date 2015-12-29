@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 /************************************************************************************
  * Pre-processor Definitions

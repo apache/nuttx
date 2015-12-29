@@ -52,7 +52,7 @@
 
 #include "lpc17_gpio.h"
 
-#include "nucleus2g_internal.h"
+#include "nucleus2g.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

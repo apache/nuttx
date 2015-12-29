@@ -1,6 +1,6 @@
 /****************************************************************************************************
- * configs/cloudctrl/src/cloudctrl-internal.h
- * arch/arm/src/board/cloudctrl-internal.n
+ * configs/cloudctrl/src/cloudctrl.h
+ * arch/arm/src/board/cloudctrl.n
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,8 +35,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_CLOUDCTRLL_SRC_CLOUDCTRL_INTERNAL_H
-#define __CONFIGS_CLOUDCTRLL_SRC_CLOUDCTRL_INTERNAL_H
+#ifndef __CONFIGS_CLOUDCTRLL_SRC_CLOUDCTRL_H
+#define __CONFIGS_CLOUDCTRLL_SRC_CLOUDCTRL_H
 
 /****************************************************************************************************
  * Included Files
@@ -279,4 +279,4 @@ int stm32_w25initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_CLOUDCTRLL_SRC_CLOUDCTRL_INTERNAL_H */
+#endif /* __CONFIGS_CLOUDCTRLL_SRC_CLOUDCTRL_H */

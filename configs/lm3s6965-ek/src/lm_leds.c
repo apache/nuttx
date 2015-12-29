@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "tiva_gpio.h"
-#include "lm3s6965ek_internal.h"
+#include "lm3s6965-ek.h"
 
 /****************************************************************************
  * Pre-processor Definitions

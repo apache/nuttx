@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/micropendous3/src/micropendous3-internal.h
+ * configs/amber/src/amber.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_MICROPENDOUS3_SRC_MICROPENDOUS3_INTERNAL_H
-#define __CONFIGS_MICROPENDOUS3_SRC_MICROPENDOUS3_INTERNAL_H
+#ifndef __CONFIGS_AMBER_SRC_AMBER_H
+#define __CONFIGS_AMBER_SRC_AMBER_H
 
 /****************************************************************************
  * Included Files
@@ -63,25 +63,26 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /************************************************************************************
- * Name: at90usb_spiinitialize
+ * Name: atmega_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Micropendous3 board.
+ *   Called to configure SPI chip select GPIO pins for the Amber Web Server.
  *
  ************************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-EXTERN void weak_function at90usb_spiinitialize(void);
+void weak_function atmega_spiinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: at90usb_led_initialize
+ * Name: atmega_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
@@ -89,7 +90,7 @@ EXTERN void weak_function at90usb_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void at90usb_led_initialize(void);
+void atmega_led_initialize(void);
 #endif
 
 #undef EXTERN
@@ -98,4 +99,4 @@ EXTERN void at90usb_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MICROPENDOUS3_SRC_MICROPENDOUS3_INTERNAL_H */
+#endif /* __CONFIGS_AMBER_SRC_AMBER_H */

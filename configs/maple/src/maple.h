@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/ea3131/src/ea3131_internal.h
+ * configs/maple/src/maple.h
  *
- *   Copyright (C) 2009-2010,2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *           Librae <librae8226@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_EA3131_SRC_EA3131_INTERNAL_H
-#define __CONFIGS_EA3131_SRC_EA3131_INTERNAL_H
+#ifndef __CONFIGS_MAPLE_SRC_MAPLE_H
+#define __CONFIGS_MAPLE_SRC_MAPLE_H
 
 /************************************************************************************
  * Included Files
@@ -44,24 +45,50 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-#include "lpc31_ioconfig.h"
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* EA3131L GPIOs ********************************************************************/
+/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
+ * modules (others may support more -- in such case, the following must be
+ * expanded).
+ */
 
-/* LEDs -- interface through an I2C GPIO expander */
+#if STM32_NSPI < 1
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#elif STM32_NSPI < 2
+#  undef CONFIG_STM32_SPI2
+#endif
 
-/* BUTTONS -- NOTE that some have EXTI interrupts configured */
+/* GPIOs **************************************************************/
+/* GPIO settings for LEDs and USB */
 
-/* SPI Chip Selects */
-/* SPI NOR flash is the only device on SPI. SPI_CS_OUT0 is its chip select */
+#ifdef CONFIG_MAPLE_MINI
+#  define GPIO_LED           (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+#  define GPIO_USB_PULLUP    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
+#else
+#  define GPIO_LED           (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN5)
+#  define GPIO_USB_PULLUP    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN12)
+#endif
 
-#define SPINOR_CS IOCONFIG_SPI_CSOUT0
+/* The Maple configuration has been used to very the Sharp Memory LCD
+ * on a custom board.  These are pin definitions for that custom
+ * board interface.  If you should decide to integrate the Sharp
+ * Memory LCD with your Maple board, you may need to changes these
+ * settings.
+ */
 
-/* USB Soft Connect Pullup -- NONE */
+#define GPIO_MEMLCD_EXTCOMIN (GPIO_PORTA | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | \
+                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
+#define GPIO_MEMLCD_DISP     (GPIO_PORTA | GPIO_PIN14 | GPIO_OUTPUT_CLEAR | \
+                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
+#define GPIO_MEMLCD_CS       (GPIO_PORTA | GPIO_PIN15 | GPIO_OUTPUT_CLEAR | \
+                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
 
 /************************************************************************************
  * Public Types
@@ -78,77 +105,24 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc31_meminitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
- *   Initialize external memory resources (sram, sdram, nand, nor, etc.)
+ *   Called to configure SPI chip select GPIO pins.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC31_EXTDRAM
-void lpc31_meminitialize(void);
-#endif
+void stm32_spiinitialize(void);
 
 /************************************************************************************
- * Name: lpc31_spiinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the EA3131 board.
+ *   Called to setup USB-related GPIO pins.
  *
  ************************************************************************************/
 
-void weak_function lpc31_spiinitialize(void);
-
-/************************************************************************************
- * Name: lpc31_usbdev_initialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the EA3131 board.
- *
- ************************************************************************************/
-
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
-void weak_function lpc31_usbdev_initialize(void);
-#endif
-
-/************************************************************************************
- * Name: lpc31_usbhost_bootinitialize
- *
- * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup USB
- *   host-related GPIO pins for the EA3131 board.
- *
- ************************************************************************************/
-
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
-void weak_function lpc31_usbhost_bootinitialize(void);
-#endif
-
-/***********************************************************************************
- * Name: lpc31_usbhost_initialize
- *
- * Description:
- *   Called at application startup time to initialize the USB host functionality.
- *   This function will start a thread that will monitor for device
- *   connection/disconnection events.
- *
- ***********************************************************************************/
-
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
-int lpc31_usbhost_initialize(void);
-#endif
-
-/************************************************************************************
- * Name: lpc31_pginitialize
- *
- * Description:
- *   Set up mass storage device to support on demand paging.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_PAGING
-void weak_function lpc31_pginitialize(void);
-#endif
+void stm32_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_EA3131_SRC_EA3131_INTERNAL_H */
+#endif /* __CONFIGS_MAPLE_SRC_MAPLE_H */

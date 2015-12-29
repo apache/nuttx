@@ -51,7 +51,7 @@
 #include "up_arch.h"
 
 #include "stm32_pwm.h"
-#include "cloudctrl-internal.h"
+#include "cloudctrl.h"
 
 #ifdef CONFIG_ADC
 

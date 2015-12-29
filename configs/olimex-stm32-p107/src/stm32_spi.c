@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "p107-internal.h"
+#include "olimex-stm32-p107.h"
 
 #if defined(CONFIG_STM32_SPI3)
 

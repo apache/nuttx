@@ -47,7 +47,7 @@
 #include <nuttx/board.h>
 
 #include "stm32.h"
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

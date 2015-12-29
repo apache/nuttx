@@ -55,7 +55,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "mikroe-stm32f4-internal.h"
+#include "mikroe-stm32f4.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 

@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI3)
 

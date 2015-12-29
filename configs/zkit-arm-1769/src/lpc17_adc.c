@@ -55,7 +55,7 @@
 #include "up_arch.h"
 
 #include "lpc17_adc.h"
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 
 #ifdef CONFIG_ADC
 

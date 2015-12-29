@@ -47,7 +47,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 #ifdef CONFIG_ARCH_RELAYS
 

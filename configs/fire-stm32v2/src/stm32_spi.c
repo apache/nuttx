@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 

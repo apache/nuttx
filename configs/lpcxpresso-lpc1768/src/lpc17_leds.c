@@ -48,7 +48,7 @@
 #include "up_internal.h"
 
 #include "lpc17_gpio.h"
-#include "lpcxpresso_internal.h"
+#include "lpcxpresso-lpc1768.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

@@ -61,7 +61,7 @@
 #include "pic32mx-internal.h"
 #include "pic32mx-adc.h"
 #include "pic32mx-ioport.h"
-#include "pic32mx7mmb_internal.h"
+#include "pic32mx7mmb.h"
 
 #ifdef CONFIG_INPUT
 

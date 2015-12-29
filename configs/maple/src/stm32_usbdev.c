@@ -50,7 +50,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "maple-internal.h"
+#include "maple.h"
 
 /************************************************************************************
  * Pre-processor Definitions

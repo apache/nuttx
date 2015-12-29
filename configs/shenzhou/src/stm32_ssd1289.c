@@ -59,7 +59,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 #ifdef CONFIG_LCD_SSD1289
 

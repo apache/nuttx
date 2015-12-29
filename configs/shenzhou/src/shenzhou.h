@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/shenzhou/src/shenzhou-internal.h
+ * configs/shenzhou/src/shenzhou.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_SHENZHOUL_SRC_SHENZHOU_INTERNAL_H
-#define __CONFIGS_SHENZHOUL_SRC_SHENZHOU_INTERNAL_H
+#ifndef __CONFIGS_SHENZHOUL_SRC_SHENZHOU_H
+#define __CONFIGS_SHENZHOUL_SRC_SHENZHOU_H
 
 /****************************************************************************************************
  * Included Files
@@ -472,4 +472,4 @@ int stm32_w25initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_SHENZHOUL_SRC_SHENZHOU_INTERNAL_H */
+#endif /* __CONFIGS_SHENZHOUL_SRC_SHENZHOU_H */

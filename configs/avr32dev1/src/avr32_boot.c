@@ -48,7 +48,7 @@
 #include "up_internal.h"
 
 #include "at32uc3_internal.h"
-#include "avr32dev1_internal.h"
+#include "avr32dev1.h"
 
 /************************************************************************************
  * Pre-processor Definitions

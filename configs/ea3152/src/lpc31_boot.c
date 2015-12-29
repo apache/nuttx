@@ -47,7 +47,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "lpc31_internal.h"
-#include "ea3152_internal.h"
+#include "ea3152.h"
 
 /************************************************************************************
  * Pre-processor Definitions

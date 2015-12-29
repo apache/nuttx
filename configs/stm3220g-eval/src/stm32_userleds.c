@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

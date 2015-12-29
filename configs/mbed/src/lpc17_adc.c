@@ -57,7 +57,7 @@
 #include "up_arch.h"
 
 #include "lpc17_adc.h"
-#include "mbed_internal.h"
+#include "mbed.h"
 
 #ifdef CONFIG_ADC
 

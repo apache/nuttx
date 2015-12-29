@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "tiva_gpio.h"
-#include "lm3s6432s2e_internal.h"
+#include "lm3s6432-s2e.h"
 
 #if defined(CONFIG_TIVA_SSI0)
 

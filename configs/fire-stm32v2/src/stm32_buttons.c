@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

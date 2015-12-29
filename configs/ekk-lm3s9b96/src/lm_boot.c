@@ -47,7 +47,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "ekklm3s9b96_internal.h"
+#include "ekk-lm3s9b96.h"
 
 /************************************************************************************
  * Pre-processor Definitions

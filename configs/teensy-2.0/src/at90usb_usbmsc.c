@@ -49,7 +49,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "at90usb_internal.h"
-#include "teensy_internal.h"
+#include "teensy-20.h"
 
 /****************************************************************************
  * Pre-processor Definitions

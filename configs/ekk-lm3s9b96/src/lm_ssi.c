@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "tiva_gpio.h"
-#include "ekklm3s9b96_internal.h"
+#include "ekk-lm3s9b96.h"
 
 #if defined(CONFIG_TIVA_SSI0)  || defined(CONFIG_TIVA_SSI1)
 

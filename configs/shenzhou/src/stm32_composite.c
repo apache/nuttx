@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 /****************************************************************************
  * Pre-processor Definitions

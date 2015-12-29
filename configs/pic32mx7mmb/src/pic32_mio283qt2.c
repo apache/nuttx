@@ -58,7 +58,7 @@
 #include "up_arch.h"
 #include "pic32mx-internal.h"
 #include "pic32mx-pmp.h"
-#include "pic32mx7mmb_internal.h"
+#include "pic32mx7mmb.h"
 
 /**************************************************************************************
  * Pre-processor Definitions

@@ -42,7 +42,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "p107-internal.h"
+#include "olimex-stm32-p107.h"
 
 /************************************************************************************
  * Pre-processor Definitions

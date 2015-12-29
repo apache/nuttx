@@ -48,7 +48,7 @@
 
 #include <arch/board/board.h>
 
-#include "xplorer_internal.h"
+#include "lpc4330-xplorer.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

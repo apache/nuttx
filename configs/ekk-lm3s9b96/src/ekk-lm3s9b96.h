@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/lm3s6965-ek/src/lm3s6965ek_internal.h
+ * configs/ekk-lm3s9b96/src/ekk-lm3s9b96.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Jose Pablo Rojas V. <jrojas@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_LM3S6965_EK_SRC_LM3S6965EK_INTERNAL_H
-#define __CONFIGS_LM3S6965_EK_SRC_LM3S6965EK_INTERNAL_H
+#ifndef __CONFIGS_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
+#define __CONFIGS_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
 
 /************************************************************************************
  * Included Files
@@ -50,8 +51,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* How many SSI modules does this chip support? The LM3S6965 supports 1 SSI
- * module (others may support more than 2 -- in such case, the following must be
+/* How many SSI modules does this chip support? The LM3S9B96 supports 2 SSI
+ * modules (others may support more than 2 -- in such case, the following must be
  * expanded).
  */
 
@@ -62,55 +63,33 @@
 #  undef CONFIG_TIVA_SSI1
 #endif
 
-/* LM3S6965 Eval Kit ***************************************************************/
+/* EKK-LM3S9B96 Eval Kit ************************************************************/
 
 /* GPIO Usage
  *
  * PIN SIGNAL      EVB Function
  * --- ----------- ---------------------------------------
- *  26 PA0/U0RX    Virtual COM port receive
- *  27 PA1/U0TX    Virtual COM port transmit
- *  10 PD0/IDX0    SD card chip select
- *  11 PD1/PWM1    Sound
- *  30 PA4/SSI0RX  SD card data out
- *  31 PA5/SSI0TX  SD card and OLED display data in
- *  28 PA2/SSI0CLK SD card and OLED display clock
- *  22 PC7/PHB0    OLED display data/control select
- *  29 PA3/SSI0FSS OLED display chip select
- *  73 PE1/PWM5    Down switch
- *  74 PE2/PHB1    Left switch
- *  72 PE0/PWM4    Up switch
- *  75 PE3/PHA1    Right switch
- *  61 PF1/IDX1    Select switch
- *  47 PF0/PWM0    User LED
- *  23 PC6/CCP3    Enable +15 V
+ *  26 PA0/U0RX      Virtual COM port receive
+ *  27 PA1/U0TX      Virtual COM port transmit
+ *  66 PB0/USB0ID    USBID signal from the USB-On-the-Go
+ *  67 PB1/USB0VBUS  USB VBUS input signal from USB-OTG
+ *  92 PB4/GPIO      User pushbutton SW2.
+ *  80 PC0/TCK/SWCLK JTAG or SWD clock input
+ *  79 PC1/TMS/SWDIO JTAG TMS input or SWD bidirectional signal SWDIO
+ *  78 PC2/TDI       JTAG TDI signal input
+ *  77 PC3/TDO/SWO   JTAG TDO output or SWD trace signal SWO output.
+ *  10 PD0/GPIO      User LED
+ *  60 PF2/LED1      Ethernet LED1 (yellow)
+ *  59 PF3/LED0      Ethernet LED0 (green)
+ *  83 PH3/USB0EPEN  USB-OTG power switch
+ *  76 PH4/USB0PFLT  Overcurrent input status from USB-OTG power switch
  */
 
-/* GPIO for microSD card chip select:
- * - PD0: SD card chip select (CARDCSn)
+/* GPIO for LED's:
+ * - PD0: User LED
  */
 
-#define SDCCS_GPIO  (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                     GPIO_VALUE_ONE | GPIO_PORTD | 0)
-
-/* GPIO for single LED:
- * - PF0: User LED
- */
-
-#define LED_GPIO    (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | 0)
-
-/* GPIOs for OLED:
- *  - PC7: OLED display data/control select (D/Cn)
- *  - PA3: OLED display chip select (CSn)
- *  - PC6: Enable +15V needed by OLED (EN+15V)
- */
-
-#define OLEDDC_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_8MA | \
-                     GPIO_VALUE_ONE | GPIO_PORTC | 7)
-#define OLEDCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                     GPIO_VALUE_ONE | GPIO_PORTA | 3)
-#define OLEDEN_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_8MA | \
-                     GPIO_VALUE_ONE | GPIO_PORTC | 6)
+#define LED_GPIO          (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | 0)
 
 /************************************************************************************
  * Public Functions
@@ -126,8 +105,8 @@
  *
  ************************************************************************************/
 
-void weak_function lm_ssiinitialize(void);
+extern void weak_function lm_ssiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_LM3S6965_EK_SRC_LM3S6965EK_INTERNAL_H */
+#endif /* __CONFIGS_EKK_LM3S9B96_SRC_EKKLM3S9B96_H */
 

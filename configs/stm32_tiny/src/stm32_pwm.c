@@ -50,7 +50,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_pwm.h"
-#include "stm32_tiny-internal.h"
+#include "stm32_tiny.h"
 
 /************************************************************************************
  * Pre-processor Definitions

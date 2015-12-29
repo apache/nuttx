@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/twr-k60n512/src/twrk60-internal.h
+ * configs/twr-k60n512/src/twr-k60n512.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H
-#define __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H
+#ifndef __CONFIGS_TWR_K60N512_SRC_TWRK60_H
+#define __CONFIGS_TWR_K60N512_SRC_TWRK60_H
 
 /************************************************************************************
  * Included Files
@@ -293,4 +293,4 @@ void weak_function kinetis_spiinitialize(void);
 void weak_function kinetis_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H */
+#endif /* __CONFIGS_TWR_K60N512_SRC_TWRK60_H */

@@ -1,9 +1,8 @@
 /************************************************************************************
- * configs/maple/src/maple-internal.h
+ * configs/mbed/src/mbed.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Laurent Latil <laurent@latil.nom.fr>
- *           Librae <librae8226@gmail.com>
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_MAPLE_SRC_MAPLE_INTERNAL_H
-#define __CONFIGS_MAPLE_SRC_MAPLE_INTERNAL_H
+#ifndef _CONFIGS_MBED_SRC_MBED_H
+#define _CONFIGS_MBED_SRC_MBED_H
 
 /************************************************************************************
  * Included Files
@@ -43,52 +42,27 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <stdint.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
- * modules (others may support more -- in such case, the following must be
- * expanded).
- */
+/* MBED GPIO Pin Definitions ********************************************************/
 
-#if STM32_NSPI < 1
-#  undef CONFIG_STM32_SPI1
-#  undef CONFIG_STM32_SPI2
-#elif STM32_NSPI < 2
-#  undef CONFIG_STM32_SPI2
-#endif
+#define MBED_LED1             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN18)
+#define MBED_LED1_OFF          MBED_LED1
+#define MBED_LED1_ON          (MBED_LED1 | GPIO_VALUE_ONE)
+#define MBED_LED2             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN20)
+#define MBED_LED2_OFF          MBED_LED2
+#define MBED_LED2_ON          (MBED_LED2 | GPIO_VALUE_ONE)
+#define MBED_LED3             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN21)
+#define MBED_LED3_OFF          MBED_LED3
+#define MBED_LED3_ON          (MBED_LED3 | GPIO_VALUE_ONE)
+#define MBED_LED4             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN23)
+#define MBED_LED4_OFF         MBED_LED4
+#define MBED_LED4_ON          (MBED_LED 4| GPIO_VALUE_ONE)
 
-/* GPIOs **************************************************************/
-/* GPIO settings for LEDs and USB */
-
-#ifdef CONFIG_MAPLE_MINI
-#  define GPIO_LED           (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                              GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
-#  define GPIO_USB_PULLUP    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                              GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
-#else
-#  define GPIO_LED           (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                              GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN5)
-#  define GPIO_USB_PULLUP    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                              GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN12)
-#endif
-
-/* The Maple configuration has been used to very the Sharp Memory LCD
- * on a custom board.  These are pin definitions for that custom
- * board interface.  If you should decide to integrate the Sharp
- * Memory LCD with your Maple board, you may need to changes these
- * settings.
- */
-
-#define GPIO_MEMLCD_EXTCOMIN (GPIO_PORTA | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | \
-                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
-#define GPIO_MEMLCD_DISP     (GPIO_PORTA | GPIO_PIN14 | GPIO_OUTPUT_CLEAR | \
-                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
-#define GPIO_MEMLCD_CS       (GPIO_PORTA | GPIO_PIN15 | GPIO_OUTPUT_CLEAR | \
-                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
+#define MBED_HEARTBEAT        MBED_LED4
 
 /************************************************************************************
  * Public Types
@@ -105,24 +79,15 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: mbed_sspinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins.
+ *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
  *
  ************************************************************************************/
 
-void stm32_spiinitialize(void);
-
-/************************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins.
- *
- ************************************************************************************/
-
-void stm32_usbinitialize(void);
+void weak_function mbed_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MAPLE_SRC_MAPLE_INTERNAL_H */
+#endif /* _CONFIGS_MBED_SRC_MBED_H */
+

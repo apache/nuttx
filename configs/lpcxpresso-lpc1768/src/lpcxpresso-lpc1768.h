@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/lpcxpresso-lpc1768/src/lpcxpresso_internal.h
+ * configs/lpcxpresso-lpc1768/src/lpcxpresso-lpc1768.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_INTERNAL_H
-#define _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_INTERNAL_H
+#ifndef _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_H
+#define _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_H
 
 /************************************************************************************
  * Included Files
@@ -231,5 +231,5 @@
 void weak_function lpcxpresso_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_INTERNAL_H */
+#endif /* _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_H */
 

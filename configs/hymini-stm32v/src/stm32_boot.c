@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "hymini_stm32v-internal.h"
+#include "hymini-stm32v.h"
 
 /************************************************************************************
  * Pre-processor Definitions

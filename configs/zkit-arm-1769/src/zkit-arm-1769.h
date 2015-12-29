@@ -1,10 +1,10 @@
 /************************************************************************************
- * configs/zkit-arm-1769/src/zkitarm_internal.h
+ * configs/zkit-arm-1769/src/zkit-arm-1769.h
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
  *
- * Based on configs/lpcxpresso-lpc1768/src/lpcxpresso_internal.h
+ * Based on configs/lpcxpresso-lpc1768/src/lpcxpresso.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +38,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_INTERNAL_H
-#define _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_INTERNAL_H
+#ifndef _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H
+#define _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H
 
 /************************************************************************************
  * Included Files
@@ -250,4 +250,4 @@ void weak_function zkit_sspinitialize(void);
 void weak_function zkit_spiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_INTERNAL_H */
+#endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H */

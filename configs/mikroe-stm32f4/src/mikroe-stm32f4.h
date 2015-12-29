@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/mikroe-stm32f4/src/mikroe-stm32f4-internal.h
+ * configs/mikroe-stm32f4/src/mikroe-stm32f4.h
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_INTERNAL_H
-#define __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_INTERNAL_H
+#ifndef __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_H
+#define __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_H
 
 /****************************************************************************************************
  * Included Files
@@ -266,4 +266,4 @@ void up_vs1053initialize(FAR struct spi_dev_s *spi);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_INTERNAL_H */
+#endif /* __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_H */

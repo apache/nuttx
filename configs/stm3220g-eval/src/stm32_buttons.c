@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

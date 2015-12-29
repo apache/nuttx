@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "tiva_gpio.h"
-#include "lm3s8962ek_internal.h"
+#include "lm3s8962-ek.h"
 
 /* The LM3S8962 Eval Kit microSD CS is on SSI0 */
 

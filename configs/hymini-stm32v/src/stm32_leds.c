@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "hymini_stm32v-internal.h"
+#include "hymini-stm32v.h"
 
 /****************************************************************************
  * Pre-processor Definitions

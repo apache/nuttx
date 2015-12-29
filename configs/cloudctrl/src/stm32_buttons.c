@@ -46,7 +46,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "cloudctrl-internal.h"
+#include "cloudctrl.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

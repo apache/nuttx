@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "hymini_stm32v-internal.h"
+#include "hymini-stm32v.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

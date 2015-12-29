@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "kinetis_internal.h"
-#include "twrk60-internal.h"
+#include "twr-k60n512.h"
 
 /************************************************************************************
  * Pre-processor Definitions

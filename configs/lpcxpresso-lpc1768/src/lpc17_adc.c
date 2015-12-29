@@ -55,7 +55,7 @@
 #include "up_arch.h"
 
 #include "lpc17_adc.h"
-#include "lpcxpresso_internal.h"
+#include "lpcxpresso-lpc1768.h"
 
 #ifdef CONFIG_ADC
 

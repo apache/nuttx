@@ -47,7 +47,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "kwikstik-internal.h"
+#include "kwikstik-k40.h"
 
 
 /**************************************************************************************

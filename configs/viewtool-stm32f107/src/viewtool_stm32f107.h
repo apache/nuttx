@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H
-#define __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H
+#ifndef __CONFIGS_VIEWTOOL_STM32F107_SRC_H
+#define __CONFIGS_VIEWTOOL_STM32F107_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -354,4 +354,4 @@ int stm32_mpl115ainitialize(FAR const char *devpath);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H */
+#endif /* __CONFIGS_VIEWTOOL_STM32F107_SRC_H */
