@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "stm32f3discovery-internal.h"
+#include "stm32f3discovery.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

@@ -51,7 +51,7 @@
 #endif
 
 #include "stm32.h"
-#include "stm32f3discovery-internal.h"
+#include "stm32f3discovery.h"
 
 /****************************************************************************
  * Pre-processor Definitions

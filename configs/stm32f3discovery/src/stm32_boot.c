@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm32f3discovery-internal.h"
+#include "stm32f3discovery.h"
 
 /************************************************************************************
  * Pre-processor Definitions

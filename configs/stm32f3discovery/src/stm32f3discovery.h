@@ -1,6 +1,6 @@
 /****************************************************************************************************
- * configs/stm32f3discovery/src/stm32f3discovery-internal.h
- * arch/arm/src/board/stm32f3discovery-internal.n
+ * configs/stm32f3discovery/src/stm32f3discovery.h
+ * arch/arm/src/board/stm32f3discovery.n
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H
-#define __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H
+#ifndef __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H
+#define __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H
 
 /****************************************************************************************************
  * Included Files
@@ -163,5 +163,5 @@ void weak_function stm32_usbinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H */
+#endif /* __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H */
 

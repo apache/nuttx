@@ -50,7 +50,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_pwm.h"
-#include "stm32f3discovery-internal.h"
+#include "stm32f3discovery.h"
 
 /************************************************************************************
  * Pre-processor Definitions
