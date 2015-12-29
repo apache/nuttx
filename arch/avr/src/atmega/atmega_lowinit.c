@@ -131,7 +131,7 @@ void up_lowinit(void)
 #ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
   CLKPR = 0x80;
   CLKPR = 0;
-#else
+#elif defined(XDIV)
   XDIV = 0;
 #endif
 

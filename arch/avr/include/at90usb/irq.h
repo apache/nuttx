@@ -94,6 +94,7 @@
 #define AT90USB_IRQ_SPMRDY  36  /* 0x004a Store Program Memory Ready */
 
 #define NR_IRQS             37
+#define XCPTCONTEXT_REGS    37 /* Size of the register state save array (in bytes) */
 
 /****************************************************************************
  * Public Types

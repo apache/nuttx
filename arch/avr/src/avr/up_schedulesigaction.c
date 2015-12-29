@@ -154,16 +154,24 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver   = sigdeliver;
-              tcb->xcp.saved_pcl    = current_regs[REG_PCL];
-              tcb->xcp.saved_pch    = current_regs[REG_PCH];
+              tcb->xcp.saved_pc0    = current_regs[REG_PC0];
+              tcb->xcp.saved_pc1    = current_regs[REG_PC1];
+#if defined(REG_PC2)
+              tcb->xcp.saved_pc2    = current_regs[REG_PC2];
+#endif
               tcb->xcp.saved_sreg   = current_regs[REG_SREG];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
-
-              current_regs[REG_PCL]   = (uint16_t)up_sigdeliver & 0xff;
-              current_regs[REG_PCH]   = (uint16_t)up_sigdeliver >> 8;
+#if !defined(REG_PC2)
+              current_regs[REG_PC0]   = (uint16_t)up_sigdeliver >> 8;
+              current_regs[REG_PC1]   = (uint16_t)up_sigdeliver & 0xff;
+#else
+              current_regs[REG_PC0]   = (uint32_t)up_sigdeliver >> 16;
+              current_regs[REG_PC1]   = (uint32_t)up_sigdeliver >> 8;
+              current_regs[REG_PC2]   = (uint32_t)up_sigdeliver & 0xff;
+#endif
               current_regs[REG_SREG] &= ~(1 << SREG_I);
 
               /* And make sure that the saved context in the TCB
@@ -188,16 +196,26 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_pcl        = tcb->xcp.regs[REG_PCL];
-          tcb->xcp.saved_pch        = tcb->xcp.regs[REG_PCH];
+          tcb->xcp.saved_pc0        = tcb->xcp.regs[REG_PC0];
+          tcb->xcp.saved_pc1        = tcb->xcp.regs[REG_PC1];
+#if defined(REG_PC2)
+          tcb->xcp.saved_pc2        = tcb->xcp.regs[REG_PC2];
+#endif
           tcb->xcp.saved_sreg       = tcb->xcp.regs[REG_SREG];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_PCL]    = (uint16_t)up_sigdeliver & 0xff;
-          tcb->xcp.regs[REG_PCH]    = (uint16_t)up_sigdeliver >> 8;
+#if !defined(REG_PC2)
+          tcb->xcp.regs[REG_PC0]    = (uint16_t)up_sigdeliver >> 8;
+          tcb->xcp.regs[REG_PC1]    = (uint16_t)up_sigdeliver & 0xff;
+#else
+          tcb->xcp.regs[REG_PC0]    = (uint32_t)up_sigdeliver >> 16;
+          tcb->xcp.regs[REG_PC1]    = (uint32_t)up_sigdeliver >> 8;
+          tcb->xcp.regs[REG_PC2]    = (uint32_t)up_sigdeliver & 0xff;
+
+#endif
           tcb->xcp.regs[REG_SREG]  &= ~(1 << SREG_I);
         }
     }
