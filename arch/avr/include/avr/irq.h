@@ -93,6 +93,9 @@
 
 #define REG_PC0          35 /* PC */
 #define REG_PC1          36
+#if ATMEGA_PC_SIZE > 16
+#define REG_PC2          37
+#endif
 
 /****************************************************************************
  * Public Types

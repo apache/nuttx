@@ -335,8 +335,11 @@
 
 	/* Pop the return address from the stack (PC0 then PC1).  R18:19 are Call-used */
 
-	pop		r19			/* r19=PC0 */
-	pop		r18			/* r18=PC1 */
+#if ATMEGA_PC_SIZE > 16
+    pop     r20         
+#endif /* ATMEGA_PC_SIZE */
+	pop		r19			
+	pop		r18			
 
 	/* Save the current stack pointer  as it would be after the return(SPH then SPL). */
 
@@ -398,9 +401,11 @@
 	adiw	r26, 2		/* Two registers: r24-r25 */
 
 	/* Save the return address that we have saved in r18:19*/
-
-	st		x+, r19		/* r19=PC0 */
-	st		x+, r18		/* r18=PC1 */
+#if ATMEGA_PC_SIZE > 16
+	st		x+, r20
+#endif /* ATMEGA_PC_SIZE */
+	st		x+, r19		
+	st		x+, r18		
 	.endm
 
 /********************************************************************************************
@@ -424,12 +429,16 @@
 
 	.macro	TCB_RESTORE, regs
 
-	/* X [r36:27] points to the register save block.  Get an offset pointer to the PC in
+	/* X [r26:27] points to the register save block.  Get an offset pointer to the PC in
 	 * Y [r28:29]
 	 */
 
 	movw	r28, r26			/* Get a pointer to the PC0/PC1 storage location */
+#if ATMEGA_PC_SIZE <= 16
 	adiw	r28, REG_PC0
+#else
+    adiw  	r28, REG_PC2
+#endif
 
 	/* Fetch and set the new stack pointer */
 
@@ -441,19 +450,33 @@
 	/* Fetch the return address and save it at the bottom of the new stack so
 	 * that we can iret to switch contexts.  The new stack is now:
 	 *
+	 *  PC2 (for 24-bit PC arch)
 	 *  PC1
 	 *  PC0
 	 *  --- <- SP
 	 */
 
+#if ATMEGA_PC_SIZE <= 16
 	ld		r25, y+				/* Load PC0 (r25) then PC1 (r24) */
 	ld		r24, y+
 	push	r24					/* Push PC0 and PC1 on the stack (PC1 then PC0) */
 	push	r25
+#else 
+	ld	r25, y /* Load PC2 (r25) */
+	subi    r28,1
+	push    r25
+	ld	r25, y /* Load PC1 (r25) */
+	subi    r28,1
+	push    r25
+	ld	r25, y /* Load PC0 (r25) */
+	subi    r28,1
+	push    r25
+#endif
 
 	/* Then get value of X [r26:r27].  Save X on the new stack where we can
 	 * recover it later.  The new stack is now:
 	 *
+	 *  PC2 (for 24-bit PC arch)
 	 *  PC1
 	 *  PC0
 	 *  R26

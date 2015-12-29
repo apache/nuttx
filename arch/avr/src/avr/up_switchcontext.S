@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+        
 #include "excptmacros.h"
 
 /************************************************************************************
