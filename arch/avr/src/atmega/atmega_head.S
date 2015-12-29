@@ -368,6 +368,9 @@ vectortab:
 	.func	__start
 __start:
 
+	/* no interrupts! Useful for software reset by jumping to address 0 */
+	cli
+
 	/* Clear the zero register, clear the status register and initialize the
 	 * IDLE thread stack
 	 */
