@@ -385,6 +385,11 @@ __start:
 	 *
 	 * This function does not return.  It must give control to os_start()
 	 * at the completion of its initialization.
+	 *
+	 * Why not just call arm_boot() and branch to os_start() when it returns?
+	 * If the stack pointer initialized above lies in SDRAM, then that may
+	 * not be possible.  Also, in the special case of the TMS570, it may
+	 * perform a destructive test, losing the pushed content of the stack.
 	 */
 
 	b		arm_boot

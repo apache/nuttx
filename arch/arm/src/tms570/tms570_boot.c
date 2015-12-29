@@ -208,7 +208,7 @@ static void tms570_memory_initialize(uint32_t ramset)
  * Name: go_os_start
  *
  * Description:
- *   Set the IDLE stack to the
+ *   Re-initialize the stack and frame pointers and branch to OS start.
  *
  ****************************************************************************/
 
@@ -227,22 +227,40 @@ static void go_os_start(void *pv, unsigned int nbytes)
 
   __asm__ __volatile__
   (
-    "\tmovs r1, r1, lsr #2\n"   /* R1 = nwords = nbytes >> 2 */
-    "\tbeq  2f\n"               /* (should not happen) */
+    "\tmovs r1, r1, lsr #2\n"       /* R1 = nwords = nbytes >> 2 */
+    "\tbeq  2f\n"                   /* (should not happen) */
 
-    "\tbic  r0, r0, #3\n"       /* R0 = Aligned stackptr */
-    "\tmovw r2, #0xbeef\n"      /* R2 = STACK_COLOR = 0xdeadbeef */
+    "\tbic  r0, r0, #3\n"           /* R0 = Aligned stackptr */
+    "\tmovw r2, #0xbeef\n"          /* R2 = STACK_COLOR = 0xdeadbeef */
     "\tmovt r2, #0xdead\n"
 
-    "1:\n"                      /* Top of the loop */
-    "\tsub  r1, r1, #1\n"       /* R1 nwords-- */
-    "\tcmp  r1, #0\n"           /* Check (nwords == 0) */
-    "\tstr  r2, [r0], #4\n"     /* Save stack color word, increment stackptr */
-    "\tbne  1b\n"               /* Bottom of the loop */
+    "1:\n"                          /* Top of the loop */
+    "\tsub  r1, r1, #1\n"           /* R1 nwords-- */
+    "\tcmp  r1, #0\n"               /* Check (nwords == 0) */
+    "\tstr  r2, [r0], #4\n"         /* Save stack color word, increment stackptr */
+    "\tbne  1b\n"                   /* Bottom of the loop */
 
     "2:\n"
-    "\tmov  r14, #0\n"          /* LR = return address (none) */
-    "\tb    os_start\n"         /* Branch to os_start */
+    "\tldr  sp, =g_idle_topstack\n" /* Reset the stack pointer */
+    "\tmov  fp, #0\n"               /* Reset the frame pointer */
+    "\tmov  r14, #0\n"              /* LR = return address (none) */
+    "\tb    os_start\n"             /* Branch to os_start */
+  );
+}
+
+#else
+static void go_os_start(void) naked_function noreturn_function;
+
+static void go_os_start(void)
+{
+  /* Reset the stack/frame pointer and jump to os_start(). */
+
+  __asm__ __volatile__
+  (
+    "\tldr  sp, =g_idle_topstack\n" /* Reset the stack pointer */
+    "\tmov  fp, #0\n"               /* Reset the frame pointer */
+    "\tmov  r14, #0\n"              /* LR = return address (none) */
+    "\tb    os_start\n"             /* Branch to os_start */
   );
 }
 #endif
@@ -445,12 +463,8 @@ void arm_boot(void)
 
   go_os_start((FAR void *)&_ebss, CONFIG_IDLETHREAD_STACKSIZE);
 #else
-  /* Call os_start() */
+  /* Branch to os_start(), resetting the stack and frame pointers. */
 
-  os_start();
-
-  /* Shouldn't get here */
-
-  for (; ; );
+  go_os_start();
 #endif
 }
