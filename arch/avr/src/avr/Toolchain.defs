@@ -124,5 +124,3 @@ ifeq ($(CONFIG_AVR_TOOLCHAIN),WINAVR)
   MAXOPTIMIZATION ?= -O2
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
-
-

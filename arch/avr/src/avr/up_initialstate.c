@@ -113,4 +113,3 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_SREG]  = getsreg() | (1 << SREG_I);
 #endif
 }
-

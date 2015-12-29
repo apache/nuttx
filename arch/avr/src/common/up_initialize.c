@@ -297,8 +297,7 @@ void up_initialize(void)
 
   up_usbinitialize();
 
-#if defined(ARCH_HAVE_LEDS)     
+#if defined(ARCH_HAVE_LEDS)
   board_autoled_on(LED_IRQSENABLED);
 #endif
 }
-
