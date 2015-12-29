@@ -241,7 +241,8 @@ static void go_os_start(void *pv, unsigned int nbytes)
     "\tbne  1b\n"                   /* Bottom of the loop */
 
     "2:\n"
-    "\tldr  sp, =g_idle_topstack\n" /* Reset the stack pointer */
+    "\tldr  ip, =g_idle_topstack\n" /* IP=address of g_idle_topstack */
+    "\tldr  sp, [ip]\n"             /* Reset the stack pointer */
     "\tmov  fp, #0\n"               /* Reset the frame pointer */
     "\tmov  r14, #0\n"              /* LR = return address (none) */
     "\tb    os_start\n"             /* Branch to os_start */
@@ -257,7 +258,8 @@ static void go_os_start(void)
 
   __asm__ __volatile__
   (
-    "\tldr  sp, =g_idle_topstack\n" /* Reset the stack pointer */
+    "\tldr  ip, =g_idle_topstack\n" /* IP=address of g_idle_topstack */
+    "\tldr  sp, [ip]\n"             /* Reset the stack pointer */
     "\tmov  fp, #0\n"               /* Reset the frame pointer */
     "\tmov  r14, #0\n"              /* LR = return address (none) */
     "\tb    os_start\n"             /* Branch to os_start */
