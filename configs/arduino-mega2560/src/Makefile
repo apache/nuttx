@@ -1,7 +1,7 @@
 ############################################################################
 # configs/arduino-mega2560/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,11 @@
 
 -include $(TOPDIR)/Make.defs
 
-ASRCS		= 
-CSRCS		= up_boot.c 
+ASRCS		=
+CSRCS		= avr_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
+CSRCS		+= avr_leds.c
 endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
@@ -58,14 +58,14 @@ endif
 
 ifeq ($(WINTOOL),y)
   CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" 
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" 
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)/atmega2560}"
 else
   CFLAGS	+= -I "$(TOPDIR)/sched"
   CFLAGS	+= -I "$(ARCH_SRCDIR)/chip"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/common" 
+  CFLAGS	+= -I "$(ARCH_SRCDIR)/common"
   CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
   CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)/atmega2560"
 endif

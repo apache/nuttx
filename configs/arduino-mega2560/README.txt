@@ -20,4 +20,3 @@ http://www.atmel.com/tools/atmelavrtoolchainforwindows.aspx
 It is basically WinAVR compatible so sub-projects may define WinAVR as a
 tool-chain but specify path to the Atmel AVR8 in path. See
 arduino-mega2560/hello for example.
-

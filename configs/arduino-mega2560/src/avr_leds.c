@@ -1,7 +1,7 @@
-/****************************************************************************
- * configs/arduino-mega2560/src/arduino-mega2560-internal.h
+/******************************************************************************
+ * configs/arduino-mega2560/src/avr_leds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,47 +31,47 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ******************************************************************************/
 
-#ifndef __CONFIGS_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_INTERNAL_H
-#define __CONFIGS_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_INTERNAL_H
-
-/****************************************************************************
+/******************************************************************************
  * Included Files
- ****************************************************************************/
+ ******************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "atmega2560_internal.h"
+#include "arduino_mega2560.h"
 
 /****************************************************************************
- * Public Types
+ * Name: board_autoled_initialize
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/*******************************************************************************
- * Name: atmega_ledinit
- *
- * Description:
- *   Configure on-board LEDs if LED support has been selected.
- *
- ******************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void atmega_led_initialize(void);
-#endif
+void board_autoled_initialize(void)
+{
+}
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_INTERNAL_H */
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+}
+
+#endif /* CONFIG_ARCH_LEDS */

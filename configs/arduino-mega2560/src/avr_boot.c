@@ -1,7 +1,7 @@
 /******************************************************************************
- * configs/arduino-mega2560/src/up_boot.c
+ * configs/arduino-mega2560/src/avr_boot.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include "up_internal.h"
 
 #include "atmega_internal.h"
-#include "arduino_mega2560_internal.h"
+#include "arduino_mega2560.h"
 
 /******************************************************************************
  * Definitions
@@ -65,9 +65,9 @@
  * Name: up_boardinitialize
  *
  * Description:
- *   All ATMega architectures must provide the following entry point.  
- *   This entry point is called early in the intitialization -- after all 
- *   memory has been configured and mapped but before any devices have been 
+ *   All ATMega architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
  *   initialized.
  *
  ******************************************************************************/
@@ -80,4 +80,3 @@ void atmega_boardinitialize(void)
   atmega_led_initialize();
 #endif
 }
-
