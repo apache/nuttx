@@ -402,32 +402,32 @@ __do_copy_data:
 	ldi		r31, hi8(_eronly)
 	ldi		r16, hh8(_eronly)
 	out		_SFR_IO_ADDR(RAMPZ), r16
-	rjmp	.Lcopystart
+	rjmp	        .Lcopystart
 
 .Lcopyloop:
-	elpm	r0, Z+
+	elpm	        r0, Z+
 	st		X+, r0
 
 .Lcopystart:
 	cpi		r26, lo8(_edata)
 	cpc		r27, r17
-	brne	.Lcopyloop
+	brne	        .Lcopyloop
 #else
 	ldi		r17, hi8(_edata)
 	ldi		r26, lo8(_sdata)
 	ldi		r27, hi8(_sdata)
 	ldi		r30, lo8(_eronly)
 	ldi		r31, hi8(_eronly)
-	rjmp	.Lcopystart
+	rjmp	        .Lcopystart
 
 .Lcopyloop:
-	lpm     r0, Z+
-	st      X+, r0
+	lpm             r0, Z+
+	st              X+, r0
 
 .Lcopystart:
-	cpi     r26, lo8(_edata)
-	cpc     r27, r17
-	brne    .Lcopyloop
+	cpi             r26, lo8(_edata)
+	cpc             r27, r17
+	brne            .Lcopyloop
 #endif
 
 	/* Clear uninitialized data */
@@ -438,7 +438,7 @@ __do_clear_bss:
 	ldi		r17, hi8(_ebss)
 	ldi		r26, lo8(_sbss)
 	ldi		r27, hi8(_sbss)
-	rjmp	.Lclearstart
+	rjmp	        .Lclearstart
 
 .Lclearloop:
 	st		X+, r1
