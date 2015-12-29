@@ -39,10 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
 #include <avr/io.h>
+#include <avr/common.h>        
 #include <avr/sfr_defs.h>
 
+#include <arch/irq.h>
+                
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
@@ -371,6 +373,11 @@ __start:
 	/* no interrupts! Useful for software reset by jumping to address 0 */
 	cli
 
+#if defined(EIND)
+	/* set EIND to 0, just to be sure we are sane */
+	out             _SFR_IO_ADDR(EIND), 0 // EIND = 0x3c
+#endif /* EIND */
+	
 	/* Clear the zero register, clear the status register and initialize the
 	 * IDLE thread stack
 	 */
