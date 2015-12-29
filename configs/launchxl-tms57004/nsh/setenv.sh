@@ -61,7 +61,7 @@ fi
 
 # This is the location where I installed the ARM "GNU Tools for ARM Embedded Processors"
 # You can this free toolchain here https://launchpad.net/gcc-arm-embedded
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2015q2/bin"
+# export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2015q2/bin"
 
 # This is the path to the location where I installed the devkitARM toolchain
 # You can get this free toolchain from http://devkitpro.org/ or http://sourceforge.net/projects/devkitpro/
@@ -69,7 +69,7 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
-# export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export TOOLCHAIN_BIN="${WD}/../buildroot/build_armeb/staging_dir/bin"
 
 # Add the path to the toolchain to the PATH varialble
 export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
