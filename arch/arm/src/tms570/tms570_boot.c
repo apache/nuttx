@@ -412,10 +412,20 @@ void arm_boot(void)
 #ifdef CONFIG_TMS570_DCAN2
                            | SYS_MSIENA_DCAN2_RAM
 #endif
-#ifdef CONFIG_TMS570_MIBASPI1
+#ifdef CONFIG_TMS570_MIBADC
                            | SYS_MSIENA_MIBADC_RAM
 #endif
     );
+
+#ifdef CONFIG_TMS570_SELFTEST
+  /* Test the parity protection mechanism for peripheral RAMs */
+#warning Missing logic
+#endif
+
+#ifdef CONFIG_TMS570_MIBASPI1
+  /* Wait for MibSPI1 RAM to complete initialization */
+#warning Missing logic
+#endif
 
   /* Configure system response to error conditions */
 
