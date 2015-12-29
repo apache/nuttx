@@ -48,7 +48,7 @@
 #include <assert.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxtk_internal.h"
+#include "nxtk.h"
 
 /****************************************************************************
  * Pre-processor Definitions

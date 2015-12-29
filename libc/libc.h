@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/lib_internal.h
+ * libc/libc.h
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_LIB_INTERNAL_H
-#define __LIBC_LIB_INTERNAL_H
+#ifndef __LIBC_LIBC_H
+#define __LIBC_LIBC_H
 
 /****************************************************************************
  * Included Files
@@ -233,4 +233,4 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
 }
 #endif
 
-#endif /* __LIBC_LIB_INTERNAL_H */
+#endif /* __LIBC_LIBC_H */

@@ -53,7 +53,7 @@
 #include <nuttx/net/dns.h>
 #include <nuttx/net/loopback.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 #include "netdb/lib_dns.h"
 
 #ifdef CONFIG_LIBC_NETDB

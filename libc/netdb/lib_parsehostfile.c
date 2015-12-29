@@ -50,7 +50,7 @@
 
 #include <arpa/inet.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #ifdef CONFIG_NETDB_HOSTFILE
 

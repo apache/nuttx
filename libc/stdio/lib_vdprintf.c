@@ -42,7 +42,7 @@
 
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions

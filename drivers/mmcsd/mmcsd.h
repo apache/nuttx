@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mmcsd/mmcsd_internal.h
+ * drivers/mmcsd/mmcsd.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MMCSD_MMCSD_INTERNAL_H
-#define __DRIVERS_MMCSD_MMCSD_INTERNAL_H
+#ifndef __DRIVERS_MMCSD_MMCSD_H
+#define __DRIVERS_MMCSD_MMCSD_H
 
 /****************************************************************************
  * Included Files
@@ -102,4 +102,4 @@ EXTERN void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __DRIVERS_MMCSD_MMCSD_INTERNAL_H */
+#endif /* __DRIVERS_MMCSD_MMCSD_H */

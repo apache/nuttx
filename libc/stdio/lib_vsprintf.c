@@ -41,7 +41,7 @@
 
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
