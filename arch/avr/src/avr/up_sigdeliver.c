@@ -155,4 +155,3 @@ void up_sigdeliver(void)
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */
-

@@ -179,7 +179,7 @@ void up_timer_initialize(void)
 #else
 # error "Unable to find IRQ for timer"
 #endif
-  
+
   /* Enable the interrupt on compare match A */
 
 #if defined(TIMSK1)

@@ -132,7 +132,7 @@ void up_lowinit(void)
   CLKPR = 0x80;
   CLKPR = 0;
 #elif defined(XDIV)
-  XDIV = 0;
+  XDIV  = 0;
 #endif
 
   /* Initialize the watchdog timer */
@@ -155,5 +155,3 @@ void up_lowinit(void)
 
   atmega_boardinitialize();
 }
-
-

@@ -146,7 +146,7 @@
 #  define ATMEGA_IRQ_INT4        6 /* 0x000A INT4 External Interrupt Request 4 */
 #  define ATMEGA_IRQ_INT5        7 /* 0x000C INT5  External Interrupt Request 5 */
 #  define ATMEGA_IRQ_INT6        8 /* 0x000E INT6 External Interrupt Request 6 */
-#  define ATMEGA_IRQ_INT7        9 /* 0x0010 INT7 External Interrupt Request 7 */ 
+#  define ATMEGA_IRQ_INT7        9 /* 0x0010 INT7 External Interrupt Request 7 */
 #  define ATMEGA_IRQ_PCINT0      10 /* 0x0012 PCINT0 Pin Change Interrupt Req 0 */
 #  define ATMEGA_IRQ_PCINT1      11 /* 0x0014 PCINT1 Pin Change Interrupt Req 1 */
 #  define ATMEGA_IRQ_PCINT2      12 /* 0x0016 PCINT2 Pin Change Interrupt Req 2 */
@@ -194,7 +194,7 @@
 #  define ATMEGA_IRQ_USART2_TXC  54 /* 0x006A USART2 TX USART2 Tx Complete */
 #  define ATMEGA_IRQ_USART3_RXC  55 /* 0x006C USART3 RX USART3 Rx Complete */
 #  define ATMEGA_IRQ_USART3_UDRE 56 /* 0x006E USART3 UDRE USART3 Data Register Empty */
-#  define ATMEGA_IRQ_USART3_TXC  57 /* 0x0070 USART3 TX USART3 Tx Complete */                       
+#  define ATMEGA_IRQ_USART3_TXC  57 /* 0x0070 USART3 TX USART3 Tx Complete */
 
 #  define NR_IRQS                58
 #  define ATMEGA_PC_SIZE         24
@@ -239,4 +239,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_AVR_INCLUDE_ATMEGA_IRQ_H */
-

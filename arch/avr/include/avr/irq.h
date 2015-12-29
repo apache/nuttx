@@ -94,7 +94,7 @@
 #define REG_PC0          35 /* PC */
 #define REG_PC1          36
 #if ATMEGA_PC_SIZE > 16
-#define REG_PC2          37
+# define REG_PC2         37
 #endif
 
 /****************************************************************************
@@ -166,9 +166,9 @@ static inline irqstate_t irqsave(void)
   asm volatile
     (
       "\tin %0, __SREG__\n"
-	  "\tcli\n"
-	  : "=&r" (sreg) ::
-	);
+      "\tcli\n"
+      : "=&r" (sreg) ::
+    );
   return sreg;
 }
 
@@ -204,4 +204,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_AVR_INCLUDE_AVR_IRQ_H */
-

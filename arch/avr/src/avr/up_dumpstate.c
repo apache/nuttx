@@ -158,9 +158,9 @@ static inline void up_registerdump(void)
             current_regs[REG_SREG]);
 #else
       lldbg("PC:  %02x%02x%02x  SP: %02x%02x SREG: %02x\n",
-            current_regs[REG_PC0], current_regs[REG_PC1], current_regs[REG_PC2],
-            current_regs[REG_SPH], current_regs[REG_SPL],
-            current_regs[REG_SREG]);
+            current_regs[REG_PC0], current_regs[REG_PC1],
+            current_regs[REG_PC2], current_regs[REG_SPH],
+            current_regs[REG_SPL], current_regs[REG_SREG]);
 #endif
     }
 }
