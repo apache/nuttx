@@ -20,6 +20,13 @@ config ARCH_BOARD_AMBER
 		on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
 		there is untested due to tool-related issues.
 
+config ARCH_BOARD_ARDUINO_MEGA2560
+	bool "Arduino Mega 2560"
+	depends on ARCH_CHIP_ATMEGA2560
+	---help---
+                This option selects the Arduino Mega 2560 board featuring the Atmel
+		Atmega2560 MCU running at 16 MHz.        
+
 config ARCH_BOARD_ARDUINO_DUE
 	bool "Arduino Due"
 	depends on ARCH_CHIP_ATSAM3X8E
@@ -1258,6 +1265,7 @@ endif #ARCH_BOARD_CUSTOM
 config ARCH_BOARD
 	string
 	default "amber"                    if ARCH_BOARD_AMBER
+	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
@@ -1435,6 +1443,9 @@ comment "Board-Specific Options"
 
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_MEGA2560
+source "configs/arduino-mega2560/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "configs/arduino-due/Kconfig"
