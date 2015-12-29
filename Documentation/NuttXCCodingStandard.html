@@ -813,9 +813,8 @@ int animals(int animal)
 <h2>1.5 <a name="indentation">Indentation</b></h2>
 
 <p>
-  <b>Indentation Unit</b>
+  <b>Indentation Unit</b>.
   Indentation is in units of two spaces; Each indentation level is twos spaces further to the right than the preceding identation levels.
-  The use of TAB characters for indentation is prohibited in C source and header files (they may be appropriate in make files and some scripts, however).
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -841,6 +840,13 @@ int animals(int animal)
 </td></tr>
 </table></center>
 
+<p>
+  <b>Use of TAB Characters</b>.
+  The use of TAB characters for indentation is prohibited in C source and header files.
+  TAB characters are, however, used in make files, assembly language source files, Kconfig files and some script files.
+  When TAB characters are used in these files, spaces may not be used for indentation.
+  The correct TAB setting is 4 spaces (not 8) in these cases.
+</p>
 <p>
   <b>Alignment of Braces</b>.
   Note that since braces must be on a separate line (see above), this indentation by two spaces has an interesting property:
