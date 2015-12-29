@@ -11253,3 +11253,8 @@
 	  (2015-12-23).
 	* arch/arm/src/stm32:  Add timer input capture driver.  From Pierre-Noel
 	  Bouteville (2015-12-24).
+	* arch/avr:  Add support for the Atmega2560.  From Dimitry Kloper
+	  (2015-12-19).
+	* configs/arduino-mega2560: Add support for the Arduino-Mega2560.  From
+	  Dimitry Koper (2015-12-29).
+
