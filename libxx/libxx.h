@@ -1,5 +1,5 @@
 //***************************************************************************
-// lib/libxx_internal.h
+// lib/libxx.h
 //
 //   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>

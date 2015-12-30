@@ -41,7 +41,7 @@
 
 #include <cassert>
 
-#include "libxx_internal.hxx"
+#include "libxx.hxx"
 
 //***************************************************************************
 // Pre-processor Definitions
