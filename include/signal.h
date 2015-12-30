@@ -45,6 +45,9 @@
 
 #include <stdint.h>
 #include <time.h>
+#ifdef CONFIG_SIG_EVTHREAD
+#  include <pthread.h>  /* Needed for pthread_attr_t */
+#endif
 
 /********************************************************************************
  * Pre-processor Definitions
@@ -162,8 +165,11 @@
 
 /* Values for the sigev_notify field of struct sigevent */
 
-#define SIGEV_NONE      0 /* No notification desired */
-#define SIGEV_SIGNAL    1 /* Notify via signal */
+#define SIGEV_NONE      0 /* No asynchronous notification is delivered */
+#define SIGEV_SIGNAL    1 /* Notify via signal,with an application-defined value */
+#ifdef CONFIG_SIG_EVTHREAD
+#  define SIGEV_THREAD  3 /* A notification function is called */
+#endif
 
 /* Special values of of sa_handler used by sigaction and sigset.  They are all
  * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
@@ -189,6 +195,7 @@
 /* This defines a set of 32 signals (numbered 0 through 31). */
 
 typedef uint32_t sigset_t;   /* Bit set of 32 signals */
+#define __SIGSET_T_DEFINED 1
 
 /* This defines the type of the siginfo si_value field */
 
@@ -205,9 +212,14 @@ union sigval
 
 struct sigevent
 {
-  uint8_t      sigev_notify; /* Notification method: SIGEV_SIGNAL or SIGEV_NONE */
+  uint8_t      sigev_notify; /* Notification method: SIGEV_SIGNAL, SIGEV_NONE, or SIGEV_THREAD */
   uint8_t      sigev_signo;  /* Notification signal */
   union sigval sigev_value;  /* Data passed with notification */
+
+#ifdef CONFIG_SIG_EVTHREAD
+  CODE void         (*sigev_notify_function)(union sigval); /* Notification function */
+  FAR pthread_attr_t *sigev_notify_attributes;              /* Notification attributes (not used) */
+#endif
 };
 
 /* The following types is used to pass parameters to/from signal handlers */
@@ -225,6 +237,7 @@ struct siginfo
 };
 
 typedef struct siginfo siginfo_t;
+#define __SIGINFO_T_DEFINED 1
 
 /* Non-standard convenience definition of signal handling function types.
  * These should be used only internally within the NuttX signal logic.
@@ -295,6 +308,25 @@ int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #undef EXTERN
 #ifdef __cplusplus
 }
+#endif
+
+#else /* __INCLUDE_SIGNAL_H */
+
+#include <stdint.h>
+
+/* Avoid a circular dependencies by assuring that simple type definitions
+ * are avaiable in any inclusion ordering.
+ */
+
+#ifndef __SIGSET_T_DEFINED
+typedef uint32_t sigset_t;
+#  define __SIGSET_T_DEFINED 1
+#endif
+
+#ifndef __SIGINFO_T_DEFINED
+struct siginfo;
+typedef struct siginfo siginfo_t;
+#  define __SIGINFO_T_DEFINED 1
 #endif
 
 #endif /* __INCLUDE_SIGNAL_H */

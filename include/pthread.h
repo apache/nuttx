@@ -158,8 +158,11 @@ extern "C"
 
 /* pthread-specific types */
 
-typedef int             pthread_key_t;
-typedef FAR void       *pthread_addr_t;
+typedef int pthread_key_t;
+#define __PTHREAD_KEY_T_DEFINED 1
+
+typedef FAR void *pthread_addr_t;
+#define __PTHREAD_ADDR_T_DEFINED 1
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
@@ -182,17 +185,24 @@ struct pthread_attr_s
   struct timespec budget;      /* Initial budget */
 #endif
 };
+
 typedef struct pthread_attr_s pthread_attr_t;
+#define __PTHREAD_ATTR_T_DEFINED 1
 
 typedef pid_t pthread_t;
+#define __PTHREAD_T_DEFINED 1
 
 typedef int pthread_condattr_t;
+#define __PTHREAD_CONDATTR_T_DEFINED 1
 
 struct pthread_cond_s
 {
   sem_t sem;
 };
+
 typedef struct pthread_cond_s pthread_cond_t;
+#define __PTHREAD_COND_T_DEFINED 1
+
 #define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0)}
 
 struct pthread_mutexattr_s
@@ -202,7 +212,9 @@ struct pthread_mutexattr_s
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
 #endif
 };
+
 typedef struct pthread_mutexattr_s pthread_mutexattr_t;
+#define __PTHREAD_MUTEXATTR_T_DEFINED 1
 
 struct pthread_mutex_s
 {
@@ -213,7 +225,9 @@ struct pthread_mutex_s
   int   nlocks;   /* The number of recursive locks held */
 #endif
 };
+
 typedef struct pthread_mutex_s pthread_mutex_t;
+#define __PTHREAD_MUTEX_T_DEFINED 1
 
 #ifdef CONFIG_MUTEX_TYPES
 #  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1), PTHREAD_MUTEX_DEFAULT, 0}
@@ -225,16 +239,21 @@ struct pthread_barrierattr_s
 {
   int pshared;
 };
+
 typedef struct pthread_barrierattr_s pthread_barrierattr_t;
+#define __PTHREAD_BARRIERATTR_T_DEFINED 1
 
 struct pthread_barrier_s
 {
   sem_t        sem;
   unsigned int count;
 };
+
 typedef struct pthread_barrier_s pthread_barrier_t;
+#define __PTHREAD_BARRIER_T_DEFINED 1
 
 typedef bool pthread_once_t;
+#define __PTHREAD_ONCE_T_DEFINED 1
 
 /* Forware references */
 
@@ -411,6 +430,76 @@ int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 
 #ifdef __cplusplus
 }
+#endif
+
+#else /* __INCLUDE_PTHREAD_H */
+
+#include <sys/types.h>
+#include <stdbool.h>
+
+/* Avoid a circular dependencies by assuring that simple type definitions
+ * are avaiable in any inclusion ordering.
+ */
+
+#ifndef __PTHREAD_KEY_T_DEFINED
+typedef int pthread_key_t;
+#  define __PTHREAD_KEY_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ADDR_T_DEFINED
+typedef FAR void *pthread_addr_t;
+#  define __PTHREAD_ADDR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ATTR_T_DEFINED
+struct pthread_attr_s;
+typedef struct pthread_attr_s pthread_attr_t;
+#  define __PTHREAD_ATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_T_DEFINED
+typedef pid_t pthread_t;
+#  define __PTHREAD_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_CONDATTR_T_DEFINED
+typedef int pthread_condattr_t;
+#  define __PTHREAD_CONDATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_COND_T_DEFINED
+struct pthread_cond_s;
+typedef struct pthread_cond_s pthread_cond_t;
+#  define __PTHREAD_COND_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_MUTEXATTR_T_DEFINED
+struct pthread_mutexattr_s;
+typedef struct pthread_mutexattr_s pthread_mutexattr_t;
+#  define __PTHREAD_MUTEXATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_MUTEX_T_DEFINED
+struct pthread_mutex_s;
+typedef struct pthread_mutex_s pthread_mutex_t;
+#  define __PTHREAD_MUTEX_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_BARRIERATTR_T_DEFINED
+struct pthread_barrierattr_s;
+typedef struct pthread_barrierattr_s pthread_barrierattr_t;
+#  define __PTHREAD_BARRIERATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_BARRIER_T_DEFINED
+struct pthread_barrier_s;
+typedef struct pthread_barrier_s pthread_barrier_t;
+#  define __PTHREAD_BARRIER_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ONCE_T_DEFINED
+typedef bool pthread_once_t;
+#  define __PTHREAD_ONCE_T_DEFINED 1
 #endif
 
 #endif /* __INCLUDE_PTHREAD_H */

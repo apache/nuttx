@@ -340,9 +340,10 @@ o Signals (sched/signal, arch/)
                embedded system.
 
   Title:       SIGEV_THREAD
-  Description: sig_notify() logic does not support SIGEV_THREAD; structure
-               struct sigevent does not provide required members sigev_notify_function
-               or sigev_notify_attributes.
+  Description: Implementation of support for support for SIGEV_THREAD is incomplete;
+               The internal OS functin sig_notification has not been implemented (and
+               will be tricky!).  There are also some unimplemented function call logic
+               in libc/aio
   Status:      Low, there are alternative designs.  However, these features
                are required by the POSIX standard.
   Priority:    Low for now

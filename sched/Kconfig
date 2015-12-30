@@ -775,6 +775,15 @@ config SCHED_ONEXIT_MAX
 
 endmenu # RTOS hooks
 
+config SIG_EVTHREAD
+	bool "Support SIGEV_THHREAD"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Built in support for the SIGEV_THREAD signal deliver method.
+
+		NOTE: Only partially implemented as of this writing.
+
 menu "Signal Numbers"
 	depends on !DISABLE_SIGNALS
 

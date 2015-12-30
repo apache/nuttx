@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mqueue.h
  *
- *   Copyright (C) 2007, 2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,8 +80,7 @@ struct mqueue_inode_s
 #ifndef CONFIG_DISABLE_SIGNALS
   FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
   pid_t ntpid;                /* Notification: Receiving Task's PID */
-  int ntsigno;                /* Notification: Signal number */
-  union sigval ntvalue;       /* Notification: Signal value */
+  struct sigevent ntevent;    /* Notification description */
 #endif
 };
 

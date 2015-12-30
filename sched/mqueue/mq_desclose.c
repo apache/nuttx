@@ -41,6 +41,7 @@
 
 #include <mqueue.h>
 #include <sched.h>
+#include <string.h>
 #include <assert.h>
 #include <queue.h>
 
@@ -128,9 +129,8 @@ void mq_desclose(mqd_t mqdes)
 #ifndef CONFIG_DISABLE_SIGNALS
   if (msgq->ntmqdes == mqdes)
     {
+      memset(&msgq->ntevent, 0, sizeof(struct sigevent));
       msgq->ntpid   = INVALID_PROCESS_ID;
-      msgq->ntsigno = 0;
-      msgq->ntvalue.sival_int = 0;
       msgq->ntmqdes = NULL;
     }
 #endif
