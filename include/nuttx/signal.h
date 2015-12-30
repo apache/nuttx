@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/aio/aio_signal.c
+ * include/nuttx/signal.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,9 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_SIGNAL_H
+#define __INCLUDE_NUTTX_SIGNAL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -40,112 +43,34 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sched.h>
 #include <signal.h>
-#include <aio.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
-#include "aio/aio.h"
-
-#ifdef CONFIG_FS_AIO
+#if defined(CONFIG_SIG_EVTHREAD) && defined(__KERNEL__)
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_signal
+ * Name: sig_notification
  *
  * Description:
- *   Signal the client that an I/O has completed.
+ *   Notify a client a signal event via a function call.  This function is
+ *   an internal OS interface that implements the common logic for signal
+ *   event notification for the case of SIGEV_THREAD.
  *
  * Input Parameters:
- *   pid    - ID of the task to signal
- *   aiocbp - Pointer to the asynchronous I/O state structure that includes
- *            information about how to signal the client
+ *   pid - The task/thread ID a the client thread to be signaled.
+ *   event - The instance of struct sigevent that describes how to signal
+ *     the client.
  *
  * Returned Value:
- *   Zero (OK) if the client was successfully signalled.  Otherwise, a
- *   negated errno value is returned.
- *
- * Assumptions:
- *   This function runs only in the context of the worker thread.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
-{
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  union sigval value;
-#endif
-  int errcode;
-  int status;
-  int ret;
+int sig_notification(pid_t pid, FAR struct sigevent *event);
 
-  DEBUGASSERT(aiocbp);
-
-  ret = OK; /* Assume success */
-
-  /* Signal the client */
-
-  if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
-    {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      status = sigqueue(pid, aiocbp->aio_sigevent.sigev_signo,
-                        aiocbp->aio_sigevent.sigev_value);
-#else
-      status = sigqueue(pid, aiocbp->aio_sigevent.sigev_sign,
-                        aiocbp->aio_sigevent.sigev_value.sival_ptr);
-#endif
-      if (status < 0)
-        {
-          errcode = get_errno();
-          fdbg("ERROR: sigqueue #1 failed: %d\n", errcode);
-          ret = ERROR;
-        }
-    }
-
-#ifdef CONFIG_SIG_EVTHREAD
-  /* Notify the client via a function call */
-
-  else if (aiocbp->aio_sigevent.sigev_notify == SIGEV_THREAD)
-    {
-      ret = sig_notification(pid, &aiocbp->aio_sigevent);
-      if (ret < 0)
-        {
-          fdbg("ERROR: sig_notification failed: %d\n", ret);
-        }
-    }
-#endif
-
-  /* Send the poll signal in any event in case the caller is waiting
-   * on sig_suspend();
-   */
-
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  value.sival_ptr = aiocbp;
-  status = sigqueue(pid, SIGPOLL, value);
-#else
-  status = sigqueue(pid, SIGPOLL, aiocbp);
-#endif
-  if (status && ret == OK)
-    {
-      errcode = get_errno();
-      fdbg("ERROR: sigqueue #2 failed: %d\n", errcode);
-      ret = ERROR;
-    }
-
-  /* Make sure that errno is set correctly on return */
-
-  if (ret < 0)
-    {
-      set_errno(errcode);
-      return ERROR;
-    }
-
-  return OK;
-}
-
-#endif /* CONFIG_FS_AIO */
+#endif /* CONFIG_SIG_EVTHREAD && __KERNEL__ */
+#endif /* __INCLUDE_NUTTX_SIGNAL_H */
