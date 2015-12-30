@@ -18,9 +18,23 @@ Contents
 Status
 ======
 
+  2015-12-29:
   The basic port to the TMS570 is complete.  After a few debug attempts,
-  I think I may have damaged my board: The CPU NERROR LED illuminates, JTAG
-  no longer recognizes the part, and can't re-program the FLASH.
+  I think I may have damaged my board or at least put it into a state where
+  I can use it:  The CPU NERROR LED illuminates and can't I re-program
+  the FLASH.
+
+  I was never able to use Code Composer Studio or UniFlash with the board.
+  But I was initially able to load FLASH and debug using a Segger J-Link
+  connected to the board as described below.  But I think that some of
+  my initial code loads put the TMS570 in bad state (or worse).  Now
+  the NERROR LED is on.  When I attempt to problem the FLASH, the J-Link
+  software complains that the CPU is running too slowly and then times
+  out trying to erase the FLASH.
+
+  I have made several important code fixes since them (some of which might
+  improve this situation).  But I have been unable to test them.  At this
+  point I will have to give up on this port OR perhaps order a new card.
 
 Toolchain
 =========
