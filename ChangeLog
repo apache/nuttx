@@ -11257,4 +11257,9 @@
 	  (2015-12-19).
 	* configs/arduino-mega2560: Add support for the Arduino-Mega2560.  From
 	  Dimitry Koper (2015-12-29).
-
+	* sched/signal, sched/mqueue, sched/timer, include/signal.h,
+	  include/nuttx/signal, fs/aio, libc/aio, and probably other
+	  directories:  Add support for the SIGEV_THREAD notification method in
+	  struct sigevent.  This initial implementation will only work in the
+	  FLAT build.  See the top-level TODO file for additional details
+	  (2015-12-30).
