@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include "m9s12_internal.h"
+#include "m9s12.h"
 
 /************************************************************************************
  * Pre-processor Definitions

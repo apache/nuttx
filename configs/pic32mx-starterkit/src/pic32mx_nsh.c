@@ -50,7 +50,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "pic32mx-starterkit.h"
 
 /****************************************************************************

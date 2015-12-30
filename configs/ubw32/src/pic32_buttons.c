@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "ubw-internal.h"
 
 #ifdef CONFIG_ARCH_BUTTONS

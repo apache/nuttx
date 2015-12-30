@@ -48,7 +48,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "twr-k60n512.h"
 
 /************************************************************************************

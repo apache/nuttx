@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "pic32mx-ioport.h"
 #include "pic32mx-starterkit.h"
 

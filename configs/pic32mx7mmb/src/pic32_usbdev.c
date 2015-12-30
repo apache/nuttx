@@ -44,7 +44,7 @@
 
 #include <nuttx/usb/usbdev.h>
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "pic32mx7mmb.h"
 
 #if defined(CONFIG_PIC32MX_USBDEV)

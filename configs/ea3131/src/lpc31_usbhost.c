@@ -53,7 +53,7 @@
 
 #include "up_arch.h"
 
-#include "lpc31_internal.h"
+#include "lpc31.h"
 #include "ea3131.h"
 
 #if defined(CONFIG_LPC31_USBOTG) || defined(CONFIG_USBHOST)

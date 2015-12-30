@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "twr-k60n512.h"
 
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)

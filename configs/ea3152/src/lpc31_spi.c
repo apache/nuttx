@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 #include "ea3152.h"
 
 #ifdef CONFIG_LPC31_SPI

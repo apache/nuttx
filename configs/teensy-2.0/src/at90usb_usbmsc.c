@@ -48,7 +48,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#include "at90usb_internal.h"
+#include "at90usb.h"
 #include "teensy-20.h"
 
 /****************************************************************************

@@ -46,7 +46,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 #include "lpc_h3131.h"
 
 /************************************************************************************

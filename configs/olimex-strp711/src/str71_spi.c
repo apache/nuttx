@@ -54,7 +54,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "str71x_internal.h"
+#include "str71x.h"
 
 #if defined(CONFIG_STR71X_BSPI0) || defined(CONFIG_STR71X_BSPI1)
 

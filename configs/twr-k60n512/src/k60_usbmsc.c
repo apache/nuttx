@@ -48,7 +48,7 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 
 /****************************************************************************
  * Pre-processor Definitions

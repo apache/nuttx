@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "pic32mx-ioport.h"
 #include "pic32mx-adc.h"
 #include "sure-pic32mx.h"

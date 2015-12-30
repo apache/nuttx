@@ -44,7 +44,7 @@
 
 #include <nuttx/board.h>
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "ubw32.h"
 
 /****************************************************************************

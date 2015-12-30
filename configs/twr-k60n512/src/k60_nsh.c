@@ -51,7 +51,7 @@
 #  include <nuttx/mmcsd.h>
 #endif
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "twr-k60n512.h"
 
 /****************************************************************************

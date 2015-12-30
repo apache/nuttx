@@ -42,7 +42,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "teensy-3x.h"
 
 #ifndef CONFIG_ARCH_LEDS

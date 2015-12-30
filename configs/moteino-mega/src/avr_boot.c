@@ -46,7 +46,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "atmega_internal.h"
+#include "atmega.h"
 #include "moteino_mega.h"
 
 /************************************************************************************

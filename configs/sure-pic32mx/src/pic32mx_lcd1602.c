@@ -91,7 +91,7 @@
 #include "up_arch.h"
 #include "pic32mx-ioport.h"
 #include "pic32mx-int.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "sure-pic32mx.h"
 
 #ifdef CONFIG_LCD_LCD1602
