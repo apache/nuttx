@@ -534,7 +534,7 @@ LEDs
   - configs/lpcxpresso-lpc1115/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/lpcxpresso-lpc1115/src/lpcxpresso_internal.h - GPIO settings for the LEDs.
+  - configs/lpcxpresso-lpc1115/src/lpcxpresso-lpc1115.h - GPIO settings for the LEDs.
 
   - configs/lpcxpresso-lpc1115/src/up_leds.c - LED control logic.
 

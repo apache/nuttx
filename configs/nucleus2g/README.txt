@@ -278,7 +278,7 @@ LEDs
   - configs/nucleus2g/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/nucleus2g/src/nucleus2g_internal.h - GPIO settings for the LEDs.
+  - configs/nucleus2g/src/nucleus2g.h - GPIO settings for the LEDs.
 
   - configs/nucleus2g/src/up_leds.c - LED control logic.
 
