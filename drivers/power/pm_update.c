@@ -44,7 +44,7 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/wqueue.h>
 
-#include "pm"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
