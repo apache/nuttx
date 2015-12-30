@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at90usb/at90usb_internal.h
+ * arch/avr/src/at90usb/at90usb.h
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_ATMEGA_ATMEGA_INTERNAL_H
-#define __ARCH_AVR_SRC_ATMEGA_ATMEGA_INTERNAL_H
+#ifndef __ARCH_AVR_SRC_ATMEGA_ATMEGA_H
+#define __ARCH_AVR_SRC_ATMEGA_ATMEGA_H
 
 /****************************************************************************
  * Included Files
@@ -208,5 +208,5 @@ void gpio_irqdisable(int irq);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_AVR_SRC_ATMEGA_ATMEGA_INTERNAL_H */
+#endif /* __ARCH_AVR_SRC_ATMEGA_ATMEGA_H */
 

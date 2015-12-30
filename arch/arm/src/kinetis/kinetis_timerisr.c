@@ -52,7 +52,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 
 /****************************************************************************
  * Pre-processor Definitions

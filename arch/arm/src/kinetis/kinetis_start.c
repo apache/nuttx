@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_smc.h"
 #include "kinetis_userspace.h"
 

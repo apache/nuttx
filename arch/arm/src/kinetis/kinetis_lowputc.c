@@ -48,7 +48,7 @@
 #include "up_arch.h"
 
 #include "kinetis_config.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_uart.h"
 #include "kinetis_sim.h"
 #include "kinetis_pinmux.h"

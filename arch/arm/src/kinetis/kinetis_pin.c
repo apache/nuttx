@@ -49,7 +49,7 @@
 #include "up_internal.h"
 
 #include "kinetis_memorymap.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_port.h"
 #include "kinetis_gpio.h"
 

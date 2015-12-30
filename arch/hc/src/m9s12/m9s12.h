@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/m9s12/m9s12_internal.h
+ * arch/hc/src/m9s12/m9s12.h
  *
  *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_HC_SRC_M9S12_M9S12_INTERNAL_H
-#define __ARCH_HC_SRC_M9S12_M9S12_INTERNAL_H
+#ifndef __ARCH_HC_SRC_M9S12_M9S12_H
+#define __ARCH_HC_SRC_M9S12_M9S12_H
 
 /************************************************************************************
  * Included Files
@@ -357,4 +357,4 @@ uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_HC_SRC_M9S12_M9S12_INTERNAL_H */
+#endif /* __ARCH_HC_SRC_M9S12_M9S12_H */

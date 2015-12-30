@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/avr/avr_internal.h
+ * arch/avr/src/avr32/avr32.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H
-#define __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H
+#ifndef __ARCH_AVR_SRC_AVR32_AVR32_H
+#define __ARCH_AVR_SRC_AVR32_AVR32_H
 
 /****************************************************************************
  * Included Files
@@ -44,9 +44,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
-#  include <sys/types.h>
 #  include <stdint.h>
-#  include <stdbool.h>
 #endif
 
 /****************************************************************************
@@ -58,7 +56,7 @@
  * state from the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, (uint8_t*)current_regs)
+#define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
 #define up_restorestate(regs) (current_regs = regs)
 
 /****************************************************************************
@@ -74,14 +72,14 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-extern volatile uint8_t *current_regs;
+extern volatile uint32_t *current_regs;
 
 /* This is the beginning of heap as provided from up_head.S. This is the first
  * address in DRAM after the loaded program+bss+idle stack.  The end of the
  * heap is CONFIG_RAM_END
  */
 
-extern uint16_t g_idle_topstack;
+extern uint32_t g_idle_topstack;
 
 #endif /* __ASSEMBLY__ */
 
@@ -90,7 +88,7 @@ extern uint16_t g_idle_topstack;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -104,7 +102,7 @@ extern uint16_t g_idle_topstack;
  *
  ************************************************************************************/
 
-void up_copystate(uint8_t *dest, uint8_t *src);
+void up_copystate(uint32_t *dest, uint32_t *src);
 
 /************************************************************************************
  * Name:  up_fullcontextrestore
@@ -114,7 +112,7 @@ void up_copystate(uint8_t *dest, uint8_t *src);
  *
  ************************************************************************************/
 
-void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
+void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 
 /************************************************************************************
  * Name:  up_switchcontext
@@ -124,7 +122,7 @@ void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
  *
  ************************************************************************************/
 
-void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
+void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 /************************************************************************************
  * Name:  up_doirq
@@ -134,46 +132,8 @@ void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
  *
  ************************************************************************************/
 
-uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
-
-/************************************************************************************
- * Name:  avr_spiselect, avr_spitatus, and avr_spicmddata
- *
- * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common LPC17xx logic.  To use
- *   this common SPI logic on your board:
- *
- *   1. Provide logic in <arch>_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide avr_spiselect() and avr_spistatus() functions in your board-specific
- *      logic.  These functions will perform chip selection and status operations
- *      using GPIOs in the way your board is configured.
- *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide the
- *      avr_spicmddata() function in your board-specific logic.  This functions will
- *      perform cmd/data selection operations using GPIOs in the way your board is
- *      configured.
- *   3. Add a call to at90usb_spiinitialize() in your low level application
- *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
- *      for example, will bind the SPI driver to the SPI MMC/SD driver).
- *
- ************************************************************************************/
-
-struct spi_dev_s;
-enum spi_dev_e;
-
-#ifdef CONFIG_AVR_SPI
-void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-int avr_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
-#endif
-#endif
+uint32_t *up_doirq(int irq, uint32_t *regs);
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H */
+#endif  /* __ARCH_AVR_SRC_AVR32_AVR32_H */
 

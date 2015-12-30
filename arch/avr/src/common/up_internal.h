@@ -47,9 +47,9 @@
 #endif
 
 #ifdef CONFIG_ARCH_FAMILY_AVR32
-# include "avr32_internal.h"
+# include "avr32.h"
 #else
-# include "avr_internal.h"
+# include "avr.h"
 #endif
 
 /****************************************************************************

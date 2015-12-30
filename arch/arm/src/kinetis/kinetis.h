@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_internal.h
+ * arch/arm/src/kinetis/kinetis.h
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_INTERNAL_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_INTERNAL_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_H
 
 /************************************************************************************
  * Included Files
@@ -846,4 +846,4 @@ void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_INTERNAL_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_H */

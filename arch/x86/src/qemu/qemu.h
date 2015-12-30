@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/x86/src/qemu/qemu_internal.h
+ * arch/x86/src/qemu/qemu.h
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_X86_SRC_QEMU_QEMU_INTERNAL_H
-#define __ARCH_X86_SRC_QEMU_QEMU_INTERNAL_H
+#ifndef __ARCH_X86_SRC_QEMU_QEMU_H
+#define __ARCH_X86_SRC_QEMU_QEMU_H
 
 /************************************************************************************
  * Included Files
@@ -444,4 +444,4 @@ void vector_irq15(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_X86_SRC_QEMU_QEMU_INTERNAL_H */
+#endif /* __ARCH_X86_SRC_QEMU_QEMU_H */

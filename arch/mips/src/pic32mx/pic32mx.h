@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/pic32mx/pic32mx-internal.h
+ * arch/mips/src/pic32mx/pic32mx.h
  *
  *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_INTERNAL_H
-#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_INTERNAL_H
+#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_H
+#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_H
 
 /************************************************************************************
  * Included Files
@@ -622,4 +622,4 @@ void pic32mx_usbdetach(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_INTERNAL_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_H */

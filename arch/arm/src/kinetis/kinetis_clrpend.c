@@ -44,7 +44,7 @@
 
 #include "nvic.h"
 #include "up_arch.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 
 /****************************************************************************
  * Pre-processor Definitions

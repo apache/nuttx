@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc31xx/lpc31_internal.h
+ * arch/arm/src/lpc31xx/lpc31.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_INTERNAL_H
-#define __ARCH_ARM_SRC_LPC31XX_LPC31_INTERNAL_H
+#ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_H
+#define __ARCH_ARM_SRC_LPC31XX_LPC31_H
 
 /************************************************************************************
  * Included Files
@@ -353,4 +353,4 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_INTERNAL_H */
+#endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_H */
