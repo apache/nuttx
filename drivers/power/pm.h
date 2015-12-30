@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/power/pm_internal.h
+ * drivers/power/pm
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_POWER_PM_INTERNAL_H
-#define __DRIVERS_POWER_PM_INTERNAL_H
+#ifndef __DRIVERS_POWER_PM_H
+#define __DRIVERS_POWER_PM_H
 
 /****************************************************************************
  * Included Files
@@ -207,4 +207,4 @@ EXTERN void pm_update(int16_t accum);
 #endif
 
 #endif /* CONFIG_PM */
-#endif /* #define __DRIVERS_POWER_PM_INTERNAL_H */
+#endif /* #define __DRIVERS_POWER_PM_H */

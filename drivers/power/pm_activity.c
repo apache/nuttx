@@ -43,7 +43,7 @@
 #include <nuttx/clock.h>
 #include <arch/irq.h>
 
-#include "pm_internal.h"
+#include "pm"
 
 #ifdef CONFIG_PM
 
