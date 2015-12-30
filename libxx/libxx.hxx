@@ -1,5 +1,5 @@
 //***************************************************************************
-// lib/libxx.h
+// lib/libxx.hxx
 //
 //   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
 //
 //***************************************************************************
 
-#ifndef __LIBXX_LIBXX_INTERNAL_HXX
-#define __LIBXX_LIBXX_INTERNAL_HXX
+#ifndef __LIBXX_LIBXX_HXX
+#define __LIBXX_LIBXX__HXX
 
 //***************************************************************************
 // Included Files
@@ -85,4 +85,4 @@ extern "C" FAR void *__dso_handle;
 
 extern "C" int __cxa_atexit(__cxa_exitfunc_t func, void *arg, void *dso_handle);
 
-#endif // __LIBXX_LIBXX_INTERNAL_HXX
+#endif // __LIBXX_LIBXX_HXX
