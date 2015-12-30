@@ -50,7 +50,7 @@
 #include "up_arch.h"
 
 #include "pic32mx.h"
-#include "ubw-internal.h"
+#include "ubw32.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

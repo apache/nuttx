@@ -753,7 +753,7 @@ write only so the driver keeps a 128*64/8 = 1KB framebuffer to remember
 the display contents:
 
 Here is how I have the OLED connected.  But you can change this with the
-settings in include/board.h and src/stm324fdiscovery-internal.h.  Connector
+settings in include/board.h and src/stm324fdiscovery.h.  Connector
 pinout for the UG-2864AMBAG01 is specific to the theO.net display board
 that I am using:
 
