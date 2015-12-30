@@ -340,10 +340,17 @@ o Signals (sched/signal, arch/)
                embedded system.
 
   Title:       SIGEV_THREAD
-  Description: Implementation of support for support for SIGEV_THREAD is incomplete;
-               The internal OS functin sig_notification has not been implemented (and
-               will be tricky!).  There are also some unimplemented function call logic
-               in libc/aio
+  Description: Implementation of support for support for SIGEV_THREAD is available
+               only in the FLAT build mode because it uses the OS work queues to
+               perform the callback.  The alternative for the PROTECTED and KERNEL
+               builds would be to create pthreads in the user space to perform the
+               callbacks.  That is not a very attractive solution due to performance
+               issues.  It would also require some additional logic to specify the
+               TCB of the parent so that the pthread could be bound to the correct
+               group.
+
+               There is also some user-space logic in libc/aio/lio_listio.c.  That
+               logic could use the user-space work queue for the callbacks.
   Status:      Low, there are alternative designs.  However, these features
                are required by the POSIX standard.
   Priority:    Low for now
