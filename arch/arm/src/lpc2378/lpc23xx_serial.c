@@ -61,7 +61,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "internal.h"
+#include "lpc2378.h"
 #include "lpc23xx_scb.h"
 #include "lpc23xx_pinsel.h"
 #include "lpc23xx_uart.h"
