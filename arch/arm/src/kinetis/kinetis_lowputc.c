@@ -448,5 +448,3 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 }
 #endif
 
-
-
