@@ -778,11 +778,14 @@ endmenu # RTOS hooks
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
-	depends on EXPERIMENTAL
+	depends on BUILD_FLAT && SCHED_WORKQUEUE
 	---help---
 		Built in support for the SIGEV_THREAD signal deliver method.
 
-		NOTE: Only partially implemented as of this writing.
+		NOTE: The current implementation uses a work queue to notify the
+		client.  This, however, would only work in the FLAT build.  A
+		different mechanism would need to be development to support this
+		feature on the PROTECTED or KERNEL build.
 
 menu "Signal Numbers"
 	depends on !DISABLE_SIGNALS

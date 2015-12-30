@@ -432,6 +432,10 @@ int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 }
 #endif
 
+/********************************************************************************
+ * Minimal Type Definitions
+ ********************************************************************************/
+
 #else /* __INCLUDE_PTHREAD_H */
 
 #include <sys/types.h>

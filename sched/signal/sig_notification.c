@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/signal.h
+ * sched/signal/sig_notification.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SIGNAL_H
-#define __INCLUDE_NUTTX_SIGNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -44,11 +41,79 @@
 
 #include <sys/types.h>
 #include <signal.h>
+#include <assert.h>
+#include <errno.h>
 
-#if defined(CONFIG_SIG_EVTHREAD) && defined(CONFIG_BUILD_FLAT)
+#include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
+
+#ifdef CONFIG_SIG_EVTHREAD
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Use the low-prioriry work queue is it is available */
+
+#if defined(CONFIG_SCHED_LPWORK)
+#  define NTWORK LPWORK
+#elif defined(CONFIG_SCHED_HPWORK)
+#  define NTWORK HPWORK
+#else
+#  error Work queue is not enabled
+#endif
+
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+/* This structure retains all that is necessary to perform the notification */
+
+struct sig_notify_s
+{
+  struct work_s nt_work;           /* Work queue structure */
+  union sigval nt_value;           /* Data passed with notification */
+  sigev_notify_function_t nt_func; /* Notification function */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sig_ntworker
+ *
+ * Description:
+ *   Perform the callback from the context of the worker thread.
+ *
+ * Input Parameters:
+ *   arg - Work argument.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void sig_ntworker(FAR void *arg)
+{
+  FAR struct sig_notify_s *notify = (FAR struct sig_notify_s *)arg;
+
+  DEBUGASSERT(notify != NULL);
+
+  /* Perform the callback */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  notify->nt_func(notify->nt_value);
+#else
+  notify->nt_func(notify->nt_value.sival_ptr);
+#endif
+
+  /* Free the alloated notification parameters */
+
+  kmm_free(notify);
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,7 +135,38 @@
  *
  ****************************************************************************/
 
-int sig_notification(pid_t pid, FAR struct sigevent *event);
+int sig_notification(pid_t pid, FAR struct sigevent *event)
+{
+  FAR struct sig_notify_s *notify;
+  DEBUGASSERT(event != NULL && event->sigev_notify_function != NULL);
+  int ret;
 
-#endif /* CONFIG_SIG_EVTHREAD && CONFIG_BUILD_FLAT */
-#endif /* __INCLUDE_NUTTX_SIGNAL_H */
+  /* Allocate a structure to hold the notification information */
+
+  notify = kmm_zalloc(sizeof(struct sig_notify_s));
+  if (notify == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  /* Initialize the notification information */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  notify->nt_value = event->sigev_value;
+#else
+  notify->nt_value.sival_ptr = event->sigev_value.sival_ptr;
+#endif
+  notify->nt_func = event->sigev_notify_function;
+
+  /* Then queue the work */
+
+  ret = work_queue(NTWORK, &notify->nt_work, sig_ntworker, notify, 0);
+  if (ret < 0)
+    {
+      kmm_free(notify);
+    }
+
+  return ret;
+}
+
+#endif /* CONFIG_SIG_EVTHREAD */

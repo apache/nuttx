@@ -210,6 +210,12 @@ union sigval
  * available on a queue
  */
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
+typedef CODE void (*sigev_notify_function_t)(union sigval value);
+#else
+typedef CODE void (*sigev_notify_function_t)(FAR void *sival_ptr);
+#endif
+
 struct sigevent
 {
   uint8_t      sigev_notify; /* Notification method: SIGEV_SIGNAL, SIGEV_NONE, or SIGEV_THREAD */
@@ -217,8 +223,8 @@ struct sigevent
   union sigval sigev_value;  /* Data passed with notification */
 
 #ifdef CONFIG_SIG_EVTHREAD
-  CODE void         (*sigev_notify_function)(union sigval); /* Notification function */
-  FAR pthread_attr_t *sigev_notify_attributes;              /* Notification attributes (not used) */
+  sigev_notify_function_t sigev_notify_function; /* Notification function */
+  FAR pthread_attr_t *sigev_notify_attributes;   /* Notification attributes (not used) */
 #endif
 };
 
@@ -265,10 +271,6 @@ struct sigaction
 #define sa_sigaction sa_u._sa_sigaction
 
 /********************************************************************************
- * Public Data
- ********************************************************************************/
-
-/********************************************************************************
  * Public Function Prototypes
  ********************************************************************************/
 
@@ -309,6 +311,10 @@ int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #ifdef __cplusplus
 }
 #endif
+
+/********************************************************************************
+ * Minimal Type Definitions
+ ********************************************************************************/
 
 #else /* __INCLUDE_SIGNAL_H */
 
