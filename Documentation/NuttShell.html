@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: December 13, 2015</p>
+      <p>Last Updated: December 31, 2015</p>
     </td>
   </tr>
 </table>
@@ -85,7 +85,7 @@
   <td>
     <a href="#commands">2.0 Commands</a>.
   </td>
-</tr>>
+</tr>
 <tr>
   <td><br></td>
   <td>
@@ -407,49 +407,55 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.54 Unmount a File System (umount)</a>
+    <a href="#cmdtime">2.54 Time execution of another command (time)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.55 Print system information (uname)</a>
+    <a href="#cmdunmount">2.55 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.56 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.56 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.57 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.57 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.58 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.58 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.59 Wait for Microseconds (usleep)</a>
+    <a href="#cmdurlencode">2.59 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.60 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.60 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.61 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.61 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.62 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -1369,15 +1375,15 @@ df [-h]
     As an example:
 </p>
 <ul><pre>
-nsh> mount
+nsh&gt; mount
   /etc type romfs
   /tmp type vfat
-nsh> df
+nsh&gt; df
   Block  Number
   Size   Blocks     Used Available Mounted on
     64        6        6         0 /etc
    512      985        2       983 /tmp
-nsh>
+nsh&gt;
 </pre></ul>
 <p>
   If <code>CONFIG_NSH_CMDOPT_DF_H</code> is defined in the NuttX configuration, then the <code>df</code> will also support an option <code>-h</code> which may be used to show the volume information in <i>human readable</i> format.
@@ -1715,27 +1721,27 @@ insmod &lt;file-path&gt; &lt;module-name&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> ls -l /mnt/romfs
+nsh&gt; ls -l /mnt/romfs
 /mnt/romfs:
  dr-xr-xr-x       0 .
  -r-xr-xr-x    9153 chardev
-nsh> ls -l /dev
+nsh&gt; ls -l /dev
 /dev:
  crw-rw-rw-       0 console
  crw-rw-rw-       0 null
  brw-rw-rw-       0 ram0
  crw-rw-rw-       0 ttyS0
-nsh> lsmod
+nsh&gt; lsmod
 NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
-nsh> insmod /mnt/romfs/chardev mydriver
-nsh> ls -l /dev
+nsh&gt; insmod /mnt/romfs/chardev mydriver
+nsh&gt; ls -l /dev
 /dev:
  crw-rw-rw-       0 chardev
  crw-rw-rw-       0 console
  crw-rw-rw-       0 null
  brw-rw-rw-       0 ram0
  crw-rw-rw-       0 ttyS0
-nsh> lsmod
+nsh&gt; lsmod
 NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
 mydriver         20404659 20404625        0 20404580      552 204047a8        0
 </pre></ul>
@@ -1901,7 +1907,7 @@ lsmod
 </ul>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> lsmod
+nsh&gt; lsmod
 NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
 mydriver         20404659 20404625        0 20404580      552 204047a8        0
 </pre></ul>
@@ -2038,12 +2044,12 @@ mkdir &lt;path&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> mkdir /mnt/fs/tmp
-nsh> ls -l /mnt/fs
+nsh&gt; mkdir /mnt/fs/tmp
+nsh&gt; ls -l /mnt/fs
 /mnt/fs:
  drw-rw-rw-       0 TESTDIR/
  drw-rw-rw-       0 TMP/
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -2093,20 +2099,20 @@ mkfifo &lt;path&gt;
 </p>
 <p><b>Example</b></p>
 <ul><pre>
-nsh> ls -l /dev
+nsh&gt; ls -l /dev
 /dev:
  crw-rw-rw-       0 console
  crw-rw-rw-       0 null
  brw-rw-rw-       0 ram0
-nsh> mkfifo /dev/fifo
-nsh> ls -l /dev
+nsh&gt; mkfifo /dev/fifo
+nsh&gt; ls -l /dev
 ls -l /dev
 /dev:
  crw-rw-rw-       0 console
  crw-rw-rw-       0 fifo
  crw-rw-rw-       0 null
  brw-rw-rw-       0 ram0
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -2211,29 +2217,29 @@ mount -t &lt;fstype&gt; [-o &lt;options&gt;] &lt;block-device&gt; <code>&lt;dir-
 <p><b>Examples</b>:</p>
 <p>Using <code>mount</code> to mount a file system:</p>
 <ul><pre>
-nsh> ls -l /dev
+nsh&gt; ls -l /dev
 /dev:
  crw-rw-rw-       0 console
  crw-rw-rw-       0 null
  brw-rw-rw-       0 ram0
-nsh> ls /mnt
+nsh&gt; ls /mnt
 nsh: ls: no such directory: /mnt
-nsh> mount -t vfat /dev/ram0 /mnt/fs
-nsh> ls -l /mnt/fs/testdir
+nsh&gt; mount -t vfat /dev/ram0 /mnt/fs
+nsh&gt; ls -l /mnt/fs/testdir
 /mnt/fs/testdir:
  -rw-rw-rw-      15 TESTFILE.TXT
-nsh> echo "This is a test" >/mnt/fs/testdir/example.txt
-nsh> ls -l /mnt/fs/testdir
+nsh&gt; echo "This is a test" >/mnt/fs/testdir/example.txt
+nsh&gt; ls -l /mnt/fs/testdir
 /mnt/fs/testdir:
 -rw-rw-rw-      15 TESTFILE.TXT
  -rw-rw-rw-      16 EXAMPLE.TXT
-nsh> cat /mnt/fs/testdir/example.txt
+nsh&gt; cat /mnt/fs/testdir/example.txt
 This is a test
-nsh>
+nsh&gt;
 </pre></ul>
 <p>Using <code>mount</code> to enumerate mounts:</p>
 <ul><pre>
-nsh> mount
+nsh&gt; mount
   /etc type romfs
   /mnt/fs type vfat
   /tmp type vfat
@@ -2462,15 +2468,15 @@ rm &lt;file-path&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> ls /mnt/fs/testdir
+nsh&gt; ls /mnt/fs/testdir
 /mnt/fs/testdir:
  TESTFILE.TXT
  EXAMPLE.TXT
-nsh> rm /mnt/fs/testdir/example.txt
-nsh> ls /mnt/fs/testdir
+nsh&gt; rm /mnt/fs/testdir/example.txt
+nsh&gt; ls /mnt/fs/testdir
 /mnt/fs/testdir:
  TESTFILE.TXT
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -2496,16 +2502,16 @@ rmdir &lt;dir-path&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> mkdir /mnt/fs/tmp
-nsh> ls -l /mnt/fs
+nsh&gt; mkdir /mnt/fs/tmp
+nsh&gt; ls -l /mnt/fs
 /mnt/fs:
  drw-rw-rw-       0 TESTDIR/
  drw-rw-rw-       0 TMP/
-nsh> rmdir /mnt/fs/tmp
-nsh> ls -l /mnt/fs
+nsh&gt; rmdir /mnt/fs/tmp
+nsh&gt; ls -l /mnt/fs
 /mnt/fs:
  drw-rw-rw-       0 TESTDIR/
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -2527,13 +2533,13 @@ rmmod &lt;module-name&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> lsmod
+nsh&gt; lsmod
 NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
 mydriver         20404659 20404625        0 20404580      552 204047a8        0
-nsh> rmmod mydriver
-nsh> lsmod
+nsh&gt; rmmod mydriver
+nsh&gt; lsmod
 NAME                 INIT   UNINIT      ARG     TEXT     SIZE     DATA     SIZE
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -2622,7 +2628,58 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.54 Unmount a File System (umount)</h2></a>
+    <a name="cmdtime"><h2>2.54 Time execution of another command (time)</h2></a>
+  </td>
+</tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+time &quot;&lt;command&gt;&quot;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Perform command timing.
+  This command will execute the following &lt;command&gt; string and then show how much time was required to execute the command.
+  Time is shown with a resolution of 100 microseconds which may be beyond the resolution of many configurations.
+  Note that the &lt;command&gt; string must be enclosed in quotation marks.
+</p>
+<p><b>Example:</b></p>
+<ul><pre>
+nsh&gt; time "sleep 2"
+
+2.0001 sec
+nsh&gt;
+</pre></ul>
+<p>
+  The addition 100 microseconds in this example is the additional overhead of the time command execution itself which is included in the total.
+  Timing quantization errors could also result in small errors in the measurement.
+</p>
+<p>
+  Notice that:
+</p>
+<ul><pre>
+nsh&gt; time "sleep 2 &"
+sleep [3:100]
+
+0.0000 sec
+nsh&gt;
+</pre></ul>
+<p>
+  Since the sleep command is executed in background, the sleep command completes almost immediately.
+  As opposed to the following where the time command is run in background with the sleep command:
+</p>
+<ul><pre>
+nsh&gt; time "sleep 2" &
+time [3:100]
+nsh&gt;
+2.0001 sec
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdunmount"><h2>2.55 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2639,20 +2696,20 @@ umount &lt;dir-path&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> ls /mnt/fs
+nsh&gt; ls /mnt/fs
 /mnt/fs:
  TESTDIR/
-nsh> umount /mnt/fs
-nsh> ls /mnt/fs
+nsh&gt; umount /mnt/fs
+nsh&gt; ls /mnt/fs
 /mnt/fs:
 nsh: ls: no such directory: /mnt/fs
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.55 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.56 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -2719,7 +2776,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.56 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.57 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2745,7 +2802,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.57 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.58 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2762,7 +2819,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.58 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.59 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2779,7 +2836,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.59 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.60 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2796,7 +2853,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget"><h2>2.60 Get File Via HTTP (wget)</h2></a>
+    <a name="cmdwget"><h2>2.61 Get File Via HTTP (wget)</h2></a>
   </td>
   </tr>
 </table>
@@ -2823,7 +2880,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.61 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.62 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2838,13 +2895,13 @@ xd &lt;hex-address&gt; &lt;byte-count&gt;
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
-nsh> xd 410e0 512
+nsh&gt; xd 410e0 512
 Hex dump:
 0000: 00 00 00 00 9c 9d 03 00 00 00 00 01 11 01 10 06 ................
 0010: 12 01 11 01 25 08 13 0b 03 08 1b 08 00 00 02 24 ....%..........$
 ...
 01f0: 08 3a 0b 3b 0b 49 13 00 00 04 13 01 01 13 03 08 .:.;.I..........
-nsh>
+nsh&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -3168,6 +3225,11 @@ nsh>
     <td><b><code>test</code></b></td>
     <td>!<code>CONFIG_NSH_DISABLESCRIPT</code></td>
     <td><code>CONFIG_NSH_DISABLE_TEST</code></td>
+  </tr>
+  <tr>
+    <td><b><code>time</code></b></td>
+    <td>&nbsp</td>
+    <td><code>CONFIG_NSH_DISABLE_TIME</code></td>
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
@@ -4726,11 +4788,12 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custinit">Start-up script</a></li>
   <li><a href="#custapps">Synchronous built-in applications</a></li>
   <li><a href="#cmdtest"><code>test</code></a></li>
-  <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
+  <li><a href="#cmdtime"><code>time</code></a></li>
   <li><a href="#cmdunmount"><code>umount</code></a></li>
   <li><a href="#cmduname"><code>uname</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
   <li><a href="#looping"><code>until</code></a></li>
+  <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
   <li><a href="#custinit"><code>up_nsh.c</code></a></li>
   <li><a href="#cmdurldec"><code>urldecode</code></a></li>
   <li><a href="#cmdurlencode"><code>urlencode</code></a></li>
