@@ -45,8 +45,9 @@
 
 #include <stdint.h>
 #include <time.h>
+
 #ifdef CONFIG_SIG_EVTHREAD
-#  include <pthread.h>  /* Needed for pthread_attr_t */
+#  include <pthread.h>  /* Needed for pthread_attr_t, includes this file */
 #endif
 
 /********************************************************************************
@@ -320,8 +321,8 @@ int sigqueue(int pid, int signo, FAR void *sival_ptr);
 
 #include <stdint.h>
 
-/* Avoid a circular dependencies by assuring that simple type definitions
- * are avaiable in any inclusion ordering.
+/* Avoid circular dependencies by assuring that simple type definitions are
+ * available in any inclusion ordering.
  */
 
 #ifndef __SIGSET_T_DEFINED

@@ -50,7 +50,7 @@
 #include <stdbool.h>        /* C99 boolean types */
 #include <unistd.h>         /* For getpid */
 #include <semaphore.h>      /* Needed for sem_t */
-#include <signal.h>         /* Needed for sigset_t */
+#include <signal.h>         /* Needed for sigset_t, includes this file */
 #include <time.h>           /* Needed for struct timespec */
 
 /********************************************************************************
@@ -441,8 +441,8 @@ int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 #include <sys/types.h>
 #include <stdbool.h>
 
-/* Avoid a circular dependencies by assuring that simple type definitions
- * are avaiable in any inclusion ordering.
+/* Avoid circular dependencies by assuring that simple type definitions are
+ * available in any inclusion ordering.
  */
 
 #ifndef __PTHREAD_KEY_T_DEFINED
