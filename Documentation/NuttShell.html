@@ -2648,12 +2648,12 @@ time &quot;&lt;command&gt;&quot;
 <ul><pre>
 nsh&gt; time "sleep 2"
 
-2.0001 sec
+2.0100 sec
 nsh&gt;
 </pre></ul>
 <p>
-  The addition 100 microseconds in this example is the additional overhead of the time command execution itself which is included in the total.
-  Timing quantization errors could also result in small errors in the measurement.
+  The additional 10 millseconds in this example is due primarily to the quantization error in the timing (this setup used a 10 millisecond periodic system timer).
+  Other sources of error could include the additional overhead of the time command execution itself which is included in the total.
 </p>
 <p>
   Notice that:
@@ -2673,7 +2673,7 @@ nsh&gt;
 nsh&gt; time "sleep 2" &
 time [3:100]
 nsh&gt;
-2.0001 sec
+2.0100 sec
 </pre></ul>
 
 <table width ="100%">
