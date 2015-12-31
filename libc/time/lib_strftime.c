@@ -70,7 +70,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 static const char * const g_abbrev_wdayname[7] =
 {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
