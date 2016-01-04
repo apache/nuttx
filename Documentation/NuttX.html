@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 5, 2015</p>
+      <p>Last Updated: January 4, 2016</p>
     </td>
   </tr>
 </table>
@@ -1386,6 +1386,7 @@
       <li><a href="#armv4">Other ARMv4</a> (1)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (3)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
+      <li><a href="#armcortexr4">ARM Cortex-R4</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (34)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (24)</li>
@@ -1580,6 +1581,7 @@
       <li><a href="#titm4c1294">TI/Tiva TM4C1294</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#titm4c129x">TI/Tiva TM4C129X</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#ticc3200launchpad">TI/Tiva CC3200 Launchpad</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#tms570ls04x">TI TMS570LS04xx</a> <small>(ARM Cortex-R4)</small></li>
     </ul>
   </li>
   <li>ZiLOG
@@ -2205,6 +2207,34 @@
           There is, at present, no work in progress to extend this port, however.
         </p>
       </li>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="armcortexr4"><b>ARM Cortex-R4</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="tms570ls04x"><b>TI TMS570LS04xx</b>.</a>
+      A port is underway for the Texas Instruments Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (<i>LAUNCHXL-TMS57004</i>) featuring the Hercules TMS570LS0432PZ chip.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS</b>.
+        This is currently in progress but the effort is stalled due to tool-related issues.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/launchxl-tms57004/README.txt" target="_blank">README</a> file for further information.
+      </p>
+      <p>
+        <b>Toolchain:</b>
+        The TMS570 is a big-endian ARM platform and requires a big-endian ARM toolchain.
+        All testing has been performed using a big-endian NuttX buildroot toolchain.
+        Instructions for building this toolchain are included in the board <a href="https://bitbucket.org/nuttx/boards/src/master/launchxl-tms57004/README.txt" target="_blank">README</a> file.
+      </p>
     </ul>
   </td>
 </tr>
