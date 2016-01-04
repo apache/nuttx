@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3/at32uc3_internal.h
+ * arch/avr/src/at32uc3/at32uc3.h
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_INTERNAL_H
-#define __ARCH_AVR_SRC_AT32UC3_AT32UC3_INTERNAL_H
+#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_H
+#define __ARCH_AVR_SRC_AT32UC3_AT32UC3_H
 
 /****************************************************************************
  * Included Files
@@ -341,5 +341,5 @@ void gpio_irqdisable(int irq);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_INTERNAL_H */
+#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_H */
 

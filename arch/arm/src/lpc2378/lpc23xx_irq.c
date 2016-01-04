@@ -53,7 +53,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "internal.h"
+#include "lpc2378.h"
 #include "lpc23xx_vic.h"
 
 /****************************************************************************

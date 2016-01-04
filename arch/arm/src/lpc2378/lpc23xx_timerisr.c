@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "clock/clock.h"
-#include "internal.h"
+#include "lpc2378.h"
 #include "up_arch.h"
 
 #include "lpc23xx_scb.h"

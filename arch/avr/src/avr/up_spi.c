@@ -57,7 +57,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "avr_internal.h"
+#include "avr.h"
 
 #ifdef CONFIG_AVR_SPI
 

@@ -50,7 +50,7 @@
 #include "ram_vectors.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 
 /****************************************************************************
  * Pre-processor Definitions

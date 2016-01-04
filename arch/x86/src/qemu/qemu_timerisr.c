@@ -56,7 +56,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "qemu_internal.h"
+#include "qemu.h"
 
 /****************************************************************************
  * Pre-processor Definitions

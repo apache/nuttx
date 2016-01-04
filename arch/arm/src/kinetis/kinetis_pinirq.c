@@ -48,7 +48,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_port.h"
 
 #ifdef CONFIG_GPIO_IRQ

@@ -48,7 +48,7 @@
 #include "up_arch.h"
 
 #include "kinetis_config.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_uart.h"
 #include "kinetis_sim.h"
 #include "kinetis_pinmux.h"
@@ -447,6 +447,4 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 }
 #endif
-
-
 

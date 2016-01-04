@@ -51,7 +51,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "at32uc3_internal.h"
+#include "at32uc3.h"
 
 #include "chip.h"
 #include "at32uc3_intc.h"

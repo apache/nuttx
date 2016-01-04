@@ -45,7 +45,7 @@
 
 #include "at32uc3_config.h"
 #include "up_internal.h"
-#include "at32uc3_internal.h"
+#include "at32uc3.h"
 #include "at32uc3_pm.h"
 #include "at32uc3_flashc.h"
 

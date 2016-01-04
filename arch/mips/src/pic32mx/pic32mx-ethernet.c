@@ -71,7 +71,7 @@
 #include "up_arch.h"
 #include "pic32mx-config.h"
 #include "pic32mx-ethernet.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 
 /* Does this chip have and Ethernet controller? */
 

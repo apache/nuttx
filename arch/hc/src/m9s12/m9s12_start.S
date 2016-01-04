@@ -42,7 +42,7 @@
 
 #include <arch/board/board.h>
 
-#include "m9s12_internal.h"
+#include "m9s12.h"
 #include "m9s12_mmc.h"
 #include "m9s12_crg.h"
 #include "m9s12_flash.h"

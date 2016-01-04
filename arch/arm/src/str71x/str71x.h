@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/str71x/str71x_internal.h
+ * arch/arm/src/str71x/str71x.h
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STR71X_STR71X_INTERNAL_H
-#define __ARCH_ARM_SRC_STR71X_STR71X_INTERNAL_H
+#ifndef __ARCH_ARM_SRC_STR71X_STR71X_H
+#define __ARCH_ARM_SRC_STR71X_STR71X_H
 
 /************************************************************************************
  * Included Files
@@ -153,4 +153,4 @@ void str71x_disable_xtiirq(int irq);
 #  define str71x_disable_xtiirq(irq)
 #endif /* CONFIG_STR71X_XTI */
 
-#endif /* __ARCH_ARM_SRC_STR71X_STR71X_INTERNAL_H */
+#endif /* __ARCH_ARM_SRC_STR71X_STR71X_H */

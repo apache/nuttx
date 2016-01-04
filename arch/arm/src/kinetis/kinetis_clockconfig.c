@@ -44,7 +44,7 @@
 
 #include "up_arch.h"
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_mcg.h"
 #include "kinetis_sim.h"
 #include "kinetis_fmc.h"

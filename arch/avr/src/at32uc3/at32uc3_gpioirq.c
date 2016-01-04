@@ -51,7 +51,7 @@
 
 #include "up_arch.h"
 #include "irq/irq.h"
-#include "at32uc3_internal.h"
+#include "at32uc3.h"
 #include "at32uc3_gpio.h"
 
 #ifdef CONFIG_AVR32_GPIOIRQ
