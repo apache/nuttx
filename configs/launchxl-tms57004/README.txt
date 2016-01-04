@@ -21,8 +21,8 @@ Status
   2015-12-29:
   The basic port to the TMS570 is complete.  After a few debug attempts,
   I think I may have damaged my board or at least put it into a state where
-  I can use it:  The CPU NERROR LED illuminates and can't I re-program
-  the FLASH.
+  I can no longer use it:  The CPU NERROR LED illuminates and can't I re-
+  program the FLASH.
 
   I was never able to use Code Composer Studio or UniFlash with the board.
   But I was initially able to load FLASH and debug using a Segger J-Link
