@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/src/pcblogic-internal.h
+ * configs/pcblogic-pic32mx/src/pcblogic.h
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

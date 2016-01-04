@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "kwikstik-internal.h"
+#include "kwikstik-k40.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

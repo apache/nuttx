@@ -53,7 +53,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 #include "lpc17_dac.h"
 
 #ifdef CONFIG_DAC

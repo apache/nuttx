@@ -74,7 +74,7 @@
 #endif
 
 #include "stm32.h"
-#include "mikroe-stm32f4-internal.h"
+#include "mikroe-stm32f4.h"
 
 /****************************************************************************
  * Pre-processor Definitions

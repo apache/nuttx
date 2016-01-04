@@ -48,8 +48,8 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "kinetis_internal.h"
-#include "twrk60-internal.h"
+#include "kinetis.h"
+#include "twr-k60n512.h"
 
 /************************************************************************************
  * Pre-processor Definitions

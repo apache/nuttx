@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "mirtoo.h"
 
 #ifdef CONFIG_PIC32MX_ADC

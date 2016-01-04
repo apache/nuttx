@@ -48,7 +48,7 @@
 #include "chip.h"
 #include "up_internal.h"
 #include "tiva_gpio.h"
-#include "lm3s6432s2e_internal.h"
+#include "lm3s6432-s2e.h"
 
 /************************************************************************************
  * Pre-processor Definitions

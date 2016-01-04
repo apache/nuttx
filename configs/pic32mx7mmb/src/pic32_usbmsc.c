@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "pic32mx7mmb_internal.h"
+#include "pic32mx7mmb.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -50,8 +50,8 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "at32uc3_internal.h"
-#include "avr32dev1_internal.h"
+#include "at32uc3.h"
+#include "avr32dev1.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

@@ -88,7 +88,7 @@
 #include "up_arch.h"
 #include "pic32mx-pmp.h"
 #include "pic32mx-int.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "pcblogic-pic32mx.h"
 
 #ifdef CONFIG_LCD_LCD1602

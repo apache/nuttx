@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "maple-internal.h"
+#include "maple.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 

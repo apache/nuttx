@@ -54,7 +54,7 @@
 #include "up_arch.h"
 
 #include "lpc17_can.h"
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_LPC17_CAN1) || defined(CONFIG_LPC17_CAN2))
 

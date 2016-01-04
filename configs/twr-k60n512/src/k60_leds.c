@@ -43,8 +43,8 @@
 
 #include <nuttx/board.h>
 
-#include "kinetis_internal.h"
-#include "twrk60-internal.h"
+#include "kinetis.h"
+#include "twr-k60n512.h"
 
 /****************************************************************************
  * Pre-processor Definitions

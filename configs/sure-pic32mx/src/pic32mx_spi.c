@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "sure-pic32mx.h"
 
 #if defined(CONFIG_PIC32MX_SPI2)

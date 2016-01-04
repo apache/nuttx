@@ -48,8 +48,8 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "kinetis_internal.h"
-#include "kwikstik-internal.h"
+#include "kinetis.h"
+#include "kwikstik-k40.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -50,7 +50,7 @@
 #include <nuttx/input/ads7843e.h>
 
 #include "stm32.h"
-#include "hymini_stm32v-internal.h"
+#include "hymini-stm32v.h"
 
 /************************************************************************************
  * Pre-processor Defintiions

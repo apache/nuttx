@@ -51,7 +51,7 @@
 
 #include "chip.h"
 #include "up_arch.h"
-#include "mikroe-stm32f4-internal.h"
+#include "mikroe-stm32f4.h"
 
 #ifdef CONFIG_VS1053
 

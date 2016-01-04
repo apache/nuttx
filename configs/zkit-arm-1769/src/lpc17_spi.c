@@ -55,7 +55,7 @@
 #include "chip.h"
 #include "lpc17_spi.h"
 #include "lpc17_gpio.h"
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 
 #if defined(CONFIG_LPC17_SPI)
 

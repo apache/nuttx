@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "maple-internal.h"
+#include "maple.h"
 
 /************************************************************************************
  * Pre-processor Definitions

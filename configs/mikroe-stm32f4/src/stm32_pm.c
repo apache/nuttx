@@ -44,7 +44,7 @@
 
 #include "up_internal.h"
 #include "stm32_pm.h"
-#include "mikroe-stm32f4-internal.h"
+#include "mikroe-stm32f4.h"
 
 #ifdef CONFIG_PM
 

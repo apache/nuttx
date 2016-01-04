@@ -53,7 +53,7 @@
 #  include <nuttx/fs/nxffs.h>
 #endif
 
-#include "cloudctrl-internal.h"
+#include "cloudctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -54,7 +54,7 @@
 #include "up_arch.h"
 #include "lpc17_pwm.h"
 #include "lpc17_timer.h"
-#include "mbed_internal.h"
+#include "mbed.h"
 
 /************************************************************************************
  * Pre-processor Definitions

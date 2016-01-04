@@ -50,8 +50,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "pic32mx-internal.h"
-#include "ubw32-internal.h"
+#include "pic32mx.h"
+#include "ubw32.h"
 
 /****************************************************************************
  * Pre-processor Definitions

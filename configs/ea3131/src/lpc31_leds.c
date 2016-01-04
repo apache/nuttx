@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 
 /****************************************************************************
  * Pre-processor Definitions

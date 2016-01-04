@@ -47,7 +47,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "mbed_internal.h"
+#include "mbed.h"
 
 /************************************************************************************
  * Pre-processor Definitions

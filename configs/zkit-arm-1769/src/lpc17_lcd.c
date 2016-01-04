@@ -60,7 +60,7 @@
 
 #include "lpc17_gpio.h"
 #include "lpc17_ssp.h"
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 
 #ifdef CONFIG_NX_LCDDRIVER
 

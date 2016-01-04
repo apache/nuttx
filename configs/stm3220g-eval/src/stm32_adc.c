@@ -50,7 +50,7 @@
 #include "up_arch.h"
 
 #include "stm32_pwm.h"
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 #ifdef CONFIG_ADC
 

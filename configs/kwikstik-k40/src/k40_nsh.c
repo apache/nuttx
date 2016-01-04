@@ -51,8 +51,8 @@
 #  include <nuttx/mmcsd.h>
 #endif
 
-#include "kinetis_internal.h"
-#include "kwikstik-internal.h"
+#include "kinetis.h"
+#include "kwikstik-k40.h"
 
 /****************************************************************************
  * Pre-processor Definitions

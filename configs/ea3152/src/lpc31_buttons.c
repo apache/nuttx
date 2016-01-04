@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "ea3152_internal.h"
+#include "ea3152.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

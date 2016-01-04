@@ -56,7 +56,7 @@
 #include "stm32_rcc.h"
 #include "stm32_exti.h"
 
-#include "mikroe-stm32f4-internal.h"
+#include "mikroe-stm32f4.h"
 
 /****************************************************************************
  * Pre-processor Definitions

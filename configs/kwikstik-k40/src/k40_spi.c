@@ -48,8 +48,8 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "kinetis_internal.h"
-#include "kwikstik-internal.h"
+#include "kinetis.h"
+#include "kwikstik-k40.h"
 
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 

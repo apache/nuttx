@@ -54,7 +54,7 @@
 #include "up_internal.h"
 
 #include "lpc17_gpio.h"
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

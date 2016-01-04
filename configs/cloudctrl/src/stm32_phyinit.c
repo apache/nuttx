@@ -43,7 +43,7 @@
 #include "stm32_gpio.h"
 #include "stm32_eth.h"
 
-#include "cloudctrl-internal.h"
+#include "cloudctrl.h"
 
 /************************************************************************************
  * Pre-processor Definitions

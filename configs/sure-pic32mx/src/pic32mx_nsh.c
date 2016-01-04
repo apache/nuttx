@@ -55,7 +55,7 @@
 #  include <apps/usbmonitor.h>
 #endif
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "sure-pic32mx.h"
 
 /****************************************************************************

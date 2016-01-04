@@ -44,7 +44,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "mikroe-stm32f4-internal.h"
+#include "mikroe-stm32f4.h"
 
 /************************************************************************************
  * Pre-processor Definitions

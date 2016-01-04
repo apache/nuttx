@@ -61,7 +61,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm3220g-internal.h"
+#include "stm3220g-eval.h"
 
 #if !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9325_DISABLE)
 

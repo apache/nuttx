@@ -52,7 +52,7 @@
 #  include <nuttx/fs/nxffs.h>
 #endif
 
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 /****************************************************************************
  * Pre-processor Definitions

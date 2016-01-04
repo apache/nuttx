@@ -305,7 +305,7 @@ LEDs
   - configs/zkit-arm-1769/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/zkit-arm-1769/src/zkitarm_internal.h - GPIO settings for the LEDs.
+  - configs/zkit-arm-1769/src/zkit-arm-1769.h - GPIO settings for the LEDs.
 
   - configs/zkit-arm-1769/src/up_leds.c - LED control logic.
 

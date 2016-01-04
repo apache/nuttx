@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_OLIMEX_STM32_H405_SRC_INTERNAL_H
-#define __CONFIGS_OLIMEX_STM32_H405_SRC_INTERNAL_H
+#ifndef __CONFIGS_OLIMEX_STM32_H405_SRC_H
+#define __CONFIGS_OLIMEX_STM32_H405_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -113,4 +113,4 @@ int stm32_can_initialize(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __CONFIGS_OLIMEX_STM32_H405_SRC_INTERNAL_H */
+#endif /* __CONFIGS_OLIMEX_STM32_H405_SRC_H */

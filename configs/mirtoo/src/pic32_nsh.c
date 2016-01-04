@@ -54,7 +54,7 @@
 #  include <nuttx/fs/nxffs.h>
 #endif
 
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 
 /****************************************************************************
  * Pre-processor Definitions

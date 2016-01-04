@@ -54,7 +54,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "lpc17_spi.h"
-#include "zkitarm_internal.h"
+#include "zkit-arm-1769.h"
 
 /****************************************************************************
  * Pre-processor Definitions

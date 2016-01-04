@@ -364,7 +364,7 @@ LEDs
   - configs/olimex-lpc1766stk/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/olimex-lpc1766stk/src/lpc1766stk_internal.h - GPIO settings for the LEDs.
+  - configs/olimex-lpc1766stk/src/lpc1766stk.h - GPIO settings for the LEDs.
 
   - configs/olimex-lpc1766stk/src/up_leds.c - LED control logic.
 

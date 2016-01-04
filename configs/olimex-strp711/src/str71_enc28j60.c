@@ -93,7 +93,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "str71x_internal.h"
+#include "str71x.h"
 
 #ifdef CONFIG_ENC28J60
 

@@ -56,7 +56,7 @@
 #include "lpc31_syscreg.h"
 #include "lpc31_cgudrvr.h"
 #include "lpc31_mpmc.h"
-#include "ea3131_internal.h"
+#include "ea3131.h"
 
 #ifdef CONFIG_LPC31_EXTDRAM
 

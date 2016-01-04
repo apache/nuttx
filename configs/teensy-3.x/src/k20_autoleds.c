@@ -43,7 +43,7 @@
 
 #include <nuttx/board.h>
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "teensy-3x.h"
 
 #ifdef CONFIG_ARCH_LEDS

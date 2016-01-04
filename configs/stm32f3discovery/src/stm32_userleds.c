@@ -47,7 +47,7 @@
 
 #include "chip.h"
 #include "stm32.h"
-#include "stm32f3discovery-internal.h"
+#include "stm32f3discovery.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

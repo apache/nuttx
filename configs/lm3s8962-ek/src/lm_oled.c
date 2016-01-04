@@ -49,7 +49,7 @@
 #include <nuttx/lcd/p14201.h>
 
 #include "tiva_gpio.h"
-#include "lm3s8962ek_internal.h"
+#include "lm3s8962-ek.h"
 
 /****************************************************************************
  * Pre-processor Definitions

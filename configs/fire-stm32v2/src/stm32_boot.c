@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 /************************************************************************************
  * Pre-processor Definitions

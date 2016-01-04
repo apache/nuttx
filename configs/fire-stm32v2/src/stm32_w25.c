@@ -52,7 +52,7 @@
 #  include <nuttx/fs/nxffs.h>
 #endif
 
-#include "fire-internal.h"
+#include "fire-stm32v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

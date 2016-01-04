@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm32_tiny-internal.h"
+#include "stm32_tiny.h"
 
 /************************************************************************************
  * Pre-processor Definitions

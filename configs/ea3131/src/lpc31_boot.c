@@ -46,8 +46,8 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lpc31_internal.h"
-#include "ea3131_internal.h"
+#include "lpc31.h"
+#include "ea3131.h"
 
 /************************************************************************************
  * Pre-processor Definitions

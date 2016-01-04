@@ -256,7 +256,7 @@ LEDs
 
 It is asumed that STMicro STM32F100RC generic board board has one LED on PA0.
 You should configure the port and pin number in
-configs/stm32vldiscovery/src/stm32f100rc_internal.h. This LED is not used by
+configs/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by
 the board port is defined in include/board.h and src/up_leds.c. The LED is used
 to encode OS-related events as follows:

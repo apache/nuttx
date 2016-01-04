@@ -45,7 +45,7 @@
 
 #include <nuttx/board.h>
 
-#include "ne64badge_internal.h"
+#include "ne64badge.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -44,7 +44,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "ne64badge_internal.h"
+#include "ne64badge.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

@@ -34,7 +34,7 @@ The only GPIO pin usage is for LEDs (2) and Buttons (2):
   PIN 24  PB2  KEY1
   PIN 25  PB3  KEY2
 
-(See configs/avr32dev/src/avr32dev_internal.h).  And also for
+(See configs/avr32dev1/src/avr32dev1.h).  And also for
 crystals (4), JTAG (1), and USB (1):
 
   PIN 30  PA11 XIN32

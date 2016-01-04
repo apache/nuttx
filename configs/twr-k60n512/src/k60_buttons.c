@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "twrk60-internal.h"
+#include "twr-k60n512.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

@@ -1,6 +1,6 @@
 /************************************************************************************
  * configs/vsn/src/vsn.h
- * arch/arm/src/board/vsn.n
+ * arch/arm/src/board/vsn.h
  *
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
  *
@@ -35,8 +35,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_VSN_SRC_VSN_INTERNAL_H
-#define __CONFIGS_VSN_SRC_VSN_INTERNAL_H
+#ifndef __CONFIGS_VSN_SRC_VSN_H
+#define __CONFIGS_VSN_SRC_VSN_H
 
 #include <nuttx/config.h>
 #include <arch/board/board.h>
@@ -216,5 +216,4 @@ extern void board_power_init(void);
 extern void sysclock_select_hsi(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VSN_SRC_VSN_INTERNAL_H */
-
+#endif /* __CONFIGS_VSN_SRC_VSN_H */

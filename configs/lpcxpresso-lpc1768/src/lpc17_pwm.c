@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "lpc17_pwm.h"
 #include "lpc17_timer.h"
-#include "lpcxpresso_internal.h"
+#include "lpcxpresso-lpc1768.h"
 
 /************************************************************************************
  * Pre-processor Definitions

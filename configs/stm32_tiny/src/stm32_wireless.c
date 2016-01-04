@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32_tiny-internal.h"
+#include "stm32_tiny.h"
 
 /************************************************************************************
  * Private Function Prototypes

@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "xplorer-internal.h"
+#include "lpc4330-xplorer.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -46,7 +46,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lm3s8962ek_internal.h"
+#include "lm3s8962-ek.h"
 
 /************************************************************************************
  * Pre-processor Definitions

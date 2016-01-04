@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "ea3131_internal.h"
+#include "ea3131.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

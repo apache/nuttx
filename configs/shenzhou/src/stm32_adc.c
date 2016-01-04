@@ -50,7 +50,7 @@
 #include "up_arch.h"
 
 #include "stm32_pwm.h"
-#include "shenzhou-internal.h"
+#include "shenzhou.h"
 
 #ifdef CONFIG_ADC
 

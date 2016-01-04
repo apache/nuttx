@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "eagle100_internal.h"
+#include "eagle100.h"
 
 /************************************************************************************
  * Pre-processor Definitions

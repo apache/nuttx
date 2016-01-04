@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "xplorer_internal.h"
+#include "lpc4330-xplorer.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

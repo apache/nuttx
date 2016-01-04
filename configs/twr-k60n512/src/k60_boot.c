@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "twrk60-internal.h"
+#include "twr-k60n512.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H
-#define _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H
+#ifndef _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H
+#define _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H
 
 /************************************************************************************
  * Included Files
@@ -261,5 +261,5 @@
 void weak_function lpc1766stk_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H */
+#endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H */
 

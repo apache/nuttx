@@ -1,6 +1,6 @@
 /****************************************************************************************************
- * configs/stm32ldiscovery/src/stm32ldiscover.h
- * arch/arm/src/board/stm32ldiscover.n
+ * configs/stm32ldiscovery/src/stm32ldiscovery.h
+ * arch/arm/src/board/stm32ldiscovery.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H
-#define __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H
+#ifndef __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H
+#define __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H
 
 /****************************************************************************************************
  * Included Files
@@ -244,5 +244,5 @@
 void weak_function stm32_spiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H */
+#endif /* __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H */
 

@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "xplorer_internal.h"
+#include "lpc4330-xplorer.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
