@@ -147,12 +147,17 @@
 # undef  CONFIG_PTR_IS_NOT_INT
 
 #elif defined(__AVR__)
-
+# if defined(CONFIG_AVR_HAS_MEMX_PTR)
   /* I-space access qualifiers needed by Harvard architecture */
 
-# if defined(CONFIG_AVR_HAS_MEMX_PTR)
 #  define IOBJ __flash
 #  define IPTR __memx
+
+# else
+/* No I-space access qualifiers */
+
+# define IOBJ
+# define IPTR
 # endif
 
 /* Select the small, 16-bit addressing model */
