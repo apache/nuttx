@@ -11284,4 +11284,7 @@
 	  example, 'const char' and 'const char*'.  For Atmel compiler these will
 	  become 'const __flash char' and 'const __memx char*'.  All printf()
 	  functions and syslog() functions are changed so that the qualifier is
-	  used with the format parameter.  From Dimitry Kloper.
+	  used with the format parameter.  From Dimitry Kloper (2016-01-05).
+	* drivers/net/tun.c:  Fix a compile time error in the TUN driver.  From
+	  Vladimir Komendantskiy (2016-01-05).
+
