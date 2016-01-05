@@ -136,11 +136,11 @@
 
 /* Select the small, 16-bit addressing model */
 
-# define  CONFIG_SMALL_MEMORY 1
+# define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define  CONFIG_LONG_IS_NOT_INT 1
+# define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size */
 
@@ -156,17 +156,17 @@
 # else
 /* No I-space access qualifiers */
 
-# define IOBJ
-# define IPTR
+#  define IOBJ
+#  define IPTR
 # endif
 
-/* Select the small, 16-bit addressing model */
+/* Select the small, 16-bit addressing model (for D-Space) */
 
-# define  CONFIG_SMALL_MEMORY 1
+# define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define  CONFIG_LONG_IS_NOT_INT 1
+# define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size */
 
@@ -186,7 +186,7 @@
 
 /* Select the small, 16-bit addressing model */
 
-# define  CONFIG_SMALL_MEMORY 1
+# define CONFIG_SMALL_MEMORY 1
 
 /* Normally, mc68hc1x code is compiled with the -mshort option
  * which results in a 16-bit integer.  If -mnoshort is defined
@@ -196,7 +196,7 @@
 # if __INT__ == 16
 /* int is 16-bits, long is 32-bits */
 
-#   define  CONFIG_LONG_IS_NOT_INT 1
+#   define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size (16-bits) */
 
@@ -208,7 +208,7 @@
 
 /* Pointers and int are NOT the same size */
 
-#   define  CONFIG_PTR_IS_NOT_INT 1
+#   define CONFIG_PTR_IS_NOT_INT 1
 # endif
 
 #else
