@@ -76,7 +76,7 @@
  * Public Functions
  ****************************************************************************/
 
-int vfprintf(FAR FILE *stream, FAR const char *fmt, va_list ap)
+int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
 {
   struct lib_stdoutstream_s stdoutstream;
   int  n = ERROR;

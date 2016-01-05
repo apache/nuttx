@@ -79,7 +79,7 @@
  * Name: fprintf
  ****************************************************************************/
 
-int fprintf(FAR FILE *stream, FAR const char *fmt, ...)
+int fprintf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int     n;

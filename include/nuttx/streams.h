@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/streams.h
  *
- *   Copyright (C) 2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -413,9 +413,10 @@ int lib_snoflush(FAR struct lib_sostream_s *this);
  *
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_outstream_s *obj, FAR const char *fmt, ...);
+int lib_sprintf(FAR struct lib_outstream_s *obj,
+                FAR const IPTR char *fmt, ...);
 int lib_vsprintf(FAR struct lib_outstream_s *obj,
-                 FAR const char *src, va_list ap);
+                 FAR const IPTR char *src, va_list ap);
 
 #undef EXTERN
 #if defined(__cplusplus)

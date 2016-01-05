@@ -80,7 +80,8 @@
  * Name: vsnprintf
  ****************************************************************************/
 
-int vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap)
+int vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *format,
+              va_list ap)
 {
   struct lib_memoutstream_s memoutstream;
   int     n;

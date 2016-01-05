@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
+static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 {
 #if defined(CONFIG_SYSLOG)
   struct lib_outstream_s stream;
@@ -190,7 +190,7 @@ static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
  *
  ****************************************************************************/
 
-int vsyslog(int priority, FAR const char *fmt, va_list ap)
+int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
   int ret = 0;
 
@@ -220,7 +220,7 @@ int vsyslog(int priority, FAR const char *fmt, va_list ap)
  *
  ****************************************************************************/
 
-int syslog(int priority, FAR const char *fmt, ...)
+int syslog(int priority, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int ret;

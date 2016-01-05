@@ -112,7 +112,7 @@
  *
  ****************************************************************************/
 
-int vasprintf(FAR char **ptr, FAR const char *fmt, va_list ap)
+int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
 {
   struct lib_outstream_s nulloutstream;
   struct lib_memoutstream_s memoutstream;

@@ -145,7 +145,8 @@ enum
 /* Pointer to ASCII conversion */
 
 #ifdef CONFIG_PTR_IS_NOT_INT
-static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags, FAR void *p);
+static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
+                   FAR void *p);
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static int  getsizesize(uint8_t fmt, uint8_t flags, FAR void *p)
 #endif /* CONFIG_NOPRINTF_FIELDWIDTH */
@@ -154,7 +155,8 @@ static int  getsizesize(uint8_t fmt, uint8_t flags, FAR void *p)
 /* Unsigned int to ASCII conversion */
 
 static void utodec(FAR struct lib_outstream_s *obj, unsigned int n);
-static void utohex(FAR struct lib_outstream_s *obj, unsigned int n, uint8_t a);
+static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
+                   uint8_t a);
 static void utooct(FAR struct lib_outstream_s *obj, unsigned int n);
 static void utobin(FAR struct lib_outstream_s *obj, unsigned int n);
 static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
@@ -169,7 +171,8 @@ static int  getusize(uint8_t fmt, uint8_t flags, unsigned int lln);
 
 #ifdef CONFIG_LONG_IS_NOT_INT
 static void lutodec(FAR struct lib_outstream_s *obj, unsigned long ln);
-static void lutohex(FAR struct lib_outstream_s *obj, unsigned long ln, uint8_t a);
+static void lutohex(FAR struct lib_outstream_s *obj, unsigned long ln,
+                    uint8_t a);
 static void lutooct(FAR struct lib_outstream_s *obj, unsigned long ln);
 static void lutobin(FAR struct lib_outstream_s *obj, unsigned long ln);
 static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
@@ -184,14 +187,16 @@ static int  getlusize(uint8_t fmt, FAR uint8_t flags, unsigned long ln);
 
 #if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
 static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long lln);
-static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long lln, uint8_t a);
+static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long lln,
+                     uint8_t a);
 static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long lln);
 static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long lln);
 static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
                        uint8_t flags, unsigned long long lln);
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln);
-static int  getllusize(uint8_t fmt, FAR uint8_t flags, FAR unsigned long long lln);
+static int  getllusize(uint8_t fmt, FAR uint8_t flags,
+                       FAR unsigned long long lln);
 #endif
 #endif
 
@@ -235,7 +240,8 @@ static const char g_nullstring[] = "(null)";
  ****************************************************************************/
 
 #ifdef CONFIG_PTR_IS_NOT_INT
-static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags, FAR void *p)
+static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
+                   FAR void *p)
 {
   union
   {
@@ -309,7 +315,8 @@ static void utodec(FAR struct lib_outstream_s *obj, unsigned int n)
  * Name: utohex
  ****************************************************************************/
 
-static void utohex(FAR struct lib_outstream_s *obj, unsigned int n, uint8_t a)
+static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
+                   uint8_t a)
 {
   bool    nonzero = false;
   uint8_t bits;
@@ -376,7 +383,8 @@ static void utobin(FAR struct lib_outstream_s *obj, unsigned int n)
  * Name: utoascii
  ****************************************************************************/
 
-static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt, uint8_t flags, unsigned int n)
+static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
+                     uint8_t flags, unsigned int n)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -577,7 +585,8 @@ static void lutodec(FAR struct lib_outstream_s *obj, unsigned long n)
  * Name: lutohex
  ****************************************************************************/
 
-static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n, uint8_t a)
+static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n,
+                    uint8_t a)
 {
   bool    nonzero = false;
   uint8_t bits;
@@ -644,7 +653,8 @@ static void lutobin(FAR struct lib_outstream_s *obj, unsigned long n)
  * Name: lutoascii
  ****************************************************************************/
 
-static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt, uint8_t flags, unsigned long ln)
+static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
+                      uint8_t flags, unsigned long ln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -827,7 +837,8 @@ static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long n)
  * Name: llutohex
  ****************************************************************************/
 
-static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n, uint8_t a)
+static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n,
+                     uint8_t a)
 {
   bool    nonzero = false;
   uint8_t bits;
@@ -894,7 +905,8 @@ static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long n)
  * Name: llutoascii
  ****************************************************************************/
 
-static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt, uint8_t flags, unsigned long long lln)
+static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
+                       uint8_t flags, unsigned long long lln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -1164,7 +1176,8 @@ static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * libc/stdio/lib_vsprintf
  ****************************************************************************/
 
-int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list ap)
+int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
+                 va_list ap)
 {
   FAR char        *ptmp;
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
@@ -1616,5 +1629,3 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list a
 
   return obj->nput;
 }
-
-

@@ -11263,4 +11263,25 @@
 	  struct sigevent.  This initial implementation will only work in the
 	  FLAT build.  See the top-level TODO file for additional details
 	  (2015-12-30).
-
+	* include/nuttx/compiler.h, include/nuttx/streams.h include/stdio.h
+	  include/syslog.h libc/stdio/, and libc/syslog: ntroduce support for
+	  Atmel toolchain in-flash strings.  Atmel toolchain AVR compiler
+	  provides a transparent in-flash object support using __flash and
+	  __memx symbols. The former indicates to compiler that this is a flash-
+	  based object.  The later used with pointer indicates that the referenced
+	  object may reside either in flash or in RAM. The compiler automatically
+	  makes 32-bit pointer with flag indicating whether referenced object is
+	  in flash or RAM and generates code to access either in run-time. Thus,
+	  any function that accepts __memx object can transparently work with RAM
+	  and flash objects.
+	  For platforms with a Harvard architecture and a very small RAM like AVR
+	  this allows to move all constant strings used in trace messages to flash
+	  in the instruction address space, releasing resources for other things.
+	  This change introduces IOBJ and IPTR type qualifiers.  The 'I' indicates
+	  that the object may lie in instruction space on a Harvard architecture
+	  machine. For platforms that do not have __flash and __memx or similar
+	  symbols IOBJ and IPTR are empty, making the types equivalent to, for
+	  example, 'const char' and 'const char*'.  For Atmel compiler these will
+	  become 'const __flash char' and 'const __memx char*'.  All printf()
+	  functions and syslog() functions are changed so that the qualifier is
+	  used with the format parameter.  From Dimitry Kloper.

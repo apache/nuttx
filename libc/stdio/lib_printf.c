@@ -86,7 +86,7 @@
  * Name: printf
  ****************************************************************************/
 
-int printf(FAR const char *fmt, ...)
+int printf(FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int     ret;

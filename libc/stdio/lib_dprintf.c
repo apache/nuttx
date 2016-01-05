@@ -47,7 +47,7 @@
  * Name: dprintf
  ****************************************************************************/
 
-int dprintf(int fd, FAR const char *fmt, ...)
+int dprintf(int fd, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int ret;
