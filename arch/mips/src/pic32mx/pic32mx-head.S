@@ -490,8 +490,8 @@ __start:
 _exception_handler:
 	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
-	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
-	la		t0, pic32mx_exception		/* Call pic32mx_exception(regs) */
+	USE_INTSTACK t0, t1, t2, t3		/* Switch to the interrupt stack */
+	la		t0, pic32mx_exception	/* Call pic32mx_exception(regs) */
 	jalr	ra, t0
 	nop
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
@@ -515,7 +515,7 @@ _exception_handler:
 _int_handler:
 	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
-	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
+	USE_INTSTACK t0, t1, t2, t3		/* Switch to the interrupt stack */
 	la		t0, pic32mx_decodeirq	/* Call pic32mx_decodeirq(regs) */
 	jalr	ra, t0
 	nop
@@ -541,7 +541,7 @@ _int_handler:
 _nmi_handler:
 	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
-	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
+	USE_INTSTACK t0, t1, t2, t3		/* Switch to the interrupt stack */
 	la		t0, pic32mx_donmi		/* Call up_donmi(regs) */
 	jalr	ra, t0
 	nop
