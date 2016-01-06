@@ -1,7 +1,7 @@
 #!/bin/bash
-# configs/amber/hello/setenv.sh
+# configs/arduino-mega2560/hello/setenv.sh
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ fi
 # toolchain under windows.  This is *not* the default install
 # location so you will probably have to edit this.  You will also have
 # to edit this if you install the Linux AVR toolchain as well
+# export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin"
 export TOOLCHAIN_BIN="/cygdrive/c/as-7/7.0/toolchain/avr8/avr8-gnu-toolchain/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
