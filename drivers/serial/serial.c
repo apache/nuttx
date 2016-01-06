@@ -900,7 +900,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               irqrestore(state);
 
-              *(int *)arg = count;
+              *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
             }
             break;
@@ -923,7 +923,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               irqrestore(state);
 
-              *(int *)arg = count;
+              *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
             }
             break;
