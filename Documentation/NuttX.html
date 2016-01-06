@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 4, 2016</p>
+      <p>Last Updated: January 6, 2016</p>
     </td>
   </tr>
 </table>
@@ -1394,7 +1394,7 @@
     </ul>
   <li>Atmel AVR
     <ul>
-      <li><a href="#atmelavr">Atmel 8-bit AVR</a> (4) </li>
+      <li><a href="#atmelavr">Atmel 8-bit AVR</a> (5) </li>
       <li><a href="#atmelavr32">Atmel AVR32</a> (1) </li>
     </ul>
   </li>
@@ -1455,6 +1455,7 @@
     <ul>
       <li><a href="#avratmega128">AVR ATMega128</a> <small>(8-bit AVR)</small></li>
       <li><a href="#avratmega1284p">AVR ATMega1284p</a> <small>(8-bit AVR)</small></li>
+      <li><a href="#avratmega2560">AVR ATMega2560</a> <small>(8-bit AVR)</small></li>
       <li><a href="#avrat90usbxxx">AVR AT90USB64x and AT90USB6128x</a> <small>(8-bit AVR)</small></li>
       <li><a href="#at32uc3bxxx">AVR32 AT32UC3BXXX</a> <small>(32-bit AVR32)</small></li>
       <li><a href="#at91samd20">Atmel SAMD20</a> <small>(ARM Cortex-M0+)</small></li>
@@ -4329,6 +4330,18 @@ Mem:         29232       5920      23312      23312
         <p>
          <b>STATUS:</b>
            The basic function port support the NuttShell (NSH) was contribute by Jedi Tek'Enum and first appeared in the NuttX 7.8 release.
+        </p>
+      </ul>
+    <p>
+      <a name="avratmega2560"><b>Arduino MEGA2560</b>.</a>
+      Extension of the AVR architecture to support the ATMega2560 and specifi support for the Arduion MEGA2560 board were contributed by Dimitry Kloper and first released in NuttX-7.14.
+    </p>
+      <ul>
+        <p>
+         <b>STATUS:</b>
+         The basic port was released in NuttX-7.14 including a simple &quot;Hello, World!&quot; and OS test configurations.
+         Extensive effort was made to the use the special capabilities of the Atmel Studio AVR compiler to retain strings in FLASH memory and so keep the SRAM memory usage to a minimum.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/arduino-mega2560/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
     </ul>
