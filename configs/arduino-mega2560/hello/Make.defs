@@ -1,5 +1,5 @@
 ############################################################################
-# configs/arduion-mega2560/hello/Make.defs
+# configs/arduino-mega2560/hello/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
