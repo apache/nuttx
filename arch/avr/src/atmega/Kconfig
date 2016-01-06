@@ -39,7 +39,7 @@ config AVR_USART1
 
 endmenu # ATMega Peripheral Selections
 
-menu "Low level UART driver options"
+menu "Low level USART driver options"
 	depends on AVR_USART0 || AVR_USART1
 
 config SERIAL_TERMIOS
