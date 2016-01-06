@@ -1,7 +1,7 @@
 /*******************************************************************************
- * configs/amber/hello/ld.script
+ * configs/arduino-memga2560/scripts/memx.ld
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,6 +129,7 @@ SECTIONS
 		*(.vectors)
 		*(.init)
 		*(.handlers)
+		*(.rodata.str1.*)
 		*(.progmem .progmem.*)                
 		*(.text)
 		*(.text.*)
