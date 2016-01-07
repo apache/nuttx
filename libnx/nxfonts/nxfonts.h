@@ -1,5 +1,5 @@
 /****************************************************************************
- * libnx/nxfonts/nxfonts_internal.h
+ * libnx/nxfonts/nxfonts.h
  *
  *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_INTERNAL_H
-#define __LIBNX_NXFONTS_NXFONTS_INTERNAL_H
+#ifndef __LIBNX_NXFONTS_NXFONTS_H
+#define __LIBNX_NXFONTS_NXFONTS_H
 
 /****************************************************************************
  * Included Files
@@ -85,4 +85,4 @@ EXTERN struct nx_font_s g_fonts;
 }
 #endif
 
-#endif /* __LIBNX_NXFONTS_NXFONTS_INTERNAL_H */
+#endif /* __LIBNX_NXFONTS_NXFONTS_H */

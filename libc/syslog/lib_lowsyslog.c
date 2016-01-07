@@ -93,7 +93,7 @@
  *
  ****************************************************************************/
 
-static inline int lowvsyslog_internal(FAR const char *fmt, va_list ap)
+static inline int lowvsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 {
   struct lib_outstream_s stream;
 
@@ -121,7 +121,7 @@ static inline int lowvsyslog_internal(FAR const char *fmt, va_list ap)
  *
  ****************************************************************************/
 
-int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
+int lowvsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
   int ret = 0;
 
@@ -154,7 +154,7 @@ int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
  *
  ****************************************************************************/
 
-int lowsyslog(int priority, FAR const char *fmt, ...)
+int lowsyslog(int priority, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int ret;

@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,7 +76,7 @@
  * sprintf
  ****************************************************************************/
 
-int sprintf (FAR char *buf, const char *fmt, ...)
+int sprintf (FAR char *buf, FAR const IPTR char *fmt, ...)
 {
   struct lib_memoutstream_s memoutstream;
   va_list ap;

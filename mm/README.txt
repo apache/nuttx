@@ -15,7 +15,7 @@ This directory contains the NuttX memory management logic.  This include:
        mm_memalign.c, mm_free.c
      o Less-Standard Interfaces: mm_zalloc.c, mm_mallinfo.c
      o Internal Implementation: mm_initialize.c mm_sem.c  mm_addfreechunk.c
-       mm_size2ndx.c mm_shrinkchunk.c, mm_internal.h
+       mm_size2ndx.c mm_shrinkchunk.c
      o Build and Configuration files: Kconfig, Makefile
 
    Memory Models:

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libnx/nxtk/nxtk_internal.h
+ * libnx/nxtk/nxtk.h
  *
  *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXTK_NXTK_INTERNAL_H
-#define __LIBNX_NXTK_NXTK_INTERNAL_H
+#ifndef __LIBNX_NXTK_NXTK_H
+#define __LIBNX_NXTK_NXTK_H
 
 /****************************************************************************
  * Included Files
@@ -222,4 +222,4 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
 }
 #endif
 
-#endif /* __LIBNX_NXTK_NXTK_INTERNAL_H */
+#endif /* __LIBNX_NXTK_NXTK_H */

@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,7 +76,8 @@
  * Name: lib_sprintf
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_outstream_s *obj, const char *fmt, ...)
+int lib_sprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *fmt,
+                ...)
 {
   va_list ap;
   int     n;

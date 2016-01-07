@@ -425,75 +425,54 @@ static void tun_receive(FAR struct tun_device_s *priv)
 
   /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4)
+  nllvdbg("IPv4 frame\n");
+  NETDEV_RXIPV4(&priv->dev);
+
+  /* Give the IPv4 packet to the network layer */
+
+  ipv4_input(&priv->dev);
+
+  /* If the above function invocation resulted in data that should be
+   * sent out on the network, the field  d_len will set to a value > 0.
+   */
+
+  if (priv->dev.d_len > 0)
     {
-      nllvdbg("IPv4 frame\n");
-      NETDEV_RXIPV4(&priv->dev);
-
-      /* Give the IPv4 packet to the network layer */
-
-      ipv4_input(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          priv->write_d_len = priv->dev.d_len;
-          tun_transmit(priv);
-        }
-      else
-        {
-          priv->write_d_len = 0;
-          tun_pollnotify(priv, POLLOUT);
-        }
+      priv->write_d_len = priv->dev.d_len;
+      tun_transmit(priv);
     }
   else
-#endif
-
-#if 0
-#ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      nllvdbg("Iv6 frame\n");
-      NETDEV_RXIPV6(&priv->dev);
+      priv->write_d_len = 0;
+      tun_pollnotify(priv, POLLOUT);
+    }
 
-      /* Give the IPv6 packet to the network layer */
+#elif defined(CONFIG_NET_IPv6)
+  nllvdbg("Iv6 frame\n");
+  NETDEV_RXIPV6(&priv->dev);
 
-      ipv6_input(&priv->dev);
+  /* Give the IPv6 packet to the network layer */
 
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
+  ipv6_input(&priv->dev);
 
-      if (priv->dev.d_len > 0)
-        {
-          /* Update the Ethernet header with the correct MAC address */
+  /* If the above function invocation resulted in data that should be
+   * sent out on the network, the field  d_len will set to a value > 0.
+   */
 
-#ifdef CONFIG_NET_IPv4
-          if (IFF_IS_IPv4(priv->dev.d_flags))
-            {
-              arp_out(&priv->dev);
-            }
-          else
-#endif
-#ifdef CONFIG_NET_IPv6
-            {
-              neighbor_out(&priv->dev);
-            }
-#endif
-
-          /* And send the packet */
-
-          tun_transmit(priv);
-        }
+  if (priv->dev.d_len > 0)
+    {
+      priv->write_d_len = priv->dev.d_len;
+      tun_transmit(priv);
     }
   else
-#endif
     {
-      NETDEV_RXDROPPED(&priv->dev);
+      priv->write_d_len = 0;
+      tun_pollnotify(priv, POLLOUT);
     }
+
+#else
+  NETDEV_RXDROPPED(&priv->dev);
 #endif
 }
 

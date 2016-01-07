@@ -42,7 +42,7 @@
 
 #include <stdlib.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #ifdef CONFIG_HAVE_LONG_LONG
 

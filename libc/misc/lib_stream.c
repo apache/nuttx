@@ -48,7 +48,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
       defined(__KERNEL__)

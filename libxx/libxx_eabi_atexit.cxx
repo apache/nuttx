@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <cstdlib>
 
-#include "libxx_internal.hxx"
+#include "libxx.hxx"
 
 //***************************************************************************
 // Pre-processor Definitions

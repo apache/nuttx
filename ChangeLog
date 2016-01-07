@@ -2741,7 +2741,7 @@
 	  the worker thread, disabling interrupts does not provide protected; Need to
 	  disable pre-emption.  (2) Fix handling of touch ID and (2) add some logic to
 	  prevent certain kinds of data overrun.
-	* include/nx/nxtk.h and graphics/nx/nxtk/nxtk_internal.h:  Move setting
+	* include/nx/nxtk.h and graphics/nx/nxtk/nxtk.h:  Move setting
 	  of configuration defaults from the internal header file to a place where
 	  other logic can use the defaults.
 	* graphics/nxtk/nxtk_events.c:  Fixed an important but in the logic that
@@ -4680,7 +4680,7 @@
 	* arch/arm/src/kl/kl_gpio.c and .h, configs/freedom-kl25z/src/freedom-kl25z.h,
 	  and configs/freedom-kl25z/src/kl_led.c:  Fixes LEDs on the Freedom KL25Z
 	  board (2013-5-6).
-	* arch/arm/src/kinetis/kinetis_pin.c and arch/arm/src/kinetis/kinetis_internal.h:
+	* arch/arm/src/kinetis/kinetis_pin.c and arch/arm/src/kinetis/kinetis.h:
 	  The Kinetis GPIO logic had some of the same issues as did the
 	  Kinetis L (2013-5-6).
 	* arch/arm/src/stm32/stm32_idle.c: Add an option to conditionally disable
@@ -11253,3 +11253,38 @@
 	  (2015-12-23).
 	* arch/arm/src/stm32:  Add timer input capture driver.  From Pierre-Noel
 	  Bouteville (2015-12-24).
+	* arch/avr:  Add support for the Atmega2560.  From Dimitry Kloper
+	  (2015-12-19).
+	* configs/arduino-mega2560: Add support for the Arduino-Mega2560.  From
+	  Dimitry Koper (2015-12-29).
+	* sched/signal, sched/mqueue, sched/timer, include/signal.h,
+	  include/nuttx/signal, fs/aio, libc/aio, and probably other
+	  directories:  Add support for the SIGEV_THREAD notification method in
+	  struct sigevent.  This initial implementation will only work in the
+	  FLAT build.  See the top-level TODO file for additional details
+	  (2015-12-30).
+	* include/nuttx/compiler.h, include/nuttx/streams.h include/stdio.h
+	  include/syslog.h libc/stdio/, and libc/syslog: ntroduce support for
+	  Atmel toolchain in-flash strings.  Atmel toolchain AVR compiler
+	  provides a transparent in-flash object support using __flash and
+	  __memx symbols. The former indicates to compiler that this is a flash-
+	  based object.  The later used with pointer indicates that the referenced
+	  object may reside either in flash or in RAM. The compiler automatically
+	  makes 32-bit pointer with flag indicating whether referenced object is
+	  in flash or RAM and generates code to access either in run-time. Thus,
+	  any function that accepts __memx object can transparently work with RAM
+	  and flash objects.
+	  For platforms with a Harvard architecture and a very small RAM like AVR
+	  this allows to move all constant strings used in trace messages to flash
+	  in the instruction address space, releasing resources for other things.
+	  This change introduces IOBJ and IPTR type qualifiers.  The 'I' indicates
+	  that the object may lie in instruction space on a Harvard architecture
+	  machine. For platforms that do not have __flash and __memx or similar
+	  symbols IOBJ and IPTR are empty, making the types equivalent to, for
+	  example, 'const char' and 'const char*'.  For Atmel compiler these will
+	  become 'const __flash char' and 'const __memx char*'.  All printf()
+	  functions and syslog() functions are changed so that the qualifier is
+	  used with the format parameter.  From Dimitry Kloper (2016-01-05).
+	* drivers/net/tun.c:  Fix a compile time error in the TUN driver.  From
+	  Vladimir Komendantskiy (2016-01-05).
+

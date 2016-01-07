@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <nuttx/nx/nxfonts.h>
 
-#include "nxfonts_internal.h"
+#include "nxfonts.h"
 
 /* Pick the fontset */
 

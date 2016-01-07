@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdlib/lib_checkbase.c
+ * include/nuttx/signal.h
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,83 +33,44 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_SIGNAL_H
+#define __INCLUDE_NUTTX_SIGNAL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <ctype.h>
+#include <sys/types.h>
+#include <signal.h>
 
-#include "libc.h"
+#if defined(CONFIG_SIG_EVTHREAD) && defined(CONFIG_BUILD_FLAT)
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lib_checkbase
+ * Name: sig_notification
  *
  * Description:
- *   This is part of the strol() family implementation.  This function checks
- *   the initial part of a string to see if it can determine the numeric
- *   base that is represented.
+ *   Notify a client a signal event via a function call.  This function is
+ *   an internal OS interface that implements the common logic for signal
+ *   event notification for the case of SIGEV_THREAD.
  *
- * Assumptions:
- *   *ptr points to the first, non-whitespace character in the string.
+ * Input Parameters:
+ *   pid - The task/thread ID a the client thread to be signaled.
+ *   event - The instance of struct sigevent that describes how to signal
+ *     the client.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-int lib_checkbase(int base, FAR const char **pptr)
-{
-   const char *ptr = *pptr;
+int sig_notification(pid_t pid, FAR struct sigevent *event);
 
-  /* Check for unspecified base */
-
-  if (!base)
-    {
-      /* Assume base 10 */
-
-      base = 10;
-
-      /* Check for leading '0' - that would signify octal or hex (or binary) */
-
-      if (*ptr == '0')
-        {
-          /* Assume octal */
-
-          base = 8;
-          ptr++;
-
-          /* Check for hexadecimal */
-
-          if ((*ptr == 'X' || *ptr == 'x') &&
-              lib_isbasedigit(ptr[1], 16, NULL))
-            {
-              base = 16;
-              ptr++;
-            }
-        }
-    }
-
-  /* If it a hexadecimal representation, than discard any leading "0X" or "0x" */
-
-  else if (base == 16)
-    {
-      if (ptr[0] == '0' && (ptr[1] == 'X' || ptr[1] == 'x'))
-        {
-          ptr += 2;
-        }
-    }
-
-  /* Return the updated pointer and base */
-
-  *pptr = ptr;
-  return base;
-}
-
+#endif /* CONFIG_SIG_EVTHREAD && CONFIG_BUILD_FLAT */
+#endif /* __INCLUDE_NUTTX_SIGNAL_H */

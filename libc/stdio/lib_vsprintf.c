@@ -41,7 +41,7 @@
 
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,7 +79,7 @@
  * Name: vsprintf
  ****************************************************************************/
 
-int vsprintf(FAR char *dest, const char *src, va_list ap)
+int vsprintf(FAR char *dest, FAR const IPTR char *src, va_list ap)
 {
   struct lib_memoutstream_s memoutstream;
 

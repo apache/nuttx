@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -167,8 +168,8 @@ void closelog(void);
  *
  ****************************************************************************/
 
-int syslog(int priority, FAR const char *format, ...);
-int vsyslog(int priority, FAR const char *src, va_list ap);
+int syslog(int priority, FAR const IPTR char *format, ...);
+int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 
 /****************************************************************************
  * Name: lowsyslog and lowvsyslog
@@ -198,8 +199,8 @@ int vsyslog(int priority, FAR const char *src, va_list ap);
 
 #ifdef CONFIG_ARCH_LOWPUTC
 
-int lowsyslog(int priority, FAR const char *format, ...);
-int lowvsyslog(int priority, FAR const char *format, va_list ap);
+int lowsyslog(int priority, FAR const IPTR char *format, ...);
+int lowvsyslog(int priority, FAR const IPTR char *format, va_list ap);
 
 #else
 

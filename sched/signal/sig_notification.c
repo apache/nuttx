@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxtk/nxtk_lower.c
+ * sched/signal/sig_notification.c
  *
- *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,56 +39,134 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxtk.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 
-#include "nxtk.h"
-
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_SIG_EVTHREAD
 
 /****************************************************************************
- * Private Types
+ * Pre-processor Definitions
  ****************************************************************************/
+/* Use the low-prioriry work queue is it is available */
+
+#if defined(CONFIG_SCHED_LPWORK)
+#  define NTWORK LPWORK
+#elif defined(CONFIG_SCHED_HPWORK)
+#  define NTWORK HPWORK
+#else
+#  error Work queue is not enabled
+#endif
 
 /****************************************************************************
- * Private Data
+ * Private Type Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* This structure retains all that is necessary to perform the notification */
+
+struct sig_notify_s
+{
+  struct work_s nt_work;           /* Work queue structure */
+  union sigval nt_value;           /* Data passed with notification */
+  sigev_notify_function_t nt_func; /* Notification function */
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sig_ntworker
+ *
+ * Description:
+ *   Perform the callback from the context of the worker thread.
+ *
+ * Input Parameters:
+ *   arg - Work argument.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void sig_ntworker(FAR void *arg)
+{
+  FAR struct sig_notify_s *notify = (FAR struct sig_notify_s *)arg;
+
+  DEBUGASSERT(notify != NULL);
+
+  /* Perform the callback */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  notify->nt_func(notify->nt_value);
+#else
+  notify->nt_func(notify->nt_value.sival_ptr);
+#endif
+
+  /* Free the alloated notification parameters */
+
+  kmm_free(notify);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_lower
+ * Name: sig_notification
  *
  * Description:
- *   Lower the window containing the specified client sub-window to the
- *   bottom of the display.
+ *   Notify a client a signal event via a function call.  This function is
+ *   an internal OS interface that implements the common logic for signal
+ *   event notification for the case of SIGEV_THREAD.
  *
- * Input parameters:
- *   hfwnd - the window to be lowered.  This must have been previously
- *           created by nxtk_openwindow().
+ * Input Parameters:
+ *   pid - The task/thread ID a the client thread to be signaled.
+ *   event - The instance of struct sigevent that describes how to signal
+ *     the client.
  *
- * Returned value:
- *   OK on success; ERROR on failure with errno set appropriately
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-int nxtk_lower(NXTKWINDOW hfwnd)
+int sig_notification(pid_t pid, FAR struct sigevent *event)
 {
-  return nx_lower((NXWINDOW)hfwnd);
+  FAR struct sig_notify_s *notify;
+  DEBUGASSERT(event != NULL && event->sigev_notify_function != NULL);
+  int ret;
+
+  /* Allocate a structure to hold the notification information */
+
+  notify = kmm_zalloc(sizeof(struct sig_notify_s));
+  if (notify == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  /* Initialize the notification information */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  notify->nt_value = event->sigev_value;
+#else
+  notify->nt_value.sival_ptr = event->sigev_value.sival_ptr;
+#endif
+  notify->nt_func = event->sigev_notify_function;
+
+  /* Then queue the work */
+
+  ret = work_queue(NTWORK, &notify->nt_work, sig_ntworker, notify, 0);
+  if (ret < 0)
+    {
+      kmm_free(notify);
+    }
+
+  return ret;
 }
+
+#endif /* CONFIG_SIG_EVTHREAD */

@@ -83,7 +83,7 @@
  * Name: vprintf
  ****************************************************************************/
 
-int vprintf(FAR const char *fmt, va_list ap)
+int vprintf(FAR const IPTR char *fmt, va_list ap)
 {
   /* vfprintf into stdout */
 

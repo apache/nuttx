@@ -52,7 +52,7 @@
 #include <nuttx/audio/audio.h>
 #include <nuttx/usb/audio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #if defined(CONFIG_AUDIO)
 

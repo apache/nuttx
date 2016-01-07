@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_send.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
+
 #include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "signal/signal.h"
@@ -384,30 +386,44 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
 #ifndef CONFIG_DISABLE_SIGNALS
   if (msgq->ntmqdes)
     {
+      struct sigevent event;
+      pid_t pid;
+
       /* Remove the message notification data from the message queue. */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      union sigval value      = msgq->ntvalue;
-#else
-      void *sival_ptr         = msgq->ntvalue.sival_ptr;
-#endif
-      int signo               = msgq->ntsigno;
-      int pid                 = msgq->ntpid;
+      memcpy(&event, &msgq->ntevent, sizeof(struct sigevent));
+      pid = msgq->ntpid;
 
       /* Detach the notification */
 
-      msgq->ntpid             = INVALID_PROCESS_ID;
-      msgq->ntsigno           = 0;
-      msgq->ntvalue.sival_int = 0;
-      msgq->ntmqdes           = NULL;
+      memset(&msgq->ntevent, 0, sizeof(struct sigevent));
+      msgq->ntpid   = INVALID_PROCESS_ID;
+      msgq->ntmqdes = NULL;
 
-      /* Queue the signal -- What if this returns an error? */
+      /* Notification the client via signal? */
+
+      if (event.sigev_notify == SIGEV_SIGNAL)
+        {
+          /* Yes... Queue the signal -- What if this returns an error? */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      sig_mqnotempty(pid, signo, value);
+          DEBUGVERIFY(sig_mqnotempty(pid, event.sigev_signo,
+                      event.sigev_value));
 #else
-      sig_mqnotempty(pid, signo, sival_ptr);
+          DEBUGVERIFY(sig_mqnotempty(pid, event.sigev_signo,
+                      event.sigev_value.sival_ptr));
 #endif
+        }
+
+#ifdef CONFIG_SIG_EVTHREAD
+      /* Notify the client via a function call */
+
+      else if (event.sigev_notify == SIGEV_THREAD)
+        {
+          DEBUGVERIFY(sig_notification(pid, &event));
+        }
+#endif
+
     }
 #endif
 

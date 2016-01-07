@@ -45,7 +45,7 @@
 
 #include <nuttx/spawn.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions

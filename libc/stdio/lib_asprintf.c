@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-int asprintf (FAR char **ptr, const char *fmt, ...)
+int asprintf (FAR char **ptr, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int ret;

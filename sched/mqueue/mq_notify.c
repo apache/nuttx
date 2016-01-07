@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_notify.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <signal.h>
 #include <mqueue.h>
 #include <sched.h>
+#include <string.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
@@ -93,7 +94,7 @@
  * Parameters:
  *   mqdes - Message queue descriptor
  *   notification - Real-time signal structure containing:
- *      sigev_notify - Should be SIGEV_SIGNAL (but actually ignored)
+ *      sigev_notify - Should be SIGEV_SIGNAL or SIGEV_THREAD
  *      sigev_signo - The signo to use for the notification
  *      sigev_value - Value associated with the signal
  *
@@ -171,10 +172,11 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 
           /* Yes... Assign it to the current task. */
 
-          msgq->ntvalue.sival_ptr = notification->sigev_value.sival_ptr;
-          msgq->ntsigno           = notification->sigev_signo;
-          msgq->ntpid             = rtcb->pid;
-          msgq->ntmqdes           = mqdes;
+          memcpy(&msgq->ntevent, &notification->sigev_value,
+                 sizeof(struct sigevent));
+
+          msgq->ntpid   = rtcb->pid;
+          msgq->ntmqdes = mqdes;
         }
     }
 
@@ -197,10 +199,9 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
        * thread to detach the notification.
        */
 
-      msgq->ntpid             = INVALID_PROCESS_ID;
-      msgq->ntsigno           = 0;
-      msgq->ntvalue.sival_ptr = NULL;
-      msgq->ntmqdes           = NULL;
+      memset(&msgq->ntevent, 0, sizeof(struct sigevent));
+      msgq->ntpid   = INVALID_PROCESS_ID;
+      msgq->ntmqdes = NULL;
     }
 
   sched_unlock();

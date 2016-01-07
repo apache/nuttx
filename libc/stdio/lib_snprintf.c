@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,7 +80,7 @@
  * sprintf
  ****************************************************************************/
 
-int snprintf(FAR char *buf, size_t size, const char *format, ...)
+int snprintf(FAR char *buf, size_t size, FAR const IPTR char *format, ...)
 {
   union
   {

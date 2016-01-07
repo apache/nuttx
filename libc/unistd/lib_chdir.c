@@ -45,7 +45,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
 

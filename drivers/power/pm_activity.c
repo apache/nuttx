@@ -43,7 +43,7 @@
 #include <nuttx/clock.h>
 #include <arch/irq.h>
 
-#include "pm_internal.h"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
@@ -164,3 +164,4 @@ void pm_activity(int priority)
 }
 
 #endif /* CONFIG_PM */
+

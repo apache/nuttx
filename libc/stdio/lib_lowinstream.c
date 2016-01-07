@@ -45,7 +45,7 @@
 
 #include <nuttx/arch.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #ifdef CONFIG_ARCH_LOWGETC
 

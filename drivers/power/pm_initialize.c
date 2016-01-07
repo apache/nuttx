@@ -43,7 +43,7 @@
 
 #include <nuttx/power/pm.h>
 
-#include "pm_internal.h"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
@@ -110,3 +110,4 @@ void pm_initialize(void)
 }
 
 #endif /* CONFIG_PM */
+

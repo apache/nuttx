@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_desclose.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <mqueue.h>
 #include <sched.h>
+#include <string.h>
 #include <assert.h>
 #include <queue.h>
 
@@ -128,9 +129,8 @@ void mq_desclose(mqd_t mqdes)
 #ifndef CONFIG_DISABLE_SIGNALS
   if (msgq->ntmqdes == mqdes)
     {
+      memset(&msgq->ntevent, 0, sizeof(struct sigevent));
       msgq->ntpid   = INVALID_PROCESS_ID;
-      msgq->ntsigno = 0;
-      msgq->ntvalue.sival_int = 0;
       msgq->ntmqdes = NULL;
     }
 #endif

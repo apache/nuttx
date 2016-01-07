@@ -44,6 +44,10 @@ CSRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
 CSRCS += sig_mqnotempty.c sig_cleanup.c sig_dispatch.c sig_deliver.c
 CSRCS += sig_pause.c sig_nanosleep.c
 
+ifeq ($(CONFIG_SIG_EVTHREAD),y)
+CSRCS += sig_notification.c
+endif
+
 # Include signal build support
 
 DEPPATH += --dep-path signal

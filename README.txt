@@ -1256,6 +1256,8 @@ nuttx/
  |- configs/
  |   |- amber/
  |   |   `- README.txt
+ |   |- arduino-mega2560/
+ |   |   `- README.txt
  |   |- arduino-due/
  |   |   `- README.txt
  |   |- avr32dev1/

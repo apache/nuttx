@@ -98,16 +98,16 @@
 
 /* Timing constants *********************************************************/
 
-#define NSEC_PER_SEC          1000000000
-#define USEC_PER_SEC             1000000
-#define MSEC_PER_SEC                1000
-#define DSEC_PER_SEC                  10
-#define NSEC_PER_DSEC          100000000
-#define USEC_PER_DSEC             100000
-#define MSEC_PER_DSEC                100
-#define NSEC_PER_MSEC            1000000
-#define USEC_PER_MSEC               1000
-#define NSEC_PER_USEC               1000
+#define NSEC_PER_SEC          1000000000L
+#define USEC_PER_SEC             1000000L
+#define MSEC_PER_SEC                1000L
+#define DSEC_PER_SEC                  10L
+#define NSEC_PER_DSEC          100000000L
+#define USEC_PER_DSEC             100000L
+#define MSEC_PER_DSEC                100L
+#define NSEC_PER_MSEC            1000000L
+#define USEC_PER_MSEC               1000L
+#define NSEC_PER_USEC               1000L
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
  * the system timer is given by USEC_PER_TICK.  This is the expected number

@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
 

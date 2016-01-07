@@ -44,7 +44,7 @@
 #include <stdio.h>
 #include <syslog.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,7 +86,7 @@
  * Name: printf
  ****************************************************************************/
 
-int printf(FAR const char *fmt, ...)
+int printf(FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int     ret;

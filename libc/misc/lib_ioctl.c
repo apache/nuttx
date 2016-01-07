@@ -46,7 +46,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #if defined(CONFIG_LIBC_IOCTL_VARIADIC) && CONFIG_NFILE_DESCRIPTORS > 0
 

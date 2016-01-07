@@ -48,7 +48,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

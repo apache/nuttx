@@ -47,7 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

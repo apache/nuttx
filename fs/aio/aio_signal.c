@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/aio/aio_signal.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,28 +52,9 @@
 #ifdef CONFIG_FS_AIO
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: aio_signal
  *
@@ -125,6 +106,19 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
           ret = ERROR;
         }
     }
+
+#ifdef CONFIG_SIG_EVTHREAD
+  /* Notify the client via a function call */
+
+  else if (aiocbp->aio_sigevent.sigev_notify == SIGEV_THREAD)
+    {
+      ret = sig_notification(pid, &aiocbp->aio_sigevent);
+      if (ret < 0)
+        {
+          fdbg("ERROR: sig_notification failed: %d\n", ret);
+        }
+    }
+#endif
 
   /* Send the poll signal in any event in case the caller is waiting
    * on sig_suspend();

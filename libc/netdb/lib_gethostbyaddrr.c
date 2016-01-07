@@ -48,7 +48,7 @@
 #include <arpa/inet.h>
 #include <nuttx/net/loopback.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 #include "netdb/lib_netdb.h"
 
 #ifdef CONFIG_NETDB_HOSTFILE

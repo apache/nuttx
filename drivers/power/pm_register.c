@@ -44,7 +44,7 @@
 
 #include <nuttx/power/pm.h>
 
-#include "pm_internal.h"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
@@ -110,3 +110,4 @@ int pm_register(FAR struct pm_callback_s *callbacks)
 }
 
 #endif /* CONFIG_PM */
+

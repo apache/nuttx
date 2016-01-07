@@ -47,7 +47,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/streams.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #ifdef CONFIG_STDIO_LINEBUFFER
 

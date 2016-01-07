@@ -48,7 +48,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -167,7 +167,7 @@ extern "C"
 
 WDOG_ID wd_create(void);
 int     wd_delete(WDOG_ID wdog);
-int     wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry, int argc, ...);
+int     wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...);
 int     wd_cancel(WDOG_ID wdog);
 int     wd_gettime(WDOG_ID wdog);
 

@@ -65,7 +65,7 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "mmcsd_internal.h"
+#include "mmcsd.h"
 #include "mmcsd_sdio.h"
 
 /****************************************************************************
