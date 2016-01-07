@@ -86,6 +86,7 @@
 #define XMEGA_IRQ_USB      xx /* 0x00fa USB on port D Interrupt base */
 
 #define NR_IRQS            xx
+#define AVR_PC_SIZE        xx
 
 /****************************************************************************
  * Public Types

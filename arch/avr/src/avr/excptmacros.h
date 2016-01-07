@@ -335,9 +335,9 @@
 
 	/* Pop the return address from the stack (PC0 then PC1).  R18:19 are Call-used */
 
-#if ATMEGA_PC_SIZE > 16
+#if AVR_PC_SIZE > 16
     pop     r20
-#endif /* ATMEGA_PC_SIZE */
+#endif /* AVR_PC_SIZE */
 	pop		r19
 	pop		r18
 
@@ -402,9 +402,9 @@
 
 	/* Save the return address that we have saved in r18:19*/
 
-#if ATMEGA_PC_SIZE > 16
+#if AVR_PC_SIZE > 16
 	st		x+, r20
-#endif /* ATMEGA_PC_SIZE */
+#endif /* AVR_PC_SIZE */
 	st		x+, r19
 	st		x+, r18
 	.endm
@@ -435,7 +435,7 @@
 	 */
 
 	movw	r28, r26				/* Get a pointer to the PC0/PC1 storage location */
-#if ATMEGA_PC_SIZE <= 16
+#if AVR_PC_SIZE <= 16
 	adiw	r28, REG_PC0
 #else
 	adiw	r28, REG_PC2
@@ -457,7 +457,7 @@
 	 *  --- <- SP
 	 */
 
-#if ATMEGA_PC_SIZE <= 16
+#if AVR_PC_SIZE <= 16
 	ld		r25, y+					/* Load PC0 (r25) then PC1 (r24) */
 	ld		r24, y+
 	push	r24						/* Push PC0 and PC1 on the stack (PC1 then PC0) */

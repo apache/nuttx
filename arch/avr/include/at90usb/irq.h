@@ -94,6 +94,7 @@
 #define AT90USB_IRQ_SPMRDY  36  /* 0x004a Store Program Memory Ready */
 
 #define NR_IRQS             37
+#define AVR_PC_SIZE         16
 #define XCPTCONTEXT_REGS    37 /* Size of the register state save array (in bytes) */
 
 /****************************************************************************

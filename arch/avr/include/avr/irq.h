@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
+ * through nuttx/irq.h.
  */
 
 #ifndef __ARCH_AVR_INCLUDE_AVR_IRQ_H
@@ -93,7 +93,7 @@
 
 #define REG_PC0          35 /* PC */
 #define REG_PC1          36
-#if ATMEGA_PC_SIZE > 16
+#if AVR_PC_SIZE > 16
 # define REG_PC2         37
 #endif
 
