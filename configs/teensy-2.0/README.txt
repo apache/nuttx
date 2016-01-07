@@ -238,6 +238,12 @@ WinAVR:
   directory!  Make sure that the path to the correct cygwin.dll file precedes
   the path to the WinAVR binaries!
 
+Atmel Studio
+
+  Another option is to use the AVR toolchain provided within the Atmel Studio
+  installation.  Look in the Atmel/Studio directories and Program Files (x86)
+  to find the tools in a subdirectory like toolchain/avr8/avr8-gnu-toolchain/bin.
+
 Linux:
 
   For Linux, there are widely available avr-gcc packages.  On Ubuntu, use:
@@ -405,6 +411,15 @@ MEMX
   in some configurations that use a lot of string memory (such as the
   ostest and nsh configurations).
 
+  UPDATE 2016-01-07:  Unfortunately, there is an issue.  When I enable
+  CONFIG_AVR_HAS_MEMX_PTR=y in the nsh/ configuration, I get a number
+  of link time errors of this form:
+
+    FILENAME.c:(.text+0xOFFSET): warning: internal error: out of range error
+
+  This same build configuratino works for the arduino-mega2560 so I am
+  suspecting some issue with the toolchain support for the AT90USB.
+
 Teensy++ Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -570,6 +585,11 @@ Configuration Sub-Directories
 
   hello:
     The simple apps/examples/hello "Hello, World!" example.
+
+  nsh:
+    This is a reduce NuttShell (NSH) configuration using apps/example/nsh.
+    The serial console is provided on USART1 and can be accessed via
+    an external RS-232 driver as described above under "Serial Console".
 
   ostest:
     This configuration directory, performs a simple OS test using
