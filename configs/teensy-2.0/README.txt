@@ -417,8 +417,9 @@ MEMX
 
     FILENAME.c:(.text+0xOFFSET): warning: internal error: out of range error
 
-  This same build configuratino works for the arduino-mega2560 so I am
-  suspecting some issue with the toolchain support for the AT90USB.
+  This same build configuration works for the arduino-mega2560 so I am
+  suspecting some issue with the toolchain support for the AT90USB (avr:5)
+  vs the Atmega2560 (avr:6).
 
 Teensy++ Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
