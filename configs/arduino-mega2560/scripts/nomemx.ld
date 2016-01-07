@@ -129,7 +129,7 @@ SECTIONS
 		*(.vectors)
 		*(.init)
 		*(.handlers)
-		*(.progmem .progmem.*)                
+		*(.progmem .progmem.*)
 		*(.text)
 		*(.text.*)
 		_etext = . ;

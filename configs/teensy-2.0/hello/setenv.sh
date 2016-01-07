@@ -47,6 +47,11 @@ if [ -z "${PATH_ORIG}" ]; then
   export PATH_ORIG="${PATH}"
 fi
 
+# This is the Cygwin path to the location where I installed the Atmel
+# Studio AVR toolchain.
+# export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin"
+# export TOOLCHAIN_BIN="/cygdrive/c/as-7/7.0/toolchain/avr8/avr8-gnu-toolchain/bin"
+
 # This is the Cygwin path to the location where I installed the WinAVR
 # toolchain under windows.  This is *not* the default install
 # location so you will probably have to edit this.  You will also have

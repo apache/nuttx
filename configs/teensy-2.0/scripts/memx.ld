@@ -1,7 +1,7 @@
-/**************************************************************************************
- * configs/teensy-2.0/nsh/ld.script
+/************************************************************************************
+ * configs/teensy-2.0/scripts/memx.ld
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ************************************************************************************/
 
-/* Memory Regions *********************************************************************/
-/* -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
- *                FLASH        | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
- *                             |           REGISTERS REGISTERS             |
- * -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
- * AT90USB1286    0x0000 128Kb | 0x0000 32 0x0020 64 0x0060 160 0x0100 8Kb | 0x0000 4Kb
- * -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+/* Memory Regions *******************************************************************/
+/* ------------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+ *              FLASH        | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
+ *                           |           REGISTERS REGISTERS             |
+ * ------------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+ * AT90USB1286  0x0000 128Kb | 0x0000 32 0x0020 64 0x0060 160 0x0100 8Kb | 0x0000 4Kb
+ * ------------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
  */
 
 MEMORY
@@ -128,6 +128,8 @@ SECTIONS
 		*(.vectors)
 		*(.init)
 		*(.handlers)
+		*(.progmem .progmem.*)
+		*(.rodata.str1.*)
 		*(.text)
 		*(.text.*)
 		_etext = . ;
@@ -138,6 +140,7 @@ SECTIONS
 	.data			:
 	{
 		_sdata = ABSOLUTE(.);
+		*(.rodata .rodata.*)                
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS

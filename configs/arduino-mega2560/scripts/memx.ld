@@ -129,8 +129,8 @@ SECTIONS
 		*(.vectors)
 		*(.init)
 		*(.handlers)
+		*(.progmem .progmem.*)
 		*(.rodata.str1.*)
-		*(.progmem .progmem.*)                
 		*(.text)
 		*(.text.*)
 		_etext = . ;
