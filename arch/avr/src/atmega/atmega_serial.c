@@ -561,7 +561,7 @@ static int usart1_txinterrupt(int irq, void *context)
 #ifdef CONFIG_AVR_USART0
 static int usart0_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if CONFIG_SERIAL_TERMIOS
+#ifdef CONFIG_SERIAL_TERMIOS
   int ret = OK;
 
   switch (cmd)
@@ -585,7 +585,7 @@ static int usart0_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_AVR_USART1
 static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if CONFIG_SERIAL_TERMIOS
+#ifdef CONFIG_SERIAL_TERMIOS
   int ret = OK;
 
   switch (cmd)
