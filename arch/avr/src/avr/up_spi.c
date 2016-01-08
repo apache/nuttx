@@ -515,7 +515,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Clear status flags by reading them */
 
   regval = SPSR;
+  UNUSED(regval);
   regval = SPDR;
+  UNUSED(regval);
 
   /* Set the initial SPI configuration */
 
@@ -538,4 +540,3 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   return &priv->spidev;
 }
 #endif /* CONFIG_AVR_SPI */
-

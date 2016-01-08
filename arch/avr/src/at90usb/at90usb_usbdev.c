@@ -2229,7 +2229,7 @@ static int avr_epconfigure(FAR struct usbdev_ep_s *ep,
 
   /* Enable interrupts as appropriate for this endpoint */
 
-  UEIENX |= uecfg1x;
+  UEIENX |= ueienx;
   return OK;
 }
 
