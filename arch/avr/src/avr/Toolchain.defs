@@ -43,25 +43,25 @@
 #
 
 ifeq ($(filter y, \
-      $(CONFIG_AVR_BUILDROOT) \
+      $(CONFIG_AVR_BUILDROOT_TOOLCHAIN) \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= BUILDROOT
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_AVR_CROSSPACK) \
+      $(CONFIG_AVR_CROSSPACK_TOOLCHAIN) \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= CROSSPACK
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_AVR_LINUXGCC) \
+      $(CONFIG_AVR_LINUXGCC_TOOLCHAIN) \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= LINUXGCC
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_AVR_WINAVR) \
+      $(CONFIG_AVR_WINAVR_TOOLCHAIN) \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= WINAVR
 endif
