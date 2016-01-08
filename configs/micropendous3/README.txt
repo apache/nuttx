@@ -216,7 +216,7 @@ Buildroot:
   at ../buildroot/build_avr.  Edit the setenv.sh file if
   this is not the case.
 
-  After configuring NuttX, make sure that CONFIG_AVR_BUILDROOT=y is set in your
+  After configuring NuttX, make sure that CONFIG_AVR_BUILDROOT_TOOLCHAIN=y is set in your
   .config file.
 
 WinAVR:
@@ -227,7 +227,7 @@ WinAVR:
   It is assumed in some places that WinAVR is installed at C:/WinAVR.  Edit the
   setenv.sh file if this is not the case.
 
-  After configuring NuttX, make sure that CONFIG_AVR_WINAVR=y is set in your
+  After configuring NuttX, make sure that CONFIG_AVR_WINAVR_TOOLCHAIN=y is set in your
   .config file.
 
   WARNING:  There is an incompatible version of cygwin.dll in the WinAVR/bin
@@ -239,7 +239,7 @@ Linux:
   For Linux, there are widely available avr-gcc packages.  On Ubuntu, use:
   sudo apt-get install gcc-avr gdb-avr avr-libc
 
-  After configuring NuttX, make sure that CONFIG_AVR_LINUXGCC=y is set in your
+  After configuring NuttX, make sure that CONFIG_AVR_LINUXGCC_TOOLCHAIN=y is set in your
   .config file.
 
 Mac OS X:
@@ -542,7 +542,7 @@ Common Configuration Notes
 
         CONFIG_HOST_WINDOWS=y
         CONFIG_WINDOWS_CYGWIN=y
-        CONFIG_AVR_BUILDROOT=y
+        CONFIG_AVR_BUILDROOT_TOOLCHAIN=y
 
 Configuration Sub-Directories
 -----------------------------

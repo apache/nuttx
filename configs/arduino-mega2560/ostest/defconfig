@@ -104,9 +104,9 @@ CONFIG_ARCH_FAMILY_AVR=y
 #
 # AVR Configuration Options
 #
-# CONFIG_AVR_WINAVR is not set
+# CONFIG_AVR_WINAVR_TOOLCHAIN is not set
 CONFIG_AVR_ATMEL_AVR_TOOLCHAIN=y
-# CONFIG_AVR_BUILDROOT is not set
+# CONFIG_AVR_BUILDROOT_TOOLCHAIN is not set
 
 #
 # Atmel AVR Toolchain options

@@ -79,8 +79,8 @@ CONFIG_ARCH_CHIP_AT90USB=y
 #
 # AVR Configuration Options
 #
-# CONFIG_AVR_WINAVR is not set
-CONFIG_AVR_BUILDROOT=y
+# CONFIG_AVR_WINAVR_TOOLCHAIN is not set
+CONFIG_AVR_BUILDROOT_TOOLCHAIN=y
 
 #
 # AT90USB Configuration Options
