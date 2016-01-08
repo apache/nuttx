@@ -2513,19 +2513,16 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
            */
 
           regval  = sam_getreg(SAM_USBHS_DEVEPTISR(epno));
-          byct    = (regval & USBHS_DEVEPTISR_BYCT_MASK) >> USBHS_DEVEPTISR_BYCT_SHIFT;
-          nbusybk = (regval & USBHS_DEVEPTISR_NBUSYBK_MASK) >> USBHS_DEVEPTISR_NBUSYBK_SHIFT;
+          byct    = (regval & USBHS_DEVEPTISR_BYCT_MASK) >>
+                    USBHS_DEVEPTISR_BYCT_SHIFT;
+          nbusybk = (regval & USBHS_DEVEPTISR_NBUSYBK_MASK) >>
+                    USBHS_DEVEPTISR_NBUSYBK_SHIFT;
 
           if (byct > 0 || nbusybk > 0)
             {
               /* Not all of the data has been sent to the host.  A TXIN
                * interrupt will be generated later.  Enable the TXIN
                * interrupt now and wait for the transfer to complete.
-               *
-               * REVISIT:  How many TXIN interrupts will be generated
-               * before the tranfer completes?  This assumes one.  If
-               * there are more than one than sam_req_write() will be
-               * called too soon.
                */
 
               sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
@@ -2690,11 +2687,46 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == USBHS_EPSTATE_SENDING ||
           privep->epstate == USBHS_EPSTATE_EP0STATUSIN)
         {
-          /* Continue/resume processing the write requests. */
+#if 0 /* Logic not yet verified */
+          uint32_t nbusybk;
+#endif
+
+          /* Clear the pending TXINIT interrupt */
 
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
-          privep->epstate = USBHS_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
+
+#if 0 /* Logic not yet verified */
+          /* Have all of the bytes in the FIFO been transmitted to the
+           * host?  During DMA, there may be several active banks and we
+           * need to all banks to be sent before handling the next request
+           * or any trailing zero-length packet.
+           */
+
+          nbusybk = (eptisr & USBHS_DEVEPTISR_NBUSYBK_MASK) >>
+                    USBHS_DEVEPTISR_NBUSYBK_SHIFT;
+          if (nbusybk > 0)
+            {
+              /* Not all of the data has been sent to the host.  Another
+               * TXIN interrupt will be generated later.  Make sure that
+               * the TXIN is enabled and wait for the transfer to complete.
+               *
+               * NOTE:  This will never happen in non-DMA tranfers because
+               * packets are sent one at a time; the multiple bank capability
+               * is not used.
+               */
+
+              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
+            }
+          else
+#endif
+            {
+              /* No additional TXINI interrupts are expected.  Continue/resume
+               * processing the write requests.
+               */
+
+              privep->epstate = USBHS_EPSTATE_IDLE;
+              (void)sam_req_write(priv, privep);
+            }
         }
 
       /* Setting of the device address is a special case.  The address was
