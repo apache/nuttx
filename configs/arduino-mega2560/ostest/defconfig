@@ -41,6 +41,7 @@ CONFIG_INTELHEX_BINARY=y
 # CONFIG_ARCH_MATH_H is not set
 # CONFIG_ARCH_FLOAT_H is not set
 # CONFIG_ARCH_STDARG_H is not set
+CONFIG_ARCH_DEBUG_H=y
 
 #
 # Debug Options
@@ -127,7 +128,7 @@ CONFIG_ARCH_CHIP_ATMEGA2560=y
 CONFIG_AVR_USART0=y
 
 #
-# Low level UART driver options
+# Low level USART driver options
 #
 
 #
