@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/include/debug.h
  *
- *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,38 +47,43 @@
 
 #include <syslog.h>
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-/*
- * Since format string that is passed to __arch_syslog() can be a 
+/* Since format string that is passed to __arch_syslog() can be a
  * comma-separated list, we need some cpp trickery to handle it
  *
  * __dbg_first() helper macro accepts the format (that is potentially
  * a comma-separated) and substitutes to its first element.
  *
- * __dbg_subst() helper macro substitutes first element in the format 
+ * __dbg_subst() helper macro substitutes first element in the format
  * with prefix.
  */
+
 #define __dbg_first(format, ...) format
 #define __dbg_subst(prefix, format, ...) prefix, ##__VA_ARGS__
 
 #define __dbg_expand(logger, prio, format, ...) \
- do { \
-   static const IOBJ char dbg_s[] = __dbg_first(format); \
-   logger(prio, __dbg_subst(dbg_s, format), ##__VA_ARGS__); \
- } while(0)
+  do \
+    { \
+     static const IOBJ char dbg_s[] = __dbg_first(format); \
+     logger(prio, __dbg_subst(dbg_s, format), ##__VA_ARGS__); \
+    } \
+  while(0)
 
-/*
- * __arch_syslog() and __arch_lowsyslog() override behavior of NuttX
+/* __arch_syslog() and __arch_lowsyslog() override behavior of NuttX
  * dbg macros. They put the format string into program memory and
  * utilize IPTR (__memx) parameter of syslog to take the format
  * directly from program memory.  This reduces amount of RAM held by
  * the format strings used in debug statements.
  */
+
 #define __arch_syslog(...) \
-   __dbg_expand(syslog, ##__VA_ARGS__)  
+   __dbg_expand(syslog, ##__VA_ARGS__)
 
 #define __arch_lowsyslog(...) \
-   __dbg_expand(lowsyslog, ##__VA_ARGS__)  
+   __dbg_expand(lowsyslog, ##__VA_ARGS__)
 
 #endif /* CONFIG_AVR_HAS_MEMX_PTR */
 
