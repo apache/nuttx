@@ -11292,4 +11292,7 @@
 	  (2016-01-09).
 	* arch/avr/include/debug.h: Add an AVR-specific header file used when
 	  the AVR MEMX pointer is used.  From Dimitri Kloper (2016-01-09).
+	* tools/mkdeps.c:  Deleted mkdeps.sh and mkdeps.bat.  The mkdeps
+	  executable generated from mkdeps.c is now that the only supported
+	  way to make dependencies (2016-01-09).
 
