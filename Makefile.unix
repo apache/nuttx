@@ -269,7 +269,12 @@ include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
 # Targets used to create dependencies
 
 tools/mkdeps$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkdeps$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkdeps$(HOSTEXEEXT)
+
+tools/cnvwindeps$(HOSTEXEEXT):
+ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" cnvwindeps$(HOSTEXEEXT)
+endif
 
 # dirlinks, and helpers
 #
@@ -460,12 +465,12 @@ download: $(BIN)
 # pass1dep: Create pass1 build dependencies
 # pass2dep: Create pass2 build dependencies
 
-pass1dep: context tools/mkdeps$(HOSTEXEEXT)
+pass1dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 	$(Q) for dir in $(USERDEPDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
 	done
 
-pass2dep: context tools/mkdeps$(HOSTEXEEXT)
+pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 	$(Q) for dir in $(KERNDEPDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRADEFINES=$(KDEFINE) depend; \
 	done
