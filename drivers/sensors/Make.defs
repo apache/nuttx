@@ -53,6 +53,10 @@ ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
 
+ifeq ($(CONFIG_SN_LSM9DS1),y)
+  CSRCS += lsm9ds1.c
+endif
+
 ifeq ($(CONFIG_ADXL345_I2C),y)
   CSRCS += adxl345_i2c.c
 endif
