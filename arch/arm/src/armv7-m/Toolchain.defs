@@ -165,7 +165,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),ATOLLIC)
   ARCROSSDEV ?= arm-atollic-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
@@ -201,7 +201,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CODEREDW)
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
@@ -222,7 +222,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CODESOURCERYW)
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
@@ -232,7 +232,7 @@ endif
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),DEVKITARM)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
@@ -254,7 +254,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIW)
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
@@ -264,7 +264,7 @@ endif
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),RAISONANCE)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)

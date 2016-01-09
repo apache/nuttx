@@ -132,7 +132,7 @@ endif
 
 ifeq ($(_WINAVR),1)
   CROSSDEV ?= avr-
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
   MAXOPTIMIZATION ?= -O2

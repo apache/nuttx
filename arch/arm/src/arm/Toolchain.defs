@@ -127,7 +127,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),CODESOURCERYW)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -O2
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
@@ -137,7 +137,7 @@ endif
 ifeq ($(CONFIG_ARM_TOOLCHAIN),DEVKITARM)
   CROSSDEV ?= arm-eabi-
   ARCROSSDEV ?= arm-eabi-
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
@@ -156,7 +156,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIW)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 endif
