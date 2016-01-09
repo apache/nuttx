@@ -376,6 +376,12 @@ config ARCH_STDARG_H
 		ARCH_STDARG_H=y and providing. If ARCH_STDARG_H, is not defined, then
 		the stdarg.h header file will stay out-of-the-way in include/nuttx/.
 
+config ARCH_DEBUG_H
+	bool "debug.h"
+	default n
+	---help---
+                The debug.h contains architecture dependent debugging primitives
+
 endmenu # Customize Header Files
 
 menu "Debug Options"
