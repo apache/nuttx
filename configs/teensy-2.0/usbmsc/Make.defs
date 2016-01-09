@@ -53,7 +53,7 @@ ifeq ($(WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
 else
   # Linux/Cygwin-native toolchain
-  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem "$(TOPDIR)/include"
   ARCHXXINCLUDES =  $(ARCHINCLUDES) -isystem "$(TOPDIR)/include/cxx"
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)

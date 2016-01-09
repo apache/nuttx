@@ -98,7 +98,7 @@ LDFLAGS         += -nostdlib
 EXTRA_LIBS		= $(shell $(CC) -print-file-name=libsupc++.a) \
                   $(shell $(CC) -print-file-name=libgcc_eh.a)
 
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
+MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC			= gcc
 HOSTINCLUDES	= -I.
