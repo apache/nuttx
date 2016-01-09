@@ -198,6 +198,25 @@ int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 
 int dns_getserver(FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 
+/****************************************************************************
+ * Name: dns_getaddr
+ *
+ * Description:
+ *   Get the DNS server IPv4 address
+ *
+ * Parameters:
+ *   ipaddr   The location to return the IPv4 address
+ *
+ * Return:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int dns_getaddr(FAR struct in_addr *inaddr);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
