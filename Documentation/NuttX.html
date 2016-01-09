@@ -5195,12 +5195,9 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
         NuttX uses the GCC compiler's <code>-M</code> option to generate make dependencies.  These
         dependencies are retained in files called <code>Make.deps</code> throughout the system.
         For compilers other than GCC, there is no support for making dependencies in this way.
-        For Windows native GCC compilers, the generated dependencies are windows paths and not
-        directly usable in the Cygwin make.  By default, dependencies are suppressed for these
-        compilers as well.
       </li>
       <p><small>
-        NOTE: dependencies are suppress by setting the make variable <code>MKDEPS</code> to point
+        NOTE: dependencies may be suppressed by setting the make variable <code>MKDEPS</code> to point
         to the do-nothing dependency script, <code>tools/mknulldeps.sh</code>.
       </small></p>
     </ul>
