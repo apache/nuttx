@@ -98,9 +98,7 @@
 # define EXTRA_ARG
 #endif
 
-/*
- * The actual logger function may be overridden in arch/debug.h if needed.
- */
+/* The actual logger function may be overridden in arch/debug.h if needed. */
 
 #ifndef __arch_syslog
 # define __arch_syslog syslog
