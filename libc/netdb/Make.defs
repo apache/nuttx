@@ -48,7 +48,7 @@ endif
 # Add DNS lookup support
 
 ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
-CSRCS += lib_dnsclient.c
+CSRCS += lib_dnsclient.c lib_getdnsaddr.c
 endif
 
 # Add the net directory to the build
