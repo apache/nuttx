@@ -11287,4 +11287,9 @@
 	  used with the format parameter.  From Dimitry Kloper (2016-01-05).
 	* drivers/net/tun.c:  Fix a compile time error in the TUN driver.  From
 	  Vladimir Komendantskiy (2016-01-05).
+	* Kconfig and include/debug.h:  Add configuration to support an
+	  architecture-specific debug.h header file. From Dimitri Kloper
+	  (2016-01-09).
+	* arch/avr/include/debug.h: Add an AVR-specific header file used when
+	  the AVR MEMX pointer is used.  From Dimitri Kloper (2016-01-09).
 
