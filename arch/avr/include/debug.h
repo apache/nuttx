@@ -40,12 +40,12 @@
  * Included Files
  ****************************************************************************/
 
-#ifdef CONFIG_AVR_HAS_MEMX_PTR
-
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
 #include <syslog.h>
+
+#ifdef CONFIG_AVR_HAS_MEMX_PTR
 
 /****************************************************************************
  * Pre-processor Definitions
