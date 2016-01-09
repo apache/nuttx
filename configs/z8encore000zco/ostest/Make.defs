@@ -288,7 +288,7 @@ else
 
   # This is the tool to use for dependencies (i.e., none)
 
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
 
   # ZDS-II cannot follow Cygwin soft links, so we will have to use directory copies
 

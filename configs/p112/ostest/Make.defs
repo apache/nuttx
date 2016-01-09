@@ -155,7 +155,7 @@ else
 
   # This is the tool to use for dependencies (i.e., none)
 
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
 
   # SDCC for Linux, OSX, or Cygwin understands symbolic links.  Windows SDCC
   # running under Cygwin does not
