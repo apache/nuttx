@@ -116,7 +116,7 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDFLAGS += -m32
 endif
 
-MKDEP = $(TOPDIR)/tools/mkdeps.sh
+MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC = gcc
 HOSTINCLUDES = -I.

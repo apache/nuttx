@@ -87,7 +87,7 @@ LDFLAGS                 += -nostdlib
 EXTRA_LIBS		=
 
 
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
+MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.

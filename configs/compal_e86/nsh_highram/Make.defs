@@ -61,7 +61,7 @@ ifeq ("${CONFIG_SERCOMM_CONSOLE}","y")
 endif
 else
   # Linux/Cygwin-native toolchain
-  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHINCLUDES = -I. -I$(OSMODIR)/src/shared/libosmocore/include -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -I$(OSMODIR)/src/shared/libosmocore/include -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx

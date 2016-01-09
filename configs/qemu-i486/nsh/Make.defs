@@ -57,7 +57,7 @@ ifeq ($(WINTOOL),y)
   MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain
-  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/ld.script
@@ -105,7 +105,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-MKDEP = $(TOPDIR)/tools/mkdeps.sh
+MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC = gcc
 HOSTINCLUDESv = -I.

@@ -121,7 +121,7 @@ endif
 EXTRA_LIBS		= -lm
 
 
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
+MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.

@@ -75,7 +75,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
+MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.
