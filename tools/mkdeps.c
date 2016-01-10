@@ -663,7 +663,9 @@ static void do_dependency(const char *file)
     {
       const char *expanded;
 
-      cmdlen += strlen(g_cflags);
+      expanded = do_expand(g_cflags);
+      cmdlen += strlen(expanded);
+
       if (cmdlen >= MAX_BUFFER)
         {
           fprintf(stderr, "ERROR: CFLAG string is too long [%d/%d]: %s\n",
@@ -671,7 +673,6 @@ static void do_dependency(const char *file)
           exit(EXIT_FAILURE);
         }
 
-      expanded = do_expand(g_cflags);
       strcat(g_command, expanded);
     }
 
