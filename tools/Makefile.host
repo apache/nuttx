@@ -58,7 +58,7 @@ HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
 HOSTCFLAGS += -DHAVE_STRTOK_C=1
 
 ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-HOSTCFLAGS += -DHAVE_CYGWIN=1
+HOSTCFLAGS += -DHOST_CYGWIN=1
 endif
 endif
 

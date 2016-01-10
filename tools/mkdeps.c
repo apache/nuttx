@@ -48,7 +48,7 @@
 #include <libgen.h>
 #include <errno.h>
 
-#ifdef HAVE_CYGWIN
+#ifdef HOST_CYGWIN
 #  include <sys/cygwin.h>
 #endif
 
@@ -107,16 +107,13 @@ static char *g_objpath   = NULL;
 static char *g_suffix    = ".o";
 static int   g_debug     = 0;
 static bool  g_winnative = false;
-
-#ifdef HAVE_WINPATH
+#ifdef HOST_CYGWIN
 static bool  g_winpath   = false;
-static char *g_topdir    = NULL;
 #endif
 
 static char g_command[MAX_BUFFER];
 static char g_expand[MAX_EXPAND];
-
-#ifdef HAVE_CYGWIN
+#ifdef HOST_CYGWIN
 static char g_dequoted[MAX_PATH];
 static char g_posixpath[MAX_PATH];
 #endif
@@ -267,7 +264,7 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "  --winnative\n");
   fprintf(stderr, "    By default, a POSIX-style environment is assumed (e.g., Linux, Cygwin, etc.)  This option is\n");
   fprintf(stderr, "    inform the tool that is working in a pure Windows native environment.\n");
-#ifdef HAVE_WINPATH
+#ifdef HOST_CYGWIN
   fprintf(stderr, "  --winpaths <TOPDIR>\n");
   fprintf(stderr, "    This option is useful when using a Windows native toolchain in a POSIX environment (such\n");
   fprintf(stderr, "    such as Cygwin).  In this case, will CC generates dependency lists using Windows paths\n");
@@ -339,22 +336,10 @@ static void parse_args(int argc, char **argv)
         {
           g_winnative = true;
         }
-#ifdef HAVE_WINPATH
+#ifdef HOST_CYGWIN
       else if (strcmp(argv[argidx], "--winpath") == 0)
         {
           g_winpath = true;
-          if (g_topdir)
-            {
-              free(g_topdir);
-            }
-
-          argidx++;
-          if (argidx >= argc)
-            {
-              show_usage(argv[0], "ERROR: Missing argument to --winpath", EXIT_FAILURE);
-            }
-
-          g_topdir = strdup(argv[argidx]);
         }
 #endif
       else if (strcmp(argv[argidx], "--help") == 0)
@@ -395,12 +380,8 @@ static void parse_args(int argc, char **argv)
           fprintf(stderr, "  OBJDIR         : (None)\n");
         }
 
-#ifdef HAVE_WINPATH
+#ifdef HOST_CYGWIN
       fprintf(stderr, "  Windows Paths  : [%s]\n", g_winpath ? "TRUE" : "FALSE");
-      if (g_winpath)
-        {
-          fprintf(stderr, "  TOPDIR         : [%s]\n", g_topdir);
-        }
 #endif
       fprintf(stderr, "  Windows Native : [%s]\n", g_winnative ? "TRUE" : "FALSE");
     }
@@ -420,7 +401,7 @@ static void parse_args(int argc, char **argv)
       exit(EXIT_SUCCESS);
     }
 
-#ifdef HAVE_WINPATH
+#ifdef HOST_CYGWIN
   if (g_winnative && g_winpath)
     {
       show_usage(argv[0], "ERROR: Both --winnative and --winpath makes no sense", EXIT_FAILURE);
@@ -430,7 +411,7 @@ static void parse_args(int argc, char **argv)
 
 static const char *do_expand(const char *argument)
 {
-  if (g_winnative)
+  if (g_winpath)
     {
       const char *src;
       char *dest;
@@ -471,7 +452,7 @@ static const char *do_expand(const char *argument)
     }
 }
 
-#ifdef HAVE_CYGWIN
+#ifdef HOST_CYGWIN
 static bool dequote_path(const char *winpath)
 {
   char *dest = g_dequoted;
@@ -507,8 +488,8 @@ static bool dequote_path(const char *winpath)
 
 static const char *convert_path(const char *path)
 {
-#ifdef HAVE_CYGWIN
-  if (g_winnative)
+#ifdef HOST_CYGWIN
+  if (g_winpath)
     {
       const char *retptr;
       ssize_t size;
@@ -577,7 +558,7 @@ static void do_dependency(const char *file)
 
   /* Initialize the separator */
 
-  separator =  g_winnative ? '\\' : '/';
+  separator =  (g_winnative || g_winpath) ? '\\' : '/';
 
   /* Copy the compiler into the command buffer */
 
@@ -798,155 +779,6 @@ static void do_dependency(const char *file)
    exit(EXIT_FAILURE);
 }
 
-/* Convert a Cygwin path to a Windows path */
-
-#ifdef HAVE_WINPATH
-static char *cywin2windows(const char *str, const char *append, enum slashmode_e mode)
-{
-  static const char cygdrive[] = "/cydrive";
-  char *dest;
-  char *newpath;
-  char *allocpath = NULL;
-  int srclen = strlen(str);
-  int alloclen = 0;
-  int drive = 0;
-  int lastchar;
-
-  /* Skip any leading whitespace */
-
-  while (isspace(*str)) str++;
-
-  /* Were we asked to append something? */
-
-  if (append)
-    {
-      alloclen = sizeof(str) + sizeof(append) + 1;
-      allocpath = (char *)malloc(alloclen);
-      if (!allocpath)
-        {
-          fprintf(stderr, "ERROR: Failed to allocate %d bytes\n", alloclen);
-          exit(EXIT_FAILURE);
-        }
-
-      snprintf(allocpath, alloclen, "%s/%s", str, append);
-      str = allocpath;
-    }
-
-  /* Looking for path of the form /cygdrive/c/bla/bla/bla */
-
-  if (strcasecmp(str, cygdrive) == 0)
-    {
-      int cygsize = sizeof(cygdrive);
-      if (str[cygsize] == '/')
-        {
-          cygsize++;
-          srclen -= cygsize;
-          str += cygsize;
-
-          if (srclen <= 0)
-            {
-              fprintf(stderr, "ERROR: Unhandled path: \"%s\"\n", str);
-              exit(EXIT_FAILURE);
-            }
-
-          drive = toupper(*str);
-          if (drive < 'A' || drive > 'Z')
-            {
-              fprintf(stderr, "ERROR: Drive character: \"%s\"\n", str);
-              exit(EXIT_FAILURE);
-            }
-
-          srclen--;
-          str++;
-          alloclen = 2;
-        }
-    }
-
-  /* Determine the size of the new path */
-
-  alloclen += sizeof(str) + 1;
-  if (mode == MODE_DBLBACK)
-    {
-      const char *tmpptr;
-      for (tmpptr = str; *tmpptr; tmpptr++)
-        {
-          if (*tmpptr == '/') alloclen++;
-        }
-    }
-
-  /* Allocate memory for the new path */
-
-  newpath = (char *)malloc(alloclen);
-  if (!newpath)
-    {
-      fprintf(stderr, "ERROR: Failed to allocate %d bytes\n", alloclen);
-      exit(EXIT_FAILURE);
-    }
-
-  dest = newpath;
-
-  /* Copy the drive character */
-
-  if (drive)
-    {
-      *dest++ = drive;
-      *dest++ = ':';
-    }
-
-  /* Copy each character from the source, making modifications for foward
-   * slashes as required.
-   */
-
-  lastchar = '\0';
-  for (; *str; str++)
-    {
-      if (mode != MODE_FSLASH && *str == '/')
-        {
-          if (lastchar != '/')
-            {
-              *dest++ = '\\';
-              if (mode == MODE_DBLBACK)
-                {
-                  *dest++ = '\\';
-                }
-            }
-        }
-      else
-        {
-          *dest++ = *str;
-        }
-
-      lastchar = *str;
-    }
-
-  *dest++ = '\0';
-  if (allocpath)
-    {
-      free(allocpath);
-    }
-  return dest;
-}
-#endif
-
-#ifdef HAVE_WINPATH
-static void do_winpath(char *file)
-{
-  /* The file is in POSIX format.  CC expects Windows format to generate the
-   * dependencies, but GNU make expect the resulting dependencies to be back
-   * in POSIX format.  What a mess!
-   */
-
-  char *path = cywin2windows(g_topdir, file, MODE_FSLASH);
-
-  /* Then get the dependency and perform conversions on it to make it
-   * palatable to the Cygwin make.
-   */
-#warning "Missing logic"
-
-  free(path);
-}
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -973,17 +805,7 @@ int main(int argc, char **argv, char **envp)
        * being using in a POSIX/Cygwin environment.
        */
 
-#ifdef HAVE_WINPATH
-      if (g_winpath)
-        {
-          do_winpath(file);
-        }
-      else
-#endif
-        {
-          do_dependency(file);
-        }
-
+      do_dependency(file);
       files = NULL;
     }
 

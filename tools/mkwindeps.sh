@@ -32,7 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Uncomment to enable debug options
 # set -x
+# DEBUG=--dep-debug
 
 # Make sure that we know where we are
 
@@ -61,7 +63,7 @@ fi
 # Run the mkdeps.exe program to generate a Windows dependency file
 
 TMPFILE=$(mktemp)
-${MKDEPS} --winnative $* > ${TMPFILE} || { echo "# ERROR: mkdeps.exe failed"; exit 1; }
+${MKDEPS} ${DEBUG} --winpath $* > ${TMPFILE} || { echo "# ERROR: mkdeps.exe failed"; exit 1; }
 
 # Then convert this to a POSIX dependency file (on stdout)
 
