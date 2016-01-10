@@ -57,8 +57,10 @@ HOSTCC ?= gcc
 HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
 HOSTCFLAGS += -DHAVE_STRTOK_C=1
 
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+HOSTOS = ${shell uname -o 2>/dev/null || echo "Other"}
+ifeq ($(HOSTOS),Cygwin)
 HOSTCFLAGS += -DHOST_CYGWIN=1
+HOSTEXEEXT ?= .exe
 endif
 endif
 

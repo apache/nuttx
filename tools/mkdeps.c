@@ -267,11 +267,10 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "    By default, a POSIX-style environment is assumed (e.g., Linux, Cygwin, etc.)  This option is\n");
   fprintf(stderr, "    inform the tool that is working in a pure Windows native environment.\n");
 #ifdef HOST_CYGWIN
-  fprintf(stderr, "  --winpaths <TOPDIR>\n");
+  fprintf(stderr, "  --winpaths\n");
   fprintf(stderr, "    This option is useful when using a Windows native toolchain in a POSIX environment (such\n");
   fprintf(stderr, "    such as Cygwin).  In this case, will CC generates dependency lists using Windows paths\n");
-  fprintf(stderr, "    (e.g., C:\\blablah\\blabla).  This switch instructs the script to use 'cygpath' to convert\n");
-  fprintf(stderr, "    the Windows paths to Cygwin POSIXE paths.\n");
+  fprintf(stderr, "    (e.g., C:\\blablah\\blabla).\n");
 #endif
   fprintf(stderr, "  --help\n");
   fprintf(stderr, "    Shows this message and exits\n");
