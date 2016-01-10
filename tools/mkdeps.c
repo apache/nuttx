@@ -113,6 +113,7 @@ static bool  g_winpath   = false;
 
 static char g_command[MAX_BUFFER];
 static char g_expand[MAX_EXPAND];
+static char g_path[MAX_PATH];
 #ifdef HOST_CYGWIN
 static char g_dequoted[MAX_PATH];
 static char g_posixpath[MAX_PATH];
@@ -187,6 +188,7 @@ static char *MY_strtok_r(char *str, const char *delim, char **saveptr)
     {
       *saveptr = pend;
     }
+
   return pbegin;
 }
 
@@ -425,15 +427,46 @@ static const char *do_expand(const char *argument)
         {
           if (*src == '\\')
             {
-              *dest++ = '\\';
+              /* Copy backslash */
+
+              *dest++ = *src++;
               if (++len >= MAX_EXPAND)
                 {
                   break;
                 }
-            }
 
-          *dest++ = *src++;
-          len++;
+              /* Already expanded? */
+
+              if (*src == '\\')
+                {
+                  /* Yes... just copy all consecutive backslashes */
+
+                  do
+                    {
+                      *dest++ = *src++;
+                      if (++len >= MAX_EXPAND)
+                        {
+                          break;
+                        }
+                    }
+                  while (*src == '\\');
+                }
+              else
+                {
+                  /* No.. expeand */
+
+                  *dest++ = '\\';
+                  if (++len >= MAX_EXPAND)
+                    {
+                      break;
+                    }
+                }
+            }
+          else
+          {
+            *dest++ = *src++;
+            len++;
+          }
         }
 
       if (*src)
@@ -672,54 +705,49 @@ static void do_dependency(const char *file)
 
       /* Create a full path to the file */
 
-      expanded = do_expand(path);
-      pathlen = strlen(expanded);
-
-      totallen = cmdlen + pathlen;
-      if (totallen >= MAX_BUFFER)
+      pathlen = strlen(path);
+      if (pathlen >= MAX_PATH)
         {
           fprintf(stderr, "ERROR: Path is too long [%d/%d]: %s\n",
-                  totallen, MAX_BUFFER, path);
+                  pathlen, MAX_PATH, path);
           exit(EXIT_FAILURE);
         }
 
-      strcpy(&g_command[cmdlen], expanded);
+      strcpy(g_path, path);
 
-      if (g_command[totallen] != '\0')
+      if (g_path[pathlen] != '\0')
         {
           fprintf(stderr, "ERROR: Missing NUL terminator\n");
           exit(EXIT_FAILURE);
         }
 
-      if (g_command[totallen-1] != separator)
+      if (g_path[pathlen-1] != separator)
         {
-          g_command[totallen] = separator;
-          g_command[totallen+1] = '\0';
+          g_path[pathlen] = separator;
+          g_path[pathlen+1] = '\0';
           pathlen++;
-          totallen++;
         }
 
-      expanded = do_expand(file);
-      filelen = strlen(expanded);
-      totallen += filelen;
-      if (totallen >= MAX_BUFFER)
+      filelen = strlen(file);
+      pathlen += filelen;
+      if (pathlen >= MAX_PATH)
         {
           fprintf(stderr, "ERROR: Path+file is too long [%d/%d]\n",
-                  totallen, MAX_BUFFER);
+                  pathlen, MAX_PATH);
           exit(EXIT_FAILURE);
         }
 
-      strcat(g_command, expanded);
+      strcat(g_path, file);
 
       /* Check that a file actually exists at this path */
 
       if (g_debug)
         {
           fprintf(stderr, "Trying path=%s file=%s fullpath=%s\n",
-                  path, file, &g_command[cmdlen]);
+                  path, file, g_path);
         }
 
-      converted = convert_path(&g_command[cmdlen]);
+      converted = convert_path(g_path);
       ret = stat(converted, &buf);
       if (ret < 0)
         {
@@ -730,13 +758,28 @@ static void do_dependency(const char *file)
       if (!S_ISREG(buf.st_mode))
         {
           fprintf(stderr, "ERROR: File %s exists but is not a regular file\n",
-                  &g_command[cmdlen]);
+                  g_path);
           exit(EXIT_FAILURE);
         }
 
-      /* Okay.. we have.  Create the dependency.  One a failure to start the
-       * compiler, system() will return -1;  Otherwise, the returned value
-       * from the compiler is in WEXITSTATUS(ret).
+      /* Append the expanded path to the command */
+
+      expanded = do_expand(g_path);
+      pathlen  = strlen(expanded);
+      totallen = cmdlen + pathlen;
+
+      if (totallen >= MAX_BUFFER)
+        {
+          fprintf(stderr, "ERROR: Path string is too long [%d/%d]: %s\n",
+                  totallen, MAX_BUFFER, g_path);
+          exit(EXIT_FAILURE);
+        }
+
+      strcat(g_command, expanded);
+
+      /* Okay.. we have everything.  Create the dependency.  One a failure
+       * to start the compiler, system() will return -1;  Otherwise, the
+       * returned value from the compiler is in WEXITSTATUS(ret).
        */
 
       if (g_debug)
