@@ -49,13 +49,17 @@ HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I. -DCONFIG_WINDOWS_NATIVE
 
 else
 
-# GCC is assumed in the POSIX environment.
+# GCC is assumed in the POSIX environment (Linux or Cygwin).
 # strtok_r is used in some tools, but does not seem to be available in
 # the MinGW environment.
 
 HOSTCC ?= gcc
-HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I. -DHAVE_STRTOK_C
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
+HOSTCFLAGS += -DHAVE_STRTOK_C=1
 
+ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+HOSTCFLAGS += -DHAVE_CYGWIN=1
+endif
 endif
 
 # Targets

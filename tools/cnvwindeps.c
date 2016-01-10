@@ -61,7 +61,6 @@ static unsigned long g_lineno;
 static char g_line[MAX_LINE];
 static char g_dequoted[MAX_PATH];
 static char g_posix[MAX_PATH];
-static const char g_cygpath[] = "/usr/bin/cygpath";
 
 /****************************************************************************
  * Private Functions

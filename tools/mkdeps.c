@@ -48,11 +48,17 @@
 #include <libgen.h>
 #include <errno.h>
 
+#ifdef HAVE_CYGWIN
+#  include <sys/cygwin.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define MAX_BUFFER  (4096)
+#define MAX_EXPAND  (2048)
+#define MAX_PATH    (512)
 
 /* NAME_MAX is typically defined in limits.h */
 
@@ -101,15 +107,19 @@ static char *g_objpath   = NULL;
 static char *g_suffix    = ".o";
 static int   g_debug     = 0;
 static bool  g_winnative = false;
+
 #ifdef HAVE_WINPATH
 static bool  g_winpath   = false;
 static char *g_topdir    = NULL;
-#define DELIM "\\"
-#else
-#define DELIM "/"
 #endif
 
 static char g_command[MAX_BUFFER];
+static char g_expand[MAX_EXPAND];
+
+#ifdef HAVE_CYGWIN
+static char g_dequoted[MAX_PATH];
+static char g_posixpath[MAX_PATH];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -413,12 +423,144 @@ static void parse_args(int argc, char **argv)
 #ifdef HAVE_WINPATH
   if (g_winnative && g_winpath)
     {
-      show_usage(argv[0], "ERROR: Both --winnative and --winpapth makes no sense", EXIT_FAILURE);
+      show_usage(argv[0], "ERROR: Both --winnative and --winpath makes no sense", EXIT_FAILURE);
     }
 #endif
 }
 
-static void do_dependency(const char *file, char separator)
+static const char *do_expand(const char *argument)
+{
+  if (g_winnative)
+    {
+      const char *src;
+      char *dest;
+      int len;
+
+      src  = argument;
+      dest = g_expand;
+      len  = 0;
+
+      while (*src && len < MAX_EXPAND)
+        {
+          if (*src == '\\')
+            {
+              *dest++ = '\\';
+              if (++len >= MAX_EXPAND)
+                {
+                  break;
+                }
+            }
+
+          *dest++ = *src++;
+          len++;
+        }
+
+      if (*src)
+        {
+          fprintf(stderr, "ERROR: Truncated during expansion string is too long [%lu/%u]\n",
+                  (unsigned long)strlen(argument), MAX_EXPAND);
+          exit(EXIT_FAILURE);
+        }
+
+      *dest = '\0';
+      return g_expand;
+    }
+  else
+    {
+      return argument;
+    }
+}
+
+#ifdef HAVE_CYGWIN
+static bool dequote_path(const char *winpath)
+{
+  char *dest = g_dequoted;
+  const char *src = winpath;
+  int len = 0;
+  bool quoted = false;
+
+  while (*src && len < MAX_PATH)
+    {
+      if (src[0] != '\\' || (src[1] != ' ' && src[1] != '(' && src[1] != ')'))
+        {
+          *dest++ = *src;
+          len++;
+        }
+      else
+        {
+          quoted = true;
+        }
+
+      src++;
+    }
+
+  if (*src || len >= MAX_PATH)
+    {
+      fprintf(stderr, "# ERROR: Path truncated\n");
+      exit(EXIT_FAILURE);
+    }
+
+  *dest = '\0';
+  return quoted;
+}
+#endif
+
+static const char *convert_path(const char *path)
+{
+#ifdef HAVE_CYGWIN
+  if (g_winnative)
+    {
+      const char *retptr;
+      ssize_t size;
+      ssize_t ret;
+      bool quoted;
+
+      quoted = dequote_path(path);
+      if (quoted)
+        {
+          retptr = g_posixpath;
+        }
+      else
+        {
+          retptr = &g_posixpath[1];
+        }
+
+      size = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_RELATIVE, g_dequoted,
+                             NULL, 0);
+      if (size > (MAX_PATH-3))
+        {
+          fprintf(stderr, "# ERROR: POSIX path too long: %lu\n",
+                  (unsigned long)size);
+          exit(EXIT_FAILURE);
+        }
+
+      ret = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_RELATIVE, g_dequoted,
+                             &g_posixpath[1], MAX_PATH-3);
+      if (ret < 0)
+        {
+          fprintf(stderr, "# ERROR: cygwin_conv_path '%s' failed: %s\n",
+                  g_dequoted, strerror(errno));
+          exit(EXIT_FAILURE);
+        }
+
+      if (quoted)
+        {
+          size++;
+          g_posixpath[0] = '"';
+          g_posixpath[size] = '"';
+        }
+
+      g_posixpath[size+1] = '\0';
+      return retptr;
+    }
+  else
+#endif
+    {
+      return path;
+    }
+}
+
+static void do_dependency(const char *file)
 {
   static const char moption[] = " -M ";
   struct stat buf;
@@ -426,11 +568,16 @@ static void do_dependency(const char *file, char separator)
   char *altpath;
   char *path;
   char *lasts;
+  char separator;
   int cmdlen;
   int pathlen;
   int filelen;
   int totallen;
   int ret;
+
+  /* Initialize the separator */
+
+  separator =  g_winnative ? '\\' : '/';
 
   /* Copy the compiler into the command buffer */
 
@@ -444,16 +591,6 @@ static void do_dependency(const char *file, char separator)
 
   strcpy(g_command, g_cc);
 
-  /* Copy " -M " */
-
-  cmdlen += strlen(moption);
-  if (cmdlen >= MAX_BUFFER)
-    {
-      fprintf(stderr, "ERROR: Option string is too long [%d/%d]: %s\n",
-              cmdlen, MAX_BUFFER, moption);
-      exit(EXIT_FAILURE);
-    }
-
   /* Copy " -MT " */
 
   if (g_objpath)
@@ -462,6 +599,7 @@ static void do_dependency(const char *file, char separator)
       char *dupname;
       char *objname;
       char *dotptr;
+      const char *expanded;
 
       dupname = strdup(file);
       if (!dupname)
@@ -477,10 +615,11 @@ static void do_dependency(const char *file, char separator)
           *dotptr = '\0';
         }
 
-      snprintf(tmp, NAME_MAX+6, " -MT %s" DELIM "%s%s ",
-               g_objpath, objname, g_suffix);
+      snprintf(tmp, NAME_MAX+6, " -MT %s%c%s%s ",
+               g_objpath, separator, objname, g_suffix);
+      expanded = do_expand(tmp);
 
-      cmdlen += strlen(tmp);
+      cmdlen += strlen(expanded);
       if (cmdlen >= MAX_BUFFER)
         {
           fprintf(stderr, "ERROR: Option string is too long [%d/%d]: %s\n",
@@ -488,8 +627,18 @@ static void do_dependency(const char *file, char separator)
           exit(EXIT_FAILURE);
         }
 
-      strcat(g_command, tmp);
+      strcat(g_command, expanded);
       free(dupname);
+    }
+
+  /* Copy " -M " */
+
+  cmdlen += strlen(moption);
+  if (cmdlen >= MAX_BUFFER)
+    {
+      fprintf(stderr, "ERROR: Option string is too long [%d/%d]: %s\n",
+              cmdlen, MAX_BUFFER, moption);
+      exit(EXIT_FAILURE);
     }
 
   strcat(g_command, moption);
@@ -498,6 +647,8 @@ static void do_dependency(const char *file, char separator)
 
   if (g_cflags)
     {
+      const char *expanded;
+
       cmdlen += strlen(g_cflags);
       if (cmdlen >= MAX_BUFFER)
         {
@@ -506,7 +657,8 @@ static void do_dependency(const char *file, char separator)
           exit(EXIT_FAILURE);
         }
 
-      strcat(g_command, g_cflags);
+      expanded = do_expand(g_cflags);
+      strcat(g_command, expanded);
     }
 
   /* Add a space */
@@ -534,9 +686,14 @@ static void do_dependency(const char *file, char separator)
 
   while ((path = strtok_r(altpath, " ", &lasts)) != NULL)
     {
+      const char *expanded;
+      const char *converted;
+
       /* Create a full path to the file */
 
-      pathlen = strlen(path);
+      expanded = do_expand(path);
+      pathlen = strlen(expanded);
+
       totallen = cmdlen + pathlen;
       if (totallen >= MAX_BUFFER)
         {
@@ -545,7 +702,7 @@ static void do_dependency(const char *file, char separator)
           exit(EXIT_FAILURE);
         }
 
-      strcpy(&g_command[cmdlen], path);
+      strcpy(&g_command[cmdlen], expanded);
 
       if (g_command[totallen] != '\0')
         {
@@ -553,7 +710,7 @@ static void do_dependency(const char *file, char separator)
           exit(EXIT_FAILURE);
         }
 
-       if (g_command[totallen-1] != separator)
+      if (g_command[totallen-1] != separator)
         {
           g_command[totallen] = separator;
           g_command[totallen+1] = '\0';
@@ -561,16 +718,17 @@ static void do_dependency(const char *file, char separator)
           totallen++;
         }
 
-       filelen = strlen(file);
-       totallen += filelen;
-       if (totallen >= MAX_BUFFER)
-         {
+      expanded = do_expand(file);
+      filelen = strlen(expanded);
+      totallen += filelen;
+      if (totallen >= MAX_BUFFER)
+        {
           fprintf(stderr, "ERROR: Path+file is too long [%d/%d]\n",
                   totallen, MAX_BUFFER);
           exit(EXIT_FAILURE);
-         }
+        }
 
-       strcat(g_command, file);
+      strcat(g_command, expanded);
 
       /* Check that a file actually exists at this path */
 
@@ -580,7 +738,8 @@ static void do_dependency(const char *file, char separator)
                   path, file, &g_command[cmdlen]);
         }
 
-      ret = stat(&g_command[cmdlen], &buf);
+      converted = convert_path(&g_command[cmdlen]);
+      ret = stat(converted, &buf);
       if (ret < 0)
         {
           altpath = NULL;
@@ -822,7 +981,7 @@ int main(int argc, char **argv, char **envp)
       else
 #endif
         {
-          do_dependency(file, g_winnative ? '\\' : '/');
+          do_dependency(file);
         }
 
       files = NULL;

@@ -39,7 +39,7 @@
 TOOLDIR=$(dirname $0)
 
 if [ ! -x ${TOOLDIR}/mkwindeps.sh ]; then
-  echo "ERROR: tools/ directory not found"
+  echo "# ERROR: tools/ directory not found"
   exit 1
 fi
 
@@ -49,19 +49,19 @@ MKDEPS=${TOOLDIR}/mkdeps.exe
 CNVWINDEPS=${TOOLDIR}/cnvwindeps.exe
 
 if [ ! -x ${MKDEPS} ]; then
-  echo "ERROR: tools/mkdeps.exe does not exist"
+  echo "# ERROR: tools/mkdeps.exe does not exist"
   exit 1
 fi
 
 if [ ! -x ${CNVWINDEPS} ]; then
-  echo "ERROR: tools/cnvwindeps.exe does not exist"
+  echo "# ERROR: tools/cnvwindeps.exe does not exist"
   exit 1
 fi
 
 # Run the mkdeps.exe program to generate a Windows dependency file
 
 TMPFILE=$(mktemp)
-${MKDEPS} $* > ${TMPFILE} || { echo "mkdeps.exe failed"; exit 1; }
+${MKDEPS} --winnative $* > ${TMPFILE} || { echo "# ERROR: mkdeps.exe failed"; exit 1; }
 
 # Then convert this to a POSIX dependency file (on stdout)
 
