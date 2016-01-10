@@ -272,9 +272,7 @@ tools/mkdeps$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkdeps$(HOSTEXEEXT)
 
 tools/cnvwindeps$(HOSTEXEEXT):
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" cnvwindeps$(HOSTEXEEXT)
-endif
 
 # dirlinks, and helpers
 #

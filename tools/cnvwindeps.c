@@ -44,6 +44,8 @@
 #include <ctype.h>
 #include <errno.h>
 
+#ifdef HOST_CYGWIN
+
 #include <sys/cygwin.h>
 
 /****************************************************************************
@@ -263,3 +265,14 @@ int main(int argc, char **argv, char **envp)
   fclose(stream);
   return 0;
 }
+
+#else /* HOST_CYGWIN */
+
+int main(int argc, char **argv, char **envp)
+{
+  fprintf(stderr, "ERROR: This tool is only available under Cywgin\n");
+  return EXIT_FAILURE;
+}
+
+#endif /* HOST_CYGWIN */
+
