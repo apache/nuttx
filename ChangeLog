@@ -11300,3 +11300,6 @@
 	* tools/mkdeps.c:  Deleted mkdeps.sh and mkdeps.bat.  The mkdeps
 	  executable generated from mkdeps.c is now that the only supported
 	  way to make dependencies (2016-01-09).
+	* tools/mkdeps.c:  Extended/fixed support for --winpath option.
+	  Dependencies now work under Cygwin with a native Windows toolchain
+	  (2016-01-10).

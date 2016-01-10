@@ -112,9 +112,9 @@ static bool  g_winpath   = false;
 #endif
 
 static char g_command[MAX_BUFFER];
-static char g_expand[MAX_EXPAND];
 static char g_path[MAX_PATH];
 #ifdef HOST_CYGWIN
+static char g_expand[MAX_EXPAND];
 static char g_dequoted[MAX_PATH];
 static char g_posixpath[MAX_PATH];
 #endif
@@ -413,6 +413,7 @@ static void parse_args(int argc, char **argv)
 
 static const char *do_expand(const char *argument)
 {
+#ifdef HOST_CYGWIN
   if (g_winpath)
     {
       const char *src;
@@ -480,6 +481,7 @@ static const char *do_expand(const char *argument)
       return g_expand;
     }
   else
+#endif
     {
       return argument;
     }
@@ -591,7 +593,11 @@ static void do_dependency(const char *file)
 
   /* Initialize the separator */
 
+#ifdef HOST_CYGWIN
   separator =  (g_winnative || g_winpath) ? '\\' : '/';
+#else
+  separator =  g_winnative ? '\\' : '/';
+#endif
 
   /* Copy the compiler into the command buffer */
 
