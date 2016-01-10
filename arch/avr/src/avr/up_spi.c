@@ -267,7 +267,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           actual = BOARD_CPU_CLOCK / 128;
         }
 
-#warning REVIST: spcr/spsr are never used
+#warning REVISIT: spcr/spsr are never used
 
       /* Save the frequency setting */
 
