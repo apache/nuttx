@@ -17,7 +17,6 @@ Contents
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
   o avr-libc
-  o MEMX
   o Teensy++ Configuration Options
   o Configurations
 
@@ -393,33 +392,6 @@ Build Notes:
   5. Install avr-lib.
 
      make install
-
-MEMX
-^^^^
-
-  If you use the GCC AVR toolchain from the Atmel Studio, then you can
-  enable suppport for the MEMX storage:
-
-    CONFIG_AVR_HAS_MEMX_PTR=y
-
-  If this support is enabled, then all strings will be saved in FLASH and
-  standard string-oriented interfaces such printf() will change so that
-  they accept memx pointers.
-
-  This means that (1) ALL strings must lie in FLASH, and (2) since the
-  strings are moved from SRAM to FLASH, you will save a LOT of SRAM usage
-  in some configurations that use a lot of string memory (such as the
-  ostest and nsh configurations).
-
-  UPDATE 2016-01-07:  Unfortunately, there is an issue.  When I enable
-  CONFIG_AVR_HAS_MEMX_PTR=y in the nsh/ configuration, I get a number
-  of link time errors of this form:
-
-    FILENAME.c:(.text+0xOFFSET): warning: internal error: out of range error
-
-  This same build configuration works for the arduino-mega2560 so I am
-  suspecting some issue with the toolchain support for the AT90USB (avr:5)
-  vs the Atmega2560 (avr:6).
 
 Teensy++ Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
