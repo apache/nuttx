@@ -47,8 +47,10 @@
 #include <netinet/ether.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/dns.h>
 
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 #include "procfs/procfs.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
@@ -246,7 +248,7 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
                   "Mask:%s\n", inet_ntoa(addr));
 
 #if defined(CONFIG_NSH_DHCPC) || defined(CONFIG_NSH_DNS)
-  netlib_get_ipv4dnsaddr(&addr);
+  dns_getaddr(&addr);
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "\tDNSaddr:%s\n", inet_ntoa(addr));
 #endif
@@ -255,7 +257,7 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
 #ifdef CONFIG_NET_IPv6
   /* Convert the 128 network mask to a human friendly prefix length */
 
-  preflen = netlib_ipv6netmask2prefix(dev->d_ipv6netmask);
+  preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
 
   /* Show the assigned IPv6 address */
 
