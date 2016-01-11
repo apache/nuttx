@@ -275,7 +275,7 @@ int main(int argc, char **argv, char **envp)
                         {
                           printf(" \\\n\t%s", g_posix);
                         }
-                  }
+                    }
                 }
             }
         }
