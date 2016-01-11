@@ -99,6 +99,15 @@ static char *find_spaces(char *ptr)
   return ptr;
 }
 
+static bool scour_path(const char *path)
+{
+  /* KLUDGE: GNU make cannot handle dependencies with spaces in them.
+   * There may be addition characters that cause problems too.
+   */
+
+  return strchr(path, ' ') != NULL;
+}
+
 static bool dequote_path(const char *winpath)
 {
   char *dest = g_dequoted;
@@ -175,6 +184,7 @@ int main(int argc, char **argv, char **envp)
   FILE *stream;
   bool begin;
   bool quoted;
+  bool scouring;
 
   if (argc != 2)
     {
@@ -189,7 +199,8 @@ int main(int argc, char **argv, char **envp)
       exit(EXIT_FAILURE);
     }
 
-  begin = true;
+  begin    = true;
+  scouring = false;
   g_lineno = 0;
 
   while (fgets(g_line, MAX_LINE, stream) != NULL)
@@ -214,15 +225,19 @@ int main(int argc, char **argv, char **envp)
                   *next++ = '\0';
                 }
 
-              quoted = convert_path(path);
-              if (quoted)
+              scouring = scour_path(path);
+              if (!scouring)
                 {
-                  printf("\"%s\":", g_posix);
-                }
-              else
-                {
-                  printf("%s:", g_posix);
-                }
+                  quoted = convert_path(path);
+                  if (quoted)
+                    {
+                      printf("\"%s\":", g_posix);
+                    }
+                  else
+                    {
+                      printf("%s:", g_posix);
+                    }
+               }
 
               begin = false;
             }
@@ -238,7 +253,8 @@ int main(int argc, char **argv, char **envp)
               else if (strcmp(path, "") == 0)
                 {
                   printf("\n\n");
-                  begin = true;
+                  begin    = true;
+                  scouring = false;
                   break;
                 }
               else
@@ -248,15 +264,18 @@ int main(int argc, char **argv, char **envp)
                       *next++ = '\0';
                     }
 
-                  quoted = convert_path(path);
-                  if (quoted)
+                  if (!scouring && !scour_path(path))
                     {
-                      printf(" \\\n\t\"%s\"", g_posix);
-                    }
-                  else
-                    {
-                      printf(" \\\n\t%s", g_posix);
-                    }
+                      quoted = convert_path(path);
+                      if (quoted)
+                        {
+                          printf(" \\\n\t\"%s\"", g_posix);
+                        }
+                      else
+                        {
+                          printf(" \\\n\t%s", g_posix);
+                        }
+                  }
                 }
             }
         }
