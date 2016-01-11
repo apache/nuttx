@@ -289,7 +289,7 @@ int main(int argc, char **argv, char **envp)
 
 int main(int argc, char **argv, char **envp)
 {
-  fprintf(stderr, "ERROR: This tool is only available under Cywgin\n");
+  fprintf(stderr, "ERROR: This tool is only available under Cygwin\n");
   return EXIT_FAILURE;
 }
 
