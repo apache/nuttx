@@ -247,7 +247,12 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "Mask:%s\n", inet_ntoa(addr));
 
-#if defined(CONFIG_NSH_DHCPC) || defined(CONFIG_NSH_DNS)
+#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_NETDB_DNSCLIENT)
+  /* Show the IPv4 DNS address */
+  /* REVISIT:  DNS client is global, not per device, and resides in the
+   * application space and is not generally accessible from kernel space.
+   */
+
   dns_getaddr(&addr);
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "\tDNSaddr:%s\n", inet_ntoa(addr));
@@ -275,7 +280,8 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
                       "\tinet6 DRaddr:%s/%d\n", addrstr, preflen);
     }
 
-#if defined(CONFIG_NSH_DHCPCv6) || defined(CONFIG_NSH_DNS)
+#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_NETDB_DNSCLIENT)
+  /* Show the IPv6 DNS address */
 #  warning Missing logic
 #endif
 #endif
