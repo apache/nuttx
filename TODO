@@ -1012,17 +1012,17 @@ o Network (net/, drivers/net)
   Description: Currently there is a single, global DNS server address.  This
                address resides in user space (owned by libc/netdb) but is
                accessed by network code in kernel space (net/procfs).  This
-               work in a FLAT build, not not in other build modules.
+               works in a FLAT build, not not in other build modules.
 
                Things would be really weird in the kernel build:  There
                would be a separate name server address and a separate netdb
                DNS client in each process.  That can't be right.
 
                The Linux kernel has no knowledge at all about DNS addresses.
-               DNS addresses are retained in /etc/resolv.conf in records 
+               DNS addresses are retained in /etc/resolv.conf in records
                ike:
 
-                 nameserver <name> <server IP addresses>
+                 nameserver <nameserver IP addresses>
 
                The nameserver is associated with the device only through
                the routing of the IP address.  And this is how there can
