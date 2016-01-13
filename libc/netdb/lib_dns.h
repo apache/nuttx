@@ -74,17 +74,39 @@
 #  define CONFIG_NETDB_DNSCLIENT_LIFESEC 3600
 #endif
 
+#ifndef CONFIG_NETDB_RESOLVCONF_PATH
+#  define CONFIG_NETDB_RESOLVCONF_PATH "/etc/resolv.conf"
+#endif
+
 #define DNS_MAX_LINE 80
 #define NETDB_DNS_KEYWORD "nameserver"
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* This describes either an IPv4 or IPv6 address.  It is essentially a named
+ * alternative to sockaddr_storage.
+ */
 
-typedef CODE int (*dns_callback_t)(FAR void *arg, int af, FAR void *addr);
+union dns_server_u
+{
+  struct sockaddr     addr;        /* Common address representation */
+#ifdef CONFIG_NET_IPv4
+  struct sockaddr_in  ipv4;        /* IPv4 address */
+#endif
+#ifdef CONFIG_NET_IPv6
+  struct sockaddr_in6 ipv6;        /* IPv6 address */
+#endif
+};
+
+/* The type of the callback from dns_foreach_nameserver() */
+
+typedef CODE int (*dns_callback_t)(FAR void *arg,
+                                   FAR struct sockaddr *addr,
+                                   FAR socklen_t *addrlen);
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -95,6 +117,17 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+#ifndef CONFIG_NETDB_RESOLVCONF
+/* The DNS server address */
+
+EXTERN union dns_server_u g_dns_server;
+EXTERN bool g_dns_address;     /* true: We have the address of the DNS server */
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: dns_bind

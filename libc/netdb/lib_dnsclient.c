@@ -89,20 +89,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This describes either an IPv4 or IPv6 address.  It is essentially a named
- * alternative to sockaddr_storage.
- */
-
-union dns_server_u
-{
-  struct sockaddr     addr;        /* Common address representation */
-#ifdef CONFIG_NET_IPv4
-  struct sockaddr_in  ipv4;        /* IPv4 address */
-#endif
-#ifdef CONFIG_NET_IPv6
-  struct sockaddr_in6 ipv6;        /* IPv6 address */
-#endif
-};
 
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
 /* This described one entry in the cache of resolved hostnames */
@@ -123,16 +109,11 @@ struct dns_cache_s
 
 static sem_t   g_dns_sem;         /* Protects g_seqno and DNS cache */
 static bool    g_dns_initialized; /* DNS data structures initialized */
-static bool    g_dns_address;     /* We have the address of the DNS server */
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
 static uint8_t g_dns_head;        /* Head of the circular, DNS resolver cache */
 static uint8_t g_dns_tail;        /* Tail of the circular, DNS resolver cache */
 #endif
 static uint8_t g_seqno;           /* Sequence number of the next request */
-
-/* The DNS server address */
-
-static union dns_server_u g_dns_server;
 
 #ifdef CONFIG_NETDB_DNSSERVER_IPv6
 /* This is the default IPv6 DNS server address */
@@ -875,52 +856,6 @@ int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
     }
 
   return -ETIMEDOUT;
-}
-
-/****************************************************************************
- * Name: dns_getserver
- *
- * Description:
- *   Obtain the currently configured DNS server.
- *
- ****************************************************************************/
-
-int dns_getserver(FAR struct sockaddr *addr, FAR socklen_t *addrlen)
-{
-  socklen_t copylen;
-
-  DEBUGASSERT(addr != NULL && addrlen != NULL);
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (g_dns_server.addr.sa_family == AF_INET)
-#endif
-    {
-      copylen = sizeof(struct sockaddr_in);
-    }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      copylen = sizeof(struct sockaddr_in6);
-    }
-#endif
-
-  /* Copy the DNS server address to the caller-provided buffer */
-
-  if (copylen > *addrlen)
-    {
-      nvdbg("ERROR: addrlen %ld too small for address family %d\n",
-            (long)addrlen, g_dns_server.addr.sa_family);
-      return -EINVAL;
-    }
-
-  memcpy(addr, &g_dns_server.addr, copylen);
-  *addrlen = copylen;
-  return OK;
 }
 
 /****************************************************************************
