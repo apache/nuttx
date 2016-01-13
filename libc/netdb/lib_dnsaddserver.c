@@ -73,7 +73,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR FILE *stream;
   char line[DNS_MAX_LINE];
-  int ret = OK;
+  int ret;
 
   stream = fopen(CONFIG_NETDB_RESOLVCONF, "at");
   if (stream == NULL)
@@ -93,6 +93,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       if (socklen < sizeof(struct sockaddr_in))
         {
           ret = -EINVAL;
+          goto errout;
         }
       else
         {
@@ -100,13 +101,14 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
           if (inet_ntop(AF_INET, &in4->sin_addr, line, DNS_MAX_LINE) == NULL)
             {
-              int errcode = errno;
+              ret = -errno;
               ndbg("ERROR: inet_ntop failed: %d\n", errcode);
-              DEBUGASSERT(errcode > 0);
-              ret = -errcode;
+              DEBUGASSERT(errcode < 0);
+              goto errout;
             }
         }
-      else
+    }
+  else
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -117,6 +119,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       if (socklen < sizeof(struct sockaddr_in6))
         {
           ret = -EINVAL;
+          goto errout;
         }
       else
         {
@@ -124,20 +127,35 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
           if (inet_ntop(AF_INET6, &in6->sin6_addr, line, DNS_MAX_LINE) == NULL)
             {
-              int errcode = errno;
+              ret = -errno;
               ndbg("ERROR: inet_ntop failed: %d\n", errcode);
-              DEBUGASSERT(errcode > 0);
-              return -errcode;
+              DEBUGASSERT(errcode < 0);
+              goto errout;
             }
         }
-      else
+    }
+  else
 #endif
-        {
-          nvdbg("ERROR: Unsupported family: %d\n",
-                g_dns_server.addr.sa_family);
-          ret = -ENOSYS;
-        }
+    {
+      nvdbg("ERROR: Unsupported family: %d\n",
+            g_dns_server.addr.sa_family);
+      ret = -ENOSYS;
+      goto errout;
+    }
 
+  /* Write the new record to the end of the resolv.conf file */
+
+  if (fprintf(stream, "%s %s\n", NETDB_DNS_KEYWORD, line) < 0)
+    {
+      ret = -errno;
+      ndbg("ERROR: fprintf failed: %d\n", errcode);
+      DEBUGASSERT(errcode < 0);
+      goto errout;
+    }
+
+  ret = OK;
+
+errout:
   fclose(stream);
   return ret;
 }
