@@ -17,7 +17,7 @@ nuttx/
   (8)  Kernel/Protected Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (11)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (1)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
@@ -1007,6 +1007,28 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low.  I don't know of any issues now, but I am sure that
                someone will encounter this in the future.
+
+  Title:       GLOBAL DNS ADDRESS
+  Description: Currently there is a single, global DNS server address.  I am
+               thinking that there should be one DNS server address per
+               network device.  This would mean:
+               - Moving the global DNS server address into the network
+                 device structure
+               - Add netwok IOCTLs to set and get the DNS address
+               - Use these address in libc/netdb and apps/netutils/netlib.
+               - The netdb/netlib interface would need to have the device
+                 name as a parameter and would need to call the IOCTL to
+                 get/set the DNS server address associated with the device.
+               Needs a more investigation.
+  Status:      Open
+  Priority:    Low.  I doubt that there are any multiple NIC, multiple DNS
+               server configurations
+
+  Title:       MISSING netdb INTERFACES
+  Description: There is no implementation for many netdb interfaces such as
+               getaddrinfo(), freeaddrinfo(), getnameinfo(), etc.
+  Status:      Open
+  Priority:    Low
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

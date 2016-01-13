@@ -500,6 +500,11 @@ config SCHED_CPULOAD
 		The statistics collected in this could be used, for example in the
 		PROCFS file system to provide CPU load measurements when read.
 
+		Note that in tickless mode of operation (SCHED_TICKLESS) there is
+		no system timer interrupt and CPU load measurements will not be
+		possible unless you provide an alternative clock to driver the
+		sampling and select SCHED_CPULOAD_EXTCLK.
+
 if SCHED_CPULOAD
 
 config SCHED_CPULOAD_EXTCLK
