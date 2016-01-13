@@ -47,7 +47,6 @@
 #include <netinet/ether.h>
 
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/dns.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -246,17 +245,6 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
   addr.s_addr = dev->d_netmask;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "Mask:%s\n", inet_ntoa(addr));
-
-#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_NETDB_DNSCLIENT)
-  /* Show the IPv4 DNS address */
-  /* REVISIT:  DNS client is global, not per device, and resides in the
-   * application space and is not generally accessible from kernel space.
-   */
-
-  dns_getaddr(&addr);
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "\tDNSaddr:%s\n", inet_ntoa(addr));
-#endif
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -279,11 +267,6 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "\tinet6 DRaddr:%s/%d\n", addrstr, preflen);
     }
-
-#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_NETDB_DNSCLIENT)
-  /* Show the IPv6 DNS address */
-#  warning Missing logic
-#endif
 #endif
 
   len += snprintf(&netfile->line[len], NET_LINELEN - len, "\n");

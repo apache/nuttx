@@ -17,7 +17,7 @@ nuttx/
   (8)  Kernel/Protected Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (1)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
@@ -1007,36 +1007,6 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low.  I don't know of any issues now, but I am sure that
                someone will encounter this in the future.
-
-  Title:       GLOBAL DNS ADDRESS
-  Description: Currently there is a single, global DNS server address.  This
-               address resides in user space (owned by libc/netdb) but is
-               accessed by network code in kernel space (net/procfs).  This
-               works in a FLAT build, not not in other build modules.
-
-               Things would be really weird in the kernel build:  There
-               would be a separate name server address and a separate netdb
-               DNS client in each process.  That can't be right.
-
-               The Linux kernel has no knowledge at all about DNS addresses.
-               DNS addresses are retained in /etc/resolv.conf in records
-               ike:
-
-                 nameserver <nameserver IP addresses>
-
-               The nameserver is associated with the device only through
-               the routing of the IP address.  And this is how there can
-               be multiple, global DNS addresses.
-
-               Conclusion: The logic in net/procfs needs to be re-designed
-               so that it does not use the DNS address.  The DNS address(es)
-               should to applied to the device status by logic in the
-               implementation of the NSH ifconfig command.  This would be,
-               unfortunately, a significant re-design since the formatting
-               is currently performed in net/procfs.
-  Status:      Open
-  Priority:    Low.  I doubt that there are any multiple NIC, multiple DNS
-               server configurations
 
   Title:       MISSING netdb INTERFACES
   Description: There is no implementation for many netdb interfaces such as

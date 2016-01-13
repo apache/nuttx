@@ -372,7 +372,7 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
  *   af   - The af argument specifies the family of the address. This can be
  *          AF_INET or AF_INET6.
  *   src  - The src argument points to the string being passed in.
- *   dest - The dest argument points to a numstr into which the function stores
+ *   dest - The dest argument points to memory into which the function stores
  *          the numeric address; this must be large enough to hold the numeric
  *          address (32 bits for AF_INET, 128 bits for AF_INET6).
  *

@@ -5,7 +5,7 @@
  * The uIP DNS resolver functions are used to lookup a hostname and
  * map it to a numerical IP address.
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based heavily on portions of uIP:
@@ -227,8 +227,8 @@ static bool dns_initialize(void)
        addr4.sin_port        = DNS_DEFAULT_PORT;
        addr4.sin_addr.s_addr = HTONL(CONFIG_NETDB_DNSSERVER_IPv4ADDR);
 
-       ret = dns_setserver((FAR struct sockaddr *)&addr4,
-                           sizeof(struct sockaddr_in));
+       ret = dns_add_nameserver((FAR struct sockaddr *)&addr4,
+                                sizeof(struct sockaddr_in));
        if (ret < 0)
          {
            return false;
@@ -244,8 +244,8 @@ static bool dns_initialize(void)
        addr6.sin6_port   = DNS_DEFAULT_PORT;
        memcpy(addr6.sin6_addr.s6_addr, g_ipv6_hostaddr, 16);
 
-       ret = dns_setserver((FAR struct sockaddr *)&addr6,
-                           sizeof(struct sockaddr_in6));
+       ret = dns_add_nameserver((FAR struct sockaddr *)&addr6,
+                                sizeof(struct sockaddr_in6));
        if (ret < 0)
          {
            return false;
@@ -875,77 +875,6 @@ int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
     }
 
   return -ETIMEDOUT;
-}
-
-/****************************************************************************
- * Name: dns_setserver
- *
- * Description:
- *   Configure which DNS server to use for queries
- *
- ****************************************************************************/
-
-int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen)
-{
-  FAR uint16_t *pport;
-  size_t copylen;
-
-  DEBUGASSERT(addr != NULL);
-
-  /* Copy the new server IP address into our private global data structure */
-
-#ifdef CONFIG_NET_IPv4
-  /* Check for an IPv4 address */
-
-  if (addr->sa_family == AF_INET)
-    {
-      /* Set up for the IPv4 address copy */
-
-      copylen = sizeof(struct sockaddr_in);
-      pport   = &g_dns_server.ipv4.sin_port;
-    }
-  else
-#endif
-
-#ifdef CONFIG_NET_IPv6
-  /* Check for an IPv6 address */
-
-  if (addr->sa_family == AF_INET6)
-    {
-      /* Set up for the IPv6 address copy */
-
-      copylen = sizeof(struct sockaddr_in6);
-      pport   = &g_dns_server.ipv6.sin6_port;
-    }
-  else
-#endif
-    {
-      nvdbg("ERROR: Unsupported family: %d\n", addr->sa_family);
-      return -ENOSYS;
-    }
-
-  /* Copy the IP address */
-
-  if (addrlen < copylen)
-    {
-      nvdbg("ERROR: Invalid addrlen %ld for family %d\n",
-            (long)addrlen, addr->sa_family);
-      return -EINVAL;
-    }
-
-  memcpy(&g_dns_server.addr, addr, copylen);
-
-  /* A port number of zero means to use the default DNS server port number */
-
-  if (*pport == 0)
-    {
-      *pport = HTONS(DNS_DEFAULT_PORT);
-    }
-
-  /* We now have a valid DNS address */
-
-  g_dns_address = true;
-  return OK;
 }
 
 /****************************************************************************

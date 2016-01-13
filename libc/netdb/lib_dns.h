@@ -74,6 +74,15 @@
 #  define CONFIG_NETDB_DNSCLIENT_LIFESEC 3600
 #endif
 
+#define DNS_MAX_LINE 80
+#define NETDB_DNS_KEYWORD "nameserver"
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+typedef CODE int (*dns_callback_t)(FAR void *arg, int af, FAR void *addr);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -156,7 +165,7 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
                     FAR socklen_t *addrlen);
 #endif
 
-#undef EXTERN
+o#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

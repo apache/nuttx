@@ -178,44 +178,35 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: dns_setserver
+ * Name: dns_add_nameserver
  *
  * Description:
- *   Configure which DNS server to use for queries.  Set the port number
- *   to zero to use the default DNS server port.
+ *   Configure a DNS server to use for queries.  Set the port number to zero
+ *   to use the default DNS server port.
  *
  ****************************************************************************/
 
-int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen);
+int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
- * Name: dns_getserver
+ * Name: dns_del_nameserver
  *
  * Description:
- *   Obtain the currently configured DNS server.
+ *   Remove a DNS server so it is no longer available for further use.
  *
  ****************************************************************************/
-
-int dns_getserver(FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+/* REVISIT: Not implemented */
 
 /****************************************************************************
- * Name: dns_getaddr
+ * Name: dns_foreach_nameserver
  *
  * Description:
- *   Get the DNS server IPv4 address
- *
- * Parameters:
- *   ipaddr   The location to return the IPv4 address
- *
- * Return:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   on failure.
+ *   Traverse each nameserver entry in the resolv.conf file and perform the
+ *   the provided callback.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int dns_getaddr(FAR struct in_addr *inaddr);
-#endif
+int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)
