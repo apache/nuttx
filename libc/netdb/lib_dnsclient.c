@@ -46,20 +46,18 @@
 
 #include <nuttx/config.h>
 
-#include <sys/socket.h>
 #include <sys/time.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
 #include <unistd.h>
-#include <semaphore.h>
-#include <time.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
-#include <assert.h>
 
 #include <arpa/inet.h>
-#include <netinet/in.h>
+
+#if 0
+#include <time.h>
+
+#endif
 
 #include <nuttx/net/dns.h>
 
@@ -78,248 +76,19 @@
 #define SEND_BUFFER_SIZE 64
 #define RECV_BUFFER_SIZE CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
 
-/* Use clock monotonic, if possible */
-
-#ifdef CONFIG_CLOCK_MONOTONIC
-#  define DNS_CLOCK CLOCK_MONOTONIC
-#else
-#  define DNS_CLOCK CLOCK_REALTIME
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-/* This described one entry in the cache of resolved hostnames */
-
-struct dns_cache_s
-{
-#if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-  time_t              ctime;      /* Creation time */
-#endif
-  char                name[CONFIG_NETDB_DNSCLIENT_NAMESIZE];
-  union dns_server_u  addr;       /* Resolved address */
-};
-#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static sem_t   g_dns_sem;         /* Protects g_seqno and DNS cache */
-static bool    g_dns_initialized; /* DNS data structures initialized */
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-static uint8_t g_dns_head;        /* Head of the circular, DNS resolver cache */
-static uint8_t g_dns_tail;        /* Tail of the circular, DNS resolver cache */
-#endif
 static uint8_t g_seqno;           /* Sequence number of the next request */
-
-#ifdef CONFIG_NETDB_DNSSERVER_IPv6
-/* This is the default IPv6 DNS server address */
-
-static const uint16_t g_ipv6_hostaddr[8] =
-{
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_1),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_2),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_3),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_4),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_5),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_6),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_7),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_8)
-};
-#endif
-
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-/* This is the DNS resolver cache */
-
-static struct dns_cache_s g_dns_cache[CONFIG_NETDB_DNSCLIENT_ENTRIES];
-#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: dns_semtake
- *
- * Description:
- *   Take the DNS semaphore, ignoring errors do to the receipt of signals.
- *
- ****************************************************************************/
-
-static void dns_semtake(void)
-{
-  int errcode = 0;
-  int ret;
-
-  do
-    {
-       ret = sem_wait(&g_dns_sem);
-       if (ret < 0)
-         {
-           errcode = get_errno();
-           DEBUGASSERT(errcode == EINTR);
-         }
-    }
-  while (ret < 0 && errcode == EINTR);
-}
-
-/****************************************************************************
- * Name: dns_semgive
- *
- * Description:
- *   Release the DNS semaphore
- *
- ****************************************************************************/
-
-#define dns_semgive() sem_post(&g_dns_sem)
-
-/****************************************************************************
- * Name: dns_initialize
- *
- * Description:
- *   Make sure that the DNS client has been properly initialized for use.
- *
- ****************************************************************************/
-
-static bool dns_initialize(void)
-{
-  /* Have DNS data structures been initialized? */
-
-  if (!g_dns_initialized)
-    {
-      sem_init(&g_dns_sem, 0, 1);
-      g_dns_initialized = true;
-    }
-
-#ifndef CONFIG_NETDB_RESOLVCONF
-  /* Has the DNS server IP address been assigned? */
-
-  if (!g_dns_address)
-    {
-#if defined(CONFIG_NETDB_DNSSERVER_IPv4)
-       struct sockaddr_in addr4;
-       int ret;
-
-       /* No, configure the default IPv4 DNS server address */
-
-       addr4.sin_family      = AF_INET;
-       addr4.sin_port        = HTONS(DNS_DEFAULT_PORT);
-       addr4.sin_addr.s_addr = HTONL(CONFIG_NETDB_DNSSERVER_IPv4ADDR);
-
-       ret = dns_add_nameserver((FAR struct sockaddr *)&addr4,
-                                sizeof(struct sockaddr_in));
-       if (ret < 0)
-         {
-           return false;
-         }
-
-#elif defined(CONFIG_NETDB_DNSSERVER_IPv6)
-       struct sockaddr_in6 addr6;
-       int ret;
-
-       /* No, configure the default IPv6 DNS server address */
-
-       addr6.sin6_family = AF_INET6;
-       addr6.sin6_port   = HTONS(DNS_DEFAULT_PORT);
-       memcpy(addr6.sin6_addr.s6_addr, g_ipv6_hostaddr, 16);
-
-       ret = dns_add_nameserver((FAR struct sockaddr *)&addr6,
-                                sizeof(struct sockaddr_in6));
-       if (ret < 0)
-         {
-           return false;
-         }
-
-#else
-       /* Then we are not ready to perform DNS queries */
-
-       return false;
-#endif
-    }
-#endif /* !ONFIG_NETDB_RESOLVCONF */
-
-  return true;
-}
-
-/****************************************************************************
- * Name: dns_save_answer
- *
- * Description:
- *   Same the last resolved hostname in the DNS cache
- *
- * Input Parameters:
- *   hostname - The hostname string to be cached.
- *   addr     - The IP address associated with the hostname
- *   addrlen  - The size of the of the IP address.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-static void dns_save_answer(FAR const char *hostname,
-                            FAR const struct sockaddr *addr,
-                            socklen_t addrlen)
-{
-  FAR struct dns_cache_s *entry;
-#if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-  struct timespec now;
-#endif
-  int next;
-  int ndx;
-
-  /* Get exclusive access to the DNS cache */
-
-  dns_semtake();
-
-  /* Get the index to the new head of the list */
-
-  ndx  = g_dns_head;
-  next = ndx + 1;
-  if (next >= CONFIG_NETDB_DNSCLIENT_ENTRIES)
-    {
-      next = 0;
-    }
-
-  /* If the next head pointer would match the tail index, then increment
-   * the tail index, discarding the oldest mapping in the cache.
-   */
-
-  if (next == g_dns_tail)
-    {
-      int tmp = g_dns_tail + 1;
-      if (tmp >= CONFIG_NETDB_DNSCLIENT_ENTRIES)
-        {
-          tmp = 0;
-        }
-
-      g_dns_tail = tmp;
-    }
-
-  /* Save the answer in the cache */
-
-  entry = &g_dns_cache[ndx];
-
-#if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-  /* Get the current time, using CLOCK_MONOTONIC if possible */
-
-  (void)clock_settime(DNS_CLOCK, &now);
-  entry->ctime = (time_t)now.tv_sec;
-#endif
-
-  strncpy(entry->name, hostname, CONFIG_NETDB_DNSCLIENT_NAMESIZE);
-  memcpy(&entry->addr.addr, addr, addrlen);
-
-  /* Save the updated head index */
-
-  g_dns_head = next;
-  dns_semgive();
-}
-#endif
 
 /****************************************************************************
  * Name: dns_parse_name
@@ -859,148 +628,3 @@ int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
 
   return -ETIMEDOUT;
 }
-
-/****************************************************************************
- * Name: dns_find_answer
- *
- * Description:
- *   Check if we already have the resolved hostname address in the cache.
- *
- * Input Parameters:
- *   hostname - The hostname string to be resolved.
- *   addr     - The location to return the IP address associated with the
- *     hostname
- *   addrlen  - On entry, the size of the buffer backing up the 'addr'
- *     pointer.  On return, this location will hold the actual size of
- *     the returned address.
- *
- * Returned Value:
- *   If the host name was successfully found in the DNS name resolution
- *   cache, zero (OK) will be returned.  Otherwise, some negated errno
- *   value will be returned, typically -ENOENT meaning that the hostname
- *   was not found in the cache.
- *
- ****************************************************************************/
-
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
-                    FAR socklen_t *addrlen)
-{
-  FAR struct dns_cache_s *entry;
-#if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-  struct timespec now;
-  uint32_t elapsed;
-  int ret;
-#endif
-  int next;
-  int ndx;
-
-  /* If DNS not initialized, no need to proceed */
-
-  if (!g_dns_initialized)
-    {
-      ndbg("ERROR: DNS not initialized yet\n");
-      return -EAGAIN;
-    }
-
-  /* Get exclusive access to the DNS cache */
-
-  dns_semtake();
-
-#if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-  /* Get the current time, using CLOCK_MONOTONIC if possible */
-
-  ret = clock_settime(DNS_CLOCK, &now);
-#endif
-
-  /* REVISIT: This is not thread safe */
-
-  for (ndx = g_dns_tail; ndx != g_dns_head; ndx = next)
-    {
-      entry = &g_dns_cache[ndx];
-
-      /* Advance the index for the next time through the loop, handling
-       * wrapping to the beginning of the circular buffer.
-       */
-
-      next = ndx + 1;
-      if (next >= CONFIG_NETDB_DNSCLIENT_ENTRIES)
-        {
-          next = 0;
-        }
-
-#if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-      /* Check if this entry has expired
-       * REVISIT: Does not this calculation assume that the sizeof(time_t)
-       * is equal to the sizeof(uint32_t)?
-       */
-
-      elapsed = (uint32_t)now.tv_sec - (uint32_t)entry->ctime;
-      if (ret >= 0 && elapsed > CONFIG_NETDB_DNSCLIENT_LIFESEC)
-        {
-          /* This entry has expired.  Increment the tail index to exclude
-           * this entry on future traversals.
-           */
-
-          g_dns_tail = next;
-        }
-      else
-#endif
-        {
-          /* The entry has not expired, check for a name match.  Notice that
-           * because the names are truncated to CONFIG_NETDB_DNSCLIENT_NAMESIZE,
-           * this has the possibility of aliasing two names and returning
-           * the wrong entry from the cache.
-           */
-
-          if (strncmp(hostname, entry->name, CONFIG_NETDB_DNSCLIENT_NAMESIZE) == 0)
-            {
-              socklen_t inlen;
-
-              /* We have a match.  Return the resolved host address */
-
-#ifdef CONFIG_NET_IPv4
-              if (entry->addr.addr.sa_family == AF_INET)
-#ifdef CONFIG_NET_IPv6
-#endif
-                {
-                   inlen = sizeof(struct sockaddr_in);
-                }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-              else
-#ifdef CONFIG_NET_IPv4
-#endif
-                {
-                   inlen = sizeof(struct sockaddr_in6);
-                }
-#endif
-              /* Make sure that the address will fit in the caller-provided
-               * buffer.
-               */
-
-              if (*addrlen < inlen)
-                {
-                  ret = -ERANGE;
-                  goto errout_with_sem;
-                }
-
-              /* Return the address information */
-
-              memcpy(addr, &entry->addr.addr, inlen);
-              *addrlen = inlen;
-
-              dns_semgive();
-              return OK;
-            }
-        }
-    }
-
-  ret = -ENOENT;
-
-errout_with_sem:
-  dns_semgive();
-  return ret;
-}
-#endif
