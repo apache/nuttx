@@ -46,18 +46,11 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arpa/inet.h>
-
-#if 0
-#include <time.h>
-
-#endif
 
 #include <nuttx/net/dns.h>
 
@@ -408,64 +401,6 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: dns_bind
- *
- * Description:
- *   Initialize the DNS resolver and return a socket bound to the DNS name
- *   server.  The name server was previously selected via dns_server().
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   On success, the bound, non-negative socket descriptor is returned.  A
- *   negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int dns_bind(void)
-{
-  struct timeval tv;
-  int errcode;
-  int sd;
-  int ret;
-
-  /* Has the DNS client been properly initialized? */
-
-  if (!dns_initialize())
-    {
-      ndbg("ERROR: DNS client has not been initialized\n");
-      return -EDESTADDRREQ;
-    }
-
-  /* Create a new socket */
-
-  sd = socket(PF_INET, SOCK_DGRAM, 0);
-  if (sd < 0)
-    {
-      errcode = get_errno();
-      ndbg("ERROR: socket() failed: %d\n", errcode);
-      return -errcode;
-    }
-
-  /* Set up a receive timeout */
-
-  tv.tv_sec  = 30;
-  tv.tv_usec = 0;
-
-  ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
-  if (ret < 0)
-    {
-      errcode = get_errno();
-      ndbg("ERROR: setsockopt() failed: %d\n", errcode);
-      close(sd);
-      return -errcode;
-    }
-
-  return sd;
-}
 
 /****************************************************************************
  * Name: dns_query
