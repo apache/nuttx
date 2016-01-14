@@ -92,6 +92,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   union dns_server_u u;
   FAR FILE *stream;
   char line[DNS_MAX_LINE];
+  FAR char *addrstr;
   FAR char *ptr;
   int keylen;
   int ret;
@@ -117,13 +118,20 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
           /* Skip over the 'nameserver' keyword */
 
           ptr = find_spaces(ptr);
-          ptr = skip_spaces(ptr);
-          if (*ptr == '\0')
+          addrstr = skip_spaces(ptr);
+          if (*addrstr == '\0')
             {
               ndbg("ERROR: Missing address in %s record\n",
                    CONFIG_NETDB_RESOLVCONF_PATH);
               continue;
             }
+
+          /* Make sure that the address string is NUL terminated and
+           * not followed by garbage.
+           */
+
+          ptr = find_spaces(addrstr);
+          *ptr = '\0';
 
           /* Convert the address string to a binary representation */
           /* REVISIT:  We really need a customizable port number. The
@@ -138,7 +146,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 #ifdef CONFIG_NET_IPv4
           /* Try to convert the IPv4 address */
 
-          ret = inet_pton(AF_INET, ptr, &u.ipv4.sin_addr);
+          ret = inet_pton(AF_INET, addrstr, &u.ipv4.sin_addr);
 
           /* The inet_pton() function returns 1 if the conversion succeeds */
 
@@ -157,7 +165,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
             {
               /* Try to convert the IPv6 address */
 
-              ret = inet_pton(AF_INET6, ptr, &u.ipv6.sin6_addr);
+              ret = inet_pton(AF_INET6, addrstr, &u.ipv6.sin6_addr);
 
               /* The inet_pton() function returns 1 if the conversion
                * succeeds.
@@ -175,7 +183,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
               else
 #endif
                 {
-                  ndbg("ERROR: Unrecognized address: %s\n", ptr)
+                  ndbg("ERROR: Unrecognized address: %s\n", addrstr)
                   ret = OK;
                 }
 #ifdef CONFIG_NET_IPv6

@@ -650,7 +650,7 @@ int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
   /* Set up the query info structure */
 
   query.sd       = sd;
-  query.result   = OK;
+  query.result   = -EADDRNOTAVAIL;
   query.hostname = hostname;
   query.addr     = addr;
   query.addrlen  = addrlen;

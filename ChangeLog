@@ -11303,3 +11303,5 @@
 	* tools/mkdeps.c:  Extended/fixed support for --winpath option.
 	  Dependencies now work under Cygwin with a native Windows toolchain
 	  (2016-01-10).
+	* libc/netdb:  Add support for the use of a DNS resolver file like
+	  /etc/resolv.conf (2016-01-14).

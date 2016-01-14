@@ -43,6 +43,8 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <arpa/inet.h>
+
 #include "netdb/lib_dns.h"
 
 /****************************************************************************

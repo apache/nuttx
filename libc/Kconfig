@@ -592,9 +592,26 @@ config NETDB_DNSCLIENT_MAXRESPONSE
 		can be received by the DNS resolver.  The default is 96 but may
 		need to be larger on enterprise networks (perhaps 176).
 
+
+config NETDB_RESOLVCONF
+	bool "DNS resolver file support"
+	default n
+	depends on FS_READABLE
+	---help---
+		Enable DNS server look ups in resolver file like /etc/resolv.conf.
+
+if NETDB_RESOLVCONF
+
+config NETDB_RESOLVCONF_PATH
+	string "Path to host configuration file"
+	default "/etc/resolv.conf"
+
+endif # NETDB_RESOLVCONF
+
 choice
 	prompt "DNS server address type"
 	default NETDB_DNSSERVER_NOADDR
+	depends on !NETDB_RESOLVCONF
 
 config NETDB_DNSSERVER_NOADDR
 	bool "No default DNS server address"
@@ -700,21 +717,6 @@ config NETDB_DNSSERVER_IPv6ADDR_8
 		of the 8-values.  The default for all eight values is fc00::1.
 
 endif # NETDB_DNSSERVER_IPv6
-
-config NETDB_RESOLVCONF
-	bool "DNS server file support"
-	default n
-	depends on FS_READABLE
-	---help---
-		Enable DNS server look ups in resolver file.
-
-if NETDB_RESOLVCONF
-
-config NETDB_RESOLVCONF_PATH
-	string "Path to host configuration file"
-	default "/etc/resolv.conf"
-
-endif # NETDB_RESOLVCONF
 endif # NETDB_DNSCLIENT
 
 comment "Non-standard Library Support"
