@@ -533,23 +533,7 @@ config NETDB_BUFSIZE
 
 endif # NETDB_HOSTFILE
 
-menuconfig NETDB_RESOLVCONF
-	bool "DNS server file support"
-	default n
-	depends on FS_READABLE
-	select LIBC_NETDB
-	---help---
-		Enable DNS server look ups in resolver file.
-
-if NETDB_RESOLVCONF
-
-config NETDB_RESOLVCONF_PATH
-	string "Path to host configuration file"
-	default "/etc/resolv.conf"
-
-endif # NETDB_RESOLVCONF
-
-config NETDB_DNSCLIENT
+menuconfig NETDB_DNSCLIENT
 	bool "DNS Name resolution"
 	default n
 	depends on NET && NET_UDP
@@ -716,6 +700,21 @@ config NETDB_DNSSERVER_IPv6ADDR_8
 		of the 8-values.  The default for all eight values is fc00::1.
 
 endif # NETDB_DNSSERVER_IPv6
+
+config NETDB_RESOLVCONF
+	bool "DNS server file support"
+	default n
+	depends on FS_READABLE
+	---help---
+		Enable DNS server look ups in resolver file.
+
+if NETDB_RESOLVCONF
+
+config NETDB_RESOLVCONF_PATH
+	string "Path to host configuration file"
+	default "/etc/resolv.conf"
+
+endif # NETDB_RESOLVCONF
 endif # NETDB_DNSCLIENT
 
 comment "Non-standard Library Support"

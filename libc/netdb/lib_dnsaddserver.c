@@ -39,6 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/net/ip.h>
 #include <nuttx/net/dns.h>
 
 #include "netdb/lib_dns.h"
@@ -75,12 +83,12 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   char line[DNS_MAX_LINE];
   int ret;
 
-  stream = fopen(CONFIG_NETDB_RESOLVCONF, "at");
+  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "at");
   if (stream == NULL)
     {
       int errcode = errno;
       ndbg("ERROR: Failed to open %s: %d\n",
-           CONFIG_NETDB_RESOLVCONF, errcode);
+           CONFIG_NETDB_RESOLVCONF_PATH, errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -90,7 +98,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (addr->sa_family == AF_INET)
     {
-      if (socklen < sizeof(struct sockaddr_in))
+      if (addrlen < sizeof(struct sockaddr_in))
         {
           ret = -EINVAL;
           goto errout;
@@ -116,7 +124,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (addr->sa_family == AF_INET6)
     {
-      if (socklen < sizeof(struct sockaddr_in6))
+      if (addrlen < sizeof(struct sockaddr_in6))
         {
           ret = -EINVAL;
           goto errout;
@@ -223,7 +231,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   g_dns_address = true;
   return OK;
-#endif /* CONFIG_NETDB_RESOLVCONF */
 }
 
+#endif /* CONFIG_NETDB_RESOLVCONF */
 #endif /* CONFIG_NETDB_DNSCLIENT */

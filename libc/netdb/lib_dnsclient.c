@@ -194,6 +194,7 @@ static bool dns_initialize(void)
       g_dns_initialized = true;
     }
 
+#ifndef CONFIG_NETDB_RESOLVCONF
   /* Has the DNS server IP address been assigned? */
 
   if (!g_dns_address)
@@ -205,7 +206,7 @@ static bool dns_initialize(void)
        /* No, configure the default IPv4 DNS server address */
 
        addr4.sin_family      = AF_INET;
-       addr4.sin_port        = DNS_DEFAULT_PORT;
+       addr4.sin_port        = HTONS(DNS_DEFAULT_PORT);
        addr4.sin_addr.s_addr = HTONL(CONFIG_NETDB_DNSSERVER_IPv4ADDR);
 
        ret = dns_add_nameserver((FAR struct sockaddr *)&addr4,
@@ -222,7 +223,7 @@ static bool dns_initialize(void)
        /* No, configure the default IPv6 DNS server address */
 
        addr6.sin6_family = AF_INET6;
-       addr6.sin6_port   = DNS_DEFAULT_PORT;
+       addr6.sin6_port   = HTONS(DNS_DEFAULT_PORT);
        memcpy(addr6.sin6_addr.s6_addr, g_ipv6_hostaddr, 16);
 
        ret = dns_add_nameserver((FAR struct sockaddr *)&addr6,
@@ -233,11 +234,12 @@ static bool dns_initialize(void)
          }
 
 #else
-       /* No, then we are not ready to perform DNS queries */
+       /* Then we are not ready to perform DNS queries */
 
        return false;
 #endif
     }
+#endif /* !ONFIG_NETDB_RESOLVCONF */
 
   return true;
 }

@@ -45,6 +45,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -98,12 +100,6 @@ union dns_server_u
   struct sockaddr_in6 ipv6;        /* IPv6 address */
 #endif
 };
-
-/* The type of the callback from dns_foreach_nameserver() */
-
-typedef CODE int (*dns_callback_t)(FAR void *arg,
-                                   FAR struct sockaddr *addr,
-                                   FAR socklen_t *addrlen);
 
 /****************************************************************************
  * Public Data
@@ -198,7 +194,7 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
                     FAR socklen_t *addrlen);
 #endif
 
-o#undef EXTERN
+#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <arpa/inet.h>
+
 #include <nuttx/net/dns.h>
 
 #include "netdb/lib_dns.h"
@@ -49,6 +58,7 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_NETDB_RESOLVCONF
 static FAR char *skip_spaces(FAR char *ptr)
 {
   while (isspace(*ptr)) ptr++;
@@ -57,9 +67,10 @@ static FAR char *skip_spaces(FAR char *ptr)
 
 static FAR char *find_spaces(FAR char *ptr)
 {
-  while (isspace(*ptr)) ptr++;
+  while (*ptr && !isspace(*ptr)) ptr++;
   return ptr;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -87,12 +98,12 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
   /* Open the resolver configuration file */
 
-  stream = fopen(CONFIG_NETDB_RESOLVCONF, "rb");
+  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "rb");
   if (stream == NULL)
     {
       int errcode = errno;
       ndbg("ERROR: Failed to open %s: %d\n",
-        CONFIG_NETDB_RESOLVCONF, errcode);
+        CONFIG_NETDB_RESOLVCONF_PATH, errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -103,8 +114,18 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
       ptr = skip_spaces(line);
       if (strncmp(ptr, NETDB_DNS_KEYWORD, keylen) == 0)
         {
-          socklen_t copylen;
+          /* Skip over the 'nameserver' keyword */
 
+          ptr = find_spaces(ptr);
+          ptr = skip_spaces(ptr);
+          if (*ptr == '\0')
+            {
+              ndbg("ERROR: Missing address in %s record\n",
+                   CONFIG_NETDB_RESOLVCONF_PATH);
+              continue;
+            }
+
+          /* Convert the address string to a binary representation */
           /* REVISIT:  We really need a customizable port number. The
            * OpenBSD version supports a [host]:port syntax.  When a
            * non-standard port is specified the host address must be
@@ -126,8 +147,9 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
               /* REVISIT:  We really need a customizable port number */
 
               u.ipv4.sin_family = AF_INET;
-              u.ipv4.sin_port   = DNS_DEFAULT_PORT;
-              ret = callback(arg, AF_INET, &u.ipv4, sizeof(struct sockaddr_in));
+              u.ipv4.sin_port   = HTONS(DNS_DEFAULT_PORT);
+              ret = callback(arg, (FAR struct sockaddr *)&u.ipv4,
+                             sizeof(struct sockaddr_in));
             }
           else
 #endif
@@ -146,8 +168,9 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
                   /* REVISIT:  We really need a customizable port number */
 
                   u.ipv6.sin6_family = AF_INET6;
-                  u.ipv6.sin6_port   = DNS_DEFAULT_PORT;
-                  ret = callback(arg, &u.ipv6, sizeof(struct sockaddr_in6));
+                  u.ipv6.sin6_port   = HTONS(DNS_DEFAULT_PORT);
+                  ret = callback(arg, (FAR struct sockaddr *)&u.ipv6,
+                                 sizeof(struct sockaddr_in6));
                 }
               else
 #endif
@@ -185,7 +208,8 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
         {
           /* Perform the callback */
 
-          ret = callback(arg, &g_dns_server.ipv4, sizeof(struct sockaddr_in);
+          ret = callback(arg, (FAR struct sockaddr *)&g_dns_server.ipv4,
+                         sizeof(struct sockaddr_in));
         }
       else
 #endif
@@ -197,7 +221,8 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
         {
           /* Perform the callback */
 
-          ret = callback(arg, &g_dns_server.ipv6, sizeof(struct sockaddr_in6);
+          ret = callback(arg, (FAR struct sockaddr *)&g_dns_server.ipv6,
+                         sizeof(struct sockaddr_in6));
         }
       else
 #endif
