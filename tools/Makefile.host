@@ -71,10 +71,12 @@ all: b16$(HOSTEXEEXT) bdf-converter$(HOSTEXEEXT) cmpconfig$(HOSTEXEEXT) \
     configure$(HOSTEXEEXT) mkconfig$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
     mksymtab$(HOSTEXEEXT)  mksyscall$(HOSTEXEEXT) mkversion$(HOSTEXEEXT) \
     cnvwindeps$(HOSTEXEEXT) nxstyle$(HOSTEXEEXT)
-default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT)
+default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
+    cnvwindeps$(HOSTEXEEXT)
 
 ifdef HOSTEXEEXT
-.PHONY: b16 bdf-converter cmpconfig clean configure mkconfig mkdeps mksymtab mksyscall mkversion
+.PHONY: b16 bdf-converter cmpconfig clean configure mkconfig mkdeps \
+    cnvwindeps mksymtab mksyscall mkversion
 else
 .PHONY: clean
 endif
@@ -191,6 +193,8 @@ endif
 clean:
 	$(call DELFILE, mkdeps)
 	$(call DELFILE, mkdeps.exe)
+	$(call DELFILE, cnvwindeps)
+	$(call DELFILE, cnvwindeps.exe)
 	$(call DELFILE, mkconfig)
 	$(call DELFILE, mkconfig.exe)
 	$(call DELFILE, Make.dep)
