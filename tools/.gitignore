@@ -4,6 +4,7 @@
 /configure
 /mkconfig
 /mkdeps
+/cnvwindeps
 /mksymtab
 /mksyscall
 /mkversion
