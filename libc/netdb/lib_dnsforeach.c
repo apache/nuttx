@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
@@ -94,6 +95,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   char line[DNS_MAX_LINE];
   FAR char *addrstr;
   FAR char *ptr;
+  uint16_t port;
   int keylen;
   int ret;
 
@@ -133,15 +135,58 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
           ptr = find_spaces(addrstr);
           *ptr = '\0';
 
-          /* Convert the address string to a binary representation */
-          /* REVISIT:  We really need a customizable port number. The
-           * OpenBSD version supports a [host]:port syntax.  When a
+          /* Convert the address string to a binary representation. */
+
+          port = HTONS(DNS_DEFAULT_PORT);
+
+#ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
+          /* The OpenBSD version supports a [host]:port syntax.  When a
            * non-standard port is specified the host address must be
            * enclosed in square brackets.  For example:
            *
            *   nameserver [10.0.0.1]:5353
            *   nameserver [::1]:5353
            */
+
+          if (*addrstr == '[')
+            {
+              /* Make sure that ther is a right bracket */
+
+              ptr = strchr(addrstr, ']');
+              if (ptr == NULL)
+                {
+                  ndbg("ERROR: Missing right bracket after %s\n", line);
+                  continue;
+                }
+
+              /* Replace the right bracket with a NULL terminator */
+
+              addrstr++;
+              *ptr++ = '\0';
+
+              /* Get the port number following the right bracket */
+
+              if (*ptr == ':')
+                {
+                  FAR char *portstr;
+                  int tmp;
+
+                  /* Isolate the port string */
+
+                  portstr = ptr;
+                  ptr     = find_spaces(addrstr);
+                  *ptr    = '\0';
+
+                  /* Get the port number */
+
+                  tmp = atoi(portstr);
+                  if (tmp != 0)
+                    {
+                      port = htons(tmp);
+                    }
+                }
+            }
+#endif /* CONFIG_NETDB_RESOLVCONF_NONSTDPORT */
 
 #ifdef CONFIG_NET_IPv4
           /* Try to convert the IPv4 address */
@@ -152,10 +197,8 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
           if (ret == 1)
             {
-              /* REVISIT:  We really need a customizable port number */
-
               u.ipv4.sin_family = AF_INET;
-              u.ipv4.sin_port   = HTONS(DNS_DEFAULT_PORT);
+              u.ipv4.sin_port   = port;
               ret = callback(arg, (FAR struct sockaddr *)&u.ipv4,
                              sizeof(struct sockaddr_in));
             }
@@ -173,10 +216,8 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
               if (ret == 1)
                 {
-                  /* REVISIT:  We really need a customizable port number */
-
                   u.ipv6.sin6_family = AF_INET6;
-                  u.ipv6.sin6_port   = HTONS(DNS_DEFAULT_PORT);
+                  u.ipv6.sin6_port   = port;
                   ret = callback(arg, (FAR struct sockaddr *)&u.ipv6,
                                  sizeof(struct sockaddr_in6));
                 }

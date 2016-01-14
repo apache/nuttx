@@ -80,7 +80,8 @@
 #  define CONFIG_NETDB_RESOLVCONF_PATH "/etc/resolv.conf"
 #endif
 
-#define DNS_MAX_LINE 80
+#define DNS_MAX_ADDRSTR   48
+#define DNS_MAX_LINE      64
 #define NETDB_DNS_KEYWORD "nameserver"
 
 /****************************************************************************

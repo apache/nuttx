@@ -80,7 +80,11 @@ bool g_dns_address;     /* true: We have the address of the DNS server */
 int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR FILE *stream;
-  char line[DNS_MAX_LINE];
+  char addrstr[DNS_MAX_ADDRSTR];
+#ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
+  uint16_t port;
+#endif
+  int status;
   int ret;
 
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "at");
@@ -107,20 +111,26 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
         {
           FAR struct sockaddr_in *in4 = (FAR struct sockaddr_in *)addr;
 
-          if (inet_ntop(AF_INET, &in4->sin_addr, line, DNS_MAX_LINE) == NULL)
+          if (inet_ntop(AF_INET, &in4->sin_addr, addrstr, DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
               ndbg("ERROR: inet_ntop failed: %d\n", errcode);
               DEBUGASSERT(errcode < 0);
               goto errout;
             }
+
+#ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
+          /* Get the port number */
+
+          port = ntohs(in4->sin_port);
+#endif
         }
     }
   else
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  /* Check for an IPv4 address */
+  /* Check for an IPv6 address */
 
   if (addr->sa_family == AF_INET6)
     {
@@ -133,13 +143,19 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
         {
           FAR struct sockaddr_in6 *in6 = (FAR struct sockaddr_in6 *)addr;
 
-          if (inet_ntop(AF_INET6, &in6->sin6_addr, line, DNS_MAX_LINE) == NULL)
+          if (inet_ntop(AF_INET6, &in6->sin6_addr, addrstr, DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
               ndbg("ERROR: inet_ntop failed: %d\n", errcode);
               DEBUGASSERT(errcode < 0);
               goto errout;
             }
+
+#ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
+          /* Get the port number */
+
+          port = ntohs(in6->sin6_port);
+#endif
         }
     }
   else
@@ -151,9 +167,30 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       goto errout;
     }
 
-  /* Write the new record to the end of the resolv.conf file */
+  /* Write the new record to the end of the resolv.conf file. */
 
-  if (fprintf(stream, "%s %s\n", NETDB_DNS_KEYWORD, line) < 0)
+#ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
+  /* The OpenBSD version supports a [host]:port syntax.  When a non-standard
+   * port is specified the host address must be enclosed in square brackets.
+   * For example:
+   *
+   *   nameserver [10.0.0.1]:5353
+   *   nameserver [::1]:5353
+   */
+
+  if (port != 0 && port != DNS_DEFAULT_PORT)
+    {
+      status = fprintf(stream, "%s [%s]:%u\n",
+                       NETDB_DNS_KEYWORD, addrstr, port);
+    }
+  else
+#endif
+    {
+      status = fprintf(stream, "%s %s\n",
+                       NETDB_DNS_KEYWORD, addrstr);
+    }
+
+  if (status < 0)
     {
       ret = -errno;
       ndbg("ERROR: fprintf failed: %d\n", errcode);

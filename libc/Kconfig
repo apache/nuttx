@@ -606,23 +606,54 @@ config NETDB_RESOLVCONF_PATH
 	string "Path to host configuration file"
 	default "/etc/resolv.conf"
 
+config NETDB_RESOLVCONF_NONSTDPORT
+	bool "Non-standard port support"
+	default n
+	---help---
+		By default, the resolv.conf file will hold only records like:
+
+			nameserver xx.xx.xx.xx
+			nameserver xxxx:::::::xxxx
+
+		The default port of 53 is always assumed.
+
+		If this option is selected, then OpenBSD style resolv.conf files
+		will be supported.  This adds logic for a bracket port notation
+		like:
+
+			nameserver [xx.xx.xx.xx]:ppppp
+			nameserver [xxxx:::::::xxxx]:ppppp
+
 endif # NETDB_RESOLVCONF
 
 choice
 	prompt "DNS server address type"
-	default NETDB_DNSSERVER_NOADDR
+	default NETDB_DNSSERVER_IPv4 if NET_IPv4
+	default NETDB_DNSSERVER_IPv6 if !NET_IPv4 && NET_IPv6
+	default NETDB_DNSSERVER_NOADDR if !NET_IPv4 && !NET_IPv6
 	depends on !NETDB_RESOLVCONF
 
 config NETDB_DNSSERVER_NOADDR
 	bool "No default DNS server address"
+	---help---
+		There is not default DNS nameserver address.  Application must call
+		dns_add_server() at runtime to add the DNS server address.
 
 config NETDB_DNSSERVER_IPv4
 	bool "IPv4 DNS server address"
 	depends on NET_IPv4
+	---help---
+		An IPv4 default DNS nameserver address will be provided.  Application
+		may overwrite this start default server address by calling
+		dns_add_server() at runtime.
 
 config NETDB_DNSSERVER_IPv6
 	bool "IPv6 DNS server address"
 	depends on NET_IPv6
+	---help---
+		An IPv6 default DNS nameserver address will be provided.  Application
+		may overwrite this start default server address by calling
+		dns_add_server() at runtime.
 
 endchoice # DNS server address type
 
