@@ -41,10 +41,11 @@ sem_init       NXsem_init
 sem_post       NXsem_post
 sem_wait       NXsem_wait
 send           NXsend
+sendto         NXsendto
+setsockopt     NXsetsockopt
 sighold        NXsighold
 sigprocmask    NXsigprocmask
 sigrelse       NXsigrelse
-sendto         NXsendto
 sleep          NXsleep
 socket         NXsocket
 stat           NXstat
