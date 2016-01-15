@@ -11308,3 +11308,7 @@
 	* drivers/sensors/mcp9844.c and include/nuttx/sensors/mcp9844.h: Driver
 	  for the MCP9844 I2C digital temperature sensor with a selectable
 	  resolution.  From Alexander Entinger (2016-01-15).
+	* arch/arm/src/lpc43xx: Numerous LPC43 improvements to SPIFI and ADC
+	  from Lok Tep (2016-01-15).
+	* configs/lpc4337-ws:  Support for the WaveShare LPC4337-WS board.  From
+	  Lok Tep (2016-01-15).

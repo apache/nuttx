@@ -1312,6 +1312,8 @@ nuttx/
  |   |   `- README.txt
  |   |- lpc4330-xplorer/
  |   |   `- README.txt
+ |   |- lpc4337-ws/
+ |   |   `- README.txt
  |   |- lpc4357-evb/
  |   |   `- README.txt
  |   |- lpc4370-link2/
