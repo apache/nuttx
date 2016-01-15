@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpc4357-evb/src/lpc43_nsh.c
+ * configs/lpc4370-link2/src/lpc43_spifilib_initc
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,27 +39,92 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
-#include <errno.h>
 
 #include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+#include "lpc43_spifi.h"
+#include "lpc43_cgu.h"
+
+#include "lpc4370-link2.h"
+
+#include "spifi/inc/spifilib_api.h"
+
+#ifdef CONFIG_SPIFI_LIBRARY
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* Local memory, 32-bit aligned that will be used for driver context
+ * (handle).
+ */
+
+static uint32_t lmem[21];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
- ****************************************************************************/
-
-int board_app_initialize(void)
+void board_spifi_initialize(void)
 {
-  return OK;
+  irqstate_t flags = irqsave();
+  uint32_t regval;
+
+  flags = irqsave();
+
+  /* Initial frequency is set by boot ROM in IDIVE */
+
+  /* Pin configuration */
+
+  lpc43_pin_config(PINCONF_SPIFI_CS);
+  lpc43_pin_config(PINCONF_SPIFI_MISO);
+  lpc43_pin_config(PINCONF_SPIFI_MOSI);
+  lpc43_pin_config(PINCONF_SPIFI_SCK);
+  lpc43_pin_config(PINCONF_SPIFI_SIO2);
+  lpc43_pin_config(PINCONF_SPIFI_SIO3);
+
+  /* Initialize LPCSPIFILIB library, reset the interface */
+
+  spifiInit(LPC43_SPIFI_CTRL, true);
+
+  /* Register the family for the device */
+
+  spifiRegisterFamily(spifi_REG_FAMILY_CommonCommandSet);
+
+  /* Initialize and detect a device and get device context */
+
+  SPIFI_HANDLE_T* pSpifi = spifiInitDevice(&lmem, sizeof(lmem),
+                                           LPC43_SPIFI_CTRL,
+                                           LPC43_LOCSRAM_SPIFI_BASE);
+
+  /* Enable quad.  If not supported it will be ignored */
+
+  spifiDevSetOpts(pSpifi, SPIFI_OPT_USE_QUAD, true);
+
+  /* Enter memMode */
+
+  spifiDevSetMemMode(pSpifi, true);
+
+  /* Configure divider as the input to the SPIFI */
+
+  regval  = getreg32(LPC43_BASE_SPIFI_CLK);
+  regval &= ~BASE_SPIFI_CLK_CLKSEL_MASK;
+  regval |= BASE_SPIFI_CLKSEL_IDIVE;
+  putreg32(regval, LPC43_BASE_SPIFI_CLK);
+
+  regval  = getreg32(LPC43_IDIVE_CTRL);
+  regval &= ~(IDIVE_CTRL_CLKSEL_MASK | IDIVE_CTRL_IDIV_MASK);
+  regval |= BASE_SPIFI_CLKSEL_PLL1 | IDIVE_CTRL_AUTOBLOCK |
+            IDIVE_CTRL_IDIV(SPIFI_DEVICE_REQUENCY_DIVIDER);
+  putreg32(regval, LPC43_IDIVE_CTRL);
+
+  irqrestore(flags);
 }
+
+#endif /* CONFIG_SPIFI_LIBRARY */

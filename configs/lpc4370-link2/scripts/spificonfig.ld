@@ -84,10 +84,10 @@ SECTIONS
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.vectors)
-		*(.text .text.*)
+		*(EXCLUDE_FILE (*spifilib*) .text .text.*)
 		*(.fixup)
 		*(.gnu.warning)
-		*(.rodata .rodata.*)
+		*(EXCLUDE_FILE (*spifilib*) .rodata .rodata.*)
 		*(.gnu.linkonce.t.*)
 		*(.glue_7)
 		*(.glue_7t)
@@ -117,6 +117,8 @@ SECTIONS
 
 	.data : {
 		_sdata = ABSOLUTE(.);
+		*spifilib*(.text .text.*)
+		*spifilib*( .rodata .rodata.*)
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
@@ -130,7 +132,8 @@ SECTIONS
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > datamem
-					/* Stabs debugging sections.	*/
+
+	/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

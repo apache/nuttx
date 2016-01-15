@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4370-LINK2/src/lpc4370-LINK2.h
+ * configs/lpc4370-link2/src/lpc4370-link2.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,6 +45,7 @@
 
 #include "lpc43_pinconfig.h"
 #include "lpc43_gpio.h"
+#include "lpc43_spifi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -90,6 +91,8 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void board_spifi_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H */

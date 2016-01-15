@@ -1,7 +1,12 @@
 /************************************************************************************
- * configs/lpc4357-evb/src/lpc43_boot.c
+ * configs/lpc4370-link2/src/lpc43_adc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
+ *   Author: Kannan <code@nuttx.org>
+ *
+ * Based on configs/stm3220g-eval/src/lpc43_adc.c
+ *
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,47 +44,67 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
-#include "up_internal.h"
 
-#include "lpc4370-link2.h"
+#include "lpc43_adc.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#if defined(CONFIG_LPC43_ADC0) || defined(CONFIG_LPC43_ADC1)
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc43_boardinitialize
+ * Name: board_adc_setup
  *
  * Description:
- *   All LPC43xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC43 architectures must provide the following interface to work with
+ *   examples/adc.
  *
  ************************************************************************************/
 
-void lpc43_boardinitialize(void)
+int board_adc_setup(void)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
+  static bool initialized = false;
+  struct adc_dev_s *adc;
+  int ret;
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
+  /* Check if we have already initialized */
 
-#ifdef CONFIG_SPIFI_LIBRARY
-  board_spifi_initialize();
-#endif
+  if (!initialized)
+    {
+      /* Call lpc43_adcinitialize() to get an instance of the ADC interface */
+
+      adc = lpc43_adcinitialize();
+      if (adc == NULL)
+        {
+          adbg("ERROR: Failed to get ADC interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the ADC driver at "/dev/adc0" */
+
+      ret = adc_register("/dev/adc0", adc);
+      if (ret < 0)
+        {
+          adbg("adc_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
 }
+
+#endif /* CONFIG_ADC */

@@ -51,7 +51,7 @@ LPC4370-Link2 board
   Console
   -------
 
-  The LPC4370-Link2 default console is the USART0.
+  The LPC4370-Link2 default console is the USART2.
 
 Status
 ======
