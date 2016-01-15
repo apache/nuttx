@@ -82,14 +82,14 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ADC0_MASK
-#define CONFIG_ADC0_MASK     0x01
+#  define CONFIG_ADC0_MASK       0x01
 #endif
 #ifndef CONFIG_ADC0_FREQ
-#define CONFIG_ADC0_FREQ      0
+#  define CONFIG_ADC0_FREQ       0
 #endif
 
-#define LPC43_ADC_MAX_FREQUENCY 4500000
-#define LPC43_ADC_MIN_FREQUENCY(BOARD_ABP3_FREQUENCY/256)
+#define LPC43_ADC_MAX_FREQUENCY  4500000
+#define LPC43_ADC_MIN_FREQUENCY  (BOARD_ABP3_FREQUENCY/256)
 
 #if defined(CONFIG_ADC0_USE_TIMER) && CONFIG_ADC0_FREQ == 0
 #  error "Set CONFIG_ADC0_FREQ != 0 if CONFIG_ADC0_USE_TIMER"
