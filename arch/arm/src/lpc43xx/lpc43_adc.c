@@ -71,8 +71,10 @@
 #include "lpc43_scu.h"
 #include "lpc43_ccu.h"
 #include "lpc43_creg.h"
+
 #include "chip/lpc43_gima.h"
-#include <chip/lpc43_timer.h>
+#include "chip/lpc43_timer.h"
+
 #include "lpc43_pinconfig.h"
 
 #if defined(CONFIG_LPC43_ADC0) /* TODO ADC1 */
