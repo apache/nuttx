@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/lpc4370-link2/src/lpc43_nsh.c
+ * configs/lpc4337-ws/src/lpc4337-ws.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,33 +33,29 @@
  *
  ****************************************************************************/
 
+#ifndef _CONFIGS_LPC4337_WS_SRC_LPC4337_WS_H
+#define _CONFIGS_LPC4337_WS_SRC_LPC4337_WS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+#include "lpc43_pinconfig.h"
+#include "lpc43_gpio.h"
 
-#include <nuttx/board.h>
+/****************************************************************************
+ * Public data
+ ****************************************************************************/
 
-#include "chip.h"
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
- ****************************************************************************/
+#endif /* __ASSEMBLY__ */
+#endif
 
-int board_app_initialize(void)
-{
-  return OK;
-}

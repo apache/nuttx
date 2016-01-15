@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4357-evb/src/lpc43_autoleds.c
+ * configs/lpc4370-link2/src/lpc43_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

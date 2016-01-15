@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4357-link2/include/board.h
+ * configs/lpc4337-ws/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_LPC4357_LINK2_INCLUDE_BOARD_H
-#define __CONFIGS_LPC4357_LINK2_INCLUDE_BOARD_H
+#ifndef __CONFIGS_LPC4337_WS_INCLUDE_BOARD_H
+#define __CONFIGS_LPC4337_WS_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -143,23 +143,24 @@
 
 #define LPC43_CCLK                  BOARD_FCLKOUT_FREQUENCY
 
-#if defined(CONFIG_LPC43_BUS) || defined(CONFIG_LPC43_MCPWM) || defined(CONFIG_LPC43_I2C0) || defined(CONFIG_LPC43_I2S0) || defined(CONFIG_LPC43_I2S1)  || defined(CONFIG_LPC43_CAN1)
+#if defined(CONFIG_LPC43_BUS) || defined(CONFIG_LPC43_MCPWM) || \
+    defined(CONFIG_LPC43_I2C0) || defined(CONFIG_LPC43_I2S0) || \
+    defined(CONFIG_LPC43_I2S1)  || defined(CONFIG_LPC43_CAN1)
 #  define BOARD_ABP1_CLKSRC         BASE_APB_CLKSEL_XTAL
 #  define BOARD_ABP1_FREQUENCY      BOARD_XTAL_FREQUENCY
 #endif
 
 
-#if defined(CONFIG_LPC43_BUS) || defined(CONFIG_LPC43_I2C1) || defined(CONFIG_LPC43_DAC) || defined(CONFIG_LPC43_ADC0) || defined(CONFIG_LPC43_ADC1)  || defined(CONFIG_LPC43_CAN0)
+#if defined(CONFIG_LPC43_BUS) || defined(CONFIG_LPC43_I2C1) || \
+    defined(CONFIG_LPC43_DAC) || defined(CONFIG_LPC43_ADC0) || \
+    defined(CONFIG_LPC43_ADC1)  || defined(CONFIG_LPC43_CAN0)
 #  define BOARD_ABP3_CLKSRC         BASE_APB_CLKSEL_XTAL
 #  define BOARD_ABP3_FREQUENCY      BOARD_XTAL_FREQUENCY
 #endif
 
-
-
 #define BOARD_IDIVA_DIVIDER         (2)
 #define BOARD_IDIVA_CLKSRC          IDIVA_CLKSEL_PLL1
 #define BOARD_IDIVA_FREQUENCY       (BOARD_FCLKOUT_FREQUENCY/BOARD_IDIVA_DIVIDER)
-
 
 /* USB0 ********************************************************************/
 /* Settings needed in lpc43_cpu.c */
@@ -186,7 +187,6 @@
 #else
 #  define BOARD_SPIFI_DIVB          1           /* Use IDIVB */
 #endif
-
 
 /* We need to configure the divider so that its output is as close to the
  * desired SCLK value.  The peak data transfer rate will be about half of
@@ -236,7 +236,6 @@
 #define BOARD_USART3_CLKSRC         BASE_USART3_CLKSEL_XTAL
 #define BOARD_USART3_BASEFREQ       BOARD_XTAL_FREQUENCY
 
-
 /* SSP clocking ***********************************************************
  *
  * BOARD_SSPX_BASEFREQ may be further divided by 2-254 to get the SSP clock.  If we
@@ -247,11 +246,11 @@
  *
  */
 
-#define BOARD_SSP0_CLKSRC           BASE_SSP0_CLKSEL_IDIVA
-#define BOARD_SSP0_BASEFREQ         BOARD_IDIVA_FREQUENCY
+#define BOARD_SSP0_CLKSRC         BASE_SSP0_CLKSEL_IDIVA
+#define BOARD_SSP0_BASEFREQ       BOARD_IDIVA_FREQUENCY
 
-#define BOARD_SSP1_CLKSRC           BASE_SSP1_CLKSEL_IDIVA
-#define BOARD_SSP1_BASEFREQ         BOARD_IDIVA_FREQUENCY
+#define BOARD_SSP1_CLKSRC         BASE_SSP1_CLKSEL_IDIVA
+#define BOARD_SSP1_BASEFREQ       BOARD_IDIVA_FREQUENCY
 
 /* LED definitions *********************************************************/
 /* LED1   K2  GPIO0[8]
@@ -259,12 +258,12 @@
  * LED index values for use with board_userled()
  */
 
-#define BOARD_LED                   0
-#define BOARD_NLEDS                 1
+#define BOARD_LED        0
+#define BOARD_NLEDS      1
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LED_BIT               (1 << BOARD_LED)
+#define BOARD_LED_BIT    (1 << BOARD_LED)
 
 /* If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
  * for NuttX debug functionality (where NC means "No Change"). If
@@ -276,49 +275,47 @@
  *  void board_userled(int led, bool ledon);
  *  void board_userled_all(uint8_t ledset);
  */
-                                       /* LED      */
-#define LED_STARTED                 0  /* OFF      */
-#define LED_HEAPALLOCATE            0  /* OFF      */
-#define LED_IRQSENABLED             0  /* OFF      */
-#define LED_STACKCREATED            1  /* ON       */
-#define LED_INIRQ                   2  /* NC       */
-#define LED_SIGNAL                  2  /* NC       */
-#define LED_ASSERTION               2  /* NC       */
-#define LED_PANIC                   3  /* Flashing */
+                                      /* LED      */
+#define LED_STARTED                0  /* OFF      */
+#define LED_HEAPALLOCATE           0  /* OFF      */
+#define LED_IRQSENABLED            0  /* OFF      */
+#define LED_STACKCREATED           1  /* ON       */
+#define LED_INIRQ                  2  /* NC       */
+#define LED_SIGNAL                 2  /* NC       */
+#define LED_ASSERTION              2  /* NC       */
+#define LED_PANIC                  3  /* Flashing */
 
 /* UART Pins ****************************************************************/
-/* 
- * The following definitions must be provided so that the LPC43 serial
+/* The following definitions must be provided so that the LPC43 serial
  * driver can set up the U[S]ART for the serial console properly (see the
  * file arch/arc/src/lpc43xx/lpc43*_pinconf.h for more info).
  */
 
-#define PINCONF_U0_TXD              PINCONF_U0_TXD_3
-#define PINCONF_U0_RXD              PINCONF_U0_RXD_3
-#define PINCONF_U0_DIR              PINCONF_U0_DIR_3
+#define PINCONF_U0_TXD  PINCONF_U0_TXD_3
+#define PINCONF_U0_RXD  PINCONF_U0_RXD_3
+#define PINCONF_U0_DIR  PINCONF_U0_DIR_3
 
-#define PINCONF_U1_TXD              PINCONF_U1_TXD_1
-#define PINCONF_U1_RXD              PINCONF_U1_RXD_1
+#define PINCONF_U1_TXD  PINCONF_U1_TXD_1
+#define PINCONF_U1_RXD  PINCONF_U1_RXD_1
 
-#define PINCONF_U2_TXD              PINCONF_U2_TXD_2
-#define PINCONF_U2_RXD              PINCONF_U2_RXD_2
-#define PINCONF_U2_DIR              PINCONF_U2_DIR_2
+#define PINCONF_U2_TXD  PINCONF_U2_TXD_2
+#define PINCONF_U2_RXD  PINCONF_U2_RXD_2
+#define PINCONF_U2_DIR  PINCONF_U2_DIR_2
 
-#define PINCONF_U3_TXD              PINCONF_U3_TXD_2
-#define PINCONF_U3_RXD              PINCONF_U3_RXD_2
-#define PINCONF_U3_DIR              PINCONF_U3_DIR_2
+#define PINCONF_U3_TXD  PINCONF_U3_TXD_2
+#define PINCONF_U3_RXD  PINCONF_U3_RXD_2
+#define PINCONF_U3_DIR  PINCONF_U3_DIR_2
 
 /* I2C1 pins, not really accessible on the board */
 
-#define PINCONF_I2C1_SCL            PINCONF_I2C1_SCL_1
-#define PINCONF_I2C1_SDA            PINCONF_I2C1_SDA_1
+#define PINCONF_I2C1_SCL PINCONF_I2C1_SCL_1
+#define PINCONF_I2C1_SDA PINCONF_I2C1_SDA_1
 
 /* SSP1 pins */
 
-#define PINCONF_SSP1_MISO           PINCONF_SSP1_MISO_3
-#define PINCONF_SSP1_MOSI           PINCONF_SSP1_MOSI_3
-#define PINCONF_SSP1_SCK            PINCONF_SSP1_SCK_1
-#define PINCONF_SSP1_SSEL           PINCONF_SSP1_SSEL_1
+#define PINCONF_SSP1_MISO PINCONF_SSP1_MISO_1
+#define PINCONF_SSP1_MOSI PINCONF_SSP1_MOSI_1
+#define PINCONF_SSP1_SCK  PINCONF_SSP1_SCK_2
 
 /****************************************************************************
  * Public Types
@@ -362,4 +359,4 @@ void lpc43_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_LPC4357_LINK2_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_LPC4337_WS_INCLUDE_BOARD_H */

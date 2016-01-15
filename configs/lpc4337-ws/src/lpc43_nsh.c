@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/lpc4370-link2/src/lpc43_nsh.c
+ * configs/lpc4337-ws/src/lpc43-nsh.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
