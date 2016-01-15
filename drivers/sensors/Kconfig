@@ -31,6 +31,13 @@ config MB7040
 	---help---
 		Enable driver support for the MaxBotix MB7040 sonar.
 
+config MCP9844
+	bool "MCP9844 Temperature Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MCP9844 I2C Temperature sensor.
+
 config MS58XX
 	bool "MEAS MS58XX Altimeter support"
 	default n

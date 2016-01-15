@@ -73,6 +73,10 @@ ifeq ($(CONFIG_MB7040),y)
   CSRCS += mb7040.c
 endif
 
+ifeq ($(CONFIG_MCP9844),y)
+  CSRCS += mcp9844.c
+endif
+
 ifeq ($(CONFIG_MS58XX),y)
   CSRCS += ms58xx.c
 endif
