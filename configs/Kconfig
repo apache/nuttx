@@ -318,9 +318,6 @@ config ARCH_BOARD_LPC4330_XPLORER
 config ARCH_BOARD_LPC4337_WS
 	bool "WaveShare LPC4337-WS"
 	depends on ARCH_CHIP_LPC4337JBD144
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The WaveShare LPC4337-ws board featuring the NXP LPC4337JBD144 MCU.
 
