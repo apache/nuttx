@@ -595,19 +595,19 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
-         (rxpending < LPC43_SSP_FIFOSZ) && nwords)
+             (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
           if (txbuffer)
-		  {
-			  if (priv->nbits > 8)
-				{
-				  data = (uint32_t)*tx.p16++;
-				}
-			  else
-				{
-				  data = (uint32_t)*tx.p8++;
-				}
-		  }
+            {
+              if (priv->nbits > 8)
+                {
+                  data = (uint32_t)*tx.p16++;
+                }
+              else
+                {
+                  data = (uint32_t)*tx.p8++;
+                }
+            }
 
           ssp_putreg(priv, LPC43_SSP_DR_OFFSET, txbuffer?data:datadummy);
           nwords--;
@@ -621,16 +621,16 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
           if (rxbuffer)
-          {
-				if(priv->nbits > 8)
-				{
-				  *rx.p16++ = (uint16_t)data;
-				}
-				else
-				{
-				  *rx.p8++  = (uint8_t)data;
-				}
-          }
+            {
+              if(priv->nbits > 8)
+                {
+                  *rx.p16++ = (uint16_t)data;
+                }
+              else
+                {
+                  *rx.p8++  = (uint8_t)data;
+                }
+            }
 
           rxpending--;
         }
@@ -658,7 +658,8 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
   return ssp_exchange(dev, buffer, NULL, nwords);
 }
@@ -683,7 +684,8 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *
  ****************************************************************************/
 
-static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords)
 {
   return ssp_exchange(dev, NULL, buffer, nwords);
 }

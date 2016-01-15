@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc43xx/lpc43_usbdev.c
+ * arch/arm/src/lpc43xx/lpc43_usb0dev.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -233,11 +233,11 @@ struct lpc43_dqh_s
 
 /* Odd physical endpoint numbers are IN; even are OUT */
 
-#define LPC43_EPPHYIN(epphy)         (((epphy)&1)!=0)
-#define LPC43_EPPHYOUT(epphy)        (((epphy)&1)==0)
+#define LPC43_EPPHYIN(epphy)         (((epphy) & 1) != 0)
+#define LPC43_EPPHYOUT(epphy)        (((epphy) & 1) == 0)
 
-#define LPC43_EPPHYIN2LOG(epphy)     (((uint8_t)(epphy)>>1)|USB_DIR_IN)
-#define LPC43_EPPHYOUT2LOG(epphy)    (((uint8_t)(epphy)>>1)|USB_DIR_OUT)
+#define LPC43_EPPHYIN2LOG(epphy)     (((uint8_t)(epphy) >> 1)  |USB_DIR_IN)
+#define LPC43_EPPHYOUT2LOG(epphy)    (((uint8_t)(epphy) >> 1) | USB_DIR_OUT)
 
 /* Endpoint 0 is special... */
 
@@ -336,11 +336,11 @@ struct lpc43_usbdev_s
 #endif
 
   uint16_t                ep0buf_len;
-  struct usb_ctrlreq_s	  ep0ctrl;
+  struct usb_ctrlreq_s    ep0ctrl;
 
   /* The endpoint list */
 
-  struct lpc43_ep_s     eplist[LPC43_NPHYSENDPOINTS];
+  struct lpc43_ep_s       eplist[LPC43_NPHYSENDPOINTS];
 };
 
 #define EP0STATE_IDLE             0        /* Idle State, leave on receiving a setup packet or epsubmit */
@@ -421,29 +421,31 @@ static int         lpc43_usbinterrupt(int irq, FAR void *context);
 
 /* USB device controller operations ********************************************/
 
-static int  lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
-              const struct usb_epdesc_s *desc, bool last);
-static int  lpc43_epdisable(FAR struct usbdev_ep_s *ep);
+static int         lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
+                     const struct usb_epdesc_s *desc, bool last);
+static int         lpc43_epdisable(FAR struct usbdev_ep_s *ep);
 static FAR struct usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep);
-static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep,
-              FAR struct usbdev_req_s *);
+static void        lpc43_epfreereq(FAR struct usbdev_ep_s *ep,
+                     FAR struct usbdev_req_s *);
 #ifdef CONFIG_USBDEV_DMA
-static void *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes);
-static void lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
+static void       *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep,
+                     unsigned bytes);
+static void        lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep,
+                     FAR void *buf);
 #endif
-static int  lpc43_epsubmit(FAR struct usbdev_ep_s *ep,
-              struct usbdev_req_s *req);
-static int  lpc43_epcancel(FAR struct usbdev_ep_s *ep,
-              struct usbdev_req_s *req);
-static int  lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume);
+static int         lpc43_epsubmit(FAR struct usbdev_ep_s *ep,
+                     struct usbdev_req_s *req);
+static int         lpc43_epcancel(FAR struct usbdev_ep_s *ep,
+                     struct usbdev_req_s *req);
+static int         lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume);
 
 static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev,
-              uint8_t epno, bool in, uint8_t eptype);
-static void lpc43_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
-static int  lpc43_getframe(struct usbdev_s *dev);
-static int  lpc43_wakeup(struct usbdev_s *dev);
-static int  lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered);
-static int  lpc43_pullup(struct usbdev_s *dev, bool enable);
+                     uint8_t epno, bool in, uint8_t eptype);
+static void        lpc43_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
+static int         lpc43_getframe(struct usbdev_s *dev);
+static int         lpc43_wakeup(struct usbdev_s *dev);
+static int         lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered);
+static int         lpc43_pullup(struct usbdev_s *dev, bool enable);
 
 /****************************************************************************
  * Private Data
@@ -1033,7 +1035,7 @@ static void lpc43_dispatchrequest(struct lpc43_usbdev_s *priv,
     {
       /* Forward to the control request to the class driver implementation */
 
-      ret = CLASS_SETUP(priv->driver, &priv->usbdev, ctrl, priv->ep0buf, priv->ep0buf_len );
+      ret = CLASS_SETUP(priv->driver, &priv->usbdev, ctrl, priv->ep0buf, priv->ep0buf_len);
     }
 
   if (ret < 0)
@@ -1240,13 +1242,12 @@ static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
       lpc43_ep0state (priv, EP0STATE_SETUP_OUT);
 
       if (len > 0)
-	{
-	  lpc43_ep0state(priv, EP0STATE_SHORTREAD);
-	  lpc43_ep0xfer(LPC43_EP0_OUT, priv->ep0buf, len);
-	  return;
-	}
+        {
+          lpc43_ep0state(priv, EP0STATE_SHORTREAD);
+          lpc43_ep0xfer(LPC43_EP0_OUT, priv->ep0buf, len);
+          return;
+        }
     }
-
 
   /* Dispatch any non-standard requests */
 
@@ -2004,7 +2005,7 @@ static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
           case USB_EP_ATTR_XFER_INT:     cfg |= USBDEV_ENDPTCTRL_TXT_INTR; break;
         }
 
-      lpc43_chgbits (0xFFFF0000, cfg, LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1));
+      lpc43_chgbits (0xFFFF0000, cfg, LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1));
     }
   else
     {
@@ -2021,7 +2022,7 @@ static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
           case USB_EP_ATTR_XFER_BULK:    cfg |= USBDEV_ENDPTCTRL_RXT_BULK; break;
         }
 
-      lpc43_chgbits (0x0000FFFF, cfg, LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1));
+      lpc43_chgbits (0x0000FFFF, cfg, LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1));
     }
 
   /* Reset endpoint status */
@@ -2032,11 +2033,11 @@ static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
 
   if (LPC43_EPPHYIN(privep->epphy))
     {
-      lpc43_setbits (USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1));
+      lpc43_setbits (USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1));
     }
   else
     {
-      lpc43_setbits (USBDEV_ENDPTCTRL_RXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1));
+      lpc43_setbits (USBDEV_ENDPTCTRL_RXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1));
     }
 
    return OK;
@@ -2070,11 +2071,11 @@ static int lpc43_epdisable(FAR struct usbdev_ep_s *ep)
 
   if (LPC43_EPPHYIN(privep->epphy))
     {
-      lpc43_clrbits (USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1));
+      lpc43_clrbits (USBDEV_ENDPTCTRL_TXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1));
     }
   else
     {
-      lpc43_clrbits (USBDEV_ENDPTCTRL_RXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1));
+      lpc43_clrbits (USBDEV_ENDPTCTRL_RXE, LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1));
     }
 
   privep->stalled = true;
@@ -2311,7 +2312,7 @@ static int lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume)
   flags = irqsave();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
-  uint32_t addr    = LPC43_USBDEV_ENDPTCTRL(privep->epphy>>1);
+  uint32_t addr    = LPC43_USBDEV_ENDPTCTRL(privep->epphy >> 1);
   uint32_t ctrl_xs = LPC43_EPPHYIN(privep->epphy) ? USBDEV_ENDPTCTRL_TXS : USBDEV_ENDPTCTRL_RXS;
   uint32_t ctrl_xr = LPC43_EPPHYIN(privep->epphy) ? USBDEV_ENDPTCTRL_TXR : USBDEV_ENDPTCTRL_RXR;
 
@@ -2444,6 +2445,7 @@ static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev, uint8_t e
               if ((epset & bit) != 0)
                 {
                   /* Mark endpoint no longer available */
+
                   priv->epavail &= ~bit;
                   irqrestore(flags);
 

@@ -630,7 +630,6 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
   return OK;
 }
 
-
 /************************************************************************************
  * Name: up_i2creset
  *

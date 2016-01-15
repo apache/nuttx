@@ -71,68 +71,65 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Register addresses *******************************************************/
 
-/* Register addresses ***************************************************************/
+#define LPC43_SPIFI_CTRL_OFFSET    0x000
+#define LPC43_SPIFI_CMD_OFFSET     0x004
+#define LPC43_SPIFI_ADDR_OFFSET    0x008
+#define LPC43_SPIFI_IDATA_OFFSET   0x00c
+#define LPC43_SPIFI_CLIMIT_OFFSET  0x010
+#define LPC43_SPIFI_DATA_OFFSET    0x014
+#define LPC43_SPIFI_MCMD_OFFSET    0x018
+#define LPC43_SPIFI_STAT_OFFSET    0x01c
 
-#define LPC43_SPIFI_CTRL_OFFSET     0x000
-#define LPC43_SPIFI_CMD_OFFSET      0x004
-#define LPC43_SPIFI_ADDR_OFFSET     0x008
-#define LPC43_SPIFI_IDATA_OFFSET    0x00C
-#define LPC43_SPIFI_CLIMIT_OFFSET   0x010
-#define LPC43_SPIFI_DATA_OFFSET     0x014
-#define LPC43_SPIFI_MCMD_OFFSET     0x018
-#define LPC43_SPIFI_STAT_OFFSET     0x01C
-
-
-#define LPC43_SPIFI_CTRL          (LPC43_SPIFI_BASE+LPC43_SPIFI_CTRL_OFFSET)
-#define LPC43_SPIFI_CMD           (LPC43_SPIFI_BASE+LPC43_SPIFI_CMD_OFFSET)
-#define LPC43_SPIFI_ADDR          (LPC43_SPIFI_BASE+LPC43_SPIFI_ADDR_OFFSET)
-#define LPC43_SPIFI_IDATA         (LPC43_SPIFI_BASE+LPC43_SPIFI_IDATA_OFFSET)
-#define LPC43_SPIFI_CLIMIT        (LPC43_SPIFI_BASE+LPC43_SPIFI_CLIMIT_OFFSET)
-#define LPC43_SPIFI_DATA          (LPC43_SPIFI_BASE+LPC43_SPIFI_DATA_OFFSET)
-#define LPC43_SPIFI_MCMD          (LPC43_SPIFI_BASE+LPC43_SPIFI_MCMD_OFFSET)
-#define LPC43_SPIFI_STAT          (LPC43_SPIFI_BASE+LPC43_SPIFI_STAT_OFFSET)
-
+#define LPC43_SPIFI_CTRL           (LPC43_SPIFI_BASE+LPC43_SPIFI_CTRL_OFFSET)
+#define LPC43_SPIFI_CMD            (LPC43_SPIFI_BASE+LPC43_SPIFI_CMD_OFFSET)
+#define LPC43_SPIFI_ADDR           (LPC43_SPIFI_BASE+LPC43_SPIFI_ADDR_OFFSET)
+#define LPC43_SPIFI_IDATA          (LPC43_SPIFI_BASE+LPC43_SPIFI_IDATA_OFFSET)
+#define LPC43_SPIFI_CLIMIT         (LPC43_SPIFI_BASE+LPC43_SPIFI_CLIMIT_OFFSET)
+#define LPC43_SPIFI_DATA           (LPC43_SPIFI_BASE+LPC43_SPIFI_DATA_OFFSET)
+#define LPC43_SPIFI_MCMD           (LPC43_SPIFI_BASE+LPC43_SPIFI_MCMD_OFFSET)
+#define LPC43_SPIFI_STAT           (LPC43_SPIFI_BASE+LPC43_SPIFI_STAT_OFFSET)
 
 /* The largest protection block of any serial flash that the ROM driver
  * can handle
  */
 
-#define SPIFI_LONGEST_PROTBLOCK 68
+#define SPIFI_LONGEST_PROTBLOCK    68
 
 /* Protection flag bit definitions */
 
-#define SPIFI_RWPROT            (1 << 0)
+#define SPIFI_RWPROT               (1 << 0)
 
 /* Instruction classes for wait_busy */
 
-#define SPIFI_STAT_INST         0
-#define SPIFI_BLOCK_ERASE       1
-#define SPIFI_PROG_INST         2
-#define SPIFI_CHIP_ERASE        3
+#define SPIFI_STAT_INST            0
+#define SPIFI_BLOCK_ERASE          1
+#define SPIFI_PROG_INST            2
+#define SPIFI_CHIP_ERASE           3
 
 /* Bit definitions in options operands (MODE3, RCVCLK, and FULLCLK
  * have the same relationship as in the Control register)
  */
 
-#define S_MODE3                (1 << 0)
-#define S_MODE0                (0)
-#define S_MINIMAL              (1 << 1)
-#define S_MAXIMAL              (0)
-#define S_FORCE_ERASE          (1 << 2)
-#define S_ERASE_NOT_REQD       (1 << 3)
-#define S_CALLER_ERASE         (1 << 3)
-#define S_ERASE_AS_REQD        (0)
-#define S_VERIFY_PROG          (1 << 4)
-#define S_VERIFY_ERASE         (1 << 5)
-#define S_NO_VERIFY            (0)
-#define S_FULLCLK              (1 << 6)
-#define S_HALFCLK              (0)
-#define S_RCVCLK               (1 << 7)
-#define S_INTCLK               (0)
-#define S_DUAL                 (1 << 8)
-#define S_CALLER_PROT          (1 << 9)
-#define S_DRIVER_PROT          (0)
+#define S_MODE3                    (1 << 0)
+#define S_MODE0                    (0)
+#define S_MINIMAL                  (1 << 1)
+#define S_MAXIMAL                  (0)
+#define S_FORCE_ERASE              (1 << 2)
+#define S_ERASE_NOT_REQD           (1 << 3)
+#define S_CALLER_ERASE             (1 << 3)
+#define S_ERASE_AS_REQD            (0)
+#define S_VERIFY_PROG              (1 << 4)
+#define S_VERIFY_ERASE             (1 << 5)
+#define S_NO_VERIFY                (0)
+#define S_FULLCLK                  (1 << 6)
+#define S_HALFCLK                  (0)
+#define S_RCVCLK                   (1 << 7)
+#define S_INTCLK                   (0)
+#define S_DUAL                     (1 << 8)
+#define S_CALLER_PROT              (1 << 9)
+#define S_DRIVER_PROT              (0)
 
 /* The length of a standard program command is 256 on all devices */
 
@@ -296,4 +293,3 @@ int32_t spifi_erase(struct spifi_dev_s *dev,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC43XX_CHIP_LPC43_SPIFI_H */
-

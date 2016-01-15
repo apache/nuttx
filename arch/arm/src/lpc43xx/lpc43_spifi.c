@@ -245,7 +245,7 @@
  *   csHigh = ceiling(min CS high / SPIFI clock period) - 1
  *
  * where ceiling means round up to the next higher integer if the argument
- * isn�t an integer.
+ * isn't an integer.
  */
 
 #define SPIFI_CSHIGH 9
