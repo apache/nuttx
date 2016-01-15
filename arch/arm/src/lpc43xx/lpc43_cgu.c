@@ -566,8 +566,8 @@ void lpc43_abp1(void)
   /* Set clock source */
 
   regval  = getreg32(LPC43_BASE_APB1_CLK);
-  regval &= ~BASE_APB1_CLK_CLKSEL_MASK;
-  regval |= BOARD_ABP1_CLKSRC | BASE_APB1_CLK_AUTOBLOCK;
+  regval &= ~BASE_APB_CLK_CLKSEL_MASK;
+  regval |= BOARD_ABP1_CLKSRC | BASE_APB_CLK_AUTOBLOCK;
   putreg32(regval, LPC43_BASE_APB1_CLK);
 }
 #endif
@@ -580,8 +580,8 @@ void lpc43_abp3(void)
   /* Set clock source */
 
   regval  = getreg32(LPC43_BASE_APB3_CLK);
-  regval &= ~BASE_APB3_CLK_CLKSEL_MASK;
-  regval |= BOARD_ABP3_CLKSRC | BASE_APB3_CLK_AUTOBLOCK;
+  regval &= ~BASE_APB_CLK_CLKSEL_MASK;
+  regval |= BOARD_ABP3_CLKSRC | BASE_APB_CLK_AUTOBLOCK;
   putreg32(regval, LPC43_BASE_APB3_CLK);
 }
 #endif

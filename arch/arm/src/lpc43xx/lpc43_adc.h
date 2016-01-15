@@ -44,7 +44,7 @@
 #include <nuttx/analog/adc.h>
 #include "chip/lpc43_adc.h"
 
-#ifdef CONFIG_LPC43_ADC
+#ifdef CONFIG_LPC43_ADC0
 
 /****************************************************************************
  * Pre-processor Definitions

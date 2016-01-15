@@ -1,0 +1,135 @@
+LPCSpifilib version <1.03>
+==========================
+Release date <01/19/2015>
+1. Corrected id for S25FL256S device.
+2. Added 4 Byte address support for large devices (S25FL256S and S25FL512S).
+3. Changed directory structure to new v3.xx format.
+4. Removed --gnu flag and produced generic lib for use with both IAR and Keil
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Will break IAR examples in LPCOpen v2.12 [Libraries in projects must be
+renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a]
+
+LPCSpifilib version <1.02>
+==========================
+Release date <12/30/2014>
+1. Included pre-build of LPCXpresso M4F and M4F_hard libraries
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Will break IAR examples in LPCOpen v2.12 [Libraries in projects must be
+renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a]
+
+LPCSpifilib version <1.01>
+==========================
+Release date <12/11/2014>
+1. Changed reported device string on S25FL512S from "S25FL512S 256kSec" to "S25FL512S". 
+2. Changelog update: Added support for MX25L1635E, MX25L6435E, MX25L8035E, S25FL016K, S25FL064P, S25FL128S, S25FL256S,
+    S25FL512S, W25Q16DV, and W25Q64FV devices.
+3. Changelog update: Changed maxRead to 16128 (was 32768).
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Will break IAR examples in LPCOpen v2.12 [Libraries in projects must be
+renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a]
+
+LPCSpifilib version <1.0>
+==========================
+Release date <12/2/2014>
+Change Log:
+1. Added support for MX25L1635E, MX25L6435E, MX25L8035E, S25FL016K, S25FL064P, S25FL128P, S25FL256S,
+    S25FL512S, W25Q16DV, and W25Q64FV devices.
+2. Added support for device enumeration.
+3. Added support for device base address return.
+4. Improved read/write performance by issuing dword access to spifi controller.
+5. Changed device structure to use function enum to facilitate adding external devices without recompiling library.
+6. Added support for dual read / write.
+7. Changed quad command to quad io read (improved performance).
+8. Added ability for device to define read / write configuration word on a per
+device basis.
+9. Changed maxRead to 16383 (was 32768)
+10. Removed API spifiDeInit();
+11. Renamed spifiDevGetInfo option SPIFI_INFO_MAX_QUADREAD_CLOCK to SPIFI_INFO_MAX_HSREAD_CLOCK
+12. Renamed spifiDevGetInfo option SPIFI_INFO_MAX_QUADPROG_CLOCK to SPIFI_INFO_MAX_HSPROG_CLOCK
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Will break IAR examples in LPCOpen v2.12 [Libraries in projects must be
+renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a].
+
+LPCSpifilib version <0.07>
+==========================
+Release date <9/9/2014>
+Change Log:
+1. Added support for Winbond W25Q32FV.
+2. Added support for Winbond W25Q80BV.
+3. Added API's to return max speed for specific functions:
+   Read, QuadRead, Program, Quad Program.
+4. Added prvGetStatus, prvSetStatus and prvSetQuadMode Functions to device definition structure. 
+5. Added spifiDevGetCount function.
+6. Consolidated MX25L3235E and S25FL164K support into spifilib_fam_standard_cmd module 
+   (removed SPIFI_REG_FAMILY_xxx registration functions and replaced with
+   spifi_REG_FAMILY_StandardCommandSet function).
+7. Fixed bug in spifiRegisterFamily where NULL was being returned instead of the
+   family handle.
+8. Removed switch statements and clib calls to memcpy and memset to facilitate running from iRam.
+9. Renamed SPIFI_DEV_FAMILY_T to SPIFI_FAM_NODE_T.
+10. Moved spifiDevRegister to shared module (spifilib_dev_common.c).
+11. Updated documentation to reflect current design.
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Will break IAR examples in LPCOpen v2.12 [Libraries in projects must be
+renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a]
+
+LPCSpifilib version <0.06>
+==========================
+Release date <6/25/2014>
+Change Log:
+1. Changed identify to allow dynamic ID bytes per MFG/PART #. Moved to common
+   module.
+2. Added support for S25FL129P (256kB sectors).
+3. Verified S25FL129P 64kB sectors variant.
+4. Renamed familes to indicate functionality in place of root device.
+   (This was done to avoid confusion over where devices reside).
+5. Family cleanup to aid in comparison.
+6. Removed Chip.h dependency.
+7. Moved getInfo to common module.
+8. Code/Memory optimizations.
+9. LPCXpresso XML projects added.
+10. M0 Library added.
+11. Sub-block erase fixed for devices with full capability.
+12. IAR libarary renamed to match Keil library
+13. Moved project files into proj directory
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Will break IAR examples in LPCOpen v2.12 [Libraries in projects must be
+renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a]
+
+LPCSpifilib version <0.05>
+==========================
+Release date <5/15/2014>
+Change Log:
+1. Comment cleanup.
+2. Added support for 40xx series
+3. Changed spifiInit() api to include spifi control register address.
+4. Changed spifiInitDevice() to include spifi control register address.
+
+Known issues: (carried forward)
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Option SPIFI_CAP_SUBBLKERASE is not working.
+3. Device S25FL129P is un-tested.
+
+
+LPCSpifilib version <0.04>
+===========================
+Release date <4/25/2014>
+Change Log:
+1. Initial version.
+
+Known issues:
+1. Option SPIFI_CAP_NOBLOCK is not implemented.
+2. Option SPIFI_CAP_SUBBLKERASE is not working.
+3. Device S25FL129P is un-tested.

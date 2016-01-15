@@ -155,7 +155,7 @@ endif
 endif
 
 ifeq ($(CONFIG_LPC43_ADC0),y)
-CHIP_CSRCS += lpc43_acc.c
+CHIP_CSRCS += lpc43_adc.c
 else
 ifeq ($(CONFIG_LPC43_ADC1),y)
 CHIP_CSRCS += lpc43_adc.c
@@ -163,7 +163,7 @@ endif
 endif
 
 ifeq ($(CONFIG_LPC43_DAC),y)
-CHIP_CSRCS += lpc43_acc.c
+CHIP_CSRCS += lpc43_adc.c
 else
 ifeq ($(CONFIG_LPC43_DAC),y)
 CHIP_CSRCS += lpc43_adc.c
@@ -180,3 +180,4 @@ CHIP_CSRCS += lpc43_usb0dev.c
 endif
 endif
 
+-include chip/spifi/src/Make.defs

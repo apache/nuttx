@@ -71,6 +71,29 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+
+/* Register addresses ***************************************************************/
+
+#define LPC43_SPIFI_CTRL_OFFSET     0x000
+#define LPC43_SPIFI_CMD_OFFSET      0x004
+#define LPC43_SPIFI_ADDR_OFFSET     0x008
+#define LPC43_SPIFI_IDATA_OFFSET    0x00C
+#define LPC43_SPIFI_CLIMIT_OFFSET   0x010
+#define LPC43_SPIFI_DATA_OFFSET     0x014
+#define LPC43_SPIFI_MCMD_OFFSET     0x018
+#define LPC43_SPIFI_STAT_OFFSET     0x01C
+
+
+#define LPC43_SPIFI_CTRL          (LPC43_SPIFI_BASE+LPC43_SPIFI_CTRL_OFFSET)
+#define LPC43_SPIFI_CMD           (LPC43_SPIFI_BASE+LPC43_SPIFI_CMD_OFFSET)
+#define LPC43_SPIFI_ADDR          (LPC43_SPIFI_BASE+LPC43_SPIFI_ADDR_OFFSET)
+#define LPC43_SPIFI_IDATA         (LPC43_SPIFI_BASE+LPC43_SPIFI_IDATA_OFFSET)
+#define LPC43_SPIFI_CLIMIT        (LPC43_SPIFI_BASE+LPC43_SPIFI_CLIMIT_OFFSET)
+#define LPC43_SPIFI_DATA          (LPC43_SPIFI_BASE+LPC43_SPIFI_DATA_OFFSET)
+#define LPC43_SPIFI_MCMD          (LPC43_SPIFI_BASE+LPC43_SPIFI_MCMD_OFFSET)
+#define LPC43_SPIFI_STAT          (LPC43_SPIFI_BASE+LPC43_SPIFI_STAT_OFFSET)
+
+
 /* The largest protection block of any serial flash that the ROM driver
  * can handle
  */

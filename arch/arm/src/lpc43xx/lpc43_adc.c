@@ -1,18 +1,13 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_adc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Ported from from the LPC17 version:
- *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,20 +60,41 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "lpc43_syscon.h"
-#include "lpc43_pinconn.h"
+
 #include "lpc43_adc.h"
+#include "lpc43_cgu.h"
+#include "lpc43_scu.h"
+#include "lpc43_ccu.h"
+#include "lpc43_creg.h"
+#include "chip/lpc43_gima.h"
+#include <chip/lpc43_timer.h>
+#include "lpc43_pinconfig.h"
 
-#if defined(CONFIG_LPC43_ADC)
 
+#if defined(CONFIG_LPC43_ADC0) /* TODO ADC1 */
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 #ifndef CONFIG_ADC0_MASK
 #define CONFIG_ADC0_MASK     0x01
 #endif
-#ifndef CONFIG_ADC0_SPS
-#define CONFIG_ADC0_SPS      1000
+#ifndef CONFIG_ADC0_FREQ
+#define CONFIG_ADC0_FREQ      0
 #endif
-#ifndef CONFIG_ADC0_AVERAGE
-#define CONFIG_ADC0_AVERAGE  200
+
+#define LPC43_ADC_MAX_FREQUENCY 4500000
+#define LPC43_ADC_MIN_FREQUENCY (BOARD_ABP3_FREQUENCY/256)
+
+#if defined(CONFIG_ADC0_USE_TIMER) && CONFIG_ADC0_FREQ == 0
+#  error "set CONFIG_ADC0_FREQ!=0 if CONFIG_ADC0_USE_TIMER"
+#endif
+
+#ifndef CONFIG_ADC0_USE_TIMER
+#  if (CONFIG_ADC0_FREQ != 0 && (CONFIG_ADC0_FREQ > LPC43_ADC_MAX_FREQUENCY || CONFIG_ADC0_FREQ < LPC43_ADC_MIN_FREQUENCY))
+#    error "ADC0 sample rate can't be grater than LPC43_ADC_MAX_FREQUENCY or less than LPC43_ADC_MIN_FREQUENCY"
+#  endif
+#define CONFIG_ADC0_USE_TIMER 0
 #endif
 
 /****************************************************************************
@@ -87,11 +103,12 @@
 
 struct up_dev_s
 {
-  uint8_t mask;
-  uint32_t sps;
-  int irq;
-  int32_t buf[8];
-  uint8_t count[8];
+  uint8_t  mask;
+  uint8_t  mask_int;
+  uint32_t freq;
+  int      irq;
+  bool	   timer;
+  bool     m_ch;
 };
 
 /****************************************************************************
@@ -122,9 +139,12 @@ static const struct adc_ops_s g_adcops =
 
 static struct up_dev_s g_adcpriv =
 {
-  .sps         = CONFIG_ADC0_SPS,
+  .freq        = CONFIG_ADC0_FREQ,
   .mask        = CONFIG_ADC0_MASK,
-  .irq         = LPC43_IRQ_ADC,
+  .mask_int    = CONFIG_ADC0_MASK,
+  .irq         = LPC43M4_IRQ_ADC0,
+  .timer       = CONFIG_ADC0_USE_TIMER,
+  .m_ch        = ( CONFIG_ADC0_MASK & (CONFIG_ADC0_MASK-1) )?true:false
 };
 
 static struct adc_dev_s g_adcdev =
@@ -137,145 +157,304 @@ static struct adc_dev_s g_adcdev =
  * Private Functions
  ****************************************************************************/
 
-/* Reset the ADC device.  Called early to initialize the hardware. This
- * is called, before ao_setup() and on error conditions.
- */
+/****************************************************************************
+ * Name: adc_reset
+ *
+ * Description:
+ *   Reset the ADC device.  Called early to initialize the hardware. This
+ *   is called, before adc_setup() and on error conditions.
+ *
+ ****************************************************************************/
 
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
   irqstate_t flags;
   uint32_t regval;
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+
+  if ( priv->m_ch ) /* calc MSB */
+    {
+      priv->mask_int |=  (priv->mask_int >> 1);
+      priv->mask_int |=  (priv->mask_int >> 2);
+      priv->mask_int |=  (priv->mask_int >> 4);
+      priv->mask_int &= ~(priv->mask_int >> 1);
+    }
 
   flags = irqsave();
 
-  regval  = getreg32(LPC43_SYSCON_PCONP);
-  regval |= SYSCON_PCONP_PCADC;
-  putreg32(regval, LPC43_SYSCON_PCONP);
+  /* Clock peripheral */
 
-  putreg32(ADC_CR_PDN, LPC43_ADC_CR);
+  regval  = getreg32(LPC43_CCU1_APB3_ADC0_CFG);
+  regval |= CCU_CLK_CFG_RUN;
+  putreg32(regval, LPC43_CCU1_APB3_ADC0_CFG);
 
-  regval  = getreg32(LPC43_SYSCON_PCLKSEL0);
-  regval &= ~SYSCON_PCLKSEL0_ADC_MASK;
-  regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
-  putreg32(regval, LPC43_SYSCON_PCLKSEL0);
 
-  uint32_t clkdiv = LPC43_CCLK / 8 / 65 / priv->sps;
-  clkdiv <<= 8;
-  clkdiv &= 0xff00;
-  putreg32(ADC_CR_PDN | ADC_CR_BURST | clkdiv | priv->mask, LPC43_ADC_CR);
+  /* calc config value*/
 
-  if (priv->mask&0x01)
+  regval = ADC_CR_PDN;
+
+  regval |= priv->mask;
+
+  if (priv->freq != 0 )
     {
-      lpc43_configgpio(GPIO_AD0p0);
+      if (priv->timer)
+	{
+
+	  /* start adc on timer */
+
+	  regval |= ADC_CR_START_CTOUT8;
+
+	  /* enable timer out in creg*/
+
+	  uint32_t regval_timer = getreg32(LPC43_CREG6);
+	  regval_timer &= ~CREG6_CTOUTCTRL;
+	  putreg32(regval_timer, LPC43_CREG6);
+
+	  /* enable synch timer 2 match 0 to adc*/
+
+	  putreg32( GIMA_EDGE | GIMA_SYNCH | GIMA_ADC1_SELECT_T2MAT0, LPC43_GIMA_ADCSTART1);
+
+	  /* power on */
+	  regval_timer  = getreg32(LPC43_CCU1_M4_TIMER2_CFG);
+	  regval_timer |= CCU_CLK_CFG_RUN;
+	  putreg32(regval_timer, LPC43_CCU1_M4_TIMER2_CFG);
+
+	  putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_TCR_OFFSET); /* disable */
+	  putreg32(TMR_MCR_MR0R, LPC43_TIMER2_BASE+LPC43_TMR_MCR_OFFSET); /* reset on match only*/
+	  putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_CCR_OFFSET); /* do not use capture */
+	  putreg32(TMR_EMR_EMC0_SET, LPC43_TIMER2_BASE+LPC43_TMR_EMR_OFFSET); /* external match */
+	  putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_CTCR_OFFSET); /* counter/timer mode */
+
+	  putreg32(LPC43_CCLK/priv->freq/2-1, LPC43_TIMER2_BASE+LPC43_TMR_PR_OFFSET); /* set clock, divide by 2 - bug in chip */
+
+	  putreg32(1, LPC43_TMR2_MR0); /* set match on 1*/
+
+	}
+      else
+	{
+	  uint32_t clkdiv = BOARD_ABP3_FREQUENCY/priv->freq + (BOARD_ABP3_FREQUENCY%priv->freq!=0) - 1;
+	  regval |= clkdiv<<ADC_CR_CLKDIV_SHIFT;
+	}
     }
-  else if (priv->mask&0x02)
+
+  putreg32(regval, LPC43_ADC0_CR);
+
+/* do pin configuration if defined */
+
+#ifdef PINCONF_ADC0_C0
+  if ((priv->mask & 0x01) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p1);
+      lpc43_pin_config(PINCONF_ADC0_C0);
     }
-  else if (priv->mask&0x04)
+#endif /* PINCONF_ADC0_C0 */
+
+#ifdef PINCONF_ADC0_C1
+  if ((priv->mask & 0x02) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p2);
+      lpc43_pin_config(PINCONF_ADC0_C1);
     }
-  else if (priv->mask&0x08)
+#endif /* PINCONF_ADC0_C1 */
+
+#ifdef PINCONF_ADC0_C2
+  if ((priv->mask & 0x04) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p3);
+      lpc43_pin_config(PINCONF_ADC0_C2);
     }
-  else if (priv->mask&0x10)
+#endif /* PINCONF_ADC0_C2 */
+
+#ifdef PINCONF_ADC0_C3
+  if ((priv->mask & 0x08) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p4);
+      lpc43_pin_config(PINCONF_ADC0_C3);
     }
-  else if (priv->mask&0x20)
+#endif /* PINCONF_ADC0_C3 */
+
+#ifdef PINCONF_ADC0_C4
+  if ((priv->mask & 0x10) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p5);
+      lpc43_pin_config(PINCONF_ADC0_C4);
     }
-  else if (priv->mask&0x40)
+#endif /* PINCONF_ADC0_C4 */
+
+#ifdef PINCONF_ADC0_C5
+  if ((priv->mask & 0x20) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p6);
+      lpc43_pin_config(PINCONF_ADC0_C5);
     }
-  else if (priv->mask&0x80)
+#endif /* PINCONF_ADC0_C5 */
+
+#ifdef PINCONF_ADC0_C6
+  if ((priv->mask & 0x40) != 0)
     {
-      lpc43_configgpio(GPIO_AD0p7);
+      lpc43_pin_config(PINCONF_ADC0_C6);
     }
+#endif /* PINCONF_ADC0_C6 */
+
+#ifdef PINCONF_ADC0_C7
+  if ((priv->mask & 0x80) != 0)
+    {
+      lpc43_configgpio(PINCONF_ADC0_C7);
+    }
+#endif /* PINCONF_ADC0_C7 */
 
   irqrestore(flags);
 }
 
-/* Configure the ADC. This method is called the first time that the ADC
- * device is opened.  This will occur when the port is first opened.
- * This setup includes configuring and attaching ADC interrupts.  Interrupts
- * are all disabled upon return.
- */
+/****************************************************************************
+ * Name: adc_setup
+ *
+ * Description:
+ *   Configure the ADC. This method is called the first time that the ADC
+ *   device is opened.  This will occur when the port is first opened.
+ *   This setup includes configuring and attaching ADC interrupts.  Interrupts
+ *   are all disabled upon return.
+ *
+ ****************************************************************************/
 
-static int  adc_setup(FAR struct adc_dev_s *dev)
+static int adc_setup(FAR struct adc_dev_s *dev)
 {
-  int i;
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-  int ret = irq_attach(priv->irq, adc_interrupt);
 
+  int ret = irq_attach(priv->irq, adc_interrupt);
   if (ret == OK)
     {
-      for (i = 0; i < 8; i++)
-        {
-          priv->buf[i]   = 0;
-          priv->count[i] = 0;
-        }
-
       up_enable_irq(priv->irq);
     }
 
   return ret;
 }
 
-/* Disable the ADC.  This method is called when the ADC device is closed.
- * This method reverses the operation the setup method.
- */
+/****************************************************************************
+ * Name: adc_shutdown
+ *
+ * Description:
+ *   Disable the ADC.  This method is called when the ADC device is closed.
+ *   This method reverses the operation the setup method.
+ *
+ ****************************************************************************/
 
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+
+  if (priv->timer)
+    {
+      putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_TCR_OFFSET); /* disable the timer */
+    }
+
+  /* Disable ADC interrupts, both at the level of the ADC device and at the
+   * level of the NVIC.
+   */
+
+  putreg32(0, LPC43_ADC0_INTEN);
   up_disable_irq(priv->irq);
+
+  /* Then detach the ADC interrupt handler. */
+
   irq_detach(priv->irq);
 }
 
-/* Call to enable or disable RX interrupts */
+/****************************************************************************
+ * Name: adc_rxint
+ *
+ * Description:
+ *   Call to enable or disable RX interrupts
+ *
+ ****************************************************************************/
 
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+
+
   if (enable)
-    putreg32(ADC_INTEN_GLOBAL, LPC43_ADC_INTEN);
+    {
+      putreg32(priv->mask_int, LPC43_ADC0_INTEN);
+
+      if (priv->timer)
+	{
+	  putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_PC_OFFSET); /* reset prescale counter */
+	  putreg32(0, LPC43_TIMER2_BASE+LPC43_TMR_TC_OFFSET); /* reset timer counter */
+	  putreg32(TMR_TCR_EN, LPC43_TIMER2_BASE+LPC43_TMR_TCR_OFFSET); /* enable the timer */
+	}
+      else
+	{
+	  uint32_t regval = getreg32(LPC43_ADC0_CR);
+
+	  if(priv->freq == 0 && !priv->m_ch)
+	    {
+	      regval |= ADC_CR_START_NOW;
+	    }
+	  else
+	    {
+	      regval |= ADC_CR_BURST;
+	    }
+
+	  putreg32(regval, LPC43_ADC0_CR);
+	}
+    }
   else
-    putreg32(0x00, LPC43_ADC_INTEN);
+    {
+      putreg32(0, LPC43_ADC0_INTEN);
+    }
 }
 
-/* All ioctl calls will be routed through this method */
+/****************************************************************************
+ * Name: adc_ioctl
+ *
+ * Description:
+ *  All ioctl calls will be routed through this method
+ *
+ ****************************************************************************/
 
-static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-  dbg("Fix me:Not Implemented\n");
-  return 0;
+  /* No ioctl commands supported */
+
+  return -ENOTTY;
 }
+
+/****************************************************************************
+ * Name: adc_interrupt
+ *
+ * Description:
+ *   ADC interrupt handler
+ *
+ ****************************************************************************/
 
 static int adc_interrupt(int irq, void *context)
 {
-  uint32_t regval;
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
-  unsigned char ch;
-  int32_t value;
 
-  regval = getreg32(LPC43_ADC_GDR);
-  ch = (regval >> 24) & 0x07;
-  priv->buf[ch] += regval & 0xfff0;
-  priv->count[ch]++;
-  if (priv->count[ch] >= CONFIG_ADC0_AVERAGE)
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  uint32_t regval;
+
+  if( priv->timer)
     {
-      value = priv->buf[ch] / priv->count[ch];
-      value <<= 15;
-      adc_receive(&g_adcdev, ch, value);
-      priv->buf[ch] = 0;
-      priv->count[ch] = 0;
+      putreg32(TMR_EMR_EMC0_SET, LPC43_TIMER2_BASE+LPC43_TMR_EMR_OFFSET); /* put match to low */
     }
+  else
+    {
+      if (priv->freq == 0 && priv->m_ch ) /* clear burst mode */
+	{
+	  regval = getreg32(LPC43_ADC0_CR);
+	  regval &= ~ADC_CR_BURST;
+	  putreg32(regval, LPC43_ADC0_CR);
+	}
+    }
+
+
+  /* read data, clear interrupt by this */
+
+  int i;
+  for (i = 0; i < 8; i++)
+    {
+      if (priv->mask & 1<<i)
+	{
+	  regval = getreg32(LPC43_ADC0_DR(i));
+	  adc_receive(&g_adcdev, i, (regval&ADC_DR_VVREF_MASK)>>ADC_DR_VVREF_SHIFT);
+	}
+    }
+
   return OK;
 }
 
@@ -284,13 +463,13 @@ static int adc_interrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_adcinitialize
+ * Name: lpc43_adcinitialize
  *
  * Description:
  *   Initialize the adc
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid can device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -298,5 +477,5 @@ FAR struct adc_dev_s *lpc43_adcinitialize(void)
 {
   return &g_adcdev;
 }
-#endif
 
+#endif /* CONFIG_LPC43_ADC0 */

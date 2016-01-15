@@ -630,4 +630,20 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
   return OK;
 }
 
+
+/************************************************************************************
+ * Name: up_i2creset
+ *
+ * Description:
+ *   Reset an I2C bus
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+int up_i2creset(FAR struct i2c_dev_s * dev)
+{
+  return OK;
+}
+#endif /* CONFIG_I2C_RESET */
+
 #endif /* CONFIG_LPC43_I2C0 || CONFIG_LPC43_I2C1 */
