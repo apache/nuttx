@@ -8,6 +8,7 @@
 /mksymtab
 /mksyscall
 /mkversion
+/nxstyle
 /*.exe
 /*.dSYM
 /.k2h-body.dat
