@@ -1,0 +1,114 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_TMS570
+
+comment "TMS570 Configuration Options"
+
+# Chip Capabilities
+
+config TMS570_HAVE_SCI2
+	bool
+	default n
+
+# Summary Configurations
+
+# Chip Selection
+
+choice
+	prompt "TI TMS570 Chip Selection"
+	default ARCH_CHIP_TMS570LS1227ZWT
+
+config ARCH_CHIP_TMS570LS0232PZ
+	bool "TI TMS570LS0232PZ"
+	select ARCH_CORTEXR4
+
+config ARCH_CHIP_TMS570LS0332PZ
+	bool "TI TMS570LS0332PZ"
+	select ARCH_CORTEXR4
+
+config ARCH_CHIP_TMS570LS0432PZ
+	bool "TI TMS570LS0432PZ"
+	select ARCH_CORTEXR4
+
+config ARCH_CHIP_TMS570LS0714PZ
+	bool "TI TMS570LS0714PZ"
+	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
+
+config ARCH_CHIP_TMS570LS0714PGE
+	bool "TI TMS570LS0714PGE"
+	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
+
+config ARCH_CHIP_TMS570LS0714ZWT
+	bool "TI TMS570LS0714ZWT"
+	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
+
+config ARCH_CHIP_TMS570LS1227ZWT
+	bool "TI TMS570LS1227ZWT"
+	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
+
+endchoice # TI TMS570 Chip Selection
+
+menu "TMS570 Peripheral Support"
+
+config TMS570_MIBADC
+	bool "MibADC"
+	default n
+
+config TMS570_DCAN1
+	bool "Controller Area Network 1 (DCAN1)"
+	default n
+
+config TMS570_DCAN2
+	bool "Controller Area Network 1 (DCAN2)"
+	default n
+
+config TMS570_QEP
+	bool "Enhanced Quadrature Encoder Unit (eQEP)"
+	default n
+
+config TMS570_N2HET
+	bool "High-End Timer (N2HET)"
+	default n
+
+config TMS570_DCAN1
+	bool "Controller Area Network 1 (D"
+	default n
+
+config TMS570_MIBASPI1
+	bool "Multi-Buffered Serial Peripheral Interface Module (MibSPI1)"
+	default n
+
+config TMS570_SCI1
+	bool "Serial Communication Interface 1 (SCI1)"
+	default n
+	select ARCH_HAVE_SCI1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config TMS570_SCI2
+	bool "Serial Communication Interface 2 (SCI2)"
+	default n
+	depends on TMS570_HAVE_SCI2
+	select ARCH_HAVE_SCI1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+endmenu # TMS570 Peripheral Support
+
+config TMS570_GIO_IRQ
+	bool "GIO pin interrupts"
+	---help---
+		Build in support for interrupting GIO pins
+
+config TMS570_SELFTEST
+	bool "Power-on Selftest"
+	default n
+	---help---
+		Enable power-on self-test of memories and ECC logic.
+
+endif # ARCH_CHIP_TMS570

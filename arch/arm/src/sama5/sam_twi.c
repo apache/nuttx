@@ -1044,7 +1044,7 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
   msgv[0].buffer = (uint8_t *)wbuffer;  /* Override const */
   msgv[0].length = wbuflen;
 
-  /* The second is either a read (rbuflen > 0) or a write (rbuflen < 0) with
+  /* The second is either a read (rbuflen > 0) or a write (rbuflen <= 0) with
    * no restart.
    */
 
@@ -1066,7 +1066,7 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
 
   twi_takesem(&priv->exclsem);
 
-  /* Initiate the read */
+  /* Perform the write-read */
 
   priv->msg  = msgv;
   priv->msgc = 2;

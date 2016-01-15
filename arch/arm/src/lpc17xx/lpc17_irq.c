@@ -180,7 +180,7 @@ static int lpc17_pendsv(int irq, FAR void *context)
 static int lpc17_dbgmonitor(int irq, FAR void *context)
 {
   (void)irqsave();
-  dbg("PANIC!!! Debug Monitor receieved\n");
+  dbg("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -383,7 +383,7 @@ void up_irqinitialize(void)
    * Fault handler.
    */
 
-#ifdef CONFIG_ARMV7M_MPU
+#ifdef CONFIG_ARM_MPU
   irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
   up_enable_irq(LPC17_IRQ_MEMFAULT);
 #endif
@@ -392,7 +392,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_DEBUG
   irq_attach(LPC17_IRQ_NMI, lpc17_nmi);
-#ifndef CONFIG_ARMV7M_MPU
+#ifndef CONFIG_ARM_MPU
   irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
 #endif
   irq_attach(LPC17_IRQ_BUSFAULT, lpc17_busfault);

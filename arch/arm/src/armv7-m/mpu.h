@@ -1,4 +1,4 @@
-/************************************************************************************
+/*****************************************************************************
  * arch/arm/src/armv7-m/mpu.h
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H
-#define __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H
+#ifndef __ARCH_ARM_SRC_ARMV7M_MPU_H
+#define __ARCH_ARM_SRC_ARMV7M_MPU_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,14 +46,15 @@
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <stdbool.h>
+#  include <assert.h>
 #  include <debug.h>
 
 #  include "up_arch.h"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* MPU Register Addresses */
 
@@ -86,7 +87,17 @@
 
 /* MPU Region Number Register Bit Definitions */
 
-#define MPU_RNR_MASK            (0xff)
+#if defined(CONFIG_ARM_MPU_NREGIONS)
+#  if CONFIG_ARM_MPU_NREGIONS <= 8
+#    define MPU_RNR_MASK            (0x00000007)
+#  elif CONFIG_ARM_MPU_NREGIONS <= 16
+#    define MPU_RNR_MASK            (0x0000000f)
+#  elif CONFIG_ARM_MPU_NREGIONS <= 32
+#    define MPU_RNR_MASK            (0x0000001f)
+#  else
+#    error "FIXME: Unsupported number of MPU regions"
+#  endif
+#endif
 
 /* MPU Region Base Address Register Bit Definitions */
 
@@ -128,9 +139,9 @@
 #    define MPU_RASR_AP_RORO    (6 << MPU_RASR_AP_SHIFT) /* P:RO   U:RO   */
 #  define MPU_RASR_XN           (1 << 28) /* Bit 28: Instruction access disable */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
@@ -194,9 +205,9 @@ uint8_t mpu_log2regionfloor(size_t size);
 
 uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size);
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: mpu_showtype
@@ -246,6 +257,7 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 
   putreg32(regval, MPU_CTRL);
 }
+
 
 /****************************************************************************
  * Name: mpu_priv_stronglyordered
@@ -570,5 +582,5 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7M_MPU_H */
 

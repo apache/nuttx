@@ -51,7 +51,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "m9s12_internal.h"
+#include "m9s12.h"
 #include "m9s12_crg.h"
 
 /****************************************************************************

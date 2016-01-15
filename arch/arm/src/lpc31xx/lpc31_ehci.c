@@ -61,7 +61,7 @@
 #include "cache.h"
 
 #include "chip.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 #include "lpc31_cgudrvr.h"
 #include "lpc31_syscreg.h"
 #include "lpc31_evntrtr.h"

@@ -13,6 +13,42 @@ choice
 	prompt "Atmel SAMV7 Chip Selection"
 	default ARCH_CHIP_SAMV71Q21
 
+config ARCH_CHIP_SAME70Q19
+	bool "SAME70Q19"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70Q20
+	bool "SAME70Q20"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70Q21
+	bool "SAME70Q21"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70N19
+	bool "SAME70N10"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70N20
+	bool "SAME70N20"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70N21
+	bool "SAME70N21"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70J19
+	bool "SAME70J10"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAME70J20
+	bool "SAME70J20"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAME70J21
+	bool "SAME70J21"
+	select ARCH_CHIP_SAME70J
+
 config ARCH_CHIP_SAMV71Q19
 	bool "SAMV71Q19"
 	select ARCH_CHIP_SAMV71Q
@@ -51,6 +87,55 @@ config ARCH_CHIP_SAMV71J21
 
 endchoice # Atmel SAMV7 Chip Selection
 
+config ARCH_CHIP_SAME70
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+config ARCH_CHIP_SAME70Q
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAME70N
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAME70J
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
 config ARCH_CHIP_SAMV71
 	bool
 	default n
@@ -60,6 +145,7 @@ config ARCH_CHIP_SAMV71
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select SAMV7_HAVE_MEDIALB
 
 config ARCH_CHIP_SAMV71Q
 	bool
@@ -122,6 +208,7 @@ config SAMV7_EMAC
 	bool
 	default n
 	select ARMV7M_DCACHE_WRITETHROUGH if ARMV7M_DCACHE
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		NOTE that write-through caching is automatically selected.  This is
 		to work around issues with the RX and TX descriptors with are 8-bytes
@@ -143,6 +230,10 @@ config SAMV7_HAVE_ISI8
 	bool
 	default n
 
+config SAMV7_HAVE_MEDIALB
+	bool
+	default n
+
 config SAMV7_HAVE_SDRAMC
 	bool
 	default n
@@ -160,6 +251,10 @@ config SAMV7_QSPI_IS_SPI
 	default n
 
 config SAMV7_SSC
+	bool
+	default n
+
+config SAMV7_HAVE_TC
 	bool
 	default n
 
@@ -275,6 +370,7 @@ config SAMV7_ISI
 config SAMV7_MLB
 	bool "Media LB Interface"
 	default n
+	depends on SAMV7_HAVE_MEDIALB
 
 config SAMV7_PWM0
 	bool "Pulse Width Modulation Controller 0 (PWM0)"
@@ -288,7 +384,7 @@ config SAMV7_QSPI
 	bool "Quad SPI (QSPI)"
 	default n
 	select ARCH_USE_MPU
-	select ARMV7M_MPU
+	select ARM_MPU
 
 config SAMV7_RTC
 	bool "Real Time Clock (RTC)"
@@ -327,68 +423,29 @@ config SAMV7_SSC0
 	select SAMV7_SSC
 
 config SAMV7_TC0
-	bool "Timer/Counter 0 (TC0)"
+	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
 	default n
-	select SAMV7_TC
+	select SAMV7_HAVE_TC
 
 config SAMV7_TC1
-	bool "Timer/Counter 1 (TC1)"
+	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
 	default n
-	select SAMV7_TC
+	select SAMV7_HAVE_TC
 
 config SAMV7_TC2
-	bool "Timer/Counter 2 (TC2)"
+	bool "Timer Counter 2 (ch. 6, 7, 8) (TC2)"
 	default n
-	select SAMV7_TC
+	select SAMV7_HAVE_TC
 
 config SAMV7_TC3
-	bool "Timer/Counter 3 (TC3)"
+	bool "Timer Counter 3 (ch. 9, 10, 11) (TC2)"
 	default n
-	select SAMV7_TC
-
-config SAMV7_TC4
-	bool "Timer/Counter 4 (TC4)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC5
-	bool "Timer/Counter 5 (TC5)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC6
-	bool "Timer/Counter 6 (TC6)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC7
-	bool "Timer/Counter 7 (TC7)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC8
-	bool "Timer/Counter 8 (TC8)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC9
-	bool "Timer/Counter 9 (TC8)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC10
-	bool "Timer/Counter 10 (TC9)"
-	default n
-	select SAMV7_TC
-
-config SAMV7_TC11
-	bool "Timer/Counter 11 (TC8)"
-	default n
-	select SAMV7_TC
+	select SAMV7_HAVE_TC
 
 config SAMV7_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
+	select ARCH_HAVE_RNG
 
 config SAMV7_TWIHS0
 	bool "Two-wire Interface 0 (TWIHS0)"
@@ -478,13 +535,15 @@ config SAMV7_USART2
 	select ARCH_HAVE_USART2
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_WDT0
-	bool "Watchdog Timer (WDT0)"
+config SAMV7_WDT
+	bool "Watchdog Timer (WDT)"
 	default n
+	select WATCHDOG
 
-config SAMV7_WDT1
-	bool "Watchdog Timer (WDT1)"
+config SAMV7_RSWDT
+	bool "Reinforced Safety Watchdog Timer (RSWDT)"
 	default n
+	select WATCHDOG
 
 endmenu # SAMV7 Peripheral Selection
 
@@ -516,6 +575,100 @@ config SAMV7_GPIOE_IRQ
 	default n
 
 endif # SAMV7_GPIO_IRQ
+
+if SAMV7_WDT || SAMV7_RSWDT
+
+menu "Watchdog Configuration"
+
+if SAMV7_WDT
+
+comment "Watchdog Configuration"
+
+config SAMV7_WDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMV7_WDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMV7_WDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMV7_WDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endif # SAMV7_WDT
+
+if SAMV7_RSWDT
+
+comment "Reinforced Safety Watchdog Configuration"
+
+config SAMV7_RSWDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMV7_RSWDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMV7_RSWDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMV7_RSWDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endif # SAMV7_RSWDT
+
+endmenu # Watchdog configuration
+
+endif # SAMV7_WDT || SAMV7_RSWDT
+
+menuconfig SAMV7_PROGMEM
+	bool "FLASH program memory"
+	---help---
+		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
+
+if SAMV7_PROGMEM
+
+config SAMV7_PROGMEM_NSECTORS
+	int "Number of 128KB sectors"
+	default 4
+	range 1 15
+	---help---
+		This is the number of 128KB FLASH sectors at the end of the program
+		flash memory that will be reserved for use with by the interfaces
+		prototyped in include/nuttx/progmem.h
+
+endif # SAMV7_PROGMEM
 
 menu "SDRAM Configuration"
 	depends on SAMV7_SDRAMC
@@ -1097,6 +1250,227 @@ config SAMV7_SSC_DUMPBUFFERS
 		Enable instrumentation to dump TX and RX buffers.
 
 endmenu # SSC Configuration
+
+if SAMV7_HAVE_TC
+menu "Timer/counter Configuration"
+
+if SAMV7_TC0
+
+config SAMV7_TC0_CLK0
+	bool "Enable TC0 channel 0 clock input pin"
+	default n
+
+config SAMV7_TC0_TIOA0
+	bool "Enable TC0 channel 0 output A"
+	default n
+
+config SAMV7_TC0_TIOB0
+	bool "Enable TC0 channel 0 output B"
+	default n
+
+config SAMV7_TC0_CLK1
+	bool "Enable TC0 channel 1 clock input pin"
+	default n
+
+config SAMV7_TC0_TIOA1
+	bool "Enable TC0 channel 1 output A"
+	default n
+
+config SAMV7_TC0_TIOB1
+	bool "Enable TC0 channel 1 output B"
+	default n
+
+config SAMV7_TC0_CLK2
+	bool "Enable TC0 channel 2 clock input pin"
+	default n
+
+config SAMV7_TC0_TIOA2
+	bool "Enable TC0 channel 2 output A"
+	default n
+
+config SAMV7_TC0_TIOB2
+	bool "Enable TC0 channel 2 output B"
+	default n
+
+endif # SAMV7_TC0
+
+if SAMV7_TC1
+
+config SAMV7_TC1_CLK3
+	bool "Enable TC1 channel 3 clock input pin"
+	default n
+
+config SAMV7_TC1_TIOA3
+	bool "Enable TC1 channel 3 output A"
+	default n
+
+config SAMV7_TC1_TIOB3
+	bool "Enable TC1 channel 3 output B"
+	default n
+
+config SAMV7_TC1_CLK4
+	bool "Enable TC1 channel 4 clock input pin"
+	default n
+
+config SAMV7_TC1_TIOA4
+	bool "Enable TC1 channel 4 output A"
+	default n
+
+config SAMV7_TC1_TIOB4
+	bool "Enable TC1 channel 4 output B"
+	default n
+
+config SAMV7_TC1_CLK5
+	bool "Enable TC1 channel 5 clock input pin"
+	default n
+
+config SAMV7_TC1_TIOA5
+	bool "Enable TC1 channel 5 output A"
+	default n
+
+config SAMV7_TC1_TIOB5
+	bool "Enable TC1 channel 5 output B"
+	default n
+
+endif # SAMV7_TC1
+
+if SAMV7_TC2
+
+config SAMV7_TC2_CLK6
+	bool "Enable TC2 channel 6 clock input pin"
+	default n
+
+config SAMV7_TC2_TIOA6
+	bool "Enable TC2 channel 6 output A"
+	default n
+
+config SAMV7_TC2_TIOB6
+	bool "Enable TC2 channel 6 output B"
+	default n
+
+config SAMV7_TC2_CLK7
+	bool "Enable TC2 channel 7 clock input pin"
+	default n
+
+config SAMV7_TC2_TIOA7
+	bool "Enable TC2 channel 7 output A"
+	default n
+
+config SAMV7_TC2_TIOB7
+	bool "Enable TC2 channel 7 output B"
+	default n
+
+config SAMV7_TC2_CLK8
+	bool "Enable TC2 channel 8 clock input pin"
+	default n
+
+config SAMV7_TC2_TIOA8
+	bool "Enable TC2 channel 8 output A"
+	default n
+
+config SAMV7_TC2_TIOB8
+	bool "Enable TC2 channel 8 output B"
+	default n
+
+endif # SAMV7_TC2
+
+if SAMV7_TC3
+config SAMV7_TC3_CLK9
+	bool "Enable TC3 channel 9 clock input pin"
+	default n
+
+config SAMV7_TC3_TIOA9
+	bool "Enable TC3 channel 9 output A"
+	default n
+
+config SAMV7_TC3_TIOB9
+	bool "Enable TC3 channel 9 output B"
+	default n
+
+config SAMV7_TC3_CLK10
+	bool "Enable TC3 channel 10 clock input pin"
+	default n
+
+config SAMV7_TC3_TIOA10
+	bool "Enable TC3 channel 10 output A"
+	default n
+
+config SAMV7_TC3_TIOB10
+	bool "Enable TC3 channel 10 output B"
+	default n
+
+config SAMV7_TC3_CLK11
+	bool "Enable TC3 channel 11 clock input pin"
+	default n
+
+config SAMV7_TC3_TIOA11
+	bool "Enable TC3 channel 11 output A"
+	default n
+
+config SAMV7_TC3_TIOB11
+	bool "Enable TC3 channel 11 output B"
+	default n
+
+endif # SAMV7_TC3
+
+config SAMV7_ONESHOT
+	bool "TC one-shot wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config SAMV7_FREERUN
+	bool "TC free-running wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+if SCHED_TICKLESS
+
+config SAMV7_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 0
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config SAMV7_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 1
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif
+
+config SAMV7_TC_DEBUG
+	bool "TC debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output high level Timer/Counter device debug information.
+		Requires also DEBUG.  If this option AND DEBUG_VERBOSE are
+		enabled, then the system will be overwhelmed the timer debug
+		output.  If DEBUG_VERBOSE is disabled, then debug output will
+		only indicate if/when timer-related errors occur.  This
+		latter mode is completely usable.
+
+config SAMV7_TC_REGDEBUG
+	bool "TC register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level Timer/Counter device debug
+		information. Very invasive! Requires also DEBUG.
+
+endmenu # Timer/counter Configuration
+endif # SAMV7_HAVE_TC
 
 menu "HSMCI device driver options"
 	depends on SAMV7_HSMCI

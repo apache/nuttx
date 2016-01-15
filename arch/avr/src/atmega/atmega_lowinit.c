@@ -43,7 +43,7 @@
 
 #include "atmega_config.h"
 #include "up_internal.h"
-#include "atmega_internal.h"
+#include "atmega.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -131,8 +131,8 @@ void up_lowinit(void)
 #ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
   CLKPR = 0x80;
   CLKPR = 0;
-#else
-  XDIV = 0;
+#elif defined(XDIV)
+  XDIV  = 0;
 #endif
 
   /* Initialize the watchdog timer */
@@ -155,5 +155,3 @@ void up_lowinit(void)
 
   atmega_boardinitialize();
 }
-
-

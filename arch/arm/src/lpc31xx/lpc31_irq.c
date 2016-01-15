@@ -53,7 +53,7 @@
 
 #include "lpc31_intc.h"
 #include "lpc31_cgudrvr.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 
 /****************************************************************************
  * Pre-processor Definitions

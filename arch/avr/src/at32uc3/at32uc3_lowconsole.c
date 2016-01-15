@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "at32uc3_internal.h"
+#include "at32uc3.h"
 #include "at32uc3_pm.h"
 #include "at32uc3_usart.h"
 #include "at32uc3_pinmux.h"

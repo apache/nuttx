@@ -259,6 +259,7 @@ config PIC32MZ_ETHERNET
 	default n
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
 
 config PIC32MZ_CTMU
 	bool "Charge Time Measurement Unit (CMTU)"

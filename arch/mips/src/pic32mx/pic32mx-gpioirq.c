@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "pic32mx-gpio.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 
 #ifdef CONFIG_PIC32MX_GPIOIRQ
 

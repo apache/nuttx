@@ -93,10 +93,11 @@
 #endif
 
 /* Timers ***************************************************************************/
-/* On the F1 series, all timers are 16-bit. */
 
 #undef HAVE_32BIT_TIMERS
 #undef HAVE_16BIT_TIMERS
+
+/* On the F1 series, all timers are 16-bit. */
 
 #if defined(CONFIG_STM32_STM32F10XX)
 
@@ -109,6 +110,33 @@
 #  define TIM3_BITWIDTH         16
 #  define TIM4_BITWIDTH         16
 #  define TIM5_BITWIDTH         16
+#  define TIM8_BITWIDTH         16
+
+/* On the F3 series, TIM5 is 32-bit.  All of the rest are 16-bit */
+
+#elif defined(CONFIG_STM32_STM32F30XX)
+
+   /* If TIM5 is enabled, then we have 32-bit timers */
+
+#  if defined(CONFIG_STM32_TIM5_QE)
+#    define HAVE_32BIT_TIMERS   1
+#  endif
+
+   /* If TIM1,2,3,4, or 8 are enabled, then we have 16-bit timers */
+
+#  if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM2_QE) || \
+      defined(CONFIG_STM32_TIM3_QE) || defined(CONFIG_STM32_TIM4_QE) || \
+      defined(CONFIG_STM32_TIM8_QE)
+#    define HAVE_16BIT_TIMERS   1
+#  endif
+
+   /* The width in bits of each timer */
+
+#  define TIM1_BITWIDTH         16
+#  define TIM2_BITWIDTH         16
+#  define TIM3_BITWIDTH         16
+#  define TIM4_BITWIDTH         16
+#  define TIM5_BITWIDTH         32
 #  define TIM8_BITWIDTH         16
 
 /* On the F4 series, TIM2 and TIM5 are 32-bit.  All of the rest are 16-bit */
@@ -146,6 +174,7 @@
 #endif
 
 /* Input filter *********************************************************************/
+
 #ifdef CONFIG_STM32_QENCODER_FILTER
 #  if defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS)
 #    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_1)
@@ -204,6 +233,17 @@
 #  define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
 #endif
 
+#if defined(CONFIG_STM32_STM32F10XX)
+#  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_CNF_INFLOAT | \
+                                  GPIO_MODE_INPUT)
+#elif defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || \
+      defined(CONFIG_STM32_STM32F40XX)
+#  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT);
+#else
+#  error "Unrecognized STM32 chip"
+#endif
+
 /* Debug ****************************************************************************/
 /* Non-standard debug that may be enabled just for testing the quadrature encoder */
 
@@ -234,12 +274,12 @@ struct stm32_qeconfig_s
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   uint8_t  width;   /* Timer width (16- or 32-bits) */
 #endif
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-  uint32_t ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
-  uint32_t ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
-#else
+#ifdef CONFIG_STM32_STM32F10XX
   uint16_t ti1cfg;  /* TI1 input pin configuration (16-bit encoding) */
   uint16_t ti2cfg;  /* TI2 input pin configuration (16-bit encoding) */
+#else
+  uint32_t ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
+  uint32_t ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
 #endif
   uint32_t base;    /* Register base address */
   uint32_t psc;     /* Timer input clock prescaler */
@@ -272,13 +312,13 @@ struct stm32_lowerhalf_s
  ************************************************************************************/
 /* Helper functions */
 
-static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv, int offset);
-static void stm32_putreg16(struct stm32_lowerhalf_s *priv, int offset, uint16_t value);
+static uint16_t stm32_getreg16(FAR struct stm32_lowerhalf_s *priv, int offset);
+static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint16_t value);
 static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset);
 static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value);
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_VERBOSE)
-static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg);
+static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
 #endif
@@ -313,7 +353,7 @@ static int stm32_tim8interrupt(int irq, FAR void *context);
 
 static int stm32_setup(FAR struct qe_lowerhalf_s *lower);
 static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int stm32_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos);
+static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos);
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
 static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long arg);
 
@@ -528,7 +568,7 @@ static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv, int offset)
  *
  ************************************************************************************/
 
-static void stm32_putreg16(struct stm32_lowerhalf_s *priv, int offset, uint16_t value)
+static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint16_t value)
 {
   putreg16(value, priv->config->base + offset);
 }
@@ -592,7 +632,7 @@ static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint3
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_VERBOSE)
-static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg)
+static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg)
 {
   snvdbg("%s:\n", msg);
   snvdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -615,8 +655,8 @@ static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg)
          stm32_getreg16(priv, STM32_GTIM_CCR2_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCR3_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCR4_OFFSET));
-#if defined(CONFIG_STM32_TIM1_QENCODER) || defined(CONFIG_STM32_TIM8_QENCODER)
-  if (priv->timtype == TIMTYPE_ADVANCED)
+#if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
+  if (priv->config->timid == 1 || priv->config->timid == 8)
     {
       snvdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
              stm32_getreg16(priv, STM32_ATIM_RCR_OFFSET),
@@ -819,7 +859,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
 #endif
 
-  /* Set the timerp rescaler value.  The clock input value (CLKIN) is based on the
+  /* Set the timer prescaler value.  The clock input value (CLKIN) is based on the
    * peripheral clock (PCLK) and a multiplier.  These CLKIN values are provided in
    * the board.h file.  The prescaler value is then that CLKIN value divided by the
    * configured CLKOUT value (minus one)
@@ -837,7 +877,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 #endif
 
   /* Generate an update event to reload the Prescaler
-   * and the repetition counter(only for TIM1 and TIM8) value immediatly
+   * and the repetition counter (only for TIM1 and TIM8) value immediately
    */
 
   stm32_putreg16(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
@@ -1090,29 +1130,15 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Put the TI1 GPIO pin back to its default state */
 
-  pincfg = priv->config->ti1cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-
-#if defined(CONFIG_STM32_STM32F10XX)
-  pincfg |= (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT);
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-  pincfg |= (GPIO_INPUT | GPIO_FLOAT);
-#else
-#  error "Unrecognized STM32 chip"
-#endif
+  pincfg  = priv->config->ti1cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
+  pincfg |= STM32_GPIO_INPUT_FLOAT;
 
   stm32_configgpio(pincfg);
 
   /* Put the TI2 GPIO pin back to its default state */
 
-  pincfg = priv->config->ti2cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-
-#if defined(CONFIG_STM32_STM32F10XX)
-  pincfg |= (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT);
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-  pincfg |= (GPIO_INPUT | GPIO_FLOAT);
-#else
-#  error "Unrecognized STM32 chip"
-#endif
+  pincfg  = priv->config->ti2cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
+  pincfg |= STM32_GPIO_INPUT_FLOAT;
 
   stm32_configgpio(pincfg);
   return -ENOSYS;
@@ -1126,7 +1152,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
  *
  ************************************************************************************/
 
-static int stm32_position(FAR struct qe_lowerhalf_s *lower, int32_t *pos)
+static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
 #ifdef HAVE_16BIT_TIMERS

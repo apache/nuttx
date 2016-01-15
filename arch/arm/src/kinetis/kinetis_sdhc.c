@@ -60,7 +60,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_pinmux.h"
 #include "kinetis_sim.h"
 #include "kinetis_sdhc.h"

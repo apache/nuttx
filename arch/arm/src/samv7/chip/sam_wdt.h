@@ -58,17 +58,17 @@
 
 /* WDT register addresses ***************************************************************/
 
-/* WDT0: Legacy Watchdog Timer */
+/* WDT: Legacy Watchdog Timer */
 
-#define SAM_WDT0_CR               (SAM_WDT0_BASE+SAM_WDT_CR_OFFSET)
-#define SAM_WDT0_MR               (SAM_WDT0_BASE+SAM_WDT_MR_OFFSET)
-#define SAM_WDT0_SR               (SAM_WDT0_BASE+SAM_WDT_SR_OFFSET)
+#define SAM_WDT_CR                (SAM_WDT_BASE+SAM_WDT_CR_OFFSET)
+#define SAM_WDT_MR                (SAM_WDT_BASE+SAM_WDT_MR_OFFSET)
+#define SAM_WDT_SR                (SAM_WDT_BASE+SAM_WDT_SR_OFFSET)
 
-/* WDT1: Reinforced Safety Watchdog Timer */
+/* RSWDT: Reinforced Safety Watchdog Timer */
 
-#define SAM_WDT1_CR               (SAM_WDT1_BASE+SAM_WDT_CR_OFFSET)
-#define SAM_WDT1_MR               (SAM_WDT1_BASE+SAM_WDT_MR_OFFSET)
-#define SAM_WDT1_SR               (SAM_WDT1_BASE+SAM_WDT_SR_OFFSET)
+#define SAM_RSWDT_CR              (SAM_RSWDT_BASE+SAM_WDT_CR_OFFSET)
+#define SAM_RSWDT_MR              (SAM_RSWDT_BASE+SAM_WDT_MR_OFFSET)
+#define SAM_RSWDT_SR              (SAM_RSWDT_BASE+SAM_WDT_SR_OFFSET)
 
 /* WDT register bit definitions *********************************************************/
 /* Watchdog Timer Control Register */
@@ -76,8 +76,8 @@
 #define WDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Rest */
 #define WDT_CR_KEY_SHIFT          (24)       /* Bits 24-31:  Password */
 #define WDT_CR_KEY_MASK           (0xff << WDT_CR_KEY_SHIFT)
-#  define WDT0_CR_KEY             (0xa5 << WDT_CR_KEY_SHIFT)
-#  define WDT1_CR_KEY             (0xc4 << WDT_CR_KEY_SHIFT)
+#  define WDT_CR_KEY              (0xa5 << WDT_CR_KEY_SHIFT)
+#  define RSWDT_CR_KEY            (0xc4 << WDT_CR_KEY_SHIFT)
 
 /* Watchdog Timer Mode Register */
 
@@ -87,20 +87,20 @@
 #  define WDT_MR_WDV(n)           ((uint32_t)(n) << WDT_MR_WDV_SHIFT)
 #define WDT_MR_WDFIEN             (1 << 12) /* Bit 12: Watchdog Fault Interrupt Enable */
 #define WDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
-#define WDT1_MR_WDRPROC           (1 << 14) /* Bit 14: Watchdog Reset Processor (WDT1 only) */
+#define RSWDT_MR_WDRPROC          (1 << 14) /* Bit 14: Watchdog Reset Processor (RSWDT only) */
 #define WDT_MR_WDDIS              (1 << 15) /* Bit 15: Watchdog Disable */
-#define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value (WDT0 only) */
+#define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value (WDT only) */
 #define WDT_MR_WDD_MAX            0xfff
 #define WDT_MR_WDD_MASK           (WDT_MR_WDD_MAX << WDT_MR_WDD_SHIFT)
-#  define WDT0_MR_WDD(n)          ((uint32_t)(n) << WDT_MR_WDD_SHIFT)
-#  define WDT1_MR_WDD_ALLONES     (0xfff << WDT_MR_WDD_SHIFT)
+#  define WDT_MR_WDD(n)           ((uint32_t)(n) << WDT_MR_WDD_SHIFT)
+#  define RSWDT_MR_WDD_ALLONES    (0xfff << WDT_MR_WDD_SHIFT)
 #define WDT_MR_WDDBGHLT           (1 << 28) /* Bit 28: Watchdog Debug Halt */
 #define WDT_MR_WDIDLEHLT          (1 << 29) /* Bit 29: Watchdog Idle Halt */
 
 /* Watchdog Timer Status Register */
 
 #define WDT_SR_WDUNF              (1 << 0)  /* Bit 0:  Watchdog Underflow */
-#define WDT0_SR_WDERR             (1 << 1)  /* Bit 1:  Watchdog Error (WDT0 only) */
+#define WDT_SR_WDERR              (1 << 1)  /* Bit 1:  Watchdog Error (WDT only) */
 
 /****************************************************************************************
  * Public Types

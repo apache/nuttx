@@ -60,7 +60,7 @@ else
 endif
 
 ifeq ($(CONFIG_AVR32_TOOLCHAIN),AVRTOOLSW)
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
   endif
 else

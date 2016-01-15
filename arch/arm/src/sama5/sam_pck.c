@@ -163,13 +163,13 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     {
       pres = 1;
     }
-  else if (pres > (PMC_PCK_PRES_MASK + 1))
+  else if (pres > 256)
     {
-      pres = PMC_PCK_PRES_MASK + 1;
+      pres = 256;
     }
 
   regval |= PMC_PCK_PRES(pres - 1);
-  actual  = frequency / pres;
+  actual  = clkin / pres;
 
 #else
   /* The the larger smallest divisor that does not exceed the requested
@@ -226,29 +226,29 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
 
   switch (pckid)
     {
-#ifdef PIO_PMC_PCK0
     case PCK0:
       putreg32(PMC_PCK0, SAM_PMC_SCDR);
+#ifdef PIO_PMC_PCK0
       (void)sam_configpio(PIO_PMC_PCK0);
+#endif
       putreg32(regval, SAM_PMC_PCK0);
       break;
-#endif
 
-#ifdef PIO_PMC_PCK1
     case PCK1:
       putreg32(PMC_PCK1, SAM_PMC_SCDR);
+#ifdef PIO_PMC_PCK1
       (void)sam_configpio(PIO_PMC_PCK1);
+#endif
       putreg32(regval, SAM_PMC_PCK1);
       break;
-#endif
 
-#ifdef PIO_PMC_PCK2
     case PCK2:
       putreg32(PMC_PCK2, SAM_PMC_SCDR);
+#ifdef PIO_PMC_PCK2
       (void)sam_configpio(PIO_PMC_PCK2);
+#endif
       putreg32(regval, SAM_PMC_PCK2);
       break;
-#endif
 
     default:
       return -EINVAL;

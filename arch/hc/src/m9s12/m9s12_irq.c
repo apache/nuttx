@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "m9s12_internal.h"
+#include "m9s12.h"
 
 /****************************************************************************
  * Pre-processor Definitions

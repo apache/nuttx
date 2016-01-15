@@ -43,8 +43,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
+#include <nuttx/net/telnet.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
 
@@ -235,6 +237,9 @@ void up_initialize(void)
   devzero_register();   /* Standard /dev/zero */
 #endif
 
+#if defined(CONFIG_DEV_LOOP)
+  loop_register();      /* Standard /dev/loop */
+#endif
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
   /* Initialize the serial device driver */
@@ -282,10 +287,17 @@ void up_initialize(void)
   (void)tun_initialize();
 #endif
 
+#ifdef CONFIG_NETDEV_TELNET
+  /* Initialize the Telnet session factory */
+
+  (void)telnet_initialize();
+#endif
+
   /* Initialize USB */
 
   up_usbinitialize();
 
+#if defined(ARCH_HAVE_LEDS)
   board_autoled_on(LED_IRQSENABLED);
+#endif
 }
-

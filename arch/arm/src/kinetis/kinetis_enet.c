@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/kinetis_enet.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 #include "kinetis_config.h"
 #include "kinetis_pinmux.h"
 #include "kinetis_sim.h"
@@ -149,22 +149,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* EMAC statistics (debug only) */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-struct kinetis_statistics_s
-{
-  uint32_t rx_packets;     /* Number of packets received */
-  uint32_t tx_packets;     /* Number of Tx packets queued */
-  unit32_t tx_done;        /* Number of packets completed */
-  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
-  uint32_t errors;         /* Number of error interrupts */
-};
-#  define EMAC_STAT(priv,name) priv->stats.name++
-#else
-#  define EMAC_STAT(priv,name)
-#endif
-
 /* The kinetis_driver_s encapsulates all state information for a single hardware
  * interface
  */
@@ -183,12 +167,6 @@ struct kinetis_driver_s
   /* This holds the information visible to uIP/NuttX */
 
   struct net_driver_s dev;     /* Interface understood by uIP */
-
-  /* Statistics */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  struct kinetis_statistics_s stats;
-#endif
 
   /* The DMA descriptors.  A unaligned uint8_t is used to allocate the
    * memory; 16 is added to assure that we can meet the descriptor alignment
@@ -385,7 +363,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   /* Increment statistics */
 
-  EMAC_STAT(priv, tx_packets);
+  NETDEV_TXPACKETS(&priv->dev);
 
   /* Setup the buffer descriptor for transmission: address=priv->dev.d_buf,
    * length=priv->dev.d_len
@@ -516,7 +494,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
     {
       /* Update statistics */
 
-      EMAC_STAT(priv, rx_packets);
+      NETDEV_RXPACKETS(&priv->dev);
 
       /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data in
        * priv->dev.d_len
@@ -553,6 +531,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -593,6 +572,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
 
@@ -629,6 +609,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
+          NETDEV_RXARP(&priv->dev);
           arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should
@@ -642,6 +623,10 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
             }
         }
 #endif
+      else
+        {
+          NETDEV_RXDROPPED(&priv->dev);
+        }
     }
 }
 
@@ -682,7 +667,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
 
       /* Update statistics */
 
-      EMAC_STAT(priv, tx_done);
+      NETDEV_TXDONE(&priv->dev);
     }
 
   /* Are there other transmissions queued? */
@@ -765,7 +750,7 @@ static int kinetis_interrupt(int irq, FAR void *context)
     {
       /* An error has occurred, update statistics */
 
-      EMAC_STAT(priv, errors);
+      NETDEV_ERRORS(&priv->dev);
 
       /* Reinitialize all buffers. */
 
@@ -804,7 +789,7 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...)
 
   /* Increment statistics and dump debug info */
 
-  EMAC_STAT(priv, tx_timeout);
+  NETDEV_TXTIMEOUT(&priv->dev);
 
   /* Take the interface down and bring it back up.  The is the most agressive
    * hardware reset.

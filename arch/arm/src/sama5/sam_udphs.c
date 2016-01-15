@@ -969,11 +969,20 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
       if (remaining > DMA_MAX_FIFO_SIZE)
         {
           privreq->inflight = DMA_MAX_FIFO_SIZE;
+          privep->zlpneeded = false;
         }
       else
 #endif
         {
           privreq->inflight = remaining;
+
+          /* If the size is an exact multple of full packets, then note if
+           * we need to send a zero length packet next.
+           */
+
+          privep->zlpneeded =
+            ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0 &&
+             (remaining % privep->ep.maxpacket) == 0);
         }
 
       /* And perform the single DMA transfer.
@@ -1223,9 +1232,19 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
    * the request.
    */
 
-  if (nbytes >= privep->ep.maxpacket)
+  privep->zlpneeded = false;
+  if (nbytes > privep->ep.maxpacket)
     {
-      nbytes =  privep->ep.maxpacket;
+      nbytes = privep->ep.maxpacket;
+    }
+  else if (nbytes == privep->ep.maxpacket)
+    {
+      /* If the size is exactly a full packet, then note if we need to
+       * send a zero length packet next.
+       */
+
+      privep->zlpneeded =
+        ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0);
     }
 
   /* This is the new number of bytes "in-flight" */
@@ -1352,26 +1371,6 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
       bytesleft = privreq->req.len - privreq->req.xfrd;
       if (bytesleft > 0)
         {
-          /* If the size is exactly a full packet, then note if we need to
-           * send a zero length packet next.
-           */
-
-          if (bytesleft == privep->ep.maxpacket &&
-             (privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0)
-            {
-              /* Next time we get here, bytesleft will be zero and zlpneeded
-               * will be set.
-               */
-
-              privep->zlpneeded = true;
-            }
-          else
-            {
-              /* No zero packet is forthcoming (maybe later) */
-
-              privep->zlpneeded = false;
-            }
-
           /* The way that we handle the transfer is going to depend on
            * whether or not this endpoint supports DMA.  In either case
            * the endpoint state will transition to SENDING.
@@ -2392,6 +2391,13 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
           /* This is an IN endpoint.  Continuing processing the write
            * request.  We must call sam_req_write in the IDLE state
            * with the number of bytes transferred in 'inflight'
+           *
+           * REVISIT: On the SAMV7, I found that you really need to
+           * wait for the TX completion interrupt before calling
+           * sam_req_write().  For the SAMV7, the logic here just
+           * enables that TX completion interrupt if BYCT > 0.  The
+           * symptom of the problem was occasional missing zero-length
+           * packets because sam_req_write() was called too soon.
            */
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
@@ -2451,7 +2457,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
                   USB_ISEPOUT(privep->ep.eplog));
 
       /* Get the number of bytes transferred from the DMA status.
-        *
+       *
        * BUFF_COUNT holds the number of untransmitted bytes. In this case,
        * BUFF_COUNT should not be zero.  BUFF_COUNT was set to the
        * 'inflight' count when the DMA started so the difference will

@@ -49,7 +49,7 @@
 
 #include "lpc31_syscreg.h"
 #include "lpc31_cgudrvr.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>

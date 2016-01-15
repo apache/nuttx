@@ -12,12 +12,14 @@ choice
 config ARCH_CHIP_ATMEGA
 	bool "ATMega family"
 	select ARCH_FAMILY_AVR
+	select MM_SMALL
 	---help---
 		Atmel ATMega family of 8-bit AVRs.
 
 config ARCH_CHIP_AT90USB
 	bool "AT90USB family"
 	select ARCH_FAMILY_AVR
+	select MM_SMALL
 	---help---
 		Atmel AT90USB family of 8-bit AVRs.
 

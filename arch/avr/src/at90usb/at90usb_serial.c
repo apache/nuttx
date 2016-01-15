@@ -58,7 +58,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "at90usb_internal.h"
+#include "at90usb.h"
 
 /****************************************************************************
  * Pre-processor Definitions

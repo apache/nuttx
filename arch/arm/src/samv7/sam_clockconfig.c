@@ -110,14 +110,14 @@ static inline void sam_efcsetup(void)
 
 static inline void sam_wdtsetup(void)
 {
-#if !defined(CONFIG_SAMV7_WDT0) || \
-    (defined(CONFIG_WDT0_ENABLED_ON_RESET) && defined(CONFIG_WDT0_DISABLE_ON_RESET))
-  putreg32(WDT_MR_WDDIS, SAM_WDT0_MR);
+#if !defined(CONFIG_SAMV7_WDT) || \
+    (defined(CONFIG_WDT_ENABLED_ON_RESET) && defined(CONFIG_WDT_DISABLE_ON_RESET))
+  putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
 #endif
 
-#if !defined(CONFIG_SAMV7_WDT1) || \
-    (defined(CONFIG_WDT1_ENABLED_ON_RESET) && defined(CONFIG_WDT1_DISABLE_ON_RESET))
-  putreg32(WDT_MR_WDDIS, SAM_WDT1_MR);
+#if !defined(CONFIG_SAMV7_RSWDT) || \
+    (defined(CONFIG_RSWDT_ENABLED_ON_RESET) && defined(CONFIG_RSWDT_DISABLE_ON_RESET))
+  putreg32(WDT_MR_WDDIS, SAM_RSWDT_MR);
 #endif
 }
 
@@ -131,7 +131,11 @@ static inline void sam_wdtsetup(void)
 
 static inline void sam_supcsetup(void)
 {
-  /* Check if the 32-kHz is already selected */
+#ifdef BOARD_HAVE_SLOWXTAL
+  /* Check if the 32-kHz is already selected.  The slow clock defaults to
+   * the RC oscillator, but the software can enable the crystal oscillator
+   * and select it as the slow clock source.
+   */
 
   if ((getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0)
     {
@@ -142,6 +146,7 @@ static inline void sam_supcsetup(void)
            (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
            delay++);
     }
+#endif
 }
 
 /****************************************************************************

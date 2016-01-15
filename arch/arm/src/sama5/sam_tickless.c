@@ -40,7 +40,7 @@
  * following custom functions.
  *
  *   void up_timer_initialize(void): Initializes the timer facilities.  Called
- *     early in the intialization sequence (by up_intialize()).
+ *     early in the initialization sequence (by up_intialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
@@ -119,21 +119,21 @@
 #if CONFIG_SAMA5_TICKLESS_ONESHOT == 0 && !defined(CONFIG_SAMA5_TC0)
 #  error CONFIG_SAMA5_TICKLESS_ONESHOT == 0 && CONFIG_SAMA5_TC0 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 1 && !defined(CONFIG_SAMA5_TC0)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 1 && CONFIG_SAMA5_TC1 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 1 && CONFIG_SAMA5_TC0 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 2 && !defined(CONFIG_SAMA5_TC0)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 2 && CONFIG_SAMA5_TC2 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 2 && CONFIG_SAMA5_TC0 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 3 && !defined(CONFIG_SAMA5_TC1)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 3 && CONFIG_SAMA5_TC3 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 3 && CONFIG_SAMA5_TC1 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 4 && !defined(CONFIG_SAMA5_TC1)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 4 && CONFIG_SAMA5_TC4 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 4 && CONFIG_SAMA5_TC1 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 5 && !defined(CONFIG_SAMA5_TC1)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 5 && CONFIG_SAMA5_TC5 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 5 && CONFIG_SAMA5_TC1 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 6 && !defined(CONFIG_SAMA5_TC2)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 6 && CONFIG_SAMA5_TC6 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 6 && CONFIG_SAMA5_TC2 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 7 && !defined(CONFIG_SAMA5_TC2)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 7 && CONFIG_SAMA5_TC7 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 7 && CONFIG_SAMA5_TC2 not selected
 #elif CONFIG_SAMA5_TICKLESS_ONESHOT == 8 && !defined(CONFIG_SAMA5_TC2)
-#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 8 && CONFIG_SAMA5_TC8 not selected
+#  error CONFIG_SAMA5_TICKLESS_ONESHOT == 8 && CONFIG_SAMA5_TC2 not selected
 #endif
 
 #if CONFIG_SAMA5_TICKLESS_ONESHOT < 0 || CONFIG_SAMA5_TICKLESS_ONESHOT > 8
@@ -143,21 +143,21 @@
 #if CONFIG_SAMA5_TICKLESS_FREERUN == 0 && !defined(CONFIG_SAMA5_TC0)
 #  error CONFIG_SAMA5_TICKLESS_FREERUN == 0 && CONFIG_SAMA5_TC0 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 1 && !defined(CONFIG_SAMA5_TC0)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 1 && CONFIG_SAMA5_TC1 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 1 && CONFIG_SAMA5_TC0 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 2 && !defined(CONFIG_SAMA5_TC0)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 2 && CONFIG_SAMA5_TC2 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 2 && CONFIG_SAMA5_TC0 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 3 && !defined(CONFIG_SAMA5_TC1)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 3 && CONFIG_SAMA5_TC3 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 3 && CONFIG_SAMA5_TC1 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 4 && !defined(CONFIG_SAMA5_TC1)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 4 && CONFIG_SAMA5_TC4 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 4 && CONFIG_SAMA5_TC1 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 5 && !defined(CONFIG_SAMA5_TC1)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 5 && CONFIG_SAMA5_TC5 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 5 && CONFIG_SAMA5_TC1 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 6 && !defined(CONFIG_SAMA5_TC2)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 6 && CONFIG_SAMA5_TC6 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 6 && CONFIG_SAMA5_TC2 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 7 && !defined(CONFIG_SAMA5_TC2)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 7 && CONFIG_SAMA5_TC7 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 7 && CONFIG_SAMA5_TC2 not selected
 #elif CONFIG_SAMA5_TICKLESS_FREERUN == 8 && !defined(CONFIG_SAMA5_TC2)
-#  error CONFIG_SAMA5_TICKLESS_FREERUN == 8 && CONFIG_SAMA5_TC8 not selected
+#  error CONFIG_SAMA5_TICKLESS_FREERUN == 8 && CONFIG_SAMA5_TC2 not selected
 #endif
 
 #if CONFIG_SAMA5_TICKLESS_FREERUN < 0 || CONFIG_SAMA5_TICKLESS_FREERUN > 8
@@ -179,14 +179,10 @@ struct sam_tickless_s
 };
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct sam_tickless_s g_tickless;
+static struct sam_tickless_s g_tickless;
 
 /****************************************************************************
  * Private Functions
@@ -247,6 +243,9 @@ static void sam_oneshot_handler(void *arg)
 
 void up_timer_initialize(void)
 {
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  uint64_t max_delay;
+#endif
   int ret;
 
   /* Initialize the one-shot timer */
@@ -259,6 +258,29 @@ void up_timer_initialize(void)
       tclldbg("ERROR: sam_oneshot_initialize failed\n");
       PANIC();
     }
+
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  /* Get the maximum delay of the one-shot timer in microseconds */
+
+  ret = sam_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
+  if (ret < 0)
+    {
+      tclldbg("ERROR: sam_oneshot_max_delay failed\n");
+      PANIC();
+    }
+
+  /* Convert this to configured clock ticks for use by the OS timer logic */
+
+  max_delay /= CONFIG_USEC_PER_TICK;
+  if (max_delay > (uint64_t)UINT32_MAX)
+    {
+      g_oneshot_maxticks = UINT32_MAX;
+    }
+  else
+    {
+      g_oneshot_maxticks = (uint32_t)max_delay;
+    }
+#endif
 
   /* Initialize the free-running timer */
 
@@ -285,7 +307,7 @@ void up_timer_initialize(void)
  *   when clockid is CLOCK_MONOTONIC.
  *
  *   This function provides the basis for reporting the current time and
- *   also is used to eliminate error build-up from small erros in interval
+ *   also is used to eliminate error build-up from small errors in interval
  *   time calculations.
  *
  *   Provided by platform-specific code and called from the RTOS base code.

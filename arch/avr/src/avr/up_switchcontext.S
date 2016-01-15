@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+        
 #include "excptmacros.h"
 
 /************************************************************************************
@@ -130,11 +132,7 @@ up_fullcontextrestore:
 
 	TCB_RESTORE
 
-	/* And "return" to the new task (using ret not reti so that the interrupt
-	 * state that we just restored will be preserved).
-	 */
+	/* Returning from the function is handled in TCB_RESTORE */
 
-	ret
 	.endfunc
 	.end
-

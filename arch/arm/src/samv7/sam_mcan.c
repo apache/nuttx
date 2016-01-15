@@ -2748,6 +2748,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* And request to send the packet */
 
   mcan_putreg(priv, SAM_MCAN_TXBAR_OFFSET, (1 << ndx));
+  mcan_dev_unlock(priv);
 
   /* Report that the TX transfer is complete to the upper half logic.  Of
    * course, the transfer is not complete, but this early notification
@@ -2758,9 +2759,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * called from the tasking level.
    */
 
-  can_txdone(dev);
-
-  mcan_dev_unlock(priv);
+  (void)can_txdone(dev);
   return OK;
 }
 
@@ -3176,12 +3175,11 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            * call to man_buffer_release(), whether or not the write
            * was successful.
            *
-           * Here we force transmit complete processing just in case.
-           * This could have the side effect of pushing the semaphore
-           * count up to high.
+           * We assume that MCAN_INT_TC will be called for each
+           * message buffer. Except the transfer is cancelled.
+           * TODO: add handling for MCAN_INT_TCF
            */
 
-          pending |= MCAN_INT_TC;
           handled  = true;
         }
 
@@ -3210,7 +3208,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
            * data in mcan_send().
            */
 
-          can_txready(dev);
+          (void)can_txready(dev);
 #endif
         }
       else if ((pending & priv->txints) != 0)
@@ -3722,7 +3720,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
    * use PCK5 to derive bit rate.
    */
 
-  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER) | SAMV7_MCAN_CLKSRC;
+  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER - 1) | SAMV7_MCAN_CLKSRC;
   putreg32(regval, SAM_PMC_PCK5);
 
   /* Enable PCK5 */

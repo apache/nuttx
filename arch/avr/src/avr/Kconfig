@@ -8,11 +8,11 @@ comment "AVR Configuration Options"
 
 choice
 	prompt "Toolchain"
-	default AVR_WINAVR if HOST_WINDOWS
-	default AVR_BUILDROOT if HOST_LINUX
-	default AVR_CROSSPACK if HOST_OSX
+	default AVR_WINAVR_TOOLCHAIN if HOST_WINDOWS
+	default AVR_BUILDROOT_TOOLCHAIN if HOST_LINUX
+	default AVR_CROSSPACK_TOOLCHAIN if HOST_OSX
 
-config AVR_WINAVR
+config AVR_WINAVR_TOOLCHAIN
 	bool "WinAVR"
 	depends on HOST_WINDOWS
 	---help---
@@ -27,14 +27,22 @@ config AVR_WINAVR
 		correct cygwin.dll file precedes the path to the WinAVR
 		binaries!
 
-config AVR_LINUXGCC
+config AVR_ATMEL_AVR_TOOLCHAIN
+	bool "Atmel AVR Toolchain"
+	depends on HOST_WINDOWS
+	---help---
+                Atmel provides GNU Toolchain for AVR development. It can
+                be obtained by installing Atmel Studio 6 and later or
+                as standalone package from Atmel.
+
+config AVR_LINUXGCC_TOOLCHAIN
 	bool "Linux GCC"
 	depends on HOST_LINUX
 	---help---
 		For Linux, there are widely available avr-gcc packages. On
 		Ubuntu, use: sudo apt-get install gcc-avr gdb-avr avr-libc
 
-config AVR_CROSSPACK
+config AVR_CROSSPACK_TOOLCHAIN
 	bool "CrossPack-AVR"
 	depends on HOST_OSX
 	---help---
@@ -45,7 +53,7 @@ config AVR_CROSSPACK
 		user's path. Edit the setenv.sh file if this is not the
 		case.
 
-config AVR_BUILDROOT
+config AVR_BUILDROOT_TOOLCHAIN
 	bool "Buildroot"
 	depends on HOST_LINUX || HOST_WINDOWS
 	---help---
@@ -57,6 +65,22 @@ config AVR_BUILDROOT
 		available at ../buildroot/build_avr. Edit the setenv.sh
 		file if this is not the case.
 
-endchoice
+endchoice # Toolchain
 
-endif
+menu "Atmel AVR Toolchain options"
+	depends on AVR_ATMEL_AVR_TOOLCHAIN
+
+config AVR_HAS_MEMX_PTR
+	bool "Enable in-flash static const stings"
+	depends on AVR_ATMEL_AVR_TOOLCHAIN
+	select ARCH_DEBUG_H
+	default y
+	---help---
+		Enabling this option (recommended) will place all constant
+		strings used for debugging and assertion in program memory
+		and allow the corresponding routines to get the strings
+		directly from there. This will dramatically decrease amount
+		of RAM needed to hold this static data.
+
+endmenu # Atmel AVR Toolchain options
+endif # ARCH_FAMILY_AVR

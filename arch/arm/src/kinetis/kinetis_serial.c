@@ -60,7 +60,7 @@
 #include "kinetis_config.h"
 #include "chip.h"
 #include "kinetis_uart.h"
-#include "kinetis_internal.h"
+#include "kinetis.h"
 
 /****************************************************************************
  * Pre-processor Definitions

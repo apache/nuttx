@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 
-#include "atmega_internal.h"
+#include "atmega.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -172,11 +172,17 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
+#if defined(ATMEGA_IRQ_T1COMPA)
   (void)irq_attach(ATMEGA_IRQ_T1COMPA, (xcpt_t)up_timerisr);
+#elif defined(ATMEGA_IRQ_TIM1_COMPA)
+  (void)irq_attach(ATMEGA_IRQ_TIM1_COMPA, (xcpt_t)up_timerisr);
+#else
+# error "Unable to find IRQ for timer"
+#endif
 
   /* Enable the interrupt on compare match A */
 
-#ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
+#if defined(TIMSK1)
   TIMSK1 |= (1 << OCIE1A);
 #else
   TIMSK |= (1 << OCIE1A);

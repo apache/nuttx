@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv-7a/syscall.h
+ * arch/arm/include/armv7-a/syscall.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

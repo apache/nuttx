@@ -50,7 +50,7 @@
 #include "clock/clock.h"
 #include "up_internal.h"
 
-#include "str71x_internal.h"
+#include "str71x.h"
 
 /****************************************************************************
  * Pre-processor Definitions

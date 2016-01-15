@@ -82,7 +82,7 @@ static uint32_t MIN_NSEC;
 static uint32_t RESET_TICKS = 1000;   /* Ticks to add to force a reset */
 
 static struct timespec base_ts;       /* Time base */
-static uint32_t base_rest;            /* Rest of ticks that is < MIN_TICKS*/
+static uint32_t base_rest;            /* Rest of ticks that is < MIN_TICKS */
 
 static struct timespec alarm_time_ts; /* alarmTime to set on next interrupt, used if not already armed */
 
@@ -353,7 +353,7 @@ static void lpc43_tl_calibrate_init(void)
 
 static void lpc43_tl_save_timer(bool from_isr)
 {
-  if (forced_int) /* special case of forced interrupt by mask*/
+  if (forced_int) /* special case of forced interrupt by mask */
     {
       forced_int = false;
       lpc43_tl_set_compare(UINT32_MAX);
@@ -373,12 +373,12 @@ static void lpc43_tl_save_timer(bool from_isr)
 
      if (from_isr || lpc43_tl_get_interrupt())
         {
-          if (lpc43_tl_get_reset_on_match()) /*was reset ?*/
+          if (lpc43_tl_get_reset_on_match()) /* Was reset? */
             {
               struct timespec match_ts;
               base_rest = lpc43_tl_tick2ts(match + base_rest,
-                                           &match_ts,true);
-              lpc43_tl_add(&base_ts, &match_ts,&base_ts);
+                                           &match_ts, true);
+              lpc43_tl_add(&base_ts, &match_ts, &base_ts);
             }
 
           lpc43_tl_clear_interrupt();
@@ -501,9 +501,9 @@ static inline uint32_t lpc43_tl_calc_to_set(void)
   struct timespec diff_ts;
   struct timespec ovf_ts;
 
-  lpc43_tl_sub(&alarm_time_ts,&base_ts,&diff_ts);
+  lpc43_tl_sub(&alarm_time_ts, &base_ts, &diff_ts);
 
-  lpc43_tl_sub(&diff_ts,&MAX_TS,&ovf_ts);
+  lpc43_tl_sub(&diff_ts, &MAX_TS, &ovf_ts);
   if (ovf_ts.tv_sec == 0 && ovf_ts.tv_nsec == 0) /* check overflow */
     {
       return (lpc43_tl_ts2tick(&diff_ts) - base_rest);
@@ -599,11 +599,11 @@ void up_timer_initialize(void)
   flags = irqsave();
 
   ctrl_cache = getreg32(LPC43_RIT_CTRL);
-  ctrl_cache &= ~RIT_CTRL_INT; /* set interrupt to 0*/
+  ctrl_cache &= ~RIT_CTRL_INT; /* Set interrupt to 0 */
   mask_cache = getreg32(LPC43_RIT_MASK);
   compare_cache = getreg32(LPC43_RIT_COMPVAL);
 
-  COMMON_DEV = commonDev(NSEC_PER_SEC,LPC43_CCLK);
+  COMMON_DEV = commonDev(NSEC_PER_SEC, LPC43_CCLK);
   MIN_TICKS = LPC43_CCLK/COMMON_DEV;
   MIN_NSEC = NSEC_PER_SEC/COMMON_DEV;
 
@@ -611,7 +611,7 @@ void up_timer_initialize(void)
   base_ts.tv_nsec = 0;
   base_rest = 0;
 
-  lpc43_tl_tick2ts(TO_END,&MAX_TS,false);
+  lpc43_tl_tick2ts(TO_END, &MAX_TS, false);
 
   lpc43_tl_set_enable(false);
 
@@ -668,9 +668,9 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   struct timespec count_ts;
 
-  lpc43_tl_tick2ts(count + base_rest,&count_ts,false);
+  lpc43_tl_tick2ts(count + base_rest, &count_ts, false);
 
-  lpc43_tl_add(&base_ts,&count_ts,ts);
+  lpc43_tl_add(&base_ts, &count_ts, ts);
 
   lpc43_tl_sync_down();
 
@@ -748,7 +748,7 @@ int up_timer_cancel(FAR struct timespec *ts)
     {
       struct timespec abs_ts;
       up_timer_gettime(&abs_ts);
-      lpc43_tl_sub(&alarm_time_ts,&abs_ts,ts);
+      lpc43_tl_sub(&alarm_time_ts, &abs_ts, ts);
     }
 
   lpc43_tl_init_timer_vars();
@@ -763,7 +763,7 @@ int up_timer_start(FAR const struct timespec *ts)
 
   struct timespec abs_ts;
   up_timer_gettime(&abs_ts);
-  lpc43_tl_add(&abs_ts,ts,&abs_ts);
+  lpc43_tl_add(&abs_ts, ts, &abs_ts);
 
   up_alarm_start(&abs_ts);
 

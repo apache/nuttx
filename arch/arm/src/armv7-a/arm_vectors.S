@@ -885,7 +885,7 @@ arm_vectorfiq:
 	stmia	r0, {r1-r4}
 #endif
 
-	/* Then call the IRQ handler with interrupts disabled. */
+	/* Then call the FIQ handler with interrupts disabled. */
 
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */

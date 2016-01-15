@@ -72,7 +72,7 @@
  * my_exception:
  *		EXCPT_PROLOGUE t0			- Save registers on stack, enable nested interrupts
  *		move a0, sp					- Pass register save structure as the parameter 1
- *		USE_INTSTACK t0, t1, t2		- Switch to the interrupt stack
+ *		USE_INTSTACK t0, t1, t2, t3	- Switch to the interrupt stack
  *		jal	handler					- Handle the exception IN=old regs OUT=new regs
  *		di							- Disable interrupts
  *		RESTORE_STACK t0, t1		- Undo the operations of USE_STACK
@@ -368,7 +368,7 @@
  *
  * On Entry:
  *   sp - Current value of the user stack pointer
- *   tmp1, tmp2, and tmp3 are registers that can be used temporarily.
+ *   tmp1, tmp2, tmp3, and tmp4 are registers that can be used temporarily.
  *   All interrupts should still be disabled.
  *
  * At completion:
@@ -378,7 +378,7 @@
  *
  ********************************************************************************************/
 
-	.macro	USE_INTSTACK, tmp1, tmp2, tmp3
+	.macro	USE_INTSTACK, tmp1, tmp2, tmp3, tmp4
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
@@ -398,9 +398,9 @@
 	 */
 
 	la		\tmp3, g_intstackbase
-	lw		\tmp, (\tmp3)
-	sw		sp, (\tmp3)
-	move	sp, \tmp3
+	lw		\tmp4, (\tmp3)
+	sw		sp, (\tmp4)
+	move	sp, \tmp4
 
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
 1:

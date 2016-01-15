@@ -1,22 +1,22 @@
 /********************************************************************************************
  * arch/avr/src/avr/excptmacros.h
  *
- *	Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *	Author: Gregory Nutt <gnutt@nuttx.org>
+ *  Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *  Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *	notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *	notice, this list of conditions and the following disclaimer in
- *	the documentation and/or other materials provided with the
- *	distribution.
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
- *	used to endorse or promote products derived from this software
- *	without specific prior written permission.
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -99,16 +99,16 @@
  *	sp - Points to the top of the stack.  The PC is already on the stack.
  *	Only the stack is available for storage
  *
- *	 PCL
- *	 PCH
+ *	 PC1
+ *	 PC0
  *	 --- <- SP
  *
  * At completion:
  *	Stack pointer is incremented by one, the saved r24 is on the stack, r24 now contains the
  *	IRQ number
  *
- *	 PCL
- *	 PCH
+ *	 PC1
+ *	 PC0
  *	 R0
  *	 --- <- SP
  *
@@ -134,14 +134,14 @@
  *	sp - Points to the top of the stack
  *	Only the stack is available for storage
  *
- *	 PCL
- *	 PCH
+ *	 PC1
+ *	 PC0
  *	 R24
  *	 --- <- SP
  *
  * At completion:
  *	Register state is saved on the stack; All registers are available for usage except sp and
- *  r24 which still contains the IRQ number as set by the HANDLER macro.
+ *	r24 which still contains the IRQ number as set by the HANDLER macro.
  *
  ********************************************************************************************/
 
@@ -223,7 +223,7 @@
 	in		r27, _SFR_IO_ADDR(SPH)
 	adiw	r26, XCPTCONTEXT_REGS-2
 
-	push	r26					/* SPL then SPH */
+	push	r26						/* SPL then SPH */
 	push	r27
 	.endm
 
@@ -248,8 +248,8 @@
 
 	/* We don't need to restore the stack pointer */
 
-	pop		r27					/* Discard SPH */
-	pop		r26					/* Discard SPL */
+	pop		r27						/* Discard SPH */
+	pop		r26						/* Discard SPL */
 
 	/* Restore r26-r27 */
 
@@ -303,8 +303,8 @@
 
 	/* Restore the status register (probably enabling interrupts) */
 
-	pop		r24					/* Restore the status register */
-	andi	r24, ~(1 << SREG_I)	/* but keeping interrupts disabled until the reti */
+	pop		r24						/* Restore the status register */
+	andi	r24, ~(1 << SREG_I)		/* but keeping interrupts disabled until the reti */
 	out		_SFR_IO_ADDR(SREG), r24
 
 	/* Finally, restore r24-r25 - the temporary and IRQ number registers */
@@ -333,10 +333,13 @@
 
 	.macro	USER_SAVE
 
-	/* Pop the return address from the stack (PCH then PCL).  R18:19 are Call-used */
+	/* Pop the return address from the stack (PC0 then PC1).  R18:19 are Call-used */
 
-	pop		r19			/* r19=PCH */
-	pop		r18			/* r18=PCL */
+#if AVR_PC_SIZE > 16
+    pop     r20
+#endif /* AVR_PC_SIZE */
+	pop		r19
+	pop		r18
 
 	/* Save the current stack pointer  as it would be after the return(SPH then SPL). */
 
@@ -347,7 +350,7 @@
 
 	/* Skip over r26-r27 and r30-r31 - Call-used, "volatile" registers */
 
-	adiw	r26, 4		/* Four registers: r26-r27 and r30-r31*/
+	adiw	r26, 4					/* Four registers: r26-r27 and r30-r31*/
 
 	/* Save r28-r29 - Call-saved, "static" registers */
 
@@ -358,7 +361,7 @@
 	 * already been skipped, r24 and r25 are saved elsewhere)
 	 */
 
-	adiw	r26, 6		/* Seven registers: r18-23 */
+	adiw	r26, 6					/* Seven registers: r18-23 */
 
 	/* Save r2-r17 - Call-saved, "static" registers */
 
@@ -395,12 +398,15 @@
 
 	/* Skip r24-r25 - These are scratch register and Call-used, "volatile" registers */
 
-	adiw	r26, 2		/* Two registers: r24-r25 */
+	adiw	r26, 2					/* Two registers: r24-r25 */
 
 	/* Save the return address that we have saved in r18:19*/
 
-	st		x+, r19		/* r19=PCH */
-	st		x+, r18		/* r18=PCL */
+#if AVR_PC_SIZE > 16
+	st		x+, r20
+#endif /* AVR_PC_SIZE */
+	st		x+, r19
+	st		x+, r18
 	.endm
 
 /********************************************************************************************
@@ -418,52 +424,70 @@
  * On completion:
  *	All registers restored except for the PC with now resides at the top of the new stack
  *	so that ret can be used to switch to the new context. (ret, not reti, becaue ret
- * 	will preserve the restored interrupt state).
+ *	will preserve the restored interrupt state).
  *
  ********************************************************************************************/
 
 	.macro	TCB_RESTORE, regs
 
-	/* X [r36:27] points to the register save block.  Get an offset pointer to the PC in
+	/* X [r26:27] points to the register save block.  Get an offset pointer to the PC in
 	 * Y [r28:29]
 	 */
 
-	movw	r28, r26			/* Get a pointer to the PCH/PCL storage location */
-	adiw	r28, REG_PCH
+	movw	r28, r26				/* Get a pointer to the PC0/PC1 storage location */
+#if AVR_PC_SIZE <= 16
+	adiw	r28, REG_PC0
+#else
+	adiw	r28, REG_PC2
+#endif
 
 	/* Fetch and set the new stack pointer */
 
-	ld		r25, x+				/* Fetch stack pointer (post-incrementing) */
-	out		_SFR_IO_ADDR(SPH), r25		/* (SPH then SPL) */
+	ld		r25, x+					/* Fetch stack pointer (post-incrementing) */
+	out		_SFR_IO_ADDR(SPH), r25	/* (SPH then SPL) */
 	ld		r24, x+
 	out		_SFR_IO_ADDR(SPL), r24
 
 	/* Fetch the return address and save it at the bottom of the new stack so
 	 * that we can iret to switch contexts.  The new stack is now:
 	 *
-	 *  PCL
-	 *  PCH
+	 *  PC2 (for 24-bit PC arch)
+	 *  PC1
+	 *  PC0
 	 *  --- <- SP
 	 */
 
-	ld		r25, y+				/* Load PCH (r25) then PCL (r24) */
+#if AVR_PC_SIZE <= 16
+	ld		r25, y+					/* Load PC0 (r25) then PC1 (r24) */
 	ld		r24, y+
-	push	r24					/* Push PCH and PCL on the stack (PCL then PCH) */
+	push	r24						/* Push PC0 and PC1 on the stack (PC1 then PC0) */
 	push	r25
+#else
+	ld		r25, y /* Load PC2 (r25) */
+	subi	r28,1
+	push	r25
+	ld		r25, y /* Load PC1 (r25) */
+	subi	r28,1
+	push	r25
+	ld		r25, y /* Load PC0 (r25) */
+	subi	r28,1
+	push	r25
+#endif
 
 	/* Then get value of X [r26:r27].  Save X on the new stack where we can
 	 * recover it later.  The new stack is now:
 	 *
-	 *  PCL
-	 *  PCH
+	 *  PC2 (for 24-bit PC arch)
+	 *  PC1
+	 *  PC0
 	 *  R26
 	 *  R27
 	 *  --- <- SP
 	 */
 
-	ld		r25, x+				/* Fetch r26-r27 and save to the new stack */
+	ld		r25, x+					/* Fetch r26-r27 and save to the new stack */
 	ld		r24, x+
-	push	r24					/* r26 then r27 */
+	push	r24						/* r26 then r27 */
 	push	r25
 
 	/* Restore r30-r31 - Call-used, "volatile" registers */
@@ -514,9 +538,23 @@
 
 	ld		r0, x+
 
-	/* Restore the status register (probably re-enabling interrupts) */
+	/* The following control flow split is required to eliminate non-atomic
+	 * interrupt_enable - return sequence.
+	 *
+	 * NOTE: since actual returning is handled by this macro it has been removed
+	 * from up_fullcontextrestore function (up_switchcontext.S)
+	 */
+
+	/* If interrupts shall be enabled go to 'restore remaining and reti' code
+	 * otherwise just do 'restore remaining and ret'
+	 */
 
 	ld		r24, x+
+	bst		r24, SREG_I
+	brts	go_reti
+
+	/* Restore the status register, interrupts are disabled */
+
 	out		_SFR_IO_ADDR(SREG), r24
 
 	/* Restore r24-r25 - The temporary and IRQ number registers */
@@ -531,6 +569,24 @@
 
 	pop		r27					/* R27 then R26 */
 	pop		r26
+	ret
+
+go_reti:
+	/* restore the Status Register with interrupts disabled
+	 * and exit with reti (that will set the Interrupt Enable)
+	 */
+
+	andi		r24, ~(1 << SREG_I)
+	out		_SFR_IO_ADDR(SREG), r24
+
+	ld		r25, x+
+	ld		r24, x+
+
+	pop		r27
+	pop		r26
+
+	reti
+
 	.endm
 
 /********************************************************************************************

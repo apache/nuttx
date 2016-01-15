@@ -51,7 +51,7 @@
 #include "up_arch.h"
 
 #include "lpc31_timer.h"
-#include "lpc31_internal.h"
+#include "lpc31.h"
 
 /****************************************************************************
  * Pre-processor Definitions

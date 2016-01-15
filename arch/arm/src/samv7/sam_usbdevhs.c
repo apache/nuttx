@@ -96,6 +96,14 @@
 #  define CONFIG_SAMV7_USBDEVHS_NDTDS 8
 #endif
 
+#if defined(CONFIG_USBDEV_DUALSPEED) && defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
+#  error CONFIG_USBDEV_DUALSPEED must not be defined with full-speed only support
+#endif
+
+#if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
+#  warning CONFIG_USBDEV_DUALSPEED should be defined for high speed support
+#endif
+
 /* Extremely detailed register debug that you would normally never want
  * enabled.
  */
@@ -1012,11 +1020,20 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
       if (remaining > DMA_MAX_FIFO_SIZE)
         {
           privreq->inflight = DMA_MAX_FIFO_SIZE;
+          privep->zlpneeded = false;
         }
       else
 #endif
         {
           privreq->inflight = remaining;
+
+          /* If the size is an exact multple of full packets, then note if
+           * we need to send a zero length packet next.
+           */
+
+          privep->zlpneeded =
+            ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0 &&
+             (remaining % privep->ep.maxpacket) == 0);
         }
 
       /* And perform the single DMA transfer.
@@ -1221,6 +1238,8 @@ static void sam_ep_fifocon(unsigned int epno)
 
   /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
    * have data ready to go.
+   *
+   * REVISIT: I don't think this is necessary,
    */
 
   sam_putreg(USBHS_DEVEPTINT_NAKINI, SAM_USBHS_DEVEPTICR(epno));
@@ -1262,9 +1281,19 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
    * the request.
    */
 
-  if (nbytes >= privep->ep.maxpacket)
+  privep->zlpneeded = false;
+  if (nbytes > privep->ep.maxpacket)
     {
-      nbytes =  privep->ep.maxpacket;
+      nbytes = privep->ep.maxpacket;
+    }
+  else if (nbytes == privep->ep.maxpacket)
+    {
+      /* If the size is exactly a full packet, then note if we need to
+       * send a zero length packet next.
+       */
+
+      privep->zlpneeded =
+        ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0);
     }
 
   /* This is the new number of bytes "in-flight" */
@@ -1381,26 +1410,6 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
       bytesleft = privreq->req.len - privreq->req.xfrd;
       if (bytesleft > 0)
         {
-          /* If the size is exactly a full packet, then note if we need to
-           * send a zero length packet next.
-           */
-
-          if (bytesleft == privep->ep.maxpacket &&
-             (privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0)
-            {
-              /* Next time we get here, bytesleft will be zero and zlpneeded
-               * will be set.
-               */
-
-              privep->zlpneeded = true;
-            }
-          else
-            {
-              /* No zero packet is forthcoming (maybe later) */
-
-              privep->zlpneeded = false;
-            }
-
           /* The way that we handle the transfer is going to depend on
            * whether or not this endpoint supports DMA.  In either case
            * the endpoint state will transition to SENDING.
@@ -2481,14 +2490,57 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
       if (privep->epstate == USBHS_EPSTATE_SENDING)
         {
+          uint32_t nbusybk;
+          uint32_t byct;
+
           /* This is an IN endpoint.  Continuing processing the write
-           * request.  We must call sam_req_write in the IDLE state
-           * with the number of bytes transferred in 'inflight'
+           * request.
            */
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
-          privep->epstate = USBHS_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
+          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
+
+          /* Have all of the bytes in the FIFO been transmitted to the
+           * host?
+           *
+           * BYCT == 0    Means that all of the data has been transferred
+           *              out of the FIFO.
+           *              Warning: This field may be updated one clock cycle
+           *              after the RWALL bit changes, so the user should not
+           *              poll this field as an interrupt bit.
+           * NBUSYBK == 0 Indicates that all banks that have been sent to
+           *              the host.
+           */
+
+          regval  = sam_getreg(SAM_USBHS_DEVEPTISR(epno));
+          byct    = (regval & USBHS_DEVEPTISR_BYCT_MASK) >>
+                    USBHS_DEVEPTISR_BYCT_SHIFT;
+          nbusybk = (regval & USBHS_DEVEPTISR_NBUSYBK_MASK) >>
+                    USBHS_DEVEPTISR_NBUSYBK_SHIFT;
+
+          if (byct > 0 || nbusybk > 0)
+            {
+              /* Not all of the data has been sent to the host.  A TXIN
+               * interrupt will be generated later.  Enable the TXIN
+               * interrupt now and wait for the transfer to complete.
+               */
+
+              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
+            }
+          else
+            {
+              /* All bytes have been sent to the host.  We must call
+               * sam_req_write() now in the IDLE state with the number of
+               * bytes transferred in 'inflight'
+               *
+               * REVISIT: Isn't there a race condition here?  Could TXIN
+               * have fired just before calculating byct?  Could TXIN be
+               * pending here?
+               */
+
+              privep->epstate = USBHS_EPSTATE_IDLE;
+              (void)sam_req_write(priv, privep);
+            }
         }
       else if (privep->epstate == USBHS_EPSTATE_RECEIVING)
         {
@@ -2546,7 +2598,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
                   USB_ISEPOUT(privep->ep.eplog));
 
       /* Get the number of bytes transferred from the DMA status.
-        *
+       *
        * BUFF_COUNT holds the number of untransmitted bytes. In this case,
        * BUFF_COUNT should not be zero.  BUFF_COUNT was set to the
        * 'inflight' count when the DMA started so the difference will
@@ -2635,11 +2687,46 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == USBHS_EPSTATE_SENDING ||
           privep->epstate == USBHS_EPSTATE_EP0STATUSIN)
         {
-          /* Continue/resume processing the write requests. */
+#if 0 /* Logic not yet verified */
+          uint32_t nbusybk;
+#endif
 
-          privep->epstate = USBHS_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
+          /* Clear the pending TXINIT interrupt */
+
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
+
+#if 0 /* Logic not yet verified */
+          /* Have all of the bytes in the FIFO been transmitted to the
+           * host?  During DMA, there may be several active banks and we
+           * need to all banks to be sent before handling the next request
+           * or any trailing zero-length packet.
+           */
+
+          nbusybk = (eptisr & USBHS_DEVEPTISR_NBUSYBK_MASK) >>
+                    USBHS_DEVEPTISR_NBUSYBK_SHIFT;
+          if (nbusybk > 0)
+            {
+              /* Not all of the data has been sent to the host.  Another
+               * TXIN interrupt will be generated later.  Make sure that
+               * the TXIN is enabled and wait for the transfer to complete.
+               *
+               * NOTE:  This will never happen in non-DMA tranfers because
+               * packets are sent one at a time; the multiple bank capability
+               * is not used.
+               */
+
+              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
+            }
+          else
+#endif
+            {
+              /* No additional TXINI interrupts are expected.  Continue/resume
+               * processing the write requests.
+               */
+
+              privep->epstate = USBHS_EPSTATE_IDLE;
+              (void)sam_req_write(priv, privep);
+            }
         }
 
       /* Setting of the device address is a special case.  The address was

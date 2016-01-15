@@ -182,6 +182,19 @@
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #endif
 
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  define ADC_DMA_CONTROL_WORD (DMA_SCR_MSIZE_16BITS | \
+                                DMA_SCR_PSIZE_16BITS | \
+                                DMA_SCR_MINC | \
+                                DMA_SCR_CIRC | \
+                                DMA_SCR_DIR_P2M)
+#else
+#  define ADC_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \
+                                DMA_CCR_PSIZE_16BITS | \
+                                DMA_CCR_MINC | \
+                                DMA_CCR_CIRC)
+#endif
+
 /* DMA channels and interface values differ for the F1 and F4 families */
 
 #if defined(CONFIG_STM32_STM32F10XX)
@@ -819,12 +832,10 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 {
   uint32_t prescaler;
   uint32_t reload;
-  uint32_t regval;
   uint32_t timclk;
 
   uint16_t clrbits = 0;
   uint16_t setbits = 0;
-  uint16_t cr1;
   uint16_t cr2;
   uint16_t ccmr1;
   uint16_t ccmr2;
@@ -1060,7 +1071,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   ccer &= ~ccenable;
   tim_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
-  /* Fetch the CR2, CCMR1, and CCMR2 register (already have cr1 and ccer) */
+  /* Fetch the CR2, CCMR1, and CCMR2 register (already have ccer) */
 
   cr2   = tim_getreg(priv, STM32_GTIM_CR2_OFFSET);
   ccmr1 = tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET);
@@ -1925,8 +1936,6 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   if (priv->hasdma)
     {
-      uint32_t ccr;
-
       /* Stop and free DMA if it was started before */
 
       if (priv->dma != NULL)
@@ -1936,17 +1945,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
         }
 
       priv->dma = stm32_dmachannel(priv->dmachan);
-      ccr       = DMA_SCR_MSIZE_16BITS | /* Memory size */
-                  DMA_SCR_PSIZE_16BITS | /* Peripheral size */
-                  DMA_SCR_MINC |         /* Memory increment mode */
-                  DMA_SCR_CIRC |         /* Circular buffer */
-                  DMA_SCR_DIR_P2M;       /* Read from peripheral */
 
       stm32_dmasetup(priv->dma,
                      priv->base + STM32_ADC_DR_OFFSET,
                      (uint32_t)priv->dmabuffer,
                      priv->nchannels,
-                     ccr);
+                     ADC_DMA_CONTROL_WORD);
 
       stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
     }

@@ -1583,7 +1583,10 @@ static int qspi_memory(struct qspi_dev_s *dev,
 #ifdef CONFIG_SAMV7_QSPI_DMA
   /* Can we perform DMA?  Should we perform DMA? */
 
-  if (priv->candma && meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD)
+  if (priv->candma &&
+      meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD &&
+      IS_ALIGNED((uintptr_t)meminfo->buffer) &&
+      IS_ALIGNED(meminfo->buflen))
     {
       return qspi_memory_dma(priv, meminfo);
     }

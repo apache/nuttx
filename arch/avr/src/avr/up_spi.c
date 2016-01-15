@@ -57,7 +57,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "avr_internal.h"
+#include "avr.h"
 
 #ifdef CONFIG_AVR_SPI
 
@@ -267,7 +267,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           actual = BOARD_CPU_CLOCK / 128;
         }
 
-#warning REVIST: spcr/spsr are never used
+#warning REVISIT: spcr/spsr are never used
 
       /* Save the frequency setting */
 
@@ -515,7 +515,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Clear status flags by reading them */
 
   regval = SPSR;
+  UNUSED(regval);
   regval = SPDR;
+  UNUSED(regval);
 
   /* Set the initial SPI configuration */
 
@@ -538,4 +540,3 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   return &priv->spidev;
 }
 #endif /* CONFIG_AVR_SPI */
-

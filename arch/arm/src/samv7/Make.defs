@@ -90,7 +90,7 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
-ifeq ($(CONFIG_ARMV7M_MPU),y)
+ifeq ($(CONFIG_ARM_MPU),y)
 CMN_CSRCS += up_mpu.c
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_task_start.c up_pthread_start.c
@@ -102,7 +102,9 @@ endif
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
+CMN_CSRCS += up_elf.c up_coherent_dcache.c
+else ifeq ($(CONFIG_MODULE),y)
+CMN_CSRCS += up_elf.c up_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
@@ -113,7 +115,7 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
-CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c
+CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c
 
 # Configuration-dependent SAMV7 files
 
@@ -121,7 +123,7 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sam_timerisr.c
 endif
 
-ifeq ($(CONFIG_ARMV7M_MPU),y)
+ifeq ($(CONFIG_ARM_MPU),y)
 CHIP_CSRCS += sam_mpuinit.c
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += sam_userspace.c
@@ -134,6 +136,14 @@ endif
 
 ifeq ($(CONFIG_SAMV7_XDMAC),y)
 CHIP_CSRCS += sam_xdmac.c
+endif
+
+ifeq ($(CONFIG_SAMV7_WDT),y)
+CHIP_CSRCS += sam_wdt.c
+endif
+
+ifeq ($(CONFIG_SAMV7_RSWDT),y)
+CHIP_CSRCS += sam_rswdt.c
 endif
 
 ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
@@ -160,6 +170,19 @@ ifeq ($(CONFIG_SAMV7_SSC),y)
 CHIP_CSRCS += sam_ssc.c
 endif
 
+ifeq ($(CONFIG_SAMV7_HAVE_TC),y)
+CHIP_CSRCS += sam_tc.c
+ifeq ($(CONFIG_SAMV7_ONESHOT),y)
+CHIP_CSRCS += sam_oneshot.c
+endif
+ifeq ($(CONFIG_SAMV7_FREERUN),y)
+CHIP_CSRCS += sam_freerun.c
+endif
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += sam_tickless.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMV7_HSMCI),y)
 CHIP_CSRCS += sam_hsmci.c sam_hsmci_clkdiv.c
 endif
@@ -174,4 +197,12 @@ endif
 
 ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
 CHIP_CSRCS += sam_usbdevhs.c
+endif
+
+ifeq ($(CONFIG_SAMV7_TRNG),y)
+CHIP_CSRCS += sam_trng.c
+endif
+
+ifeq ($(CONFIG_SAMV7_PROGMEM),y)
+CHIP_CSRCS += sam_progmem.c
 endif

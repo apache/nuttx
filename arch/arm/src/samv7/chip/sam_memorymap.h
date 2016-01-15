@@ -44,6 +44,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAMV71)
 #  include "chip/samv71_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_SAME70)
+#  include "chip/same70_memorymap.h"
 #else
 #  error Unrecognized SAMV7 architecture
 #endif

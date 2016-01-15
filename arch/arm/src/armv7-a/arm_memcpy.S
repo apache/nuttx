@@ -60,7 +60,6 @@
 	.global		memcpy
 
 	.syntax		unified
-	.thumb
 
 	.file		"arm_memcpy.S"
 
@@ -149,7 +148,6 @@ MEM_LongCopyTable:
  ************************************************************************************/
 
 	.align 4
-	.thumb_func
 
 memcpy:
 	push	{r14}
@@ -160,7 +158,6 @@ memcpy:
 
 	.align 4
 
-	.thumb_func
 _do_memcpy:
 	push    {r14}
 

@@ -45,7 +45,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "m9s12_internal.h"
+#include "m9s12.h"
 #include "m9s12_pim.h"
 #include "m9s12_mebi.h"
 

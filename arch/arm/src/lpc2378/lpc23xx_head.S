@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "arm.h"
-#include "internal.h"
+#include "lpc2378.h"
 #include "up_arch.h"
 #include "lpc23xx_uart.h"
 #include "lpc23xx_scb.h"

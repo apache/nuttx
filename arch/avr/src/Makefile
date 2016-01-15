@@ -66,10 +66,10 @@ else
 endif
 endif
 
-CPPFLAGS += $(INCLUDES)
-CFLAGS += $(INCLUDES)
-CXXFLAGS += $(INCLUDES)
-AFLAGS += $(INCLUDES)
+CPPFLAGS += $(INCLUDES) $(EXTRADEFINES)
+CFLAGS += $(INCLUDES) $(EXTRADEFINES)
+CXXFLAGS += $(INCLUDES) $(EXTRADEFINES)
+AFLAGS += $(INCLUDES) $(EXTRADEFINES)
 
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
 STARTUP_OBJS ?= $(HEAD_OBJ)
@@ -138,10 +138,10 @@ board/libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_OBJ) $(EXTRA_OBJS) \
+	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		--start-group $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) --end-group
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) $(NM) $(NUTTX)$(EXEEXT) | \
+	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
 endif
@@ -183,4 +183,3 @@ endif
 	$(call DELFILE, .depend)
 
 -include Make.dep
-

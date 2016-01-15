@@ -52,7 +52,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "qemu_internal.h"
+#include "qemu.h"
 
 /****************************************************************************
  * Pre-processor Definitions

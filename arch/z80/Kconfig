@@ -11,6 +11,7 @@ choice
 config ARCH_CHIP_Z80
 	bool "Classic z80"
 	select ARCH_NOINTC
+	select MM_SMALL
 	---help---
 		Classic ZiLOG z80 chip
 
@@ -378,6 +379,7 @@ config ARCH_CHIP_Z8F640X
 
 config ARCH_CHIP_Z180
 	bool
+	select MM_SMALL
 	select ARCH_NOINTC
 	select ARCH_HAVE_ADDRENV
 	select ARCH_ADDRENV
@@ -406,9 +408,11 @@ config ARCH_CHIP_Z8S180
 
 config ARCH_CHIP_Z8
 	bool
+	select MM_SMALL
 
 config ARCH_CHIP_EZ80
 	bool
+	select MM_SMALL if EZ80_Z80MODE
 	select HAVE_LOWSERIALINIT
 	select ARCH_HAVE_PHY
 

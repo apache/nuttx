@@ -65,7 +65,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 #include "pic32mx-usbotg.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_PIC32MX_USBDEV)

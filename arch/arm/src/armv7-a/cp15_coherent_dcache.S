@@ -93,7 +93,7 @@
 	.type	cp15_coherent_dcache, function
 
 cp15_coherent_dcache:
-	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	mrc		CP15_CTR(r3)				/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
@@ -111,7 +111,7 @@ cp15_coherent_dcache:
 
 	dsb
 
-	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	mrc		CP15_CTR(r3)				/* Read the Cache Type Register */
 	and		r3, r3, #0xf			/* Isolate the IminLine field */
 	mov		r2, #4
 	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */

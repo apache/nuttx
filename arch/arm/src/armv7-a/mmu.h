@@ -342,7 +342,7 @@
  *   PL2   - Software executing in Hyp mode
  */
 
-#ifdef CONFIG_AFE_ENABLE
+#ifdef CPU_AFE_ENABLE
 /* AP[2:1] access permissions model.  AP[0] is used as an access flag:
  *
  * AP[2] AP[1]   PL1        PL0        Description

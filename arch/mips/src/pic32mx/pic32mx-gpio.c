@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "pic32mx-ioport.h"
-#include "pic32mx-internal.h"
+#include "pic32mx.h"
 
 /****************************************************************************
  * Pre-processor Definitions

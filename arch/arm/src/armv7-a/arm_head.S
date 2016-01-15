@@ -54,10 +54,13 @@
  * Configuration
  **********************************************************************************/
 
-#undef ALIGNMENT_TRAP
+/* Hard-coded options */
+
+#undef CPU_ALIGNMENT_TRAP
 #undef CPU_CACHE_ROUND_ROBIN
 #undef CPU_DCACHE_DISABLE
 #undef CPU_ICACHE_DISABLE
+#undef CPU_AFE_ENABLE
 
 /* There are three operational memory configurations:
  *
@@ -407,7 +410,7 @@ __start:
 	 *                      replacement strategy.
 	 *   SCTLR_HA   Bit 17: Not supported by A5
 	 *
-	 *   SCTLR_EE   Bit 25: Little endian (reset value).
+	 *   SCTLR_EE   Bit 25: 0=Little endian (reset value).
 	 *   SCTLR_TRE  Bit 28: No memory region remapping (reset value)
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
 	 *   SCTLR_TE   Bit 30: All exceptions handled in ARM state (reset value).
@@ -465,7 +468,7 @@ __start:
 	orr		r0, r0, #(SCTLR_I)
 #endif
 
-#ifdef ALIGNMENT_TRAP
+#ifdef CPU_ALIGNMENT_TRAP
 	/* Alignment abort enable
 	 *
 	 *   SCTLR_A    Bit 1:  Strict alignment enabled
@@ -474,7 +477,16 @@ __start:
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
-#ifdef CONFIG_AFE_ENABLE
+#ifdef CONFIG_ENDIAN_BIG
+	/* Big endian mode
+	 *
+	 *   SCTLR_EE       Bit 25: 1=Big endian.
+	 */
+
+	orr		r0, r0, #(SCTLR_EE)
+#endif
+
+#ifdef CPU_AFE_ENABLE
 	/* AP[0:2] Permissions model
 	 *
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
@@ -613,7 +625,7 @@ __start:
 	/* Set up the stack pointer and clear the frame pointer */
 
 	ldr		sp, .Lstackpointer
-	mov     fp, #0
+	mov		fp, #0
 
 #ifndef CONFIG_BOOT_SDRAM_DATA
 	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
+ * through nuttx/irq.h.
  */
 
 #ifndef __ARCH_AVR_INCLUDE_AVR_IRQ_H
@@ -91,12 +91,11 @@
 
 /* The program counter is automatically pushed when the interrupt occurs */
 
-#define REG_PCH          35 /* PC */
-#define REG_PCL          36
-
-/* Size of the register state save array (in bytes) */
-
-#define XCPTCONTEXT_REGS 37
+#define REG_PC0          35 /* PC */
+#define REG_PC1          36
+#if AVR_PC_SIZE > 16
+# define REG_PC2         37
+#endif
 
 /****************************************************************************
  * Public Types
@@ -116,8 +115,11 @@ struct xcptcontext
 
   /* These are saved copies of PC and SR used during signal processing.*/
 
-  uint8_t saved_pcl;
-  uint8_t saved_pch;
+  uint8_t saved_pc1;
+  uint8_t saved_pc0;
+# if defined(REG_PC2)
+  uint8_t saved_pc2;
+# endif   
   uint8_t saved_sreg;
 #endif
 
@@ -167,9 +169,9 @@ static inline irqstate_t irqsave(void)
   asm volatile
     (
       "\tin %0, __SREG__\n"
-	  "\tcli\n"
-	  : "=&r" (sreg) ::
-	);
+      "\tcli\n"
+      : "=&r" (sreg) ::
+    );
   return sreg;
 }
 
@@ -205,4 +207,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_AVR_INCLUDE_AVR_IRQ_H */
-

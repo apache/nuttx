@@ -112,8 +112,8 @@
  * On Entry:
  *	The return PC and the saved r24 is on the stack, r24 now contains the IRQ number
  *
- *	  PCL
- *	  PCH
+ *	  PC1
+ *	  PC0
  *	  R0
  *	  --- <- SP
  *

@@ -135,11 +135,14 @@
 #  endif
 #  define up_restorestate(regs) (current_regs = regs)
 
-/* The Cortex-A5 supports the same mechanism, but only lazy floating point
- * register save/restore.
+/* The Cortex-A and Cortex-R supports the same mechanism, but only lazy
+ * floating point register save/restore.
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
+#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)  || \
+      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
+      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
+      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.
@@ -348,11 +351,14 @@ int  up_memfault(int irq, FAR void *context);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 
-/* Exception handling logic unique to the Cortex-A family (but should be
- * back-ported to the ARM7 and ARM9 families).
+/* Exception handling logic unique to the Cortex-A and Cortex-R families
+* (but should be back-ported to the ARM7 and ARM9 families).
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
+#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)  || \
+      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
+      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
+      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
 
 /* Interrupt acknowledge and dispatch */
 
