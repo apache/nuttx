@@ -163,9 +163,9 @@
 #  define ATMEGA_IRQ_TIM0_COMPB  23 /* 0x002C TIMER0 COMPB Timer/Counter0 Compare match B */
 #  define ATMEGA_IRQ_TIM0_OVF    24 /* 0x002E TIMER0 OVF Timer/Counter0 Overflow */
 #  define ATMEGA_IRQ_SPI_STC     25 /* 0x0030 SPI, STC SPI Serial Transfer Complete */
-#  define ATMEGA_IRQ_USART0_RXC  26 /* 0x0032 USART0 RX USART0 Rx Complete */
-#  define ATMEGA_IRQ_USART0_UDRE 27 /* 0x0034 USART0 UDRE USART0 Data Register Empty */
-#  define ATMEGA_IRQ_USART0_TXC  28 /* 0x0036 USART0 TX USART0 Tx Complete */
+#  define ATMEGA_IRQ_U0RX        26 /* 0x0032 USART0 RX USART0 Rx Complete */
+#  define ATMEGA_IRQ_U0DRE       27 /* 0x0034 USART0 UDRE USART0 Data Register Empty */
+#  define ATMEGA_IRQ_U0TX        28 /* 0x0036 USART0 TX USART0 Tx Complete */
 #  define ATMEGA_IRQ_ANA_COMP    29 /* 0x0038 ANALOG COMP Analog Comparator */
 #  define ATMEGA_IRQ_ADC         30 /* 0x003A ADC ADC Conversion Complete */
 #  define ATMEGA_IRQ_EE_RDY      31 /* 0x003C EE READY EEPROM Ready */
@@ -174,9 +174,9 @@
 #  define ATMEGA_IRQ_TIM3_COMPB  34 /* 0x0042 TIMER3 COMPB Timer/Counter3 Compare Match B */
 #  define ATMEGA_IRQ_TIM3_COMPC  35 /* 0x0044 TIMER3 COMPC Timer/Counter3 Compare Match C */
 #  define ATMEGA_IRQ_TIM3_OVF    36 /* 0x0046 TIMER3 OVF Timer/Counter3 Overflow */
-#  define ATMEGA_IRQ_USART1_RXC  37 /* 0x0048 USART1 RX USART1 Rx Complete */
-#  define ATMEGA_IRQ_USART1_UDRE 38 /* 0x004A USART1 UDRE USART1 Data Register Empty */
-#  define ATMEGA_IRQ_USART1_TXC  39 /* 0x004C USART1 TX USART1 Tx Complete */
+#  define ATMEGA_IRQ_U1RX        37 /* 0x0048 USART1 RX USART1 Rx Complete */
+#  define ATMEGA_IRQ_U1DRE       38 /* 0x004A USART1 UDRE USART1 Data Register Empty */
+#  define ATMEGA_IRQ_U1TX        39 /* 0x004C USART1 TX USART1 Tx Complete */
 #  define ATMEGA_IRQ_TWI         40 /* 0x004E TWI 2-wire Serial Interface */
 #  define ATMEGA_IRQ_SPM_RDY     41 /* 0x0050 SPM READY Store Program Memory Ready */
 #  define ATMEGA_IRQ_TIM4_CAPT   42 /* 0x0052 TIMER4 CAPT Timer/Counter4 Capture Event */
@@ -189,12 +189,12 @@
 #  define ATMEGA_IRQ_TIM5_COMPB  49 /* 0x0060 TIMER5 COMPB Timer/Counter5 Compare Match B */
 #  define ATMEGA_IRQ_TIM5_COMPC  50 /* 0x0062 TIMER5 COMPC Timer/Counter5 Compare Match C */
 #  define ATMEGA_IRQ_TIM5_OVF    51 /* 0x0064 TIMER5 OVF Timer/Counter5 Overflow */
-#  define ATMEGA_IRQ_USART2_RXC  52 /* 0x0066 USART2 RX USART2 Rx Complete */
-#  define ATMEGA_IRQ_USART2_UDRE 53 /* 0x0068 USART2 UDRE USART2 Data Register Empty */
-#  define ATMEGA_IRQ_USART2_TXC  54 /* 0x006A USART2 TX USART2 Tx Complete */
-#  define ATMEGA_IRQ_USART3_RXC  55 /* 0x006C USART3 RX USART3 Rx Complete */
-#  define ATMEGA_IRQ_USART3_UDRE 56 /* 0x006E USART3 UDRE USART3 Data Register Empty */
-#  define ATMEGA_IRQ_USART3_TXC  57 /* 0x0070 USART3 TX USART3 Tx Complete */
+#  define ATMEGA_IRQ_U2RX        52 /* 0x0066 USART2 RX USART2 Rx Complete */
+#  define ATMEGA_IRQ_U2DRE       53 /* 0x0068 USART2 UDRE USART2 Data Register Empty */
+#  define ATMEGA_IRQ_U2TX        54 /* 0x006A USART2 TX USART2 Tx Complete */
+#  define ATMEGA_IRQ_U3RX        55 /* 0x006C USART3 RX USART3 Rx Complete */
+#  define ATMEGA_IRQ_U3DRE       56 /* 0x006E USART3 UDRE USART3 Data Register Empty */
+#  define ATMEGA_IRQ_U3TX        57 /* 0x0070 USART3 TX USART3 Tx Complete */
 
 #  define NR_IRQS                58
 #  define AVR_PC_SIZE            24
