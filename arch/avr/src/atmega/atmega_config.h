@@ -46,6 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* USARTs ***************************************************************************/
+/* Check if any USART is selected */
 
 #undef HAVE_USART_DEVICE
 #if defined(CONFIG_AVR_USART0) || defined(CONFIG_AVR_USART1)

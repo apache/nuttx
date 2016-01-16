@@ -80,27 +80,30 @@
 
 /* Which USART with be tty0/console and which tty1? */
 
+#undef CONSOLE_DEV
+#undef TTYS0_DEV
+#undef TTYS1_DEV
+
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart0port     /* USART0 is console */
 #  define TTYS0_DEV       g_usart0port     /* USART0 is ttyS0 */
 #  ifdef CONFIG_AVR_USART1
 #    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
-#  else
-#    undef TTYS1_DEV                       /* No ttyS1 */
 #  endif
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart1port     /* USART1 is console */
 #  define TTYS0_DEV       g_usart1port     /* USART1 is ttyS0 */
 #  ifdef CONFIG_AVR_USART0
 #    define TTYS1_DEV     g_usart0port     /* USART0 is ttyS1 */
-#  else
-#    undef TTYS1_DEV                       /* No ttyS1 */
 #  endif
+#elif defined(CONFIG_AVR_USART0)
+#  define TTYS0_DEV       g_usart0port     /* USART0 is ttyS0 */
+#  ifdef CONFIG_AVR_USART1
+#    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
+#  endif
+#elif defined(CONFIG_AVR_USART1)
+#  define TTYS0_DEV       g_usart1port     /* USART1 is ttyS1 */
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
