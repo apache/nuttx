@@ -262,12 +262,6 @@ Windows Native Toolchains
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This
-     is because the dependencies are generated using Windows pathes which do
-     not work with the Cygwin make.
-
-       MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-
   An additional issue with the WinAVR toolchain, in particular, is that it
   contains an incompatible version of the Cygwin DLL in its bin/ directory.
   You must take care that the correct Cygwin DLL is used.

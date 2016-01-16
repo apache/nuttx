@@ -41,13 +41,13 @@ ifeq ($(WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
   DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}" -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include$(DELIM)cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)ld.script}"
 else
   # Linux/Cygwin-native toolchain
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps.sh
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include -isystem $(TOPDIR)$(DELIM)include$(DELIM)cxx
   ARCHSCRIPT = -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)ld.script

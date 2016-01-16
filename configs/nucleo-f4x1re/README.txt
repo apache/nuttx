@@ -135,12 +135,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-
   The Atollic "Pro" and "Lite" Toolchain
   --------------------------------------
   One problem that I had with the Atollic toolchains is that the provide a gcc.exe

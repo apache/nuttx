@@ -51,7 +51,7 @@ LPC4370-Link2 board
   Console
   -------
 
-  The LPC4370-Link2 default console is the USART0.
+  The LPC4370-Link2 default console is the USART2.
 
 Status
 ======
@@ -175,12 +175,6 @@ GNU Toolchain Options
        make clean_context all
 
      An alias in your .bashrc file might make that less painful.
-
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
 
   The CodeSourcery Toolchain (2009q1)
   -----------------------------------

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/lpc4357-evb/src/lpc43_boot.c
+ * configs/lpc4370-link2/src/lpc43_boot.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -78,5 +78,8 @@ void lpc43_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
-}
 
+#ifdef CONFIG_SPIFI_LIBRARY
+  board_spifi_initialize();
+#endif
+}

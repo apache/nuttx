@@ -315,6 +315,10 @@ configs/lpc4330-xplorer
   NuttX port to the LPC4330-Xplorer board from NGX Technologies featuring
   the NXP LPC4330FET100 MCU
 
+configs/lpc4337-ws
+  NuttX port to the WaveShare LPC4337-ws board featuring the NXP LPC4337JBD144
+  MCU.
+
 configs/lpc4357-evb
   NuttX port to the LPC4357-EVB board from Embest featuring the NXP
   LPC4357FET256 MCU.  Based on the LPC4300 Xplorer port and provided by

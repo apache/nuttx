@@ -20,19 +20,3 @@ Toolchain
   tool-chain but specify path to the Atmel AVR8 in path. See
   arduino-mega2560/hello for example.
 
-MEMX
-^^^^
-
-  If you use the GCC AVR toolchain from the Atmel Studio, then you can
-  enable suppport for the MEMX storage:
-
-    CONFIG_AVR_HAS_MEMX_PTR=y
-
-  If this support is enabled, then all strings will be saved in FLASH and
-  standard string-oriented interfaces such printf() will change so that
-  they accept memx pointers.
-
-  This means that (1) ALL strings must lie in FLASH, and (2) since the
-  strings are moved from SRAM to FLASH, you will save a LOT of SRAM usage
-  in some configurations that use a lot of string memory (such as the
-  ostest and nsh configurations).

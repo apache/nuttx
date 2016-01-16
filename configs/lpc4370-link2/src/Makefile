@@ -56,22 +56,12 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc43_usbmsc.c
 endif
 
+ifeq ($(CONFIG_LPC43_ADC0),y)
+CSRCS += lpc43_adc.c
+endif
+
 ifeq ($(CONFIG_SPIFI_LIBRARY),y)
-CFLAGS += -DEUROBIRD
-SPIFI_LIB = spifi_lib
-CSRCS += $(SPIFI_LIB)/spifi_rom_api.c
-#CSRCS += $(SPIFI_LIB)/amic.c
-#CSRCS += $(SPIFI_LIB)/atmel.c
-#CSRCS += $(SPIFI_LIB)/chi.c
-#CSRCS += $(SPIFI_LIB)/eon.c
-#CSRCS += $(SPIFI_LIB)/esmt.c
-#CSRCS += $(SPIFI_LIB)/esmt.c
-#CSRCS += $(SPIFI_LIB)/giga.c
-#CSRCS += $(SPIFI_LIB)/macronix.c
-#CSRCS += $(SPIFI_LIB)/numonyx.c
-CSRCS += $(SPIFI_LIB)/spansion.c
-#CSRCS += $(SPIFI_LIB)/sst.c
-CSRCS += $(SPIFI_LIB)/winbond.c
+CSRCS += lpc43_spifilib_init.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

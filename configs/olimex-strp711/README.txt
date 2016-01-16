@@ -153,12 +153,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
   NOTE 1: The CodeSourcery toolchain (2009q1) may not work with default optimization
   level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
   -Os.

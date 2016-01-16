@@ -1,5 +1,5 @@
-/************************************************************************************
- * configs/teensy-2.0/scripts/memx.ld
+/*******************************************************************************
+ * configs/arduino-mega2560/scripts/flash.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,26 +31,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ******************************************************************************/
 
-/* Memory Regions *******************************************************************/
-/* ------------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
- *              FLASH        | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
- *                           |           REGISTERS REGISTERS             |
- * ------------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
- * AT90USB1286  0x0000 128Kb | 0x0000 32 0x0020 64 0x0060 160 0x0100 8Kb | 0x0000 4Kb
- * ------------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+/* Memory Regions *************************************************************/
+/* ------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+ *         FLASH       | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
+ *                     |           REGISTERS REGISTERS             |
+ * ------- ------ -----+------- -- ------ -- ------ --- ------ ----+------- ---
+ *         0x0000 256Kb| 0x0000 32 0x0020 64 0x0060 416 0x0200 8Kb | 0x0000 4Kb
+ * ------- ------ -----+------- -- ------ -- ------ --- ------ ----+------- ---
+ * *Memory configuration A
  */
 
 MEMORY
 {
-	flash    (rx) : ORIGIN = 0, LENGTH = 128K
-	sram   (rw!x) : ORIGIN = 0x800100, LENGTH = 8K
+	flash    (rx) : ORIGIN = 0, LENGTH = 256K
+	sram   (rw!x) : ORIGIN = 0x800200, LENGTH = 8K
 	eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 4K
 }
 
 OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
-OUTPUT_ARCH(avr:5)
+OUTPUT_ARCH(avr:6)
 ENTRY(__start)
 
 SECTIONS
@@ -129,7 +130,6 @@ SECTIONS
 		*(.init)
 		*(.handlers)
 		*(.progmem .progmem.*)
-		*(.rodata.str1.*)
 		*(.text)
 		*(.text.*)
 		_etext = . ;
@@ -174,13 +174,13 @@ SECTIONS
 
 	/* Stabs debugging sections.	*/
 
-	.stab 0				: { *(.stab) }
-	.stabstr 0			: { *(.stabstr) }
+	.stab 0			: { *(.stab) }
+	.stabstr 0		: { *(.stabstr) }
 	.stab.excl 0		: { *(.stab.excl) }
 	.stab.exclstr 0		: { *(.stab.exclstr) }
 	.stab.index 0		: { *(.stab.index) }
 	.stab.indexstr 0	: { *(.stab.indexstr) }
-	.comment 0			: { *(.comment) }
+	.comment 0		: { *(.comment) }
 
 	/* DWARF debug sections.
 		 Symbols in the DWARF debugging sections are relative to the beginning
@@ -188,8 +188,8 @@ SECTIONS
 
 	/* DWARF 1 */
 
-	.debug 0			: { *(.debug) }
-	.line 0				: { *(.line) }
+	.debug 0		: { *(.debug) }
+	.line 0			: { *(.line) }
 
 	/* GNU DWARF 1 extensions */
 

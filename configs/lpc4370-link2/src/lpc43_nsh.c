@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpc4357-evb/src/lpc43_nsh.c
+ * config/lpc4370-link2/src/lpc43_nsh.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,88 +47,6 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_LPC43_SPIFI
-#  include <nuttx/mtd/mtd.h>
-#  include "lpc43_spifi.h"
-
-#  ifdef CONFIG_SPFI_NXFFS
-#    include <sys/mount.h>
-#    include <nuttx/fs/nxffs.h>
-#  endif
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_SPIFI_DEVNO
-#  define CONFIG_SPIFI_DEVNO 0
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nsh_spifi_initialize
- *
- * Description:
- *   Make the SPIFI (or part of it) into a block driver that can hold a
- *   file system.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LPC43_SPIFI
-static int nsh_spifi_initialize(void)
-{
-  FAR struct mtd_dev_s *mtd;
-  int ret;
-
-  /* Initialize the SPIFI interface and create the MTD driver instance */
-
-  mtd = lpc43_spifi_initialize();
-  if (!mtd)
-    {
-      fdbg("ERROR: lpc43_spifi_initialize failed\n");
-      return -ENODEV;
-    }
-
-#ifndef CONFIG_SPFI_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(CONFIG_SPIFI_DEVNO, mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Initializing the FTL layer: %d\n", ret);
-      return ret;
-    }
-#else
-  /* Initialize to provide NXFFS on the MTD interface */
-
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
-      return ret;
-    }
-
-  /* Mount the file system at /mnt/spifi */
-
-  ret = mount(NULL, "/mnt/spifi", "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
-#endif
-
-  return OK;
-}
-#else
-#  define nsh_spifi_initialize() (OK)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -143,8 +61,5 @@ static int nsh_spifi_initialize(void)
 
 int board_app_initialize(void)
 {
-  /* Initialize the SPIFI block device */
-
-  return nsh_spifi_initialize();
+  return OK;
 }
-

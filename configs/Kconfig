@@ -315,6 +315,12 @@ config ARCH_BOARD_LPC4330_XPLORER
 		NXG Technologies LPC4330 Xplorer board.  This board is based on the
 		LPC4330FET100.  The Code Red toolchain is used by default.
 
+config ARCH_BOARD_LPC4337_WS
+	bool "WaveShare LPC4337-WS"
+	depends on ARCH_CHIP_LPC4337JBD144
+	---help---
+		The WaveShare LPC4337-ws board featuring the NXP LPC4337JBD144 MCU.
+
 config ARCH_BOARD_LPC4357_EVB
 	bool "NXP LPC4357-EVB"
 	depends on ARCH_CHIP_LPC4357FET256
@@ -1295,6 +1301,7 @@ config ARCH_BOARD
 	default "lm3s8962-ek"              if ARCH_BOARD_LM3S8962EK
 	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
+	default "lpc4337-ws"               if ARCH_BOARD_LPC4337_WS
 	default "lpc4357-evb"              if ARCH_BOARD_LPC4357_EVB
 	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
 	default "lpcxpresso-lpc1115"       if ARCH_BOARD_LPCXPRESSO_LPC1115
@@ -1533,6 +1540,9 @@ source "configs/lm4f120-launchpad/Kconfig"
 endif
 if ARCH_BOARD_LPC4330_XPLORER
 source "configs/lpc4330-xplorer/Kconfig"
+endif
+if ARCH_BOARD_LPC4337_WS
+source "configs/lpc4337-ws/Kconfig"
 endif
 if ARCH_BOARD_LPC4357_EVB
 source "configs/lpc4357-evb/Kconfig"

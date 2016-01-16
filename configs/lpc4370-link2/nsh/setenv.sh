@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/lpc4357-evb/nsh/setenv.sh
+# configs/lpc4370-link2/nsh/setenv.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
