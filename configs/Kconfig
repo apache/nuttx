@@ -504,6 +504,17 @@ config ARCH_BOARD_OLIMEX_STM32H405
 		further information. This board features the STMicro STM32F405RGT6
 		MCU.
 
+config ARCH_BOARD_OLIMEX_STM32H407
+	bool "Olimex STM32 H407 board"
+	depends on ARCH_CHIP_STM32F407ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Olimex STM32 H407 board and a GNU arm-nuttx-elf
+		toolchain* under Linux or Cygwin. See the http://www.olimex.com for
+		further information. This board features the STMicro STM32F407ZGT6 (144pins).
+
 config ARCH_BOARD_OLIMEX_STM32P107
 	bool "Olimex STM32 P107 board"
 	depends on ARCH_CHIP_STM32F107VC
