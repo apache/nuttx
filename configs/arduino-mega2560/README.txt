@@ -81,3 +81,24 @@ Configurations
     This is a reduce NuttShell (NSH) configuration using apps/example/nsh.
     The serial console is provided on USART0 and can be accessed via
     an external RS-232 driver as described above under "Serial Console".
+
+    NOTES:
+
+    1. As of 2015-01-16, the default static memory usage is:
+
+       $ size nuttx.elf
+        text    data     bss     dec     hex filename
+       34348    2117     944   37409    9221 nuttx.elf
+
+       And dynamic, heap usage:
+
+       nsh> free
+                    total       used       free    largest
+       Mem:          4736       1768       2968       2968
+
+       There is plenty of FLASH space, so many additional NSH featurs
+       could be enabled.  There is, however, not a lot of free SRAM.
+
+       NOTE: There is partial support for the MEMX pointer in apps/nshlib.
+       If that support were completed then some reduction of the static
+       .data allocation could be achieved by enabling the MEMX pointer.
