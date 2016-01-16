@@ -1616,6 +1616,8 @@ o Other drivers (drivers/)
                  I2C usage.
                - I2C_SETADDRESS used with I2C_READ, I2C_WRITE, and I2C_WRITEREAD:
                  Similarly, address can and will be changed by other I2C usage.
+                 NOTE also that I2C_SETADDRESS also sets the address width (either
+                 7 or 10 bits).
                - I2C_TRANSFER:  This is the only interface that is properly self
                  contained and protected from most mult-tasking issues.  But even
                  this interface can suffer if there are differing frequency settings.
