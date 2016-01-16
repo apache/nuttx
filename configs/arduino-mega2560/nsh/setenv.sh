@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/arduino-mega2560/ostest/setenv.sh
+# configs/arduino-mega2560/nsh/setenv.sh
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
