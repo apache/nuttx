@@ -541,6 +541,24 @@ indent.sh
   to my coding NuttX coding style.  It doesn't do a really good job,
   however (see the comments at the top of the indent.sh file).
 
+  USAGE:
+    ./indent.sh [-d] -o <out-file> <in-file>
+    ./indent.sh [-d] <in-file-list>
+    ./indent.sh [-d] -h
+
+  Where:
+    -<in-file>
+      A single, unformatted input file
+    -<in-file-list>
+      A list of unformatted input files that will be reformatted in place.
+    -o <out-file>
+      Write the single, reformatted <in-file> to <out-file>.  <in-file>
+      will not be modified.
+    -d
+      Enable script debug
+    -h
+      Show this help message and exit
+
 refresh.sh
 ----------
 
