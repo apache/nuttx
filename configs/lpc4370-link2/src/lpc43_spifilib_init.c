@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4370-link2/src/lpc43_spifilib_initc
+ * configs/lpc4370-link2/src/lpc43_spifilib_init.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
