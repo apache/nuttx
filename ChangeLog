@@ -11312,3 +11312,9 @@
 	  from Lok Tep (2016-01-15).
 	* configs/lpc4337-ws:  Support for the WaveShare LPC4337-WS board.  From
 	  Lok Tep (2016-01-15).
+	* drivers/wireless/pn532.c: Add driver for the NXP pn532 NFC-chip.  From
+	  Janne Rosberg and others at Offcode Ltd (2016-01-17).
+	* drivers/sensors/lsm9ds1.c:  Add driver for the STMicro LSM9DS1 chip.
+	  The LSM9DS1 is a system-in-package featuring a 3D digital linear
+	  acceleration sensor, a 3D digital angular rate sensor, and a 3D
+	  digital magnetic sensor.  From Paul Alexander Patience (2016-01-17).
