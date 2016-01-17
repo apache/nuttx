@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/pn532.h
  *
- *   Copyright(C) 2012,2013,2016 Offcode Ltd. All rights reserved.
+ *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
  *   Authors: Janne Rosberg <janne@offcode.fi>
  *            Teemu Pirinen <teemu@offcode.fi>
  *            Juho Grundström <juho@offcode.fi>
@@ -35,35 +35,39 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_WIRELESS_PN532_H
+#define __DRIVERS_WIRELESS_PN532_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
-
 #include <nuttx/wireless/pn532.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define PN532_PREAMBLE      0x00
-#define PN532_STARTCODE1    0x00
-#define PN532_STARTCODE2    0xFF
-#define PN532_POSTAMBLE     0x00
+#define PN532_PREAMBLE                      0x00
+#define PN532_STARTCODE1                    0x00
+#define PN532_STARTCODE2                    0xFF
+#define PN532_POSTAMBLE                     0x00
 
-#define PN532_SOF           0xFF00
+#define PN532_SOF                           0xFF00
 
-#define PN532_HOSTTOPN532   0xD4
-#define PN532_PN532TOHOST   0xD5
+#define PN532_HOSTTOPN532                   0xD4
+#define PN532_PN532TOHOST                   0xD5
 
-#define PN532_SPI_STATREAD	0x02
-#define PN532_SPI_DATAWRITE	0x01
-#define PN532_SPI_DATAREAD	0x03
-#define PN532_SPI_READY     0x01
+#define PN532_SPI_STATREAD                  0x02
+#define PN532_SPI_DATAWRITE                 0x01
+#define PN532_SPI_DATAREAD                  0x03
+#define PN532_SPI_READY                     0x01
 
 /* PN532 Commands */
 
@@ -102,38 +106,49 @@
 
 #define PN532_WAKEUP                        0x55
 
-#define PN532_SAM_NORMAL_MODE		0x01
-#define PN532_SAM_VIRTUAL_CARD  0x02
-#define PN532_SAM_WIRED_CARD		0x03
-#define PN532_SAM_DUAL_CARD     0x04
+#define PN532_SAM_NORMAL_MODE               0x01
+#define PN532_SAM_VIRTUAL_CARD              0x02
+#define PN532_SAM_WIRED_CARD                0x03
+#define PN532_SAM_DUAL_CARD                 0x04
 
+#ifndef CONFIG_PN532_SPI_FREQ
+#  define CONFIG_PN532_SPI_FREQ             (5000000)
+#endif
 
-struct pn532_frame {
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct pn532_frame
+{
   uint8_t  preamble;    /* 0x00 */
-  uint16_t start_code;	/* 0x00FF (BE) -> 0xFF00 (LE) */
+  uint16_t start_code;  /* 0x00FF (BE) -> 0xFF00 (LE) */
   uint8_t  len;         /* 1 byte indicating the number of bytes in
                          * the data field */
   uint8_t  lcs;         /* 1 Packet Length Checksum LCS byte that satisfies
                          * the relation:  Lower byte of [LEN + LCS] = 00h */
-  uint8_t	 tfi;         /* Frame idenfifier 0xD4, 0xD5 */
+  uint8_t  tfi;         /* Frame idenfifier 0xD4, 0xD5 */
   uint8_t  data[];      /* LEN-1 bytes of Packet Data Information.
                          * The first byte PD0 is the Command Code */
 } packed_struct;
 
-struct pn_poll_response {
+struct pn_poll_response
+{
   uint8_t nbtg;
   uint8_t tg;
   uint8_t target_data[];
 } packed_struct;
 
-struct pn_target_type_a {
+struct pn_target_type_a
+{
   uint16_t sens_res;
   uint8_t  sel_res;
   uint8_t  nfcid_len;
   uint8_t  nfcid_data[];
 } packed_struct;
 
-struct pn_firmware_version {
+struct pn_firmware_version
+{
   uint8_t ic;
   uint8_t ver;
   uint8_t rev;
@@ -142,14 +157,15 @@ struct pn_firmware_version {
 
 struct pn532_dev_s
 {
-  uint8_t		state;
+  uint8_t state;
   FAR struct spi_dev_s *spi;          /* SPI interface */
   FAR struct pn532_config_s *config;  /* Board configuration data */
 };
 
-#ifndef CONFIG_PN532_SPI_FREQ
-#define CONFIG_PN532_SPI_FREQ	(5000000)
-#endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 bool pn532_set_config(struct pn532_dev_s *dev, uint8_t flags);
 
+#endif /* __DRIVERS_WIRELESS_PN532_H */

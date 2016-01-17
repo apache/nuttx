@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/wireless/pn532.h
  *
- *   Copyright(C) 2012,2013,2016 Offcode Ltd. All rights reserved.
+ *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
  *   Authors: Janne Rosberg <janne@offcode.fi>
  *            Teemu Pirinen <teemu@offcode.fi>
  *            Juho Grundström <juho@offcode.fi>
@@ -63,7 +63,7 @@
 #    define pn532dbg(x...)
 #  else
 #    define pn532dbg (void)
-#	endif
+#    endif
 #endif
 
 #ifdef CONFIG_WL_PN532_DEBUG_TX
@@ -97,11 +97,22 @@ static void pn532_unlock(FAR struct spi_dev_s *spi);
 
 /* Character driver methods */
 
-static int		 _open(FAR struct file *filep);
-static int		 _close(FAR struct file *filep);
+static int     _open(FAR struct file *filep);
+static int     _close(FAR struct file *filep);
 static ssize_t _read(FAR struct file *, FAR char *, size_t);
-static ssize_t _write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-static int		 _ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static ssize_t _write(FAR struct file *filep, FAR const char *buffer,
+                      size_t buflen);
+static int     _ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+
+static uint8_t pn532_checksum(uint8_t value);
+static uint8_t pn532_data_checksum(uint8_t *data, int datalen);
+
+int pn532_read(struct pn532_dev_s *dev, uint8_t *buff, uint8_t n);
+
+/* IRQ Handling TODO:
+static int pn532_irqhandler(FAR int irq, FAR void *context, FAR void* dev);
+static inline int pn532_attachirq(FAR struct pn532_dev_s *dev, xcpt_t isr);
+*/
 
 /****************************************************************************
  * Private Data
@@ -118,17 +129,15 @@ static const struct file_operations g_pn532fops =
 #ifndef CONFIG_DISABLE_POLL
   ,0
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  ,0
+#endif
 };
 
-static uint8_t pn532_checksum(uint8_t value);
-static uint8_t pn532_data_checksum(uint8_t *data, int datalen);
-
-int pn532_read(struct pn532_dev_s *dev, uint8_t *buff, uint8_t n);
-
-/* IRQ Handling TODO:
-static int pn532_irqhandler(FAR int irq, FAR void *context, FAR void* dev);
-static inline int pn532_attachirq(FAR struct pn532_dev_s *dev, xcpt_t isr);
-*/
+static const uint8_t pn532ack[] =
+{
+  0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00
+};
 
 /****************************************************************************
  * Private Functions
@@ -142,7 +151,6 @@ static void pn532_lock(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, -8);
   SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
-
 }
 #endif
 
@@ -159,6 +167,7 @@ static inline void pn532_configspi(FAR struct spi_dev_s *spi)
   /* Configure SPI for the PN532 module.
    * As we own the SPI bus this method is called just once.
    */
+
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, -8);
   SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
@@ -223,7 +232,6 @@ static uint8_t pn532_data_checksum(uint8_t *data, int datalen)
   return pn532_checksum(sum);
 }
 
-
 bool pn532_rx_frame_is_valid(struct pn532_frame *f, bool check_data)
 {
   uint8_t chk;
@@ -235,7 +243,9 @@ bool pn532_rx_frame_is_valid(struct pn532_frame *f, bool check_data)
     }
 
   if (f->tfi != PN532_PN532TOHOST)
-    return false;
+    {
+      return false;
+    }
 
   chk = pn532_checksum(f->len);
   if (chk != f->lcs)
@@ -247,7 +257,8 @@ bool pn532_rx_frame_is_valid(struct pn532_frame *f, bool check_data)
   if (check_data)
     {
       chk = pn532_data_checksum(&f->tfi, f->len);
-      if (chk != f->data[f->len-1]) {
+      if (chk != f->data[f->len-1])
+        {
           pn532dbg("Frame data checksum failed: calc=0x%X != 0x%X", chk, f->data[f->len-1]);
           return false;
         }
@@ -272,11 +283,20 @@ static uint8_t pn532_status(struct pn532_dev_s *dev)
   return rs;
 }
 
-/**
- * Blocks until Data frame available from chip.
+/****************************************************************************
+ * Name: pn532_wait_rx_ready
  *
- * @return 0 for OK. -ETIMEDOUT if no data available
- */
+ * Description:
+ *   Blocks until Data frame available from chip.
+ *
+ * Input Parameters:
+ *   dev
+ *   timeout
+ *
+ * Returned Value:
+ *   0 for OK. -ETIMEDOUT if no data available
+ *
+ ****************************************************************************/
 
 static int pn532_wait_rx_ready(struct pn532_dev_s *dev, int timeout)
 {
@@ -289,7 +309,8 @@ static int pn532_wait_rx_ready(struct pn532_dev_s *dev, int timeout)
   sem_timedwait(dev->sem_rx, &ts);
 #endif
 
-  // TODO: Handle Exception bits 2, 3
+  /* TODO: Handle Exception bits 2, 3 */
+
   while (pn532_status(dev) != PN532_SPI_READY)
     {
       if (--timeout == 0x00)
@@ -297,22 +318,32 @@ static int pn532_wait_rx_ready(struct pn532_dev_s *dev, int timeout)
           pn532dbg("wait RX timeout!\n");
           return -ETIMEDOUT;
         }
+
       usleep(1000);
     }
 
   dev->state = PN532_STATE_DATA_READY;
-
   return ret;
 }
 
+/****************************************************************************
+ * Name: pn532_writecommand
+ *
+ * Description:
+ *   Helper for debug/testing
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 #if 0
-/* Helper for debug/testing */
-
 static void pn532_writecommand(struct pn532_dev_s *dev, uint8_t cmd)
 {
   char cmd_buffer[16];
   struct pn532_frame *f = (struct pn532_frame *) cmd_buffer;
+
   pn532_frame_init(f, cmd);
   pn532_frame_finish(f);
 
@@ -327,16 +358,22 @@ static void pn532_writecommand(struct pn532_dev_s *dev, uint8_t cmd)
   pn532_unlock(dev->spi);
 
   tracetx("command sent", (uint8_t *) f, FRAME_SIZE(f));
-
 }
 #endif
 
-
-/**
- * RAW Read data from chip.
- * @note this DON'T wait if data is available!
+/****************************************************************************
+ * Name: pn532_read
  *
- */
+ * Description:
+ *   RAW Read data from chip.
+ *   NOTE: This WON'T wait if data is available!
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
 int pn532_read(struct pn532_dev_s *dev, uint8_t *buff, uint8_t n)
 {
   pn532_lock(dev->spi);
@@ -362,14 +399,20 @@ int pn532_read_more(struct pn532_dev_s *dev, uint8_t *buff, uint8_t n)
   return n;
 }
 
-
-static const uint8_t pn532ack[] = {0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00};
-
-/**
- * @brief Read Ack responce from device
+/****************************************************************************
+ * Name: pn532_read_ack
  *
- * @return 0 = NOK, 1 = OK
- **/
+ * Description:
+ *   Read Ack responce from device
+ *
+ * Input Parameters:
+ *   dev
+ *
+ * Returned Value:
+ *   0 = NOK, 1 = OK
+ *
+ ****************************************************************************/
+
 int pn532_read_ack(struct pn532_dev_s *dev)
 {
   int res = 0;
@@ -380,7 +423,9 @@ int pn532_read_ack(struct pn532_dev_s *dev)
   if (memcmp(&ack, &pn532ack, 6) == 0x00)
     {
       res = 1;
-    } else {
+    }
+  else
+    {
       pn532dbg("ACK NOK");
       res = 0;
     }
@@ -388,18 +433,24 @@ int pn532_read_ack(struct pn532_dev_s *dev)
   return res;
 }
 
+/****************************************************************************
+ * Name: pn532_write_frame
+ *
+ * Description:
+ *   Write frame to chip.  Also waits and reads ACK frame from chip.
+ *
+ *   Construct frame with
+ *      pn532_frame_init(), pn532_frame_finish()
+ * 
+ * Input Parameters:
+ *   dev - Device instance
+ *   f   - Pointer to start frame
+ *
+ * Returned Value:
+ *   0 for OK, negative for error
+ *
+ ****************************************************************************/
 
-/**
- * @brief Write frame to chip
- * also waits and reads ACK frame from chip.
- *
- * construct frame with
- *  pn532_frame_init(), pn532_frame_finish()
- *
- * @param dev device instance
- * @param f pointer to start frame
- * @return 0 for OK, negative for error
- */
 int pn532_write_frame(struct pn532_dev_s *dev, struct pn532_frame *f)
 {
   int res = OK;
@@ -414,7 +465,8 @@ int pn532_write_frame(struct pn532_dev_s *dev, struct pn532_frame *f)
   pn532_unlock(dev->spi);
   tracetx("WriteFrame", (uint8_t *) f, FRAME_SIZE(f));
 
-  // wait ACK frame
+  /* Wait ACK frame */
+
   res = pn532_wait_rx_ready(dev, 30);
   if (res == OK)
     {
@@ -428,16 +480,15 @@ int pn532_write_frame(struct pn532_dev_s *dev, struct pn532_frame *f)
   return res;
 }
 
-
 int pn532_read_frame(struct pn532_dev_s *dev, struct pn532_frame *f, int max_size)
 {
   int res = -EIO;
 
-  /* wait for frame available */
+  /* Wait for frame available */
 
   if ((res = pn532_wait_rx_ready(dev, 100)) == OK)
     {
-      /* read header */
+      /* Read header */
 
       pn532_read(dev, (uint8_t *) f, sizeof(struct pn532_frame));
       if (pn532_rx_frame_is_valid(f, false))
@@ -446,6 +497,7 @@ int pn532_read_frame(struct pn532_dev_s *dev, struct pn532_frame *f, int max_siz
             {
               return -EINVAL;
             }
+
           pn532_read_more(dev, &f->data[0], f->len);
 
           /* TODO: optimize frame integrity check...
@@ -462,7 +514,6 @@ int pn532_read_frame(struct pn532_dev_s *dev, struct pn532_frame *f, int max_siz
 
   return res;
 }
-
 
 bool pn532_set_config(struct pn532_dev_s *dev, uint8_t flags)
 {
@@ -491,19 +542,22 @@ int pn532_sam_config(struct pn532_dev_s *dev, struct pn_sam_settings_s *settings
 {
   char cmd_buffer[4+7];
   struct pn532_frame *f = (struct pn532_frame *) cmd_buffer;
+  int res;
 
   pn532_frame_init(f, PN532_COMMAND_SAMCONFIGURATION);
   f->data[1] = PN532_SAM_NORMAL_MODE;
-  f->data[2] = 0x14;  /* Timeout LSB=50ms 0x14*50ms = 1sec */
-  f->data[3] = 0x01;	/* P-70, IRQ enabled */
+  f->data[2] = 0x14;    /* Timeout LSB=50ms 0x14*50ms = 1sec */
+  f->data[3] = 0x01;    /* P-70, IRQ enabled */
 
-  if (settings) {
+  if (settings)
+    {
       /*  TODO: !!! */
     }
+
   f->len += 3;
   pn532_frame_finish(f);
 
-  int res = -EIO;
+  res = -EIO;
 
   if (pn532_write_frame(dev, f) == OK)
     {
@@ -511,13 +565,14 @@ int pn532_sam_config(struct pn532_dev_s *dev, struct pn_sam_settings_s *settings
         {
           tracerx("sam config response", (uint8_t *) f->data, 3);
           if (f->data[0] == PN532_COMMAND_SAMCONFIGURATION + 1)
-            res = OK;
+            {
+              res = OK;
+            }
         }
     }
 
   return res;
 }
-
 
 int pn532_get_fw_version(struct pn532_dev_s *dev,
                          struct pn_firmware_version *fv)
@@ -543,6 +598,7 @@ int pn532_get_fw_version(struct pn532_dev_s *dev,
                 {
                   memcpy(fv, fw, sizeof(struct pn_firmware_version));
                 }
+
               res = OK;
             }
         }
@@ -550,8 +606,6 @@ int pn532_get_fw_version(struct pn532_dev_s *dev,
 
   return res;
 }
-
-
 
 int pn532_write_gpio(struct pn532_dev_s *dev, uint8_t p3, uint8_t p7)
 {
@@ -571,7 +625,9 @@ int pn532_write_gpio(struct pn532_dev_s *dev, uint8_t p3, uint8_t p7)
       tracetx("Resp:", cmd_buffer, 10);
       pn532dbg("TFI=%x, data0=%X", f->tfi, f->data[0]);
       if ((f->tfi == PN532_PN532TOHOST) && (f->data[0] == PN532_COMMAND_WRITEGPIO+1))
-        res = OK;
+        {
+          res = OK;
+        }
     }
 
   return res;
@@ -610,6 +666,7 @@ uint32_t pn532_write_passive_data(struct pn532_dev_s *dev, uint8_t address,
             }
         }
     }
+
   return res;
 }
 
@@ -650,6 +707,7 @@ uint32_t pn532_read_passive_data(struct pn532_dev_s *dev, uint8_t address,
             }
         }
     }
+
   return res;
 }
 
@@ -688,7 +746,8 @@ uint32_t pn532_read_passive_target_id(struct pn532_dev_s *dev, uint8_t baudrate)
                   pn532dbg("idlen:0x%x ", t->nfcid_len);
 
                   /* generate 32bit cid from id (could be longer)
-                   * HACK: Using only top 4 bytes */
+                   * HACK: Using only top 4 bytes.
+                   */
 
                   for (i = 0; i < 4 /*t->nfcid_len*/; i++)
                     {
@@ -696,6 +755,7 @@ uint32_t pn532_read_passive_target_id(struct pn532_dev_s *dev, uint8_t baudrate)
                       cid |= t->nfcid_data[i];
                     }
                 }
+
               res = cid;
             }
         }
@@ -737,18 +797,29 @@ bool pn532_set_rf_config(struct pn532_dev_s *dev, struct pn_rf_config_s *conf)
       if (pn532_rx_frame_is_valid(f, true))
         {
           if (f->data[0] == PN532_COMMAND_RFCONFIGURATION + 1)
-            res = true;
+            {
+              res = true;
+            }
         }
     }
 
   return res;
 }
 
+/****************************************************************************
+ * Name: pn532_attachirq
+ *
+ * Description:
+ *   IRQ handling TODO:
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
 #if 0
-
-/* IRQ handling TODO: */
-
-static inline int pn532_attachirq(FAR struct pn532_dev_s *dev, xcpt_t isr)
+static inline int (FAR struct pn532_dev_s *dev, xcpt_t isr)
 {
   return dev->config->irqattach(dev,isr);
 }
@@ -821,12 +892,12 @@ static int _close(FAR struct file *filep)
 #ifdef CONFIG_PM
   if(dev->pm_level >= PM_SLEEP)
     {
-      //	priv->config->reset(0);
+      //priv->config->reset(0);
     }
 #endif
+
   return OK;
 }
-
 
 /****************************************************************************
  * Name: _read
@@ -851,8 +922,10 @@ static ssize_t _read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   dev = inode->i_private;
 
   uint32_t id = pn532_read_passive_target_id(dev, PN532_MIFARE_ISO14443A);
-  if (id != 0xFFFFFFFF) {
-      if (buffer) {
+  if (id != 0xFFFFFFFF)
+    {
+      if (buffer)
+        {
           return snprintf(buffer, buflen, "0X%X", id);
         }
     }
@@ -905,6 +978,7 @@ static int _ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (tag_data)
           {
             /* HACK: get rid of previous command */
+
             if (dev->state == PN532_STATE_CMD_SENT)
               {
                 if (pn532_wait_rx_ready(dev, 1))
@@ -928,6 +1002,7 @@ static int _ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (tag_data)
           {
             /* HACK: get rid of previous command */
+
             if (dev->state == PN532_STATE_CMD_SENT)
               {
                 if (pn532_wait_rx_ready(dev, 1))
@@ -1020,11 +1095,11 @@ static int _ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   Register the PN532 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath	- The full path to the driver to register.
- *   				E.g., "/dev/nfc0"
- *   spi		- An instance of the SPI interface to use to communicate with
- *   			   PN532.
- *   config	- chip config
+ *   devpath - The full path to the driver to register.
+ *             E.g., "/dev/nfc0"
+ *   spi     - An instance of the SPI interface to use to communicate with
+ *             PN532.
+ *   config  - chip config
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

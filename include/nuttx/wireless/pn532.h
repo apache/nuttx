@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/wireless/nfc.h
+ * include/wireless/pn532.h
  *
- *   Copyright(C) 2012,2013,2016 Offcode Ltd. All rights reserved.
+ *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
  *   Authors: Janne Rosberg <janne@offcode.fi>
  *            Teemu Pirinen <teemu@offcode.fi>
  *            Juho Grundström <juho@offcode.fi>
@@ -52,7 +52,7 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define PN532_MIFARE_ISO14443A  (0x00)
+#define PN532_MIFARE_ISO14443A          (0x00)
 
 /* IOCTL Commands ***********************************************************/
 
@@ -66,6 +66,10 @@
 #define PN532IOC_READ_TAG_DATA          _WLIOC_USER(0x0008)
 #define PN532IOC_WRITE_TAG_DATA         _WLIOC_USER(0x0009)
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 enum pn532_state_E
 {
   PN532_STATE_NOT_INIT,
@@ -74,23 +78,19 @@ enum pn532_state_E
   PN532_STATE_DATA_READY,
 };
 
-
-/****************************************************************************
- * Global Data
- ****************************************************************************/
 struct pn532_dev_s;
-
 struct pn532_config_s
 {
   int (*reset)(uint8_t enable);
 
-  /* external CS, if NULL then SPIDEV_WIRELESS CS is used */
+  /* External CS, if NULL then SPIDEV_WIRELESS CS is used */
 
   int (*select)(struct pn532_dev_s *dev, bool sel);
   int (*irqattach)(void* dev, xcpt_t isr);
 };
 
-enum PN_SAM_MODE {
+enum PN_SAM_MODE
+{
   PN_SAM_NORMAL_MODE = 0x01,
   PN_SAM_VIRTUAL_CARD,
   PN_SAM_WIRED_CARD,
@@ -104,7 +104,8 @@ struct pn_sam_settings_s
   uint8_t irq_en;         /* If 1 - enable P-70, IRQ */
 };
 
-enum PN_RF_CONFIG_ITEM {
+enum PN_RF_CONFIG_ITEM
+{
   PN_RF_CONFIG_RF_FIELD         = 0x01,
   PN_RF_CONFIG_VARIOUS_TIMINGS  = 0x02,
 
@@ -114,9 +115,9 @@ enum PN_RF_CONFIG_ITEM {
 
 struct pn_rf_config_s
 {
-  uint8_t cfg_item;	/* Item */
-  uint8_t data_size;	/* number of config items */
-  uint8_t config[11];	/* Item config data */
+  uint8_t cfg_item;       /* Item */
+  uint8_t data_size;      /* number of config items */
+  uint8_t config[11];     /* Item config data */
 };
 
 struct pn_mifare_tag_data_s
@@ -125,9 +126,14 @@ struct pn_mifare_tag_data_s
   uint8_t address;
 };
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -148,8 +154,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
-                          FAR struct pn532_config_s *config);
+int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
+                   FAR struct pn532_config_s *config);
 
 #undef EXTERN
 #ifdef __cplusplus

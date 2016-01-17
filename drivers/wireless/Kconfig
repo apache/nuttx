@@ -59,8 +59,8 @@ config WL_NRF24L01_RXFIFO_LEN
 		Length of the software based fifo used to store content of
 		received messages.
 
-endif
-endif
+endif # WL_NRF24L01_RXSUPPORT
+endif # WL_NRF24L01
 
 config WL_PN532
 	bool "pn532 NFC-chip support"
@@ -91,10 +91,4 @@ config WL_PN532_DEBUG_RX
 	default n
 	depends on WL_PN532_DEBUG
 
-
-
-endif
-
-
-
-
+endif # WL_PN532
