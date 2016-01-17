@@ -24,6 +24,13 @@ config LIS331DL
 	select I2C
 	select I2C_TRANSFER
 
+config SN_LSM9DS1
+	bool "STMicro LSM9DS1 support"
+	default n
+	depends on I2C
+	---help---
+		Enable driver support for the STMicro LSM9DS1.
+
 config MB7040
 	bool "MaxBotix MB7040 Sonar support"
 	default n
