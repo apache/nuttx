@@ -1,30 +1,16 @@
 README
 ======
 
-The NuttX configuration for the Olimex STM32-H407 is based on the configuration
-Olimex STM32-H405 / STM32-P207.
+The Olimex STM32-H407 configuration is based on 
+stm32Fdiscovery and Olimex STM32-H405. 
 
-[[[It was tested with the NuttX EABI "buildroot" Toolchain.
+The H407 was programmed with ST-LINK/V2 from both Win8.1 and Ubuntu 14.04
 
-Debugging with OpenOCD via an Olimex ARM-USB-TINY-H works. Note that
-CONFIG_DEBUG_SYMBOLS and CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG
-are enabled so that the JTAG connection is not disconnected by the idle
-loop.
-nshusb - tested stm32F407 OTG_HS
-added nsh
+nsh - Only basic shell response tested on USART2
 
-Make sure that '# CONFIG_NSH_CONDEV is not set' is in the .config file - it defaults
-to '/dev/console' which makes problems with the shell over USB.
+This realease provides baseline for H407 12MHZ clock in include/board.h
 
-The following peripherals are enabled in this configuration.
-?? - LED:        Shows the sytem status
+TODO: Update to use mini USB-OTG and USB HOST
 
-?? - Button:     Built in app 'buttons' works.
 
-?? - ADC:        ADC1 samples ADC_IN1. Built in app 'adc' works.
 
-?? - USB-FS-OTG: The console is running on the virtual serial port. Note that you
-               have to press enter three times until NSH appears.
-
- - CAN:        Built in app 'can' is enabled but not tested, since no CAN transceiver
-               is on board.

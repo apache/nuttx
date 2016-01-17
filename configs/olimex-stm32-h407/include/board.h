@@ -2,7 +2,8 @@
  * configs/olimex-stm32-h407/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Gregory Nutt <gnutt@nuttx.org> 
+ *   Modified for H407 Neil Hancock
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,18 +44,44 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
+#  include <stdbool.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
+#ifdef __KERNEL__
+#  include "stm32_rcc.h"
+#  include "stm32_sdio.h"
+#  include "stm32.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* The Olimex-STM32-H407 board features a 12MHz crystal and
+ * a 32kHz RTC backup crystal.
+ *
+ * This is the canonical configuration:
+ *   System Clock source           : PLL (HSE)
+ *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
+ *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
+ *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
+ *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
+ *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
+ *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
+ *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
+ *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
+ *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
+ *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
+ *   Flash Latency(WS)             : 5
+ *   Prefetch Buffer               : OFF
+ *   Instruction cache             : ON
+ *   Data cache                    : ON
+ *   Require 48MHz for USB OTG FS, : Enabled
+ *   SDIO and RNG clock
+ */
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC (30-60KHz, uncalibrated)
@@ -94,20 +121,20 @@
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(5)
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
 
-/* AHB clock (HCLK) is SYSCLK (168MHz) ?*/
 #define STM32_SYSCLK_FREQUENCY  168000000ul
+
+/* AHB clock (HCLK) is SYSCLK (168MHz) */
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
-/* APB1 clock (PCLK1) is HCLK/4 (30MHz) */
 /* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
 
-/* Timers driven from APB1 will be twice PCLK1 (60Mhz)*/
+/* Timers driven from APB1 will be twice PCLK1 */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
@@ -119,12 +146,12 @@
 #define STM32_APB1_TIM13_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
-/* APB2 clock (PCLK2) is HCLK/2 (60MHz) */
+/* APB2 clock (PCLK2) is HCLK/2  */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* Timers driven from APB2 will be twice PCLK2 (120Mhz)*/
+/* Timers driven from APB2 will be twice PCLK2 */
 
 #define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
@@ -183,6 +210,7 @@
 //#define GPIO_USART3_CTS   GPIO_USART3_CTS_1 //PB13
 //#define GPIO_USART3_RTS   GPIO_USART3_RTS_1 //PB14
 
+//USART2
 #define GPIO_USART2_RX    GPIO_USART2_RX_1  //
 #define GPIO_USART2_TX    GPIO_USART2_TX_1  //
 #define GPIO_USART2_CTS   GPIO_USART2_CTS_1 //
@@ -203,7 +231,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -211,12 +240,13 @@ extern "C" {
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+
 /************************************************************************************
  * Name: stm32_boardinitialize
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
