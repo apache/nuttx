@@ -1,5 +1,5 @@
 ############################################################################
-# configs/arduino-mega2560/ostest/Make.defs
+# configs/arduino-mega2560/nsh/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
