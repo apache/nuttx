@@ -86,19 +86,20 @@ Configurations
 
     1. As of 2015-01-16, the default static memory usage is:
 
-       $ size nuttx.elf
-        text    data     bss     dec     hex filename
-       34348    2117     944   37409    9221 nuttx.elf
+         $ size nuttx.elf
+          text    data     bss     dec     hex filename
+         34348    2117     944   37409    9221 nuttx.elf
 
        And dynamic, heap usage:
 
-       nsh> free
-                    total       used       free    largest
-       Mem:          4736       1768       2968       2968
+         nsh> free
+                      total       used       free    largest
+         Mem:          4736       1768       2968       2968
 
-       There is plenty of FLASH space, so many additional NSH featurs
-       could be enabled.  There is, however, not a lot of free SRAM.
+       There is plenty of FLASH space but not a lot of free SRAM. This
+       SRAM usage is due primarily to constant strings defined by NSH.
 
-       NOTE: There is partial support for the MEMX pointer in apps/nshlib.
-       If that support were completed then some reduction of the static
-       .data allocation could be achieved by enabling the MEMX pointer.
+       NOTE: I investigated the possibility of adding IPTR/IOBJ
+       qualifiers in the NSH library and moving the strings to FLASH.
+       This is still a possibility but would requires some extensive
+       changes to NSH.
