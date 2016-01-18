@@ -1,9 +1,9 @@
 /************************************************************************************
  * configs/olimex-stm32-h407/include/board.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org> 
- *   Modified for H407 Neil Hancock
+ *           Modified for H407 Neil Hancock
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -204,23 +204,27 @@
 
 /* Alternate function pin selections ************************************************/
 
-//USART3:
-//#define GPIO_USART3_RX    GPIO_USART3_RX_1  //PB11
-//#define GPIO_USART3_TX    GPIO_USART3_TX_1  //PB10
-//#define GPIO_USART3_CTS   GPIO_USART3_CTS_1 //PB13
-//#define GPIO_USART3_RTS   GPIO_USART3_RTS_1 //PB14
+/* USART3: */
+#if 0
+#define GPIO_USART3_RX    GPIO_USART3_RX_1  /* PB11 */
+#define GPIO_USART3_TX    GPIO_USART3_TX_1  /* PB10 */
+#define GPIO_USART3_CTS   GPIO_USART3_CTS_1 /* PB13 */
+#define GPIO_USART3_RTS   GPIO_USART3_RTS_1 /* PB14 */
+#endif
 
-//USART2
-#define GPIO_USART2_RX    GPIO_USART2_RX_1  //
-#define GPIO_USART2_TX    GPIO_USART2_TX_1  //
-#define GPIO_USART2_CTS   GPIO_USART2_CTS_1 //
-#define GPIO_USART2_RTS   GPIO_USART2_RTS_1 //
+/* USART2: */
 
-//CAN:
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 //PB8
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 //PB9
-#define GPIO_CAN2_RX      GPIO_CAN1_RX_2 //PB5
-#define GPIO_CAN2_TX      GPIO_CAN1_TX_2 //PB6
+#define GPIO_USART2_RX    GPIO_USART2_RX_1
+#define GPIO_USART2_TX    GPIO_USART2_TX_1
+#define GPIO_USART2_CTS   GPIO_USART2_CTS_1
+#define GPIO_USART2_RTS   GPIO_USART2_RTS_1
+
+/* CAN: */
+
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2   /* PB8 */
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2   /* PB9 */
+#define GPIO_CAN2_RX      GPIO_CAN1_RX_2   /* PB5 */
+#define GPIO_CAN2_TX      GPIO_CAN1_TX_2   /* PB6 */
 
 /************************************************************************************
  * Public Data

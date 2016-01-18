@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-stm32-h407/src/stm32_autoleds.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,14 +71,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -99,11 +91,15 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  if(led == LED_STARTED)
-    stm32_gpiowrite(GPIO_LED_STATUS, true);
+  if (led == LED_STARTED)
+    {
+      stm32_gpiowrite(GPIO_LED_STATUS, true);
+    }
 
-  if(led == LED_ASSERTION || led == LED_PANIC)
+  if (led == LED_ASSERTION || led == LED_PANIC)
+    {
       stm32_gpiowrite(GPIO_LED_STATUS, false);
+    }
 }
 
 /****************************************************************************
@@ -112,11 +108,15 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  if(led == LED_STARTED)
+  if (led == LED_STARTED)
+    {
       stm32_gpiowrite(GPIO_LED_STATUS, false);
+    }
 
-    if(led == LED_ASSERTION || led == LED_PANIC)
-        stm32_gpiowrite(GPIO_LED_STATUS, true);
+  if (led == LED_ASSERTION || led == LED_PANIC)
+    {
+      stm32_gpiowrite(GPIO_LED_STATUS, true);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

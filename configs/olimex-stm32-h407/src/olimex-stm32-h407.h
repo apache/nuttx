@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-h405/src/olimex-stm32-h405.h
+ * configs/olimex-stm32-h407/src/olimex-stm32-h407.h
  *
  *   Copyright (C) 2014 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>

@@ -11,6 +11,3 @@ nsh - Only basic shell response tested on USART2
 This realease provides baseline for H407 12MHZ clock in include/board.h
 
 TODO: Update to use mini USB-OTG and USB HOST
-
-
-

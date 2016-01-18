@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/olimex-stm32-h405/src/stm32_boot.c
+ * configs/olimex-stm32-h407/src/stm32_boot.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,14 +50,6 @@
 #include "stm32_ccm.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -73,27 +65,27 @@
 
 void stm32_boardinitialize(void)
 {
+#if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * into the build. Presumeably either CONFIG_USBDEV is also selected.
    */
 
-#if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)
   if (stm32_usbinitialize)
     {
       stm32_usbinitialize();
     }
 #endif
 
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
 
+#ifdef CONFIG_ARCH_BUTTONS
   /* Configure on-board BUTTONs if BUTTON support has been selected. */
 
-#ifdef CONFIG_ARCH_BUTTONS
   board_button_initialize();
 #endif
 }
@@ -114,12 +106,12 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   board_app_initialize();
 #endif
 }
