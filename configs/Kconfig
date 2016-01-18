@@ -1333,6 +1333,7 @@ config ARCH_BOARD
 	default "olimex-lpc2378"           if ARCH_BOARD_OLIMEXLPC2378
 	default "olimex-lpc-h3131"         if ARCH_BOARD_OLIMEX_LPC_H3131
 	default "olimex-stm32-h405"        if ARCH_BOARD_OLIMEX_STM32H405
+	default "olimex-stm32-h407"        if ARCH_BOARD_OLIMEX_STM32H407
 	default "olimex-stm32-p107"        if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
@@ -1614,6 +1615,9 @@ source "configs/olimex-lpc-h3131/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32H405
 source "configs/olimex-stm32-h405/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32H407
+source "configs/olimex-stm32-h407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P107
 source "configs/olimex-stm32-p107/Kconfig"
