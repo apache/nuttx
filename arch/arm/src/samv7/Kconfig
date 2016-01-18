@@ -318,6 +318,7 @@ config SAMV7_MCAN0
 	bool "CAN controller 0 (MCAN0)"
 	default n
 	select CAN
+	select ARCH_HAVE_CAN_ERRORS
 	select CAN_TXREADY
 	select SAMV7_MCAN
 
@@ -326,6 +327,7 @@ config SAMV7_MCAN1
 	default n
 	depends on SAMV7_HAVE_MCAN1
 	select CAN
+	select ARCH_HAVE_CAN_ERRORS
 	select CAN_TXREADY
 	select SAMV7_MCAN
 

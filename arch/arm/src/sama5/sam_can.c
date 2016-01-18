@@ -1332,7 +1332,9 @@ static inline void can_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
 
   hdr.ch_dlc    = (msr & CAN_MSR_MDLC_MASK) >> CAN_MSR_MDLC_SHIFT;
   hdr.ch_rtr    = 0;
-  hdr.ch_error  = 0;
+#ifdef CONFIG_CAN_ERRORS
+  hdr.ch_error  = 0; /* Error reporting not supported */
+#endif
   hdr.ch_unused = 0;
 
   /* And provide the CAN message to the upper half logic */

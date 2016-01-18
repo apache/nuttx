@@ -977,7 +977,9 @@ static void can_interrupt(FAR struct can_dev_s *dev)
       hdr.ch_id     = rid;
       hdr.ch_rtr    = ((rfs & CAN_RFS_RTR) != 0);
       hdr.ch_dlc    = (rfs & CAN_RFS_DLC_MASK) >> CAN_RFS_DLC_SHIFT;
-      hdr.ch_error  = 0;
+#ifdef CONFIG_CAN_ERRORS
+      hdr.ch_error  = 0; /* Error reporting not supported */
+#endif
 #ifdef CONFIG_CAN_EXTID
       hdr.ch_extid  = ((rfs & CAN_RFS_FF) != 0);
 #else

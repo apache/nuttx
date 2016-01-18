@@ -1096,7 +1096,9 @@ static int can_rx0interrupt(int irq, void *context)
 
   /* Clear the error indication and unused bits */
 
-  hdr.ch_error  = 0;
+#ifdef CONFIG_CAN_ERRORS
+  hdr.ch_error  = 0; /* Error reporting not supported */
+#endif
   hdr.ch_unused = 0;
 
   /* Extract the RTR bit */
