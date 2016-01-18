@@ -4839,7 +4839,7 @@ static void stm32_flush_txfifos(uint32_t txfnum)
   /* Initiate the TX FIFO flush operation */
 
   regval = OTGFS_GRSTCTL_TXFFLSH | txfnum;
-  stm32_putreg(regval, STM32_OTGFS_GRSTCTL);
+  stm32_putreg(STM32_OTGFS_GRSTCTL, regval);
 
   /* Wait for the FLUSH to complete */
 
@@ -4878,7 +4878,7 @@ static void stm32_flush_rxfifo(void)
 
   /* Initiate the RX FIFO flush operation */
 
-  stm32_putreg(OTGFS_GRSTCTL_RXFFLSH, STM32_OTGFS_GRSTCTL);
+  stm32_putreg(STM32_OTGFS_GRSTCTL, OTGFS_GRSTCTL_RXFFLSH);
 
   /* Wait for the FLUSH to complete */
 
