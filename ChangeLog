@@ -11321,3 +11321,6 @@
 	* configs/olimex-stm32-h407:  Added a port to the Olimex STM32 H407
 	  board. This board features the STMicro STM32F407ZGT6 (144 pins).
 	  Contributed by Neil Hancock. (2016-01-18)
+	* arch/arm/src/stm32/stm32_otgfs/hs/host.c:  Fix some backward
+	  arguments to stm32_putreg().  Note by Hang Xu (2016-01-18).
+
