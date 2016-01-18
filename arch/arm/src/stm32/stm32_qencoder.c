@@ -851,12 +851,12 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
     }
   else
     {
-      stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
+      stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
     }
 #elif defined(HAVE_32BIT_TIMERS)
   stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, 0xffffffff);
 #else
-  stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
+  stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
 #endif
 
   /* Set the timer prescaler value.  The clock input value (CLKIN) is based on the
@@ -1073,37 +1073,37 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   switch (priv->config->timid)
     {
-#ifdef CONFIG_STM32_TIM1_PWM
+#ifdef CONFIG_STM32_TIM1_QE
       case 1:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM1RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM2_PWM
+#ifdef CONFIG_STM32_TIM2_QE
       case 2:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM2RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM3_PWM
+#ifdef CONFIG_STM32_TIM3_QE
       case 3:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM3RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM4_PWM
+#ifdef CONFIG_STM32_TIM4_QE
       case 4:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM4RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM5_PWM
+#ifdef CONFIG_STM32_TIM5_QE
       case 5:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM5RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM8_PWM
+#ifdef CONFIG_STM32_TIM8_QE
       case 8:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM8RST;
@@ -1141,7 +1141,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
   pincfg |= STM32_GPIO_INPUT_FLOAT;
 
   stm32_configgpio(pincfg);
-  return -ENOSYS;
+  return OK;
 }
 
 /************************************************************************************
