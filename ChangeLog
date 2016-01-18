@@ -11318,3 +11318,6 @@
 	  The LSM9DS1 is a system-in-package featuring a 3D digital linear
 	  acceleration sensor, a 3D digital angular rate sensor, and a 3D
 	  digital magnetic sensor.  From Paul Alexander Patience (2016-01-17).
+	* configs/olimex-stm32-h407:  Added a port to the Olimex STM32 H407
+	  board. This board features the STMicro STM32F407ZGT6 (144 pins).
+	  Contributed by Neil Hancock. (2016-01-18)
