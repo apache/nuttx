@@ -104,6 +104,20 @@ config CAN_EXTID
 		Enables support for the 28-bit extended ID.  Default Standard 11-bit
 		IDs.
 
+config ARCH_HAVE_CAN_ERRORS
+	bool
+	default n
+
+config CAN_ERRORS
+	bool "CAN error reporting"
+	default n
+	depends on ARCH_HAVE_CAN_ERRORS
+	---help---
+		Support CAN error reporting.  If this option is selected then CAN
+		error reporting is enabled.  In the event of an error, the ch_error
+		bit will be set in the CAN message and the following message payload
+		will include a more detailed description of certain errors.
+
 config CAN_FD
 	bool "CAN FD"
 	default n

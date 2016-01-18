@@ -207,19 +207,91 @@
 
 /* CAN Error Indications ************************************************************/
 
-#define CAN_ERROR_SYSTEM          (1 << 0)  /* Bit 0:  Driver internal error */
-#define CAN_ERROR_RXLOST          (1 << 1)  /* Bit 1:  RX Message Lost */
-#define CAN_ERROR_TXLOST          (1 << 2)  /* Bit 2:  TX Message Lost */
-#define CAN_ERROR_ACCESS          (1 << 3)  /* Bit 3:  RAM Access Failure */
-#define CAN_ERROR_TIMEOUT         (1 << 4)  /* Bit 4:  Timeout Occurred */
-#define CAN_ERROR_PASSIVE         (1 << 5)  /* Bit 5:  Error Passive */
-#define CAN_ERROR_CRC             (1 << 6)  /* Bit 6:  RX CRC Error */
-#define CAN_ERROR_BIT             (1 << 7)  /* Bit 7:  Bit Error */
-#define CAN_ERROR_ACK             (1 << 8)  /* Bit 8:  Acknowledge Error */
-#define CAN_ERROR_FORMAT          (1 << 9)  /* Bit 9:  Format Error */
-#define CAN_ERROR_STUFF           (1 << 10) /* Bit 10: Stuff Error */
+#ifdef CONFIG_CAN_ERRORS
+/* Bit settings in the ch_error field of the CAN error message */
 
-#define CAN_ERROR_ALL             (0x07ff)
+#  define CAN_ERROR_TXTIMEOUT     (1 << 0) /* TX timeout */
+#  define CAN_ERROR_LOSTARB       (1 << 1) /* Lost arbitration (See CAN_ERROR0_* definitions) */
+#  define CAN_ERROR_CONTROLLER    (1 << 2) /* Controller error (See CAN_ERROR1_* definitions) */
+#  define CAN_ERROR_PROTOCOL      (1 << 3) /* Protocol error (see CAN_ERROR1_* and CAN_ERROR3_* definitions) */
+#  define CAN_ERROR_TRANSCEIVER   (1 << 4) /* Transceiver error (See CAN_ERROR4_* definitions)    */
+#  define CAN_ERROR_NOACK         (1 << 5) /* No ACK received on transmission */
+#  define CAN_ERROR_BUSOFF        (1 << 6) /* Bus off */
+#  define CAN_ERROR_BUSERROR      (1 << 7) /* Bus error */
+#  define CAN_ERROR_RESTARTED     (1 << 8) /* Controller restarted */
+
+/* The remaining definitions described the error report payload that follows the
+ * CAN header.
+ */
+
+#  define CAN_ERROR_DLC           (8)      /* DLC of error report */
+
+/* Data[0]: Arbitration lost in ch_error. */
+
+#  define CAN_ERROR0_UNSPEC       0x00     /* Unspecified error */
+#  define CAN_ERROR0_BIT(n)       (n)      /* Bit number in the bit stream */
+
+/* Data[1]:  Error status of CAN-controller */
+
+#  define CAN_ERROR1_UNSPEC       0x00     /* Unspecified error */
+#  define CAN_ERROR1_RXOVERFLOW   (1 << 0) /* RX buffer overflow */
+#  define CAN_ERROR1_TXOVERFLOW   (1 << 1) /* TX buffer overflow */
+#  define CAN_ERROR1_RXWARNING    (1 << 2) /* Reached warning level for RX errors */
+#  define CAN_ERROR1_TXWARNING    (1 << 3) /* Reached warning level for TX errors */
+#  define CAN_ERROR1_RXPASSIVE    (1 << 4) /* Reached passive level for RX errors */
+#  define CAN_ERROR1_TXPASSIVE    (1 << 5) /* Reached passive level for TX errors */
+
+/* Data[2]:  Error in CAN protocol.  This provides the type of the error. */
+
+#  define CAN_ERROR2_UNSPEC      0x00     /* Unspecified error */
+#  define CAN_ERROR2_BIT         (1 << 0) /* Single bit error */
+#  define CAN_ERROR2_FORM        (1 << 1) /* Frame format error */
+#  define CAN_ERROR2_STUFF       (1 << 2) /* Bit stuffing error */
+#  define CAN_ERROR2_BIT0        (1 << 3) /* Unable to send dominant bit */
+#  define CAN_ERROR2_BIT1        (1 << 4) /* Unable to send recessive bit */
+#  define CAN_ERROR2_OVERLOAD    (1 << 5) /* Bus overload */
+#  define CAN_ERROR2_ACTIVE      (1 << 6) /* Active error announcement */
+#  define CAN_ERROR2_TX          (1 << 7) /* Error occured on transmission */
+
+/* Data[3]:  Error in CAN protocol.  This provides the loation of the error. */
+
+#  define CAN_ERROR3_UNSPEC      0x00 /* Unspecified error */
+#  define CAN_ERROR3_SOF         0x01 /* start of frame */
+#  define CAN_ERROR3_ID0         0x02 /* ID bits 0-4 */
+#  define CAN_ERROR3_ID1         0x03 /* ID bits 5-12 */
+#  define CAN_ERROR3_ID2         0x04 /* ID bits 13-17 */
+#  define CAN_ERROR3_ID3         0x05 /* ID bits 21-28 */
+#  define CAN_ERROR3_ID4         0x06 /* ID bits 18-20 */
+#  define CAN_ERROR3_IDE         0x07 /* Identifier extension */
+#  define CAN_ERROR3_RTR         0x08 /* RTR */
+#  define CAN_ERROR3_SRTR        0x09 /* Substitute RTR */
+#  define CAN_ERROR3_RES0        0x0a /* Reserved bit 0 */
+#  define CAN_ERROR3_RES1        0x0b /* Reserved bit 1 */
+#  define CAN_ERROR3_DLC         0x0c /* Data length code */
+#  define CAN_ERROR3_DATA        0x0d /* Data section */
+#  define CAN_ERROR3_CRCSEQ      0x0e /* CRC sequence */
+#  define CAN_ERROR3_CRCDEL      0x0f /* CRC delimiter */
+#  define CAN_ERROR3_ACK         0x10 /* ACK slot */
+#  define CAN_ERROR3_ACKDEL      0x11 /* ACK delimiter */
+#  define CAN_ERROR3_EOF         0x12 /* End of frame */
+#  define CAN_ERROR3_INTERM      0x13 /* Intermission */
+
+/* error status of CAN-transceiver / data[4] */
+
+#  define CAN_ERROR4_UNSPEC      0x00
+
+#  define CANH_ERROR4_NOWIRE     0x01
+#  define CANH_ERROR4_SHORT2BAT  0x02
+#  define CANH_ERROR4_SHORT2VCC  0x03
+#  define CANH_ERROR4_SHORT2GND  0x04
+
+#  define CANL_ERROR4_NOWIRE     0x10
+#  define CANL_ERROR4_SHORT2BAT  0x20
+#  define CANL_ERROR4_SHORT2VCC  0x30
+#  define CANL_ERROR4_SHORT2GND  0x40
+#  define CANL_ERROR4_SHORT2CANH 0x50
+
+#endif /* CONFIG_CAN_ERRORS */
 
 /* CAN filter support ***************************************************************/
 /* Some CAN hardware supports a notion of prioritizing messages that match filters.
@@ -272,6 +344,8 @@
  * NOTE: The error indication if valid only on message reports received from the
  * CAN driver; it is ignored on transmission.  When the error bit is set, the
  * message ID is an encoded set of error indications (see CAN_ERROR_* definitions).
+ * A more detailed report of certain errors then follows in message payload.
+ * CONFIG_CAN_ERRORS=y is required in order to receive error reports.
  *
  * The struct can_msg_s holds this information in a user-friendly, unpacked form.
  * This is the form that is used at the read() and write() driver interfaces.  The
@@ -285,7 +359,9 @@ struct can_hdr_s
   uint32_t     ch_id;         /* 11- or 29-bit ID (20- or 3-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC */
   uint8_t      ch_rtr    : 1; /* RTR indication */
+#ifdef CONFIG_CAN_ERRORS
   uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
+#endif
   uint8_t      ch_extid  : 1; /* Extended ID indication */
   uint8_t      ch_unused : 1; /* Unused */
 } packed_struct;
@@ -295,7 +371,9 @@ struct can_hdr_s
   uint16_t     ch_id;         /* 11-bit standard ID (5-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC.  May be encoded in CAN_FD mode. */
   uint8_t      ch_rtr    : 1; /* RTR indication */
+#ifdef CONFIG_CAN_ERRORS
   uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
+#endif
   uint8_t      ch_unused : 2; /* Unused */
 } packed_struct;
 #endif

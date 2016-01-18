@@ -11323,4 +11323,7 @@
 	  Contributed by Neil Hancock. (2016-01-18)
 	* arch/arm/src/stm32/stm32_otgfs/hs/host.c:  Fix some backward
 	  arguments to stm32_putreg().  Note by Hang Xu (2016-01-18).
+	* include/nuttx/can.h and several CAN drivers:  Add more extensive
+	  error reporting capaibility to the CAN interferace.  From Frank
+	  Benkert (21016-01-18).
 
