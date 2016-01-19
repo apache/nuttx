@@ -11326,4 +11326,6 @@
 	* include/nuttx/can.h and several CAN drivers:  Add more extensive
 	  error reporting capaibility to the CAN interferace.  From Frank
 	  Benkert (21016-01-18).
+	* libc/misc/lib_tea.h and include/nuttx/crypto/tea.h:  Add an
+	  implementation of the Tiny Encryption Algorithm (2016-01-19).
 
