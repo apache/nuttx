@@ -1217,9 +1217,7 @@
 #define GTIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 output Polarity (F2,F4 and TIM2-5 only) */
 #define GTIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable (TIM2-5 only) */
 #define GTIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity (TIM2-5 only) */
-#ifdef CONFIG_STM32_STM32F30XX
-#  define GTIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
-#endif
+#define GTIM_CCER_CC4NP           (1 << 15) /* Bit 15: Capture/Compare 4 output Polarity */
 
 /* 16-bit counter register */
 
