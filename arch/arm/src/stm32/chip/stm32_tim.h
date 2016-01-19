@@ -833,7 +833,7 @@
 #  define ATIM_CCER_CC5E          (1 << 16) /* Bit 16: Capture/Compare 5 output enable */
 #  define ATIM_CCER_CC5P          (1 << 17) /* Bit 17: Capture/Compare 5 output Polarity */
 #  define ATIM_CCER_CC6E          (1 << 20) /* Bit 20: Capture/Compare 6 output enable */
-#  define ATIM_CCER_CC7P          (1 << 21) /* Bit 21: Capture/Compare 6 output Polarity */
+#  define ATIM_CCER_CC6P          (1 << 21) /* Bit 21: Capture/Compare 6 output Polarity */
 #endif
 
 /* 16-bit counter register */
@@ -851,7 +851,7 @@
 #  define ATIM_RCR_REP_SHIFT      (0)       /* Bits 0-15: Repetition Counter Value */
 #  define ATIM_RCR_REP_MASK       (0xffff << ATIM_RCR_REP_SHIFT)
 
-#  define ATIM_RCR_REP_MAX         32768    /* REVISIT */
+#  define ATIM_RCR_REP_MAX        32768    /* REVISIT */
 #else
 #  define ATIM_RCR_REP_SHIFT      (0)       /* Bits 0-7: Repetition Counter Value */
 #  define ATIM_RCR_REP_MASK       (0xff << ATIM_RCR_REP_SHIFT)
@@ -1028,9 +1028,8 @@
 #  define GTIM_SMCR_ETRPd8        (3 << GTIM_SMCR_ETPS_SHIFT) /* 11: ETRP frequency divided by 8 */
 #define GTIM_SMCR_ECE             (1 << 14) /* Bit 14: External Clock enable */
 #define GTIM_SMCR_ETP             (1 << 15) /* Bit 15: External Trigger Polarity */
-
 #ifdef CONFIG_STM32_STM32F30XX
-#  define GTIM_CR1_SMS            (1 << 16) /* Bit 16: Slave mode selection - bit 3 */
+#  define GTIM_SMCR_SMS           (1 << 16) /* Bit 16: Slave mode selection - bit 3 */
 #endif
 
 /* DMA/Interrupt enable register (TIM2-5 and TIM9-14) */
@@ -1099,8 +1098,8 @@
 #define GTIM_CCMR1_OC2CE          (1 << 15) /* Bit 15: Output Compare 2 Clear Enable */
 
 #ifdef CONFIG_STM32_STM32F30XX
-#  define GTIM_CCMR1_OC1M          (1 << 16) /* Bit 16: Output Compare 1 mode - bit 3 */
-#  define GTIM_CCMR1_OC2M          (1 << 24) /* Bit 24: Output Compare 2 mode - bit 3 */
+#  define GTIM_CCMR1_OC1M         (1 << 16) /* Bit 16: Output Compare 1 mode - bit 3 */
+#  define GTIM_CCMR1_OC2M         (1 << 24) /* Bit 24: Output Compare 2 mode - bit 3 */
 #endif
 
 /* Common CCMR (unshifted) Capture/Compare Selection bit-field definitions */
@@ -1218,6 +1217,9 @@
 #define GTIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 output Polarity (F2,F4 and TIM2-5 only) */
 #define GTIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable (TIM2-5 only) */
 #define GTIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity (TIM2-5 only) */
+#ifdef CONFIG_STM32_STM32F30XX
+#  define GTIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
+#endif
 
 /* 16-bit counter register */
 
