@@ -239,7 +239,7 @@
 #elif defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || \
       defined(CONFIG_STM32_STM32F40XX)
-#  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT);
+#  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
 #else
 #  error "Unrecognized STM32 chip"
 #endif
