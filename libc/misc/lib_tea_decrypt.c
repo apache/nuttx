@@ -1,6 +1,6 @@
 /****************************************************************************
- * libc/misc/lib_tea.c
- * Tiny Encryption Algorithm
+ * libc/misc/lib_tea_decrypt.c
+ * Tiny Encryption Algorithm - Decryption support
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,37 +55,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tea_encrypt
- *
- * Input Parameters:
- *   value = 2 x 32-bit value (input/output)
- *   key   = 4 x 32-bit Cache key (input)
- *
- ****************************************************************************/
-
-void tea_encrypt(FAR uint32_t *value, FAR const uint32_t *key)
-{
-  uint32_t v0  = value[0];
-  uint32_t v1  = value[1];
-  uint32_t sum = 0;
-  int i;
-
-  /* Basic cycle start */
-
-  for (i = 0; i < 32; i++)
-    {
-      sum += TEA_KEY_SCHEDULE_CONSTANT;
-      v0  += ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1]);
-      v1  += ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3]);
-    }
-
-  /* End cycle */
-
-  value[0] = v0;
-  value[1] = v1;
-}
 
 /****************************************************************************
  * Name: tea_decrypt
