@@ -655,7 +655,7 @@ CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # FLASH Program Installation

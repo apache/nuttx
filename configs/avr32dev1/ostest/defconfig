@@ -547,7 +547,7 @@ CONFIG_EXAMPLES_OSTEST_RR_RUNS=10
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # FLASH Program Installation

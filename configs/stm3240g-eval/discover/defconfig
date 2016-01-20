@@ -1094,7 +1094,7 @@ CONFIG_DISCOVER_DESCR="STM3240G-EVAL"
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # NxPlayer media player library / command Line

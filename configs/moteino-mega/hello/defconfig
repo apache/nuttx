@@ -589,7 +589,7 @@ CONFIG_EXAMPLES_HELLO=y
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # NxPlayer media player library / command Line

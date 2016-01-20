@@ -767,7 +767,7 @@ CONFIG_EXAMPLES_BUTTONS_NAME7="UP"
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # FLASH Program Installation
