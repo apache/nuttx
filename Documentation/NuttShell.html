@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: December 31, 2015</p>
+      <p>Last Updated: January 20, 2016</p>
     </td>
   </tr>
 </table>
@@ -335,127 +335,145 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdping">2.42 Check Network Peer (ping/ping6)</a>
+    <a href="#cmdpasswd">2.42 Change a User's Password (passwd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdpoweroff">2.43 Shut the system down (poweroff)</a>
+    <a href="#cmdping">2.43 Check Network Peer (ping/ping6)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdput">2.44 Send File Via TFTP (put)</a>
+    <a href="#cmdpoweroff">2.44 Shut the system down (poweroff)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdpwd">2.45 Show Current Working Directory (pwd)</a>
+    <a href="#cmdput">2.45 Send File Via TFTP (put)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdreboot">2.46 Reset and reboot the system (reboot)</a>
+    <a href="#cmdpwd">2.46 Show Current Working Directory (pwd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrm">2.47 Remove a File (rm)</a>
+    <a href="#cmdreboot">2.47 Reset and reboot the system (reboot)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmdir">2.48 Remove a Directory (rmdir)</a>
+    <a href="#cmdrm">2.48 Remove a File (rm)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmmod">2.49 Remove on OS Module (rmmod)</a>
+    <a href="#cmdrmdir">2.49 Remove a Directory (rmdir)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdset">2.50 Set an Environment Variable (set)</a>
+    <a href="#cmdrmmod">2.50 Remove on OS Module (rmmod)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsh">2.51 Execute an NSH Script (sh)</a>
+    <a href="#cmdset">2.51 Set an Environment Variable (set)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdshutdown">2.52 Shut the system down (shutdown)</a>
+    <a href="#cmdsh">2.52 Execute an NSH Script (sh)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.53 Wait for Seconds (sleep)</a>
+    <a href="#cmdshutdown">2.53 Shut the system down (shutdown)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdtime">2.54 Time execution of another command (time)</a>
+    <a href="#cmdsleep">2.54 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.55 Unmount a File System (umount)</a>
+    <a href="#cmdtime">2.55 Time execution of another command (time)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.56 Print system information (uname)</a>
+    <a href="#cmdunmount">2.56 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.57 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.57 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.58 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.58 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.59 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.59 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.60 Wait for Microseconds (usleep)</a>
+    <a href="#cmdurlencode">2.60 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.61 Get File Via HTTP (wget)</a>
+    <a href="#cmduseradd">2.61 Add a New User (useradd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.62 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmduserdel">2.62 Delete a user (userdel)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdusleep">2.63 Wait for Microseconds (usleep)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdwget">2.64 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.65 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2302,7 +2320,24 @@ nslookup &lt;host-name&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdping"><h2>2.42 Check Network Peer (ping/ping6)</h2></a>
+    <a name="cmdpasswd"><h2>2.42 Change a User's Password (passwd)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+passwd &lt;username&gt; &lt;password&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Set the password for the existing user &lt;username&gt; to &lt;password&gt;.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdping"><h2>2.43 Check Network Peer (ping/ping6)</h2></a>
   </td>
   </tr>
 </table>
@@ -2339,7 +2374,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdpoweroff"><h2>2.43 Shut the system down (poweroff)</h2></a>
+    <a name="cmdpoweroff"><h2>2.44 Shut the system down (poweroff)</h2></a>
   </td>
   </tr>
 </table>
@@ -2361,7 +2396,7 @@ poweroff
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdput"><h2>2.44 Send File Via TFTP (put)</h2></a>
+    <a name="cmdput"><h2>2.45 Send File Via TFTP (put)</h2></a>
   </td>
   </tr>
 </table>
@@ -2396,7 +2431,7 @@ put [-b|-n] [-f &lt;remote-path&gt;] -h &lt;ip-address&gt; &lt;local-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdpwd"><h2>2.45 Show Current Working Directory (pwd)</h2></a>
+    <a name="cmdpwd"><h2>2.46 Show Current Working Directory (pwd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2426,7 +2461,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdreboot"><h2>2.46 Reboot the system (reboot)</h2></a>
+    <a name="cmdreboot"><h2>2.47 Reboot the system (reboot)</h2></a>
   </td>
   </tr>
 </table>
@@ -2448,7 +2483,7 @@ reboot
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrm"><h2>2.47 Remove a File (rm)</h2></a>
+    <a name="cmdrm"><h2>2.48 Remove a File (rm)</h2></a>
   </td>
 </tr>
 </table>
@@ -2482,7 +2517,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmdir"><h2>2.48 Remove a Directory (rmdir)</h2></a>
+    <a name="cmdrmdir"><h2>2.49 Remove a Directory (rmdir)</h2></a>
   </td>
 </tr>
 </table>
@@ -2517,7 +2552,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmmod"><h2>2.49 Remove on OS Module (rmmod)</h2></a>
+    <a name="cmdrmmod"><h2>2.50 Remove on OS Module (rmmod)</h2></a>
   </td>
 </tr>
 </table>
@@ -2545,7 +2580,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdset"><h2>2.50 Set an Environment Variable (set)</h2></a>
+    <a name="cmdset"><h2>2.51 Set an Environment Variable (set)</h2></a>
   </td>
   </tr>
 </table>
@@ -2571,7 +2606,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsh"><h2>2.51 Execute an NSH Script (sh)</h2></a>
+    <a name="cmdsh"><h2>2.52 Execute an NSH Script (sh)</h2></a>
   </td>
   </tr>
 </table>
@@ -2590,7 +2625,7 @@ sh &lt;script-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdshutdown"><h2>2.52 Shut the system down (shutdown)</h2></a>
+    <a name="cmdshutdown"><h2>2.53 Shut the system down (shutdown)</h2></a>
   </td>
   </tr>
 </table>
@@ -2611,7 +2646,7 @@ shutdown [--reboot]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.53 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdsleep"><h2>2.54 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2628,7 +2663,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdtime"><h2>2.54 Time execution of another command (time)</h2></a>
+    <a name="cmdtime"><h2>2.55 Time execution of another command (time)</h2></a>
   </td>
 </tr>
 </table>
@@ -2687,7 +2722,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.55 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.56 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2717,7 +2752,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.56 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.57 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -2784,7 +2819,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.57 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.58 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2810,7 +2845,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.58 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.59 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2827,7 +2862,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.59 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.60 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2844,7 +2879,41 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.60 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmduseradd"><h2>2.61 Add a New User (useradd)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+useradd &lt;username&gt; &lt;password&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Add a new user with &lt;username&gt; and &lt;password&gt;.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmduserdel"><h2>2.62 Delete a user (userdel)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+userdel &lt;username&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Delete the user with the name &lt;username&gt;.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdusleep"><h2>2.63 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2861,7 +2930,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget"><h2>2.61 Get File Via HTTP (wget)</h2></a>
+    <a name="cmdwget"><h2>2.64 Get File Via HTTP (wget)</h2></a>
   </td>
   </tr>
 </table>
@@ -2888,7 +2957,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.62 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.65 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3157,6 +3226,11 @@ nsh&gt;
     <td><code>CONFIG_NSH_DISABLE_NSLOOKUP</code></td>
   </tr>
   <tr>
+    <td><b><code>passwd</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_FSUTILS_PASSWD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_PASSWD</code></td>
+  </tr>
+  <tr>
     <td><b><code>ping</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP</code> &amp;&amp;
         <code>CONFIG_NET_ICMP_PING</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code></td>
@@ -3263,6 +3337,16 @@ nsh&gt;
     <td><b><code>urlencode</code></b></td>
     <td>!<code>CONFIG_NETUTILS_CODECS</code> &amp;&amp; <code>CONFIG_CODECS_URLCODE</code>
     <td><code>CONFIG_NSH_DISABLE_URLENCODE</code></td>
+  </tr>
+  <tr>
+    <td><b><code>useradd</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_FSUTILS_PASSWD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_USERADD</code></td>
+  </tr>
+  <tr>
+    <td><b><code>userdel</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_FSUTILS_PASSWD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_USERDEL</code></td>
   </tr>
   <tr>
     <td><b><code>usleep</code></b></td>
@@ -4747,10 +4831,10 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
   <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
   <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
+  <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
   <li><a href="#custinit"><code>mkromfsimg.sh</code></a></li>
   <li><a href="#cmdmount"><code>mount</code></a></li>
   <li><a href="#cmdmv"><code>mv</code></a></li>
@@ -4770,6 +4854,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdnslookup"><code>nslookup</code></a></li>
   <li><a href="#environvars"><code>OLDPWD</code></a></li>
   <li><a href="#overview">Overview</a></li>
+  <li><a href="#cmdpasswd"><code>passwd</code></a></li>
   <li><a href="#cmdping"><code>ping</code></a></li>
   <li><a href="#cmdping"><code>ping6</code></a></li>
   <li><a href="#cmdpoweroff"><code>poweroff</code></a></li>
@@ -4805,6 +4890,8 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custinit"><code>up_nsh.c</code></a></li>
   <li><a href="#cmdurldec"><code>urldecode</code></a></li>
   <li><a href="#cmdurlencode"><code>urlencode</code></a></li>
+  <li><a href="#cmduseradd"><code>useradd</code></a></li>
+  <li><a href="#cmduserdel"><code>userdel</code></a></li>
   <li><a href="#cmdusleep"><code>usleep</code></a></li>
   <li><a href="#custapps"><code>waitpid()</code></a></li>
   <li><a href="#cmdwget"><code>wget</code></a></li>
