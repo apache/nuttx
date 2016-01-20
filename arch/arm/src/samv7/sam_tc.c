@@ -907,51 +907,51 @@ static int sam_tc2_interrupt(int irq, void *context)
 #ifdef CONFIG_SAMV7_TC1
 static int sam_tc3_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc345, g_tc345.channel[0]);
+  return sam_tc_interrupt(&g_tc345, &g_tc345.channel[0]);
 }
 
 static int sam_tc4_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc345, g_tc345.channel[1]);
+  return sam_tc_interrupt(&g_tc345, &g_tc345.channel[1]);
 }
 
 static int sam_tc5_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc345, g_tc345.channel[2]);
+  return sam_tc_interrupt(&g_tc345, &g_tc345.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC2
 static int sam_tc6_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc678, g_tc678.channel[0]);
+  return sam_tc_interrupt(&g_tc678, &g_tc678.channel[0]);
 }
 
 static int sam_tc7_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc678, g_tc678.channel[1]);
+  return sam_tc_interrupt(&g_tc678, &g_tc678.channel[1]);
 }
 
 static int sam_tc8_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc678, g_tc678.channel[2]);
+  return sam_tc_interrupt(&g_tc678, &g_tc678.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC3
 static int sam_tc9_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc901, g_tc901.channel[0]);
+  return sam_tc_interrupt(&g_tc901, &g_tc901.channel[0]);
 }
 
 static int sam_tc10_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc901, g_tc901.channel[1]);
+  return sam_tc_interrupt(&g_tc901, &g_tc901.channel[1]);
 }
 
 static int sam_tc11_interrupt(int irq, void *context)
 {
-  return sam_tc_interrupt(&g_tc901, g_tc901.channel[2]);
+  return sam_tc_interrupt(&g_tc901, &g_tc901.channel[2]);
 }
 #endif
 
