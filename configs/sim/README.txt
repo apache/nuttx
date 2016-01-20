@@ -478,7 +478,16 @@ nsh
   1. This version has one builtin function:  This configuration:
      apps/examples/hello.
 
-  2. This configuration has BINFS enabled so that the builtin applications
+  2. This version has password protection enable.  Here is the login:
+
+       USERNAME:  admin
+       PASSWORD:  Adminstrator
+
+     The encrypted password is retained in /etc/passwd.  I am sure that
+     you will find this annoying.  You can disable the password protection
+     by de-selecting CONFIG_NSH_CONSOLE_LOGIN=y.
+
+  3. This configuration has BINFS enabled so that the builtin applications
      can be made visible in the file system.  Because of that, the
      build in applications do not work as other examples.
 

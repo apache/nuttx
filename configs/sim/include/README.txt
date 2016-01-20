@@ -35,11 +35,11 @@ README
 
     3. Create the new ROMFS image.
 
-       genromfs -f romfs_image -d etc -V SimEtcVol
+       genromfs -f romfs_img -d etc -V SimEtcVol
 
     4. Convert the ROMFS image to a C header file
 
-        xxd -i image >nsh_romfsimg.h
+        xxd -i romfs_img >nsh_romfsimg.h
 
     5. Edit nsh_romfsimg.h, mark both data definitions as 'const' so that
        that will be stored in FLASH.
