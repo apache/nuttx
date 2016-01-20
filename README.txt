@@ -1417,6 +1417,7 @@ nuttx/
  |   |- samv71-xult/
  |   |   `- README.txt
  |   |- sim/
+ |   |   |- include/README.txt
  |   |   `- README.txt
  |   |- shenzhou/
  |   |   `- README.txt

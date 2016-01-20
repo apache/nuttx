@@ -11328,4 +11328,8 @@
 	  Benkert (21016-01-18).
 	* libc/misc/lib_tea.h and include/nuttx/crypto/tea.h:  Add an
 	  implementation of the Tiny Encryption Algorithm (2016-01-19).
+	* sim/include: Now supports a customizable startup script with a
+	  read-only passwd file (2016-01-20).
+	* sim/nsh:  Uses the custom start up script, includes hoks for
+	  an MOTD message. (2016-01-20).
 
