@@ -4784,7 +4784,7 @@ CONFIG_NSH_LOGIN_USERNAME=admin
 CONFIG_NSH_LOGIN_PASSWORD="Administrator"
 </pre></ul>
 <p>
-  This is not very flexible since there can be only one user and the password if fixed in the FLASH image. This option is also not very secure because a maliscious user could get the password by just looking at the <code>.text</code> stings in the flash image.
+  This is not very flexible since there can be only one user and the password is fixed in the FLASH image. This option is also not very secure because a malicious user could get the password by just looking at the <code>.text</code> stings in the flash image.
 </p>
 
 <table width ="100%">
@@ -4908,9 +4908,12 @@ nsh>
 </ol>
 <p>
   Now rebuild the simulation.  No login should be required to enter the
-  shell and you should find the <a href="#cmduseradd"><code>useradd</code></a>, <a href="#cmduserdel"><code>userdel</code></a>, and <a href="#cmdpasswd"><code>passwd</code></a> commands
-  available in the help summary.
+  shell and you should find the <a href="#cmduseradd"><code>useradd</code></a>, <a href="#cmduserdel"><code>userdel</code></a>, and <a href="#cmdpasswd"><code>passwd</code></a> commands available in the help summary, provided that they are enabled.
+  Make certain that the <code>useradd</code> command is not disabled:
 </p>
+<ul><pre>
+# CONFIG_NSH_DISABLE_USERADD is not set
+</pre></ul>
 <p>
   Use the NSH <a href="#cmduseradd"><code>useradd</code></a> command to add new uses with new user passwords like:
 </p>
