@@ -24,8 +24,14 @@ README
     USERNAME:  admin
     PASSWORD:  Adminstrator
 
-  This directory structure is contained in the binary file etc.tar.gz and
-  can be modified per the following steps:
+  The encrypted passwords in the provided passwd file are only value if the
+  TEA key is set to:  012345678 9abcdef0 012345678 9abcdef0.  Changes to either
+  the key or the password word will require regeneration of the nsh_romfimg.h
+  header file.
+
+  The content on the nsh_romfsimg.h header file as generated from a sample
+  directory structure.  That directory structure is contained in the binary
+  file etc.tar.gz and can be modified per the following steps:
 
     1. Unpack the directory structure:
 
