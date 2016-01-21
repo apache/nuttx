@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/recvfrom.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ struct recvfrom_s
 {
   FAR struct socket       *rf_sock;      /* The parent socket structure */
 #ifdef CONFIG_NET_SOCKOPTS
-  uint32_t                 rf_starttime; /* rcv start time for determining timeout */
+  systime_t                rf_starttime; /* rcv start time for determining timeout */
 #endif
   FAR struct devif_callback_s *rf_cb;    /* Reference to callback instance */
   sem_t                    rf_sem;       /* Semaphore signals recv completion */

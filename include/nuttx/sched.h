@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/nuttx/sched.h
  *
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <mqueue.h>
 #include <time.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
@@ -273,14 +274,14 @@ struct replenishment_s
 
 struct sporadic_s
 {
-  bool     suspended;               /* Thread is currently suspended            */
-  uint8_t  hi_priority;             /* Sporadic high priority                   */
-  uint8_t  low_priority;            /* Sporadic low priority                    */
-  uint8_t  max_repl;                /* Maximum number of replenishments         */
-  uint8_t  nrepls;                  /* Number of active replenishments          */
-  uint32_t repl_period;             /* Sporadic replenishment period            */
-  uint32_t budget;                  /* Sporadic execution budget period         */
-  uint32_t eventtime;               /* Time thread suspended or [re-]started    */
+  bool      suspended;              /* Thread is currently suspended            */
+  uint8_t   hi_priority;            /* Sporadic high priority                   */
+  uint8_t   low_priority;           /* Sporadic low priority                    */
+  uint8_t   max_repl;               /* Maximum number of replenishments         */
+  uint8_t   nrepls;                 /* Number of active replenishments          */
+  uint32_t  repl_period;            /* Sporadic replenishment period            */
+  uint32_t  budget;                 /* Sporadic execution budget period         */
+  systime_t eventtime;              /* Time thread suspended or [re-]started    */
 
   /* This is the last interval timer activated */
 

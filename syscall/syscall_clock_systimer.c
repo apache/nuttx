@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syscall_clock_systimer
+ * Name: syscall_clock_systimer32/64
  *
  * Description:
  *   In the kernel build, proxying for clock_systimer() must be handled
@@ -74,7 +74,14 @@
  *
  ****************************************************************************/
 
-uint32_t syscall_clock_systimer(void)
+#ifdef CONFIG_SYSTEM_TIME64
+uint64_t syscall_clock_systimer64(void)
 {
-  return clock_systimer();
+  return clock_systimer64();
 }
+#else
+uint32_t syscall_clock_systimer32(void)
+{
+  return clock_systimer32();
+}
+#endif

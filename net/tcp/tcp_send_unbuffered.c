@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send_unbuffered.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ struct send_s
   uint32_t                snd_isn;     /* Initial sequence number */
   uint32_t                snd_acked;   /* The number of bytes acked */
 #ifdef CONFIG_NET_SOCKOPTS
-  uint32_t                snd_time;    /* Last send time for determining timeout */
+  systime_t               snd_time;    /* Last send time for determining timeout */
 #endif
 #if defined(CONFIG_NET_TCP_SPLIT)
   bool                    snd_odd;     /* True: Odd packet in pair transaction */

@@ -212,23 +212,16 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   size_t linesize;
   off_t offset;
   ssize_t ret;
-
-#ifdef CONFIG_SYSTEM_TIME64
-  uint64_t ticktime;
-#if !defined(CONFIG_HAVE_DOUBLE) || !defined(CONFIG_LIBC_FLOATINGPOINT)
-  uint64_t sec;
-#endif
-
-#else
-  uint32_t ticktime;
-#if !defined(CONFIG_HAVE_DOUBLE) || !defined(CONFIG_LIBC_FLOATINGPOINT)
-  uint32_t sec;
-#endif
-#endif
+  systime ticktime;
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
   double now;
 #else
+# if defined(CONFIG_SYSTEM_TIME64)
+  uint64_t sec;
+# else
+  uint32_t sec;
+# endif
   unsigned int remainder;
   unsigned int csec;
 #endif
@@ -249,15 +242,9 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos == 0)
     {
-#ifdef CONFIG_SYSTEM_TIME64
-      /* 64-bit timer */
-
-      ticktime = clock_systimer64();
-#else
-      /* 32-bit timer */
+      /* System time */
 
       ticktime = clock_systimer();
-#endif
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
       /* Convert the system up time to a seconds + hundredths of seconds string */

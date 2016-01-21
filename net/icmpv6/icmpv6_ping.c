@@ -86,8 +86,8 @@ struct icmpv6_ping_s
   FAR struct devif_callback_s *png_cb; /* Reference to callback instance */
 
   sem_t          png_sem;     /* Use to manage the wait for the response */
-  uint32_t       png_time;    /* Start time for determining timeouts */
-  uint32_t       png_ticks;   /* System clock ticks to wait */
+  systime_t      png_time;    /* Start time for determining timeouts */
+  systime_t      png_ticks;   /* System clock ticks to wait */
   int            png_result;  /* 0: success; <0:negated errno on fail */
   net_ipv6addr_t png_addr;    /* The peer to be ping'ed */
   uint16_t       png_id;      /* Used to match requests with replies */
@@ -127,7 +127,7 @@ struct icmpv6_ping_s
 
 static inline int ping_timeout(FAR struct icmpv6_ping_s *pstate)
 {
-  uint32_t elapsed =  clock_systimer() - pstate->png_time;
+  systime_t elapsed =  clock_systimer() - pstate->png_time;
   if (elapsed >= pstate->png_ticks)
     {
       return TRUE;

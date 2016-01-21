@@ -679,8 +679,8 @@ static void enc_wrreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 static int enc_waitreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
                           uint16_t bits, uint16_t value)
 {
-  uint32_t start = clock_systimer();
-  uint32_t elapsed;
+  systime_t start = clock_systimer();
+  systime_t elapsed;
   uint16_t rddata;
 
   /* Loop until the exit condition is met */
@@ -1533,7 +1533,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           arp_ipin(&priv->dev);
           ret = ipv4_input(&priv->dev);
 
-          if (ret == OK || (clock_systimer() - descr->ts) > ENC_RXTIMEOUT)
+          if (ret == OK || (clock_systimer() - (systime_t)descr->ts) > ENC_RXTIMEOUT)
             {
               /* If packet has been successfully processed or has timed out,
                * free it.
@@ -1580,7 +1580,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           ret = ipv6_input(&priv->dev);
 
-          if (ret == OK || (clock_systimer() - descr->ts) > ENC_RXTIMEOUT)
+          if (ret == OK || (clock_systimer() - (systime_t)descr->ts) > ENC_RXTIMEOUT)
             {
               /* If packet has been successfully processed or has timed out,
                * free it.
@@ -1728,7 +1728,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       /* Set current timestamp */
 
-      descr->ts = clock_systimer();
+      descr->ts = (uint32_t)clock_systimer();
 
       /* Store the start address of the frame without the enc's header */
 

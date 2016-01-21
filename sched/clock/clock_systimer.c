@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock/clock_systimer.c
  *
- *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
  ****************************************************************************/
 /* See nuttx/clock.h */
 
-#undef clock_systimer
+#undef cloc_systimer32
 #undef clock_systimer64
 
 /****************************************************************************
@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_systimer
+ * Name: cloc_systimer32
  *
  * Description:
  *   Return the current value of the 32-bit system timer counter
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-uint32_t clock_systimer(void)
+uint32_t cloc_systimer32(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
   struct timespec ts;

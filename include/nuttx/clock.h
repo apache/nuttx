@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016 Gregory Nutt.
+             All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,6 +165,14 @@
 #define TICK2DSEC(tick)       (((tick)+(TICK_PER_DSEC/2))/TICK_PER_DSEC) /* Rounds */
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
 
+/* Select the access to the system timer using its natural with */
+
+#ifdef CONFIG_SYSTEM_TIME64
+#  define clock_systimer()    clock_systimer64()
+#else
+#  define clock_systimer()    clock_systimer32()
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -177,9 +186,25 @@ struct cpuload_s
 };
 #endif
 
+/* This type is the natural with of the system timer */
+
+#ifdef CONFIG_SYSTEM_TIME64
+typedef uint64_t systime_t;
+#else
+typedef uint32_t systime_t;
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /* Access to raw system clock ***********************************************/
 /* Direct access to the system timer/counter is supported only if (1) the
@@ -191,14 +216,14 @@ struct cpuload_s
 #ifdef __HAVE_KERNEL_GLOBALS
 #  ifdef CONFIG_SYSTEM_TIME64
 
-extern volatile uint64_t g_system_timer;
-#define clock_systimer()  (uint32_t)(g_system_timer & 0x00000000ffffffff)
+EXTERN volatile uint64_t g_system_timer;
+#define clock_systimer32()  (uint32_t)(g_system_timer & 0x00000000ffffffff)
 #define clock_systimer64() g_system_timer
 
 #  else
 
-extern volatile uint32_t g_system_timer;
-#define clock_systimer() g_system_timer
+EXTERN volatile uint32_t g_system_timer;
+#define clock_systimer32() g_system_timer
 
 #  endif
 #endif
@@ -206,14 +231,6 @@ extern volatile uint32_t g_system_timer;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Function:  clock_synchronize
@@ -248,7 +265,7 @@ void clock_synchronize(void);
 #endif
 
 /****************************************************************************
- * Function:  clock_systimer
+ * Function:  clock_systimer32
  *
  * Description:
  *   Return the current value of the 32-bit system timer counter.  Indirect
@@ -268,9 +285,9 @@ void clock_synchronize(void);
 
 #ifndef __HAVE_KERNEL_GLOBALS
 #  ifdef CONFIG_SYSTEM_TIME64
-#    define clock_systimer()  (uint32_t)(clock_systimer64() & 0x00000000ffffffff)
+#    define clock_systimer32()  (uint32_t)(clock_systimer64() & 0x00000000ffffffff)
 #  else
-uint32_t clock_systimer(void);
+uint32_t clock_systimer32(void);
 #  endif
 #endif
 

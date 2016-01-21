@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_tickdwait.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,11 +80,11 @@
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
+int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   irqstate_t flags;
-  uint32_t elapsed;
+  systime_t elapsed;
   int ret;
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false &&

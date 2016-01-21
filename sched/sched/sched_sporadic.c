@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_sporadic.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -975,9 +975,9 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
+  systime_t now;
   uint32_t unrealized;
   uint32_t last;
-  uint32_t now;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;

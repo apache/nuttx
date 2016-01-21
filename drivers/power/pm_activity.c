@@ -103,7 +103,7 @@
 
 void pm_activity(int priority)
 {
-  uint32_t now;
+  systime_t now;
   uint32_t accum;
   irqstate_t flags;
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp_psock_sendto.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ struct sendto_s
   FAR struct socket *st_sock;         /* Points to the parent socket structure */
 #endif
 #ifdef CONFIG_NET_SENDTO_TIMEOUT
-  uint32_t st_time;                   /* Last send time for determining timeout */
+  systime_t st_time;                  /* Last send time for determining timeout */
 #endif
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
   sem_t st_sem;                       /* Semaphore signals sendto completion */

@@ -434,8 +434,8 @@ static void slip_txtask(int argc, FAR char *argv[])
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
   net_lock_t flags;
-  unsigned int msec_start;
-  unsigned int msec_now;
+  systime_t msec_start;
+  systime_t msec_now;
   unsigned int hsec;
 
   ndbg("index: %d\n", index);

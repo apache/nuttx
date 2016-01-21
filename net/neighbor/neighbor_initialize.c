@@ -58,7 +58,7 @@ struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
 
 /* This is the time, in clock ticks, of the last poll */
 
-uint32_t g_neighbor_polltime;
+systime_t g_neighbor_polltime;
 
 /****************************************************************************
  * Public Functions

@@ -45,8 +45,9 @@
 #include <semaphore.h>
 #include <queue.h>
 
-#include <nuttx/power/pm.h>
+#include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/power/pm.h>
 
 #ifdef CONFIG_PM
 
@@ -136,7 +137,7 @@ struct pm_global_s
 
   /* stime - The time (in ticks) at the start of the current time slice */
 
-  uint32_t stime;
+  systime_t stime;
 
   /* This semaphore manages mutually exclusive access to the power management
    * registry.  It must be initialized to the value 1.

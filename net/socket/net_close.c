@@ -82,7 +82,7 @@ struct tcp_close_s
   FAR struct socket       *cl_psock;  /* Reference to the TCP socket */
   sem_t                    cl_sem;    /* Signals disconnect completion */
   int                      cl_result; /* The result of the close */
-  uint32_t                 cl_start;  /* Time close started (in ticks) */
+  systime_t                cl_start;  /* Time close started (in ticks) */
 #endif
 };
 #endif

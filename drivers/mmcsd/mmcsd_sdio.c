@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_sdio.c
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1120,10 +1120,10 @@ static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
 
 static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 {
-  uint32_t starttime;
-  uint32_t elapsed;
+  systime_t starttime;
+  systime_t elapsed;
   uint32_t r1;
-  int      ret;
+  int ret;
 
   /* First, check if the card has been removed. */
 
@@ -2714,9 +2714,9 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 {
   uint32_t response;
-  uint32_t start;
-  uint32_t elapsed;
   uint32_t sdcapacity = MMCSD_ACMD41_STDCAPACITY;
+  systime_t start;
+  systime_t elapsed;
   int      ret;
 
   /* Assume failure to identify the card */

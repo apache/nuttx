@@ -110,7 +110,7 @@ static int g_fillresult;
  */
 
 #ifdef CONFIG_PAGING_TIMEOUT_TICKS
-status uint32_t g_starttime;
+static systime_t g_starttime;
 #endif
 #endif
 

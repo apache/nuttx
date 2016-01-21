@@ -147,7 +147,7 @@ config SYSTEM_TIME64
 		USEC_PER_TICK, typically at 100Hz. The count at any given time is
 		then the "uptime" in units of system timer ticks.  By default, the
 		system time is 32-bits wide.  Those defaults provide a range of about
-		13.6 years which is probably a sufficient range for "uptime".
+		497 days which is probably a sufficient range for "uptime".
 
 		However, if the system timer rate is significantly higher than 100Hz
 		and/or if a very long "uptime" is required, then this option can be

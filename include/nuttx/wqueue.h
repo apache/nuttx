@@ -47,6 +47,8 @@
 #include <semaphore.h>
 #include <queue.h>
 
+#include <nuttx/clock.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -290,8 +292,8 @@ struct work_s
   struct dq_entry_s dq;  /* Implements a doubly linked list */
   worker_t  worker;      /* Work callback */
   FAR void *arg;         /* Callback argument */
-  uint32_t  qtime;       /* Time work queued */
-  uint32_t  delay;       /* Delay until work performed */
+  systime_t qtime;       /* Time work queued */
+  systime_t delay;       /* Delay until work performed */
 };
 
 /****************************************************************************
@@ -359,7 +361,7 @@ int work_usrstart(void);
  ****************************************************************************/
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, uint32_t delay);
+               FAR void *arg, systime_t delay);
 
 /****************************************************************************
  * Name: work_cancel

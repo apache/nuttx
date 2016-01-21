@@ -47,6 +47,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/net.h>
 
 /****************************************************************************
@@ -345,7 +346,7 @@ int net_close(int sockfd);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SOCKOPTS
-int net_timeo(uint32_t start_time, socktimeo_t timeo);
+int net_timeo(systime_t start_time, socktimeo_t timeo);
 #endif
 
 /****************************************************************************

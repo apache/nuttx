@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_checkstate.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@
 
 enum pm_state_e pm_checkstate(void)
 {
-  uint32_t now;
+  systime_t now;
   irqstate_t flags;
 
   /* Check for the end of the current time slice.  This must be performed

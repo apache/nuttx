@@ -75,8 +75,8 @@
 
 void neighbor_periodic(void)
 {
-  uint32_t now;
-  uint32_t ticks;
+  systime_t now;
+  systime_t ticks;
   uint32_t hsecs;
   int i;
 
@@ -84,7 +84,7 @@ void neighbor_periodic(void)
 
   now   = clock_systimer();
   ticks = now - g_neighbor_polltime;
-  hsecs = TICK2HSEC(ticks);
+  hsecs = (uint32_t)TICK2HSEC(ticks);
 
   /* Reset the time of the last poll */
 

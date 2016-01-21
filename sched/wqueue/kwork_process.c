@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_process.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,22 +73,6 @@
 #endif
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -109,17 +93,17 @@
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
+void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
   irqstate_t flags;
   FAR void *arg;
-  uint32_t elapsed;
-  uint32_t remaining;
-  uint32_t stick;
-  uint32_t ctick;
-  uint32_t next;
+  systime_t elapsed;
+  systime_t remaining;
+  systime_t stick;
+  systime_t ctick;
+  systime_t next;
 
   /* Then process queued work.  We need to keep interrupts disabled while
    * we process items in the work list.

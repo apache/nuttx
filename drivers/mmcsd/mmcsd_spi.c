@@ -443,8 +443,8 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   uint8_t response;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
 
   /* Wait until the card is no longer busy (up to 500MS) */
 
@@ -548,8 +548,8 @@ static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
     case MMCSD_CMDRESP_R1B:
       {
         uint32_t busy = 0;
-        uint32_t start;
-        uint32_t elapsed;
+        systime_t start;
+        systime_t elapsed;
 
         start = START_TIME;
         do
@@ -963,9 +963,9 @@ static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
                            int nbytes)
 {
   FAR struct spi_dev_s *spi = slot->spi;
-  uint32_t start;
-  uint32_t elapsed;
-  uint8_t  token;
+  systime_t start;
+  systime_t elapsed;
+  uint8_t token;
 
   /* Wait up to the maximum to receive a valid data token.  taccess is the
    * time from when the command is sent until the first byte of data is
@@ -1579,8 +1579,8 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   FAR struct spi_dev_s *spi = slot->spi;
   uint8_t csd[16];
   uint32_t result = MMCSD_SPIR1_IDLESTATE;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
   int i;
   int j;
 
