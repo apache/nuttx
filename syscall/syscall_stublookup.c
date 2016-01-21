@@ -151,9 +151,9 @@ uintptr_t STUB_nanosleep(int nbr, uintptr_t parm1, uintptr_t parm2);
  */
 
 #ifdef CONFIG_SYSTEM_TIME64
-uintptr_t STUB_clock_systimer32(int nbr);
-#else
 uintptr_t STUB_clock_systimer64(int nbr);
+#else
+uintptr_t STUB_clock_systimer32(int nbr);
 #endif
 uintptr_t STUB_clock_getres(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_gettime(int nbr, uintptr_t parm1, uintptr_t parm2);
