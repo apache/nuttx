@@ -7,7 +7,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -226,7 +226,7 @@ struct stm32_trace_s
   uint32_t count;              /* Interrupt count when status change */
   enum stm32_intstate_e event; /* Last event that occurred with this status */
   uint32_t parm;               /* Parameter associated with the event */
-  uint32_t time;               /* First of event or first status */
+  systime_t time;              /* First of event or first status */
 };
 
 /* I2C Device hardware configuration */
@@ -267,7 +267,7 @@ struct stm32_i2c_priv_s
 
 #ifdef CONFIG_I2C_TRACE
   int tndx;                    /* Trace array index */
-  uint32_t start_time;         /* Time when the trace was started */
+  systime_t start_time;        /* Time when the trace was started */
 
   /* The actual trace data */
 
@@ -687,9 +687,9 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 #else
 static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 {
-  uint32_t timeout;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t timeout;
+  systime_t start;
+  systime_t elapsed;
   int ret;
 
   /* Get the timeout value */
@@ -725,8 +725,8 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cvdbg("intstate: %d elapsed: %d threshold: %d status: %08x\n",
-          priv->intstate, elapsed, timeout, priv->status);
+  i2cvdbg("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
+          priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
 
@@ -746,9 +746,9 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
 static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
 {
-  uint32_t start;
-  uint32_t elapsed;
-  uint32_t timeout;
+  systime_t start;
+  systime_t elapsed;
+  systime_t timeout;
   uint32_t cr1;
   uint32_t sr1;
 
@@ -946,8 +946,8 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
   struct stm32_trace_s *trace;
   int i;
 
-  syslog(LOG_DEBUG, "Elapsed time: %d\n",
-         clock_systimer() - priv->start_time);
+  syslog(LOG_DEBUG, "Elapsed time: %ld\n",
+         (long)(clock_systimer() - priv->start_time));
 
   for (i = 0; i <= priv->tndx; i++)
     {

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_otgfshost.c
  *
- *   Copyright (C) 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1596,8 +1596,8 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
                                 FAR const struct usb_ctrlreq_s *req)
 {
   FAR struct stm32_chan_s *chan;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
   int ret;
 
   /* Loop while the device reports NAK (and a timeout is not exceeded */
@@ -1826,8 +1826,8 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                  FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
   int ret;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
@@ -2085,8 +2085,8 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                   FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
@@ -4305,8 +4305,8 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
   FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
   int retries;
   int ret;
 
@@ -4390,8 +4390,8 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
   FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
   int retries;
   int ret;
 

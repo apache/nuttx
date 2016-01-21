@@ -212,8 +212,8 @@ struct efm32_trace_s
   uint32_t i2c_reg_state;     /* I2C register I2Cx_STATES */
   uint32_t i2c_reg_if;        /* I2C register I2Cx_IF */
   uint32_t count;             /* Interrupt count when status change */
-  int      dcnt;              /* Interrupt count when status change */
-  uint32_t time;              /* First of event or first status */
+  systime_t time;             /* First of event or first status */
+  int dcnt;                   /* Interrupt count when status change */
 };
 
 /* I2C Device hardware configuration */
@@ -260,7 +260,7 @@ struct efm32_i2c_priv_s
 
 #ifdef CONFIG_I2C_TRACE
   int tndx;                   /* Trace array index */
-  uint32_t start_time;        /* Time when the trace was started */
+  systime_t start_time;       /* Time when the trace was started */
 
   /* The actual trace data */
 
@@ -650,9 +650,9 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 #else
 static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 {
-  uint32_t timeout;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t timeout;
+  systime_t start;
+  systime_t elapsed;
 
   /* Get the timeout value */
 
@@ -759,11 +759,11 @@ static void efm32_i2c_traceclear(FAR struct efm32_i2c_priv_s *priv)
 {
   struct efm32_trace_s *trace = &priv->trace[priv->tndx];
 
-  trace->i2c_state = I2CSTATE_NONE;     /* I2C current state of state machine */
-  trace->i2c_reg_if = 0;        /* I2C I2Cx_IF register */
-  trace->i2c_reg_state = 0;     /* I2C I2Cx_STATES register */
-  trace->count = 0;             /* Interrupt count when status change */
-  trace->time = 0;              /* Time of first status or event */
+  trace->i2c_state = I2CSTATE_NONE; /* I2C current state of state machine */
+  trace->i2c_reg_if = 0;            /* I2C I2Cx_IF register */
+  trace->i2c_reg_state = 0;         /* I2C I2Cx_STATES register */
+  trace->count = 0;                 /* Interrupt count when status change */
+  trace->time = 0;                  /* Time of first status or event */
 }
 
 static void efm32_i2c_tracereset(FAR struct efm32_i2c_priv_s *priv)
@@ -826,17 +826,18 @@ static void efm32_i2c_tracedump(FAR struct efm32_i2c_priv_s *priv)
   struct efm32_trace_s *trace;
   int i;
 
-  syslog(LOG_DEBUG, "Elapsed time: %d\n", clock_systimer() - priv->start_time);
+  syslog(LOG_DEBUG, "Elapsed time: %ld\n",
+         (long)(clock_systimer() - priv->start_time));
 
   for (i = 0; i < priv->tndx; i++)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
              "%2d. I2Cx_STATE: %08x I2Cx_PENDING: %08x dcnt %3d COUNT: %3d "
-             "STATE: %s(%2d) TIME: %d\n",
+             "STATE: %s(%2d) TIME: %ld\n",
              i + 1, trace->i2c_reg_state, trace->i2c_reg_if, trace->dcnt,
              trace->count, efm32_i2c_state_str(trace->i2c_state),
-             trace->i2c_state, trace->time - priv->start_time);
+             trace->i2c_state, (long)(trace->time - priv->start_time));
     }
 }
 #endif /* CONFIG_I2C_TRACE */

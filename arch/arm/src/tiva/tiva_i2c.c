@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/tiva/tiva_i2c.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The basic structure of this driver derives in spirit (if nothing more) from the
@@ -187,7 +187,7 @@ struct tiva_trace_s
   uint32_t count;           /* Interrupt count when status change */
   enum tiva_trace_e event;  /* Last event that occurred with this status */
   uint32_t parm;            /* Parameter associated with the event */
-  uint32_t time;            /* First of event or first status */
+  systime_t time;           /* First of event or first status */
 };
 
 /* I2C Device hardware configuration */
@@ -243,7 +243,7 @@ struct tiva_i2c_priv_s
 
   int tndx;                    /* Trace array index */
   int tcount;                  /* Number of events with this status */
-  uint32_t ttime;              /* Time when the trace was started */
+  systime_t ttime;             /* Time when the trace was started */
   uint32_t tstatus;            /* Last status read */
 
   /* The actual trace data */
@@ -861,9 +861,9 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 #else
 static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 {
-  uint32_t timeout;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t timeout;
+  systime_t start;
+  systime_t elapsed;
   uint32_t status;
   int ret;
 
@@ -903,8 +903,8 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cvdbg("intstate: %d elapsed: %d threshold: %d status: %08x\n",
-          priv->intstate, elapsed, timeout, status);
+  i2cvdbg("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
+          priv->intstate, (long)elapsed, (long)timeout, status);
 
   /* Set the interrupt state back to IDLE */
 
@@ -1086,8 +1086,8 @@ static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv)
   struct tiva_trace_s *trace;
   int i;
 
-  syslog(LOG_DEBUG, "Elapsed time: %d\n",
-         clock_systimer() - priv->ttime);
+  syslog(LOG_DEBUG, "Elapsed time: %ld\n",
+         (long)(clock_systimer() - priv->ttime));
 
   for (i = 0; i <= priv->tndx; i++)
     {
