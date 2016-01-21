@@ -85,7 +85,10 @@ README
 
   Now rebuild the simulation.  No login should be required to enter the
   shell and you should find the 'useradd', 'userdel', and 'passwd' commands
-  available in the help summary.
+  available in the help summary, provided that they are enabled.  Make
+  certain that the 'useradd' command is not disabled:
+
+      # CONFIG_NSH_DISABLE_USERADD is not set
 
   Use the NSH 'useradd' command to add new uses with new user passwords like:
 
