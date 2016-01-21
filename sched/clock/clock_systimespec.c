@@ -138,7 +138,10 @@ int clock_systimespec(FAR struct timespec *ts)
       uint64_t secs;
       uint64_t nsecs;
 
-      /* Get the time since power-on in seconds and microsecon */
+      /* Get the time since power-on in seconds and microsecond.
+       * NOTE that overflow is still possible if we use a 64-bit
+       * timer.
+       */
 
       usecs = (uint64_t)TICK2USEC(clock_systimer());
       secs  = usecs / USEC_PER_SEC;
@@ -161,7 +164,7 @@ int clock_systimespec(FAR struct timespec *ts)
        * of 10 milliseconds, the msecs value will overflow at about
        * 49.7 days.
        *
-       * So, we will still use 64-bit calculations if we have them
+       * So.. we will still use 64-bit calculations if we have them
        * in order to avoid that limitation.
        */
 
