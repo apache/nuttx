@@ -76,5 +76,5 @@
 
 systime_t syscall_clock_systimer(void)
 {
-  return clock_systime();
+  return clock_systimer();
 }
