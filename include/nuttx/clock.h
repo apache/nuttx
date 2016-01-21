@@ -165,14 +165,6 @@
 #define TICK2DSEC(tick)       (((tick)+(TICK_PER_DSEC/2))/TICK_PER_DSEC) /* Rounds */
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
 
-/* Select the access to the system timer using its natural with */
-
-#ifdef CONFIG_SYSTEM_TIME64
-#  define clock_systimer()    clock_systimer64()
-#else
-#  define clock_systimer()    clock_systimer32()
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -214,18 +206,8 @@ extern "C"
  */
 
 #ifdef __HAVE_KERNEL_GLOBALS
-#  ifdef CONFIG_SYSTEM_TIME64
-
-EXTERN volatile uint64_t g_system_timer;
-#define clock_systimer32()  (uint32_t)(g_system_timer & 0x00000000ffffffff)
-#define clock_systimer64() g_system_timer
-
-#  else
-
-EXTERN volatile uint32_t g_system_timer;
-#define clock_systimer32() g_system_timer
-
-#  endif
+EXTERN volatile systime_t g_system_timer;
+#  define clock_systimer() g_system_timer
 #endif
 
 /****************************************************************************
@@ -265,13 +247,13 @@ void clock_synchronize(void);
 #endif
 
 /****************************************************************************
- * Function:  clock_systimer32
+ * Function:  clock_systimer
  *
  * Description:
- *   Return the current value of the 32-bit system timer counter.  Indirect
- *   access to the system timer counter is required through this function if
- *   the execution environment does not have direct access to kernel global
- *   data
+ *   Return the current value of the 32/64-bit system timer counter.
+ *   Indirect access to the system timer counter is required through this
+ *   function if the execution environment does not have direct access to
+ *   kernel globaldata
  *
  * Parameters:
  *   None
@@ -284,34 +266,7 @@ void clock_synchronize(void);
  ****************************************************************************/
 
 #ifndef __HAVE_KERNEL_GLOBALS
-#  ifdef CONFIG_SYSTEM_TIME64
-#    define clock_systimer32()  (uint32_t)(clock_systimer64() & 0x00000000ffffffff)
-#  else
-uint32_t clock_systimer32(void);
-#  endif
-#endif
-
-/****************************************************************************
- * Function:  clock_systimer64
- *
- * Description:
- *   Return the current value of the 64-bit system timer counter.  Indirect
- *   access to the system timer counter is required through this function if
- *   the execution environment does not have direct access to kernel global
- *   data
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   The current value of the system timer counter
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if !defined(__HAVE_KERNEL_GLOBALS) && defined(CONFIG_SYSTEM_TIME64)
-uint64_t clock_systimer64(void);
+systime_t clock_systimer(void);
 #endif
 
 /****************************************************************************

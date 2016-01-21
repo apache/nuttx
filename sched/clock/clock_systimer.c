@@ -51,8 +51,7 @@
  ****************************************************************************/
 /* See nuttx/clock.h */
 
-#undef clock_systimer32
-#undef clock_systimer64
+#undef clock_systimer
 
 /****************************************************************************
  * Private Data
@@ -63,10 +62,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_systimer32
+ * Name: clock_systimer
  *
  * Description:
- *   Return the current value of the 32-bit system timer counter
+ *   Return the current value of the 32/64-bit system timer counter
  *
  * Parameters:
  *   None
@@ -78,57 +77,10 @@
  *
  ****************************************************************************/
 
-uint32_t clock_systimer32(void)
+systime_t clock_systimer(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
-  struct timespec ts;
-  uint64_t tmp;
-
-  /* Get the time from the platform specific hardware */
-
-  (void)up_timer_gettime(&ts);
-
-  /* Convert to a 64- then 32-bit value */
-
-  tmp = MSEC2TICK(1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000);
-  return (uint32_t)(tmp & 0x00000000ffffffff);
-
-#else
-
 #ifdef CONFIG_SYSTEM_TIME64
-  /* Return the current system time truncated to 32-bits */
-
-  return (uint32_t)(g_system_timer & 0x00000000ffffffff);
-
-#else
-  /* Return the current system time */
-
-  return g_system_timer;
-
-#endif
-#endif
-}
-
-/****************************************************************************
- * Name: clock_systimer64
- *
- * Description:
- *   Return the current value of the 64-bit system timer counter
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   The current value of the system timer counter
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSTEM_TIME64
-uint64_t clock_systimer64(void)
-{
-#ifdef CONFIG_SCHED_TICKLESS
   struct timespec ts;
 
   /* Get the time from the platform specific hardware */
@@ -139,10 +91,23 @@ uint64_t clock_systimer64(void)
 
   return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
 #else
+  struct timespec ts;
+  uint64_t tmp;
+
+  /* Get the time from the platform specific hardware */
+
+  (void)up_timer_gettime(&ts);
+
+  /* Convert to a 64- then 32-bit value */
+
+  tmp = MSEC2TICK(1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000);
+  return (systime_t)(tmp & 0x00000000ffffffff);
+#endif
+#else
+
   /* Return the current system time */
 
   return g_system_timer;
 
 #endif
 }
-#endif

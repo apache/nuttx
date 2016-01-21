@@ -148,11 +148,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
  * NuttX configuration.
  */
 
-#ifdef CONFIG_SYSTEM_TIME64
-  SYSCALL_LOOKUP(syscall_clock_systimer64, 0, STUB_clock_systimer64)
-#else
-  SYSCALL_LOOKUP(syscall_clock_systimer32, 0, STUB_clock_systimer32)
-#endif
+  SYSCALL_LOOKUP(syscall_clock_systimer,  0, STUB_clock_systimer)
   SYSCALL_LOOKUP(clock_getres,            2, STUB_clock_getres)
   SYSCALL_LOOKUP(clock_gettime,           2, STUB_clock_gettime)
   SYSCALL_LOOKUP(clock_settime,           2, STUB_clock_settime)

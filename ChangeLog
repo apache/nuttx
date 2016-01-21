@@ -11338,4 +11338,6 @@
 	  systime_t to represent the 32- or 64-bit system timer (2016-01-21).
 	* sched/clock/clock_systimespec.c:  Fix an error in a time
 	  conversion (2016-01-21).
+	* include/nuttx/clock.h:  Get rid of clock_systimer32() and
+	  clock_systime64().  There is now only clock_systimer() (2016-01-21).
 

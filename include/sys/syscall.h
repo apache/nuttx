@@ -211,11 +211,7 @@
  * NuttX configuration.
  */
 
-#ifdef CONFIG_SYSTEM_TIME64
-#  define SYS_clock_systimer64         (__SYS_clock+0)
-#else
-#  define SYS_clock_systimer32         (__SYS_clock+0)
-#endif
+#define SYS_clock_systimer             (__SYS_clock+0)
 #define SYS_clock_getres               (__SYS_clock+1)
 #define SYS_clock_gettime              (__SYS_clock+2)
 #define SYS_clock_settime              (__SYS_clock+3)

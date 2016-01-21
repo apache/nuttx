@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_clock_systimer.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syscall_clock_systimer32/64
+ * Name: syscall_clock_systimer
  *
  * Description:
  *   In the kernel build, proxying for clock_systimer() must be handled
@@ -74,14 +74,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSTEM_TIME64
-uint64_t syscall_clock_systimer64(void)
+systime_t syscall_clock_systimer(void)
 {
-  return clock_systimer64();
+  return clock_systime();
 }
-#else
-uint32_t syscall_clock_systimer32(void)
-{
-  return clock_systimer32();
-}
-#endif
