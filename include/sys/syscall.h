@@ -213,7 +213,7 @@
 
 #ifdef CONFIG_SYSTEM_TIME64
 #  define SYS_clock_systimer64         (__SYS_clock+0)
-#endif
+#else
 #  define SYS_clock_systimer32         (__SYS_clock+0)
 #endif
 #define SYS_clock_getres               (__SYS_clock+1)
