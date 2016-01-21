@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: January 20, 2016</p>
+      <p>Last Updated: January 21, 2016</p>
     </td>
   </tr>
 </table>
@@ -497,7 +497,7 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
-    <a href="#customizingnsh">4.0 Customimizing the NuttShell</a>
+    <a href="#customizingnsh">4.0 Customizing the NuttShell</a>
   </td>
 </tr>
 <tr>
@@ -522,6 +522,35 @@
   <td><br></td>
   <td>
     <a href="#custinit">4.4 Customizing NSH Initialization</a>
+  </td>
+</tr>
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td>
+    <a href="#nshlogin">5.0 Shell Login</a>
+</td>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#enablelogin">5.1 Enabling Shell Logins</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#fixedlogin">5.2 Fixed Credentials</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#passwdfiles">5.3 Password Files</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#passwdromfs">5.4 Creating a Password File for a ROMFS File System</a>
   </td>
 </tr>
 <tr>
@@ -1019,7 +1048,7 @@ mount -t vfat /dev/ram1 /tmp
 
 <p>
   <b>Further Information</b>.
-  See the section on <a href="#customizingnsh">Customimizing the NuttShell</a> for additional, more detailed information about the NSH start-up script and how to modify it.
+  See the section on <a href="#customizingnsh">Customizing the NuttShell</a> for additional, more detailed information about the NSH start-up script and how to modify it.
 </p>
 
 <table width ="100%">
@@ -3922,7 +3951,7 @@ set FOOBAR ABC_${FOO}_${BAR}
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="customizingnsh"><h1>4.0 Customimizing the NuttShell</h1></a>
+    <a name="customizingnsh"><h1>4.0 Customizing the NuttShell</h1></a>
   </td>
   </tr>
 </table>
@@ -4692,6 +4721,261 @@ mount -t vfat /dev/ram1 /tmp
 </ol>
 <p>
   You can find the generated ROMFS file system for the <code>configs/vsn</code> case here: <code>configs/vsn/include/rcS.template</code>
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="nshlogin"><h1>5.0 Shell Login</h1></a>
+  </td>
+  </tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="enablelogin"><h2>5.1 Enabling Shell Logins</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  NuttShell sessions can be protected by requiring that the user supplying username and password credentials at the beginning of the session. Logins can be enabled for standard USB or serial consoles with:
+</p>
+<ul><pre>
+CONFIG_NSH_CONSOLE_LOGIN=y
+</pre></ul>
+<p>
+  Logins for Telnet sessions can be enabled separately with:
+</p>
+<ul><pre>
+CONFIG_NSH_CONSOLE_LOGIN=y
+</pre></ul>
+<p>
+  Logins can be enable for either or both session types.  On a successful login, the use will have access to the NSH session:
+</p>
+<ul><pre>
+login: admin
+password:
+User Logged-in!
+
+NuttShell (NSH)
+nsh>
+</pre></ul>
+<p>
+  But after a certain number of failed login attempts, the session will be closed.  That number is controlled by:
+</p>
+<ul><pre>
+CONFIG_NSH_LOGIN_FAILCOUNT=3
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="fixedlogin"><h2>5.2 Fixed Credentials</h2></a>
+  </td>
+  </tr>
+</table>
+<p>
+  The simplest implementation simply uses fixed login credentials controlled by 
+</p>
+<ul><pre>
+CONFIG_NSH_LOGIN_USERNAME=admin
+CONFIG_NSH_LOGIN_PASSWORD="Administrator"
+</pre></ul>
+<p>
+  This is not very flexible since there can be only one user and the password if fixed in the FLASH image. This option is also not very secure because a maliscious user could get the password by just looking at the <code>.text</code> stings in the flash image.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="passwdfiles"><h2>5.3 Password Files</h2></a>
+  </td>
+  </tr>
+</table>
+<p>
+  NuttX can also be configured to support a password file, by default at <code>/etc/passwd</code>.  This option enables support for a password file:
+</p>
+<ul><pre>
+CONFIG_FSUTILS_PASSWD=y
+</pre></ul>
+<p>
+  And this determines the location of the password file in a mounted volume:
+</p>
+<ul><pre>
+CONFIG_FSUTILS_PASSWD_PATH="/etc/passwd"
+</pre></ul>
+<p>
+  <code>/etc/passwd</code> is a <i>standard</i> location, but you will need to locate the password where ever you have a mounted volume.
+</p>
+<p>
+  The password file can be a fixed list of users in a ROMFS file system or a modifiable list maintained in a file in some writable file system.  If the password file lies in a read-only file system like ROMFS, then you should also indicate that the password file is read-only.
+</p>
+<ul><pre>
+CONFIG_FSUTILS_PASSWD_READONLY=y
+</pre></ul>
+<p>
+  If the password file is writable, then additional NSH commands will be enabled to modify the password file:  <a href="#cmduseradd"><code>useradd</code></a>, <a href="#cmduserdel"><code>userdel</code></a>, and <a href="#cmdpasswd"><code>passwd</code></a>.  If you do not wish you have these commands available, then they should be specifically disabled.
+</p>
+<p>
+  The password file logic requires a few additional settings:
+<ol>
+  <li>
+    <p>
+      The size of dynamically allocated and freed buffer that is used for file access:
+    </p>
+<ul><pre>
+CONFIG_FSUTILS_PASSWD_IOBUFFER_SIZE=512
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      And the 128-bit encryption key.  The password file currently uses the Tiny Encryption Algorithm (TEA), but could be extended to use something more powerful.
+    </p>
+<ul><pre>
+CONFIG_FSUTILS_PASSWD_KEY1=0x12345678
+CONFIG_FSUTILS_PASSWD_KEY2=0x9abcdef0
+CONFIG_FSUTILS_PASSWD_KEY3=0x12345678
+CONFIG_FSUTILS_PASSWD_KEY4=0x9abcdef0
+</pre></ul>
+  </li>
+</ol>
+<p>
+  Password can only be decrypted with access to this key.  Note that this key could potentially be fished out of your FLASH image, but without any symbolic information, that would be a difficult job since the TEA KEY is binary data and not distinguishable from other binary data in the FLASH image.
+</p>
+<p>
+  If the password file is enabled (<code>CONFIG_FSUTILS_PASSWD=y</code>), then the fixed user credentials will not be used for the NSH session login.  Instead, the password file will be consulted to verify the user credentials.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="passwdromfs"><h2>5.4 Creating a Password File for a ROMFS File System</h2></a>
+  </td>
+  </tr>
+</table>
+<p>
+  What we want to accomplish is a ROMFS file system, mounted at <code>/etc</code> and containing the password file, <code>passwd</code> like:
+</p>
+<ul><pre>
+NuttShell (NSH)
+nsh> ls -Rl /etc
+/etc:
+ dr-xr-xr-x       0 .
+ dr-xr-xr-x       0 init.d/
+ -r--r--r--      39 passwd
+/etc/init.d:
+ dr-xr-xr-x       0 ..
+ -r--r--r--     110 rcS
+nsh>
+</pre></ul>
+<p>
+  Where <code>/etc/init.d/rcS</code> is the start-up script; <code>/etc/passwd</code> is a the password file.  Note that here we assume that you are already using a start-up script.  We can then piggyback the passwd file into the <code>/etc</code> file system already mounted for the NSH start up file as described above <a href=#custinit>above</a>.
+</p>
+<p>
+  I use the sim/nsh configuration to create a new password file, but other configurations could also be used.  That configuration already supports a ROMFS file system, passwords, and login prompts.  First, I make these changes to that configuration.
+</p>
+<ol>
+  <li>
+    <p>
+      Disable logins
+    </p>
+<ul><pre>
+- CONFIG_NSH_CONSOLE_LOGIN=y
++ # CONFIG_NSH_CONSOLE_LOGIN is not set
+  # CONFIG_NSH_TELNET_LOGIN is not set
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      Move the password file to a write-able file system:
+    </p>
+<ul><pre>
+- CONFIG_FSUTILS_PASSWD_PATH=&quot;/etc/passwd&quot;
++ CONFIG_FSUTILS_PASSWD_PATH=&quot;/tmp/passwd&quot;
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      Make the password file modifiable
+    </p>
+<ul><pre>
+- CONFIG_FSUTILS_PASSWD_READONLY=y
+# CONFIG_FSUTILS_PASSWD_READONLY is not set
+</pre></ul>
+  </li>
+</ol>
+<p>
+  Now rebuild the simulation.  No login should be required to enter the
+  shell and you should find the <a href="#cmduseradd"><code>useradd</code></a>, <a href="#cmduserdel"><code>userdel</code></a>, and <a href="#cmdpasswd"><code>passwd</code></a> commands
+  available in the help summary.
+</p>
+<p>
+  Use the NSH <a href="#cmduseradd"><code>useradd</code></a> command to add new uses with new user passwords like:
+</p>
+<ul><pre>
+nsh> useradd &lt;username&gt; &lt;password&gt;
+</pre></ul>
+<p>
+  Do this as many times as you would like.  Each time that you do this a new
+  entry with an encrypted password will be added to the <code>passwd</code> file at
+  <code>/tmp/passwd</code>.  You can see the content of the password file like:
+</p>
+<ul><pre>
+nsh> cat /tmp/passwd
+</pre></ul>
+<p>
+  When you are finished, you can simply copy the <code>/tmp/passwd</code> content from the
+  <code>cat</code> command and paste it into an editor.  Make sure to remove any
+  carriage returns that may have ended up on the file if you are using
+  Windows.
+</p>
+<p>
+  Then create/re-create the <code>nsh_romfsimg.h</code> file as described below.
+</p>
+<ol>
+  <li>
+    <p>
+      The content on the <code>nsh_romfsimg.h</code> header file is generated from a template directory structure.  Create the directory structure:
+    </p>
+<ul><pre>
+mkdir etc
+mkdir etc/init.d
+</pre></ul>
+    <p>
+       And copy your existing startup script into <code>etc/init.c</code> as <code>rcS</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      Save your new password file in the <code>etc/</code> directory as <code>passwd</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      Create the new ROMFS image.
+    </p>
+<ul><pre>
+genromfs -f romfs_img -d etc -V MyVolName
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      Convert the ROMFS image to a C header file
+    </p>
+<ul><pre>
+xxd -i romfs_img >nsh_romfsimg.h
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      Edit nsh_romfsimg.h, mark both data definitions as <code>const</code> so that that will be stored in FLASH.
+    </p>
+  </li>
+</ol>
+<p>
+  There is a good example of how to do this in the NSH simulation configuration at <a href="https://bitbucket.org/nuttx/boards/src/master/sim/nsh/">configs/sim/nsh<a>.  The ROMFS support files are provided at <a href="https://bitbucket.org/nuttx/boards/src/master/sim/include/">configs/sim/include<a> and the <a href="https://bitbucket.org/nuttx/boards/src/master/sim/include/README.txt">README.txt</a> file at the location provides detailed information about creating and modifying the ROMFS file system.
 </p>
 
 <table width ="100%">
