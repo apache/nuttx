@@ -150,7 +150,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 
 #ifdef CONFIG_SYSTEM_TIME64
   SYSCALL_LOOKUP(syscall_clock_systimer64, 0, STUB_clock_systimer64)
-#endif
+#else
   SYSCALL_LOOKUP(syscall_clock_systimer32, 0, STUB_clock_systimer32)
 #endif
   SYSCALL_LOOKUP(clock_getres,            2, STUB_clock_getres)
