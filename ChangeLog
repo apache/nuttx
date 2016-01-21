@@ -11332,4 +11332,10 @@
 	  read-only passwd file (2016-01-20).
 	* sim/nsh:  Uses the custom start up script, includes hoks for
 	  an MOTD message. (2016-01-20).
+	* include/clock.h and lots of other files:  If the 64-bit timer is
+	  selected, then use it whenever clock_systimer() is called rather
+	  then chopping the 64-bit timer down to 32-bits.  Add a new type,
+	  systime_t to represent the 32- or 64-bit system timer (2016-01-21).
+	* sched/clock/clock_systimespec.c:  Fix an error in a time
+	  conversion (2016-01-21).
 
