@@ -601,8 +601,8 @@ int sif_main(int argc, char *argv[])
 
             if (lis) {
                 const struct lis331dl_vector_s * a;
+                systime_t time_stamp = clock_systimer();
                 int i;
-                uint32_t time_stamp = clock_systimer();
 
                 /* Set to 400 Hz : 3 = 133 Hz/axis */
 
@@ -621,7 +621,8 @@ int sif_main(int argc, char *argv[])
                     }
                 }
 
-                printf("Time diff = %d\n", clock_systimer() - time_stamp);
+                printf("Time diff = %ld\n",
+                       (long)(clock_systimer() - time_stamp));
 
                 lis331dl_deinit(lis);
             }
