@@ -51,7 +51,7 @@
  ****************************************************************************/
 /* See nuttx/clock.h */
 
-#undef cloc_systimer32
+#undef clock_systimer32
 #undef clock_systimer64
 
 /****************************************************************************
@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cloc_systimer32
+ * Name: clock_systimer32
  *
  * Description:
  *   Return the current value of the 32-bit system timer counter
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-uint32_t cloc_systimer32(void)
+uint32_t clock_systimer32(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
   struct timespec ts;
