@@ -196,7 +196,7 @@ static struct kinetis_driver_s g_enet[CONFIG_ENET_NETHIFS];
  ****************************************************************************/
 /* Utility functions */
 
-#ifdef CONFIG_ENDIAN_BIG
+#ifndef KINETIS_BUFFERS_SWAP
 #  define kinesis_swap32(value) (value)
 #  define kinesis_swap16(value) (value)
 #else
@@ -346,6 +346,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 {
   struct enet_desc_s *txdesc;
   uint32_t regval;
+  uint8_t *buf;
 
   /* Since this can be called from kinetis_receive, it is possible that
    * the transmit queue is full, so check for that now.  If this is the
@@ -387,6 +388,22 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   txdesc->status2 = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
   txdesc->status1 |= (TXDESC_R | TXDESC_L | TXDESC_TC);
+
+  buf = (uint8_t*)kinesis_swap32((uint32_t)priv->dev.d_buf);
+  if (priv->rxdesc[priv->rxtail].data == buf)
+    {
+       struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
+
+       /* Data was written into the RX buffer, so swap the TX and RX buffers */
+
+       DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
+       rxdesc->data = txdesc->data;
+       txdesc->data = buf;
+    }
+  else
+    {
+       ASSERT(txdesc->data == buf);
+    }
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -463,6 +480,7 @@ static int kinetis_txpoll(struct net_driver_s *dev)
       /* Send the packet */
 
       kinetis_transmit(priv);
+      priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 
       /* Check if there is room in the device to hold another packet. If not,
        * return a non-zero value to terminate the poll.
@@ -514,22 +532,6 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 
       priv->dev.d_len = kinesis_swap16(priv->rxdesc[priv->rxtail].length);
       priv->dev.d_buf = (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
-
-      /* Doing this here could cause corruption! */
-
-      priv->rxdesc[priv->rxtail].status1 |= RXDESC_E;
-
-      /* Update the index to the next descriptor */
-
-      priv->rxtail++;
-      if (priv->rxtail >= CONFIG_ENET_NTXBUFFERS)
-        {
-          priv->rxtail = 0;
-        }
-
-      /* Indicate that there have been empty receive buffers produced */
-
-      putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
@@ -639,6 +641,27 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
         {
           NETDEV_RXDROPPED(&priv->dev);
         }
+
+      /* Point the packet buffer back to the next TX buffer, which will be used during
+       * the next write.  If the write queue is full, then this will point at an active
+       * buffer, which must not be written to.  This is OK because devif_poll won't be
+       * called unless the queue is not full.
+       */
+
+      priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+      priv->rxdesc[priv->rxtail].status1 |= RXDESC_E;
+
+      /* Update the index to the next descriptor */
+
+      priv->rxtail++;
+      if (priv->rxtail >= CONFIG_ENET_NRXBUFFERS)
+        {
+          priv->rxtail = 0;
+        }
+
+      /* Indicate that there have been empty receive buffers produced */
+
+      putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
     }
 }
 
@@ -942,7 +965,11 @@ static int kinetis_ifup(struct net_driver_s *dev)
   /* And enable the MAC itself */
 
   regval = getreg32(KINETIS_ENET_ECR);
-  regval |= ENET_ECR_ETHEREN;
+  regval |= ENET_ECR_ETHEREN
+#ifdef KINETIS_USE_DBSWAP
+        | ENET_ECR_DBSWP
+#endif
+        ;
   putreg32(regval, KINETIS_ENET_ECR);
 
   /* Indicate that there have been empty receive buffers produced */
@@ -1453,6 +1480,10 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
   priv->txtail = 0;
   priv->txhead = 0;
   priv->rxtail = 0;
+
+  /* Initialize the packet buffer, which is used when sending */
+
+  priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 }
 
 /****************************************************************************

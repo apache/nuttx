@@ -195,7 +195,10 @@
                                                /* Bit 5: Reserved */
 #define ENET_ECR_DBGEN               (1 << 6)  /* Bit 6:  Debug enable */
 #define ENET_ECR_STOPEN              (1 << 7)  /* Bit 7:  STOPEN Signal Control */
-                                               /* Bits 8-31: Reserved */
+#ifdef KINETIS_ENET_HAS_DBSWAP
+#define ENET_ECR_DBSWP               (1 << 8)  /* Bit 8:  Swap bytes */
+#endif
+                                               /* Bits 9-31: Reserved */
 /* MII Management Frame Register */
 
 #define ENET_MMFR_DATA_SHIFT         (0)       /* Bits 0-15: Management frame data */
@@ -454,7 +457,17 @@
  *   the underlying hardware writes the data in big-endian byte order.
  */
 
-#ifdef CONFIG_ENDIAN_BIG
+#ifdef KINETIS_ENET_HAS_DBSWAP
+# ifndef CONFIG_ENDIAN_BIG
+#  define KINETIS_USE_DBSWAP
+# endif
+#else
+# ifndef CONFIG_ENDIAN_BIG
+#  define KINETIS_BUFFERS_SWAP
+# endif
+#endif
+
+#ifndef KINETIS_BUFFERS_SWAP
 #  define TXDESC_ABC                 (1 << 9)  /* Legacy */
 #  define TXDESC_TC                  (1 << 10) /* Common */
 #  define TXDESC_L                   (1 << 11) /* Common */
@@ -474,7 +487,7 @@
 
 /* Enhanced (only) TX Buffer Descriptor Bit Definitions */
 
-#ifdef CONFIG_ENDIAN_BIG
+#ifndef KINETIS_BUFFERS_SWAP
 #  define TXDESC_TSE                 (1 << 8)
 #  define TXDESC_OE                  (1 << 9)
 #  define TXDESC_LCE                 (1 << 10)
@@ -508,7 +521,7 @@
 
 /* Legacy (and Common) RX Buffer Descriptor Bit Definitions */
 
-#ifdef CONFIG_ENDIAN_BIG
+#ifndef KINETIS_BUFFERS_SWAP
 #  define RXDESC_TR                  (1 << 0)
 #  define RXDESC_OV                  (1 << 1)
 #  define RXDESC_CR                  (1 << 2)
@@ -540,7 +553,7 @@
 
 /* Enhanced (only) TX Buffer Descriptor Bit Definitions */
 
-#ifdef CONFIG_ENDIAN_BIG
+#ifndef KINETIS_BUFFERS_SWAP
 #  define RXDESC_FRAG                (1 << 0)
 #  define RXDESC_IPV6                (1 << 1)
 #  define RXDESC_VLAN                (1 << 2)
@@ -575,6 +588,26 @@
 /* Legacy Buffer Descriptor */
 
 #ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef KINETIS_USE_DBSWAP
+/* When DBSWP is used to swap the bytes in hardware, it is done 32-bits
+ * at a time.  Therefore, all 16 bit elements need to be swapped to
+ * compensate.
+ */
+
+struct enet_desc_s
+{
+  uint16_t length;      /* Data length */
+  uint16_t status1;     /* Control and status */
+  uint8_t  *data;       /* Buffer address */
+  uint32_t status2;     /* Extended status */
+  uint16_t checksum;    /* Payload checksum */
+  uint16_t lenproto;    /* Header length + Protocol type */
+  uint32_t bdu;         /* BDU */
+  uint32_t timestamp;   /* Time stamp */
+  uint32_t reserved1;   /* unused */
+  uint32_t reserved2;   /* unused */
+};
+#else
 struct enet_desc_s
 {
   uint16_t status1;     /* Control and status */
@@ -587,7 +620,16 @@ struct enet_desc_s
   uint32_t timestamp;   /* Time stamp */
   uint32_t reserved1;   /* unused */
   uint32_t reserved2;   /* unused */
-}
+};
+#endif
+#else
+#ifdef KINETIS_USE_DBSWAP
+struct enet_desc_s
+{
+  uint16_t length;      /* Data length */
+  uint16_t status1;     /* Control and status */
+  uint8_t  *data;       /* Buffer address */
+};
 #else
 struct enet_desc_s
 {
@@ -595,6 +637,7 @@ struct enet_desc_s
   uint16_t length;      /* Data length */
   uint8_t  *data;       /* Buffer address */
 };
+#endif
 #endif
 
 /********************************************************************************************
