@@ -507,9 +507,12 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
     {
       nllvdbg("Lost connection: %04x\n", flags);
 
-      /* Report not connected */
+      if (psock->s_conn != NULL)
+        {
+          /* Report not connected */
 
-      net_lostconnection(psock, flags);
+          net_lostconnection(psock, flags);
+        }
 
       /* Free write buffers and terminate polling */
 
