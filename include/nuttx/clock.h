@@ -207,7 +207,10 @@ extern "C"
 
 #ifdef __HAVE_KERNEL_GLOBALS
 EXTERN volatile systime_t g_system_timer;
+
+#ifndef CONFIG_SYSTEM_TIME64
 #  define clock_systimer() g_system_timer
+#endif
 #endif
 
 /****************************************************************************
@@ -253,7 +256,10 @@ void clock_synchronize(void);
  *   Return the current value of the 32/64-bit system timer counter.
  *   Indirect access to the system timer counter is required through this
  *   function if the execution environment does not have direct access to
- *   kernel globaldata
+ *   kernel global data.
+ *
+ *   Use of this function is also required to assue atomic access to the
+ *   64-bit system timer.
  *
  * Parameters:
  *   None
@@ -265,7 +271,7 @@ void clock_synchronize(void);
  *
  ****************************************************************************/
 
-#ifndef __HAVE_KERNEL_GLOBALS
+#if !defined(__HAVE_KERNEL_GLOBALS) || defined(CONFIG_SYSTEM_TIME64)
 systime_t clock_systimer(void);
 #endif
 
