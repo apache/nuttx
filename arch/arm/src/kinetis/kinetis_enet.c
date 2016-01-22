@@ -939,15 +939,15 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   putreg32((uint32_t)priv->txdesc, KINETIS_ENET_TDSR);
 
-  /* Indicate that there have been empty receive buffers produced */
-
-  putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
-
   /* And enable the MAC itself */
 
   regval = getreg32(KINETIS_ENET_ECR);
   regval |= ENET_ECR_ETHEREN;
   putreg32(regval, KINETIS_ENET_ECR);
+
+  /* Indicate that there have been empty receive buffers produced */
+
+  putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
 
   /* Set and activate a timer process */
 
