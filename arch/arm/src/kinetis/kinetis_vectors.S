@@ -371,7 +371,8 @@ _vectors:
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
       defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100) || \
+      defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
 
 	.word	kinetis_dmach0		/* Vector 16: DMA channel 0 transfer complete */
 	.word	kinetis_dmach1		/* Vector 17: DMA channel 1 transfer complete */
@@ -680,7 +681,8 @@ handlers:
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
       defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100) || \
+      defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
 
 	HANDLER kinetis_dmach0, KINETIS_IRQ_DMACH0		/* Vector 16: DMA channel 0 transfer complete */
 	HANDLER kinetis_dmach1, KINETIS_IRQ_DMACH1		/* Vector 17: DMA channel 1 transfer complete */

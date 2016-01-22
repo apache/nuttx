@@ -561,6 +561,7 @@
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
 #  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_ENET_HAS_DBSWAP            /* MAC-NET supports DBSWP bit */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */

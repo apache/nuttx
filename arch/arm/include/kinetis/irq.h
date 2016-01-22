@@ -276,7 +276,8 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
       defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100) || \
+      defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
 
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
 #  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */

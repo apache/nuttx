@@ -310,7 +310,8 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
       defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100) || \
+      defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
 
 # define KINETIS_FLASH_BASE     0x00000000 /* –0x0fffffff Program flash and read-
                                             *             only data (Includes exception
