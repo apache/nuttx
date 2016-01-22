@@ -1046,7 +1046,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       WRB_SEQNO(wrb) = (unsigned)-1;
       WRB_NRTX(wrb)  = 0;
-      WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
+      result = WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
 
       /* Dump I/O buffer chain */
 
@@ -1065,7 +1065,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       send_txnotify(psock, conn);
       net_unlock(save);
-      result = len;
     }
 
   /* Set the socket state to idle */

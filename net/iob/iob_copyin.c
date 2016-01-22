@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/iob/iob_copyin.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,17 +89,21 @@ typedef CODE struct iob_s *(*iob_alloc_t)(bool throttled);
  *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
  *  starting at 'offset', extending the chain as necessary.
  *
+ * Returned Value:
+ *  The number of uncopied bytes left if >= 0 OR a negative error code.
+ *
  ****************************************************************************/
 
 static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
                                unsigned int len, unsigned int offset,
-                               bool throttled, iob_alloc_t allocator)
+                               bool throttled, bool can_block)
 {
   FAR struct iob_s *head = iob;
   FAR struct iob_s *next;
   FAR uint8_t *dest;
   unsigned int ncopy;
   unsigned int avail;
+  unsigned int total = len;
 
   nllvdbg("iob=%p len=%u offset=%u\n", iob, len, offset);
   DEBUGASSERT(iob && src);
@@ -207,13 +211,25 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
       if (len > 0 && !next)
         {
-          /* Yes.. allocate a new buffer */
+          /* Yes.. allocate a new buffer.
+           *
+           * Copy as many bytes as possible.  If we have successfully copied
+           * any already don't block, otherwise block if we're allowed.
+           */
 
-          next = allocator(throttled);
+          if (!can_block || len < total)
+            {
+              next = iob_tryalloc(throttled);
+            }
+          else
+            {
+              next = iob_alloc(throttled);
+            }
+
           if (next == NULL)
             {
               ndbg("ERROR: Failed to allocate I/O buffer\n");
-              return -ENOMEM;
+              return len;
             }
 
           /* Add the new, empty I/O buffer to the end of the buffer chain. */
@@ -226,7 +242,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       offset = 0;
     }
 
-  return OK;
+  return 0;
 }
 
 /****************************************************************************
@@ -245,7 +261,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                unsigned int len, unsigned int offset, bool throttled)
 {
-  return iob_copyin_internal(iob, src, len, offset, throttled, iob_alloc);
+  return len - iob_copyin_internal(iob, src, len, offset, throttled, true);
 }
 
 /****************************************************************************
@@ -261,6 +277,12 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                   unsigned int len, unsigned int offset, bool throttled)
 {
-  return iob_copyin_internal(iob, src, len, offset, throttled, iob_tryalloc);
+  if (iob_copyin_internal(iob, src, len, offset, throttled, false) == 0)
+    {
+      return OK;
+    }
+  else
+    {
+      return -ENOMEM;
+    }
 }
-
