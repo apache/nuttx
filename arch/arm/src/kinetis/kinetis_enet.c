@@ -347,6 +347,16 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   struct enet_desc_s *txdesc;
   uint32_t regval;
 
+  /* Since this can be called from kinetis_receive, it is possible that
+   * the transmit queue is full, so check for that now.  If this is the
+   * case, the outgoing packet will be dropped (e.g. an ARP reply)
+   */
+
+  if (kinetics_txringfull(priv))
+    {
+      return -EBUSY;
+    }
+
   /* When we get here the TX descriptor should show that the previous
    * transfer has  completed.  If we get here, then we are committed to
    * sending a packet; Higher level logic must have assured that there is
