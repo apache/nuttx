@@ -11344,3 +11344,8 @@
 	  From Andrew Webster (2016-01-21).
 	* arch/arm/src/kinetis: Add support for the MK60N512VLL100 Kinetis part.
 	  From Andrew Webster (2016-01-21).
+	* net/tcp and net/iob:  Numerous fixes, mostly relate to TCP and IOB
+	  buffering and race conditions.  These were necessary for for the
+	  NuttX networking later to be stable in some stress testing.  From
+	  Andrew Webster (2016-01-22).
+
