@@ -1343,10 +1343,12 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 
 #ifdef CONFIG_ENET_USEMII
   rcr = ENET_RCR_MII_MODE | ENET_RCR_CRCFWD |
-        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT;
+        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT |
+        ENET_RCR_MII_MODE;
 #else
   rcr = ENET_RCR_RMII_MODE | ENET_RCR_CRCFWD |
-        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT;
+        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT |
+        ENET_RCR_MII_MODE;
 #endif
   tcr = 0;
 
