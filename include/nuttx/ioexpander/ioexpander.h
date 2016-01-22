@@ -47,7 +47,7 @@
 
 #ifndef CONFIG_PCA9555_INT_DISABLE
 #ifndef CONFIG_SCHED_WORKQUEUE
-#error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
+#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
 #endif
 #endif
 
@@ -223,7 +223,7 @@
 #define IOEXP_MULTIREADBUF(dev,pins,vals,count) \
                           ((dev)->ops->ioe_multireadbuf(dev,pin,vals,count))
 
-#endif
+#endif /* CONFIG_IOEXPANDER_MULTIPIN */
 
 /****************************************************************************
  * Public Types
@@ -238,14 +238,14 @@ struct ioexpander_ops_s
   CODE int (*ioe_option)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                          int opt, void *val);
   CODE int (*ioe_writepin)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                        bool value);
+                           bool value);
   CODE int (*ioe_readpin)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
   CODE int (*ioe_readbuf)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
   CODE int (*ioe_multiwritepin)(FAR struct ioexpander_dev_s *dev,
-                             uint8_t *pins, bool *values, int count);
+                                uint8_t *pins, bool *values, int count);
   CODE int (*ioe_multireadpin)(FAR struct ioexpander_dev_s *dev,
                                uint8_t *pins, bool *values, int count);
   CODE int (*ioe_multireadbuf)(FAR struct ioexpander_dev_s *dev,
@@ -257,12 +257,11 @@ struct ioexpander_dev_s
 {
   FAR const struct ioexpander_ops_s *ops;
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
-  struct work_s                      work;   /* Supports the interrupt handling "bottom half" */
-  int                                sigpid; /* PID to be signaled in case of interrupt */
-  int                                sigval; /* signal to be sent in case of interrupt */
+  struct work_s work;   /* Supports the interrupt handling "bottom half" */
+  int sigpid;           /* PID to be signaled in case of interrupt */
+  int sigval;           /* Signal to be sent in case of interrupt */
 #endif
 };
 
-#endif //CONFIG_IOEXPANDER
-#endif //__INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H
-
+#endif /* CONFIG_IOEXPANDER */
+#endif /* __INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H */
