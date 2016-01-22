@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1144,6 +1144,35 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
 /****************************************************************************
+ * Function: psock_tcp_cansend
+ *
+ * Description:
+ *   psock_tcp_cansend() returns a value indicating if a write to the socket
+ *   would block.  No space in the buffer is actually reserved, so it is
+ *   possible that the write may still block if the buffer is filled by
+ *   another means.
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be succesfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *   -ENOTCONN
+ *     The socket is not connected.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level
+ *
+ ****************************************************************************/
+
+int psock_tcp_cansend(FAR struct socket *psock);
+
+/****************************************************************************
  * Function: tcp_wrbuffer_initialize
  *
  * Description:
@@ -1195,6 +1224,21 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
+
+/****************************************************************************
+ * Function: tcp_wrbuffer_test
+ *
+ * Description:
+ *   Check if there is room in the write buffer.  Does not reserve any space.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+int tcp_wrbuffer_test(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************

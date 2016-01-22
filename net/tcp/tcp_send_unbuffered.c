@@ -880,4 +880,30 @@ errout:
   return ERROR;
 }
 
+/****************************************************************************
+ * Function: psock_tcp_cansend
+ *
+ * Description:
+ *   psock_tcp_cansend() returns a value indicating if a write to the socket
+ *   would block.  It is still possible that the write may block if another
+ *   write occurs first.
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK (Function not implemented).
+ *
+ * Assumptions:
+ *   None
+ *
+ ****************************************************************************/
+
+int psock_tcp_cansend(FAR struct socket *psock)
+{
+  /* TODO: return OK unless someone is waiting for a packet to send */
+
+  return OK;
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_TCP && !CONFIG_NET_TCP_WRITE_BUFFERS */

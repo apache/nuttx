@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_netpoll.c
  *
- *   Copyright (C) 2008-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -281,6 +281,10 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
        */
 
       fds->revents |= (POLLERR | POLLHUP);
+    }
+  else if (_SS_ISCONNECTED(psock->s_flags) && psock_tcp_cansend(psock) >= 0)
+    {
+      fds->revents |= (POLLWRNORM & fds->events);
     }
 
   /* Check if any requested events are already in effect */

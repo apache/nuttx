@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send_buffered.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Jason Jiang  <jasonj@live.cn>
  *
@@ -1102,6 +1102,55 @@ errout_with_lock:
 errout:
   set_errno(err);
   return ERROR;
+}
+
+/****************************************************************************
+ * Function: psock_tcp_cansend
+ *
+ * Description:
+ *   psock_tcp_cansend() returns a value indicating if a write to the socket
+ *   would block.  No space in the buffer is actually reserved, so it is
+ *   possible that the write may still block if the buffer is filled by
+ *   another means.
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be succesfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *   -ENOTCONN
+ *     The socket is not connected.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level
+ *
+ ****************************************************************************/
+
+int psock_tcp_cansend(FAR struct socket *psock)
+{
+  if (!psock || psock->s_crefs <= 0)
+    {
+      ndbg("ERROR: Invalid socket\n");
+      return -EBADF;
+    }
+
+  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+    {
+      ndbg("ERROR: Not connected\n");
+      return -ENOTCONN;
+    }
+
+  if (tcp_wrbuffer_test())
+    {
+      return -EWOULDBLOCK;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_TCP_WRITE_BUFFERS */
