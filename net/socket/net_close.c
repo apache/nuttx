@@ -223,7 +223,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
 
-  else if (conn->unacked != 0)
+  else if (conn->unacked != 0 || !sq_empty(&conn->write_q))
     {
       /* No... we are still waiting for ACKs.  Drop any received data, but
        * do not yet report TCP_CLOSE in the response.
@@ -357,14 +357,11 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   if (psock->s_sndcb)
     {
-      tcp_callback_free(conn, psock->s_sndcb);
       psock->s_sndcb = NULL;
     }
 #endif
 
-  /* There shouldn't be any callbacks registered. */
-
-  DEBUGASSERT(conn && conn->list == NULL);
+  DEBUGASSERT(conn != NULL);
 
   /* Check for the case where the host beat us and disconnected first */
 
