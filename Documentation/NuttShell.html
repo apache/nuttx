@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: January 21, 2016</p>
+      <p>Last Updated: January 22, 2016</p>
     </td>
   </tr>
 </table>
@@ -538,7 +538,7 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#fixedlogin">5.2 Fixed Credentials</a>
+    <a href="#verifymethods">5.2 Verification of Credentials</a>
   </td>
 </tr>
 <tr>
@@ -3256,7 +3256,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>passwd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_FSUTILS_PASSWD</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code></td>
     <td><code>CONFIG_NSH_DISABLE_PASSWD</code></td>
   </tr>
   <tr>
@@ -3369,12 +3369,12 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>useradd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_FSUTILS_PASSWD</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code></td>
     <td><code>CONFIG_NSH_DISABLE_USERADD</code></td>
   </tr>
   <tr>
     <td><b><code>userdel</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_FSUTILS_PASSWD</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code></td>
     <td><code>CONFIG_NSH_DISABLE_USERDEL</code></td>
   </tr>
   <tr>
@@ -4763,7 +4763,17 @@ NuttShell (NSH)
 nsh>
 </pre></ul>
 <p>
-  But after a certain number of failed login attempts, the session will be closed.  That number is controlled by:
+  After each failed login attempt, a delay can be set up.
+  The purpose of this delay is to discourage attempts to crack the password by brute force.
+  That delay is configured with
+</p>
+<ul><pre>
+CONFIG_NSH_LOGIN_FAILDELAY=0
+</pre></ul>
+<p>
+  This setting provides the login failure delay in units of milliseconds.
+  The system will pause this amount of time after each failed login attempt.
+  After a certain number of failed login attempts, the session will be closed.  That number is controlled by:
 </p>
 <ul><pre>
 CONFIG_NSH_LOGIN_FAILCOUNT=3
@@ -4772,20 +4782,66 @@ CONFIG_NSH_LOGIN_FAILCOUNT=3
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="fixedlogin"><h2>5.2 Fixed Credentials</h2></a>
+    <a name="verifymethods"><h2>5.2 Verification of Credentials</h2></a>
   </td>
   </tr>
 </table>
 <p>
-  The simplest implementation simply uses fixed login credentials controlled by 
+  There are three ways that NSH can be configured to verify user credentials at login time:
 </p>
+<ol>
+  <li>
+    <p>
+      The simplest implementation simply uses fixed login credentials and is selected with:
+    </p>
+<ul><pre>
+CONFIG_NSH_LOGIN_FIXED=y
+</pre></ul>
+    <p>
+      The fixed login credentials are selected via: 
+    </p>
 <ul><pre>
 CONFIG_NSH_LOGIN_USERNAME=admin
 CONFIG_NSH_LOGIN_PASSWORD="Administrator"
 </pre></ul>
-<p>
-  This is not very flexible since there can be only one user and the password is fixed in the FLASH image. This option is also not very secure because a malicious user could get the password by just looking at the <code>.text</code> stings in the flash image.
-</p>
+    <p>
+      This is not very flexible since there can be only one user and the password is fixed in the FLASH image. This option is also not very secure because a malicious user could get the password by just looking at the <code>.text</code> stings in the flash image.
+    </p>
+  </li>
+  <li>
+    <p>
+      NSH can also be configured to defer the entire user credential verification to platform-specific logic with this setting:
+    </p>
+<ul><pre>
+CONFIG_NSH_LOGIN_PLATFORM=y
+</pre></ul>
+    <p>
+      In this case, NSH will call a platform-specific function to perform the verification of user credentials.
+      The platform-specific logic must provide a function with the following prototype:
+    </p>
+<ul><pre>
+int platform_user_verify(FAR const char *username, FAR const char *password);
+</pre></ul>
+     <p>
+       which is prototyped an described in <code>apps/include/nsh.h</code> and which may be included like:
+     </p>
+<ul><pre>
+#include &lt;apps/nsh.h&gt;
+</pre></ul>
+     <p>
+        An appropriate place to implement this function might be in the directory <code>apps/platform/&lt;board&gt;</code>.
+     </p>
+   <li>
+     <p>
+       A final option is to use a password file contained encrypted password information.
+       This final option is selected with the following and described in more detail in the
+       following paragraph.
+     </p>
+<ul><pre>
+CONFIG_NSH_LOGIN_PASSWD=y
+</pre></ul>
+   </li>
+</ol>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -4795,7 +4851,14 @@ CONFIG_NSH_LOGIN_PASSWORD="Administrator"
   </tr>
 </table>
 <p>
-  NuttX can also be configured to support a password file, by default at <code>/etc/passwd</code>.  This option enables support for a password file:
+  NuttX can also be configured to support a password file, by default at <code>/etc/passwd</code>.
+  This option enables support for a password file:
+</p>
+<ul><pre>
+CONFIG_NSH_LOGIN_PASSWD=y
+</pre></ul>
+<p>
+This options requires that you have selected <code>CONFIG_FSUTILS_PASSWD=y</code> to enable the access methods of <code>apps/fsutils/passwd</code>:
 </p>
 <ul><pre>
 CONFIG_FSUTILS_PASSWD=y
@@ -4845,7 +4908,7 @@ CONFIG_FSUTILS_PASSWD_KEY4=0x9abcdef0
   Password can only be decrypted with access to this key.  Note that this key could potentially be fished out of your FLASH image, but without any symbolic information, that would be a difficult job since the TEA KEY is binary data and not distinguishable from other binary data in the FLASH image.
 </p>
 <p>
-  If the password file is enabled (<code>CONFIG_FSUTILS_PASSWD=y</code>), then the fixed user credentials will not be used for the NSH session login.  Instead, the password file will be consulted to verify the user credentials.
+  If the password file is enabled (<code>CONFIG_NSH_LOGIN_PASSWD=y</code>), then the fixed user credentials will not be used for the NSH session login.  Instead, the password file will be consulted to verify the user credentials.
 </p>
 
 <table width ="100%">
