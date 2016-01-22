@@ -95,7 +95,7 @@
 #define NENET_NBUFFERS (CONFIG_ENET_NTXBUFFERS+CONFIG_ENET_NRXBUFFERS)
 
 #ifndef CONFIG_NET_MULTIBUFFER
-#  errror "CONFIG_NET_MULTIBUFFER is required in the configuration"
+#  error "CONFIG_NET_MULTIBUFFER is required in the configuration"
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -789,7 +789,7 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...)
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUT(&priv->dev);
+  NETDEV_TXTIMEOUTS(&priv->dev);
 
   /* Take the interface down and bring it back up.  The is the most agressive
    * hardware reset.
@@ -1174,7 +1174,7 @@ static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   putreg32(data |
            2 << ENET_MMFR_TA_SHIFT |
-           (uint32_t)regaddr << ENET_MMFR_PA_SHIFT |
+           (uint32_t)regaddr << ENET_MMFR_RA_SHIFT |
            (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
            ENET_MMFR_OP_WRMII |
            1 << ENET_MMFR_ST_SHIFT,
@@ -1232,7 +1232,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
   /* Initiatate the MII Management read */
 
   putreg32(2 << ENET_MMFR_TA_SHIFT |
-           (uint32_t)regaddr << ENET_MMFR_PA_SHIFT |
+           (uint32_t)regaddr << ENET_MMFR_RA_SHIFT |
            (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
            ENET_MMFR_OP_RDMII |
            1 << ENET_MMFR_ST_SHIFT,
@@ -1390,7 +1390,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
   /* Get an aligned RX descriptor (array) address */
 
   addr        +=  CONFIG_ENET_NTXBUFFERS * sizeof(struct enet_desc_s);
-  priv->txdesc = (struct enet_desc_s *)addr;
+  priv->rxdesc = (struct enet_desc_s *)addr;
 
   /* Get the beginning of the first aligned buffer */
 
@@ -1495,7 +1495,7 @@ int kinetis_netinitialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf < CONFIG_ENET_NETHIFS);
+  DEBUGASSERT(intf < CONFIG_ENET_NETHIFS);
   priv = &g_enet[intf];
 
   /* Enable the ENET clock */
