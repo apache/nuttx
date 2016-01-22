@@ -312,7 +312,7 @@ static bool kinetics_txringfull(FAR struct kinetis_driver_s *priv)
    */
 
   txnext = priv->txhead + 1;
-  if (txnext > CONFIG_ENET_NTXBUFFERS)
+  if (txnext >= CONFIG_ENET_NTXBUFFERS)
     {
       txnext = 0;
     }
@@ -353,7 +353,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   txdesc = &priv->txdesc[priv->txhead];
   priv->txhead++;
-  if (priv->txhead > CONFIG_ENET_NTXBUFFERS)
+  if (priv->txhead >= CONFIG_ENET_NTXBUFFERS)
     {
       priv->txhead = 0;
     }
@@ -490,7 +490,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 {
   /* Loop while there are received packets to be processed */
 
-  while ((priv->rxdesc[priv->rxtail].status1 & RXDESC_E) != 0)
+  while ((priv->rxdesc[priv->rxtail].status1 & RXDESC_E) == 0)
     {
       /* Update statistics */
 
@@ -660,7 +660,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
       /* Yes.. bump up the tail pointer, making space for a new TX descriptor */
 
       priv->txtail++;
-      if (priv->txtail > CONFIG_ENET_NTXBUFFERS)
+      if (priv->txtail >= CONFIG_ENET_NTXBUFFERS)
         {
           priv->txtail = 0;
         }
@@ -795,8 +795,8 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...)
    * hardware reset.
    */
 
-  (void)kinetis_ifup(&priv->dev);
   (void)kinetis_ifdown(&priv->dev);
+  (void)kinetis_ifup(&priv->dev);
 
   /* Then poll uIP for new XMIT data */
 
