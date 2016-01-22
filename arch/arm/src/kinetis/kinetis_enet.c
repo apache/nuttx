@@ -651,13 +651,12 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 
 static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
 {
-  struct enet_desc_s *txdesc;
   uint32_t regval;
 
   /* Verify that the oldest descriptor descriptor completed */
 
-  txdesc = &priv->txdesc[priv->txtail];
-  if ((txdesc->status1 & TXDESC_R) == 0)
+  while (((priv->txdesc[priv->txtail].status1 & TXDESC_R) == 0) &&
+         (priv->txtail != priv->txhead))
     {
       /* Yes.. bump up the tail pointer, making space for a new TX descriptor */
 
