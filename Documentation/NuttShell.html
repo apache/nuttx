@@ -4738,9 +4738,9 @@ mount -t vfat /dev/ram1 /tmp
   </td>
   </tr>
 </table>
-
 <p>
-  NuttShell sessions can be protected by requiring that the user supplying username and password credentials at the beginning of the session. Logins can be enabled for standard USB or serial consoles with:
+  NuttShell sessions can be protected by requiring that the user supply username and password credentials at the beginning of the session.
+  Logins can be enabled for standard USB or serial consoles with:
 </p>
 <ul><pre>
 CONFIG_NSH_CONSOLE_LOGIN=y
@@ -4749,10 +4749,11 @@ CONFIG_NSH_CONSOLE_LOGIN=y
   Logins for Telnet sessions can be enabled separately with:
 </p>
 <ul><pre>
-CONFIG_NSH_CONSOLE_LOGIN=y
+CONFIG_NSH_TELNET_LOGIN=y
 </pre></ul>
 <p>
-  Logins can be enable for either or both session types.  On a successful login, the use will have access to the NSH session:
+  Logins can be enabled for either or both session types.
+  On a successful login, the user will have access to the NSH session:
 </p>
 <ul><pre>
 login: admin
@@ -4760,7 +4761,7 @@ password:
 User Logged-in!
 
 NuttShell (NSH)
-nsh>
+nsh&gt;
 </pre></ul>
 <p>
   After each failed login attempt, a delay can be set up.
@@ -4773,7 +4774,8 @@ CONFIG_NSH_LOGIN_FAILDELAY=0
 <p>
   This setting provides the login failure delay in units of milliseconds.
   The system will pause this amount of time after each failed login attempt.
-  After a certain number of failed login attempts, the session will be closed.  That number is controlled by:
+  After a certain number of failed login attempts, the session will be closed.
+  That number is controlled by:
 </p>
 <ul><pre>
 CONFIG_NSH_LOGIN_FAILCOUNT=3
@@ -4802,7 +4804,7 @@ CONFIG_NSH_LOGIN_FIXED=y
     </p>
 <ul><pre>
 CONFIG_NSH_LOGIN_USERNAME=admin
-CONFIG_NSH_LOGIN_PASSWORD="Administrator"
+CONFIG_NSH_LOGIN_PASSWORD=&quot;Administrator&quot;
 </pre></ul>
     <p>
       This is not very flexible since there can be only one user and the password is fixed in the FLASH image. This option is also not very secure because a malicious user could get the password by just looking at the <code>.text</code> stings in the flash image.
@@ -4867,7 +4869,7 @@ CONFIG_FSUTILS_PASSWD=y
   And this determines the location of the password file in a mounted volume:
 </p>
 <ul><pre>
-CONFIG_FSUTILS_PASSWD_PATH="/etc/passwd"
+CONFIG_FSUTILS_PASSWD_PATH=&quot;/etc/passwd&quot;
 </pre></ul>
 <p>
   <code>/etc/passwd</code> is a <i>standard</i> location, but you will need to locate the password where ever you have a mounted volume.
@@ -4923,7 +4925,7 @@ CONFIG_FSUTILS_PASSWD_KEY4=0x9abcdef0
 </p>
 <ul><pre>
 NuttShell (NSH)
-nsh> ls -Rl /etc
+nsh&gt; ls -Rl /etc
 /etc:
  dr-xr-xr-x       0 .
  dr-xr-xr-x       0 init.d/
@@ -4931,7 +4933,7 @@ nsh> ls -Rl /etc
 /etc/init.d:
  dr-xr-xr-x       0 ..
  -r--r--r--     110 rcS
-nsh>
+nsh&gt;
 </pre></ul>
 <p>
   Where <code>/etc/init.d/rcS</code> is the start-up script; <code>/etc/passwd</code> is a the password file.  Note that here we assume that you are already using a start-up script.  We can then piggyback the passwd file into the <code>/etc</code> file system already mounted for the NSH start up file as described above <a href=#custinit>above</a>.
@@ -4981,7 +4983,7 @@ nsh>
   Use the NSH <a href="#cmduseradd"><code>useradd</code></a> command to add new uses with new user passwords like:
 </p>
 <ul><pre>
-nsh> useradd &lt;username&gt; &lt;password&gt;
+nsh&gt; useradd &lt;username&gt; &lt;password&gt;
 </pre></ul>
 <p>
   Do this as many times as you would like.  Each time that you do this a new
@@ -4989,7 +4991,7 @@ nsh> useradd &lt;username&gt; &lt;password&gt;
   <code>/tmp/passwd</code>.  You can see the content of the password file like:
 </p>
 <ul><pre>
-nsh> cat /tmp/passwd
+nsh&gt; cat /tmp/passwd
 </pre></ul>
 <p>
   When you are finished, you can simply copy the <code>/tmp/passwd</code> content from the
