@@ -11340,4 +11340,7 @@
 	  conversion (2016-01-21).
 	* include/nuttx/clock.h:  Get rid of clock_systimer32() and
 	  clock_systime64().  There is now only clock_systimer() (2016-01-21).
-
+	* arch/arm/src/kinetis:  Numerous updates to the Kinetis ENET driver.
+	  From Andrew Webster (2016-01-21).
+	* arch/arm/src/kinetis: Add support for the MK60N512VLL100 Kinetis part.
+	  From Andrew Webster (2016-01-21).

@@ -138,7 +138,7 @@ int clock_systimespec(FAR struct timespec *ts)
       uint64_t secs;
       uint64_t nsecs;
 
-      /* Get the time since power-on in seconds and microsecond.
+      /* Get the time since power-on in seconds and microseconds.
        * NOTE that overflow is still possible if we use a 64-bit
        * timer.
        */
