@@ -1487,6 +1487,49 @@ static void kinetis_reset(struct kinetis_driver_s *priv)
     }
 }
 
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
+{
+  int ret;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
+
+  switch (cmd)
+  {
+  case SIOCGMIIPHY: /* Get MII PHY address */
+    {
+      struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      req->phy_id = CONFIG_ENET_PHYADDR;
+      ret = OK;
+    }
+    break;
+
+  case SIOCGMIIREG: /* Get register from MII PHY */
+    {
+      struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+    }
+    break;
+
+  case SIOCSMIIREG: /* Set register in MII PHY */
+    {
+      struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+    }
+    break;
+
+  default:
+    ret = -ENOTTY;
+    break;
+  }
+
+  return ret;
+}
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1623,6 +1666,9 @@ int kinetis_netinitialize(int intf)
 #ifdef CONFIG_NET_IGMP
   priv->dev.d_addmac  = kinetis_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = kinetis_rmmac;    /* Remove multicast MAC address */
+#endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  priv->dev.d_ioctl   = kinetis_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
 
