@@ -1054,9 +1054,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        */
 
       sq_addlast(&wrb->wb_node, &conn->write_q);
-      nvdbg("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
-            wrb, WRB_PKTLEN(wrb),
-            conn->write_q.head, conn->write_q.tail);
+      nllvdbg("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
+              wrb, WRB_PKTLEN(wrb),
+              conn->write_q.head, conn->write_q.tail);
 
       /* Notify the device driver of the availability of TX data */
 
