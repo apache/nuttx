@@ -386,7 +386,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   txdesc->bdu     = 0x00000000;
   txdesc->status2 = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
-  txdesc->status1 = (TXDESC_R | TXDESC_L | TXDESC_TC | TXDESC_W);
+  txdesc->status1 |= (TXDESC_R | TXDESC_L | TXDESC_TC);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
