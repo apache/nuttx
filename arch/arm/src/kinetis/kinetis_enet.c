@@ -865,6 +865,7 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
 static int kinetis_ifup(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  uint8_t *mac = dev->d_mac.ether_addr_octet;
   uint32_t regval;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
@@ -882,6 +883,12 @@ static int kinetis_ifup(struct net_driver_s *dev)
   /* Configure the MII interface */
 
   kinetis_initmii(priv);
+
+  /* Set the MAC address */
+
+  putreg32((mac[0] << 24) | (mac[1] << 16) | (mac[2] << 8) | mac[3],
+           KINETIS_ENET_PALR);
+  putreg32((mac[4] << 24) | (mac[5] << 16), KINETIS_ENET_PAUR);
 
   /* Clear the Individual and Group Address Hash registers */
 
