@@ -200,8 +200,13 @@ static struct kinetis_driver_s g_enet[CONFIG_ENET_NETHIFS];
 #  define kinesis_swap32(value) (value)
 #  define kinesis_swap16(value) (value)
 #else
+#if 0 /* Use builtins if the compiler supports them */
 static inline uint32_t kinesis_swap32(uint32_t value);
 static inline uint16_t kinesis_swap16(uint16_t value);
+#else
+#  define kinesis_swap32 __builtin_bswap32
+#  define kinesis_swap16 __builtin_bswap16
+#endif
 #endif
 
 /* Common TX logic */
@@ -261,6 +266,7 @@ static void kinetis_reset(struct kinetis_driver_s *priv);
  *
  ****************************************************************************/
 
+#if 0 /* Use builtins if the compiler supports them */
 #ifndef CONFIG_ENDIAN_BIG
 static inline uint32_t kinesis_swap32(uint32_t value)
 {
@@ -287,6 +293,7 @@ static inline uint16_t kinesis_swap16(uint16_t value)
   );
   return result;
 }
+#endif
 #endif
 
 /****************************************************************************
