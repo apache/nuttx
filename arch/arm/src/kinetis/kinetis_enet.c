@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/kinetis_enet.c
  *
- *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,6 +146,8 @@
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
+#define KINETIS_BUF_SIZE  ((CONFIG_NET_ETH_MTU & 0xfffffff0) + 0x10)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -180,7 +182,7 @@ struct kinetis_driver_s
    * requirements.
    */
 
-  uint8_t buffers[NENET_NBUFFERS * CONFIG_NET_ETH_MTU + 16];
+  uint8_t buffers[NENET_NBUFFERS * KINETIS_BUF_SIZE + 16];
 };
 
 /****************************************************************************
@@ -911,7 +913,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set the RX buffer size */
 
-  putreg32(CONFIG_NET_ETH_MTU, KINETIS_ENET_MRBR);
+  putreg32(KINETIS_BUF_SIZE, KINETIS_ENET_MRBR);
 
   /* Point to the start of the circular RX buffer descriptor queue */
 
@@ -1406,7 +1408,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 #ifdef CONFIG_ENET_ENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
-      addr                   += CONFIG_NET_ETH_MTU;
+      addr                   += KINETIS_BUF_SIZE;
     }
 
   /* Then fill in the RX descriptors */
@@ -1420,7 +1422,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
 #endif
-      addr                   += CONFIG_NET_ETH_MTU;
+      addr                   += KINETIS_BUF_SIZE;
     }
 
   /* Set the wrap bit in the last descriptors to form a ring */
