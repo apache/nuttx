@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/ioexpander/ioexpander.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@
 #define IOEXP_SETOPTION(dev,pin,opt,val) ((dev)->ops->ioe_option(dev,pin,opt,val))
 
 /****************************************************************************
- * Name: IOEXP_WRITE
+ * Name: IOEXP_WRITEPIN
  *
  * Description:
  *   Set the pin level. Required.
@@ -164,7 +164,7 @@
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 
 /****************************************************************************
- * Name: IOEXP_MULTIWRITE
+ * Name: IOEXP_MULTIWRITEPIN
  *
  * Description:
  *   Set the pin level for multiple pins. This routine may be faster than
@@ -237,14 +237,14 @@ struct ioexpander_ops_s
                             int direction);
   CODE int (*ioe_option)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                          int opt, void *val);
-  CODE int (*ioe_write)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+  CODE int (*ioe_writepin)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                         bool value);
   CODE int (*ioe_readpin)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
   CODE int (*ioe_readbuf)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-  CODE int (*ioe_multiwrite)(FAR struct ioexpander_dev_s *dev,
+  CODE int (*ioe_multiwritepin)(FAR struct ioexpander_dev_s *dev,
                              uint8_t *pins, bool *values, int count);
   CODE int (*ioe_multireadpin)(FAR struct ioexpander_dev_s *dev,
                                uint8_t *pins, bool *values, int count);

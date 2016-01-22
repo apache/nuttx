@@ -72,26 +72,23 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int pca9555_direction   (FAR struct ioexpander_dev_s *dev,
-                                uint8_t pin, int dir);
-static int pca9555_option      (FAR struct ioexpander_dev_s *dev,
-                                uint8_t pin, int opt, void *val);
-static int pca9555_write       (FAR struct ioexpander_dev_s *dev,
-                                uint8_t pin, bool value);
-static int pca9555_readpin     (FAR struct ioexpander_dev_s *dev,
-                                uint8_t pin, FAR bool *value);
-static int pca9555_readbuf     (FAR struct ioexpander_dev_s *dev,
-                                uint8_t pin, FAR bool *value);
+static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+             int dir);
+static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+             int opt, void *val);
+static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+             bool value);
+static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+             FAR bool *value);
+static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+             FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-static int pca9555_multiwrite  (FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count);
+static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
+             FAR uint8_t *pins, FAR bool *values, int count);
 static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count);
+             FAR uint8_t *pins, FAR bool *values, int count);
 static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count);
+             FAR uint8_t *pins, FAR bool *values, int count);
 #endif
 
 /****************************************************************************
@@ -115,11 +112,11 @@ static const struct ioexpander_ops_s g_pca9555_ops =
 {
   pca9555_direction,
   pca9555_option,
-  pca9555_write,
+  pca9555_writepin,
   pca9555_readpin,
   pca9555_readbuf,
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-  pca9555_multiwrite,
+  pca9555_multiwritepin,
   pca9555_multireadpin,
   pca9555_multireadbuf,
 #endif
@@ -245,15 +242,15 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 }
 
 /****************************************************************************
- * Name: pca9555_write
+ * Name: pca9555_writepin
  *
  * Description:
  *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
-static int pca9555_write(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                         bool value)
+static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+                            bool value)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   return pca9555_setbit(pca->i2c, PCA9555_REG_OUTPUT, pin, value);
@@ -339,16 +336,16 @@ static int pca9555_getmultibits(FAR struct i2c_dev_s *i2c, uint8_t addr,
 }
 
 /****************************************************************************
- * Name: pca9555_multiwrite
+ * Name: pca9555_multiwritepin
  *
  * Description:
  *  See include/nuttx/ioexpander/ioexpander.h
  *
  ****************************************************************************/
 
-static int pca9555_multiwrite(FAR struct ioexpander_dev_s *dev,
-                              FAR uint8_t *pins, FAR bool *values,
-                              int count)
+static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
+                                 FAR uint8_t *pins, FAR bool *values,
+                                 int count)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   uint8_t addr = PCA9555_REG_OUTPUT;
