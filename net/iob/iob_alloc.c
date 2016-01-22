@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/iob/iob_alloc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 
 #include <semaphore.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
