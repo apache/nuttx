@@ -235,6 +235,9 @@ static int kinetis_txavail(struct net_driver_s *dev);
 static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg);
+#endif
 
 /* PHY/MII support */
 
@@ -424,7 +427,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout, 1,
+                 (uint32_t)priv);
   return OK;
 }
 
@@ -454,7 +458,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
 static int kinetis_txpoll(struct net_driver_s *dev)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -487,7 +492,8 @@ static int kinetis_txpoll(struct net_driver_s *dev)
       /* Send the packet */
 
       kinetis_transmit(priv);
-      priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+      priv->dev.d_buf =
+        (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 
       /* Check if there is room in the device to hold another packet. If not,
        * return a non-zero value to terminate the poll.
@@ -538,7 +544,8 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
        */
 
       priv->dev.d_len = kinesis_swap16(priv->rxdesc[priv->rxtail].length);
-      priv->dev.d_buf = (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
+      priv->dev.d_buf =
+        (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
@@ -655,7 +662,8 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
        * called unless the queue is not full.
        */
 
-      priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+      priv->dev.d_buf =
+        (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
       priv->rxdesc[priv->rxtail].status1 |= RXDESC_E;
 
       /* Update the index to the next descriptor */
@@ -768,7 +776,9 @@ static int kinetis_interrupt(int irq, FAR void *context)
 
   if ((pending & ENET_INT_RXF) != 0)
     {
-      /* A packet has been received, call kinetis_receive() to handle the packet */
+      /* A packet has been received, call kinetis_receive() to handle the
+       * packet.
+       */
 
       kinetis_receive(priv);
     }
@@ -904,7 +914,8 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
 
 static int kinetis_ifup(struct net_driver_s *dev)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
   uint8_t *mac = dev->d_mac.ether_addr_octet;
   uint32_t regval;
 
@@ -985,7 +996,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer, 1,
+                 (uint32_t)priv);
 
   /* Clear all pending ENET interrupt */
 
@@ -1028,7 +1040,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
 static int kinetis_ifdown(struct net_driver_s *dev)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupts at the NVIC */
@@ -1080,7 +1093,8 @@ static int kinetis_ifdown(struct net_driver_s *dev)
 
 static int kinetis_txavail(struct net_driver_s *dev)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable interrupts because this function may be called from interrupt
@@ -1132,7 +1146,8 @@ static int kinetis_txavail(struct net_driver_s *dev)
 #ifdef CONFIG_NET_IGMP
 static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1161,13 +1176,76 @@ static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
+  UNUSED(priv);
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Function: kinetis_ioctl
+ *
+ * Description:
+ *   PHY ioctl command handler
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   cmd  - ioctl command
+ *   arg  - Argument accompanying the command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
+{
+  int ret;
+  FAR struct kinetis_driver_s *priv =
+    (FAR struct kinetis_driver_s *)dev->d_private;
+
+  switch (cmd)
+  {
+  case SIOCGMIIPHY: /* Get MII PHY address */
+    {
+      struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      req->phy_id = CONFIG_ENET_PHYADDR;
+      ret = OK;
+    }
+    break;
+
+  case SIOCGMIIREG: /* Get register from MII PHY */
+    {
+      struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+    }
+    break;
+
+  case SIOCSMIIREG: /* Set register in MII PHY */
+    {
+      struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+    }
+    break;
+
+  default:
+    ret = -ENOTTY;
+    break;
+  }
+
+  return ret;
+}
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
 
 /****************************************************************************
  * Function: kinetis_initmii
@@ -1490,7 +1568,8 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Initialize the packet buffer, which is used when sending */
 
-  priv->dev.d_buf = (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+  priv->dev.d_buf =
+    (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 }
 
 /****************************************************************************
@@ -1524,49 +1603,6 @@ static void kinetis_reset(struct kinetis_driver_s *priv)
       asm volatile ("nop");
     }
 }
-
-#ifdef CONFIG_NETDEV_PHY_IOCTL
-static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
-{
-  int ret;
-  FAR struct kinetis_driver_s *priv =
-    (FAR struct kinetis_driver_s *)dev->d_private;
-
-  switch (cmd)
-  {
-  case SIOCGMIIPHY: /* Get MII PHY address */
-    {
-      struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = CONFIG_ENET_PHYADDR;
-      ret = OK;
-    }
-    break;
-
-  case SIOCGMIIREG: /* Get register from MII PHY */
-    {
-      struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
-    }
-    break;
-
-  case SIOCSMIIREG: /* Set register in MII PHY */
-    {
-      struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
-    }
-    break;
-
-  default:
-    ret = -ENOTTY;
-    break;
-  }
-
-  return ret;
-}
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
 
 /****************************************************************************
  * Public Functions
