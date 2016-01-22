@@ -1020,7 +1020,7 @@ mount -t vfat /dev/ram1 /tmp
           <li>The configuration settings then installed configuration.
           <li>The <code>genromfs</code> tool (available from <a href="http://romfs.sourceforge.net">http://romfs.sourceforge.net</a>).
           <li>The file <code>apps/nshlib/rcS.template</code>
-		    (OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined <code>include/arch/board/rcs.template</code>.
+          (OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined <code>include/arch/board/rcs.template</code>.
         </ul>
       </p>
     </li>
@@ -5035,6 +5035,11 @@ genromfs -f romfs_img -d etc -V MyVolName
 <ul><pre>
 xxd -i romfs_img >nsh_romfsimg.h
 </pre></ul>
+  </li>
+  <li>
+    <p>
+       Edit <code>nsh_romfsimg.h</code>: Mark both data definitions as <code>const</code> so that the data will be stored in FLASH.
+    </p>
   </li>
   <li>
     <p>
