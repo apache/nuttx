@@ -181,8 +181,11 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 
   /* Do not allow any further callbacks */
 
-  psock->s_sndcb->flags = 0;
-  psock->s_sndcb->event = NULL;
+  if (psock->s_sndcb != NULL)
+    {
+      psock->s_sndcb->flags = 0;
+      psock->s_sndcb->event = NULL;
+    }
 
   /* Free all queued write buffers */
 
