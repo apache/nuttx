@@ -524,9 +524,12 @@ int psock_close(FAR struct socket *psock)
   /* We perform the uIP close operation only if this is the last count on
    * the socket. (actually, I think the socket crefs only takes the values
    * 0 and 1 right now).
+   *
+   * It is possible for a psock to have no connection, e.g. a TCP socket
+   * waiting in accept.
    */
 
-  if (psock->s_crefs <= 1)
+  if (psock->s_crefs <= 1 && psock->s_conn != NULL)
     {
       /* Perform uIP side of the close depending on the protocol type */
 
