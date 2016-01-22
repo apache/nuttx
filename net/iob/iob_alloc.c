@@ -121,16 +121,45 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
            */
 
           ret = sem_wait(sem);
+          if (ret < 0)
+            {
+              int errcode = get_errno();
 
-          /* When we wake up from wait, an I/O buffer was returned to
-           * the free list.  However, if there are concurrent allocations
-           * from interrupt handling, then I suspect that there is a
-           * race condition.  But no harm, we will just wait again in
-           * that case.
-           */
+              /* EINTR is not an error!  EINTR simply means that we were
+               * awakened by a signal and we should try again.
+               */
+
+              if (errcode == EINTR)
+                {
+                  /* Force a success indication so that we will continue
+                   * looping.
+                   */
+
+                  ret = 0;
+                }
+            }
+          else
+            {
+              /* When we wake up from wait successfully, an I/O buffer was
+               * returned to the free list.  However, if there are concurrent
+               * allocations from interrupt handling, then I suspect that
+               * there is a race condition.  But no harm, we will just wait
+               * again in that case.
+               *
+               * We need release our count so that it is available to
+               * iob_tryalloc(), perhaps allowing another thread to take our
+               * count.  In that event, iob_tryalloc() will fail above and
+               * we will have to wait again.
+               *
+               * TODO: Consider a design modification to permit us to
+               * complete the allocation without losing our count.
+               */
+
+              sem_post(sem);
+            }
         }
     }
-  while (ret == OK && !iob);
+  while (ret == OK && iob == NULL);
 
   irqrestore(flags);
   return iob;
