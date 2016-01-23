@@ -35,6 +35,7 @@ int board_power_off(int status)
   struct spi_dev_s *spi = up_spiinitialize(0);
 
   SPI_SETBITS(spi, 16);
+  (void)SPI_HWFEATURES(spi, 0);
 
   tx = (1 << 6) | (1 << 1);
   SPI_SNDBLOCK(spi, &tx, 1);
