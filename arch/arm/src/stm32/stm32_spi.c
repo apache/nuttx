@@ -274,6 +274,9 @@ static const struct spi_ops_s g_sp1iops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,                   /* Not supported */
+#endif
   .status            = stm32_spi1status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi1cmddata,
@@ -286,9 +289,9 @@ static const struct spi_ops_s g_sp1iops =
   .recvblock         = spi_recvblock,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32_spi1register,  /* provided externally */
+  .registercallback  = stm32_spi1register,  /* Provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* Not implemented */
 #endif
 };
 

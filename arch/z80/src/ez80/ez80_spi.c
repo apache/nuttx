@@ -89,18 +89,21 @@ static const struct spi_ops_s g_spiops =
 #ifndef CONFIG_SPI_OWNBUS
   spi_lock,
 #endif
-  ez80_spiselect,    /* Provided externally by board logic */
+  ez80_spiselect,    /* select: Provided externally by board logic */
   spi_setfrequency,
   spi_setmode,
-  NULL,              /* Variable number of bits not implemented */
-  ez80_spistatus,    /* Provided externally by board logic */
+  NULL,              /* setbits: Variable number of bits not implemented */
+#ifdef CONFIG_SPI_HWFEATURES
+  NULL,              /* hwfeatures: Not supported */
+#endif
+  ez80_spistatus,    /* status: Provided externally by board logic */
 #ifdef CONFIG_SPI_CMDDATA
   ez80_spicmddata,
 #endif
   spi_send,
   spi_sndblock,
   spi_recvblock,
-  0                  /* registercallback not yet implemented */
+  0                  /* registercallback: Not yet implemented */
 };
 
 /* This supports is only a single SPI bus/port.  If you port this to an

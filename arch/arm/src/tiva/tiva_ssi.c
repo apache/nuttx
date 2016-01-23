@@ -318,6 +318,9 @@ static const struct spi_ops_s g_spiops =
   .setfrequency = ssi_setfrequency,
   .setmode      = ssi_setmode,
   .setbits      = ssi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures   = 0,                 /* Not supported */
+#endif
   .status       = tiva_spistatus,    /* Provided externally by board logic */
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata      = tiva_spicmddata,

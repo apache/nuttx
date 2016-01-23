@@ -141,6 +141,9 @@ static const struct spi_ops_s g_spi0ops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,           /* Not supported */
+#endif
   .status            = kl_spi0status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = kl_spi0cmddata,
@@ -152,7 +155,7 @@ static const struct spi_ops_s g_spi0ops =
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
 #endif
-  .registercallback  = 0,
+  .registercallback  = 0,           /* Not supported */
 };
 
 static struct kl_spidev_s g_spi0dev =

@@ -142,6 +142,9 @@ static const struct spi_ops_s g_spiops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,           /* Not supported */
+#endif
   .status            = spi_status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = lpc31_spicmddata,
@@ -153,7 +156,7 @@ static const struct spi_ops_s g_spiops =
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
 #endif
-  .registercallback  = 0,
+  .registercallback  = 0,           /* Not supported */
 };
 
 static struct lpc31_spidev_s g_spidev =

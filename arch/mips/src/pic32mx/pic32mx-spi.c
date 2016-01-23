@@ -147,6 +147,9 @@ static const struct spi_ops_s g_spi1ops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,                    /* Not supported */
+#endif
   .status            = pic32mx_spi1status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = pic32mx_spi1cmddata,

@@ -161,6 +161,9 @@ static const struct spi_ops_s g_spi0ops =
   .setfrequency      = ssp_setfrequency,
   .setmode           = ssp_setmode,
   .setbits           = ssp_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,                  /* Not supported */
+#endif
   .status            = lpc43_ssp0status,   /* Provided externally */
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = lpc43_ssp0cmddata,  /* Provided externally */

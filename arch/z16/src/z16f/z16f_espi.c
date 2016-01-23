@@ -169,6 +169,9 @@ static const struct spi_ops_s g_epsiops =
   spi_setfrequency,
   spi_setmode,
   spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  NULL, /* hwfeatures:  Not supported */
+#endif
   z16f_espi_status,
 #ifdef CONFIG_SPI_CMDDATA
   z16f_espi_cmddata,

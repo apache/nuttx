@@ -196,6 +196,9 @@ static const struct spi_ops_s g_spiops =
   .setfrequency = spi_setfrequency,
   .setmode      = spi_setmode,
   .setbits      = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,           /* Not supported */
+#endif
   .status       = imx_spistatus,    /* Provided externally by board logic */
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata      = imx_spicmddata,

@@ -242,6 +242,9 @@ static const struct spi_ops_s g_spiops =
   .setfrequency      = spiflash_setfrequency,
   .setmode           = spiflash_setmode,
   .setbits           = spiflash_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = 0,                   /* Not supported */
+#endif
   .status            = spiflash_status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = spiflash_cmddata,
