@@ -11348,4 +11348,6 @@
 	  buffering and race conditions.  These were necessary for for the
 	  NuttX networking later to be stable in some stress testing.  From
 	  Andrew Webster (2016-01-22).
+	* include/spi/spi.h:  Add an optional hwfeaqtures() method to the
+	  SPI interface (2016-01-22).
 

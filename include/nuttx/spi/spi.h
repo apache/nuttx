@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/spi/spi.h
  *
- *   Copyright(C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2008-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -165,6 +166,44 @@
 
 #define SPI_SETBITS(d,b) \
   do { if ((d)->ops->setbits) (d)->ops->setbits(d,b); } while (0)
+
+/****************************************************************************
+ * Name: SPI_HWFEATURES
+ *
+ * Description:
+ *   Set hardware-specific feature flags.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   flags - H/W feature flags
+ *
+ * Returned Value:
+ *   Zero (OK) if the selected H/W features are enabled; A negated errno
+ *   value if any H/W feature is not supportable.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+  /* If there are multiple SPI drivers, some may not support hardware
+   * feature selection.
+   */
+
+#  define SPI_HWFEATURES(d,f) \
+  (((d)->ops->hwfeatures) ? (d)->ops->hwfeatures(d,f) : ((f) == 0 ? OK : -ENOSYS))
+
+  /* These are currently defined feature flags */
+
+#  ifdef CONFIG_SPI_CRCGENERATION
+#    HWFEAT_CRCGENERATION (1 << 0) /* Bit 0: Hardward CRC generation */
+#  endif
+
+#else
+  /* Any attempt to select hardware features with CONFIG_SPI_HWFEATURES
+   * deselected will cause an assertion.
+   */
+
+#  define SPI_HWFEATURES(d,f) (((f) == 0) ? OK : -ENOSYS)
+#endif
 
 /****************************************************************************
  * Name: SPI_STATUS
@@ -378,6 +417,12 @@ enum spi_mode_e
   SPIDEV_MODE3          /* CPOL=1 CHPHA=1 */
 };
 
+#ifdef CONFIG_SPI_HWFEATURES
+/* This is a type wide enough to support all hardware features */
+
+typedef uint8_t spi_hwfeatures_t;
+#endif
+
 /* The SPI vtable */
 
 struct spi_dev_s;
@@ -391,6 +436,10 @@ struct spi_ops_s
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
   CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
+#ifdef CONFIG_SPI_HWFEATURES
+  CODE int      (*hwfeatures)(FAR struct spi_dev_s *dev,
+                  spi_hwfeatures_t features);
+#endif
   CODE uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
   CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,

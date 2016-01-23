@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/spi/spi_bitbang.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,24 +145,27 @@ static int      spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 static const struct spi_ops_s g_spiops =
 {
 #ifndef CONFIG_SPI_OWNBUS
-  .lock              = spi_lock,
+  spi_lock,           /* lock */
 #endif
-  .select            = spi_select,
-  .setfrequency      = spi_setfrequency,
-  .setmode           = spi_setmode,
-  .setbits           = spi_setbits,
-  .status            = spi_status,
+  spi_select,         /* select */
+  spi_setfrequency,   /* setfrequency */
+  spi_setmode,        /* setmode */
+  spi_setbits,        /* setbits */
+#ifdef CONFIG_SPI_HWFEATURES
+  0,                  /* hwfeatures */
+#endif
+  spi_status,         /* status */
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = spi_cmddata,
+  spi_cmddata,        /* cmddata */
 #endif
-  .send              = spi_send,
+  spi_send,           /* send */
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spi_exchange,
+  spi_exchange,       /* exchange */
 #else
-  .sndblock          = spi_sndblock,
-  .recvblock         = spi_recvblock,
+  spi_sndblock,       /* sndblock */
+  spi_recvblock,      /* recvblock */
 #endif
-  .registercallback  = 0,                 /* Not implemented */
+   0                  /* registercallback */
 };
 
 /****************************************************************************
