@@ -343,6 +343,7 @@ static void ramtron_lock(FAR struct ramtron_dev_s *priv)
 
   SPI_SETMODE(dev, SPIDEV_MODE3);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, priv->speed);
 }
 

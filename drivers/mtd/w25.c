@@ -310,6 +310,7 @@ static void w25_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_W25_SPIMODE);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_W25_SPIFREQUENCY);
 }
 

@@ -150,7 +150,8 @@ static void pn532_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, -8);
-  SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 #endif
 
@@ -170,7 +171,8 @@ static inline void pn532_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, -8);
-  SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 #endif
 

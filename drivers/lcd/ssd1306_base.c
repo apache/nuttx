@@ -824,15 +824,16 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int
    */
 
 #  ifdef CONFIG_SPI_OWNBUS
-    /* Configure SPI */
+  /* Configure SPI */
 
-    SPI_SETMODE(priv->spi, CONFIG_SSD1306_SPIMODE);
-    SPI_SETBITS(priv->spi, 8);
-    SPI_SETFREQUENCY(priv->spi, CONFIG_SSD1306_FREQUENCY);
+  SPI_SETMODE(priv->spi, CONFIG_SSD1306_SPIMODE);
+  SPI_SETBITS(priv->spi, 8);
+  (void)SPI_HWFEATURES(priv->spi, 0);
+  (void)SPI_SETFREQUENCY(priv->spi, CONFIG_SSD1306_FREQUENCY);
 #  else
-    /* Configure the SPI */
+  /* Configure the SPI */
 
-    ssd1306_configspi(priv->spi);
+  ssd1306_configspi(priv->spi);
 #  endif
 
 #else

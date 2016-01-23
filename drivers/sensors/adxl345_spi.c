@@ -71,7 +71,8 @@ static inline void adxl345_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
 }
 #endif
 

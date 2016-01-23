@@ -404,7 +404,8 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_ENCX24J600_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ENCX24J600_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_ENCX24J600_FREQUENCY);
 }
 #endif
 
@@ -439,7 +440,8 @@ static void enc_lock(FAR struct enc_driver_s *priv)
 
   SPI_SETMODE(priv->spi, CONFIG_ENCX24J600_SPIMODE);
   SPI_SETBITS(priv->spi, 8);
-  SPI_SETFREQUENCY(priv->spi, CONFIG_ENCX24J600_FREQUENCY);
+  (void)SPI_HWFEATURES(priv->spi, 0);
+  (void)SPI_SETFREQUENCY(priv->spi, CONFIG_ENCX24J600_FREQUENCY);
 }
 #endif
 

@@ -394,8 +394,9 @@ static void st7567_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_ST7567_SPIMODE);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_ST7567_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_ST7567_FREQUENCY);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_ST7567_FREQUENCY);
 #endif
 }
 #endif

@@ -274,6 +274,7 @@ static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
 
   SPI_SETMODE(dev, CONFIG_VS1053_SPIMODE);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, freq_mhz);
 }
 

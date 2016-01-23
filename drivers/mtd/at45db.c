@@ -292,6 +292,7 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
 
   SPI_SETMODE(priv->spi, SPIDEV_MODE0);
   SPI_SETBITS(priv->spi, 8);
+  (void)SPI_HWFEATURES(priv->spi, 0);
   (void)SPI_SETFREQUENCY(priv->spi, CONFIG_AT45DB_FREQUENCY);
 }
 

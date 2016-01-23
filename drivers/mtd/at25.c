@@ -191,6 +191,7 @@ static void at25_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_AT25_SPIMODE);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, CONFIG_AT25_SPIFREQUENCY);
 }
 

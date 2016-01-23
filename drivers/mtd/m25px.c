@@ -284,6 +284,7 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_M25P_SPIMODE);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, 20000000);
 }
 

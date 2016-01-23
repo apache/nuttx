@@ -419,7 +419,8 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
 
   SPI_SETMODE(priv->spi, SPIDEV_MODE3);
   SPI_SETBITS(priv->spi, 8);
-  SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
+  (void)SPI_HWFEATURES(priv->spi, 0);
+  (void)SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
 #endif
 
 #else

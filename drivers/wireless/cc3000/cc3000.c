@@ -259,7 +259,8 @@ static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_CC3000_SPI_MODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_CC3000_SPI_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_CC3000_SPI_FREQUENCY);
 }
 
 /****************************************************************************

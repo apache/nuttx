@@ -197,7 +197,8 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
 }
 #endif
 
@@ -256,7 +257,8 @@ static inline void max11802_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
 }
 #endif
 

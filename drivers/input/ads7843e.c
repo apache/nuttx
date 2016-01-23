@@ -197,7 +197,8 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 }
 #endif
@@ -258,7 +259,8 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 }
 #endif

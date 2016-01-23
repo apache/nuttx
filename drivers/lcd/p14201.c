@@ -460,8 +460,9 @@ static inline void rit_configspi(FAR struct spi_dev_s *spi)
 #ifdef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_P14201_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
+  (void)SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
 #endif
 #endif
 }
@@ -505,8 +506,9 @@ static void rit_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_P14201_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
 #endif
 }
 #endif

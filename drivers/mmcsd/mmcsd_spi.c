@@ -365,9 +365,10 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
    * changed those since the last time that we had the SPI bus.
    */
 
-  SPI_SETFREQUENCY(slot->spi, slot->spispeed);
   SPI_SETMODE(slot->spi, CONFIG_MMCSD_SPIMODE);
   SPI_SETBITS(slot->spi, 8);
+  (void)SPI_HWFEATURES(slot->spi, 0);
+  (void)SPI_SETFREQUENCY(slot->spi, slot->spispeed);
 #endif
 
   /* Get exclusive access to the MMC/SD device (possibly unnecessary if
@@ -425,6 +426,7 @@ static inline void mmcsd_spiinit(FAR struct mmcsd_slot_s *slot)
 {
   SPI_SETMODE(slot->spi, CONFIG_MMCSD_SPIMODE);
   SPI_SETBITS(slot->spi, 8);
+  (void)SPI_HWFEATURES(slot->spi, 0);
 }
 #endif
 
@@ -1608,7 +1610,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 #ifndef CONFIG_SPI_OWNBUS
   slot->spispeed = MMCSD_IDMODE_CLOCK;
 #endif
-  SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
+  (void)SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
 
   /* Set the maximum access time out */
 

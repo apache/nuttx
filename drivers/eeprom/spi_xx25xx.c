@@ -288,6 +288,7 @@ static void ee25xx_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_EE25XX_SPIMODE);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, 10000000); /* This is the default speed */
 }
 

@@ -119,7 +119,8 @@ static inline void mpl115a_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
 }
 #endif
 

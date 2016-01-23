@@ -267,7 +267,8 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_WIRELESS, true);
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 }
 #endif
@@ -328,7 +329,8 @@ static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_WIRELESS, true);  /* Useful ? */
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 }
 #endif

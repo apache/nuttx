@@ -203,6 +203,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   SPI_SETMODE(spi, SPIDEV_MODE1);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
   usleep(1000);
   SPI_SELECT(spi, priv->devno, true);

@@ -510,7 +510,8 @@ static void ssd1351_select(FAR struct ssd1351_dev_s *priv)
 #ifndef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
   SPI_SETBITS(spi, SSD1351_SPIBITS);
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
 #endif
 }
 #endif
@@ -1196,7 +1197,8 @@ FAR struct lcd_dev_s *ssd1351_initialize(FAR struct spi_dev_s *spi,
 #ifdef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
   SPI_SETBITS(spi, SSD1351_SPIBITS);
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
 #endif
 #endif
 

@@ -284,7 +284,8 @@ int max31855_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(priv->spi, SPIDEV_MODE1);
   SPI_SETBITS(priv->spi, 8);
-  SPI_SETFREQUENCY(priv->spi, MAX31855_SPI_MAXFREQ);
+  (void)SPI_HWFEATURES(priv->spi, 0);
+  (void)SPI_SETFREQUENCY(priv->spi, MAX31855_SPI_MAXFREQ);
 #endif
 
   /* Register the character driver */

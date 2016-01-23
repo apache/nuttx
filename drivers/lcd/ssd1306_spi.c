@@ -71,7 +71,8 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_SSD1306_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
 }
 #endif
 
