@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <debug.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "up_arch.h"
@@ -60,14 +61,34 @@ struct calypso_spidev_s
 {
   struct spi_dev_s spidev;  /* External driver interface */
   int              nbits;   /* Number of transfered bits */
-  sem_t            exclsem; /* Mutual exclusion of devices */
+  sem_t            exclsem; /* Supports mutually exclusive access */
 };
 
 /* STUBS! */
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  return -ENOSYS;
+  struct calypso_spidev_s *priv = (struct efm32_spidev_s *)dev;
+
+  if (lock)
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      while (sem_wait(&priv->exclsem) != 0)
+        {
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
+
+          ASSERT(errno == EINTR);
+        }
+    }
+  else
+    {
+      (void)sem_post(&priv->exclsem);
+    }
+
+  return OK;
 }
 
 static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
@@ -142,6 +163,12 @@ static struct calypso_spidev_s g_spidev =
 
 void spi_init(void)
 {
+#if 0
+  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+
+  sem_init(&priv->exclsem, 0, 1);
+#endif
+
   putreg16(SPI_SET1_EN_CLK | SPI_SET1_WR_IRQ_DIS | SPI_SET1_RDWR_IRQ_DIS,
            SPI_REG(REG_SET1));
 

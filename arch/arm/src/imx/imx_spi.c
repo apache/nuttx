@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx/imx_spi.c
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -98,8 +100,9 @@ struct imx_spidev_s
 {
   const struct spi_ops_s *ops;  /* Common SPI operations */
 #ifndef CONFIG_SPI_POLLWAIT
-  sem_t  sem;                   /* Wait for transfer to complete */
+  sem_t waitsem;                /* Wait for transfer to complete */
 #endif
+  sem_t exclsem;                /* Supports mutually exclusive access */
 
   /* These following are the source and destination buffers of the transfer.
    * they are retained in this structure so that they will be accessible
@@ -558,9 +561,10 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
     {
       /* Wait to be signaled from the interrupt handler */
 
-      ret = sem_wait(&priv->sem);
+      ret = sem_wait(&priv->waitsem);
     }
   while (ret < 0 && errno == EINTR);
+
 #else
   /* Perform the transfer using polling logic.  This will totally
    * dominate the CPU until the transfer is complete.  Only recommended
@@ -673,8 +677,9 @@ static int spi_interrupt(int irq, void *context)
     {
       /* Yes, wake up the waiting thread */
 
-      sem_post(&priv->sem);
+      sem_post(&priv->waitsem);
     }
+
   return OK;
 }
 #endif
@@ -702,9 +707,27 @@ static int spi_interrupt(int irq, void *context)
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  /* Not implemented */
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
 
-  return -ENOSYS;
+  if (lock)
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      while (sem_wait(&priv->exclsem) != 0)
+        {
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
+
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+  else
+    {
+      (void)sem_post(&priv->exclsem);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1093,8 +1116,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Initialize the state structure */
 
 #ifndef CONFIG_SPI_POLLWAIT
-   sem_init(&priv->sem, 0, 0);
+   sem_init(&priv->waitsem, 0, 0);
 #endif
+   sem_init(&priv->exclsem, 0, 1);
 
   /* Initialize control register: min frequency, ignore ready, master mode, mode=0, 8-bit */
 

@@ -768,7 +768,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
            * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(errno == EINTR);
         }
     }
   else
