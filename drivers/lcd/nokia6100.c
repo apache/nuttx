@@ -1073,6 +1073,13 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 {
   struct spi_dev_s *spi = priv->spi;
 
+  /* Configure SPI */
+
+  SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
+  SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY);
+
   /* Configure the display */
 
   nokia_cmdarray(spi, sizeof(g_disctl), g_disctl);   /* Display control */
@@ -1096,6 +1103,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_cmdarray(spi, sizeof(g_paset), g_caset);     /* Column address set */
   nokia_clrram(spi);
   nokia_sndcmd(spi, S1D15G10_DISON);                 /* Display on */
+
   return OK;
 }
 #endif
@@ -1104,6 +1112,15 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 static int nokia_initialize(struct nokia_dev_s *priv)
 {
   struct struct spi_dev_s *spi = priv->spi;
+
+  /* Configure SPI */
+
+  SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
+  SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY);
+
+  /* Configure the display */
 
   nokia_sndcmd(spi, PCF8833_SLEEPOUT);              /* Exit sleep mode */
   nokia_sndcmd(spi, PCF8833_BSTRON);                /* Turn on voltage booster */
@@ -1118,6 +1135,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_sndcmd(spi, PCF8833_NOP);                   /* No operation */
   nokia_clrram(spi);
   nokia_sndcmd(spi, PCF8833_DISPON);                /* Display on */
+
   return OK;
 }
 #endif /* CONFIG_NOKIA6100_PCF8833 */
@@ -1159,12 +1177,7 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
   priv->spi      = spi;                     /* Save the SPI instance */
   priv->contrast = NOKIA_DEFAULT_CONTRAST;  /* Initial contrast setting */
 
-  /* Configure and enable the LCD controller */
-
-  SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
-  SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY)
+  /* Enable the LCD controller */
 
   if (nokia_initialize(priv) == OK)
     {
