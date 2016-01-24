@@ -52,13 +52,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
+/* These SPI configuration options affect the form of the SPI interface:
+ *
+ * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
  *   (vs a recvblock() and sndblock ()methods).
- * CONFIG_SPI_HWFEATURES - Support special, hardware-specific SPI features.
  * CONFIG_SPI_CMDDATA - Devices on the SPI bus require out-of-band support
  *   to distinguish command transfers from data transfers.  Such devices
  *   will often support either 9-bit SPI (yech) or 8-bit SPI and a GPIO
  *   output that selects between command and data.
+ * CONFIG_SPI_HWFEATURES - Include an interface method to support special,
+ *   hardware-specific SPI features.
  */
 
 /* Access macros ************************************************************/

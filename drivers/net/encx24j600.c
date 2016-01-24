@@ -248,9 +248,7 @@ struct enc_driver_s
   WDOG_ID               txpoll;        /* TX poll timer */
   WDOG_ID               txtimeout;     /* TX timeout timer */
 
-  /* If we don't own the SPI bus, then we cannot do SPI accesses from the
-   * interrupt handler.
-   */
+  /* Avoid SPI accesses from the interrupt handler by using the work queue */
 
   struct work_s         irqwork;       /* Interrupt continuation work queue support */
   struct work_s         towork;        /* Tx timeout work queue support */

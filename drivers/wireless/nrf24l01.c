@@ -1277,7 +1277,7 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev)
   CHECK_ARGS(dev);
   nrf24l01_lock(dev->spi);
 
-  /* Configure the SPI parameters now  (if we own the bus) */
+  /* Configure the SPI parameters before communicating */
 
   nrf24l01_configspi(dev->spi);
 

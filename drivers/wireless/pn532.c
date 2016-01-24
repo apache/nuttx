@@ -154,9 +154,7 @@ static void pn532_unlock(FAR struct spi_dev_s *spi)
 
 static inline void pn532_configspi(FAR struct spi_dev_s *spi)
 {
-  /* Configure SPI for the PN532 module.
-   * As we own the SPI bus this method is called just once.
-   */
+  /* Configure SPI for the PN532 module. */
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, -8);
