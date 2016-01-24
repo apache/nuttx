@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/kwork_queue.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,22 +53,6 @@
 #ifdef CONFIG_SCHED_WORKQUEUE
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -103,7 +87,7 @@
 
 static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
                         FAR struct work_s *work, worker_t worker,
-                        FAR void *arg, uint32_t delay)
+                        FAR void *arg, systime_t delay)
 {
   irqstate_t flags;
 
@@ -162,7 +146,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
  ****************************************************************************/
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, uint32_t delay)
+               FAR void *arg, systime_t delay)
 {
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
