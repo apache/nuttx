@@ -285,7 +285,6 @@ static struct enc_driver_s g_encx24j600[CONFIG_ENCX24J600_NINTERFACES];
 
 /* Low-level SPI helpers */
 
-static inline void enc_configspi(FAR struct spi_dev_s *spi);
 static void enc_lock(FAR struct enc_driver_s *priv);
 static inline void enc_unlock(FAR struct enc_driver_s *priv);
 
@@ -372,32 +371,6 @@ static int  enc_reset(FAR struct enc_driver_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function: enc_configspi
- *
- * Description:
- *   Configure the SPI for use with the ENCX24J600
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void enc_configspi(FAR struct spi_dev_s *spi)
-{
-  /* Configure SPI for the ENCX24J600. */
-
-  SPI_SETMODE(spi, CONFIG_ENCX24J600_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_ENCX24J600_FREQUENCY);
-}
 
 /****************************************************************************
  * Function: enc_lock
@@ -2911,10 +2884,6 @@ int enc_initialize(FAR struct spi_dev_s *spi,
 
       return -EAGAIN;
     }
-
-  /* Configure SPI for the ENCX24J600 */
-
-  enc_configspi(priv->spi);
 
   /* Lock the SPI bus so that we have exclusive access */
 

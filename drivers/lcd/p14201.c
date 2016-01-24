@@ -205,7 +205,6 @@ struct rit_dev_s
 
 /* Low-level SPI helpers */
 
-static inline void rit_configspi(FAR struct spi_dev_s *spi);
 static void rit_select(FAR struct spi_dev_s *spi);
 static void rit_deselect(FAR struct spi_dev_s *spi);
 static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
@@ -422,43 +421,6 @@ static const uint8_t g_setallrow[] =
 /**************************************************************************************
  * Private Functions
  **************************************************************************************/
-
-/**************************************************************************************
- * Name: rit_configspi
- *
- * Description:
- *   Configure the SPI for use with the P14201
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-static inline void rit_configspi(FAR struct spi_dev_s *spi)
-{
-#ifdef CONFIG_P14201_FREQUENCY
-  ritdbg("Mode: %d Bits: 8 Frequency: %d\n",
-         CONFIG_P14201_SPIMODE, CONFIG_P14201_FREQUENCY);
-#else
-  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
-#endif
-
-  /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
-   * bother because it might change.
-   */
-
-  SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-#ifdef CONFIG_P14201_FREQUENCY
-  (void)SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
-#endif
-}
 
 /**************************************************************************************
  * Name: rit_select
@@ -1204,7 +1166,6 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
 
   /* Select the SD1329 controller */
 
-  rit_configspi(spi);
   rit_select(spi);
 
   /* Clear the display */
