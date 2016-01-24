@@ -1159,7 +1159,12 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
   priv->spi      = spi;                     /* Save the SPI instance */
   priv->contrast = NOKIA_DEFAULT_CONTRAST;  /* Initial contrast setting */
 
-  /* Enable the LCD controller */
+  /* Configure and enable the LCD controller */
+
+  SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
+  SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY)
 
   if (nokia_initialize(priv) == OK)
     {
