@@ -163,12 +163,9 @@
 struct sam_spics_s
 {
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
-
-#ifndef CONFIG_SPI_OWNBUS
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
   uint8_t mode;                /* Mode 0,1,2,3 */
-#endif
   uint8_t nbits;               /* Width of word in bits (8 to 16) */
 
 #if defined(CONFIG_SAMV7_SPI0_MASTER) || defined(CONFIG_SAMV7_SPI1_MASTER)
@@ -275,9 +272,7 @@ static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
 
 /* SPI master methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(struct spi_dev_s *dev, bool lock);
-#endif
 static void     spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
@@ -314,9 +309,7 @@ static const uint8_t g_csroffset[4] =
 
 static const struct spi_ops_s g_spi0ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -355,9 +348,7 @@ static struct sam_spidev_s g_spi0dev =
 
 static const struct spi_ops_s g_spi1ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -880,7 +871,6 @@ static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
@@ -907,7 +897,6 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_select
@@ -997,14 +986,12 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Check if the requested frequency is the same as the frequency selection */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (spics->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
       return spics->actual;
     }
-#endif
 
   /* Configure SPI to a frequency as close as possible to the requested frequency.
    *
@@ -1069,10 +1056,8 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the frequency setting */
 
-#ifndef CONFIG_SPI_OWNBUS
   spics->frequency = frequency;
   spics->actual    = actual;
-#endif
 
   spidbg("Frequency %d->%d\n", frequency, actual);
   return actual;
@@ -1104,10 +1089,8 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != spics->mode)
     {
-#endif
       /* Yes... Set the mode appropriately:
        *
        * SPI  CPOL NCPHA
@@ -1149,10 +1132,8 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       spics->mode = mode;
     }
-#endif
 }
 
 /****************************************************************************
@@ -1182,9 +1163,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
   /* Has the number of bits changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (nbits != spics->nbits)
-#endif
     {
       /* Yes... Set number of bits appropriately */
 
@@ -1740,10 +1719,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   int csno  = (port & __SPI_CS_MASK) >> __SPI_CS_SHIFT;
   int spino = (port & __SPI_SPI_MASK) >> __SPI_SPI_SHIFT;
   irqstate_t flags;
-#ifndef CONFIG_SPI_OWNBUS
   uint32_t regval;
   unsigned int offset;
-#endif
 
   /* The support SAM parts have only a single SPI port */
 
@@ -1889,14 +1866,12 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       (void)spi_getreg(spi, SAM_SPI_SR_OFFSET);
       (void)spi_getreg(spi, SAM_SPI_RDR_OFFSET);
 
-#ifndef CONFIG_SPI_OWNBUS
       /* Initialize the SPI semaphore that enforces mutually exclusive
        * access to the SPI registers.
        */
 
       sem_init(&spi->spisem, 0, 1);
       spi->initialized = true;
-#endif
 
 #ifdef CONFIG_SAMV7_SPI_DMA
       /* Initialize the SPI semaphore that is used to wake up the waiting
@@ -1914,10 +1889,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       spi_dumpregs(spi, "After initialization");
     }
 
-#ifndef CONFIG_SPI_OWNBUS
-  /* Set to mode=0 and nbits=8 and impossible frequency. It is only
-   * critical to do this if CONFIG_SPI_OWNBUS is not defined because in
-   * that case, the SPI will only be reconfigured if there is a change.
+  /* Set to mode=0 and nbits=8 and impossible frequency. The SPI will only
+   * be reconfigured if there is a change.
    */
 
   offset = (unsigned int)g_csroffset[csno];
@@ -1928,7 +1901,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   spics->nbits = 8;
   spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
-#endif
 
   return &spics->spidev;
 }

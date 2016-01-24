@@ -132,12 +132,10 @@ struct sam_spidev_s
 
   /* Dynamic configuration */
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_t spilock;               /* Used to managed exclusive access to the bus */
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
   uint8_t mode;                /* Mode 0,1,2,3 */
-#endif
   uint8_t nbits;               /* Width of word in bits (8 to 16) */
 
   /* Debug stuff */
@@ -209,9 +207,7 @@ static int  spi5_interrupt(int irq, void *context);
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(struct spi_dev_s *dev, int nbits);
@@ -239,9 +235,7 @@ static void     spi_pad_configure(struct sam_spidev_s *priv);
 
 static const struct spi_ops_s g_spi0ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = sam_spi0select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -284,9 +278,7 @@ static struct sam_spidev_s g_spi0dev =
 #if 0 /* Not used */
   .handler   = spi0_interrupt,
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
-#endif
 };
 #endif
 
@@ -295,9 +287,7 @@ static struct sam_spidev_s g_spi0dev =
 
 static const struct spi_ops_s g_spi1ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = sam_spi1select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -337,9 +327,7 @@ static struct sam_spidev_s g_spi1dev =
 #if 0 /* Not used */
   .handler   = spi1_interrupt,
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
-#endif
 };
 #endif
 
@@ -348,9 +336,7 @@ static struct sam_spidev_s g_spi1dev =
 
 static const struct spi_ops_s g_spi2ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = sam_spi0select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -390,9 +376,7 @@ static struct sam_spidev_s g_spi2dev =
 #if 0 /* Not used */
   .handler   = spi2_interrupt,
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
-#endif
 };
 #endif
 
@@ -401,9 +385,7 @@ static struct sam_spidev_s g_spi2dev =
 
 static const struct spi_ops_s g_spi3ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = sam_spi3select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -443,9 +425,7 @@ static struct sam_spidev_s g_spi3dev =
 #if 0 /* Not used */
   .handler   = spi3_interrupt,
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
-#endif
 };
 #endif
 
@@ -454,9 +434,7 @@ static struct sam_spidev_s g_spi3dev =
 
 static const struct spi_ops_s g_spi4ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = sam_spi4select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -496,9 +474,7 @@ static struct sam_spidev_s g_spi4dev =
 #if 0 /* Not used */
   .handler   = spi4_interrupt,
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
-#endif
 };
 #endif
 
@@ -507,9 +483,7 @@ static struct sam_spidev_s g_spi4dev =
 
 static const struct spi_ops_s g_spi5ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = sam_spi5select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -549,15 +523,9 @@ static struct sam_spidev_s g_spi5dev =
 #if 0 /* Not used */
   .handler   = spi5_interrupt,
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
-#endif
 };
 #endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -917,7 +885,6 @@ static int  spi5_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
@@ -943,7 +910,6 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_setfrequency
@@ -983,14 +949,12 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Check if the requested frequency is the same as the frequency selection */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (priv->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
       return priv->actual;
     }
-#endif
 
   /* For synchronous mode, the BAUAD rate (Fbaud) is generated from the
    * source clock frequency (Fref) as follows:
@@ -1048,10 +1012,8 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the frequency setting */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = frequency;
   priv->actual    = actual;
-#endif
 
   spivdbg("Frequency %d->%d\n", frequency, actual);
   return actual;
@@ -1081,9 +1043,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
-#endif
     {
       /* Yes... Set the mode appropriately */
 
@@ -1116,9 +1076,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
-#endif
     }
 }
 

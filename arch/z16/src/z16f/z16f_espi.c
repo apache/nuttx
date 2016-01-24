@@ -90,13 +90,11 @@ struct z16f_spi_s
 {
   struct spi_dev_s spi;        /* Externally visible part of the SPI interface */
   bool initialized;            /* TRUE: Controller has been initialized */
-#ifndef CONFIG_SPI_OWNBUS
   uint8_t nbits;               /* Width of word in bits (1-8) */
   uint8_t mode;                /* Mode 0,1,2,3 */
   sem_t exclsem;               /* Assures mutually exclusive access to SPI */
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
-#endif
 
   /* Debug stuff */
 
@@ -138,9 +136,7 @@ static void     spi_flush(FAR struct z16f_spi_s *priv);
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -162,9 +158,7 @@ static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 
 static const struct spi_ops_s g_epsiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   spi_lock,
-#endif
   z16f_espi_select,
   spi_setfrequency,
   spi_setmode,
@@ -396,7 +390,6 @@ static void spi_flush(FAR struct z16f_spi_s *priv)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct z16f_spi_s *priv = (FAR struct z16f_spi_s *)dev;
@@ -422,7 +415,6 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_setfrequency
@@ -449,14 +441,12 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Check if the requested frequency is the same as the frequency selection */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (priv->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
       return priv->actual;
     }
-#endif
 
   /* Fbaud = Fsystem / (2 * BRG)
    * BRG   = Fsystem / (2 * Fbaud)
@@ -482,10 +472,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the frequency setting */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = frequency;
   priv->actual    = actual;
-#endif
 
   spidbg("Frequency %d->%d\n", frequency, actual);
   return actual;
@@ -515,10 +503,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
-#endif
       /* Yes... Set the mode appropriately:
        *
        * SPI  CPOL CPHA
@@ -559,10 +545,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
     }
-#endif
 }
 
 /****************************************************************************
@@ -590,9 +574,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   /* Has the number of bits changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (nbits != priv->nbits)
-#endif
     {
       /* Yes... Set number of bits appropriately */
 
@@ -609,11 +591,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_putreg8(priv, regval, Z16F_ESPI_MODE);
       spivdbg("ESPI MODE: %02x\n", regval);
 
-#ifndef CONFIG_SPI_OWNBUS
       /* Save the selection so the subsequence re-configurations will be faster */
 
       priv->nbits = nbits;
-#endif
     }
 }
 
@@ -840,9 +820,6 @@ struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct z16f_spi_s *priv;
   irqstate_t flags;
-#ifndef CONFIG_SPI_OWNBUS
-  unsigned int offset;
-#endif
   uint8_t regval;
 
   spivdbg("port: %d\n", port);
@@ -857,9 +834,7 @@ struct spi_dev_s *up_spiinitialize(int port)
 
       flags = irqsave();
       priv->spi.ops = &g_epsiops;
-#ifndef CONFIG_SPI_OWNBUS
       sem_init(&priv->exclsem, 0, 1);
-#endif
 
       /* Set up the SPI pin configuration (board-specific logic is required to
        * configure and manage all chip selects).

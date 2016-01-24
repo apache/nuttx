@@ -204,9 +204,7 @@ struct sim_spiflashdev_s
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int         spiflash_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t    spiflash_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spiflash_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spiflash_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -235,9 +233,7 @@ static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spiflash_lock,
-#endif
   .select            = spiflash_select,
   .setfrequency      = spiflash_setfrequency,
   .setmode           = spiflash_setmode,
@@ -293,12 +289,10 @@ struct sim_spiflashdev_s g_spidev =
  *
  ************************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spiflash_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   return OK;
 }
-#endif
 
 /************************************************************************************
  * Name: spiflash_select

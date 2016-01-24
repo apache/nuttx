@@ -106,13 +106,10 @@ struct pic32mz_dev_s
 {
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
   FAR const struct pic32mz_config_s *config;
-
-#ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
   uint8_t          mode;       /* Mode 0,1,2,3 */
-#endif
   uint8_t          nbits;      /* Width of word in bits (8 to 16) */
 
 #ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
@@ -152,9 +149,7 @@ static void     spi_exchange8(FAR struct pic32mz_dev_s *priv,
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -177,9 +172,7 @@ static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 
 static const struct spi_ops_s g_spi1ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = pic32mz_spi1select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -228,9 +221,7 @@ static struct pic32mz_dev_s g_spi1dev =
 #ifdef CONFIG_PIC32MZ_SPI2
 static const struct spi_ops_s g_spi2ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = pic32mz_spi2select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -276,9 +267,7 @@ static struct pic32mz_dev_s g_spi2dev =
 #ifdef CONFIG_PIC32MZ_SPI3
 static const struct spi_ops_s g_spi3ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = pic32mz_spi3select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -324,9 +313,7 @@ static struct pic32mz_dev_s g_spi3dev =
 #ifdef CONFIG_PIC32MZ_SPI4
 static const struct spi_ops_s g_spi4ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = pic32mz_spi4select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -372,9 +359,7 @@ static struct pic32mz_dev_s g_spi4dev =
 #ifdef CONFIG_PIC32MZ_SPI5
 static const struct spi_ops_s g_spi5ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = pic32mz_spi5select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -420,9 +405,7 @@ static struct pic32mz_dev_s g_spi5dev =
 #ifdef CONFIG_PIC32MZ_SPI6
 static const struct spi_ops_s g_spi6ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = pic32mz_spi6select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -807,7 +790,6 @@ static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
@@ -831,7 +813,6 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_setfrequency
@@ -855,23 +836,17 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint32_t actual;
   uint32_t regval;
 
-#ifndef CONFIG_SPI_OWNBUS
   spivdbg("Old frequency: %d actual: %d New frequency: %d\n",
           priv->frequency, priv->actual, frequency);
-#else
-  spivdbg("New frequency: %d\n", regval);
-#endif
 
   /* Check if the requested frequency is the same as the frequency selection */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (priv->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
       return priv->actual;
     }
-#endif
 
   /* Calculate the divisor
    *
@@ -908,10 +883,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the frequency setting */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = frequency;
   priv->actual    = actual;
-#endif
 
   spidbg("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
@@ -937,18 +910,12 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
   uint32_t regval;
 
-#ifndef CONFIG_SPI_OWNBUS
   spivdbg("Old mode: %d New mode: %d\n", priv->mode, mode);
-#else
-  spivdbg("New mode: %d\n", mode);
-#endif
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
-#endif
       /* Yes... Set CON register appropriately.
        *
        * Standard terminology is as follows:
@@ -1009,10 +976,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Save the mode so that subsequent re-configuratins will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
     }
-#endif
 }
 
 /****************************************************************************
@@ -1392,16 +1357,12 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Set the initial SPI configuration */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->nbits = 8;
   priv->mode  = SPIDEV_MODE0;
-#endif
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
-#endif
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   /* Enable interrupts at the SPI controller */

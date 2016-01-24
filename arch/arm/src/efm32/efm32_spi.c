@@ -152,13 +152,10 @@ struct efm32_spidev_s
   sem_t txdmasem;            /* Wait for TX DMA to complete */
 #endif
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_t exclsem;             /* Supports mutually exclusive access */
   uint32_t frequency;        /* Requested clock frequency */
   uint32_t actual;           /* Actual clock frequency */
   uint8_t mode;              /* Mode 0,1,2,3 */
-#endif
-
   uint8_t nbits;             /* Width of word in bits (4-16) */
   bool lsbfirst;             /* True: Bit order is LSB first */
   bool initialized;          /* True: Already initialized */
@@ -200,9 +197,7 @@ static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv);
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int       spi_lock(struct spi_dev_s *dev, bool lock);
-#endif
 static void      spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool selected);
 static uint32_t  spi_setfrequency(struct spi_dev_s *dev,
@@ -236,9 +231,7 @@ static int       spi_portinitialize(struct efm32_spidev_s *priv);
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -761,7 +754,6 @@ static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
@@ -786,7 +778,6 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_select
@@ -846,7 +837,6 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Has the frequency changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (frequency == priv->frequency)
     {
       /* No... just return the actual frequency from the last calcualtion */
@@ -854,7 +844,6 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       actual = priv->actual;
     }
   else
-#endif
     {
       /* We want to use integer division to avoid forcing in float division
        * utils, and yet keep rounding effect errors to a minimum.
@@ -909,14 +898,12 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       actual = (BOARD_HFPERCLK_FREQUENCY << 7) / (256 + clkdiv);
       spivdbg("frequency=%u actual=%u\n", frequency, actual);
 
-#ifndef CONFIG_SPI_OWNBUS
       /* Save the frequency selection so that subsequent reconfigurations
        * will be faster.
        */
 
       priv->frequency = frequency;
       priv->actual    = actual;
-#endif
     }
 
   return actual;
@@ -951,10 +938,8 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
-#endif
       setting = 0;
       switch (mode)
         {
@@ -983,12 +968,10 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
       regval |= setting;
       spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
-#ifndef CONFIG_SPI_OWNBUS
       /* Save the mode so that subsequent re-configurations will be faster */
 
-        priv->mode = mode;
+      priv->mode = mode;
     }
-#endif
 }
 
 /****************************************************************************
@@ -1585,10 +1568,8 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   regval |= USART_FRAME_DATABITS_EIGHT | USART_CTRL_MSBF;
   spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = 0;
   priv->mode      = SPIDEV_MODE0;
-#endif
   priv->nbits     = 8;
   priv->lsbfirst  = false;
 
@@ -1602,9 +1583,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
-#endif
 
 #ifdef CONFIG_EFM32_SPI_DMA
   /* Allocate two DMA channels... one for the RX and one for the TX side of

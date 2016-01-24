@@ -90,13 +90,11 @@ struct kl_spidev_s
 {
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
   uint32_t         spibase;    /* Base address of SPI registers */
-#ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
   uint8_t          nbits;      /* Width of word in bits (8 to 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
-#endif
 };
 
 /************************************************************************************
@@ -111,9 +109,7 @@ static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -134,9 +130,7 @@ static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
 #ifdef CONFIG_KL_SPI0
 static const struct spi_ops_s g_spi0ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = kl_spi0select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -168,9 +162,7 @@ static struct kl_spidev_s g_spi0dev =
 #ifdef CONFIG_KL_SPI1
 static const struct spi_ops_s g_spi1ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = kl_spi1select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -263,7 +255,6 @@ static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
  *
  ************************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
@@ -287,7 +278,6 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   return OK;
 }
-#endif
 
 /************************************************************************************
  * Name: spi_setfrequency
@@ -314,14 +304,12 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Check if the requested frequence is the same as the frequency selection */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (priv->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
       return priv->actual;
     }
-#endif
 
   /* The clock source for the SPI baud rate generator is the bus clock.   We
    * need to pick  a prescaler value 1, 2, 3, 4, 5, 6, 7, or 8 and then a
@@ -373,10 +361,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the frequency setting */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = frequency;
   priv->actual    = actual;
-#endif
 
   spidbg("Frequency %d->%d\n", frequency, actual);
   return actual;
@@ -406,10 +392,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
-#endif
       /* Yes... Set C1 appropriately */
 
       regval = spi_getreg(priv, KL_SPI_C1_OFFSET);
@@ -441,10 +425,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Save the mode so that subsequent re-configuratins will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
     }
-#endif
 }
 
 /************************************************************************************
@@ -721,10 +703,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Set the initial SPI configuration */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = 0;
   priv->mode      = SPIDEV_MODE0;
-#endif
 
   /* Select a default frequency of approx. 400KHz */
 
@@ -732,9 +712,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
-#endif
   return &priv->spidev;
 }
 

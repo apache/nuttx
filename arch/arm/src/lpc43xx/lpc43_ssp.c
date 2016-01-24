@@ -103,13 +103,11 @@ struct lpc43_sspdev_s
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   uint8_t          sspirq;     /* SPI IRQ number */
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
   uint8_t          nbits;      /* Width of word in bits (4 to 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
-#endif
 };
 
 /****************************************************************************
@@ -124,9 +122,7 @@ static inline void ssp_putreg(FAR struct lpc43_sspdev_s *priv, uint8_t offset,
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      ssp_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void     ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     ssp_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -154,9 +150,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void);
 #ifdef CONFIG_LPC43_SSP0
 static const struct spi_ops_s g_spi0ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = ssp_lock,
-#endif
   .select            = lpc43_ssp0select,   /* Provided externally */
   .setfrequency      = ssp_setfrequency,
   .setmode           = ssp_setmode,
@@ -196,9 +190,7 @@ static struct lpc43_sspdev_s g_ssp0dev =
 #ifdef CONFIG_LPC43_SSP1
 static const struct spi_ops_s g_spi1ops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = ssp_lock,
-#endif
   .select            = lpc43_ssp1select,   /* Provided externally */
   .setfrequency      = ssp_setfrequency,
   .setmode           = ssp_setmode,
@@ -302,7 +294,6 @@ static inline void ssp_putreg(FAR struct lpc43_sspdev_s *priv, uint8_t offset, u
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int ssp_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct lpc43_sspdev_s *priv = (FAR struct lpc43_sspdev_s *)dev;
@@ -327,7 +318,6 @@ static int ssp_lock(FAR struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: ssp_setfrequency
@@ -350,14 +340,12 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint32_t divisor;
   uint32_t actual;
 
-#ifndef CONFIG_SPI_OWNBUS
   if (priv->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
       return priv->actual;
     }
-#endif
 
   /* frequency = SSP_CLOCK / divisor, or divisor = SSP_CLOCK / frequency */
 
@@ -386,10 +374,8 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the frequency setting */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = frequency;
   priv->actual    = actual;
-#endif
 
   sspdbg("Frequency %d->%d\n", frequency, actual);
   return actual;
@@ -417,10 +403,8 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
-#endif
       /* Yes... Set CR0 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
@@ -453,10 +437,8 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
     }
-#endif
 }
 
 /****************************************************************************
@@ -482,10 +464,9 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
   /* Has the number of bits changed? */
 
   DEBUGASSERT(priv && nbits > 3 && nbits < 17);
-#ifndef CONFIG_SPI_OWNBUS
+
   if (nbits != priv->nbits)
     {
-#endif
       /* Yes... Set CR1 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
@@ -495,10 +476,8 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->nbits = nbits;
     }
-#endif
 }
 
 /****************************************************************************
@@ -855,11 +834,9 @@ FAR struct spi_dev_s *lpc43_sspinitialize(int port)
 
   /* Set the initial SSP configuration */
 
-#ifndef CONFIG_SPI_OWNBUS
   priv->frequency = 0;
   priv->nbits     = 8;
   priv->mode      = SPIDEV_MODE0;
-#endif
 
   /* Select a default frequency of approx. 400KHz */
 
@@ -867,9 +844,7 @@ FAR struct spi_dev_s *lpc43_sspinitialize(int port)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
-#endif
 
   /* Enable the SPI */
 

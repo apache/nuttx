@@ -218,17 +218,14 @@ struct tiva_ssidev_s
   uint8_t  irq;                 /* SSI IRQ number */
 #endif
 
-  /* If there is more than one device on the SPI bus, then we have to enforce
-   * mutual exclusion and remember some configuration settings to reduce the
-   * overhead of constant SPI re-configuration.
+  /* Enforce mutual exclusion and remember some configuration settings to
+   * reduce the overhead of constant SPI re-configuration.
    */
 
-#ifndef CONFIG_SPI_OWNBUS
   sem_t    exclsem;             /* For exclusive access to the SSI bus */
   uint32_t frequency;           /* Current desired SCLK frequency */
   uint32_t actual;              /* Current actual SCLK frequency */
   uint8_t  mode;                /* Current mode 0,1,2,3 */
-#endif
 };
 
 /****************************************************************************
@@ -280,9 +277,7 @@ static int  ssi_interrupt(int irq, void *context);
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int  ssi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
               uint32_t frequency);
 static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
@@ -311,9 +306,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock         = ssi_lock,
-#endif
   .select       = tiva_spiselect,    /* Provided externally by board logic */
   .setfrequency = ssi_setfrequency,
   .setmode      = ssi_setmode,
@@ -457,7 +450,7 @@ static inline void ssi_putreg(struct tiva_ssidev_s *priv,
  *   State of the SSI before the SSE was disabled
  *
  * Assumption:
- *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *   Caller holds a lock on the SPI bus
  *
  ****************************************************************************/
 
@@ -486,7 +479,7 @@ static uint32_t ssi_disable(struct tiva_ssidev_s *priv)
  * Returned Value:
  *
  * Assumption:
- *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *   Caller holds a lock on the SPI bus
  *
  ****************************************************************************/
 
@@ -836,7 +829,7 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
  *   0: success, <0:Negated error number on failure
  *
  * Assumption:
- *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *   Caller holds a lock on the SPI bus
  *
  ****************************************************************************/
 
@@ -1092,7 +1085,6 @@ static int ssi_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct tiva_ssidev_s *priv = (FAR struct tiva_ssidev_s *)dev;
@@ -1117,7 +1109,6 @@ static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: ssi_setfrequency
@@ -1133,7 +1124,7 @@ static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
  *   Returns the actual frequency selected
  *
  * Assumption:
- *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *   Caller holds a lock on the SPI bus
  *
  ****************************************************************************/
 
@@ -1151,10 +1142,8 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
 
   /* Has the frequency changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (frequency != priv->frequency)
     {
-#endif
       /* "The serial bit rate is derived by dividing down the input clock
        *  (FSysClk). The clock is first divided by an even prescale value
        *  CPSDVSR from 2 to 254, which is programmed in the SSI Clock Prescale
@@ -1228,16 +1217,11 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
        * faster.
        */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->frequency = frequency;
       priv->actual    = actual;
     }
 
   return priv->actual;
-#else
-
-  return actual;
-#endif
 }
 
 static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
@@ -1268,7 +1252,7 @@ static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  *   none
  *
  * Assumption:
- *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *   Caller holds a lock on the SPI bus
  *
  ****************************************************************************/
 
@@ -1282,10 +1266,8 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
 
   /* Has the number of bits per word changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
-#endif
       /* Select the CTL register bits based on the selected mode */
 
       switch (mode)
@@ -1320,10 +1302,8 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
 
       /* Save the mode so that subsequent re-configuratins will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
     }
-#endif
 }
 
 static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
@@ -1352,7 +1332,7 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *   none
  *
  * Assumption:
- *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *   Caller holds a lock on the SPI bus
  *
  ****************************************************************************/
 
@@ -1662,9 +1642,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #ifndef CONFIG_SSI_POLLWAIT
   sem_init(&priv->xfrsem, 0, 0);
 #endif
-#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
-#endif
 
   /* Set all CR1 fields to reset state.  This will be master mode. */
 

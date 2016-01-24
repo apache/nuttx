@@ -68,9 +68,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                 uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
@@ -86,9 +84,7 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR uint8_t *buffer,
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   spi_lock,
-#endif
   ez80_spiselect,    /* select: Provided externally by board logic */
   spi_setfrequency,
   spi_setmode,
@@ -142,14 +138,12 @@ static struct spi_dev_s g_spidev = { &g_spiops };
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   /* Not implemented */
 
   return -ENOSYS;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_setfrequency

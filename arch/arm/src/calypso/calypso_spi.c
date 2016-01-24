@@ -60,20 +60,15 @@ struct calypso_spidev_s
 {
   struct spi_dev_s spidev;  /* External driver interface */
   int              nbits;   /* Number of transfered bits */
-
-#ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem; /* Mutual exclusion of devices */
-#endif
 };
 
 /* STUBS! */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   return -ENOSYS;
 }
-#endif
 
 static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                        bool selected)
@@ -117,9 +112,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -129,7 +122,7 @@ static const struct spi_ops_s g_spiops =
 #endif
   .status            = 0,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = ,
+  .cmddata           = 0,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
