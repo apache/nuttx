@@ -64,8 +64,6 @@ struct calypso_spidev_s
   sem_t            exclsem; /* Supports mutually exclusive access */
 };
 
-/* STUBS! */
-
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   struct calypso_spidev_s *priv = (struct efm32_spidev_s *)dev;
@@ -80,7 +78,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
            * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(errno == EINTR);
         }
     }
   else
@@ -90,6 +88,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
+
+/* STUBS! */
 
 static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                        bool selected)
