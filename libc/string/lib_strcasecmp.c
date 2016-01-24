@@ -46,7 +46,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRCMP
+#ifndef CONFIG_ARCH_STRCASECMP
 int strcasecmp(FAR const char *cs, FAR const char *ct)
 {
   int result;
