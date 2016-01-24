@@ -11348,6 +11348,7 @@
 	  buffering and race conditions.  These were necessary for for the
 	  NuttX networking later to be stable in some stress testing.  From
 	  Andrew Webster (2016-01-22).
-	* include/spi/spi.h:  Add an optional hwfeaqtures() method to the
-	  SPI interface (2016-01-22).
-
+	* include/spi/spi.h:  Add an optional hwfeatures() method to the
+	  SPI interface (2016-01-23).
+	* drivers/spi/Kconfig and many other files:  Remove CONFIG_SPI_OWNBUS:
+	  Now its not just a good idea, its the law (2015-01-23).
