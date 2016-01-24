@@ -574,7 +574,6 @@ Analog Input
 
     CONFIG_ADC=y         : Enable support for analog input devices
     CONFIG_PIC32MX_ADC=y : Enable support the PIC32 ADC driver
-    CONFIG_SPI_OWNBUS=n  : The PGA117 is *not* the only device on the bus
     CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
 
   When CONFIG_PIC32MX_ADC=y is defined, the Mirtoo boot up logic will
@@ -892,7 +891,6 @@ Where <subdir> is one of the following:
        but can be enabled by setting:
 
          CONFIG_ADC=y         : Enable support for analog input devices
-         CONFIG_SPI_OWNBUS=y  : If the PGA117 is the only device on the bus
          CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
 
   nxffs
@@ -992,5 +990,4 @@ Where <subdir> is one of the following:
        configuration but can be enabled by setting:
 
          CONFIG_ADC=y         : Enable support for anlog input devices
-         CONFIG_SPI_OWNBUS=n  : The PGA117 is *not* the only device on the bus
          CONFIG_ADC_PGA11X=y  : Enable support for the PGA117

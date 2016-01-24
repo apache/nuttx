@@ -913,7 +913,6 @@ Touchscreen
     Device Drivers
       CONFIG_SPI=y                          : Enable SPI support
       CONFIG_SPI_EXCHANGE=y                 : The exchange() method is supported
-      CONFIG_SPI_OWNBUS=y                   : Smaller code if this is the only SPI device
 
       CONFIG_INPUT=y                        : Enable support for input devices
       CONFIG_INPUT_ADS7843E=y               : Enable support for the ADS7843E
@@ -1410,7 +1409,6 @@ Configurations
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
          CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
 
          CONFIG_INPUT=y                    : Enable support for input devices
          CONFIG_INPUT_ADS7843E=y           : Enable support for the ADS7843E

@@ -726,7 +726,6 @@ Configuration sub-directories
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
          CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
 
          CONFIG_MMCSD=y                    : Enable MMC/SD support
          CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
@@ -781,7 +780,6 @@ Configuration sub-directories
          CONFIG_SPI=y                       : Enable SPI support
          CONFIG_SPI_EXCHANGE=y              : The exchange() method is supported
          CONFIG_SPI_CMDDATA=y               : CMD/DATA support is required
-         CONFIG_SPI_OWNBUS=y                : Smaller code if this is the only SPI device
 
        Device Drivers -> LCDs
          CONFIG_LCD=y                       : Enable LCD support

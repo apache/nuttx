@@ -1008,7 +1008,6 @@ Configuration sub-directories
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
          CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
          CONFIG_SPI_BITBANG=y              : Enable SPI bit-bang support
 
          CONFIG_MMCSD=y                    : Enable MMC/SD support
@@ -1045,7 +1044,6 @@ Configuration sub-directories
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
          CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
          CONFIG_SPI_BITBANG=y              : Enable SPI bit-bang support
 
          CONFIG_INPUT=y                    : Enable support for input devices

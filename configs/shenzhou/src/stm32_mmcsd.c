@@ -58,10 +58,6 @@
 
 #ifndef CONFIG_STM32_SPI1
 #  undef HAVE_MMCSD
-#else
-#  ifdef CONFIG_SPI_OWNBUS
-#    warning "SPI1 is shared with SD and FLASH but CONFIG_SPI_OWNBUS is defined"
-#  endif
 #endif
 
 /* Can't support MMC/SD features if MMC/SD driver support is not selected */

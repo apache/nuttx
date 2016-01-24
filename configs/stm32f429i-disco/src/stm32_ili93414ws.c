@@ -116,16 +116,13 @@
 #define ILI93414WS_SPI_SR           (ILI93414WS_SPI_BASE + STM32_SPI_SR_OFFSET)
 #define ILI93414WS_SPI_DR           (ILI93414WS_SPI_BASE + STM32_SPI_DR_OFFSET)
 
-/*
- * Activates the usage of the spi interface structure if several active devices
+/* Activates the usage of the spi interface structure if several active devices
  * connected on the SPI5 bus, e.g. LCD Display, MEMS. This will perform locking
  * of the spi bus by SPI_LOCK at each selection of the SPI5 device.
  */
 
 #ifdef CONFIG_STM32_SPI5
-# ifndef CONFIG_SPI_OWNBUS
 #  define ILI93414WS_SPI
-# endif
 #endif
 
 /* Debug option */
@@ -267,7 +264,6 @@ static inline void stm32_ili93414ws_modifycr1(uint16_t setbits, uint16_t clrbits
 {
   stm32_ili93414ws_modifyreg(ILI93414WS_SPI_CR1, setbits, clrbits);
 }
-
 
 /****************************************************************************
  * Name: stm32_ili93414ws_modifycr2
@@ -818,8 +814,7 @@ static void stm32_ili93414ws_spiconfig(FAR struct ili9341_lcd_s *lcd)
   stm32_ili93414ws_set8bitmode(priv);
 
 #ifdef ILI93414WS_SPI
-  /*
-   * Backup cr1 and cr2 register to be sure they will be usable
+  /* Backup cr1 and cr2 register to be sure they will be usable
    * by default spi interface. Disable spi device here is neccessary at the time
    * restoring the register during deselection.
    */
@@ -855,6 +850,7 @@ static void stm32_ili93414ws_spiconfig(FAR struct ili9341_lcd_s *lcd)
  * Returned Value:
  *
  ****************************************************************************/
+
 #ifdef ILI93414WS_SPI
 static inline void stm32_ili93414ws_cmddata(
                       FAR struct ili9341_lcd_s *lcd, bool cmd)
@@ -908,6 +904,7 @@ static int stm32_ili93414ws_backlight(FAR struct ili9341_lcd_s *lcd, int level)
  * Returned Value:
  *
  ****************************************************************************/
+
 #ifdef ILI93414WS_SPI
 static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
 {
