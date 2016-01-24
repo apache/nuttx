@@ -158,17 +158,12 @@ static const struct spi_ops_s g_spiops =
 static struct calypso_spidev_s g_spidev =
 {
   .spidev  = { &g_spiops },
-  .nbits  = 0,
+  .nbits   = 0,
+  .exclsem = SEM_INITIALIZER(1)
 };
 
 void spi_init(void)
 {
-#if 0
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
-
-  sem_init(&priv->exclsem, 0, 1);
-#endif
-
   putreg16(SPI_SET1_EN_CLK | SPI_SET1_WR_IRQ_DIS | SPI_SET1_RDWR_IRQ_DIS,
            SPI_REG(REG_SET1));
 
