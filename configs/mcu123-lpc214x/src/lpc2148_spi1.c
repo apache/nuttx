@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/mcu123-lpc214x/src/lpc2148_spi1.c
  *
- *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -149,7 +151,8 @@ static const struct spi_ops_s g_spiops =
   .registercallback  = 0,                 /* Not implemented */
 };
 
-static struct spi_dev_s g_spidev = { &g_spiops };
+static struct spi_dev_s g_spidev = {&g_spiops};
+static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access */
 
 /****************************************************************************
  * Public Data
@@ -182,9 +185,25 @@ static struct spi_dev_s g_spidev = { &g_spiops };
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  /* Not implemented */
+  if (lock)
+    {
+      /* Take the semaphore (perhaps waiting) */
 
-  return -ENOSYS;
+      while (sem_wait(&g_exclsem) != 0)
+        {
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
+
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+  else
+    {
+      (void)sem_post(&g_exclsem);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
