@@ -409,20 +409,6 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
 #ifdef CONFIG_ADXL345_SPI
   priv->spi = dev;
 
-  /* If this SPI bus is not shared, then we can config it now.
-   * If it is shared, then other device could change our config,
-   * then just configure before sending data.
-   */
-
-#ifdef CONFIG_SPI_OWNBUS
-  /* Configure SPI for the ADXL345 */
-
-  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
-  SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
-#endif
-
 #else
   priv->i2c = dev;
 

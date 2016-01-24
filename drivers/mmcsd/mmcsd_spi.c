@@ -158,9 +158,7 @@ struct mmcsd_slot_s
   uint32_t twrite;           /* Card write time */
   uint32_t ocr;              /* Last 4 bytes of OCR (R3) */
   uint32_t r7;               /* Last 4 bytes of R7 */
-#ifndef CONFIG_SPI_OWNBUS
   uint32_t spispeed;         /* Speed to use for SPI in data mode */
-#endif
 };
 
 struct mmcsd_cmdinfo_s
@@ -180,12 +178,6 @@ static void     mmcsd_semtake(FAR struct mmcsd_slot_s *slot);
 static void     mmcsd_semgive(FAR struct mmcsd_slot_s *slot);
 
 /* Card SPI interface *******************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void mmcsd_spiinit(FAR struct mmcsd_slot_s *slot);
-#else
-#  define mmcsd_spiinit(slot)
-#endif
 
 static int      mmcsd_waitready(FAR struct mmcsd_slot_s *slot);
 static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
@@ -358,7 +350,6 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 {
   /* Get exclusive access to the SPI bus (if necessary) */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(slot->spi, true);
 
   /* Set the frequency, bit width and mode, as some other driver could have
@@ -369,7 +360,6 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
   SPI_SETBITS(slot->spi, 8);
   (void)SPI_HWFEATURES(slot->spi, 0);
   (void)SPI_SETFREQUENCY(slot->spi, slot->spispeed);
-#endif
 
   /* Get exclusive access to the MMC/SD device (possibly unnecessary if
    * SPI_LOCK is also implemented as a semaphore).
@@ -397,7 +387,6 @@ static void mmcsd_semgive(FAR struct mmcsd_slot_s *slot)
 
   /* Relinquish the lock on the SPI bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   /* The card may need up to 8 SCLK cycles to sample the CS status
    * and release the MISO line.
    */
@@ -407,28 +396,7 @@ static void mmcsd_semgive(FAR struct mmcsd_slot_s *slot)
   /* Relinquish exclusive access to the SPI bus */
 
   (void)SPI_LOCK(slot->spi, false);
-#endif
 }
-
-/****************************************************************************
- * Name: mmcsd_spiinit
- *
- * Description:
- *   Set SPI mode and data width.
- *
- * Assumptions:
- *   MMC/SD card already selected
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void mmcsd_spiinit(FAR struct mmcsd_slot_s *slot)
-{
-  SPI_SETMODE(slot->spi, CONFIG_MMCSD_SPIMODE);
-  SPI_SETBITS(slot->spi, 8);
-  (void)SPI_HWFEATURES(slot->spi, 0);
-}
-#endif
 
 /****************************************************************************
  * Name: mmcsd_waitready
@@ -738,9 +706,7 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
 
   /* Set the actual SPI frequency as close as possible to the max frequency */
 
-#ifndef CONFIG_SPI_OWNBUS
   slot->spispeed = frequency;
-#endif
   frequency = SPI_SETFREQUENCY(spi, frequency);
 
   /* Now determine the delay to access data */
@@ -1607,9 +1573,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   /* Clock Freq. Identification Mode < 400kHz */
 
-#ifndef CONFIG_SPI_OWNBUS
   slot->spispeed = MMCSD_IDMODE_CLOCK;
-#endif
   (void)SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
 
   /* Set the maximum access time out */
@@ -1974,17 +1938,14 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 
   /* Bind the SPI port to the slot */
 
-  slot->spi = spi;
-#ifndef CONFIG_SPI_OWNBUS
+  slot->spi      = spi;
   slot->spispeed = MMCSD_IDMODE_CLOCK;
-#endif
 
   /* Get exclusive access to the SPI bus and make sure that SPI is properly
    * configured for the MMC/SD card
    */
 
   mmcsd_semtake(slot);
-  mmcsd_spiinit(slot);
 
   /* Initialize for the media in the slot (if any) */
 

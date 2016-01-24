@@ -112,7 +112,6 @@ static const struct file_operations g_mpl115afops =
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void mpl115a_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the MPL115A */
@@ -122,7 +121,6 @@ static inline void mpl115a_configspi(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Name: mpl115a_getreg8
@@ -138,10 +136,8 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   mpl115a_configspi(priv->spi);
-#endif
 
   /* Select the MPL115A */
 
@@ -158,9 +154,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, false);
-#endif
 
 #ifdef CONFIG_MPL115A_REGDEBUG
   dbg("%02x->%02x\n", regaddr, regval);

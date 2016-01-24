@@ -261,13 +261,8 @@ struct ug_dev_s
 
 /* SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ug_select(FAR struct spi_dev_s *spi);
-static inline void ug_deselect(FAR struct spi_dev_s *spi);
-#else
 static void ug_select(FAR struct spi_dev_s *spi);
 static void ug_deselect(FAR struct spi_dev_s *spi);
-#endif
 
 /* LCD Data Transfer Methods */
 
@@ -415,14 +410,6 @@ static inline FAR const char *ug_powerstring(uint8_t power)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ug_select(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-}
-#else
 static void ug_select(FAR struct spi_dev_s *spi)
 {
   /* Select UG-9664HSWAG01 chip (locking the SPI bus in case there are multiple
@@ -443,7 +430,6 @@ static void ug_select(FAR struct spi_dev_s *spi)
   (void)SPI_SETFREQUENCY(spi, CONFIG_UG9664HSWAG01_FREQUENCY);
 #endif
 }
-#endif
 
 /**************************************************************************************
  * Function: ug_deselect
@@ -461,14 +447,6 @@ static void ug_select(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ug_deselect(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just de-select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
 static void ug_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select UG-9664HSWAG01 chip and relinquish the SPI bus. */
@@ -476,7 +454,6 @@ static void ug_deselect(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
-#endif
 
 /**************************************************************************************
  * Name:  ug_putrun

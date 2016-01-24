@@ -64,7 +64,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void adxl345_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the ADXL345 */
@@ -74,7 +73,6 @@ static inline void adxl345_configspi(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -94,10 +92,8 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
-#endif
 
   /* Select the ADXL345 */
 
@@ -114,9 +110,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, false);
-#endif
 
 #ifdef CONFIG_ADXL345_REGDEBUG
   dbg("%02x->%02x\n", regaddr, regval);
@@ -141,10 +135,8 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
-#endif
 
   /* Select the ADXL345 */
 
@@ -160,9 +152,8 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
 
   /* Unlock bus */
-#ifndef CONFIG_SPI_OWNBUS
+
   (void)SPI_LOCK(priv->spi, false);
-#endif
 }
 
 /****************************************************************************
@@ -179,10 +170,8 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
-#endif
 
   /* Select the ADXL345 */
 
@@ -199,9 +188,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, false);
-#endif
 
 #ifdef CONFIG_ADXL345_REGDEBUG
   dbg("%02x->%04x\n", regaddr, regval);

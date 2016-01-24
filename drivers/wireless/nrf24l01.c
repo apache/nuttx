@@ -158,21 +158,13 @@ struct nrf24l01_dev_s
  ****************************************************************************/
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi);
-#  define nrf24l01_lock(spi)
-#  define nrf24l01_unlock(spi)
-#else
-#  define nrf24l01_configspi(spi);
 static void nrf24l01_lock(FAR struct spi_dev_s *spi);
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 static uint8_t nrf24l01_access(FAR struct nrf24l01_dev_s *dev,
     nrf24l01_access_mode_t mode, uint8_t cmd, uint8_t *buf, int length);
-
 static uint8_t nrf24l01_flush_rx(FAR struct nrf24l01_dev_s *dev);
-
 static uint8_t nrf24l01_flush_tx(FAR struct nrf24l01_dev_s *dev);
 
 /* Read register from nrf24 */
@@ -250,7 +242,6 @@ static const struct file_operations nrf24l01_fops =
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void nrf24l01_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus because there are multiple devices competing for the
@@ -271,15 +262,13 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
   (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 }
-#endif
 
 /****************************************************************************
  * Function: nrf24l01_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer, possibly losing the current
+ *   configuration if we are sharing the SPI bus with other devices.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -291,23 +280,18 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
 }
-#endif
 
 /****************************************************************************
  * Function: nrf24l01_configspi
  *
  * Description:
- *   Configure the SPI for use with the NRF24L01.  This function should be
- *   called once during touchscreen initialization to configure the SPI
- *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
- *   does nothing.
+ *   Configure the SPI for use with the NRF24L01.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -319,12 +303,9 @@ static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
 {
-  /* Configure SPI for the NRF24L01 module.
-   * As we own the SPI bus this method is called just once.
-   */
+  /* Configure SPI for the NRF24L01 module. */
 
   SPI_SELECT(spi, SPIDEV_WIRELESS, true);  /* Useful ? */
   SPI_SETMODE(spi, SPIDEV_MODE0);
@@ -333,7 +314,6 @@ static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
   (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 }
-#endif
 
 static inline void nrf24l01_select(struct nrf24l01_dev_s * dev)
 {

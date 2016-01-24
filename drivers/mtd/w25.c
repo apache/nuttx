@@ -472,34 +472,6 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 {
   uint8_t status;
 
-  /* Are we the only device on the bus? */
-
-#ifdef CONFIG_SPI_OWNBUS
-
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
-
-  /* Send "Read Status Register (RDSR)" command */
-
-  (void)SPI_SEND(priv->spi, W25_RDSR);
-
-  /* Loop as long as the memory is busy with a write cycle */
-
-  do
-    {
-      /* Send a dummy byte to generate the clock needed to shift out the status */
-
-      status = SPI_SEND(priv->spi, W25_DUMMY);
-    }
-  while ((status & W25_SR_BUSY) != 0);
-
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
-
-#else
-
   /* Loop as long as the memory is busy with a write cycle */
 
   do
@@ -535,7 +507,6 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 #endif
     }
   while ((status & W25_SR_BUSY) != 0);
-#endif
 
   return status;
 }

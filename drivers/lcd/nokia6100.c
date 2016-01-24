@@ -338,14 +338,8 @@ struct nokia_dev_s
 
 /* SPI support */
 
-static inline void nokia_configspi(FAR struct spi_dev_s *spi);
-#ifdef CONFIG_SPI_OWNBUS
-static inline void nokia_select(FAR struct spi_dev_s *spi);
-static inline void nokia_deselect(FAR struct spi_dev_s *spi);
-#else
 static void nokia_select(FAR struct spi_dev_s *spi);
 static void nokia_deselect(FAR struct spi_dev_s *spi);
-#endif
 static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd);
 static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata);
 static void nokia_clrram(FAR struct spi_dev_s *spi);
@@ -651,39 +645,6 @@ static const uint8_t g_setcon[] =
  **************************************************************************************/
 
 /**************************************************************************************
- * Function: nokia_configspi
- *
- * Description:
- *   Configure the SPI for use with the Nokia 6100
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-static inline void nokia_configspi(FAR struct spi_dev_s *spi)
-{
-  lcddbg("Mode: %d Bits: %d Frequency: %d\n",
-         CONFIG_NOKIA6100_SPIMODE, CONFIG_NOKIA6100_WORDWIDTH, CONFIG_NOKIA6100_FREQUENCY);
-
-  /* Configure SPI for the Nokia 6100.  But only if we own the SPI bus.  Otherwise, don't
-   * bother because it might change.
-   */
-
-#ifdef CONFIG_SPI_OWNBUS
-  SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
-  SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY)
-#endif
-}
-
-/**************************************************************************************
  * Function: nokia_select
  *
  * Description:
@@ -699,15 +660,6 @@ static inline void nokia_configspi(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void nokia_select(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just select the chip */
-
-  lcddbg("SELECTED\n");
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-}
-#else
 static void nokia_select(FAR struct spi_dev_s *spi)
 {
   /* Select Nokia 6100 chip (locking the SPI bus in case there are multiple
@@ -727,7 +679,6 @@ static void nokia_select(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY);
 }
-#endif
 
 /**************************************************************************************
  * Function: nokia_deselect
@@ -745,15 +696,6 @@ static void nokia_select(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void nokia_deselect(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just de-select the chip */
-
-  lcddbg("DE-SELECTED\n");
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
 static void nokia_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select Nokia 6100 chip and relinquish the SPI bus. */
@@ -762,7 +704,6 @@ static void nokia_deselect(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
-#endif
 
 /**************************************************************************************
  * Name:  nokia_sndcmd
@@ -1218,9 +1159,8 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
   priv->spi      = spi;                     /* Save the SPI instance */
   priv->contrast = NOKIA_DEFAULT_CONTRAST;  /* Initial contrast setting */
 
-  /* Configure and enable the LCD controller */
+  /* Enable the LCD controller */
 
-  nokia_configspi(spi);
   if (nokia_initialize(priv) == OK)
     {
       /* Turn on the backlight */
@@ -1228,5 +1168,6 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
       nokia_backlight(CONFIG_NOKIA6100_BLINIT);
       return &priv->dev;
     }
+
   return NULL;
 }

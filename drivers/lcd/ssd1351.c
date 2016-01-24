@@ -507,12 +507,10 @@ static void ssd1351_select(FAR struct ssd1351_dev_s *priv)
    * have gotten configured for a different device while unlocked)
    */
 
-#ifndef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
   SPI_SETBITS(spi, SSD1351_SPIBITS);
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
-#endif
 }
 #endif
 
@@ -1188,19 +1186,6 @@ FAR struct lcd_dev_s *ssd1351_initialize(FAR struct spi_dev_s *spi,
   priv->spi              = spi;
 #endif
   priv->power            = LCD_FULL_OFF;
-
-  /* Configure the SPI bus if we own it.  Otherwise, don't bother because
-   * it might change.
-   */
-
-#if defined(CONFIG_SSD1351_SPI3WIRE) || defined(CONFIG_SSD1351_SPI4WIRE)
-#ifdef CONFIG_SPI_OWNBUS
-  SPI_SETMODE(spi, CONFIG_SSD1351_SPIMODE);
-  SPI_SETBITS(spi, SSD1351_SPIBITS);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1351_SPIFREQ);
-#endif
-#endif
 
   /* Configure the device */
 

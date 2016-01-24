@@ -88,16 +88,8 @@
  ****************************************************************************/
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void max11802_configspi(FAR struct spi_dev_s *spi);
-#  define max11802_lock(spi)
-#  define max11802_unlock(spi)
-#else
-#  define max11802_configspi(spi);
 static void max11802_lock(FAR struct spi_dev_s *spi);
 static void max11802_unlock(FAR struct spi_dev_s *spi);
-#endif
-
 static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
                                  uint8_t cmd, int *tags);
 
@@ -181,7 +173,6 @@ static struct max11802_dev_s *g_max11802list;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void max11802_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus because there are multiple devices competing for the
@@ -200,15 +191,13 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Function: max11802_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer, possibly losing the current
+ *   configuration if we are sharing the SPI bus with other devices
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -220,47 +209,12 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void max11802_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
 }
-#endif
-
-/****************************************************************************
- * Function: max11802_configspi
- *
- * Description:
- *   Configure the SPI for use with the MAX11802.  This function should be
- *   called once during touchscreen initialization to configure the SPI
- *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
- *   does nothing.
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void max11802_configspi(FAR struct spi_dev_s *spi)
-{
-  /* Configure SPI for the MAX11802.  But only if we own the SPI bus.
-   * Otherwise, don't bother because it might change.
-   */
-
-  SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
-}
-#endif
 
 /****************************************************************************
  * Name: max11802_sendcmd
@@ -1256,11 +1210,8 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   max11802_lock(spi);
 
-  /* Configure the SPI interface */
-
-  max11802_configspi(spi);
-
   /* Configure MAX11802 registers */
+
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_WR);
   (void)SPI_SEND(priv->spi, MAX11802_MODE);

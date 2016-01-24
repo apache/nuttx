@@ -301,15 +301,8 @@ struct ug2864ambag01_dev_s
 
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ug2864ambag01_configspi(FAR struct spi_dev_s *spi);
-#  define ug2864ambag01_lock(spi)
-#  define ug2864ambag01_unlock(spi)
-#else
-#  define ug2864ambag01_configspi(spi)
 static void ug2864ambag01_lock(FAR struct spi_dev_s *spi);
 static void ug2864ambag01_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 /* LCD Data Transfer Methods */
 
@@ -409,39 +402,6 @@ static struct ug2864ambag01_dev_s g_oleddev =
  **************************************************************************************/
 
 /**************************************************************************************
- * Name: ug2864ambag01_configspi
- *
- * Description:
- *   Configure the SPI for use with the UG-2864AMBAG01
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ug2864ambag01_configspi(FAR struct spi_dev_s *spi)
-{
-  lcdvdbg("Mode: %d Bits: 8 Frequency: %d\n",
-          CONFIG_UG2864AMBAG01_SPIMODE, CONFIG_UG2864AMBAG01_FREQUENCY);
-
-  /* Configure SPI for the UG-2864AMBAG01.  But only if we own the SPI bus.  Otherwise,
-   * don't bother because it might change.
-   */
-
-  SPI_SETMODE(spi, CONFIG_UG2864AMBAG01_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_UG2864AMBAG01_FREQUENCY);
-}
-#endif
-
-/**************************************************************************************
  * Name: ug2864ambag01_lock
  *
  * Description:
@@ -457,7 +417,6 @@ static inline void ug2864ambag01_configspi(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus if there are multiple devices competing for the SPI bus. */
@@ -473,7 +432,6 @@ static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_UG2864AMBAG01_FREQUENCY);
 }
-#endif
 
 /**************************************************************************************
  * Name: ug2864ambag01_unlock
@@ -491,14 +449,12 @@ static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void ug2864ambag01_unlock(FAR struct spi_dev_s *spi)
 {
   /* De-select UG-2864AMBAG01 chip and relinquish the SPI bus. */
 
   SPI_LOCK(spi, false);
 }
-#endif
 
 /**************************************************************************************
  * Name:  ug2864ambag01_putrun
@@ -1079,10 +1035,6 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
   /* Save the reference to the SPI device */
 
   priv->spi = spi;
-
-  /* Configure the SPI */
-
-  ug2864ambag01_configspi(spi);
 
   /* Lock and select device */
 

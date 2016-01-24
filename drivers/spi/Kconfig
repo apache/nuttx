@@ -22,14 +22,6 @@ config SPI_SLAVE_DMA
 
 endif
 
-config SPI_OWNBUS
-	bool "SPI single device"
-	default n
-	---help---
-		Set if there is only one active device on the SPI bus.  No locking or
-		SPI configuration will be performed. It is not necessary for clients to
-		lock, re-configure, etc.
-
 config SPI_EXCHANGE
 	bool "SPI exchange"
 	default y

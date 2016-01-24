@@ -270,15 +270,9 @@ static struct enc_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void enc_configspi(FAR struct spi_dev_s *spi);
-#  define enc_lock(priv);
-#  define enc_unlock(priv);
-#else
-#  define enc_configspi(spi)
 static void enc_lock(FAR struct enc_driver_s *priv);
 static inline void enc_unlock(FAR struct enc_driver_s *priv);
-#endif
 
 /* SPI control register access */
 
@@ -372,19 +366,15 @@ static int  enc_reset(FAR struct enc_driver_s *priv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void enc_configspi(FAR struct spi_dev_s *spi)
 {
-  /* Configure SPI for the ENC28J60.  But only if we own the SPI bus.
-   * Otherwise, don't bother because it might change.
-   */
+  /* Configure SPI for the ENC28J60. */
 
   SPI_SETMODE(spi, CONFIG_ENC28J60_SPIMODE);
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_ENC28J60_FREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Function: enc_lock
@@ -402,7 +392,6 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void enc_lock(FAR struct enc_driver_s *priv)
 {
   /* Lock the SPI bus in case there are multiple devices competing for the SPI
@@ -420,7 +409,6 @@ static void enc_lock(FAR struct enc_driver_s *priv)
   (void)SPI_HWFEATURES(priv->spi, 0);
   (void)SPI_SETFREQUENCY(priv->spi, CONFIG_ENC28J60_FREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Function: enc_unlock
@@ -438,14 +426,12 @@ static void enc_lock(FAR struct enc_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void enc_unlock(FAR struct enc_driver_s *priv)
 {
   /* Relinquish the lock on the bus. */
 
   SPI_LOCK(priv->spi, false);
 }
-#endif
 
 /****************************************************************************
  * Function: enc_rdgreg2

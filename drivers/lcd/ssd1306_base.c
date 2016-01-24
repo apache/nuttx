@@ -818,23 +818,9 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int
 #ifdef CONFIG_LCD_SSD1306_SPI
   priv->spi = dev;
 
-  /* If this SPI bus is not shared, then we can config it now.
-   * If it is shared, then other device could change our config,
-   * then just configure before sending data.
-   */
-
-#  ifdef CONFIG_SPI_OWNBUS
-  /* Configure SPI */
-
-  SPI_SETMODE(priv->spi, CONFIG_SSD1306_SPIMODE);
-  SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, CONFIG_SSD1306_FREQUENCY);
-#  else
   /* Configure the SPI */
 
   ssd1306_configspi(priv->spi);
-#  endif
 
 #else
   /* Remember the I2C configuration */

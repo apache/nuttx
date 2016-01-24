@@ -246,13 +246,8 @@ struct st7567_dev_s
 
 /* SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void st7567_select(FAR struct spi_dev_s *spi);
-static inline void st7567_deselect(FAR struct spi_dev_s *spi);
-#else
 static void st7567_select(FAR struct spi_dev_s *spi);
 static void st7567_deselect(FAR struct spi_dev_s *spi);
-#endif
 
 /* LCD Data Transfer Methods */
 
@@ -371,14 +366,6 @@ static struct st7567_dev_s g_st7567dev =
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void st7567_select(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-}
-#else
 static void st7567_select(FAR struct spi_dev_s *spi)
 {
   /* Select ST7567 chip (locking the SPI bus in case there are multiple
@@ -399,7 +386,6 @@ static void st7567_select(FAR struct spi_dev_s *spi)
   (void)SPI_SETFREQUENCY(spi, CONFIG_ST7567_FREQUENCY);
 #endif
 }
-#endif
 
 /**************************************************************************************
  * Function: st7567_deselect
@@ -417,14 +403,6 @@ static void st7567_select(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void st7567_deselect(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just de-select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
 static void st7567_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select ST7567 chip and relinquish the SPI bus. */
@@ -432,7 +410,6 @@ static void st7567_deselect(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
-#endif
 
 /**************************************************************************************
  * Name:  st7567_putrun

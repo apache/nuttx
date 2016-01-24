@@ -283,15 +283,9 @@ static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 
 static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
 {
-#ifndef CONFIG_SPI_OWNBUS
-  /* Lock the SPI bus because there are multiple devices competing for the
-   * SPI bus
-   */
-
   /* Lock the SPI bus so that we have exclusive access */
 
   (void)SPI_LOCK(spi, true);
-#endif
 
   /* We have the lock.  Now make sure that the SPI bus is configured for the
    * CC3000 (it might have gotten configured for a different device while
@@ -306,9 +300,8 @@ static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
  * Function: cc3000_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer, possibly losing the current
+ *   configuration if we are sharing the SPI bus with other devices.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -326,11 +319,9 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
 
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 
-#ifndef CONFIG_SPI_OWNBUS
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
-#endif
 }
 
 /****************************************************************************

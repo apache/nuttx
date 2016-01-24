@@ -51,11 +51,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SPI_OWNBUS - Set if there is only one active device on the SPI bus.
- *   No locking or SPI configuration will be performed. It is not necessary
- *   for clients to lock, re-configure, etc..
- * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
+/* CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
  *   (vs a recvblock() and sndblock ()methods).
+ * CONFIG_SPI_HWFEATURES - Support special, hardware-specific SPI features.
  * CONFIG_SPI_CMDDATA - Devices on the SPI bus require out-of-band support
  *   to distinguish command transfers from data transfers.  Such devices
  *   will often support either 9-bit SPI (yech) or 8-bit SPI and a GPIO
@@ -85,11 +83,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
-#  define SPI_LOCK(d,l) (d)->ops->lock(d,l)
-#else
-#  define SPI_LOCK(d,l) 0
-#endif
+#define SPI_LOCK(d,l) (d)->ops->lock(d,l)
 
 /****************************************************************************
  * Name: SPI_SELECT
@@ -428,9 +422,7 @@ typedef uint8_t spi_hwfeatures_t;
 struct spi_dev_s;
 struct spi_ops_s
 {
-#ifndef CONFIG_SPI_OWNBUS
   CODE int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
-#endif
   CODE void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);

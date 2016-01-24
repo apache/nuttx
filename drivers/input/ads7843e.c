@@ -94,15 +94,8 @@
  ****************************************************************************/
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ads7843e_configspi(FAR struct spi_dev_s *spi);
-#  define ads7843e_lock(spi)
-#  define ads7843e_unlock(spi)
-#else
-#  define ads7843e_configspi(spi);
 static void ads7843e_lock(FAR struct spi_dev_s *spi);
 static void ads7843e_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
 
@@ -180,7 +173,6 @@ static struct ads7843e_dev_s *g_ads7843elist;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void ads7843e_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus because there are multiple devices competing for the
@@ -201,15 +193,13 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
   (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 }
-#endif
 
 /****************************************************************************
  * Function: ads7843e_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer,  possibly losing the current
+ *   configuration if we are sharing the bus with other devices.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -221,49 +211,12 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void ads7843e_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
 }
-#endif
-
-/****************************************************************************
- * Function: ads7843e_configspi
- *
- * Description:
- *   Configure the SPI for use with the ADS7843E.  This function should be
- *   called once during touchscreen initialization to configure the SPI
- *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
- *   does nothing.
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
-{
-  /* Configure SPI for the ADS7843.  But only if we own the SPI bus. 
-   * Otherwise, don't bother because it might change.
-   */
-
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
-  SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
-}
-#endif
 
 /****************************************************************************
  * Name: ads7843e_sendcmd
@@ -1253,10 +1206,6 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   /* Lock the SPI bus so that we have exclusive access */
 
   ads7843e_lock(spi);
-
-  /* Configure the SPI interface */
-
-  ads7843e_configspi(spi);
 
   /* Enable the PEN IRQ */
 

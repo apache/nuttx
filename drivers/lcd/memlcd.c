@@ -150,14 +150,8 @@ struct memlcd_dev_s
 
 /* Low-level spi helpers */
 
-static inline void memlcd_configspi(FAR struct spi_dev_s *spi);
-#ifdef CONFIG_SPI_OWNBUS
-static inline void memlcd_select(FAR struct spi_dev_s *spi);
-static inline void memlcd_deselect(FAR struct spi_dev_s *spi);
-#else
 static void memlcd_select(FAR struct spi_dev_s *spi);
 static void memlcd_deselect(FAR struct spi_dev_s *spi);
-#endif
 
 /* lcd data transfer methods */
 
@@ -267,48 +261,6 @@ static inline int __test_bit(int nr, const volatile uint8_t * addr)
 }
 
 /****************************************************************************
- * Name: memlcd_configspi
- *
- * Description:
- *   Configure the SPI for use with the Sharp Memory LCD
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void memlcd_configspi(FAR struct spi_dev_s *spi)
-{
-#ifdef CONFIG_MEMLCD_SPI_FREQUENCY
-  lcddbg("Mode: %d Bits: %d Frequency: %d\n",
-         MEMLCD_SPI_MODE, MEMLCD_SPI_BITS, CONFIG_MEMLCD_SPI_FREQUENCY);
-#else
-  lcddbg("Mode: %d Bits: %d Frequency: %d\n",
-         MEMLCD_SPI_MODE, MEMLCD_SPI_BITS, MEMLCD_SPI_FREQUENCY);
-#endif
-
-  /* Configure SPI for the Memory LCD.  But only if we own the SPI bus.
-   * Otherwise, don't bother because it might change.
-   */
-
-#ifdef CONFIG_SPI_OWNBUS
-  SPI_SETMODE(spi, MEMLCD_SPI_MODE);
-  SPI_SETBITS(spi, MEMLCD_SPI_BITS);
-  (void)SPI_HWFEATURES(spi, 0);
-#  ifdef CONFIG_MEMLCD_SPI_FREQUENCY
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MEMLCD_SPI_FREQUENCY);
-#  else
-  (void)SPI_SETFREQUENCY(spi, MEMLCD_SPI_FREQUENCY);
-#  endif
-#endif
-}
-
-/****************************************************************************
  * Name: memlcd_select
  *
  * Description:
@@ -324,25 +276,19 @@ static inline void memlcd_configspi(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void memlcd_select(FAR struct spi_dev_s *spi)
-{
-  /* we own the spi bus, so just select the chip */
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-}
-
-#else
 static void memlcd_select(FAR struct spi_dev_s *spi)
 {
   /* Select memlcd (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
+
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
   /* Now make sure that the SPI bus is configured for the memlcd (it
    * might have gotten configured for a different device while unlocked)
    */
+
   SPI_SETMODE(spi, MEMLCD_SPI_MODE);
   SPI_SETBITS(spi, MEMLCD_SPI_BITS);
   (void)SPI_HWFEATURES(spi, 0);
@@ -352,7 +298,6 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
   (void)SPI_SETFREQUENCY(spi, MEMLCD_SPI_FREQUENCY);
 #  endif
 }
-#endif
 
 /****************************************************************************
  * Name: memlcd_deselect
@@ -370,20 +315,13 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void memlcd_deselect(FAR struct spi_dev_s *spi)
-{
-  /* we own the spi bus, so just de-select the chip */
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
 static void memlcd_deselect(FAR struct spi_dev_s *spi)
 {
-  /* de-select memlcd and relinquish the spi bus. */
+  /* De-select memlcd and relinquish the spi bus. */
+
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
-#endif
 
 /****************************************************************************
  * Name:  memlcd_clear
@@ -765,11 +703,10 @@ FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
 
   DEBUGASSERT(spi && priv && devno == 0);
 
-  /* register board specific functions */
-  mlcd->priv = priv;
+  /* Register board specific functions */
 
+  mlcd->priv = priv;
   mlcd->spi = spi;
-  memlcd_configspi(spi);
 
   mlcd->priv->attachirq(memlcd_extcominisr);
 

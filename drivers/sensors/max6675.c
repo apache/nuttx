@@ -256,15 +256,6 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   priv->spi        = spi;
   priv->temp       = 0;
 
-#ifdef CONFIG_SPI_OWNBUS
-  /* Configure SPI for the MAX6675 */
-
-  SPI_SETMODE(priv->spi, SPIDEV_MODE1);
-  SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, MAX6675_SPI_MAXFREQ);
-#endif
-
   /* Register the character driver */
 
   ret = register_driver(devpath, &g_max6675fops, 0666, priv);

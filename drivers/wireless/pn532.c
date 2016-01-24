@@ -85,15 +85,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void pn532_configspi(FAR struct spi_dev_s *spi);
-#  define pn532_lock(spi)
-#  define pn532_unlock(spi)
-#else
-#  define pn532_configspi(spi);
 static void pn532_lock(FAR struct spi_dev_s *spi);
 static void pn532_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 /* Character driver methods */
 
@@ -143,7 +137,6 @@ static const uint8_t pn532ack[] =
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void pn532_lock(FAR struct spi_dev_s *spi)
 {
   (void)SPI_LOCK(spi, true);
@@ -153,16 +146,12 @@ static void pn532_lock(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
-#endif
 
-#ifndef CONFIG_SPI_OWNBUS
 static void pn532_unlock(FAR struct spi_dev_s *spi)
 {
   (void)SPI_LOCK(spi, false);
 }
-#endif
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void pn532_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the PN532 module.
@@ -174,7 +163,6 @@ static inline void pn532_configspi(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
-#endif
 
 static inline void pn532_select(struct pn532_dev_s *dev)
 {

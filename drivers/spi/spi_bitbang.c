@@ -110,9 +110,7 @@
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static void     spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
@@ -144,9 +142,7 @@ static int      spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   spi_lock,           /* lock */
-#endif
   spi_select,         /* select */
   spi_setfrequency,   /* setfrequency */
   spi_setmode,        /* setmode */
@@ -193,7 +189,6 @@ static const struct spi_ops_s g_spiops =
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
@@ -219,7 +214,6 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_select
