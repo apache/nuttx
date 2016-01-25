@@ -69,13 +69,13 @@
 /* NVIC priority levels *************************************************************/
 /* Each priority field holds a priority value, 0-31. The lower the value, the greater
  * the priority of the corresponding interrupt. The processor implements only
- * bits[7:3] of each field, bits[2:0] read as zero and ignore writes.
+ * bits[7:6] of each field, bits[5:0] read as zero and ignore writes.
  */
 
-#define NVIC_SYSH_PRIORITY_MIN     0xf8 /* All bits[7:3] set is minimum priority */
+#define NVIC_SYSH_PRIORITY_MIN     0xc0 /* All bits[7:6] set is minimum priority */
 #define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
-#define NVIC_SYSH_PRIORITY_STEP    0x08 /* Five bits of interrupt priority used */
+#define NVIC_SYSH_PRIORITY_STEP    0x40 /* Two bits of interrupt priority used */
 
 /* If CONFIG_ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
  * by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so that most

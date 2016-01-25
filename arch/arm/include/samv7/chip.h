@@ -389,7 +389,7 @@
 /* NVIC priority levels *************************************************************/
 /* Each priority field holds a priority value, 0-15. The lower the value, the greater
  * the priority of the corresponding interrupt. The processor implements only
- * bits[7:4] of each field, bits[3:0] read as zero and ignore writes.
+ * bits[7:6] of each field, bits[5:0] read as zero and ignore writes.
  */
 
 #define NVIC_SYSH_PRIORITY_MIN        0xc0 /* All bits[7:6] set is minimum priority */
