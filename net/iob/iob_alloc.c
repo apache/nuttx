@@ -56,22 +56,6 @@
 #include "iob.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -128,6 +112,11 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
 
               /* EINTR is not an error!  EINTR simply means that we were
                * awakened by a signal and we should try again.
+               *
+               * REVISIT:  Many end-user interfaces are required to return
+               * with an error if EINTR is set.  Most uses of this function
+               * is in internal, non-user logic.  But are there cases where
+               * the error should be returned.
                */
 
               if (errcode == EINTR)
@@ -137,6 +126,13 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
                    */
 
                   ret = 0;
+                }
+              else
+                {
+                  /* Stop the loop and return a error */
+
+                  DEBUGASSERT(errcode > 0);
+                  ret = -errcode;
                 }
             }
           else

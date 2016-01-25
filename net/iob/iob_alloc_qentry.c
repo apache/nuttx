@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/iob/iob_alloc_qentry.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 
 #include <semaphore.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
@@ -55,22 +56,6 @@
 #include "iob.h"
 
 #if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -115,13 +100,54 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
            */
 
           ret = sem_wait(&g_qentry_sem);
+          if (ret < 0)
+            {
+              int errcode = get_errno();
 
-          /* When we wake up from wait, an I/O buffer chain container was
-           * returned to the free list.  However, if there are concurrent
-           * allocations from interrupt handling, then I suspect that there
-           * is a race condition.  But no harm, we will just wait again in
-           * that case.
-           */
+              /* EINTR is not an error!  EINTR simply means that we were
+               * awakened by a signal and we should try again.
+               *
+               * REVISIT:  Many end-user interfaces are required to return
+               * with an error if EINTR is set.  Most uses of this function
+               * is in internal, non-user logic.  But are there cases where
+               * the error should be returned.
+               */
+
+              if (errcode == EINTR)
+                {
+                  /* Force a success indication so that we will continue
+                   * looping.
+                   */
+
+                  ret = 0;
+                }
+              else
+                {
+                  /* Stop the loop and return a error */
+
+                  DEBUGASSERT(errcode > 0);
+                  ret = -errcode;
+                }
+            }
+          else
+            {
+              /* When we wake up from wait successfully, an I/O buffer chain
+               * container was returned to the free list.  However, if there
+               * are concurrent allocations from interrupt handling, then I
+               * suspect that there is a race condition.  But no harm, we
+               * will just wait again in that case.
+               *
+               * We need release our count so that it is available to
+               * iob_tryalloc_qentry(), perhaps allowing another thread to
+               * take our count.  In that event, iob_tryalloc_qentry() will
+               * fail above and we will have to wait again.
+               *
+               * TODO: Consider a design modification to permit us to
+               * complete the allocation without losing our count.
+               */
+
+              sem_post(sem);
+            }
         }
     }
   while (ret == OK && !qentry);
