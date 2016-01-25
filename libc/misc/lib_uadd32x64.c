@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/lib_usub64.c
+ * libc/fixedmath/lib_uadd32x64.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,39 +44,37 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usub64
+ * Name: uadd32x64
  *
  * Description:
- *   Subtract two 64-bit values and return the 64-bit difference.
+ *   Add a 32-bit value to a 64-bit values and return the truncated 64-bit
+ *   sum.
  *
  * Input Parameters:
- *   minuend    - The number from which another number (the Subtrahend) is
- *     to be subtracted.
- *   subtrahend - The number that is to be subtracted.
- *   difference - The location to return the difference of the two values.
- *     difference may the same as one of minuend or subtrahend.
+ *   term1 and term2 - The values to be added
+ *   sum - The location to return the product of the two values.  sum may
+ *     be one of term1 or term2
  *
  ****************************************************************************/
 
-void usub64(FAR const struct uint64_s *minuend,
-            FAR const struct uint64_s *subtrahend,
-            FAR struct uint64_s *difference)
+void uadd32x64(uint32_t term1, FAR const struct uint64_s *term2,
+               FAR struct uint64_s *sum)
 {
-  /* Get the MS part of the difference */
+  /* Get the MS part of the sum */
 
-  difference->ms = minuend->ms - subtrahend->ms;
+  sum->ms = term2->ms;
 
-  /* Check for a borrow, i.e., that is when:
+  /* Check for carry, i.e., that is when:
    *
-   * subtrahend->ls > minuend->ls
+   * term1 + term2->ls > UINT32_MAX
    */
 
-  if (subtrahend->ls > minuend->ls)
+  if ((UINT32_MAX - term1) > term2->ls)
     {
-      difference->ms--;
+      sum->ms++;
     }
 
-  /* Get the LS part of the difference */
+  /* Get the LS part of the sum */
 
-  difference->ls = minuend->ls - subtrahend->ls;
+  sum->ls = term1 + term2->ls;
 }

@@ -65,7 +65,7 @@ void uadd64(FAR const struct uint64_s *term1,
   sum->ms = term1->ms + term2->ms;
 
   /* Check for carry, i.e., that is when:
-   * 
+   *
    * term1->ls + term2->ls > UINT32_MAX
    */
 

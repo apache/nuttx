@@ -11352,3 +11352,6 @@
 	  SPI interface (2016-01-23).
 	* drivers/spi/Kconfig and many other files:  Remove CONFIG_SPI_OWNBUS:
 	  Now its not just a good idea, its the law (2015-01-23).
+	* include/nuttx/math32.h and libc/misc:  Add some utilities to support
+	  64-bit arithmetic operations for platforms that do not support long
+	  long types.  Not yet used anywhere (2015-01-25).

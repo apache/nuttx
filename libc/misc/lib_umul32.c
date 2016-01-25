@@ -75,7 +75,7 @@ void umul32(uint32_t factor1, uint32_t factor2, FAR struct uint64_s *product)
   ls2         = factor2 & 0x0000ffff;
 
   /* factor1 * factor2 = (ms1 * ms2 << 32) +
-   *                     ls1 * (ms2 << 16) + ls2 * (ms1 << 16) + 
+   *                     ls1 * (ms2 << 16) + ls2 * (ms1 << 16) +
    *                     ls1 * ls2
    * part1             = (ms1 * ms2 << 32) + ls1 * ls2
    * part2             = ls1 * (ms2 << 16) + ls2 * (ms1 << 16)

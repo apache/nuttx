@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/lib_usub64.c
+ * libc/fixedmath/lib_usub64x32.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,10 +44,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usub64
+ * Name: usub64x32
  *
  * Description:
- *   Subtract two 64-bit values and return the 64-bit difference.
+ *   Subtract a 32-bit value from a 64-bit value and return the 64-bit
+ *   difference.
  *
  * Input Parameters:
  *   minuend    - The number from which another number (the Subtrahend) is
@@ -58,25 +59,24 @@
  *
  ****************************************************************************/
 
-void usub64(FAR const struct uint64_s *minuend,
-            FAR const struct uint64_s *subtrahend,
-            FAR struct uint64_s *difference)
+void usub64x32(FAR const struct uint64_s *minuend, uint32_t subtrahend,
+               FAR struct uint64_s *difference)
 {
   /* Get the MS part of the difference */
 
-  difference->ms = minuend->ms - subtrahend->ms;
+  difference->ms = minuend->ms;
 
   /* Check for a borrow, i.e., that is when:
    *
    * subtrahend->ls > minuend->ls
    */
 
-  if (subtrahend->ls > minuend->ls)
+  if (subtrahend > minuend->ls)
     {
       difference->ms--;
     }
 
   /* Get the LS part of the difference */
 
-  difference->ls = minuend->ls - subtrahend->ls;
+  difference->ls = minuend->ls - subtrahend;
 }

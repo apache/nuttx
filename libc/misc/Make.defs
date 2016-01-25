@@ -41,7 +41,7 @@ CSRCS += lib_tea_encrypt.c lib_tea_decrypt.c
 # Support for platforms that do not have long long types
 
 CSRCS += lib_umul32.c lib_umul64.c lib_umul32x64.c
-CSRCS += lib_uadd64.c lib_usub64.c
+CSRCS += lib_uadd32x64.c lib_uadd64.c lib_usub64x32.c lib_usub64.c
 
 # Add C files that depend on file OR socket descriptors
 

@@ -69,12 +69,12 @@ void umul64(FAR const struct uint64_s *factor1,
    * Full 128-bit product:
    *   factor1 * factor2 = (factor1->ms * factor2->ms << 64) +
    *                       factor1->ls * (factor2->ms << 32) +
-   *                       factor2->ls * (factor1->ms << 32) + 
+   *                       factor2->ls * (factor1->ms << 32) +
    *                       factor1->ls * factor2->ls
    *
    * Truncated, 64-bit product:
    *   factor1 * factor2 = (factor1->ls * factor2->ms +
-   *                        factor2->ls * factor1->ms) << 32) + 
+   *                        factor2->ls * factor1->ms) << 32) +
    *                       factor1->ls * factor2->ls
    *
    *   part1             = (factor1->ls * factor2->ms +

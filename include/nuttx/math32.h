@@ -89,6 +89,103 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: uneg64
+ *
+ * Description:
+ *   Negate a 64-bit unsigned value.
+ *
+ * Input Parameters:
+ *   value - The value to be negated.
+ *
+ ****************************************************************************/
+
+/* void uneg64(FAR const uint64_s *value); */
+
+#define uneg64(value) \
+  do \
+    { \
+      value->ms = ~value->ms; \
+      value->ls = -value->ls; \
+      if (value->ls == 0) \
+        { \
+          value->ms++; \
+        } \
+    } \
+  while (0)
+
+/****************************************************************************
+ * Name: uadd32x64
+ *
+ * Description:
+ *   Add a 32-bit value to a 64-bit values and return the truncated 64-bit
+ *   sum.
+ *
+ * Input Parameters:
+ *   term1 and term2 - The values to be added
+ *   sum - The location to return the product of the two values.  sum may
+ *     be one of term1 or term2
+ *
+ ****************************************************************************/
+
+void uadd32x64(uint32_t term1, FAR const struct uint64_s *term2,
+               FAR struct uint64_s *sum);
+
+/****************************************************************************
+ * Name: uadd64
+ *
+ * Description:
+ *   Add two 64-bit values and return a 64-bit sum.
+ *
+ * Input Parameters:
+ *   term1 and term2 - The values to be added
+ *   sum - The location to return the product of the two values.  sum may
+ *     be one of term1 or term2
+ *
+ ****************************************************************************/
+
+void uadd64(FAR const struct uint64_s *term1,
+            FAR const struct uint64_s *term2,
+            FAR struct uint64_s *sum);
+
+/****************************************************************************
+ * Name: usub64x32
+ *
+ * Description:
+ *   Subtract a 32-bit value from a 64-bit value and return the 64-bit
+ *   difference.
+ *
+ * Input Parameters:
+ *   minuend    - The number from which another number (the Subtrahend) is
+ *     to be subtracted.
+ *   subtrahend - The number that is to be subtracted.
+ *   difference - The location to return the difference of the two values.
+ *     difference may the same as one of minuend or subtrahend.
+ *
+ ****************************************************************************/
+
+void usub64x32(FAR const struct uint64_s *minuend, uint32_t subtrahend,
+               FAR struct uint64_s *difference);
+
+/****************************************************************************
+ * Name: usub64
+ *
+ * Description:
+ *   Subtract two 64-bit values and return the 64-bit difference.
+ *
+ * Input Parameters:
+ *   minuend    - The number from which another number (the Subtrahend) is
+ *     to be subtracted.
+ *   subtrahend - The number that is to be subtracted.
+ *   difference - The location to return the difference of the two values.
+ *     difference may the same as one of minuend or subtrahend.
+ *
+ ****************************************************************************/
+
+void usub64(FAR const struct uint64_s *minuend,
+            FAR const struct uint64_s *subtrahend,
+            FAR struct uint64_s *difference);
+
+/****************************************************************************
  * Name: umul32
  *
  * Description:
@@ -135,42 +232,6 @@ void umul32x64(uint32_t factor1, FAR const struct uint64_s *factor2,
 void umul64(FAR const struct uint64_s *factor1,
             FAR const struct uint64_s *factor2,
             FAR struct uint64_s *product);
-
-/****************************************************************************
- * Name: uadd64
- *
- * Description:
- *   Add two 64-bit values and return a 64-bit sum.
- *
- * Input Parameters:
- *   term1 and term2 - The values to be added
- *   sum - The location to return the product of the two values.  sum may
- *     be one of term1 or term2
- *
- ****************************************************************************/
-
-void uadd64(FAR const struct uint64_s *term1,
-            FAR const struct uint64_s *term2,
-            FAR struct uint64_s *sum);
-
-/****************************************************************************
- * Name: usub64
- *
- * Description:
- *   Subtract two 64-bit values and return the 64-bit difference.
- *
- * Input Parameters:
- *   minuend    - The number from which another number (the Subtrahend) is
- *     to be subtracted.
- *   subtrahend - The number that is to be subtracted.
- *   difference - The location to return the difference of the two values. 
- *     difference may the same as one of minuend or subtrahend.
- *
- ****************************************************************************/
-
-void usub64(FAR const struct uint64_s *minuend,
-            FAR const struct uint64_s *subtrahend,
-            FAR struct uint64_s *difference);
 
 #undef EXTERN
 #ifdef __cplusplus
