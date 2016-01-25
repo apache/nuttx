@@ -648,12 +648,12 @@
 #define LPC43M4_SYSH_PRIORITY_MIN     0xe0 /* All bits[7:5] set is minimum priority */
 #define LPC43M4_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
 #define LPC43M4_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
-#define LPC43M4_SYSH_PRIORITY_STEP    0x10 /* Steps between priorities */
+#define LPC43M4_SYSH_PRIORITY_STEP    0x20 /* Steps between priorities */
 
 #define LPC43M0_SYSH_PRIORITY_MIN     0xc0 /* All bits[7:6] set is minimum priority */
 #define LPC43M0_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
 #define LPC43M0_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
-#define LPC43M0_SYSH_PRIORITY_STEP    0x20 /* Steps between priorities */
+#define LPC43M0_SYSH_PRIORITY_STEP    0x40 /* Steps between priorities */
 
 /* Only the Cortex-M4 is supported by Nuttx */
 
