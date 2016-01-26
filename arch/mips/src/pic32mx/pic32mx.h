@@ -384,6 +384,22 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
 #  define pic32mx_dumpgpio(p,m)
 #endif
 
+/****************************************************************************
+ * Name: pic32mx_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
+
 /************************************************************************************
  * Name:  pic32mx_spiNselect, pic32mx_spiNstatus, and pic32mx_spiNcmddata
  *
@@ -391,7 +407,7 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common PIC32MX logic.  To use
+ *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SSP chip select
@@ -403,9 +419,9 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  *      pic32mx_spiNcmddata() functions in your board-specific logic.  These
  *      functions will perform cmd/data selection operations using GPIOs in the way
  *      your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to pic32mx_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

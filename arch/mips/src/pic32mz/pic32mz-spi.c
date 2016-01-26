@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz-spi.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1201,7 +1201,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: pic32mz_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -1214,7 +1214,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 {
   FAR struct pic32mz_dev_s *priv;
   uintptr_t regaddr;
