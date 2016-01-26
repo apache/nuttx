@@ -398,6 +398,9 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  *
  ****************************************************************************/
 
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
+
 FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
 
 /************************************************************************************

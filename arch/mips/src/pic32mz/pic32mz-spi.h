@@ -70,6 +70,9 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
+
 /****************************************************************************
  * Name: pic32mz_spibus_initialize
  *

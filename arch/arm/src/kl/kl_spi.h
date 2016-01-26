@@ -45,10 +45,6 @@
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
 
 /************************************************************************************
- * Pre-processor Declarations
- ************************************************************************************/
-
-/************************************************************************************
  * Public Data
  ************************************************************************************/
 
@@ -67,8 +63,11 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
- * Name: up_spiinitialize
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
+
+/****************************************************************************
+ * Name: kl_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -79,10 +78,9 @@ extern "C"
  * Returned Value:
  *   Valid SPI device structure reference on succcess; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-struct spi_dev_s;
-FAR struct spi_dev_s *up_spiinitialize(int port);
+FAR struct spi_dev_s *kl_spibus_initialize(int port);
 
 /************************************************************************************
  * Name:  kl_spi[n]select, kl_spi[n]status, and kl_spi[n]cmddata
@@ -91,7 +89,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common Kinetis logic.  To use
+ *   including kl_spibus_initialize()) are provided by common Kinetis logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in kl_boardinitialize() to configure SPI chip select
@@ -103,16 +101,14 @@ FAR struct spi_dev_s *up_spiinitialize(int port);
  *      kl_spi[n]cmddata() functions in your board-specific logic.  These
  *      functions will perform cmd/data selection operations using GPIOs in the way
  *      your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to kl_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by kl_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ************************************************************************************/
-
-enum spi_dev_e;
 
 #ifdef CONFIG_KL_SPI0
 void  kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);

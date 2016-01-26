@@ -111,6 +111,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+struct spi_dev_s;    /* Forward reference */
+enum spi_dev_e;      /* Forward reference */
+struct spi_sctrlr_s; /* Forward reference */
+
 /****************************************************************************
  * Name: sam_spibus_initialize
  *
@@ -177,9 +181,6 @@ FAR struct spi_sctrlr_s *sam_spi_slave_initialize(int port);
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
-
-struct spi_dev_s; /* Forward reference */
-enum spi_dev_e;   /* Forward reference */
 
 /****************************************************************************
  * Name: sam_spi[0|1]select

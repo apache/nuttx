@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_spi.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -622,7 +622,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: kl_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -635,7 +635,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *kl_spibus_initialize(int port)
 {
   FAR struct kl_spidev_s *priv;
   uint32_t regval;
