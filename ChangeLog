@@ -11355,3 +11355,6 @@
 	* include/nuttx/math32.h and libc/misc:  Add some utilities to support
 	  64-bit arithmetic operations for platforms that do not support long
 	  long types.  Not yet used anywhere (2015-01-25).
+	* arch/arm/src/samv7/chip:  Add an AFEC header file (2016-01-25).
+	* net/iob:  iob_alloc_qentry() has the same issues as did iob_alloc()
+	  fixed on 2016-01-23. (2016-01-26).
