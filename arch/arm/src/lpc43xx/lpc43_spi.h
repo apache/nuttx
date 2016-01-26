@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_spi.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,8 @@
  *    lpc43_spicmddata() functions in your board-specific logic.  This
  *    function will perform cmd/data selection operations using GPIOs in the
  *    way your board is configured.
- * 4. Your low level board initialization logic should call lpc43_sspiinitialize.
- * 5. The handle returned by lpc43_spiinitialize() may then be used to bind the
+ * 4. Your low level board initialization logic should call lpc43_spibus_initialize.
+ * 5. The handle returned by lpc43_spibus_initialize() may then be used to bind the
  *    SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *    for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
@@ -89,21 +89,24 @@ extern "C"
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: lpc43_spiinitialize
+/****************************************************************************
+ * Name: lpc43_spibus_initialize
  *
  * Description:
- *   Initialize the SPI port
+ *   Initialize the selected SPI port
+ *   0 - SPI
+ *   1 - SSP0
+ *   2 - SSP1
  *
  * Input Parameter:
- *   port Port number (must be zero)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-FAR struct spi_dev_s *lpc43_spiinitialize(int port);
+FAR struct spi_dev_s *lpc43_spibus_initialize(int port);
 
 /************************************************************************************
  * Name:  lpc43_spiselect, lpc43_spistatus, and lpc43_spicmddata

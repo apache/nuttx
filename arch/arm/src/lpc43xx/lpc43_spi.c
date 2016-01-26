@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_spi.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -509,11 +509,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc43_spiinitialize
+ * Name: lpc43_spiport_initialize
  *
  * Description:
  *   Initialize the SPI port
@@ -526,7 +522,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc43_spiinitialize(int port)
+static FAR struct spi_dev_s *lpc43_spiport_initialize(int port)
 {
   FAR struct lpc43_spidev_s *priv = &g_spidev;
 
@@ -565,7 +561,11 @@ FAR struct spi_dev_s *lpc43_spiinitialize(int port)
 #endif /* CONFIG_LPC43_SPI */
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc43_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -581,7 +581,7 @@ FAR struct spi_dev_s *lpc43_spiinitialize(int port)
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *lpc43_spibus_initialize(int port)
 {
   if (port)
     {
@@ -594,7 +594,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   else
     {
 #if defined(CONFIG_LPC43_SPI)
-      return lpc43_spiinitialize(port);
+      return lpc43_spiport_initialize(port);
 #else
       return NULL;
 #endif
