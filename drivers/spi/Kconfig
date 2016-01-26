@@ -80,5 +80,5 @@ config SPI_BITBANG_VARWIDTH
 		Enable support for a variable data width transfers.  Default: 8-bit
 		only.
 
-endif
-endif
+endif # SPI_BITBANG
+endif # SPI

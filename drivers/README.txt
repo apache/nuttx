@@ -68,6 +68,9 @@ eeprom/
   interface but instead use the simple character interface provided by
   the EEPROM drivers.
 
+i2c/
+  I2C drivers and support logic.  See include/nuttx/i2c.h
+
 input/
   This directory holds implementations of human input device (HID)
   drivers.  This includes such things as mouse, touchscreen, joystick,
@@ -144,7 +147,7 @@ serial/
   the NuttX system console.  See also include/nuttx/serial/serial.h
 
 spi/
-  SPI drivers.  See include/nuttx/spi.h
+  SPI drivers and support logic.  See include/nuttx/spi/spi.h
 
 syslog/
   System logging devices. See include/syslog.h and include/nuttx/syslog/syslog.h

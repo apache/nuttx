@@ -137,41 +137,19 @@ static const struct ioexpander_ops_s g_pca9555_ops =
  *
  ****************************************************************************/
 
-static int pca9555_writeread(FAR struct pca9555_dev_s *pca,
-                             FAR const uint8_t *wbuffer, int wbuflen,
-                             FAR uint8_t *rbuffer, int rbuflen)
+static inline int pca9555_writeread(FAR struct pca9555_dev_s *pca,
+                                    FAR const uint8_t *wbuffer, int wbuflen,
+                                    FAR uint8_t *rbuffer, int rbuflen)
 {
-  struct i2c_msg_s msg[2];
+  struct i2c_config_s config;
 
-  /* Format two messages: The first is a write */
+  /* Set up the configuration and perform the write-read operation */
 
-  msg[0].addr   = pca->config->address;
-  msg[0].flags  = 0;
-  msg[0].buffer = (uint8_t *)wbuffer;  /* Override const */
-  msg[0].length = wbuflen;
+  config.frequency = pca->config->frequency;
+  config.address   = pca->config->address;
+  config.addrlen   = 7;
 
-  /* The second is either a read (rbuflen > 0) or a write (rbuflen < 0) with
-   * no restart.
-   */
-
-  if (rbuflen > 0)
-    {
-      msg[1].flags = I2C_M_READ;
-    }
-  else
-    {
-      msg[1].flags = I2C_M_NORESTART;
-      rbuflen = -rbuflen;
-    }
-
-  msg[1].addr   = pca->config->address;
-  msg[1].buffer = rbuffer;
-  msg[1].length = rbuflen;
-
-  /* Then perform the transfer */
-
-  I2C_SETFREQUENCY(pca->i2c, pca->config->frequency);
-  return I2C_TRANSFER(pca->i2c, msg, 2);
+  return i2c_writeread(pca->i2c, &config, wbuffer, wbuflen, rbuffer, rbuflen);
 }
 
 /****************************************************************************

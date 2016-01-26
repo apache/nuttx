@@ -11369,3 +11369,6 @@
 	  ioexpander and not the I2C address.  From Stefan Kolb (2016-01-26).
 	* drivers/ioexpander/pca9555: Convert to use I2C_TRANSFER vs. I2C_WRITEREAD,
 	  the former is thread safe while the latter is deprecated (2016-01-26).
+	* drivers/i2c/i2c_writeread.c:  Create a wrapper that uses I2C_TRANSFER
+	  to implement I2C_WRITEREAD functionalit (2016-01-26).
+

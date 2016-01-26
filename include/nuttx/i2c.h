@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/i2c.h
  *
- *   Copyright(C) 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -251,21 +251,34 @@ struct i2c_ops_s
   uint32_t (*setfrequency)(FAR struct i2c_dev_s *dev, uint32_t frequency);
   int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
   int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
-                  int buflen);
+           int buflen);
   int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 #ifdef CONFIG_I2C_WRITEREAD
-  int    (*writeread)(FAR struct i2c_dev_s *inst, const uint8_t *wbuffer,
-                      int wbuflen, uint8_t *rbuffer, int rbuflen);
+  int    (*writeread)(FAR struct i2c_dev_s *dev,
+           FAR const uint8_t *wbuffer, int wbuflen,
+           FAR uint8_t *rbuffer, int rbuflen);
 #endif
 #ifdef CONFIG_I2C_TRANSFER
   int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
-                     int count);
+           int count);
 #endif
 #ifdef CONFIG_I2C_SLAVE
   int    (*setownaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
   int    (*registercallback)(FAR struct i2c_dev_s *dev,
-                             int (*callback)(FAR void *arg), FAR void *arg);
+           int (*callback)(FAR void *arg), FAR void *arg);
 #endif
+};
+
+/* This structure contains the full state of I2C as needed for a specific
+ * transfer.  It is passed to I2C methods so that I2C transfer may be
+ * performed in a thread safe manner.
+ */
+
+struct i2c_config_s
+{
+  uint32_t frequency;              /* I2C frequency */
+  uint16_t address;                /* I2C address (7 or 10 bit) */
+  uint8_t  addrlen;                /* I2C address length (7 or 10 bits) */
 };
 
 /* I2C transaction segment beginning with a START.  A number of these can
@@ -350,6 +363,20 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev);
 
 #ifdef CONFIG_I2C_RESET
 int up_i2creset(FAR struct i2c_dev_s *dev);
+#endif
+
+/************************************************************************************
+ * Name: i2c_writeread
+ *
+ * Description:
+ *   Write to then read from the I2C device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_TRANSFER
+int i2c_writeread(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
+                  FAR const uint8_t *wbuffer, int wbuflen,
+                  FAR uint8_t *rbuffer, int rbuflen);
 #endif
 
 #undef EXTERN
