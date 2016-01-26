@@ -86,14 +86,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc31_spiinitialize
+ * Name: lpc31_spidev_intialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the EA3152 board.
  *
  ************************************************************************************/
 
-void weak_function lpc31_spiinitialize(void)
+void weak_function lpc31_spidev_intialize(void)
 {
   /* NOTE: Clocking for SPI has already been provided. Pin configuration is performed
    * on-the-fly, so no additional setup is required.
@@ -107,7 +107,7 @@ void weak_function lpc31_spiinitialize(void)
  *   The external functions, lpc31_spiselect and lpc31_spistatus must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc31_spibus_initialize())
  *   are provided by common LPC31XX logic.  To use this common SPI logic on your
  *   board:
  *
@@ -116,9 +116,9 @@ void weak_function lpc31_spiinitialize(void)
  *   2. Provide lpc31_spiselect() and lpc31_spistatus() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to lpc31_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by lpc31_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

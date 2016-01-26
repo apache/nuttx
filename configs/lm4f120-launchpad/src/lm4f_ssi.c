@@ -87,14 +87,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm4f_ssiinitialize
+ * Name: lm4f_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM4F LaunchPad.
  *
  ************************************************************************************/
 
-void weak_function lm4f_ssiinitialize(void)
+void weak_function lm4f_spidev_initialize(void)
 {
 }
 
@@ -102,15 +102,15 @@ void weak_function lm4f_ssiinitialize(void)
  * The external functions, tiva_spiselect and tiva_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All othermethods (including tiva_spiinitialize()) are provided by common
+ * All othermethods (including tiva_spibus_initialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
  *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
  *      board-specific logic.  This function will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   2. Add a call to tiva_spiinitialize() in your low level initialization
+ *   2. Add a call to tiva_spibus_initialize() in your low level initialization
  *      logic
- *   3. The handle returned by tiva_spiinitialize() may then be used to bind the
+ *   3. The handle returned by tiva_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

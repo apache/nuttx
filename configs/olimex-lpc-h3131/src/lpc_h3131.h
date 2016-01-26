@@ -145,14 +145,14 @@ void lpc31_meminitialize(void);
 #endif
 
 /************************************************************************************
- * Name: lpc31_spiinitialize
+ * Name: lpc31_spidev_intialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPC-H3131 board.
  *
  ************************************************************************************/
 
-void weak_function lpc31_spiinitialize(void);
+void weak_function lpc31_spidev_intialize(void);
 
 /************************************************************************************
  * Name: lpc31_usbdev_initialize

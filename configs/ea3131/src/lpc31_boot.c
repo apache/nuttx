@@ -80,13 +80,13 @@ void lpc31_boardinitialize(void)
 #endif
 
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * lpc31_spiinitialize() has been brought into the link.
+   * lpc31_spidev_intialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC31_SPI)
-  if (lpc31_spiinitialize)
+  if (lpc31_spidev_intialize)
     {
-      lpc31_spiinitialize();
+      lpc31_spidev_intialize();
     }
 #endif
 

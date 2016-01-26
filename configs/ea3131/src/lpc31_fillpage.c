@@ -304,7 +304,7 @@ static inline void lpc31_initsrc(void)
 
       /* First get an instance of the SPI device interface */
 
-      spi = up_spiinitialize(CONFIG_EA3131_PAGING_SPIPORT);
+      spi = lpc31_spibus_initialize(CONFIG_EA3131_PAGING_SPIPORT);
       DEBUGASSERT(spi != NULL);
 
       /* Then bind the SPI interface to the MTD driver */
@@ -506,7 +506,7 @@ void weak_function lpc31_pginitialize(void)
    *
    * - Initialize and configure a mass storage device to support on-demand paging.
    *   This might be, perhaps an SD card or NAND memory.  An SPI FLASH would probably
-   *   already have been configured by lpc31_spiinitialize(void);
+   *   already have been configured by lpc31_spidev_intialize(void);
    * - Set up resources to support up_fillpage() operation.  For example, perhaps the
    *   the text image is stored in a named binary file.  In this case, the virtual
    *   text addresses might map to offsets into that file.

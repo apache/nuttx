@@ -127,14 +127,14 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: lm4f_ssiinitialize
+ * Name: lm4f_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM4F LaunchPad.
  *
  ************************************************************************************/
 
-void weak_function lm4f_ssiinitialize(void);
+void weak_function lm4f_spidev_initialize(void);
 
 /****************************************************************************
  * Name: lm4f_led_initialize
