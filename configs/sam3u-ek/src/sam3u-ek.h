@@ -212,14 +212,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_spiinitialize
+ * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
  *
  ************************************************************************************/
 
-void weak_function sam_spiinitialize(void);
+void weak_function sam_spidev_initialize(void);
 
 /************************************************************************************
  * Name: sam_hsmciinit

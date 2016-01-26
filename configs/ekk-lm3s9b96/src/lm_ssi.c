@@ -95,19 +95,19 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_ssiinitialize
+ * Name: lm_spidev_initialize
  *
  * Description:
  *   Called to configure chip select GPIO pins for the LM3S9B96 Eval board.
  *
  ************************************************************************************/
 
-void weak_function lm_ssiinitialize(void)
+void weak_function lm_spidev_initialize(void)
 {
   /* Configure the CS GPIO */
 #if 0
-  ssi_dumpgpio("lm_ssiinitialize() Entry");
-  ssi_dumpgpio("lm_ssiinitialize() Exit");
+  ssi_dumpgpio("lm_spidev_initialize() Entry");
+  ssi_dumpgpio("lm_spidev_initialize() Exit");
 #endif
 }
 
@@ -116,15 +116,15 @@ void weak_function lm_ssiinitialize(void)
  * The external functions, tiva_spiselect and tiva_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All othermethods (including up_spiinitialize()) are provided by common
+ * All othermethods (including tiva_spibus_initialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
  *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
  *      board-specific logic.  This function will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   2. Add a call to up_spiinitialize() in your low level initialization
+ *   2. Add a call to tiva_spibus_initialize() in your low level initialization
  *      logic
- *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *   3. The handle returned by tiva_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

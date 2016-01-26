@@ -101,13 +101,13 @@ void sam_boardinitialize(void)
   board_config_usart1();
 
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam_spiinitialize() has been brought into the link.
+   * sam_spidev_initialize() has been brought into the link.
    */
 
 #ifdef CONFIG_SAM34_SPI0
-  if (sam_spiinitialize)
+  if (sam_spidev_initialize)
     {
-      sam_spiinitialize();
+      sam_spidev_initialize();
     }
 #endif
 

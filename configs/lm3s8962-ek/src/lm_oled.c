@@ -109,7 +109,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SSI port (configure as a Freescale SPI port) */
 
-  spi = up_spiinitialize(0);
+  spi = tiva_spibus_initialize(0);
   if (!spi)
     {
       glldbg("Failed to initialize SSI port 0\n");

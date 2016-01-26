@@ -675,7 +675,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_spiinitialize
+ * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PIO pins for the SAMA5D3x-EK board.
@@ -683,7 +683,7 @@
  ************************************************************************************/
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
-void weak_function sam_spiinitialize(void);
+void weak_function sam_spidev_initialize(void);
 #endif
 
 /************************************************************************************

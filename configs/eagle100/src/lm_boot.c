@@ -72,15 +72,15 @@
 void tiva_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
-   * lm_ssiinitialize() has been brought into the link.
+   * lm_spidev_initialize() has been brought into the link.
    */
 
 /* The Eagle100 microSD CS is on SSI0 */
 
 #if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
-  if (lm_ssiinitialize)
+  if (lm_spidev_initialize)
     {
-      lm_ssiinitialize();
+      lm_spidev_initialize();
     }
 #endif
 
