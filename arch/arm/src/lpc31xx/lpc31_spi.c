@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/lpc31xx/lpc31_spi.c
  *
- *   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: David Hewson, deriving in part from other SPI drivers originally by
  *           Gregory Nutt <gnutt@nuttx.org>
  *
@@ -892,7 +892,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_spiinitialize
+ * Name: lpc31_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -905,7 +905,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  *
  ************************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *lpc31_spibus_initialize(int port)
 {
   FAR struct lpc31_spidev_s *priv = &g_spidev;
 

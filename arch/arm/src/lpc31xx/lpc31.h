@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc31xx/lpc31.h
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -171,6 +171,25 @@ void lpc31_lowsetup(void);
 void lpc31_clockconfig(void);
 
 /************************************************************************************
+ * Name: lpc31_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ************************************************************************************/
+
+struct spi_dev_s; /* Forward reference */
+enum spi_dev_e;   /* Forward reference */
+
+FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
+
+/************************************************************************************
  * Name:  lpc31_spiselect and lpc31_spistatus
  *
  * Description:
@@ -178,7 +197,7 @@ void lpc31_clockconfig(void);
  *   lpc31_spicmddata must be provided by board-specific logic.  These are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   (including up_spiinitialize()) are provided by common LPC31XX logic.  To use
+ *   (including lpc31_spibus_initialize()) are provided by common LPC31XX logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in lpc31_boardinitialize() to configure SPI chip select
@@ -190,17 +209,15 @@ void lpc31_clockconfig(void);
  *      the lpc31_spicmddata() function in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in the
  *      way your board is configured.
- *   4. Add a calls to up_spiinitialize() in your low level application
+ *   4. Add a calls to lpc31_spibus_initialize() in your low level application
  *      initialization logic
- *   5. The handle returned by up_spiinitialize() may then be used to bind the
+ *   5. The handle returned by lpc31_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ************************************************************************************/
 
-struct spi_dev_s;
-enum spi_dev_e;
 void  lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
