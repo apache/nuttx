@@ -149,7 +149,7 @@ void weak_function pic32mx_spi2initialize(void)
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common PIC32MX logic.  To use
+ *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in pic32mx_boardinitialize() to configure SPI chip select
@@ -161,9 +161,9 @@ void weak_function pic32mx_spi2initialize(void)
  *      pic32mx_spiNcmddata() functions in your board-specific logic.  These
  *      functions will perform cmd/data selection operations using GPIOs in the way
  *      your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to pic32mx_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

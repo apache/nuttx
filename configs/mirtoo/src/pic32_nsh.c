@@ -107,7 +107,7 @@ int board_app_initialize(void)
 
   /* Get the SPI port */
 
-  spi = up_spiinitialize(2);
+  spi = pic32mx_spibus_initialize(2);
   if (!spi)
     {
       fdbg("ERROR: Failed to initialize SPI port 2\n");
