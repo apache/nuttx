@@ -11372,4 +11372,6 @@
 	* drivers/i2c/i2c_writeread.c:  Create a wrapper that uses I2C_TRANSFER
 	  to implement I2C_WRITEREAD functionality (2016-01-26).
 	* I2C: Eliminate the I@C_WRITEREAD method (2016-01-26).
+	* drivers/i2c/i2c_read.c and i2c_write.c: Convert to use I2C_TRANSFER vs.
+	  I2C_READ and I2C_WRITE which are not thread safe (2016-01-26).
 

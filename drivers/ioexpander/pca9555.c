@@ -72,7 +72,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int pca9555_writeread(FAR struct pca9555_dev_s *pca,
+static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
+             FAR const uint8_t *wbuffer, int wbuflen);
+static inline int pca9555_writeread(FAR struct pca9555_dev_s *pca,
              FAR const uint8_t *wbuffer, int wbuflen, FAR uint8_t *rbuffer,
              int rbuflen);
 static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
@@ -128,6 +130,28 @@ static const struct ioexpander_ops_s g_pca9555_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pca9555_writeread
+ *
+ * Description:
+ *   Write to then read from the I2C device.
+ *
+ ****************************************************************************/
+
+static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
+                                FAR const uint8_t *wbuffer, int wbuflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = pca->config->frequency;
+  config.address   = pca->config->address;
+  config.addrlen   = 7;
+
+  return i2c_write(pca->i2c, &config, wbuffer, wbuflen);
+}
 
 /****************************************************************************
  * Name: pca9555_writeread
@@ -194,7 +218,7 @@ static int pca9555_setbit(FAR struct ioexpander_dev_s *dev, uint8_t addr,
       buf[1] &= ~(1 << pin);
     }
 
-  return I2C_WRITE(pca->i2c, buf, 2);
+  return pca9555_write(pca, buf, 2);
 }
 
 /****************************************************************************
@@ -418,7 +442,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   /* Now write back the new pins states */
 
   buf[0] = addr;
-  return I2C_WRITE(pca->i2c, buf, 3);
+  return pca9555_write(pca, buf, 3);
 }
 
 /****************************************************************************
