@@ -72,13 +72,13 @@
 void kl_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * kl_spiinitialize() has been brought into the link.
+   * kl_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
-  if (kl_spiinitialize)
+  if (kl_spidev_initialize)
     {
-      kl_spiinitialize();
+      kl_spidev_initialize();
     }
 #endif
 

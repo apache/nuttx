@@ -301,7 +301,7 @@ int wireless_archinitialize(size_t max_rx_size)
 
   /* Get an instance of the SPI interface */
 
-  spi = up_spiinitialize(CONFIG_CC3000_SPIDEV);
+  spi = kl_spibus_initialize(CONFIG_CC3000_SPIDEV);
   if (!spi)
     {
       idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);

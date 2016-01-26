@@ -272,7 +272,7 @@ int adxl345_archinitialize(int minor)
 
       /* Get an instance of the I2C interface */
 
-      dev = up_spiinitialize(CONFIG_ADXL345_SPIDEV);
+      dev = kl_spibus_initialize(CONFIG_ADXL345_SPIDEV);
       if (!dev)
         {
           sndbg("Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);

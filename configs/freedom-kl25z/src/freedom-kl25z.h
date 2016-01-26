@@ -103,14 +103,14 @@
  ****************************************************************************************************/
 
 /****************************************************************************************************
- * Name: kl_spiinitialize
+ * Name: kl_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Freedom KL25Z board.
  *
  ****************************************************************************************************/
 
-void weak_function kl_spiinitialize(void);
+void weak_function kl_spidev_initialize(void);
 
 /****************************************************************************************************
  * Name: kl_usbinitialize
