@@ -11358,3 +11358,5 @@
 	* arch/arm/src/samv7/chip:  Add an AFEC header file (2016-01-25).
 	* net/iob:  iob_alloc_qentry() has the same issues as did iob_alloc()
 	  fixed on 2016-01-23. (2016-01-26).
+	* drivers/usbhost/hid_parser.c:  Wrong size used in memcpy().  From Hang
+	  Xu (2016-01-25).

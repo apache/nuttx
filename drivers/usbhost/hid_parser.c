@@ -139,9 +139,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
               return -E2BIG;
             }
 
-          memcpy((currstate + 1),
-                 currstate, sizeof(struct hid_rptitem_s));
-
+          memcpy((currstate + 1), currstate, sizeof(struct hid_state_s));
           currstate++;
           break;
 
