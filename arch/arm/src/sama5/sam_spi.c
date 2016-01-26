@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_spi.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * This derives from SAM3/4 SPI driver:
@@ -1647,7 +1647,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: sam_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -1660,7 +1660,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  *
  ****************************************************************************/
 
-struct spi_dev_s *up_spiinitialize(int port)
+struct spi_dev_s *sam_spibus_initialize(int port)
 {
   struct sam_spidev_s *spi;
   struct sam_spics_s *spics;

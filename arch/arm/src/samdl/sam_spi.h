@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_spi.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +87,22 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sam_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   port - SPI "port" number (i.e., SERCOM number)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct spi_dev_s *sam_spibus_initialize(int port);
+
+/****************************************************************************
  * Name:  sam_spi[n]select, sam_spi[n]status, and sam_spi[n]cmddata
  *
  * Description:
@@ -98,7 +114,7 @@ extern "C"
  *   o sam_spi[n]status and sam_spi[n]cmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAMD/L logic.
+ *     sam_spibus_initialize()) are provided by common SAMD/L logic.
  *
  *   Where [n] is the SERCOM number for the SPI module.
  *
@@ -113,9 +129,9 @@ extern "C"
  *      sam_spi[n]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind
+ *   4. The handle returned by sam_spibus_initialize() may then be used to bind
  *      the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

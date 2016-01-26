@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_spi.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1410,7 +1410,7 @@ static void spi_pad_configure(struct sam_spidev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: sam_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -1423,7 +1423,7 @@ static void spi_pad_configure(struct sam_spidev_s *priv)
  *
  ****************************************************************************/
 
-struct spi_dev_s *up_spiinitialize(int port)
+struct spi_dev_s *sam_spibus_initialize(int port)
 {
   struct sam_spidev_s *priv;
   irqstate_t flags;
