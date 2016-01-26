@@ -146,7 +146,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
                * complete the allocation without losing our count.
                */
 
-              sem_post(sem);
+              sem_post(&g_qentry_sem);
             }
         }
     }
