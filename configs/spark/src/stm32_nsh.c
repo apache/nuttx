@@ -146,7 +146,7 @@ int board_app_initialize(void)
   syslog(LOG_INFO, "Initializing SPI port %d\n",
          CONFIG_SPARK_FLASH_SPI);
 
-  spi = up_spiinitialize(CONFIG_SPARK_FLASH_SPI);
+  spi = stm32_spibus_initialize(CONFIG_SPARK_FLASH_SPI);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",

@@ -75,14 +75,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the M3 Wildfire board.
  *
  ************************************************************************************/
 
-void weak_function stm32_spiinitialize(void);
+void weak_function stm32_spidev_initialize(void);
 
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_STM32_P107_SRC_H */

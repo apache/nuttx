@@ -46,6 +46,8 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "stm32_spi.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -95,7 +97,7 @@ int stm32_sdinitialize(int minor)
 
   fvdbg("Initializing SPI port %d\n", STM32_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(STM32_MMCSDSPIPORTNO);
+  spi = stm32_spibus_initialize(STM32_MMCSDSPIPORTNO);
   if (!spi)
     {
       fdbg("Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);

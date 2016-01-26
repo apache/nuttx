@@ -114,14 +114,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
  *
  ************************************************************************************/
 
-extern void stm32_spiinitialize(void);
+extern void stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize

@@ -193,7 +193,7 @@ FAR int board_lcd_initialize(void)
   lcddbg("Initializing lcd\n");
 
   lcddbg("init spi1\n");
-  spi = up_spiinitialize(1);
+  spi = stm32_spibus_initialize(1);
   DEBUGASSERT(spi);
 
   lcddbg("configure related io\n");

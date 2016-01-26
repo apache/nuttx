@@ -80,7 +80,7 @@ int stm32_max6675initialize(FAR const char *devpath)
   FAR struct spi_dev_s *spi;
   int ret;
 
-  spi = up_spiinitialize(MAX6675_SPI_PORTNO);
+  spi = stm32_spibus_initialize(MAX6675_SPI_PORTNO);
 
   if (!spi)
     {

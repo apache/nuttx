@@ -181,7 +181,7 @@ int board_app_initialize(void)
   /* Get the SPI port */
 
   syslog(LOG_INFO, "Initializing SPI port 3\n");
-  spi = up_spiinitialize(3);
+  spi = stm32_spibus_initialize(3);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 3\n");

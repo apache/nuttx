@@ -52,6 +52,7 @@
 
 #include "up_arch.h"
 #include "stm32_gpio.h"
+#include "stm32_spi.h"
 
 #include "viewtool_stm32f107.h"
 
@@ -275,7 +276,7 @@ int board_tsc_setup(int minor)
 
       /* Get an instance of the SPI interface for the touchscreen chip select */
 
-      dev = up_spiinitialize(TSC_DEVNUM);
+      dev = stm32_spibus_initialize(TSC_DEVNUM);
       if (!dev)
         {
           idbg("Failed to initialize SPI%d\n", TSC_DEVNUM);

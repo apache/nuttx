@@ -52,6 +52,7 @@
 #  include <nuttx/fs/nxffs.h>
 #endif
 
+#include "stm32_spi.h"
 #include "fire-stm32v2.h"
 
 /****************************************************************************
@@ -102,7 +103,7 @@ int stm32_w25initialize(int minor)
 
   /* Get the SPI port */
 
-  spi = up_spiinitialize(1);
+  spi = stm32_spibus_initialize(1);
   if (!spi)
     {
       fdbg("ERROR: Failed to initialize SPI port 2\n");

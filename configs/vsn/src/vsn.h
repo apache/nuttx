@@ -180,14 +180,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the VSN board.
  *
  ************************************************************************************/
 
-extern void weak_function stm32_spiinitialize(void);
+extern void weak_function stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize

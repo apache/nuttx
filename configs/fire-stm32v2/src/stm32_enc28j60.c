@@ -63,6 +63,8 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "stm32_spi.h"
+
 #include "fire-stm32v2.h"
 
 #ifdef CONFIG_ENC28J60
@@ -183,7 +185,7 @@ void up_netinitialize(void)
    * 2) Clocking for the SPI1 peripheral was also provided earlier in boot-up.
    */
 
-  spi = up_spiinitialize(ENC28J60_SPI_PORTNO);
+  spi = stm32_spibus_initialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
       nlldbg("Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);

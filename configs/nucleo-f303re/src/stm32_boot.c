@@ -80,9 +80,9 @@
 void stm32_boardinitialize(void)
 {
 #ifdef CONFIG_SPI
-  if (stm32_spiinitialize != NULL)
+  if (stm32_spidev_initialize != NULL)
     {
-      stm32_spiinitialize();
+      stm32_spidev_initialize();
     }
 #endif
 

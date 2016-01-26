@@ -103,7 +103,7 @@ int composite_archinitialize(void)
   syslog(LOG_INFO, "Initializing SPI port %d\n",
          OLIMEXINO_STM32_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(OLIMEXINO_STM32_MMCSDSPIPORTNO);
+  spi = stm32_spibus_initialize(OLIMEXINO_STM32_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",

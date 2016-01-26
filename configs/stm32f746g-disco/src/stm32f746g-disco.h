@@ -101,14 +101,14 @@
  ****************************************************************************************************/
 
 /****************************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the stm32f746g-disco board.
  *
  ****************************************************************************************************/
 
-void weak_function stm32_spiinitialize(void);
+void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************************************
  * Name: arch_sporadic_initialize

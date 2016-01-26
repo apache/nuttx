@@ -47,6 +47,8 @@
 #include <nuttx/lcd/ssd1306.h>
 
 #include "stm32_gpio.h"
+#include "stm32_spi.h"
+
 #include "stm32f4discovery.h"
 
 #ifdef CONFIG_LCD_UG2864HSWEG01
@@ -131,7 +133,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SPI1 port interface */
 
-  spi = up_spiinitialize(1);
+  spi = stm32_spibus_initialize(1);
   if (!spi)
     {
       lcddbg("Failed to initialize SPI port 1\n");

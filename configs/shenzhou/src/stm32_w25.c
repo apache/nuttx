@@ -50,6 +50,8 @@
 #  include <nuttx/spi/spi.h>
 #  include <nuttx/mtd/mtd.h>
 #  include <nuttx/fs/nxffs.h>
+
+#  include "stm32_spi.h"
 #endif
 
 #include "shenzhou.h"
@@ -102,7 +104,7 @@ int stm32_w25initialize(int minor)
 
   /* Get the SPI port */
 
-  spi = up_spiinitialize(1);
+  spi = stm32_spibus_initialize(1);
   if (!spi)
     {
       fdbg("ERROR: Failed to initialize SPI port 2\n");

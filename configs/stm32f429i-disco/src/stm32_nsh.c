@@ -157,7 +157,7 @@ int board_app_initialize(void)
 
   syslog(LOG_INFO, "Initializing SPI port 4\n");
 
-  spi = up_spiinitialize(4);
+  spi = stm32_spibus_initialize(4);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 4\n");

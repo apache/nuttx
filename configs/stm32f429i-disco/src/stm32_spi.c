@@ -95,14 +95,14 @@ FAR struct spi_dev_s *g_spidev5 = NULL;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the stm32f429i-disco board.
  *
  ************************************************************************************/
 
-void weak_function stm32_spiinitialize(void)
+void weak_function stm32_spidev_initialize(void)
 {
 #ifdef CONFIG_STM32_SPI5
   (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
@@ -122,7 +122,7 @@ void weak_function stm32_spiinitialize(void)
  *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
  *   are provided by common STM32 logic.  To use this common SPI logic on your
  *   board:
  *
@@ -131,9 +131,9 @@ void weak_function stm32_spiinitialize(void)
  *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to stm32_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by stm32_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -296,7 +296,7 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
  *
  * Description:
  *   Initialize the selected SPI port.
- *   As long as the method up_spiinitialize recognized the initialized state of
+ *   As long as the method stm32_spibus_initialize recognized the initialized state of
  *   the spi device by the spi enable flag of the cr1 register, it isn't safe to
  *   disable the spi device outside of the nuttx spi interface structure. But
  *   this has to be done as long as the nuttx spi interface doesn't support
@@ -317,7 +317,7 @@ FAR struct spi_dev_s *stm32_spi5initialize(void)
 {
   if (!g_spidev5)
     {
-      g_spidev5 = up_spiinitialize(5);
+      g_spidev5 = stm32_spibus_initialize(5);
     }
 
   return g_spidev5;

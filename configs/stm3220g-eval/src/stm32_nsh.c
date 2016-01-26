@@ -149,7 +149,7 @@ int board_app_initialize(void)
 #ifdef CONFIG_STM32_SPI1
   /* Get the SPI port */
 
-  spi = up_spiinitialize(1);
+  spi = stm32_spibus_initialize(1);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 0\n");

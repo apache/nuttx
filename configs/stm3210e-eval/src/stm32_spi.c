@@ -84,14 +84,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
  *
  ************************************************************************************/
 
-void weak_function stm32_spiinitialize(void)
+void weak_function stm32_spidev_initialize(void)
 {
   /* NOTE: Clocking for SPI1 and/or SPI2 was already provided in stm32_rcc.c.
    *       Configurations of SPI pins is performed in stm32_spi.c.
@@ -113,7 +113,7 @@ void weak_function stm32_spiinitialize(void)
  *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
  *   are provided by common STM32 logic.  To use this common SPI logic on your
  *   board:
  *
@@ -122,9 +122,9 @@ void weak_function stm32_spiinitialize(void)
  *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to stm32_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by stm32_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

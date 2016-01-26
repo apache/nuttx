@@ -289,14 +289,14 @@ extern struct sdio_dev_s *g_sdio;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
  ************************************************************************************/
 
-void stm32_spiinitialize(void);
+void stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize

@@ -51,6 +51,8 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "stm32_spi.h"
+
 #include "olimex-stm32-p107.h"
 
 #ifdef CONFIG_ENCX24J600
@@ -175,7 +177,7 @@ void up_netinitialize(void)
    * 2) Clocking for the SPI1 peripheral was also provided earlier in boot-up.
    */
 
-  spi = up_spiinitialize(ENCX24J600_SPI_PORTNO);
+  spi = stm32_spibus_initialize(ENCX24J600_SPI_PORTNO);
   if (!spi)
     {
       nlldbg("Failed to initialize SPI port %d\n", ENCX24J600_SPI_PORTNO);

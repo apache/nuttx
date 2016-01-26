@@ -50,6 +50,8 @@
 #include <nuttx/lcd/ssd1351.h>
 
 #include "stm32_gpio.h"
+#include "stm32_spi.h"
+
 #include "nucleo-f303re.h"
 
 #ifdef CONFIG_LCD_SSD1351
@@ -109,7 +111,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SPI1 port interface */
 
-  spi = up_spiinitialize(1);
+  spi = stm32_spibus_initialize(1);
   if (spi == NULL)
     {
       lcddbg("Failed to initialize SPI port 1\n");

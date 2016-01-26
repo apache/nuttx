@@ -111,7 +111,7 @@ void stm32_wlinitialize(void)
 
   /* Init SPI bus */
 
-  spidev = up_spiinitialize(2);
+  spidev = stm32_spibus_initialize(2);
   if (!spidev)
     {
       dbg("Failed to initialize SPI bus\n");

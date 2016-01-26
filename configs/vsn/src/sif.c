@@ -63,6 +63,10 @@
  *    SNP Message descriptor.
  */
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdio.h>
@@ -82,8 +86,10 @@
 #include <nuttx/sensors/lis331dl.h>
 #include <nuttx/wireless/cc1101.h>
 
-#include "vsn.h"
 #include "stm32_gpio.h"
+#include "stm32_spi.h"
+
+#include "vsn.h"
 
 /****************************************************************************
  * Declarations and Structures
@@ -316,7 +322,7 @@ int sif_anout_init(void)
     vsn_sif.i2c1 = up_i2cinitialize(1);
     vsn_sif.i2c2 = up_i2cinitialize(2);
 
-    vsn_sif.spi2 = up_spiinitialize(2);
+    vsn_sif.spi2 = stm32_spibus_initialize(2);
 
     return OK;
 }

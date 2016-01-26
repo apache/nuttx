@@ -166,14 +166,14 @@ extern const uint16_t g_commonconfig[NCOMMON_CONFIG];
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
  *
  ************************************************************************************/
 
-void weak_function stm32_spiinitialize(void);
+void weak_function stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize

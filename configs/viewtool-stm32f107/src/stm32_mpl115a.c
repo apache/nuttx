@@ -80,7 +80,7 @@ int stm32_mpl115ainitialize(FAR const char *devpath)
   FAR struct spi_dev_s *spi;
   int ret;
 
-  spi = up_spiinitialize(MPL115A_SPI_PORTNO);
+  spi = stm32_spibus_initialize(MPL115A_SPI_PORTNO);
 
   if (!spi)
     {

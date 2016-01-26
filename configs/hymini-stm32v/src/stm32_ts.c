@@ -155,7 +155,7 @@ int board_tsc_setup(int minor)
 
   idbg("minor %d\n", minor);
 
-  dev = up_spiinitialize(1);
+  dev = stm32_spibus_initialize(1);
   if (!dev)
     {
       idbg("Failed to initialize SPI bus\n");
