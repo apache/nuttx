@@ -81,14 +81,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: kinetis_spiinitialize
+ * Name: kinetis_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the TWR-K60N512 board.
  *
  ************************************************************************************/
 
-void weak_function kinetis_spiinitialize(void)
+void weak_function kinetis_spidev_initialize(void)
 {
 # warning "Missing logic"
 }
@@ -100,7 +100,7 @@ void weak_function kinetis_spiinitialize(void)
  *   The external functions, kinetis_spi1/2/3select and kinetis_spi1/2/3status must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including kinetis_spibus_initialize())
  *   are provided by common Kinetis logic.  To use this common SPI logic on your
  *   board:
  *
@@ -109,9 +109,9 @@ void weak_function kinetis_spiinitialize(void)
  *   2. Provide kinetis_spi1/2/3select() and kinetis_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to kinetis_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by kinetis_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

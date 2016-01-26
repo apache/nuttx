@@ -73,12 +73,12 @@ void kinetis_boardinitialize(void)
 {
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * kinetis_spiinitialize() has been brought into the link.
+   * kinetis_spidev_initialize() has been brought into the link.
    */
 
-  if (kinetis_spiinitialize)
+  if (kinetis_spidev_initialize)
     {
-      kinetis_spiinitialize();
+      kinetis_spidev_initialize();
     }
 #endif
 

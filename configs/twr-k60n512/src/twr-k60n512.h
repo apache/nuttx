@@ -273,14 +273,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: kinetis_spiinitialize
+ * Name: kinetis_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the TWR-K60N512 board.
  *
  ************************************************************************************/
 
-void weak_function kinetis_spiinitialize(void);
+void weak_function kinetis_spidev_initialize(void);
 
 /************************************************************************************
  * Name: kinetis_usbinitialize

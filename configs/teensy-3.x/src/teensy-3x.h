@@ -83,14 +83,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: kinetis_spiinitialize
+ * Name: kinetis_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the KwikStik-K40 board.
  *
  ************************************************************************************/
 
-extern void weak_function kinetis_spiinitialize(void);
+extern void weak_function kinetis_spidev_initialize(void);
 
 /************************************************************************************
  * Name: kinetis_usbinitialize
