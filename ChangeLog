@@ -11360,3 +11360,12 @@
 	  fixed on 2016-01-23. (2016-01-26).
 	* drivers/usbhost/hid_parser.c:  Wrong size used in memcpy().  From Hang
 	  Xu (2016-01-25).
+	* drivers/ioexpander/pca9555.c: Fixed a bug in the function pca9555_setbit
+	  which occurs if someone tries to set one of the pins 8-15. The problem is
+	  that after the check if the pin is greater than 7 the variable addr is
+	  incremented and used in the Call I2C_WRITEREAD. But later in the call to
+	  the I2C_WRITE buf[0] is used as address but this address is not incremented
+	  as it should be. Note address does mean the address to the register in the
+	  ioexpander and not the I2C address.  From Stefan Kolb (2016-01-26).
+	* drivers/ioexpander/pca9555: Convert to use I2C_TRANSFER vs. I2C_WRITEREAD,
+	  the former is thread safe while the latter is deprecated (2016-01-26).
