@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_twi.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -195,10 +195,6 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
 static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
           int buflen);
 static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
-#ifdef CONFIG_I2C_WRITEREAD
-static int twi_writeread(FAR struct i2c_dev_s *inst, const uint8_t *wbuffer,
-          int wbuflen, uint8_t *rbuffer, int rbuflen);
-#endif
 #ifdef CONFIG_I2C_TRANSFER
 static int twi_transfer(FAR struct i2c_dev_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
@@ -234,9 +230,6 @@ struct i2c_ops_s g_twiops =
   .setaddress       = twi_setaddress,
   .write            = twi_write,
   .read             = twi_read,
-#ifdef CONFIG_I2C_WRITEREAD
-  .writeread        = twi_writeread,
-#endif
 #ifdef CONFIG_I2C_TRANSFER
   .transfer         = twi_transfer
 #endif
@@ -903,73 +896,6 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
   twi_givesem(&priv->exclsem);
   return ret;
 }
-
-/****************************************************************************
- * Name: twi_writeread
- *
- * Description:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_WRITEREAD
-static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
-                         int wbuflen, uint8_t *rbuffer, int rbuflen)
-{
-  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
-  irqstate_t flags;
-  int ret;
-
-  struct i2c_msg_s msgv[2] =
-  {
-    {
-      .addr   = priv->address,
-      .flags  = priv->flags,
-      .buffer = (uint8_t *)wbuffer,  /* Override const */
-      .length = wbuflen
-    },
-    {
-      .addr   = priv->address,
-      .flags  = priv->flags | ((rbuflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
-      .buffer = rbuffer,
-      .length = (rbuflen < 0) ? -rbuflen : rbuflen
-    }
-  };
-
-  DEBUGASSERT(dev != NULL);
-  i2cvdbg("TWI%d wbuflen: %d rbuflen: %d\n", priv->twi, wbuflen, rbuflen);
-
-  /* Get exclusive access to the device */
-
-  twi_takesem(&priv->exclsem);
-
-  /* Initiate the read */
-
-  priv->msg  = msgv;
-  priv->msgc = 2;
-
-  /* Initiate the write operation.  The rest will be handled from interrupt
-   * logic.  Interrupts must be disabled to prevent re-entrance from the
-   * interrupt level.
-   */
-
-  flags = irqsave();
-  twi_startwrite(priv, msgv);
-
-  /* And wait for the write/read to complete.  Interrupts will be re-enabled
-   * while we are waiting.
-   */
-
-  ret = twi_wait(priv);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: Transfer failed: %d\n", ret);
-    }
-
-  irqrestore(flags);
-  twi_givesem(&priv->exclsem);
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Name: twi_setownaddress

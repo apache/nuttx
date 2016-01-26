@@ -336,12 +336,6 @@ static int efm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t * buffer,
 static int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer,
                           int buflen);
 
-#ifdef CONFIG_I2C_WRITEREAD
-static int efm32_i2c_writeread(FAR struct i2c_dev_s *dev,
-                               const uint8_t * wbuffer, int wbuflen,
-                               uint8_t * buffer, int buflen);
-#endif /* CONFIG_I2C_WRITEREAD */
-
 #ifdef CONFIG_I2C_TRANSFER
 static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
                               FAR struct i2c_msg_s *msgs, int count);
@@ -421,9 +415,6 @@ static const struct i2c_ops_s efm32_i2c_ops =
   .setaddress = efm32_i2c_setaddress,
   .write = efm32_i2c_write,
   .read = efm32_i2c_read
-#ifdef CONFIG_I2C_WRITEREAD
-  , .writeread = efm32_i2c_writeread
-#endif
 #ifdef CONFIG_I2C_TRANSFER
   , .transfer = efm32_i2c_transfer
 #endif
@@ -1702,38 +1693,6 @@ int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer, int buflen)
 
   return efm32_i2c_process(dev, &msgv, 1);
 }
-
-/****************************************************************************
- * Name: efm32_i2c_writeread
- *
- * Description:
- *  Read then write I2C data
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_WRITEREAD
-static int efm32_i2c_writeread(FAR struct i2c_dev_s *dev,
-                               const uint8_t * wbuffer, int wbuflen,
-                               uint8_t * buffer, int buflen)
-{
-  struct i2c_msg_s msgv[2] =
-  {
-    {
-     .addr = ((struct efm32_i2c_inst_s *)dev)->address,
-     .flags = ((struct efm32_i2c_inst_s *)dev)->flags,
-     .buffer = (uint8_t *) wbuffer,     /* This is really ugly, sorry const ... */
-     .length = wbuflen},
-    {
-     .addr = ((struct efm32_i2c_inst_s *)dev)->address,
-     .flags = ((struct efm32_i2c_inst_s *)dev)->flags |
-     ((buflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
-     .buffer = buffer,
-     .length = (buflen > 0) ? buflen : -buflen}
-  };
-
-  return efm32_i2c_process(dev, msgv, 2);
-}
-#endif
 
 /****************************************************************************
  * Name: efm32_i2c_transfer

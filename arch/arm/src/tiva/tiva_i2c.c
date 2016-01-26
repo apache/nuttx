@@ -349,12 +349,6 @@ static int tiva_i2c_write(struct i2c_dev_s *dev, const uint8_t *buffer,
                           int buflen);
 static int tiva_i2c_read(struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 
-#ifdef CONFIG_I2C_WRITEREAD
-static int tiva_i2c_writeread(struct i2c_dev_s *dev,
-                              const uint8_t *wbuffer, int wbuflen,
-                              uint8_t *buffer, int buflen);
-#endif /* CONFIG_I2C_WRITEREAD */
-
 #ifdef CONFIG_I2C_TRANSFER
 static int tiva_i2c_transfer(struct i2c_dev_s *dev, struct i2c_msg_s *msgv,
                              int msgc);
@@ -592,9 +586,6 @@ static const struct i2c_ops_s tiva_i2c_ops =
   .setaddress         = tiva_i2c_setaddress,
   .write              = tiva_i2c_write,
   .read               = tiva_i2c_read
-#ifdef CONFIG_I2C_WRITEREAD
-  , .writeread        = tiva_i2c_writeread
-#endif
 #ifdef CONFIG_I2C_TRANSFER
   , .transfer         = tiva_i2c_transfer
 #endif
@@ -2140,44 +2131,6 @@ int tiva_i2c_read(struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
   tiva_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
   return tiva_i2c_process(dev, &msgv, 1);
 }
-
-/************************************************************************************
- * Name: tiva_i2c_writeread
- *
- * Description:
- *  Read then write I2C data
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_WRITEREAD
-static int tiva_i2c_writeread(struct i2c_dev_s *dev,
-                              const uint8_t *wbuffer, int wbuflen,
-                              uint8_t *buffer, int buflen)
-{
-  struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
-  struct i2c_msg_s msgv[2] =
-  {
-    {
-      .addr   = inst->address,
-      .flags  = inst->flags,
-      .buffer = (uint8_t *)wbuffer,          /* This is really ugly, sorry const ... */
-      .length = wbuflen
-    },
-    {
-      .addr   = inst->address,
-      .flags  = inst->flags | ((buflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
-      .buffer = buffer,
-      .length = (buflen > 0) ? buflen : -buflen
-    }
-  };
-
-  DEBUGASSERT(inst && inst->priv && inst->priv->config);
-  i2cvdbg("I2C%d: wbuflen=%d buflen=%d\n", inst->priv->config->devno, wbuflen, buflen);
-
-  tiva_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
-  return tiva_i2c_process(dev, msgv, 2);
-}
-#endif
 
 /************************************************************************************
  * Name: tiva_i2c_transfer

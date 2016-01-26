@@ -386,12 +386,6 @@ static int stm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
                            int buflen);
 static int stm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 
-#ifdef CONFIG_I2C_WRITEREAD
-static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
-                               const uint8_t *wbuffer, int wbuflen,
-                               uint8_t *buffer, int buflen);
-#endif /* CONFIG_I2C_WRITEREAD */
-
 #ifdef CONFIG_I2C_TRANSFER
 static int stm32_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
                               int count);
@@ -496,9 +490,6 @@ static const struct i2c_ops_s stm32_i2c_ops =
   .setaddress         = stm32_i2c_setaddress,
   .write              = stm32_i2c_write,
   .read               = stm32_i2c_read
-#ifdef CONFIG_I2C_WRITEREAD
-  , .writeread        = stm32_i2c_writeread
-#endif
 #ifdef CONFIG_I2C_TRANSFER
   , .transfer         = stm32_i2c_transfer
 #endif
@@ -2356,42 +2347,6 @@ int stm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   return stm32_i2c_process(dev, &msgv, 1);
 }
-
-/************************************************************************************
- * Name: stm32_i2c_writeread
- *
- * Description:
- *  Read then write I2C data
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_WRITEREAD
-static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
-                               const uint8_t *wbuffer, int wbuflen,
-                               uint8_t *buffer, int buflen)
-{
-  stm32_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
-
-  struct i2c_msg_s msgv[2] =
-  {
-    {
-      .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags,
-      .buffer = (uint8_t *)wbuffer,          /* This is really ugly, sorry const ... */
-      .length = wbuflen
-    },
-    {
-      .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-      .flags  = ((struct stm32_i2c_inst_s *)dev)->flags |
-                ((buflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
-      .buffer = buffer,
-      .length = (buflen > 0) ? buflen : -buflen
-    }
-  };
-
-  return stm32_i2c_process(dev, msgv, 2);
-}
-#endif
 
 /************************************************************************************
  * Name: stm32_i2c_transfer
