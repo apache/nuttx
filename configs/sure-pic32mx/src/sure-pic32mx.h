@@ -129,7 +129,7 @@ extern "C" {
 #endif
 
 /************************************************************************************
- * Name: pic32mx_spiinitialize
+ * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX Logic board.
@@ -137,7 +137,7 @@ extern "C" {
  ************************************************************************************/
 
 #if defined(CONFIG_PIC32MX_SPI2)
-void weak_function pic32mx_spiinitialize(void);
+void weak_function pic32mx_spidev_initialize(void);
 #endif
 
 /************************************************************************************

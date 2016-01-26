@@ -177,7 +177,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Name: pic32mz_spiinitialize
+ * Name: pic32mz_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
@@ -185,7 +185,7 @@ extern "C"
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI
-void weak_function pic32mz_spiinitialize(void);
+void weak_function pic32mz_spidev_initialize(void);
 #endif
 
 /************************************************************************************

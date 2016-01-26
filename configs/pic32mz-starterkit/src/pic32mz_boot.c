@@ -71,13 +71,13 @@
 void pic32mz_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mz_spiinitialize() has been brought into the link.
+   * function pic32mz_spidev_initialize() has been brought into the link.
    */
 
 #ifdef CONFIG_PIC32MZ_SPI
-  if (pic32mz_spiinitialize)
+  if (pic32mz_spidev_initialize)
     {
-      pic32mz_spiinitialize();
+      pic32mz_spidev_initialize();
     }
 #endif
 

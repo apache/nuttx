@@ -73,7 +73,7 @@ static int nsh_sdinitialize(void)
 
   /* Get the SPI port */
 
-  spi = up_spiinitialize(PIC32MZ_MMCSDSPIPORTNO);
+  spi = pic32mz_spibus_initialize(PIC32MZ_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",

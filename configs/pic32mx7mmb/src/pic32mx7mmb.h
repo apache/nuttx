@@ -120,7 +120,7 @@ extern "C" {
 #endif
 
 /************************************************************************************
- * Name: pic32mx_spiinitialize
+ * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Mikroelektronika PIC32MX7
@@ -130,7 +130,7 @@ extern "C" {
 
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
-void weak_function pic32mx_spiinitialize(void);
+void weak_function pic32mx_spidev_initialize(void);
 #endif
 
 /************************************************************************************
