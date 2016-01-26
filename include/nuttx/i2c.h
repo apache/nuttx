@@ -196,28 +196,6 @@
 #define I2C_READ(d,b,l) ((d)->ops->read(d,b,l))
 
 /****************************************************************************
- * Name: I2C_WRITEREAD
- *
- * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address, followed by restarted read access.
- *   It provides a convenient wrapper to the transfer function.
- *
- * Input Parameters:
- *   dev     - Device-specific state data
- *   wbuffer - A pointer to the read-only buffer of data to be written to device
- *   wbuflen - The number of bytes to send from the buffer
- *   rbuffer - A pointer to a buffer of data to receive the data from the device
- *   rbuflen - The requested number of bytes to be read
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-#define I2C_WRITEREAD(d,wb,wl,rb,rl) ((d)->ops->writeread(d,wb,wl,rb,rl))
-
-/****************************************************************************
  * Name: I2C_TRANSFER
  *
  * Description:
@@ -253,11 +231,6 @@ struct i2c_ops_s
   int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
            int buflen);
   int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
-#ifdef CONFIG_I2C_WRITEREAD
-  int    (*writeread)(FAR struct i2c_dev_s *dev,
-           FAR const uint8_t *wbuffer, int wbuflen,
-           FAR uint8_t *rbuffer, int rbuflen);
-#endif
 #ifdef CONFIG_I2C_TRANSFER
   int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
            int count);

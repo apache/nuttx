@@ -1614,7 +1614,7 @@ o Other drivers (drivers/)
                in a multi-tasking I2C environment:
                - I2C_SETFREQUENCY:  Frequency setting can be overwritten by other
                  I2C usage.
-               - I2C_SETADDRESS used with I2C_READ, I2C_WRITE, and I2C_WRITEREAD:
+               - I2C_SETADDRESS used with I2C_READ and I2C_WRITE:
                  Similarly, address can and will be changed by other I2C usage.
                  NOTE also that I2C_SETADDRESS also sets the address width (either
                  7 or 10 bits).
@@ -1627,7 +1627,7 @@ o Other drivers (drivers/)
                as is provided with the SPI interface, or (2) make each interface
                self-contained and atomic:  Remove the I2C_FREQUENCY and I2C_ADDRESS
                methods; Add frequency to all interfaces and add the address to
-               I2C_READ, I2C_WRITE, and I2C_WRITEREAD.
+               I2C_READ and I2C_WRITE.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

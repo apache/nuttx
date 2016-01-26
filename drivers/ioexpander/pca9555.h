@@ -63,8 +63,8 @@
 /* Prerequisites:
  *   CONFIG_I2C
  *     I2C support is required
- *   CONFIG_I2C_WRITEREAD
- *     Support for the I2C writeread method is required.
+ *   CONFIG_I2C_TRANSFER
+ *     Support for the I2C transfer method is required.
  *   CONFIG_IOEXPANDER
  *     Enables support for the PCA9555 I/O expander
  *
