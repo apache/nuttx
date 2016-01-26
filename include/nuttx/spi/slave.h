@@ -269,13 +269,18 @@
  *    slave device and the SPI slave controller hardware.  This interface
  *    is implemented by the SPI slave device controller lower-half driver
  *    and is provided to the the SPI slave device driver when that driver
- *    is initialized.  That SPI slave device initialization function has
- *    the prototype:
+ *    is initialized.  That SPI slave device initialization function is
+ *    unique to the SPI slave implementation.  The prototype is probably
+ *    something like:
  *
- *      FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
+ *      FAR struct spi_sctrlr_s *xyz_spi_slave_initialize(int port);
  *
  *    Given an SPI port number, this function returns an instance of the
  *    SPI slave controller interface.
+ *
+ *    The actual prototype and more detailed usage instructions should
+ *    appear in a header file associated with the specific SPI slave
+ *    implementation.
  *
  * 2) struct spi_sdev_s:  Defines the second interface between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
@@ -503,23 +508,6 @@ extern "C"
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_spi_slave_initialize
- *
- * Description:
- *   Initialize the selected SPI port in slave mode.
- *
- * Input Parameter:
- *   port - Chip select number identifying the "logical" SPI port.  Includes
- *          encoded port and chip select information.
- *
- * Returned Value:
- *   Valid SPI device structure reference on success; a NULL on failure
- *
- ****************************************************************************/
-
-FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)
