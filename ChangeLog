@@ -11374,4 +11374,10 @@
 	* I2C: Eliminate the I@C_WRITEREAD method (2016-01-26).
 	* drivers/i2c/i2c_read.c and i2c_write.c: Convert to use I2C_TRANSFER vs.
 	  I2C_READ and I2C_WRITE which are not thread safe (2016-01-26).
+	* SPI: Rename the STM32 up_spiinitialize() to stm32_spibus_initialize()
+	  (2016-01-26).
+	* SPI: Rename the SAM up_spiinitialize() to stm32_spibus_initialize()
+	  (2016-01-26).
+	* SPI: Rename the Tiva up_spiinitialize() to tiva_spibus_intialize()
+	  (2016-01-26).
 
