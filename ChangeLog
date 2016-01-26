@@ -11380,4 +11380,10 @@
 	  (2016-01-26).
 	* SPI: Rename the Tiva up_spiinitialize() to tiva_spibus_intialize()
 	  (2016-01-26).
-
+	* SPI: Rename the PIC32MX/MZ up_spiinitialize() to pic32mx/mz_spibus_intialize()
+	  (2016-01-26).
+	* SPI: Rename EFM32's efm32_spi_initialize to efm32_spibus_initialize()
+	  for compatibility with these other changes (2016-01-26).
+	* SPI: Rename the KL up_spiinitialize() to kl_spibus_intialize() (2016-01-26).
+	* SPI: Rename the Kinetis up_spiinitialize() to kinetis_spibus_intialize()
+	  (2016-01-26).
