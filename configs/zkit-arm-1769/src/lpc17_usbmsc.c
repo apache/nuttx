@@ -100,8 +100,8 @@ int usbmsc_archinitialize(void)
   syslog(LOG_INFO, "Initializing SPI port %d\n",
          LPC17XX_MMCSDSPIPORTNO);
 
-  zkit_spiinitialize();
-  spi = lpc17_spiinitialize(LPC17XX_MMCSDSPIPORTNO);
+  zkit_spidev_initialize();
+  spi = lpc17_spibus_initialize(LPC17XX_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",

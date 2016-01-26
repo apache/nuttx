@@ -247,7 +247,7 @@ void weak_function zkit_sspinitialize(void);
  *
  ************************************************************************************/
 
-void weak_function zkit_spiinitialize(void);
+void weak_function zkit_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H */

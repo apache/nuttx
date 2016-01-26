@@ -94,7 +94,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: zkit_spiinitialize
+ * Name: zkit_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select and card detect GPIO pins for the
@@ -102,18 +102,18 @@
  *
  ************************************************************************************/
 
-void weak_function zkit_spiinitialize(void)
+void weak_function zkit_spidev_initialize(void)
 {
   /* Configure the SPI-based microSD CS  and Card Detect (CD) GPIO */
 
-  spi_dumpgpio("zkit_spiinitialize() Entry)");
+  spi_dumpgpio("zkit_spidev_initialize() Entry)");
 
   /* Configure card detect and chip select for the SD slot. */
 
   (void)lpc17_configgpio(ZKITARM_SD_CS);
   (void)lpc17_configgpio(ZKITARM_SD_CD);
 
-  spi_dumpgpio("zkit_spiinitialize() Exit");
+  spi_dumpgpio("zkit_spidev_initialize() Exit");
 }
 
 /************************************************************************************
@@ -123,7 +123,7 @@ void weak_function zkit_spiinitialize(void)
  *   The external functions, lpc17_spiselect and  lpc17_spistatus
  *   must be provided by board-specific logic. They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc17_spibus_initialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *
@@ -132,9 +132,9 @@ void weak_function zkit_spiinitialize(void)
  *   2. Provide lpc17_spiselect and  lpc17_spistatus functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to lpc17_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by lpc17_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

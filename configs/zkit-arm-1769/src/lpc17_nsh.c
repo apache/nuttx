@@ -150,7 +150,7 @@ int board_app_initialize(void)
 
   /* Get the SPI port */
 
-  spi = lpc17_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  spi = lpc17_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
       message("board_app_initialize: Failed to initialize SPI port %d\n",
