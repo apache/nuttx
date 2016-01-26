@@ -115,14 +115,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_sspinitialize
+ * Name: lpc43_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Lincoln 80 board.
  *
  ****************************************************************************/
 
-void weak_function lpc43_sspinitialize(void);
+void weak_function lpc43_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_H */
