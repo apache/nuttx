@@ -37,7 +37,7 @@
  * The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
  * provided by board-specific logic.  They are implementations of the select
  * and status methods of the SPI interface defined by struct spi_ops_s (see
- * include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ * include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
  * are provided by common STM32 logic.  To use this common SPI logic on your
  * board:
  *
@@ -46,9 +46,9 @@
  *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to stm32_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by stm32_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -254,7 +254,7 @@ static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
 
 /* Initialization */
 
-static void        spi_portinitialize(FAR struct stm32_spidev_s *priv);
+static void        spi_bus_initialize(FAR struct stm32_spidev_s *priv);
 
 /************************************************************************************
  * Private Data
@@ -1448,10 +1448,10 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
 #endif
 
 /************************************************************************************
- * Name: spi_portinitialize
+ * Name: spi_bus_initialize
  *
  * Description:
- *   Initialize the selected SPI port in its default state (Master, 8-bit, mode 0, etc.)
+ *   Initialize the selected SPI bus in its default state (Master, 8-bit, mode 0, etc.)
  *
  * Input Parameter:
  *   priv   - private SPI device structure
@@ -1461,7 +1461,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  *
  ************************************************************************************/
 
-static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
+static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
 {
   uint16_t setbits;
   uint16_t clrbits;
@@ -1527,10 +1527,10 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_spiinitialize
+ * Name: stm32_spibus_initialize
  *
  * Description:
- *   Initialize the selected SPI port
+ *   Initialize the selected SPI bus
  *
  * Input Parameter:
  *   Port number (for hardware that has mutiple SPI interfaces)
@@ -1540,20 +1540,20 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
  *
  ************************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 {
   FAR struct stm32_spidev_s *priv = NULL;
 
   irqstate_t flags = irqsave();
 
 #ifdef CONFIG_STM32_SPI1
-  if (port == 1)
+  if (bus == 1)
     {
       /* Select SPI1 */
 
       priv = &g_spi1dev;
 
-      /* Only configure if the port is not already configured */
+      /* Only configure if the bus is not already configured */
 
       if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
@@ -1565,19 +1565,19 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
-          spi_portinitialize(priv);
+          spi_bus_initialize(priv);
         }
     }
   else
 #endif
 #ifdef CONFIG_STM32_SPI2
-  if (port == 2)
+  if (bus == 2)
     {
       /* Select SPI2 */
 
       priv = &g_spi2dev;
 
-      /* Only configure if the port is not already configured */
+      /* Only configure if the bus is not already configured */
 
       if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
@@ -1589,19 +1589,19 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
-          spi_portinitialize(priv);
+          spi_bus_initialize(priv);
         }
     }
   else
 #endif
 #ifdef CONFIG_STM32_SPI3
-  if (port == 3)
+  if (bus == 3)
     {
       /* Select SPI3 */
 
       priv = &g_spi3dev;
 
-      /* Only configure if the port is not already configured */
+      /* Only configure if the bus is not already configured */
 
       if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
@@ -1613,19 +1613,19 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
-          spi_portinitialize(priv);
+          spi_bus_initialize(priv);
         }
     }
   else
 #endif
 #ifdef CONFIG_STM32_SPI4
-  if (port == 4)
+  if (bus == 4)
     {
       /* Select SPI4 */
 
       priv = &g_spi4dev;
 
-      /* Only configure if the port is not already configured */
+      /* Only configure if the bus is not already configured */
 
       if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
@@ -1637,19 +1637,19 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
-          spi_portinitialize(priv);
+          spi_bus_initialize(priv);
         }
     }
   else
 #endif
 #ifdef CONFIG_STM32_SPI5
-  if (port == 5)
+  if (bus == 5)
     {
       /* Select SPI5 */
 
       priv = &g_spi5dev;
 
-      /* Only configure if the port is not already configured */
+      /* Only configure if the bus is not already configured */
 
       if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
@@ -1661,19 +1661,19 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
-          spi_portinitialize(priv);
+          spi_bus_initialize(priv);
         }
     }
   else
 #endif
 #ifdef CONFIG_STM32_SPI6
-  if (port == 6)
+  if (bus == 6)
     {
       /* Select SPI6 */
 
       priv = &g_spi6dev;
 
-      /* Only configure if the port is not already configured */
+      /* Only configure if the bus is not already configured */
 
       if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
@@ -1685,13 +1685,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
-          spi_portinitialize(priv);
+          spi_bus_initialize(priv);
         }
     }
   else
 #endif
     {
-      spidbg("ERROR: Unsupported SPI port: %d\n", port);
+      spidbg("ERROR: Unsupbused SPI bus: %d\n", bus);
       return NULL;
     }
 
