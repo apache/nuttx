@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/i2c/i2c_writeread.c
+ * drivers/i2c/i2c_write.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,61 +50,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: i2c_writeread
+ * Name: i2c_write
  *
  * Description:
- *   Send a block of data on I2C using the previously, followed by restarted
- *   read access.  This provides a convenient wrapper to the transfer function.
+ *   Send a block of data on I2C. Each write operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this write completes.
  *
  * Input Parameters:
- *   dev     - Device-specific state data
+ *   dev    - Device-specific state data
  *   config  - Described the I2C configuration
- *   wbuffer - A pointer to the read-only buffer of data to be written to device
- *   wbuflen - The number of bytes to send from the buffer
- *   rbuffer - A pointer to a buffer of data to receive the data from the device
- *   rbuflen - The requested number of bytes to be read
+ *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buflen - The number of bytes to send from the buffer
  *
  * Returned Value:
  *   0: success, <0: A negated errno
  *
  ****************************************************************************/
 
-int i2c_writeread(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
-                  FAR const uint8_t *wbuffer, int wbuflen,
-                  FAR uint8_t *rbuffer, int rbuflen)
+int i2c_write(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
+              FAR const uint8_t *buffer, int buflen)
 {
-  struct i2c_msg_s msg[2];
-  unsigned int flags;
+  struct i2c_msg_s msg;
 
-  /* 7- or 10-bit address? */
+  /* Setup for the transfer */
 
-  DEBUGASSERT(config->addrlen == 10 || config->addrlen == 7);
-  flags = (config->addrlen == 10) ? I2C_M_TEN : 0;
-
-  /* Format two messages: The first is a write */
-
-  msg[0].addr   = config->address;
-  msg[0].flags  = flags;
-  msg[0].buffer = (FAR uint8_t *)wbuffer;  /* Override const */
-  msg[0].length = wbuflen;
-
-  /* The second is either a read (rbuflen > 0) or a write (rbuflen < 0) with
-   * no restart.
-   */
-
-  if (rbuflen > 0)
-    {
-      msg[1].flags = (flags | I2C_M_READ);
-    }
-  else
-    {
-      msg[1].flags = (flags | I2C_M_NORESTART);
-      rbuflen = -rbuflen;
-    }
-
-  msg[1].addr   = config->address;
-  msg[1].buffer = rbuffer;
-  msg[1].length = rbuflen;
+  msg.addr   = config->address;
+  msg.flags  = (config->addrlen == 10) ? I2C_M_TEN : 0;
+  msg.buffer = (FAR uint8_t *)buffer;  /* Override const */
+  msg.length = buflen;
 
   /* Then perform the transfer
    *
@@ -113,7 +87,7 @@ int i2c_writeread(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *conf
    */
 
   I2C_SETFREQUENCY(dev, config->frequency);
-  return I2C_TRANSFER(dev, msg, 2);
+  return I2C_TRANSFER(dev, &msg, 1);
 }
 
 #endif /* CONFIG_I2C_TRANSFER */

@@ -228,9 +228,10 @@ struct i2c_ops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_dev_s *dev, uint32_t frequency);
   int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
-  int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
+  int    (*write)(FAR struct i2c_dev_s *dev, FAR const uint8_t *buffer,
            int buflen);
-  int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+  int    (*read)(FAR struct i2c_dev_s *dev, FAR uint8_t *buffer,
+           int buflen);
 #ifdef CONFIG_I2C_TRANSFER
   int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
            int count);
@@ -338,18 +339,78 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev);
 int up_i2creset(FAR struct i2c_dev_s *dev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: i2c_writeread
  *
  * Description:
- *   Write to then read from the I2C device.
+ *   Send a block of data on I2C using the previously, followed by restarted
+ *   read access.  This provides a convenient wrapper to the transfer function.
  *
- ************************************************************************************/
+ * Input Parameters:
+ *   dev     - Device-specific state data
+ *   config  - Described the I2C configuration
+ *   wbuffer - A pointer to the read-only buffer of data to be written to device
+ *   wbuflen - The number of bytes to send from the buffer
+ *   rbuffer - A pointer to a buffer of data to receive the data from the device
+ *   rbuflen - The requested number of bytes to be read
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER
 int i2c_writeread(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
                   FAR const uint8_t *wbuffer, int wbuflen,
                   FAR uint8_t *rbuffer, int rbuflen);
+#endif
+
+/****************************************************************************
+ * Name: i2c_write
+ *
+ * Description:
+ *   Send a block of data on I2C. Each write operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this write completes.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   config  - Described the I2C configuration
+ *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buflen - The number of bytes to send from the buffer
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRANSFER
+int i2c_write(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
+              FAR const uint8_t *buffer, int buflen);
+#endif
+
+/****************************************************************************
+ * Name: i2c_read
+ *
+ * Description:
+ *   Receive a block of data from I2C using the previously selected I2C
+ *   frequency and slave address. Each read operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this read completes. Required.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - A pointer to a buffer of data to receive the data from the device
+ *   buflen - The requested number of bytes to be read
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRANSFER
+int i2c_read(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
+             FAR uint8_t *buffer, int buflen);
 #endif
 
 #undef EXTERN

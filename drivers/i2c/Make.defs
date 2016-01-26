@@ -38,7 +38,7 @@
 ifeq ($(CONFIG_I2C),y)
 
 ifeq ($(CONFIG_I2C_TRANSFER),y)
-  CSRCS += i2c_writeread.c
+  CSRCS += i2c_read.c i2c_write.c i2c_writeread.c
 endif
 
 # Include I2C device driver build support
