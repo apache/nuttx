@@ -2581,7 +2581,6 @@ I2C Tool
     Device Drivers -> I2C Driver Support
       CONFIG_I2C=y                          : Enable I2C support
       CONFIG_I2C_TRANSFER=y                 : Driver supports the transfer() method
-      CONFIG_I2C_WRITEREAD=y                : Driver supports the writeread() method
 
     Application Configuration -> NSH Library
       CONFIG_SYSTEM_I2CTOOL=y               : Enable the I2C tool
