@@ -51,6 +51,8 @@
 #include <nuttx/input/ads7843e.h>
 
 #include "sam_gpio.h"
+#include "sam_spi.h"
+
 #include "sam4e-ek.h"
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
@@ -247,7 +249,7 @@ int board_tsc_setup(int minor)
 
   /* Get an instance of the SPI interface for the touchscreen chip select */
 
-  dev = up_spiinitialize(TSC_CSNUM);
+  dev = sam_spibus_initialize(TSC_CSNUM);
   if (!dev)
     {
       idbg("Failed to initialize SPI chip select %d\n", TSC_CSNUM);
@@ -260,7 +262,7 @@ int board_tsc_setup(int minor)
   if (ret < 0)
     {
       idbg("Failed to initialize SPI chip select %d\n", TSC_CSNUM);
-      /* up_spiuninitialize(dev); */
+      /* sam_spibus_uninitialize(dev); */
       return -ENODEV;
     }
 

@@ -84,7 +84,7 @@ int sam_at25_automount(int minor)
     {
       /* No.. Get the SPI port driver */
 
-      spi = up_spiinitialize(AT25_PORT);
+      spi = sam_spibus_initialize(AT25_PORT);
       if (!spi)
         {
           fdbg("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);

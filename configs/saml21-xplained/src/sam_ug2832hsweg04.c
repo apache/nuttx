@@ -116,6 +116,8 @@
 #include <nuttx/lcd/ssd1306.h>
 
 #include "sam_port.h"
+#include "sam_spi.h"
+
 #include "saml21-xplained.h"
 
 #ifdef CONFIG_SAML21_XPLAINED_OLED1MODULE
@@ -182,7 +184,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SPI1 port interface */
 
-  spi = up_spiinitialize(OLED_CSNO);
+  spi = sam_spibus_initialize(OLED_CSNO);
   if (!spi)
     {
       lcddbg("Failed to initialize SPI port 1\n");

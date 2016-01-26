@@ -46,6 +46,8 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "sam_spi.h"
+
 #include "sam4l-xplained.h"
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
@@ -94,7 +96,7 @@ int sam_sdinitialize(int minor)
 
   fvdbg("Initializing SPI chip select %d\n", SD_CSNO);
 
-  spi = up_spiinitialize(SD_CSNO);
+  spi = sam_spibus_initialize(SD_CSNO);
   if (!spi)
     {
       fdbg("Failed to initialize SPI chip select %d\n", SD_CSNO);

@@ -47,6 +47,8 @@
 #include <nuttx/mmcsd.h>
 
 #include "sam_config.h"
+#include "sam_spi.h"
+
 #include "samd21-xplained.h"
 
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE
@@ -95,7 +97,7 @@ int sam_sdinitialize(int port, int minor)
 
   fvdbg("Initializing SERCOM SPI%d\n", port);
 
-  spi = up_spiinitialize(port);
+  spi = sam_spibus_initialize(port);
   if (!spi)
     {
       fdbg("Failed to initialize SPI%d\n", port);
