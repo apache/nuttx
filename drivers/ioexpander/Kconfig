@@ -15,6 +15,7 @@ if IOEXPANDER_PCA9555
 config PCA9555_MULTIPLE
 	bool "Multiple PCA9555 Devices"
 	default n
+	depends on EXPERIMENTAL
 	---help---
 		Can be defined to support multiple PCA9555 devices on board.
 
