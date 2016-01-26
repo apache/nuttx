@@ -11387,3 +11387,9 @@
 	* SPI: Rename the KL up_spiinitialize() to kl_spibus_intialize() (2016-01-26).
 	* SPI: Rename the Kinetis up_spiinitialize() to kinetis_spibus_intialize()
 	  (2016-01-26).
+	* SPI: Rename the LPC31xx up_spiinitialize() to lpc31_spibus_intialize()
+	  (2016-01-26).
+	* SPI: Rename the LPC17xx lpc17_spiinitialize() to lpc31_spibus_intialize()
+	  (2016-01-26).
+	* SPI: Rename the LPC43xx up_spiinitialize() to lpc43_spibus_intialize()
+	  (2016-01-26).
