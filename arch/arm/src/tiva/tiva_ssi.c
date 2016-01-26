@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_ssi.c
  *
- *   Copyright (C) 2009-2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1481,7 +1481,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: tiva_spibus_initialize
  *
  * Description:
  *   Initialize common parts the selected SPI port.  Initialization of
@@ -1502,7 +1502,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *tiva_spibus_initialize(int port)
 {
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
