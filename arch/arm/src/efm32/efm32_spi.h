@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_spi_initialize
+ * Name: efm32_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -66,7 +66,7 @@
  ****************************************************************************/
 
 struct spi_dev_s;
-struct spi_dev_s *efm32_spi_initialize(int port);
+struct spi_dev_s *efm32_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  efm32_spi[n]_select,  efm32_spi[n]_status, and efm32_spi[n]_cmddata
@@ -76,7 +76,7 @@ struct spi_dev_s *efm32_spi_initialize(int port);
  *   efm32_spi[n]_cmddata must be provided by board-specific logic.  These
  *   are implementations of the select, status, and cmddata methods of the
  *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- *   All other methods (including up_spiinitialize()) are provided by common
+ *   All other methods (including efm32_spibus_initialize()) are provided by common
  *   EFM32 logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in efm32_boardinitialize() to configure SPI chip select
@@ -89,9 +89,9 @@ struct spi_dev_s *efm32_spi_initialize(int port);
  *      then provide efm32_spi[n]_cmddata() functions in your board-specific
  *      logic.  These functions will perform cmd/data selection operations
  *      using GPIOs in the way your board is configured.
- *   4. Add a calls to up_spiinitialize() in your low level application
+ *   4. Add a calls to efm32_spibus_initialize() in your low level application
  *      initialization logic
- *   5. The handle returned by up_spiinitialize() may then be used to bind
+ *   5. The handle returned by efm32_spibus_initialize() may then be used to bind
  *      the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

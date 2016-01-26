@@ -1553,7 +1553,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
    *
    * 1. USART GPIO pins were configured in efm32_lowsetup().  Chip select
    *    pins must be configured by board specific logic before
-   *    efm32_spi_initialize() is called.
+   *    efm32_spibus_initialize() is called.
    * 2. Clocking for the USART as also enabled in efm32_lowsetup();
    */
 
@@ -1645,7 +1645,7 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_spi_initialize
+ * Name: efm32_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -1658,7 +1658,7 @@ errout:
  *
  ****************************************************************************/
 
-struct spi_dev_s *efm32_spi_initialize(int port)
+struct spi_dev_s *efm32_spibus_initialize(int port)
 {
   const struct efm32_spiconfig_s *config;
   struct efm32_spidev_s *priv;
