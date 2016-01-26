@@ -1081,7 +1081,7 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
     }
   else
     {
-      msgv[1].flags = (priv->flags | I2C_M_NORESTART),
+      msgv[1].flags = (priv->flags | I2C_M_NORESTART);
       rbuflen = -rbuflen;
     }
 
