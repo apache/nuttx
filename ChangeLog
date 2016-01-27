@@ -11387,25 +11387,18 @@
 	* SPI: Rename the KL up_spiinitialize() to kl_spibus_intialize() (2016-01-26).
 	* SPI: Rename the Kinetis up_spiinitialize() to kinetis_spibus_intialize()
 	  (2016-01-26).
-	* SPI: Rename the LPC31xx up_spiinitialize() to lpc31_spibus_intialize()
+	* SPI: Rename the LPC31xx up_spiinitialize() to lpc31_spibus_intialize(),
+	  Rename the LPC17xx lpc17_spiinitialize() to lpc31_spibus_intialize(),
+	  Rename the LPC43xx up_spiinitialize() to lpc43_spibus_intialize()
 	  (2016-01-26).
-	* SPI: Rename the LPC17xx lpc17_spiinitialize() to lpc31_spibus_intialize()
-	  (2016-01-26).
-	* SPI: Rename the LPC43xx up_spiinitialize() to lpc43_spibus_intialize()
-	  (2016-01-26).
-	* SPI: Rename the AVR up_spiinitialize() to avr_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the LPC2148 up_spiinitialize() to lpc214x_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the Calypso up_spiinitialize() to calypso_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the ez80 up_spiinitialize() to ez80_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the STR71xx up_spiinitialize() to str71_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the i.MX1 up_spiinitialize() to imx_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the LPC2378 up_spiinitialize() to lpc23_spibus_intialize()
-	  (2016-01-27).
-	* SPI: Rename the M9S12 up_spiinitialize() to hcs12_spibus_intialize()
-	  (2016-01-27).
+	* SPI: Rename the AVR up_spiinitialize() to avr_spibus_intialize(),
+	  Rename the LPC2148 up_spiinitialize() to lpc214x_spibus_intialize(),
+	  Rename the Calypso up_spiinitialize() to calypso_spibus_intialize(),
+	  Rename the ez80 up_spiinitialize() to ez80_spibus_intialize(),
+	  Rename the STR71xx up_spiinitialize() to str71_spibus_intialize(),
+	  Rename the i.MX1 up_spiinitialize() to imx_spibus_intialize(),
+	  Rename the LPC2378 up_spiinitialize() to lpc23_spibus_intialize(),
+	  Rename the M9S12 up_spiinitialize() to hcs12_spibus_intialize(),
+	  Rename the x86 up_spiinitialize() to i486_spibus_intialize(),
+	  Rename the z16f up_spiinitialize() to z16_spibus_intialize().
+	  up_spiinitialize() has been completely eliminated. (2016-01-27).

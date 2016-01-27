@@ -479,42 +479,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: up_spiinitialize
- *
- * Description:
- *   Initialize the selected SPI port in master mode.
- *
- *   This is a generic prototype for the SPI initialize logic.  Specific
- *   architectures may support different SPI initialization functions if,
- *   for example, those architectures support multiple, incompatible SPI
- *   implementations.  In any event, the prototype of those architecture-
- *   specific initialization functions should be the same as
- *   up_spiinitialize()
- *
- *   As an example, the LPC17xx family supports an SPI block and several SSP
- *   blocks that may be programmed to support the SPI function.  In this
- *   case, the LPC17xx architecture supports these two initialization
- *   functions:
- *
- *     FAR struct spi_dev_s *lpc17_spiinitialize(int port);
- *     FAR struct spi_dev_s *lpc17_sspinitialize(int port);
- *
- *   Another example would be the STM32 families that support both SPI
- *   blocks as well as USARTs that can be configured to perform the SPI
- *   function as well (the STM32 USARTs do not support SPI as of this
- *   writing).
- *
- * Input Parameter:
- *   Port number (for hardware that has multiple SPI interfaces)
- *
- * Returned Value:
- *   Valid SPI device structure reference on success; a NULL on failure
- *
- ****************************************************************************/
-
-FAR struct spi_dev_s *up_spiinitialize(int port);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
