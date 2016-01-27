@@ -656,7 +656,6 @@ CONFIG_READLINE_ECHO=y
 #
 # RAMTRON
 #
-# CONFIG_SYSTEM_RAMTRON is not set
 
 #
 # SD Card

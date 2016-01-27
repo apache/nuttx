@@ -649,7 +649,6 @@ CONFIG_EXAMPLES_NXFLAT=y
 #
 # RAMTRON
 #
-# CONFIG_SYSTEM_RAMTRON is not set
 
 #
 # SD Card

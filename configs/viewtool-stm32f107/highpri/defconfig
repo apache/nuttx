@@ -785,7 +785,6 @@ CONFIG_NSH_WGET_USERAGENT="NuttX/6.xx.x (; http://www.nuttx.org/)"
 #
 # RAMTRON
 #
-# CONFIG_SYSTEM_RAMTRON is not set
 
 #
 # SD Card

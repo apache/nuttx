@@ -958,11 +958,6 @@ CONFIG_READLINE_ECHO=y
 # CONFIG_SYSTEM_POWEROFF is not set
 
 #
-# RAMTRON
-#
-# CONFIG_SYSTEM_RAMTRON is not set
-
-#
 # SD Card
 #
 # CONFIG_SYSTEM_SDCARD is not set
