@@ -803,7 +803,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: z16_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -816,7 +816,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *z16_spibus_initialize(int port)
 {
   FAR struct z16f_spi_s *priv;
   irqstate_t flags;

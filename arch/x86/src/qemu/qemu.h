@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/x86/src/qemu/qemu.h
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -193,6 +193,25 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
 #  define i486_dumpgpio(p,m)
 #endif
 
+/****************************************************************************
+ * Name: i486_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
+
+FAR struct spi_dev_s *i486_spibus_initialize(int port);
+
 /************************************************************************************
  * Name:  i486_spi/ssp0/ssp1select, i486_spi/ssp0/ssp1status, and
  *        i486_spi/ssp0/ssp1cmddata
@@ -201,7 +220,7 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common LPC17xx logic.  To use
+ *   including i486_spibus_initialize()) are provided by common LPC17xx logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in i486_boardinitialize() to configure SPI/SSP chip select
@@ -213,9 +232,9 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
  *      i486_spi/ssp0/ssp1cmddata() functions in your board-specific logic.  These
  *      functions will perform cmd/data selection operations using GPIOs in the way
  *      your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to i486_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by i486_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

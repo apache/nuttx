@@ -323,9 +323,6 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg);
 int hcs12_ethinitialize(int intf);
 #endif
 
-struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
-
 /****************************************************************************
  * Name: hcs12_spibus_initialize
  *
@@ -339,6 +336,9 @@ enum spi_dev_e;    /* Forward reference */
  *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
+
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
 
 FAR struct spi_dev_s *hcs12_spibus_initialize(int port);
 

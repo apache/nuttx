@@ -675,6 +675,14 @@ void z16f_reset(void);
  */
 
 #ifdef CONFIG_Z16F_ESPI
+
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
+
+/* Initialize the selected SPI port */
+
+FAR struct spi_dev_s *z16_spibus_initialize(int port);
+
 /* Select an SPI device (see include/nuttx/spi/spi.h) */
 
 void z16f_espi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
