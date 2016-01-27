@@ -419,7 +419,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: ez80_spibus_initialize
  *
  * Description:
  *   Initialize common parts the selected SPI port.  Initialization of
@@ -440,7 +440,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *ez80_spibus_initialize(int port)
 {
   uint8_t regval;
 
