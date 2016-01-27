@@ -74,13 +74,13 @@
 void atmega_boardinitialize(void)
 {
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function atmega_spiinitialize() has been brought into the link.
+   * function atmega_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-  if (atmega_spiinitialize)
+  if (atmega_spidev_initialize)
     {
-      atmega_spiinitialize();
+      atmega_spidev_initialize();
     }
 #endif
 

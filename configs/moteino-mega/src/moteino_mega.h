@@ -70,7 +70,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Name: atmega_spiinitialize
+ * Name: atmega_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Amber Web Server.
@@ -78,7 +78,7 @@ extern "C"
  ************************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-void weak_function atmega_spiinitialize(void);
+void weak_function atmega_spidev_initialize(void);
 #endif
 
 /************************************************************************************

@@ -70,7 +70,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Name: at90usb_spiinitialize
+ * Name: at90usb_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Teensy++ 2.0 board.
@@ -78,7 +78,7 @@ extern "C"
  ************************************************************************************/
 
 #ifdef CONFIG_AVR_SPI
-void weak_function at90usb_spiinitialize(void);
+void weak_function at90usb_spidev_initialize(void);
 #endif
 
 /************************************************************************************

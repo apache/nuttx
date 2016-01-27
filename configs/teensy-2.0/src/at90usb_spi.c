@@ -108,14 +108,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: at90usb_spiinitialize
+ * Name: at90usb_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
  ************************************************************************************/
 
-void weak_function at90usb_spiinitialize(void)
+void weak_function at90usb_spidev_initialize(void)
 {
   /* The Teensy board has no dedicated SPI devices so we assume that SS is used
    * for chip select:
@@ -144,16 +144,16 @@ void weak_function at90usb_spiinitialize(void)
  *   The external functions, avr_spiselect and avr_spistatus  must be provided by
  *   board-specific logic.  They are implementations of the select and status methods
  *   of the SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
- *   other methods (including up_spiinitialize()) are provided by common AVR logic.
+ *   other methods (including avr_spibus_initialize()) are provided by common AVR logic.
  *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in avr_sspinitialize() to configure SPI chip select pins.
  *   2. Provide avr_spiselect() and avr_spistatus() functions in your board-specific
  *      logic.  These functions will perform chip selection and status operations
  *      in the way your board is configured.
- *   3. Add a calls to at90usb_spiinitialize() in your low level application
+ *   3. Add a calls to at90usb_spidev_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by avr_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  *

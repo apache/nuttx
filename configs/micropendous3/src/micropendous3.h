@@ -69,7 +69,7 @@ extern "C" {
 #endif
 
 /************************************************************************************
- * Name: at90usb_spiinitialize
+ * Name: at90usb_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Micropendous3 board.
@@ -77,7 +77,7 @@ extern "C" {
  ************************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-EXTERN void weak_function at90usb_spiinitialize(void);
+EXTERN void weak_function at90usb_spidev_initialize(void);
 #endif
 
 /************************************************************************************

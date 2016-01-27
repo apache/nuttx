@@ -94,10 +94,10 @@ int usbmsc_archinitialize(void)
 
   syslog(LOG_INFO, "Initializing SPI port\n");
 
-  spi = up_spiinitialize(AVR_MMCSDSPIPORTNO);
+  spi = avr_spibus_initialize(AVR_MMCSDSPIPORTNO);
   if (!spi)
     {
-      syslog(LOG_ERR, "ERROR: up_spiinitialize failed\n");
+      syslog(LOG_ERR, "ERROR: avr_spibus_initialize failed\n");
       return -ENODEV;
     }
 
