@@ -153,4 +153,23 @@ void str71x_disable_xtiirq(int irq);
 #  define str71x_disable_xtiirq(irq)
 #endif /* CONFIG_STR71X_XTI */
 
+struct spi_dev_s; /* Forward reference */
+
+/****************************************************************************
+ * Name: str71_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port.  This function could get called
+ *   multiple times for each STR7 devices that needs an SPI reference.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structre reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *str71_spibus_initialize(int port);
+
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_H */
