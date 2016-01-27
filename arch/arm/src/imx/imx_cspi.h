@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/imx/imx_cspi.h
  *
- *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,10 +177,38 @@ extern "C"
  * Public Functions
  ************************************************************************************/
 
-/* The external functions, imx_spiselect, imx_spistatus, and imx_cmddaa must be
+struct spi_dev_s; /* Forward reference */
+enum spi_dev_e;   /* Forward reference */
+
+/****************************************************************************
+ * Name: imx_spibus_initialize
+ *
+ * Description:
+ *   Initialize common parts the selected SPI port.  Initialization of
+ *   chip select GPIOs must have been performed by board specific logic
+ *   prior to calling this function.  Specifically:  GPIOs should have
+ *   been configured for output, and all chip selects disabled.
+ *
+ *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
+ *   If multiple devices on on the bus, then multiple chip selects will be
+ *   required.  Theregore, all GPIO chip management is deferred to board-
+ *   specific logic.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structre reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *imx_spibus_initialize(int port);
+
+/****************************************************************************
+ * The external functions, imx_spiselect, imx_spistatus, and imx_cmddaa must be
  * provided by board-specific logic.  These are implementations of the select and
  * status methods of the SPI interface defined by struct spi_ops_s (see
- * include/nuttx/spi/spi.h).  All other methods (including up_spiinitialize()) are
+ * include/nuttx/spi/spi.h).  All other methods (including imx_spibus_initialize()) are
  * provided by common logic.  To use this common SPI logic on your board:
  *
  *   1. Provide imx_spiselect() and imx_spistatus() functions in your board-specific
@@ -190,11 +218,12 @@ extern "C"
  *      imx_spicmddata() function in your board-specific logic.  This function will
  *      perform cmd/data selection operations using GPIOs in the way your board is
  *      configured.
- *   3. Add a call to up_spiinitialize() in your low level initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   3. Add a call to imx_spibus_initialize() in your low level initialization logic
+ *   4. The handle returned by imx_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
- */
+ *
+ ****************************************************************************/
 
 void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
