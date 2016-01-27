@@ -136,6 +136,25 @@ void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 
 uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
 
+/****************************************************************************
+ * Name: avr_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct spi_dev_s; /* Forward references */
+enum spi_dev_e;   /* Forward references */
+
+FAR struct spi_dev_s *avr_spibus_initialize(int port);
+
 /************************************************************************************
  * Name:  avr_spiselect, avr_spitatus, and avr_spicmddata
  *
@@ -143,7 +162,7 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common LPC17xx logic.  To use
+ *   including avr_spibus_initialize()) are provided by common LPC17xx logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in <arch>_boardinitialize() to configure SPI chip select
@@ -157,14 +176,11 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  *      configured.
  *   3. Add a call to at90usb_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by avr_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  *
  ************************************************************************************/
-
-struct spi_dev_s;
-enum spi_dev_e;
 
 #ifdef CONFIG_AVR_SPI
 void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);

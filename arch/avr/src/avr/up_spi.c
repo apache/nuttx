@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/avr/up_spi.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -454,7 +454,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: avr_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -467,7 +467,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *avr_spibus_initialize(int port)
 {
   FAR struct avr_spidev_s *priv = &g_spidev;
   irqstate_t flags;
