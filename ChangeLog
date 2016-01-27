@@ -11393,3 +11393,9 @@
 	  (2016-01-26).
 	* SPI: Rename the LPC43xx up_spiinitialize() to lpc43_spibus_intialize()
 	  (2016-01-26).
+	* SPI: Rename the AVR up_spiinitialize() to avr_spibus_intialize()
+	  (2016-01-27).
+	* SPI: Rename the LPC2148 up_spiinitialize() to lpc214x_spibus_intialize()
+	  (2016-01-27).
+	* SPI: Rename the Calypso up_spiinitialize() to calypso_spibus_intialize()
+	  (2016-01-27).

@@ -215,9 +215,9 @@ int main(int argc, char **argv, char **envp)
               path = skip_spaces(next);
               if (*path == '#')
                 {
-                  /* Comment line */
+                  /* The reset of the line is comment */
 
-                  puts(g_line);
+                  puts(path);
                   break;
                 }
 
@@ -302,4 +302,3 @@ int main(int argc, char **argv, char **envp)
 }
 
 #endif /* HOST_CYGWIN */
-
