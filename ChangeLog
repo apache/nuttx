@@ -11402,6 +11402,6 @@
 	  Rename the x86 up_spiinitialize() to i486_spibus_intialize(),
 	  Rename the z16f up_spiinitialize() to z16_spibus_intialize().
 	  up_spiinitialize() has been completely eliminated. (2016-01-27).
-	* fs/vfs/fs_poll.c: Fix handling of sem_tickwait() return value 
+	* fs/vfs/fs_poll.c: Fix handling of sem_tickwait() return value
 	  sem_tickwait() does not return an -1+errno, it returns a negated
 	  errno value.  Noted by Freddie Chopin."
