@@ -329,6 +329,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
   sem_t sem;
   int count = 0;
+  int err;
   int ret;
 
   sem_init(&sem, 0, 0);
@@ -354,20 +355,14 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            ret = sem_tickwait(&sem, clock_systimer(), MSEC2TICK(timeout));
            if (ret < 0)
              {
-               int err = get_errno();
-
-               if (err == ETIMEDOUT)
+               if (ret == -ETIMEDOUT)
                  {
                    /* Return zero (OK) in the event of a timeout */
 
                    ret = OK;
                  }
-               else
-                 {
-                   /* EINTR is the only other error expected in normal operation */
 
-                   ret = -err;
-                 }
+               /* EINTR is the only other error expected in normal operation */
              }
         }
       else
@@ -379,9 +374,15 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
       /* Teardown the poll operation and get the count of events.  Zero will be
        * returned in the case of a timeout.
+       *
+       * Preserve ret, if negative, since it holds the result of the wait.
        */
 
-      ret = poll_teardown(fds, nfds, &count, ret);
+      err = poll_teardown(fds, nfds, &count, ret);
+      if (err < 0 && ret == OK)
+        {
+          ret = err;
+        }
     }
 
   sem_destroy(&sem);
