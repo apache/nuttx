@@ -91,14 +91,14 @@
  ****************************************************************************************************/
 
 /****************************************************************************************************
- * Name: nuc_spiinitialize
+ * Name: nuc_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the NuTiny-EVB-120 board.
  *
  ****************************************************************************************************/
 
-void weak_function nuc_spiinitialize(void);
+void weak_function nuc_spidev_initialize(void);
 
 /****************************************************************************************************
  * Name: nuc_usbinitialize

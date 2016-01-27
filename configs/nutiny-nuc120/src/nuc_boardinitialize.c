@@ -72,13 +72,13 @@
 void nuc_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * nuc_spiinitialize() has been brought into the link.
+   * nuc_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_NUC1XX_SPI1) || defined(CONFIG_NUC1XX_SPI2) || defined(CONFIG_NUC1XX_SPI3)
-  if (nuc_spiinitialize)
+  if (nuc_spidev_initialize)
     {
-      nuc_spiinitialize();
+      nuc_spidev_initialize();
     }
 #endif
 
