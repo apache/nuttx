@@ -283,7 +283,21 @@ int spi_xfer(uint8_t dev_idx, uint8_t bitlen, const void *dout, void *din)
   return 0;
 }
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+/****************************************************************************
+ * Name: calypso_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *calypso_spibus_initialize(int port)
 {
   switch (port)
     {

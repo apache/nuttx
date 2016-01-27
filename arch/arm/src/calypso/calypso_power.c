@@ -9,6 +9,8 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 
+#include "calypso_spi.h"
+
 /****************************************************************************
  * Name: board_power_off
  *
@@ -31,8 +33,8 @@
 #ifdef CONFIG_BOARDCTL_POWEROFF
 int board_power_off(int status)
 {
+  struct spi_dev_s *spi = calypso_spibus_initialize(0);
   uint16_t tx;
-  struct spi_dev_s *spi = up_spiinitialize(0);
 
   SPI_SETBITS(spi, 16);
   (void)SPI_HWFEATURES(spi, 0);
@@ -46,4 +48,3 @@ int board_power_off(int status)
   return 0;
 }
 #endif
-
