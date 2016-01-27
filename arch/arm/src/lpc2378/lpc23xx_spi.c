@@ -6,7 +6,7 @@
  *
  * Derived from  arch/arm/src/lpc17xx/lpc17_spi.c
  *
- *   Copyright (C) 2010, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -529,7 +529,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: lpc23_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -542,7 +542,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *lpc23_spibus_initialize(int port)
 {
   FAR struct lpc23xx_spidev_s *priv = &g_spidev;
   irqstate_t flags;

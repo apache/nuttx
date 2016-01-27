@@ -6,7 +6,7 @@
  *
  * Derived arch/arm/src/lpc17xx/lpc17_spi.h
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,9 +153,30 @@
  * Public Functions
  ************************************************************************************/
 
-/* These functions must be provided by the board specific logic that has knowledge
+struct spi_dev_s;  /* Forward reference */
+enum spi_dev_e;    /* Forward reference */
+
+/****************************************************************************
+ * Name: lpc23_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct spi_dev_s *lpc23_spibus_initialize(int port);
+
+/****************************************************************************
+ * These functions must be provided by the board specific logic that has knowledge
  * the chip select and card detect GPIO configuration of the board.
- */
+ *
+ ****************************************************************************/
 
 void  lpc23xx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t lpc23xx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
