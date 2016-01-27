@@ -213,7 +213,7 @@ void up_netinitialize(void)
 
   /* Get the SPI port */
 
-  spi = up_spiinitialize(ENC28J60_SPI_PORTNO);
+  spi = str71_spibus_initialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
       nlldbg("Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);

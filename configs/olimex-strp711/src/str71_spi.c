@@ -939,7 +939,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: str71_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port.  This function could get called
@@ -953,7 +953,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *str71_spibus_initialize(int port)
 {
   FAR struct spi_dev_s *ret;
 #if defined(CONFIG_STR71X_BSPI0) || defined(CONFIG_STR71X_BSPI1)

@@ -47,6 +47,8 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "str71x.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -118,7 +120,7 @@ int board_app_initialize(void)
   syslog(LOG_INFO, "Initializing SPI port %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  spi = str71_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
