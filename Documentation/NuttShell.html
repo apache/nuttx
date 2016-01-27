@@ -4098,7 +4098,7 @@ mount -t vfat /dev/ram1 /tmp
     <p>
       <code>board_app_initialize()</code>:
       Next any architecture-specific NSH initialization will be performed (if any).
-      For the STM3240G-EVAL, this architecture specific initialization can be found at <code>configs/stm3240g-eval/src/up_nsh.c</code>.
+      For the STM3240G-EVAL, this architecture specific initialization can be found at <code>configs/stm3240g-eval/src/stm32_nsh.c</code>.
       This it does things like:  (1) Initialize SPI devices, (2) Initialize SDIO, and (3) mount any SD cards that may be inserted.
     </p>
   <li>
@@ -4498,7 +4498,7 @@ CONFIG_SCHED_WAITPID=y
 <ol>
   <li>
     <p>
-      You can extend the initialization logic in <code>configs/stm3240g-eval/src/up_nsh.c</code>.
+      You can extend the initialization logic in <code>configs/stm3240g-eval/src/stm32_nsh.c</code>.
       The logic there is called each time that NSH is started and is good place in particular for any device-related initialization.
     </p>
   <li>
@@ -5241,6 +5241,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#custinit">Start-up, Default behavior</a></li>
   <li><a href="#startupscript">Start-up script</a>
   <li><a href="#custinit">Start-up script</a></li>
+  <li><a href="#custinit"><code>stm32_nsh.c</code></a></li>
   <li><a href="#custapps">Synchronous built-in applications</a></li>
   <li><a href="#cmdtest"><code>test</code></a></li>
   <li><a href="#cmdtime"><code>time</code></a></li>
@@ -5249,7 +5250,6 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdunset"><code>unset</code></a></li>
   <li><a href="#looping"><code>until</code></a></li>
   <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
-  <li><a href="#custinit"><code>up_nsh.c</code></a></li>
   <li><a href="#cmdurldec"><code>urldecode</code></a></li>
   <li><a href="#cmdurlencode"><code>urlencode</code></a></li>
   <li><a href="#cmduseradd"><code>useradd</code></a></li>
