@@ -54,6 +54,6 @@ enum spi_regs
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *calypso_spibus_initialize(int port)
+FAR struct spi_dev_s *calypso_spibus_initialize(int port);
 
 #endif /* ___ARCH_ARM_SRC_CALYPSO_CALYPSO_SPI_H */

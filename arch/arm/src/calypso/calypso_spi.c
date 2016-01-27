@@ -66,7 +66,7 @@ struct calypso_spidev_s
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  struct calypso_spidev_s *priv = (struct efm32_spidev_s *)dev;
+  struct calypso_spidev_s *priv = (struct calypso_spidev_s *)dev;
 
   if (lock)
     {
