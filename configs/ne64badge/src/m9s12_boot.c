@@ -71,13 +71,13 @@
 void hcs12_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * hcs12_spiinitialize() has been brought into the link.
+   * hcs12_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_INCLUDE_HCS12_ARCH_SPI)
-  if (hcs12_spiinitialize)
+  if (hcs12_spidev_initialize)
     {
-      hcs12_spiinitialize();
+      hcs12_spidev_initialize();
     }
 #endif
 

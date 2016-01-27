@@ -178,14 +178,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: hcs12_spiinitialize
+ * Name: hcs12_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
  *
  ************************************************************************************/
 
-void weak_function hcs12_spiinitialize(void);
+void weak_function hcs12_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NE64BADGE_SRC_NE64BADGE_H */
