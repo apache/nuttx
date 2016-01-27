@@ -840,7 +840,7 @@ static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_spiinitialize
+ * Name: up_spiflashinitialize
  *
  * Description:
  *   Initialize the selected SPI port
