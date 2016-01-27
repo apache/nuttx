@@ -156,7 +156,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SPI1 port interface */
 
-  spi = up_spiinitialize(1);
+  spi = lpc214x_spibus_initialize(1);
   if (!spi)
     {
       lcddbg("Failed to initialize SPI port 1\n");

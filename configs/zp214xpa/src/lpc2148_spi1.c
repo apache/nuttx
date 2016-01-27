@@ -571,7 +571,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: lpc214x_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -584,7 +584,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
 {
   uint32_t regval32;
   uint8_t regval8;

@@ -94,7 +94,7 @@ int usbmsc_archinitialize(void)
   syslog(LOG_INFO, "Initializing SPI port %d\n",
          LPC214X_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(LPC214X_MMCSDSPIPORTNO);
+  spi = lpc214x_spibus_initialize(LPC214X_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
