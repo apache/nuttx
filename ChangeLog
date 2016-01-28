@@ -11206,12 +11206,12 @@
 	* configs/samv7-xult/: If Tickless mode is selected then enable PCK6
 	  as a timer/counter clock source (2015-12-04).
 
-7.14 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.14 2016-01-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/samv7:  Port the TRNG driver from the SAMA5D3/4 to the
 	  SAMV7 (2015-12-06).
 	* arch/arm/src/samv7:  Port the WDT driver from the SAMA5D3/4 to the
-	  SAMV7 (s015-12-06).
+	  SAMV7 (2015-12-06).
 	* arch/arm/src/samv7:  Add an RSWDT driver (2015-12-06).
 	* drivers/net/telnet.c:  Move the Telnet driver from apps/netutils/telnetd
 	  to drivers/net.  It is a driver a belongs in the OS.  There are still
@@ -11249,7 +11249,7 @@
 	  (2015-12-22).
 	* sys/time.h: Add timeradd(), timersub(), timerclear(), timerisset(),
 	  and timercmp() as macros. These are non-POSIX interfaces, but
-	  included in most BSD deriviatives, included Linux.  From Manuel Stühn
+	  included in most BSD deriviatives, including Linux.  From Manuel Stühn
 	  (2015-12-23).
 	* arch/arm/src/stm32:  Add timer input capture driver.  From Pierre-Noel
 	  Bouteville (2015-12-24).
@@ -11264,7 +11264,7 @@
 	  FLAT build.  See the top-level TODO file for additional details
 	  (2015-12-30).
 	* include/nuttx/compiler.h, include/nuttx/streams.h include/stdio.h
-	  include/syslog.h libc/stdio/, and libc/syslog: ntroduce support for
+	  include/syslog.h libc/stdio/, and libc/syslog: introduce support for
 	  Atmel toolchain in-flash strings.  Atmel toolchain AVR compiler
 	  provides a transparent in-flash object support using __flash and
 	  __memx symbols. The former indicates to compiler that this is a flash-
@@ -11324,13 +11324,13 @@
 	* arch/arm/src/stm32/stm32_otgfs/hs/host.c:  Fix some backward
 	  arguments to stm32_putreg().  Note by Hang Xu (2016-01-18).
 	* include/nuttx/can.h and several CAN drivers:  Add more extensive
-	  error reporting capaibility to the CAN interferace.  From Frank
-	  Benkert (21016-01-18).
+	  error reporting capaibility to the CAN interface.  From Frank
+	  Benkert (2016-01-18).
 	* libc/misc/lib_tea.h and include/nuttx/crypto/tea.h:  Add an
 	  implementation of the Tiny Encryption Algorithm (2016-01-19).
 	* sim/include: Now supports a customizable startup script with a
 	  read-only passwd file (2016-01-20).
-	* sim/nsh:  Uses the custom start up script, includes hoks for
+	* sim/nsh:  Uses the custom start up script, includes hooks for
 	  an MOTD message. (2016-01-20).
 	* include/clock.h and lots of other files:  If the 64-bit timer is
 	  selected, then use it whenever clock_systimer() is called rather
@@ -11371,7 +11371,7 @@
 	  the former is thread safe while the latter is deprecated (2016-01-26).
 	* drivers/i2c/i2c_writeread.c:  Create a wrapper that uses I2C_TRANSFER
 	  to implement I2C_WRITEREAD functionality (2016-01-26).
-	* I2C: Eliminate the I@C_WRITEREAD method (2016-01-26).
+	* I2C: Eliminate the I2C_WRITEREAD method (2016-01-26).
 	* drivers/i2c/i2c_read.c and i2c_write.c: Convert to use I2C_TRANSFER vs.
 	  I2C_READ and I2C_WRITE which are not thread safe (2016-01-26).
 	* SPI: Rename the STM32 up_spiinitialize() to stm32_spibus_initialize()
@@ -11404,4 +11404,6 @@
 	  up_spiinitialize() has been completely eliminated. (2016-01-27).
 	* fs/vfs/fs_poll.c: Fix handling of sem_tickwait() return value
 	  sem_tickwait() does not return an -1+errno, it returns a negated
-	  errno value.  Noted by Freddie Chopin."
+	  errno value.  Noted by Freddie Chopin.
+
+7.15 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
