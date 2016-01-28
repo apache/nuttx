@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,18 +51,6 @@
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Data
- ********************************************************************************/
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
 
 /********************************************************************************
  * Private Functions
@@ -213,13 +201,31 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
   ret->pt_delay = 0;
   ret->pt_wdog  = wdog;
 
+  /* Was a struct sigevent provided? */
+
   if (evp)
     {
+      /* Yes, copy the entire struct sigevent content */
+
       memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
     }
   else
     {
-      memset(&ret->pt_event, 0, sizeof(struct sigevent));
+      /* "If the evp argument is NULL, the effect is as if the evp argument
+       *  pointed to a sigevent structure with the sigev_notify member
+       *  having the value SIGEV_SIGNAL, the sigev_signo having a default
+       *  signal number, and the sigev_value member having the value of the
+       *  timer ID."
+       */
+
+      ret->pt_event.sigev_notify          = SIGEV_SIGNAL;
+      ret->pt_event.sigev_signo           = SIGALRM;
+      ret->pt_event.sigev_value.sival_ptr = ret;
+
+#ifdef CONFIG_SIG_EVTHREAD
+      ret->pt_event.sigev_value.sigev_notify_function   = NULL;
+      ret->pt_event.sigev_value.sigev_notify_attributes = NULL;
+#endif
     }
 
   /* Return the timer */
