@@ -229,6 +229,13 @@ static inline void stm32_rtc_beginwr(void)
 static inline void stm32_rtc_endwr(void)
 {
   modifyreg16(STM32_RTC_CRL, RTC_CRL_CNF, 0);
+
+  /* Wait for the write to actually reach RTC registers */
+
+  while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
+    {
+      up_waste();
+    }
 }
 
 /************************************************************************************
