@@ -73,15 +73,15 @@
 void tiva_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
-   * tm4c_ssiinitialize() has been brought into the link.
+   * tm4c_spidev_initialize() has been brought into the link.
    */
 
   /* The DK-TM4C129X microSD CS and OLED are on SSI0 */
 
 #if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
-  if (tm4c_ssiinitialize)
+  if (tm4c_spidev_initialize)
     {
-      tm4c_ssiinitialize();
+      tm4c_spidev_initialize();
     }
 #endif
 

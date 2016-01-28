@@ -127,14 +127,14 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: tm4c_ssiinitialize
+ * Name: tm4c_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the EK-TM4C1294XL.
  *
  ************************************************************************************/
 
-void weak_function tm4c_ssiinitialize(void);
+void weak_function tm4c_spidev_initialize(void);
 
 /****************************************************************************
  * Name: tm4c_led_initialize

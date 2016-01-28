@@ -49,6 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "lpc214x_pinsel.h"
+#include "lpc214x_spi.h"
 
 #ifdef CONFIG_LCD_UG2864AMBAG01
 

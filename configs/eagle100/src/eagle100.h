@@ -77,14 +77,14 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: lm_ssiinitialize
+ * Name: lm_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Eagle100 board.
  *
  ************************************************************************************/
 
-void weak_function lm_ssiinitialize(void);
+void weak_function lm_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_EAGLE100_SRC_EAGLE100_H */
