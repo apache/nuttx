@@ -24,7 +24,7 @@ config ARCH_BOARD_ARDUINO_MEGA2560
 	bool "Arduino Mega 2560"
 	depends on ARCH_CHIP_ATMEGA2560
 	---help---
-                This option selects the Arduino Mega 2560 board featuring the Atmel
+		This option selects the Arduino Mega 2560 board featuring the Atmel
 		Atmega2560 MCU running at 16 MHz.        
 
 config ARCH_BOARD_ARDUINO_DUE
