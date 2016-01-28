@@ -47,6 +47,9 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "tiva_ssi.h"
+#include "lm3s8962-ek.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
