@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_i2c.c
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Ported from from the LPC17 version:
@@ -82,7 +82,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define I2C_TIMEOUT     (20*1000/CONFIG_USEC_PER_TICK) /* 20 mS */
+#define I2C_TIMEOUT  (20*1000/CONFIG_USEC_PER_TICK) /* 20 mS */
 
 #ifdef CONFIG_LPC43_I2C0_SUPERFAST
 #  define I2C0_DEFAULT_FREQUENCY 1000000
@@ -127,36 +127,36 @@ static struct lpc43_i2cdev_s g_i2c1dev;
  * Private Functions
  ****************************************************************************/
 
-static int i2c_start(struct lpc43_i2cdev_s *priv);
-static void i2c_stop(struct lpc43_i2cdev_s *priv);
-static int  i2c_interrupt(int irq, FAR void *context);
-static void i2c_timeout(int argc, uint32_t arg, ...);
+static int      lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
+static void     lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
+static int      lpc43_i2c_interrupt(int irq, FAR void *context);
+static void     lpc43_i2c_timeout(int argc, uint32_t arg, ...);
 
 /****************************************************************************
  * I2C device operations
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev,
-                                 uint32_t frequency);
-static int      i2c_setaddress(FAR struct i2c_dev_s *dev, int addr,
-                               int nbits);
-static int      i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
-                          int buflen);
-static int      i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer,
-                         int buflen);
+static uint32_t lpc43_i2c_setfrequency(FAR struct i2c_dev_s *dev,
+                  uint32_t frequency);
+static int      lpc43_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr,
+                  int nbits);
+static int      lpc43_i2c_write(FAR struct i2c_dev_s *dev,
+                  const uint8_t *buffer, int buflen);
+static int      lpc43_i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer,
+                  int buflen);
 #ifdef CONFIG_I2C_TRANSFER
-static int      i2c_transfer(FAR struct i2c_dev_s *dev,
-                             FAR struct i2c_msg_s *msgs, int count);
+static int      lpc43_i2c_transfer(FAR struct i2c_dev_s *dev,
+                  FAR struct i2c_msg_s *msgs, int count);
 #endif
 
 struct i2c_ops_s lpc43_i2c_ops =
 {
-  .setfrequency = i2c_setfrequency,
-  .setaddress   = i2c_setaddress,
-  .write        = i2c_write,
-  .read         = i2c_read,
+  .setfrequency = lpc43_i2c_setfrequency,
+  .setaddress   = lpc43_i2c_setaddress,
+  .write        = lpc43_i2c_write,
+  .read         = lpc43_i2c_read,
 #ifdef CONFIG_I2C_TRANSFER
-  .transfer     = i2c_transfer
+  .transfer     = lpc43_i2c_transfer
 #endif
 };
 
@@ -167,7 +167,9 @@ struct i2c_ops_s lpc43_i2c_ops =
  *   Set the frequence for the next transfer
  *
  ****************************************************************************/
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
+
+static uint32_t lpc43_i2c_setfrequency(FAR struct i2c_dev_s *dev,
+                                       uint32_t frequency)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *) dev;
 
@@ -175,15 +177,19 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
     {
       /* asymetric per 400Khz I2C spec */
 
-      putreg32(priv->baseFreq / (83 + 47) * 47 / frequency, priv->base + LPC43_I2C_SCLH_OFFSET);
-      putreg32(priv->baseFreq / (83 + 47) * 83 / frequency, priv->base + LPC43_I2C_SCLL_OFFSET);
+      putreg32(priv->baseFreq / (83 + 47) * 47 / frequency, priv->base +
+               LPC43_I2C_SCLH_OFFSET);
+      putreg32(priv->baseFreq / (83 + 47) * 83 / frequency, priv->base +
+               LPC43_I2C_SCLL_OFFSET);
     }
   else
     {
       /* 50/50 mark space ratio */
 
-      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base + LPC43_I2C_SCLH_OFFSET);
-      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base + LPC43_I2C_SCLL_OFFSET);
+      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base +
+               LPC43_I2C_SCLH_OFFSET);
+      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base +
+               LPC43_I2C_SCLL_OFFSET);
     }
 
   /* FIXME: This function should return the actual selected frequency */
@@ -199,7 +205,8 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
+static int lpc43_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr,
+                                int nbits)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
 
@@ -220,8 +227,8 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
-                     int buflen)
+static int lpc43_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
+                           int buflen)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
   int ret = 0;
@@ -239,7 +246,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
 
   if (buflen > 0)
     {
-      ret = i2c_start(priv);
+      ret = lpc43_i2c_start(priv);
     }
 
   return (ret == 0 ? 0 : -ETIMEDOUT);
@@ -254,7 +261,8 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
+static int lpc43_i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer,
+                          int buflen)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
   int ret = 0;
@@ -272,30 +280,31 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   if (buflen > 0)
     {
-      ret = i2c_start(priv);
+      ret = lpc43_i2c_start(priv);
     }
 
   return (ret == 0 ? 0 : -ETIMEDOUT);
 }
 
 /****************************************************************************
- * Name: i2c_start
+ * Name: lpc43_i2c_start
  *
  * Description:
  *   Perform a I2C transfer start
  *
  ****************************************************************************/
 
-static int i2c_start(struct lpc43_i2cdev_s *priv)
+static int lpc43_i2c_start(struct lpc43_i2cdev_s *priv)
 {
   int ret = -1;
 
   sem_wait(&priv->mutex);
 
-  putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC, priv->base + LPC43_I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
+           priv->base + LPC43_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT, lpc43_i2c_timeout, 1, (uint32_t)priv);
   sem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);
@@ -308,32 +317,33 @@ static int i2c_start(struct lpc43_i2cdev_s *priv)
 }
 
 /****************************************************************************
- * Name: i2c_stop
+ * Name: lpc43_i2c_stop
  *
  * Description:
  *   Perform a I2C transfer stop
  *
  ****************************************************************************/
 
-static void i2c_stop(struct lpc43_i2cdev_s *priv)
+static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv)
 {
   if (priv->state != 0x38)
     {
-      putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + LPC43_I2C_CONSET_OFFSET);
+      putreg32(I2C_CONSET_STO | I2C_CONSET_AA,
+               priv->base + LPC43_I2C_CONSET_OFFSET);
     }
 
   sem_post(&priv->wait);
 }
 
 /****************************************************************************
- * Name: i2c_timeout
+ * Name: lpc43_i2c_timeout
  *
  * Description:
  *   Watchdog timer for timeout of I2C operation
  *
  ****************************************************************************/
 
-static void i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc43_i2c_timeout(int argc, uint32_t arg, ...)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)arg;
 
@@ -344,14 +354,15 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Name: i2c_transfer
+ * Name: lpc43_i2c_transfer
  *
  * Description:
  *   Perform a sequence of I2C transfers
  *
  ****************************************************************************/
 
-static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count)
+static int lpc43_i2c_transfer(FAR struct i2c_dev_s *dev,
+                              FAR struct i2c_msg_s *msgs, int count)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
   int ret;
@@ -363,7 +374,7 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, i
   priv->msgs  = msgs;
   priv->nmsg  = count;
 
-  ret = i2c_start(priv);
+  ret = lpc43_i2c_start(priv);
 
   return ret;
 }
@@ -379,19 +390,19 @@ void startStopNextMessage(struct lpc43_i2cdev_s *priv)
     }
   else
     {
-      i2c_stop(priv);
+      lpc43_i2c_stop(priv);
     }
 }
 
 /****************************************************************************
- * Name: i2c_interrupt
+ * Name: lpc43_i2c_interrupt
  *
  * Description:
  *   The I2C Interrupt Handler
  *
  ****************************************************************************/
 
-static int i2c_interrupt(int irq, FAR void *context)
+static int lpc43_i2c_interrupt(int irq, FAR void *context)
 {
   struct lpc43_i2cdev_s *priv;
   struct i2c_msg_s *msg;
@@ -488,7 +499,7 @@ static int i2c_interrupt(int irq, FAR void *context)
       break;
 
     default:
-      i2c_stop(priv);
+      lpc43_i2c_stop(priv);
       break;
     }
 
@@ -551,7 +562,8 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       regval |= CCU_CLK_CFG_RUN;
       putreg32(regval, LPC43_CCU1_APB1_I2C0_CFG);
 
-      i2c_setfrequency((struct i2c_dev_s *)priv, I2C0_DEFAULT_FREQUENCY);
+      lpc43_i2c_setfrequency((struct i2c_dev_s *)priv,
+                             I2C0_DEFAULT_FREQUENCY);
 
       /* No pin configuration needed */
     }
@@ -578,7 +590,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       lpc43_pin_config(PINCONF_I2C1_SCL);
       lpc43_pin_config(PINCONF_I2C1_SDA);
 
-      i2c_setfrequency(priv, I2C1_DEFAULT_FREQUENCY);
+      lpc43_i2c_setfrequency(priv, I2C1_DEFAULT_FREQUENCY);
     }
   else
 #endif
@@ -600,7 +612,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, i2c_interrupt);
+  irq_attach(priv->irqid, lpc43_i2c_interrupt);
 
   /* Enable Interrupt Handler */
 
@@ -630,13 +642,13 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_i2creset
  *
  * Description:
  *   Reset an I2C bus
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 int up_i2creset(FAR struct i2c_dev_s * dev)
