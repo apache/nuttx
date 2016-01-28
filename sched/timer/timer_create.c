@@ -218,13 +218,13 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
        *  timer ID."
        */
 
-      ret->pt_event.sigev_notify          = SIGEV_SIGNAL;
-      ret->pt_event.sigev_signo           = SIGALRM;
-      ret->pt_event.sigev_value.sival_ptr = ret;
+      ret->pt_event.sigev_notify            = SIGEV_SIGNAL;
+      ret->pt_event.sigev_signo             = SIGALRM;
+      ret->pt_event.sigev_value.sival_ptr   = ret;
 
 #ifdef CONFIG_SIG_EVTHREAD
-      ret->pt_event.sigev_value.sigev_notify_function   = NULL;
-      ret->pt_event.sigev_value.sigev_notify_attributes = NULL;
+      ret->pt_event.sigev_notify_function   = NULL;
+      ret->pt_event.sigev_notify_attributes = NULL;
 #endif
     }
 
