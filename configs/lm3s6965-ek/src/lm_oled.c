@@ -49,6 +49,8 @@
 #include <nuttx/lcd/p14201.h>
 
 #include "tiva_gpio.h"
+#include "tiva_ssi.h"
+
 #include "lm3s6965-ek.h"
 
 /****************************************************************************
