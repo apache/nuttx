@@ -379,7 +379,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
        */
 
       err = poll_teardown(fds, nfds, &count, ret);
-      if (err < 0 && ret == OK)
+      if (err < 0 && ret >= 0)
         {
           ret = err;
         }

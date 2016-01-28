@@ -44,9 +44,9 @@ unset testfile
 function showusage {
     echo ""
     echo "USAGE: $progname [-w|l] [-c|n] [-s] <testlist-file>"
-    echo "USAGE: $progname -h"
+    echo "       $progname -h"
     echo ""
-    echo "where"
+    echo "Where:"
     echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
     echo "  -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin"
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
