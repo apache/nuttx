@@ -11413,4 +11413,7 @@
 	  SPI with a MCU. Reading the ADC conversion result as well as configuring
 	  the ADC, setting the input channel, etc. is implemented via ioctl calls.
 	  However, it does not yet implement the standard ADC interface.  From
-	  Alexander Entinger (2014-01-29).
+	* configs/board/src/xyz_cxxinitialize.c:  Move CXX initialization logic
+	  out of the RTOS and into the application space, specifically to
+	  apps/platform/board, where it belongs (2016-01-29).
+
