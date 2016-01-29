@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mikroe-stm32f4/src/Makefile
 #
-#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 #   Updates: 04/15/2013 - Ken Pettit
@@ -41,10 +41,6 @@
 
 ASRCS =
 CSRCS = stm32_boot.c stm32_spi.c
-
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += stm32_cxxinitialize.c
-endif
 
 ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
