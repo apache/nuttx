@@ -43,6 +43,13 @@ config ADS1255_FREQUENCY
 
 endif # ADC_ADS125X
 
+config ADC_ADS1242
+	bool "ADS1242"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the ADS1242 24-Bit SPI powered ADC.
+
 config ADC_PGA11X
 	bool "TI PGA112/3/6/7 support"
 	default n
