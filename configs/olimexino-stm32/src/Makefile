@@ -46,10 +46,6 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
-CSRCS += stm32_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += stm32_usbmsc.c
 endif

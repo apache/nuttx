@@ -42,10 +42,6 @@ ifeq ($(CONFIG_SAM34_EXTSRAM0),y)
 CSRCS += sam_sram.c
 endif
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else

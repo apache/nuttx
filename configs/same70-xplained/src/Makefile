@@ -42,18 +42,10 @@ ifeq ($(CONFIG_SAMV7_SDRAMC),y)
 CSRCS += sam_sdram.c
 endif
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c sam_bringup.c
 else ifeq ($(CONFIG_BOARD_INITIALIZE),y)
 CSRCS += sam_bringup.c
-endif
-
-ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
-CSRCS += sam_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

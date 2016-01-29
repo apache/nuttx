@@ -38,10 +38,6 @@
 ASRCS =
 CSRCS = sam_boot.c sam_leds.c sam_buttons.c sam_udp.c
 
-ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif

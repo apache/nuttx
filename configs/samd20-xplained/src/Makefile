@@ -38,10 +38,6 @@
 ASRCS =
 CSRCS = sam_boot.c
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_SAMDL_SERCOM0),y)
 CSRCS += sam_spi.c
 endif

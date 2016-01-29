@@ -42,10 +42,6 @@ ifeq ($(CONFIG_STM32_FSMC),y)
 CSRCS += stm32_lcd.c stm32_selectlcd.c
 endif
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += stm32_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else

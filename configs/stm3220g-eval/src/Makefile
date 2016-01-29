@@ -38,10 +38,6 @@
 ASRCS =
 CSRCS = stm32_boot.c stm32_spi.c
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += stm32_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
