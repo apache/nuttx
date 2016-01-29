@@ -66,6 +66,10 @@ endif
 
 # Include ADC device drivers
 
+ifeq ($(CONFIG_ADC_ADS1242),y)
+  CSRCS += ads1242.c
+endif
+
 ifeq ($(CONFIG_ADC_ADS125X),y)
   CSRCS += ads1255.c
 endif

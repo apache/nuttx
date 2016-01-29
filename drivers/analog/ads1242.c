@@ -95,7 +95,7 @@ static bool    ads1242_is_data_ready(FAR struct ads1242_dev_s *dev);
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE)
 static void    ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg);
-#endif / defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) */
+#endif /* CONFIG_DEBUG && CONFIG_DEBUG_VERBOSE */
 
 /* Character driver methods */
 
@@ -335,11 +335,9 @@ static void ads1242_set_negative_input(FAR struct ads1242_dev_s *dev,
 static bool ads1242_is_data_ready(FAR struct ads1242_dev_s *dev)
 {
   uint8_t acr_reg_value = 0xFF;
-  bool const is_data_ready;
 
   ads1242_read_reg(dev, ADS1242_REG_ACR, &acr_reg_value);
-  is_data_ready = (acr_reg_value & ADS1242_REG_ACR_BIT_nDRDY) == 0;
-  return is_data_ready;
+  return (acr_reg_value & ADS1242_REG_ACR_BIT_nDRDY) == 0;
 }
 
 /****************************************************************************
@@ -363,7 +361,7 @@ static void ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg)
  dbg("MUX    %02X\n", mux_reg_value);
  dbg("ACR    %02X\n", acr_reg_value);
 }
-#endif /* defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) */
+#endif /* CONFIG_DEBUG && CONFIG_DEBUG_VERBOSE */
 
 /****************************************************************************
  * Name: ads1242_open
@@ -419,9 +417,6 @@ static int ads1242_close(FAR struct file *filep)
 static ssize_t ads1242_read(FAR struct file *filep,
                             FAR char *buffer, size_t buflen)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ads1242_dev_s *priv = inode->i_private;
-
   return -ENOSYS;
 }
 
@@ -432,9 +427,6 @@ static ssize_t ads1242_read(FAR struct file *filep,
 static ssize_t ads1242_write(FAR struct file *filep,
                              FAR const char *buffer, size_t buflen)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ads1242_dev_s *priv = inode->i_private;
-
   return -ENOSYS;
 }
 

@@ -11407,3 +11407,10 @@
 	  errno value.  Noted by Freddie Chopin.
 
 7.15 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* drivers/analog/adc1242.c and include/nuttx/analog/adc1242.h:  Driver
+	  for the  24-Bit Differential Input ADC ADS1242 that communicates via
+	  SPI with a MCU. Reading the ADC conversion result as well as configuring
+	  the ADC, setting the input channel, etc. is implemented via ioctl calls.
+	  However, it does not yet implement the standard ADC interface.  From
+	  Alexander Entinger (2014-01-29).
