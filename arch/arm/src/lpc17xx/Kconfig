@@ -612,17 +612,17 @@ config GPIO_IRQ
 menu "I2C driver options"
 	depends on LPC17_I2C0 || LPC17_I2C1 || LPC17_I2C2
 
-config I2C0_DEFAULT_FREQUENCY
+config LPC17_I2C0_FREQUENCY
 	int "I2C0 frequency"
 	depends on LPC17_I2C0
 	default 100000
 
-config I2C1_DEFAULT_FREQUENCY
+config LPC17_I2C1_FREQUENCY
 	int "I2C1 frequency"
 	depends on LPC17_I2C1
 	default 100000
 
-config I2C2_DEFAULT_FREQUENCY
+config LPC17_I2C2_FREQUENCY
 	int "I2C2 frequency"
 	depends on LPC17_I2C2
 	default 100000

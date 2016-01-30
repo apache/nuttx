@@ -104,7 +104,7 @@ void up_idle(void)
  * disabled in order to save power."
  */
 
-#ifdef CONFIG_LPC17_GPDMA
+#ifdef CONFIG_LPC11_GPDMA
   if (g_dma_inprogress == 0)
 #endif
     {

@@ -151,7 +151,7 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
   pinsel  = lpc11_pinsel(port, pin);
   pinmode = lpc11_pinmode(port, pin);
 #elif defined(LPC178x)
-  iocon   = LPC17_IOCON_P(port, pin);
+  iocon   = LPC11_IOCON_P(port, pin);
 #endif /* LPC176x */
 
   /* The following requires exclusive access to the GPIO registers */
@@ -171,18 +171,18 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
 
   base = g_fiobase[port];
   lldbg("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
-        base+LPC17_FIO_DIR_OFFSET,  getreg32(base+LPC17_FIO_DIR_OFFSET),
-        base+LPC17_FIO_MASK_OFFSET, getreg32(base+LPC17_FIO_MASK_OFFSET),
-        base+LPC17_FIO_PIN_OFFSET,  getreg32(base+LPC17_FIO_PIN_OFFSET));
+        base+LPC11_FIO_DIR_OFFSET,  getreg32(base+LPC11_FIO_DIR_OFFSET),
+        base+LPC11_FIO_MASK_OFFSET, getreg32(base+LPC11_FIO_MASK_OFFSET),
+        base+LPC11_FIO_PIN_OFFSET,  getreg32(base+LPC11_FIO_PIN_OFFSET));
 
   base = g_intbase[port];
   lldbg("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
-        LPC17_GPIOINT_IOINTSTATUS,          getreg32(LPC17_GPIOINT_IOINTSTATUS),
-        base+LPC17_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATR_OFFSET),
-        base+LPC17_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATF_OFFSET));
+        LPC11_GPIOINT_IOINTSTATUS,          getreg32(LPC11_GPIOINT_IOINTSTATUS),
+        base+LPC11_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC11_GPIOINT_INTSTATR_OFFSET),
+        base+LPC11_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC11_GPIOINT_INTSTATF_OFFSET));
   lldbg("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
-        base+LPC17_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENR_OFFSET),
-        base+LPC17_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENF_OFFSET));
+        base+LPC11_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENR_OFFSET),
+        base+LPC11_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENF_OFFSET));
   irqrestore(flags);
   return OK;
 }

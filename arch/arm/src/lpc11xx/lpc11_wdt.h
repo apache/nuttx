@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_WDT_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_WDT_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_WDT_H
+#define __ARCH_ARM_SRC_LPC11XX_LPC11_WDT_H
 
 /************************************************************************************
  * Included Files
@@ -59,4 +59,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_WDT_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_WDT_H */

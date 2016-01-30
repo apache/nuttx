@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/lpc17_userspace.h
+ * arch/arm/src/lpc17xx/lpc11_userspace.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_USERSPACE_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_USERSPACE_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_USERSPACE_H
+#define __ARCH_ARM_SRC_LPC11XX_LPC11_USERSPACE_H
 
 /************************************************************************************
  * Included Files
@@ -59,7 +59,7 @@
  ************************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_userspace
+ * Name: lpc11_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-void lpc17_userspace(void);
+void lpc11_userspace(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_USERSPACE_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_USERSPACE_H */

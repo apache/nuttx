@@ -90,7 +90,7 @@
 #define LPC11_IRQ_PIO1_0        (28) /* Vector 28: PIO1_0 */
 #define LPC11_IRQ_CCAN          (29) /* Vector 29: C_CAN controller for LPC11Cxx */
 #define LPC11_IRQ_SSP1          (30) /* Vector 30: SPI1/SSP1 */
-#define LPC11_IRQ_I2C           (31) /* Vector 31: I2C */
+#define LPC11_IRQ_I2C0          (31) /* Vector 31: I2C0 */
 #define LPC11_IRQ_CT16B0        (32) /* Vector 32: Clock/Timer0 16 bits */
 #define LPC11_IRQ_CT16B1        (33) /* Vector 33: Clock/Timer1 16 bits */
 #define LPC11_IRQ_CT32B0        (34) /* Vector 34: Clock/Timer0 32 bits */

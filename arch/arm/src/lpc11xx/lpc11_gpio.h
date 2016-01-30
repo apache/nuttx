@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_GPIO_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_GPIO_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_GPIO_H
+#define __ARCH_ARM_SRC_LPC11XX_LPC11_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -191,4 +191,4 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_GPIO_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_GPIO_H */

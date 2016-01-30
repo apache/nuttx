@@ -182,7 +182,7 @@
                                                                                   /* Bits 2-31:  Reserved */
 
 #define SYSCON_PRESETCTRL_SSP0_RST_N          (1 << 0)  /* SPI0 reset control */
-#define SYSCON_PRESETCTRL_I2C_RST_N           (1 << 1)  /* I2C reset control */
+#define SYSCON_PRESETCTRL_I2C0_RST_N          (1 << 1)  /* I2C0 reset control */
 #define SYSCON_PRESETCTRL_SSP1_RST_N          (1 << 2)  /* SPI1 reset control */
 #define SYSCON_PRESETCTRL_CAN_RST_N           (1 << 3)  /* C_CAN reset control */
                                                         /* Bits 4-31:  Reserved */
@@ -266,7 +266,7 @@
 #define SYSCON_SYSAHBCLKCTRL_RAM              (1 << 2)  /* Bit 2:  Enables clock for RAM */
 #define SYSCON_SYSAHBCLKCTRL_FLASHREG         (1 << 3)  /* Bit 3:  Enables clock for flash register interface */
 #define SYSCON_SYSAHBCLKCTRL_FLASHARRAY       (1 << 4)  /* Bit 4:  Enables clock for flash array access */
-#define SYSCON_SYSAHBCLKCTRL_I2C              (1 << 5)  /* Bit 5:  Enables clock for I2C */
+#define SYSCON_SYSAHBCLKCTRL_I2C0             (1 << 5)  /* Bit 5:  Enables clock for I2C0 */
 #define SYSCON_SYSAHBCLKCTRL_GPIO             (1 << 6)  /* Bit 6:  Enables clock for GPIO */
 #define SYSCON_SYSAHBCLKCTRL_CT16B0           (1 << 7)  /* Bit 7:  Enables clock for 16-bit counter/timer 0 */
 #define SYSCON_SYSAHBCLKCTRL_CT16B1           (1 << 8)  /* Bit 8:  Enables clock for 16-bit counter/timer 1 */

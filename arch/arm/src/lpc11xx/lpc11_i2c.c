@@ -1,15 +1,16 @@
 /****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_i2c.c
  *
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-20 initial version
+ *   Author: Li Zhuoyi <lzyy.cn@gmail.com> (Original author)
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from arch/arm/src/lpc31xx/lpc31_i2c.c
  *
  *   Author: David Hewson
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +63,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -81,19 +83,20 @@
 #  define GPIO_I2C1_SDA GPIO_I2C1_SDA_1
 #endif
 
-#ifndef CONFIG_I2C0_FREQ
-#  define CONFIG_I2C0_FREQ 100000
+#ifndef CONFIG_LPC11_I2C0_FREQUENCY
+#  define CONFIG_LPC11_I2C0_FREQUENCY 100000
 #endif
 
-#ifndef CONFIG_I2C1_FREQ
-#  define CONFIG_I2C1_FREQ 100000
+#ifndef CONFIG_LPC11_I2C1_FREQUENCY
+#  define CONFIG_LPC11_I2C1_FREQUENCY 100000
 #endif
 
-#ifndef CONFIG_I2C2_FREQ
-#  define CONFIG_I2C2_FREQ 100000
+#ifndef CONFIG_LPC11_I2C2_FREQUENCY
+#  define CONFIG_LPC11_I2C2_FREQUENCY 100000
 #endif
 
-#define I2C_TIMEOUT     ((20 * CLK_TCK) / 1000) /* 20 mS */
+#define I2C_TIMEOUT  (20 * 1000/CONFIG_USEC_PER_TICK) /* 20 mS */
+#define LPC11_I2C1_FREQUENCY 400000
 
 /****************************************************************************
  * Private Types
@@ -101,51 +104,70 @@
 
 struct lpc11_i2cdev_s
 {
-  struct i2c_master_s dev;        /* Generic I2C device */
-  struct i2c_msg_s    msg;        /* a single message for legacy read/write */
-  unsigned int        base;       /* Base address of registers */
-  uint16_t            irqid;      /* IRQ for this device */
+  struct i2c_master_s dev;     /* Generic I2C device */
+  struct i2c_msg_s    msg;     /* a single message for legacy read/write */
+  unsigned int        base;    /* Base address of registers */
+  uint16_t            irqid;   /* IRQ for this device */
 
-  sem_t               mutex;      /* Only one thread can access at a time */
-  sem_t               wait;       /* Place to wait for state machine completion */
-  volatile uint8_t    state;      /* State of state machine */
-  WDOG_ID             timeout;    /* watchdog to timeout when bus hung */
+  sem_t               mutex;   /* Only one thread can access at a time */
+  sem_t               wait;    /* Place to wait for state machine completion */
+  volatile uint8_t    state;   /* State of state machine */
+  WDOG_ID             timeout; /* watchdog to timeout when bus hung */
 
-  uint16_t            wrcnt;      /* number of bytes sent to tx fifo */
-  uint16_t            rdcnt;      /* number of bytes read from rx fifo */
+  struct i2c_msg_s   *msgs;    /* remaining transfers - first one is in progress */
+  unsigned int        nmsg;    /* number of transfer remaining */
+
+  uint16_t            wrcnt;   /* number of bytes sent to tx fifo */
+  uint16_t            rdcnt;   /* number of bytes read from rx fifo */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int i2c_start(struct lpc11_i2cdev_s *priv);
-static void i2c_stop(struct lpc11_i2cdev_s *priv);
-static int  i2c_interrupt(int irq, FAR void *context);
-static void i2c_timeout(int argc, uint32_t arg, ...);
+static int      lpc11_i2c_start(struct lpc11_i2cdev_s *priv);
+static void     lpc11_i2c_stop(struct lpc11_i2cdev_s *priv);
+static int      lpc11_i2c_interrupt(int irq, FAR void *context);
+static void     lpc11_i2c_timeout(int argc, uint32_t arg, ...);
 
 /* I2C device operations */
 
-static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);
-static int      i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
-static int      i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);
-static int      i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
-static int      i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count);
+static uint32_t lpc11_i2c_setfrequency(FAR struct i2c_master_s *dev,
+                  uint32_t frequency);
+static int      lpc11_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
+                  int nbits);
+static int      lpc11_i2c_write(FAR struct i2c_master_s *dev,
+                  const uint8_t *buffer, int buflen);
+static int      lpc11_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer,
+                  int buflen);
+#ifdef CONFIG_I2C_TRANSFER
+static int      lpc11_i2c_transfer(FAR struct i2c_master_s *dev,
+                  FAR struct i2c_msg_s *msgs, int count);
+#endif
+static void     lpc11_stopnext(struct lpc11_i2cdev_s *priv);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct lpc11_i2cdev_s i2cdevices[3];
+#ifdef CONFIG_LPC11_I2C0
+static struct lpc11_i2cdev_s g_i2c0dev;
+#endif
+#ifdef CONFIG_LPC11_I2C1
+static struct lpc11_i2cdev_s g_i2c1dev;
+#endif
+#ifdef CONFIG_LPC11_I2C2
+static struct lpc11_i2cdev_s g_i2c2dev;
+#endif
 
 struct i2c_ops_s lpc11_i2c_ops =
 {
-  .setfrequency = i2c_setfrequency,
-  .setaddress   = i2c_setaddress,
-  .write        = i2c_write,
-  .read         = i2c_read,
+  .setfrequency = lpc11_i2c_setfrequency,
+  .setaddress   = lpc11_i2c_setaddress,
+  .write        = lpc11_i2c_write,
+  .read         = lpc11_i2c_read,
 #ifdef CONFIG_I2C_TRANSFER
-  .transfer     = i2c_transfer
+  .transfer     = lpc11_i2c_transfer
 #endif
 };
 
@@ -153,11 +175,12 @@ struct i2c_ops_s lpc11_i2c_ops =
  * Name: lpc11_i2c_setfrequency
  *
  * Description:
- *   Set the frequency for the next transfer
+ *   Set the frequence for the next transfer
  *
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
+static uint32_t lpc11_i2c_setfrequency(FAR struct i2c_master_s *dev,
+                                       uint32_t frequency)
 {
   struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *) dev;
 
@@ -165,18 +188,18 @@ static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequenc
     {
       /* Asymetric per 400Khz I2C spec */
 
-      putreg32(LPC11_CCLK / (83 + 47) * 47 / frequency,
+      putreg32(LPC11_MCLK / (83 + 47) * 47 / frequency,
                priv->base + LPC11_I2C_SCLH_OFFSET);
-      putreg32(LPC11_CCLK / (83 + 47) * 83 / frequency,
+      putreg32(LPC11_MCLK / (83 + 47) * 83 / frequency,
                priv->base + LPC11_I2C_SCLL_OFFSET);
     }
   else
     {
       /* 50/50 mark space ratio */
 
-      putreg32(LPC11_CCLK / 100 * 50 / frequency,
+      putreg32(LPC11_MCLK / 100 * 50 / frequency,
                priv->base + LPC11_I2C_SCLH_OFFSET);
-      putreg32(LPC11_CCLK / 100 * 50 / frequency,
+      putreg32(LPC11_MCLK / 100 * 50 / frequency,
                priv->base + LPC11_I2C_SCLL_OFFSET);
     }
 
@@ -193,15 +216,15 @@ static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequenc
  *
  ****************************************************************************/
 
-static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
+static int lpc11_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
+                                int nbits)
 {
-  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *) dev;
+  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *)dev;
 
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(nbits == 7);
 
-  priv->msg.addr  = addr << 1;
-  priv->msg.flags = 0 ;
+  priv->msg.addr  = addr;
 
   return OK;
 }
@@ -215,23 +238,29 @@ static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
-                     int buflen)
+static int lpc11_i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
+                           int buflen)
 {
-  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *) dev;
-  int ret;
+  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *)dev;
+  int ret = 0;
 
   DEBUGASSERT(dev != NULL);
 
   priv->wrcnt      = 0;
   priv->rdcnt      = 0;
-  priv->msg.addr  &= ~0x01;
+  priv->msg.flags  = 0;
   priv->msg.buffer = (uint8_t *)buffer;
   priv->msg.length = buflen;
 
-  ret = i2c_start(priv);
+  priv->nmsg       = 1;
+  priv->msgs       = &(priv->msg);
 
-  return ret > 0 ? OK : -ETIMEDOUT;
+  if (buflen > 0)
+    {
+      ret = lpc11_i2c_start(priv);
+    }
+
+  return (ret == 0 ? 0 : -ETIMEDOUT);
 }
 
 /****************************************************************************
@@ -243,87 +272,91 @@ static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
+static int lpc11_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer,
+                          int buflen)
 {
-  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *) dev;
-  int ret;
+  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *)dev;
+  int ret = 0;
 
   DEBUGASSERT(dev != NULL);
 
   priv->wrcnt      = 0;
   priv->rdcnt      = 0;
-  priv->msg.addr  |= 0x01;
+  priv->msg.flags  = I2C_M_READ;
   priv->msg.buffer = buffer;
   priv->msg.length = buflen;
 
-  ret = i2c_start(priv);
+  priv->nmsg       = 1;
+  priv->msgs       = &(priv->msg);
 
-  return ret > 0 ? OK : -ETIMEDOUT;
+  if (buflen > 0)
+    {
+      ret = lpc11_i2c_start(priv);
+    }
+
+  return (ret == 0 ? 0 : -ETIMEDOUT);
 }
 
 /****************************************************************************
- * Name: i2c_start
+ * Name: lpc11_i2c_start
  *
  * Description:
  *   Perform a I2C transfer start
  *
  ****************************************************************************/
 
-static int i2c_start(struct lpc11_i2cdev_s *priv)
+static int lpc11_i2c_start(struct lpc11_i2cdev_s *priv)
 {
   int ret = -1;
 
   sem_wait(&priv->mutex);
 
-  putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC, priv->base + LPC11_I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
+           priv->base + LPC11_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC11_I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT, lpc11_i2c_timeout, 1, (uint32_t)priv);
   sem_wait(&priv->wait);
-  wd_cancel(priv->timeout);
-  sem_post(&priv->mutex);
 
-  if (priv-> state == 0x18 || priv->state == 0x28)
-    {
-      ret = priv->wrcnt;
-    }
-  else if (priv-> state == 0x50 || priv->state == 0x58)
-    {
-      ret = priv->rdcnt;
-    }
+  wd_cancel(priv->timeout);
+
+  ret = priv->nmsg;
+
+  sem_post(&priv->mutex);
 
   return ret;
 }
 
 /****************************************************************************
- * Name: i2c_stop
+ * Name: lpc11_i2c_stop
  *
  * Description:
  *   Perform a I2C transfer stop
  *
  ****************************************************************************/
 
-static void i2c_stop(struct lpc11_i2cdev_s *priv)
+static void lpc11_i2c_stop(struct lpc11_i2cdev_s *priv)
 {
   if (priv->state != 0x38)
     {
-      putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + LPC11_I2C_CONSET_OFFSET);
+      putreg32(I2C_CONSET_STO | I2C_CONSET_AA,
+               priv->base + LPC11_I2C_CONSET_OFFSET);
     }
 
   sem_post(&priv->wait);
 }
 
 /****************************************************************************
- * Name: i2c_timeout
+ * Name: lpc11_i2c_timeout
  *
  * Description:
  *   Watchdog timer for timeout of I2C operation
  *
  ****************************************************************************/
 
-static void i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc11_i2c_timeout(int argc, uint32_t arg, ...)
 {
-  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *) arg;
+  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *)arg;
 
   irqstate_t flags = irqsave();
   priv->state = 0xff;
@@ -332,36 +365,88 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Name: i2c_interrupt
+ * Name: lpc11_i2c_transfer
+ *
+ * Description:
+ *   Perform a sequence of I2C transfers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRANSFER
+static int lpc11_i2c_transfer(FAR struct i2c_master_s *dev,
+                              FAR struct i2c_msg_s *msgs, int count)
+{
+  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *)dev;
+  int ret;
+
+  DEBUGASSERT(dev != NULL);
+
+  priv->wrcnt = 0;
+  priv->rdcnt = 0;
+  priv->msgs  = msgs;
+  priv->nmsg  = count;
+
+  ret = lpc11_i2c_start(priv);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc11_i2c_interrupt
+ *
+ * Description:
+ *   Check if we need to issue STOP at the next message
+ *
+ ****************************************************************************/
+
+static void lpc11_stopnext(struct lpc11_i2cdev_s *priv)
+{
+  priv->nmsg--;
+
+  if (priv->nmsg > 0)
+    {
+      priv->msgs++;
+      putreg32(I2C_CONSET_STA, priv->base + LPC11_I2C_CONSET_OFFSET);
+    }
+  else
+    {
+      lpc11_i2c_stop(priv);
+    }
+}
+
+/****************************************************************************
+ * Name: lpc11_i2c_interrupt
  *
  * Description:
  *   The I2C Interrupt Handler
  *
  ****************************************************************************/
 
-static int i2c_interrupt(int irq, FAR void *context)
+static int lpc11_i2c_interrupt(int irq, FAR void *context)
 {
   struct lpc11_i2cdev_s *priv;
+  struct i2c_msg_s *msg;
   uint32_t state;
 
 #ifdef CONFIG_LPC11_I2C0
   if (irq == LPC11_IRQ_I2C0)
     {
-      priv = &i2cdevices[0];
+      priv = &g_i2c0dev;
     }
   else
 #endif
 #ifdef CONFIG_LPC11_I2C1
   if (irq == LPC11_IRQ_I2C1)
     {
-      priv = &i2cdevices[1];
+      priv = &g_i2c1dev;
     }
   else
 #endif
 #ifdef CONFIG_LPC11_I2C2
   if (irq == LPC11_IRQ_I2C2)
     {
-      priv = &i2cdevices[2];
+      priv = &g_i2c2dev;
     }
   else
 #endif
@@ -372,69 +457,81 @@ static int i2c_interrupt(int irq, FAR void *context)
   /* Reference UM10360 19.10.5 */
 
   state = getreg32(priv->base + LPC11_I2C_STAT_OFFSET);
-  putreg32(I2C_CONCLR_SIC, priv->base + LPC11_I2C_CONCLR_OFFSET);
-  priv->state = state;
-  state &= 0xf8;
+  msg  = priv->msgs;
 
+  priv->state = state;
+  state &= 0xf8;  /* state mask, only 0xX8 is possible */
   switch (state)
     {
-    case 0x00:      /* Bus Error */
-    case 0x20:
-    case 0x30:
-    case 0x38:
-    case 0x48:
-      i2c_stop(priv);
-      break;
 
-    case 0x08:     /* START */
-    case 0x10:     /* Repeat START */
-      putreg32(priv->msg.addr, priv->base + LPC11_I2C_DAT_OFFSET);
+    case 0x08:     /* A START condition has been transmitted. */
+    case 0x10:     /* A Repeated START condition has been transmitted. */
+      /* Set address */
+
+      putreg32(((I2C_M_READ & msg->flags) == I2C_M_READ) ?
+        I2C_READADDR8(msg->addr) :
+        I2C_WRITEADDR8(msg->addr), priv->base + LPC11_I2C_DAT_OFFSET);
+
+      /* Clear start bit */
+
       putreg32(I2C_CONCLR_STAC, priv->base + LPC11_I2C_CONCLR_OFFSET);
       break;
 
-    case 0x18:
+    /* Write cases */
+
+    case 0x18: /* SLA+W has been transmitted; ACK has been received  */
       priv->wrcnt = 0;
-      putreg32(priv->msg.buffer[0], priv->base + LPC11_I2C_DAT_OFFSET);
+      putreg32(msg->buffer[0], priv->base + LPC11_I2C_DAT_OFFSET); /* put first byte */
       break;
 
-    case 0x28:
+    case 0x28: /* Data byte in DAT has been transmitted; ACK has been received. */
       priv->wrcnt++;
-      if (priv->wrcnt < priv->msg.length)
+
+      if (priv->wrcnt < msg->length)
         {
-          putreg32(priv->msg.buffer[priv->wrcnt], priv->base + LPC11_I2C_DAT_OFFSET);
+          putreg32(msg->buffer[priv->wrcnt], priv->base + LPC11_I2C_DAT_OFFSET); /* Put next byte */
         }
       else
         {
-          i2c_stop(priv);
+          lpc11_stopnext(priv);
         }
       break;
 
-    case 0x40:
+    /* Read cases */
+
+    case 0x40:  /* SLA+R has been transmitted; ACK has been received */
       priv->rdcnt = 0;
-      putreg32(I2C_CONSET_AA, priv->base + LPC11_I2C_CONSET_OFFSET);
-      break;
-
-    case 0x50:
-      if (priv->rdcnt < priv->msg.length)
+      if (msg->length > 1)
         {
-          priv->msg.buffer[priv->rdcnt] = getreg32(priv->base + LPC11_I2C_BUFR_OFFSET);
-          priv->rdcnt++;
+          putreg32(I2C_CONSET_AA, priv->base + LPC11_I2C_CONSET_OFFSET); /* Set ACK next read */
         }
-
-      if (priv->rdcnt >= priv->msg.length)
+      else
         {
-          putreg32(I2C_CONCLR_AAC | I2C_CONCLR_SIC, priv->base + LPC11_I2C_CONCLR_OFFSET);
+          putreg32(I2C_CONCLR_AAC, priv->base + LPC11_I2C_CONCLR_OFFSET);  /* Do not ACK because only one byte */
         }
       break;
 
-    case 0x58:
-      i2c_stop(priv);
+    case 0x50:  /* Data byte has been received; ACK has been returned. */
+      priv->rdcnt++;
+      msg->buffer[priv->rdcnt - 1] = getreg32(priv->base + LPC11_I2C_BUFR_OFFSET);
+
+      if (priv->rdcnt >= (msg->length - 1))
+        {
+          putreg32(I2C_CONCLR_AAC, priv->base + LPC11_I2C_CONCLR_OFFSET);  /* Do not ACK any more */
+        }
+      break;
+
+    case 0x58:  /* Data byte has been received; NACK has been returned. */
+      msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC11_I2C_BUFR_OFFSET);
+      lpc11_stopnext(priv);
       break;
 
     default:
-      i2c_stop(priv);
+      lpc11_i2c_stop(priv);
       break;
     }
+
+  putreg32(I2C_CONCLR_SIC, priv->base + LPC11_I2C_CONCLR_OFFSET); /* clear interrupt */
 
   return OK;
 }
@@ -454,94 +551,108 @@ static int i2c_interrupt(int irq, FAR void *context)
 struct i2c_master_s *up_i2cinitialize(int port)
 {
   struct lpc11_i2cdev_s *priv;
-  irqstate_t flags;
-  uint32_t regval;
 
-  if (port > 2)
+  if (port > 1)
     {
-      dbg("lpc I2C Only support 0,1,2\n");
+      dbg("lpc I2C Only support 0,1\n");
       return NULL;
     }
 
+  irqstate_t flags;
+  uint32_t regval;
+
   flags = irqsave();
 
-  priv = &i2cdevices[port];
 #ifdef CONFIG_LPC11_I2C0
   if (port == 0)
     {
-      priv        = (FAR struct lpc11_i2cdev_s *)&i2cdevices[0];
+      priv        = &g_i2c0dev;
       priv->base  = LPC11_I2C0_BASE;
       priv->irqid = LPC11_IRQ_I2C0;
 
-      regval  = getreg32(LPC11_SYSCON_PCONP);
-      regval |= SYSCON_PCONP_PCI2C0;
-      putreg32(regval, LPC11_SYSCON_PCONP);
+      /* Enable clocking */
 
-      regval  = getreg32(LPC11_SYSCON_PCLKSEL0);
-      regval &= ~SYSCON_PCLKSEL0_I2C0_MASK;
-      regval |= (SYSCON_PCLKSEL_CCLK << SYSCON_PCLKSEL0_I2C0_SHIFT);
-      putreg32(regval, LPC11_SYSCON_PCLKSEL0);
+      regval  = getreg32(LPC11_SYSCON_SYSAHBCLKCTRL);
+      regval |= SYSCON_SYSAHBCLKCTRL_I2C0;
+      putreg32(regval, LPC11_SYSCON_SYSAHBCLKCTRL);
+
+      /* Pin configuration */
 
       lpc11_configgpio(GPIO_I2C0_SCL);
       lpc11_configgpio(GPIO_I2C0_SDA);
 
-      putreg32(LPC11_CCLK/CONFIG_I2C0_FREQ/2, priv->base + LPC11_I2C_SCLH_OFFSET);
-      putreg32(LPC11_CCLK/CONFIG_I2C0_FREQ/2, priv->base + LPC11_I2C_SCLL_OFFSET);
+      /* Set default frequency */
+
+      lpc11_i2c_setfrequency((struct i2c_master_s *)priv,
+                             CONFIG_LPC11_I2C0_FREQUENCY);
     }
   else
 #endif
 #ifdef CONFIG_LPC11_I2C1
   if (port == 1)
     {
-      priv        = (FAR struct lpc11_i2cdev_s *)&i2cdevices[1];
+      priv        = &g_i2c1dev;
       priv->base  = LPC11_I2C1_BASE;
       priv->irqid = LPC11_IRQ_I2C1;
 
-      regval  = getreg32(LPC11_SYSCON_PCONP);
-      regval |= SYSCON_PCONP_PCI2C1;
-      putreg32(regval, LPC11_SYSCON_PCONP);
+      /* Enable clocking */
+
+      regval  = getreg32(LPC11_SYSCON_SYSAHBCLKCTRL);
+      regval |= SYSCON_SYSAHBCLKCTRL_I2C1;
+      putreg32(regval, LPC11_SYSCON_SYSAHBCLKCTRL);
 
       regval  = getreg32(LPC11_SYSCON_PCLKSEL1);
       regval &= ~SYSCON_PCLKSEL1_I2C1_MASK;
       regval |= (SYSCON_PCLKSEL_CCLK << SYSCON_PCLKSEL1_I2C1_SHIFT);
       putreg32(regval, LPC11_SYSCON_PCLKSEL1);
 
+      /* Pin configuration */
+
       lpc11_configgpio(GPIO_I2C1_SCL);
       lpc11_configgpio(GPIO_I2C1_SDA);
 
-      putreg32(LPC11_CCLK/CONFIG_I2C1_FREQ/2, priv->base + LPC11_I2C_SCLH_OFFSET);
-      putreg32(LPC11_CCLK/CONFIG_I2C1_FREQ/2, priv->base + LPC11_I2C_SCLL_OFFSET);
+      /* Set default frequency */
+
+      lpc11_i2c_setfrequency((struct i2c_master_s *)priv,
+                             CONFIG_LPC11_I2C1_FREQUENCY);
     }
   else
 #endif
 #ifdef CONFIG_LPC11_I2C2
   if (port == 2)
     {
-      priv        = (FAR struct lpc11_i2cdev_s *)&i2cdevices[2];
+      priv        = &g_i2c2dev;
       priv->base  = LPC11_I2C2_BASE;
       priv->irqid = LPC11_IRQ_I2C2;
 
-      regval  = getreg32(LPC11_SYSCON_PCONP);
-      regval |= SYSCON_PCONP_PCI2C2;
-      putreg32(regval, LPC11_SYSCON_PCONP);
+      /* Enable clocking */
+
+      regval  = getreg32(LPC11_SYSCON_SYSAHBCLKCTRL);
+      regval |= SYSCON_SYSAHBCLKCTRL_I2C2;
+      putreg32(regval, LPC11_SYSCON_SYSAHBCLKCTRL);
 
       regval  = getreg32(LPC11_SYSCON_PCLKSEL1);
       regval &= ~SYSCON_PCLKSEL1_I2C2_MASK;
       regval |= (SYSCON_PCLKSEL_CCLK << SYSCON_PCLKSEL1_I2C2_SHIFT);
       putreg32(regval, LPC11_SYSCON_PCLKSEL1);
 
+      /* Pin configuration */
+
       lpc11_configgpio(GPIO_I2C2_SCL);
       lpc11_configgpio(GPIO_I2C2_SDA);
 
-      putreg32(LPC11_CCLK/CONFIG_I2C2_FREQ/2, priv->base + LPC11_I2C_SCLH_OFFSET);
-      putreg32(LPC11_CCLK/CONFIG_I2C2_FREQ/2, priv->base + LPC11_I2C_SCLL_OFFSET);
+      /* Set default frequency */
+
+      lpc11_i2c_setfrequency((struct i2c_master_s *)priv,
+                             CONFIG_LPC11_I2C2_FREQUENCY);
     }
   else
 #endif
     {
-      irqrestore(flags);
       return NULL;
     }
+
+  irqrestore(flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC11_I2C_CONSET_OFFSET);
 
@@ -555,7 +666,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, i2c_interrupt);
+  irq_attach(priv->irqid, lpc11_i2c_interrupt);
 
   /* Enable Interrupt Handler */
 
@@ -564,8 +675,6 @@ struct i2c_master_s *up_i2cinitialize(int port)
   /* Install our operations */
 
   priv->dev.ops = &lpc11_i2c_ops;
-
-  irqrestore(flags);
   return &priv->dev;
 }
 
@@ -605,4 +714,19 @@ int up_i2cuninitialize(FAR struct i2c_master_s * dev)
   return OK;
 }
 
-#endif
+/****************************************************************************
+ * Name: up_i2creset
+ *
+ * Description:
+ *   Reset an I2C bus
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+int up_i2creset(FAR struct i2c_master_s * dev)
+{
+  return OK;
+}
+#endif /* CONFIG_I2C_RESET */
+
+#endif /* CONFIG_LPC11_I2C0 || CONFIG_LPC11_I2C1 || CONFIG_LPC11_I2C2 */

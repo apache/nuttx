@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/lpc17_timer.h
+ * arch/arm/src/lpc17xx/lpc11_timer.h
  *
  *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_TIMER_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_TIMER_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_TIMER_H
+#define __ARCH_ARM_SRC_LPC11XX_LPC11_TIMER_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc17_timer.h"
+#include "chip/lpc11_timer.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -59,4 +59,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_TIMER_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_TIMER_H */

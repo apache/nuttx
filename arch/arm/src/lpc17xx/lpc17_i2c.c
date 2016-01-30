@@ -83,20 +83,20 @@
 #  define GPIO_I2C1_SDA GPIO_I2C1_SDA_1
 #endif
 
-#ifndef CONFIG_I2C0_DEFAULT_FREQUENCY
-#  define CONFIG_I2C0_DEFAULT_FREQUENCY 100000
+#ifndef CONFIG_LPC17_I2C0_FREQUENCY
+#  define CONFIG_LPC17_I2C0_FREQUENCY 100000
 #endif
 
-#ifndef CONFIG_I2C1_DEFAULT_FREQUENCY
-#  define CONFIG_I2C1_DEFAULT_FREQUENCY 100000
+#ifndef CONFIG_LPC17_I2C1_FREQUENCY
+#  define CONFIG_LPC17_I2C1_FREQUENCY 100000
 #endif
 
-#ifndef CONFIG_I2C2_DEFAULT_FREQUENCY
-#  define CONFIG_I2C2_DEFAULT_FREQUENCY 100000
+#ifndef CONFIG_LPC17_I2C2_FREQUENCY
+#  define CONFIG_LPC17_I2C2_FREQUENCY 100000
 #endif
 
 #define I2C_TIMEOUT  (20 * 1000/CONFIG_USEC_PER_TICK) /* 20 mS */
-#define I2C1_DEFAULT_FREQUENCY 400000
+#define LPC17_I2C1_FREQUENCY 400000
 
 /****************************************************************************
  * Private Types
@@ -589,7 +589,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
       /* Set default frequency */
 
       lpc17_i2c_setfrequency((struct i2c_master_s *)priv,
-                             CONFIG_I2C0_DEFAULT_FREQUENCY);
+                             CONFIG_LPC17_I2C0_FREQUENCY);
     }
   else
 #endif
@@ -619,7 +619,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
       /* Set default frequency */
 
       lpc17_i2c_setfrequency((struct i2c_master_s *)priv,
-                             CONFIG_I2C1_DEFAULT_FREQUENCY);
+                             CONFIG_LPC17_I2C1_FREQUENCY);
     }
   else
 #endif
@@ -649,7 +649,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
       /* Set default frequency */
 
       lpc17_i2c_setfrequency((struct i2c_master_s *)priv,
-                             CONFIG_I2C2_DEFAULT_FREQUENCY);
+                             CONFIG_LPC17_I2C2_FREQUENCY);
     }
   else
 #endif
