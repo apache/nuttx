@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config MODEM_U_BLOX
+	bool "Enable u-blox modem driver"
+	default n
+	---help---
+		Compile the u-blox serial modem driver. The driver consists of
+		the upper half in the OS and the lower half with implementation
+		in the chosen board.
+
+config MODEM_U_BLOX_DEBUG
+	bool "Debug u-blox modem driver"
+	default n
+	depends on MODEM_U_BLOX
+	---help---
+		Allow the u-blox modem driver print debug information.
+

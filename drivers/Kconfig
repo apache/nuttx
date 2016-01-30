@@ -403,6 +403,16 @@ if MMCSD
 source drivers/mmcsd/Kconfig
 endif # MMCSD
 
+menuconfig MODEM
+	bool "Modem Support"
+	default n
+	---help---
+		Enable modem support.
+
+if MODEM
+source drivers/modem/Kconfig
+endif # MODEM
+
 menuconfig MTD
 	bool "Memory Technology Device (MTD) Support"
 	default n

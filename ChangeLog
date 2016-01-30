@@ -11416,4 +11416,7 @@
 	* configs/board/src/xyz_cxxinitialize.c:  Move CXX initialization logic
 	  out of the RTOS and into the application space, specifically to
 	  apps/platform/board, where it belongs (2016-01-29).
+	* drivers/modem/u-blox.c and include/nuttx/drivers/u-blox.h:  Add an upper
+	  half driver for the U-Blox Modem.  From  Vladimir Komendantskiy
+	  (2018-01-30).
 

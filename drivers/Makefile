@@ -59,6 +59,7 @@ include lcd$(DELIM)Make.defs
 include leds$(DELIM)Make.defs
 include loop$(DELIM)Make.defs
 include mmcsd$(DELIM)Make.defs
+include modem$(DELIM)Make.defs
 include mtd$(DELIM)Make.defs
 include eeprom$(DELIM)Make.defs
 include net$(DELIM)Make.defs
