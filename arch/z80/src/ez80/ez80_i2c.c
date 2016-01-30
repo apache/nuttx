@@ -47,7 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
 #include <arch/io.h>
 #include <arch/board/board.h>

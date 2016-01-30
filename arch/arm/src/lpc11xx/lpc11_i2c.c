@@ -57,7 +57,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
