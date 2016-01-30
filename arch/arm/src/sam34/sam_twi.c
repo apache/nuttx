@@ -116,7 +116,7 @@
 
 struct twi_dev_s
 {
-  struct i2c_dev_s    dev;        /* Generic I2C device */
+  struct i2c_master_s dev;        /* Generic I2C device */
   struct i2c_msg_s    *msg;       /* Message list */
   uintptr_t           base;       /* Base address of registers */
   uint32_t            frequency;  /* TWI input clock frequency */
@@ -189,20 +189,15 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 /* I2C device operations */
 
-static uint32_t twi_setfrequency(FAR struct i2c_dev_s *dev,
+static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev,
           uint32_t frequency);
-static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
+static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
+static int twi_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
           int buflen);
-static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+static int twi_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 #ifdef CONFIG_I2C_TRANSFER
-static int twi_transfer(FAR struct i2c_dev_s *dev,
+static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
-#endif
-#ifdef CONFIG_I2C_SLAVE
-static int twi_setownaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int twi_registercallback(FAR struct i2c_dev_s *dev,
-          int (*callback)(void));
 #endif
 
 /* Initialization */
@@ -232,10 +227,6 @@ struct i2c_ops_s g_twiops =
   .read             = twi_read,
 #ifdef CONFIG_I2C_TRANSFER
   .transfer         = twi_transfer
-#endif
-#ifdef CONFIG_I2C_SLAVE
-  .setownaddress    = twi_setownaddress
-  .registercallback = twi_registercallback
 #endif
 };
 
@@ -719,7 +710,7 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
  *
  ****************************************************************************/
 
-static uint32_t twi_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
+static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   uint32_t actual;
@@ -745,7 +736,7 @@ static uint32_t twi_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
+static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
 
@@ -774,7 +765,7 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuflen)
+static int twi_write(FAR struct i2c_master_s *dev, const uint8_t *wbuffer, int wbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
   irqstate_t flags;
@@ -840,7 +831,7 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
  *
  ****************************************************************************/
 
-static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
+static int twi_read(FAR struct i2c_master_s *dev, uint8_t *rbuffer, int rbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   irqstate_t flags;
@@ -898,37 +889,6 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
 }
 
 /****************************************************************************
- * Name: twi_setownaddress
- *
- * Description:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_SLAVE
-static int twi_setownaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
-{
-#error Not implemented
-  return -ENOSYS;
-}
-#endif
-
-/****************************************************************************
- * Name: twi_registercallback
- *
- * Description:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_SLAVE
-static int twi_registercallback(FAR struct i2c_dev_s *dev,
-                                int (*callback)(void))
-{
-#error Not implemented
-  return -ENOSYS;
-}
-#endif
-
-/****************************************************************************
  * Name: twi_transfer
  *
  * Description:
@@ -938,7 +898,7 @@ static int twi_registercallback(FAR struct i2c_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER
-static int twi_transfer(FAR struct i2c_dev_s *dev,
+static int twi_transfer(FAR struct i2c_master_s *dev,
                         FAR struct i2c_msg_s *msgs, int count)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
@@ -1131,7 +1091,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
  *
  ****************************************************************************/
 
-struct i2c_dev_s *up_i2cinitialize(int bus)
+struct i2c_master_s *up_i2cinitialize(int bus)
 {
   struct twi_dev_s *priv;
   xcpt_t handler;
@@ -1241,7 +1201,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
  *
  ****************************************************************************/
 
-int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
+int up_i2cuninitialize(FAR struct i2c_master_s * dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
 

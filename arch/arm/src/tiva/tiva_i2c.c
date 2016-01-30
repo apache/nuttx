@@ -280,16 +280,16 @@ static inline uint32_t tiva_i2c_getreg(struct tiva_i2c_priv_s *priv,
 static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
                                    unsigned int offset, uint32_t value);
 #endif
-static inline void tiva_i2c_sem_wait(struct i2c_dev_s *dev);
+static inline void tiva_i2c_sem_wait(struct i2c_master_s *dev);
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
 static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv);
 #endif /* CONFIG_TIVA_I2C_DYNTIMEO */
 
 static inline int  tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv);
-static inline void tiva_i2c_sem_post(struct i2c_dev_s *dev);
-static inline void tiva_i2c_sem_init(struct i2c_dev_s *dev);
-static inline void tiva_i2c_sem_destroy(struct i2c_dev_s *dev);
+static inline void tiva_i2c_sem_post(struct i2c_master_s *dev);
+static inline void tiva_i2c_sem_init(struct i2c_master_s *dev);
+static inline void tiva_i2c_sem_destroy(struct i2c_master_s *dev);
 
 #ifdef CONFIG_I2C_TRACE
 static void tiva_i2c_tracereset(struct tiva_i2c_priv_s *priv);
@@ -340,17 +340,17 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
 static int tiva_i2c_uninitialize(struct tiva_i2c_priv_s *priv);
 static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv,
                                   uint32_t frequency);
-static uint32_t tiva_i2c_setfrequency(struct i2c_dev_s *dev,
+static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev,
                                       uint32_t frequency);
-static int tiva_i2c_setaddress(struct i2c_dev_s *dev, int addr, int nbits);
-static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgv,
+static int tiva_i2c_setaddress(struct i2c_master_s *dev, int addr, int nbits);
+static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                             int msgc);
-static int tiva_i2c_write(struct i2c_dev_s *dev, const uint8_t *buffer,
+static int tiva_i2c_write(struct i2c_master_s *dev, const uint8_t *buffer,
                           int buflen);
-static int tiva_i2c_read(struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+static int tiva_i2c_read(struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 
 #ifdef CONFIG_I2C_TRANSFER
-static int tiva_i2c_transfer(struct i2c_dev_s *dev, struct i2c_msg_s *msgv,
+static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc);
 #endif /* CONFIG_I2C_TRANSFER */
 
@@ -589,10 +589,6 @@ static const struct i2c_ops_s tiva_i2c_ops =
 #ifdef CONFIG_I2C_TRANSFER
   , .transfer         = tiva_i2c_transfer
 #endif
-#ifdef CONFIG_I2C_SLAVE
-  , .setownaddress    = tiva_i2c_setownaddress,
-    .registercallback = tiva_i2c_registercallback
-#endif
 };
 
 /************************************************************************************
@@ -719,7 +715,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_sem_wait(struct i2c_dev_s *dev)
+static inline void tiva_i2c_sem_wait(struct i2c_master_s *dev)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
 
@@ -913,7 +909,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_sem_post(struct i2c_dev_s *dev)
+static inline void tiva_i2c_sem_post(struct i2c_master_s *dev)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
 
@@ -928,7 +924,7 @@ static inline void tiva_i2c_sem_post(struct i2c_dev_s *dev)
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_sem_init(struct i2c_dev_s *dev)
+static inline void tiva_i2c_sem_init(struct i2c_master_s *dev)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
 
@@ -946,7 +942,7 @@ static inline void tiva_i2c_sem_init(struct i2c_dev_s *dev)
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_sem_destroy(struct i2c_dev_s *dev)
+static inline void tiva_i2c_sem_destroy(struct i2c_master_s *dev)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
 
@@ -1895,7 +1891,7 @@ static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequen
  *
  ************************************************************************************/
 
-static uint32_t tiva_i2c_setfrequency(struct i2c_dev_s *dev, uint32_t frequency)
+static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev, uint32_t frequency)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct tiva_i2c_priv_s *priv;
@@ -1925,7 +1921,7 @@ static uint32_t tiva_i2c_setfrequency(struct i2c_dev_s *dev, uint32_t frequency)
  *
  ************************************************************************************/
 
-static int tiva_i2c_setaddress(struct i2c_dev_s *dev, int addr, int nbits)
+static int tiva_i2c_setaddress(struct i2c_master_s *dev, int addr, int nbits)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
 
@@ -1949,7 +1945,7 @@ static int tiva_i2c_setaddress(struct i2c_dev_s *dev, int addr, int nbits)
  *
  ************************************************************************************/
 
-static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgv, int msgc)
+static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv, int msgc)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct tiva_i2c_priv_s *priv = inst->priv;
@@ -2088,7 +2084,7 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgv, int m
  *
  ************************************************************************************/
 
-static int tiva_i2c_write(struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
+static int tiva_i2c_write(struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct i2c_msg_s msgv =
@@ -2114,7 +2110,7 @@ static int tiva_i2c_write(struct i2c_dev_s *dev, const uint8_t *buffer, int bufl
  *
  ************************************************************************************/
 
-int tiva_i2c_read(struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
+int tiva_i2c_read(struct i2c_master_s *dev, uint8_t *buffer, int buflen)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct i2c_msg_s msgv =
@@ -2141,7 +2137,7 @@ int tiva_i2c_read(struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER
-static int tiva_i2c_transfer(struct i2c_dev_s *dev, struct i2c_msg_s *msgv,
+static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
@@ -2167,7 +2163,7 @@ static int tiva_i2c_transfer(struct i2c_dev_s *dev, struct i2c_msg_s *msgv,
  *
  ************************************************************************************/
 
-struct i2c_dev_s *up_i2cinitialize(int port)
+struct i2c_master_s *up_i2cinitialize(int port)
 {
   struct tiva_i2c_priv_s *priv = NULL;    /* Private data of device with multiple instances */
   struct tiva_i2c_inst_s *inst = NULL;    /* Device, single instance */
@@ -2284,7 +2280,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       /* Initialize the device structure */
 
       priv->config = config;
-      tiva_i2c_sem_init((struct i2c_dev_s *)inst);
+      tiva_i2c_sem_init((struct i2c_master_s *)inst);
 
       /* Initialize the I2C hardware */
 
@@ -2292,7 +2288,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
     }
 
   irqrestore(irqs);
-  return (struct i2c_dev_s *)inst;
+  return (struct i2c_master_s *)inst;
 }
 
 /************************************************************************************
@@ -2303,7 +2299,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
  *
  ************************************************************************************/
 
-int up_i2cuninitialize(struct i2c_dev_s *dev)
+int up_i2cuninitialize(struct i2c_master_s *dev)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct tiva_i2c_priv_s *priv ;
@@ -2356,7 +2352,7 @@ int up_i2cuninitialize(struct i2c_dev_s *dev)
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-int up_i2creset(struct i2c_dev_s *dev)
+int up_i2creset(struct i2c_master_s *dev)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct tiva_i2c_priv_s *priv;

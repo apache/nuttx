@@ -292,16 +292,16 @@ static inline void efm32_i2c_putreg(FAR struct efm32_i2c_priv_s *priv,
 static inline void efm32_i2c_modifyreg(FAR struct efm32_i2c_priv_s *priv,
                                        uint8_t offset, uint32_t clearbits,
                                        uint32_t setbits);
-static inline void efm32_i2c_sem_wait(FAR struct i2c_dev_s *dev);
+static inline void efm32_i2c_sem_wait(FAR struct i2c_master_s *dev);
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEOUT
 static useconds_t efm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_EFM32_I2C_DYNTIMEOUT */
 
 static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv);
-static inline void efm32_i2c_sem_post(FAR struct i2c_dev_s *dev);
-static inline void efm32_i2c_sem_init(FAR struct i2c_dev_s *dev);
-static inline void efm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev);
+static inline void efm32_i2c_sem_post(FAR struct i2c_master_s *dev);
+static inline void efm32_i2c_sem_init(FAR struct i2c_master_s *dev);
+static inline void efm32_i2c_sem_destroy(FAR struct i2c_master_s *dev);
 
 #ifdef CONFIG_I2C_TRACE
 static void efm32_i2c_tracereset(FAR struct efm32_i2c_priv_s *priv);
@@ -326,18 +326,18 @@ static int efm32_i2c1_isr(int irq, void *context);
 static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv);
 static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv, int frequency);
 static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv);
-static uint32_t efm32_i2c_setfrequency(FAR struct i2c_dev_s *dev,
+static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
                                        uint32_t frequency);
-static int efm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
+static int efm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
+static int efm32_i2c_process(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count);
-static int efm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t * buffer,
+static int efm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t * buffer,
                            int buflen);
-static int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer,
+static int efm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t * buffer,
                           int buflen);
 
 #ifdef CONFIG_I2C_TRANSFER
-static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
+static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count);
 #endif /* CONFIG_I2C_TRANSFER */
 
@@ -417,10 +417,6 @@ static const struct i2c_ops_s efm32_i2c_ops =
   .read = efm32_i2c_read
 #ifdef CONFIG_I2C_TRANSFER
   , .transfer = efm32_i2c_transfer
-#endif
-#ifdef CONFIG_I2C_SLAVE
-  , .setownaddress = efm32_i2c_setownaddress,
-  .registercallback = efm32_i2c_registercallback
 #endif
 };
 
@@ -520,7 +516,7 @@ static const char *efm32_i2c_state_str(int i2c_state)
  *
  ****************************************************************************/
 
-static inline void efm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
+static inline void efm32_i2c_sem_wait(FAR struct i2c_master_s *dev)
 {
   while (sem_wait(&((struct efm32_i2c_inst_s *)dev)->priv->sem_excl) != OK)
     {
@@ -700,7 +696,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void efm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
+static inline void efm32_i2c_sem_post(FAR struct i2c_master_s *dev)
 {
   sem_post(&((struct efm32_i2c_inst_s *)dev)->priv->sem_excl);
 }
@@ -713,7 +709,7 @@ static inline void efm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
  *
  ****************************************************************************/
 
-static inline void efm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
+static inline void efm32_i2c_sem_init(FAR struct i2c_master_s *dev)
 {
   sem_init(&((struct efm32_i2c_inst_s *)dev)->priv->sem_excl, 0, 1);
 #ifndef CONFIG_I2C_POLLED
@@ -729,7 +725,7 @@ static inline void efm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
  *
  ****************************************************************************/
 
-static inline void efm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
+static inline void efm32_i2c_sem_destroy(FAR struct i2c_master_s *dev)
 {
   sem_destroy(&((struct efm32_i2c_inst_s *)dev)->priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
@@ -1469,7 +1465,7 @@ static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static uint32_t efm32_i2c_setfrequency(FAR struct i2c_dev_s *dev,
+static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
                                        uint32_t frequency)
 {
   efm32_i2c_sem_wait(dev);
@@ -1488,7 +1484,7 @@ static uint32_t efm32_i2c_setfrequency(FAR struct i2c_dev_s *dev,
  *
  ****************************************************************************/
 
-static int efm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
+static int efm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 {
   efm32_i2c_sem_wait(dev);
 
@@ -1507,7 +1503,7 @@ static int efm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
+static int efm32_i2c_process(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count)
 {
   struct efm32_i2c_inst_s *inst = (struct efm32_i2c_inst_s *)dev;
@@ -1659,7 +1655,7 @@ static int efm32_i2c_process(FAR struct i2c_dev_s *dev,
  *
  ****************************************************************************/
 
-static int efm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t * buffer,
+static int efm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t * buffer,
                            int buflen)
 {
   struct i2c_msg_s msgv =
@@ -1681,7 +1677,7 @@ static int efm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t * buffer,
  *
  ****************************************************************************/
 
-int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer, int buflen)
+int efm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t * buffer, int buflen)
 {
   struct i2c_msg_s msgv =
   {
@@ -1703,7 +1699,7 @@ int efm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t * buffer, int buflen)
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER
-static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
+static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count)
 {
   return efm32_i2c_process(dev, msgs, count);
@@ -1722,7 +1718,7 @@ static int efm32_i2c_transfer(FAR struct i2c_dev_s *dev,
  *
  ****************************************************************************/
 
-FAR struct i2c_dev_s *up_i2cinitialize(int port)
+FAR struct i2c_master_s *up_i2cinitialize(int port)
 {
   struct efm32_i2c_priv_s *priv = NULL; /* Private data of device with multiple
                                          * instances */
@@ -1772,12 +1768,12 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   if ((volatile int)priv->refs++ == 0)
     {
-      efm32_i2c_sem_init((struct i2c_dev_s *)inst);
+      efm32_i2c_sem_init((struct i2c_master_s *)inst);
       efm32_i2c_init(priv, inst->frequency);
     }
 
   irqrestore(irqs);
-  return (struct i2c_dev_s *)inst;
+  return (struct i2c_master_s *)inst;
 }
 
 /****************************************************************************
@@ -1788,7 +1784,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
  *
  ****************************************************************************/
 
-int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
+int up_i2cuninitialize(FAR struct i2c_master_s *dev)
 {
   irqstate_t irqs;
 
@@ -1818,7 +1814,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 
   /* Release unused resources */
 
-  efm32_i2c_sem_destroy((struct i2c_dev_s *)dev);
+  efm32_i2c_sem_destroy((struct i2c_master_s *)dev);
 
   kmm_free(dev);
   return OK;
@@ -1833,7 +1829,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_dev_s *dev)
+int up_i2creset(FAR struct i2c_master_s *dev)
 {
   struct efm32_i2c_priv_s *priv;
   unsigned int clock_count;

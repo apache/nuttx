@@ -37,6 +37,21 @@
 #define __ARCH_ARM_SRC_STM32_STM32_I2C_H
 
 /************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* If a dynamic timeout is selected, then a non-negative, non-zero micro-
+ * seconds per byte value must be provided as well.
+ */
+
+#ifdef CONFIG_STM32_I2C_DYNTIMEO
+#  if CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE < 1
+#    warning "Ignoring CONFIG_STM32_I2C_DYNTIMEO because of CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE"
+#    undef CONFIG_STM32_I2C_DYNTIMEO
+#  endif
+#endif
+
+/************************************************************************************
  * Included Files
  ************************************************************************************/
 

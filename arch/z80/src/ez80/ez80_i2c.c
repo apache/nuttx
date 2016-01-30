@@ -87,10 +87,10 @@ static int  i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit);
 
 /* I2C methods */
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);
-static int  i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int  i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
-static int  i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);
+static int  i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
+static int  i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);
+static int  i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -496,7 +496,7 @@ failure:
  *
  * Description:
  *   Set the I2C frequency. This frequency will be retained in the struct
- *   i2c_dev_s instance and will be used with all transfers.  Required.
+ *   i2c_master_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
  *   dev -       Device-specific state data
@@ -507,7 +507,7 @@ failure:
  *
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
+static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
 
@@ -532,7 +532,7 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  * Description:
  *   Set the I2C slave address. This frequency will be retained in the struct
- *   i2c_dev_s instance and will be used with all transfers.  Required.
+ *   i2c_master_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
  *   dev -     Device-specific state data
@@ -544,7 +544,7 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
+static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
 
@@ -584,7 +584,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
+static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
   const uint8_t *ptr;
@@ -718,7 +718,7 @@ failure:
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
+static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
   uint8_t *ptr;
@@ -880,7 +880,7 @@ failure:
  *
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
- *   struct i2c_dev_s.  This function may be called to obtain multiple
+ *   struct i2c_master_s.  This function may be called to obtain multiple
  *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
@@ -892,7 +892,7 @@ failure:
  *
  ****************************************************************************/
 
-FAR struct i2c_dev_s *up_i2cinitialize(int port)
+FAR struct i2c_master_s *up_i2cinitialize(int port)
 {
   FAR struct ez80_i2cdev_s *i2c;
   uint16_t ccr;
@@ -928,5 +928,5 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
       i2c->ops = &g_ops;
       i2c->ccr = g_currccr;
     }
-  return (FAR struct i2c_dev_s *)i2c;
+  return (FAR struct i2c_master_s *)i2c;
 }

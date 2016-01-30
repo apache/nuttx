@@ -82,10 +82,10 @@ static uint16_t i2c_getbrg(uint32_t frequency);
 
 /* I2C methods */
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);
-static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
-static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);
+static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
+static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);
+static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -244,7 +244,7 @@ static uint16_t i2c_getbrg(uint32_t frequency)
  *
  * Description:
  *   Set the I2C frequency. This frequency will be retained in the struct
- *   i2c_dev_s instance and will be used with all transfers.  Required.
+ *   i2c_master_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
  *   dev -       Device-specific state data
@@ -255,7 +255,7 @@ static uint16_t i2c_getbrg(uint32_t frequency)
  *
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
+static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
 
@@ -280,7 +280,7 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  * Description:
  *   Set the I2C slave address. This frequency will be retained in the struct
- *   i2c_dev_s instance and will be used with all transfers.  Required.
+ *   i2c_master_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
  *   dev -     Device-specific state data
@@ -292,7 +292,7 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
+static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
 
@@ -332,7 +332,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
+static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
   const uint8_t *ptr;
@@ -445,7 +445,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
+static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
   uint8_t *ptr;
@@ -552,7 +552,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
  *
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
- *   struct i2c_dev_s.  This function may be called to obtain multiple
+ *   struct i2c_master_s.  This function may be called to obtain multiple
  *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
@@ -564,7 +564,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
  *
  ****************************************************************************/
 
-FAR struct i2c_dev_s *up_i2cinitialize(int port)
+FAR struct i2c_master_s *up_i2cinitialize(int port)
 {
   FAR struct z8_i2cdev_s *i2c;
 
@@ -602,5 +602,5 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
       i2c->brg = g_currbrg;
     }
 
-  return (FAR struct i2c_dev_s *)i2c;
+  return (FAR struct i2c_master_s *)i2c;
 }

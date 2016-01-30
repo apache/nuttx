@@ -79,7 +79,7 @@
  ****************************************************************************/
 struct lpc31_i2cdev_s
 {
-    struct i2c_dev_s  dev;        /* Generic I2C device */
+    struct i2c_master_s dev;      /* Generic I2C device */
     struct i2c_msg_s  msg;        /* a single message for legacy read/write */
     unsigned int      base;       /* Base address of registers */
     uint16_t          clkid;      /* Clock for this device */
@@ -125,11 +125,11 @@ static void i2c_reset(struct lpc31_i2cdev_s *priv);
  * I2C device operations
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);
-static int      i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int      i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
-static int      i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
-static int      i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count);
+static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);
+static int      i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
+static int      i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);
+static int      i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
+static int      i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count);
 
 struct i2c_ops_s lpc31_i2c_ops =
 {
@@ -150,7 +150,7 @@ struct i2c_ops_s lpc31_i2c_ops =
  *
  ****************************************************************************/
 
-struct i2c_dev_s *up_i2cinitialize(int port)
+struct i2c_master_s *up_i2cinitialize(int port)
 {
   struct lpc31_i2cdev_s *priv = &i2cdevices[port];
 
@@ -226,7 +226,7 @@ void up_i2cuninitalize(struct lpc31_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
+static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
 
@@ -260,7 +260,7 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
+static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
 
@@ -282,7 +282,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
+static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
   int ret;
@@ -307,7 +307,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
+static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
   int ret;
@@ -331,7 +331,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
  *
  ****************************************************************************/
 
-static int i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count)
+static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
   irqstate_t flags;
