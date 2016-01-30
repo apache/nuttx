@@ -11421,6 +11421,8 @@
 	  (2018-01-30).
 	* arch/arm/src/lpc17xx: Backport lpc43xx I2C driver, replacing the
 	  lpc17xx I2C driver.  This gives us the I2C_TRANSFER method (2016-01-30).
-	* arch/arm/src/lpc11xx: Backport the lpc17xx I2C driver, replace the
+	* arch/arm/src/lpc11xx: Backport the lpc17xx I2C driver, replacing the
 	  lpc11xx I2C driver.  This gives us the I2C_TRANSFER method (2019-01-30).
- 
+	* arcm/arm/src/lpc2378: Backo the Lpc17xx I2C driver, replacing the
+	  lpc2378 I2C driver.  This gives us the I2C_TRANSFER method (2019-01-30).
+
