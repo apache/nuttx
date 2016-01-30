@@ -5100,10 +5100,10 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     Each I2C device driver must implement an instance of <code>struct i2c_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>uint32_t setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);</code><br>
-     <code>int setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);</code><br>
-     <code>int write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);</code><br>
-     <code>int read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);</code></p>
+     <p><code>uint32_t setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);</code><br>
+     <code>int setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);</code><br>
+     <code>int write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);</code><br>
+     <code>int read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);</code></p>
     </p>
   </ul>
   <li>
@@ -5115,7 +5115,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     </p>
     <p>
       <ol>
-        <li>Get an instance of <code>struct i2c_dev_s</code> from the hardware-specific I2C device driver, and </li>
+        <li>Get an instance of <code>struct i2c_master_s</code> from the hardware-specific I2C device driver, and </li>
         <li>Provide that instance to the initialization method of the higher level device driver.</li>
       </ol>
     </p>
