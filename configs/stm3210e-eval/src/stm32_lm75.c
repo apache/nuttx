@@ -78,7 +78,7 @@
 
 int stm32_lm75initialize(FAR const char *devpath)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   int ret;
 
   /* Configure PB.5 as Input pull-up.  This pin can be used as a temperature

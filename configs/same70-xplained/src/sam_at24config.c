@@ -66,7 +66,7 @@
 
 int sam_at24config(void)
 {
-  struct i2c_dev_s *i2c;
+  struct i2c_master_s *i2c;
   struct mtd_dev_s *at24;
   int ret;
 

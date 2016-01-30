@@ -122,7 +122,7 @@ int sam_bringup(void)
   FAR struct mtd_dev_s *mtd;
 #endif
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
 #endif
 #if defined(HAVE_S25FL1_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
   char blockdev[18];

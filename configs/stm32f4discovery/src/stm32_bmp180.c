@@ -76,7 +76,7 @@
 
 int stm32_bmp180initialize(FAR const char *devpath)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   int ret;
 
   sndbg("Initializing BMP180!\n");

@@ -276,7 +276,7 @@ static void stmpe811_clear(FAR struct stmpe811_config_s *state)
 int board_tsc_setup(int minor)
 {
 #ifndef CONFIG_STMPE811_TSC_DISABLE
-  FAR struct i2c_dev_s *dev;
+  FAR struct i2c_master_s *dev;
   int ret;
 
   idbg("minor %d\n", minor);

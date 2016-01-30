@@ -246,7 +246,7 @@ int sam_wm8904_initialize(int minor)
 {
   FAR struct audio_lowerhalf_s *wm8904;
   FAR struct audio_lowerhalf_s *pcm;
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   FAR struct i2s_dev_s *i2s;
   static bool initialized = false;
   char devname[12];

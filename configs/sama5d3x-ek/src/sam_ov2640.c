@@ -151,7 +151,7 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
 
 static inline int ov2640_camera_initialize(void)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint32_t actual;
   int ret;
 

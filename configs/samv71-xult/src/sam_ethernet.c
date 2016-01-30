@@ -158,7 +158,7 @@ void weak_function sam_netinitialize(void)
 #ifdef HAVE_MACADDR
 int sam_emac0_setmac(void)
 {
-  struct i2c_dev_s *i2c;
+  struct i2c_master_s *i2c;
   struct mtd_dev_s *at24;
   uint8_t mac[6];
   ssize_t nread;

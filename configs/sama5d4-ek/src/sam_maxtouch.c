@@ -238,7 +238,7 @@ static int mxt_interrupt(int irq, FAR void *context)
 
 int board_tsc_setup(int minor)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   static bool initialized = false;
   int ret;
 

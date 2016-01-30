@@ -158,35 +158,36 @@ typedef unsigned char vsn_sif_gpio_t;
 #define VSN_SIF_ANIN_OVERSMP16
 
 
-struct vsn_sif_s {
-    vsn_sif_state_t     state;              // activity
-    unsigned char       opencnt;            // open count
+struct vsn_sif_s
+{
+  vsn_sif_state_t     state;              /* Activity */
+  unsigned char       opencnt;            /* Open count */
 
-    vsn_sif_gpio_t      gpio[2];
+  vsn_sif_gpio_t      gpio[2];
 
-    unsigned char       anout_opts;
-    unsigned short int  anout_width;
-    unsigned short int  anout_period;       // setting it to 0, disables PWM
-    unsigned short int  anout_samplerate;   // as written by write()
+  unsigned char       anout_opts;
+  unsigned short int  anout_width;
+  unsigned short int  anout_period;       /* Setting it to 0, disables PWM */
+  unsigned short int  anout_samplerate;   /* As written by write() */
 
-    unsigned short int  anref_width;
-    unsigned short int  anref_period;       // setting it to 0, disables PWM
-    unsigned short int  anref_samplerate;   // as written by write()
+  unsigned short int  anref_width;
+  unsigned short int  anref_period;       /* Setting it to 0, disables PWM */
+  unsigned short int  anref_samplerate;   /* As written by write() */
 
-    unsigned char       anin_opts;
-    unsigned int        anin_samplerate;    // returned on read() as 16-bit results
+  unsigned char       anin_opts;
+  unsigned int        anin_samplerate;    /* Returned on read() as 16-bit results */
 
-        /*--- Private Data ---*/
+  /*--- Private Data ---*/
 
-    struct stm32_tim_dev_s * tim3;          // Timer3 is used for PWM, and Analog RefTap
-    struct stm32_tim_dev_s * tim8;          // Timer8 is used for Power Switch
+  struct stm32_tim_dev_s *tim3;           /* Timer3 is used for PWM, and Analog RefTap */
+  struct stm32_tim_dev_s *tim8;           /* Timer8 is used for Power Switch */
 
-    struct i2c_dev_s    * i2c1;
-    struct i2c_dev_s    * i2c2;
+  struct i2c_master_s *i2c1;
+  struct i2c_master_s *i2c2;
 
-    struct spi_dev_s    * spi2;
+  struct spi_dev_s    *spi2;
 
-    sem_t               exclusive_access;
+  sem_t               exclusive_access;
 };
 
 /****************************************************************************

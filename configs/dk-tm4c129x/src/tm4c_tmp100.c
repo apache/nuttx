@@ -78,7 +78,7 @@
 
 int tiva_tmp100_initialize(FAR const char *devpath)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   int ret;
 
   /* Get an instance of the I2C6 interface */

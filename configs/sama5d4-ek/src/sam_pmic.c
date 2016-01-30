@@ -87,7 +87,7 @@
 
 void sam_pmic_initialize(void)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t buffer[2];
 
   /* Get an instance of the I2C interface for the PMIC */
