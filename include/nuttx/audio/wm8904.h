@@ -214,7 +214,7 @@ extern "C"
  *
  ****************************************************************************/
 
-struct i2c_dev_s;         /* Forward reference. Defined in include/nuttx/i2c.h */
+struct i2c_dev_s;         /* Forward reference. Defined in include/nuttx/i2c/i2c_master.h */
 struct i2s_dev_s;         /* Forward reference. Defined in include/nuttx/audio/i2s.h */
 struct audio_lowerhalf_s; /* Forward reference. Defined in nuttx/audio/audio.h */
 

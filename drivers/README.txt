@@ -69,7 +69,7 @@ eeprom/
   the EEPROM drivers.
 
 i2c/
-  I2C drivers and support logic.  See include/nuttx/i2c.h
+  I2C drivers and support logic.  See include/nuttx/i2c/i2c_master.h
 
 input/
   This directory holds implementations of human input device (HID)

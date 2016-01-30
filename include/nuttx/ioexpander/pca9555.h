@@ -40,7 +40,7 @@
 #ifndef __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
 #define __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /* A reference to a structure of this type must be passed to the PCA9555 driver when the
  * driver is instantiated. This structure provides information about the configuration of

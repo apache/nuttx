@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/timers/ds3231.h>
 
 #include "ds3231.h"

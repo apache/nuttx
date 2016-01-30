@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/i2c.h
+ * include/nuttx/i2c/i2c_master.h
  *
  *   Copyright(C) 2009-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_I2C_H
-#define __INCLUDE_NUTTX_I2C_H
+#ifndef __INCLUDE_NUTTX_I2C_I2C_MASTER_H
+#define __INCLUDE_NUTTX_I2C_I2C_MASTER_H
 
 /****************************************************************************
  * Included Files
@@ -417,4 +417,4 @@ int i2c_read(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __INCLUDE_NUTTX_I2C_H */
+#endif /* __INCLUDE_NUTTX_I2C_I2C_MASTER_H */

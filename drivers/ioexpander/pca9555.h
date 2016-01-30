@@ -51,7 +51,7 @@
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/pca9555.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/irq.h>
 
 #if defined(CONFIG_IOEXPANDER) && defined(CONFIG_IOEXPANDER_PCA9555)

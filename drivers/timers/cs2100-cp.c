@@ -46,7 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/timers/cs2100-cp.h>
 
 #ifdef CONFIG_TIMERS_CS2100CP

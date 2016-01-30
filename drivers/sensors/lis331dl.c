@@ -46,7 +46,7 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lis331dl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_TRANSFER) && defined(CONFIG_LIS331DL)

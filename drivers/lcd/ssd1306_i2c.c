@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/lcd/ssd1306.h>
 
 #include "ssd1306.h"

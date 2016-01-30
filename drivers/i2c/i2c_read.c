@@ -41,7 +41,7 @@
 
 #include <assert.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #if defined(CONFIG_I2C_TRANSFER)
 

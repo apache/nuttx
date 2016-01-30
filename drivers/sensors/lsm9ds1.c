@@ -45,7 +45,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lsm9ds1.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SN_LSM9DS1)

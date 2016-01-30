@@ -268,7 +268,7 @@ menuconfig I2C
 	default n
 	---help---
 		This selection enables building of the "upper-half" I2C driver.
-		See include/nuttx/i2c.h for further I2C driver information.
+		See include/nuttx/i2c/i2c_master.h for further I2C driver information.
 
 if I2C
 source drivers/i2c/Kconfig

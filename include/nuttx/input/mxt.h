@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_MXT)
 
