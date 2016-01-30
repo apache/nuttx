@@ -93,34 +93,15 @@
 #define I2CS_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
 
 /****************************************************************************
- * Name: I2CS_SETADDRESS
- *
- * Description:
- *   Set the I2C slave address. This frequency will be retained in the struct
- *   i2c_slave_s instance and will be used with all transfers.  Required.
- *
- * Input Parameters:
- *   dev     - Device-specific state data
- *   address - The I2C slave address
- *   nbits   - The number of address bits provided (7 or 10)
- *
- * Returned Value:
- *   Returns OK on success; a negated errno on failure.
- *
- ****************************************************************************/
-
-#define I2CS_SETADDRESS(d,a,n) ((d)->ops->setaddress(d,a,n))
-
-/****************************************************************************
  * Name: I2CS_SETOWNADDRESS
  *
  * Description:
  *   Set our own I2C address. Calling this function enables Slave mode and
- *   disables Master mode on given instance (note that I2C is a bus, where
+ *   disables Master mode on the I2C bus (note that I2C is a bus, where
  *   multiple masters and slave may be handled by one device driver).
  *
  *   One may register a callback to be notified about reception. During the
- *   slave mode reception, the function READ and WRITE must be used to
+ *   slave mode reception, the methods READ and WRITE must be used to
  *   to handle reads and writes from a master.
  *
  * Input Parameters:
@@ -180,6 +161,24 @@
 #define I2CS_READ(d,b,l) ((d)->ops->read(d,b,l))
 
 /****************************************************************************
+ * Name: I2CS_REGISTERCALLBACK
+ *
+ * Description:
+ *   Register to receive a callback when something is received on I2C.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   callback - The function to be called when something has been received.
+ *   arg      - User provided argument to be used with the callback
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+#define I2CS_REGISTERCALLBACK(d,c,a) ((d)->ops->registercallback(d,c,a))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -189,12 +188,11 @@ struct i2c_slave_s;
 struct i2c_slaveops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_slave_s *dev, uint32_t frequency);
-  int    (*setaddress)(FAR struct i2c_slave_s *dev, int addr, int nbits);
+  int    (*setownaddress)(FAR struct i2c_slave_s *dev, int addr, int nbits);
   int    (*write)(FAR struct i2c_slave_s *dev, FAR const uint8_t *buffer,
            int buflen);
   int    (*read)(FAR struct i2c_slave_s *dev, FAR uint8_t *buffer,
            int buflen);
-  int    (*setownaddress)(FAR struct i2c_slave_s *dev, int addr, int nbits);
   int    (*registercallback)(FAR struct i2c_slave_s *dev,
            int (*callback)(FAR void *arg), FAR void *arg);
 };

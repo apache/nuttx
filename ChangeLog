@@ -11419,4 +11419,8 @@
 	* drivers/modem/u-blox.c and include/nuttx/drivers/u-blox.h:  Add an upper
 	  half driver for the U-Blox Modem.  From  Vladimir Komendantskiy
 	  (2018-01-30).
+	* arch/arm/src/lpc17xx: Backport lpc43xx I2C driver, replacing the
+	  the lpc17xx I2C drivers.  This gives use the I2C_TRANSFER method.
+	  (2016-01-30).
+
 
