@@ -67,6 +67,8 @@
 #define CCLK_DIV          4
 #define USBCLK_DIV        6
 
+#define LPC23XX_CCLK      57600000
+
  /* LED definitions **********************************************************/
 
 #define LED_STARTED       0
