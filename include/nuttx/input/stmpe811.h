@@ -549,7 +549,7 @@ extern "C"
 STMPE811_HANDLE stmpe811_instantiate(FAR struct spi_dev_s *dev,
                                      FAR struct stmpe811_config_s *config);
 #else
-STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
+STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_master_s *dev,
                                      FAR struct stmpe811_config_s *config);
 #endif
 

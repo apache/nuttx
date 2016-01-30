@@ -217,9 +217,9 @@ int battery_charger_register(FAR const char *devpath,
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_BQ2425X)
-struct i2c_dev_s; /* Forward reference */
+struct i2c_master_s; /* Forward reference */
 
-FAR struct battery_charger_dev_s *bq2425x_initialize(FAR struct i2c_dev_s *i2c,
+FAR struct battery_charger_dev_s *bq2425x_initialize(FAR struct i2c_master_s *i2c,
                                                      uint8_t addr,
                                                      uint32_t frequency);
 #endif

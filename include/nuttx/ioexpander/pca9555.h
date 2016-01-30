@@ -110,7 +110,7 @@ extern "C"
  *
  ********************************************************************************************/
 
-FAR struct ioexpander_dev_s* pca9555_initialize(FAR struct i2c_dev_s *dev,
+FAR struct ioexpander_dev_s* pca9555_initialize(FAR struct i2c_master_s *dev,
                                                 FAR struct pca9555_config_s *config);
 
 #ifdef __cplusplus

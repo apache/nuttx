@@ -165,7 +165,7 @@ struct tsc2007_dev_s
   sem_t waitsem;                       /* Used to wait for the availability of data */
 
   FAR struct tsc2007_config_s *config; /* Board configuration data */
-  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
+  FAR struct i2c_master_s *i2c;        /* Saved I2C driver instance */
   struct work_s work;                  /* Supports the interrupt handling "bottom half" */
   struct tsc2007_sample_s sample;      /* Last sampled touch point data */
 
@@ -1210,7 +1210,7 @@ errout:
  *
  ****************************************************************************/
 
-int tsc2007_register(FAR struct i2c_dev_s *dev,
+int tsc2007_register(FAR struct i2c_master_s *dev,
                      FAR struct tsc2007_config_s *config, int minor)
 {
   FAR struct tsc2007_dev_s *priv;

@@ -120,7 +120,7 @@ struct adxl345_dev_s
 #ifdef CONFIG_ADXL345_SPI
   FAR struct spi_dev_s *spi;           /* Saved SPI driver instance */
 #else
-  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
+  FAR struct i2c_master_s *i2c;        /* Saved I2C driver instance */
 #endif
 
   uint8_t status;                      /* See ADXL345_STAT_* definitions */

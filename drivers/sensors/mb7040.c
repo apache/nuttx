@@ -57,8 +57,8 @@
 
 struct mb7040_dev_s
 {
-  FAR struct i2c_dev_s *i2c;  /* I2C interface */
-  uint8_t               addr; /* I2C address */
+  FAR struct i2c_master_s *i2c;  /* I2C interface */
+  uint8_t                  addr; /* I2C address */
 };
 
 /****************************************************************************
@@ -336,7 +336,7 @@ static int mb7040_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int mb7040_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int mb7040_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr)
 {
   FAR struct mb7040_dev_s *priv;

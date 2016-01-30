@@ -286,16 +286,16 @@ struct ovr2640_reg_s
 
 /* OV2640 register operations */
 
-static int     ov2640_putreg(FAR struct i2c_dev_s *i2c, uint8_t regaddr,
+static int     ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
                  uint8_t regval);
-static uint8_t ov2640_getreg(FAR struct i2c_dev_s *i2c, uint8_t regaddr);
-static int     ov2640_putreglist(FAR struct i2c_dev_s *i2c,
+static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr);
+static int     ov2640_putreglist(FAR struct i2c_master_s *i2c,
                  FAR const struct ovr2640_reg_s *reglist, size_t nentries);
 
 /* Initialization */
 
-static int     ovr2640_chipid(FAR struct i2c_dev_s *i2c);
-static int     ov2640_reset(FAR struct i2c_dev_s *i2c);
+static int     ovr2640_chipid(FAR struct i2c_master_s *i2c);
+static int     ov2640_reset(FAR struct i2c_master_s *i2c);
 
 /****************************************************************************
  * Private Data
@@ -687,7 +687,7 @@ static const struct ovr2640_reg_s g_ov2640_jpeg_uxga_resolution[] =
  *
  ****************************************************************************/
 
-static int ov2640_putreg(FAR struct i2c_dev_s *i2c, uint8_t regaddr,
+static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
                          uint8_t regval)
 {
   uint8_t buffer[2];
@@ -731,7 +731,7 @@ static int ov2640_putreg(FAR struct i2c_dev_s *i2c, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static uint8_t ov2640_getreg(FAR struct i2c_dev_s *i2c, uint8_t regaddr)
+static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
 {
   uint8_t regval;
   int ret;
@@ -780,7 +780,7 @@ static uint8_t ov2640_getreg(FAR struct i2c_dev_s *i2c, uint8_t regaddr)
  *
  ****************************************************************************/
 
-static int ov2640_putreglist(FAR struct i2c_dev_s *i2c,
+static int ov2640_putreglist(FAR struct i2c_master_s *i2c,
                              FAR const struct ovr2640_reg_s *reglist,
                              size_t nentries)
 {
@@ -815,7 +815,7 @@ static int ov2640_putreglist(FAR struct i2c_dev_s *i2c,
  *
  ****************************************************************************/
 
-static int ovr2640_chipid(FAR struct i2c_dev_s *i2c)
+static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
 {
   uint8_t pidl;
   uint8_t pidh;
@@ -870,7 +870,7 @@ static int ovr2640_chipid(FAR struct i2c_dev_s *i2c)
  *
  ****************************************************************************/
 
-static int ov2640_reset(FAR struct i2c_dev_s *i2c)
+static int ov2640_reset(FAR struct i2c_master_s *i2c)
 {
   int ret;
 
@@ -903,7 +903,7 @@ static int ov2640_reset(FAR struct i2c_dev_s *i2c)
  *
  ****************************************************************************/
 
-int ov2640_initialize(FAR struct i2c_dev_s *i2c)
+int ov2640_initialize(FAR struct i2c_master_s *i2c)
 {
   int ret;
 

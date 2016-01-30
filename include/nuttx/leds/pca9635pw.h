@@ -157,7 +157,7 @@ struct pca9635pw_setled_brightness_arg_s
  * Forward declarations
  ****************************************************************************/
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Types
@@ -189,7 +189,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int pca9635pw_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t const pca9635pw_i2c_addr);
 
 #undef EXTERN

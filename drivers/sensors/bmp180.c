@@ -110,10 +110,10 @@
 
 struct bmp180_dev_s
 {
-  FAR struct i2c_dev_s *i2c;  /* I2C interface */
-  uint8_t addr;               /* BMP180 I2C address */
-  int freq;                   /* BMP180 Frequency <= 3.4MHz */
-  int16_t bmp180_cal_ac1;     /* Calibration coefficients */
+  FAR struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;                 /* BMP180 I2C address */
+  int freq;                     /* BMP180 Frequency <= 3.4MHz */
+  int16_t bmp180_cal_ac1;       /* Calibration coefficients */
   int16_t bmp180_cal_ac2;
   int16_t bmp180_cal_ac3;
   uint16_t bmp180_cal_ac4;
@@ -124,8 +124,8 @@ struct bmp180_dev_s
   int16_t bmp180_cal_mb;
   int16_t bmp180_cal_mc;
   int16_t bmp180_cal_md;
-  int32_t bmp180_utemp;       /* Uncompensated temperature read from BMP180 */
-  int32_t bmp180_upress;      /* Uncompensated pressure read from BMP180 */
+  int32_t bmp180_utemp;         /* Uncompensated temperature read from BMP180 */
+  int32_t bmp180_upress;        /* Uncompensated pressure read from BMP180 */
 };
 
 /****************************************************************************
@@ -569,7 +569,7 @@ static ssize_t bmp180_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-int bmp180_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c)
+int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 {
   FAR struct bmp180_dev_s *priv;
   int ret;

@@ -87,7 +87,7 @@ enum ms58xx_model_e
   MS58XX_MODEL_MS5837_30 = 7
 };
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -119,7 +119,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int ms58xx_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, uint16_t osr, enum ms58xx_model_e model);
 
 #undef EXTERN

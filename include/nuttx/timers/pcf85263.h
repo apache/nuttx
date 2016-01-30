@@ -78,8 +78,8 @@ extern "C"
  *
  ************************************************************************************/
 
-struct i2c_dev_s; /* Forward reference */
-int pcf85263_rtc_initialize(FAR struct i2c_dev_s *i2c);
+struct i2c_master_s; /* Forward reference */
+int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c);
 
 #undef EXTERN
 #ifdef __cplusplus

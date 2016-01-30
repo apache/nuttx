@@ -54,7 +54,7 @@
 
 struct pca9635pw_dev_s
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t i2c_addr;
 };
 
@@ -351,7 +351,7 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int pca9635pw_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t const pca9635pw_i2c_addr)
 {
   /* Sanity check */

@@ -500,7 +500,7 @@ struct lsm9ds1_ops_s
 
 struct lsm9ds1_dev_s
 {
-  FAR struct i2c_dev_s           *i2c;        /* I2C interface */
+  FAR struct i2c_master_s        *i2c;        /* I2C interface */
   uint8_t                         addr;       /* I2C address */
 
   FAR const struct lsm9ds1_ops_s *ops;
@@ -567,7 +567,7 @@ static int     lsm9ds1_ioctl(FAR struct file *filep, int cmd,
 /* Common Register Function */
 
 static int lsm9ds1_register(FAR const char *devpath,
-                            FAR struct i2c_dev_s *i2c, uint8_t addr,
+                            FAR struct i2c_master_s *i2c, uint8_t addr,
                             FAR const struct lsm9ds1_ops_s *ops,
                             uint8_t datareg);
 
@@ -1413,7 +1413,7 @@ static int lsm9ds1_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int lsm9ds1_register(FAR const char *devpath,
-                            FAR struct i2c_dev_s *i2c, uint8_t addr,
+                            FAR struct i2c_master_s *i2c, uint8_t addr,
                             FAR const struct lsm9ds1_ops_s *ops,
                             uint8_t datareg)
 {
@@ -1486,7 +1486,7 @@ static int lsm9ds1_register(FAR const char *devpath,
  *
  ****************************************************************************/
 
-int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                           uint8_t addr)
 {
   /* Sanity check */
@@ -1513,7 +1513,7 @@ int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
  *
  ****************************************************************************/
 
-int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                          uint8_t addr)
 {
   /* Sanity check */
@@ -1540,7 +1540,7 @@ int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
  *
  ****************************************************************************/
 
-int lsm9ds1mag_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lsm9ds1mag_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                         uint8_t addr)
 {
   /* Sanity check */

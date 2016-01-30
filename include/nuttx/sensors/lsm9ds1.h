@@ -75,7 +75,7 @@
  * Public Types
  ****************************************************************************/
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -102,7 +102,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                           uint8_t addr);
 
 /****************************************************************************
@@ -121,7 +121,7 @@ int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
  *
  ****************************************************************************/
 
-int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                          uint8_t addr);
 
 /****************************************************************************
@@ -140,7 +140,7 @@ int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
  *
  ****************************************************************************/
 
-int lsm9ds1mag_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lsm9ds1mag_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                         uint8_t addr);
 
 #ifdef __cplusplus

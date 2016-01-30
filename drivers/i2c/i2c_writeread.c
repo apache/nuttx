@@ -69,7 +69,8 @@
  *
  ****************************************************************************/
 
-int i2c_writeread(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
+int i2c_writeread(FAR struct i2c_master_s *dev,
+                  FAR const struct i2c_config_s *config,
                   FAR const uint8_t *wbuffer, int wbuflen,
                   FAR uint8_t *rbuffer, int rbuflen)
 {

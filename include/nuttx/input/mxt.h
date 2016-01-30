@@ -199,7 +199,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int mxt_register(FAR struct i2c_dev_s *i2c,
+int mxt_register(FAR struct i2c_master_s *i2c,
                  FAR const struct mxt_lower_s *lower, int minor);
 
 #undef EXTERN

@@ -160,7 +160,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int tsc2007_register(FAR struct i2c_dev_s *dev,
+int tsc2007_register(FAR struct i2c_master_s *dev,
                      FAR struct tsc2007_config_s *config, int minor);
 
 #undef EXTERN

@@ -384,7 +384,7 @@ static void adxl345_reset(FAR struct adxl345_dev_s *priv)
 ADXL345_HANDLE adxl345_instantiate(FAR struct spi_dev_s *dev,
                                    FAR struct adxl345_config_s *config)
 #else
-ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
+ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
                                    FAR struct adxl345_config_s *config)
 #endif
 {

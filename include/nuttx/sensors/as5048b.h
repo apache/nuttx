@@ -99,7 +99,7 @@
  * Public Types
  ****************************************************************************/
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -129,7 +129,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_dev_s *i2c,
+FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
                                               uint8_t addr);
 
 #undef EXTERN

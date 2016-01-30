@@ -150,15 +150,15 @@
 
 struct at24c_dev_s
 {
-  struct mtd_dev_s      mtd;      /* MTD interface */
-  FAR struct i2c_dev_s *dev;      /* Saved I2C interface instance */
-  bool                  initd;    /* True: The device has been initialize */
+  struct mtd_dev_s mtd;         /* MTD interface */
+  FAR struct i2c_master_s *dev; /* Saved I2C interface instance */
+  bool initd;                   /* True: The device has been initialize */
 #ifdef CONFIG_AT24XX_EXTENDED
-  bool                  extended; /* True: use extended memory region */
+  bool extended;                /* True: use extended memory region */
 #endif
-  uint8_t               addr;     /* I2C address */
-  uint16_t              pagesize; /* 32, 63 */
-  uint16_t              npages;   /* 128, 256, 512, 1024 */
+  uint8_t addr;                 /* I2C address */
+  uint16_t pagesize;            /* 32, 63 */
+  uint16_t npages;              /* 128, 256, 512, 1024 */
 };
 
 /************************************************************************************
@@ -547,9 +547,9 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  ************************************************************************************/
 
 #ifdef CONFIG_AT24XX_MULTI
-FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev, uint8_t address)
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev, uint8_t address)
 #else
-FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev)
 #endif
 {
   FAR struct at24c_dev_s *priv;

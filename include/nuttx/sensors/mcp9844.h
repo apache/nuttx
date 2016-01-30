@@ -86,7 +86,7 @@ enum mcp9844_resolution_e
   RES_0_0625 = MCP9844_RESO_REG_BIT_1 | MCP9844_RESO_REG_BIT_0
 };
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -116,7 +116,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int mcp9844_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                      uint8_t addr);
 
 #undef EXTERN

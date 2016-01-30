@@ -106,7 +106,7 @@
  * Public Types
  ****************************************************************************/
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -139,7 +139,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int lm92_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lm92_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                   uint8_t addr);
 
 #undef EXTERN

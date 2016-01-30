@@ -68,7 +68,8 @@
  *
  ****************************************************************************/
 
-int i2c_write(FAR struct i2c_dev_s *dev, FAR const struct i2c_config_s *config,
+int i2c_write(FAR struct i2c_master_s *dev,
+              FAR const struct i2c_config_s *config,
               FAR const uint8_t *buffer, int buflen)
 {
   struct i2c_msg_s msg;

@@ -163,13 +163,13 @@
 
 struct cs2100_config_s
 {
-  FAR struct i2c_dev_s *i2c;      /* Instance of an I2C interface */
-  uint32_t              refclk;   /* RefClk/XTAL frequency */
-  uint32_t              clkin;    /* Frequency CLK_IN provided to the CS2100-CP */
-  uint32_t              clkout;   /* Desired CLK_OUT frequency */
-  uint8_t               i2caddr;  /* CP2100-CP I2C address */
-  uint8_t               loopbw;   /* Minimum loop bandwidth: 1-128 */
-  bool                  xtal;     /* false: Refclck, true: Crystal on XTI/XTO */
+  FAR struct i2c_master_s *i2c;  /* Instance of an I2C interface */
+  uint32_t refclk;               /* RefClk/XTAL frequency */
+  uint32_t clkin;                /* Frequency CLK_IN provided to the CS2100-CP */
+  uint32_t clkout;               /* Desired CLK_OUT frequency */
+  uint8_t i2caddr;               /* CP2100-CP I2C address */
+  uint8_t loopbw;                /* Minimum loop bandwidth: 1-128 */
+  bool xtal;                     /* false: Refclck, true: Crystal on XTI/XTO */
 };
 
 /********************************************************************************************
@@ -188,7 +188,7 @@ extern "C"
  * Public Function Prototypes
  ********************************************************************************************/
 
-struct i2c_dev_s;  /* Forward reference */
+struct i2c_master_s;  /* Forward reference */
 
 /********************************************************************************************
  * Name: cs2100_enable

@@ -67,9 +67,9 @@
 
 struct lm75_dev_s
 {
-  FAR struct i2c_dev_s *i2c; /* I2C interface */
-  uint8_t addr;              /* I2C address */
-  bool fahrenheit;           /* true: temperature will be reported in fahrenheit */
+  FAR struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;                 /* I2C address */
+  bool fahrenheit;              /* true: temperature will be reported in fahrenheit */
 };
 
 /****************************************************************************
@@ -503,7 +503,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c, uint8_t addr)
+int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c, uint8_t addr)
 {
   FAR struct lm75_dev_s *priv;
   int ret;

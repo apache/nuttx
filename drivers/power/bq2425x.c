@@ -93,13 +93,13 @@ struct bq2425x_dev_s
   /* The common part of the battery driver visible to the upper-half driver */
 
   FAR const struct battery_charger_operations_s *ops; /* Battery operations */
-  sem_t batsem;              /* Enforce mutually exclusive access */
+  sem_t batsem;                /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower half BQ2425x driver follow */
 
-  FAR struct i2c_dev_s *i2c; /* I2C interface */
-  uint8_t addr;              /* I2C address */
-  uint32_t frequency;        /* I2C frequency */
+  FAR struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;                 /* I2C address */
+  uint32_t frequency;           /* I2C frequency */
 };
 
 /****************************************************************************
@@ -715,8 +715,9 @@ static int bq2425x_current(struct battery_charger_dev_s *dev, int value)
  *
  ****************************************************************************/
 
-FAR struct battery_charger_dev_s *bq2425x_initialize(FAR struct i2c_dev_s *i2c,
-                            uint8_t addr, uint32_t frequency)
+FAR struct battery_charger_dev_s *
+  bq2425x_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
+                     uint32_t frequency)
 {
   FAR struct bq2425x_dev_s *priv;
   int ret;

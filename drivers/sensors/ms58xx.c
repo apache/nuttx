@@ -75,18 +75,18 @@
 
 struct ms58xx_dev_s
 {
-  FAR struct i2c_dev_s *i2c;   /* I2C interface */
-  uint8_t               addr;  /* I2C address */
+  FAR struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t               addr;   /* I2C address */
 
   enum ms58xx_model_e   model;
   uint8_t               crcindex;
   uint8_t               crcshift;
 
-  int32_t               temp;  /* Uncompensated temperature (degrees Centigrade) */
-  int32_t               press; /* Uncompensated pressure (millibar) */
+  int32_t               temp;   /* Uncompensated temperature (degrees Centigrade) */
+  int32_t               press;  /* Uncompensated pressure (millibar) */
 
-  uint8_t               osr;   /* Oversampling ratio bits */
-  useconds_t            delay; /* Oversampling ratio delay */
+  uint8_t               osr;    /* Oversampling ratio bits */
+  useconds_t            delay;  /* Oversampling ratio delay */
 
   /* Calibration coefficients */
 
@@ -838,7 +838,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int ms58xx_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, uint16_t osr, enum ms58xx_model_e model)
 {
   FAR struct ms58xx_dev_s *priv;

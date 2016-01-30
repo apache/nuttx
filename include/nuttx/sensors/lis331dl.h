@@ -71,7 +71,7 @@ struct lis331dl_vector_s
   int8_t z;
 };
 
-struct i2c_dev_s;
+struct i2c_master_s;
 
 /************************************************************************************
  * Public Function Prototypes
@@ -100,7 +100,7 @@ struct i2c_dev_s;
  *
  ************************************************************************************/
 
-FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_dev_s * i2c,
+FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s * i2c,
                                          uint16_t address);
 
 /************************************************************************************

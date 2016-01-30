@@ -108,7 +108,7 @@
 
 struct pcf85263_dev_s
 {
-  FAR struct i2c_dev_s *i2c;  /* Contained reference to the I2C bus driver */
+  FAR struct i2c_master_s *i2c;  /* Contained reference to the I2C bus driver */
 };
 
 /************************************************************************************
@@ -237,7 +237,7 @@ static int rtc_bcd2bin(uint8_t value)
  *
  ************************************************************************************/
 
-int pcf85263_rtc_initialize(FAR struct i2c_dev_s *i2c)
+int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c)
 {
   /* Remember the i2c device and claim that the RTC is enabled */
 

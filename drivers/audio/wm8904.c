@@ -2464,7 +2464,7 @@ static void wm8904_hw_reset(FAR struct wm8904_dev_s *priv)
  ****************************************************************************/
 
 FAR struct audio_lowerhalf_s *
-  wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
+  wm8904_initialize(FAR struct i2c_master_s *i2c, FAR struct i2s_dev_s *i2s,
                     FAR const struct wm8904_lower_s *lower)
 {
   FAR struct wm8904_dev_s *priv;

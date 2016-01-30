@@ -57,9 +57,9 @@
 
 struct as5048b_dev_s
 {
-  struct qe_lowerhalf_s  lower; /* AS5048B quadrature encoder lower half */
-  FAR struct i2c_dev_s  *i2c;   /* I2C interface */
-  uint8_t                addr;  /* I2C address */
+  struct qe_lowerhalf_s    lower; /* AS5048B quadrature encoder lower half */
+  FAR struct i2c_master_s *i2c;   /* I2C interface */
+  uint8_t                  addr;  /* I2C address */
 };
 
 /****************************************************************************
@@ -577,7 +577,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_dev_s *i2c,
+FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
                                               uint8_t addr)
 {
   FAR struct as5048b_dev_s *priv;

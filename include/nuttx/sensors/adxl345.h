@@ -325,7 +325,7 @@ struct adxl345_config_s
 
 typedef FAR void *ADXL345_HANDLE;
 
-struct i2c_dev_s;
+struct i2c_master_s;
 struct spi_dev_s;
 
 /********************************************************************************************
@@ -361,7 +361,7 @@ extern "C"
 ADXL345_HANDLE adxl345_instantiate(FAR struct spi_dev_s *dev,
                                    FAR struct adxl345_config_s *config);
 #else
-ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
+ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
                                    FAR struct adxl345_config_s *config);
 #endif
 
