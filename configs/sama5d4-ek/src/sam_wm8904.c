@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/pcm.h>
 #include <nuttx/audio/wm8904.h>

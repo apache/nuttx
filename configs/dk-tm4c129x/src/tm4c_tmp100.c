@@ -41,7 +41,7 @@
 
 #include <errno.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lm75.h>
 
 #include "tiva_i2c.h"

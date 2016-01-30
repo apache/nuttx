@@ -72,7 +72,7 @@
 
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
 #  include <nuttx/clock.h>
-#  include <nuttx/i2c.h>
+#  include <nuttx/i2c/i2c_master.h>
 #ifdef HAVE_RTC_DSXXXX
 #  include <nuttx/timers/ds3231.h>
 #else

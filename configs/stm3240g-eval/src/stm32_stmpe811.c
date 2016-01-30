@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/stmpe811.h>
 
