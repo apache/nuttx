@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -208,9 +209,9 @@ struct i2c_ops_s
 
 struct i2c_config_s
 {
-  uint32_t frequency;              /* I2C frequency */
-  uint16_t address;                /* I2C address (7 or 10 bit) */
-  uint8_t  addrlen;                /* I2C address length (7 or 10 bits) */
+  uint32_t frequency;          /* I2C frequency */
+  uint16_t address;            /* I2C address (7- or 10-bit) */
+  uint8_t  addrlen;            /* I2C address length (7 or 10 bits) */
 };
 
 /* I2C transaction segment beginning with a START.  A number of these can
@@ -220,10 +221,10 @@ struct i2c_config_s
 
 struct i2c_msg_s
 {
-  uint16_t  addr;                  /* Slave address */
-  uint16_t  flags;                 /* See I2C_M_* definitions */
-  uint8_t  *buffer;
-  int       length;
+  uint16_t  addr;              /* Slave address (7- or 10-bit) */
+  uint16_t  flags;             /* See I2C_M_* definitions */
+  uint8_t  *buffer;            /* Buffer to be transferred */
+  ssize_t   length;            /* Length of the buffer in byetes */
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
