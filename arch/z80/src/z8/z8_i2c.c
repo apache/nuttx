@@ -58,6 +58,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define EZ80_NOSTOP    (1 << 0)   /* Bit 0: No STOP on this transfer */
+#define EZ80_NOSTART   (1 << 1)   /* Bit 1: No address or START on this tranfers */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -65,6 +68,7 @@
 struct z8_i2cdev_s
 {
   const struct i2c_ops_s *ops; /* I2C vtable */
+  uint32_t frequency;          /* Currently selected I2C frequency */
   uint16_t brg;                /* Baud rate generator value */
   uint8_t  addr;               /* 8-bit address */
 };
@@ -75,17 +79,29 @@ struct z8_i2cdev_s
 
 /* Misc. Helpers */
 
-static void i2c_waittxempty(void);
-static void i2c_waitrxavail(void);
-static void i2c_setbrg(uint16_t brg);
-static uint16_t i2c_getbrg(uint32_t frequency);
+static void     z8_i2c_waittxempty(void);
+static void     z8_i2c_waitrxavail(void);
+static void     z8_i2c_setbrg(uint16_t brg);
+static uint16_t z8_i2c_getbrg(uint32_t frequency);
+static int      z8_i2c_read_transfer(FAR struct z8_i2cdev_s *priv,
+                  FAR uint8_t *buffer, int buflen, uint8_t flags);
+static int      z8_i2c_write_transfer(FAR struct z8_i2cdev_s *priv,
+                  FAR const uint8_t *buffer, int buflen, uint8_t flags);
 
 /* I2C methods */
 
-static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);
-static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
-static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);
-static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
+static uint32_t z8_i2c_setfrequency(FAR struct i2c_master_s *dev,
+                  uint32_t frequency);
+static int      z8_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
+                  int nbits);
+static int      z8_i2c_write(FAR struct i2c_master_s *dev,
+                  FAR const uint8_t *buffer, int buflen);
+static int      z8_i2c_read(FAR struct i2c_master_s *dev,
+                  FAR uint8_t *buffer, int buflen);
+#ifdef CONFIG_I2C_TRANSFER
+static int      z8_i2c_transfer(FAR struct i2c_master_s *dev,
+                  FAR struct i2c_msg_s *msgs, int count);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -105,17 +121,17 @@ static sem_t    g_i2csem;       /* Serialize I2C transfers */
 
 const struct i2c_ops_s g_ops =
 {
-  i2c_setfrequency,
-  i2c_setaddress,
-  i2c_write,
-  i2c_read,
+  z8_i2c_setfrequency,
+  z8_i2c_setaddress,
+  z8_i2c_write,
+  z8_i2c_read,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: i2c_semtake/i2c_semgive
+ * Name: z8_i2c_semtake/z8_i2c_semgive
  *
  * Description:
  *   Take/Give the I2C semaphore.
@@ -128,7 +144,7 @@ const struct i2c_ops_s g_ops =
  *
  ****************************************************************************/
 
-static void i2c_semtake(void)
+static void z8_i2c_semtake(void)
 {
   /* Take the I2C semaphore (perhaps waiting) */
 
@@ -142,10 +158,10 @@ static void i2c_semtake(void)
     }
 }
 
-#define i2c_semgive() sem_post(&g_i2csem)
+#define z8_i2c_semgive() sem_post(&g_i2csem)
 
 /****************************************************************************
- * Name: i2c_waittxempty
+ * Name: z8_i2c_waittxempty
  *
  * Description:
  *   Wait for the transmit data register to become empty.
@@ -158,14 +174,14 @@ static void i2c_semtake(void)
  *
  ****************************************************************************/
 
-static void i2c_waittxempty(void)
+static void z8_i2c_waittxempty(void)
 {
   int i;
   for (i = 0; i < 10000 && (I2CSTAT & I2C_STAT_TDRE) == 0;  i++);
 }
 
 /****************************************************************************
- * Name: i2c_waitrxavail
+ * Name: z8_i2c_waitrxavail
  *
  * Description:
  *   Wait until we have received a full byte of data.
@@ -178,14 +194,14 @@ static void i2c_waittxempty(void)
  *
  ****************************************************************************/
 
-static void i2c_waitrxavail(void)
+static void z8_i2c_waitrxavail(void)
 {
   int i;
   for (i = 0; i <= 10000 && (I2CSTAT & (I2C_STAT_RDRF | I2C_STAT_NCKI)) == 0; i++);
 }
 
 /****************************************************************************
- * Name: i2c_setbrg
+ * Name: z8_i2c_setbrg
  *
  * Description:
  *   Set the current BRG value for this transaction
@@ -198,7 +214,7 @@ static void i2c_waitrxavail(void)
  *
  ****************************************************************************/
 
-static void i2c_setbrg(uint16_t brg)
+static void z8_i2c_setbrg(uint16_t brg)
 {
   if (g_currbrg != brg)
     {
@@ -209,7 +225,7 @@ static void i2c_setbrg(uint16_t brg)
 }
 
 /****************************************************************************
- * Name: i2c_getbrg
+ * Name: z8_i2c_getbrg
  *
  * Description:
  *   Calculate the BRG value
@@ -222,7 +238,7 @@ static void i2c_setbrg(uint16_t brg)
  *
  ****************************************************************************/
 
-static uint16_t i2c_getbrg(uint32_t frequency)
+static uint16_t z8_i2c_getbrg(uint32_t frequency)
 {
   uint32_t sysclock = get_freq();
 
@@ -240,7 +256,61 @@ static uint16_t i2c_getbrg(uint32_t frequency)
 }
 
 /****************************************************************************
- * Name: i2c_setfrequency
+ * Name: z8_i2c_read_transfer
+ *
+ * Description:
+ *   Receive a block of data from I2C using the previously selected I2C
+ *   frequency and slave address. Each read operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this read completes. Required.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - A pointer to a buffer of data to receive the data from the device
+ *   buflen - The requested number of bytes to be read
+ *   flags  - Determines is a START and/or STOP indication is needed.
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+static int z8_i2c_read_transfer(FAR struct z8_i2cdev_s *priv,
+                                FAR uint8_t *buffer, int buflen,
+                                uint8_t flags)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: z8_i2c_write_transfer
+ *
+ * Description:
+ *   Send a block of data on I2C using the previously selected I2C
+ *   frequency and slave address. Each write operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this write completes. Required.
+ *
+ * Input Parameters:
+ *   dev -    Device-specific state data
+ *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buflen - The number of bytes to send from the buffer
+ *   flags  - Determines is a START and/or STOP indication is needed.
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+static int z8_i2c_write_transfer(FAR struct z8_i2cdev_s *priv,
+                                 FAR const uint8_t *buffer, int buflen,
+                                 uint8_t flags)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: z8_i2c_setfrequency
  *
  * Description:
  *   Set the I2C frequency. This frequency will be retained in the struct
@@ -255,28 +325,28 @@ static uint16_t i2c_getbrg(uint32_t frequency)
  *
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
+static uint32_t z8_i2c_setfrequency(FAR struct i2c_master_s *dev,
+                                    uint32_t frequency)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
 
-  /* Sanity Check */
+  DEBUGASSERT(dev != NULL);
 
-#ifdef CONFIG_DEBUG
-  if (!dev)
-    {
-      dbg("Invalid inputs\n");
-      return -EINVAL;
-    }
-#endif
+  /* Has the frequency changed? */
 
-  /* Calculate and save the BRG (we won't apply it until the first transfer) */
+  if (priv->frequency != frequency)
+  {
+    /* Calculate and save the BRG (we won't apply it until the first transfer) */
 
-  priv->brg = i2c_getbrg(frequency);
+    priv->brg = z8_i2c_getbrg(frequency);
+    priv->frequency = frequency;
+  }
+
   return OK;
 }
 
 /****************************************************************************
- * Name: i2c_setaddress
+ * Name: z8_i2c_setaddress
  *
  * Description:
  *   Set the I2C slave address. This frequency will be retained in the struct
@@ -292,7 +362,8 @@ static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequenc
  *
  ****************************************************************************/
 
-static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
+static int z8_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
+                             int nbits)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
 
@@ -314,7 +385,7 @@ static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 }
 
 /****************************************************************************
- * Name: i2c_write
+ * Name: z8_i2c_write
  *
  * Description:
  *   Send a block of data on I2C using the previously selected I2C
@@ -332,28 +403,23 @@ static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
+static int z8_i2c_write(FAR struct i2c_master_s *dev,
+                        FAR const uint8_t *buffer, int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
   const uint8_t *ptr;
   int retry;
   int count;
 
-#ifdef CONFIG_DEBUG
-  if (!priv || !buffer || buflen < 1)
-    {
-      dbg("Invalid inputs\n");
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
 
   /* Get exclusive access */
 
-  i2c_semtake();
+  z8_i2c_semtake();
 
   /* Set the frequency */
 
-  i2c_setbrg(priv->brg);
+  z8_i2c_setbrg(priv->brg);
 
   /* Retry as necessary to send this whole message */
 
@@ -368,7 +434,7 @@ static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int bu
 
       /* Wait for the xmt buffer to become empty */
 
-      i2c_waittxempty();
+      z8_i2c_waittxempty();
 
       /* Then send all of the bytes in the buffer */
 
@@ -378,7 +444,7 @@ static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int bu
           /* Send a byte of data and wait for it to be sent */
 
           I2CD = *ptr++;
-          i2c_waittxempty();
+          z8_i2c_waittxempty();
 
           /* If this was the last byte, then send STOP immediately.  This
            * is because the ACK will not be valid until the STOP clocks out
@@ -396,7 +462,7 @@ static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int bu
 
               if ((I2CSTAT & I2C_STAT_ACK) != 0)
                 {
-                  i2c_semgive();
+                  z8_i2c_semgive();
                   return OK;
                 }
 
@@ -422,12 +488,13 @@ static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int bu
             }
         }
     }
-  i2c_semgive();
+
+  z8_i2c_semgive();
   return -ETIMEDOUT;
 }
 
 /****************************************************************************
- * Name: i2c_read
+ * Name: z8_i2c_read
  *
  * Description:
  *   Receive a block of data from I2C using the previously selected I2C
@@ -445,28 +512,23 @@ static int i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int bu
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
+static int z8_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
+                       int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
   uint8_t *ptr;
   int retry;
   int count;
 
-#ifdef CONFIG_DEBUG
-  if (!priv || !buffer || buflen < 1)
-    {
-      dbg("Invalid inputs\n");
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
 
   /* Get exclusive access */
 
-  i2c_semtake();
+  z8_i2c_semtake();
 
   /* Set the frequency */
 
-  i2c_setbrg(priv->brg);
+  z8_i2c_setbrg(priv->brg);
 
   /* Retry as necessary to receive the whole message */
 
@@ -495,7 +557,7 @@ static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
         {
           /* Wait for the receive buffer to fill */
 
-          i2c_waitrxavail();
+          z8_i2c_waitrxavail();
 
           /* Did we get a byte?  Or did an error occur? */
 
@@ -517,7 +579,7 @@ static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
               else if (count == 1)
                 {
                   I2CCTL |= I2C_CTL_STOP;
-                  i2c_semgive();
+                  z8_i2c_semgive();
                   return OK;
                 }
             }
@@ -539,9 +601,111 @@ static int i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
             }
         }
     }
-  i2c_semgive();
+
+  z8_i2c_semgive();
   return -ETIMEDOUT;
 }
+
+/****************************************************************************
+ * Name: z8_i2c_transfer
+ *
+ * Description:
+ *   Perform a sequence of I2C transfers, each transfer is started with a
+ *   START and the final transfer is completed with a STOP. Each sequence
+ *   will be an 'atomic'  operation in the sense that any other I2C actions
+ *   will be serialized and pend until this read completes. Optional.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   msgs     - A pointer to a set of message descriptors
+ *   msgcount - The number of transfers to perform
+ *
+ * Returned Value:
+ *   The number of transfers completed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRANSFER
+static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
+                             FAR struct i2c_msg_s *msgs, int count)
+{
+  FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
+  FAR struct i2c_msg_s *msg;
+  bool nostop;
+  uint8_t flags;
+  int ret = OK;
+  int i;
+
+  /* Perform each segment of the transfer, message at a time */
+
+  flags = 0;
+
+  /* Get exclusive access to the I2C bus */
+
+  z8_i2c_semtake();
+
+  /* Set the frequency */
+
+  z8_i2c_setbrg(priv->brg);
+
+  for (i = 0; i < count; i++)
+    {
+      msg  = &msgs[i];
+
+      /* Is this the last message in the sequence? */
+
+      nostop = false;
+      if (i < (count - 1))
+       {
+          FAR struct i2c_msg_s *next;
+
+          /* No... Check if the next message should have a repeated start or
+           * not.  The conditions for NO repeated start are:
+           *
+           *   - I2C_M_NORESTART bit set
+           *   - Same direction (I2C_M_READ)
+           *   - Same address (and I2C_M_TEN)
+           */
+
+          next = &msgs[i + 1];
+          if ((msg->flags & I2C_M_NORESTART) != 0 &&
+              (msg->flags & (I2C_M_READ | I2C_M_TEN)) == (next->flags & (I2C_M_READ | I2C_M_TEN)) &&
+              msg->addr == next->addr)
+            {
+              nostop = true;
+            }
+        }
+
+      /* Perform the read or write operation */
+
+      flags |= (nostop) ? EZ80_NOSTOP : 0;
+      if ((msg->flags & I2C_M_READ) != 0)
+        {
+          ret = z8_i2c_read_transfer(priv, msg->buffer, msg->length, flags);
+        }
+      else
+        {
+          ret = z8_i2c_write_transfer(priv, msg->buffer, msg->length, flags);
+        }
+
+      /* Check for I2C transfer errors */
+
+      if (ret < 0)
+        {
+          break;
+        }
+
+      /* If there was no STOP bit on this segment, then there should be no
+       * START on the next segment.
+       */
+
+      flags = (nostop) ? EZ80_NOSTART : 0;
+    }
+
+  z8_i2c_semgive();
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -572,8 +736,8 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
     {
       /* Set up some initial BRG value */
 
-      uint16_t brg = i2c_getbrg(100*1000);
-      i2c_setbrg(brg);
+      uint16_t brg = z8_i2c_getbrg(100*1000);
+      z8_i2c_setbrg(brg);
 
       /* Make sure that GPIOs are configured for the alternate function (this
        * varies with silicon revisions).
@@ -593,7 +757,7 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
 
   /* Now, allocate an I2C instance for this caller */
 
-  i2c = (FAR struct z8_i2cdev_s *)kmm_malloc(sizeof(FAR struct z8_i2cdev_s));
+  i2c = (FAR struct z8_i2cdev_s *)kmm_zalloc(sizeof(FAR struct z8_i2cdev_s));
   if (i2c)
     {
       /* Initialize the allocated instance */

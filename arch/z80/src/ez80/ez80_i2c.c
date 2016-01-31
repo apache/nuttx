@@ -970,9 +970,7 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
-  FAR struct i2c_msg_s *msgs;
-  FAR struct i2c_msg_s *prev;
-  FAR struct i2c_msg_s *next;
+  FAR struct i2c_msg_s *msg;
   bool nostop;
   uint8_t flags;
   int ret = OK;
@@ -981,7 +979,6 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
   /* Perform each segment of the transfer, message at a time */
 
   flags = 0;
-  prev  = NULL;
 
   /* Get exclusive access to the I2C bus */
 
@@ -1000,6 +997,8 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
       nostop = false;
       if (i < (count - 1))
        {
+          FAR struct i2c_msg_s *next;
+
           /* No... Check if the next message should have a repeated start or
            * not.  The conditions for NO repeated start are:
            *
@@ -1010,7 +1009,7 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
 
           next = &msgs[i + 1];
           if ((msg->flags & I2C_M_NORESTART) != 0 &&
-              (msg->flags & (I2C_M_READ | I2C_M_TEN)) = (next->flags & (I2C_M_READ | I2C_M_TEN)) &&
+              (msg->flags & (I2C_M_READ | I2C_M_TEN)) == (next->flags & (I2C_M_READ | I2C_M_TEN)) &&
               msg->addr == next->addr)
             {
               nostop = true;
@@ -1022,11 +1021,11 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
       flags |= (nostop) ? EZ80_NOSTOP : 0;
       if ((msg->flags & I2C_M_READ) != 0)
         {
-          ret = ez80_i2c_read_transfer(priv, msg->buffer, msg->buflen, flags);
+          ret = ez80_i2c_read_transfer(priv, msg->buffer, msg->length, flags);
         }
       else
         {
-          ret = ez80_i2c_write_transfer(priv, msg->buffer, msg->buflen, flags);
+          ret = ez80_i2c_write_transfer(priv, msg->buffer, msg->length, flags);
         }
 
       /* Check for I2C transfer errors */
