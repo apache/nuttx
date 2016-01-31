@@ -784,7 +784,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_sspinitialize
+ * Name: lpc43_sspbus_initialize
  *
  * Description:
  *   Initialize the selected SSP port (0=SSP0, 1=SSP1)
@@ -797,7 +797,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc43_sspinitialize(int port)
+FAR struct spi_dev_s *lpc43_sspbus_initialize(int port)
 {
   FAR struct lpc43_sspdev_s *priv;
   uint32_t regval;

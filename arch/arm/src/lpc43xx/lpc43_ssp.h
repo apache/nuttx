@@ -60,8 +60,8 @@
  *    lpc43_ssp0/1cmddata() functions in your board-specific logic.  These
  *    functions will perform cmd/data selection operations using GPIOs in the
  *    way your board is configured.
- * 4. Your low level board initialization logic should call lpc43_sspinitialize.
- * 5. The handle returned by lpc43_sspinitialize() may then be used to bind the
+ * 4. Your low level board initialization logic should call lpc43_sspbus_initialize.
+ * 5. The handle returned by lpc43_sspbus_initialize() may then be used to bind the
  *    SSP driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *    for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
@@ -90,7 +90,7 @@ extern "C"
  ************************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_sspinitialize
+ * Name: lpc43_sspbus_initialize
  *
  * Description:
  *   Initialize the selected SSP port (0=SSP0, 1=SSP1)
@@ -103,7 +103,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc43_sspinitialize(int port);
+FAR struct spi_dev_s *lpc43_sspbus_initialize(int port);
 
 /************************************************************************************
  * Name:  lpc43_ssp0/1select, lpc43_ssp0/1status, and lpc43_ssp0/1cmddata

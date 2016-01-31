@@ -586,7 +586,7 @@ FAR struct spi_dev_s *lpc43_spibus_initialize(int port)
   if (port)
     {
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
-      return lpc43_sspinitialize(port - 1);
+      return lpc43_sspbus_initialize(port - 1);
 #else
       return NULL;
 #endif

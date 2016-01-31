@@ -949,7 +949,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp2initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc11_sspinitialize
+ * Name: lpc11_sspbus_initialize
  *
  * Description:
  *   Initialize the selected SSP port.
@@ -962,7 +962,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp2initialize(void)
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc11_sspinitialize(int port)
+FAR struct spi_dev_s *lpc11_sspbus_initialize(int port)
 {
   FAR struct lpc11_sspdev_s *priv;
   uint32_t regval;
