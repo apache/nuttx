@@ -58,8 +58,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define EZ80_NOSTOP    (1 << 0)   /* Bit 0: No STOP on this transfer */
-#define EZ80_NOSTART   (1 << 1)   /* Bit 1: No address or START on this tranfers */
+#define Z8_NOSTOP    (1 << 0)  /* Bit 0: No STOP on this transfer */
+#define Z8_NOSTART   (1 << 1)  /* Bit 1: No address or START on this tranfers */
 
 /****************************************************************************
  * Private Types
@@ -279,7 +279,90 @@ static int z8_i2c_read_transfer(FAR struct z8_i2cdev_s *priv,
                                 FAR uint8_t *buffer, int buflen,
                                 uint8_t flags)
 {
-  return -ENOSYS;
+  FAR uint8_t *ptr;
+  int retry;
+  int count;
+
+  /* Retry as necessary to receive the whole message */
+
+  for (retry = 0; retry < 100; retry++)
+    {
+      if ((flags & Z8_NOSTART) == 0)
+        {
+          /* Load the address into the transmit register.  It is not sent
+           * until the START bit is set.
+           */
+
+          I2CD = I2C_READADDR8(priv->addr);
+
+          /* If we want only a single byte of data, then set the NACK
+           * bit now.
+           */
+
+          I2CCTL |= I2C_CTL_NAK;
+
+          /* The START bit begins the transaction */
+
+          I2CCTL |= I2C_CTL_START;
+        }
+
+      /* Now loop to receive each data byte */
+
+      ptr = buffer;
+      for (count = buflen; count; count--)
+        {
+          /* Wait for the receive buffer to fill */
+
+          z8_i2c_waitrxavail();
+
+          /* Did we get a byte?  Or did an error occur? */
+
+          if (I2CSTAT & I2C_STAT_RDRF)
+            {
+              /* Save the data byte */
+
+              *ptr++ = I2CD;
+
+              /* If the next byte is the last byte, then set NAK now */
+
+              if (count == 2 && (flags & Z8_NOSTOP) == 0)
+                {
+                  I2CCTL |= I2C_CTL_NAK;
+                }
+
+              /* If this was the last byte, then set STOP and return success */
+
+              else if (count == 1)
+                {
+                  if ((flags & Z8_NOSTOP) == 0)
+                    {
+                      I2CCTL |= I2C_CTL_STOP;
+                    }
+
+                  return OK;
+                }
+            }
+
+          /* An error occurred.  Clear byte bus and break out of the loop
+           * to retry now.
+           */
+
+          else
+            {
+              /* No, flush the buffer and toggle the I2C on and off */
+
+              I2CCTL |= I2C_CTL_FLUSH;
+              I2CCTL &= ~I2C_CTL_IEN;
+              I2CCTL |= I2C_CTL_IEN;
+
+              /* Break out of the loop early and try again */
+
+              break;
+            }
+        }
+    }
+
+  return -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -306,7 +389,84 @@ static int z8_i2c_write_transfer(FAR struct z8_i2cdev_s *priv,
                                  FAR const uint8_t *buffer, int buflen,
                                  uint8_t flags)
 {
-  return -ENOSYS;
+  FAR const uint8_t *ptr;
+  int retry;
+  int count;
+
+  /* Retry as necessary to send this whole message */
+
+  for (retry = 0; retry < 100; retry++)
+    {
+      if ((flags & Z8_NOSTART) == 0)
+        {
+          /* Load the address into the transmit register.  It is not sent
+           * until the START bit is set.
+           */
+
+          I2CD    = I2C_WRITEADDR8(priv->addr);
+          I2CCTL |= I2C_CTL_START;
+
+          /* Wait for the xmt buffer to become empty */
+
+          z8_i2c_waittxempty();
+        }
+
+      /* Then send all of the bytes in the buffer */
+
+      ptr = buffer;
+      for (count = buflen; count; count--)
+        {
+          /* Send a byte of data and wait for it to be sent */
+
+          I2CD = *ptr++;
+          z8_i2c_waittxempty();
+
+          /* If this was the last byte, then send STOP immediately.  This
+           * is because the ACK will not be valid until the STOP clocks out
+           * the last bit.. Hmmm.  If this true then we will never be
+           * able to send more than one data byte???
+           */
+
+          if (count == 1)
+            {
+              if ((flags & Z8_NOSTOP) == 0)
+                {
+                  I2CCTL |= I2C_CTL_STOP;
+                }
+
+              /* If this last byte was ACKed, then the whole buffer
+               * was successfully sent and we can return success.
+               */
+
+              if ((I2CSTAT & I2C_STAT_ACK) != 0)
+                {
+                  return OK;
+                }
+
+              /* If was was not ACKed, then this inner loop will
+               * terminated (because count will decrement to zero
+               * and the whole message will be resent
+               */
+            }
+
+          /* Not the last byte... was this byte ACKed? */
+
+          else if ((I2CSTAT & I2C_STAT_ACK) == 0)
+            {
+              /* No, flush the buffer and toggle the I2C on and off */
+
+              I2CCTL |= I2C_CTL_FLUSH;
+              I2CCTL &= ~I2C_CTL_IEN;
+              I2CCTL |= I2C_CTL_IEN;
+
+              /* Break out of the loop early and try again */
+
+              break;
+            }
+        }
+    }
+
+  return -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -516,9 +676,7 @@ static int z8_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
                        int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
-  uint8_t *ptr;
-  int retry;
-  int count;
+  int ret;
 
   DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
 
@@ -530,80 +688,12 @@ static int z8_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
 
   z8_i2c_setbrg(priv->brg);
 
-  /* Retry as necessary to receive the whole message */
+  /* Perform the transfer */
 
-  for (retry = 0; retry < 100; retry++)
-    {
-      /* Load the address into the transmit register.  It is not sent
-       * until the START bit is set.
-       */
-
-      I2CD = I2C_READADDR8(priv->addr);
-
-      /* If we want only a single byte of data, then set the NACK
-       * bit now.
-       */
-
-      I2CCTL |= I2C_CTL_NAK;
-
-      /* The START bit begins the transaction */
-
-      I2CCTL |= I2C_CTL_START;
-
-      /* Now loop to receive each data byte */
-
-      ptr = buffer;
-      for (count = buflen; count; count--)
-        {
-          /* Wait for the receive buffer to fill */
-
-          z8_i2c_waitrxavail();
-
-          /* Did we get a byte?  Or did an error occur? */
-
-          if (I2CSTAT & I2C_STAT_RDRF)
-            {
-              /* Save the data byte */
-
-              *ptr++ = I2CD;
-
-              /* If the next byte is the last byte, then set NAK now */
-
-              if (count == 2)
-                {
-                  I2CCTL |= I2C_CTL_NAK;
-                }
-
-              /* If this was the last byte, then set STOP and return success */
-
-              else if (count == 1)
-                {
-                  I2CCTL |= I2C_CTL_STOP;
-                  z8_i2c_semgive();
-                  return OK;
-                }
-            }
-          /* An error occurred.  Clear byte bus and break out of the loop
-           * to retry now.
-           */
-
-          else
-            {
-              /* No, flush the buffer and toggle the I2C on and off */
-
-              I2CCTL |= I2C_CTL_FLUSH;
-              I2CCTL &= ~I2C_CTL_IEN;
-              I2CCTL |= I2C_CTL_IEN;
-
-              /* Break out of the loop early and try again */
-
-              break;
-            }
-        }
-    }
+  ret = z8_i2c_read_transfer(priv, buffer, buflen, 0);
 
   z8_i2c_semgive();
-  return -ETIMEDOUT;
+  return ret;
 }
 
 /****************************************************************************
@@ -678,7 +768,7 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
 
       /* Perform the read or write operation */
 
-      flags |= (nostop) ? EZ80_NOSTOP : 0;
+      flags |= (nostop) ? Z8_NOSTOP : 0;
       if ((msg->flags & I2C_M_READ) != 0)
         {
           ret = z8_i2c_read_transfer(priv, msg->buffer, msg->length, flags);
@@ -699,7 +789,7 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
        * START on the next segment.
        */
 
-      flags = (nostop) ? EZ80_NOSTART : 0;
+      flags = (nostop) ? Z8_NOSTART : 0;
     }
 
   z8_i2c_semgive();
