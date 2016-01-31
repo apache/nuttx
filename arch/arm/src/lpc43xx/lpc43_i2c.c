@@ -144,10 +144,8 @@ static int      lpc43_i2c_write(FAR struct i2c_master_s *dev,
                   const uint8_t *buffer, int buflen);
 static int      lpc43_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer,
                   int buflen);
-#ifdef CONFIG_I2C_TRANSFER
 static int      lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
-#endif
 
 struct i2c_ops_s lpc43_i2c_ops =
 {
@@ -155,9 +153,7 @@ struct i2c_ops_s lpc43_i2c_ops =
   .setaddress   = lpc43_i2c_setaddress,
   .write        = lpc43_i2c_write,
   .read         = lpc43_i2c_read,
-#ifdef CONFIG_I2C_TRANSFER
   .transfer     = lpc43_i2c_transfer
-#endif
 };
 
 /****************************************************************************

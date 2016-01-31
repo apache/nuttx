@@ -104,10 +104,8 @@ static int      ez80_i2c_write(FAR struct i2c_master_s *dev,
                   FAR const uint8_t *buffer, int buflen);
 static int      ez80_i2c_read(FAR struct i2c_master_s *dev,
                   FAR uint8_t *buffer, int buflen);
-#ifdef CONFIG_I2C_TRANSFER
 static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -130,10 +128,8 @@ const struct i2c_ops_s g_ops =
   ez80_i2c_setfrequency,
   ez80_i2c_setaddress,
   ez80_i2c_write,
-  ez80_i2c_read
-#ifdef CONFIG_I2C_TRANSFER
-  , ez80_i2c_transfer
-#endif
+  ez80_i2c_read,
+  ez80_i2c_transfer
 };
 
 /****************************************************************************
@@ -965,7 +961,6 @@ static int ez80_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count)
 {
@@ -1045,7 +1040,6 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
   ez80_i2c_semgive();
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

@@ -335,11 +335,8 @@ static int efm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t * buffer,
                            int buflen);
 static int efm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t * buffer,
                           int buflen);
-
-#ifdef CONFIG_I2C_TRANSFER
 static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count);
-#endif /* CONFIG_I2C_TRANSFER */
 
 #ifdef CONFIG_I2C_TRACE
 static const char *efm32_i2c_state_str(int i2c_state);
@@ -412,12 +409,10 @@ static struct efm32_i2c_priv_s efm32_i2c1_priv =
 static const struct i2c_ops_s efm32_i2c_ops =
 {
   .setfrequency = efm32_i2c_setfrequency,
-  .setaddress = efm32_i2c_setaddress,
-  .write = efm32_i2c_write,
-  .read = efm32_i2c_read
-#ifdef CONFIG_I2C_TRANSFER
-  , .transfer = efm32_i2c_transfer
-#endif
+  .setaddress   = efm32_i2c_setaddress,
+  .write        = efm32_i2c_write,
+  .read         = efm32_i2c_read,
+  .transfer     = efm32_i2c_transfer
 };
 
 /****************************************************************************
@@ -1698,13 +1693,11 @@ int efm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t * buffer, int buflen)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count)
 {
   return efm32_i2c_process(dev, msgs, count);
 }
-#endif
 
 /****************************************************************************
  * Public Functions

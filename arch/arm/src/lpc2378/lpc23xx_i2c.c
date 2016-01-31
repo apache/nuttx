@@ -145,10 +145,8 @@ static int      lpc2378_i2c_write(FAR struct i2c_master_s *dev,
                   const uint8_t *buffer, int buflen);
 static int      lpc2378_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer,
                   int buflen);
-#ifdef CONFIG_I2C_TRANSFER
 static int      lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
-#endif
 static void     lpc2378_stopnext(struct lpc2378_i2cdev_s *priv);
 
 /****************************************************************************
@@ -171,9 +169,7 @@ struct i2c_ops_s lpc2378_i2c_ops =
   .setaddress   = lpc2378_i2c_setaddress,
   .write        = lpc2378_i2c_write,
   .read         = lpc2378_i2c_read,
-#ifdef CONFIG_I2C_TRANSFER
   .transfer     = lpc2378_i2c_transfer
-#endif
 };
 
 /****************************************************************************
@@ -377,7 +373,6 @@ static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count)
 {
@@ -395,7 +390,6 @@ static int lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: lpc2378_i2c_interrupt

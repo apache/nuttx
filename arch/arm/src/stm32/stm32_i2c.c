@@ -356,11 +356,8 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 static int stm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
                            int buflen);
 static int stm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
-
-#ifdef CONFIG_I2C_TRANSFER
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count);
-#endif /* CONFIG_I2C_TRANSFER */
 
 /************************************************************************************
  * Private Data
@@ -481,10 +478,8 @@ static const struct i2c_ops_s stm32_i2c_ops =
   .setfrequency       = stm32_i2c_setfrequency,
   .setaddress         = stm32_i2c_setaddress,
   .write              = stm32_i2c_write,
-  .read               = stm32_i2c_read
-#ifdef CONFIG_I2C_TRANSFER
-  , .transfer         = stm32_i2c_transfer
-#endif
+  .read               = stm32_i2c_read,
+  .transfer           = stm32_i2c_transfer
 };
 
 /************************************************************************************
@@ -1908,14 +1903,12 @@ int stm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count)
 {
   stm32_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
   return stm32_i2c_process(dev, msgs, count);
 }
-#endif
 
 /************************************************************************************
  * Public Functions

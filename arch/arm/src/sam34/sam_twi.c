@@ -195,10 +195,8 @@ static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
 static int twi_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
           int buflen);
 static int twi_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
-#ifdef CONFIG_I2C_TRANSFER
 static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
-#endif
 
 /* Initialization */
 
@@ -225,9 +223,7 @@ struct i2c_ops_s g_twiops =
   .setaddress       = twi_setaddress,
   .write            = twi_write,
   .read             = twi_read,
-#ifdef CONFIG_I2C_TRANSFER
   .transfer         = twi_transfer
-#endif
 };
 
 /****************************************************************************
@@ -897,7 +893,6 @@ static int twi_read(FAR struct i2c_master_s *dev, uint8_t *rbuffer, int rbuflen)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int twi_transfer(FAR struct i2c_master_s *dev,
                         FAR struct i2c_msg_s *msgs, int count)
 {
@@ -939,7 +934,6 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   twi_givesem(&priv->exclsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Initialization

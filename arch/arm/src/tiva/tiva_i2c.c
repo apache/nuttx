@@ -348,11 +348,8 @@ static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
 static int tiva_i2c_write(struct i2c_master_s *dev, const uint8_t *buffer,
                           int buflen);
 static int tiva_i2c_read(struct i2c_master_s *dev, uint8_t *buffer, int buflen);
-
-#ifdef CONFIG_I2C_TRANSFER
 static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc);
-#endif /* CONFIG_I2C_TRANSFER */
 
 /************************************************************************************
  * Private Data
@@ -585,10 +582,8 @@ static const struct i2c_ops_s tiva_i2c_ops =
   .setfrequency       = tiva_i2c_setfrequency,
   .setaddress         = tiva_i2c_setaddress,
   .write              = tiva_i2c_write,
-  .read               = tiva_i2c_read
-#ifdef CONFIG_I2C_TRANSFER
-  , .transfer         = tiva_i2c_transfer
-#endif
+  .read               = tiva_i2c_read,
+  .transfer           = tiva_i2c_transfer
 };
 
 /************************************************************************************
@@ -2136,7 +2131,6 @@ int tiva_i2c_read(struct i2c_master_s *dev, uint8_t *buffer, int buflen)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc)
 {
@@ -2149,7 +2143,6 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
   tiva_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
   return tiva_i2c_process(dev, msgv, msgc);
 }
-#endif
 
 /************************************************************************************
  * Public Functions

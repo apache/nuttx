@@ -98,10 +98,8 @@ static int      z8_i2c_write(FAR struct i2c_master_s *dev,
                   FAR const uint8_t *buffer, int buflen);
 static int      z8_i2c_read(FAR struct i2c_master_s *dev,
                   FAR uint8_t *buffer, int buflen);
-#ifdef CONFIG_I2C_TRANSFER
 static int      z8_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -715,7 +713,6 @@ static int z8_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count)
 {
@@ -795,7 +792,6 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
   z8_i2c_semgive();
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

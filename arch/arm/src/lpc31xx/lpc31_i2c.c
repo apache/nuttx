@@ -137,9 +137,7 @@ struct i2c_ops_s lpc31_i2c_ops =
   .setaddress   = i2c_setaddress,
   .write        = i2c_write,
   .read         = i2c_read,
-#ifdef CONFIG_I2C_TRANSFER
   .transfer     = i2c_transfer
-#endif
 };
 
 /****************************************************************************
