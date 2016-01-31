@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/z8encore000zco/ostest/setenv.sh
 #
-#   Copyright (C) 2008, 2009, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009, 2012, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,8 @@ fi
 #
 # This is the Cygwin path to location where the XDS-II tools were installed
 #
-TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_Z8Encore!_5.0.0/bin"
+# TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_Z8Encore!_5.0.0/bin"
+TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_Z8Encore!_5.2.2/bin"
 
 #
 # Add the path to the toolchain to the PATH varialble.  NOTE that /bin and /usr/bin
