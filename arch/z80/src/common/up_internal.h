@@ -173,7 +173,7 @@ void lowconsole_init(void);
 
 /* Defined in drivers/syslog_console.c */
 
-#ifdef defined(CONFIG_SYSLOG_CONSOLE)
+#ifdef CONFIG_SYSLOG_CONSOLE
 void syslog_console_init();
 #else
 # define syslog_console_init()

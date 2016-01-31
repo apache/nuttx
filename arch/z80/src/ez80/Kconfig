@@ -41,6 +41,18 @@ config EZ80_TOOLCHAIN_ZDSII
 	default y if ARCH_CHIP_EZ80
 	default n if !ARCH_CHIP_EZ80
 
+choice
+	prompt "ZDS-II Toolchain version"
+	default EZ80_ZDSII_V521
+
+config EZ80_ZDSII_V511
+	bool "ZDS-II 5.1.1"
+
+config EZ80_ZDSII_V521
+	bool "ZDS-II 5.2.1"
+
+endchoice # ZDS-II Toolchain version
+
 if EZ80_EMAC
 
 config EZ80_FIAD
@@ -105,7 +117,7 @@ config ARCH_MCFILTER
 	---help---
 		Enables multicast MAC address filtering (not fully implemented)
 
-endif
+endif # EZ80_EMAC
 
 config ARCH_TIMERHOOK
 	bool "Timer Hook"
@@ -116,4 +128,4 @@ config ARCH_TIMERHOOK
 		user provided function called up_timerhook().  At present, this timer hook is
 		only used for driving the segment LED on board certain ez80 boards.
 
-endif
+endif # ARCH_CHIP_EZ80
