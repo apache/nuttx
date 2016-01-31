@@ -1461,6 +1461,8 @@ nuttx/
  |   |   `- README.txt
  |   |- twr-k60n512/
  |   |   `- README.txt
+ |   |- u-blox-co27/
+ |   |   `- README.txt
  |   |- ubw32/
  |   |   `- README.txt
  |   |- us7032evb1/

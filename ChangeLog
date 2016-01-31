@@ -11417,12 +11417,15 @@
 	  out of the RTOS and into the application space, specifically to
 	  apps/platform/board, where it belongs (2016-01-29).
 	* drivers/modem/u-blox.c and include/nuttx/drivers/u-blox.h:  Add an upper
-	  half driver for the U-Blox Modem.  From  Vladimir Komendantskiy
+	  half driver for the U-Blox Modem.  From Vladimir Komendantskiy
 	  (2018-01-30).
 	* arch/arm/src/lpc17xx: Backport lpc43xx I2C driver, replacing the
 	  lpc17xx I2C driver.  This gives us the I2C_TRANSFER method (2016-01-30).
 	* arch/arm/src/lpc11xx: Backport the lpc17xx I2C driver, replacing the
 	  lpc11xx I2C driver.  This gives us the I2C_TRANSFER method (2019-01-30).
-	* arcm/arm/src/lpc2378: Backo the Lpc17xx I2C driver, replacing the
+	* arch/arm/src/lpc2378: Backo the Lpc17xx I2C driver, replacing the
 	  lpc2378 I2C driver.  This gives us the I2C_TRANSFER method (2019-01-30).
-
+	* confgs/u-blox-c027:  Support for the u-blox GSM and GPS module evaluation
+	  board with NXP LPCExpresso LPC1768.  The GSM module is one of LISA-C200,
+	  LISA-U200 or SARA-G350. The GPS module is one of MAX-M7 or MAX-M8.  From
+	  Vladimir Komendantskiy (2016-01-31).
