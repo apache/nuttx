@@ -163,7 +163,6 @@ Configurations
 
        Drivers
         CONFIG_I2C=y
-        CONFIG_I2C_TRANSFER=y
 
        Applications -> System Add-Ons
          CONFIG_SYSTEM_I2CTOOL=y
@@ -214,7 +213,6 @@ Configurations
 
        Drivers
         CONFIG_I2C=y
-        CONFIG_I2C_TRANSFER=y
 
        Applications -> System Add-Ons
          CONFIG_SYSTEM_I2CTOOL=y

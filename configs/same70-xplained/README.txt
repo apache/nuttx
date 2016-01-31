@@ -1155,7 +1155,6 @@ Configuration sub-directories
          CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
 
          CONFIG_I2C=y
-         CONFIG_I2C_TRANSFER=y
 
     7. TWIHS0 is used to support 256 byte non-volatile storage.  This EEPROM
        holds the assigned MAC address which is necessary for networking. The
@@ -1307,7 +1306,6 @@ Configuration sub-directories
          CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
 
          CONFIG_I2C=y
-         CONFIG_I2C_TRANSFER=y
 
          CONFIG_SYSTEM_I2CTOOL=y
          CONFIG_I2CTOOL_MINBUS=0
