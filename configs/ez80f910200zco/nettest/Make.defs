@@ -45,7 +45,11 @@ include $(TOPDIR)/tools/Config.mk
 #
 # Your PC may be configured differently.
 
+ifeq ($(CONFIG_EZ80_ZDSII_V521),y)
+ZDSVERSION := 5.2.1
+else # ifeq ($(CONFIGEZ80_ZDSII_V511),y)
 ZDSVERSION := 5.1.1
+endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSINSTALLDIR := C:/PROGRA~2/ZiLOG/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
@@ -250,7 +254,8 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
   # Windows-native host tools
 
-  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+  #MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
 else
 
 # Linux/Cygwin host tool definitions
@@ -262,7 +267,7 @@ else
 
   # This is the tool to use for dependencies (i.e., none)
 
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
 
   # ZDS-II cannot follow Cygwin soft links, so we will have to use directory copies
 

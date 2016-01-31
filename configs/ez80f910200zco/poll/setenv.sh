@@ -51,7 +51,8 @@ fi
 #
 # This is the Cygwin path to location where the XDS-II tools were installed
 #
-TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_eZ80Acclaim!_5.1.1\bin"
+#TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_eZ80Acclaim!_5.1.1\bin"
+TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_eZ80Acclaim!_5.2.1/bin"
 
 #
 # Add the path to the toolchain to the PATH varialble.  NOTE that /bin and /usr/bin

@@ -45,7 +45,11 @@ include $(TOPDIR)/tools/Config.mk
 #
 # Your PC may be configured differently.
 
+ifeq ($(CONFIG_Z8_ZDSII_V522),y)
+ZDSVERSION = 5.2.2
+else # ifeq ($(CONFIG_Z8_ZDSII_V500),y)
 ZDSVERSION = 5.0.0
+endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_Z8Encore!_$(ZDSVERSION)
