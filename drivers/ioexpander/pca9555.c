@@ -64,10 +64,6 @@
 #  warning I2C support is required (CONFIG_I2C)
 #endif
 
-#ifndef CONFIG_I2C_TRANSFER
-#  warning Support of the I2C transfer() method is required (CONFIG_I2C_TRANSFER)
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/

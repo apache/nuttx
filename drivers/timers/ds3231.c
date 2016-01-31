@@ -66,10 +66,6 @@
 #  error CONFIG_RTC_HIRES must NOT be set with this driver
 #endif
 
-#ifndef CONFIG_I2C_TRANSFER
-#  error CONFIG_I2C_TRANSFER is required by this driver
-#endif
-
 #ifndef CONFIG_DS3231_I2C_FREQUENCY
 #  error CONFIG_DS3231_I2C_FREQUENCY is not configured
 #  define CONFIG_DS3231_I2C_FREQUENCY 400000

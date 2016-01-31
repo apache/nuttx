@@ -121,9 +121,6 @@
 #  ifndef CONFIG_I2C
 #    error "CONFIG_I2C is required in the I2C support"
 #  endif
-#  ifndef CONFIG_I2C_TRANSFER
-#    error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
-#  endif
 #endif
 
 #ifdef CONFIG_DISABLE_SIGNALS

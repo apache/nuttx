@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_TRANSFER) && defined(CONFIG_LIS331DL)
+#if defined(CONFIG_I2C) && defined(CONFIG_LIS331DL)
 
 /************************************************************************************
  * Pre-Processor Declarations
@@ -208,5 +208,5 @@ FAR const struct lis331dl_vector_s *
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_I2C && CONFIG_I2C_TRANSFER && CONFIG_LIS331DL */
+#endif /* CONFIG_I2C && CONFIG_LIS331DL */
 #endif /* __INCLUDE_NUTTX_SENSORS_LIS331DL_H */

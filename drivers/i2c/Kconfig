@@ -9,10 +9,6 @@ config I2C_SLAVE
 	bool "I2C Slave"
 	default n
 
-config I2C_TRANSFER
-	bool "Support the I2C transfer() method"
-	default n
-
 config I2C_POLLED
 	bool "Polled I2C (no interrupts)"
 	default n

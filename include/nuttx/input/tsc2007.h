@@ -69,10 +69,6 @@
  * in getting the right configuration.
  */
 
-#ifndef CONFIG_I2C_TRANSFER
-#  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
-#endif
-
 #ifdef CONFIG_DISABLE_SIGNALS
 #  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
 #endif

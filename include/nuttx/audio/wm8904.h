@@ -84,10 +84,6 @@
 #  error CONFIG_I2C is required by the WM8904 driver
 #endif
 
-#ifndef CONFIG_I2C_TRANSFER
-#  error CONFIG_I2C_TRANSFER is required in the I2C configuration
-#endif
-
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error CONFIG_SCHED_WORKQUEUE is required by the WM8904 driver
 #endif

@@ -54,10 +54,6 @@
 
 #ifndef CONFIG_I2C
 #  error I2C driver support is required (CONFIG_I2C)
-#else
-#  ifndef CONFIG_I2C_TRANSFER
-#    error I2C transfer method is required (CONFIG_I2C_TRANSFER)
-#  endif
 #endif
 
 #ifndef CONFIG_TIMERS_CS2100CP_CLKINBW

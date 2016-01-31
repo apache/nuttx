@@ -196,10 +196,8 @@ struct i2c_ops_s
            int buflen);
   int    (*read)(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
            int buflen);
-#ifdef CONFIG_I2C_TRANSFER
   int    (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
            int count);
-#endif
 };
 
 /* This structure contains the full state of I2C as needed for a specific
@@ -318,11 +316,9 @@ int up_i2creset(FAR struct i2c_master_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 int i2c_writeread(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *config,
                   FAR const uint8_t *wbuffer, int wbuflen,
                   FAR uint8_t *rbuffer, int rbuflen);
-#endif
 
 /****************************************************************************
  * Name: i2c_write
@@ -343,10 +339,8 @@ int i2c_writeread(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *c
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 int i2c_write(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *config,
               FAR const uint8_t *buffer, int buflen);
-#endif
 
 /****************************************************************************
  * Name: i2c_read
@@ -367,10 +361,8 @@ int i2c_write(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *confi
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_TRANSFER
 int i2c_read(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *config,
              FAR uint8_t *buffer, int buflen);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

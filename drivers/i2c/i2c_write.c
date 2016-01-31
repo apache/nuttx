@@ -43,8 +43,6 @@
 
 #include <nuttx/i2c/i2c_master.h>
 
-#if defined(CONFIG_I2C_TRANSFER)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -91,4 +89,3 @@ int i2c_write(FAR struct i2c_master_s *dev,
   return I2C_TRANSFER(dev, &msg, 1);
 }
 
-#endif /* CONFIG_I2C_TRANSFER */
