@@ -378,6 +378,11 @@
 # define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
 # define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
+/* No I-space access qualifiers */
+
+# define IOBJ
+# define IPTR
+
 /* Attributes
  *
  * The Zilog compiler does not support weak symbols
