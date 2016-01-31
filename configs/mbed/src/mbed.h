@@ -79,14 +79,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: mbed_sspinitialize
+ * Name: mbed_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
  *
  ************************************************************************************/
 
-void weak_function mbed_sspinitialize(void);
+void weak_function mbed_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_MBED_SRC_MBED_H */

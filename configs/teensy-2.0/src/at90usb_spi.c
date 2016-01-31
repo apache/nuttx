@@ -147,7 +147,7 @@ void weak_function at90usb_spidev_initialize(void)
  *   other methods (including avr_spibus_initialize()) are provided by common AVR logic.
  *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in avr_sspinitialize() to configure SPI chip select pins.
+ *   1. Provide logic in avr_spidev_initialize() to configure SPI chip select pins.
  *   2. Provide avr_spiselect() and avr_spistatus() functions in your board-specific
  *      logic.  These functions will perform chip selection and status operations
  *      in the way your board is configured.

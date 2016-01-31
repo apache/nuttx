@@ -195,7 +195,7 @@ static int nsh_sdinitialize(void)
 
   /* Get the SSP port */
 
-  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  ssp = lpc17_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",

@@ -139,14 +139,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: nucleus2g_sspinitialize
+ * Name: nucleus2g_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
  *
  ************************************************************************************/
 
-void weak_function nucleus2g_sspinitialize(void);
+void weak_function nucleus2g_spidev_initialize(void);
 
 void up_relayinit(void);
 

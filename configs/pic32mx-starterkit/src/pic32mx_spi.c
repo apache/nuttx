@@ -86,14 +86,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pic32mx_sspinitialize
+ * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX board.
  *
  ************************************************************************************/
 
-void weak_function pic32mx_sspinitialize(void)
+void weak_function pic32mx_spidev_initialize(void)
 {
   /* Configure the SPI chip select GPIOs */
 
