@@ -1070,6 +1070,15 @@ config ARCH_BOARD_TWR_K60N512
 		Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
 		development board.
 
+config ARCH_BOARD_U_BLOX_C027
+	bool "u-blox C027"
+	depends on ARCH_CHIP_LPC1768
+	select ARCH_HAVE_LEDS
+	---help---
+		u-blox GSM and GPS module evaluation board with NXP LPCExpresso
+		LPC1768.  The GSM module is one of LISA-C200, LISA-U200 or SARA-G350.
+		The GPS module is one of MAX-M7 or MAX-M8.
+
 config ARCH_BOARD_UBW32
 	bool "UBW32 v2.4 board from Sparkfun"
 	depends on ARCH_CHIP_PIC32MX460F512L
@@ -1386,6 +1395,7 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "cc3200-launchpad"         if ARCH_BOARD_CC3200_LAUNCHPAD
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
+        default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
@@ -1765,6 +1775,9 @@ source "configs/cc3200-launchpad/Kconfig"
 endif
 if ARCH_BOARD_TWR_K60N512
 source "configs/twr-k60n512/Kconfig"
+endif
+if ARCH_BOARD_U_BLOX_C027
+source "configs/u-blox-c027/Kconfig"
 endif
 if ARCH_BOARD_UBW32
 source "configs/ubw32/Kconfig"
