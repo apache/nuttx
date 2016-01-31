@@ -200,7 +200,7 @@ static int lpc17_poweron(FAR struct ubxmdm_lower* lower)
   lpc17_configgpio(priv->pins->usb_detect   | usb_detect_val);
 
   lpc17_configgpio(priv->pins->ldo_enable   | GPIO_VALUE_ONE);  /* LDO enabled */
-  usleep(1 * 1000);  /* Delay to obtain correct voltage on shifters
+  usleep(1 * 1000);  /* Delay to obtain correct voltage on shifters */
 
   lpc17_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ZERO); /* UART shifter enabled */
 /* lpc17_configgpio(priv->pins->power_on_n  | GPIO_VALUE_ONE);   * Stop current through switch */
