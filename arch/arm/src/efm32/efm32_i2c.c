@@ -331,10 +331,6 @@ static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
 static int efm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
 static int efm32_i2c_process(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count);
-static int efm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t * buffer,
-                           int buflen);
-static int efm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t * buffer,
-                          int buflen);
 static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count);
 
@@ -410,8 +406,6 @@ static const struct i2c_ops_s efm32_i2c_ops =
 {
   .setfrequency = efm32_i2c_setfrequency,
   .setaddress   = efm32_i2c_setaddress,
-  .write        = efm32_i2c_write,
-  .read         = efm32_i2c_read,
   .transfer     = efm32_i2c_transfer
 };
 
@@ -1640,49 +1634,6 @@ static int efm32_i2c_process(FAR struct i2c_master_s *dev,
   efm32_i2c_sem_post(dev);
 
   return -errval;
-}
-
-/****************************************************************************
- * Name: efm32_i2c_write
- *
- * Description:
- *   Write I2C data
- *
- ****************************************************************************/
-
-static int efm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t * buffer,
-                           int buflen)
-{
-  struct i2c_msg_s msgv =
-  {
-    .addr = ((struct efm32_i2c_inst_s *)dev)->address,
-    .flags = ((struct efm32_i2c_inst_s *)dev)->flags,
-    .buffer = (uint8_t *) buffer,
-    .length = buflen
-  };
-
-  return efm32_i2c_process(dev, &msgv, 1);
-}
-
-/****************************************************************************
- * Name: efm32_i2c_read
- *
- * Description:
- *   Read I2C data
- *
- ****************************************************************************/
-
-int efm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t * buffer, int buflen)
-{
-  struct i2c_msg_s msgv =
-  {
-    .addr = ((struct efm32_i2c_inst_s *)dev)->address,
-    .flags = ((struct efm32_i2c_inst_s *)dev)->flags | I2C_M_READ,
-    .buffer = buffer,
-    .length = buflen
-  };
-
-  return efm32_i2c_process(dev, &msgv, 1);
 }
 
 /****************************************************************************

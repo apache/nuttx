@@ -136,10 +136,6 @@ static uint32_t lpc17_i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
 static int      lpc17_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
                   int nbits);
-static int      lpc17_i2c_write(FAR struct i2c_master_s *dev,
-                  const uint8_t *buffer, int buflen);
-static int      lpc17_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer,
-                  int buflen);
 static int      lpc17_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 static void     lpc17_stopnext(struct lpc17_i2cdev_s *priv);
@@ -162,8 +158,6 @@ struct i2c_ops_s lpc17_i2c_ops =
 {
   .setfrequency = lpc17_i2c_setfrequency,
   .setaddress   = lpc17_i2c_setaddress,
-  .write        = lpc17_i2c_write,
-  .read         = lpc17_i2c_read,
   .transfer     = lpc17_i2c_transfer
 };
 
@@ -223,74 +217,6 @@ static int lpc17_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
   priv->msg.addr  = addr;
 
   return OK;
-}
-
-/****************************************************************************
- * Name: lpc17_i2c_write
- *
- * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address.
- *
- ****************************************************************************/
-
-static int lpc17_i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
-                           int buflen)
-{
-  struct lpc17_i2cdev_s *priv = (struct lpc17_i2cdev_s *)dev;
-  int ret = 0;
-
-  DEBUGASSERT(dev != NULL);
-
-  priv->wrcnt      = 0;
-  priv->rdcnt      = 0;
-  priv->msg.flags  = 0;
-  priv->msg.buffer = (uint8_t *)buffer;
-  priv->msg.length = buflen;
-
-  priv->nmsg       = 1;
-  priv->msgs       = &(priv->msg);
-
-  if (buflen > 0)
-    {
-      ret = lpc17_i2c_start(priv);
-    }
-
-  return (ret == 0 ? 0 : -ETIMEDOUT);
-}
-
-/****************************************************************************
- * Name: lpc17_i2c_read
- *
- * Description:
- *   Receive a block of data on I2C using the previously selected I2C
- *   frequency and slave address.
- *
- ****************************************************************************/
-
-static int lpc17_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer,
-                          int buflen)
-{
-  struct lpc17_i2cdev_s *priv = (struct lpc17_i2cdev_s *)dev;
-  int ret = 0;
-
-  DEBUGASSERT(dev != NULL);
-
-  priv->wrcnt      = 0;
-  priv->rdcnt      = 0;
-  priv->msg.flags  = I2C_M_READ;
-  priv->msg.buffer = buffer;
-  priv->msg.length = buflen;
-
-  priv->nmsg       = 1;
-  priv->msgs       = &(priv->msg);
-
-  if (buflen > 0)
-    {
-      ret = lpc17_i2c_start(priv);
-    }
-
-  return (ret == 0 ? 0 : -ETIMEDOUT);
 }
 
 /****************************************************************************

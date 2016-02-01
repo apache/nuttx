@@ -239,9 +239,6 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev,
           uint32_t frequency);
 static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
-static int twi_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
-          int buflen);
-static int twi_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
 
@@ -319,8 +316,6 @@ struct i2c_ops_s g_twiops =
 {
   .setfrequency     = twi_setfrequency,
   .setaddress       = twi_setaddress,
-  .write            = twi_write,
-  .read             = twi_read,
   .transfer         = twi_transfer
 };
 
@@ -880,122 +875,6 @@ static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
 
   twi_givesem(&priv->exclsem);
   return OK;
-}
-
-/****************************************************************************
- * Name: twi_write
- *
- * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address.
- *
- ****************************************************************************/
-
-static int twi_write(FAR struct i2c_master_s *dev, const uint8_t *wbuffer, int wbuflen)
-{
-  struct twi_dev_s *priv = (struct twi_dev_s *) dev;
-  irqstate_t flags;
-  int ret;
-
-  struct i2c_msg_s msg =
-  {
-    .addr   = priv->address,
-    .flags  = priv->flags,
-    .buffer = (uint8_t *)wbuffer,  /* Override const */
-    .length = wbuflen
-  };
-
-  i2cvdbg("TWI%d buflen: %d\n", priv->attr->twi, wbuflen);
-  DEBUGASSERT(dev != NULL);
-
-  /* Get exclusive access to the device */
-
-  twi_takesem(&priv->exclsem);
-
-  /* Initiate the write */
-
-  priv->msg  = &msg;
-  priv->msgc = 1;
-
-  /* Initiate the write operation.  The rest will be handled from interrupt
-   * logic.  Interrupts must be disabled to prevent re-entrance from the
-   * interrupt level.
-   */
-
-  flags = irqsave();
-  twi_startwrite(priv, &msg);
-
-  /* And wait for the write to complete.  Interrupts will be re-enabled while
-   * we are waiting.
-   */
-
-  ret = twi_wait(priv, wbuflen);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: Transfer failed: %d\n", ret);
-    }
-
-  irqrestore(flags);
-  twi_givesem(&priv->exclsem);
-  return ret;
-}
-
-/****************************************************************************
- * Name: twi_read
- *
- * Description:
- *   Receive a block of data on I2C using the previously selected I2C
- *   frequency and slave address.
- *
- ****************************************************************************/
-
-static int twi_read(FAR struct i2c_master_s *dev, uint8_t *rbuffer, int rbuflen)
-{
-  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
-  irqstate_t flags;
-  int ret;
-
-  struct i2c_msg_s msg =
-  {
-    .addr   = priv->address,
-    .flags  = priv->flags | I2C_M_READ,
-    .buffer = rbuffer,
-    .length = rbuflen
-  };
-
-  DEBUGASSERT(dev != NULL);
-  i2cvdbg("TWI%d rbuflen: %d\n", priv->attr->twi, rbuflen);
-
-  /* Get exclusive access to the device */
-
-  twi_takesem(&priv->exclsem);
-
-  /* Initiate the read */
-
-  priv->msg  = &msg;
-  priv->msgc = 1;
-
-  /* Initiate the read operation.  The rest will be handled from interrupt
-   * logic.  Interrupts must be disabled to prevent re-entrance from the
-   * interrupt level.
-   */
-
-  flags = irqsave();
-  twi_startread(priv, &msg);
-
-  /* And wait for the read to complete.  Interrupts will be re-enabled while
-   * we are waiting.
-   */
-
-  ret = twi_wait(priv, rbuflen);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: Transfer failed: %d\n", ret);
-    }
-
-  irqrestore(flags);
-  twi_givesem(&priv->exclsem);
-  return ret;
 }
 
 /****************************************************************************

@@ -94,10 +94,6 @@ static uint32_t z8_i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
 static int      z8_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
                   int nbits);
-static int      z8_i2c_write(FAR struct i2c_master_s *dev,
-                  FAR const uint8_t *buffer, int buflen);
-static int      z8_i2c_read(FAR struct i2c_master_s *dev,
-                  FAR uint8_t *buffer, int buflen);
 static int      z8_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
@@ -121,8 +117,7 @@ const struct i2c_ops_s g_ops =
 {
   z8_i2c_setfrequency,
   z8_i2c_setaddress,
-  z8_i2c_write,
-  z8_i2c_read,
+  z8_i2c_transfer,
 };
 
 /****************************************************************************
@@ -540,158 +535,6 @@ static int z8_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
   DEBUGASSERT(nbits == 7);
   priv->addr = (uint8_t)addr;
   return OK;
-}
-
-/****************************************************************************
- * Name: z8_i2c_write
- *
- * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address. Each write operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this write completes. Required.
- *
- * Input Parameters:
- *   dev -    Device-specific state data
- *   buffer - A pointer to the read-only buffer of data to be written to device
- *   buflen - The number of bytes to send from the buffer
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-static int z8_i2c_write(FAR struct i2c_master_s *dev,
-                        FAR const uint8_t *buffer, int buflen)
-{
-  FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
-  const uint8_t *ptr;
-  int retry;
-  int count;
-
-  DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
-
-  /* Get exclusive access */
-
-  z8_i2c_semtake();
-
-  /* Set the frequency */
-
-  z8_i2c_setbrg(priv->brg);
-
-  /* Retry as necessary to send this whole message */
-
-  for (retry = 0; retry < 100; retry++)
-    {
-      /* Load the address into the transmit register.  It is not sent
-       * until the START bit is set.
-       */
-
-      I2CD    = I2C_WRITEADDR8(priv->addr);
-      I2CCTL |= I2C_CTL_START;
-
-      /* Wait for the xmt buffer to become empty */
-
-      z8_i2c_waittxempty();
-
-      /* Then send all of the bytes in the buffer */
-
-      ptr = buffer;
-      for (count = buflen; count; count--)
-        {
-          /* Send a byte of data and wait for it to be sent */
-
-          I2CD = *ptr++;
-          z8_i2c_waittxempty();
-
-          /* If this was the last byte, then send STOP immediately.  This
-           * is because the ACK will not be valid until the STOP clocks out
-           * the last bit.. Hmmm.  If this true then we will never be
-           * able to send more than one data byte???
-           */
-
-          if (count == 1)
-            {
-              I2CCTL |= I2C_CTL_STOP;
-
-              /* If this last byte was ACKed, then the whole buffer
-               * was successfully sent and we can return success.
-               */
-
-              if ((I2CSTAT & I2C_STAT_ACK) != 0)
-                {
-                  z8_i2c_semgive();
-                  return OK;
-                }
-
-              /* If was was not ACKed, then this inner loop will
-               * terminated (because count will decrement to zero
-               * and the whole message will be resent
-               */
-            }
-
-          /* Not the last byte... was this byte ACKed? */
-
-          else if ((I2CSTAT & I2C_STAT_ACK) == 0)
-            {
-              /* No, flush the buffer and toggle the I2C on and off */
-
-              I2CCTL |= I2C_CTL_FLUSH;
-              I2CCTL &= ~I2C_CTL_IEN;
-              I2CCTL |= I2C_CTL_IEN;
-
-              /* Break out of the loop early and try again */
-
-              break;
-            }
-        }
-    }
-
-  z8_i2c_semgive();
-  return -ETIMEDOUT;
-}
-
-/****************************************************************************
- * Name: z8_i2c_read
- *
- * Description:
- *   Receive a block of data from I2C using the previously selected I2C
- *   frequency and slave address. Each read operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this read completes. Required.
- *
- * Input Parameters:
- *   dev -   Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
- *   buflen - The requested number of bytes to be read
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-static int z8_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
-                       int buflen)
-{
-  FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
-  int ret;
-
-  DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
-
-  /* Get exclusive access */
-
-  z8_i2c_semtake();
-
-  /* Set the frequency */
-
-  z8_i2c_setbrg(priv->brg);
-
-  /* Perform the transfer */
-
-  ret = z8_i2c_read_transfer(priv, buffer, buflen, 0);
-
-  z8_i2c_semgive();
-  return ret;
 }
 
 /****************************************************************************

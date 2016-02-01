@@ -100,10 +100,6 @@ static uint32_t ez80_i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
 static int      ez80_i2c_setaddress(FAR struct i2c_master_s *dev,
                   int addr, int nbits);
-static int      ez80_i2c_write(FAR struct i2c_master_s *dev,
-                  FAR const uint8_t *buffer, int buflen);
-static int      ez80_i2c_read(FAR struct i2c_master_s *dev,
-                  FAR uint8_t *buffer, int buflen);
 static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
@@ -127,8 +123,6 @@ const struct i2c_ops_s g_ops =
 {
   ez80_i2c_setfrequency,
   ez80_i2c_setaddress,
-  ez80_i2c_write,
-  ez80_i2c_read,
   ez80_i2c_transfer
 };
 
@@ -854,92 +848,6 @@ static int ez80_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
   priv->addr   = addr;
   priv->addr10 = (nbits == 10);
   return OK;
-}
-
-/****************************************************************************
- * Name: ez80_i2c_write
- *
- * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address. Each write operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this write completes. Required.
- *
- * Input Parameters:
- *   dev -    Device-specific state data
- *   buffer - A pointer to the read-only buffer of data to be written to device
- *   buflen - The number of bytes to send from the buffer
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-static int ez80_i2c_write(FAR struct i2c_master_s *dev,
-                          FAR const uint8_t *buffer, int buflen)
-{
-  FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
-  int ret;
-
-  DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
-
-  /* Get exclusive access to the I2C bus */
-
-  ez80_i2c_semtake();
-
-  /* Set the frequency */
-
-  ez80_i2c_setccr(priv->ccr);
-
-  /* Perform the transfer */
-
-  ret = ez80_i2c_write_transfer(priv, buffer, buflen, 0);
-
-  ez80_i2c_semgive();
-  return ret;
-}
-
-/****************************************************************************
- * Name: ez80_i2c_read
- *
- * Description:
- *   Receive a block of data from I2C using the previously selected I2C
- *   frequency and slave address. Each read operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this read completes. Required.
- *
- * Input Parameters:
- *   dev -   Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
- *   buflen - The requested number of bytes to be read
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-static int ez80_i2c_read(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
-                         int buflen)
-{
-  FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
-  int ret;
-
-  DEBUGASSERT(dev != NULL && buffer != NULL && buflen > 0);
-
-  /* Get exclusive access to the I2C bus */
-
-  ez80_i2c_semtake();
-
-  /* Set the frequency */
-
-  ez80_i2c_setccr(priv->ccr);
-
-  /* Perform the transfer */
-
-  ret = ez80_i2c_read_transfer(priv, buffer, buflen, 0);
-
-  ez80_i2c_semgive();
-  return ret;
 }
 
 /****************************************************************************

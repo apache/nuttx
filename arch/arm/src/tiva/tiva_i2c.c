@@ -345,9 +345,6 @@ static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev,
 static int tiva_i2c_setaddress(struct i2c_master_s *dev, int addr, int nbits);
 static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                             int msgc);
-static int tiva_i2c_write(struct i2c_master_s *dev, const uint8_t *buffer,
-                          int buflen);
-static int tiva_i2c_read(struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc);
 
@@ -581,8 +578,6 @@ static const struct i2c_ops_s tiva_i2c_ops =
 {
   .setfrequency       = tiva_i2c_setfrequency,
   .setaddress         = tiva_i2c_setaddress,
-  .write              = tiva_i2c_write,
-  .read               = tiva_i2c_read,
   .transfer           = tiva_i2c_transfer
 };
 
@@ -2069,58 +2064,6 @@ static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv, in
   tiva_i2c_sem_post(dev);
 
   return -errcode;
-}
-
-/************************************************************************************
- * Name: tiva_i2c_write
- *
- * Description:
- *   Write I2C data
- *
- ************************************************************************************/
-
-static int tiva_i2c_write(struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
-{
-  struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
-  struct i2c_msg_s msgv =
-  {
-    .addr   = inst->address,
-    .flags  = inst->flags,
-    .buffer = (uint8_t *)buffer,
-    .length = buflen
-  };
-
-  DEBUGASSERT(inst && inst->priv && inst->priv->config);
-  i2cvdbg("I2C%d: buflen=%d\n", inst->priv->config->devno, buflen);
-
-  tiva_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
-  return tiva_i2c_process(dev, &msgv, 1);
-}
-
-/************************************************************************************
- * Name: tiva_i2c_read
- *
- * Description:
- *   Read I2C data
- *
- ************************************************************************************/
-
-int tiva_i2c_read(struct i2c_master_s *dev, uint8_t *buffer, int buflen)
-{
-  struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
-  struct i2c_msg_s msgv =
-  {
-    .addr   = inst->address,
-    .flags  = inst->flags | I2C_M_READ,
-    .buffer = buffer,
-    .length = buflen
-  };
-
-  DEBUGASSERT(inst && inst->priv && inst->priv->config);
-  i2cvdbg("I2C%d: buflen=%d\n", inst->priv->config->devno, buflen);
-
-  tiva_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
-  return tiva_i2c_process(dev, &msgv, 1);
 }
 
 /************************************************************************************

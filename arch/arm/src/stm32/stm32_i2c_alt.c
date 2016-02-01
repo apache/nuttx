@@ -382,9 +382,6 @@ static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
 static int stm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
 static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                              int count);
-static int stm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer,
-                           int buflen);
-static int stm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count);
 
@@ -485,8 +482,6 @@ static const struct i2c_ops_s stm32_i2c_ops =
 {
   .setfrequency       = stm32_i2c_setfrequency,
   .setaddress         = stm32_i2c_setaddress,
-  .write              = stm32_i2c_write,
-  .read               = stm32_i2c_read,
   .transfer           = stm32_i2c_transfer
 };
 
@@ -2291,52 +2286,6 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
   stm32_i2c_sem_post(dev);
 
   return -errval;
-}
-
-/************************************************************************************
- * Name: stm32_i2c_write
- *
- * Description:
- *   Write I2C data
- *
- ************************************************************************************/
-
-static int stm32_i2c_write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen)
-{
-  stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
-
-  struct i2c_msg_s msgv =
-  {
-    .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-    .flags  = ((struct stm32_i2c_inst_s *)dev)->flags,
-    .buffer = (uint8_t *)buffer,
-    .length = buflen
-  };
-
-  return stm32_i2c_process(dev, &msgv, 1);
-}
-
-/************************************************************************************
- * Name: stm32_i2c_read
- *
- * Description:
- *   Read I2C data
- *
- ************************************************************************************/
-
-int stm32_i2c_read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen)
-{
-  stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
-
-  struct i2c_msg_s msgv =
-  {
-    .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
-    .flags  = ((struct stm32_i2c_inst_s *)dev)->flags | I2C_M_READ,
-    .buffer = buffer,
-    .length = buflen
-  };
-
-  return stm32_i2c_process(dev, &msgv, 1);
 }
 
 /************************************************************************************
