@@ -246,7 +246,6 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
   int startblock = 0;
 
   memset(&buf[AT24XX_ADDRSIZE], 0xff, priv->pagesize);
-  I2C_SETFREQUENCY(priv->dev, CONFIG_AT24XX_FREQUENCY);
 
   for (startblock = 0; startblock < priv->npages; startblock++)
     {
@@ -297,8 +296,6 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
 
   fvdbg("offset: %lu nbytes: %lu address: %02x\n",
         (unsigned long)offset, (unsigned long)nbytes, address);
-
-  I2C_SETFREQUENCY(priv->dev, CONFIG_AT24XX_FREQUENCY);
 
   /* "Random Read: A Random Read requires a dummy byte write sequence to load in the
    *  data word address. Once the device address word and data word address are clocked
@@ -422,7 +419,6 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
     }
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
-  I2C_SETFREQUENCY(priv->dev, CONFIG_AT24XX_FREQUENCY);
 
   while (blocksleft-- > 0)
     {

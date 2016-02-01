@@ -610,10 +610,6 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->addr = BMP180_ADDR;
   priv->freq = BMP180_FREQ;
 
-  /* Configure I2C before using it */
-
-  I2C_SETFREQUENCY(priv->i2c, priv->freq);
-
   /* Check Device ID */
 
   ret = bmp180_checkid(priv);

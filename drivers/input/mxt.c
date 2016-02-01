@@ -1517,7 +1517,6 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(priv->lower != NULL && ptr != NULL);
 
           priv->frequency = *ptr;
-          (void)I2C_SETFREQUENCY(priv->i2c, *ptr);
         }
         break;
 
@@ -1741,7 +1740,6 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   /* Set the selected I2C frequency */
 
   priv->frequency = priv->lower->frequency;
-  (void)I2C_SETFREQUENCY(priv->i2c, priv->lower->frequency);
 
   /* Read the info registers from the device */
 

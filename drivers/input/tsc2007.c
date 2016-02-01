@@ -1073,7 +1073,6 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
           priv->config->frequency = *ptr;
-          (void)I2C_SETFREQUENCY(priv->i2c, *ptr);
         }
         break;
 
@@ -1254,10 +1253,6 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   priv->config = config;          /* Save the board configuration */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
-
-  /* Set the I2C frequency (saving the actual frequency) */
-
-  config->frequency = I2C_SETFREQUENCY(dev, config->frequency);
 
   /* Make sure that interrupts are disabled */
 

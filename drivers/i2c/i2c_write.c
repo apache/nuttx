@@ -82,7 +82,6 @@ int i2c_write(FAR struct i2c_master_s *dev,
 
   /* Then perform the transfer. */
 
-  I2C_SETFREQUENCY(dev, config->frequency);
   return I2C_TRANSFER(dev, &msg, 1);
 }
 

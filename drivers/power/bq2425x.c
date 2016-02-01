@@ -744,10 +744,6 @@ FAR struct battery_charger_dev_s *
       priv->addr      = addr;
       priv->frequency = frequency;
 
-      /* Set the I2C frequency (ignoring the returned, actual frequency) */
-
-      (void)I2C_SETFREQUENCY(i2c, priv->frequency);
-
       /* Reset the BQ2425x */
 
       ret = bq2425x_reset(priv);

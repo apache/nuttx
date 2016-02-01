@@ -2501,11 +2501,6 @@ FAR struct audio_lowerhalf_s *
       dq_init(&priv->pendq);
       dq_init(&priv->doneq);
 
-      /* Initialize I2C */
-
-      auddbg("address=%02x frequency=%d\n", lower->address, lower->frequency);
-      I2C_SETFREQUENCY(i2c, lower->frequency);
-
       /* Software reset.  This puts all WM8904 registers back in their
        * default state.
        */

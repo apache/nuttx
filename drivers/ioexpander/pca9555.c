@@ -618,13 +618,6 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *i2cdev,
   pcadev->dev.ops = &g_pca9555_ops;
   pcadev->config  = config;
 
-  /* Set the I2C frequency.  REVISIT:  This logic would be
-   * insufficient if we share the I2C bus with any other devices that also
-   * modify the address and frequency.
-   */
-
-  I2C_SETFREQUENCY(i2cdev, config->frequency);
-
 #ifdef CONFIG_PCA9555_INT_ENABLE
   pcadev->config->attach(pcadev->config, pca9555_interrupt);
   pcadev->config->enable(pcadev->config, TRUE);

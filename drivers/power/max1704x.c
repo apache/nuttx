@@ -548,10 +548,6 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c
       priv->addr      = addr;
       priv->frequency = frequency;
 
-      /* Set the I2C frequency (ignoring the returned, actual frequency) */
-
-      (void)I2C_SETFREQUENCY(i2c, priv->frequency);
-
       /* Reset the MAX1704x (mostly just to make sure that we can talk to it) */
 
 #if 0

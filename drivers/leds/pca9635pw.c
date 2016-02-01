@@ -381,10 +381,6 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return ret;
     }
 
-  /* setup i2c frequency */
-
-  I2C_SETFREQUENCY(priv->i2c, I2C_BUS_FREQ_HZ);
-
   return OK;
 }
 

@@ -329,10 +329,6 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   msg[3].buffer    = &seconds;
   msg[3].length    = 1;
 
-  /* Configure I2C before using it */
-
-  I2C_SETFREQUENCY(g_pcf85263.i2c, CONFIG_PCF85263_I2C_FREQUENCY);
-
   /* Perform the transfer.  The transfer may be performed repeatedly of the
    * seconds values decreases, meaning that that was a rollover in the seconds.
    */
@@ -512,10 +508,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
   msg[2].flags     = I2C_M_READ;
   msg[2].buffer    = &seconds;
   msg[2].length    = 1;
-
-  /* Configure I2C before using it */
-
-  I2C_SETFREQUENCY(g_pcf85263.i2c, CONFIG_PCF85263_I2C_FREQUENCY);
 
   /* Perform the transfer.  This transfer will be repeated if the seconds
    * count rolls over to a smaller value while writing.

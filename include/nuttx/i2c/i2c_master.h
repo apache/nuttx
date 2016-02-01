@@ -81,24 +81,6 @@
 /* Access macros ************************************************************/
 
 /****************************************************************************
- * Name: I2C_SETFREQUENCY
- *
- * Description:
- *   Set the I2C frequency. This frequency will be retained in the struct
- *   i2c_master_s instance and will be used with all transfers.  Required.
- *
- * Input Parameters:
- *   dev       - Device-specific state data
- *   frequency - The I2C frequency requested
- *
- * Returned Value:
- *   Returns the actual frequency selected
- *
- ****************************************************************************/
-
-#define I2C_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
-
-/****************************************************************************
  * Name: I2C_TRANSFER
  *
  * Description:
@@ -131,9 +113,8 @@ struct i2c_master_s;
 struct i2c_msg_s;
 struct i2c_ops_s
 {
-  uint32_t (*setfrequency)(FAR struct i2c_master_s *dev, uint32_t frequency);
-  int      (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-                       int count);
+  int (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
+                  int count);
 };
 
 /* This structure contains the full state of I2C as needed for a specific

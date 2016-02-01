@@ -615,7 +615,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          priv->config->frequency = I2C_SETFREQUENCY(priv->i2c, *ptr);
+          priv->config->frequency = *ptr;
         }
         break;
 

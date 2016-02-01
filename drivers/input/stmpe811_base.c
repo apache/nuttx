@@ -324,13 +324,6 @@ STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_master_s *dev,
   priv->spi = dev;
 #else
   priv->i2c = dev;
-
-  /* Set the I2C address and frequency.  REVISIT:  This logic would be
-   * insufficient if we share the I2C bus with any other devices that also
-   * modify the address and frequency.
-   */
-
-  I2C_SETFREQUENCY(dev, config->frequency);
 #endif
 
   /* Read and verify the STMPE811 chip ID */

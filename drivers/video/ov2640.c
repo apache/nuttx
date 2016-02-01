@@ -922,10 +922,6 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 {
   int ret;
 
-  /* Configure I2C bus for the OV2640 */
-
-  I2C_SETFREQUENCY(i2c, CONFIG_OV2640_FREQUENCY);
-
   /* Reset the OVR2640 */
 
   ret = ov2640_reset(i2c);
