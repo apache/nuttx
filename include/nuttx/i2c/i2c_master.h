@@ -99,25 +99,6 @@
 #define I2C_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
 
 /****************************************************************************
- * Name: I2C_SETADDRESS
- *
- * Description:
- *   Set the I2C slave address. This frequency will be retained in the struct
- *   i2c_master_s instance and will be used with all transfers.  Required.
- *
- * Input Parameters:
- *   dev     - Device-specific state data
- *   address - The I2C slave address
- *   nbits   - The number of address bits provided (7 or 10)
- *
- * Returned Value:
- *   Returns OK on success; a negated errno on failure.
- *
- ****************************************************************************/
-
-#define I2C_SETADDRESS(d,a,n) ((d)->ops->setaddress(d,a,n))
-
-/****************************************************************************
  * Name: I2C_TRANSFER
  *
  * Description:
@@ -125,7 +106,6 @@
  *   START and the final transfer is completed with a STOP. Each sequence
  *   will be an 'atomic'  operation in the sense that any other I2C actions
  *   will be serialized and pend until this sequence of transfers completes.
- *   Required.
  *
  * Input Parameters:
  *   dev  
@@ -152,9 +132,8 @@ struct i2c_msg_s;
 struct i2c_ops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_master_s *dev, uint32_t frequency);
-  int      (*setaddress)(FAR struct i2c_master_s *dev, int addr, int nbits);
   int      (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-             int count);
+                       int count);
 };
 
 /* This structure contains the full state of I2C as needed for a specific

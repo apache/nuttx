@@ -417,7 +417,6 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
    * modify the address and frequency.
    */
 
-  I2C_SETADDRESS(dev, config->address, 7);
   I2C_SETFREQUENCY(dev, config->frequency);
 #endif
 

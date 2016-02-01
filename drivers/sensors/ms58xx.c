@@ -302,7 +302,6 @@ static int ms58xx_readu16(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
@@ -343,7 +342,6 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
@@ -551,7 +549,6 @@ static int ms58xx_reset(FAR struct ms58xx_dev_s *priv)
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
@@ -588,7 +585,6 @@ static int ms58xx_convert(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {

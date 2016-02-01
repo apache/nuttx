@@ -672,50 +672,6 @@ static const struct ovr2640_reg_s g_ov2640_jpeg_uxga_resolution[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ov2640_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int ov2640_i2c_write(FAR struct i2c_master_s *i2c,
-                            FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_OV2640_FREQUENCY;
-  config.address   = CONFIG_OV2640_I2CADDR;
-  config.addrlen   = 7;
-
-  return i2c_write(i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: ov2640_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int ov2640_i2c_read(FAR struct i2c_master_s *i2c,
-                           FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_OV2640_FREQUENCY;
-  config.address   = CONFIG_OV2640_I2CADDR;
-  config.addrlen   = 7;
-
-  return i2c_read(i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Function: ov2640_putreg
  *
  * Description:
@@ -735,6 +691,7 @@ static int ov2640_i2c_read(FAR struct i2c_master_s *i2c,
 static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
                          uint8_t regval)
 {
+  struct i2c_config_s config;
   uint8_t buffer[2];
   int ret;
 
@@ -747,9 +704,15 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
   buffer[0] = regaddr; /* Register address */
   buffer[1] = regval;  /* New register value */
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_OV2640_FREQUENCY;
+  config.address   = CONFIG_OV2640_I2CADDR;
+  config.addrlen   = 7;
+
   /* And do it */
 
-  ret = ov2640_i2c_write(i2c, buffer, 2);
+  ret = i2c_write(i2c, &config, buffer, 2);
   if (ret < 0)
     {
       gdbg("ERROR: i2c_write failed: %d\n", ret);
@@ -778,12 +741,19 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
 
 static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
 {
+  struct i2c_config_s config;
   uint8_t regval;
   int ret;
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_OV2640_FREQUENCY;
+  config.address   = CONFIG_OV2640_I2CADDR;
+  config.addrlen   = 7;
+
   /* Write the register address */
 
-  ret = ov2640_i2c_write(i2c, &regaddr, 1);
+  ret = i2c_write(i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       gdbg("ERROR: i2c_write failed: %d\n", ret);
@@ -792,7 +762,7 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
 
   /* Restart and read 8-bits from the register */
 
-  ret = ov2640_i2c_read(i2c, &regval, 1);
+  ret = i2c_read(i2c, &config, &regval, 1);
   if (ret < 0)
     {
       gdbg("ERROR: i2c_read failed: %d\n", ret);
@@ -954,7 +924,6 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 
   /* Configure I2C bus for the OV2640 */
 
-  I2C_SETADDRESS(i2c, CONFIG_OV2640_I2CADDR, 7);
   I2C_SETFREQUENCY(i2c, CONFIG_OV2640_FREQUENCY);
 
   /* Reset the OVR2640 */

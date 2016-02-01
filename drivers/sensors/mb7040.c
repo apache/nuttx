@@ -77,10 +77,6 @@ struct mb7040_dev_s
  ****************************************************************************/
 /* I2C Helpers */
 
-static int mb7040_i2c_write(FAR struct mb7040_dev_s *priv,
-                            FAR const uint8_t *buffer, int buflen);
-static int mb7040_i2c_read(FAR struct mb7040_dev_s *priv,
-                           FAR uint8_t *buffer, int buflen);
 static int mb7040_measurerange(FAR struct mb7040_dev_s *priv);
 static int mb7040_readrange(FAR struct mb7040_dev_s *priv,
                             FAR uint16_t *range);
@@ -122,50 +118,6 @@ static const struct file_operations g_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mb7040_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int mb7040_i2c_write(FAR struct mb7040_dev_s *priv,
-                            FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_MB7040_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_write(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: mb7040_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int mb7040_i2c_read(FAR struct mb7040_dev_s *priv,
-                           FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_MB7040_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_read(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Name: mb7040_measurerange
  *
  * Description:
@@ -175,16 +127,23 @@ static int mb7040_i2c_read(FAR struct mb7040_dev_s *priv,
 
 static int mb7040_measurerange(FAR struct mb7040_dev_s *priv)
 {
+  struct i2c_config_s config;
   uint8_t regaddr;
   int ret;
 
-  regaddr = MB7040_RANGE_REG;
   sndbg("addr: %02x\n", regaddr);
+
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_MB7040_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = mb7040_i2c_write(priv, &regaddr, sizeof(regaddr));
+  regaddr = MB7040_RANGE_REG;
+
+  ret = i2c_write(priv->i2c, &config, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);
@@ -204,13 +163,19 @@ static int mb7040_measurerange(FAR struct mb7040_dev_s *priv)
 static int mb7040_readrange(FAR struct mb7040_dev_s *priv,
                             FAR uint16_t *range)
 {
+  struct i2c_config_s config;
   uint8_t buffer[2];
   int ret;
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_MB7040_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
   /* Read two bytes */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = mb7040_i2c_read(priv, buffer, sizeof(buffer));
+  ret = i2c_read(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
       sndbg("i2c_read failed: %d\n", ret);
@@ -232,6 +197,7 @@ static int mb7040_readrange(FAR struct mb7040_dev_s *priv,
 
 static int mb7040_changeaddr(FAR struct mb7040_dev_s *priv, uint8_t addr)
 {
+  struct i2c_config_s config;
   uint8_t buffer[3];
   int ret;
 
@@ -248,10 +214,15 @@ static int mb7040_changeaddr(FAR struct mb7040_dev_s *priv, uint8_t addr)
   buffer[1] = MB7040_ADDRUNLOCK2_REG;
   buffer[2] = addr;
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_MB7040_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = mb7040_i2c_write(priv, buffer, sizeof(buffer));
+  ret = i2c_write(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);

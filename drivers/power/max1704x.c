@@ -230,50 +230,6 @@ static const struct battery_gauge_operations_s g_max1704xops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: max1704x_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int max1704x_i2c_write(FAR struct max1704x_dev_s *priv,
-                              FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = priv->frequency;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_write(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: max1704x_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int max1704x_i2c_read(FAR struct max1704x_dev_s *priv,
-                             FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = priv->frequency;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_read(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Name: max1704x_getreg16
  *
  * Description:
@@ -287,16 +243,19 @@ static int max1704x_i2c_read(FAR struct max1704x_dev_s *priv,
 static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
                              FAR uint16_t *regval)
 {
+  struct i2c_config_s config;
   uint8_t buffer[2];
   int ret;
 
-  /* Set the I2C address and address size */
+  /* Set up the configuration and perform the write-read operation */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   /* Write the register address */
 
-  ret = max1704x_i2c_write(priv, &regaddr, 1);
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       batdbg("i2c_write failed: %d\n", ret);
@@ -305,7 +264,7 @@ static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
 
   /* Restart and read 16-bits from the register */
 
-  ret = max1704x_i2c_read(priv, buffer, 2);
+  ret = i2c_read(priv->i2c, &config, buffer, 2);
   if (ret < 0)
     {
       batdbg("i2c_read failed: %d\n", ret);
@@ -330,6 +289,7 @@ static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
 static int max1704x_putreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
                              uint16_t regval)
 {
+  struct i2c_config_s config;
   uint8_t buffer[3];
 
   batdbg("addr: %02x regval: %08x\n", regaddr, regval);
@@ -340,13 +300,15 @@ static int max1704x_putreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
   buffer[1] = (uint8_t)(regval >> 8);
   buffer[2] = (uint8_t)(regval & 0xff);
 
-  /* Set the I2C address and address size */
+  /* Set up the configuration and perform the write-read operation */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   /* Write the register address followed by the data (no RESTART) */
 
-  return max1704x_i2c_write(priv, buffer, 3);
+  return i2c_write(priv->i2c, &config, buffer, 3);
 }
 
 /****************************************************************************

@@ -329,9 +329,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   I2C_SETFREQUENCY(g_pcf85263.i2c, CONFIG_PCF85263_I2C_FREQUENCY);
 
-  /* Perform the transfer (This could be done with i2c_writeread()).  The
-   * transfer may be performed repeatedly of the seconds values decreases,
-   * meaning that that was a rollover in the seconds.
+  /* Perform the transfer.  The transfer may be performed repeatedly of the
+   * seconds values decreases, meaning that that was a rollover in the seconds.
    */
 
   do

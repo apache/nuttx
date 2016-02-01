@@ -174,50 +174,6 @@ static const struct file_operations g_bmp180fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bmp180_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int bmp180_i2c_write(FAR struct bmp180_dev_s *priv,
-                            FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = priv->freq;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_write(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: bmp180_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int bmp180_i2c_read(FAR struct bmp180_dev_s *priv,
-                           FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = priv->freq;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_read(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Name: bmp180_getreg8
  *
  * Description:
@@ -227,21 +183,28 @@ static int bmp180_i2c_read(FAR struct bmp180_dev_s *priv,
 
 static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 {
-  int ret;
+  struct i2c_config_s config;
   uint8_t regval = 0;
+  int ret;
 
-  /* Restart the register */
+  /* Set up the I2C configuration */
 
-  ret = bmp180_i2c_write(priv, &regaddr, 1);
+  config.frequency = priv->freq;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  /* Write the register address */
+
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
-  /* Restart the register */
+  /* Read the register value */
 
-  ret = bmp180_i2c_read(priv, &regval, 1);
+  ret = i2c_read(priv->i2c, &config, &regval, 1);
   if (ret < 0)
     {
       sndbg("i2c_read failed: %d\n", ret);
@@ -261,13 +224,20 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 
 static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 {
-  int ret;
+  struct i2c_config_s config;
   uint16_t msb, lsb;
   uint16_t regval = 0;
+  int ret;
+
+  /* Set up the I2C configuration */
+
+  config.frequency = priv->freq;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   /* Register to read */
 
-  ret = bmp180_i2c_write(priv, &regaddr, 1);
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);
@@ -276,7 +246,7 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 
   /* Read register */
 
-  ret = bmp180_i2c_read(priv, (uint8_t *)&regval, 2);
+  ret = i2c_read(priv->i2c, &config, (uint8_t *)&regval, 2);
   if (ret < 0)
     {
       sndbg("i2c_read failed: %d\n", ret);
@@ -304,15 +274,22 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
                            uint8_t regval)
 {
-  int ret;
+  struct i2c_config_s config;
   uint8_t data[2];
+  int ret;
+
+  /* Set up the I2C configuration */
+
+  config.frequency = priv->freq;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   data[0] = regaddr;
   data[1] = regval;
 
-  /* Restart the register */
+  /* Write the register address and value */
 
-  ret = bmp180_i2c_write(priv, (uint8_t *) &data, 2);
+  ret = i2c_write(priv->i2c, &config, (uint8_t *) &data, 2);
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);
@@ -635,7 +612,6 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Configure I2C before using it */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   I2C_SETFREQUENCY(priv->i2c, priv->freq);
 
   /* Check Device ID */

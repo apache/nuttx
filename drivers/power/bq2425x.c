@@ -148,50 +148,6 @@ static const struct battery_charger_operations_s g_bq2425xops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bq2425x_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int bq2425x_i2c_write(FAR struct bq2425x_dev_s *priv,
-                             FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = priv->frequency;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_write(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: bq2425x_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int bq2425x_i2c_read(FAR struct bq2425x_dev_s *priv,
-                            FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = priv->frequency;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_read(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Name: bq2425x_getreg8
  *
  * Description:
@@ -205,16 +161,19 @@ static int bq2425x_i2c_read(FAR struct bq2425x_dev_s *priv,
 static int bq2425x_getreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
                            FAR uint8_t *regval)
 {
+  struct i2c_config_s config;
   uint8_t val;
   int ret;
 
-  /* Set the I2C address and address size */
+  /* Set up the I2C configuration */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   /* Write the register address */
 
-  ret = bq2425x_i2c_write(priv, &regaddr, 1);
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       batdbg("i2c_write failed: %d\n", ret);
@@ -223,7 +182,7 @@ static int bq2425x_getreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
 
   /* Restart and read 8-bits from the register */
 
-  ret = bq2425x_i2c_read(priv, &val, 1);
+  ret = i2c_read(priv->i2c, &config, &val, 1);
   if (ret < 0)
     {
       batdbg("i2c_read failed: %d\n", ret);
@@ -249,7 +208,14 @@ static int bq2425x_getreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
 static int bq2425x_putreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
                            uint8_t regval)
 {
+  struct i2c_config_s config;
   uint8_t buffer[2];
+
+  /* Set up the I2C configuration */
+
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   batdbg("addr: %02x regval: %08x\n", regaddr, regval);
 
@@ -258,13 +224,9 @@ static int bq2425x_putreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
   buffer[0] = regaddr;
   buffer[1] = regval;
 
-  /* Set the I2C address and address size */
-
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-
   /* Write the register address followed by the data (no RESTART) */
 
-  return bq2425x_i2c_write(priv, buffer, 2);
+  return i2c_write(priv->i2c, &config, buffer, 2);
 }
 
 /****************************************************************************

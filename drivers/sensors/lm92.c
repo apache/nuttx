@@ -139,7 +139,7 @@ static int lm92_i2c_write(FAR struct lm92_dev_s *priv,
 {
   struct i2c_config_s config;
 
-  /* Set up the configuration and perform the write-read operation */
+  /* Set up the I2C configuration */
 
   config.frequency = CONFIG_LM92_I2C_FREQUENCY;
   config.address   = priv->addr;
@@ -161,7 +161,7 @@ static int lm92_i2c_read(FAR struct lm92_dev_s *priv,
 {
   struct i2c_config_s config;
 
-  /* Set up the configuration and perform the write-read operation */
+  /* Set up the I2C configuration */
 
   config.frequency = CONFIG_LM92_I2C_FREQUENCY;
   config.address   = priv->addr;
@@ -187,7 +187,6 @@ static int lm92_readb16(FAR struct lm92_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   ret = lm92_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
@@ -240,7 +239,6 @@ static int lm92_writeb16(FAR struct lm92_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   return lm92_i2c_write(priv, buffer, 3);
 }
 
@@ -297,9 +295,8 @@ static int lm92_readconf(FAR struct lm92_dev_s *priv, FAR uint8_t *conf)
 
   /* Write the configuration register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-
   buffer = LM92_CONF_REG;
+
   ret = lm92_i2c_write(priv, &buffer, 1);
   if (ret < 0)
     {
@@ -335,7 +332,6 @@ static int lm92_writeconf(FAR struct lm92_dev_s *priv, uint8_t conf)
 
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
   return lm92_i2c_write(priv, buffer, 2);
 }
 
@@ -355,9 +351,8 @@ static int lm92_readid(FAR struct lm92_dev_s *priv, FAR uint16_t *id)
 
   /* Write the identification register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-
   regaddr = LM92_ID_REG;
+
   ret = lm92_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {

@@ -522,10 +522,6 @@ struct lsm9ds1_dev_s
  ****************************************************************************/
 /* I2C Helpers */
 
-static int lsm9ds1_i2c_write(FAR struct lsm9ds1_dev_s *priv,
-                             FAR const uint8_t *buffer, int buflen);
-static int lsm9ds1_i2c_read(FAR struct lsm9ds1_dev_s *priv,
-                            FAR uint8_t *buffer, int buflen);
 static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
                             FAR uint8_t *regval);
 static int lsm9ds1_writereg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
@@ -635,50 +631,6 @@ static const struct lsm9ds1_ops_s g_lsm9ds1mag_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lsm9ds1_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int lsm9ds1_i2c_write(FAR struct lsm9ds1_dev_s *priv,
-                             FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_LSM9DS1_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_write(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: lsm9ds1_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int lsm9ds1_i2c_read(FAR struct lsm9ds1_dev_s *priv,
-                            FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_LSM9DS1_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_read(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Name: lsm9ds1_readreg8
  *
  * Description:
@@ -689,6 +641,7 @@ static int lsm9ds1_i2c_read(FAR struct lsm9ds1_dev_s *priv,
 static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
                             FAR uint8_t *regval)
 {
+  struct i2c_config_s config;
   int ret;
 
   /* Sanity check */
@@ -696,10 +649,15 @@ static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(regval != NULL);
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_LSM9DS1_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = lsm9ds1_i2c_write(priv, &regaddr, sizeof(regaddr));
+  ret = i2c_write(priv->i2c, &config, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);
@@ -708,7 +666,7 @@ static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
 
   /* Restart and read 8 bits from the register */
 
-  ret = lsm9ds1_i2c_read(priv, regval, sizeof(*regval));
+  ret = i2c_read(priv->i2c, &config, regval, sizeof(*regval));
   if (ret < 0)
     {
       sndbg("i2c_read failed: %d\n", ret);
@@ -730,8 +688,9 @@ static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
 static int lsm9ds1_writereg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
                              uint8_t regval)
 {
-  int ret;
+  struct i2c_config_s config;
   uint8_t buffer[2];
+  int ret;
 
   /* Sanity check */
 
@@ -742,10 +701,15 @@ static int lsm9ds1_writereg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   buffer[0] = regaddr;
   buffer[1] = regval;
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_LSM9DS1_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = lsm9ds1_i2c_write(priv, buffer, sizeof(buffer));
+  ret = i2c_write(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
       sndbg("i2c_write failed: %d\n", ret);

@@ -1254,15 +1254,6 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
 
   config->frequency = I2C_SETFREQUENCY(dev, config->frequency);
 
-  /* Set the I2C address and address size */
-
-  ret = I2C_SETADDRESS(dev, config->address, 7);
-  if (ret < 0)
-    {
-      idbg("I2C_SETADDRESS failed: %d\n", ret);
-      goto errout_with_priv;
-    }
-
   /* Make sure that interrupts are disabled */
 
   config->clear(config);

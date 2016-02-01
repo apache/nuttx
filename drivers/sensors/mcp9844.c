@@ -77,10 +77,6 @@ struct mcp9844_dev_s
 
 /* I2C helper functions */
 
-static int     mcp9844_i2c_write(FAR struct mcp9844_dev_s *priv,
-                  FAR const uint8_t *buffer, int buflen);
-static int     mcp9844_i2c_read(FAR struct mcp9844_dev_s *priv,
-                  FAR uint8_t *buffer, int buflen);
 static int     mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
                   uint8_t const regaddr, FAR uint16_t *value);
 static int     mcp9844_write_u16(FAR struct mcp9844_dev_s *priv,
@@ -119,50 +115,6 @@ static const struct file_operations g_mcp9844_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mcp9844_i2c_write
- *
- * Description:
- *   Write to the I2C device.
- *
- ****************************************************************************/
-
-static int mcp9844_i2c_write(FAR struct mcp9844_dev_s *priv,
-                             FAR const uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_MCP9844_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_write(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
- * Name: mcp9844_i2c_read
- *
- * Description:
- *   Read from the I2C device.
- *
- ****************************************************************************/
-
-static int mcp9844_i2c_read(FAR struct mcp9844_dev_s *priv,
-                            FAR uint8_t *buffer, int buflen)
-{
-  struct i2c_config_s config;
-
-  /* Set up the configuration and perform the write-read operation */
-
-  config.frequency = CONFIG_MCP9844_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
-
-  return i2c_read(priv->i2c, &config, buffer, buflen);
-}
-
-/****************************************************************************
  * Name: mcp9844_read_u16
  *
  * Description:
@@ -173,13 +125,19 @@ static int mcp9844_i2c_read(FAR struct mcp9844_dev_s *priv,
 static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
                             uint8_t const regaddr, FAR uint16_t *value)
 {
+  struct i2c_config_s config;
+  uint8_t buffer[2];
   int ret = -1;
+
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_MCP9844_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-
-  ret = mcp9844_i2c_write(priv, &regaddr, 1);
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       sndbg ("i2c_write failed: %d\n", ret);
@@ -188,9 +146,7 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
 
   /* Restart and read 16-bits from the register */
 
-  uint8_t const BUFFER_SIZE = 2;
-  uint8_t buffer[BUFFER_SIZE];
-  ret = mcp9844_i2c_read(priv, buffer, BUFFER_SIZE);
+  ret = i2c_read(priv->i2c, &config, buffer, 2);
   if (ret < 0)
     {
       sndbg ("i2c_read failed: %d\n", ret);
@@ -202,7 +158,6 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
   *value = (((uint16_t)(buffer[0]))<<8) + ((uint16_t)(buffer[1]));
 
   sndbg("addr: %02x value: %08x ret: %d\n", regaddr, *value, ret);
-
   return OK;
 }
 
@@ -217,6 +172,8 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
 static int mcp9844_write_u16(FAR struct mcp9844_dev_s *priv,
                              uint8_t const regaddr, uint16_t const regval)
 {
+  struct i2c_config_s config;
+
   sndbg("addr: %02x value: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
@@ -228,11 +185,15 @@ static int mcp9844_write_u16(FAR struct mcp9844_dev_s *priv,
   buffer[1] = (uint8_t)(regval >> 8);
   buffer[2] = (uint8_t)(regval);
 
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_MCP9844_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-
-  return mcp9844_i2c_write(priv, buffer, BUFFER_SIZE);
+  return i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
 }
 
 /****************************************************************************
