@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * configs/sama5d4-ek/src/sam_pmic.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -50,22 +50,6 @@
 #include "sama5d4-ek.h"
 
 #ifdef HAVE_PMIC
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -88,6 +72,7 @@
 void sam_pmic_initialize(void)
 {
   FAR struct i2c_master_s *i2c;
+  struct i2c_config_s config;
   uint8_t buffer[2];
 
   /* Get an instance of the I2C interface for the PMIC */
@@ -99,24 +84,25 @@ void sam_pmic_initialize(void)
     }
   else
     {
-      /* Configure the I2C instance */
+      /* Setup up the I2C configuration */
 
-      (void)I2C_SETADDRESS(i2c, PMIC_I2C_ADDRESS, 7);
-      (void)I2C_SETFREQUENCY(i2c, PMIC_I2C_FREQUENCY);
+      config.frequency = PMIC_I2C_FREQUENCY;
+      config.address   = PMIC_I2C_ADDRESS;
+      config.addrlen   = 7;
 
       /* Send the disable sequence */
 
       buffer[0] = 0x0b;
       buffer[1] = 0xee;
-      (void)I2C_WRITE(i2c, buffer, 2);
+      (void)i2c_write(i2c, &config, buffer, 2);
 
       buffer[0] = 0x02;
       buffer[1] = 0x0f;
-      (void)I2C_WRITE(i2c, buffer, 2);
+      (void)i2c_write(i2c, &config, buffer, 2);
 
       buffer[0] = 0x03;
       buffer[1] = 0x0f;
-      (void)I2C_WRITE(i2c, buffer, 2);
+      (void)i2c_write(i2c, &config, buffer, 2);
    }
 }
 
