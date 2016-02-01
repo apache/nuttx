@@ -160,6 +160,7 @@
 struct cs2100_config_s
 {
   FAR struct i2c_master_s *i2c;  /* Instance of an I2C interface */
+  uint32_t i2cfreq;              /* I2C frequency */
   uint32_t refclk;               /* RefClk/XTAL frequency */
   uint32_t clkin;                /* Frequency CLK_IN provided to the CS2100-CP */
   uint32_t clkout;               /* Desired CLK_OUT frequency */

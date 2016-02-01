@@ -266,17 +266,19 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 
       /* Set up to write the address */
 
-      msg[0].addr   = priv->lower->address;
-      msg[0].flags  = 0;
-      msg[0].buffer = &regaddr;
-      msg[0].length = 1;
+      msg[0].frequency = priv->lower->frequency;
+      msg[0].addr      = priv->lower->address;
+      msg[0].flags     = 0;
+      msg[0].buffer    = &regaddr;
+      msg[0].length    = 1;
 
       /* Followed by the read data */
 
-      msg[1].addr   = priv->lower->address;
-      msg[1].flags  = I2C_M_READ;
-      msg[1].buffer = data;
-      msg[1].length = 2;
+      msg[1].frequency = priv->lower->frequency;
+      msg[1].addr      = priv->lower->address;
+      msg[1].flags     = I2C_M_READ;
+      msg[1].buffer    = data;
+      msg[1].length    = 2;
 
       /* Read the register data.  The returned value is the number messages
        * completed.

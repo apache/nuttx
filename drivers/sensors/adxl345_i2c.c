@@ -76,19 +76,21 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Setup 8-bit ADXL345 address write message */
 
-  msg[0].addr   = priv->config->address; /* 7-bit address */
-  msg[0].flags  = 0;                     /* Write transaction, beginning with START */
-  msg[0].buffer = &regaddr;              /* Transfer from this address */
-  msg[0].length = 1;                     /* Send one byte following the address
-                                          * (no STOP) */
+  msg[0].frequency = priv->config->frequency;  /* I2C frequency */
+  msg[0].addr      = priv->config->address;    /* 7-bit address */
+  msg[0].flags     = 0;                        /* Write transaction, beginning with START */
+  msg[0].buffer    = &regaddr;                 /* Transfer from this address */
+  msg[0].length    = 1;                        /* Send one byte following the address
+                                                * (no STOP) */
 
   /* Set up the 8-bit ADXL345 data read message */
 
-  msg[1].addr   = priv->config->address; /* 7-bit address */
-  msg[1].flags  = I2C_M_READ;            /* Read transaction, beginning with Re-START */
-  msg[1].buffer = &regval;               /* Transfer to this address */
-  msg[1].length = 1;                     /* Receive one byte following the address
-                                          * (then STOP) */
+  msg[1].frequency = priv->config->frequency;  /* I2C frequency */
+  msg[1].addr      = priv->config->address;    /* 7-bit address */
+  msg[1].flags     = I2C_M_READ;               /* Read transaction, beginning with Re-START */
+  msg[1].buffer    = &regval;                  /* Transfer to this address */
+  msg[1].length    = 1;                        /* Receive one byte following the address
+                                                * (then STOP) */
 
   /* Perform the transfer */
 
@@ -140,11 +142,12 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv,
 
   /* Setup 8-bit ADXL345 address write message */
 
-  msg.addr   = priv->config->address; /* 7-bit address */
-  msg.flags  = 0;                     /* Write transaction, beginning with START */
-  msg.buffer = txbuffer;              /* Transfer from this address */
-  msg.length = 2;                     /* Send two byte following the address
-                                       * (then STOP) */
+  msg.frequency = priv->config->frequency;  /* I2C frequency */
+  msg.addr      = priv->config->address;    /* 7-bit address */
+  msg.flags     = 0;                        /* Write transaction, beginning with START */
+  msg.buffer    = txbuffer;                 /* Transfer from this address */
+  msg.length    = 2;                        /* Send two byte following the address
+                                             * (then STOP) */
 
   /* Perform the transfer */
 
@@ -180,19 +183,21 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Setup 8-bit ADXL345 address write message */
 
-  msg[0].addr   = priv->config->address; /* 7-bit address */
-  msg[0].flags  = 0;                     /* Write transaction, beginning with START */
-  msg[0].buffer = &regaddr;              /* Transfer from this address */
-  msg[0].length = 1;                     /* Send one byte following the address
-                                          * (no STOP) */
+  msg[0].frequency = priv->config->frequency;  /* I2C frequency */
+  msg[0].addr      = priv->config->address;    /* 7-bit address */
+  msg[0].flags     = 0;                        /* Write transaction, beginning with START */
+  msg[0].buffer    = &regaddr;                 /* Transfer from this address */
+  msg[0].length    = 1;                        /* Send one byte following the address
+                                                * (no STOP) */
 
   /* Set up the 8-bit ADXL345 data read message */
 
-  msg[1].addr   = priv->config->address; /* 7-bit address */
-  msg[1].flags  = I2C_M_READ;            /* Read transaction, beginning with Re-START */
-  msg[1].buffer = rxbuffer;              /* Transfer to this address */
-  msg[1].length = 2;                     /* Receive two bytes following the address
-                                          * (then STOP) */
+  msg[1].frequency = priv->config->frequency;  /* I2C frequency */
+  msg[1].addr      = priv->config->address;    /* 7-bit address */
+  msg[1].flags     = I2C_M_READ;               /* Read transaction, beginning with Re-START */
+  msg[1].buffer    = rxbuffer;                 /* Transfer to this address */
+  msg[1].length    = 2;                        /* Receive two bytes following the address
+                                                * (then STOP) */
 
   /* Perform the transfer */
 

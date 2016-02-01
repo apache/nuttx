@@ -82,10 +82,11 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
 
   /* Format two messages: The first is a write */
 
-  msg[0].addr   = config->address;
-  msg[0].flags  = flags;
-  msg[0].buffer = (FAR uint8_t *)wbuffer;  /* Override const */
-  msg[0].length = wbuflen;
+  msg[0].frequency = config->frequency,
+  msg[0].addr      = config->address;
+  msg[0].flags     = flags;
+  msg[0].buffer    = (FAR uint8_t *)wbuffer;  /* Override const */
+  msg[0].length =    wbuflen;
 
   /* The second is either a read (rbuflen > 0) or a write (rbuflen < 0) with
    * no restart.
@@ -101,15 +102,12 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
       rbuflen = -rbuflen;
     }
 
-  msg[1].addr   = config->address;
-  msg[1].buffer = rbuffer;
-  msg[1].length = rbuflen;
+  msg[1].frequency = config->frequency,
+  msg[1].addr      = config->address;
+  msg[1].buffer    = rbuffer;
+  msg[1].length    = rbuflen;
 
-  /* Then perform the transfer
-   *
-   * REVISIT:  The following two operations must become atomic in order to
-   * assure thread safety.
-   */
+  /* Then perform the transfer. */
 
   I2C_SETFREQUENCY(dev, config->frequency);
   return I2C_TRANSFER(dev, msg, 2);

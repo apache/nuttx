@@ -79,16 +79,13 @@ int i2c_read(FAR struct i2c_master_s *dev,
 
   /* Setup for the transfer */
 
-  msg.addr   = config->address,
-  msg.flags  = (flags | I2C_M_READ);
-  msg.buffer = buffer;
-  msg.length = buflen;
+  msg.frequency = config->frequency,
+  msg.addr      = config->address,
+  msg.flags     = (flags | I2C_M_READ);
+  msg.buffer    = buffer;
+  msg.length    = buflen;
 
-  /* Then perform the transfer
-   *
-   * REVISIT:  The following two operations must become atomic in order to
-   * assure thread safety.
-   */
+  /* Then perform the transfer. */
 
   I2C_SETFREQUENCY(dev, config->frequency);
   return I2C_TRANSFER(dev, &msg, 1);

@@ -155,10 +155,11 @@ struct i2c_config_s
 
 struct i2c_msg_s
 {
+  uint32_t  frequency;         /* I2C frequency */
   uint16_t  addr;              /* Slave address (7- or 10-bit) */
   uint16_t  flags;             /* See I2C_M_* definitions */
   uint8_t  *buffer;            /* Buffer to be transferred */
-  ssize_t   length;            /* Length of the buffer in byetes */
+  ssize_t   length;            /* Length of the buffer in bytes */
 };
 
 /* I2C private data.  This structure only defines the initial fields of the

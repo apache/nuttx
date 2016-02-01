@@ -11429,3 +11429,9 @@
 	  board with NXP LPCExpresso LPC1768.  The GSM module is one of LISA-C200,
 	  LISA-U200 or SARA-G350. The GPS module is one of MAX-M7 or MAX-M8.  From
 	  Vladimir Komendantskiy (2016-01-31).
+	* drivers/, arch/, include/, numerous files:  May restructuring of the I2C
+	  interface necessary to eliminate some thread-safety issues inherent in
+	  the legacy I2C interface design.  This effects the interface definition,
+	  all I2C clients, and all low-level I2C drivers.  I have used caution,
+	  but I still expect a change of this magnitude to introduce some errors.
+	  Any bug reports of bug fixes will be much appreciated (2016-02-01).

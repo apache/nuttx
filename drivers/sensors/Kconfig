@@ -22,7 +22,12 @@ config LIS331DL
 	bool "ST LIS331DL device support"
 	default n
 	select I2C
-	select I2C_TRANSFER
+
+config LIS331DL_I2C_FREQUENCY
+	bool "LIS331DL I2C frequency"
+	default 100000
+	range 1 100000
+	depends on LIS331DL
 
 config SN_LSM9DS1
 	bool "STMicro LSM9DS1 support"

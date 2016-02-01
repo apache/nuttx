@@ -298,33 +298,37 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   /* Select to begin reading at the seconds register */
 
-  secaddr       = DSXXXX_TIME_SECR;
+  secaddr          = DSXXXX_TIME_SECR;
 
-  msg[0].addr   = DS3231_I2C_ADDRESS;
-  msg[0].flags  = 0;
-  msg[0].buffer = &secaddr;
-  msg[0].length = 1;
+  msg[0].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[0].addr      = DS3231_I2C_ADDRESS;
+  msg[0].flags     = 0;
+  msg[0].buffer    = &secaddr;
+  msg[0].length    = 1;
 
   /* Set up to read 7 registers: secondss, minutes, hour, day-of-week, date,
    * month, year
    */
 
-  msg[1].addr   = DS3231_I2C_ADDRESS;
-  msg[1].flags  = I2C_M_READ;
-  msg[1].buffer = buffer;
-  msg[1].length = 7;
+  msg[1].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[1].addr      = DS3231_I2C_ADDRESS;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = buffer;
+  msg[1].length    = 7;
 
   /* Read the seconds register again */
 
-  msg[2].addr   = DS3231_I2C_ADDRESS;
-  msg[2].flags  = 0;
-  msg[2].buffer = &secaddr;
-  msg[2].length = 1;
+  msg[2].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[2].addr      = DS3231_I2C_ADDRESS;
+  msg[2].flags     = 0;
+  msg[2].buffer    = &secaddr;
+  msg[2].length    = 1;
 
-  msg[3].addr   = DS3231_I2C_ADDRESS;
-  msg[3].flags  = I2C_M_READ;
-  msg[3].buffer = &seconds;
-  msg[3].length = 1;
+  msg[3].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[3].addr      = DS3231_I2C_ADDRESS;
+  msg[3].flags     = I2C_M_READ;
+  msg[3].buffer    = &seconds;
+  msg[3].length    = 1;
 
   /* Configure I2C before using it */
 
@@ -525,22 +529,25 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Setup the I2C message */
 
-  msg[0].addr   = DS3231_I2C_ADDRESS;
-  msg[0].flags  = 0;
-  msg[0].buffer = buffer;
-  msg[0].length = 8;
+  msg[0].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[0].addr      = DS3231_I2C_ADDRESS;
+  msg[0].flags     = 0;
+  msg[0].buffer    = buffer;
+  msg[0].length    = 8;
 
   /* Read back the seconds register */
 
-  msg[1].addr   = DS3231_I2C_ADDRESS;
-  msg[1].flags  = 0;
-  msg[1].buffer = buffer;
-  msg[1].length = 1;
+  msg[1].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[1].addr      = DS3231_I2C_ADDRESS;
+  msg[1].flags     = 0;
+  msg[1].buffer    = buffer;
+  msg[1].length    = 1;
 
-  msg[2].addr   = DS3231_I2C_ADDRESS;
-  msg[2].flags  = I2C_M_READ;
-  msg[2].buffer = &seconds;
-  msg[2].length = 1;
+  msg[2].frequency = CONFIG_DS3231_I2C_FREQUENCY;
+  msg[2].addr      = DS3231_I2C_ADDRESS;
+  msg[2].flags     = I2C_M_READ;
+  msg[2].buffer    = &seconds;
+  msg[2].length    = 1;
 
   /* Configure I2C before using it */
 

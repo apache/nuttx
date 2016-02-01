@@ -430,12 +430,13 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    * activation command (ACKed).
    */
 
-   data = TSC2007_SETUP;
+   data          = TSC2007_SETUP;
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &data;                 /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = 0;                         /* Write transaction, beginning with START */
+   msg.buffer    = &data;                     /* Transfer from this address */
+   msg.length    = 1;                         /* Send one byte following the address */
 
    /* Ignore errors from the setup command (because it is not ACKed) */
 
@@ -443,12 +444,13 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
 
    /* Now activate the A/D converter */
 
-   data = cmd;
+   data          = cmd;
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &data;                 /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = 0;                         /* Write transaction, beginning with START */
+   msg.buffer    = &data;                     /* Transfer from this address */
+   msg.length    = 1;                         /* Send one byte following the address */
 
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
@@ -483,10 +485,11 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    *  STOP condition...
    */
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &cmd;                  /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = 0;                         /* Write transaction, beginning with START */
+   msg.buffer    = &cmd;                      /* Transfer from this address */
+   msg.length    = 1;                         /* Send one byte following the address */
 
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
@@ -527,10 +530,11 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    *  data byte has been received...
    */
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = I2C_M_READ;            /* Read transaction, beginning with START */
-   msg.buffer = data12;                /* Transfer to this address */
-   msg.length = 2;                     /* Read two bytes following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = I2C_M_READ;                /* Read transaction, beginning with START */
+   msg.buffer    = data12;                    /* Transfer to this address */
+   msg.length    = 2;                         /* Read two bytes following the address */
 
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
@@ -1068,7 +1072,8 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          priv->config->frequency = I2C_SETFREQUENCY(priv->i2c, *ptr);
+          priv->config->frequency = *ptr;
+          (void)I2C_SETFREQUENCY(priv->i2c, *ptr);
         }
         break;
 

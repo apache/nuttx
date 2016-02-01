@@ -54,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Driver Definitions *******************************************************/
 
 #define MAX_REFCLK_FREQ 75000000
@@ -133,15 +134,17 @@ static int cs2100_write_reg(FAR const struct cs2100_config_s *config,
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
 
-  msgs[0].addr   = config->i2caddr;
-  msgs[0].flags  = 0;
-  msgs[0].buffer = &regaddr;
-  msgs[0].length = 1;
+  msga[0].frequency = config->i2cfreq;
+  msgs[0].addr      = config->i2caddr;
+  msgs[0].flags     = 0;
+  msgs[0].buffer    = &regaddr;
+  msgs[0].length    = 1;
 
-  msgs[1].addr   = config->i2caddr;
-  msgs[1].flags  = I2C_M_NORESTART;
-  msgs[1].buffer = &regval;
-  msgs[1].length = 1;
+  msga[1].frequency = config->i2cfreq;
+  msgs[1].addr      = config->i2caddr;
+  msgs[1].flags     = I2C_M_NORESTART;
+  msgs[1].buffer    = &regval;
+  msgs[1].length    = 1;
 
   /* Send the message */
 
@@ -175,20 +178,22 @@ static int cs2100_read_reg(FAR const struct cs2100_config_s *config,
 
   /* Construct the I2C message (write 1 bytes, restart, read N bytes) */
 
-  msg.addr   = config->i2caddr;
-  msg.flags  = 0;
-  msg.buffer = &regaddr;
-  msg.length = 1;
+  msg.frequency = config->i2cfreq;
+  msg.addr      = config->i2caddr;
+  msg.flags     = 0;
+  msg.buffer    = &regaddr;
+  msg.length    = 1;
 
   /* Send the address followed by a STOP */
 
   ret = I2C_TRANSFER(config->i2c, &msg, 1);
   if (ret == OK)
     {
-      msg.addr   = config->i2caddr;
-      msg.flags  = I2C_M_READ;
-      msg.buffer = regval;
-      msg.length = 1;
+      msg.frequency = config->i2cfreq;
+      msg.addr      = config->i2caddr;
+      msg.flags     = I2C_M_READ;
+      msg.buffer    = regval;
+      msg.length    = 1;
 
       /* Read the register beginning with another START */
 
@@ -229,16 +234,17 @@ static int cs2100_write_ratio(FAR const struct cs2100_config_s *config,
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
 
-  buffer[0]  = CS2100_RATIO0;
-  buffer[1]  = (uint8_t)(ratio >> 24);
-  buffer[2]  = (uint8_t)((ratio >> 16) & 0xff);
-  buffer[3]  = (uint8_t)((ratio >> 8) & 0xff);
-  buffer[4]  = (uint8_t)(ratio  & 0xff);
+  buffer[0]     = CS2100_RATIO0;
+  buffer[1]     = (uint8_t)(ratio >> 24);
+  buffer[2]     = (uint8_t)((ratio >> 16) & 0xff);
+  buffer[3]     = (uint8_t)((ratio >> 8) & 0xff);
+  buffer[4]     = (uint8_t)(ratio  & 0xff);
 
-  msg.addr   = config->i2caddr;
-  msg.flags  = 0;
-  msg.buffer = buffer;
-  msg.length = 5;
+  msg.frequency = config->i2cfreq;
+  msg.addr      = config->i2caddr;
+  msg.flags     = 0;
+  msg.buffer    = buffer;
+  msg.length    = 5;
 
   /* Send the message */
 
@@ -272,22 +278,24 @@ static int cs2100_read_ratio(FAR const struct cs2100_config_s *config,
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
 
-  buffer[0]  = CS2100_RATIO0;
+  buffer[0]     = CS2100_RATIO0;
 
-  msg.addr   = config->i2caddr;
-  msg.flags  = 0;
-  msg.buffer = buffer;
-  msg.length = 1;
+  msg.frequency = config->i2cfreq;
+  msg.addr      = config->i2caddr;
+  msg.flags     = 0;
+  msg.buffer    = buffer;
+  msg.length    = 1;
 
   /* Send the address followed by a STOP */
 
   ret = I2C_TRANSFER(config->i2c, &msg, 1);
   if (ret == OK)
     {
-      msg.addr   = config->i2caddr;
-      msg.flags  = I2C_M_READ;
-      msg.buffer = buffer;
-      msg.length = 4;
+      msg.frequency = config->i2cfreq;
+      msg.addr      = config->i2caddr;
+      msg.flags     = I2C_M_READ;
+      msg.buffer    = buffer;
+      msg.length    = 4;
 
       /* Read the ratio registers beginning with another START */
 

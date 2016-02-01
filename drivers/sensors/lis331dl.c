@@ -54,6 +54,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_LIS331DL_I2C_FREQUENCY
+#  define CONFIG_LIS331DL_I2C_FREQUENCY
+#endif
+
 /* LIS331DL Internal Registers **********************************************/
 
 #define ST_LIS331DL_WHOAMI          0x0F    /* who am I register */
@@ -182,16 +187,18 @@ static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
     struct i2c_msg_s msgv[2] =
     {
       {
-        .addr   = dev->address,
-        .flags  = 0,
-        .buffer = &subaddr,
-        .length = 1
+        .frequency = CONFIG_LIS331DL_I2C_FREQUENCY,
+        .addr      = dev->address,
+        .flags     = 0,
+        .buffer    = &subaddr,
+        .length    = 1
       },
       {
-        .addr   = dev->address,
-        .flags  = flags,
-        .buffer = buf,
-        .length = length
+        .frequency = CONFIG_LIS331DL_I2C_FREQUENCY,
+        .addr      = dev->address,
+        .flags     = flags,
+        .buffer    = buf,
+        .length    = length
       }
     };
 
