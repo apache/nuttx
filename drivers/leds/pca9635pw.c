@@ -103,6 +103,8 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
                                     uint8_t const reg_addr,
                                     uint8_t const reg_val)
 {
+  struct i2c_config_s config;
+
   dbg("pca9635pw_i2c_write_byte\n");
 
   /* assemble the 2 byte message comprised of reg_addr and reg_val */
@@ -113,25 +115,22 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
   buffer[0] = reg_addr;
   buffer[1] = reg_val;
 
-  /* Write the register address followed by the data (no RESTART) */
+  /* Setup up the I2C configuration */
 
-  uint8_t const NUMBER_OF_I2C_ADDRESS_BITS = 7;
+  config.frequency = I2C_BUS_FREQ_HZ;
+  config.address   = priv->i2c_addr;
+  config.addrlen   = 7;
+
+  /* Write the register address followed by the data (no RESTART) */
 
   dbg("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
       buffer[0], buffer[1]);
 
-  int ret = I2C_SETADDRESS(priv->i2c, priv->i2c_addr,
-                           NUMBER_OF_I2C_ADDRESS_BITS);
-  if (ret != OK)
-    {
-      dbg("I2C_SETADDRESS returned error code %d\n", ret);
-      return ret;
-    }
 
-  ret = I2C_WRITE(priv->i2c, buffer, BUFFER_SIZE);
+  ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
     {
-      dbg("I2C_WRITE returned error code %d\n", ret);
+      dbg("i2c_write returned error code %d\n", ret);
       return ret;
     }
 

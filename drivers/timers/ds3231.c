@@ -547,9 +547,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   I2C_SETFREQUENCY(g_ds3231.i2c, CONFIG_DS3231_I2C_FREQUENCY);
 
-  /* Perform the transfer (This could be done with I2C_READ).  This transfer
-   * will be repeated if the seconds count rolls over to a smaller value
-   * while writing.
+  /* Perform the transfer.  This transfer will be repeated if the seconds
+   * count rolls over to a smaller value while writing.
    */
 
   do

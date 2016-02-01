@@ -5,6 +5,9 @@
  *   Copyright (C) 2015 DS-Automotion GmbH. All rights reserved.
  *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -51,7 +54,15 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_MCP9844)
 
 /****************************************************************************
- * Private
+ * Pre-process Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_MCP9844_I2C_FREQUENCY
+#  define CONFIG_MCP9844_I2C_FREQUENCY 400000
+#endif
+
+/****************************************************************************
+ * Private Types
  ****************************************************************************/
 
 struct mcp9844_dev_s
@@ -66,6 +77,10 @@ struct mcp9844_dev_s
 
 /* I2C helper functions */
 
+static int     mcp9844_i2c_write(FAR struct mcp9844_dev_s *priv,
+                  FAR const uint8_t *buffer, int buflen);
+static int     mcp9844_i2c_read(FAR struct mcp9844_dev_s *priv,
+                  FAR uint8_t *buffer, int buflen);
 static int     mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
                   uint8_t const regaddr, FAR uint16_t *value);
 static int     mcp9844_write_u16(FAR struct mcp9844_dev_s *priv,
@@ -104,6 +119,50 @@ static const struct file_operations g_mcp9844_fops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mcp9844_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int mcp9844_i2c_write(FAR struct mcp9844_dev_s *priv,
+                             FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_MCP9844_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_write(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: mcp9844_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int mcp9844_i2c_read(FAR struct mcp9844_dev_s *priv,
+                            FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_MCP9844_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_read(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
  * Name: mcp9844_read_u16
  *
  * Description:
@@ -120,10 +179,10 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
 
-  ret = I2C_WRITE(priv->i2c, &regaddr, 1);
+  ret = mcp9844_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg ("I2C_WRITE failed: %d\n", ret);
+      sndbg ("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -131,10 +190,10 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
 
   uint8_t const BUFFER_SIZE = 2;
   uint8_t buffer[BUFFER_SIZE];
-  ret = I2C_READ(priv->i2c, buffer, BUFFER_SIZE);
+  ret = mcp9844_i2c_read(priv, buffer, BUFFER_SIZE);
   if (ret < 0)
     {
-      sndbg ("I2C_READ failed: %d\n", ret);
+      sndbg ("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -173,7 +232,7 @@ static int mcp9844_write_u16(FAR struct mcp9844_dev_s *priv,
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
 
-  return I2C_WRITE(priv->i2c, buffer, BUFFER_SIZE);
+  return mcp9844_i2c_write(priv, buffer, BUFFER_SIZE);
 }
 
 /****************************************************************************

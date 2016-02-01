@@ -118,60 +118,21 @@
 #define I2C_SETADDRESS(d,a,n) ((d)->ops->setaddress(d,a,n))
 
 /****************************************************************************
- * Name: I2C_WRITE
- *
- * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address. Each write operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this write completes. Required.
- *
- * Input Parameters:
- *   dev    - Device-specific state data
- *   buffer - A pointer to the read-only buffer of data to be written to device
- *   buflen - The number of bytes to send from the buffer
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-#define I2C_WRITE(d,b,l) ((d)->ops->write(d,b,l))
-
-/****************************************************************************
- * Name: I2C_READ
- *
- * Description:
- *   Receive a block of data from I2C using the previously selected I2C
- *   frequency and slave address. Each read operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this read completes. Required.
- *
- * Input Parameters:
- *   dev    - Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
- *   buflen - The requested number of bytes to be read
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-#define I2C_READ(d,b,l) ((d)->ops->read(d,b,l))
-
-/****************************************************************************
  * Name: I2C_TRANSFER
  *
  * Description:
  *   Perform a sequence of I2C transfers, each transfer is started with a
  *   START and the final transfer is completed with a STOP. Each sequence
  *   will be an 'atomic'  operation in the sense that any other I2C actions
- *   will be serialized and pend until this read completes. Optional.
+ *   will be serialized and pend until this sequence of transfers completes.
+ *   Required.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
- *   msgs     - A pointer to a set of message descriptors
- *   msgcount - The number of transfers to perform
+ *   dev  
+
+ - Device-specific state data
+ *   msgs  - A pointer to a set of message descriptors
+ *   count - The number of transfers to perform
  *
  * Returned Value:
  *   The number of transfers completed
@@ -191,13 +152,13 @@ struct i2c_msg_s;
 struct i2c_ops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_master_s *dev, uint32_t frequency);
-  int    (*setaddress)(FAR struct i2c_master_s *dev, int addr, int nbits);
-  int    (*write)(FAR struct i2c_master_s *dev, FAR const uint8_t *buffer,
-           int buflen);
-  int    (*read)(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
-           int buflen);
-  int    (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-           int count);
+  int      (*setaddress)(FAR struct i2c_master_s *dev, int addr, int nbits);
+  int      (*write)(FAR struct i2c_master_s *dev, FAR const uint8_t *buffer,
+             int buflen);
+  int      (*read)(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
+             int buflen);
+  int      (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
+             int count);
 };
 
 /* This structure contains the full state of I2C as needed for a specific

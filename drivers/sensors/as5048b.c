@@ -5,6 +5,9 @@
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -112,6 +115,50 @@ static const struct qe_ops_s g_qeops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: as5048b_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int as5048b_i2c_write(FAR struct as5048b_dev_s *priv,
+                             FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_write(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: as5048b_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int as5048b_i2c_read(FAR struct as5048b_dev_s *priv,
+                            FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_read(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
  * Name: as5048b_readu8
  *
  * Description:
@@ -127,19 +174,19 @@ static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
   /* Write the register address */
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, &regaddr, sizeof(regaddr));
+  ret = as5048b_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 8 bits from the register */
 
-  ret = I2C_READ(priv->i2c, regval, sizeof(*regval));
+  ret = as5048b_i2c_read(priv, regval, sizeof(*regval));
   if (ret < 0)
     {
-      sndbg("I2C_READ failed: %d\n", ret);
+      sndbg("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -209,10 +256,10 @@ static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
   /* Write the register address followed by the data (no RESTART) */
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, buffer, sizeof(buffer));
+  ret = as5048b_i2c_write(priv, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
     }
 
   return ret;

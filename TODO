@@ -1614,10 +1614,9 @@ o Other drivers (drivers/)
                in a multi-tasking I2C environment:
                - I2C_SETFREQUENCY:  Frequency setting can be overwritten by other
                  I2C usage.
-               - I2C_SETADDRESS used with I2C_READ and I2C_WRITE:
-                 Similarly, address can and will be changed by other I2C usage.
-                 NOTE also that I2C_SETADDRESS also sets the address width (either
-                 7 or 10 bits).
+               - I2C_SETADDRESS: The I2C address can and will be changed by other
+                 I2C usage. NOTE also that I2C_SETADDRESS also sets the address width
+                 (either 7 or 10 bits).
                - I2C_TRANSFER:  This is the only interface that is properly self
                  contained and protected from most mult-tasking issues.  But even
                  this interface can suffer if there are differing frequency settings.
@@ -1626,8 +1625,7 @@ o Other drivers (drivers/)
                are two ways to fix theses problems:  (1) Add a locking method such
                as is provided with the SPI interface, or (2) make each interface
                self-contained and atomic:  Remove the I2C_FREQUENCY and I2C_ADDRESS
-               methods; Add frequency to all interfaces and add the address to
-               I2C_READ and I2C_WRITE.
+               methods; Add frequency to the I2C_TRANSFER message structure.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

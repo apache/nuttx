@@ -128,10 +128,10 @@ static const struct ioexpander_ops_s g_pca9555_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pca9555_writeread
+ * Name: pca9555_write
  *
  * Description:
- *   Write to then read from the I2C device.
+ *   Write to the I2C device.
  *
  ****************************************************************************/
 

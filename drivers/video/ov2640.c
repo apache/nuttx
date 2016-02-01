@@ -670,6 +670,51 @@ static const struct ovr2640_reg_s g_ov2640_jpeg_uxga_resolution[] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ov2640_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int ov2640_i2c_write(FAR struct i2c_master_s *i2c,
+                            FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_OV2640_FREQUENCY;
+  config.address   = CONFIG_OV2640_I2CADDR;
+  config.addrlen   = 7;
+
+  return i2c_write(i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: ov2640_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int ov2640_i2c_read(FAR struct i2c_master_s *i2c,
+                           FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_OV2640_FREQUENCY;
+  config.address   = CONFIG_OV2640_I2CADDR;
+  config.addrlen   = 7;
+
+  return i2c_read(i2c, &config, buffer, buflen);
+}
+
 /****************************************************************************
  * Function: ov2640_putreg
  *
@@ -704,10 +749,10 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
 
   /* And do it */
 
-  ret = I2C_WRITE(i2c, buffer, 2);
+  ret = ov2640_i2c_write(i2c, buffer, 2);
   if (ret < 0)
     {
-      gdbg("ERROR: I2C_WRITE failed: %d\n", ret);
+      gdbg("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -738,19 +783,19 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
 
   /* Write the register address */
 
-  ret = I2C_WRITE(i2c, &regaddr, 1);
+  ret = ov2640_i2c_write(i2c, &regaddr, 1);
   if (ret < 0)
     {
-      gdbg("ERROR: I2C_WRITE failed: %d\n", ret);
+      gdbg("ERROR: i2c_write failed: %d\n", ret);
       return 0;
     }
 
   /* Restart and read 8-bits from the register */
 
-  ret = I2C_READ(i2c, &regval, 1);
+  ret = ov2640_i2c_read(i2c, &regval, 1);
   if (ret < 0)
     {
-      gdbg("ERROR: I2C_READ failed: %d\n", ret);
+      gdbg("ERROR: i2c_read failed: %d\n", ret);
       return 0;
     }
 #ifdef CONFIG_OV2640_REGDEBUG

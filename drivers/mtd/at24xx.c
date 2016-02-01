@@ -4,9 +4,9 @@
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-20 initial version
  *
- *   2011-11-1 Added support for larger MTD block sizes: Hal Glenn <hglenn@2g-eng.com>
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from drivers/mtd/m25px.c
  *
@@ -192,6 +192,54 @@ static struct at24c_dev_s g_at24c;
  * Private Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: at24c_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int at24c_i2c_write(FAR struct at24c_dev_s *priv,
+                           FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_AT24XX_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_write(priv->dev, &config, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: at24c_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int at24c_i2c_read(FAR struct at24c_dev_s *priv,
+                          FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_AT24XX_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_read(priv->dev, &config, buffer, buflen);
+}
+
+/************************************************************************************
+ * Name: at24c_eraseall
+ ************************************************************************************/
+
 static int at24c_eraseall(FAR struct at24c_dev_s *priv)
 {
   int startblock = 0;
@@ -212,12 +260,12 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
       I2C_SETADDRESS(priv->dev, priv->addr | ((offset >> 8) & 0x07), 7);
 #endif
 
-      while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
+      while (at24c_i2c_write(priv, buf, AT24XX_ADDRSIZE) < 0)
         {
           usleep(1000);
         }
 
-      I2C_WRITE(priv->dev, buf, AT24XX_PAGESIZE + AT24XX_ADDRSIZE);
+      at24c_i2c_write(priv, buf, AT24XX_PAGESIZE + AT24XX_ADDRSIZE);
     }
 
   return OK;
@@ -273,7 +321,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
   I2C_SETADDRESS(priv->dev, address | ((offset >> 8) & 0x07), 7);
 #endif
 
-  while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
+  while (at24c_i2c_write(priv, buf, AT24XX_ADDRSIZE) < 0)
     {
       fvdbg("wait\n");
       usleep(1000);
@@ -281,7 +329,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
 
   /* Then transfer the following bytes */
 
-  I2C_READ(priv->dev, buffer, nbytes);
+  at24c_i2c_read(priv, buffer, nbytes);
   return nbytes;
 }
 
@@ -388,7 +436,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
       I2C_SETADDRESS(priv->dev, priv->addr | ((offset >> 8) & 0x07), 7);
 #endif
 
-      while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
+      while (at24c_i2c_write(priv, buf, AT24XX_ADDRSIZE) < 0)
         {
           fvdbg("wait\n");
           usleep(1000);
@@ -396,7 +444,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
       memcpy(&buf[AT24XX_ADDRSIZE], buffer, priv->pagesize);
 
-      I2C_WRITE(priv->dev, buf, priv->pagesize + AT24XX_ADDRSIZE);
+      at24c_i2c_write(priv, buf, priv->pagesize + AT24XX_ADDRSIZE);
       startblock++;
       buffer += priv->pagesize;
     }

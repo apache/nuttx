@@ -332,7 +332,14 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
                             uint16_t regval)
 {
+  struct i2c_config_s config;
   int retries;
+
+  /* Setup up the I2C configuration */
+
+  config.frequency = priv->lower->frequency;
+  config.address   = priv->lower->address;
+  config.addrlen   = 7;
 
   /* Try up to three times to read the register */
 
@@ -351,13 +358,13 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
        * completed.
        */
 
-      ret = I2C_WRITE(priv->i2c, data, 3);
+      ret = i2c_write(priv->i2c, &config, data, 3);
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          auddbg("WARNING: i2c_write failed: %d ... Resetting\n", ret);
 
           ret = up_i2creset(priv->i2c);
           if (ret < 0)

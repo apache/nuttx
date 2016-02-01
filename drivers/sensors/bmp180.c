@@ -3,9 +3,11 @@
  * drivers/sensors/bmp180.c
  * Character driver for the Freescale BMP1801 Barometer Sensor
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Alan Carvalho de Assis
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -172,6 +174,50 @@ static const struct file_operations g_bmp180fops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: bmp180_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int bmp180_i2c_write(FAR struct bmp180_dev_s *priv,
+                            FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = priv->freq;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_write(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: bmp180_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int bmp180_i2c_read(FAR struct bmp180_dev_s *priv,
+                           FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = priv->freq;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_read(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
  * Name: bmp180_getreg8
  *
  * Description:
@@ -186,19 +232,19 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 
   /* Restart the register */
 
-  ret = I2C_WRITE(priv->i2c, &regaddr, 1);
+  ret = bmp180_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart the register */
 
-  ret = I2C_READ(priv->i2c, &regval, 1);
+  ret = bmp180_i2c_read(priv, &regval, 1);
   if (ret < 0)
     {
-      sndbg("I2C_READ failed: %d\n", ret);
+      sndbg("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -221,19 +267,19 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 
   /* Register to read */
 
-  ret = I2C_WRITE(priv->i2c, &regaddr, 1);
+  ret = bmp180_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Read register */
 
-  ret = I2C_READ(priv->i2c, (uint8_t *)&regval, 2);
+  ret = bmp180_i2c_read(priv, (uint8_t *)&regval, 2);
   if (ret < 0)
     {
-      sndbg("I2C_READ failed: %d\n", ret);
+      sndbg("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -266,10 +312,10 @@ static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
 
   /* Restart the register */
 
-  ret = I2C_WRITE(priv->i2c, (uint8_t *) &data, 2);
+  ret = bmp180_i2c_write(priv, (uint8_t *) &data, 2);
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return;
     }
 

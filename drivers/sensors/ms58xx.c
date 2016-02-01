@@ -6,6 +6,9 @@
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *   Updated by: Karim Keddam <karim.keddam@polymtl.ca>
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -56,6 +59,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_MS58XX_I2C_FREQUENCY
+#  define CONFIG_MS58XX_I2C_FREQUENCY 400000
+#endif
+
 /* Register Definitions *****************************************************/
 /* Register Addresses */
 
@@ -135,6 +143,10 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex);
 
 /* I2C Helpers */
 
+static int ms58xx_i2c_write(FAR struct ms58xx_dev_s *priv,
+                             FAR const uint8_t *buffer, int buflen);
+static int ms58xx_i2c_read(FAR struct ms58xx_dev_s *priv,
+                            FAR uint8_t *buffer, int buflen);
 static int ms58xx_readu16(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
                           FAR uint16_t *regval);
 static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc);
@@ -229,6 +241,50 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
 }
 
 /****************************************************************************
+ * Name: ms58xx_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int ms58xx_i2c_write(FAR struct ms58xx_dev_s *priv,
+                             FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_MS58XX_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_write(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: ms58xx_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int ms58xx_i2c_read(FAR struct ms58xx_dev_s *priv,
+                            FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_config_s config;
+
+  /* Set up the configuration and perform the write-read operation */
+
+  config.frequency = CONFIG_MS58XX_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  return i2c_read(priv->i2c, &config, buffer, buflen);
+}
+
+/****************************************************************************
  * Name: ms58xx_readu16
  *
  * Description:
@@ -247,19 +303,19 @@ static int ms58xx_readu16(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
   /* Write the register address */
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, &regaddr, sizeof(regaddr));
+  ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 16 bits from the register */
 
-  ret = I2C_READ(priv->i2c, buffer, sizeof(buffer));
+  ret = ms58xx_i2c_read(priv, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("I2C_READ failed: %d\n", ret);
+      sndbg("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -288,19 +344,19 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
   /* Write the register address */
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, &regaddr, sizeof(regaddr));
+  ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 24 bits from the register */
 
-  ret = I2C_READ(priv->i2c, buffer, sizeof(buffer));
+  ret = ms58xx_i2c_read(priv, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("I2C_READ failed: %d\n", ret);
+      sndbg("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -496,10 +552,10 @@ static int ms58xx_reset(FAR struct ms58xx_dev_s *priv)
   /* Write the register address */
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, &regaddr, sizeof(regaddr));
+  ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -533,10 +589,10 @@ static int ms58xx_convert(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
   /* Write the register address */
 
   I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, &regaddr, sizeof(regaddr));
+  ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
     }
 
   /* Wait for the conversion to end */
