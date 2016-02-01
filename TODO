@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 13, 2016)
+NuttX TODO List (Last updated February 1, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
-  (1)  Other drivers (drivers/)
+  (0)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
@@ -1607,21 +1607,6 @@ o Build system
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       I2C NOT THREAD SAFE
-  Description: Unlike the SPI interface, the I2C interface has no method to lock
-               the interface.  This is a problem for all non-atomic I2C operations
-               in a multi-tasking I2C environment:
-               - I2C_SETFREQUENCY:  Frequency setting can be overwritten by other
-                 I2C usage.
-               - I2C_TRANSFER:  This interface is almost self but even can suffer
-                 if there are differing frequency settings.
-  Status:      Open
-  Priority:    Medium-High.  The fix is easy but effects a lot of software.  There
-               are two ways to fix theses problems:  (1) Add a locking method such
-               as is provided with the SPI interface, or (2) make each interface
-               self-contained and atomic:  Remove the I2C_FREQUENCY and add
-               frequency to the I2C_TRANSFER message structure.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
