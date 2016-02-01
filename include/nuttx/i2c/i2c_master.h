@@ -153,10 +153,6 @@ struct i2c_ops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_master_s *dev, uint32_t frequency);
   int      (*setaddress)(FAR struct i2c_master_s *dev, int addr, int nbits);
-  int      (*write)(FAR struct i2c_master_s *dev, FAR const uint8_t *buffer,
-             int buflen);
-  int      (*read)(FAR struct i2c_master_s *dev, FAR uint8_t *buffer,
-             int buflen);
   int      (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
              int count);
 };
