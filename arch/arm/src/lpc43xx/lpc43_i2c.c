@@ -99,7 +99,6 @@
 struct lpc43_i2cdev_s
 {
   struct i2c_master_s dev;     /* Generic I2C device */
-  struct i2c_msg_s msg;        /* a single message for legacy read/write */
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
   uint32_t         baseFreq;   /* branch frequency */
@@ -138,15 +137,12 @@ static void     lpc43_i2c_timeout(int argc, uint32_t arg, ...);
 
 static uint32_t lpc43_i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
-static int      lpc43_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
-                  int nbits);
 static int      lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
 struct i2c_ops_s lpc43_i2c_ops =
 {
   .setfrequency = lpc43_i2c_setfrequency,
-  .setaddress   = lpc43_i2c_setaddress,
   .transfer     = lpc43_i2c_transfer
 };
 
@@ -185,27 +181,6 @@ static uint32_t lpc43_i2c_setfrequency(FAR struct i2c_master_s *dev,
   /* FIXME: This function should return the actual selected frequency */
 
   return frequency;
-}
-
-/****************************************************************************
- * Name: lpc43_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address for a subsequent read/write
- *
- ****************************************************************************/
-
-static int lpc43_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
-                                int nbits)
-{
-  struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
-
-  DEBUGASSERT(dev != NULL);
-  DEBUGASSERT(nbits == 7);
-
-  priv->msg.addr  = addr;
-
-  return OK;
 }
 
 /****************************************************************************

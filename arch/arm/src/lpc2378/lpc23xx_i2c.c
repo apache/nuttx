@@ -7,9 +7,10 @@
  * Derived from arch/arm/src/lpc17xx/lpc17xx_i2c.c
  *
  *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com> (Original author)
- *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from arch/arm/src/lpc31xx/lpc31_i2c.c
  *
@@ -110,7 +111,6 @@
 struct lpc2378_i2cdev_s
 {
   struct i2c_master_s dev;     /* Generic I2C device */
-  struct i2c_msg_s msg;        /* a single message for legacy read/write */
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
 
@@ -139,8 +139,6 @@ static void     lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
 
 static uint32_t lpc2378_i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
-static int      lpc2378_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
-                  int nbits);
 static int      lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 static void     lpc2378_stopnext(struct lpc2378_i2cdev_s *priv);
@@ -162,7 +160,6 @@ static struct lpc2378_i2cdev_s g_i2c2dev;
 struct i2c_ops_s lpc2378_i2c_ops =
 {
   .setfrequency = lpc2378_i2c_setfrequency,
-  .setaddress   = lpc2378_i2c_setaddress,
   .transfer     = lpc2378_i2c_transfer
 };
 
@@ -201,27 +198,6 @@ static uint32_t lpc2378_i2c_setfrequency(FAR struct i2c_master_s *dev,
   /* FIXME: This function should return the actual selected frequency */
 
   return frequency;
-}
-
-/****************************************************************************
- * Name: lpc2378_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address for a subsequent read/write
- *
- ****************************************************************************/
-
-static int lpc2378_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
-                                int nbits)
-{
-  struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *)dev;
-
-  DEBUGASSERT(dev != NULL);
-  DEBUGASSERT(nbits == 7);
-
-  priv->msg.addr  = addr;
-
-  return OK;
 }
 
 /****************************************************************************

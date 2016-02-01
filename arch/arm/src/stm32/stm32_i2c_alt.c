@@ -314,8 +314,6 @@ struct stm32_i2c_inst_s
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
 
   uint32_t    frequency;   /* Frequency used in this instantiation */
-  int         address;     /* Address used in this instantiation */
-  uint16_t    flags;       /* Flags used in this instantiation */
 };
 
 /************************************************************************************
@@ -379,7 +377,6 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
 static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
                                        uint32_t frequency);
-static int stm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
 static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                              int count);
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
@@ -481,7 +478,6 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
 static const struct i2c_ops_s stm32_i2c_ops =
 {
   .setfrequency       = stm32_i2c_setfrequency,
-  .setaddress         = stm32_i2c_setaddress,
   .transfer           = stm32_i2c_transfer
 };
 
@@ -2056,25 +2052,6 @@ static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t fr
 }
 
 /************************************************************************************
- * Name: stm32_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address
- *
- ************************************************************************************/
-
-static int stm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
-{
-  stm32_i2c_sem_wait(dev);
-
-  ((struct stm32_i2c_inst_s *)dev)->address = addr;
-  ((struct stm32_i2c_inst_s *)dev)->flags   = (nbits == 10) ? I2C_M_TEN : 0;
-
-  stm32_i2c_sem_post(dev);
-  return OK;
-}
-
-/************************************************************************************
  * Name: stm32_i2c_process
  *
  * Description:
@@ -2365,8 +2342,6 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
   inst->ops       = &stm32_i2c_ops;
   inst->priv      = priv;
   inst->frequency = 100000;
-  inst->address   = 0;
-  inst->flags     = 0;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.

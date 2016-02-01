@@ -260,8 +260,6 @@ struct tiva_i2c_inst_s
   struct tiva_i2c_priv_s *priv; /* Common driver private data structure */
 
   uint32_t    frequency;   /* Frequency used in this instantiation */
-  uint16_t    address;     /* Address used in this instantiation */
-  uint16_t    flags;       /* Flags used in this instantiation */
 };
 
 /************************************************************************************
@@ -342,7 +340,6 @@ static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv,
                                   uint32_t frequency);
 static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev,
                                       uint32_t frequency);
-static int tiva_i2c_setaddress(struct i2c_master_s *dev, int addr, int nbits);
 static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                             int msgc);
 static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
@@ -577,7 +574,6 @@ static struct tiva_i2c_priv_s tiva_i2c9_priv;
 static const struct i2c_ops_s tiva_i2c_ops =
 {
   .setfrequency       = tiva_i2c_setfrequency,
-  .setaddress         = tiva_i2c_setaddress,
   .transfer           = tiva_i2c_transfer
 };
 
@@ -1904,30 +1900,6 @@ static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev, uint32_t frequen
 }
 
 /************************************************************************************
- * Name: tiva_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address
- *
- ************************************************************************************/
-
-static int tiva_i2c_setaddress(struct i2c_master_s *dev, int addr, int nbits)
-{
-  struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
-
-  DEBUGASSERT(inst && inst->priv && inst->priv->config);
-  i2cvdbg("I2C%d: addr: %02x nbits=%d\n", inst->priv->config->devno, addr, nbits);
-
-  tiva_i2c_sem_wait(dev);
-
-  inst->address = addr;
-  inst->flags   = (nbits == 10) ? I2C_M_TEN : 0;
-
-  tiva_i2c_sem_post(dev);
-  return OK;
-}
-
-/************************************************************************************
  * Name: tiva_i2c_process
  *
  * Description:
@@ -2201,8 +2173,6 @@ struct i2c_master_s *up_i2cinitialize(int port)
   inst->ops       = &tiva_i2c_ops;
   inst->priv      = priv;
   inst->frequency = 100000;
-  inst->address   = 0;
-  inst->flags     = 0;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.

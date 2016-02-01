@@ -5,6 +5,9 @@
  *   Copyright (C) 2015 Pierre-noel Bouteville . All rights reserved.
  *   Authors: Pierre-noel Bouteville <pnb990@gmail.com>
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -277,8 +280,6 @@ struct efm32_i2c_inst_s
                                        */
 
   uint32_t frequency;         /* Frequency used in this instantiation */
-  int address;                /* Address used in this instantiation */
-  uint32_t flags;             /* Flags used in this instantiation */
 };
 
 /****************************************************************************
@@ -328,7 +329,6 @@ static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv, int frequency);
 static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv);
 static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
                                        uint32_t frequency);
-static int efm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
 static int efm32_i2c_process(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count);
 static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
@@ -405,7 +405,6 @@ static struct efm32_i2c_priv_s efm32_i2c1_priv =
 static const struct i2c_ops_s efm32_i2c_ops =
 {
   .setfrequency = efm32_i2c_setfrequency,
-  .setaddress   = efm32_i2c_setaddress,
   .transfer     = efm32_i2c_transfer
 };
 
@@ -1466,25 +1465,6 @@ static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
 }
 
 /****************************************************************************
- * Name: efm32_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address
- *
- ****************************************************************************/
-
-static int efm32_i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
-{
-  efm32_i2c_sem_wait(dev);
-
-  ((struct efm32_i2c_inst_s *)dev)->address = addr;
-  ((struct efm32_i2c_inst_s *)dev)->flags = (nbits == 10) ? I2C_M_TEN : 0;
-
-  efm32_i2c_sem_post(dev);
-  return OK;
-}
-
-/****************************************************************************
  * Name: efm32_i2c_process
  *
  * Description:
@@ -1632,7 +1612,6 @@ static int efm32_i2c_process(FAR struct i2c_master_s *dev,
   priv->ptr = NULL;
 
   efm32_i2c_sem_post(dev);
-
   return -errval;
 }
 
@@ -1701,8 +1680,6 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
   inst->ops = &efm32_i2c_ops;
   inst->priv = priv;
   inst->frequency = 100000;
-  inst->address = 0;
-  inst->flags = 0;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.

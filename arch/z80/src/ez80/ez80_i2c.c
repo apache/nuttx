@@ -98,8 +98,6 @@ static int      ez80_i2c_write_transfer(FAR struct ez80_i2cdev_s *priv,
 
 static uint32_t ez80_i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
-static int      ez80_i2c_setaddress(FAR struct i2c_master_s *dev,
-                  int addr, int nbits);
 static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
@@ -122,7 +120,6 @@ static sem_t   g_i2csem;       /* Serialize I2C transfers */
 const struct i2c_ops_s g_ops =
 {
   ez80_i2c_setfrequency,
-  ez80_i2c_setaddress,
   ez80_i2c_transfer
 };
 
@@ -820,37 +817,6 @@ static uint32_t ez80_i2c_setfrequency(FAR struct i2c_master_s *dev,
 }
 
 /****************************************************************************
- * Name: ez80_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address. This frequency will be retained in the struct
- *   i2c_master_s instance and will be used with all transfers.  Required.
- *
- * Input Parameters:
- *   dev -     Device-specific state data
- *   address - The I2C slave address
- *   nbits -   The number of address bits provided (7 or 10)
- *
- * Returned Value:
- *   Returns the actual frequency selected
- *
- ****************************************************************************/
-
-static int ez80_i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
-                               int nbits)
-{
-  FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
-
-  DEBUGASSERT(dev != NULL && (unsigned)addr < 0x80 && (nbits == 7 || nbits == 10));
-
-  /* Save the 7- or 10-bit address */
-
-  priv->addr   = addr;
-  priv->addr10 = (nbits == 10);
-  return OK;
-}
-
-/****************************************************************************
  * Name: ez80_i2c_transfer
  *
  * Description:
@@ -893,7 +859,12 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
 
   for (i = 0; i < count; i++)
     {
-      msg  = &msgs[i];
+      msg = &msgs[i];
+
+      /* Set the I2C address */
+
+      priv->addr   = msg->addr;
+      priv->addr10 = (msg->flags & I2C_M_TEN) != 0);
 
       /* Is this the last message in the sequence? */
 

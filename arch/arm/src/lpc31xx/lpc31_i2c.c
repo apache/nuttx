@@ -3,7 +3,7 @@
  *
  *   Author: David Hewson
  *
- *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,6 @@
 struct lpc31_i2cdev_s
 {
     struct i2c_master_s dev;      /* Generic I2C device */
-    struct i2c_msg_s  msg;        /* a single message for legacy read/write */
     unsigned int      base;       /* Base address of registers */
     uint16_t          clkid;      /* Clock for this device */
     uint16_t          rstid;      /* Reset for this device */
@@ -127,15 +126,12 @@ static void i2c_reset(struct lpc31_i2cdev_s *priv);
 
 static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev,
                   uint32_t frequency);
-static int      i2c_setaddress(FAR struct i2c_master_s *dev, int addr,
-                  int nbits);
 static int      i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
 struct i2c_ops_s lpc31_i2c_ops =
 {
   .setfrequency = i2c_setfrequency,
-  .setaddress   = i2c_setaddress,
   .transfer     = i2c_transfer
 };
 
@@ -247,27 +243,6 @@ static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequenc
   /* FIXME: This function should return the actual selected frequency */
 
   return frequency;
-}
-
-/****************************************************************************
- * Name: lpc31_i2c_setaddress
- *
- * Description:
- *   Set the I2C slave address for a subsequent read/write
- *
- ****************************************************************************/
-
-static int i2c_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
-{
-  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
-
-  DEBUGASSERT(dev != NULL);
-  DEBUGASSERT(nbits == 7 || nbits == 10);
-
-  priv->msg.addr  = addr;
-  priv->msg.flags = (nbits == 7) ? 0 : I2C_M_TEN;
-
-  return OK;
 }
 
 /****************************************************************************

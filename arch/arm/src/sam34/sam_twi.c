@@ -122,8 +122,6 @@ struct twi_dev_s
   uint32_t            frequency;  /* TWI input clock frequency */
   uint32_t            deffreq;    /* Selected TWI frequency */
   uint16_t            irq;        /* IRQ number for this device */
-  uint16_t            address;    /* Slave address */
-  uint16_t            flags;      /* Transfer flags */
   uint8_t             msgc;       /* Number of message in the message list */
   uint8_t             twi;        /* TWI peripheral number (for debug output) */
   uint8_t             pid;        /* TWI peripheral ID */
@@ -191,7 +189,6 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev,
           uint32_t frequency);
-static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);
 static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
 
@@ -217,7 +214,6 @@ static struct twi_dev_s g_twi1;
 struct i2c_ops_s g_twiops =
 {
   .setfrequency     = twi_setfrequency,
-  .setaddress       = twi_setaddress,
   .transfer         = twi_transfer
 };
 
@@ -720,34 +716,6 @@ static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequenc
 }
 
 /****************************************************************************
- * Name: twi_setaddress
- *
- * Description:
- *   Set the I2C slave address for a subsequent read/write
- *
- ****************************************************************************/
-
-static int twi_setaddress(FAR struct i2c_master_s *dev, int addr, int nbits)
-{
-  struct twi_dev_s *priv = (struct twi_dev_s *) dev;
-
-  i2cvdbg("TWI%d address: %02x nbits: %d\n", priv->twi, addr, nbits);
-  DEBUGASSERT(dev != NULL && nbits == 7);
-
-  /* Get exclusive access to the device */
-
-  twi_takesem(&priv->exclsem);
-
-  /* Remember 7- or 10-bit address */
-
-  priv->address = addr;
-  priv->flags   = (nbits == 10) ? I2C_M_TEN : 0;
-
-  twi_givesem(&priv->exclsem);
-  return OK;
-}
-
-/****************************************************************************
  * Name: twi_transfer
  *
  * Description:
@@ -1023,8 +991,6 @@ struct i2c_master_s *up_i2cinitialize(int bus)
   /* Initialize the device structure */
 
   priv->dev.ops = &g_twiops;
-  priv->address = 0;
-  priv->flags   = 0;
 
   sem_init(&priv->exclsem, 0, 1);
   sem_init(&priv->waitsem, 0, 0);
