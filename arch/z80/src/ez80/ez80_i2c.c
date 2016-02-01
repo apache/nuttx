@@ -861,10 +861,10 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
     {
       msg = &msgs[i];
 
-      /* Set the I2C address */
+      /* Set the I2C frequency and address */
 
       priv->addr   = msg->addr;
-      priv->addr10 = (msg->flags & I2C_M_TEN) != 0);
+      priv->addr10 = ((msg->flags & I2C_M_TEN) != 0);
 
       /* Is this the last message in the sequence? */
 
