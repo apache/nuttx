@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: November 20, 2015</p>
+      <p>Last Updated: February 01, 2016</p>
     </td>
   </tr>
 </table>
@@ -5102,8 +5102,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     <ul>
      <p><code>uint32_t setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);</code><br>
      <code>int setaddress(FAR struct i2c_master_s *dev, int addr, int nbits);</code><br>
-     <code>int write(FAR struct i2c_master_s *dev, const uint8_t *buffer, int buflen);</code><br>
-     <code>int read(FAR struct i2c_master_s *dev, uint8_t *buffer, int buflen);</code></p>
+     <code>int transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count);</code></p>
     </p>
   </ul>
   <li>
