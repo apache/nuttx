@@ -601,9 +601,6 @@ int sif_main(int argc, char *argv[])
         }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
-
-            I2C_SETFREQUENCY(vsn_sif.i2c1, 100000);
-
             struct lis331dl_dev_s * lis = lis331dl_init(vsn_sif.i2c1, val);
 
             if (lis) {
