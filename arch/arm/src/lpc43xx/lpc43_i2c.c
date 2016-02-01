@@ -107,6 +107,7 @@ struct lpc43_i2cdev_s
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
   WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
+  uint32_t         frequency;  /* Current I2C frequency */
 
   struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
   unsigned int     nmsg;       /* number of transfer remaining */
@@ -126,61 +127,58 @@ static struct lpc43_i2cdev_s g_i2c1dev;
  * Private Functions
  ****************************************************************************/
 
-static int      lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
-static void     lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
-static int      lpc43_i2c_interrupt(int irq, FAR void *context);
-static void     lpc43_i2c_timeout(int argc, uint32_t arg, ...);
+static int  lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
+static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
+static int  lpc43_i2c_interrupt(int irq, FAR void *context);
+static void lpc43_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
+              uint32_t frequency);
+static int  lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
+              FAR struct i2c_msg_s *msgs, int count);
 
 /****************************************************************************
  * I2C device operations
  ****************************************************************************/
 
-static uint32_t lpc43_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                  uint32_t frequency);
-static int      lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
-                  FAR struct i2c_msg_s *msgs, int count);
-
 struct i2c_ops_s lpc43_i2c_ops =
 {
-  .setfrequency = lpc43_i2c_setfrequency,
-  .transfer     = lpc43_i2c_transfer
+  .transfer = lpc43_i2c_transfer
 };
 
 /****************************************************************************
  * Name: lpc43_i2c_setfrequency
  *
  * Description:
- *   Set the frequence for the next transfer
+ *   Set the frequency for the next transfer
  *
  ****************************************************************************/
 
-static uint32_t lpc43_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                       uint32_t frequency)
+static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
+                                   uint32_t frequency)
 {
-  struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *) dev;
-
-  if (frequency > 100000)
+  if (frequency != priv->frequency)
     {
-      /* asymetric per 400Khz I2C spec */
+      if (frequency > 100000)
+        {
+          /* asymetric per 400Khz I2C spec */
 
-      putreg32(priv->baseFreq / (83 + 47) * 47 / frequency, priv->base +
-               LPC43_I2C_SCLH_OFFSET);
-      putreg32(priv->baseFreq / (83 + 47) * 83 / frequency, priv->base +
-               LPC43_I2C_SCLL_OFFSET);
+          putreg32(priv->baseFreq / (83 + 47) * 47 / frequency,
+                   priv->base + LPC43_I2C_SCLH_OFFSET);
+          putreg32(priv->baseFreq / (83 + 47) * 83 / frequency,
+                   priv->base + LPC43_I2C_SCLL_OFFSET);
+        }
+      else
+        {
+          /* 50/50 mark space ratio */
+
+          putreg32(priv->baseFreq / 100 * 50 / frequency,
+                   priv->base + LPC43_I2C_SCLH_OFFSET);
+          putreg32(priv->baseFreq / 100 * 50 / frequency,
+                   priv->base + LPC43_I2C_SCLL_OFFSET);
+        }
+
+      priv->frequency =  frequency;
     }
-  else
-    {
-      /* 50/50 mark space ratio */
-
-      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base +
-               LPC43_I2C_SCLH_OFFSET);
-      putreg32(priv->baseFreq / 100 * 50 / frequency, priv->base +
-               LPC43_I2C_SCLL_OFFSET);
-    }
-
-  /* FIXME: This function should return the actual selected frequency */
-
-  return frequency;
 }
 
 /****************************************************************************
@@ -195,8 +193,6 @@ static int lpc43_i2c_start(struct lpc43_i2cdev_s *priv)
 {
   int ret = -1;
 
-  sem_wait(&priv->mutex);
-
   putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
            priv->base + LPC43_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
@@ -205,12 +201,7 @@ static int lpc43_i2c_start(struct lpc43_i2cdev_s *priv)
   sem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);
-
-  ret = priv->nmsg;
-
-  sem_post(&priv->mutex);
-
-  return ret;
+  return priv->nmsg;
 }
 
 /****************************************************************************
@@ -266,17 +257,42 @@ static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
 
   DEBUGASSERT(dev != NULL);
 
+  /* Get exclusive access to the I2C bus */
+
+  sem_wait(&priv->mutex);
+
+  /* Set up for the transfer */
+
   priv->wrcnt = 0;
   priv->rdcnt = 0;
   priv->msgs  = msgs;
   priv->nmsg  = count;
 
+  /* Configure the I2C frequency.
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
+
+  lpc43_i2c_setfrequency(priv, msgs->frequency);
+
+  /* Perform the transfer */
+
   ret = lpc43_i2c_start(priv);
 
+  sem_post(&priv->mutex);
   return ret;
 }
 
-void startStopNextMessage(struct lpc43_i2cdev_s *priv)
+/****************************************************************************
+ * Name: lpc32_i2c_nextmsg
+ *
+ * Description:
+ *   Setup for the next message.
+ *
+ ****************************************************************************/
+
+void lpc32_i2c_nextmsg(struct lpc43_i2cdev_s *priv)
 {
   priv->nmsg--;
 
@@ -362,7 +378,7 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context)
         }
       else
         {
-          startStopNextMessage(priv);
+          lpc32_i2c_nextmsg(priv);
         }
       break;
 
@@ -392,7 +408,7 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context)
 
     case 0x58:  /* Data byte has been received; NACK has been returned. */
       msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
-      startStopNextMessage(priv);
+      lpc32_i2c_nextmsg(priv);
       break;
 
     default:
@@ -459,8 +475,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
       regval |= CCU_CLK_CFG_RUN;
       putreg32(regval, LPC43_CCU1_APB1_I2C0_CFG);
 
-      lpc43_i2c_setfrequency((struct i2c_master_s *)priv,
-                             I2C0_DEFAULT_FREQUENCY);
+      lpc43_i2c_setfrequency(priv, I2C0_DEFAULT_FREQUENCY);
 
       /* No pin configuration needed */
     }

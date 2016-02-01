@@ -117,7 +117,8 @@ struct lpc2378_i2cdev_s
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
-  WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
+  WDOG_ID          timeout;    /* Watchdog to timeout when bus hung */
+   uint32_t        frequency;  /* Current I2C frequency */
 
   struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
   unsigned int     nmsg;       /* number of transfer remaining */
@@ -130,18 +131,18 @@ struct lpc2378_i2cdev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int      lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv);
-static void     lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv);
-static int      lpc2378_i2c_interrupt(int irq, FAR void *context);
-static void     lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
+static int  lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv);
+static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv);
+static int  lpc2378_i2c_interrupt(int irq, FAR void *context);
+static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
+              uint32_t frequency);
 
 /* I2C device operations */
 
-static uint32_t lpc2378_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                  uint32_t frequency);
-static int      lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
-                  FAR struct i2c_msg_s *msgs, int count);
-static void     lpc2378_stopnext(struct lpc2378_i2cdev_s *priv);
+static int  lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
+              FAR struct i2c_msg_s *msgs, int count);
+static void lpc2378_stopnext(struct lpc2378_i2cdev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -159,45 +160,43 @@ static struct lpc2378_i2cdev_s g_i2c2dev;
 
 struct i2c_ops_s lpc2378_i2c_ops =
 {
-  .setfrequency = lpc2378_i2c_setfrequency,
-  .transfer     = lpc2378_i2c_transfer
+  .transfer = lpc2378_i2c_transfer
 };
 
 /****************************************************************************
  * Name: lpc2378_i2c_setfrequency
  *
  * Description:
- *   Set the frequence for the next transfer
+ *   Set the frequency for the next transfer
  *
  ****************************************************************************/
 
-static uint32_t lpc2378_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                       uint32_t frequency)
+static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
+                                     uint32_t frequency)
 {
-  struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *) dev;
-
-  if (frequency > 100000)
+  if (frequency != priv->frequency)
     {
-      /* Asymetric per 400Khz I2C spec */
+      if (frequency > 100000)
+        {
+          /* Asymetric per 400Khz I2C spec */
 
-      putreg32(LPC23XX_CCLK / (83 + 47) * 47 / frequency,
-               priv->base + I2C_SCLH_OFFSET);
-      putreg32(LPC23XX_CCLK / (83 + 47) * 83 / frequency,
-               priv->base + I2C_SCLL_OFFSET);
+          putreg32(LPC23XX_CCLK / (83 + 47) * 47 / frequency,
+                   priv->base + I2C_SCLH_OFFSET);
+          putreg32(LPC23XX_CCLK / (83 + 47) * 83 / frequency,
+                   priv->base + I2C_SCLL_OFFSET);
+        }
+      else
+        {
+          /* 50/50 mark space ratio */
+
+          putreg32(LPC23XX_CCLK / 100 * 50 / frequency,
+                   priv->base + I2C_SCLH_OFFSET);
+          putreg32(LPC23XX_CCLK / 100 * 50 / frequency,
+                   priv->base + I2C_SCLL_OFFSET);
+        }
+
+      priv->frequency =  frequency;
     }
-  else
-    {
-      /* 50/50 mark space ratio */
-
-      putreg32(LPC23XX_CCLK / 100 * 50 / frequency,
-               priv->base + I2C_SCLH_OFFSET);
-      putreg32(LPC23XX_CCLK / 100 * 50 / frequency,
-               priv->base + I2C_SCLL_OFFSET);
-    }
-
-  /* FIXME: This function should return the actual selected frequency */
-
-  return frequency;
 }
 
 /****************************************************************************
@@ -212,8 +211,6 @@ static int lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv)
 {
   int ret = -1;
 
-  sem_wait(&priv->mutex);
-
   putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
            priv->base + I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + I2C_CONSET_OFFSET);
@@ -223,11 +220,7 @@ static int lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv)
 
   wd_cancel(priv->timeout);
 
-  ret = priv->nmsg;
-
-  sem_post(&priv->mutex);
-
-  return ret;
+  return priv->nmsg;
 }
 
 /****************************************************************************
@@ -281,15 +274,32 @@ static int lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
   struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *)dev;
   int ret;
 
-  DEBUGASSERT(dev != NULL);
+   DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
+
+  /* Get exclusive access to the I2C bus */
+
+  sem_wait(&priv->mutex);
+
+  /* Set up for the transfer */
 
   priv->wrcnt = 0;
   priv->rdcnt = 0;
   priv->msgs  = msgs;
   priv->nmsg  = count;
 
+  /* Configure the I2C frequency.
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
+
+  lpc23_i2c_setfrequency(priv, msgs->frequency);
+
+  /* Perform the transfer */
+
   ret = lpc2378_i2c_start(priv);
 
+  sem_post(&priv->mutex);
   return ret;
 }
 
@@ -491,8 +501,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
 
       /* Set default frequency */
 
-      lpc2378_i2c_setfrequency((struct i2c_master_s *)priv,
-                               CONFIG_LPC2378_I2C0_FREQUENCY);
+      lpc2378_i2c_setfrequency(priv, CONFIG_LPC2378_I2C0_FREQUENCY);
     }
   else
 #endif
@@ -523,8 +532,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
 
       /* Set default frequency */
 
-      lpc2378_i2c_setfrequency((struct i2c_master_s *)priv,
-                               CONFIG_LPC2378_I2C1_FREQUENCY);
+      lpc2378_i2c_setfrequency(priv, CONFIG_LPC2378_I2C1_FREQUENCY);
     }
   else
 #endif
@@ -555,8 +563,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
 
       /* Set default frequency */
 
-      lpc2378_i2c_setfrequency((struct i2c_master_s *)priv,
-                               CONFIG_LPC2378_I2C2_FREQUENCY);
+      lpc2378_i2c_setfrequency(priv, CONFIG_LPC2378_I2C2_FREQUENCY);
     }
   else
 #endif

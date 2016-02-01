@@ -86,10 +86,10 @@ struct lpc31_i2cdev_s
     uint16_t          irqid;      /* IRQ for this device */
 
     sem_t             mutex;      /* Only one thread can access at a time */
-
     sem_t             wait;       /* Place to wait for state machine completion */
     volatile uint8_t  state;      /* State of state machine */
-    WDOG_ID           timeout;    /* watchdog to timeout when bus hung */
+    WDOG_ID           timeout;    /* Watchdog to timeout when bus hung */
+    uint32_t          frequency;  /* Current I2C frequency */
 
     struct i2c_msg_s *msgs;       /* remaining transfers - first one is in progress */
     unsigned int      nmsg;       /* number of transfer remaining */
@@ -108,31 +108,24 @@ struct lpc31_i2cdev_s
 static struct lpc31_i2cdev_s i2cdevices[2];
 
 /****************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 static int  i2c_interrupt(int irq, FAR void *context);
 static void i2c_progress(struct lpc31_i2cdev_s *priv);
 static void i2c_timeout(int argc, uint32_t arg, ...);
 static void i2c_reset(struct lpc31_i2cdev_s *priv);
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency);
+static int  i2c_transfer(FAR struct i2c_master_s *dev,
+                         FAR struct i2c_msg_s *msgs, int count);
 
 /****************************************************************************
  * I2C device operations
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev,
-                  uint32_t frequency);
-static int      i2c_transfer(FAR struct i2c_master_s *dev,
-                  FAR struct i2c_msg_s *msgs, int count);
-
 struct i2c_ops_s lpc31_i2c_ops =
 {
-  .setfrequency = i2c_setfrequency,
-  .transfer     = i2c_transfer
+  .transfer = i2c_transfer
 };
 
 /****************************************************************************
@@ -215,34 +208,37 @@ void up_i2cuninitalize(struct lpc31_i2cdev_s *priv)
  * Name: lpc31_i2c_setfrequency
  *
  * Description:
- *   Set the frequence for the next transfer
+ *   Set the frequency for the next transfer
  *
  ****************************************************************************/
 
-static uint32_t i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
+static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency)
 {
-  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
-
-  uint32_t freq = lpc31_clkfreq(priv->clkid, DOMAINID_AHB0APB1);
-
-  if (freq > 100000)
+  if (frequency != priv->frequency)
     {
-      /* asymetric per 400Khz I2C spec */
+      uint32_t freq = lpc31_clkfreq(priv->clkid, DOMAINID_AHB0APB1);
 
-      putreg32(((47 * freq) / (83 + 47)) / frequency, priv->base + LPC31_I2C_CLKHI_OFFSET);
-      putreg32(((83 * freq) / (83 + 47)) / frequency, priv->base + LPC31_I2C_CLKLO_OFFSET);
+      if (freq > 100000)
+        {
+          /* asymetric per 400Khz I2C spec */
+
+          putreg32(((47 * freq) / (83 + 47)) / frequency,
+                   priv->base + LPC31_I2C_CLKHI_OFFSET);
+          putreg32(((83 * freq) / (83 + 47)) / frequency,
+                   priv->base + LPC31_I2C_CLKLO_OFFSET);
+        }
+      else
+        {
+          /* 50/50 mark space ratio */
+
+          putreg32(((50 * freq) / 100) / frequency,
+                   priv->base + LPC31_I2C_CLKLO_OFFSET);
+          putreg32(((50 * freq) / 100) / frequency,
+                   priv->base + LPC31_I2C_CLKHI_OFFSET);
+        }
+
+      priv->frequency = frequency;
     }
-  else
-    {
-      /* 50/50 mark space ratio */
-
-      putreg32(((50 * freq) / 100) / frequency, priv->base + LPC31_I2C_CLKLO_OFFSET);
-      putreg32(((50 * freq) / 100) / frequency, priv->base + LPC31_I2C_CLKHI_OFFSET);
-    }
-
-  /* FIXME: This function should return the actual selected frequency */
-
-  return frequency;
 }
 
 /****************************************************************************
@@ -259,20 +255,34 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
   irqstate_t flags;
   int ret;
 
+  /* Get exclusive access to the I2C bus */
+
   sem_wait(&priv->mutex);
   flags = irqsave();
+
+  /* Set up for the transfer */
 
   priv->state = I2C_STATE_START;
   priv->msgs  = msgs;
   priv->nmsg  = count;
 
-  i2c_progress(priv);
-
-  /* start a watchdog to timeout the transfer if
-   * the bus is locked up...
+  /* Configure the I2C frequency.
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
    */
 
+  i2c_setfrequency(priv, msgs->frequency);
+
+  /* Start the transfer */
+
+  i2c_progress(priv);
+
+  /* Start a watchdog to timeout the transfer if the bus is locked up... */
+
   wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
+
+  /* Wait for the transfer to complete */
 
   while (priv->state != I2C_STATE_DONE)
     {
@@ -280,12 +290,10 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
     }
 
   wd_cancel(priv->timeout);
-
   ret = count - priv->nmsg;
 
   irqrestore(flags);
   sem_post(&priv->mutex);
-
   return ret;
 }
 

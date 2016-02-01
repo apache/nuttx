@@ -225,6 +225,7 @@ struct tiva_i2c_priv_s
   uint8_t msgc;                /* Message count */
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *mptr;               /* Current message buffer */
+  uint32_t frequency;          /* Current I2C frequency */
   int mcnt;                    /* Current message length */
   uint16_t mflags;             /* Current message flags */
   uint32_t mstatus;            /* MCS register at the end of the transfer */
@@ -258,8 +259,6 @@ struct tiva_i2c_inst_s
 {
   const struct i2c_ops_s *ops;  /* Standard I2C operations */
   struct tiva_i2c_priv_s *priv; /* Common driver private data structure */
-
-  uint32_t    frequency;   /* Frequency used in this instantiation */
 };
 
 /************************************************************************************
@@ -336,10 +335,7 @@ static int tiva_i2c9_interrupt(int irq, void *context);
 
 static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency);
 static int tiva_i2c_uninitialize(struct tiva_i2c_priv_s *priv);
-static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv,
-                                  uint32_t frequency);
-static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev,
-                                      uint32_t frequency);
+static void tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequency);
 static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                             int msgc);
 static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
@@ -573,8 +569,7 @@ static struct tiva_i2c_priv_s tiva_i2c9_priv;
 
 static const struct i2c_ops_s tiva_i2c_ops =
 {
-  .setfrequency       = tiva_i2c_setfrequency,
-  .transfer           = tiva_i2c_transfer
+  .transfer = tiva_i2c_transfer
 };
 
 /************************************************************************************
@@ -1770,7 +1765,7 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
 
   /* Configure the the initial I2C clock frequency. */
 
-  (void)tiva_i2c_setclock(priv, frequency);
+  tiva_i2c_setclock(priv, frequency);
 
   /* Attach interrupt handlers and enable interrupts at the NVIC (still
    * disabled at the source).
@@ -1835,68 +1830,46 @@ static int tiva_i2c_uninitialize(struct tiva_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequency)
+static void tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequency)
 {
   uint32_t regval;
   uint32_t tmp;
 
   i2cvdbg("I2C%d: frequency: %u\n", priv->config->devno, frequency);
 
-  /* Calculate the clock divider that results in the highest frequency that
-   * is than or equal to the desired speed.
-   */
+  /* Has the I2C bus frequency changed? */
 
-  tmp = 2 * 10 * frequency;
-  regval = (((SYSCLK_FREQUENCY + tmp - 1) / tmp) - 1) << I2CM_TPR_SHIFT;
-
-  DEBUGASSERT((regval & I2CM_TPR_MASK) == regval);
-  tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET, regval);
-
-#if defined(CONFIG_TIVA_I2C_HIGHSPEED) && defined(TIVA_I2CSC_PC_OFFSET)
-  /* If the I2C peripheral is High-Speed enabled then choose the highest
-   * speed that is less than or equal to 3.4 Mbps.
-   */
-
-  regval = tiva_i2c_getreg(priv, TIVA_I2CSC_PC_OFFSET);
-  if ((regval & I2CSC_PC_HS) != 0)
+  if (frequency != priv->frequency)
     {
-      tmp    = (2 * 3 * 3400000);
+      /* Calculate the clock divider that results in the highest frequency that
+       * is than or equal to the desired speed.
+       */
+
+      tmp = 2 * 10 * frequency;
       regval = (((SYSCLK_FREQUENCY + tmp - 1) / tmp) - 1) << I2CM_TPR_SHIFT;
 
-      tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET,  I2CM_TPR_HS | regval);
-    }
+      DEBUGASSERT((regval & I2CM_TPR_MASK) == regval);
+      tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET, regval);
+
+#if defined(CONFIG_TIVA_I2C_HIGHSPEED) && defined(TIVA_I2CSC_PC_OFFSET)
+      /* If the I2C peripheral is High-Speed enabled then choose the highest
+       * speed that is less than or equal to 3.4 Mbps.
+       */
+
+      regval = tiva_i2c_getreg(priv, TIVA_I2CSC_PC_OFFSET);
+      if ((regval & I2CSC_PC_HS) != 0)
+        {
+          tmp    = (2 * 3 * 3400000);
+          regval = (((SYSCLK_FREQUENCY + tmp - 1) / tmp) - 1) << I2CM_TPR_SHIFT;
+
+          tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET,  I2CM_TPR_HS | regval);
+        }
 #endif
 
-  return frequency;
-}
-/************************************************************************************
- * Name: tiva_i2c_setfrequency
- *
- * Description:
- *   Set the I2C frequency
- *
- ************************************************************************************/
+      /* Save the new I2C frequency */
 
-static uint32_t tiva_i2c_setfrequency(struct i2c_master_s *dev, uint32_t frequency)
-{
-  struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
-  struct tiva_i2c_priv_s *priv;
-
-  DEBUGASSERT(inst && inst->priv);
-  priv = inst->priv;
-
-  i2cvdbg("I2C%d: frequency: %u\n", inst->priv->config->devno, frequency);
-
-  /* Get exclusive access to the I2C device */
-
-  tiva_i2c_sem_wait(dev);
-
-  /* Set the clocking for the selected frequency */
-
-  inst->frequency = tiva_i2c_setclock(priv, frequency);
-
-  tiva_i2c_sem_post(dev);
-  return frequency;
+      priv->frequency = frequency;
+    }
 }
 
 /************************************************************************************
@@ -1935,9 +1908,14 @@ static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv, in
   tiva_i2c_tracereset(priv);
   tiva_i2c_tracenew(priv, 0);
 
-  /* Set I2C clock frequency  */
+  /* Set I2C clock frequency
+   *
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
 
-  tiva_i2c_setclock(priv, inst->frequency);
+  tiva_i2c_setclock(priv, msgs->frequency);
 
   /* Send the address, then the process moves into the ISR.  I2C
    * interrupts will be enabled within tiva_i2c_waitdone().
@@ -2012,7 +1990,7 @@ static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv, in
 
       /* Reset and reinitialize the I2C hardware */
 
-      tiva_i2c_initialize(priv, inst->frequency);
+      tiva_i2c_initialize(priv, priv->frequency);
 
       /* Is the busy condition a consequence of some other error? */
 
@@ -2032,9 +2010,6 @@ static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv, in
 
   priv->mcnt = 0;
   priv->mptr = NULL;
-
-  tiva_i2c_sem_post(dev);
-
   return -errcode;
 }
 
@@ -2050,13 +2025,15 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc)
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
+  int ret;
 
   DEBUGASSERT(inst && inst->priv && inst->priv->config);
   i2cvdbg("I2C%d: msgc=%d\n", inst->priv->config->devno, msgc);
   UNUSED(inst);
 
   tiva_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
-  return tiva_i2c_process(dev, msgv, msgc);
+  ret = tiva_i2c_process(dev, msgv, msgc);
+  tiva_i2c_sem_post(dev);
 }
 
 /************************************************************************************
@@ -2172,7 +2149,6 @@ struct i2c_master_s *up_i2cinitialize(int port)
 
   inst->ops       = &tiva_i2c_ops;
   inst->priv      = priv;
-  inst->frequency = 100000;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.
@@ -2360,7 +2336,7 @@ int up_i2creset(struct i2c_master_s *dev)
 
   /* Re-init the port */
 
-  tiva_i2c_initialize(priv, inst->frequency);
+  tiva_i2c_initialize(priv, priv->frequency);
   ret = OK;
 
 out:

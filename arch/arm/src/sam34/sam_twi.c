@@ -119,8 +119,8 @@ struct twi_dev_s
   struct i2c_master_s dev;        /* Generic I2C device */
   struct i2c_msg_s    *msg;       /* Message list */
   uintptr_t           base;       /* Base address of registers */
-  uint32_t            frequency;  /* TWI input clock frequency */
-  uint32_t            deffreq;    /* Selected TWI frequency */
+  uint32_t            clkin;      /* TWI input clock frequency */
+  uint32_t            i2cfreq;    /* Selected TWI frequency */
   uint16_t            irq;        /* IRQ number for this device */
   uint8_t             msgc;       /* Number of message in the message list */
   uint8_t             twi;        /* TWI peripheral number (for debug output) */
@@ -187,15 +187,12 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 /* I2C device operations */
 
-static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev,
-          uint32_t frequency);
 static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
 
 /* Initialization */
 
-static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv,
-          uint32_t frequency);
+static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency);
 static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
           uint32_t frequency);
 
@@ -213,8 +210,7 @@ static struct twi_dev_s g_twi1;
 
 struct i2c_ops_s g_twiops =
 {
-  .setfrequency     = twi_setfrequency,
-  .transfer         = twi_transfer
+  .transfer = twi_transfer
 };
 
 /****************************************************************************
@@ -690,32 +686,6 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: twi_setfrequency
- *
- * Description:
- *   Set the frequency for the next transfer
- *
- ****************************************************************************/
-
-static uint32_t twi_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
-{
-  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
-  uint32_t actual;
-
-  DEBUGASSERT(dev);
-
-  /* Get exclusive access to the device */
-
-  twi_takesem(&priv->exclsem);
-
-  /* And setup the clock frequency */
-
-  actual = twi_hw_setfrequency(priv, frequency);
-  twi_givesem(&priv->exclsem);
-  return actual;
-}
-
-/****************************************************************************
  * Name: twi_transfer
  *
  * Description:
@@ -738,10 +708,18 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
 
   twi_takesem(&priv->exclsem);
 
-  /* Initiate the message transfer */
+  /* Setup the message transfer */
 
   priv->msg  = msgs;
   priv->msgc = count;
+
+ /* Configure the I2C frequency.
+  * REVISIT: Note that the frequency is set only on the first message.
+  * This could be extended to support different transfer frequencies for
+  * each message segment.
+  */
+
+  twi_setfrequency(priv, msgs->frequency);
 
   /* Initiate the transfer.  The rest will be handled from interrupt
    * logic.  Interrupts must be disabled to prevent re-entrance from the
@@ -771,59 +749,54 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: twi_hw_setfrequency
+ * Name: twi_setfrequency
  *
  * Description:
  *   Set the frequency for the next transfer
  *
  ****************************************************************************/
 
-static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
+static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 {
   unsigned int ckdiv;
   unsigned int cldiv;
-  uint32_t actual;
   uint32_t regval;
 
-  /* Configure TWI output clocking, trying each value of CKDIV {0..7} */
-
-  for (ckdiv = 0; ckdiv < 8; ckdiv++)
+  if (frequency != priv->i2cfreq)
     {
-      /* Calulate the CLDIV value using the current CKDIV guess */
+      /* Configure TWI output clocking, trying each value of CKDIV {0..7} */
 
-      cldiv = ((priv->frequency / (frequency << 1)) - 4) / (1 << ckdiv);
-
-      /* Is CLDIV in range? */
-
-      if (cldiv <= 255)
+      for (ckdiv = 0; ckdiv < 8; ckdiv++)
         {
-          /* Yes, break out and use it */
+          /* Calulate the CLDIV value using the current CKDIV guess */
 
-          break;
+          cldiv = ((priv->clkin / (frequency << 1)) - 4) / (1 << ckdiv);
+
+          /* Is CLDIV in range? */
+
+          if (cldiv <= 255)
+            {
+              /* Yes, break out and use it */
+
+              break;
+            }
         }
+
+      /* Then setup the TWI Clock Waveform Generator Register, using the same
+       * value for CLDIV and CHDIV (for 1:1 duty).
+       */
+
+      twi_putrel(priv, SAM_TWI_CWGR_OFFSET, 0);
+
+      regval = ((uint32_t)ckdiv << TWI_CWGR_CKDIV_SHIFT) |
+               ((uint32_t)cldiv << TWI_CWGR_CHDIV_SHIFT) |
+               ((uint32_t)cldiv << TWI_CWGR_CLDIV_SHIFT);
+      twi_putrel(priv, SAM_TWI_CWGR_OFFSET, regval);
+
+      /* Remember the selected frequency for error recovery */
+
+      priv->i2cfreq = frequency;
     }
-
-  /* Then setup the TWI Clock Waveform Generator Register, using the same
-   * value for CLDIV and CHDIV (for 1:1 duty).
-   */
-
-  twi_putrel(priv, SAM_TWI_CWGR_OFFSET, 0);
-
-  regval = ((uint32_t)ckdiv << TWI_CWGR_CKDIV_SHIFT) |
-           ((uint32_t)cldiv << TWI_CWGR_CHDIV_SHIFT) |
-           ((uint32_t)cldiv << TWI_CWGR_CLDIV_SHIFT);
-  twi_putrel(priv, SAM_TWI_CWGR_OFFSET, regval);
-
-  /* Return the actual frequency */
-
-  actual = (priv->frequency / 2) / (((1 << ckdiv) * cldiv) + 2);
-  i2cvdbg("TWI%d frequency: %d ckdiv: %d cldiv: %d actual: %d\n",
-          priv->twi, frequency, ckdiv, cldiv, actual);
-
-  /* Remember the selected frequency for error recovery */
-
-  priv->deffreq = frequency;
-  return actual;
 }
 
 /****************************************************************************
@@ -864,7 +837,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
   /* Set base frequency */
 
-  priv->frequency = BOARD_MCK_FREQUENCY;
+  priv->clkin = BOARD_MCK_FREQUENCY;
 
 #if 0
   /* Determine the maximum valid frequency setting */
@@ -874,23 +847,23 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
   if (mck <= TWI_MAX_FREQUENCY)
     {
-      priv->frequency = mck;
-      regval          = PMC_PCR_DIV1;
+      priv->clkin = mck;
+      regval      = PMC_PCR_DIV1;
     }
   else if ((mck >> 1) <= TWI_MAX_FREQUENCY)
     {
-      priv->frequency = (mck >> 1);
-      regval          = PMC_PCR_DIV2;
+      priv->clkin = (mck >> 1);
+      regval      = PMC_PCR_DIV2;
     }
   else if ((mck >> 2) <= TWI_MAX_FREQUENCY)
     {
-      priv->frequency = (mck >> 2);
-      regval          = PMC_PCR_DIV4;
+      priv->clkin = (mck >> 2);
+      regval      = PMC_PCR_DIV4;
     }
   else /* if ((mck >> 3) <= TWI_MAX_FREQUENCY) */
     {
-      priv->frequency = (mck >> 3);
-      regval          = PMC_PCR_DIV8;
+      priv->clkin = (mck >> 3);
+      regval      = PMC_PCR_DIV8;
     }
 
   /* Set the TWI peripheral input clock to the maximum, valid frequency */
@@ -901,7 +874,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
   /* Set the initial TWI data transfer frequency */
 
-  (void)twi_hw_setfrequency(priv, frequency);
+  twi_setfrequency(priv, frequency);
 }
 
 /****************************************************************************

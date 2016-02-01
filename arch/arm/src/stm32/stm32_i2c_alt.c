@@ -287,6 +287,7 @@ struct stm32_i2c_priv_s
   uint8_t msgc;                /* Message count */
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *ptr;                /* Current message buffer */
+  uint32_t frequency;          /* Current I2C frequency */
   int dcnt;                    /* Current message length */
   uint16_t flags;              /* Current message flags */
   bool check_addr_ACK;         /* Flag to signal if on next interrupt address has ACKed */
@@ -312,8 +313,6 @@ struct stm32_i2c_inst_s
 {
   const struct i2c_ops_s  *ops;  /* Standard I2C operations */
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
-
-  uint32_t    frequency;   /* Frequency used in this instantiation */
 };
 
 /************************************************************************************
@@ -375,8 +374,6 @@ static int stm32_i2c3_isr(int irq, void *context);
 
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
-static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                       uint32_t frequency);
 static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                              int count);
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
@@ -477,8 +474,7 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
 
 static const struct i2c_ops_s stm32_i2c_ops =
 {
-  .setfrequency       = stm32_i2c_setfrequency,
-  .transfer           = stm32_i2c_transfer
+  .transfer = stm32_i2c_transfer
 };
 
 /************************************************************************************
@@ -957,90 +953,99 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
   uint16_t freqmhz;
   uint16_t speed;
 
-  /* Disable the selected I2C peripheral to configure TRISE */
+  /* Has the I2C bus frequency changed? */
 
-  cr1 = stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET);
-  stm32_i2c_putreg(priv, STM32_I2C_CR1_OFFSET, cr1 & ~I2C_CR1_PE);
-
-  /* Update timing and control registers */
-
-  freqmhz = (uint16_t)(STM32_PCLK1_FREQUENCY / 1000000);
-  ccr = 0;
-
-  /* Configure speed in standard mode */
-
-  if (frequency <= 100000)
+  if (frequency != priv->frequency)
     {
-      /* Standard mode speed calculation */
+      /* Disable the selected I2C peripheral to configure TRISE */
 
-      speed = (uint16_t)(STM32_PCLK1_FREQUENCY / (frequency << 1));
+      cr1 = stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET);
+      stm32_i2c_putreg(priv, STM32_I2C_CR1_OFFSET, cr1 & ~I2C_CR1_PE);
 
-      /* The CCR fault must be >= 4 */
+      /* Update timing and control registers */
 
-      if (speed < 4)
+      freqmhz = (uint16_t)(STM32_PCLK1_FREQUENCY / 1000000);
+      ccr = 0;
+
+      /* Configure speed in standard mode */
+
+      if (frequency <= 100000)
         {
-          /* Set the minimum allowed value */
+          /* Standard mode speed calculation */
 
-          speed = 4;
+          speed = (uint16_t)(STM32_PCLK1_FREQUENCY / (frequency << 1));
+
+          /* The CCR fault must be >= 4 */
+
+          if (speed < 4)
+            {
+              /* Set the minimum allowed value */
+
+              speed = 4;
+            }
+
+          ccr |= speed;
+
+          /* Set Maximum Rise Time for standard mode */
+
+          trise = freqmhz + 1;
         }
 
-      ccr |= speed;
+      /* Configure speed in fast mode */
 
-      /* Set Maximum Rise Time for standard mode */
-
-      trise = freqmhz + 1;
-    }
-
-  /* Configure speed in fast mode */
-
-  else /* (frequency <= 400000) */
-    {
-      /* Fast mode speed calculation with Tlow/Thigh = 16/9 */
+      else /* (frequency <= 400000) */
+        {
+          /* Fast mode speed calculation with Tlow/Thigh = 16/9 */
 
 #ifdef CONFIG_STM32_I2C_DUTY16_9
-      speed = (uint16_t)(STM32_PCLK1_FREQUENCY / (frequency * 25));
+          speed = (uint16_t)(STM32_PCLK1_FREQUENCY / (frequency * 25));
 
-      /* Set DUTY and fast speed bits */
+          /* Set DUTY and fast speed bits */
 
-      ccr |= (I2C_CCR_DUTY | I2C_CCR_FS);
+          ccr |= (I2C_CCR_DUTY | I2C_CCR_FS);
 #else
-      /* Fast mode speed calculation with Tlow/Thigh = 2 */
+          /* Fast mode speed calculation with Tlow/Thigh = 2 */
 
-      speed = (uint16_t)(STM32_PCLK1_FREQUENCY / (frequency * 3));
+          speed = (uint16_t)(STM32_PCLK1_FREQUENCY / (frequency * 3));
 
-      /* Set fast speed bit */
+          /* Set fast speed bit */
 
-      ccr |= I2C_CCR_FS;
+          ccr |= I2C_CCR_FS;
 #endif
 
-      /* Verify that the CCR speed value is nonzero */
+          /* Verify that the CCR speed value is nonzero */
 
-      if (speed < 1)
-        {
-          /* Set the minimum allowed value */
+          if (speed < 1)
+            {
+              /* Set the minimum allowed value */
 
-          speed = 1;
+              speed = 1;
+            }
+
+          ccr |= speed;
+
+          /* Set Maximum Rise Time for fast mode */
+
+          trise = (uint16_t)(((freqmhz * 300) / 1000) + 1);
         }
 
-      ccr |= speed;
+      /* Write the new values of the CCR and TRISE registers */
 
-      /* Set Maximum Rise Time for fast mode */
+      stm32_i2c_putreg(priv, STM32_I2C_CCR_OFFSET, ccr);
+      stm32_i2c_putreg(priv, STM32_I2C_TRISE_OFFSET, trise);
 
-      trise = (uint16_t)(((freqmhz * 300) / 1000) + 1);
+      /* Bit 14 of OAR1 must be configured and kept at 1 */
+
+      stm32_i2c_putreg(priv, STM32_I2C_OAR1_OFFSET, I2C_OAR1_ONE);
+
+      /* Re-enable the peripheral (or not) */
+
+      stm32_i2c_putreg(priv, STM32_I2C_CR1_OFFSET, cr1);
+
+      /* Save the new I2C frequency */
+
+      priv->frequency = frequency;
     }
-
-  /* Write the new values of the CCR and TRISE registers */
-
-  stm32_i2c_putreg(priv, STM32_I2C_CCR_OFFSET, ccr);
-  stm32_i2c_putreg(priv, STM32_I2C_TRISE_OFFSET, trise);
-
-  /* Bit 14 of OAR1 must be configured and kept at 1 */
-
-  stm32_i2c_putreg(priv, STM32_I2C_OAR1_OFFSET, I2C_OAR1_ONE);
-
-  /* Re-enable the peripheral (or not) */
-
-  stm32_i2c_putreg(priv, STM32_I2C_CR1_OFFSET, cr1);
 }
 
 /************************************************************************************
@@ -2030,28 +2035,6 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_i2c_setfrequency
- *
- * Description:
- *   Set the I2C frequency
- *
- ************************************************************************************/
-
-static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
-{
-  stm32_i2c_sem_wait(dev);
-
-#if STM32_PCLK1_FREQUENCY < 4000000
-  ((struct stm32_i2c_inst_s *)dev)->frequency = 100000;
-#else
-  ((struct stm32_i2c_inst_s *)dev)->frequency = frequency;
-#endif
-
-  stm32_i2c_sem_post(dev);
-  return ((struct stm32_i2c_inst_s *)dev)->frequency;
-}
-
-/************************************************************************************
  * Name: stm32_i2c_process
  *
  * Description:
@@ -2108,9 +2091,13 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
   stm32_i2c_tracereset(priv);
 
-  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
+  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !)
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
 
-  stm32_i2c_setclock(priv, inst->frequency);
+  stm32_i2c_setclock(priv, msgs->frequency);
 
   /* Trigger start condition, then the process moves into the ISR.  I2C
    * interrupts will be enabled within stm32_i2c_waitdone().
@@ -2339,9 +2326,8 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
 
   /* Initialize instance */
 
-  inst->ops       = &stm32_i2c_ops;
-  inst->priv      = priv;
-  inst->frequency = 100000;
+  inst->ops  = &stm32_i2c_ops;
+  inst->priv = priv;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.

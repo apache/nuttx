@@ -87,11 +87,11 @@ static int      z8_i2c_read_transfer(FAR struct z8_i2cdev_s *priv,
                   FAR uint8_t *buffer, int buflen, uint8_t flags);
 static int      z8_i2c_write_transfer(FAR struct z8_i2cdev_s *priv,
                   FAR const uint8_t *buffer, int buflen, uint8_t flags);
+static void     z8_i2c_setfrequency(FAR struct z8_i2cdev_s *priv,
+                  uint32_t frequency);
 
 /* I2C methods */
 
-static uint32_t z8_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                  uint32_t frequency);
 static int      z8_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
@@ -107,13 +107,11 @@ extern uint32_t get_freq(void);
  * Private Data
  ****************************************************************************/
 
-static uint16_t g_currbrg;      /* Current BRG setting */
-static bool     g_initialized;  /* true:I2C has been initialized */
-static sem_t    g_i2csem;       /* Serialize I2C transfers */
+static bool  g_initialized;  /* true:I2C has been initialized */
+static sem_t g_i2csem;       /* Serialize I2C transfers */
 
 const struct i2c_ops_s g_ops =
 {
-  z8_i2c_setfrequency,
   z8_i2c_transfer,
 };
 
@@ -206,12 +204,8 @@ static void z8_i2c_waitrxavail(void)
 
 static void z8_i2c_setbrg(uint16_t brg)
 {
-  if (g_currbrg != brg)
-    {
-      I2CBRH    = (uint8_t)(brg >> 8);
-      I2CBRL    = (uint8_t)(brg & 0xff);
-      g_currbrg = brg;
-    }
+  I2CBRH = (uint8_t)(brg >> 8);
+  I2CBRL = (uint8_t)(brg & 0xff);
 }
 
 /****************************************************************************
@@ -471,16 +465,14 @@ static int z8_i2c_write_transfer(FAR struct z8_i2cdev_s *priv,
  *   frequency - The I2C frequency requested
  *
  * Returned Value:
- *   Returns the actual frequency selected
+ *   None
  *
  ****************************************************************************/
 
-static uint32_t z8_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                    uint32_t frequency)
+static void z8_i2c_setfrequency(FAR struct z8_i2cdev_s *priv,
+                                uint32_t frequency)
 {
-  FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
-
-  DEBUGASSERT(dev != NULL);
+  uint16_t brg;
 
   /* Has the frequency changed? */
 
@@ -488,11 +480,13 @@ static uint32_t z8_i2c_setfrequency(FAR struct i2c_master_s *dev,
   {
     /* Calculate and save the BRG (we won't apply it until the first transfer) */
 
-    priv->brg = z8_i2c_getbrg(frequency);
+    brg = z8_i2c_getbrg(frequency);
+    z8_i2c_setbrg(brg);
+
+    /* Save the new I2C frequency */
+
     priv->frequency = frequency;
   }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -532,15 +526,15 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
 
   z8_i2c_semtake();
 
-  /* Set the frequency */
-
-  z8_i2c_setbrg(priv->brg);
+  /* The process each message seqment */
 
   for (i = 0; i < count; i++)
     {
       msg = &msgs[i];
 
-      /* Set the I2C address */
+      /* Set the I2C frequency and address */
+
+      z8_i2c_setfrequency(priv, msg->frequency);
 
       priv->addr = msg->addr;
       DEBUGASSERT((msg->flags & I2C_M_TEN) == 0);
@@ -655,7 +649,6 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
       /* Initialize the allocated instance */
 
       i2c->ops = &g_ops;
-      i2c->brg = g_currbrg;
     }
 
   return (FAR struct i2c_master_s *)i2c;

@@ -252,6 +252,7 @@ struct stm32_i2c_priv_s
   uint8_t msgc;                /* Message count */
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *ptr;                /* Current message buffer */
+  uint32_t frequency;          /* Current I2C frequency */
   int dcnt;                    /* Current message length */
   uint16_t flags;              /* Current message flags */
   bool astart;                 /* START sent */
@@ -276,8 +277,6 @@ struct stm32_i2c_inst_s
 {
   struct i2c_ops_s        *ops;  /* Standard I2C operations */
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
-
-  uint32_t    frequency;   /* Frequency used in this instantiation */
 };
 
 /************************************************************************************
@@ -332,8 +331,6 @@ static int stm32_i2c3_isr(int irq, void *context);
 #endif
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
-static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                       uint32_t frequency);
 static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                              int count);
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
@@ -434,8 +431,7 @@ struct stm32_i2c_priv_s stm32_i2c3_priv =
 
 struct i2c_ops_s stm32_i2c_ops =
 {
-  .setfrequency       = stm32_i2c_setfrequency,
-  .transfer           = stm32_i2c_transfer
+ .transfer = stm32_i2c_transfer
 };
 
 /************************************************************************************
@@ -1066,70 +1062,79 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
   uint8_t scl_h_period;
   uint8_t scl_l_period;
 
-  /* Disable the selected I2C peripheral to configure TRISE */
+  /* Has the I2C bus frequency changed? */
 
-  pe = (stm32_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_PE);
-  if (pe)
+  if (frequency != priv->frequency)
     {
-      stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
-    }
+      /* Disable the selected I2C peripheral to configure TRISE */
 
-  /* Update timing and control registers */
+      pe = (stm32_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_PE);
+      if (pe)
+        {
+          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+        }
 
-  /* TODO: speed/timing calcs */
+      /* Update timing and control registers */
+
+      /* TODO: speed/timing calcs */
 #warning "check set filters before timing, see RM0316"
 
-  /* values from 100khz at 8mhz i2c clock */
+      /* values from 100khz at 8mhz i2c clock */
 
-  /* prescaler */
-  /* t_presc= (presc+1)*t_i2cclk */
-  /* RM0316 */
+      /* prescaler */
+      /* t_presc= (presc+1)*t_i2cclk */
+      /* RM0316 */
 
-  if (frequency == 10000)
-    {
-      presc        = 0x01;
-      scl_l_period = 0xc7;
-      scl_h_period = 0xc3;
-      h_time       = 0x02;
-      s_time       = 0x04;
-    }
-  else if (frequency == 100000)
-    {
-      /* values from datasheet with clock 8mhz */
+      if (frequency == 10000)
+        {
+          presc        = 0x01;
+          scl_l_period = 0xc7;
+          scl_h_period = 0xc3;
+          h_time       = 0x02;
+          s_time       = 0x04;
+        }
+     else if (frequency == 100000)
+        {
+          /* values from datasheet with clock 8mhz */
 
-      presc        = 0x01;
-      scl_l_period = 0x13;
-      scl_h_period = 0x0f;
-      h_time       = 0x02;
-      s_time       = 0x04;
-    }
-  else
-    {
-      presc        = 0x00;
-      scl_l_period = 0x09;
-      scl_h_period = 0x03;
-      h_time       = 0x01;
-      s_time       = 0x03;
-    }
+          presc        = 0x01;
+          scl_l_period = 0x13;
+          scl_h_period = 0x0f;
+          h_time       = 0x02;
+          s_time       = 0x04;
+        }
+      else
+        {
+          presc        = 0x00;
+          scl_l_period = 0x09;
+          scl_h_period = 0x03;
+          h_time       = 0x01;
+          s_time       = 0x03;
+        }
 
-  uint32_t timingr =
-    (presc << I2C_TIMINGR_PRESC_SHIFT) |
-    (s_time << I2C_TIMINGR_SCLDEL_SHIFT) |
-    (h_time << I2C_TIMINGR_SDADEL_SHIFT) |
-    (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
-    (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
+      uint32_t timingr =
+        (presc << I2C_TIMINGR_PRESC_SHIFT) |
+        (s_time << I2C_TIMINGR_SCLDEL_SHIFT) |
+        (h_time << I2C_TIMINGR_SDADEL_SHIFT) |
+        (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
+        (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
-  stm32_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
+      stm32_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
 
-  /* Bit 14 of OAR1 must be configured and kept at 1 */
+      /* Bit 14 of OAR1 must be configured and kept at 1 */
 
-  stm32_i2c_putreg(priv, STM32_I2C_OAR1_OFFSET, I2C_OAR1_ONE);
+      stm32_i2c_putreg(priv, STM32_I2C_OAR1_OFFSET, I2C_OAR1_ONE);
 
-  /* Re-enable the peripheral (or not) */
+      /* Re-enable the peripheral (or not) */
 
-  if (pe)
-    {
-      stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+      if (pe)
+        {
+          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+        }
+
+      /* Save the new I2C frequency */
+
+      priv->frequency = frequency;
     }
 }
 
@@ -1626,28 +1631,6 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_i2c_setfrequency
- *
- * Description:
- *   Set the I2C frequency
- *
- ************************************************************************************/
-
-static uint32_t stm32_i2c_setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency)
-{
-  stm32_i2c_sem_wait(dev);
-
-#if STM32_PCLK1_FREQUENCY < 4000000
-  ((struct stm32_i2c_inst_s *)dev)->frequency = 100000;
-#else
-  ((struct stm32_i2c_inst_s *)dev)->frequency = frequency;
-#endif
-
-  stm32_i2c_sem_post(dev);
-  return ((struct stm32_i2c_inst_s *)dev)->frequency;
-}
-
-/************************************************************************************
  * Name: stm32_i2c_process
  *
  * Description:
@@ -1690,9 +1673,13 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
   stm32_i2c_tracereset(priv);
 
-  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
+  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !)
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
 
-  stm32_i2c_setclock(priv, inst->frequency);
+  stm32_i2c_setclock(priv, msgs->frequency);
 
   /* Trigger start condition, then the process moves into the ISR.  I2C
    * interrupts will be enabled within stm32_i2c_waitdone().
@@ -1896,9 +1883,8 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
 
   /* Initialize instance */
 
-  inst->ops       = &stm32_i2c_ops;
-  inst->priv      = priv;
-  inst->frequency = 400000;
+  inst->ops  = &stm32_i2c_ops;
+  inst->priv = priv;
 
   /* Init private data for the first time, increment refs count,
    * power-up hardware and configure GPIOs.

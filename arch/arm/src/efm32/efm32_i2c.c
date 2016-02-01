@@ -258,6 +258,7 @@ struct efm32_i2c_priv_s
   uint8_t *ptr;               /* Current message buffer */
   int dcnt;                   /* Current message length */
   uint32_t flags;             /* Current message flags */
+  uint32_t frequency;         /* Current I2C frequency */
 
   /* I2C trace support */
 
@@ -275,11 +276,8 @@ struct efm32_i2c_priv_s
 
 struct efm32_i2c_inst_s
 {
-  const struct i2c_ops_s *ops;        /* Standard I2C operations */
-  struct efm32_i2c_priv_s *priv;      /* Common driver private data structure
-                                       */
-
-  uint32_t frequency;         /* Frequency used in this instantiation */
+  const struct i2c_ops_s *ops;   /* Standard I2C operations */
+  struct efm32_i2c_priv_s *priv; /* Common driver private data structure */
 };
 
 /****************************************************************************
@@ -325,10 +323,8 @@ static int efm32_i2c1_isr(int irq, void *context);
 #endif /* !CONFIG_I2C_POLLED */
 
 static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv);
-static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv, int frequency);
+static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv);
 static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv);
-static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                       uint32_t frequency);
 static int efm32_i2c_process(FAR struct i2c_master_s *dev,
                              FAR struct i2c_msg_s *msgs, int count);
 static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
@@ -404,8 +400,7 @@ static struct efm32_i2c_priv_s efm32_i2c1_priv =
 
 static const struct i2c_ops_s efm32_i2c_ops =
 {
-  .setfrequency = efm32_i2c_setfrequency,
-  .transfer     = efm32_i2c_transfer
+  .transfer = efm32_i2c_transfer
 };
 
 /****************************************************************************
@@ -830,21 +825,25 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 {
   uint32_t div;
 
-  /* Set the CLHR (clock low to high ratio). */
+  /* Has the I2C bus frequency changed? */
 
-  efm32_i2c_modifyreg(priv, EFM32_I2C_CTRL_OFFSET, _I2C_CTRL_CLHR_MASK,
+  if (priv->frequency != frequency)
+    {
+      /* Set the CLHR (clock low to high ratio). */
+
+      efm32_i2c_modifyreg(priv, EFM32_I2C_CTRL_OFFSET, _I2C_CTRL_CLHR_MASK,
 #if defined(CONFIG_EFM32_I2C_CLHR_FAST)
-                      _I2C_CTRL_CLHR_FAST       /* Ratio is 11:3 */
+                          _I2C_CTRL_CLHR_FAST       /* Ratio is 11:3 */
 #elif defined(CONFIG_EFM32_I2C_CLHR_ASYMMETRIC)
-                      _I2C_CTRL_CLHR_ASYMMETRIC /* Ratio is 6:3 */
+                          _I2C_CTRL_CLHR_ASYMMETRIC /* Ratio is 6:3 */
 #else                                /* CLHR STANDARD */
-                      _I2C_CTRL_CLHR_STANDARD   /* Ratio is 4:4 */
+                          _I2C_CTRL_CLHR_STANDARD   /* Ratio is 4:4 */
 #endif
-                      << _I2C_CTRL_CLHR_SHIFT);
+                          << _I2C_CTRL_CLHR_SHIFT);
 
-  /* Frequency is given by fSCL = fHFPERCLK/((Nlow + Nhigh)(DIV + 1) + 4), thus
-   * DIV = ((fHFPERCLK - 4fSCL)/((Nlow + Nhigh)fSCL)) - 1
-   */
+      /* Frequency is given by fSCL = fHFPERCLK/((Nlow + Nhigh)(DIV + 1) + 4),
+       * thus DIV = ((fHFPERCLK - 4fSCL)/((Nlow + Nhigh)fSCL)) - 1
+       */
 
 #if defined(CONFIG_EFM32_I2C_CLHR_FAST)
 #  define n (11 + 6)          /* Ratio is 11:3 */
@@ -854,19 +853,26 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 #  define n ( 4 + 4)          /* Ratio is 4:4 */
 #endif
 
-  div = (BOARD_HFPERCLK_FREQUENCY - (4 * frequency)) / (n * frequency);
+      div = (BOARD_HFPERCLK_FREQUENCY - (4 * frequency)) / (n * frequency);
 
-  /* Clock divisor must be at least 1 in slave mode according to reference */
-  /* manual (in which case there is normally no need to set bus frequency). */
+      /* Clock divisor must be at least 1 in slave mode according to
+       * reference manual (in which case there is normally no need to set
+       * bus frequency).
+       */
 
-  if ((efm32_i2c_getreg(priv, EFM32_I2C_CTRL_OFFSET) & I2C_CTRL_SLAVE) && !div)
-    {
-      div = 1;
+      if ((efm32_i2c_getreg(priv, EFM32_I2C_CTRL_OFFSET) & I2C_CTRL_SLAVE) && !div)
+        {
+          div = 1;
+        }
+
+      DEBUGASSERT(div <= (_I2C_CLKDIV_DIV_MASK >> _I2C_CLKDIV_DIV_SHIFT));
+
+      efm32_i2c_putreg(priv, EFM32_I2C_CLKDIV_OFFSET, div);
+
+      /* Save the new I2C frequency */
+
+      priv->frequency = frequency;
     }
-
-  DEBUGASSERT(div <= (_I2C_CLKDIV_DIV_MASK >> _I2C_CLKDIV_DIV_SHIFT));
-
-  efm32_i2c_putreg(priv, EFM32_I2C_CLKDIV_OFFSET, div);
 }
 
 /****************************************************************************
@@ -1347,7 +1353,7 @@ static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv, int frequency)
+static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv)
 {
   int regval;
 
@@ -1446,25 +1452,6 @@ static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_i2c_setfrequency
- *
- * Description:
- *   Set the I2C frequency
- *
- ****************************************************************************/
-
-static uint32_t efm32_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                       uint32_t frequency)
-{
-  efm32_i2c_sem_wait(dev);
-
-  ((struct efm32_i2c_inst_s *)dev)->frequency = frequency;
-
-  efm32_i2c_sem_post(dev);
-  return frequency;
-}
-
-/****************************************************************************
  * Name: efm32_i2c_process
  *
  * Description:
@@ -1504,9 +1491,13 @@ static int efm32_i2c_process(FAR struct i2c_master_s *dev,
 
   efm32_i2c_tracereset(priv);
 
-  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
+  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !).
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
 
-  efm32_i2c_setclock(priv, inst->frequency);
+  efm32_i2c_setclock(priv, msgs->frequency);
 
   /* Prepare for a transfer */
 
@@ -1677,9 +1668,8 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
 
   /* Initialize instance */
 
-  inst->ops = &efm32_i2c_ops;
+  inst->ops  = &efm32_i2c_ops;
   inst->priv = priv;
-  inst->frequency = 100000;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.
@@ -1690,7 +1680,7 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
   if ((volatile int)priv->refs++ == 0)
     {
       efm32_i2c_sem_init((struct i2c_master_s *)inst);
-      efm32_i2c_init(priv, inst->frequency);
+      efm32_i2c_init(priv);
     }
 
   irqrestore(irqs);
@@ -1847,7 +1837,7 @@ int up_i2creset(FAR struct i2c_master_s *dev)
 
   /* Re-init the port */
 
-  efm32_i2c_init(priv, ((struct efm32_i2c_inst_s *)dev)->frequency);
+  efm32_i2c_init(priv);
   ret = OK;
 
 out:

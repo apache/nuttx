@@ -70,7 +70,6 @@ struct ez80_i2cdev_s
 {
   FAR const struct i2c_ops_s *ops; /* I2C vtable */
   uint32_t frequency;              /* Currently selected I2C frequency */
-  uint16_t ccr;                    /* Clock control register value */
   uint16_t addr;                   /* 7- or 10-bit address */
   uint8_t  addr10 : 1;             /* 1=Address is 10-bit */
 };
@@ -93,11 +92,11 @@ static int      ez80_i2c_read_transfer(FAR struct ez80_i2cdev_s *priv,
                   FAR uint8_t *buffer, int buflen, uint8_t flags);
 static int      ez80_i2c_write_transfer(FAR struct ez80_i2cdev_s *priv,
                   FAR const uint8_t *buffer, int buflen, uint8_t flags);
+static void     ez80_i2c_setfrequency(FAR struct ez80_i2cdev_s *priv,
+                  uint32_t frequency);
 
 /* I2C methods */
 
-static uint32_t ez80_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                  uint32_t frequency);
 static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
@@ -113,13 +112,11 @@ extern uint32_t get_freq(void);
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_currccr;      /* Current setting of I2C CCR register */
-static bool    g_initialized;  /* true:I2C has been initialized */
-static sem_t   g_i2csem;       /* Serialize I2C transfers */
+static bool  g_initialized;  /* true:I2C has been initialized */
+static sem_t g_i2csem;       /* Serialize I2C transfers */
 
 const struct i2c_ops_s g_ops =
 {
-  ez80_i2c_setfrequency,
   ez80_i2c_transfer
 };
 
@@ -172,11 +169,7 @@ static void ez80_i2c_semtake(void)
 
 static void ez80_i2c_setccr(uint16_t ccr)
 {
-  if (g_currccr != ccr)
-    {
-      outp(EZ80_I2C_CCR, ccr);
-      g_currccr = ccr;
-    }
+  outp(EZ80_I2C_CCR, ccr);
 }
 
 /****************************************************************************
@@ -791,29 +784,26 @@ static int ez80_i2c_write_transfer(FAR struct ez80_i2cdev_s *priv,
  *   frequency - The I2C frequency requested
  *
  * Returned Value:
- *   Returns the actual frequency selected
+ *   None
  *
  ****************************************************************************/
 
-static uint32_t ez80_i2c_setfrequency(FAR struct i2c_master_s *dev,
-                                      uint32_t frequency)
+static void ez80_i2c_setfrequency(FAR struct ez80_i2cdev_s *priv,
+                                  uint32_t frequency)
 {
-  FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
+  uint16_t ccr;
 
-  DEBUGASSERT(dev != NULL);
   if (priv->frequency != frequency)
     {
-      /* Calculate and save the BRG (we won't apply it until the first
-       * transfer)
-       */
+      /* Calculate and save the BRG and set the CCR */
 
-      priv->ccr = ez80_i2c_getccr(frequency);
+      ccr = ez80_i2c_getccr(frequency);
+      ez80_i2c_setccr(ccr);
+
+      /* Save the new I2C frequency */
+
       priv->frequency = frequency;
     }
-
-  /* TODO: Calculate and return the actual frequency */
-
-  return frequency;
 }
 
 /****************************************************************************
@@ -853,15 +843,15 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
 
   ez80_i2c_semtake();
 
-  /* Set the frequency */
-
-  ez80_i2c_setccr(priv->ccr);
+  /* The process each message seqment */
 
   for (i = 0; i < count; i++)
     {
       msg = &msgs[i];
 
       /* Set the I2C frequency and address */
+
+      ez80_i2c_setfrequency(priv, msg->frequency);
 
       priv->addr   = msg->addr;
       priv->addr10 = ((msg->flags & I2C_M_TEN) != 0);
@@ -975,7 +965,6 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
       /* Initialize the allocated instance */
 
       i2c->ops = &g_ops;
-      i2c->ccr = g_currccr;
     }
 
   return (FAR struct i2c_master_s *)i2c;
