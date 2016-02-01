@@ -5100,7 +5100,6 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     Each I2C device driver must implement an instance of <code>struct i2c_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>uint32_t setfrequency(FAR struct i2c_master_s *dev, uint32_t frequency);</code><br>
      <code>int transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count);</code></p>
     </p>
   </ul>
