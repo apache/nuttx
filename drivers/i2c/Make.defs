@@ -39,6 +39,10 @@ ifeq ($(CONFIG_I2C),y)
 
 CSRCS += i2c_read.c i2c_write.c i2c_writeread.c
 
+ifeq ($(CONFIG_I2C_DRIVER),y)
+CSRCS += i2c_driver.c
+endif
+
 # Include I2C device driver build support
 
 DEPPATH += --dep-path i2c

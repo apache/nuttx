@@ -13,6 +13,11 @@ config I2C_POLLED
 	bool "Polled I2C (no interrupts)"
 	default n
 
+config I2C_RESET
+	bool "Support up_i2creset"
+	default n
+	depends on ARCH_HAVE_I2CRESET
+
 config I2C_TRACE
 	bool "Enable I2C trace debug"
 	default n
@@ -22,9 +27,8 @@ config I2C_NTRACE
 	default 32
 	depends on I2C_TRACE
 
-config I2C_RESET
-	bool "Support up_i2creset"
+config I2C_DRIVER
+	bool "I2C character driver"
 	default n
-	depends on ARCH_HAVE_I2CRESET
 
 endif # I2C

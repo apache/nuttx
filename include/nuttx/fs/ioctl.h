@@ -82,6 +82,7 @@
 #define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
 #define _LOOPBASE       (0x1e00) /* Loop device commands */
 #define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
+#define _I2CBASE        (0x2000) /* I2C driver commands */
 
 /* boardctl commands share the same number space */
 
@@ -373,6 +374,12 @@
 
 #define _MODEMIOCVALID(c)  (_IOC_TYPE(c)==_MODEMBASE)
 #define _MODEMIOC(nr)      _IOC(_MODEMBASE,nr)
+
+/* I2C driver ioctl definitions **********************************************/
+/* see nuttx/include/i2c/i2c_master.h */
+
+#define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
+#define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

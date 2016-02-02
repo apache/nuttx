@@ -45,6 +45,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#include <nuttx/fs/ioctl.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -77,6 +79,16 @@
 #define I2C_M_TEN            0x0002 /* Ten bit address */
 #define I2C_M_NORESTART      0x0080 /* Message should not begin with
                                      * (re-)start of transfer */
+
+/* I2C Character Driver IOCTL Commands **************************************/
+
+/* Command:      I2CIOC_TRANSFER
+ * Description:  Perform an I2C transfer
+ * Argument:     A reference to an instance of struct i2c_transfer_s.
+ * Dependencies: CONFIG_I2C_DRIVER
+ */
+
+#define I2CIOC_TRANSFER      _I2CIOC(0x0001)
 
 /* Access macros ************************************************************/
 
@@ -151,6 +163,16 @@ struct i2c_master_s
   const struct i2c_ops_s *ops; /* I2C vtable */
 };
 
+/* This structure is used to communicate with the I2C character driver in
+ * order to perform IOCTL transfers.
+ */
+
+struct i2c_transfer_s
+{
+  FAR struct i2c_msg_s *msgv; /* Array of I2C messages for the transfer */
+  size_t msgc;                /* Number of messges in the array. */
+};
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -210,6 +232,32 @@ int up_i2cuninitialize(FAR struct i2c_master_s *dev);
 
 #ifdef CONFIG_I2C_RESET
 int up_i2creset(FAR struct i2c_master_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: i2c_register
+ *
+ * Description:
+ *   Create and register the I2C character driver.
+ *
+ *   The I2C character driver is a simple character driver that supports I2C
+ *   transfers.  The intent of this driver is to support I2C testing.  It is
+ *   not suitable for use in any real driver application.
+ *
+ * Input Parameters:
+ *   i2c - An instance of the lower half I2C driver
+ *   bus - The I2C bus number.  This will be used as the I2C device minor
+ *     number.  The I2C character device will be registered as /dev/i2cN
+ *     where N is the minor number
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_DRIVER
+int i2schar_register(FAR struct i2c_master_s *i2c, int bus);
 #endif
 
 /****************************************************************************
