@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 1, 2016)
+NuttX TODO List (Last updated February 2, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,7 +14,7 @@ nuttx/
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (8)  Kernel/Protected Build
+  (7)  Kernel/Protected Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
@@ -480,16 +480,6 @@ o Kernel/Protected Build
   Status:      Open
   Priority:    Medium
 
-  Title:       I2C TOOL PATITIONING
-  Description: The tool at apps/system/i2c makes direct calls into MCU level
-               I2C logic within the OS and, hence, violates the OS/application
-               interface.  An I2C character driver will need to be developed
-               to perform the I2C interactions within the OS; the I2C tools
-               will need to be modified to use that driver to perform the
-               I2C accesses.
-  Status:      Open
-  Priority:    Medium.  Until this change is made, the I2C tool will not be
-               availabel in protected or kernel builds.
   Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES (PROTECTED MODE)
   Description: When a C++ ELF module is loaded, its C++ constructors are called
                via sched/task_starthook.c logic.  This logic runs in protected mode.
