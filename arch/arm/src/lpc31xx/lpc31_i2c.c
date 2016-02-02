@@ -114,10 +114,13 @@ static struct lpc31_i2cdev_s i2cdevices[2];
 static int  i2c_interrupt(int irq, FAR void *context);
 static void i2c_progress(struct lpc31_i2cdev_s *priv);
 static void i2c_timeout(int argc, uint32_t arg, ...);
-static void i2c_reset(struct lpc31_i2cdev_s *priv);
+static void i2c_hwreset(struct lpc31_i2cdev_s *priv);
 static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency);
 static int  i2c_transfer(FAR struct i2c_master_s *dev,
                          FAR struct i2c_msg_s *msgs, int count);
+#ifdef CONFIG_I2C_RESET
+static int  i2c_reset(FAR struct i2c_master_s * dev);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -126,6 +129,9 @@ static int  i2c_transfer(FAR struct i2c_master_s *dev,
 struct i2c_ops_s lpc31_i2c_ops =
 {
   .transfer = i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = i2c_reset
+#endif
 };
 
 /****************************************************************************
@@ -167,62 +173,6 @@ static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency)
 
       priv->frequency = frequency;
     }
-}
-
-/****************************************************************************
- * Name: i2c_transfer
- *
- * Description:
- *   Perform a sequence of I2C transfers
- *
- ****************************************************************************/
-
-static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count)
-{
-  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
-  irqstate_t flags;
-  int ret;
-
-  /* Get exclusive access to the I2C bus */
-
-  sem_wait(&priv->mutex);
-  flags = irqsave();
-
-  /* Set up for the transfer */
-
-  priv->state = I2C_STATE_START;
-  priv->msgs  = msgs;
-  priv->nmsg  = count;
-
-  /* Configure the I2C frequency.
-   * REVISIT: Note that the frequency is set only on the first message.
-   * This could be extended to support different transfer frequencies for
-   * each message segment.
-   */
-
-  i2c_setfrequency(priv, msgs->frequency);
-
-  /* Start the transfer */
-
-  i2c_progress(priv);
-
-  /* Start a watchdog to timeout the transfer if the bus is locked up... */
-
-  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
-
-  /* Wait for the transfer to complete */
-
-  while (priv->state != I2C_STATE_DONE)
-    {
-      sem_wait(&priv->wait);
-    }
-
-  wd_cancel(priv->timeout);
-  ret = count - priv->nmsg;
-
-  irqrestore(flags);
-  sem_post(&priv->mutex);
-  return ret;
 }
 
 /****************************************************************************
@@ -269,7 +219,7 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
     {
       /* Perform a soft reset */
 
-      i2c_reset(priv);
+      i2c_hwreset(priv);
 
       /* FIXME: automatic retry? */
 
@@ -439,7 +389,7 @@ out:
               priv->nmsg++;
             }
 
-          i2c_reset(priv);
+          i2c_hwreset(priv);
         }
 
       priv->state = I2C_STATE_DONE;
@@ -477,7 +427,7 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
 
       /* Soft reset the USB controller */
 
-      i2c_reset(priv);
+      i2c_hwreset(priv);
 
       /* Mark the transfer as finished */
 
@@ -489,14 +439,14 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Name: i2c_reset
+ * Name: i2c_hwreset
  *
  * Description:
  *   Perform a soft reset of the I2C controller
  *
  ****************************************************************************/
 
-static void i2c_reset(struct lpc31_i2cdev_s *priv)
+static void i2c_hwreset(struct lpc31_i2cdev_s *priv)
 {
   putreg32(I2C_CTRL_RESET, priv->base + LPC31_I2C_CTRL_OFFSET);
 
@@ -505,6 +455,83 @@ static void i2c_reset(struct lpc31_i2cdev_s *priv)
   while ((getreg32(priv->base + LPC31_I2C_CTRL_OFFSET) & I2C_CTRL_RESET) != 0)
       ;
 }
+
+/****************************************************************************
+ * Name: i2c_transfer
+ *
+ * Description:
+ *   Perform a sequence of I2C transfers
+ *
+ ****************************************************************************/
+
+static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count)
+{
+  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
+  irqstate_t flags;
+  int ret;
+
+  /* Get exclusive access to the I2C bus */
+
+  sem_wait(&priv->mutex);
+  flags = irqsave();
+
+  /* Set up for the transfer */
+
+  priv->state = I2C_STATE_START;
+  priv->msgs  = msgs;
+  priv->nmsg  = count;
+
+  /* Configure the I2C frequency.
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
+
+  i2c_setfrequency(priv, msgs->frequency);
+
+  /* Start the transfer */
+
+  i2c_progress(priv);
+
+  /* Start a watchdog to timeout the transfer if the bus is locked up... */
+
+  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
+
+  /* Wait for the transfer to complete */
+
+  while (priv->state != I2C_STATE_DONE)
+    {
+      sem_wait(&priv->wait);
+    }
+
+  wd_cancel(priv->timeout);
+  ret = count - priv->nmsg;
+
+  irqrestore(flags);
+  sem_post(&priv->mutex);
+  return ret;
+}
+
+/************************************************************************************
+ * Name: i2c_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int i2c_reset(FAR struct i2c_master_s * dev)
+{
+  return OK;
+}
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Public Functions
@@ -540,7 +567,7 @@ struct i2c_master_s *up_i2cinitialize(int port)
 
   /* Soft reset the device */
 
-  i2c_reset(priv);
+  i2c_hwreset(priv);
 
   /* Allocate a watchdog timer */
   priv->timeout = wd_create();
@@ -571,7 +598,7 @@ void up_i2cuninitalize(struct lpc31_i2cdev_s *priv)
 {
   /* Disable All Interrupts, soft reset the device */
 
-  i2c_reset(priv);
+  i2c_hwreset(priv);
 
   /* Detach Interrupt Handler */
 

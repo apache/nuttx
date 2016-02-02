@@ -330,6 +330,9 @@ static int tiva_i2c_uninitialize(struct tiva_i2c_priv_s *priv);
 static void tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequency);
 static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
                              int msgc);
+#ifdef CONFIG_I2C_RESET
+static int tiva_i2c_reset(FAR struct i2c_master_s *dev);
+#endif
 
 /************************************************************************************
  * Private Data
@@ -340,6 +343,9 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
 static const struct i2c_ops_s tiva_i2c_ops =
 {
   .transfer = tiva_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = tiva_i2c_reset
+#endif
 };
 
 #ifdef CONFIG_TIVA_I2C0
@@ -1997,6 +2003,130 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
 }
 
 /************************************************************************************
+ * Name: tiva_i2c_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int tiva_i2c_reset(FAR struct i2c_master_s * dev)
+{
+  struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)dev;
+  unsigned int clock_count;
+  unsigned int stretch_count;
+  uint32_t scl_gpio;
+  uint32_t sda_gpio;
+  int ret = ERROR;
+
+  DEBUGASSERT(priv && priv->config);
+  i2cvdbg("I2C%d:\n", priv->config->devno);
+
+  /* Our caller must own a ref */
+
+  ASSERT(priv->refs > 0);
+
+  /* Lock out other clients */
+
+  tiva_i2c_sem_wait(priv);
+
+  /* Un-initialize the port */
+
+  tiva_i2c_uninitialize(priv);
+
+  /* Use GPIO configuration to un-wedge the bus */
+
+  scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
+  sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
+
+  tiva_configgpio(scl_gpio);
+  tiva_configgpio(sda_gpio);
+
+  /* Let SDA go high */
+
+  tiva_gpiowrite(sda_gpio, 1);
+
+  /* Clock the bus until any slaves currently driving it let it go. */
+
+  clock_count = 0;
+  while (!tiva_gpioread(sda_gpio))
+    {
+      /* Give up if we have tried too hard */
+
+      if (clock_count++ > 10)
+        {
+          goto out;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretch_count = 0;
+      while (!tiva_gpioread(scl_gpio))
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretch_count++ > 10)
+            {
+              goto out;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      tiva_gpiowrite(scl_gpio, 0);
+      up_udelay(10);
+
+      /* Drive SCL high again */
+
+      tiva_gpiowrite(scl_gpio, 1);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+  tiva_gpiowrite(sda_gpio, 0);
+  up_udelay(10);
+  tiva_gpiowrite(scl_gpio, 0);
+  up_udelay(10);
+  tiva_gpiowrite(scl_gpio, 1);
+  up_udelay(10);
+  tiva_gpiowrite(sda_gpio, 1);
+  up_udelay(10);
+
+  /* Revert the GPIO configuration. */
+
+  tiva_configgpio(MKI2C_INPUT(sda_gpio));
+  tiva_configgpio(MKI2C_INPUT(scl_gpio));
+
+  /* Re-init the port */
+
+  tiva_i2c_initialize(priv, priv->frequency);
+  ret = OK;
+
+out:
+
+  /* Release the port for re-use by other clients */
+
+  tiva_i2c_sem_post(priv);
+  return ret;
+}
+#endif /* CONFIG_I2C_RESET */
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -2166,123 +2296,5 @@ int up_i2cuninitialize(struct i2c_master_s *dev)
   irqrestore(irqs);
   return OK;
 }
-
-/************************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-int up_i2creset(struct i2c_master_s *dev)
-{
-  struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)dev;
-  unsigned int clock_count;
-  unsigned int stretch_count;
-  uint32_t scl_gpio;
-  uint32_t sda_gpio;
-  int ret = ERROR;
-
-  DEBUGASSERT(priv && priv->config);
-  i2cvdbg("I2C%d:\n", priv->config->devno);
-
-  /* Our caller must own a ref */
-
-  ASSERT(priv->refs > 0);
-
-  /* Lock out other clients */
-
-  tiva_i2c_sem_wait(priv);
-
-  /* Un-initialize the port */
-
-  tiva_i2c_uninitialize(priv);
-
-  /* Use GPIO configuration to un-wedge the bus */
-
-  scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
-  sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
-
-  tiva_configgpio(scl_gpio);
-  tiva_configgpio(sda_gpio);
-
-  /* Let SDA go high */
-
-  tiva_gpiowrite(sda_gpio, 1);
-
-  /* Clock the bus until any slaves currently driving it let it go. */
-
-  clock_count = 0;
-  while (!tiva_gpioread(sda_gpio))
-    {
-      /* Give up if we have tried too hard */
-
-      if (clock_count++ > 10)
-        {
-          goto out;
-        }
-
-      /* Sniff to make sure that clock stretching has finished.
-       *
-       * If the bus never relaxes, the reset has failed.
-       */
-
-      stretch_count = 0;
-      while (!tiva_gpioread(scl_gpio))
-        {
-          /* Give up if we have tried too hard */
-
-          if (stretch_count++ > 10)
-            {
-              goto out;
-            }
-
-          up_udelay(10);
-        }
-
-      /* Drive SCL low */
-
-      tiva_gpiowrite(scl_gpio, 0);
-      up_udelay(10);
-
-      /* Drive SCL high again */
-
-      tiva_gpiowrite(scl_gpio, 1);
-      up_udelay(10);
-    }
-
-  /* Generate a start followed by a stop to reset slave
-   * state machines.
-   */
-
-  tiva_gpiowrite(sda_gpio, 0);
-  up_udelay(10);
-  tiva_gpiowrite(scl_gpio, 0);
-  up_udelay(10);
-  tiva_gpiowrite(scl_gpio, 1);
-  up_udelay(10);
-  tiva_gpiowrite(sda_gpio, 1);
-  up_udelay(10);
-
-  /* Revert the GPIO configuration. */
-
-  tiva_configgpio(MKI2C_INPUT(sda_gpio));
-  tiva_configgpio(MKI2C_INPUT(scl_gpio));
-
-  /* Re-init the port */
-
-  tiva_i2c_initialize(priv, priv->frequency);
-  ret = OK;
-
-out:
-
-  /* Release the port for re-use by other clients */
-
-  tiva_i2c_sem_post(priv);
-  return ret;
-}
-#endif /* CONFIG_I2C_RESET */
 
 #endif /* CONFIG_TIVA_I2C0 ... CONFIG_TIVA_I2C9 */

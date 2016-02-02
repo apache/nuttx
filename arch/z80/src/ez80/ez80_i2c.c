@@ -99,6 +99,9 @@ static void     ez80_i2c_setfrequency(FAR struct ez80_i2cdev_s *priv,
 
 static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
+#ifdef CONFIG_I2C_RESET
+static int      ez80_i2c_reset(FAR struct i2c_master_s *dev);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -118,6 +121,9 @@ static sem_t g_i2csem;       /* Serialize I2C transfers */
 const struct i2c_ops_s g_ops =
 {
   ez80_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , ez80_i2c_reset
+#endif
 };
 
 /****************************************************************************
@@ -909,6 +915,27 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
   ez80_i2c_semgive();
   return ret;
 }
+
+/************************************************************************************
+ * Name: ez80_i2c_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int ez80_i2c_reset(FAR struct i2c_master_s * dev)
+{
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

@@ -170,14 +170,14 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 
 /* I2C transfer helper functions */
 
-static int twi_wait(struct twi_dev_s *priv);
+static int  twi_wait(struct twi_dev_s *priv);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
-static int twi_interrupt(struct twi_dev_s *priv);
+static int  twi_interrupt(struct twi_dev_s *priv);
 #ifdef CONFIG_SAM34_TWI0
-static int twi0_interrupt(int irq, FAR void *context);
+static int  twi0_interrupt(int irq, FAR void *context);
 #endif
 #ifdef CONFIG_SAM34_TWI1
-static int twi1_interrupt(int irq, FAR void *context);
+static int  twi1_interrupt(int irq, FAR void *context);
 #endif
 static void twi_timeout(int argc, uint32_t arg, ...);
 
@@ -189,6 +189,9 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
+#ifdef CONFIG_I2C_RESET
+static int  twi_reset(FAR struct i2c_master_s * dev);
+#endif
 
 /* Initialization */
 
@@ -211,6 +214,9 @@ static struct twi_dev_s g_twi1;
 struct i2c_ops_s g_twiops =
 {
   .transfer = twi_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = twi_reset
+#endif
 };
 
 /****************************************************************************
@@ -743,6 +749,27 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   twi_givesem(&priv->exclsem);
   return ret;
 }
+
+/************************************************************************************
+ * Name: twi_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int twi_reset(FAR struct i2c_master_s * dev)
+{
+  return OK;
+}
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Initialization

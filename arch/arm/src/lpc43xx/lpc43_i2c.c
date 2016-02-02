@@ -135,6 +135,9 @@ static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
               uint32_t frequency);
 static int  lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
               FAR struct i2c_msg_s *msgs, int count);
+#ifdef CONFIG_I2C_RESET
+static int lpc43_i2c_reset(FAR struct i2c_master_s * dev);
+#endif
 
 /****************************************************************************
  * I2C device operations
@@ -143,6 +146,9 @@ static int  lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
 struct i2c_ops_s lpc43_i2c_ops =
 {
   .transfer = lpc43_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = lpc43_i2c_reset
+#endif
 };
 
 /****************************************************************************
@@ -237,49 +243,6 @@ static void lpc43_i2c_timeout(int argc, uint32_t arg, ...)
   priv->state = 0xff;
   sem_post(&priv->wait);
   irqrestore(flags);
-}
-
-/****************************************************************************
- * Name: lpc43_i2c_transfer
- *
- * Description:
- *   Perform a sequence of I2C transfers
- *
- ****************************************************************************/
-
-static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
-                              FAR struct i2c_msg_s *msgs, int count)
-{
-  struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
-  int ret;
-
-  DEBUGASSERT(dev != NULL);
-
-  /* Get exclusive access to the I2C bus */
-
-  sem_wait(&priv->mutex);
-
-  /* Set up for the transfer */
-
-  priv->wrcnt = 0;
-  priv->rdcnt = 0;
-  priv->msgs  = msgs;
-  priv->nmsg  = count;
-
-  /* Configure the I2C frequency.
-   * REVISIT: Note that the frequency is set only on the first message.
-   * This could be extended to support different transfer frequencies for
-   * each message segment.
-   */
-
-  lpc43_i2c_setfrequency(priv, msgs->frequency);
-
-  /* Perform the transfer */
-
-  ret = lpc43_i2c_start(priv);
-
-  sem_post(&priv->mutex);
-  return ret;
 }
 
 /****************************************************************************
@@ -420,6 +383,70 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context)
 }
 
 /****************************************************************************
+ * Name: lpc43_i2c_transfer
+ *
+ * Description:
+ *   Perform a sequence of I2C transfers
+ *
+ ****************************************************************************/
+
+static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
+                              FAR struct i2c_msg_s *msgs, int count)
+{
+  struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)dev;
+  int ret;
+
+  DEBUGASSERT(dev != NULL);
+
+  /* Get exclusive access to the I2C bus */
+
+  sem_wait(&priv->mutex);
+
+  /* Set up for the transfer */
+
+  priv->wrcnt = 0;
+  priv->rdcnt = 0;
+  priv->msgs  = msgs;
+  priv->nmsg  = count;
+
+  /* Configure the I2C frequency.
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
+
+  lpc43_i2c_setfrequency(priv, msgs->frequency);
+
+  /* Perform the transfer */
+
+  ret = lpc43_i2c_start(priv);
+
+  sem_post(&priv->mutex);
+  return ret;
+}
+
+/************************************************************************************
+ * Name: lpc43_i2c_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int lpc43_i2c_reset(FAR struct i2c_master_s * dev)
+{
+  return OK;
+}
+#endif /* CONFIG_I2C_RESET */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -551,20 +578,5 @@ int up_i2cuninitialize(FAR struct i2c_master_s * dev)
   irq_detach(priv->irqid);
   return OK;
 }
-
-/****************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s * dev)
-{
-  return OK;
-}
-#endif /* CONFIG_I2C_RESET */
 
 #endif /* CONFIG_LPC43_I2C0 || CONFIG_LPC43_I2C1 */

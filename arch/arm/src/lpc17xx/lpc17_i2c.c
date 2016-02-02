@@ -132,12 +132,15 @@ static int  lpc17_i2c_interrupt(int irq, FAR void *context);
 static void lpc17_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc17_i2c_setfrequency(struct lpc17_i2cdev_s *priv,
               uint32_t frequency);
+static void lpc17_stopnext(struct lpc17_i2cdev_s *priv);
 
 /* I2C device operations */
 
 static int  lpc17_i2c_transfer(FAR struct i2c_master_s *dev,
               FAR struct i2c_msg_s *msgs, int count);
-static void lpc17_stopnext(struct lpc17_i2cdev_s *priv);
+#ifdef CONFIG_I2C_RESET
+static int  lpc17_i2c_reset(FAR struct i2c_master_s * dev);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -156,6 +159,9 @@ static struct lpc17_i2cdev_s g_i2c2dev;
 struct i2c_ops_s lpc17_i2c_ops =
 {
   .transfer = lpc17_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = lpc17_i2c_reset
+#endif
 };
 
 /****************************************************************************
@@ -440,6 +446,27 @@ static int lpc17_i2c_interrupt(int irq, FAR void *context)
   return OK;
 }
 
+/************************************************************************************
+ * Name: lpc17_i2c_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int lpc17_i2c_reset(FAR struct i2c_master_s * dev)
+{
+  return OK;
+}
+#endif /* CONFIG_I2C_RESET */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -619,20 +646,5 @@ int up_i2cuninitialize(FAR struct i2c_master_s * dev)
   irq_detach(priv->irqid);
   return OK;
 }
-
-/****************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s * dev)
-{
-  return OK;
-}
-#endif /* CONFIG_I2C_RESET */
 
 #endif /* CONFIG_LPC17_I2C0 || CONFIG_LPC17_I2C1 || CONFIG_LPC17_I2C2 */

@@ -234,6 +234,9 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 static int twi_transfer(FAR struct i2c_master_s *dev,
           FAR struct i2c_msg_s *msgs, int count);
+#ifdef CONFIG_I2C_RESET
+static int  twi_reset(FAR struct i2c_master_s * dev);
+#endif
 
 /* Initialization */
 
@@ -307,6 +310,9 @@ static struct twi_dev_s g_twi3;
 struct i2c_ops_s g_twiops =
 {
   .transfer = twi_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = twi_reset
+#endif
 };
 
 /****************************************************************************
@@ -889,6 +895,140 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
+/************************************************************************************
+ * Name: twi_reset
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int twi_reset(FAR struct i2c_master_s *dev)
+{
+  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  unsigned int clockcnt;
+  unsigned int stretchcnt;
+  uint32_t sclpin;
+  uint32_t sdapin;
+  int ret;
+
+  ASSERT(priv);
+
+  /* Get exclusive access to the TWI device */
+
+  twi_takesem(&priv->exclsem);
+
+  /* Disable TWI interrupts */
+
+  up_disable_irq(priv->attr->irq);
+
+  /* Use PIO configuration to un-wedge the bus.
+   *
+   * Reconfigure both pins as open drain outputs with initial output value
+   * "high" (i.e., floating since these are open-drain outputs).
+   */
+
+  sclpin = MKI2C_OUTPUT(priv->attr->sclcfg);
+  sdapin = MKI2C_OUTPUT(priv->attr->sdacfg);
+
+  sam_configpio(sclpin);
+  sam_configpio(sdapin);
+
+  /* Peripheral clocking must be enabled in order to read valid data from
+   * the output pin (clocking is enabled automatically for pins configured
+   * as inputs).
+   */
+
+  sam_pio_forceclk(sclpin, true);
+  sam_pio_forceclk(sdapin, true);
+
+  /* Clock the bus until any slaves currently driving it low let it float.
+   * Reading from the output will return the actual sensed level on the
+   * SDA pin (not the level that we wrote).
+   */
+
+  clockcnt = 0;
+  while (sam_pioread(sdapin) == false)
+    {
+      /* Give up if we have tried too hard */
+
+      if (clockcnt++ > 10)
+        {
+          ret = -ETIMEDOUT;
+          goto errout_with_lock;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.  SCL should
+       * be floating high here unless something is driving it low.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretchcnt = 0;
+      while (sam_pioread(sclpin) == false)
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretchcnt++ > 10)
+            {
+              ret = -EAGAIN;
+              goto errout_with_lock;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      sam_piowrite(sclpin, false);
+      up_udelay(10);
+
+      /* Drive SCL high (floating) again */
+
+      sam_piowrite(sclpin, true);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+  sam_piowrite(sdapin, false);
+  up_udelay(10);
+  sam_piowrite(sclpin, false);
+  up_udelay(10);
+
+  sam_piowrite(sclpin, true);
+  up_udelay(10);
+  sam_piowrite(sdapin, true);
+  up_udelay(10);
+
+  /* Clocking is no longer forced */
+
+  sam_pio_forceclk(sclpin, false);
+  sam_pio_forceclk(sdapin, false);
+
+  /* Re-initialize the port hardware */
+
+  twi_hw_initialize(priv, priv->frequency);
+  ret = OK;
+
+errout_with_lock:
+
+  /* Release our lock on the bus */
+
+  twi_givesem(&priv->exclsem);
+  return ret;
+}
+#endif /* CONFIG_I2C_RESET */
+
 /****************************************************************************
  * Initialization
  ****************************************************************************/
@@ -1228,131 +1368,4 @@ int up_i2cuninitialize(FAR struct i2c_master_s *dev)
   return OK;
 }
 
-/************************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s *dev)
-{
-  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
-  unsigned int clockcnt;
-  unsigned int stretchcnt;
-  uint32_t sclpin;
-  uint32_t sdapin;
-  int ret;
-
-  ASSERT(priv);
-
-  /* Get exclusive access to the TWI device */
-
-  twi_takesem(&priv->exclsem);
-
-  /* Disable TWI interrupts */
-
-  up_disable_irq(priv->attr->irq);
-
-  /* Use PIO configuration to un-wedge the bus.
-   *
-   * Reconfigure both pins as open drain outputs with initial output value
-   * "high" (i.e., floating since these are open-drain outputs).
-   */
-
-  sclpin = MKI2C_OUTPUT(priv->attr->sclcfg);
-  sdapin = MKI2C_OUTPUT(priv->attr->sdacfg);
-
-  sam_configpio(sclpin);
-  sam_configpio(sdapin);
-
-  /* Peripheral clocking must be enabled in order to read valid data from
-   * the output pin (clocking is enabled automatically for pins configured
-   * as inputs).
-   */
-
-  sam_pio_forceclk(sclpin, true);
-  sam_pio_forceclk(sdapin, true);
-
-  /* Clock the bus until any slaves currently driving it low let it float.
-   * Reading from the output will return the actual sensed level on the
-   * SDA pin (not the level that we wrote).
-   */
-
-  clockcnt = 0;
-  while (sam_pioread(sdapin) == false)
-    {
-      /* Give up if we have tried too hard */
-
-      if (clockcnt++ > 10)
-        {
-          ret = -ETIMEDOUT;
-          goto errout_with_lock;
-        }
-
-      /* Sniff to make sure that clock stretching has finished.  SCL should
-       * be floating high here unless something is driving it low.
-       *
-       * If the bus never relaxes, the reset has failed.
-       */
-
-      stretchcnt = 0;
-      while (sam_pioread(sclpin) == false)
-        {
-          /* Give up if we have tried too hard */
-
-          if (stretchcnt++ > 10)
-            {
-              ret = -EAGAIN;
-              goto errout_with_lock;
-            }
-
-          up_udelay(10);
-        }
-
-      /* Drive SCL low */
-
-      sam_piowrite(sclpin, false);
-      up_udelay(10);
-
-      /* Drive SCL high (floating) again */
-
-      sam_piowrite(sclpin, true);
-      up_udelay(10);
-    }
-
-  /* Generate a start followed by a stop to reset slave
-   * state machines.
-   */
-
-  sam_piowrite(sdapin, false);
-  up_udelay(10);
-  sam_piowrite(sclpin, false);
-  up_udelay(10);
-
-  sam_piowrite(sclpin, true);
-  up_udelay(10);
-  sam_piowrite(sdapin, true);
-  up_udelay(10);
-
-  /* Clocking is no longer forced */
-
-  sam_pio_forceclk(sclpin, false);
-  sam_pio_forceclk(sdapin, false);
-
-  /* Re-initialize the port hardware */
-
-  twi_hw_initialize(priv, priv->frequency);
-  ret = OK;
-
-errout_with_lock:
-
-  /* Release our lock on the bus */
-
-  twi_givesem(&priv->exclsem);
-  return ret;
-}
-#endif /* CONFIG_I2C_RESET */
 #endif /* CONFIG_SAMA5_TWI0 || ... || CONFIG_SAMA5_TWI3 */

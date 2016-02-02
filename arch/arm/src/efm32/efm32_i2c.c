@@ -314,11 +314,14 @@ static int efm32_i2c1_isr(int irq, void *context);
 #endif
 #endif /* !CONFIG_I2C_POLLED */
 
-static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv);
+static void efm32_i2c_hwreset(FAR struct efm32_i2c_priv_s *priv);
 static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv);
 static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv);
 static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count);
+#ifdef CONFIG_I2C_RESET
+static int efm32_i2c_reset(FAR struct i2c_master_s *dev);
+#endif
 
 #ifdef CONFIG_I2C_TRACE
 static const char *efm32_i2c_state_str(int i2c_state);
@@ -333,6 +336,9 @@ static const char *efm32_i2c_state_str(int i2c_state);
 static const struct i2c_ops_s efm32_i2c_ops =
 {
   .transfer = efm32_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = efm32_i2c_reset
+#endif
 };
 
 /* I2C device structures */
@@ -1315,14 +1321,14 @@ static int efm32_i2c1_isr(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_i2c_reset
+ * Name: efm32_i2c_hwreset
  *
  * Description:
  *   Reset I2C to same state as after a HW reset.
  *
  ****************************************************************************/
 
-static void efm32_i2c_reset(FAR struct efm32_i2c_priv_s *priv)
+static void efm32_i2c_hwreset(FAR struct efm32_i2c_priv_s *priv)
 {
   efm32_i2c_putreg(priv, EFM32_I2C_CTRL_OFFSET, _I2C_CTRL_RESETVALUE);
   efm32_i2c_putreg(priv, EFM32_I2C_CLKDIV_OFFSET, _I2C_CLKDIV_RESETVALUE);
@@ -1357,7 +1363,7 @@ static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv)
 
   /* Eeset all resgister */
 
-  efm32_i2c_reset(priv);
+  efm32_i2c_hwreset(priv);
 
   /* Configure pins */
 
@@ -1417,7 +1423,7 @@ static int efm32_i2c_deinit(FAR struct efm32_i2c_priv_s *priv)
 {
   /* Disable I2C */
 
-  efm32_i2c_reset(priv);
+  efm32_i2c_hwreset(priv);
 
   /* Unconfigure GPIO pins */
 
@@ -1594,111 +1600,22 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_i2cinitialize
+/************************************************************************************
+ * Name: efm32_i2c_reset
  *
  * Description:
- *   Initialize one I2C bus
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
  *
- ****************************************************************************/
-
-FAR struct i2c_master_s *up_i2cinitialize(int port)
-{
-  struct efm32_i2c_priv_s *priv = NULL;
-  irqstate_t irqs;
-
-  /* Get I2C private structure */
-
-  switch (port)
-    {
-#ifdef CONFIG_EFM32_I2C0
-    case 0:
-      priv = (struct efm32_i2c_priv_s *)&efm32_i2c0_priv;
-      break;
-#endif
-
-#ifdef CONFIG_EFM32_I2C1
-    case 1:
-      priv = (struct efm32_i2c_priv_s *)&efm32_i2c1_priv;
-      break;
-#endif
-
-    default:
-      return NULL;
-    }
-
-  /* Initialize private data for the first time, increment reference count,
-   * power-up hardware and configure GPIOs.
-   */
-
-  irqs = irqsave();
-
-  if ((volatile int)priv->refs++ == 0)
-    {
-      efm32_i2c_sem_init(priv);
-      efm32_i2c_init(priv);
-    }
-
-  irqrestore(irqs);
-  return (struct i2c_master_s *)priv;
-}
-
-/****************************************************************************
- * Name: up_i2cuninitialize
+ * Input Parameters:
+ *   dev   - Device-specific state data
  *
- * Description:
- *   Uninitialize an I2C bus
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
- ****************************************************************************/
-
-int up_i2cuninitialize(FAR struct i2c_master_s *dev)
-{
-  FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
-  irqstate_t irqs;
-
-  ASSERT(dev);
-
-  /* Decrement reference count and check for underflow */
-
-  if (priv->refs == 0)
-    {
-      return ERROR;
-    }
-
-  irqs = irqsave();
-
-  if (--priv->refs)
-    {
-      irqrestore(irqs);
-      return OK;
-    }
-
-  irqrestore(irqs);
-
-  /* Disable power and other HW resource (GPIO's) */
-
-  efm32_i2c_deinit(priv);
-
-  /* Release unused resources */
-
-  efm32_i2c_sem_destroy(priv);
-  return OK;
-}
-
-/****************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
- *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s *dev)
+int efm32_i2c_reset(FAR struct i2c_master_s *dev)
 {
   FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
   unsigned int clock_count;
@@ -1801,5 +1718,100 @@ out:
   return ret;
 }
 #endif /* CONFIG_I2C_RESET */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_i2cinitialize
+ *
+ * Description:
+ *   Initialize one I2C bus
+ *
+ ****************************************************************************/
+
+FAR struct i2c_master_s *up_i2cinitialize(int port)
+{
+  struct efm32_i2c_priv_s *priv = NULL;
+  irqstate_t irqs;
+
+  /* Get I2C private structure */
+
+  switch (port)
+    {
+#ifdef CONFIG_EFM32_I2C0
+    case 0:
+      priv = (struct efm32_i2c_priv_s *)&efm32_i2c0_priv;
+      break;
+#endif
+
+#ifdef CONFIG_EFM32_I2C1
+    case 1:
+      priv = (struct efm32_i2c_priv_s *)&efm32_i2c1_priv;
+      break;
+#endif
+
+    default:
+      return NULL;
+    }
+
+  /* Initialize private data for the first time, increment reference count,
+   * power-up hardware and configure GPIOs.
+   */
+
+  irqs = irqsave();
+
+  if ((volatile int)priv->refs++ == 0)
+    {
+      efm32_i2c_sem_init(priv);
+      efm32_i2c_init(priv);
+    }
+
+  irqrestore(irqs);
+  return (struct i2c_master_s *)priv;
+}
+
+/****************************************************************************
+ * Name: up_i2cuninitialize
+ *
+ * Description:
+ *   Uninitialize an I2C bus
+ *
+ ****************************************************************************/
+
+int up_i2cuninitialize(FAR struct i2c_master_s *dev)
+{
+  FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
+  irqstate_t irqs;
+
+  ASSERT(dev);
+
+  /* Decrement reference count and check for underflow */
+
+  if (priv->refs == 0)
+    {
+      return ERROR;
+    }
+
+  irqs = irqsave();
+
+  if (--priv->refs)
+    {
+      irqrestore(irqs);
+      return OK;
+    }
+
+  irqrestore(irqs);
+
+  /* Disable power and other HW resource (GPIO's) */
+
+  efm32_i2c_deinit(priv);
+
+  /* Release unused resources */
+
+  efm32_i2c_sem_destroy(priv);
+  return OK;
+}
 
 #endif /* CONFIG_EFM32_I2C0 || CONFIG_EFM32_I2C1 */

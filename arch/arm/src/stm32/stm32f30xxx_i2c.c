@@ -325,6 +325,9 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count);
+#ifdef CONFIG_I2C_RESET
+static int stm32_i2c_reset(FAR struct i2c_master_s *dev);
+#endif
 
 /************************************************************************************
  * Private Data
@@ -335,6 +338,9 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
 const struct i2c_ops_s stm32_i2c_ops =
 {
  .transfer = stm32_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = stm32_i2c_reset
+#endif
 };
 
 #ifdef CONFIG_STM32_I2C1
@@ -1806,122 +1812,21 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
 }
 
 /************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Name: up_i2cinitialize
+ * Name: stm32_i2c_reset
  *
  * Description:
- *   Initialize one I2C bus
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
  *
- ************************************************************************************/
-
-FAR struct i2c_master_s *up_i2cinitialize(int port)
-{
-  struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  int irqs;
-
-#if STM32_PCLK1_FREQUENCY < 4000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32_PCLK1_FREQUENCY < 2000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
-#endif
-
-  /* Get I2C private structure */
-
-  switch (port)
-    {
-#ifdef CONFIG_STM32_I2C1
-      case 1:
-        priv = (struct stm32_i2c_priv_s *)&stm32_i2c1_priv;
-        break;
-#endif
-#ifdef CONFIG_STM32_I2C2
-      case 2:
-        priv = (struct stm32_i2c_priv_s *)&stm32_i2c2_priv;
-        break;
-#endif
-#ifdef CONFIG_STM32_I2C3
-      case 3:
-        priv = (struct stm32_i2c_priv_s *)&stm32_i2c3_priv;
-        break;
-#endif
-      default:
-        return NULL;
-    }
-
-  /* Init private data for the first time, increment refs count,
-   * power-up hardware and configure GPIOs.
-   */
-
-  irqs = irqsave();
-
-  if ((volatile int)priv->refs++ == 0)
-    {
-      stm32_i2c_sem_init(priv);
-      stm32_i2c_init(priv);
-    }
-
-  irqrestore(irqs);
-  return (struct i2c_master_s *)priv;
-}
-
-/************************************************************************************
- * Name: up_i2cuninitialize
+ * Input Parameters:
+ *   dev   - Device-specific state data
  *
- * Description:
- *   Uninitialize an I2C bus
- *
- ************************************************************************************/
-
-int up_i2cuninitialize(FAR struct i2c_master_s * dev)
-{
-  FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  int irqs;
-
-  ASSERT(dev);
-
-  /* Decrement refs and check for underflow */
-
-  if (priv->refs == 0)
-    {
-      return ERROR;
-    }
-
-  irqs = irqsave();
-
-  if (--priv->refs)
-    {
-      irqrestore(irqs);
-      return OK;
-    }
-
-  irqrestore(irqs);
-
-  /* Disable power and other HW resource (GPIO's) */
-
-  stm32_i2c_deinit(priv);
-
-  /* Release unused resources */
-
-  stm32_i2c_sem_destroy(priv);
-  return OK;
-}
-
-/************************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s * dev)
+static int stm32_i2c_reset(FAR struct i2c_master_s * dev)
 {
   unsigned int clock_count;
   unsigned int stretch_count;
@@ -2024,6 +1929,113 @@ out:
   return ret;
 }
 #endif /* CONFIG_I2C_RESET */
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize one I2C bus
+ *
+ ************************************************************************************/
+
+FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
+{
+  struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
+  int irqs;
+
+#if STM32_PCLK1_FREQUENCY < 4000000
+#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
+#endif
+
+#if STM32_PCLK1_FREQUENCY < 2000000
+#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
+  return NULL;
+#endif
+
+  /* Get I2C private structure */
+
+  switch (port)
+    {
+#ifdef CONFIG_STM32_I2C1
+      case 1:
+        priv = (struct stm32_i2c_priv_s *)&stm32_i2c1_priv;
+        break;
+#endif
+#ifdef CONFIG_STM32_I2C2
+      case 2:
+        priv = (struct stm32_i2c_priv_s *)&stm32_i2c2_priv;
+        break;
+#endif
+#ifdef CONFIG_STM32_I2C3
+      case 3:
+        priv = (struct stm32_i2c_priv_s *)&stm32_i2c3_priv;
+        break;
+#endif
+      default:
+        return NULL;
+    }
+
+  /* Init private data for the first time, increment refs count,
+   * power-up hardware and configure GPIOs.
+   */
+
+  irqs = irqsave();
+
+  if ((volatile int)priv->refs++ == 0)
+    {
+      stm32_i2c_sem_init(priv);
+      stm32_i2c_init(priv);
+    }
+
+  irqrestore(irqs);
+  return (struct i2c_master_s *)priv;
+}
+
+/************************************************************************************
+ * Name: stm32_i2cbus_uninitialize
+ *
+ * Description:
+ *   Uninitialize an I2C bus
+ *
+ ************************************************************************************/
+
+int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
+{
+  FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
+  int irqs;
+
+  ASSERT(dev);
+
+  /* Decrement refs and check for underflow */
+
+  if (priv->refs == 0)
+    {
+      return ERROR;
+    }
+
+  irqs = irqsave();
+
+  if (--priv->refs)
+    {
+      irqrestore(irqs);
+      return OK;
+    }
+
+  irqrestore(irqs);
+
+  /* Disable power and other HW resource (GPIO's) */
+
+  stm32_i2c_deinit(priv);
+
+  /* Release unused resources */
+
+  stm32_i2c_sem_destroy(priv);
+  return OK;
+}
 
 #endif /* CONFIG_STM32_STM32F30XX */
 #endif /* CONFIG_STM32_I2C1 || CONFIG_STM32_I2C2 || CONFIG_STM32_I2C3 */
