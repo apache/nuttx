@@ -292,10 +292,10 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 
           auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: up_i2creset failed: %d\n", ret);
+              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
@@ -368,10 +368,10 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 
           auddbg("WARNING: i2c_write failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: up_i2creset failed: %d\n", ret);
+              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else

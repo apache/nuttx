@@ -14,7 +14,7 @@ config I2C_POLLED
 	default n
 
 config I2C_RESET
-	bool "Support up_i2creset"
+	bool "Support I2C reset interface method"
 	default n
 	depends on ARCH_HAVE_I2CRESET
 

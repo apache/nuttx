@@ -113,6 +113,24 @@
 
 #define I2C_TRANSFER(d,m,c) ((d)->ops->transfer(d,m,c))
 
+/************************************************************************************
+ * Name: I2C_RESET
+ *
+ * Description:
+ *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+#  define I2C_RESET(d) ((d)->ops->reset(d))
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -125,6 +143,9 @@ struct i2c_ops_s
 {
   int (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                   int count);
+#ifdef CONFIG_I2C_RESET
+  int (*reset)(FAR struct i2c_master_s *dev);
+#endif
 };
 
 /* This structure contains the full state of I2C as needed for a specific
@@ -184,54 +205,6 @@ extern "C"
 {
 #else
 #define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: up_i2cinitialize
- *
- * Description:
- *   Initialize the selected I2C port. And return a unique instance of struct
- *   struct i2c_master_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a
- *   different frequency and slave address.
- *
- * Input Parameter:
- *   Port number (for hardware that has multiple I2C interfaces)
- *
- * Returned Value:
- *   Valid I2C device structure reference on succcess; a NULL on failure
- *
- ****************************************************************************/
-
-FAR struct i2c_master_s *up_i2cinitialize(int port);
-
-/****************************************************************************
- * Name: up_i2cuninitialize
- *
- * Description:
- *   De-initialize the selected I2C port, and power down the device.
- *
- * Input Parameter:
- *   Device structure as returned by the up_i2cinitialize()
- *
- * Returned Value:
- *   OK on success, ERROR when internal reference count mismatch or dev
- *   points to invalid hardware device.
- *
- ****************************************************************************/
-
-int up_i2cuninitialize(FAR struct i2c_master_s *dev);
-
-/************************************************************************************
- * Name: up_i2creset
- *
- * Description:
- *   Reset an I2C bus
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************

@@ -11437,4 +11437,6 @@
 	  Any bug reports of bug fixes will be much appreciated (2016-02-01).
 	* drivers/i2c/i2c_driver.c:  Add an I2C character drivers to support
 	  raw I2C data transfers for test applications (2016-02-02).
+	* I2C_RESET:  Eliminate up_i2creset().  It should not be a global function;
+	  Now it is an I2C interface method (2016-02-02).
 

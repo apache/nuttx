@@ -344,10 +344,10 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
           idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              idbg("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
@@ -418,10 +418,10 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
           idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              idbg("ERROR: I2C_RESET failed: %d\n", ret);
             }
 #else
           idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
