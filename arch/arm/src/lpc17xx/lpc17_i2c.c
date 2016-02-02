@@ -167,7 +167,7 @@ struct i2c_ops_s lpc17_i2c_ops =
  ****************************************************************************/
 
 static void lpc17_i2c_setfrequency(struct lpc17_i2cdev_s *priv,
-                                   uint32_t frequency);
+                                   uint32_t frequency)
 {
   if (frequency != priv->frequency)
     {
@@ -204,8 +204,6 @@ static void lpc17_i2c_setfrequency(struct lpc17_i2cdev_s *priv,
 
 static int lpc17_i2c_start(struct lpc17_i2cdev_s *priv)
 {
-  int ret = -1;
-
   putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
            priv->base + LPC17_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC17_I2C_CONSET_OFFSET);

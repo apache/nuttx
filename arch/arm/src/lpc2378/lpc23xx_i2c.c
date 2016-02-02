@@ -209,8 +209,6 @@ static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
 
 static int lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv)
 {
-  int ret = -1;
-
   putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
            priv->base + I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + I2C_CONSET_OFFSET);

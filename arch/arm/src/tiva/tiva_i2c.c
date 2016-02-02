@@ -1915,7 +1915,7 @@ static int tiva_i2c_process(struct i2c_master_s *dev, struct i2c_msg_s *msgv, in
    * each message segment.
    */
 
-  tiva_i2c_setclock(priv, msgs->frequency);
+  tiva_i2c_setclock(priv, msgv->frequency);
 
   /* Send the address, then the process moves into the ISR.  I2C
    * interrupts will be enabled within tiva_i2c_waitdone().
@@ -2033,7 +2033,9 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
 
   tiva_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
   ret = tiva_i2c_process(dev, msgv, msgc);
+
   tiva_i2c_sem_post(dev);
+  return ret;
 }
 
 /************************************************************************************

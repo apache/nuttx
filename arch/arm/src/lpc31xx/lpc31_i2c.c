@@ -120,7 +120,7 @@ static int  i2c_transfer(FAR struct i2c_master_s *dev,
                          FAR struct i2c_msg_s *msgs, int count);
 
 /****************************************************************************
- * I2C device operations
+ * Private Data
  ****************************************************************************/
 
 struct i2c_ops_s lpc31_i2c_ops =
@@ -129,83 +129,11 @@ struct i2c_ops_s lpc31_i2c_ops =
 };
 
 /****************************************************************************
- * Name: up_i2cinitialize
- *
- * Description:
- *   Initialise an I2C device
- *
+ * Private Functions
  ****************************************************************************/
 
-struct i2c_master_s *up_i2cinitialize(int port)
-{
-  struct lpc31_i2cdev_s *priv = &i2cdevices[port];
-
-  priv->base  = (port == 0) ? LPC31_I2C0_VBASE : LPC31_I2C1_VBASE;
-  priv->clkid = (port == 0) ? CLKID_I2C0PCLK     : CLKID_I2C1PCLK;
-  priv->rstid = (port == 0) ? RESETID_I2C0RST    : RESETID_I2C1RST;
-  priv->irqid = (port == 0) ? LPC31_IRQ_I2C0   : LPC31_IRQ_I2C1;
-
-  sem_init(&priv->mutex, 0, 1);
-  sem_init(&priv->wait, 0, 0);
-
-  /* Enable I2C system clocks */
-
-  lpc31_enableclock(priv->clkid);
-
-  /* Reset I2C blocks */
-
-  lpc31_softreset(priv->rstid);
-
-  /* Soft reset the device */
-
-  i2c_reset(priv);
-
-  /* Allocate a watchdog timer */
-  priv->timeout = wd_create();
-
-  DEBUGASSERT(priv->timeout != 0);
-
-  /* Attach Interrupt Handler */
-  irq_attach(priv->irqid, i2c_interrupt);
-
-  /* Enable Interrupt Handler */
-  up_enable_irq(priv->irqid);
-
-  /* Install our operations */
-  priv->dev.ops = &lpc31_i2c_ops;
-
-  return &priv->dev;
-}
-
 /****************************************************************************
- * Name: up_i2cuninitalize
- *
- * Description:
- *   Uninitialise an I2C device
- *
- ****************************************************************************/
-
-void up_i2cuninitalize(struct lpc31_i2cdev_s *priv)
-{
-  /* Disable All Interrupts, soft reset the device */
-
-  i2c_reset(priv);
-
-  /* Detach Interrupt Handler */
-
-  irq_detach(priv->irqid);
-
-  /* Reset I2C blocks */
-
-  lpc31_softreset(priv->rstid);
-
-  /* Disable I2C system clocks */
-
-  lpc31_disableclock(priv->clkid);
-}
-
-/****************************************************************************
- * Name: lpc31_i2c_setfrequency
+ * Name: i2c_setfrequency
  *
  * Description:
  *   Set the frequency for the next transfer
@@ -567,6 +495,7 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
  *   Perform a soft reset of the I2C controller
  *
  ****************************************************************************/
+
 static void i2c_reset(struct lpc31_i2cdev_s *priv)
 {
   putreg32(I2C_CTRL_RESET, priv->base + LPC31_I2C_CTRL_OFFSET);
@@ -575,4 +504,84 @@ static void i2c_reset(struct lpc31_i2cdev_s *priv)
 
   while ((getreg32(priv->base + LPC31_I2C_CTRL_OFFSET) & I2C_CTRL_RESET) != 0)
       ;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_i2cinitialize
+ *
+ * Description:
+ *   Initialise an I2C device
+ *
+ ****************************************************************************/
+
+struct i2c_master_s *up_i2cinitialize(int port)
+{
+  struct lpc31_i2cdev_s *priv = &i2cdevices[port];
+
+  priv->base  = (port == 0) ? LPC31_I2C0_VBASE : LPC31_I2C1_VBASE;
+  priv->clkid = (port == 0) ? CLKID_I2C0PCLK     : CLKID_I2C1PCLK;
+  priv->rstid = (port == 0) ? RESETID_I2C0RST    : RESETID_I2C1RST;
+  priv->irqid = (port == 0) ? LPC31_IRQ_I2C0   : LPC31_IRQ_I2C1;
+
+  sem_init(&priv->mutex, 0, 1);
+  sem_init(&priv->wait, 0, 0);
+
+  /* Enable I2C system clocks */
+
+  lpc31_enableclock(priv->clkid);
+
+  /* Reset I2C blocks */
+
+  lpc31_softreset(priv->rstid);
+
+  /* Soft reset the device */
+
+  i2c_reset(priv);
+
+  /* Allocate a watchdog timer */
+  priv->timeout = wd_create();
+
+  DEBUGASSERT(priv->timeout != 0);
+
+  /* Attach Interrupt Handler */
+  irq_attach(priv->irqid, i2c_interrupt);
+
+  /* Enable Interrupt Handler */
+  up_enable_irq(priv->irqid);
+
+  /* Install our operations */
+  priv->dev.ops = &lpc31_i2c_ops;
+
+  return &priv->dev;
+}
+
+/****************************************************************************
+ * Name: up_i2cuninitalize
+ *
+ * Description:
+ *   Uninitialise an I2C device
+ *
+ ****************************************************************************/
+
+void up_i2cuninitalize(struct lpc31_i2cdev_s *priv)
+{
+  /* Disable All Interrupts, soft reset the device */
+
+  i2c_reset(priv);
+
+  /* Detach Interrupt Handler */
+
+  irq_detach(priv->irqid);
+
+  /* Reset I2C blocks */
+
+  lpc31_softreset(priv->rstid);
+
+  /* Disable I2C system clocks */
+
+  lpc31_disableclock(priv->clkid);
 }

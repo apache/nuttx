@@ -237,7 +237,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
 
 /* Initialization */
 
-static uint32_t twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency);
+static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency);
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency);
 
 /****************************************************************************

@@ -338,8 +338,6 @@ static const char *efm32_i2c_state_str(int i2c_state);
  * Private Data
  ****************************************************************************/
 
-/* Trace events strings */
-
 /* I2C device structures */
 
 #ifdef CONFIG_EFM32_I2C0
