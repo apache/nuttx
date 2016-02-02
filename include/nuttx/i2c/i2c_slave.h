@@ -75,24 +75,6 @@
 /* Access macros ************************************************************/
 
 /****************************************************************************
- * Name: I2CS_SETFREQUENCY
- *
- * Description:
- *   Set the I2C frequency. This frequency will be retained in the struct
- *   i2c_slave_s instance and will be used with all transfers.  Required.
- *
- * Input Parameters:
- *   dev       - Device-specific state data
- *   frequency - The I2C frequency requested
- *
- * Returned Value:
- *   Returns the actual frequency selected
- *
- ****************************************************************************/
-
-#define I2CS_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
-
-/****************************************************************************
  * Name: I2CS_SETOWNADDRESS
  *
  * Description:
@@ -187,14 +169,13 @@
 struct i2c_slave_s;
 struct i2c_slaveops_s
 {
-  uint32_t (*setfrequency)(FAR struct i2c_slave_s *dev, uint32_t frequency);
-  int    (*setownaddress)(FAR struct i2c_slave_s *dev, int addr, int nbits);
-  int    (*write)(FAR struct i2c_slave_s *dev, FAR const uint8_t *buffer,
-           int buflen);
-  int    (*read)(FAR struct i2c_slave_s *dev, FAR uint8_t *buffer,
-           int buflen);
-  int    (*registercallback)(FAR struct i2c_slave_s *dev,
-           int (*callback)(FAR void *arg), FAR void *arg);
+  int (*setownaddress)(FAR struct i2c_slave_s *dev, int addr, int nbits);
+  int (*write)(FAR struct i2c_slave_s *dev, FAR const uint8_t *buffer,
+        int buflen);
+  int (*read)(FAR struct i2c_slave_s *dev, FAR uint8_t *buffer,
+        int buflen);
+  int (*registercallback)(FAR struct i2c_slave_s *dev,
+        int (*callback)(FAR void *arg), FAR void *arg);
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
