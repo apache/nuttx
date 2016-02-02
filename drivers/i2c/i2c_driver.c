@@ -308,7 +308,7 @@ static int i2cdrvr_unlink(FAR struct inode *inode)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(inde != NULL && inode->i_private != NULL);
+  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct i2c_driver_s *)inode->i_private;
 
   /* Get exclusive access to the I2C driver state structure */
