@@ -291,7 +291,7 @@ static int lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
    * each message segment.
    */
 
-  lpc23_i2c_setfrequency(priv, msgs->frequency);
+  lpc2378_i2c_setfrequency(priv, msgs->frequency);
 
   /* Perform the transfer */
 
