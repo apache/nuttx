@@ -136,7 +136,7 @@ static const struct ioexpander_ops_s g_pca9555_ops =
  ****************************************************************************/
 
 static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
-                                FAR const uint8_t *, int wbuflen)
+                                FAR const uint8_t *wbuffer, int wbuflen)
 {
   struct i2c_msg_s msg;
 
