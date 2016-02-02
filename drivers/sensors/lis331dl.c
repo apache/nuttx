@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIS331DL_I2C_FREQUENCY
-#  define CONFIG_LIS331DL_I2C_FREQUENCY
+#  define CONFIG_LIS331DL_I2C_FREQUENCY 100000
 #endif
 
 /* LIS331DL Internal Registers **********************************************/
@@ -111,7 +111,10 @@ struct lis331dl_dev_s
  ****************************************************************************/
 
 /****************************************************************************
- * LIS331DL Access with range check
+ * Name: lis331dl_access
+ *
+ * Description:
+ *   LIS331DL Access with range check
  *
  * Input Parameters:
  *   dev     LIS331 DL Private Structure
@@ -128,16 +131,16 @@ struct lis331dl_dev_s
 static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
                            FAR uint8_t *buf, int length)
 {
-  uint16_t flags = 0;
+  uint16_t flags;
   int retval;
 
   if (length > 0)
     {
-      flags = I2C_M_READ;
+      flags  = I2C_M_READ;
     }
   else
     {
-      flags = I2C_M_NORESTART;
+      flags  = I2C_M_NORESTART;
       length = -length;
     }
 
@@ -210,6 +213,10 @@ static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
   return retval;
 }
 
+/****************************************************************************
+ * Name: lis331dl_readregs
+ ****************************************************************************/
+
 static int lis331dl_readregs(FAR struct lis331dl_dev_s *dev)
 {
   if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, 3) != 3)
@@ -222,6 +229,10 @@ static int lis331dl_readregs(FAR struct lis331dl_dev_s *dev)
 
 /****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lis331dl_init
  ****************************************************************************/
 
 FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
@@ -285,6 +296,10 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
   return NULL;
 }
 
+/****************************************************************************
+ * Name: lis331dl_deinit
+ ****************************************************************************/
+
 int lis331dl_deinit(FAR struct lis331dl_dev_s * dev)
 {
   ASSERT(dev);
@@ -294,6 +309,10 @@ int lis331dl_deinit(FAR struct lis331dl_dev_s * dev)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: lis331dl_powerup
+ ****************************************************************************/
 
 int lis331dl_powerup(FAR struct lis331dl_dev_s * dev)
 {
@@ -310,6 +329,10 @@ int lis331dl_powerup(FAR struct lis331dl_dev_s * dev)
   return ERROR;
 }
 
+/****************************************************************************
+ * Name: lis331dl_powerdown
+ ****************************************************************************/
+
 int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev)
 {
   dev->cr1 = ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
@@ -323,6 +346,10 @@ int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev)
 
   return ERROR;
 }
+
+/****************************************************************************
+ * Name: lis331dl_setconversion
+ ****************************************************************************/
 
 int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev, bool full, bool fast)
 {
@@ -338,6 +365,10 @@ int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev, bool full, bool fast
   return ERROR;
 }
 
+/****************************************************************************
+ * Name: lis331dl_getprecision
+ ****************************************************************************/
+
 int lis331dl_getprecision(FAR struct lis331dl_dev_s * dev)
 {
   if (dev->cr1 & ST_LIS331DL_CR1_FS)
@@ -348,6 +379,10 @@ int lis331dl_getprecision(FAR struct lis331dl_dev_s * dev)
   return 2300/127;       /* typ. 2.3g full scale */
 }
 
+/****************************************************************************
+ * Name: lis331dl_getsamplerate
+ ****************************************************************************/
+
 int lis331dl_getsamplerate(FAR struct lis331dl_dev_s * dev)
 {
   if (dev->cr1 & ST_LIS331DL_CR1_DR)
@@ -357,6 +392,10 @@ int lis331dl_getsamplerate(FAR struct lis331dl_dev_s * dev)
 
   return 100;
 }
+
+/****************************************************************************
+ * Name: lis331dl_getreadings
+ ****************************************************************************/
 
 FAR const struct lis331dl_vector_s *
 lis331dl_getreadings(FAR struct lis331dl_dev_s * dev)
