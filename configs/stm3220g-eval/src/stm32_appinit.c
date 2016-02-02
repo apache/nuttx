@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/stm3240g_eval/src/stm32_nsh.c
+ * config/stm3220g_eval/src/stm32_appinit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #ifdef CONFIG_STM32_SPI1
 #  include <nuttx/spi/spi.h>
@@ -61,7 +62,8 @@
 #endif
 
 #include "stm32.h"
-#include "stm3240g-eval.h"
+#include "stm32_i2c.h"
+#include "stm3220g-eval.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,11 +75,20 @@
 
 #undef CONFIG_STM32_SPI1
 
-/* Assume that we support everything until convinced otherwise */
+/* MMCSD PORT and SLOT number probably depend on the board configuration */
 
-#define HAVE_MMCSD    1
 #define HAVE_USBDEV   1
+#define HAVE_MMCSD    1
 #define HAVE_USBHOST  1
+
+#if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#  error "Only one MMC/SD slot"
+#  undef CONFIG_NSH_MMCSDSLOTNO
+#endif
+
+#ifndef CONFIG_NSH_MMCSDSLOTNO
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#endif
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
  * is not enabled.
@@ -87,23 +98,8 @@
 #  undef HAVE_MMCSD
 #endif
 
-/* Default MMC/SD minor number */
-
-#ifdef HAVE_MMCSD
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
-
-/* Default MMC/SD SLOT number */
-
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "Only one MMC/SD slot"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
@@ -123,6 +119,66 @@
 
 #ifndef CONFIG_USBHOST
 #  undef HAVE_USBHOST
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void stm32_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          stm32_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void stm32_i2ctool(void)
+{
+#ifdef CONFIG_STM32_I2C1
+  stm32_i2c_register(1);
+#endif
+#ifdef CONFIG_STM32_I2C2
+  stm32_i2c_register(2);
+#endif
+#ifdef CONFIG_STM32_I2C3
+  stm32_i2c_register(3);
+#endif
+}
+#else
+#  define stm32_i2ctool()
 #endif
 
 /****************************************************************************
@@ -146,9 +202,13 @@ int board_app_initialize(void)
 #ifdef HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
 #endif
-#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST)
+#if defined(HAVE_MMCSD) || defined (HAVE_USBHOST)
   int ret;
 #endif
+
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  stm32_i2ctool();
 
   /* Configure SPI-based devices */
 
@@ -170,6 +230,7 @@ int board_app_initialize(void)
       syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
+
 #warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
@@ -196,18 +257,18 @@ int board_app_initialize(void)
     }
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the STM3240G-EVAL board supports a GPIO to detect if there is a card in
+   * see if the STM3220G-EVAL board supports a GPIO to detect if there is a card in
    * the slot.
    */
 
    sdio_mediachange(sdio, true);
 #endif
 
-#ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.
    */
 
+#ifdef HAVE_USBHOST
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {

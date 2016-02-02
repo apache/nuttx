@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samv71-xult/src/sam_nsh.c
+ * config/samv71-xult/src/sam_appinit.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

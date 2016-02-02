@@ -52,7 +52,9 @@
 
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/binfmt/elf.h>
+#include <nuttx/i2c/i2c_master.h>
 
+#include "sam_twi.h"
 #include "sama5d4-ek.h"
 
 #ifdef HAVE_ROMFS
@@ -76,6 +78,69 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void sam_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = sam_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          sam_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void sam_i2ctool(void)
+{
+#ifdef CONFIG_SAMA5_TWI0
+  sam_i2c_register(0);
+#endif
+#ifdef CONFIG_SAMA5_TWI1
+  sam_i2c_register(1);
+#endif
+#ifdef CONFIG_SAMA5_TWI2
+  sam_i2c_register(2);
+#endif
+#ifdef CONFIG_SAMA5_TWI3
+  sam_i2c_register(3);
+#endif
+}
+#else
+#  define sam_i2ctool()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -95,6 +160,10 @@ int sam_bringup(void)
     defined(CONFIG_FS_PROCFS)
   int ret;
 #endif
+
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  sam_i2ctool();
 
 #ifdef HAVE_NAND
   /* Initialize the NAND driver */

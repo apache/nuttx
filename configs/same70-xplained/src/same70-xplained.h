@@ -62,6 +62,7 @@
 #define HAVE_MACADDR         1
 #define HAVE_MTDCONFIG       1
 #define HAVE_PROGMEM_CHARDEV 1
+#define HAVE_I2CTOOL         1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -189,6 +190,12 @@
 /* This is the on-chip progmem memroy driver minor number */
 
 #define PROGMEM_MTD_MINOR 0
+
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
 
 /* procfs File System */
 

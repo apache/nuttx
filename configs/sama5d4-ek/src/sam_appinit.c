@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/same70-xplained/src/sam_nsh.c
+ * config/sama5d4-ek/src/sam_appinit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,9 @@
 
 #include <nuttx/board.h>
 
-#include "same70-xplained.h"
+#include "sama5d4-ek.h"
 
-#if defined(CONFIG_NSH_ARCHINIT) && !defined(CONFIG_BUILD_KERNEL)
+#ifndef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,4 +72,4 @@ int board_app_initialize(void)
 #endif
 }
 
-#endif /* CONFIG_NSH_ARCHINIT && !CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_BUILD_KERNEL */

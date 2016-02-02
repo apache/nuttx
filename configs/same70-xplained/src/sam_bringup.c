@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/same70-xplained/src/sam_bringup.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,9 @@
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/binfmt/elf.h>
+#include <nuttx/i2c/i2c_master.h>
 
+#include "sam_twihs.h"
 #include "same70-xplained.h"
 
 #ifdef HAVE_PROGMEM_CHARDEV
@@ -83,6 +85,66 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void sam_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = sam_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          sam_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void sam_i2ctool(void)
+{
+#ifdef CONFIG_SAMV7_TWIHS0
+  sam_i2c_register(0);
+#endif
+#ifdef CONFIG_SAMV7_TWIHS1
+  sam_i2c_register(1);
+#endif
+#ifdef CONFIG_SAMV7_TWIHS2
+  sam_i2c_register(2);
+#endif
+}
+#else
+#  define sam_i2ctool()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -102,6 +164,10 @@ int sam_bringup(void)
   char chardev[12];
 #endif
   int ret;
+
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  sam_i2ctool();
 
 #ifdef HAVE_MACADDR
   /* Read the Ethernet MAC address from the AT24 FLASH and configure the

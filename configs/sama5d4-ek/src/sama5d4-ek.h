@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d4-ek/src/sama5d4-ek.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,7 @@
 #define HAVE_PMIC        1
 #define HAVE_ELF         1
 #define HAVE_ROMFS       1
+#define HAVE_I2CTOOL     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -476,6 +477,12 @@
 
 #ifndef CONFIG_SAMA5D4EK_ROMFS_MOUNT
 #  undef HAVE_ROMFS
+#endif
+
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
 #endif
 
 /* procfs File System */

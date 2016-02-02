@@ -60,6 +60,13 @@
 #  undef CONFIG_TIVA_SSI0
 #endif
 
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#define HAVE_I2CTOOL 1
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
+
 /* LED definitions ******************************************************************/
 /* The EK-TM4C1294XL has a four green LEDs.
  *

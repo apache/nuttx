@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/fire-stm32v2/src/stm32_nsh.c
+ * config/fire-stm32v2/src/stm32_appinit.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,8 +45,10 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include "stm32.h"
+#include "stm32_i2c.h"
 #include "fire-stm32v2.h"
 
 /****************************************************************************
@@ -125,6 +127,66 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void stm32_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          stm32_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void stm32_i2ctool(void)
+{
+#ifdef CONFIG_STM32_I2C1
+  stm32_i2c_register(1);
+#endif
+#ifdef CONFIG_STM32_I2C2
+  stm32_i2c_register(2);
+#endif
+#ifdef CONFIG_STM32_I2C3
+  stm32_i2c_register(3);
+#endif
+}
+#else
+#  define stm32_i2ctool()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -142,9 +204,13 @@ int board_app_initialize(void)
   int ret;
 #endif
 
-  /* Initialize and register the W25 FLASH file system. */
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  stm32_i2ctool();
 
 #ifdef HAVE_W25
+  /* Initialize and register the W25 FLASH file system. */
+
   ret = stm32_w25initialize(CONFIG_NSH_W25MINOR);
   if (ret < 0)
     {
@@ -154,9 +220,9 @@ int board_app_initialize(void)
     }
 #endif
 
+#ifdef HAVE_MMCSD
   /* Initialize the SDIO-based MMC/SD slot */
 
-#ifdef HAVE_MMCSD
   ret = stm32_sdinitialize(CONFIG_NSH_MMCSDMINOR);
   if (ret < 0)
     {
@@ -165,5 +231,6 @@ int board_app_initialize(void)
       return ret;
     }
 #endif
+
   return OK;
 }

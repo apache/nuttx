@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/lpc4370-link2/src/lpc43_nsh.c
+ * configs/lpc4337-ws/src/lpc43_appinit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,67 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/i2c/i2c_master.h>
 
+#include "lpc43_i2c.h"
 #include "chip.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc43_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void lpc43_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = lpc43_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          lpc43_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc43_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void lpc43_i2ctool(void)
+{
+#ifdef CONFIG_LPC43_I2C0
+  lpc43_i2c_register(0);
+#endif
+#ifdef CONFIG_STM32_I2C1
+  lpc43_i2c_register(1);
+#endif
+}
+#else
+#  define lpc43_i2ctool()
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -61,5 +120,8 @@
 
 int board_app_initialize(void)
 {
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  lpc43_i2ctool();
   return OK;
 }

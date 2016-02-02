@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/dk-tm4c129x/src/tm4c_bringup.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,10 @@
 
 #include <debug.h>
 
+#include <nuttx/i2c/i2c_master.h>
 #include <arch/board/board.h>
 
+#include "tiva_i2c.h"
 #include "dk-tm4c129x.h"
 
 /****************************************************************************
@@ -64,6 +66,87 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tm4c_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void tm4c_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = tiva_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          tiva_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: tm4c_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void tm4c_i2ctool(void)
+{
+#ifdef CONFIG_TIVA_I2C0
+  tm4c_i2c_register(0);
+#endif
+#ifdef CONFIG_TIVA_I2C1
+  tm4c_i2c_register(1);
+#endif
+#ifdef CONFIG_TIVA_I2C2
+  tm4c_i2c_register(2);
+#endif
+#ifdef CONFIG_TIVA_I2C3
+  tm4c_i2c_register(3);
+#endif
+#ifdef CONFIG_TIVA_I2C4
+  tm4c_i2c_register(4);
+#endif
+#ifdef CONFIG_TIVA_I2C5
+  tm4c_i2c_register(5);
+#endif
+#ifdef CONFIG_TIVA_I2C6
+  tm4c_i2c_register(6);
+#endif
+#ifdef CONFIG_TIVA_I2C7
+  tm4c_i2c_register(7);
+#endif
+#ifdef CONFIG_TIVA_I2C8
+  tm4c_i2c_register(8);
+#endif
+#ifdef CONFIG_TIVA_I2C9
+  tm4c_i2c_register(9);
+#endif
+}
+#else
+#  define tm4c_i2ctool()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -80,6 +163,10 @@ int tm4c_bringup(void)
 #if defined(HAVE_TMP100) || defined(HAVE_TIMER)
   int ret;
 #endif
+
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  tm4c_i2ctool();
 
 #ifdef HAVE_TMP100
   /* Initialize and register the TMP-100 Temperature Sensor driver. */

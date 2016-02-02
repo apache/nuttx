@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = lpc43_boot.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lpc43_nsh.c
+CSRCS += lpc43_appinit.c
 endif
 
 ifeq ($(CONFIG_LPC43_ADC0),y)

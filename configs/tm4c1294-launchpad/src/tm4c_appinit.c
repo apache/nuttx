@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/dk-tm4c129x/src/tm4c_nsh.c
+ * config/tm4c1294-launchpad/src/tm4c_appinit.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 
 #include <nuttx/board.h>
 
-#include "dk-tm4c129x.h"
+#include "tm4c1294-launchpad.h"
 
 /****************************************************************************
  * Pre-processor Definitions

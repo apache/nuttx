@@ -41,8 +41,10 @@
 
 #include <debug.h>
 
+#include <nuttx/i2c/i2c_master.h>
 #include <arch/board/board.h>
 
+#include "tiva_i2c.h"
 #include "tm4c1294-launchpad.h"
 
 /****************************************************************************
@@ -51,6 +53,87 @@
 
 #ifdef CONFIG_DK_TM4C129X_TIMER
 #  define HAVE_TIMER
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tm4c_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void tm4c_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = tiva_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          tiva_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: tm4c_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void tm4c_i2ctool(void)
+{
+#ifdef CONFIG_TIVA_I2C0
+  tm4c_i2c_register(0);
+#endif
+#ifdef CONFIG_TIVA_I2C1
+  tm4c_i2c_register(1);
+#endif
+#ifdef CONFIG_TIVA_I2C2
+  tm4c_i2c_register(2);
+#endif
+#ifdef CONFIG_TIVA_I2C3
+  tm4c_i2c_register(3);
+#endif
+#ifdef CONFIG_TIVA_I2C4
+  tm4c_i2c_register(4);
+#endif
+#ifdef CONFIG_TIVA_I2C5
+  tm4c_i2c_register(5);
+#endif
+#ifdef CONFIG_TIVA_I2C6
+  tm4c_i2c_register(6);
+#endif
+#ifdef CONFIG_TIVA_I2C7
+  tm4c_i2c_register(7);
+#endif
+#ifdef CONFIG_TIVA_I2C8
+  tm4c_i2c_register(8);
+#endif
+#ifdef CONFIG_TIVA_I2C9
+  tm4c_i2c_register(9);
+#endif
+}
+#else
+#  define tm4c_i2ctool()
 #endif
 
 /****************************************************************************
@@ -70,6 +153,10 @@ int tm4c_bringup(void)
 #ifdef HAVE_TIMER
   int ret;
 #endif
+
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  tm4c_i2ctool();
 
 #ifdef HAVE_TIMER
   /* Initialize the timer driver */

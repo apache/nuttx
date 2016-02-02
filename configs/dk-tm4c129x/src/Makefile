@@ -57,7 +57,7 @@ CSRCS += tm4c_timer.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += tm4c_nsh.c
+CSRCS += tm4c_appinit.c
 endif
 
 ifeq ($(CONFIG_I2C_LM75),y)
