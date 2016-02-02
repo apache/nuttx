@@ -51,7 +51,7 @@
  * Name: i2c_write
  *
  * Description:
- *   Send a block of data on I2C. Each write operational will be an 'atomic'
+ *   Send a block of data on I2C. Each write operation will be an 'atomic'
  *   operation in the sense that any other I2C actions will be serialized
  *   and pend until this write completes.
  *

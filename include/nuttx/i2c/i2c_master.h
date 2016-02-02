@@ -90,9 +90,7 @@
  *   will be serialized and pend until this sequence of transfers completes.
  *
  * Input Parameters:
- *   dev  
-
- - Device-specific state data
+ *   dev   - Device-specific state data
  *   msgs  - A pointer to a set of message descriptors
  *   count - The number of transfers to perform
  *
@@ -218,8 +216,8 @@ int up_i2creset(FAR struct i2c_master_s *dev);
  * Name: i2c_writeread
  *
  * Description:
- *   Send a block of data on I2C using the previously, followed by restarted
- *   read access.  This provides a convenient wrapper to the transfer function.
+ *   Send a block of data on I2C followed by restarted read access.  This
+ *   provides a convenient wrapper to the transfer function.
  *
  * Input Parameters:
  *   dev     - Device-specific state data
@@ -234,7 +232,8 @@ int up_i2creset(FAR struct i2c_master_s *dev);
  *
  ****************************************************************************/
 
-int i2c_writeread(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *config,
+int i2c_writeread(FAR struct i2c_master_s *dev,
+                  FAR const struct i2c_config_s *config,
                   FAR const uint8_t *wbuffer, int wbuflen,
                   FAR uint8_t *rbuffer, int rbuflen);
 
@@ -242,7 +241,7 @@ int i2c_writeread(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *c
  * Name: i2c_write
  *
  * Description:
- *   Send a block of data on I2C. Each write operational will be an 'atomic'
+ *   Send a block of data on I2C. Each write operation will be an 'atomic'
  *   operation in the sense that any other I2C actions will be serialized
  *   and pend until this write completes.
  *
@@ -257,17 +256,17 @@ int i2c_writeread(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *c
  *
  ****************************************************************************/
 
-int i2c_write(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *config,
+int i2c_write(FAR struct i2c_master_s *dev,
+              FAR const struct i2c_config_s *config,
               FAR const uint8_t *buffer, int buflen);
 
 /****************************************************************************
  * Name: i2c_read
  *
  * Description:
- *   Receive a block of data from I2C using the previously selected I2C
- *   frequency and slave address. Each read operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this read completes. Required.
+ *   Receive a block of data from I2C. Each read operation will be an
+ *   'atomic' operation in the sense that any other I2C actions will be
+ *   serialized and pend until this read completes.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -279,7 +278,8 @@ int i2c_write(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *confi
  *
  ****************************************************************************/
 
-int i2c_read(FAR struct i2c_master_s *dev, FAR const struct i2c_config_s *config,
+int i2c_read(FAR struct i2c_master_s *dev,
+             FAR const struct i2c_config_s *config,
              FAR uint8_t *buffer, int buflen);
 
 #undef EXTERN

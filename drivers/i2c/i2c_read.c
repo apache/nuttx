@@ -51,10 +51,9 @@
  * Name: i2c_read
  *
  * Description:
- *   Receive a block of data from I2C using the previously selected I2C
- *   frequency and slave address. Each read operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this read completes. Required.
+ *   Receive a block of data from I2C. Each read operation will be an
+ *   'atomic' operation in the sense that any other I2C actions will be
+ *   serialized and pend until this read completes.
  *
  * Input Parameters:
  *   dev    - Device-specific state data

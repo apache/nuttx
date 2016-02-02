@@ -51,8 +51,8 @@
  * Name: i2c_writeread
  *
  * Description:
- *   Send a block of data on I2C using the previously, followed by restarted
- *   read access.  This provides a convenient wrapper to the transfer function.
+ *   Send a block of data on I2C followed by restarted read access.  This
+ *   provides a convenient wrapper to the transfer function.
  *
  * Input Parameters:
  *   dev     - Device-specific state data
