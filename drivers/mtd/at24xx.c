@@ -203,15 +203,19 @@ static struct at24c_dev_s g_at24c;
 static int at24c_i2c_write(FAR struct at24c_dev_s *priv, uint16_t at24addr,
                            FAR const uint8_t *buffer, int buflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the I2C configuration */
+  /* Setup for the transfer */
 
-  config.frequency = CONFIG_AT24XX_FREQUENCY;
-  config.address   = at24addr;
-  config.addrlen   = 7;
+  msg.frequency = CONFIG_AT24XX_FREQUENCY,
+  msg.addr      = at24addr;
+  msg.flags     = 0;
+  msg.buffer    = (FAR uint8_t *)buffer;  /* Override const */
+  msg.length    = buflen;
 
-  return i2c_write(priv->dev, &config, buffer, buflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->dev, &msg, 1);
 }
 
 /****************************************************************************
@@ -225,15 +229,19 @@ static int at24c_i2c_write(FAR struct at24c_dev_s *priv, uint16_t at24addr,
 static int at24c_i2c_read(FAR struct at24c_dev_s *priv, uint16_t at24addr,
                           FAR uint8_t *buffer, int buflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the I2C configuration */
+  /* Setup for the transfer */
 
-  config.frequency = CONFIG_AT24XX_FREQUENCY;
-  config.address   = at24addr;
-  config.addrlen   = 7;
+  msg.frequency = CONFIG_AT24XX_FREQUENCY,
+  msg.addr      = at24addr,
+  msg.flags     = I2C_M_READ;
+  msg.buffer    = buffer;
+  msg.length    = buflen;
 
-  return i2c_read(priv->dev, &config, buffer, buflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->dev, &msg, 1);
 }
 
 /************************************************************************************

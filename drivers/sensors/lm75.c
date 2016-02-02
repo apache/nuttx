@@ -135,15 +135,19 @@ static const struct file_operations g_lm75fops =
 static int lm75_i2c_write(FAR struct lm75_dev_s *priv,
                           FAR const uint8_t *buffer, int buflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the I2C configuration */
+  /* Setup for the transfer */
 
-  config.frequency = CONFIG_LM75_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
+  msg.frequency = CONFIG_LM75_I2C_FREQUENCY,
+  msg.addr      = priv->addr;
+  msg.flags     = 0;
+  msg.buffer    = (FAR uint8_t *)buffer;  /* Override const */
+  msg.length    = buflen;
 
-  return i2c_write(priv->i2c, &config, buffer, buflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
 }
 
 /****************************************************************************
@@ -157,15 +161,19 @@ static int lm75_i2c_write(FAR struct lm75_dev_s *priv,
 static int lm75_i2c_read(FAR struct lm75_dev_s *priv,
                          FAR uint8_t *buffer, int buflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the I2C configuration */
+  /* Setup for the transfer */
 
-  config.frequency = CONFIG_LM75_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
+  msg.frequency = CONFIG_LM75_I2C_FREQUENCY,
+  msg.addr      = priv->addr,
+  msg.flags     = I2C_M_READ;
+  msg.buffer    = buffer;
+  msg.length    = buflen;
 
-  return i2c_read(priv->i2c, &config, buffer, buflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
 }
 
 /****************************************************************************

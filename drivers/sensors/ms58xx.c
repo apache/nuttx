@@ -251,15 +251,19 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
 static int ms58xx_i2c_write(FAR struct ms58xx_dev_s *priv,
                              FAR const uint8_t *buffer, int buflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the configuration and perform the write-read operation */
+  /* Setup for the transfer */
 
-  config.frequency = CONFIG_MS58XX_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
+  msg.frequency = CONFIG_MS58XX_I2C_FREQUENCY,
+  msg.addr      = priv->addr;
+  msg.flags     = 0;
+  msg.buffer    = (FAR uint8_t *)buffer;  /* Override const */
+  msg.length    = buflen;
 
-  return i2c_write(priv->i2c, &config, buffer, buflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
 }
 
 /****************************************************************************
@@ -273,15 +277,19 @@ static int ms58xx_i2c_write(FAR struct ms58xx_dev_s *priv,
 static int ms58xx_i2c_read(FAR struct ms58xx_dev_s *priv,
                             FAR uint8_t *buffer, int buflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the configuration and perform the write-read operation */
+  /* Setup for the transfer */
 
-  config.frequency = CONFIG_MS58XX_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
+  msg.frequency = CONFIG_MS58XX_I2C_FREQUENCY,
+  msg.addr      = priv->addr,
+  msg.flags     = I2C_M_READ;
+  msg.buffer    = buffer;
+  msg.length    = buflen;
 
-  return i2c_read(priv->i2c, &config, buffer, buflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
 }
 
 /****************************************************************************

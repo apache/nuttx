@@ -24,7 +24,7 @@ config LIS331DL
 	select I2C
 
 config LIS331DL_I2C_FREQUENCY
-	bool "LIS331DL I2C frequency"
+	int "LIS331DL I2C frequency"
 	default 100000
 	range 1 100000
 	depends on LIS331DL
@@ -37,7 +37,7 @@ config SN_LSM9DS1
 		Enable driver support for the STMicro LSM9DS1.
 
 config LSM9DS1_I2C_FREQUENCY
-	bool "LSM9DS1 I2C frequency"
+	int "LSM9DS1 I2C frequency"
 	default 400000
 	range 1 400000
 	depends on SN_LSM9DS1
@@ -50,7 +50,7 @@ config MB7040
 		Enable driver support for the MaxBotix MB7040 sonar.
 
 config MB7040_I2C_FREQUENCY
-	bool "MB7040 I2C frequency"
+	int "MB7040 I2C frequency"
 	default 400000
 	range 1 400000
 	depends on MB7040
@@ -63,7 +63,7 @@ config MCP9844
 		Enable driver support for the MCP9844 I2C Temperature sensor.
 
 config MCP9844_I2C_FREQUENCY
-	bool "MCP9844 I2C frequency"
+	int "MCP9844 I2C frequency"
 	default 400000
 	range 1 400000
 	depends on MCP9844
@@ -76,7 +76,7 @@ config MS58XX
 		Enable driver support for MEAS MS58XX altimeters.
 
 config MS58XX_I2C_FREQUENCY
-	bool "MS58XX I2C frequency"
+	int "MS58XX I2C frequency"
 	default 400000
 	range 1 400000
 	depends on MS58XX
@@ -164,7 +164,7 @@ config LM75
 		the TI TMP100/101.
 
 config LM75_I2C_FREQUENCY
-	bool "LM75 I2C frequency"
+	int "LM75 I2C frequency"
 	default 100000
 	range 1 100000
 	depends on I2C_LM75
@@ -177,7 +177,7 @@ config LM92
 		Enable driver support for the TI LM92 Temperature Sensor.
 
 config LM92_I2C_FREQUENCY
-	bool "LM92 I2C frequency"
+	int "LM92 I2C frequency"
 	default 400000
 	range 1 400000
 	depends on LM92

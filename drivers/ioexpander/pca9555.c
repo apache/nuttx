@@ -136,17 +136,21 @@ static const struct ioexpander_ops_s g_pca9555_ops =
  ****************************************************************************/
 
 static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
-                                FAR const uint8_t *wbuffer, int wbuflen)
+                                FAR const uint8_t *, int wbuflen)
 {
-  struct i2c_config_s config;
+  struct i2c_msg_s msg;
 
-  /* Set up the configuration and perform the write-read operation */
+  /* Setup for the transfer */
 
-  config.frequency = pca->config->frequency;
-  config.address   = pca->config->address;
-  config.addrlen   = 7;
+  msg.frequency = pca->config->frequency;
+  msg.addr      = pca->config->address;
+  msg.flags     = 0;
+  msg.buffer    = (FAR uint8_t *)wbuffer;  /* Override const */
+  msg.length    = wbuflen;
 
-  return i2c_write(pca->i2c, &config, wbuffer, wbuflen);
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER((pca->i2c, &msg, 1);
 }
 
 /****************************************************************************

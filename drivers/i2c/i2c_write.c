@@ -84,4 +84,3 @@ int i2c_write(FAR struct i2c_master_s *dev,
 
   return I2C_TRANSFER(dev, &msg, 1);
 }
-
