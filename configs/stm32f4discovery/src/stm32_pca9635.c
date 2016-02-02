@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f4discovery/src/stm32_pca9635.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,9 @@
 
 #include <arch/irq.h>
 
-#include "stm32f4discovery.h"
 #include "stm32_gpio.h"
+#include "stm32_i2c.h"
+#include "stm32f4discovery.h"
 
 #ifdef CONFIG_PCA9635PW
 
@@ -82,7 +83,7 @@ int stm32_pca9635_initialize(void)
 
   /* Get the I2C driver that interfaces with the pca9635 (PCA9635_I2CBUS)*/
 
-  i2c = up_i2cinitialize(PCA9635_I2CBUS);
+  i2c = stm32_i2cbus_initialize(PCA9635_I2CBUS);
   if (!i2c)
     {
       dbg("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/same70-xplained/src/sam_ethernet.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,7 +162,7 @@ int sam_emac0_setmac(void)
 
   /* Get an instance of the TWI0 interface */
 
-  i2c = up_i2cinitialize(0);
+  i2c = sam_i2cbus_initialize(0);
   if (!i2c)
     {
       ndbg("ERROR: Failed to initialize TWI0\n");
@@ -175,7 +175,7 @@ int sam_emac0_setmac(void)
   if (!at24)
     {
       ndbg("ERROR: Failed to initialize the AT24 driver\n");
-      (void)up_i2cuninitialize(i2c);
+      (void)sam_i2cbus_uninitialize(i2c);
       return -ENODEV;
     }
 
@@ -185,7 +185,7 @@ int sam_emac0_setmac(void)
   if (ret < 0)
     {
       ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
-      (void)up_i2cuninitialize(i2c);
+      (void)sam_i2cbus_uninitialize(i2c);
       return ret;
     }
 
@@ -195,7 +195,7 @@ int sam_emac0_setmac(void)
   if (nread < 6)
     {
       ndbg("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n", (long)nread);
-      (void)up_i2cuninitialize(i2c);
+      (void)sam_i2cbus_uninitialize(i2c);
       return (int)nread;
     }
 
@@ -211,7 +211,7 @@ int sam_emac0_setmac(void)
    * REVISIT:  Need an interface to release the AT24 instance too
    */
 
-  ret = up_i2cuninitialize(i2c);
+  ret = sam_i2cbus_uninitialize(i2c);
   if (ret < 0)
     {
       ndbg("ERROR: Failed to release the I2C interface: %d\n", ret);

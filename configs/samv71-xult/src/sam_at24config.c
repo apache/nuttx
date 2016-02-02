@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/samv71-xult/src/sam_at24config.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ int sam_at24config(void)
 
   /* Get an instance of the TWI0 interface */
 
-  i2c = up_i2cinitialize(0);
+  i2c = sam_i2cbus_initialize(0);
   if (!i2c)
     {
       fdbg("ERROR: Failed to initialize TWI0\n");
@@ -85,7 +85,7 @@ int sam_at24config(void)
   if (!at24)
     {
       fdbg("ERROR: Failed to initialize the AT24 driver\n");
-      (void)up_i2cuninitialize(i2c);
+      (void)sam_i2cbus_uninitialize(i2c);
       return -ENODEV;
     }
 
@@ -103,7 +103,7 @@ int sam_at24config(void)
   if (ret < 0)
     {
       fdbg("ERROR: Failed to bind AT24 driver to the MTD config device\n");
-      (void)up_i2cuninitialize(i2c);
+      (void)sam_i2cbus_uninitialize(i2c);
     }
 
   return ret;

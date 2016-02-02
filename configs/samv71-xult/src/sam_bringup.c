@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/samv71-xult/src/sam_bringup.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,10 +133,10 @@ int sam_bringup(void)
 #if defined(HAVE_RTC_PCF85263)
   /* Get an instance of the TWIHS0 I2C interface */
 
-  i2c = up_i2cinitialize(PCF85263_TWI_BUS);
+  i2c = sam_i2cbus_initialize(PCF85263_TWI_BUS);
   if (i2c == NULL)
     {
-      SYSLOG("ERROR: up_i2cinitialize(%d) failed\n", PCF85263_TWI_BUS);
+      SYSLOG("ERROR: sam_i2cbus_initialize(%d) failed\n", PCF85263_TWI_BUS);
     }
   else
     {
@@ -158,10 +158,10 @@ int sam_bringup(void)
 #elif defined(HAVE_RTC_DSXXXX)
   /* Get an instance of the TWIHS0 I2C interface */
 
-  i2c = up_i2cinitialize(DSXXXX_TWI_BUS);
+  i2c = sam_i2cbus_initialize(DSXXXX_TWI_BUS);
   if (i2c == NULL)
     {
-      SYSLOG("ERROR: up_i2cinitialize(%d) failed\n", DSXXXX_TWI_BUS);
+      SYSLOG("ERROR: sam_i2cbus_initialize(%d) failed\n", DSXXXX_TWI_BUS);
     }
   else
     {

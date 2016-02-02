@@ -122,7 +122,7 @@ if [ "$answer" = y ]; then
 	echo "EXTERN(up_earlyserialinit)" >>ld-locked.inc
 fi
 
-# up_i2cinitialize -- Not conditioned on anything
+# xyz_i2cbus_initialize -- Not conditioned on anything
 
 answer=$(checkconfig CONFIG_USBDEV)
 if [ "$answer" = y ]; then

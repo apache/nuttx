@@ -88,6 +88,7 @@
 
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
+#include "stm32_i2c.h"
 
 #include "vsn.h"
 
@@ -320,8 +321,8 @@ int sif_anout_init(void)
     STM32_TIM_SETMODE(vsn_sif.tim8, STM32_TIM_MODE_UP);
     //STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
 
-    vsn_sif.i2c1 = up_i2cinitialize(1);
-    vsn_sif.i2c2 = up_i2cinitialize(2);
+    vsn_sif.i2c1 = stm32_i2cbus_initialize(1);
+    vsn_sif.i2c2 = stm32_i2cbus_initialize(2);
 
     vsn_sif.spi2 = stm32_spibus_initialize(2);
 

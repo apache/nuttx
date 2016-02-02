@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sam_wm8904.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -269,7 +269,7 @@ int sam_wm8904_initialize(int minor)
 
       /* Get an instance of the I2C interface for the WM8904 chip select */
 
-      i2c = up_i2cinitialize(WM8904_TWI_BUS);
+      i2c = sam_i2cbus_initialize(WM8904_TWI_BUS);
       if (!i2c)
         {
           auddbg("Failed to initialize TWI%d\n", WM8904_TWI_BUS);

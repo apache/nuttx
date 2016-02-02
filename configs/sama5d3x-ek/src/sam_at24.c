@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d3x-ek/src/sam_at24.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
 
+#include "sam_twi.h"
 #include "sama5d3x-ek.h"
 
 #ifdef HAVE_AT24
@@ -102,7 +103,7 @@ int sam_at24_automount(int minor)
       /* No.. Get the I2C bus driver */
 
       fvdbg("Initialize TWI%d\n", AT24_BUS);
-      i2c = up_i2cinitialize(AT24_BUS);
+      i2c = sam_i2cbus_initialize(AT24_BUS);
       if (!i2c)
         {
           fdbg("ERROR: Failed to initialize TWI%d\n", AT24_BUS);

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm3220g-eval/src/stm32_stmpe811.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -294,7 +294,7 @@ int board_tsc_setup(int minor)
 
       /* Get an instance of the I2C interface */
 
-      dev = up_i2cinitialize(CONFIG_STMPE811_I2CDEV);
+      dev = stm32_i2cbus_initialize(CONFIG_STMPE811_I2CDEV);
       if (!dev)
         {
           idbg("Failed to initialize I2C bus %d\n", CONFIG_STMPE811_I2CDEV);
@@ -317,7 +317,7 @@ int board_tsc_setup(int minor)
       if (ret < 0)
         {
           idbg("Failed to register STMPE driver: %d\n", ret);
-          /* up_i2cuninitialize(dev); */
+          /* stm32_i2cbus_uninitialize(dev); */
           return -ENODEV;
         }
     }

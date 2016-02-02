@@ -46,6 +46,7 @@
 #include <nuttx/sensors/bmp180.h>
 
 #include "stm32.h"
+#include "stm32_i2c.h"
 #include "stm32f4discovery.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_BMP180)
@@ -83,7 +84,7 @@ int stm32_bmp180initialize(FAR const char *devpath)
 
   /* Initialize I2C */
 
-  i2c = up_i2cinitialize(BMP180_I2C_PORTNO);
+  i2c = stm32_i2cbus_initialize(BMP180_I2C_PORTNO);
 
   if (!i2c)
     {

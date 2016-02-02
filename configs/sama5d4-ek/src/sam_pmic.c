@@ -77,7 +77,7 @@ void sam_pmic_initialize(void)
 
   /* Get an instance of the I2C interface for the PMIC */
 
-  i2c = up_i2cinitialize(PMIC_TWI_BUS);
+  i2c = sam_i2cbus_initialize(PMIC_TWI_BUS);
   if (!i2c)
     {
       dbg("ERROR: Failed to initialize TWI%d\n", PMIC_TWI_BUS);

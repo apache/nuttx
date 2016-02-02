@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/src/sam_ov2640.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include "sam_periphclks.h"
 #include "sam_lcd.h"
 #include "sam_pck.h"
+#include "sam_twi.h"
 #include "sam_pio.h"
 #include "chip/sam_pinmap.h"
 
@@ -157,7 +158,7 @@ static inline int ov2640_camera_initialize(void)
 
   /* Get the I2C driver that interfaces with the camers (OV2640_BUS)*/
 
-  i2c = up_i2cinitialize(OV2640_BUS);
+  i2c = sam_i2cbus_initialize(OV2640_BUS);
   if (!i2c)
     {
       gdbg("ERROR: Failed to initialize TWI%d\n", OV2640_BUS);
