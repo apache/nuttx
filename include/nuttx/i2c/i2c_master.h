@@ -230,7 +230,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_DRIVER
-int i2schar_register(FAR struct i2c_master_s *i2c, int bus);
+int i2c_register(FAR struct i2c_master_s *i2c, int bus);
 #endif
 
 /****************************************************************************
