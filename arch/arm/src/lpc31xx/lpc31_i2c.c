@@ -538,14 +538,14 @@ static int i2c_reset(FAR struct i2c_master_s * dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2cinitialize
+ * Name: lpc31_i2cbus_initialize
  *
  * Description:
  *   Initialise an I2C device
  *
  ****************************************************************************/
 
-struct i2c_master_s *up_i2cinitialize(int port)
+struct i2c_master_s *lpc31_i2cbus_initialize(int port)
 {
   struct lpc31_i2cdev_s *priv = &i2cdevices[port];
 
@@ -587,14 +587,14 @@ struct i2c_master_s *up_i2cinitialize(int port)
 }
 
 /****************************************************************************
- * Name: up_i2cuninitalize
+ * Name: lpc31_i2cbus_uninitialize
  *
  * Description:
  *   Uninitialise an I2C device
  *
  ****************************************************************************/
 
-void up_i2cuninitalize(struct lpc31_i2cdev_s *priv)
+void lpc31_i2cbus_uninitialize(struct lpc31_i2cdev_s *priv)
 {
   /* Disable All Interrupts, soft reset the device */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_i2c.c
  *
- *   Copyright(C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,9 +99,6 @@ static void     ez80_i2c_setfrequency(FAR struct ez80_i2cdev_s *priv,
 
 static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
-#ifdef CONFIG_I2C_RESET
-static int      ez80_i2c_reset(FAR struct i2c_master_s *dev);
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -121,9 +118,6 @@ static sem_t g_i2csem;       /* Serialize I2C transfers */
 const struct i2c_ops_s g_ops =
 {
   ez80_i2c_transfer
-#ifdef CONFIG_I2C_RESET
-  , ez80_i2c_reset
-#endif
 };
 
 /****************************************************************************
@@ -916,33 +910,12 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/************************************************************************************
- * Name: ez80_i2c_reset
- *
- * Description:
- *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
- *
- * Input Parameters:
- *   dev   - Device-specific state data
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-static int ez80_i2c_reset(FAR struct i2c_master_s * dev)
-{
-  return OK;
-}
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2cinitialize
+ * Name: ez80_i2cbus_initialize
  *
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
@@ -958,7 +931,7 @@ static int ez80_i2c_reset(FAR struct i2c_master_s * dev)
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *up_i2cinitialize(int port)
+FAR struct i2c_master_s *ez80_i2cbus_initialize(int port)
 {
   FAR struct ez80_i2cdev_s *i2c;
   uint16_t ccr;

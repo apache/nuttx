@@ -2131,14 +2131,14 @@ out:
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_i2cinitialize
+ * Name: tiva_i2cbus_initialize
  *
  * Description:
  *   Initialize one I2C bus
  *
  ************************************************************************************/
 
-struct i2c_master_s *up_i2cinitialize(int port)
+struct i2c_master_s *tiva_i2cbus_initialize(int port)
 {
   struct tiva_i2c_priv_s *priv = NULL;
   const struct tiva_i2c_config_s *config;
@@ -2253,14 +2253,14 @@ struct i2c_master_s *up_i2cinitialize(int port)
 }
 
 /************************************************************************************
- * Name: up_i2cuninitialize
+ * Name: tiva_i2cbus_uninitialize
  *
  * Description:
  *   Uninitialize an I2C bus
  *
  ************************************************************************************/
 
-int up_i2cuninitialize(struct i2c_master_s *dev)
+int tiva_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)dev;
   int irqs;

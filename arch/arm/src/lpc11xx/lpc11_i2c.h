@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_i2c.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,32 +31,57 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_I2C_H
 #define __ARCH_ARM_SRC_LPC11XX_LPC11_I2C_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/i2c/i2c_master.h>
 #include "chip/lpc11_i2c.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc11_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct i2c_master_s *lpc11_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: lpc11_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the lpc11_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int lpc11_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_I2C_H */

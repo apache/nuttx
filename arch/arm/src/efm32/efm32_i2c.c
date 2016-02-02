@@ -1724,14 +1724,14 @@ out:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2cinitialize
+ * Name: efm32_i2cbus_initialize
  *
  * Description:
  *   Initialize one I2C bus
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *up_i2cinitialize(int port)
+FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
 {
   struct efm32_i2c_priv_s *priv = NULL;
   irqstate_t irqs;
@@ -1773,14 +1773,14 @@ FAR struct i2c_master_s *up_i2cinitialize(int port)
 }
 
 /****************************************************************************
- * Name: up_i2cuninitialize
+ * Name: efm32_i2cbus_uninitialize
  *
  * Description:
  *   Uninitialize an I2C bus
  *
  ****************************************************************************/
 
-int up_i2cuninitialize(FAR struct i2c_master_s *dev)
+int efm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
   FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
   irqstate_t irqs;

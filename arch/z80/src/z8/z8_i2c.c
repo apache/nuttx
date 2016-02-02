@@ -625,7 +625,7 @@ static int z8_i2c_reset(FAR struct i2c_master_s * dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2cinitialize
+ * Name: z8_i2cbus_initialize
  *
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
@@ -641,7 +641,7 @@ static int z8_i2c_reset(FAR struct i2c_master_s * dev)
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *up_i2cinitialize(int port)
+FAR struct i2c_master_s *z8_i2cbus_initialize(int port)
 {
   FAR struct z8_i2cdev_s *i2c;
 

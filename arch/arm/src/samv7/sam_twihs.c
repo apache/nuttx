@@ -1240,14 +1240,14 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2cinitialize
+ * Name: sam_i2cbus_initialize
  *
  * Description:
  *   Initialize a TWIHS device for I2C operation
  *
  ****************************************************************************/
 
-struct i2c_master_s *up_i2cinitialize(int bus)
+struct i2c_master_s *sam_i2cbus_initialize(int bus)
 {
   struct twi_dev_s *priv;
   uint32_t frequency;
@@ -1358,14 +1358,14 @@ errout_with_irq:
 }
 
 /****************************************************************************
- * Name: up_i2cuninitalize
+ * Name: sam_i2cbus_uninitialize
  *
  * Description:
  *   Uninitialize an I2C device
  *
  ****************************************************************************/
 
-int up_i2cuninitialize(FAR struct i2c_master_s *dev)
+int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
   irqstate_t flags;

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_twi.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,20 +44,44 @@
 #include <nuttx/i2c/i2c_master.h>
 #include "chip/sam_twi.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/****************************************************************************
+ * Name: sam_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+FAR struct i2c_master_s *sam_i2cbus_initialize(int port);
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Name: sam_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the sam_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_TWI_H */

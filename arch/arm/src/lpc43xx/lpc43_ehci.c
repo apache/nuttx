@@ -4472,7 +4472,7 @@ exit_terminate:
 #else
   /* Wake up the waiting thread */
 
-  sam_givesem(&epinfo->iocsem);
+  lpc43_givesem(&epinfo->iocsem);
 #endif
 
 errout_with_sem:

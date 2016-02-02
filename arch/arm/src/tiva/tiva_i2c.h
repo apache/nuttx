@@ -46,4 +46,44 @@
 #include "chip.h"
 #include "chip/tiva_i2c.h"
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tiva_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct i2c_master_s *tiva_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: tiva_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the tiva_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int tiva_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_I2C_H */

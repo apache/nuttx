@@ -472,14 +472,14 @@ static int lpc11_i2c_reset(FAR struct i2c_master_s * dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2cinitialize
+ * Name: lpc11_i2cbus_initialize
  *
  * Description:
  *   Initialise an I2C device
  *
  ****************************************************************************/
 
-struct i2c_master_s *up_i2cinitialize(int port)
+struct i2c_master_s *lpc11_i2cbus_initialize(int port)
 {
   struct lpc11_i2cdev_s *priv;
 
@@ -607,14 +607,14 @@ struct i2c_master_s *up_i2cinitialize(int port)
 }
 
 /****************************************************************************
- * Name: up_i2cuninitalize
+ * Name: lpc11_i2cbus_uninitialize
  *
  * Description:
  *   Uninitialise an I2C device
  *
  ****************************************************************************/
 
-int up_i2cuninitialize(FAR struct i2c_master_s * dev)
+int lpc11_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 {
   struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *) dev;
 
