@@ -78,7 +78,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define LO_WDDELAY   (1*CLK_TCK)
-#define LO_POLLHSEC  (1*2)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -242,7 +241,7 @@ static void lo_poll_work(FAR void *arg)
 
   state = net_lock();
   priv->lo_txdone = false;
-  (void)devif_timer(&priv->lo_dev, lo_txpoll, LO_POLLHSEC);
+  (void)devif_timer(&priv->lo_dev, lo_txpoll);
 
   /* Was something received and looped back? */
 

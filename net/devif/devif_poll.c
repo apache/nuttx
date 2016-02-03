@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif_poll.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 
@@ -56,8 +57,12 @@
 #include "igmp/igmp.h"
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
+
+/* Time of last poll */
+
+systime_t g_polltime;
 
 /****************************************************************************
  * Private Functions
@@ -258,22 +263,30 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_TCP
 static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
-                                       devif_poll_callback_t callback, int hsec)
+                                       devif_poll_callback_t callback,
+                                       int hsec)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
-  /* Traverse all of the active TCP connections and perform the poll action */
+  /* Don't do anything is less a half second has elapsed */
 
-  while (!bstop && (conn = tcp_nextconn(conn)))
+  if (hsec > 0)
     {
-      /* Perform the TCP timer poll */
+      /* Traverse all of the active TCP connections and perform the poll
+       * action.
+       */
 
-      tcp_timer(dev, conn, hsec);
+      while (!bstop && (conn = tcp_nextconn(conn)))
+        {
+          /* Perform the TCP timer poll */
 
-      /* Call back into the driver */
+          tcp_timer(dev, conn, hsec);
 
-      bstop = callback(dev);
+          /* Call back into the driver */
+
+          bstop = callback(dev);
+        }
     }
 
   return bstop;
@@ -414,26 +427,46 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *
  ****************************************************************************/
 
-int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
-                int hsec)
+int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
+  systime_t now;
+  systime_t elpased;
   int bstop = false;
+  int hsec;
 
-  /* Increment the timer used by the IP reassembly logic */
+  /* Get the elapsed time since the last poll in units of half seconds
+   * (truncating).
+   */
+
+  now  = clock_systimer();
+  hsec = (now - g_polltime) / TICK_PER_HSEC;
+
+  /* Update the time only when more than one half second elapses */
+
+  if (hsec > 0)
+    {
+      /* Save the current time */
+
+      g_polltime = now;
+
+      /* Perform periodic activitives that depend on hsec > 0 */
 
 #if defined(CONFIG_NET_TCP_REASSEMBLY) && defined(CONFIG_NET_IPv4)
-  if (g_reassembly_timer != 0 &&
-      g_reassembly_timer < CONFIG_NET_TCP_REASS_MAXAGE)
-    {
-      g_reassembly_timer += hsec;
-    }
+      /* Increment the timer used by the IP reassembly logic */
+
+      if (g_reassembly_timer != 0 &&
+          g_reassembly_timer < CONFIG_NET_TCP_REASS_MAXAGE)
+        {
+          g_reassembly_timer += hsec;
+        }
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  /* Perform ageing on the entries in the Neighbor Table */
+      /* Perform aging on the entries in the Neighbor Table */
 
-  neighbor_periodic();
+       neighbor_periodic(hsec);
 #endif
+    }
 
   /* Traverse all of the active packet connections and perform the poll
    * action.
@@ -467,6 +500,8 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
     {
       /* Traverse all of the active TCP connections and perform the
        * timer action.
+       *
+       * NOTE: devif_poll_tcp_timer will handle the case where hsec <= 0.
        */
 
       bstop = devif_poll_tcp_timer(dev, callback, hsec);

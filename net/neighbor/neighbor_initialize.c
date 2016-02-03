@@ -56,16 +56,12 @@
 
 struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
 
-/* This is the time, in clock ticks, of the last poll */
-
-systime_t g_neighbor_polltime;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: neighbor_setup
+ * Name: neighbor_initialize
  *
  * Description:
  *   Initialize Neighbor table data structures.  This function is called
@@ -81,7 +77,7 @@ systime_t g_neighbor_polltime;
  *
  ****************************************************************************/
 
-void neighbor_setup(void)
+void neighbor_initialize(void)
 {
   int i;
 
@@ -89,29 +85,4 @@ void neighbor_setup(void)
     {
       g_neighbors[i].ne_time = NEIGHBOR_MAXTIME;
     }
-}
-
-/****************************************************************************
- * Name: neighbor_initialize
- *
- * Description:
- *  Initialize Neighbor ageing.  This function is called from the OS
- *  initialization logic at power-up reset AFTER initialization of hardware
- *  facilities such as timers and interrupts.  This logic completes the
- *  initialization started by neighbor_setup.
- *
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void neighbor_initialize(void)
-{
-  /* Initialize the time of the last poll */
-
-   g_neighbor_polltime = clock_systimer();
 }

@@ -149,7 +149,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define ENC_WDDELAY   (1*CLK_TCK)
-#define ENC_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -2156,7 +2155,7 @@ static void enc_pollworker(FAR void *arg)
        * in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, enc_txpoll, ENC_POLLHSEC);
+      (void)devif_timer(&priv->dev, enc_txpoll);
     }
 
   /* Release lock on the SPI bus and uIP */

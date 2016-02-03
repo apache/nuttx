@@ -490,7 +490,7 @@ static void slip_txtask(int argc, FAR char *argv[])
             {
               /* Yes, perform the timer poll */
 
-              (void)devif_timer(&priv->dev, slip_txpoll, hsec);
+              (void)devif_timer(&priv->dev, slip_txpoll);
               msec_start += hsec * (MSEC_PER_SEC / 2);
             }
           else

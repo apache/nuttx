@@ -2,7 +2,7 @@
  * include/nuttx/net/netdev.h
  * Defines architecture-specific device driver interfaces to the uIP network.
  *
- *   Copyright (C) 2007, 2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:
@@ -475,8 +475,7 @@ int ipv6_input(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
-int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
-                int hsec);
+int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
 
 /****************************************************************************
  * Name: neighbor_out

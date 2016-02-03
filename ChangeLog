@@ -11444,4 +11444,8 @@
 	  these are MCU-specific interfaces used only be MCU-specific code.  The
 	  the correct naming is xyz_i2cbus_initialize and xzy_i2cbus_uninitialize
 	  where xzy is the MCU mnemonic (2016-02-02).
-
+	* Networking drivers that support CONFIG_NET_NOINTS:  Fix a race condition
+	  that can cause the TX poll timer to stop running.  From Manuel Stuhn
+	  (2016-02-03).
+	* All Network drivers:  Remove the hsec parameter from devif_timer().
+	  We can get better timing accuracy without it (2016-02-03).

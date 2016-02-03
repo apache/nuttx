@@ -96,7 +96,6 @@
  */
 
 #define TUN_WDDELAY   (1*CLK_TCK)
-#define TUN_POLLHSEC  (1*2)
 
 /****************************************************************************
  * Private Types
@@ -533,7 +532,7 @@ static void tun_poll_process(FAR struct tun_device_s *priv)
       /* If so, poll uIP for new XMIT data. */
 
       priv->dev.d_buf = priv->read_buf;
-      (void)devif_timer(&priv->dev, tun_txpoll, TUN_POLLHSEC);
+      (void)devif_timer(&priv->dev, tun_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

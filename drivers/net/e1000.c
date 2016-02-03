@@ -78,7 +78,6 @@
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define E1000_WDDELAY   (1*CLK_TCK)
-#define E1000_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -770,7 +769,7 @@ static void e1000_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&e1000->netdev, e1000_txpoll, E1000_POLLHSEC);
+  (void)devif_timer(&e1000->netdev, e1000_txpoll);
 
   /* Setup the watchdog poll timer again */
 

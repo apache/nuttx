@@ -266,7 +266,6 @@
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define DM6X_WDDELAY   (1*CLK_TCK)
-#define DM6X_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1266,7 +1265,7 @@ static void dm9x_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)devif_timer(&dm9x->dm_dev, dm9x_txpoll, DM6X_POLLHSEC);
+      (void)devif_timer(&dm9x->dm_dev, dm9x_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

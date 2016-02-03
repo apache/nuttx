@@ -118,7 +118,7 @@ void net_setup(void)
 #ifdef CONFIG_NET_IPv6
   /* Initialize the Neighbor Table data structures */
 
-  neighbor_setup();
+  neighbor_initialize();
 #endif
 
 #ifdef CONFIG_NET_IOB
@@ -197,12 +197,6 @@ void net_setup(void)
 
 void net_initialize(void)
 {
-#ifdef CONFIG_NET_IPv6
-  /* Configure Neighbor Table ageing */
-
-  neighbor_initialize();
-#endif
-
   /* Initialize the periodic ARP timer */
 
   arp_timer_initialize();

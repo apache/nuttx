@@ -86,7 +86,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define skeleton_WDDELAY   (1*CLK_TCK)
-#define skeleton_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -746,7 +745,7 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->sk_dev, skel_txpoll, skeleton_POLLHSEC);
+  (void)devif_timer(&priv->sk_dev, skel_txpoll);
 
   /* Setup the watchdog poll timer again */
 

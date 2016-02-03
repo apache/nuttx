@@ -99,42 +99,18 @@ struct neighbor_entry
 
 extern struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
 
-/* This is the time, in clock ticks, of the last poll */
-
-extern systime_t g_neighbor_polltime;
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: neighbor_setup
+ * Name: neighbor_initialize
  *
  * Description:
  *   Initialize Neighbor table data structures.  This function is called
  *   prior to platform-specific driver initialization so that the networking
  *   subsystem is prepared to deal with network driver initialization
  *   actions.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void neighbor_setup(void);
-
-/****************************************************************************
- * Name: neighbor_initialize
- *
- * Description:
- *  Initialize Neighbor ageing.  This function is called from the OS
- *  initialization logic at power-up reset AFTER initialization of hardware
- *  facilities such as timers and interrupts.  This logic completes the
- *  initialization started by neighbor_setup.
- *
  *
  * Input Parameters:
  *   None
@@ -226,14 +202,14 @@ void neighbor_update(const net_ipv6addr_t ipaddr);
  *   entries in the Neighbor Table
  *
  * Input Parameters:
- *   None
+ *   hsec - Elapsed time in half seconds since the last check
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void neighbor_periodic(void);
+void neighbor_periodic(int hsec);
 
 #endif /* CONFIG_NET_IPv6 */
 #endif /* __NET_NEIGHBOR_NEIGHBOR_H */

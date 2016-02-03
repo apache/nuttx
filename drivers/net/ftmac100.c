@@ -91,7 +91,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define FTMAC100_WDDELAY   (1*CLK_TCK)
-#define FTMAC100_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1200,7 +1199,7 @@ static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->ft_dev, ftmac100_txpoll, FTMAC100_POLLHSEC);
+  (void)devif_timer(&priv->ft_dev, ftmac100_txpoll);
 
   /* Setup the watchdog poll timer again */
 

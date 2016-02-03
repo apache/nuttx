@@ -99,16 +99,25 @@
 
 /* Timing constants *********************************************************/
 
-#define NSEC_PER_SEC          1000000000L
+#define NSEC_PER_SEC          1000000000L /* Seconds */
 #define USEC_PER_SEC             1000000L
 #define MSEC_PER_SEC                1000L
 #define DSEC_PER_SEC                  10L
-#define NSEC_PER_DSEC          100000000L
+#define HSEC_PER_SEC                   2L
+
+#define NSEC_PER_HSEC          500000000L /* Half seconds */
+#define USEC_PER_HSEC             500000L
+#define MSEC_PER_HSEC                500L
+#define DSEC_PER_HSEC                  5L
+
+#define NSEC_PER_DSEC          100000000L /* Deciseconds */
 #define USEC_PER_DSEC             100000L
 #define MSEC_PER_DSEC                100L
-#define NSEC_PER_MSEC            1000000L
+
+#define NSEC_PER_MSEC            1000000L /* Milliseconds */
 #define USEC_PER_MSEC               1000L
-#define NSEC_PER_USEC               1000L
+
+#define NSEC_PER_USEC               1000L /* Microseconds */
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
  * the system timer is given by USEC_PER_TICK.  This is the expected number
@@ -136,6 +145,7 @@
  */
 
 #define TICK_PER_DSEC         (USEC_PER_DSEC / USEC_PER_TICK)            /* Truncates! */
+#define TICK_PER_HSEC         (USEC_PER_HSEC / USEC_PER_TICK)            /* Truncates! */
 #define TICK_PER_SEC          (USEC_PER_SEC  / USEC_PER_TICK)            /* Truncates! */
 #define TICK_PER_MSEC         (USEC_PER_MSEC / USEC_PER_TICK)            /* Truncates! */
 #define MSEC_PER_TICK         (USEC_PER_TICK / USEC_PER_MSEC)            /* Truncates! */
@@ -151,6 +161,7 @@
 #endif
 
 #define DSEC2TICK(dsec)       MSEC2TICK((dsec) * MSEC_PER_DSEC)          /* Rounds */
+#define HSEC2TICK(dsec)       MSEC2TICK((dsec) * MSEC_PER_HSEC)          /* Rounds */
 #define SEC2TICK(sec)         MSEC2TICK((sec)  * MSEC_PER_SEC)           /* Rounds */
 
 #define TICK2NSEC(tick)       ((tick) * NSEC_PER_TICK)                   /* Exact */
@@ -163,6 +174,7 @@
 #endif
 
 #define TICK2DSEC(tick)       (((tick)+(TICK_PER_DSEC/2))/TICK_PER_DSEC) /* Rounds */
+#define TICK2HSEC(tick)       (((tick)+(TICK_PER_HSEC/2))/TICK_PER_HSEC) /* Rounds */
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
 
 /****************************************************************************

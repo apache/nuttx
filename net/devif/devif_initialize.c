@@ -46,6 +46,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 
@@ -140,14 +141,6 @@ const struct ether_addr g_ipv6_ethallrouters =   /* All link local routers */
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -167,6 +160,10 @@ const struct ether_addr g_ipv6_ethallrouters =   /* All link local routers */
 
 void devif_initialize(void)
 {
+  /* Initialize the time of the last timer poll */
+
+  g_polltime = clock_systimer();
+
   /* Initialize callback support */
 
   devif_callback_init();

@@ -51,6 +51,7 @@
 #include <errno.h>
 #include <arch/irq.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
 
 /****************************************************************************
@@ -255,6 +256,10 @@ extern uint16_t g_ipid;
 
 extern uint8_t g_reassembly_timer;
 #endif
+
+/* Time of last poll */
+
+extern systime_t g_polltime;
 
 /****************************************************************************
  * Public Function Prototypes
