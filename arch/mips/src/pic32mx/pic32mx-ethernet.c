@@ -169,7 +169,6 @@
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define PIC32MX_WDDELAY        (1*CLK_TCK)
-#define PIC32MX_POLLHSEC       (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1248,7 +1247,7 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)devif_timer(&priv->pd_dev, pic32mx_txpoll, PIC32MX_POLLHSEC);
+          (void)devif_timer(&priv->pd_dev, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 

@@ -290,7 +290,6 @@
  */
 
 #define STM32_WDDELAY     (1*CLK_TCK)
-#define STM32_POLLHSEC    (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -2441,7 +2440,7 @@ static inline void stm32_poll_process(struct stm32_ethmac_s *priv)
           /* Update TCP timing states and poll uIP for new XMIT data.
            */
 
-          (void)devif_timer(dev, stm32_txpoll, STM32_POLLHSEC);
+          (void)devif_timer(dev, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

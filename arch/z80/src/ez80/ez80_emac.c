@@ -229,7 +229,6 @@
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define EMAC_WDDELAY           (1*CLK_TCK)
-#define EMAC_POLLHSEC          (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1698,7 +1697,7 @@ static void ez80emac_polltimer(int argc, uint32_t arg, ...)
 
   /* Poll uIP for new XMIT data */
 
-  (void)devif_timer(&priv->dev, ez80emac_txpoll, EMAC_POLLHSEC);
+  (void)devif_timer(&priv->dev, ez80emac_txpoll);
 
   /* Setup the watchdog poll timer again */
 

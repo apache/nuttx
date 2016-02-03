@@ -101,7 +101,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define KINETIS_WDDELAY   (1*CLK_TCK)
-#define KINETIS_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -887,7 +886,7 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
        * we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, kinetis_txpoll, KINETIS_POLLHSEC);
+      (void)devif_timer(&priv->dev, kinetis_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */

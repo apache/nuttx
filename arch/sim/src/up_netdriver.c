@@ -302,7 +302,7 @@ void netdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      devif_timer(&g_sim_dev, sim_txpoll, 1);
+      devif_timer(&g_sim_dev, sim_txpoll);
     }
   sched_unlock();
 }

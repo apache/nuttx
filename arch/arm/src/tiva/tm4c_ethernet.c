@@ -274,7 +274,6 @@
  */
 
 #define TIVA_WDDELAY     (1*CLK_TCK)
-#define TIVA_POLLHSEC    (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -2366,7 +2365,7 @@ static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv)
           /* Update TCP timing states and poll uIP for new XMIT data.
            */
 
-          (void)devif_timer(dev, tiva_txpoll, TIVA_POLLHSEC);
+          (void)devif_timer(dev, tiva_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

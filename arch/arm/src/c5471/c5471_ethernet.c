@@ -112,12 +112,11 @@
 /* Timing values ************************************************************/
 /* TX poll deley = 1 seconds. CLK_TCK=number of clock ticks per second */
 
-#define C5471_WDDELAY   (1*CLK_TCK)
-#define C5471_POLLHSEC  (1*2)
+#define C5471_WDDELAY         (1*CLK_TCK)
 
 /* TX timeout = 1 minute */
 
-#define C5471_TXTIMEOUT (60*CLK_TCK)
+#define C5471_TXTIMEOUT       (60*CLK_TCK)
 
 /* Ethernet GPIO bit settings ***********************************************/
 
@@ -1650,7 +1649,7 @@ static void c5471_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)devif_timer(&c5471->c_dev, c5471_txpoll, C5471_POLLHSEC);
+      (void)devif_timer(&c5471->c_dev, c5471_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

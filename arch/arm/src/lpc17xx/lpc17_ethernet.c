@@ -152,7 +152,6 @@
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define LPC17_WDDELAY        (1*CLK_TCK)
-#define LPC17_POLLHSEC       (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1512,7 +1511,7 @@ static void lpc17_poll_process(FAR struct lpc17_driver_s *priv)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->lp_dev, lpc17_txpoll, LPC17_POLLHSEC);
+      (void)devif_timer(&priv->lp_dev, lpc17_txpoll);
     }
 
   /* Simulate a fake receive to relaunch the data exchanges when a receive

@@ -239,7 +239,6 @@
  */
 
 #define SAM_WDDELAY     (1*CLK_TCK)
-#define SAM_POLLHSEC    (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1670,7 +1669,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
     {
       /* Update TCP timing states and poll uIP for new XMIT data. */
 
-      (void)devif_timer(dev, sam_txpoll, SAM_POLLHSEC);
+      (void)devif_timer(dev, sam_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

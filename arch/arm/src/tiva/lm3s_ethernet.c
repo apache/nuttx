@@ -153,7 +153,6 @@
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define TIVA_WDDELAY   (1*CLK_TCK)
-#define TIVA_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -1072,7 +1071,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)devif_timer(&priv->ld_dev, tiva_txpoll, TIVA_POLLHSEC);
+      (void)devif_timer(&priv->ld_dev, tiva_txpoll);
 
       /* Setup the watchdog poll timer again */
 
