@@ -1328,8 +1328,9 @@ static int lpc17_interrupt(int irq, void *context)
 
               /* Then make sure that the TX poll timer is running (if it is
                * already running, the following would restart it).  This is
-               * necessary to avoid certain race conditions where the polling sequence can be interrupted.
-                */
+               * necessary to avoid certain race conditions where the polling
+               * sequence can be interrupted.
+               */
 
               (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry,
                              1, priv);
