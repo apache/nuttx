@@ -1325,8 +1325,13 @@ static int tiva_txpoll(struct net_driver_s *dev)
  * Function: tiva_dopoll
  *
  * Description:
- *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors to the received frame.
+ *   The function is called in order to perform an out-of-sequence TX poll.
+ *   This is done:
+ *
+ *   1. After completion of a transmission (tiva_txdone),
+ *   2. When new TX data is available (tiva_txavail_process), and
+ *   3. After a TX timeout to restart the sending process
+ *      (tiva_txtimeout_process).
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1959,7 +1964,17 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 
   if (priv->inflight <= 0)
     {
+      /* Cancel the TX timeout */
+
       wd_cancel(priv->txtimeout);
+
+      /* Then make sure that the TX poll timer is running (if it is already
+       * running, the following would restart it).  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
 
       /* And disable further TX interrupts. */
 

@@ -1326,6 +1326,14 @@ static int lpc17_interrupt(int irq, void *context)
 
               work_cancel(HPWORK, &priv->lp_txwork);
 
+              /* Then make sure that the TX poll timer is running (if it is
+               * already running, the following would restart it).  This is
+               * necessary to avoid certain race conditions where the polling sequence can be interrupted.
+                */
+
+              (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry,
+                             1, priv);
+
               /* Schedule TX-related work to be performed on the work thread */
 
               work_queue(HPWORK, &priv->lp_txwork, (worker_t)lpc17_txdone_work,

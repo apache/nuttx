@@ -1554,7 +1554,14 @@ static int sam_txpoll(struct net_driver_s *dev)
  * Function: sam_dopoll
  *
  * Description:
- *   Perform the network poll.
+ *   The function is called in order to perform an out-of-sequence TX poll.
+ *   This is done:
+ *
+ *   1. After completion of a transmission (sam_txdone),
+ *   2. When new TX data is available (sam_txavail_process),
+ *   3. For certain TX errors (sam_txerr_interrupt), and
+ *   4. After a TX timeout to restart the sending process
+ *      (sam_txtimeout_process).
  *
  * Parameters:
  *   priv - Reference to the driver state structure
@@ -2507,6 +2514,14 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
        */
 
        wd_cancel(priv->txtimeout);
+
+      /* Make sure that the TX poll timer is running (if it is already
+       * running, the following would restart it).  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
     }
 
   /* Cancel any pending poll work */

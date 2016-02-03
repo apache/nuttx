@@ -831,7 +831,12 @@ static int sam_txpoll(struct net_driver_s *dev)
  * Function: sam_dopoll
  *
  * Description:
- *   Perform the uIP poll.
+ *   The function is called in order to perform an out-of-sequence TX poll.
+ *   This is done:
+ *
+ *   1. After completion of a transmission (sam_txdone),
+ *   2. When new TX data is available (sam_txavail), and
+ *   3. After a TX timeout to restart the sending process (sam_txtimeout).
  *
  * Parameters:
  *   priv - Reference to the driver state structure

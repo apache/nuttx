@@ -1356,8 +1356,13 @@ static int stm32_txpoll(struct net_driver_s *dev)
  * Function: stm32_dopoll
  *
  * Description:
- *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors to the received frame.
+ *   The function is called in order to perform an out-of-sequence TX poll.
+ *   This is done:
+ *
+ *   1. After completion of a transmission (stm32_txdone),
+ *   2. When new TX data is available (stm32_txavail_process), and
+ *   3. After a TX timeout to restart the sending process
+ *      (stm32_txtimeout_process).
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -2051,7 +2056,17 @@ static void stm32_txdone(struct stm32_ethmac_s *priv)
 
   if (priv->inflight <= 0)
     {
+      /* Cancel the TX timeout */
+
       wd_cancel(priv->txtimeout);
+
+      /* Then make sure that the TX poll timer is running (if it is already
+       * running, the following would restart it).  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
 
       /* And disable further TX interrupts. */
 
