@@ -1279,6 +1279,14 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   wd_cancel(priv->txtimeout);
 
+  /* Then make sure that the TX poll timer is running (if it is already
+   * running, the following would restart it).  This is necessary to
+   * avoid certain race conditions where the polling sequence can be
+   * interrupted.
+   */
+
+  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, arg);
+
   /* Then poll uIP for new XMIT data */
 
   (void)devif_poll(&priv->dev, enc_txpoll);
