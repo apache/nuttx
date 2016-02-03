@@ -1018,18 +1018,12 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
       wd_cancel(e1000->txtimeout);
     }
 
-  /* Check is a packet transmission just completed.  If so, call skel_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * tansmissions.
-   */
-
   /* Tx-descriptor Written back */
 
   if (intr_cause & (1 << 0))
     {
       devif_poll(&e1000->netdev, e1000_txpoll);
     }
-
 
   /* Rx-Descriptors Low */
 
