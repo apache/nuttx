@@ -81,6 +81,11 @@
                                      * (re-)start of transfer */
 
 /* I2C Character Driver IOCTL Commands **************************************/
+/* The I2C driver is intended to support application testing of the I2C bus.
+ * The I2C driver simply wraps an instance of struct i2c_dev_s and then
+ * provides the following IOCTL commands to access each method of the I2c
+ * interface.
+ */
 
 /* Command:      I2CIOC_TRANSFER
  * Description:  Perform an I2C transfer
@@ -89,6 +94,15 @@
  */
 
 #define I2CIOC_TRANSFER      _I2CIOC(0x0001)
+
+/* Command:      I2CIOC_RESET
+ * Description:  Perform an I2C bus reset in an attempt to break loose stuck
+ *               I2C devices.
+ * Argument:     None
+ * Dependencies: CONFIG_I2C_DRIVER && CONFIG_I2C_RESET
+ */
+
+#define I2CIOC_RESET         _I2CIOC(0x0002)
 
 /* Access macros ************************************************************/
 

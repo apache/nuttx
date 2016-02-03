@@ -249,51 +249,76 @@ static ssize_t i2cdrvr_write(FAR struct file *filep, FAR const char *buffer,
 
 static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct i2c_driver_s *priv;
+  FAR struct i2c_transfer_s *transfer;
+  int ret;
+
   i2cvdbg("cmd=%d arg=%lu\n", cmd, arg);
 
-  /* Only one command is supported */
+  /* Get our private data structure */
 
-  if (cmd == I2CIOC_TRANSFER)
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+
+  priv = (FAR struct i2c_driver_s *)inode->i_private;
+  DEBUGASSERT(priv);
+
+  /* Get exclusive access to the I2C driver state structure */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
     {
-      FAR struct inode *inode = filep->f_inode;
-      FAR struct i2c_driver_s *priv;
-      FAR struct i2c_transfer_s *transfer;
-      int ret;
+      int errcode = errno;
+      DEBUGASSERT(errcode < 0);
+      return -errcode;
+    }
 
-      /* Get our private data structure */
+  /* Process the IOCTL command */
 
-      DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-      inode = filep->f_inode;
+  switch (cmd)
+    {
+      /* Command:      I2CIOC_TRANSFER
+       * Description:  Perform an I2C transfer
+       * Argument:     A reference to an instance of struct i2c_transfer_s.
+       * Dependencies: CONFIG_I2C_DRIVER
+       */
 
-      priv = (FAR struct i2c_driver_s *)inode->i_private;
-      DEBUGASSERT(priv);
-
-      /* Get the reference to the i2c_transfer_s structure */
-
-      transfer = (FAR struct i2c_transfer_s *)((uintptr_t)arg);
-      DEBUGASSERT(transfer != NULL);
-
-      /* Get exclusive access to the I2C driver state structure */
-
-      ret = sem_wait(&priv->exclsem);
-      if (ret < 0)
+      case I2CIOC_TRANSFER:
         {
-          int errcode = errno;
-          DEBUGASSERT(errcode < 0);
-          return -errcode;
+          /* Get the reference to the i2c_transfer_s structure */
+
+          transfer = (FAR struct i2c_transfer_s *)((uintptr_t)arg);
+          DEBUGASSERT(transfer != NULL);
+
+          /* Perform the transfer */
+
+          ret = I2C_TRANSFER(priv->i2c, transfer->msgv, transfer->msgc);
         }
+        break;
 
-      /* Perform the transfer */
+#ifdef CONFIG_I2C_RESET
+      /* Command:      I2CIOC_RESET
+       * Description:  Perform an I2C bus reset in an attempt to break loose
+       *               stuck I2C devices.
+       * Argument:     None
+       * Dependencies: CONFIG_I2C_DRIVER && CONFIG_I2C_RESET
+       */
 
-      ret = I2C_TRANSFER(priv->i2c, transfer->msgv, transfer->msgc);
+      case I2CIOC_RESET:
+        {
+          ret = I2C_RESET(priv->i2c);
+        }
+        break;
+#endif
 
-      sem_post(&priv->exclsem);
-      return ret;
+      default:
+        ret = -ENOTTY;
+        break;
     }
-  else
-    {
-      return -ENOTTY;
-    }
+
+  sem_post(&priv->exclsem);
+  return ret;
 }
 
 /****************************************************************************
