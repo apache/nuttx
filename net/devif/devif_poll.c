@@ -430,7 +430,6 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
   systime_t now;
-  systime_t elpased;
   int bstop = false;
   int hsec;
 
@@ -441,13 +440,15 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   now  = clock_systimer();
   hsec = (now - g_polltime) / TICK_PER_HSEC;
 
-  /* Update the time only when more than one half second elapses */
+  /* Process time-related events only when more than one half second elapses. */
 
   if (hsec > 0)
     {
-      /* Save the current time */
+      /* Update the current poll time (truncating to the last half second
+       * boundary to avoid error build-up).
+       */
 
-      g_polltime = now;
+      g_polltime += (TICK_PER_HSEC * (systime_t)hsec);
 
       /* Perform periodic activitives that depend on hsec > 0 */
 
