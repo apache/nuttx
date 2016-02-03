@@ -46,6 +46,8 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
+
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/ioexpander/ioexpander.h>
@@ -114,15 +116,16 @@
 
 struct pca9555_dev_s
 {
-  struct ioexpander_dev_s     dev;    /* Nested structure to allow casting as public gpio expander. */
+  struct ioexpander_dev_s      dev;     /* Nested structure to allow casting as public gpio
+                                         * expander. */
 
 #ifdef CONFIG_PCA9555_MULTIPLE
-  FAR struct pca9555_dev_s    *flink;  /* Supports a singly linked list of drivers */
+  FAR struct pca9555_dev_s    *flink;   /* Supports a singly linked list of drivers */
 #endif
 
-  FAR struct pca9555_config_s *config; /* Board configuration data */
-  FAR struct i2c_master_s     *i2c;    /* Saved I2C driver instance */
-
+  FAR struct pca9555_config_s *config;  /* Board configuration data */
+  FAR struct i2c_master_s     *i2c;     /* Saved I2C driver instance */
+  sem_t                        exclsem; /* Mutual exclusion */
 };
 
 #endif /* CONFIG_IOEXPANDER && CONFIG_IOEXPANDER_PCA9555 */

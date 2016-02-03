@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -128,6 +129,26 @@ static const struct ioexpander_ops_s g_pca9555_ops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: pca9555_lock
+ *
+ * Description:
+ *   Get exclusive access to the PCA9555
+ *
+ ****************************************************************************/
+
+static void pca9555_lock(FAR struct pca9555_dev_s *pca)
+{
+  while (sem_wait(&pca->exclsem) < 0)
+    {
+      /* EINTR is the only expected error from sem_wait() */
+
+      DEBUGASSERT(errno == EINTR);
+    }
+}
+
+#define pca9555_unlock(p) sem_post(&(p)->exclsem)
+
+/****************************************************************************
  * Name: pca9555_write
  *
  * Description:
@@ -150,7 +171,7 @@ static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER((pca->i2c, &msg, 1);
+  return I2C_TRANSFER(pca->i2c, &msg, 1);
 }
 
 /****************************************************************************
@@ -184,10 +205,9 @@ static inline int pca9555_writeread(FAR struct pca9555_dev_s *pca,
  *
  ****************************************************************************/
 
-static int pca9555_setbit(FAR struct ioexpander_dev_s *dev, uint8_t addr,
+static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
                           uint8_t pin, int bitval)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   uint8_t buf[2];
   int ret;
 
@@ -229,10 +249,9 @@ static int pca9555_setbit(FAR struct ioexpander_dev_s *dev, uint8_t addr,
  *
  ****************************************************************************/
 
-static int pca9555_getbit(FAR struct ioexpander_dev_s *dev, uint8_t addr,
+static int pca9555_getbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
                           uint8_t pin, FAR bool *val)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   uint8_t buf;
   int ret;
 
@@ -267,8 +286,16 @@ static int pca9555_getbit(FAR struct ioexpander_dev_s *dev, uint8_t addr,
 static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                              int direction)
 {
-  return pca9555_setbit(dev, PCA9555_REG_CONFIG, pin,
-                        (direction == IOEXPANDER_DIRECTION_IN));
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+  ret = pca9555_setbit(pca, PCA9555_REG_CONFIG, pin,
+                       (direction == IOEXPANDER_DIRECTION_IN));
+  pca9555_unlock(pca);
+  return ret;
 }
 
 /****************************************************************************
@@ -282,14 +309,20 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           int opt, FAR void *val)
 {
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   int ival = (int)val;
+  int ret = -EINVAL;
 
   if (opt == IOEXPANDER_OPTION_INVERT)
     {
-      return pca9555_setbit(dev, PCA9555_REG_POLINV, pin, ival);
+      /* Get exclusive access to the PCA555 */
+
+      pca9555_lock(pca);
+      ret = pca9555_setbit(pca, PCA9555_REG_POLINV, pin, ival);
+      pca9555_unlock(pca);
     }
 
-  return -EINVAL;
+  return ret;
 }
 
 /****************************************************************************
@@ -303,7 +336,15 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                             bool value)
 {
-  return pca9555_setbit(dev, PCA9555_REG_OUTPUT, pin, value);
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+  ret = pca9555_setbit(pca, PCA9555_REG_OUTPUT, pin, value);
+  pca9555_unlock(pca);
+  return ret;
 }
 
 /****************************************************************************
@@ -317,7 +358,15 @@ static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                            FAR bool *value)
 {
-  return pca9555_getbit(dev, PCA9555_REG_INPUT, pin, value);
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+  ret = pca9555_getbit(pca, PCA9555_REG_INPUT, pin, value);
+  pca9555_unlock(pca);
+  return ret;
 }
 
 /****************************************************************************
@@ -331,7 +380,15 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                            FAR bool *value)
 {
-  return pca9555_getbit(dev, PCA9555_REG_OUTPUT, pin, value);
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+  ret = pca9555_getbit(pca, PCA9555_REG_OUTPUT, pin, value);
+  pca9555_unlock(pca);
+  return ret;
 }
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
@@ -344,11 +401,10 @@ static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  *
  ****************************************************************************/
 
-static int pca9555_getmultibits(FAR struct ioexpander_dev_s *dev, uint8_t addr,
+static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
                                 FAR uint8_t *pins, FAR bool *values,
                                 int count)
 {
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   uint8_t buf[2];
   int ret = OK;
   int i;
@@ -403,6 +459,12 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   int index;
   int pin;
 
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+
   /* Start by reading both registers, whatever the pins to change. We could
    * attempt to read one port only if all pins were on the same port, but
    * this would not save much. */
@@ -410,6 +472,8 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   ret = pca9555_writeread(pca, &addr, 1, &buf[1], 2);
   if (ret < 0)
     {
+
+      pca9555_unlock(pca);
       return ret;
     }
 
@@ -421,6 +485,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
       pin = pins[i];
       if (pin > 15)
         {
+          pca9555_unlock(pca);
           return -ENXIO;
         }
       else if(pin > 7)
@@ -442,7 +507,10 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   /* Now write back the new pins states */
 
   buf[0] = addr;
-  return pca9555_write(pca, buf, 3);
+  ret = pca9555_write(pca, buf, 3);
+
+  pca9555_unlock(pca);
+  return ret;
 }
 
 /****************************************************************************
@@ -457,8 +525,16 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
                                 FAR uint8_t *pins, FAR bool *values,
                                 int count)
 {
-  return pca9555_getmultibits(dev, PCA9555_REG_INPUT,
-                              pins, values, count);
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+  ret = pca9555_getmultibits(pca, PCA9555_REG_INPUT,
+                             pins, values, count);
+  pca9555_unlock(pca);
+  return ret;
 }
 
 /****************************************************************************
@@ -473,8 +549,16 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
                                 FAR uint8_t *pins, FAR bool *values,
                                 int count)
 {
-  return pca9555_getmultibits(dev, PCA9555_REG_OUTPUT,
-                              pins, values, count);
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+  ret = pca9555_getmultibits(pca, PCA9555_REG_OUTPUT,
+                             pins, values, count);
+  pca9555_unlock(pca);
+  return ret;
 }
 
 #endif
@@ -544,7 +628,7 @@ static int pca9555_interrupt(int irq, FAR void *context)
 {
 #ifdef CONFIG_PCA9555_MULTIPLE
   /* To support multiple devices,
-   * retrieve the priv structure using the irq number.
+   * retrieve the pca structure using the irq number.
    */
 
 #  warning Missing logic
@@ -626,6 +710,8 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *i2cdev,
   pcadev->config->attach(pcadev->config, pca9555_interrupt);
   pcadev->config->enable(pcadev->config, TRUE);
 #endif
+
+  sem_init(&pcadev->exclsem, 0, 1);
   return &pcadev->dev;
 }
 

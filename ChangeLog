@@ -11449,3 +11449,6 @@
 	  (2016-02-03).
 	* All Network drivers:  Remove the hsec parameter from devif_timer().
 	  We can get better timing accuracy without it (2016-02-03).
+	* drivers/ioexpander/pca555.c:  Add logic to make the PCA555 driver
+	  thread safe (2016-02-03).
+
