@@ -1908,10 +1908,11 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
  * Function: stm32_txdone
  *
  * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
+ *   An interrupt was received indicating that the last TX packet
+ *  transfer(s) are complete.
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   priv - Reference to the driver state structure
  *
  * Returned Value:
  *   None
@@ -1933,7 +1934,15 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 
   if (priv->inflight <= 0)
     {
+      /* Cancel the TX timeout */
+
       wd_cancel(priv->txtimeout);
+
+      /* Then make sure that the TX poll timer is running (if it is already
+       * running, the following would restart it).
+       */
+
+      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
 
       /* And disable further TX interrupts. */
 
