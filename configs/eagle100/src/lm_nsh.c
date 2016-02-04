@@ -115,7 +115,7 @@ int board_app_initialize(void)
   syslog(LOG_INFO, "Initializing SPI port %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO);
 
-  spi = tiva_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  spi = tiva_ssibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
