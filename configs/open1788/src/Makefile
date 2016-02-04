@@ -57,7 +57,7 @@ ifeq ($(CONFIG_LPC17_LCD),y)
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-  CSRCS += lpc17_nsh.c
+  CSRCS += lpc17_appinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

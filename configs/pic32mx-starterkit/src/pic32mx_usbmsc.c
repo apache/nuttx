@@ -62,7 +62,7 @@ int usbmsc_archinitialize(void)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see
-   * pic32mx_nsh.c).  In this case, there is nothing further to be done here.
+   * pic32mx_appinit.c).  In this case, there is nothing further to be done here.
    */
 
 #ifndef CONFIG_NSH_BUILTIN_APPS

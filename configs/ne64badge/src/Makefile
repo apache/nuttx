@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = m9s12_boot.c m9s12_leds.c m9s12_buttons.c m9s12_spi.c
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += m9s12_nsh.c
+CSRCS += m9s12_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

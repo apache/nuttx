@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = lpc17_boot.c lpc17_leds.c lpc17_adc.c lpc17_dac.c lpc17_pwm.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lpc17_nsh.c
+CSRCS += lpc17_appinit.c
 endif
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc17_usbmsc.c

@@ -49,7 +49,7 @@ CSRCS += pic32mz_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += pic32mz_nsh.c
+CSRCS += pic32mz_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

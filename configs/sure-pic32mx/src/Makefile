@@ -63,7 +63,7 @@ CSRCS += pic32mx_lcd1602.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += pic32mx_nsh.c
+CSRCS += pic32mx_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

@@ -50,7 +50,7 @@ CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += stm32_nsh.c
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

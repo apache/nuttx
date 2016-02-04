@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = lpc2148_spi1.c lpc2148_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += lpc2148_nsh.c
+CSRCS += lpc2148_appinit.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

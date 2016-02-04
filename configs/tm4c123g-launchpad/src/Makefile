@@ -43,7 +43,7 @@ CSRCS += tm4c_autoleds.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += tm4c_nsh.c
+CSRCS += tm4c_appinit.c
 endif
 
 ifeq ($(CONFIG_TIVA_TIMER),y)

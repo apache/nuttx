@@ -43,7 +43,7 @@ CSRCS += pic32_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += pic32_nsh.c
+CSRCS += pic32_appinit.c
 endif
 
 ifeq ($(CONFIG_PIC32MX_USBDEV),y)

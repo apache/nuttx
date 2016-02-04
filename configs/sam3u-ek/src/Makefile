@@ -43,7 +43,7 @@ CSRCS += sam_lcd.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
+CSRCS += sam_appinit.c
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)

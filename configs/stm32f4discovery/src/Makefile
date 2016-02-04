@@ -89,7 +89,7 @@ CSRCS += stm32_watchdog.c
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_nsh.c
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)

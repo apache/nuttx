@@ -47,7 +47,7 @@ CSRCS += k60_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += k60_nsh.c
+CSRCS += k60_appinit.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

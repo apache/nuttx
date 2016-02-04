@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = moxart_boot.c
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += moxart_nsh.c
+CSRCS += moxart_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

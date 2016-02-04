@@ -89,7 +89,7 @@
 int usbmsc_archinitialize(void)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see stm32_nsh.c).
+   * already have been initialized in board_app_initialize() (see stm32_appinit.c).
    * In this case, there is nothing further to be done here.
    */
 

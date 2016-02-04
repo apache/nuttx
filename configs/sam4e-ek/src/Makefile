@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = sam_boot.c sam_leds.c sam_buttons.c sam_udp.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
+CSRCS += sam_appinit.c
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)

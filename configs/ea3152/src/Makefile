@@ -50,7 +50,7 @@ ifeq ($(CONFIG_LPC31_SPI),y)
 CSRCS += lpc31_spi.c
 endif
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lpc31_nsh.c
+CSRCS += lpc31_appinit.c
 endif
 ifeq ($(CONFIG_PAGING),y)
 CSRCS += lpc31_fillpage.c

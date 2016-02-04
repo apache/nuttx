@@ -85,7 +85,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
+CSRCS += sam_appinit.c
 endif
 
 ifeq ($(CONFIG_ADC),y)

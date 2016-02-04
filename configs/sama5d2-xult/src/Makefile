@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = sam_boot.c sam_userleds.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c sam_bringup.c
+CSRCS += sam_appinit.c sam_bringup.c
 else
 ifeq ($(CONFIG_BOARD_INITIALIZE),y)
 CSRCS += sam_bringup.c
