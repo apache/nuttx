@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = a1x_boot.c a1x_leds.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += a1x_nsh.c
 endif
 

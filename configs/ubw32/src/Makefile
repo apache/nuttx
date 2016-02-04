@@ -42,7 +42,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += pic32_buttons.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += pic32_appinit.c
 endif
 

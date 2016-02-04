@@ -143,7 +143,7 @@ void board_initialize(void)
   board_lcd_initialize();
 #endif
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.

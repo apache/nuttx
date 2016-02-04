@@ -84,7 +84,7 @@ CSRCS += sam_ethernet.c
 endif
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c
 endif
 

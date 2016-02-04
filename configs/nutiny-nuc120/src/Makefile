@@ -62,8 +62,4 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CSRCS += nuc_watchdog.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += nuc_nsh.c
-endif
-
 include $(TOPDIR)/configs/Board.mk

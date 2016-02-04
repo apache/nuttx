@@ -130,7 +130,7 @@
   /* SD card bringup does not work if performed on the IDLE thread because it
    * will cause waiting.  Use either:
    *
-   *  CONFIG_NSH_ARCHINIT=y, OR
+   *  CONFIG_LIB_BOARDCTL=y, OR
    *  CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARD_INITTHREAD=y
    */
 
@@ -375,7 +375,7 @@ int stm32_bmp180initialize(FAR const char *devpath);
  *   CONFIG_BOARD_INITIALIZE=y :
  *     Called from board_initialize().
  *
- *   CONFIG_BOARD_INITIALIZE=y && CONFIG_NSH_ARCHINIT=y :
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -504,7 +504,7 @@ void stm32_pm_buttons(void);
  *   CONFIG_BOARD_INITIALIZE=y :
  *     Called from board_initialize().
  *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_NSH_ARCHINIT=y :
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/

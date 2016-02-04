@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = lpc43_boot.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc43_appinit.c
 endif
 

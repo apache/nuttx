@@ -127,7 +127,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NSH_ARCHINIT) || !defined(CONFIG_NSH_BUILTIN_APPS)
+#if !defined(CONFIG_LIB_BOARDCTL) || !defined(CONFIG_NSH_BUILTIN_APPS)
 static int do_composite_archinitialize(void)
 {
 #ifdef HAVE_SST25
@@ -293,7 +293,7 @@ static int do_composite_archinitialize(void)
 
 int composite_archinitialize(void)
 {
-#if defined(CONFIG_NSH_ARCHINIT) && defined(CONFIG_NSH_BUILTIN_APPS)
+#if defined(CONFIG_LIB_BOARDCTL) && defined(CONFIG_NSH_BUILTIN_APPS)
   return OK;
 #else
   return do_composite_archinitialize();

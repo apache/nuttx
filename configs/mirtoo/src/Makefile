@@ -46,7 +46,7 @@ ifeq ($(CONFIG_PIC32MX_ADC),y)
 CSRCS += pic32_adc.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += pic32_appinit.c
 endif
 

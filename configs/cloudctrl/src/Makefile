@@ -57,7 +57,7 @@ ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

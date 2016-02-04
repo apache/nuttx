@@ -66,7 +66,7 @@ ifeq ($(CONFIG_LCD_SSD1289),y) # F103
 CSRCS += stm32_ssd1289.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

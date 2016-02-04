@@ -54,7 +54,7 @@ ifeq ($(CONFIG_LPC31_SPI),y)
 CSRCS += lpc31_spi.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc31_appinit.c
 endif
 

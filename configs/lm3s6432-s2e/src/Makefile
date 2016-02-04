@@ -37,7 +37,7 @@
 
 ASRCS =
 CSRCS = lm_boot.c lm_leds.c lm_ethernet.c lm_ssi.c
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lm_appinit.c
 endif
 

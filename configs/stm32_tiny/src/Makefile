@@ -47,7 +47,7 @@ ifeq ($(CONFIG_WL_NRF24L01),y)
 CSRCS += stm32_wireless.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

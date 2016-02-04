@@ -47,7 +47,7 @@ CSRCS += stm32_r61505u.c
 endif
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

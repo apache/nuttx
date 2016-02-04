@@ -42,7 +42,7 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += tm4c_autoleds.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += tm4c_appinit.c
 endif
 

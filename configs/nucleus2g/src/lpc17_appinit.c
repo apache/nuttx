@@ -60,7 +60,7 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_NSH_ARCHINIT
+#ifdef CONFIG_LIB_BOARDCTL
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
 #    error "The Nucleus-2G MMC/SD is on SSP0"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO

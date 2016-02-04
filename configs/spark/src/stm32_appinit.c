@@ -287,7 +287,7 @@ int board_app_initialize(void)
 
 int usbmsc_archinitialize(void)
 {
-#if defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_LIB_BOARDCTL)
   return OK;
 #else
   return board_app_initialize();

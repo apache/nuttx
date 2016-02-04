@@ -56,7 +56,7 @@ ifeq ($(CONFIG_DK_TM4C129X_TIMER),y)
 CSRCS += tm4c_timer.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += tm4c_appinit.c
 endif
 

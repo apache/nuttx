@@ -43,7 +43,7 @@
 
 #include "pic32mz-starterkit.h"
 
-#ifdef CONFIG_NSH_ARCHINIT
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -70,4 +70,4 @@ int board_app_initialize(void)
 #endif
 }
 
-#endif /* CONFIG_NSH_ARCHINIT */
+#endif /* CONFIG_LIB_BOARDCTL */

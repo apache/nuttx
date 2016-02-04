@@ -66,7 +66,7 @@
 
 /* MMC/SD is on SSP port 1.  There is only a single slot, slot 0 */
 
-#ifdef CONFIG_NSH_ARCHINIT
+#ifdef CONFIG_LIB_BOARDCTL
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 1

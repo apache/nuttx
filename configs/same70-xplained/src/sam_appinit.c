@@ -43,7 +43,7 @@
 
 #include "same70-xplained.h"
 
-#if defined(CONFIG_NSH_ARCHINIT) && !defined(CONFIG_BUILD_KERNEL)
+#if defined(CONFIG_LIB_BOARDCTL) && !defined(CONFIG_BUILD_KERNEL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,4 +72,4 @@ int board_app_initialize(void)
 #endif
 }
 
-#endif /* CONFIG_NSH_ARCHINIT && !CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_LIB_BOARDCTL && !CONFIG_BUILD_KERNEL */

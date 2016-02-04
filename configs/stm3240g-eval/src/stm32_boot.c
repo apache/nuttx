@@ -106,7 +106,7 @@
 #undef HAVE_INITTHREAD
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#  if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
 #    define HAVE_INITTHREAD 1
 #  elif defined(HAVE_NXSTART)
 #    define HAVE_INITTHREAD 1
@@ -155,7 +155,7 @@ static int board_initthread(int argc, char *argv[])
 {
   int ret;
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.

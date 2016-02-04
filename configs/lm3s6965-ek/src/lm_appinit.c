@@ -74,7 +74,7 @@
 
 /* PORT and SLOT number depend on the board configuration */
 
-#ifdef CONFIG_NSH_ARCHINIT
+#ifdef CONFIG_LIB_BOARDCTL
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
 #    error "The LM3S6965 Eval Kit MMC/SD is on SSI0"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO

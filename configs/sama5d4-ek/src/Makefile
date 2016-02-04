@@ -112,7 +112,7 @@ ifeq ($(CONFIG_INPUT_MXT),y)
 CSRCS += sam_maxtouch.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c sam_bringup.c
 else
 ifeq ($(CONFIG_BOARD_INITIALIZE),y)

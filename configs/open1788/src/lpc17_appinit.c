@@ -364,11 +364,11 @@ static int nsh_usbhostinitialize(void)
  * Description:
  *   Perform architecture specific initialization for NSH.
  *
- *   CONFIG_NSH_ARCHINIT=y :
+ *   CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
- *   CONFIG_NSH_ARCHINIT=n:
+ *   CONFIG_LIB_BOARDCTL=n:
  *     Called from board_initialize().
  *
  ****************************************************************************/

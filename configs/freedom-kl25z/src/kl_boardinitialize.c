@@ -124,7 +124,7 @@ void board_initialize(void)
    * but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   (void)board_app_initialize();
 #endif
 

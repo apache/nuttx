@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = pic32mx_boot.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += pic32mx_appinit.c
 endif
 

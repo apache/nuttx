@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = lpc17_boot.c lpc17_leds.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc17_appinit.c
 endif
 

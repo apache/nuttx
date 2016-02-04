@@ -55,7 +55,7 @@
 
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_NSH_ARCHINIT
+#ifdef CONFIG_LIB_BOARDCTL
 
 /* PORT and SLOT number probably depend on the board configuration */
 
@@ -107,7 +107,7 @@
 
 #else
 #  undef NSH_HAVEMMCSD
-#endif /* CONFIG_NSH_ARCHINIT */
+#endif /* CONFIG_LIB_BOARDCTL */
 
 /****************************************************************************
  * Private Data

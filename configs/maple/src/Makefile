@@ -43,7 +43,7 @@ ifeq ($(CONFIG_NX_LCDDRIVER),y)
 CSRCS += stm32_lcd.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 endif
 
 ifeq ($(CONFIG_INPUT),y)
