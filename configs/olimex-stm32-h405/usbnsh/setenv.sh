@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/olimex-stm32-h405/nshusb/setenv.sh
+# configs/olimex-stm32-h405/usbnsh/setenv.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
