@@ -110,12 +110,14 @@
 #  undef HAVE_SDIO
 #endif
 
-#undef SDIO_MINOR      /* Any minor number, default 0 */
+#undef  SDIO_MINOR     /* Any minor number, default 0 */
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
 
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  elif CONFIG_NSH_MMCSDSLOTNO != 0
 #    warning "Only one MMC/SD slot, slot 0"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
