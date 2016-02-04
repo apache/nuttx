@@ -453,7 +453,8 @@ static int e1000_transmit(struct e1000_dev *e1000)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(e1000->txtimeout, E1000_TXTIMEOUT, e1000_txtimeout, 1, (uint32_t)e1000);
+  wd_start(e1000->txtimeout, E1000_TXTIMEOUT, e1000_txtimeout, 1,
+           (wdparm_t)e1000);
   return OK;
 }
 
@@ -773,7 +774,8 @@ static void e1000_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(e1000->txpoll, E1000_WDDELAY, e1000_polltimer, 1, arg);
+  (void)wd_start(e1000->txpoll, E1000_WDDELAY, e1000_polltimer, 1,
+                 (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -807,7 +809,8 @@ static int e1000_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(e1000->txpoll, E1000_WDDELAY, e1000_polltimer, 1, (uint32_t)e1000);
+  (void)wd_start(e1000->txpoll, E1000_WDDELAY, e1000_polltimer, 1,
+                 (wdparm_t)e1000);
 
   if (e1000_inl(e1000, E1000_STATUS) & 2)
     {

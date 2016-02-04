@@ -305,7 +305,8 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(cs89x0->cs_txtimeout, CS89x0_TXTIMEOUT, cs89x0_txtimeout, 1, (uint32_t)cs89x0);
+  (void)wd_start(cs89x0->cs_txtimeout, CS89x0_TXTIMEOUT, cs89x0_txtimeout,
+                 1, (wdparm_t)cs89x0);
   return OK;
 }
 
@@ -793,7 +794,8 @@ static void cs89x0_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1, arg);
+  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1,
+                 (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -826,7 +828,8 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1, (uint32_t)cs89x0);
+  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1,
+                 (wdparm_t)cs89x0);
 
   /* Enable the Ethernet interrupt */
 

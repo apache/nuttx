@@ -321,7 +321,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   (void)wd_start(priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
-                 ftmac100_txtimeout_expiry, 1, (uint32_t)priv);
+                 ftmac100_txtimeout_expiry, 1, (wdparm_t)priv);
 
 //irqrestore(flags);
   return OK;
@@ -846,7 +846,8 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
    * certain race conditions where the polling sequence can be interrupted.
    */
 
-  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1, priv);
+  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
+                 (wdparm_t)priv);
 
   /* Then poll uIP for new XMIT data */
 
@@ -1203,7 +1204,8 @@ static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1, priv);
+  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
+                 (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -1276,7 +1278,8 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1, arg);
+      (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry,
+                     1, (wdparm_t)arg);
     }
 
 #else
@@ -1337,7 +1340,8 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
+                 (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

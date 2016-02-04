@@ -1057,7 +1057,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    */
 
   (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
-                (uint32_t)priv);
+                 (wdparm_t)priv);
 
   /* free the descriptor */
 
@@ -1293,7 +1293,8 @@ static void enc_txif(FAR struct enc_driver_s *priv)
        * interrupted.
        */
 
-      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, arg);
+      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
+                     (wdparm_t)priv);
 
       /* Poll for TX packets from the networking layer */
 
@@ -2165,7 +2166,7 @@ static void enc_pollworker(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, arg);
+  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -2266,7 +2267,8 @@ static int enc_ifup(struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (uint32_t)priv);
+      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
+                     (wdparm_t)priv);
 
       /* Mark the interface up and enable the Ethernet interrupt at the
        * controller
