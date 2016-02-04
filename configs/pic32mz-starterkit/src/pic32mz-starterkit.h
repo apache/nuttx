@@ -90,7 +90,7 @@
 
    /* Make sure that the NSH configuration uses the slot */
 
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
 #    warning "The PIC32 Starter Kit has only one slot (0)"
