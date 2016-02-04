@@ -193,9 +193,9 @@ static int nsh_sdinitialize(void)
 
   lpc17_gpiowrite(LPC1766STK_MMC_PWR, false);
 
-  /* Get the SSP port */
+  /* Get the SSP port.   MMC/SD is on SSP port 1.  */
 
-  ssp = lpc17_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  ssp = lpc17_sspbus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",
