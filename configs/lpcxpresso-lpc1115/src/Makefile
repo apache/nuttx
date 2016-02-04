@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = lpc11_boot.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lpc11_nsh.c
+CSRCS += lpc11_appinit.c
 endif
 
 ifeq ($(CONFIG_KL_SPI0),y)

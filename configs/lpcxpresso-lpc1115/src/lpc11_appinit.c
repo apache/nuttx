@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpcxpresso-lpc1115/src/lpc11_nsh.c
+ * config/lpcxpresso-lpc1115/src/lpc11_appinit.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -111,14 +111,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef NSH_HAVEMMCSD
   FAR struct spi_dev_s *ssp;
