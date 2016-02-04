@@ -114,8 +114,8 @@ int board_lcd_initialize(void)
   lpc17_gpiowrite(ZKITARM_OLED_RST, 1);
   lpc17_gpiowrite(ZKITARM_OLED_RS, 1);
 
-  zkit_spidev_initialize();
-  g_spidev = lpc17_spibus_initialize(0);
+  zkit_sspdev_initialize();
+  g_spidev = lpc17_sspbus_initialize(0);
   if (!g_spidev)
     {
       glldbg("Failed to initialize SSP port 0\n");

@@ -91,13 +91,13 @@ void lpc17_boardinitialize(void)
 #endif
 
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function open1788_spidev_initialize() has been brought into the link.
+   * function open1788_sspdev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1) || defined(CONFIG_LPC17_SSP2)
-  if (open1788_spidev_initialize)
+  if (open1788_sspdev_initialize)
     {
-      open1788_spidev_initialize();
+      open1788_sspdev_initialize();
     }
 #endif
 

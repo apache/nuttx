@@ -251,14 +251,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc1766stk_spidev_initialize
+ * Name: lpc1766stk_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Olimex LPC1766-STK board.
  *
  ************************************************************************************/
 
-void weak_function lpc1766stk_spidev_initialize(void);
+void weak_function lpc1766stk_sspdev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H */

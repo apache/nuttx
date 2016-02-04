@@ -298,7 +298,7 @@ int board_tsc_setup(int minor)
 
       /* Get an instance of the SPI interface */
 
-      dev = lpc17_spibus_initialize(CONFIG_ADS7843E_SPIDEV);
+      dev = lpc17_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
       if (!dev)
         {
           idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);

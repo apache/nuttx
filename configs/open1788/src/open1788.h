@@ -166,14 +166,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: open1788_spidev_initialize
+ * Name: open1788_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the WaveShare Open1788 board.
  *
  ************************************************************************************/
 
-void weak_function open1788_spidev_initialize(void);
+void weak_function open1788_sspdev_initialize(void);
 
 /************************************************************************************
  * Name: open1788_sdram_initialize

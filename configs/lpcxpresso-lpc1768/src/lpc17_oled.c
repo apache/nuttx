@@ -125,7 +125,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SPI1 port (configure as a Freescale SPI port) */
 
-  spi = lpc17_spibus_initialize(1);
+  spi = lpc17_sspbus_initialize(1);
   if (!spi)
     {
       glldbg("Failed to initialize SPI port 1\n");

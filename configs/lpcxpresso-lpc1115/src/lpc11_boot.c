@@ -75,13 +75,13 @@
 void lpc11_boardinitialize(void)
 {
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpcxpresso_spidev_initialize() has been brought into the link.
+   * function lpcxpresso_sspdev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC11_SSP0) || defined(CONFIG_LPC11_SSP1)
-  if (lpcxpresso_spidev_initialize)
+  if (lpcxpresso_sspdev_initialize)
     {
-      lpcxpresso_spidev_initialize();
+      lpcxpresso_sspdev_initialize();
     }
 #endif
 

@@ -217,14 +217,14 @@ static int ssp1_cdinterrupt(int irq, FAR void *context)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc1766stk_spidev_initialize
+ * Name: lpc1766stk_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
  ************************************************************************************/
 
-void weak_function lpc1766stk_spidev_initialize(void)
+void weak_function lpc1766stk_sspdev_initialize(void)
 {
   /* Configure the SSP0 chip select GPIOs.  Only the Nokia LCD is connected to SSP0 */
 
@@ -263,7 +263,7 @@ void weak_function lpc1766stk_spidev_initialize(void)
  *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_spibus_initialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspbus_initialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *
@@ -272,9 +272,9 @@ void weak_function lpc1766stk_spidev_initialize(void)
  *   2. Provide lpc17_ssp0/ssp1select() and lpc17_ssp0/ssp1status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_spibus_initialize() in your low level application
+ *   3. Add a calls to lpc17_sspbus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by lpc17_spibus_initialize() may then be used to bind the
+ *   4. The handle returned by lpc17_sspbus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

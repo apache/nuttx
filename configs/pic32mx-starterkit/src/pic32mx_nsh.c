@@ -215,13 +215,13 @@ static int nsh_waiter(int argc, char *argv[])
 #ifdef NSH_HAVEMMCSD
 static int nsh_sdinitialize(void)
 {
-  FAR struct spi_dev_s *ssp;
+  FAR struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */
 
-  ssp = pic32mx_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (!ssp)
+  spi = pic32mx_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
              CONFIG_NSH_MMCSDSPIPORTNO);
@@ -235,7 +235,7 @@ static int nsh_sdinitialize(void)
   /* Bind the SPI port to the slot */
 
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
-                                CONFIG_NSH_MMCSDSLOTNO, ssp);
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       syslog(LOG_ERR,

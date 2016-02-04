@@ -230,17 +230,17 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: zkit_spidev_initialize
+ * Name: zkit_sspdev_initialize
  *
  * Description:
  *   Called to configure SSP chip select GPIO pins for the ZKit-ARM-1769 board.
  *
  ************************************************************************************/
 
-void weak_function zkit_spidev_initialize(void);
+void weak_function zkit_sspdev_initialize(void);
 
 /************************************************************************************
- * Name: zkit_spinitialize
+ * Name: zkit_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the ZKit-ARM-1769 board.

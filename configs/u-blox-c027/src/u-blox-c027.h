@@ -81,14 +81,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: c027_ssp_initialize
+ * Name: c027_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the C027 board.
  *
  ************************************************************************************/
 
-void weak_function c027_ssp_initialize(void);
+void weak_function c027_sspdev_initialize(void);
 
 #if defined(CONFIG_MODEM_U_BLOX)
 
