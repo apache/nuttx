@@ -534,7 +534,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc11_spiinitialize
+ * Name: lpc11_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -547,7 +547,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc11_spiinitialize(int port)
+FAR struct spi_dev_s *lpc11_spibus_initialize(int port)
 {
   FAR struct lpc11_spidev_s *priv = &g_spidev;
   irqstate_t flags;
