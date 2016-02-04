@@ -438,7 +438,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
    */
 
   now  = clock_systimer();
-  hsec = (now - g_polltime) / TICK_PER_HSEC;
+  hsec = (int)((now - g_polltime) / TICK_PER_HSEC);
 
   /* Process time-related events only when more than one half second elapses. */
 
