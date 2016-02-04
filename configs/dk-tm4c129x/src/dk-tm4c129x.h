@@ -145,14 +145,14 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: tm4c_spidev_initialize
+ * Name: tm4c_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the DK-TM4C129X.
  *
  ************************************************************************************/
 
-void weak_function tm4c_spidev_initialize(void);
+void weak_function tm4c_ssidev_initialize(void);
 
 /****************************************************************************
  * Name: tm4c_led_initialize
