@@ -92,20 +92,20 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_spidev_initialize
+ * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the MDL-S2E.
  *
  ************************************************************************************/
 
-void weak_function lm_spidev_initialize(void)
+void weak_function lm_ssidev_initialize(void)
 {
   /* Configure the SPI CS GPIO */
 
-  ssi_dumpgpio("lm_spidev_initialize() Entry)");
+  ssi_dumpgpio("lm_ssidev_initialize() Entry)");
   tiva_configgpio(SSICS_GPIO);
-  ssi_dumpgpio("lm_spidev_initialize() Exit");
+  ssi_dumpgpio("lm_ssidev_initialize() Exit");
 }
 
 /****************************************************************************

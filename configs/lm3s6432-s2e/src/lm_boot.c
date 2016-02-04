@@ -79,13 +79,13 @@
 void tiva_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
-   * lm_spidev_initialize() has been brought into the link.
+   * lm_ssidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_TIVA_SSI0)
-  if (lm_spidev_initialize)
+  if (lm_ssidev_initialize)
     {
-      lm_spidev_initialize();
+      lm_ssidev_initialize();
     }
 #endif
 

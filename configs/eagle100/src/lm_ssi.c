@@ -90,20 +90,20 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_spidev_initialize
+ * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Eagle100 board.
  *
  ************************************************************************************/
 
-void weak_function lm_spidev_initialize(void)
+void weak_function lm_ssidev_initialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssi_dumpgpio("lm_spidev_initialize() before tiva_configgpio()");
+  ssi_dumpgpio("lm_ssidev_initialize() before tiva_configgpio()");
   tiva_configgpio(SDCCS_GPIO);
-  ssi_dumpgpio("lm_spidev_initialize() after tiva_configgpio()");
+  ssi_dumpgpio("lm_ssidev_initialize() after tiva_configgpio()");
 }
 
 /****************************************************************************

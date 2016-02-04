@@ -94,23 +94,23 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: tiva_ssidev_initialize
+ * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
  *
  ************************************************************************************/
 
-void weak_function lm_spidev_initialize(void)
+void weak_function lm_ssidev_initialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssi_dumpgpio("lm_spidev_initialize() Entry)");
+  ssi_dumpgpio("lm_ssidev_initialize() Entry)");
   tiva_configgpio(SDCCS_GPIO);
 #ifdef CONFIG_NX_LCDDRIVER
   tiva_configgpio(OLEDCS_GPIO);
 #endif
-  ssi_dumpgpio("lm_spidev_initialize() Exit");
+  ssi_dumpgpio("lm_ssidev_initialize() Exit");
 }
 
 /****************************************************************************

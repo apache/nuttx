@@ -95,19 +95,19 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_spidev_initialize
+ * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure chip select GPIO pins for the LM3S9B96 Eval board.
  *
  ************************************************************************************/
 
-void weak_function lm_spidev_initialize(void)
+void weak_function lm_ssidev_initialize(void)
 {
   /* Configure the CS GPIO */
 #if 0
-  ssi_dumpgpio("lm_spidev_initialize() Entry");
-  ssi_dumpgpio("lm_spidev_initialize() Exit");
+  ssi_dumpgpio("lm_ssidev_initialize() Entry");
+  ssi_dumpgpio("lm_ssidev_initialize() Exit");
 #endif
 }
 

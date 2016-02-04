@@ -119,14 +119,14 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: lm_spidev_initialize
+ * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
  *
  ************************************************************************************/
 
-void weak_function lm_spidev_initialize(void);
+void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_LM3S6965_EK_SRC_LM3S6965EK_H */
