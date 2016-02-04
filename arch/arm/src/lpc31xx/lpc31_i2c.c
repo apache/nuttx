@@ -550,8 +550,8 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
   struct lpc31_i2cdev_s *priv = &i2cdevices[port];
 
   priv->base  = (port == 0) ? LPC31_I2C0_VBASE : LPC31_I2C1_VBASE;
-  priv->clkid = (port == 0) ? CLKID_I2C0PCLK     : CLKID_I2C1PCLK;
-  priv->rstid = (port == 0) ? RESETID_I2C0RST    : RESETID_I2C1RST;
+  priv->clkid = (port == 0) ? CLKID_I2C0PCLK   : CLKID_I2C1PCLK;
+  priv->rstid = (port == 0) ? RESETID_I2C0RST  : RESETID_I2C1RST;
   priv->irqid = (port == 0) ? LPC31_IRQ_I2C0   : LPC31_IRQ_I2C1;
 
   sem_init(&priv->mutex, 0, 1);
@@ -570,19 +570,21 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
   i2c_hwreset(priv);
 
   /* Allocate a watchdog timer */
-  priv->timeout = wd_create();
 
+  priv->timeout = wd_create();
   DEBUGASSERT(priv->timeout != 0);
 
   /* Attach Interrupt Handler */
+
   irq_attach(priv->irqid, i2c_interrupt);
 
   /* Enable Interrupt Handler */
+
   up_enable_irq(priv->irqid);
 
   /* Install our operations */
-  priv->dev.ops = &lpc31_i2c_ops;
 
+  priv->dev.ops = &lpc31_i2c_ops;
   return &priv->dev;
 }
 
@@ -594,8 +596,10 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
  *
  ****************************************************************************/
 
-void lpc31_i2cbus_uninitialize(struct lpc31_i2cdev_s *priv)
+int lpc31_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
+  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *)dev;
+
   /* Disable All Interrupts, soft reset the device */
 
   i2c_hwreset(priv);
@@ -611,4 +615,5 @@ void lpc31_i2cbus_uninitialize(struct lpc31_i2cdev_s *priv)
   /* Disable I2C system clocks */
 
   lpc31_disableclock(priv->clkid);
+  return OK;
 }
