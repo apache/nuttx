@@ -57,10 +57,10 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_OLIMEX_STRP711
-#  define NSH_HAVEUSBDEV 1
-#  ifdef CONFIG_STR71X_BSPI1
-#    define NSH_HAVEMMCSD  1
+#define NSH_HAVEUSBDEV 1
+#ifdef CONFIG_STR71X_BSPI1
+#  define NSH_HAVEMMCSD  1
+#  ifdef CONFIG_NSH_ARCHINIT
 #    if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
 #      error "The Olimex STR-P711 MMC/SD is on BSPI1"
 #      undef CONFIG_NSH_MMCSDSPIPORTNO
@@ -72,12 +72,12 @@
 #      define CONFIG_NSH_MMCSDSLOTNO 0
 #    endif
 #  else
-#    undef NSH_HAVEMMCSD
+#    undef  CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 0
+#    undef  CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new STR71x boards here */
-#  error "Unrecognized STR71x board"
-#  undef NSH_HAVEUSBDEV
 #  undef NSH_HAVEMMCSD
 #endif
 

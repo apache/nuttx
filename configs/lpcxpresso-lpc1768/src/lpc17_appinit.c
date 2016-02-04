@@ -59,22 +59,17 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_LPCXPRESSO
-#  define NSH_HAVEUSBDEV 1
-#  ifdef CONFIG_LPC17_SSP1
-#    define NSH_HAVEMMCSD 1
-#  else
-#    undef NSH_HAVEMMCSD
-#  endif
+#define NSH_HAVEUSBDEV 1
+#ifdef CONFIG_LPC17_SSP1
+#  define NSH_HAVEMMCSD 1
 #else
-#  error "Unrecognized board"
-#  undef NSH_HAVEUSBDEV
 #  undef NSH_HAVEMMCSD
 #endif
 
 /* Do we have SPI support for MMC/SD? */
 
 #ifdef NSH_HAVEMMCSD
+#ifdef CONFIG_NSH_ARCHINIT
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
 #    error "The LPCXpresso MMC/SD is on SSP1"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
@@ -85,6 +80,12 @@
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
+#else
+#  undef  CONFIG_NSH_MMCSDSPIPORTNO
+#  define CONFIG_NSH_MMCSDSPIPORTNO 1
+#  undef  CONFIG_NSH_MMCSDSLOTNO
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#endif
 #endif
 
 /* Can't support USB device features if USB device is not enabled */
@@ -108,14 +109,6 @@
 #else
 #  undef NSH_HAVEMMCSD
 #endif /* CONFIG_LIB_BOARDCTL */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

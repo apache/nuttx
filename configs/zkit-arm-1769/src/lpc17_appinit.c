@@ -78,13 +78,20 @@
 /* Do we have SPI support for MMC/SD? */
 
 #ifdef CONFIG_NSH_HAVEMMCSD
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "The ZKit-arm MMC/SD is on SPI port 0"
+#  ifdef CONFIG_NSH_ARCHINIT
+#    if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
+#      error "The ZKit-arm MMC/SD is on SPI port 0"
+#      undef CONFIG_NSH_MMCSDSPIPORTNO
+#      define CONFIG_NSH_MMCSDSPIPORTNO 0
+#    endif
+#    if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
+#      error "The ZKit-arm MMC/SD has only one slot (0)"
+#      undef CONFIG_NSH_MMCSDSLOTNO
+#      define CONFIG_NSH_MMCSDSLOTNO 0
+#    endif
+#  else
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 0
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The ZKit-arm MMC/SD has only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif

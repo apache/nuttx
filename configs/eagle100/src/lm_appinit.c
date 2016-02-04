@@ -57,7 +57,7 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_EAGLE100
+#ifdef CONFIG_NSH_ARCHINIT
 #  undef NSH_HAVEUSBDEV
 #  define NSH_HAVEMMCSD  1
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
@@ -71,10 +71,10 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new LM3s boards here */
-#  error "Unrecognized lm3s board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
+#    undef  CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 0
+#    undef  CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
 
 /* Can't support USB features if USB is not enabled */

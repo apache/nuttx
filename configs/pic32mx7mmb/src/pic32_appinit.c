@@ -86,7 +86,9 @@
     * SD slot on the Mikroelektronica PIC32MX7 MMB).
     */
 
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  elif CONFIG_NSH_MMCSDSLOTNO != 0
 #    warning "The Mikroelektronika PIC32MX7 MMB has only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0

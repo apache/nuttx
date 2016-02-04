@@ -77,14 +77,21 @@
 /* Do we have SPI support for MMC/SD? */
 
 #ifdef NSH_HAVEMMCSD
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "External MMC/SD on SSP0"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#  ifdef CONFIG_NSH_ARCHINIT
+#    if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
+#      error "External MMC/SD on SSP0"
+#      undef CONFIG_NSH_MMCSDSPIPORTNO
+#      define CONFIG_NSH_MMCSDSPIPORTNO 0
+#    endif
+#    if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#      error "Use MMC/SD slot 0 by default"
+#      undef CONFIG_NSH_MMCSDSLOTNO
+#      define CONFIG_NSH_MMCSDSLOTNO 0
+#    endif
+#  else
+#    undef  CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 0
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
-#    error "Use MMC/SD slot 0 by default"
-#    undef CONFIG_NSH_MMCSDSLOTNO
+#    undef  CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #endif

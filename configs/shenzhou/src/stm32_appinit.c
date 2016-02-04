@@ -88,24 +88,12 @@
 
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != STM32_MMCSDSLOTNO
 #    error "Only one MMC/SD slot:  Slot 0"
-#    undef  CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO STM32_MMCSDSLOTNO
-#  endif
-
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO STM32_MMCSDSLOTNO
 #  endif
 
 /* Verify configured SPI port number */
 
 #  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != STM32_MMCSDSPIPORTNO
 #    error "Only one MMC/SD port:  SPI1"
-#    undef  CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO STM32_MMCSDSPIPORTNO
-#  endif
-
-#  ifndef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO STM32_MMCSDSPIPORTNO
 #  endif
 #endif
 
@@ -183,7 +171,7 @@ int board_app_initialize(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot %d: %d\n",
-              CONFIG_NSH_MMCSDSLOTNO, ret);
+              STM32_MMCSDSLOTNO, ret);
       return ret;
     }
 #endif
