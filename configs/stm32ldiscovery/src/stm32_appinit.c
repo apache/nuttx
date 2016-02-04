@@ -1,6 +1,6 @@
 /****************************************************************************
- * config/stm32ldiscovery/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/stm32ldiscovery/src/stm32_appinit.c
+ * arch/arm/src/board/stm32_appinit.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
