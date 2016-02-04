@@ -57,7 +57,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: tiva_spibus_initialize
+ * Name: tiva_ssibus_initialize
  *
  * Description:
  *   Initialize common parts the selected SPI port.  Initialization of
@@ -79,28 +79,28 @@ extern "C"
  ****************************************************************************/
 
 struct spi_dev_s;
-FAR struct spi_dev_s *tiva_spibus_initialize(int port);
+FAR struct spi_dev_s *tiva_ssibus_initialize(int port);
 
 /****************************************************************************
- * The external functions, tiva_spiselect, tiva_spistatus, and
- * tiva_spicmddata must be provided by board-specific logic.  These are
+ * The external functions, tiva_ssiselect, tiva_ssistatus, and
+ * tiva_ssicmddata must be provided by board-specific logic.  These are
  * implementations of the select, status, and cmddata methods of the SPI
  * interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All other methods (including tiva_spibus_initialize()) are provided by common
+ * All other methods (including tiva_ssibus_initialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in tiva_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide tiva_spiselect() and tiva_spistatus() functions in your
+ *   2. Provide tiva_ssiselect() and tiva_ssistatus() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide
- *      the tiva_spicmddata() function in your board-specific logic.  This
+ *      the tiva_ssicmddata() function in your board-specific logic.  This
  *      functions will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
- *   4. Add a call to tiva_spibus_initialize() in your low level application
+ *   4. Add a call to tiva_ssibus_initialize() in your low level application
  *      initialization logic
- *   5. The handle returned by tiva_spibus_initialize() may then be used to bind the
+ *   5. The handle returned by tiva_ssibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -109,10 +109,10 @@ FAR struct spi_dev_s *tiva_spibus_initialize(int port);
 
 struct spi_dev_s;
 enum spi_dev_e;
-void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-int tiva_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int tiva_ssicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #if defined(__cplusplus)

@@ -307,16 +307,16 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 static const struct spi_ops_s g_spiops =
 {
   .lock         = ssi_lock,
-  .select       = tiva_spiselect,    /* Provided externally by board logic */
+  .select       = tiva_ssiselect,    /* Provided externally by board logic */
   .setfrequency = ssi_setfrequency,
   .setmode      = ssi_setmode,
   .setbits      = ssi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
   .hwfeatures   = 0,                 /* Not supported */
 #endif
-  .status       = tiva_spistatus,    /* Provided externally by board logic */
+  .status       = tiva_ssistatus,    /* Provided externally by board logic */
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata      = tiva_spicmddata,
+  .cmddata      = tiva_ssicmddata,
 #endif
   .send         = ssi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -1481,7 +1481,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_spibus_initialize
+ * Name: tiva_ssibus_initialize
  *
  * Description:
  *   Initialize common parts the selected SPI port.  Initialization of
@@ -1502,7 +1502,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *tiva_spibus_initialize(int port)
+FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 {
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
