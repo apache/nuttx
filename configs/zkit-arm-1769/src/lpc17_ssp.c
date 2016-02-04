@@ -147,11 +147,11 @@ void weak_function zkit_sspdev_initialize(void)
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_spi1select() Entry");
+  ssp_dumpgpio("lpc17_ssp1select() Entry");
 
 #warning "Assert CS here (false)"
 
-  ssp_dumpgpio("lpc17_spi1select() Exit");
+  ssp_dumpgpio("lpc17_ssp1select() Exit");
 }
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -181,7 +181,7 @@ int weak_function lpc17_ssp1cmddata(FAR struct spi_dev_s *dev,
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_spi0select() Entry");
+  ssp_dumpgpio("lpc17_ssp0select() Entry");
 
 #ifdef CONFIG_NX_LCDDRIVER
   if (devid == SPIDEV_DISPLAY)
@@ -192,7 +192,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     }
 #endif
 
-  ssp_dumpgpio("lpc17_spi0select() Exit");
+  ssp_dumpgpio("lpc17_ssp0select() Exit");
 }
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
