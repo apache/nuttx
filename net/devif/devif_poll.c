@@ -269,24 +269,17 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
-  /* Don't do anything is less a half second has elapsed */
+  /* Traverse all of the active TCP connections and perform the poll action. */
 
-  if (hsec > 0)
+  while (!bstop && (conn = tcp_nextconn(conn)))
     {
-      /* Traverse all of the active TCP connections and perform the poll
-       * action.
-       */
+      /* Perform the TCP timer poll */
 
-      while (!bstop && (conn = tcp_nextconn(conn)))
-        {
-          /* Perform the TCP timer poll */
+      tcp_timer(dev, conn, hsec);
 
-          tcp_timer(dev, conn, hsec);
+      /* Call back into the driver */
 
-          /* Call back into the driver */
-
-          bstop = callback(dev);
-        }
+      bstop = callback(dev);
     }
 
   return bstop;
@@ -430,20 +423,26 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
   systime_t now;
+  systime_t elapsed;
   int bstop = false;
-  int hsec;
 
   /* Get the elapsed time since the last poll in units of half seconds
    * (truncating).
    */
 
-  now  = clock_systimer();
-  hsec = (int)((now - g_polltime) / TICK_PER_HSEC);
+  now     = clock_systimer();
+  elapsed = now - g_polltime;
 
   /* Process time-related events only when more than one half second elapses. */
 
-  if (hsec > 0)
+  if (elapsed >= TICK_PER_HSEC)
     {
+      /* Calculate the elpased time in units of half seconds (truncating to
+       * number of whole half seconds).
+       */
+
+      int hsec = (int)(elapsed / TICK_PER_HSEC);
+
       /* Update the current poll time (truncating to the last half second
        * boundary to avoid error build-up).
        */
@@ -467,80 +466,23 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
        neighbor_periodic(hsec);
 #endif
-    }
 
-  /* Traverse all of the active packet connections and perform the poll
-   * action.
-   */
-
-#ifdef CONFIG_NET_ARP_SEND
-  /* Check for pending ARP requests */
-
-  bstop = arp_poll(dev, callback);
-  if (!bstop)
-#endif
-#ifdef CONFIG_NET_PKT
-    {
-      /* Check for pending packet socket transfer */
-
-      bstop = devif_poll_pkt_connections(dev, callback);
-    }
-
-  if (!bstop)
-#endif
-#ifdef CONFIG_NET_IGMP
-    {
-      /* Check for pending IGMP messages */
-
-      bstop = devif_poll_igmp(dev, callback);
-    }
-
-  if (!bstop)
-#endif
 #ifdef CONFIG_NET_TCP
-    {
       /* Traverse all of the active TCP connections and perform the
        * timer action.
-       *
-       * NOTE: devif_poll_tcp_timer will handle the case where hsec <= 0.
        */
 
       bstop = devif_poll_tcp_timer(dev, callback, hsec);
+#endif
     }
 
-  if (!bstop)
-#endif
-#ifdef CONFIG_NET_UDP
-   {
-      /* Traverse all of the allocated UDP connections and perform
-       * the timer action.
-       */
-
-      bstop = devif_poll_udp_connections(dev, callback);
-    }
+  /* If possible, continue with a normal poll checking for pending
+   * network driver actions.
+   */
 
   if (!bstop)
-#endif
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
     {
-      /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
-
-      bstop = devif_poll_icmp(dev, callback);
-    }
-
-  if (!bstop)
-#endif
-#if defined(CONFIG_NET_ICMPv6) && defined(CONFIG_NET_ICMPv6_PING)
-    {
-      /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
-
-      bstop = devif_poll_icmpv6(dev, callback);
-    }
-
-  if (!bstop)
-#endif
-    {
-      /* Nothing to do */
+      bstop = devif_poll(dev, callback);
     }
 
   return bstop;
