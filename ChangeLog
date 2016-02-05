@@ -11456,3 +11456,6 @@
 	  some logic that may attempt to run early in the start-up sequence but
 	  cannot run if a sufficient level of initialization has not yet occurred
 	  (2016-02-05).
+	* libc/syslog/lib_syslog.c: If syslog timestamping is enabled, don't try to
+	  get the time if the timer hardware has not yet been initialized
+	  (2016-02-05).

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/syslog/lib_syslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,42 +42,11 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/init.h>
 #include <nuttx/clock.h>
 #include <nuttx/streams.h>
 
 #include "syslog/syslog.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -104,11 +73,19 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   struct timespec ts;
-  int ret;
 
-  /* Get the current time */
+  /* Get the current time.  Since debug output may be generated very early
+   * in the start-up sequence, hardware timer support may not yet be
+   * available.
+   */
 
-  ret = clock_systimespec(&ts);
+  if (!OSINIT_HW_READY() || clock_systimespec(&ts) < 0)
+    {
+      /* Timer hardware is not available, or clock_systimespec failed */
+
+      ts.tv_sec  = 0;
+      ts.tv_nsec = 0;
+    }
 #endif
 
 #if defined(CONFIG_SYSLOG)
@@ -119,14 +96,11 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
   lib_syslogstream((FAR struct lib_outstream_s *)&stream);
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time */
+  /* Pre-pend the message with the current time, if available */
 
-  if (ret == OK)
-    {
-      (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                        "[%6d.%06d]",
-                         ts.tv_sec, ts.tv_nsec/1000);
-    }
+  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
+                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
+
 #endif
 
   return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
@@ -139,14 +113,10 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
   lib_rawoutstream(&stream, 1);
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time */
+  /* Pre-pend the message with the current time, if available */
 
-  if (ret == OK)
-    {
-      (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                        "[%6d.%06d]",
-                         ts.tv_sec, ts.tv_nsec/1000);
-    }
+  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
+                    "[%6d.%06d]",  ts.tv_sec, ts.tv_nsec/1000);
 #endif
 
   return lib_vsprintf(&stream.public, fmt, ap);
@@ -159,20 +129,18 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
   lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time */
+  /* Pre-pend the message with the current time, if available */
 
-  if (ret == OK)
-    {
-      (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                        "[%6d.%06d]",
-                         ts.tv_sec, ts.tv_nsec/1000);
-    }
+  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
+                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
 #endif
 
   return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
 
 #else /* CONFIG_SYSLOG */
+
   return 0;
+
 #endif /* CONFIG_SYSLOG */
 }
 
