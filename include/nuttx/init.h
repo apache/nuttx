@@ -75,7 +75,7 @@ enum os_initstate_e
   OSINIT_HARDWARE = 3,  /* MCU-specific hardware is initialized.  Hardware
                          * resources such as timers and device drivers are
                          * now avaiable.  Low-level OS services sufficient
-                         * to support the hardware are also avaialable but
+                         * to support the hardware are also available but
                          * the OS has not yet completed its full
                          * initialization. */
   OSINIT_OSREADY  = 4   /* The OS is fully initialized and multi-tasking is
@@ -96,7 +96,7 @@ extern "C"
 
 /* This is the current initialization state.  The level of initialization
  * is only important early in the start-up sequence when certain OS or
- * hardware resources may not yet be available to the kernel logic.
+ * hardware resources may not yet be available to the OS-internal logic.
  */
 
 EXTERN uint8_t g_os_initstate;  /* See enum os_initstate_e */
