@@ -11451,4 +11451,8 @@
 	  We can get better timing accuracy without it (2016-02-03).
 	* drivers/ioexpander/pca555.c:  Add logic to make the PCA555 driver
 	  thread safe (2016-02-03).
-
+	* sched/init/os_start.c and include/nuttx/init.h:  Add a state variable
+	  that provides the current level of OS initialization.  This is needed by
+	  some logic that may attempt to run early in the start-up sequence but
+	  cannot run if a sufficient level of initialization has not yet occurred
+	  (2016-02-05).

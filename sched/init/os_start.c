@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/init/os_start.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,14 +71,6 @@
 #include  "group/group.h"
 #endif
 #include  "init/init.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -215,6 +207,13 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
 #endif
 };
 
+/* This is the current initialization state.  The level of initialization
+ * is only important early in the start-up sequence when certain OS or
+ * hardware resources may not yet be available to the kernel logic.
+ */
+
+uint8_t g_os_initstate;  /* See enum os_initstate_e */
+
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
@@ -263,6 +262,10 @@ void os_start(void)
   int i;
 
   slldbg("Entry\n");
+
+  /* Boot up is complete */
+
+  g_os_initstate = OSINIT_BOOT;
 
   /* Initialize RTOS Data ***************************************************/
   /* Initialize all task lists */
@@ -391,6 +394,10 @@ void os_start(void)
   }
 #endif
 
+  /* The memory manager is available */
+
+  g_os_initstate = OSINIT_MEMORY;
+
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Initialize tasking data structures */
 
@@ -497,6 +504,10 @@ void os_start(void)
 
   up_initialize();
 
+  /* Hardware resources are available */
+
+  g_os_initstate = OSINIT_HARDWARE;
+
 #ifdef CONFIG_NET
   /* Complete initialization the networking system now that interrupts
    * and timers have been configured by up_initialize().
@@ -542,6 +553,10 @@ void os_start(void)
 #endif
 
   /* Bring Up the System ****************************************************/
+  /* The OS is fully initialized and we are beginning multi-tasking */
+
+  g_os_initstate = OSINIT_OSREADY;
+
   /* Create initial tasks and bring-up the system */
 
   DEBUGVERIFY(os_bringup());

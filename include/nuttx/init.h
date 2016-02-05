@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/init.h
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,39 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <stdint.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define OSINIT_MM_READY()        (g_os_initstate >= OSINIT_MEMORY)
+#define OSINIT_HW_READY()        (g_os_initstate >= OSINIT_HARDWARE)
+#define OSINIT_OS_READY()        (g_os_initstate >= OSINIT_OSREADY)
+#define OSINIT_OS_INITIALIZING() (g_os_initstate  < OSINIT_OSREADY)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Initialization state.  OS bring-up occurs in several phases: */
+
+enum os_initstate_e
+{
+  OSINIT_POWERUP = 0,   /* 1. Power-up.  No initialization yet performed */
+  OSINIT_BOOT,          /* 2. Basic boot up initialization is complete.  OS
+                         *    services and hardware resources are not yet
+                         *    available. */
+  OSINIT_MEMORY,        /* 3. The memory manager has been initialized */
+  OSINIT_HARDWARE,      /* 4. MCU-specific hardware is complete.  Hardware
+                         *    resources such as timers and device drivers
+                         *    are now avaiable.  Low-level OS services
+                         *    sufficient to support the hardware are
+                         *    also avaialable but the OS has not yet
+                         *    completed its full initialization. */
+  OSINIT_OSREADY        /* 5. The OS is fully initialized and multi-tasking
+                         *    is active. */
+};
 
 /****************************************************************************
  * Public Data
@@ -58,6 +88,13 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/* This is the current initialization state.  The level of initialization
+ * is only important early in the start-up sequence when certain OS or
+ * hardware resources may not yet be available to the kernel logic.
+ */
+
+EXTERN uint8_t g_os_initstate;  /* See enum os_initstate_e */
 
 /****************************************************************************
  * Public Function Prototypes
