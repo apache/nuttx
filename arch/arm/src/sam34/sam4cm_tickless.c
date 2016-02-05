@@ -84,6 +84,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 
@@ -247,6 +248,8 @@ void up_timer_initialize(void)
       PANIC();
     }
 
+  DEBUGASSERT(ONESHOT_INITIALIZED(&g_tickless.oneshot));
+
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
   /* Get the maximum delay of the one-shot timer in microseconds */
 
@@ -280,6 +283,8 @@ void up_timer_initialize(void)
       tclldbg("ERROR: sam_freerun_initialize failed\n");
       PANIC();
     }
+
+  DEBUGASSERT(FREERUN_INITIALIZED(&g_tickless.freerun));
 }
 
 /****************************************************************************
@@ -317,7 +322,9 @@ void up_timer_initialize(void)
 
 int up_timer_gettime(FAR struct timespec *ts)
 {
-  return sam_freerun_counter(&g_tickless.freerun, ts);
+  return FREERUN_INITIALIZED(&g_tickless.freerun) ?
+         sam_freerun_counter(&g_tickless.freerun, ts) :
+         -EAGAIN;
 }
 
 /****************************************************************************
@@ -358,7 +365,9 @@ int up_timer_gettime(FAR struct timespec *ts)
 
 int up_timer_cancel(FAR struct timespec *ts)
 {
-  return sam_oneshot_cancel(&g_tickless.oneshot, ts);
+  return ONESHOT_INITIALIZED(&g_tickless.oneshot) ?
+         sam_oneshot_cancel(&g_tickless.oneshot, ts) :
+         -EAGAIN;
 }
 
 /****************************************************************************
@@ -388,6 +397,8 @@ int up_timer_cancel(FAR struct timespec *ts)
 
 int up_timer_start(FAR const struct timespec *ts)
 {
-  return sam_oneshot_start(&g_tickless.oneshot, sam_oneshot_handler, NULL, ts);
+  return ONESHOT_INITIALIZED(&g_tickless.oneshot) ?
+         sam_oneshot_start(&g_tickless.oneshot, sam_oneshot_handler, NULL, ts) :
+         -EAGAIN;
 }
 #endif /* CONFIG_SCHED_TICKLESS */
