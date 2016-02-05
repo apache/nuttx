@@ -48,6 +48,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Macros for testing which OS services are available at this phase of
+ * initialization.
+ */
 
 #define OSINIT_MM_READY()        (g_os_initstate >= OSINIT_MEMORY)
 #define OSINIT_HW_READY()        (g_os_initstate >= OSINIT_HARDWARE)
@@ -62,19 +65,21 @@
 
 enum os_initstate_e
 {
-  OSINIT_POWERUP = 0,   /* 1. Power-up.  No initialization yet performed */
-  OSINIT_BOOT,          /* 2. Basic boot up initialization is complete.  OS
-                         *    services and hardware resources are not yet
-                         *    available. */
-  OSINIT_MEMORY,        /* 3. The memory manager has been initialized */
-  OSINIT_HARDWARE,      /* 4. MCU-specific hardware is complete.  Hardware
-                         *    resources such as timers and device drivers
-                         *    are now avaiable.  Low-level OS services
-                         *    sufficient to support the hardware are
-                         *    also avaialable but the OS has not yet
-                         *    completed its full initialization. */
-  OSINIT_OSREADY        /* 5. The OS is fully initialized and multi-tasking
-                         *    is active. */
+  OSINIT_POWERUP  = 0,  /* Power-up.  No initialization yet performed.
+                         * Depends on .bss initialization logic for this
+                         * value. */
+  OSINIT_BOOT     = 1,  /* Basic boot up initialization is complete.  OS
+                         * services and hardware resources are not yet
+                         * available. */
+  OSINIT_MEMORY   = 2,  /* The memory manager has been initialized */
+  OSINIT_HARDWARE = 3,  /* MCU-specific hardware is initialized.  Hardware
+                         * resources such as timers and device drivers are
+                         * now avaiable.  Low-level OS services sufficient
+                         * to support the hardware are also avaialable but
+                         * the OS has not yet completed its full
+                         * initialization. */
+  OSINIT_OSREADY  = 4   /* The OS is fully initialized and multi-tasking is
+                         * active. */
 };
 
 /****************************************************************************
