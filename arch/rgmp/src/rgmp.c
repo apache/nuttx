@@ -113,9 +113,9 @@ void rtos_exit_interrupt(void)
           push_xcptcontext(&rtcb->xcp);
         }
 
-      ntcb = (struct tcb_s*)g_readytorun.head;
+      ntcb = this_task();
 
-      // switch needed
+      /* Switch needed */
 
       if (rtcb != ntcb)
         {

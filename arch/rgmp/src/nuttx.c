@@ -296,7 +296,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
               panic("%s: %d\n", __func__, __LINE__);
             }
 
-          /* If there are any pending tasks, then add them to the g_readytorun
+          /* If there are any pending tasks, then add them to the ready-to-run
            * task list now. It should be the up_realease_pending() called from
            * sched_unlock() to do this for disable preemption. But it block
            * itself, so it's OK.
@@ -308,7 +308,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
               sched_mergepending();
             }
 
-          nexttcb = (struct tcb_s*)g_readytorun.head;
+          nexttcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously
@@ -365,7 +365,7 @@ void up_unblock_task(struct tcb_s *tcb)
       sched_removeblocked(tcb);
 
       /* Add the task in the correct location in the prioritized
-       * g_readytorun task list.
+       * ready-to-run task list.
        */
 
       if (sched_addreadytorun(tcb) && !up_interrupt_context())
@@ -377,7 +377,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
           /* Are we in an interrupt handler? */
 
-          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+          struct tcb_s *nexttcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously
@@ -406,11 +406,11 @@ void up_release_pending(void)
 {
   struct tcb_s *rtcb = current_task;
 
-  /* Merge the g_pendingtasks list into the g_readytorun task list */
+  /* Merge the g_pendingtasks list into the ready-to-run task list */
 
   if (sched_mergepending())
     {
-      struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+      struct tcb_s *nexttcb = this_task();
 
       /* The currently active task has changed!  We will need to switch
        * contexts.
@@ -488,7 +488,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
         {
           struct tcb_s *nexttcb;
 
-          /* If there are any pending tasks, then add them to the g_readytorun
+          /* If there are any pending tasks, then add them to the ready-to-run
            * task list now. It should be the up_realease_pending() called from
            * sched_unlock() to do this for disable preemption. But it block
            * itself, so it's OK.
@@ -506,7 +506,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           /* Get the TCB of the new task to run */
 
-          nexttcb = (struct tcb_s*)g_readytorun.head;
+          nexttcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously
@@ -540,7 +540,7 @@ void _exit(int status)
      * head of the list.
      */
 
-    tcb = (struct tcb_s*)g_readytorun.head;
+    tcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
     /* Make sure that the address environment for the previously running
@@ -562,7 +562,7 @@ void up_assert(const uint8_t *filename, int line)
     fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-    board_crashdump(up_getsp(), g_readytorun.head, filename, line);
+    board_crashdump(up_getsp(), this_task(), filename, line);
 #endif
 
     // in interrupt context or idle task means kernel error
