@@ -54,18 +54,6 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -121,9 +109,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * to the currently executing task.
        */
 
-      sdbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
+      sdbg("rtcb=0x%p current_regs=0x%p\n", this_task(), current_regs);
 
-      if (tcb == (struct tcb_s *)g_readytorun.head)
+      if (tcb == this_task())
         {
           /* CASE 1:  We are not in an interrupt handler and a task is
            * signalling itself for some reason.

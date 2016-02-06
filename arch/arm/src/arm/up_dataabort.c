@@ -104,7 +104,7 @@
 #ifdef CONFIG_PAGING
 void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
-  FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
+  struct tcb_s *tcb = this_task();
 #ifdef CONFIG_PAGING
   uint32_t *savestate;
 

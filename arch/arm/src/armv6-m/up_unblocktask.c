@@ -69,7 +69,7 @@
 
 void up_unblock_task(struct tcb_s *tcb)
 {
-  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
+  struct tcb_s *rtcb = this_task();
 
   /* Verify that the context switch can be performed */
 
@@ -81,7 +81,7 @@ void up_unblock_task(struct tcb_s *tcb)
   sched_removeblocked(tcb);
 
   /* Add the task in the correct location in the prioritized
-   * g_readytorun task list
+   * ready-to-run task list
    */
 
   if (sched_addreadytorun(tcb))
@@ -105,10 +105,10 @@ void up_unblock_task(struct tcb_s *tcb)
           up_savestate(rtcb->xcp.regs);
 
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (struct tcb_s *)g_readytorun.head;
+          rtcb = this_task();
 
           /* Update scheduler parameters */
 
@@ -123,7 +123,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
       else
         {
-          struct tcb_s *nexttcb = (struct tcb_s *)g_readytorun.head;
+          struct tcb_s *nexttcb = this_task();
 
           /* Update scheduler parameters */
 

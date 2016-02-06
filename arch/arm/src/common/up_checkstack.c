@@ -50,19 +50,16 @@
 #include "sched/sched.h"
 #include "up_internal.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 #ifdef CONFIG_STACK_COLORATION
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 static size_t do_stackcheck(uintptr_t alloc, size_t size);
 
 /****************************************************************************
@@ -180,12 +177,12 @@ ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
 
 size_t up_check_stack(void)
 {
-  return up_check_tcbstack((FAR struct tcb_s *)g_readytorun.head);
+  return up_check_tcbstack(this_task());
 }
 
 ssize_t up_check_stack_remain(void)
 {
-  return up_check_tcbstack_remain((FAR struct tcb_s *)g_readytorun.head);
+  return up_check_tcbstack_remain(this_task());
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

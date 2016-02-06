@@ -53,14 +53,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -146,7 +138,7 @@ void _exit(int status)
 
   (void)irqsave();
 
-  slldbg("TCB=%p exiting\n", g_readytorun.head);
+  slldbg("TCB=%p exiting\n", this_task());
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
   slldbg("Other tasks:\n");
@@ -161,7 +153,7 @@ void _exit(int status)
    * head of the list.
    */
 
-  tcb = (struct tcb_s *)g_readytorun.head;
+  tcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running
