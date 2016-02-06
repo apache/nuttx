@@ -65,11 +65,11 @@
 
 void up_release_pending(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
+  struct tcb_s *rtcb = this_task();
 
   slldbg("From TCB=%p\n", rtcb);
 
-  /* Merge the g_pendingtasks list into the g_readytorun task list */
+  /* Merge the g_pendingtasks list into the ready-to-run task list */
 
   /* sched_lock(); */
   if (sched_mergepending())
@@ -93,10 +93,10 @@ void up_release_pending(void)
            up_savestate(rtcb->xcp.regs);
 
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (struct tcb_s *)g_readytorun.head;
+          rtcb = this_task();
 
           /* Update scheduler parameters */
 
@@ -117,7 +117,7 @@ void up_release_pending(void)
            * ready to run list.
            */
 
-          struct tcb_s *nexttcb = (struct tcb_s *)g_readytorun.head;
+          struct tcb_s *nexttcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously

@@ -105,7 +105,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || ((struct tcb_s *)g_readytorun.head)->pid == 0)
+  if (current_regs || this_task()->pid == 0)
     {
       (void)irqsave();
       for (; ; )
@@ -160,7 +160,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 void up_assert(const uint8_t *filename, int lineno)
 {
 #ifdef CONFIG_PRINT_TASKNAME
-  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
+  struct tcb_s *rtcb = this_task();
 #endif
 
   board_autoled_on(LED_ASSERTION);
@@ -176,7 +176,7 @@ void up_assert(const uint8_t *filename, int lineno)
   up_dumpstate();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), g_readytorun.head, filename, lineno);
+  board_crashdump(up_getsp(), this_task(), filename, lineno);
 #endif
 
 #ifdef CONFIG_ARCH_USBDUMP

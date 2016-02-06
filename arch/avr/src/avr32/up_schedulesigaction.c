@@ -119,9 +119,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sdbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
+      sdbg("rtcb=0x%p current_regs=0x%p\n", this_task(), current_regs);
 
-      if (tcb == (struct tcb_s *)g_readytorun.head)
+      if (tcb == this_task())
         {
           /* CASE 1:  We are not in an interrupt handler and
            * a task is signalling itself for some reason.
@@ -143,7 +143,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * logic would fail in the strange case where we are in an
            * interrupt handler, the thread is signalling itself, but
            * a context switch to another task has occurred so that
-           * current_regs does not refer to the thread at g_readytorun.head!
+           * current_regs does not refer to the thread of this_task()!
            */
 
           else
