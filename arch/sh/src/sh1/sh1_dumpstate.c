@@ -145,8 +145,8 @@ static inline void sh1_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s    *rtcb     = (struct tcb_s*)g_readytorun.head;
-  uint32_t sp       = sh1_getsp();
+  struct tcb_s *rtcb = this_task();
+  uint32_t sp = sh1_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

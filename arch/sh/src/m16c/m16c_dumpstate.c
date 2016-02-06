@@ -156,7 +156,7 @@ static inline void m16c_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = this_task();
   uint16_t sp = m16c_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;

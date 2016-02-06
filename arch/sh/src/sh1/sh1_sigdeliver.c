@@ -82,7 +82,7 @@
 void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
-  struct tcb_s  *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
