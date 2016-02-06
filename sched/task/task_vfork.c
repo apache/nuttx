@@ -240,7 +240,7 @@ static inline int vfork_argsetup(FAR struct tcb_s *parent,
 
 FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
 {
-  struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
+  struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
   uint8_t ttype;
   int priority;
@@ -364,12 +364,12 @@ errout_with_tcb:
 
 pid_t task_vforkstart(FAR struct task_tcb_s *child)
 {
-  struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
+  struct tcb_s *parent = this_task();
   pid_t pid;
   int rc;
   int ret;
 
-  svdbg("Starting Child TCB=%p, parent=%p\n", child, g_readytorun.head);
+  svdbg("Starting Child TCB=%p, parent=%p\n", child, this_task());
   DEBUGASSERT(child);
 
   /* Duplicate the original argument list in the forked child TCB */

@@ -127,10 +127,10 @@
  *
  ****************************************************************************/
 
-int mq_notify(mqd_t mqdes, const struct sigevent *notification)
+int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 {
-  struct tcb_s *rtcb;
-  struct mqueue_inode_s *msgq;
+  FAR struct tcb_s *rtcb;
+  FAR struct mqueue_inode_s *msgq;
   int errval;
 
   /* Was a valid message queue descriptor provided? */
@@ -150,7 +150,7 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 
   /* Get the current process ID */
 
-  rtcb = (struct tcb_s *)g_readytorun.head;
+  rtcb = this_task();
 
   /* Is there already a notification attached */
 

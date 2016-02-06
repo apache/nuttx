@@ -183,7 +183,7 @@ static void mq_sndtimeout(int argc, wdparm_t pid)
 int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
                  FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
   irqstate_t saved_state;

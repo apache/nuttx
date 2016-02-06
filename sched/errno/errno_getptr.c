@@ -97,11 +97,11 @@ FAR int *get_errno_ptr(void)
        * logic (see, for example, task_exit.c).
        *
        * There is also a corner case early in the initialization sequence:
-       * The ready to run list may not yet be initialized and g_readytorun.head
+       * The ready to run list may not yet be initialized and this_task()
        * may be NULL.
        */
 
-      FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+      FAR struct tcb_s *rtcb = this_task();
       if (rtcb && rtcb->task_state == TSTATE_TASK_RUNNING)
         {
           /* Yes.. the task is running normally.  Return a reference to the

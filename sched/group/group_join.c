@@ -172,7 +172,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 
 int group_bind(FAR struct pthread_tcb_s *tcb)
 {
-  FAR struct tcb_s *ptcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *ptcb = this_task();
 
   DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->cmn.group);
 

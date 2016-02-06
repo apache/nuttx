@@ -67,18 +67,6 @@
 #define SIG_WAIT_TIMEOUT 0xff
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -175,7 +163,7 @@ static void sig_timeout(int argc, wdparm_t itcb)
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                  FAR const struct timespec *timeout)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
   irqstate_t saved_state;

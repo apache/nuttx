@@ -104,7 +104,7 @@
 FAR void *pthread_getspecific(pthread_key_t key)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)g_readytorun.head;
+  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)this_task();
   FAR struct task_group_s *group = rtcb->cmn.group;
   FAR void *ret = NULL;
 

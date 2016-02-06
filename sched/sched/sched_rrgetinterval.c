@@ -91,7 +91,7 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 
   if (!pid)
     {
-      rrtcb = (FAR struct tcb_s *)g_readytorun.head;
+      rrtcb = this_task();
     }
 
   /* Return a special error code on invalid PID */

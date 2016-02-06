@@ -89,7 +89,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
 
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct file *parent;
   FAR struct file *child;
   int i;
@@ -147,7 +147,7 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
 
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct socket *parent;
   FAR struct socket *child;
   int i;

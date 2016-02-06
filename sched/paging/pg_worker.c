@@ -279,7 +279,7 @@ static inline bool pg_dequeue(void)
                * if a new higher priority fill is required).
                */
 
-              FAR struct tcb_s *wtcb = (FAR struct tcb_s *)g_readytorun.head;
+              FAR struct tcb_s *wtcb = this_task();
               if (wtcb->sched_priority > CONFIG_PAGING_DEFPRIO &&
                   wtcb->sched_priority > g_pftcb->sched_priority)
                 {
@@ -456,7 +456,7 @@ static inline bool pg_startfill(void)
 
 static inline void pg_alldone(void)
 {
-  FAR struct tcb_s *wtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *wtcb = this_task();
   g_pftcb = NULL;
   pgllvdbg("New worker priority. %d->%d\n",
            wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);

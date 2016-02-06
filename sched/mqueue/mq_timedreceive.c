@@ -182,7 +182,7 @@ static void mq_rcvtimeout(int argc, wdparm_t pid)
 ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
                         FAR int *prio, FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t saved_state;
   int ret = ERROR;

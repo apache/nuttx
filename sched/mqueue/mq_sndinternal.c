@@ -280,7 +280,7 @@ int mq_waitsend(mqd_t mqdes)
                * When we are unblocked, we will try again
                */
 
-              rtcb = (FAR struct tcb_s *)g_readytorun.head;
+              rtcb = this_task();
               rtcb->msgwaitq = msgq;
               msgq->nwaitnotfull++;
 

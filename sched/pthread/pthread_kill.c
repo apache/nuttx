@@ -94,7 +94,7 @@ int pthread_kill(pthread_t thread, int signo)
    */
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 #endif
   FAR struct tcb_s *stcb;
   siginfo_t info;

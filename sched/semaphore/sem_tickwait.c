@@ -82,7 +82,7 @@
 
 int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   systime_t elapsed;
   int ret;

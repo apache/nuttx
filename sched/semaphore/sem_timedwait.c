@@ -94,7 +94,7 @@
 
 int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   int        ticks;
   int        errcode;

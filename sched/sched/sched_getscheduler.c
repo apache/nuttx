@@ -107,7 +107,7 @@ int sched_getscheduler(pid_t pid)
 
   if (!pid)
     {
-      tcb = (struct tcb_s *)g_readytorun.head;
+      tcb = this_task();
     }
   else
     {

@@ -59,18 +59,6 @@
     (t)->sa_flags     = (f)->sa_flags; }
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -165,7 +153,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
 int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR sigactq_t *sigact;
 
   /* Since sigactions can only be installed from the running thread of

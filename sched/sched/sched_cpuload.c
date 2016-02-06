@@ -111,7 +111,7 @@ volatile uint32_t g_cpuload_total;
 
 void weak_function sched_process_cpuload(void)
 {
-  FAR struct tcb_s *rtcb  = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb  = this_task();
   int hash_index;
   int i;
 

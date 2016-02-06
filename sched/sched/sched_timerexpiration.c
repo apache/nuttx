@@ -164,8 +164,8 @@ static struct timespec g_stop_time;
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 {
-  FAR struct tcb_s *rtcb  = (FAR struct tcb_s *)g_readytorun.head;
-  FAR struct tcb_s *ntcb  = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb  = this_task();
+  FAR struct tcb_s *ntcb  = this_task();
   uint32_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
@@ -212,7 +212,7 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
    * the new task at the head of the ready to run list.
    */
 
-  ntcb = (FAR struct tcb_s *)g_readytorun.head;
+  ntcb = this_task();
 
   /* Check if the new task at the head of the ready-to-run has changed. */
 

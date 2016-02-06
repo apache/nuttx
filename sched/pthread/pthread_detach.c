@@ -97,7 +97,7 @@
 
 int pthread_detach(pthread_t thread)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct join_s *pjoin;
   int ret;

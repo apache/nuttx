@@ -228,13 +228,9 @@ o Task/Scheduler (sched/)
                hidden behind simple accessor functions and so the internal
                data structures can be changed if need with very little impact.
 
-               The only area are the list structure is not well contained is
-               in the sequence of code that finds the current running task:
 
-                 FAR struct tcb_s *rtcb = (FAT struc tcb_s *)g_readytorun.head;
-
-               That needs to be hidden behind a macro (it would also be a problem
-               for any SMP implementation).
+               Explicity refereence to the list strucutre are hidden behnid
+               the macro this_task().
 
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way

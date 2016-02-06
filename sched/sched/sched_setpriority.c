@@ -103,7 +103,7 @@
 
 int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   tstate_t task_state;
   irqstate_t saved_state;
 

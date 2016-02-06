@@ -45,10 +45,6 @@
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -70,7 +66,7 @@
 
 FAR struct socketlist *sched_getsockets(void)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
 
   DEBUGASSERT(group);

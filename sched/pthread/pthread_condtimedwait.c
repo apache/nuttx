@@ -182,7 +182,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   int ticks;
   int mypid = (int)getpid();
   irqstate_t int_state;

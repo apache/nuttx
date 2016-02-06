@@ -42,10 +42,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -69,7 +65,7 @@
 
 FAR struct streamlist *sched_getstreams(void)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
 
   DEBUGASSERT(group);

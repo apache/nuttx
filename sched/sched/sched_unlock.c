@@ -63,7 +63,7 @@
 
 int sched_unlock(void)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
@@ -118,7 +118,7 @@ int sched_unlock(void)
                * maximum.
                */
 
-              if (rtcb != (FAR struct tcb_s *)g_readytorun.head)
+              if (rtcb != this_task())
                 {
                   rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
@@ -156,7 +156,7 @@ int sched_unlock(void)
                * change the currently active task.
                */
 
-              if (rtcb == (FAR struct tcb_s *)g_readytorun.head)
+              if (rtcb == this_task())
                 {
                   sched_timer_reassess();
                 }

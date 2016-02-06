@@ -165,7 +165,7 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
 
 static void pthread_start(void)
 {
-  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)g_readytorun.head;
+  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)this_task();
   FAR struct task_group_s *group = ptcb->cmn.group;
   FAR struct join_s *pjoin = (FAR struct join_s *)ptcb->joininfo;
   pthread_addr_t exit_status;
@@ -269,8 +269,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 #ifdef CONFIG_ARCH_ADDRENV
   /* Share the address environment of the parent task group. */
 
-  ret = up_addrenv_attach(ptcb->cmn.group,
-                          (FAR struct tcb_s *)g_readytorun.head);
+  ret = up_addrenv_attach(ptcb->cmn.group, this_task());
   if (ret < 0)
     {
       errcode = -ret;

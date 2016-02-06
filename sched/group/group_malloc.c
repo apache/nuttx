@@ -92,7 +92,7 @@ FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes)
 
   if (!group)
     {
-      FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
+      FAR struct tcb_s *tcb = this_task();
       DEBUGASSERT(tcb && tcb->group);
       group = tcb->group;
     }

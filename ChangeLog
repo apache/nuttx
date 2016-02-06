@@ -11462,4 +11462,8 @@
 	* fs/procfs/fs_procfskmm.c:  Add /proc/kmm entry that shows that state of
 	  the kernel heap.  Only useful in PROTECTED and KERNEL build modes where
 	  there is a kernel heap (2016-02-06).
+	* sched/ and arch/: Replace explicit access to the OS internal data structure
+	  g_readytorun() with the wrapper this_task() which hides the implementation
+	  and will permit such things as more scalable representations of task queues
+	  and SMP (2016-02-06).
 
