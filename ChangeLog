@@ -11459,3 +11459,7 @@
 	* libc/syslog/lib_syslog.c: If syslog timestamping is enabled, don't try to
 	  get the time if the timer hardware has not yet been initialized
 	  (2016-02-05).
+	* fs/procfs/fs_procfskmm.c:  Add /proc/kmm entry that shows that state of
+	  the kernel heap.  Only useful in PROTECTED and KERNEL build modes where
+	  there is a kernel heap (2016-02-06).
+

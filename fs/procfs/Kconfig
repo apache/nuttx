@@ -48,6 +48,11 @@ config FS_PROCFS_EXCLUDE_CPULOAD
 	default n
 	depends on SCHED_CPULOAD
 
+config FS_PROCFS_EXCLUDE_KMM
+	bool "Exclude kmm"
+	default n
+	depends on MM_KERNEL_HEAP
+
 config FS_PROCFS_EXCLUDE_MOUNTS
 	bool "Exclude mounts"
 	default n

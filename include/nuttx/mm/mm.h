@@ -491,8 +491,8 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
 struct mallinfo kmm_mallinfo(void);
 #else
 int kmm_mallinfo(struct mallinfo *info);
-#endif
 #endif /* CONFIG_CAN_PASS_STRUCTS */
+#endif /* CONFIG_MM_KERNEL_HEAP */
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
 
