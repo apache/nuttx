@@ -92,7 +92,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
     }
   else
     {
-      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+      struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
       slldbg("TCB=%p PRI=%d\n", tcb, priority);
@@ -147,10 +147,10 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                up_copystate(rtcb->xcp.regs, current_regs);
 
               /* Restore the exception context of the rtcb at the (new) head
-               * of the g_readytorun task list.
+               * of the ready-to-run task list.
                */
 
-              rtcb = (struct tcb_s*)g_readytorun.head;
+              rtcb = this_task();
 
               /* Update scheduler parameters */
 
@@ -164,17 +164,17 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
             }
 
           /* Copy the exception context into the TCB at the (old) head of the
-           * g_readytorun Task list. if up_saveusercontext returns a non-zero
+           * ready-to-run Task list. if up_saveusercontext returns a non-zero
            * value, then this is really the previously running task restarting!
            */
 
           else if (!up_saveusercontext(rtcb->xcp.regs))
             {
               /* Restore the exception context of the rtcb at the (new) head
-               * of the g_readytorun task list.
+               * of the ready-to-run task list.
                */
 
-              rtcb = (struct tcb_s*)g_readytorun.head;
+              rtcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
               /* Make sure that the address environment for the previously
