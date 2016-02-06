@@ -77,7 +77,7 @@
 
 void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   bool switch_needed;
 
   /* Verify that the context switch can be performed */
@@ -100,7 +100,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 
   sched_addblocked(tcb, (tstate_t)task_state);
 
-  /* If there are any pending tasks, then add them to the g_readytorun
+  /* If there are any pending tasks, then add them to the ready-to-run
    * task list now
    */
 
@@ -128,10 +128,10 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
           SAVE_IRQCONTEXT(rtcb);
 
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
 
           /* Reset scheduler parameters */
 
@@ -146,17 +146,17 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
         }
 
       /* Copy the user C context into the TCB at the (old) head of the
-       * g_readytorun Task list. if SAVE_USERCONTEXT returns a non-zero
+       * ready-to-run Task list. if SAVE_USERCONTEXT returns a non-zero
        * value, then this is really the previously running task restarting!
        */
 
       else if (!SAVE_USERCONTEXT(rtcb))
         {
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
          /* Make sure that the address environment for the previously

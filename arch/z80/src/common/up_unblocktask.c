@@ -74,7 +74,7 @@
 
 void up_unblock_task(FAR struct tcb_s *tcb)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 
   /* Verify that the context switch can be performed */
 
@@ -88,7 +88,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
   sched_removeblocked(tcb);
 
   /* Add the task in the correct location in the prioritized
-   * g_readytorun task list
+   * ready-to-run task list
    */
 
   if (sched_addreadytorun(tcb))
@@ -112,10 +112,10 @@ void up_unblock_task(FAR struct tcb_s *tcb)
           SAVE_IRQCONTEXT(rtcb);
 
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
 
           /* Update scheduler parameters */
 
@@ -139,10 +139,10 @@ void up_unblock_task(FAR struct tcb_s *tcb)
         {
           /* Restore the exception context of the new task that is ready to
            * run (probably tcb).  This is the new rtcb at the head of the
-           * g_readytorun task list.
+           * ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
          /* Make sure that the address environment for the previously

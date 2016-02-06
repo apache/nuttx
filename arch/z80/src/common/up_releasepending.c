@@ -68,11 +68,11 @@
 
 void up_release_pending(void)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 
   slldbg("From TCB=%p\n", rtcb);
 
-  /* Merge the g_pendingtasks list into the g_readytorun task list */
+  /* Merge the g_pendingtasks list into the ready-to-run task list */
 
   /* sched_lock(); */
   if (sched_mergepending())
@@ -96,10 +96,10 @@ void up_release_pending(void)
            SAVE_IRQCONTEXT(rtcb);
 
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
 
           /* Update scheduler parameters */
 
@@ -122,10 +122,10 @@ void up_release_pending(void)
       else if (!SAVE_USERCONTEXT(rtcb))
         {
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously

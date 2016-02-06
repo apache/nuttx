@@ -164,7 +164,7 @@ void _exit(int status)
    * head of the list.
    */
 
-  tcb = (FAR struct tcb_s*)g_readytorun.head;
+  tcb = this_task();
   slldbg("New Active Task TCB=%p\n", tcb);
 
 #ifdef CONFIG_ARCH_ADDRENV

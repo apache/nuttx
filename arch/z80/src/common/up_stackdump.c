@@ -78,7 +78,7 @@
 
 static void up_stackdump(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = this_task();
   uint16_t sp = up_getsp();
   uint16_t stack_base = (uint16_t)rtcb->adj_stack_ptr;
   uint16_t stack_size = (uint16_t)rtcb->adj_stack_size;
