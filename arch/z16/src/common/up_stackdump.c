@@ -55,14 +55,6 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -77,7 +69,7 @@
 
 static void up_stackdump(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = this_task();
   chipreg_t sp = up_getsp();
   chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;

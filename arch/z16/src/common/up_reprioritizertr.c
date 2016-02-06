@@ -93,7 +93,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
     }
   else
     {
-      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+      FAR struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
       slldbg("TCB=%p PRI=%d\n", tcb, priority);
@@ -148,10 +148,10 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
                SAVE_IRQCONTEXT(rtcb);
 
               /* Restore the exception context of the rtcb at the (new) head
-               * of the g_readytorun task list.
+               * of the ready-to-run task list.
                */
 
-              rtcb = (FAR struct tcb_s*)g_readytorun.head;
+              rtcb = this_task();
 
               /* Update scheduler parameters */
 
@@ -165,17 +165,17 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
             }
 
           /* Copy the exception context into the TCB at the (old) head of the
-           * g_readytorun Task list. if SAVE_USERCONTEXT returns a non-zero
+           * ready-to-run Task list. if SAVE_USERCONTEXT returns a non-zero
            * value, then this is really the previously running task restarting!
            */
 
           else if (!SAVE_USERCONTEXT(rtcb))
             {
               /* Restore the exception context of the rtcb at the (new) head
-               * of the g_readytorun task list.
+               * of the ready-to-run task list.
                */
 
-              rtcb = (FAR struct tcb_s*)g_readytorun.head;
+              rtcb = this_task();
 
               /* Update scheduler parameters */
 
