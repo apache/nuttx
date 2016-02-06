@@ -112,7 +112,7 @@ void up_assert(const uint8_t *filename, int line)
   /* Allow for any board/configuration specific crash information */
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), g_readytorun.head, filename, line);
+  board_crashdump(up_getsp(), this_task(), filename, line);
 #endif
 
   /* Exit the simulation */

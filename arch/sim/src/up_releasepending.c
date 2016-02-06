@@ -64,11 +64,11 @@
 
 void up_release_pending(void)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 
   sdbg("From TCB=%p\n", rtcb);
 
-  /* Merge the g_pendingtasks list into the g_readytorun task list */
+  /* Merge the g_pendingtasks list into the ready-to-run task list */
 
   /* sched_lock(); */
   if (sched_mergepending())
@@ -89,10 +89,10 @@ void up_release_pending(void)
       if (!up_setjmp(rtcb->xcp.regs))
         {
           /* Restore the exception context of the rtcb at the (new) head
-           * of the g_readytorun task list.
+           * of the ready-to-run task list.
            */
 
-          rtcb = (FAR struct tcb_s *)g_readytorun.head;
+          rtcb = this_task();
           sdbg("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of

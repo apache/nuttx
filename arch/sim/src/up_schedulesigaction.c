@@ -100,7 +100,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   /* We don't have to anything complex for the simulated target */
 
-  if (tcb == (FAR struct tcb_s *)g_readytorun.head)
+  if (tcb == this_task())
     {
       sigdeliver(tcb);
     }
