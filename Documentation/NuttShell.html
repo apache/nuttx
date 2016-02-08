@@ -1169,7 +1169,7 @@ arp [-a &lt;ipaddr&gt; |-d &lt;ipaddr&gt; |-s &lt;ipaddr&gt; &lt;hwaddr&gt;]
 </p>
 <ul><pre>
 nsh&gt; arp -a 10.0.0.1
-nsh: arp: ioctl failed: 22
+nsh: arp: no such ARP entry: 10.0.0.1
 
 nsh&gt; arp -s 10.0.0.1 00:13:3b:12:73:e6
 nsh&gt; arp -a 10.0.0.1
@@ -1177,7 +1177,7 @@ HWAddr: 00:13:3b:12:73:e6
 
 nsh&gt; arp -d 10.0.0.1
 nsh&gt; arp -a 10.0.0.1
-nsh: arp: ioctl failed: 22
+nsh: arp: no such ARP entry: 10.0.0.1
 </pre></ul>
 
 <table width ="100%">
