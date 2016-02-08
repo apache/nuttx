@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -420,15 +420,41 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr);
  *   address of an existing association.
  *
  * Input parameters:
- *   pipaddr - Refers to an IP address uint16_t[2] in network order
+ *   ipaddr  - The IP address as an inaddr_t
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
  *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
  * Assumptions
- *   Interrupts are disabled to assure exclusive access to the ARP table.
+ *   The network is locked to assure exclusive access to the ARP table
  *
  ****************************************************************************/
 
-void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
+int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr);
+
+/****************************************************************************
+ * Name: arp_hdr_update
+ *
+ * Description:
+ *   Add the IP/HW address mapping to the ARP table -OR- change the IP
+ *   address of an existing association.
+ *
+ * Input parameters:
+ *   pipaddr - Refers to an IP address uint16_t[2] in network order
+ *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
+ *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
 
 /****************************************************************************
  * Name: arp_dump
@@ -467,6 +493,7 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 #  define arp_find(i) (NULL)
 #  define arp_delete(i)
 #  define arp_update(i,m);
+#  define arp_hdr_update(i,m);
 #  define arp_dump(arp)
 
 #endif /* CONFIG_NET_ARP */

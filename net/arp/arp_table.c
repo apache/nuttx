@@ -142,18 +142,21 @@ void arp_timer(void)
  *   address of an existing association.
  *
  * Input parameters:
- *   pipaddr - Refers to an IP address uint16_t[2]
+ *   ipaddr  - The IP address as an inaddr_t
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
  *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
  * Assumptions
- *   Interrupts are disabled
+ *   The network is locked to assure exclusive access to the ARP table
  *
  ****************************************************************************/
 
-void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
+int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
 {
   struct arp_entry *tabptr = NULL;
-  in_addr_t         ipaddr = net_ip4addr_conv32(pipaddr);
   int               i;
 
   /* Walk through the ARP mapping table and try to find an entry to
@@ -227,6 +230,35 @@ void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
   tabptr->at_ipaddr = ipaddr;
   memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
   tabptr->at_time = g_arptime;
+}
+
+/****************************************************************************
+ * Name: arp_hdr_update
+ *
+ * Description:
+ *   Add the IP/HW address mapping to the ARP table -OR- change the IP
+ *   address of an existing association.
+ *
+ * Input parameters:
+ *   pipaddr - Refers to an IP address uint16_t[2] in network order
+ *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
+ *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
+{
+  in_addr_t ipaddr = net_ip4addr_conv32(pipaddr);
+
+  /* Update the ARP table */
+
+  (void)arp_update(ipaddr, ethaddr);
 }
 
 /****************************************************************************

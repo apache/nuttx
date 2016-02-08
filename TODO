@@ -1740,7 +1740,7 @@ o Network Utilities (apps/netutils/)
   Priority:    Low
 
   Title:       DHCPD ACCESSES KERNEL PRIVATE INTERFACE
-  Description: arp_update() is referenced outside of nuttx/net.  It is used in
+  Description: arp_hdr_update() is referenced outside of nuttx/net.  It is used in
                in the netutils/ DHCPD logic to set entries in the ARP table.
                That is violation of the separation of kernel and OS
                functionality.  As a consequence, dhcpd will not work with the

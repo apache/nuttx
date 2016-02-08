@@ -132,7 +132,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
              * with this host in the future.
              */
 
-            arp_update(arp->ah_sipaddr, arp->ah_shwaddr);
+            arp_hdr_update(arp->ah_sipaddr, arp->ah_shwaddr);
 
             arp->ah_opcode = HTONS(ARP_REPLY);
             memcpy(arp->ah_dhwaddr, arp->ah_shwaddr, ETHER_ADDR_LEN);
@@ -161,7 +161,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
           {
             /* Yes... Insert the address mapping in the ARP table */
 
-            arp_update(arp->ah_sipaddr, arp->ah_shwaddr);
+            arp_hdr_update(arp->ah_sipaddr, arp->ah_shwaddr);
 
             /* Then notify any logic waiting for the ARP result */
 

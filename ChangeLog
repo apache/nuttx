@@ -11466,4 +11466,6 @@
 	  g_readytorun() with the wrapper this_task() which hides the implementation
 	  and will permit such things as more scalable representations of task queues
 	  and SMP (2016-02-06).
-
+	* include/nuttx/net/arp.h, include/nuttx/net/ioctl.h, net/netdev/netdev_ioctl.c,
+	  and ARP-related files: Add support for IOCTL commands to manage the
+	  ARP table (2016-02-08).

@@ -2,7 +2,7 @@
  * include/nuttx/net/arp.h
  * Macros and definitions for the ARP module.
  *
- *   Copyright (C) 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from uIP with has a similar BSD-styple license:
@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <sys/socket.h>
 #include <stdint.h>
 
 #include <netinet/in.h>
@@ -60,6 +61,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* ARP protocol HARDWARE identifiers.  Provided as the sa_family member of a
+ * struct sockaddr.
+ *
+ * When sa_family is ARPHRD_ETHER, the 6 byte Ethernet address is provided
+ * in the first 6-bytes of the sockaddr sa_data array.
+ */
+
+#define ARPHRD_ETHER  1 /* Only Ethernet is supported */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -70,8 +80,28 @@ struct arp_entry
 {
   in_addr_t         at_ipaddr;   /* IP address */
   struct ether_addr at_ethaddr;  /* Hardware address */
-  uint8_t           at_time;
+  uint8_t           at_time;     /* Time of last usage */
 };
+
+/* Used with the SIOCSARP, SIOCDARP, and SIOCGARP IOCTL commands to set,
+ * delete, or get an ARP table entry.
+ *
+ * SIOCSARP - Both values are inputs a define the new ARP table entry
+ * SIOCDARP - Only the protcol address is required as an input.  The ARP
+ *            table entry with that matching address will be deleted,
+ *            regardless of the hardware address.
+ * SIOCGARP - The protocol address is an input an identifies the table
+ *            entry to locate; The hardware address is an output and
+ *            on a successful lookup, provides the matching hardware
+ *            address.
+ */
+
+struct arpreq
+{
+  struct sockaddr   arp_pa;      /* Protocol address */
+  struct sockaddr   arp_ha;      /* Hardware address */
+};
+
 
 /****************************************************************************
  * Public Data
