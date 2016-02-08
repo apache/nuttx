@@ -676,13 +676,6 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
-#ifdef CONFIG_NET_ARPIOCTLS
-      case SIOCSARP:  /* Set a ARP mapping */
-      case SIOCDARP:  /* Delete an ARP mapping */
-      case SIOCGARP:  /* Get an ARP mapping */
-# error "IOCTL Commands not implemented"
-#endif
-
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */

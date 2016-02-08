@@ -54,7 +54,7 @@
  * Name: inet_ntoa
  *
  * Description:
- *   The inet_ntoa() function converts the Internet host address in given in
+ *   The inet_ntoa() function converts the Internet host address given in
  *   network byte order to a string in standard numbers-and-dots notation.
  *   The string is returned in a statically allocated buffer, which subsequent
  *   calls will overwrite.

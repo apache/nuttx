@@ -31,7 +31,7 @@ nuttx/
 apps/
 
   (3)  Network Utilities (apps/netutils/)
-  (3)  NuttShell (NSH) (apps/nshlib)
+  (2)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (4)  Other Applications & Tests (apps/examples/)
 
@@ -1757,12 +1757,6 @@ o NuttShell (NSH) (apps/nshlib)
                still show status for all interfaces.
   Status:      Open
   Priority:    Low
-
-  Title:       ARP COMMAND
-  Description: Add an ARP command so that we can see and modify the contents of
-               the ARP table.
-  Status:      Open
-  Priority:    Low (enhancement)
 
   Title:       ARPPING COMMAND
   Description: Add an arping command
