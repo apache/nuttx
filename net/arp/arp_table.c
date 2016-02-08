@@ -182,13 +182,12 @@ int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
 
               memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
               tabptr->at_time = g_arptime;
-              return;
+              return OK;
             }
         }
     }
 
   /* If we get here, no existing ARP table entry was found, so we create one. */
-
   /* First, we try to find an unused entry in the ARP table. */
 
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
@@ -230,6 +229,7 @@ int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
   tabptr->at_ipaddr = ipaddr;
   memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
   tabptr->at_time = g_arptime;
+  return OK;
 }
 
 /****************************************************************************

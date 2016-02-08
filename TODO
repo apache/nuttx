@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 6, 2016)
+NuttX TODO List (Last updated February 8, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -30,7 +30,7 @@ nuttx/
 
 apps/
 
-  (4)  Network Utilities (apps/netutils/)
+  (3)  Network Utilities (apps/netutils/)
   (3)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (4)  Other Applications & Tests (apps/examples/)
@@ -1738,18 +1738,6 @@ o Network Utilities (apps/netutils/)
                be fixed someday.
   Status:      Open.  An annoyance, but not a real problem.
   Priority:    Low
-
-  Title:       DHCPD ACCESSES KERNEL PRIVATE INTERFACE
-  Description: arp_hdr_update() is referenced outside of nuttx/net.  It is used in
-               in the netutils/ DHCPD logic to set entries in the ARP table.
-               That is violation of the separation of kernel and OS
-               functionality.  As a consequence, dhcpd will not work with the
-               NuttX kernel built.
-
-               This direct OS call needs to be replaced with a network ioctl()
-               call.
-  Status:      Open
-  Priority:    Medium.  Important for full functionality with kernel build.
 
   Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
   Description: The NSH network management logic has general applicability
