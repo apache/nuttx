@@ -11469,3 +11469,8 @@
 	* include/nuttx/net/arp.h, include/nuttx/net/ioctl.h, net/netdev/netdev_ioctl.c,
 	  and ARP-related files: Add support for IOCTL commands to manage the
 	  ARP table (2016-02-08).
+	* ARMv7-A, ARMv7-R, and ARMv7-A: Add test-and-set logic and definitions
+	  needed to supports spinlocks (2016-02-09).
+	* include/nuttx/spinlock.h:  Add basic definitions for spinlocks.  Not yet
+	  used by NuttX (2016-02-09).
+
