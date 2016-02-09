@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_testset.S
+ * arch/arm/src/armv7-m/up_testset.S
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,9 @@
 #include <nuttx/config.h>
 #include <arch/spinlock.h>
 
-	.file	"arm_testset.S"
+	.syntax		unified
+	.thumb
+	.file	"up_testset.S"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -98,12 +100,12 @@ up_testset:
 1:
 	ldrexb	r2, [r0]			/* Test if spinlock is locked or not */
 	cmp		r2, r1				/* Already locked? */
-	beq		2f					/* If alrady locked, return SP_LOCKED */
+	beq		2f					/* If already locked, return SP_LOCKED */
 
 	/* Not locked ... attempt to lock it */
 
 	strexb	r2, r1, [r0]		/* Attempt to set the locked state */
-	cmp		r2, r1				/* r2 will be 1 is strexb failed */
+	cmp		r2, r1				/* r2 will be 1 is strexb succeeded */
 	beq		1b					/* Failed to lock... try again */
 
 	/* Lock acquired -- return SP_UNLOCKED */
