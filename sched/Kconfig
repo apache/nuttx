@@ -307,6 +307,11 @@ config RR_INTERVAL
 		Round roben scheduling (SCHED_RR) is enabled by setting this
 		interval to a positive, non-zero value.
 
+config SPINLOCK
+	bool "Support Spinlocks"
+	default n
+	depends on EXPERIMENTAL
+
 config SCHED_SPORADIC
 	bool "Support sporadic scheduling"
 	default n

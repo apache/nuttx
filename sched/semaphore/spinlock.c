@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/spinlock.h
+ * sched/semaphore/spinlock.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,67 +33,39 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SPINLOCK_H
-#define __INCLUDE_NUTTX_SPINLOCK_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
+
+#include <sched.h>
+#include <assert.h>
+
+#include <nuttx/spinlock.h>
+
+#include "sched/sched.h"
 
 #ifdef CONFIG_SPINLOCK
 
-/* The architecture specific spinlock.h header file must also provide the
- * following:
- *
- *   SP_LOCKED   - A definition of the locked state value (usually 1)
- *   SP_UNLOCKED - A definition of the unlocked state value (usually 0)
- *   spinlock_t  - The type of a spinlock memory object.
- *
- * SP_LOCKED and SP_UNLOCKED must constants of type spinlock_t.
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define IMPOSSIBLE_CPU 0xff
+
+/* REVISIT:  What happens if a thread taks a spinlock while running on one
+ * CPU, but is suspended, then reassigned to another CPU where it runs and
+ * eventually calls spinunlock().  One solution might be to lock a thread to
+ * a CPU if it holds a spinlock.  That would assure that it never runs on
+ * any other CPU and avoids such complexities.
  */
 
-#include <arch/spinlock.h>
+#undef CONFIG_SPINLOCK_LOCKDOWN /* Feature not yet available */
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
-
-struct spinlock_s
-{
-  spinlock_t sp_lock;  /* Indicates if the spinlock is locked or not.  See the
-                        * values SP_LOCKED and SP_UNLOCKED. */
-  uint8_t    sp_cpu;   /* CPU holding the lock */
-  uint16_t   sp_count; /* The count of references by this CPU on the lock */
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_testset
- *
- * Description:
- *   Perform and atomic test and set operation on the provided spinlock.
- *
- *   This function must be provided via the architecture-specific logoic.
- *
- * Input Parameters:
- *   lock - The address of spinlock object.
- *
- * Returned Value:
- *   The spinlock is always locked upon return.  The value of previous value
- *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
- *   as previously locked (meaning that the test-and-set operation failed to
- *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
- *   (meaning that we successfully obtained the lock)
- *
- ****************************************************************************/
-
-spinlock_t up_testset(FAR spinlock_t *lock);
 
 /****************************************************************************
  * Name: spinlock_initialize
@@ -109,7 +81,14 @@ spinlock_t up_testset(FAR spinlock_t *lock);
  *
  ****************************************************************************/
 
-void spinlock_initialize(FAR struct spinlock_s *lock);
+void spinlock_initialize(FAR struct spinlock_s *lock)
+{
+  DEBUGASSERT(lock != NULL);
+
+  lock->sp_lock  = SP_UNLOCKED;
+  lock->sp_cpu   = IMPOSSIBLE_CPU;
+  lock->sp_count = 0;
+}
 
 /****************************************************************************
  * Name: spinlock
@@ -130,7 +109,53 @@ void spinlock_initialize(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-void spinlock(FAR struct spinlock_s *lock);
+void spinlock(FAR struct spinlock_s *lock)
+{
+  irqstate_t flags;
+  uint8_t cpu = this_cpu();
+
+  /* Disable interrupts (all CPUs) */
+
+  flags = irqsave();
+
+  /* Do we already hold the lock on this CPU? */
+
+  if (lock->sp_cpu == cpu)
+    {
+      /* Yes... just increment the number of references we have on the lock */
+
+      lock->sp_count++;
+      DEBUGASSERT(lock->sp_lock = SP_LOCKED && lock->sp_count > 0);
+    }
+  else
+    {
+#ifdef CONFIG_SPINLOCK_LOCKDOWN
+      /* REVISIT:  What happens if this thread is suspended, then reassigned
+       * to another CPU where it runs and eventually calls spinunlock().
+       * One solution might be to lock a thread to a CPU if it holds a
+       * spinlock.  That would assure that it never runs on any other CPU
+       * and avoids such complexities.
+       */
+
+#  warning Missing logic
+#endif
+      /* Take the lock */
+
+      while (up_testset(&lock->sp_lock) == SP_LOCKED)
+        {
+          irqrestore(flags);
+          sched_yield();
+          flags = irqsave();
+        }
+
+      /* Take one count on the lock */
+
+      lock->sp_cpu   = cpu;
+      lock->sp_count = 1;
+    }
+
+  irqrestore(flags);
+}
 
 /****************************************************************************
  * Name: spinunlock
@@ -149,7 +174,54 @@ void spinlock(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-void spinunlock(FAR struct spinlock_s *lock);
+void spinunlock(FAR struct spinlock_s *lock)
+{
+  irqstate_t flags;
+#ifdef CONFIG_SPINLOCK_LOCKDOWN
+  uint8_t cpu = this_cpu();
+#endif
+
+  /* Disable interrupts (all CPUs) */
+
+  flags = irqsave();
+
+#ifdef CONFIG_SPINLOCK_LOCKDOWN
+  /* REVISIT:  What happens if this thread took the lock on a different CPU,
+   * was suspended, then reassigned to this CPU where it runs and eventually
+   * calls spinunlock(). One solution might be to lock a thread to a CPU if
+   * it holds a spinlock.  That would assure that it never runs on any other
+   * CPU and avoids such complexities.
+   */
+
+  DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED &&
+              lock->sp_cpu == this_cpu() && lock->sp_count > 0);
+
+  /* Do we already hold the lock? */
+
+  if (lock->sp_cpu == cpu)
+#else
+  DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED &&
+              lock->sp_count > 0);
+#endif
+
+    {
+      /* Yes... just decrement the number of references we have on the lock */
+
+      if (lock->sp_count <= 1)
+        {
+          /* The count must decremented to zero */
+
+          lock->sp_count = 0;
+          lock->sp_cpu   = IMPOSSIBLE_CPU;
+          lock->sp_lock  = SP_UNLOCKED; 
+        }
+      else
+        {
+          lock->sp_count--;
+        }
+    }
+
+  irqrestore(flags);
+}
 
 #endif /* CONFIG_SPINLOCK */
-#endif /* __INCLUDE_NUTTX_SPINLOCK_H */

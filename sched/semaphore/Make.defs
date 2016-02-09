@@ -41,6 +41,10 @@ ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sem_initialize.c sem_holder.c
 endif
 
+ifeq ($(CONFIG_SPINLOCK),y)
+CSRCS += spinlock.c
+endif
+
 # Include semaphore build support
 
 DEPPATH += --dep-path semaphore
