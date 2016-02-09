@@ -103,7 +103,7 @@ up_testset:
 	/* Not locked ... attempt to lock it */
 
 	strexb	r2, r1, [r0]		/* Attempt to set the locked state */
-	cmp		r2, r1				/* r2 will be 1 is strexb succeeded */
+	cmp		r2, r1				/* r2 will be 1 is strexb failed */
 	beq		1b					/* Failed to lock... try again */
 
 	/* Lock acquired -- return SP_UNLOCKED */
