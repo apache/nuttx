@@ -26,7 +26,7 @@ nuttx/
   (1)  Pascal add-on (pcode/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
-  (5)  ARM (arch/arm/)
+  (4)  ARM (arch/arm/)
 
 apps/
 
@@ -1674,31 +1674,6 @@ o ARM (arch/arm/)
   Priority:    Low.  The conditions of continuous interrupts is really the problem.
                If your design needs continuous interrupts like this, please try
                the above change and, please, submit a patch with the working fix.
-
-  Title:       STACK ALIGNMENT IN INTERRUPT HANDLERS
-  Description: The EABI standard requires that the stack always have a 32-byte
-               alignment.  There is no guarantee at present that the stack will be
-               so aligned in an interrupt handler.  Therefore, I would expect some
-               issues if, for example, floating point or perhaps long long operations
-               were performed in an interrupt handler.
-
-               This issue exists for ARM7, ARM9, and Cortex-M0 but has been
-               addressed for the Cortex-M3/4/7 and Cortex-A5/8.  The fix
-               is really simple but cannot be incorporated without some
-               substantial testing.  For ARM, the fix is the following logic
-               arround each call into C code from assembly:
-
-                 mov  r4, sp     /* Save the SP in a preserved register */
-                 bic  sp, sp, #7 /* Force 8-byte alignment */
-                 bl   cfunction  /* Call the C function */
-                 mov  sp, r4     /* Restore the possibly unaligned stack pointer */
-
-               This same issue applies to the interrupt stack which is, I think
-               improperly aligned in almost all cases (except Cortex-A5).
-
-  Status:      Open
-  Priority:    Low for me because I never do floating point operations in
-               interrupt handlers.
 
   Title:       IMPROVED TASK START-UP AND SYSCALL RETURN
   Description: Couldn't up_start_task and up_start_pthread syscalls be
