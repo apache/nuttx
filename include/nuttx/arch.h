@@ -1702,8 +1702,7 @@ int up_cpundx(void);
  *   idletask - The entry point to the IDLE task.
  *
  * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

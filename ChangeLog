@@ -11473,4 +11473,11 @@
 	  needed to supports spinlocks (2016-02-09).
 	* include/nuttx/spinlock.h:  Add basic definitions for spinlocks.  Not yet
 	  used by NuttX (2016-02-09).
+	* include/nuttx/arch.h, sched/sched/sched.h:  Add some basic definitions
+	  that may be needed for SMP support (2016-02-10).
+	* sched/init/os_start.c, sched/init/os_smpstart.c, and include/nuttx/arch.h:
+	  Add some tentative SMP start-up logic (2016-02-10).
+	* arch/arm/sim/up_head.c and up_simsmp.c:  Add multi-CPU support to the
+	  simulation to support SMP investigation..  Currently crashes when CONFIG_SMP
+	  is enabled as expected (2016-02-10).
 
