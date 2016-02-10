@@ -234,7 +234,7 @@ void spinunlock(FAR struct spinlock_s *lock)
 
           lock->sp_count = 0;
           lock->sp_cpu   = IMPOSSIBLE_CPU;
-          lock->sp_lock  = SP_UNLOCKED; 
+          lock->sp_lock  = SP_UNLOCKED;
         }
       else
         {
@@ -248,7 +248,7 @@ void spinunlock(FAR struct spinlock_s *lock)
   /* Just mark the spinlock unlocked */
 
   DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED);
-  lock->sp_lock  = SP_UNLOCKED; 
+  lock->sp_lock  = SP_UNLOCKED;
 
 #endif /* CONFIG_SMP */
 }

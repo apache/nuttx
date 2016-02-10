@@ -262,7 +262,7 @@ typedef FAR char      *caddr_t;
 
 /* Task entry point */
 
-typedef CODE int (*main_t)(int argc, char *argv[]);
+typedef CODE int (*main_t)(int argc, FAR char *argv[]);
 
 #endif /* __ASSEMBLY__ */
 

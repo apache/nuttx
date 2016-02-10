@@ -588,6 +588,14 @@ void os_start(void)
   g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
 
+#ifdef CONFIG_SMP
+  /* Start all CPUs *********************************************************/
+
+  DEBUGASSERT(this_cpu() == 0);
+  DEBUGVERIFY(os_smpstart());
+
+#endif /* CONFIG_SMP */
+
   /* Bring Up the System ****************************************************/
   /* The OS is fully initialized and we are beginning multi-tasking */
 
@@ -600,7 +608,7 @@ void os_start(void)
   /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */
 
-  sdbg("Beginning Idle Loop\n");
+  sdbg("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker

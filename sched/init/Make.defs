@@ -35,6 +35,10 @@
 
 CSRCS += os_start.c os_bringup.c
 
+ifeq ($(CONFIG_SMP),y)
+CSRCS += os_smpstart.c
+endif
+
 # Include init build support
 
 DEPPATH += --dep-path init

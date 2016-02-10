@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/init/init.h
+ * sched/init/os_smpstart.c
  *
- *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,36 +33,86 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_INIT_INIT_H
-#define __SCHED_INIT_INIT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
+
+# include "init/init.h"
+
+#ifdef CONFIG_SMP
+
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_start
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: os_idletask
  *
  * Description:
- *   This function is called to initialize the operating system and to spawn
- *   the user initialization thread of execution.  This is the initial entry
- *   point into NuttX
+ *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
+ *   It is equivalent to the CPU 0 IDLE logic in os_start.c
  *
  * Input Parameters:
- *   None
+ *   Standard task arguments.
  *
- * Returned value:
- *   Does not return.
+ * Returned Value:
+ *   This function does not return.
  *
  ****************************************************************************/
 
-void os_start(void);
+int os_idletask(int argc, FAR char *argv[])
+{
+  sdbg("CPU%d: Beginning Idle Loop\n");
+  for (; ; )
+    {
+      /* Perform garbage collection (if it is not being done by the worker
+       * thread).  This cleans-up memory de-allocations that were queued
+       * because they could not be freed in that execution context (for
+       * example, if the memory was freed from an interrupt handler).
+       */
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+      /* We must have exclusive access to the memory manager to do this
+       * BUT the idle task cannot wait on a semaphore.  So we only do
+       * the cleanup now if we can get the semaphore -- this should be
+       * possible because if the IDLE thread is running, no other task is!
+       *
+       * WARNING: This logic could have undesirable side-effects if priority
+       * inheritance is enabled.  Imaginee the possible issues if the
+       * priority of the IDLE thread were to get boosted!  Moral: If you
+       * use priority inheritance, then you should also enable the work
+       * queue so that is done in a safer context.
+       */
+
+      if (kmm_trysemaphore() == 0)
+        {
+          sched_garbagecollection();
+          kmm_givesemaphore();
+        }
+#endif
+
+      /* Perform any processor-specific idle state operations */
+
+      up_idle();
+    }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: os_smpstart
@@ -81,38 +131,26 @@ void os_start(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-int os_smpstart(void);
+int os_smpstart(void)
+{
+  int ret;
+  int i;
+
+  for (i = 1; i < CONFIG_SMP_NCPUS; i++)
+    {
+      ret = up_cpustart(i, os_idletask);
+#ifdef CONFIG_DEBUG
+      if (ret < 0)
+        {
+          sdbg("ERROR: Failed to start CPU%d: %d\n", i, ret);
+          return ret;
+        }
+#else
+      UNUSED(ret);
 #endif
+    }
 
-/****************************************************************************
- * Name: os_bringup
- *
- * Description:
- *   Start all initial system tasks.  This does the "system bring-up" after
- *   the conclusion of basic OS initialization.  These initial system tasks
- *   may include:
- *
- *   - pg_worker:   The page-fault worker thread (only if CONFIG_PAGING is
- *                  defined.
- *   - work_thread: The work thread.  This general thread can be used to
- *                  perform most any kind of queued work.  Its primary
- *                  function is to serve as the "bottom half" of device
- *                  drivers.
- *
- *   And the main application entry point:
- *   symbols:
- *
- *   - USER_ENTRYPOINT: This is the default user application entry point.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  return OK;
+}
 
-int os_bringup(void);
-
-#endif /* __SCHED_INIT_INIT_H */
+#endif /* CONFIG_SMP */

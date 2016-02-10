@@ -1683,6 +1683,35 @@ int up_cpundx(void);
 #endif
 
 /****************************************************************************
+ * Name: up_cpustart
+ *
+ * Description:
+ *   In an SMP configution, only one CPU is initially active (CPU 0). System
+ *   initialization occurs on that single thread. At the completion of the
+ *   initialization of the OS, just before beginning normal multitasking,
+ *   the additional CPUs would be started by calling this function.
+ *
+ *   Each CPU is provided the entry point to is IDLE task when started.  The
+ *   OS initialization logic calls this function repeatedly until each CPU
+ *   has been started.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU being started.  This will be a numeric
+ *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
+ *         0 is already active)
+ *   idletask - The entry point to the IDLE task.
+ *
+ * Returned Value:
+ *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpustart(int cpu, main_t idletask);
+#endif
+
+/****************************************************************************
  * Name: up_romgetc
  *
  * Description:
