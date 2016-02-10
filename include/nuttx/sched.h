@@ -137,9 +137,9 @@
 
 #define TCB_FLAG_TTYPE_SHIFT       (0)      /* Bits 0-1: thread type */
 #define TCB_FLAG_TTYPE_MASK        (3 << TCB_FLAG_TTYPE_SHIFT)
-#  define TCB_FLAG_TTYPE_TASK      (0 << TCB_FLAG_TTYPE_SHIFT) /* Normal user task */
-#  define TCB_FLAG_TTYPE_PTHREAD   (1 << TCB_FLAG_TTYPE_SHIFT) /* User pthread */
-#  define TCB_FLAG_TTYPE_KERNEL    (2 << TCB_FLAG_TTYPE_SHIFT) /* Kernel thread */
+#  define TCB_FLAG_TTYPE_TASK      (0 << TCB_FLAG_TTYPE_SHIFT)  /* Normal user task */
+#  define TCB_FLAG_TTYPE_PTHREAD   (1 << TCB_FLAG_TTYPE_SHIFT)  /* User pthread */
+#  define TCB_FLAG_TTYPE_KERNEL    (2 << TCB_FLAG_TTYPE_SHIFT)  /* Kernel thread */
 #define TCB_FLAG_NONCANCELABLE     (1 << 2) /* Bit 2: Pthread is non-cancelable */
 #define TCB_FLAG_CANCEL_PENDING    (1 << 3) /* Bit 3: Pthread cancel is pending */
 #define TCB_FLAG_POLICY_SHIFT      (4) /* Bit 4-5: Scheduling policy */
@@ -148,7 +148,8 @@
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT) /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT) /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT) /* Other scheding policy */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 6) /* Bit 6: Exitting */
+#define TCB_FLAG_EXIT_ASSIGNED     (1 << 6) /* Bit 6: Assigned to a CPU */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 7) /* Bit 7: Exitting */
 
 /* Values for struct task_group tg_flags */
 
@@ -547,6 +548,9 @@ struct tcb_s
 #endif
 
   uint8_t  task_state;                   /* Current state of the thread         */
+#ifdef CONFIG_SMP
+  uint8_t  cpu;                          /* CPU index if running or assigned    */
+#endif
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 

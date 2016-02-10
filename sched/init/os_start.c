@@ -328,6 +328,13 @@ void os_start(void)
   sq_init(&g_delayed_kufree);
 #endif
 
+#ifdef CONFIG_SMP
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      dq_init(&g_assignedtasks[i]);
+    }
+#endif
+
   /* Initialize the logic that determine unique process IDs. */
 
   g_lastpid = 0;
@@ -380,7 +387,15 @@ void os_start(void)
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 
+#ifdef CONFIG_SMP
+  /* Use the list a ready-to-run tasks assigned to CPU0 */
+
+  dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_assignedtasks[0]);
+#else
+  /* Use the common, unassigned ready-to-run list */
+
   dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_readytorun);
+#endif
 
   /* Initialize the processor-specific portion of the TCB */
 

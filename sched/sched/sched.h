@@ -138,7 +138,7 @@ extern volatile dq_queue_t g_readytorun;
 
 #ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
- * The g_readytorun is still used but in the SMP cae it will contain only:
+ * The g_readytorun is still used but in the SMP case it will contain only:
  *
  *  - Only tasks/threads that are eligible to run, but not currently running,
  *    and
