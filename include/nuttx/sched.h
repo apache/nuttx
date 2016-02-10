@@ -126,8 +126,8 @@
 /* Task Management Definitions **************************************************/
 /* Special task IDS.  Any negative PID is invalid. */
 
-#define NULL_TASK_PROCESS_ID      (pid_t)0
-#define INVALID_PROCESS_ID        (pid_t)-1
+#define NULL_TASK_PROCESS_ID       (pid_t)0
+#define INVALID_PROCESS_ID         (pid_t)-1
 
 /* This is the maximum number of times that a lock can be set */
 
@@ -169,9 +169,9 @@
 
 /* Sporadic scheduler flags */
 
-#define SPORADIC_FLAG_ALLOCED     (1 << 0)  /* Bit 0: Timer is allocated */
-#define SPORADIC_FLAG_MAIN        (1 << 1)  /* Bit 1: The main timer */
-#define SPORADIC_FLAG_REPLENISH   (1 << 2)  /* Bit 2: Replenishment cycle */
+#define SPORADIC_FLAG_ALLOCED      (1 << 0)  /* Bit 0: Timer is allocated */
+#define SPORADIC_FLAG_MAIN         (1 << 1)  /* Bit 1: The main timer */
+#define SPORADIC_FLAG_REPLENISH    (1 << 2)  /* Bit 2: Replenishment cycle */
 
 /********************************************************************************
  * Public Type Definitions
@@ -211,10 +211,10 @@ typedef enum tstate_e tstate_t;
 
 /* The following definitions are determined by tstate_t */
 
-#define FIRST_READY_TO_RUN_STATE TSTATE_TASK_READYTORUN
-#define LAST_READY_TO_RUN_STATE  TSTATE_TASK_RUNNING
-#define FIRST_BLOCKED_STATE      TSTATE_TASK_INACTIVE
-#define LAST_BLOCKED_STATE       (NUM_TASK_STATES-1)
+#define FIRST_READY_TO_RUN_STATE   TSTATE_TASK_READYTORUN
+#define LAST_READY_TO_RUN_STATE    TSTATE_TASK_RUNNING
+#define FIRST_BLOCKED_STATE        TSTATE_TASK_INACTIVE
+#define LAST_BLOCKED_STATE         (NUM_TASK_STATES-1)
 
 /* The following is the form of a thread start-up function */
 
