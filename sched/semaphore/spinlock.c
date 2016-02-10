@@ -139,7 +139,10 @@ void spinlock(FAR struct spinlock_s *lock)
 
 #  warning Missing logic
 #endif
-      /* Take the lock */
+      /* Take the lock.  REVISIT:  We should set an indication in the TCB
+       * that the thread is spinning.  This might be useful in determining
+       * some scheduling actions?
+       */
 
       while (up_testset(&lock->sp_lock) == SP_LOCKED)
         {
