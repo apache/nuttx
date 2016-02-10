@@ -53,6 +53,7 @@ config ARCH_SH
 
 config ARCH_SIM
 	bool "Simulation"
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
 	---help---

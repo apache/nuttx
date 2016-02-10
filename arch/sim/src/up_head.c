@@ -153,4 +153,3 @@ int board_power_off(int status)
   longjmp(g_simabort, 1);
 }
 #endif
-
