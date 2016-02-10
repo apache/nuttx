@@ -136,6 +136,10 @@ config ARCH_NEED_ADDRENV_MAPPING
 	bool
 	default n
 
+config ARCH_HAVE_MULTICPU
+	bool
+	default n
+
 config ARCH_HAVE_VFORK
 	bool
 	default n
