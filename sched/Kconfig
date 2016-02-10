@@ -240,7 +240,7 @@ config SPINLOCK
 config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
-	depends on EXPERIMENTAL
+	depends on ARCH_HAVE_MULTICPU && EXPERIMENTAL
 	select SPINLOCK
 	---help---
 		Enable support for Symmetric Multi-Processing (SMP) on a multi-CPU
