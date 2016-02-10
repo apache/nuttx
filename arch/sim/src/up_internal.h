@@ -210,6 +210,12 @@ extern volatile int g_uart_data_available;
 int  up_setjmp(xcpt_reg_t *jb);
 void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 
+/* up_simsmp.c ************************************************************/
+
+#ifdef CONFIG_SMP
+int sim_cpu0initialize(void);
+#endif
+
 /* up_tickless.c **********************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS

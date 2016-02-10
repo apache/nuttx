@@ -65,6 +65,10 @@ ifeq ($(CONFIG_SCHED_TICKLESS),y)
   CSRCS += up_tickless.c
 endif
 
+ifeq ($(CONFIG_SMP),y)
+  HOSTSRCS += up_simsmp.c
+endif
+
 ifeq ($(CONFIG_DEV_CONSOLE),y)
   CSRCS += up_uartwait.c
   HOSTSRCS += up_simuart.c

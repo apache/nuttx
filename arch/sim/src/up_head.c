@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_head.c
  *
- *   Copyright (C) 2007-2009, 2011-2113 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,11 +73,17 @@ static int g_exitcode = EXIT_SUCCESS;
 
 int main(int argc, char **argv, char **envp)
 {
+#ifdef CONFIG_SMP
+  /* In the SMP case, configure the main thread as CPU 0 */
+
+  sim_cpu0initialize();
+#endif
+
+#ifdef CONFIG_PM
   /* Power management should be initialized early in the (simulated) boot
    * sequence.
    */
 
-#ifdef CONFIG_PM
   pm_initialize();
 #endif
 
