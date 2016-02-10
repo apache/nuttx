@@ -63,10 +63,14 @@
 
 struct spinlock_s
 {
-  spinlock_t sp_lock;  /* Indicates if the spinlock is locked or not.  See the
-                        * values SP_LOCKED and SP_UNLOCKED. */
-  uint8_t    sp_cpu;   /* CPU holding the lock */
-  uint16_t   sp_count; /* The count of references by this CPU on the lock */
+  volatile spinlock_t sp_lock;  /* Indicates if the spinlock is locked or
+                                 * not.  See the* values SP_LOCKED and
+                                 * SP_UNLOCKED. */
+#ifdef CONFIG_SMP
+  uint8_t  sp_cpu;              /* CPU holding the lock */
+  uint16_t sp_count;            /* The count of references by this CPU on
+                                 * the lock */
+#endif
 };
 
 /****************************************************************************
@@ -93,7 +97,7 @@ struct spinlock_s
  *
  ****************************************************************************/
 
-spinlock_t up_testset(FAR spinlock_t *lock);
+spinlock_t up_testset(volatile FAR spinlock_t *lock);
 
 /****************************************************************************
  * Name: spinlock_initialize

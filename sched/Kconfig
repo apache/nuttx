@@ -229,6 +229,35 @@ endmenu # Clocks and Timers
 
 menu "Tasks and Scheduling"
 
+config SPINLOCK
+	bool "Support Spinlocks"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enables suppport for spinlocks.  Spinlocks are current used only for
+		SMP suppport.
+
+config SMP
+	bool "Symmetric Multi-Processing (SMP)"
+	default n
+	depends on EXPERIMENTAL
+	select SPINLOCK
+	---help---
+		Enable support for Symmetric Multi-Processing (SMP) on a multi-CPU
+		platform.
+
+if SMP
+
+config SMP_NCPUS
+	int "Number of CPUs"
+	default 4
+	range 2 32
+	---help---
+		This value identifies the number of CPUs support by the processor
+		that will be used for SMP.
+
+endif # SMP
+
 choice
 	prompt "Initialization Task"
 	default INIT_ENTRYPOINT if !BUILD_KERNEL
@@ -306,11 +335,6 @@ config RR_INTERVAL
 		The round robin timeslice will be set this number of milliseconds;
 		Round roben scheduling (SCHED_RR) is enabled by setting this
 		interval to a positive, non-zero value.
-
-config SPINLOCK
-	bool "Support Spinlocks"
-	default n
-	depends on EXPERIMENTAL
 
 config SCHED_SPORADIC
 	bool "Support sporadic scheduling"

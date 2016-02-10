@@ -86,8 +86,10 @@ void spinlock_initialize(FAR struct spinlock_s *lock)
   DEBUGASSERT(lock != NULL);
 
   lock->sp_lock  = SP_UNLOCKED;
+#ifdef CONFIG_SMP
   lock->sp_cpu   = IMPOSSIBLE_CPU;
   lock->sp_count = 0;
+#endif
 }
 
 /****************************************************************************
@@ -111,6 +113,7 @@ void spinlock_initialize(FAR struct spinlock_s *lock)
 
 void spinlock(FAR struct spinlock_s *lock)
 {
+#ifdef CONFIG_SMP
   irqstate_t flags;
   uint8_t cpu = this_cpu();
 
@@ -158,6 +161,20 @@ void spinlock(FAR struct spinlock_s *lock)
     }
 
   irqrestore(flags);
+
+#else /* CONFIG_SMP */
+
+  /* Take the lock.  REVISIT:  We should set an indication in the TCB that
+   * the thread is spinning.  This might be useful in determining some
+   * scheduling actions?
+   */
+
+  while (up_testset(&lock->sp_lock) == SP_LOCKED)
+    {
+      sched_yield();
+    }
+
+#endif /* CONFIG_SMP */
 }
 
 /****************************************************************************
@@ -179,6 +196,7 @@ void spinlock(FAR struct spinlock_s *lock)
 
 void spinunlock(FAR struct spinlock_s *lock)
 {
+#ifdef CONFIG_SMP
   irqstate_t flags;
 #ifdef CONFIG_SPINLOCK_LOCKDOWN
   uint8_t cpu = this_cpu();
@@ -225,6 +243,14 @@ void spinunlock(FAR struct spinlock_s *lock)
     }
 
   irqrestore(flags);
+
+#else /* CONFIG_SMP */
+  /* Just mark the spinlock unlocked */
+
+  DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED);
+  lock->sp_lock  = SP_UNLOCKED; 
+
+#endif /* CONFIG_SMP */
 }
 
 #endif /* CONFIG_SPINLOCK */
