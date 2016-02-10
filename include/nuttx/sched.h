@@ -148,7 +148,7 @@
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT) /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT) /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT) /* Other scheding policy */
-#define TCB_FLAG_EXIT_ASSIGNED     (1 << 6) /* Bit 6: Assigned to a CPU */
+#define TCB_FLAG_CPU_ASSIGNED      (1 << 6) /* Bit 6: Assigned to a CPU */
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 7) /* Bit 7: Exitting */
 
 /* Values for struct task_group tg_flags */

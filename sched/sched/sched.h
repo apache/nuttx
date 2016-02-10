@@ -275,6 +275,8 @@ extern volatile uint32_t g_cpuload_total;
  * Public Function Prototypes
  ****************************************************************************/
 
+/* Task list manipulation functions */
+
 bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_removereadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_addprioritized(FAR struct tcb_s *newTcb, DSEG dq_queue_t *list);
@@ -283,12 +285,16 @@ void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state);
 void sched_removeblocked(FAR struct tcb_s *btcb);
 int  sched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
 
+/* Priority inheritance support */
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
 int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
 #  define sched_reprioritize(tcb,sched_priority) \
      sched_setpriority(tcb,sched_priority)
 #endif
+
+/* Support for tickless operation */
 
 #ifdef CONFIG_SCHED_TICKLESS
 unsigned int sched_timer_cancel(void);
@@ -299,6 +305,8 @@ void sched_timer_reassess(void);
 #  define sched_timer_resume()
 #  define sched_timer_reassess()
 #endif
+
+/* Scheduler policy support */
 
 #if CONFIG_RR_INTERVAL > 0
 uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
@@ -317,9 +325,13 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
+/* CPU load measurement support */
+
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
 void weak_function sched_process_cpuload(void);
 #endif
+
+/* TCB operations */
 
 bool sched_verifytcb(FAR struct tcb_s *tcb);
 int  sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype);
