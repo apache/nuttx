@@ -62,21 +62,44 @@
  * tasks built into the design).
  */
 
-#define MAX_TASKS_MASK      (CONFIG_MAX_TASKS-1)
-#define PIDHASH(pid)        ((pid) & MAX_TASKS_MASK)
+#define MAX_TASKS_MASK           (CONFIG_MAX_TASKS-1)
+#define PIDHASH(pid)             ((pid) & MAX_TASKS_MASK)
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
  */
 
 #ifdef CONFIG_SMP
-#  define current_task(cpu) ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
-#  define this_cpu()        up_cpundx()
+#  define current_task(cpu)      ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
+#  define this_cpu()             up_cpundx()
 #else
-#  define current_task(cpu) ((FAR struct tcb_s *)g_readytorun.head)
-#  define this_cpu()        (0)
+#  define current_task(cpu)      ((FAR struct tcb_s *)g_readytorun.head)
+#  define this_cpu()             (0)
 #endif
-#define this_task()         (current_task(this_cpu()))
+#define this_task()              (current_task(this_cpu()))
+
+/* List attribute flags */
+
+#define TLIST_ATTR_PRIORITIZED   (1 << 0) /* Bit 0: List is prioritized */
+#define TLIST_ATTR_INDEXED       (1 << 1) /* Bit 1: List is indexed by CPU */
+
+#define __TLIST_ATTR(s)          g_tasklisttable[s].attr
+#define TLIST_ISPRIORITIZED(s)   ((__TLIST_ATTR(s) & TLIST_ATTR_PRIORITIZED) != 0)
+#define TLIST_ISINDEXED(s)       ((__TLIST_ATTR(s) & TLIST_ATTR_INDEXED) != 0)
+
+#define __TLIST_HEAD(s)          (FAR dq_queue_t *)g_tasklisttable[s].list
+#define __TLIST_HEADINDEXED(s,c) (&(__TLIST_HEAD(s))[c])
+
+#ifdef CONFIG_SMP
+#  define TLIST_HEAD(s,c) \
+  ((TLIST_ISINDEXED(s)) ? __TLIST_HEADINDEXED(s,c) : __TLIST_HEAD(s))
+#  define TLIST_READYTORUN(s,c)  __TLIST_HEADINDEXED(s,c)
+#  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
+#else
+#  define TLIST_HEAD(s)          __TLIST_HEAD(s)
+#  define TLIST_READYTORUN(s)    __TLIST_HEAD(s)
+#  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
+#endif
 
 /****************************************************************************
  * Public Type Definitions
@@ -102,15 +125,14 @@ struct pidhash_s
 #endif
 };
 
-/* This structure defines an element of the g_tasklisttable[].
- * This table is used to map a task_state enumeration to the
- * corresponding task list.
+/* This structure defines an element of the g_tasklisttable[].  This table
+ * is used to map a task_state enumeration to the corresponding task list.
  */
 
 struct tasklist_s
 {
   DSEG volatile dq_queue_t *list; /* Pointer to the task list */
-  bool prioritized;               /* true if the list is prioritized */
+  uint8_t attr;                   /* List attribute flags */
 };
 
 /****************************************************************************
@@ -255,10 +277,11 @@ extern volatile pid_t g_lastpid;
 
 extern struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
 
-/* This is a table of task lists.  This table is indexed by the task state
+/* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated
- * static task list (if there is one) as well as a boolean indication as to
- * if the list is an ordered list or not.
+ * static task list (if there is one) as well as a a set of attribute flags
+ * indicating properities of the list, for example, if the list is an
+ * ordered list or not.
  */
 
 extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];

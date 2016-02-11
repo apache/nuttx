@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_removeblocked.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,26 +45,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -93,15 +73,14 @@ void sched_removeblocked(FAR struct tcb_s *btcb)
 
   /* Make sure the TCB is in a valid blocked state */
 
-  ASSERT(task_state >= FIRST_BLOCKED_STATE &&
-         task_state <= LAST_BLOCKED_STATE);
+  DEBUGASSERT(task_state >= FIRST_BLOCKED_STATE &&
+              task_state <= LAST_BLOCKED_STATE);
 
   /* Remove the TCB from the blocked task list associated
    * with this state
    */
 
-  dq_rem((FAR dq_entry_t *)btcb,
-         (FAR dq_queue_t *)g_tasklisttable[task_state].list);
+  dq_rem((FAR dq_entry_t *)btcb, TLIST_BLOCKED(task_state));
 
   /* Make sure the TCB's state corresponds to not being in
    * any list
@@ -109,4 +88,3 @@ void sched_removeblocked(FAR struct tcb_s *btcb)
 
   btcb->task_state = TSTATE_TASK_INVALID;
 }
-

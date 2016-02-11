@@ -11480,4 +11480,7 @@
 	* arch/arm/sim/up_head.c and up_simsmp.c:  Add multi-CPU support to the
 	  simulation to support SMP investigation..  Currently crashes when CONFIG_SMP
 	  is enabled as expected (2016-02-10).
+	* sched/sched.h and other files:  Replace the bool 'prioritized' in the task
+	  list table with a uint8_t bit set so that additional attributes of a task
+	  list can be provided without adding more booleans (2016-10-11).
 

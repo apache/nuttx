@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_terminate.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,30 +54,6 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -124,6 +100,7 @@
 int task_terminate(pid_t pid, bool nonblocking)
 {
   FAR struct tcb_s *dtcb;
+  FAR dq_queue_t *tasklist;
   irqstate_t saved_state;
 
   /* Make sure the task does not become ready-to-run while we are futzing with
@@ -142,6 +119,14 @@ int task_terminate(pid_t pid, bool nonblocking)
       sched_unlock();
       return -ESRCH;
     }
+
+#ifdef CONFIG_SMP
+  /* We will need some interlocks to assure that no tasks are rescheduled
+   * on any other CPU while we do this.
+   */
+
+#  warning Missing SMP logic
+#endif
 
   /* Verify our internal sanity */
 
@@ -165,11 +150,16 @@ int task_terminate(pid_t pid, bool nonblocking)
 
   task_exithook(dtcb, EXIT_SUCCESS, nonblocking);
 
-  /* Remove the task from the OS's tasks lists. */
+  /* Remove the task from the OS's task lists. */
+
+#ifdef CONFIG_SMP
+  tasklist = TLIST_HEAD(dtcb->task_state, dtcb->cpu);
+#else
+  tasklist = TLIST_HEAD(dtcb->task_state);
+#endif
 
   saved_state = irqsave();
-  dq_rem((FAR dq_entry_t *)dtcb,
-         (FAR dq_queue_t *)g_tasklisttable[dtcb->task_state].list);
+  dq_rem((FAR dq_entry_t *)dtcb, tasklist);
   dtcb->task_state = TSTATE_TASK_INVALID;
   irqrestore(saved_state);
 

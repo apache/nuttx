@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_setpriority.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,30 +47,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -104,6 +80,7 @@
 int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 {
   FAR struct tcb_s *rtcb = this_task();
+  FAR dq_queue_t *tasklist;
   tstate_t task_state;
   irqstate_t saved_state;
 
@@ -127,8 +104,8 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
   task_state = tcb->task_state;
   switch (task_state)
     {
-      /* CASE 1. The task is running or ready-to-run and a context switch
-       * may be caused by the re-prioritization
+      /* CASE 1. The task is and a context switch may be caused by the
+       * re-prioritization
        */
 
       case TSTATE_TASK_RUNNING:
@@ -155,11 +132,14 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
           }
         break;
 
-      /* CASE 2. The task is running or ready-to-run and a context switch
-       * may be caused by the re-prioritization
+      /* CASE 2. The task is ready-to-run (but not running) and a context
+       * switch may be caused by the re-prioritization
        */
 
       case TSTATE_TASK_READYTORUN:
+#ifdef CONFIG_SMP
+      case TSTATE_TASK_ASSIGNED:
+#endif
 
         /* A context switch will occur if the new priority of the ready-to
          * run task is (strictly) greater than the current running task
@@ -188,7 +168,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 
             /* Put it back into the ready-to-run task list */
 
-            ASSERT(!sched_addreadytorun(tcb));
+            DEBUGASSERT(!sched_addreadytorun(tcb));
           }
         break;
 
@@ -200,12 +180,12 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 
         /* CASE 3a. The task resides in a prioritized list. */
 
-        if (g_tasklisttable[task_state].prioritized)
+        tasklist = TLIST_BLOCKED(task_state);
+        if (TLIST_ISPRIORITIZED(task_state))
           {
             /* Remove the TCB from the prioritized task list */
 
-            dq_rem((FAR dq_entry_t *)tcb,
-                   (FAR dq_queue_t *)g_tasklisttable[task_state].list);
+            dq_rem((FAR dq_entry_t *)tcb, tasklist);
 
             /* Change the task priority */
 
@@ -215,8 +195,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
              * position
              */
 
-            sched_addprioritized(tcb,
-                                 (FAR dq_queue_t *)g_tasklisttable[task_state].list);
+            sched_addprioritized(tcb, tasklist);
           }
 
         /* CASE 3b. The task resides in a non-prioritized list. */

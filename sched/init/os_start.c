@@ -203,8 +203,8 @@ volatile pid_t g_lastpid;
 
 /* The following hash table is used for two things:
  *
- * 1. This hash table greatly speeds the determination of
- *    a new unique process ID for a task, and
+ * 1. This hash table greatly speeds the determination of a new unique
+ *    process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
  * It has the side effects of using more memory and limiting
  *
@@ -213,33 +213,74 @@ volatile pid_t g_lastpid;
 
 struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
 
-/* This is a table of task lists.  This table is indexed by
- * the task state enumeration type (tstate_t) and provides
- * a pointer to the associated static task list (if there
- * is one) as well as a boolean indication as to if the list
- * is an ordered list or not.
+/* This is a table of task lists.  This table is indexed by the task stat
+ * enumeration type (tstate_t) and provides a pointer to the associated
+ * static task list (if there is one) as well as a a set of attribute flags
+ * indicating properities of the list, for example, if the list is an
+ * ordered list or not.
  */
 
 const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
 {
-  { NULL,                    false },  /* TSTATE_TASK_INVALID */
-  { &g_pendingtasks,         true  },  /* TSTATE_TASK_PENDING */
-  { &g_readytorun,           true  },  /* TSTATE_TASK_READYTORUN */
-  { &g_readytorun,           true  },  /* TSTATE_TASK_RUNNING */
-  { &g_inactivetasks,        false },  /* TSTATE_TASK_INACTIVE */
-  { &g_waitingforsemaphore,  true  }   /* TSTATE_WAIT_SEM */
+  {                                              /* TSTATE_TASK_INVALID */
+    NULL,
+    0
+  },
+  {                                              /* TSTATE_TASK_PENDING */
+    &g_pendingtasks,
+    TLIST_ATTR_PRIORITIZED
+  },
+  {                                              /* TSTATE_TASK_READYTORUN */
+    &g_readytorun,
+    TLIST_ATTR_PRIORITIZED
+  },
+#ifdef CONFIG_SMP
+  {                                              /* TSTATE_TASK_ASSIGNED */
+    g_assignedtasks,
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED
+  },
+  {                                              /* TSTATE_TASK_RUNNING */
+    g_assignedtasks,
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED
+  },
+#else
+  {                                              /* TSTATE_TASK_RUNNING */
+    &g_readytorun,
+    TLIST_ATTR_PRIORITIZED
+  },
+#endif
+  {                                              /* TSTATE_TASK_INACTIVE */
+    &g_inactivetasks,
+    0
+  },
+  {                                              /* TSTATE_WAIT_SEM */
+    &g_waitingforsemaphore,
+    TLIST_ATTR_PRIORITIZED
+  }
 #ifndef CONFIG_DISABLE_SIGNALS
   ,
-  { &g_waitingforsignal,     false }  /* TSTATE_WAIT_SIG */
+  {                                              /* TSTATE_WAIT_SIG */
+    &g_waitingforsignal,
+    0
+  }
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
   ,
-  { &g_waitingformqnotempty, true  },  /* TSTATE_WAIT_MQNOTEMPTY */
-  { &g_waitingformqnotfull,  true  }   /* TSTATE_WAIT_MQNOTFULL */
+  {                                              /* TSTATE_WAIT_MQNOTEMPTY */
+    &g_waitingformqnotempty,
+    TLIST_ATTR_PRIORITIZED
+  },
+  {                                              /* TSTATE_WAIT_MQNOTFULL */
+    &g_waitingformqnotfull,
+    TLIST_ATTR_PRIORITIZED
+  }
 #endif
 #ifdef CONFIG_PAGING
   ,
-  { &g_waitingforfill,       true  }   /* TSTATE_WAIT_PAGEFILL */
+  {                                              /* TSTATE_WAIT_PAGEFILL */
+    &g_waitingforfill,
+    TLIST_ATTR_PRIORITIZED
+  }
 #endif
 };
 
@@ -360,7 +401,16 @@ void os_start(void)
   bzero((void *)&g_idletcb, sizeof(struct task_tcb_s));
   g_idletcb.cmn.task_state = TSTATE_TASK_RUNNING;
   g_idletcb.cmn.entry.main = (main_t)os_start;
+
+  /* Set the task flags to indicate that this is a kernel thread and, if
+   * configured for SMP, that this task is assigned to CPU0.
+   */
+
+#ifdef CONFIG_SMP
+  g_idletcb.cmn.flags      = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_ASSIGNED);
+#else
   g_idletcb.cmn.flags      = TCB_FLAG_TTYPE_KERNEL;
+#endif
 
   /* Set the IDLE task name */
 
