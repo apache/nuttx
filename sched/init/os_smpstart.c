@@ -40,14 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sched.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
-# include "sched/sched.h"
-# include "init/init.h"
+#include "init/init.h"
 
 #ifdef CONFIG_SMP
 
@@ -72,22 +70,7 @@
 
 int os_idletask(int argc, FAR char *argv[])
 {
-  FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  int cpu = this_cpu();
-
-  /* Make sure that this thread is assigned to the current CPU */
-
-  DEBUGASSERT(rtcb->cpu == cpu);
-
-  /* REVISIT: disabling interrupts is not sufficient protection */
-
-  flags        = irqsave();
-  rtcb->flags |= TCB_FLAG_CPU_ASSIGNED;
-  rtcb->cpu    = cpu;
-  irqrestore(flags);
-
-  /* Then enter the IDLE loop */
+  /* Enter the IDLE loop */
 
   sdbg("CPU%d: Beginning Idle Loop\n");
   for (; ; )

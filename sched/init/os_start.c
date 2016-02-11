@@ -300,19 +300,15 @@ uint8_t g_os_initstate;  /* See enum os_initstate_e */
  * initialization task is responsible for bringing up the rest of the system.
  */
 
-static FAR struct task_tcb_s g_idletcb;
+static struct task_tcb_s g_idletcb;
 
 /* This is the name of the idle task */
 
-static FAR const char g_idlename[] = "Idle Task";
+static const char g_idlename[] = "Idle Task";
 
 /* This the IDLE idle threads argument list. */
 
 static FAR char *g_idleargv[2];
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -336,6 +332,7 @@ static FAR char *g_idleargv[2];
 
 void os_start(void)
 {
+  FAR dq_queue_t *tasklist;
   int i;
 
   slldbg("Entry\n");
@@ -438,14 +435,11 @@ void os_start(void)
   /* Then add the idle task's TCB to the head of the ready to run list */
 
 #ifdef CONFIG_SMP
-  /* Use the list a ready-to-run tasks assigned to CPU0 */
-
-  dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_assignedtasks[0]);
+  tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, 0);
 #else
-  /* Use the common, unassigned ready-to-run list */
-
-  dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_readytorun);
+  tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
 #endif
+  dq_addfirst((FAR dq_entry_t *)&g_idletcb, tasklist);
 
   /* Initialize the processor-specific portion of the TCB */
 
