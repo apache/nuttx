@@ -40,14 +40,38 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdio.h>
+#include <queue.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 
+#include "group/group.h"
+#include "sched/sched.h"
 #include "init/init.h"
 
 #ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct os_tcballoc_s
+{
+  struct task_tcb_s tcb;  /* IDLE task TCB */
+  FAR char *idleargv[2];  /* Argument list */
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if CONFIG_TASK_NAME_SIZE < 1
+static const char g_idlename[] = "CPUn Idle"
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -108,6 +132,130 @@ int os_idletask(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
+ * Name: os_idletcb_setup
+ *
+ * Description:
+ *   Initialize the IDLE task TCB for this CPU and add it to the correct OS
+ *   task list.  The calling sequence here is:
+ *
+ *   1. os_start() - Initializes the system and calls os_smpstart()
+ *   2. os_smpstart() - Calls up_cpustart() for each CPU 1..(CONFIG_SMP_NCPUS-1)
+ *   3. up_cpustart() - Calls os_idletcb_setup() when appropriate to configure
+ *      the OS data structures.
+ *   4. up_cpustart() - may also call os_idletcb_teardown() to recover from
+ *      from any errors.
+ *
+ * Input Parameters:
+ *   cpu - The CPU to undel
+ *   idle - Memory allocated by os_idletcb_setup
+ *   pid - Task ID of the IDLE task
+ *
+ * Returned Value:
+ *   Memory allocated by os_idletcb_setup (for error recovery). NULL is
+ *   returned only a a failure to allocate memory.
+ *
+ ****************************************************************************/
+
+static FAR void *os_idletcb_setup(int cpu, main_t idletask, pid_t pid)
+{
+  FAR struct os_tcballoc_s *alloc;
+  FAR struct task_tcb_s *itcb;
+  dq_queue_t *tasklist;
+
+  /* IDLE TCB Initialization ************************************************/
+  /* Allocate and clear the IDLE TCB */
+
+  alloc = (FAR struct os_tcballoc_s *)kmm_zalloc(sizeof(struct os_tcballoc_s));
+  if (alloc == NULL)
+    {
+       return NULL;
+    }
+
+  /* Initialize the TCB for the IDLE task on the stack.
+   * REVISIT: We should be able to use task_schedsetup() to do most of this
+   */
+
+  itcb                 = &alloc->tcb;
+  itcb->cmn.task_state = TSTATE_TASK_RUNNING;
+  itcb->cmn.entry.main = idletask;
+  itcb->cmn.flags      = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_ASSIGNED);
+  itcb->cmn.cpu        = cpu;
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  snprintf(itcb->cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", cpu);
+  alloc->idleargv[0]   = itcb->cmn.name;
+#else
+  alloc->idleargv[0]   = (FAR char *)g_idlename;
+#endif
+  alloc->idleargv[1]   = NULL;
+  itcb->argv           = alloc->idleargv;
+
+  /* Add the IDLE task TCB to the end of the assigned task list */
+
+  tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, cpu);
+  dq_addfirst((FAR dq_entry_t *)itcb, tasklist);
+
+  /* Initialize the processor-specific portion of the TCB */
+
+  up_initial_state(&itcb->cmn);
+
+  /* PID assignment *********************************************************/
+
+  g_pidhash[PIDHASH(pid)].tcb = &itcb->cmn;
+
+  /* IDLE Group Initialization **********************************************/
+#ifdef HAVE_TASK_GROUP
+  /* Allocate the IDLE group */
+
+  DEBUGVERIFY(group_allocate(itcb, itcb->cmn.flags));
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* Create stdout, stderr, stdin on the IDLE task.  These will be
+   * inherited by all of the threads created by the IDLE task.
+   */
+
+  DEBUGVERIFY(group_setupidlefiles(itcb));
+#endif
+
+#ifdef HAVE_TASK_GROUP
+  /* Complete initialization of the IDLE group.  Suppress retention
+   * of child status in the IDLE group.
+   */
+
+  DEBUGVERIFY(group_initialize(itcb));
+  itcb->cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
+#endif
+
+  return alloc;
+}
+
+/****************************************************************************
+ * Name: os_idletcb_teardown
+ *
+ * Description:
+ *   Undo what os_idletcb_setup() did.  Necessary only for error recovery.
+ *
+ * Input Parameters:
+ *   cpu - The CPU to undel
+ *   alloc - Memory allocated by os_idletcb_setup
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void os_idletcb_teardown(int cpu, FAR void *alloc)
+{
+  /* Undo what os_idletcb_setup() did */
+
+  FAR dq_queue_t *tasklist= TLIST_HEAD(TSTATE_TASK_RUNNING, 0);
+  dq_init(tasklist);
+
+  kmm_free(alloc);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -126,25 +274,51 @@ int os_idletask(int argc, FAR char *argv[])
  * Returned Value:
  *   Zero on success; a negater errno value on failure.
  *
+ * Assumption:
+ *   Runs before the full initialization sequence has completed.  Runs after
+ *   all OS facilities are set up, but before multi-tasking has been started.
+ *
  ****************************************************************************/
 
 int os_smpstart(void)
 {
+  FAR void *alloc;
+  pid_t pid;
   int ret;
-  int i;
+  int cpu;
 
-  for (i = 1; i < CONFIG_SMP_NCPUS; i++)
+  /* Reserve PIDs for IDLE tasks 1..(CONFIG_SMP_NCPUS-1).  We do not have to
+   * be careful here because so far because there is only one CPU running and
+   * we have not yet started multi-tasking.
+   */
+
+  pid        = g_lastpid + 1;     /* Should be 1 */
+  g_lastpid += CONFIG_SMP_NCPUS;  /* Should be CONFIG_SMP_NCPUS */
+
+  /* CPU0 is already running.  Start the remaining CPUs */
+
+  for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++, pid++)
     {
-      ret = up_cpustart(i, os_idletask);
-#ifdef CONFIG_DEBUG
+      /* Assign a PID to the IDLE task and set up the IDLE thread TCB */
+
+      alloc = os_idletcb_setup(cpu, os_idletask, pid);
+      if (alloc == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      /* And start the CPU.  */
+
+      ret = up_cpustart(cpu, os_idletask, pid);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to start CPU%d: %d\n", i, ret);
+          sdbg("ERROR: Failed to start CPU%d: %d\n", cpu, ret);
+
+          /* Undo what os_idletcb_setup() did and return the failure*/
+
+          os_idletcb_teardown(cpu, alloc);
           return ret;
         }
-#else
-      UNUSED(ret);
-#endif
     }
 
   return OK;

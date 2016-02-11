@@ -304,7 +304,11 @@ static struct task_tcb_s g_idletcb;
 
 /* This is the name of the idle task */
 
+#ifdef CONFIG_SMP
+static const char g_idlename[] = "CPU0 Idle";
+#else
 static const char g_idlename[] = "Idle Task";
+#endif
 
 /* This the IDLE idle threads argument list. */
 
@@ -650,7 +654,7 @@ void os_start(void)
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
 
-  DEBUGASSERT(this_cpu() == 0);
+  DEBUGASSERT(this_cpu() == 0 && CONFIG_MAX_TASKS > CONFIG_SMP_NCPUS);
   DEBUGVERIFY(os_smpstart());
 
 #endif /* CONFIG_SMP */

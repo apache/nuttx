@@ -1700,6 +1700,7 @@ int up_cpundx(void);
  *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
  *         0 is already active)
  *   idletask - The entry point to the IDLE task.
+ *   pid - Task ID of the IDLE task
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -1707,7 +1708,7 @@ int up_cpundx(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int up_cpustart(int cpu, main_t idletask);
+int up_cpustart(int cpu, main_t idletask, pid_t pid);
 #endif
 
 /****************************************************************************
