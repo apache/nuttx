@@ -96,6 +96,10 @@ static void *sim_idle_trampoline(void *arg)
       return NULL;
     }
 
+  /* Let up_cpustart() continue */
+
+  (void)pthread_mutex_unlock(&cpuinfo->mutex);
+
   /* Give control to the IDLE task */
 
   (void)cpuinfo->idletask(0, (char **)0);

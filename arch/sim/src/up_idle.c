@@ -49,10 +49,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -70,10 +66,6 @@ extern int up_hostusleep(unsigned int usec);
 extern void up_x11update(void);
 #endif
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -197,9 +189,12 @@ void up_idle(void)
 
   lock = SP_UNLOCKED;
 
+#if !defined(CONFIG_SIM_WALLTIME) && !defined(CONFIG_SIM_X11FB)
   /* Give other pthreads/CPUs a shot */
 
   //pthread_yield();
-  usleep(25*1000);
+  up_hostusleep(25*1000);
+
+#endif
 #endif
 }
