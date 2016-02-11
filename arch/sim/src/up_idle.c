@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <pthread.h>
 #include <time.h>
 
 #include <nuttx/arch.h>
@@ -192,8 +193,13 @@ void up_idle(void)
 #endif
 
 #ifdef CONFIG_SMP
-  /* Release the spinlock and return */
+  /* Release the spinlock */
 
   lock = SP_UNLOCKED;
+
+  /* Give other pthreads/CPUs a shot */
+
+  //pthread_yield();
+  usleep(25*1000);
 #endif
 }

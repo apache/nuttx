@@ -171,7 +171,7 @@ int up_cpundx(void)
 }
 
 /****************************************************************************
- * Name: sim_cpustart
+ * Name: up_cpustart
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -194,7 +194,7 @@ int up_cpundx(void)
  *
  ****************************************************************************/
 
-int sim_cpustart(int cpu, main_t idletask)
+int up_cpustart(int cpu, main_t idletask)
 {
   struct sim_cpuinfo_s cpuinfo;
   pthread_t thread;
