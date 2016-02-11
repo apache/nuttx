@@ -1,7 +1,7 @@
 /****************************************************************************
  * shced/sched_removereadytorun.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,26 +46,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -79,24 +59,25 @@
  *   rtcb - Points to the TCB that is ready-to-run
  *
  * Return Value:
- *   true if the currently active task (the head of the
- *     g_readytorun list) has changed.
+ *   true if the currently active task (the head of the ready-to-run list)
+ *     has changed.
  *
  * Assumptions:
  * - The caller has established a critical section before calling this
  *   function (calling sched_lock() first is NOT a good idea -- use irqsave()).
- * - The caller handles the condition that occurs if the
- *   the head of the g_readytorun list is changed.
+ * - The caller handles the condition that occurs if the head of the
+ *   ready-to-run list is changed.
  *
  ****************************************************************************/
 
 bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 {
   FAR struct tcb_s *ntcb = NULL;
+  FAR dq_queue_t *tasklist;
   bool ret = false;
 
   /* Check if the TCB to be removed is at the head of the ready to run list.
-   * In this case, we are removing the currently active task.
+   * In this case, we are removing the currently active task on this CPU.
    */
 
   if (!rtcb->blink)
@@ -113,9 +94,18 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       ret = true;
     }
 
-  /* Remove the TCB from the ready-to-run list */
+  /* Remove the TCB from the ready-to-run list.  In the non-SMP case, this
+   * is always the g_readytorun list; In the SMP case, however, this may be
+   * either the g_readytorun() or the g_assignedtasks[cpu] list.
+   */
 
-  dq_rem((FAR dq_entry_t *)rtcb, (FAR dq_queue_t *)&g_readytorun);
+#ifdef CONFIG_SMP
+  tasklist = TLIST_HEAD(rtcb->task_state, rtcb->cpu);
+#else
+  tasklist = (FAR dq_queue_t *)&g_readytorun;
+#endif
+
+  dq_rem((FAR dq_entry_t *)rtcb, tasklist);
 
   /* Since the TCB is not in any list, it is now invalid */
 

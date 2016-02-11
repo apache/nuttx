@@ -93,11 +93,9 @@
 #ifdef CONFIG_SMP
 #  define TLIST_HEAD(s,c) \
   ((TLIST_ISINDEXED(s)) ? __TLIST_HEADINDEXED(s,c) : __TLIST_HEAD(s))
-#  define TLIST_READYTORUN(s,c)  __TLIST_HEADINDEXED(s,c)
 #  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
 #else
 #  define TLIST_HEAD(s)          __TLIST_HEAD(s)
-#  define TLIST_READYTORUN(s)    __TLIST_HEAD(s)
 #  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
 #endif
 

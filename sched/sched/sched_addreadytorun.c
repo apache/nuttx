@@ -46,26 +46,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -73,12 +53,11 @@
  * Name:  sched_addreadytorun
  *
  * Description:
- *   This function adds a TCB to the ready to run
- *   list.  If the currently active task has preemption disabled
- *   and the new TCB would cause this task to be pre-empted, the
- *   new task is added to the g_pendingtasks list instead.  The
- *   pending tasks will be made ready-to-run when preemption
- *   is unlocked.
+ *   This function adds a TCB to the ready to run list.  If the currently
+ *   active task has preemption disabled and the new TCB would cause this
+ *   task to be pre-empted, the new task is added to the g_pendingtasks list
+ *   instead.  Thepending tasks will be made ready-to-run when preemption is
+ *   unlocked.
  *
  * Inputs:
  *   btcb - Points to the blocked TCB that is ready-to-run
@@ -88,13 +67,13 @@
  *   has changed.
  *
  * Assumptions:
- * - The caller has established a critical section before
- *   calling this function (calling sched_lock() first is NOT
- *   a good idea -- use irqsave()).
- * - The caller has already removed the input rtcb from
- *   whatever list it was in.
- * - The caller handles the condition that occurs if the
- *   the head of the ready-to-run list is changed.
+ * - The caller has established a critical section before calling this
+ *   function (calling sched_lock() first is NOT a good idea -- use
+ *   irqsave()).
+ * - The caller has already removed the input rtcb from whatever list it
+ *   was in.
+ * - The caller handles the condition that occurs if the head of the
+ *   ready-to-run list is changed.
  *
  ****************************************************************************/
 
