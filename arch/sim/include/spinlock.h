@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Must match definitions in up_testset.c */
 
 #define SP_UNLOCKED false  /* The Un-locked state */
 #define SP_LOCKED   true   /* The Locked state */
@@ -53,6 +54,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* Must match definitions in up_testset.c */
 
 typedef bool spinlock_t;
 

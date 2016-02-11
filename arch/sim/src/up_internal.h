@@ -49,6 +49,9 @@
 
 #  include <nuttx/irq.h>
 #  include <arch/irq.h>
+#  ifdef CONFIG_SMP
+#    include <nuttx/sched.h>
+#  endif
 #endif
 
 /****************************************************************************
@@ -214,6 +217,7 @@ void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 
 #ifdef CONFIG_SMP
 int sim_cpu0initialize(void);
+int sim_cpustart(int cpu, main_t idletask);
 #endif
 
 /* up_tickless.c **********************************************************/

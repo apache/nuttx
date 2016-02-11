@@ -65,7 +65,12 @@ ifeq ($(CONFIG_SCHED_TICKLESS),y)
   CSRCS += up_tickless.c
 endif
 
+ifeq ($(CONFIG_SPINLOCK),y)
+  HOSTSRCS += up_testset.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
+  CSRCS += up_idlesetup.c
   HOSTSRCS += up_simsmp.c
 endif
 
@@ -113,6 +118,10 @@ else
   HOSTSRCS += up_wpcap.c up_netdev.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
 endif
+endif
+
+ifeq ($(CONFIG_SMP),y)
+  HOSTCFLAGS += -DCONFIG_SMP=1
 endif
 
 ifeq ($(CONFIG_FS_HOSTFS),y)

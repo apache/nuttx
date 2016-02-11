@@ -69,7 +69,7 @@ static pthread_key_t g_cpukey;
  * Description:
  *   This is a pthread task entry point.  A (host) pthread is used to
  *   simulate a CPU.  Multiple pthreads is a good analog to tasks running on
- *   multiple CPUs 
+ *   multiple CPUs
  *
  *   This function is simply a wrapper that sets the pthread specific data
  *   that presents the CPU number and then calls into the IDLE task entry
@@ -171,7 +171,7 @@ int up_cpundx(void)
 }
 
 /****************************************************************************
- * Name: up_cpustart
+ * Name: sim_cpustart
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -194,7 +194,7 @@ int up_cpundx(void)
  *
  ****************************************************************************/
 
-int up_cpustart(int cpu, main_t idletask)
+int sim_cpustart(int cpu, main_t idletask)
 {
   struct sim_cpuinfo_s cpuinfo;
   pthread_t thread;
@@ -207,7 +207,7 @@ int up_cpustart(int cpu, main_t idletask)
   ret = pthread_mutex_init(&cpuinfo.mutex, NULL);
   if (ret != 0)
     {
-      return -ret;
+      return -ret;  /* REVISIT:  That is a host errno value. */
     }
 
   /* Lock the mutex */
@@ -215,16 +215,18 @@ int up_cpustart(int cpu, main_t idletask)
   ret = pthread_mutex_lock(&cpuinfo.mutex);
   if (ret != 0)
     {
-      ret = -ret;
+      ret = -ret;  /* REVISIT: This is a host errno value. */
       goto errout_with_mutex;
     }
 
-  /* Start the CPU emulation thread */
+  /* Start the CPU emulation thread.  This is analogous to starting the CPU
+   * in a multi-CPU hardware model.
+   */
 
   ret = pthread_create(&thread, NULL, sim_idle_trampoline, &cpuinfo);
   if (ret != 0)
     {
-      ret = -ret;
+      ret = -ret;  /* REVISIT:  That is a host errno value. */
       goto errout_with_lock;
     }
 
@@ -235,7 +237,7 @@ int up_cpustart(int cpu, main_t idletask)
   ret = pthread_mutex_lock(&cpuinfo.mutex);
   if (ret != 0)
     {
-      ret = -ret;
+      ret = -ret;  /* REVISIT:  That is a host errno value. */
     }
 
 errout_with_lock:
