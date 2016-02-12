@@ -107,6 +107,29 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       ntcb = (FAR struct tcb_s *)rtcb->flink;
       DEBUGASSERT(ntcb != NULL);
 
+#ifdef CONFIG_SMP
+      /* Will pre-emption be disabled after the switch? */
+
+      if (ntcb->lockcount > 0)
+        {
+          /* Yes... make sure that scheduling logic knows about this */
+
+          g_cpu_lockset |= (1 << this_cpu());
+          g_cpu_schedlock = SP_LOCKED;
+        }
+      else
+        {
+          /* No.. we may need to perform release our hold on the lock.
+           *
+           * REVISIT: It might be possible for two CPUs to hold the logic in
+           * some strange cornercases like:
+           */
+
+          g_cpu_lockset  &= ~(1 << this_cpu());
+          g_cpu_schedlock = ((g_cpu_lockset == 0) ? SP_UNLOCKED : SP_LOCKED);
+        }
+#endif
+
       /* Inform the instrumentation layer that we are switching tasks */
 
       sched_note_switch(rtcb, ntcb);

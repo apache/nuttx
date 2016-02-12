@@ -100,7 +100,7 @@ struct spinlock_s
 spinlock_t up_testset(volatile FAR spinlock_t *lock);
 
 /****************************************************************************
- * Name: spinlock_initialize
+ * Name: spin_initialize
  *
  * Description:
  *   Initialize a spinlock object to its initial, unlocked state.
@@ -113,14 +113,18 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  *
  ****************************************************************************/
 
-void spinlock_initialize(FAR struct spinlock_s *lock);
+void spin_initialize(FAR struct spinlock_s *lock);
 
 /****************************************************************************
- * Name: spinlock
+ * Name: spin_lock
  *
  * Description:
  *   If this CPU does not already hold the spinlock, then loop until the
  *   spinlock is successfully locked.
+ *
+ *   This implementation is non-reentrant and is prone to deadlocks in
+ *   the case that any logic on the same CPU attempts to take the lock
+ *   more than one
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
@@ -134,13 +138,40 @@ void spinlock_initialize(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-void spinlock(FAR struct spinlock_s *lock);
+void spin_lock(FAR volatile spinlock_t *lock);
 
 /****************************************************************************
- * Name: spinunlock
+ * Name: spin_lockr
  *
  * Description:
- *   Release one count on a spinlock.
+ *   If this CPU does not already hold the spinlock, then loop until the
+ *   spinlock is successfully locked.
+ *
+ *   This implementation is re-entrant in the sense that it can called
+ *   numerous times from the same CPU without blocking.  Of course,
+ *   spin_unlock() must be called the same number of times.  NOTE: the
+ *   thread that originallly took the look may be executing on a different
+ *   CPU when it unlocks the spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   None.  When the function returns, the spinlock was successfully locked
+ *   by this CPU.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+void spin_lockr(FAR struct spinlock_s *lock);
+
+/****************************************************************************
+ * Name: spin_unlock
+ *
+ * Description:
+ *   Release one count on a non-reentrant spinlock.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to unlock.
@@ -153,7 +184,61 @@ void spinlock(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-void spinunlock(FAR struct spinlock_s *lock);
+/* void spin_unlock(FAR spinlock_t *lock); */
+#define spin_unlock(l)  do { (l) = SP_UNLOCKED; } while (0)
+
+/****************************************************************************
+ * Name: spin_unlockr
+ *
+ * Description:
+ *   Release one count on a re-entrant spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to unlock.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+void spin_unlockr(FAR struct spinlock_s *lock);
+
+/****************************************************************************
+ * Name: spin_islocked
+ *
+ * Description:
+ *   Release one count on a renonentrant spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to test.
+ *
+ * Returned Value:
+ *   A boolean value: true the spinlock is locked; false if it is unlocked.
+ *
+ ****************************************************************************/
+
+/* bool spin_islocked(FAR spinlock_t lock); */
+#define spin_islocked(l) ((l) == SP_UNLOCKED)
+
+/****************************************************************************
+ * Name: spin_islockedr
+ *
+ * Description:
+ *   Release one count on a re-entrant spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to test.
+ *
+ * Returned Value:
+ *   A boolean value: true the spinlock is locked; false if it is unlocked.
+ *
+ ****************************************************************************/
+
+/* bool spin_islockedr(FAR struct spinlock_s *lock); */
+#define spin_islockedr(l) ((l)->sp_lock == SP_UNLOCKED)
 
 #endif /* CONFIG_SPINLOCK */
 #endif /* __INCLUDE_NUTTX_SPINLOCK_H */

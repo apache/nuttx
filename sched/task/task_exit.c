@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_exit.c
  *
- *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,14 @@ int task_exit(void)
    */
 
   rtcb->lockcount++;
+
+#ifdef CONFIG_SMP
+  /* Make sure that the system knows about the locked state */
+
+  g_cpu_schedlock = SP_LOCKED;
+  g_cpu_lockset |= (1 << this_cpu());
+#endif
+
   rtcb->task_state = TSTATE_TASK_READYTORUN;
 
   /* Move the TCB to the specified blocked task list and delete it.  Calling
@@ -137,5 +145,19 @@ int task_exit(void)
    */
 
   rtcb->lockcount--;
+
+#ifdef CONFIG_SMP
+  if (rtcb->lockcount == 0)
+    {
+      /* Make sure that the system knows about the unlocked state */
+
+      g_cpu_lockset &= ~(1 << this_cpu());
+      if (g_cpu_lockset == 0)
+        {
+          g_cpu_schedlock = SP_UNLOCKED;
+        }
+    }
+#endif
+
   return ret;
 }

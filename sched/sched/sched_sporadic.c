@@ -452,7 +452,7 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
    * this operation is needed.
    */
 
-  if (tcb->lockcount > 0)
+  if (sched_islocked(tcb))
     {
       DEBUGASSERT((mrepl->flags && SPORADIC_FLAG_ALLOCED) != 0 &&
                   sporadic->nrepls > 0);
@@ -600,7 +600,7 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
    * this operation is needed.
    */
 
-  if (tcb->lockcount > 0)
+  if (sched_islocked(tcb))
     {
       /* Set the timeslice to the magic value */
 
@@ -1199,7 +1199,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
       /* Does the thread have the scheduler locked? */
 
       sporadic = tcb->sporadic;
-      if (tcb->lockcount > 0)
+      if (sched_islocked(tcb))
         {
           /* Yes... then we have no option but to give the thread more
            * time at the higher priority.  Dropping the priority could

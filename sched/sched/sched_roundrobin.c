@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_roundrobin.c
  *
- *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,7 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
    */
 
   ret = tcb->timeslice;
-  if (tcb->timeslice <= 0 && tcb->lockcount == 0)
+  if (tcb->timeslice <= 0 && !sched_islocked(tcb))
     {
       /* We will also suppress context switches if we were called via one
        * of the unusual cases handled by sched_timer_reasses().  In that

@@ -56,7 +56,7 @@
 
 /* REVISIT:  What happens if a thread taks a spinlock while running on one
  * CPU, but is suspended, then reassigned to another CPU where it runs and
- * eventually calls spinunlock().  One solution might be to lock a thread to
+ * eventually calls spin_unlock().  One solution might be to lock a thread to
  * a CPU if it holds a spinlock.  That would assure that it never runs on
  * any other CPU and avoids such complexities.
  */
@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spinlock_initialize
+ * Name: spin_initialize
  *
  * Description:
  *   Initialize a spinlock object to its initial, unlocked state.
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-void spinlock_initialize(FAR struct spinlock_s *lock)
+void spin_initialize(FAR struct spinlock_s *lock)
 {
   DEBUGASSERT(lock != NULL);
 
@@ -93,11 +93,15 @@ void spinlock_initialize(FAR struct spinlock_s *lock)
 }
 
 /****************************************************************************
- * Name: spinlock
+ * Name: spin_lock
  *
  * Description:
  *   If this CPU does not already hold the spinlock, then loop until the
  *   spinlock is successfully locked.
+ *
+ *   This implementation is non-reentrant and is prone to deadlocks in
+ *   the case that any logic on the same CPU attempts to take the lock
+ *   more than one
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
@@ -111,7 +115,40 @@ void spinlock_initialize(FAR struct spinlock_s *lock)
  *
  ****************************************************************************/
 
-void spinlock(FAR struct spinlock_s *lock)
+void spin_lock(FAR volatile spinlock_t *lock)
+{
+  while (up_testset(lock) == SP_LOCKED)
+    {
+      sched_yield();
+    }
+}
+
+/****************************************************************************
+ * Name: spin_lockr
+ *
+ * Description:
+ *   If this CPU does not already hold the spinlock, then loop until the
+ *   spinlock is successfully locked.
+ *
+ *   This implementation is re-entrant in the sense that it can called
+ *   numerous times from the same CPU without blocking.  Of course,
+ *   spin_unlock() must be called the same number of times.  NOTE: the
+ *   thread that originallly took the look may be executing on a different
+ *   CPU when it unlocks the spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   None.  When the function returns, the spinlock was successfully locked
+ *   by this CPU.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+void spin_lockr(FAR struct spinlock_s *lock)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags;
@@ -134,7 +171,7 @@ void spinlock(FAR struct spinlock_s *lock)
     {
 #ifdef CONFIG_SPINLOCK_LOCKDOWN
       /* REVISIT:  What happens if this thread is suspended, then reassigned
-       * to another CPU where it runs and eventually calls spinunlock().
+       * to another CPU where it runs and eventually calls spin_unlock().
        * One solution might be to lock a thread to a CPU if it holds a
        * spinlock.  That would assure that it never runs on any other CPU
        * and avoids such complexities.
@@ -178,7 +215,7 @@ void spinlock(FAR struct spinlock_s *lock)
 }
 
 /****************************************************************************
- * Name: spinunlock
+ * Name: spin_unlockr
  *
  * Description:
  *   Release one count on a spinlock.
@@ -194,7 +231,7 @@ void spinlock(FAR struct spinlock_s *lock)
  *
  ****************************************************************************/
 
-void spinunlock(FAR struct spinlock_s *lock)
+void spin_unlockr(FAR struct spinlock_s *lock)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags;
@@ -209,7 +246,7 @@ void spinunlock(FAR struct spinlock_s *lock)
 #ifdef CONFIG_SPINLOCK_LOCKDOWN
   /* REVISIT:  What happens if this thread took the lock on a different CPU,
    * was suspended, then reassigned to this CPU where it runs and eventually
-   * calls spinunlock(). One solution might be to lock a thread to a CPU if
+   * calls spin_unlock(). One solution might be to lock a thread to a CPU if
    * it holds a spinlock.  That would assure that it never runs on any other
    * CPU and avoids such complexities.
    */
@@ -221,6 +258,8 @@ void spinunlock(FAR struct spinlock_s *lock)
 
   if (lock->sp_cpu == cpu)
 #else
+  /* The alternative is to allow the lock to be released from any CPU */
+
   DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED &&
               lock->sp_count > 0);
 #endif
