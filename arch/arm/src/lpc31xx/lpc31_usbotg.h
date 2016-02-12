@@ -544,9 +544,9 @@
 #define USBDEV_USBMODE_ES                    (1 << 2)  /* Bit 2:  Endian select */
 #define USBDEV_USBMODE_CM_SHIFT              (0)       /* Bits 0-1: Controller mode */
 #define USBDEV_USBMODE_CM_MASK               (3 << USBDEV_USBMODE_CM_SHIFT)
-#  define USBDEV_USBMODE_CMIDLE              (0 << USBDEV_USBMODE_CM_SHIFT) /* Idle */
-#  define USBDEV_USBMODE_CMDEVICE            (2 << USBDEV_USBMODE_CM_SHIFT) /* Device controller */
-#  define USBDEV_USBMODE_CMHOST              (3 << USBDEV_USBMODE_CM_SHIFT) /* Host controller */
+#  define USBDEV_USBMODE_CM_IDLE             (0 << USBDEV_USBMODE_CM_SHIFT) /* Idle */
+#  define USBDEV_USBMODE_CM_DEVICE           (2 << USBDEV_USBMODE_CM_SHIFT) /* Device controller */
+#  define USBDEV_USBMODE_CM_HOST             (3 << USBDEV_USBMODE_CM_SHIFT) /* Host controller */
 
 /* USB Mode register USBMODE (address 0x190001a8) -- Device Mode */
 
@@ -555,9 +555,9 @@
 #define USBHOST_USBMODE_ES                   (1 << 2)  /* Bit 2:  Endian select */
 #define USBHOST_USBMODE_CM_SHIFT             (0)       /* Bits 0-1: Controller mode */
 #define USBHOST_USBMODE_CM_MASK              (3 << USBHOST_USBMODE_CM_SHIFT)
-#  define USBHOST_USBMODE_CMIDLE             (0 << USBHOST_USBMODE_CM_SHIFT) /* Idle */
-#  define USBHOST_USBMODE_CMDEVICE           (2 << USBHOST_USBMODE_CM_SHIFT) /* Device controller */
-#  define USBHOST_USBMODE_CMHOST             (3 << USBHOST_USBMODE_CM_SHIFT) /* Host controller */
+#  define USBHOST_USBMODE_CM_IDLE            (0 << USBHOST_USBMODE_CM_SHIFT) /* Idle */
+#  define USBHOST_USBMODE_CM_DEVICE          (2 << USBHOST_USBMODE_CM_SHIFT) /* Device controller */
+#  define USBHOST_USBMODE_CM_HOST            (3 << USBHOST_USBMODE_CM_SHIFT) /* Host controller */
 
 /* Device endpoint registers */
 
