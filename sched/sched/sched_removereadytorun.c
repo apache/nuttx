@@ -76,11 +76,31 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
   FAR dq_queue_t *tasklist;
   bool ret = false;
 
-  /* Check if the TCB to be removed is at the head of the ready to run list.
-   * In this case, we are removing the currently active task on this CPU.
+  /* Check if the TCB to be removed is at the head of a ready to run list. */
+
+#ifdef CONFIG_SMP
+  /* For the case of SMP, there are two lists involved:  (1) the
+   * g_readytorun list that holds non-running tasks that have not been
+   * assigned to a CPU, and (2) and the g_assignedtasks[] lists which hold
+   * tasks assigned a CPU, including the task that is currently running on
+   * that CPU.  Only this latter list contains the currently active task
+   * only only removing the head of that list can result in a context
+   * switch.
+   *
+   * The tasklist RUNNABLE attribute will inform us if the list holds the
+   * currently executing and task and, hence, if a context switch could
+   * occur.
+   */
+
+  if (!rtcb->blink || TLIST_ISRUNNABLE(rtcb->task_state))
+#else
+  /* There is only one list, g_readytorun, and it always contains the
+   * currently running task.  If we are removing the head of this list,
+   * then we are removing the currently active task.
    */
 
   if (!rtcb->blink)
+#endif
     {
       /* There must always be at least one task in the list (the idle task) */
 

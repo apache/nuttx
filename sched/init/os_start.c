@@ -230,23 +230,27 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
     &g_pendingtasks,
     TLIST_ATTR_PRIORITIZED
   },
+#ifdef CONFIG_SMP
   {                                              /* TSTATE_TASK_READYTORUN */
     &g_readytorun,
     TLIST_ATTR_PRIORITIZED
   },
-#ifdef CONFIG_SMP
   {                                              /* TSTATE_TASK_ASSIGNED */
     g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
   },
   {                                              /* TSTATE_TASK_RUNNING */
     g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
   },
 #else
+  {                                              /* TSTATE_TASK_READYTORUN */
+    &g_readytorun,
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
+  },
   {                                              /* TSTATE_TASK_RUNNING */
     &g_readytorun,
-    TLIST_ATTR_PRIORITIZED
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
   },
 #endif
   {                                              /* TSTATE_TASK_INACTIVE */
