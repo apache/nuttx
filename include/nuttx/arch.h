@@ -1712,6 +1712,51 @@ int up_cpustart(int cpu, main_t idletask, pid_t pid);
 #endif
 
 /****************************************************************************
+ * Name: up_cpustop
+ *
+ * Description:
+ *   Save the state of the current task at the head of the
+ *   g_assignedtasks[cpu] task list and then stop the CPU.
+ *
+ *   This function is called by the OS when the logic executing on one CPU
+ *   needs to modify the state of the g_assignedtasks[cpu] list for another
+ *   CPU.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be stopped/
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpustop(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: up_cpurestart
+ *
+ * Description:
+ *   Restart the cpu, restoring the state of the task at the head of the
+ *   g_assignedtasks[cpu] list.
+ *
+ *   This function is called after up_cpustop in order resume operation of
+ *   the CPU after modifying its g_assignedtasks[cpu] list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU being re-started.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpurestart(int cpu);
+#endif
+
+/****************************************************************************
  * Name: up_romgetc
  *
  * Description:

@@ -170,49 +170,61 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *next;
   FAR dq_queue_t *tasklist;
-  uint8_t minprio;
   int task_state;
   int cpu;
   bool switched;
   bool doswitch;
-  int i;
 
-  /* Find the CPU that is executing the lowest priority task (possibly its
-   * IDLE task).
-   */
+  /* Check if the blocked TCB is already assigned to a CPU */
 
-  rtcb     = NULL;
-  minprio  = SCHED_PRIORITY_MAX;
-  cpu      = 0;
-
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+  if ((btcb->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
     {
-      FAR struct tcb_s *candidate =
-        (FAR struct tcb_s *)g_assignedtasks[i].head;
+      /* Yes.. that that is the CPU we must use */
 
-      /* If this thread is executing its IDLE task, the use it.  The IDLE
-       * task is always the last task in the assigned task list.
+      cpu  = btcb->cpu;
+      rtcb = (FAR struct tcb_s *)g_assignedtasks[cpu].head;
+    }
+  else
+    {
+      uint8_t minprio;
+      int i;
+
+      /* Otherwise, find the CPU that is executing the lowest priority task
+       * (possibly its IDLE task).
        */
 
-      if (candidate->flink == NULL)
+      rtcb     = NULL;
+      minprio  = SCHED_PRIORITY_MAX;
+      cpu      = 0;
+
+      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
         {
-          /* The IDLE task should always be assigned to this CPU and have a
-           * priority zero.
+          FAR struct tcb_s *candidate =
+            (FAR struct tcb_s *)g_assignedtasks[i].head;
+
+          /* If this thread is executing its IDLE task, the use it.  The
+           * IDLE task is always the last task in the assigned task list.
            */
 
-          DEBUGASSERT((candidate->flags & TCB_FLAG_CPU_ASSIGNED) != 0 &&
-                      candidate->sched_priority == 0);
+          if (candidate->flink == NULL)
+            {
+              /* The IDLE task should always be assigned to this CPU and
+               * have a priority of zero.
+               */
 
-          rtcb = candidate;
-          cpu  = i;
-          break;
-        }
-      else if (candidate->sched_priority < minprio)
-        {
-          DEBUGASSERT(candidate->sched_priority > 0);
+              DEBUGASSERT(candidate->sched_priority == 0);
 
-          rtcb = candidate;
-          cpu  = i;
+              rtcb = candidate;
+              cpu  = i;
+              break;
+            }
+          else if (candidate->sched_priority < minprio)
+            {
+              DEBUGASSERT(candidate->sched_priority > 0);
+
+              rtcb = candidate;
+              cpu  = i;
+            }
         }
     }
 
@@ -258,20 +270,46 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       btcb->task_state = TSTATE_TASK_PENDING;
       doswitch = false;
     }
-  else
+  else if (task_state == TSTATE_TASK_READYTORUN)
     {
+      /* The new btcb was added either (1) in the middle of the assigned
+       * task list (the btcb->cpu field is already valid) or (2) was
+       * added to the ready-to-run list (the btcb->cpu field does not
+       * matter).  Either way, it won't be running.
+       *
+       * Add the task to the ready-to-run (but not running) task list
+       */
+
+      (void)sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun);
+
+       btcb->task_state = TSTATE_TASK_READYTORUN;
+       doswitch         = false;
+    }
+  else /* (task_state == TSTATE_TASK_ASSIGNED || task_state == TSTATE_TASK_RUNNING) */
+    {
+      int me = this_cpu();
+
+      /* If we are modifying some assigned task list other than our own, we will
+       * need to stop that CPU.
+       */
+
+      if (cpu != me)
+        {
+          DEBUGVERIFY(up_cpustop(cpu));
+        }
+
       /* Add the task to the list corresponding to the selected state
        * and check if a context switch will occur
        */
 
-      tasklist = TLIST_HEAD(task_state, cpu);
+      tasklist = (FAR dq_queue_t *)g_assignedtasks[cpu].head;
       switched = sched_addprioritized(btcb, tasklist);
 
       /* If the selected task was the g_assignedtasks[] list, then a context
        * swith will occur.
        */
 
-      if (switched && task_state != TSTATE_TASK_READYTORUN)
+      if (switched)
         {
           /* The new btcb was added at the head of the ready-to-run list.  It
            * is now the new active task!
@@ -310,7 +348,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
            * lifting machinery.
            */
 
-          next = (FAR dq_queue_t *)btcb->flink;
+          next = (FAR struct tcb_s *)btcb->flink;
           ASSERT(!rtcb->lockcount && next != NULL);
 
           if ((btcb->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
@@ -328,23 +366,28 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                */
 
               next->task_state = TSTATE_TASK_READYTORUN;
-              (void)sched_addprioritized(btcb, &g_readytorun);
+              (void)sched_addprioritized(btcb,
+                                         (FAR dq_queue_t *)&g_readytorun);
             }
 
           doswitch = true;
         }
       else
         {
-          /* The new btcb was added either (1) in the middle of the assigned
-           * task list (the btcb->cpu field is already valid) or (2) was
-           * added to the ready-to-run list (the btcb->cpu field does not
-           * matter).  Either way, it won't be running.
-           */
+          /* No context switch.  Assign the CPU and set the assigned state */
 
-          DEBUGASSERT(task_state != TSTATE_TASK_RUNNING);
+          DEBUGASSERT(task_state == TSTATE_TASK_ASSIGNED);
 
-          btcb->task_state = TSTATE_TASK_READYTORUN;
-          doswitch         = false;
+          btcb->cpu        = cpu;
+          btcb->task_state = TSTATE_TASK_ASSIGNED;
+        }
+
+      /* All done, restart the other that CPU. */
+
+      if (cpu != me)
+        {
+          DEBUGVERIFY(up_cpurestart(cpu));
+          doswitch = false;
         }
     }
 
