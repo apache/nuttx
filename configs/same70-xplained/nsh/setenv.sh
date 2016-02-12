@@ -71,7 +71,10 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9
 # toolchain.
 # export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
 
-# Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+# The same70-xplained/tools directory
+export TOOL_DIR="${WD}/configs/same70-xplained/tools"
+
+# Add the path to the toolchain and tools directory to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:${TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
