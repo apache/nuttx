@@ -94,9 +94,21 @@ static const char g_idlename[] = "CPUn Idle"
 
 int os_idletask(int argc, FAR char *argv[])
 {
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* Finish TCB initialization */
+
+  FAR struct task_tcb_s *rtcb = (FAR struct task_tcb_s *)this_task();
+
+  /* Create stdout, stderr, stdin on the IDLE task.  These will be
+   * inherited by all of the threads created by the IDLE task.
+   */
+
+  DEBUGVERIFY(group_setupidlefiles(rtcb));
+#endif
+
   /* Enter the IDLE loop */
 
-  sdbg("CPU%d: Beginning Idle Loop\n");
+  sdbg("CPU%d: Beginning Idle Loop\n", this_cpu());
   for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker
@@ -208,14 +220,6 @@ static FAR void *os_idletcb_setup(int cpu, main_t idletask, pid_t pid)
   /* Allocate the IDLE group */
 
   DEBUGVERIFY(group_allocate(itcb, itcb->cmn.flags));
-#endif
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  /* Create stdout, stderr, stdin on the IDLE task.  These will be
-   * inherited by all of the threads created by the IDLE task.
-   */
-
-  DEBUGVERIFY(group_setupidlefiles(itcb));
 #endif
 
 #ifdef HAVE_TASK_GROUP

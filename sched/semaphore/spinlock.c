@@ -251,7 +251,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
    * CPU and avoids such complexities.
    */
 
-  DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED &&
+  DEBUGASSERT(lock != NULL && lock->sp_lock == SP_LOCKED &&
               lock->sp_cpu == this_cpu() && lock->sp_count > 0);
 
   /* Do we already hold the lock? */
@@ -260,7 +260,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
 #else
   /* The alternative is to allow the lock to be released from any CPU */
 
-  DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED &&
+  DEBUGASSERT(lock != NULL && lock->sp_lock == SP_LOCKED &&
               lock->sp_count > 0);
 #endif
 
@@ -286,7 +286,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
 #else /* CONFIG_SMP */
   /* Just mark the spinlock unlocked */
 
-  DEBUGASSERT(lock != NULL && lock->sp-lock = SP_LOCKED);
+  DEBUGASSERT(lock != NULL && lock->sp_lock == SP_LOCKED);
   lock->sp_lock  = SP_UNLOCKED;
 
 #endif /* CONFIG_SMP */
