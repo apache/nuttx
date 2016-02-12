@@ -99,8 +99,11 @@ void up_idle(void)
 
   if (up_testset(&lock) != SP_UNLOCKED)
     {
-      /* We didn't get it... just return and try again later */
+      /* We didn't get it... Give other pthreads/CPUs a shot and try again
+       * later.
+       */
 
+      pthread_yield();
       return;
     }
 #endif
@@ -189,12 +192,8 @@ void up_idle(void)
 
   lock = SP_UNLOCKED;
 
-#if !defined(CONFIG_SIM_WALLTIME) && !defined(CONFIG_SIM_X11FB)
   /* Give other pthreads/CPUs a shot */
 
-  //pthread_yield();
-  up_hostusleep(25*1000);
-
-#endif
+  pthread_yield();
 #endif
 }
