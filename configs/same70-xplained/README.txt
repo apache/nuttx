@@ -21,6 +21,7 @@ Contents
   - SPI Slave
   - Tickless OS
   - Debugging
+  - Using OpenOCD and GDB to flash via the EDBG chip
   - Configurations
 
 Status/Open Issues
@@ -993,6 +994,105 @@ Debugging
     (gdb) file nuttx
     (gdb) ... start debugging ...
 
+Using OpenOCD and GDB to flash via the EDBG chip
+================================================
+
+  Building OpenOCD under Cygwin:
+
+    Refer to configs/olimex-lpc1766stk/README.txt
+
+  Installing OpenOCD in Linux (but see note below):
+
+    sudo apt-get install openocd
+
+  NOTE: At the time of writing installing the above openocd package from
+  the distribution (Ubuntu 14.04) was not enough to get the latest openocd
+  version supporting the SAME70 Xplained.
+
+  The code was obtained from the OpenOCD git repository, available at
+  https://github.com/ntfreak/openocd.
+
+    git clone https://github.com/ntfreak/openocd.git
+
+  Then follow the directions of the "Building OpenOCD" section of their README,
+  but be sure to configure including the CMSIS-DAP interface:
+
+    ./bootstrap
+    ./configure --enable-cmsis-dap
+    make
+    sudo make install
+
+  If your configure step fails, you might be missing some dependencies, i.e.:
+
+    sudo apt-get install libhidapi-dev
+
+  Helper Scripts.
+
+    OpenOCD requires a configuration file.  I keep the one I used last here:
+
+      configs/same70-xplained/tools/atmel_same70_xplained.cfg
+
+    However, the "correct" configuration script to use with OpenOCD may
+    change as the features of OpenOCD evolve.  So you should at least
+    compare that atmel_same70_xplained.cfg file with configuration files in
+    /usr/share/openocd/scripts.  As of this writing, the configuration
+    files of interest were:
+
+      /usr/share/openocd/scripts/interface/cmsis-dap.cfg
+      /usr/share/openocd/scripts/board/atmel_same70_xplained.cfg
+      /usr/share/openocd/scripts/target/atsamv.cfg
+
+    There is also a script on the tools/ directory that I use to start
+    the OpenOCD daemon on my system called oocd.sh.  That script will
+    probably require some modifications to work in another environment:
+
+    - Possibly the value of OPENOCD_PATH and TARGET_PATH
+    - It assumes that the correct script to use is the one at
+      configs/same70-xplained/tools/atmel_same70_xplained.cfg
+
+  Starting OpenOCD
+
+    Then you should be able to start the OpenOCD daemon like:
+
+      configs/same70-xplained/tools/oocd.sh $PWD
+
+  Connecting GDB
+
+    Once the OpenOCD daemon has been started, you can connect to it via
+    GDB using the following GDB command:
+
+      arm-nuttx-elf-gdb
+      (gdb) target remote localhost:3333
+
+    NOTE:  The name of your GDB program may differ.  For example, with the
+    CodeSourcery toolchain, the ARM GDB would be called arm-none-eabi-gdb.
+
+    After starting GDB, you can load the NuttX ELF file:
+
+      (gdb) symbol-file nuttx
+      (gdb) monitor reset
+      (gdb) monitor halt
+      (gdb) load nuttx
+
+    NOTES:
+    1. Loading the symbol-file is only useful if you have built NuttX to
+       include debug symbols (by setting CONFIG_DEBUG_SYMBOLS=y in the
+       .config file).
+    2. The MCU must be halted prior to loading code using 'mon reset'
+       as described below.
+
+    OpenOCD will support several special 'monitor' commands.  These
+    GDB commands will send comments to the OpenOCD monitor.  Here
+    are a couple that you will need to use:
+
+     (gdb) monitor reset
+     (gdb) monitor halt
+
+    NOTES:
+    1. The MCU must be halted using 'mon halt' prior to loading code.
+    2. Reset will restart the processor after loading code.
+    3. The 'monitor' command can be abbreviated as just 'mon'.
+
 Configurations
 ==============
 
@@ -1394,4 +1494,3 @@ Configuration sub-directories
     STATUS:
     2015-03-28: HSMCI TX DMA is disabled.  There are some issues with the TX
       DMA that need to be corrected.
-
