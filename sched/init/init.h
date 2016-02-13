@@ -86,6 +86,25 @@ int os_smpstart(void);
 #endif
 
 /****************************************************************************
+ * Name: os_idletask
+ *
+ * Description:
+ *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
+ *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *
+ * Input Parameters:
+ *   Standard task arguments.
+ *
+ * Returned Value:
+ *   This function does not return.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int os_idletask(int argc, FAR char *argv[]);
+#endif
+
+/****************************************************************************
  * Name: os_bringup
  *
  * Description:

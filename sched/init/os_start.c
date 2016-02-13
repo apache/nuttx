@@ -39,13 +39,14 @@
 
 #include  <sys/types.h>
 #include  <stdbool.h>
+#include  <stdio.h>
 #include  <string.h>
 #include  <assert.h>
 #include  <debug.h>
 
 #include  <nuttx/arch.h>
 #include  <nuttx/compiler.h>
-#include <nuttx/sched.h>
+#include  <nuttx/sched.h>
 #include  <nuttx/fs/fs.h>
 #include  <nuttx/net/net.h>
 #include  <nuttx/lib.h>
@@ -296,27 +297,40 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
 uint8_t g_os_initstate;  /* See enum os_initstate_e */
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
-/* This is the task control block for this thread of execution. This thread
- * of execution is the IDLE task.  NOTE:  the system boots into the IDLE
- * task.  The IDLE task spawns the user initialization task and that user
- * initialization task is responsible for bringing up the rest of the system.
+/* This is an arry of task control block (TCB) for the IDLE thread of each
+ * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
+ * there is one TCB per CPU.  NOTE: The system boots on CPU0 into the IDLE
+ * task.  The IDLE task later starts the other CPUs and spawns the user
+ * initialization task.  That user initialization task is responsible for
+ * bringing up the rest of the system.
  */
 
-static struct task_tcb_s g_idletcb;
+#ifdef CONFIG_SMP
+static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+#else
+static struct task_tcb_s g_idletcb[1];
+#endif
 
 /* This is the name of the idle task */
 
 #ifdef CONFIG_SMP
-static const char g_idlename[] = "CPU0 Idle";
+static const char g_idlename[] = "CPU Idle";
 #else
 static const char g_idlename[] = "Idle Task";
 #endif
 
-/* This the IDLE idle threads argument list. */
+/* This the IDLE idle threads argument list.  NOTE: Normally the argument
+ * list is created on the stack prior to starting the task.  We have to
+ * do things s little differently here for the IDLE tasks.
+ */
 
+#ifdef CONFIG_SMP
+static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
+#else
 static FAR char *g_idleargv[2];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -340,7 +354,11 @@ static FAR char *g_idleargv[2];
 
 void os_start(void)
 {
-  FAR dq_queue_t *tasklist;
+#ifdef CONFIG_SMP
+  int cpu;
+#else
+# define cpu 0
+#endif
   int i;
 
   slldbg("Entry\n");
@@ -390,68 +408,100 @@ void os_start(void)
       g_pidhash[i].pid = INVALID_PROCESS_ID;
     }
 
-  /* Assign the process ID of ZERO to the idle task */
-
-  g_pidhash[PIDHASH(0)].tcb = &g_idletcb.cmn;
-  g_pidhash[PIDHASH(0)].pid = 0;
-
   /* Initialize the IDLE task TCB *******************************************/
-  /* Initialize a TCB for this thread of execution.  NOTE:  The default
-   * value for most components of the g_idletcb are zero.  The entire
-   * structure is set to zero.  Then only the (potentially) non-zero
-   * elements are initialized. NOTE:  The idle task is the only task in
-   * that has pid == 0 and sched_priority == 0.
-   */
-
-  bzero((void *)&g_idletcb, sizeof(struct task_tcb_s));
-  g_idletcb.cmn.task_state = TSTATE_TASK_RUNNING;
-  g_idletcb.cmn.entry.main = (main_t)os_start;
-
-  /* Set the task flags to indicate that this is a kernel thread and, if
-   * configured for SMP, that this task is assigned to CPU0.
-   */
 
 #ifdef CONFIG_SMP
-  g_idletcb.cmn.flags      = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_ASSIGNED);
-#else
-  g_idletcb.cmn.flags      = TCB_FLAG_TTYPE_KERNEL;
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++, g_lastpid++)
 #endif
+    {
+      FAR dq_queue_t *tasklist;
 
-  /* Set the IDLE task name */
+      /* Assign the process ID(s) of ZERO to the idle task(s) */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  strncpy(g_idletcb.cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
-  g_idletcb.cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
-#endif /* CONFIG_TASK_NAME_SIZE */
+      g_pidhash[PIDHASH(0)].tcb = &g_idletcb[cpu].cmn;
+      g_pidhash[PIDHASH(0)].pid = g_lastpid;
 
-  /* Configure the task name in the argument list.  The IDLE task does
-   * not really have an argument list, but this name is still useful
-   * for things like the NSH PS command.
-   *
-   * In the kernel mode build, the arguments are saved on the task's stack
-   * and there is no support that yet.
-   */
+      /* Initialize a TCB for this thread of execution.  NOTE:  The default
+       * value for most components of the g_idletcb are zero.  The entire
+       * structure is set to zero.  Then only the (potentially) non-zero
+       * elements are initialized. NOTE:  The idle task is the only task in
+       * that has pid == 0 and sched_priority == 0.
+       */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  g_idleargv[0]  = g_idletcb.cmn.name;
-#else
-  g_idleargv[0]  = (FAR char *)g_idlename;
-#endif /* CONFIG_TASK_NAME_SIZE */
-  g_idleargv[1]  = NULL;
-  g_idletcb.argv = g_idleargv;
+      bzero((void *)&g_idletcb[cpu], sizeof(struct task_tcb_s));
+      g_idletcb[cpu].cmn.task_state = TSTATE_TASK_RUNNING;
 
-  /* Then add the idle task's TCB to the head of the ready to run list */
+      /* Set the entry point.  This is only for debug purposes.  NOTE: that
+       * the start_t entry point is not saved.  That is acceptable, however,
+       * becaue it can be used only for restarting a task: The IDLE task
+       * cannot be restarted.
+       */
 
 #ifdef CONFIG_SMP
-  tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, 0);
+      if (cpu > 0)
+        {
+          g_idletcb[cpu].cmn.entry.main = os_idletask;
+        }
+      else
 #else
-  tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
+        {
+          g_idletcb[cpu].cmn.entry.main = (main_t)os_start;
+        }
 #endif
-  dq_addfirst((FAR dq_entry_t *)&g_idletcb, tasklist);
 
-  /* Initialize the processor-specific portion of the TCB */
+      /* Set the task flags to indicate that this is a kernel thread and, if
+       * configured for SMP, that this task is assigned to the correct CPU.
+       */
 
-  up_initial_state(&g_idletcb.cmn);
+#ifdef CONFIG_SMP
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_ASSIGNED);
+      g_idletcb[cpu].cmn.cpu   = cpu;
+#else
+      g_idletcb[cpu].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
+#endif
+
+      /* Set the IDLE task name */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+#  ifdef CONFIG_SMP
+      snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", cpu);
+#  else
+      strncpy(g_idletcb[cpu].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
+      g_idletcb[cpu].cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
+#  endif
+#endif
+
+      /* Configure the task name in the argument list.  The IDLE task does
+       * not really have an argument list, but this name is still useful
+       * for things like the NSH PS command.
+       *
+       * In the kernel mode build, the arguments are saved on the task's
+       * stack and there is no support that yet.
+       */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+      g_idleargv[cpu][0]  = g_idletcb[cpu].cmn.name;
+#else
+      g_idleargv[cpu][0]  = (FAR char *)g_idlename;
+#endif /* CONFIG_TASK_NAME_SIZE */
+      g_idleargv[cpu][1]  = NULL;
+      g_idletcb[cpu].argv = &g_idleargv[cpu][0];
+
+      /* Then add the idle task's TCB to the head of the corrent ready to
+       * run list.
+       */
+
+#ifdef CONFIG_SMP
+      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, cpu);
+#else
+      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
+#endif
+      dq_addfirst((FAR dq_entry_t *)&g_idletcb[cpu], tasklist);
+
+      /* Initialize the processor-specific portion of the TCB */
+
+      up_initial_state(&g_idletcb[cpu].cmn);
+    }
 
   /* Initialize RTOS facilities *********************************************/
   /* Initialize the semaphore facility.  This has to be done very early
@@ -632,28 +682,46 @@ void os_start(void)
   lib_initialize();
 
   /* IDLE Group Initialization **********************************************/
-#ifdef HAVE_TASK_GROUP
-  /* Allocate the IDLE group */
 
-  DEBUGVERIFY(group_allocate(&g_idletcb, g_idletcb.cmn.flags));
+#ifdef CONFIG_SMP
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+#endif
+    {
+#ifdef HAVE_TASK_GROUP
+      /* Allocate the IDLE group */
+
+      DEBUGVERIFY(group_allocate(&g_idletcb[cpu], g_idletcb[cpu].cmn.flags));
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  /* Create stdout, stderr, stdin on the IDLE task.  These will be
-   * inherited by all of the threads created by the IDLE task.
-   */
+#ifdef CONFIG_SMP
+     if (cpu > 0)
+        {
+          /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 
-  DEBUGVERIFY(group_setupidlefiles(&g_idletcb));
+          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[cpu]));
+        }
+      else
+#endif
+        {
+          /* Create stdout, stderr, stdin on the CPU0 IDLE task.  These
+           * will be inherited by all of the threads created by the CPU0
+           * IDLE task.
+           */
+
+          DEBUGVERIFY(group_setupidlefiles(&g_idletcb[cpu]));
+        }
 #endif
 
 #ifdef HAVE_TASK_GROUP
-  /* Complete initialization of the IDLE group.  Suppress retention
-   * of child status in the IDLE group.
-   */
+      /* Complete initialization of the IDLE group.  Suppress retention
+       * of child status in the IDLE group.
+       */
 
-  DEBUGVERIFY(group_initialize(&g_idletcb));
-  g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
+      DEBUGVERIFY(group_initialize(&g_idletcb[cpu]));
+      g_idletcb[cpu].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
+}
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
