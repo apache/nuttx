@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/mikroe-stm32f4/src/stm32_touchscreen.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Modified:  May, 2013 by Ken Pettit to adapt for Mikroe-STM32M4 board
@@ -50,6 +50,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
@@ -351,7 +352,7 @@ static void tc_adc_init(void)
    * is used by several different drivers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable  ADC reset state */
 
@@ -459,7 +460,7 @@ static void tc_adc_init(void)
 
   /* Restore the IRQ state */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /************************************************************************************

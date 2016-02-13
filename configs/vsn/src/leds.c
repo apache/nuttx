@@ -35,20 +35,25 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#ifdef CONFIG_ARCH_LEDS
-
-#include <arch/stm32/irq.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include <arch/stm32/irq.h>
+
 #include "vsn.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,7 +75,7 @@
  * Private Data
  ****************************************************************************/
 
-irqstate_t irqidle_mask;
+irqstate_t flags;
 
 /****************************************************************************
  * Private Functions
@@ -89,7 +94,7 @@ void board_autoled_on(int led)
 {
   if (led == LED_IDLE)
     {
-      irqidle_mask = irqsave();
+      flags = enter_critical_section();
       stm32_gpiowrite(GPIO_LED, true);
     }
 }
@@ -99,7 +104,7 @@ void board_autoled_off(int led)
   if (led == LED_IDLE)
     {
       stm32_gpiowrite(GPIO_LED, false);
-      irqrestore(irqidle_mask);
+      leave_critical_section(flags);
     }
 }
 

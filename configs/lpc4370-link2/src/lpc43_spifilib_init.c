@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpc4370-link2/src/lpc43_spifilib_init.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
@@ -73,10 +74,10 @@ static uint32_t lmem[21];
 
 void board_spifi_initialize(void)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Initial frequency is set by boot ROM in IDIVE */
 
@@ -124,7 +125,7 @@ void board_spifi_initialize(void)
             IDIVE_CTRL_IDIV(SPIFI_DEVICE_REQUENCY_DIVIDER);
   putreg32(regval, LPC43_IDIVE_CTRL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_SPIFI_LIBRARY */

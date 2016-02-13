@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "pcduino_a10.h"
@@ -132,7 +132,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
        * following operations are atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Get the old button interrupt handler and save the new one */
 
@@ -144,7 +144,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       a1x_pioirq(xxx);
       (void)irq_attach(xxx, irqhandler);
       a1x_pioirqenable(xxx);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Return the old button handler (so that it can be restored) */

@@ -47,7 +47,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/adxl345.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "freedom-kl25z.h"
 #include "kl_gpio.h"
@@ -205,7 +205,7 @@ static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
    * interrupts disabled during the reconfiguration.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Configure the interrupt using the SAVED handler */
@@ -222,7 +222,7 @@ static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
       kl_gpioirqdisable(GPIO_ADXL345_INT1); 
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 static void adxl345_clear(FAR struct adxl345_config_s *state)

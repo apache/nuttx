@@ -136,7 +136,7 @@
 #include <nuttx/lcd/ili9488.h>
 #include <nuttx/video/rgbcolors.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "cache.h"
@@ -1070,7 +1070,7 @@ static int sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
   ret = sam_dmatxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE, (uint32_t)buffer, buflen);
   if (ret == OK)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* The setup was successful, start the DMA */
 
@@ -1082,7 +1082,7 @@ static int sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
           ret = sam_lcd_dmawait(priv, DMA_TIMEOUT_TICKS);
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   priv->dmabusy = false;
@@ -1111,7 +1111,7 @@ static int sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
   ret = sam_dmarxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE, (uint32_t)buffer, buflen);
   if (ret == OK)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* The setup was successful, start the DMA */
 
@@ -1123,7 +1123,7 @@ static int sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
           ret = sam_lcd_dmawait(priv, DMA_TIMEOUT_TICKS);
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   priv->dmabusy = false;

@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -961,7 +962,7 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
 #endif
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_STR71X_BSPI0
   if (port == 0)
     {
@@ -1139,7 +1140,7 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
       ret = NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

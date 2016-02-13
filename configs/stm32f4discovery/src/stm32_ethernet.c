@@ -222,7 +222,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   DEBUGASSERT(intf);
 
-  flags      = irqsave();
+  flags      = enter_critical_section();
   oldhandler = g_ethmac_handler;
 
   if (strcmp(intf, STM32_ETHMAC_DEVNAME) == 0)
@@ -242,7 +242,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       *enable = enabler;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 #endif

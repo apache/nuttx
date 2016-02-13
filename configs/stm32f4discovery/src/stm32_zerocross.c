@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32_zerocross.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sensors/zerocross.h>
 
@@ -107,7 +108,7 @@ static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
 
   /* Start with all interrupts disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   zcross_disable();
 
   snllvdbg("handler: %p arg: %p\n", handler, arg);
@@ -121,7 +122,7 @@ static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
   (void)stm32_gpiosetevent(GPIO_ZEROCROSS, rising, falling,
                            true, zcross_interrupt);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -139,11 +140,11 @@ static void zcross_disable(void)
 
   /* Disable zero cross pin interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   (void)stm32_gpiosetevent(GPIO_ZEROCROSS, false, false, false, NULL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Nullify the handler and argument */
 

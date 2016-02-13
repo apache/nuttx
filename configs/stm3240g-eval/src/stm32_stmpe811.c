@@ -49,7 +49,7 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/stmpe811.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "stm32.h"
 #include "stm3240g-eval.h"
@@ -230,7 +230,7 @@ static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
    * interrupts disabled during the reconfiguration.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Configure the EXTI interrupt using the SAVED handler */
@@ -243,7 +243,7 @@ static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
 
      (void)stm32_gpiosetevent(GPIO_IO_EXPANDER, false, false, false, NULL);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 static void stmpe811_clear(FAR struct stmpe811_config_s *state)

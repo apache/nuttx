@@ -45,7 +45,7 @@
 
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/automount.h>
 
@@ -218,7 +218,7 @@ static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
 
   /* Save the fake enable setting */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   state->enable = enable;
 
   /* Did an interrupt occur while interrupts were disabled? */
@@ -236,7 +236,7 @@ static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
       state->pending = false;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /************************************************************************************

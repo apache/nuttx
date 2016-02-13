@@ -60,7 +60,7 @@
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "sam_pio.h"
@@ -149,7 +149,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
        * following operations are atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Get the old button interrupt handler and save the new one */
 
@@ -174,7 +174,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           (void)irq_detach(IRQ_USER1);
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Return the old button handler (so that it can be restored) */

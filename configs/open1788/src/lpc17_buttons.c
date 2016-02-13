@@ -219,7 +219,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         {
           /* Disable interrupts until we are done */
 
-          flags = irqsave();
+          flags = enter_critical_section();
 
           /* Return the current button handler and set the new interrupt handler */
 
@@ -245,7 +245,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
               (void)irq_detach(irq);
             }
 
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
     }
 

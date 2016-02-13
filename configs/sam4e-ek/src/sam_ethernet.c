@@ -226,7 +226,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
    * following operations are atomic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the old interrupt handler and save the new one */
 
@@ -263,7 +263,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   /* Return the old handler (so that it can be restored) */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 #endif /* CONFIG_SAM34_GPIOD_IRQ */

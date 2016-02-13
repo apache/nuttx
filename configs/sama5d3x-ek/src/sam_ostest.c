@@ -44,7 +44,7 @@
 #include <string.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -92,13 +92,13 @@ void arch_getfpu(FAR uint32_t *fpusave)
 
   /* Take a snapshot of the thread context right now */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_saveusercontext(g_saveregs);
 
   /* Return only the floating register values */
 
   memcpy(fpusave, &g_saveregs[REG_S0], (4*FPU_CONTEXT_REGS));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /* Given two arrays of size CONFIG_EXAMPLES_OSTEST_FPUSIZE this function

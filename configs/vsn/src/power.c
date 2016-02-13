@@ -47,6 +47,7 @@
 
 #include <nuttx/board.h>
 
+#include <arch/irq.h>
 #include <arch/board/board.h>
 #include <arch/stm32/irq.h>
 
@@ -102,7 +103,7 @@ int board_power_off(int status)
 
   /* stop background processes */
 
-  irqsave();
+  (void)irqsave();
 
   /* switch to internal HSI and get the PD0 and PD1 as GPIO */
 

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/viewtools-stm32f107/src/stm32_touchscreen.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/input/touchscreen.h>
@@ -195,7 +196,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
    * interrupts disabled during the reconfiguration.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable && priv->handler)
     {
       /* Configure the EXTI interrupt using the SAVED handler */
@@ -209,7 +210,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false, NULL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 static void tsc_clear(FAR struct ads7843e_config_s *state)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/stm32_djoystick.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/input/djoystick.h>
 
@@ -173,7 +174,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 
   /* Start with all interrupts disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   djoy_disable();
 
   illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
@@ -217,7 +218,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -235,13 +236,13 @@ static void djoy_disable(void)
 
   /* Disable each joystick interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
       (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Nullify the handler and argument */
 

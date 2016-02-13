@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3-xplained/src/sam_usb.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -506,7 +507,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
    * following operations are atomic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the old interrupt handler and save the new one */
 
@@ -521,7 +522,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 
   /* Return the old handler (so that it can be restored) */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 
 #else

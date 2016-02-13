@@ -45,6 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/pcm.h>
@@ -179,7 +180,7 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
 
   /* Has the interrupt state changed */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable != enabled)
     {
       /* Enable or disable interrupts */
@@ -199,7 +200,7 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
     }
 
   ret = enabled;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

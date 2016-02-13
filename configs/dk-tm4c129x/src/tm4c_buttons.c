@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "dk-tm4c129x.h"
@@ -163,7 +163,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
     {
       /* The following should be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Detach and disable the button interrupt */
 
@@ -183,7 +183,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
             }
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return oldhandler;

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/fire-stm32v2/src/stm32_selectlcd.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -177,7 +178,7 @@ void stm32_selectlcd(void)
 
   /* Configure LCD GPIO pis */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (i = 0; i < NLCD_GPIOS; i++)
     {
       stm32_configgpio(g_lcdconfig[i]);
@@ -201,7 +202,7 @@ void stm32_selectlcd(void)
   /* Enable the bank by setting the MBKEN bit */
 
   putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_STM32_FSMC */

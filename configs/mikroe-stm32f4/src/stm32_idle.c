@@ -49,7 +49,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_internal.h"
 #include "stm32_pm.h"
@@ -125,7 +125,7 @@ static void up_idlepm(void)
     {
       lldbg("newstate= %d oldstate=%d\n", newstate, oldstate);
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Force the global state change */
 
@@ -214,7 +214,7 @@ static void up_idlepm(void)
       oldstate = newstate;
 
 errout:
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #else

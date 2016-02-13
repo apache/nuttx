@@ -50,7 +50,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -172,7 +172,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
     {
       /* Return the previous value of the interrupt handler */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       rethandler   = g_oldhandler;
       g_oldhandler = irqhandler;
 
@@ -205,7 +205,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return rethandler;

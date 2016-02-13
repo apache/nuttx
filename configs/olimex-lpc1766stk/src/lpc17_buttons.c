@@ -199,7 +199,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
       /* Disable interrupts until we are done */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Configure the interrupt.  Either attach and enable the new
        * interrupt or disable and detach the old interrupt handler.
@@ -220,7 +220,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           up_disable_irq(irq);
           (void)irq_detach(irq);
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
   return oldhandler;
 }

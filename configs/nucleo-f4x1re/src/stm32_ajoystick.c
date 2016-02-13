@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-f3x1re/src/stm32_ajoystick.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/input/ajoystick.h>
 
@@ -339,7 +340,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
 
   /* Start with all interrupts disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ajoy_disable();
 
   illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
@@ -383,7 +384,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -401,13 +402,13 @@ static void ajoy_disable(void)
 
   /* Disable each joystick interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
       (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Nullify the handler and argument */
 
