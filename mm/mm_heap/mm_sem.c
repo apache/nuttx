@@ -86,7 +86,7 @@
 void mm_seminitialize(FAR struct mm_heap_s *heap)
 {
   /* Initialize the MM semaphore to one (to support one-at-a-time access to
-   * private data sets.
+   * private data sets).
    */
 
   (void)sem_init(&heap->mm_semaphore, 0, 1);

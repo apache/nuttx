@@ -98,12 +98,34 @@ int os_idletask(int argc, FAR char *argv[])
   /* Finish TCB initialization */
 
   FAR struct task_tcb_s *rtcb = (FAR struct task_tcb_s *)this_task();
+  int ret;
 
   /* Create stdout, stderr, stdin on the IDLE task.  These will be
    * inherited by all of the threads created by the IDLE task.
+   *
+   * We must have exclusive access to the memory manager to do this BUT the
+   * idle task cannot wait on a semaphore (at least not later in the
+   * initialzation sequency when this thread is started).  So loop until
+   * we do finally get access
+   *
    */
 
-  DEBUGVERIFY(group_setupidlefiles(rtcb));
+  do
+    {
+      ret = kmm_trysemaphore();
+      if (ret >= 0)
+        {
+          DEBUGVERIFY(group_setupidlefiles(rtcb));
+          kmm_givesemaphore();
+        }
+      else
+        {
+          /* Perform any processor-specific idle state operations */
+
+          up_idle();
+        }
+    }
+  while (ret < 0);
 #endif
 
   /* Enter the IDLE loop */
