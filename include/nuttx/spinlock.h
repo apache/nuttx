@@ -103,7 +103,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  * Name: spin_initialize
  *
  * Description:
- *   Initialize a spinlock object to its initial, unlocked state.
+ *   Initialize a non-reentrant spinlock object to its initial, unlocked state.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to be initialized.
@@ -113,7 +113,24 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  *
  ****************************************************************************/
 
-void spin_initialize(FAR struct spinlock_s *lock);
+/* void spin_initialize(FAR spinlock_t *lock); */
+#define spin_initialize(i) do { (l) = SPI_UNLOCKED; } while (0)
+
+/****************************************************************************
+ * Name: spin_initializer
+ *
+ * Description:
+ *   Initialize a re-entrant spinlock object to its initial, unlocked state.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to be initialized.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void spin_initializer(FAR struct spinlock_s *lock);
 
 /****************************************************************************
  * Name: spin_lock

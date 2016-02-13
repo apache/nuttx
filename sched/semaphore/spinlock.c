@@ -68,10 +68,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spin_initialize
+ * Name: spin_initializer
  *
  * Description:
- *   Initialize a spinlock object to its initial, unlocked state.
+ *   Initialize a re-entrant spinlock object to its initial, unlocked state.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to be initialized.
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-void spin_initialize(FAR struct spinlock_s *lock)
+void spin_initializer(FAR struct spinlock_s *lock)
 {
   DEBUGASSERT(lock != NULL);
 

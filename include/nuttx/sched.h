@@ -560,6 +560,9 @@ struct tcb_s
 #endif
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
+#ifdef CONFIG_SMP
+  int16_t  irqcount;                     /* 0=interrupts enabled                */
+#endif
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   int32_t  timeslice;                    /* RR timeslice OR Sporadic budget     */

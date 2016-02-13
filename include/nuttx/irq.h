@@ -40,8 +40,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 # include <assert.h>
+# include <arch/irq.h>
 #endif
 
 /****************************************************************************
@@ -96,6 +99,43 @@ extern "C"
  ****************************************************************************/
 
 int irq_attach(int irq, xcpt_t isr);
+
+/****************************************************************************
+ * Name: enter_critical_section
+ *
+ * Description:
+ *   If SMP is enabled:
+ *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
+ *     specific counter is increment to indicate that the thread has IRQs
+ *     disabled and to support nested calls to enter_critical_section().
+ *   If SMP is not enabled:
+ *     This function is equivalent to irqsave().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+irqstate_t enter_critical_section(void);
+#else
+#  define enter_critical_section(f) irqsave(f)
+#endif
+
+/****************************************************************************
+ * Name: leave_critical_section
+ *
+ * Description:
+ *   If SMP is enabled:
+ *     Decrement the IRQ lock count and if it decrements to zero then release
+ *     the spinlock.
+ *   If SMP is not enabled:
+ *     This function is equivalent to irqrestore().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+void leave_critical_section(irqstate_t flags);
+#else
+#  define leave_critical_section(f) irqrestore(f)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

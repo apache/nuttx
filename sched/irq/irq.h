@@ -41,24 +41,30 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/compiler.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-extern FAR xcpt_t g_irqvector[NR_IRQS+1];
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* This is the list of interrupt handlers, one for each IRQ.  This is used
+ * by irq_dispatch to transfer control to interrupt handlers after the
+ * occurrence of an interrupt.
+ */
+
+extern FAR xcpt_t g_irqvector[NR_IRQS+1];
+
+#ifdef CONFIG_SMP
+/* This is the spinlock that enforces critical sections when interrupts are
+ * disabled.
+ */
+
+extern spinlock_t g_cpu_irqlock;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
