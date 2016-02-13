@@ -329,7 +329,7 @@ static const char g_idlename[] = "Idle Task";
 #ifdef CONFIG_SMP
 static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
 #else
-static FAR char *g_idleargv[2];
+static FAR char *g_idleargv[1][2];
 #endif
 
 /****************************************************************************
