@@ -1734,7 +1734,7 @@ out:
 FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
 {
   struct efm32_i2c_priv_s *priv = NULL;
-  irqstate_t irqs;
+  irqstate_t flags;
 
   /* Get I2C private structure */
 
@@ -1760,7 +1760,7 @@ FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  irqs = irqsave();
+  flags = irqsave();
 
   if ((volatile int)priv->refs++ == 0)
     {
@@ -1768,7 +1768,7 @@ FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
       efm32_i2c_init(priv);
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
   return (struct i2c_master_s *)priv;
 }
 
@@ -1783,7 +1783,7 @@ FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
 int efm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
   FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
-  irqstate_t irqs;
+  irqstate_t flags;
 
   ASSERT(dev);
 
@@ -1794,15 +1794,15 @@ int efm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
       return ERROR;
     }
 
-  irqs = irqsave();
+  flags = irqsave();
 
   if (--priv->refs)
     {
-      irqrestore(irqs);
+      irqrestore(flags);
       return OK;
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 

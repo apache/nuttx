@@ -2142,7 +2142,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
 {
   struct tiva_i2c_priv_s *priv = NULL;
   const struct tiva_i2c_config_s *config;
-  int irqs;
+  int flags;
 
   i2cvdbg("I2C%d: Initialize\n", port);
 
@@ -2233,7 +2233,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  irqs = irqsave();
+  flags = irqsave();
 
   priv->refs++;
   if (priv->refs == 1)
@@ -2248,7 +2248,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
       tiva_i2c_initialize(priv, 100000);
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
   return (struct i2c_master_s *)priv;
 }
 
@@ -2263,7 +2263,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
 int tiva_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)dev;
-  int irqs;
+  int flags;
 
   DEBUGASSERT(priv && priv->config && priv->refs > 0);
 
@@ -2271,7 +2271,7 @@ int tiva_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   /* Decrement reference count and check for underflow */
 
-  irqs = irqsave();
+  flags = irqsave();
 
   /* Check if the reference count will decrement to zero */
 
@@ -2293,7 +2293,7 @@ int tiva_i2cbus_uninitialize(struct i2c_master_s *dev)
       priv->refs--;
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
   return OK;
 }
 

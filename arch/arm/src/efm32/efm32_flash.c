@@ -636,7 +636,7 @@ ssize_t __ramfunc__ up_progmem_erasepage(size_t page)
   int ret = 0;
   int timeout;
   uint32_t regval;
-  irqstate_t irqs;
+  irqstate_t flags;
 
   if (page >= (EFM32_FLASH_NPAGES+EFM32_USERDATA_NPAGES))
     {
@@ -645,7 +645,7 @@ ssize_t __ramfunc__ up_progmem_erasepage(size_t page)
 
   efm32_flash_unlock();
 
-  irqs = irqsave();
+  flags = irqsave();
 
   /* enable writing to the flash */
 
@@ -706,7 +706,7 @@ ssize_t __ramfunc__ up_progmem_erasepage(size_t page)
         }
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
 
   if (ret != 0)
     {
@@ -787,7 +787,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
     {
       int page_bytes;
       ssize_t page_idx;
-      irqstate_t irqs;
+      irqstate_t flags;
 
       /* Compute the number of words to write to the current page. */
 
@@ -813,7 +813,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
           page_words = num_words - word_count;
         }
 
-      irqs = irqsave();
+      flags = irqsave();
 
       /* First we load address. The address is auto-incremented within a page.
        * Therefore the address phase is only needed once for each page.
@@ -828,7 +828,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
           ret = msc_load_write_data(p_data, page_words, true);
         }
 
-      irqrestore(irqs);
+      irqrestore(flags);
 
       if (ret != 0)
         {

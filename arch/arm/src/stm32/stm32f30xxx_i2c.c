@@ -1346,7 +1346,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
            */
 
 #ifdef CONFIG_I2C_POLLED
-          irqstate_t state = irqsave();
+          irqstate_t flags = irqsave();
 #endif
           /* Receive a byte */
 
@@ -1361,7 +1361,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             }
 
 #ifdef CONFIG_I2C_POLLED
-          irqrestore(state);
+          irqrestore(flags);
 #endif
         }
     }
@@ -1945,7 +1945,7 @@ out:
 FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  int irqs;
+  irqtate_t flags;
 
 #if STM32_PCLK1_FREQUENCY < 4000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
@@ -1983,7 +1983,7 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  irqs = irqsave();
+  flags = irqsave();
 
   if ((volatile int)priv->refs++ == 0)
     {
@@ -1991,7 +1991,7 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
       stm32_i2c_init(priv);
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
   return (struct i2c_master_s *)priv;
 }
 
@@ -2006,7 +2006,7 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 {
   FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  int irqs;
+  irqstate_t flags;
 
   ASSERT(dev);
 
@@ -2017,15 +2017,15 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
       return ERROR;
     }
 
-  irqs = irqsave();
+  flags = irqsave();
 
   if (--priv->refs)
     {
-      irqrestore(irqs);
+      irqrestore(flags);
       return OK;
     }
 
-  irqrestore(irqs);
+  irqrestore(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 
