@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_schedunload.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 
@@ -105,10 +106,10 @@ static void unload_list_add(pid_t pid, FAR struct binary_s *bin)
    * interrupts.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   bin->flink = g_unloadhead;
   g_unloadhead = bin;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -313,13 +314,13 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
 
       /* Emergency removal from the list */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if (unload_list_remove(pid) != bin)
         {
           blldbg("ERROR: Failed to remove structure\n");
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       goto errout;
     }
 
