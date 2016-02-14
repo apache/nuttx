@@ -11490,4 +11490,6 @@
 	  irqrestore() to up_irq_restore().  These should no longer be used.  If
 	  your code still uses them, please switch to enter_critical_section()
 	  and leave_critical_section() (2016-02-14).
+	* Also rename irqdisable() and irqenable() to up_irq_disable() and
+	  up_irq_enable (2016-02-14).
 
