@@ -299,7 +299,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
                   FAR struct itimerspec *ovalue)
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-  irqstate_t flags;
+  irqstate_t intflags;
   int delay;
   int ret = OK;
 
@@ -339,7 +339,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
    * that the system timer is stable.
    */
 
-  flags = enter_critical_section();
+  intflags = enter_critical_section();
 
   /* Check if abstime is selected */
 
@@ -381,7 +381,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
                      1, (uint32_t)((wdparm_t)timer));
     }
 
-  leave_critical_section(flags);
+  leave_critical_section(intflags);
   return ret;
 }
 
