@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_cancel.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -93,14 +94,14 @@ int wd_cancel(WDOG_ID wdog)
 {
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
-  irqstate_t state;
+  irqstate_t flags;
   int ret = ERROR;
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete
    */
 
-  state = irqsave();
+  flags = enter_critical_section();
 
   /* Make sure that the watchdog is initialized (non-NULL) and is still
    * active.
@@ -168,6 +169,6 @@ int wd_cancel(WDOG_ID wdog)
       ret = OK;
     }
 
-  irqrestore(state);
+  leave_critical_section(flags);
   return ret;
 }

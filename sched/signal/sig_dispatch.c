@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_dispatch.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -53,22 +54,6 @@
 #include "semaphore/semaphore.h"
 #include "signal/signal.h"
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -89,7 +74,7 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   FAR sigactq_t *sigact;
   FAR sigq_t    *sigq;
-  irqstate_t     saved_state;
+  irqstate_t     flags;
   int            ret = OK;
 
   sched_lock();
@@ -123,9 +108,9 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 
           /* Put it at the end of the pending signals list */
 
-          saved_state = irqsave();
+          flags = enter_critical_section();
           sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpendactionq));
-          irqrestore(saved_state);
+          leave_critical_section(flags);
         }
     }
 
@@ -144,7 +129,7 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 static FAR sigpendq_t *sig_allocatependingsignal(void)
 {
   FAR sigpendq_t *sigpend;
-  irqstate_t      saved_state;
+  irqstate_t      flags;
 
   /* Check if we were called from an interrupt handler. */
 
@@ -172,9 +157,9 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
     {
       /* Try to get the pending signal structure from the free list */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* Check if we got one. */
 
@@ -211,13 +196,13 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
                                              int signo)
 {
   FAR sigpendq_t *sigpend = NULL;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   DEBUGASSERT(group);
 
   /* Pending sigals can be added from interrupt level. */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Seach the list for a sigpendion on this signal */
 
@@ -225,7 +210,7 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
        (sigpend && sigpend->info.si_signo != signo);
        sigpend = sigpend->flink);
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
   return sigpend;
 }
 
@@ -245,7 +230,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
 {
   FAR struct task_group_s *group = stcb->group;
   FAR sigpendq_t *sigpend;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   DEBUGASSERT(group);
 
@@ -274,9 +259,9 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
 
           /* Add the structure to the pending signal list */
 
-          saved_state = irqsave();
+          flags = enter_critical_section();
           sq_addlast((FAR sq_entry_t *)sigpend, &group->sigpendingq);
-          irqrestore(saved_state);
+          leave_critical_section(flags);
         }
     }
 
@@ -311,7 +296,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
 
 int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
-  irqstate_t saved_state;
+  irqstate_t flags;
   int ret = OK;
 
   sdbg("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
@@ -333,14 +318,14 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * from the interrupt level.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       if (stcb->task_state == TSTATE_WAIT_SIG &&
           sigismember(&stcb->sigwaitmask, info->si_signo))
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
           stcb->sigwaitmask = NULL_SIGNAL_SET;
           up_unblock_task(stcb);
-          irqrestore(saved_state);
+          leave_critical_section(flags);
         }
 
       /* Its not one we are waiting for... Add it to the list of pending
@@ -349,7 +334,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       else
         {
-          irqrestore(saved_state);
+          leave_critical_section(flags);
           ASSERT(sig_addpendingsignal(stcb, info));
         }
     }
@@ -373,7 +358,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * signals can be queued from the interrupt level.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       if (stcb->task_state == TSTATE_WAIT_SIG)
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
@@ -381,7 +366,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
           up_unblock_task(stcb);
         }
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* If the task neither was waiting for the signal nor had a signal
        * handler attached to the signal, then the default action is

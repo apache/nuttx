@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_rcvinternal.c
  *
- *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,30 +48,11 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -249,7 +230,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                      FAR char *ubuffer, int *prio)
 {
   FAR struct tcb_s *btcb;
-  irqstate_t saved_state;
+  irqstate_t flags;
   FAR struct mqueue_inode_s *msgq;
   ssize_t rcvmsglen;
 
@@ -283,7 +264,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
        * messages can be sent from interrupt handlers.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotfull.head;
            btcb && btcb->msgwaitq != msgq;
            btcb = btcb->flink);
@@ -299,7 +280,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
        msgq->nwaitnotfull--;
        up_unblock_task(btcb);
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   /* Return the length of the message transferred to the user buffer */

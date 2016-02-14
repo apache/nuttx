@@ -45,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
@@ -73,9 +74,9 @@ static FAR struct posix_timer_s *timer_allocate(void)
   /* Try to get a preallocated timer from the free list */
 
 #if CONFIG_PREALLOC_TIMERS > 0
-  flags = irqsave();
+  flags = enter_critical_section();
   ret   = (FAR struct posix_timer_s *)sq_remfirst((FAR sq_queue_t *)&g_freetimers);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Did we get one? */
 
@@ -103,9 +104,9 @@ static FAR struct posix_timer_s *timer_allocate(void)
 
       /* And add it to the end of the list of allocated timers */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)ret, (FAR sq_queue_t *)&g_alloctimers);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return ret;

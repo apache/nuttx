@@ -66,7 +66,7 @@
  * Assumptions:
  * - The caller has established a critical section before
  *   calling this function (calling sched_lock() first is NOT
- *   a good idea -- use irqsave()).
+ *   a good idea -- use enter_critical_section()).
  * - The caller has already removed the input tcb from
  *   whatever list it was in.
  * - The caller handles the condition that occurs if the

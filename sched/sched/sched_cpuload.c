@@ -43,7 +43,7 @@
 #include <assert.h>
 
 #include <nuttx/clock.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 
@@ -183,7 +183,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
    * synchronized when read.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Make sure that the entry is valid (TCB field is not NULL) and matches
    * the requested PID.  The first check is needed if the thread has exited.
@@ -205,7 +205,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

@@ -69,7 +69,7 @@
  * Assumptions:
  * - The caller has established a critical section before calling this
  *   function (calling sched_lock() first is NOT a good idea -- use
- *   irqsave()).
+ *   enter_critical_section()).
  * - The caller has already removed the input rtcb from whatever list it
  *   was in.
  * - The caller handles the condition that occurs if the head of the
@@ -156,7 +156,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
  * Assumptions:
  * - The caller has established a critical section before calling this
  *   function (calling sched_lock() first is NOT a good idea -- use
- *   irqsave()).
+ *   enter_critical_section()).
  * - The caller has already removed the input rtcb from whatever list it
  *   was in.
  * - The caller handles the condition that occurs if the head of the

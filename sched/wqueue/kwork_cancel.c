@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/kwork_cancel.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 
@@ -104,7 +105,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
    * new work is typically added to the work queue from interrupt handlers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (work->worker != NULL)
     {
       /* A little test of the integrity of the work queue */
@@ -123,7 +124,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

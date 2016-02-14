@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_timedwait.c
  *
- *   Copyright (C) 2007-2009, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -166,7 +167,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   FAR struct tcb_s *rtcb = this_task();
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int32_t waitticks;
   int ret = ERROR;
 
@@ -180,7 +181,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
    * can only be eliminated by disabling interrupts!
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Check if there is a pending signal corresponding to one of the
    * signals in the pending signal set argument.
@@ -207,7 +208,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       /* Then dispose of the pending signal structure properly */
 
       sig_releasependingsignal(sigpend);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* The return value is the number of the signal that awakened us */
 
@@ -338,7 +339,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
         }
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   sched_unlock();

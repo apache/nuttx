@@ -64,7 +64,8 @@
  *
  * Assumptions:
  * - The caller has established a critical section before calling this
- *   function (calling sched_lock() first is NOT a good idea -- use irqsave()).
+ *   function (calling sched_lock() first is NOT a good idea -- use
+ *   enter_critical_section()).
  * - The caller handles the condition that occurs if the head of the
  *   ready-to-run list is changed.
  *

@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -82,7 +84,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
   FAR struct tcb_s *rtcb = this_task();
   FAR dq_queue_t *tasklist;
   tstate_t task_state;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Verify that the requested priority is in the valid range */
 
@@ -97,7 +99,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
    * performing the following.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* There are four cases that must be considered: */
 
@@ -209,6 +211,6 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
         break;
     }
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
   return OK;
 }

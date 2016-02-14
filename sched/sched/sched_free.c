@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_free.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,16 @@
  *
  ****************************************************************************/
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 
 #include <nuttx/config.h>
 
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
@@ -51,34 +50,8 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Name: sched_ufree and sched_kfree
@@ -119,7 +92,7 @@ void sched_ufree(FAR void *address)
        * using the user deallocator.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
      defined(CONFIG_MM_KERNEL_HEAP)
       DEBUGASSERT(!kmm_heapmember(address));
@@ -135,7 +108,7 @@ void sched_ufree(FAR void *address)
 #ifdef CONFIG_SCHED_WORKQUEUE
       work_signal(LPWORK);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
   else
     {
@@ -163,7 +136,7 @@ void sched_kfree(FAR void *address)
        * using the kernel deallocator.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       DEBUGASSERT(kmm_heapmember(address));
 
       /* Delay the deallocation until a more appropriate time. */
@@ -176,7 +149,7 @@ void sched_kfree(FAR void *address)
 #ifdef CONFIG_SCHED_WORKQUEUE
       work_signal(LPWORK);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
   else
     {

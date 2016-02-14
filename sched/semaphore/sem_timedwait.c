@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_timedwait.c
  *
- *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -134,7 +135,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
    * enabled while we are blocked waiting for the semaphore.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Try to take the semaphore without waiting. */
 
@@ -205,7 +206,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
   /* Success exits */
 
 success_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
   return OK;
@@ -213,7 +214,7 @@ success_with_irqdisabled:
   /* Error exits */
 
 errout_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
 

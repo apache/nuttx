@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -101,7 +101,7 @@ int task_terminate(pid_t pid, bool nonblocking)
 {
   FAR struct tcb_s *dtcb;
   FAR dq_queue_t *tasklist;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Make sure the task does not become ready-to-run while we are futzing with
    * its TCB by locking ourselves as the executing task.
@@ -158,10 +158,10 @@ int task_terminate(pid_t pid, bool nonblocking)
   tasklist = TLIST_HEAD(dtcb->task_state);
 #endif
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
   dq_rem((FAR dq_entry_t *)dtcb, tasklist);
   dtcb->task_state = TSTATE_TASK_INVALID;
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   /* At this point, the TCB should no longer be accessible to the system */
 

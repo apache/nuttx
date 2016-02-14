@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_trywait.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 #include <semaphore.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -77,7 +79,7 @@
 int sem_trywait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t saved_state;
+  irqstate_t flags;
   int ret = ERROR;
 
   /* This API should not be called from interrupt handlers */
@@ -94,7 +96,7 @@ int sem_trywait(FAR sem_t *sem)
        * because sem_post() may be called from an interrupt handler.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
 
       /* Any further errors could only occurr because the semaphore is not
        * available.
@@ -115,7 +117,7 @@ int sem_trywait(FAR sem_t *sem)
 
       /* Interrupts may now be enabled. */
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   return ret;

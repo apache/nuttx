@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_releasependingsignal.c
  *
- *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,31 +46,12 @@
 #include <debug.h>
 #include <sched.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -86,7 +67,7 @@
 
 void sig_releasependingsignal(FAR sigpendq_t *sigpend)
 {
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* If this is a generally available pre-allocated structyre,
    * then just put it back in the free list.
@@ -98,9 +79,9 @@ void sig_releasependingsignal(FAR sigpendq_t *sigpend)
        * list from interrupt handlers.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)sigpend, &g_sigpendingsignal);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -113,9 +94,9 @@ void sig_releasependingsignal(FAR sigpendq_t *sigpend)
        * list from interrupt handlers.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)sigpend, &g_sigpendingirqsignal);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

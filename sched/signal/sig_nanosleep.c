@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/clock.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "clock/clock.h"
 
@@ -143,7 +143,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
    * after the wait.
    */
 
-  flags     = irqsave();
+  flags     = enter_critical_section();
   starttick = clock_systimer();
 
   /* Set up for the sleep.  Using the empty set means that we are not
@@ -173,7 +173,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
     {
       /* The timeout "error" is the normal, successful result */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 
@@ -214,7 +214,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
       (void)clock_ticks2time((int)remaining, rmtp);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 errout:
   set_errno(errval);

@@ -44,7 +44,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/wdog.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "semaphore/semaphore.h"
 
@@ -78,7 +78,7 @@ void sem_timeout(int argc, wdparm_t pid)
 
   /* Disable interrupts to avoid race conditions */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the TCB associated with this PID.  It is possible that
    * task may no longer be active when this watchdog goes off.
@@ -99,5 +99,5 @@ void sem_timeout(int argc, wdparm_t pid)
 
   /* Interrupts may now be enabled. */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }

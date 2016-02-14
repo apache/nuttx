@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_allocatependingsigaction.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,29 +41,11 @@
 
 #include <signal.h>
 #include <assert.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -80,7 +62,7 @@
 FAR sigq_t *sig_allocatependingsigaction(void)
 {
   FAR sigq_t    *sigq;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Check if we were called from an interrupt handler. */
 
@@ -107,9 +89,9 @@ FAR sigq_t *sig_allocatependingsigaction(void)
     {
       /* Try to get the pending signal action structure from the free list */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* Check if we got one. */
 

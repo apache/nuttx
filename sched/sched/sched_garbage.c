@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_garbage.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,25 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "sched/sched.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -101,9 +86,9 @@ static inline void sched_kucleanup(void)
        * we must disable interrupts around the queue operation.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       address = (FAR void *)sq_remfirst((FAR sq_queue_t *)&g_delayed_kufree);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* The address should always be non-NULL since that was checked in the
        * 'while' condition above.
@@ -150,9 +135,9 @@ static inline void sched_kcleanup(void)
        * we must disable interrupts around the queue operation.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       address = (FAR void *)sq_remfirst((FAR sq_queue_t *)&g_delayed_kfree);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* The address should always be non-NULL since that was checked in the
        * 'while' condition above.

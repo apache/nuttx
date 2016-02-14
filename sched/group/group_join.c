@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_join.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "sched/sched.h"
@@ -58,14 +59,6 @@
 /* Is this worth making a configuration option? */
 
 #define GROUP_REALLOC_MEMBERS 4
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -126,10 +119,10 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
        * may be traversed from an interrupt handler (read-only).
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       group->tg_members   = newmembers;
       group->tg_mxmembers = newmax;
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Assign this new pid to the group; group->tg_nmembers will be incremented

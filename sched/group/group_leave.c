@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib.h>
@@ -89,7 +90,7 @@ static void group_remove(FAR struct task_group_s *group)
    * This is probably un-necessary.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Find the task group structure */
 
@@ -115,7 +116,7 @@ static void group_remove(FAR struct task_group_s *group)
       curr->flink = NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -320,10 +321,10 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
            * interrupt handlers (read-only).
            */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
           group->tg_nmembers--;
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
     }
 }

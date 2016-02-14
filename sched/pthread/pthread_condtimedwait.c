@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_condtimedwait.c
  *
- *   Copyright (C) 2007-2009, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,28 +49,13 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"
 #include "clock/clock.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -185,7 +170,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
   FAR struct tcb_s *rtcb = this_task();
   int ticks;
   int mypid = (int)getpid();
-  irqstate_t int_state;
+  irqstate_t flags;
   int ret = OK;
   int status;
 
@@ -236,7 +221,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
            */
 
           sched_lock();
-          int_state = irqsave();
+          flags = enter_critical_section();
 
           /* Convert the timespec to clock ticks.  We must disable pre-emption
            * here so that this time stays valid until the wait begins.
@@ -249,7 +234,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                * we fall through the if/then/else
                */
 
-              irqrestore(int_state);
+              leave_critical_section(flags);
             }
           else
             {
@@ -264,7 +249,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                    * if/then/else
                    */
 
-                  irqrestore(int_state);
+                  leave_critical_section(flags);
                   ret = ETIMEDOUT;
                 }
               else
@@ -279,7 +264,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                        * we fall through the if/then/else)
                        */
 
-                      irqrestore(int_state);
+                      leave_critical_section(flags);
                     }
                   else
                     {
@@ -322,7 +307,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                        * handling! (bad)
                        */
 
-                      irqrestore(int_state);
+                      leave_critical_section(flags);
                     }
 
                   /* Reacquire the mutex (retaining the ret). */

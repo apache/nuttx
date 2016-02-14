@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_deliver.c
  *
- *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,30 +45,12 @@
 #include <sched.h>
 #include <string.h>
 #include <debug.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "semaphore/semaphore.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -88,7 +70,7 @@ void sig_deliver(FAR struct tcb_s *stcb)
   FAR sigq_t *sigq;
   FAR sigq_t *next;
   sigset_t    savesigprocmask;
-  irqstate_t  saved_state;
+  irqstate_t  flags;
   int         saved_errno;
 
   sched_lock();
@@ -111,10 +93,10 @@ void sig_deliver(FAR struct tcb_s *stcb)
        * time, there should never be more than one signal in the sigpostedq
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpendactionq));
       sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* Call the signal handler (unless the signal was cancelled)
        *
@@ -172,9 +154,9 @@ void sig_deliver(FAR struct tcb_s *stcb)
 
       /* Remove the signal from the sigpostedq */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
       sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* Then deallocate it */
 

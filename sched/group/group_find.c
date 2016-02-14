@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_find.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,32 +44,13 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "group/group.h"
 #include "environ/environ.h"
 
 #ifdef HAVE_TASK_GROUP
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -107,17 +88,17 @@ FAR struct task_group_s *group_findbygid(gid_t gid)
 
   /* Find the status structure with the matching GID  */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (group = g_grouphead; group; group = group->flink)
     {
       if (group->tg_gid == gid)
         {
-          irqrestore(flags);
+          leave_critical_section(flags);
           return group;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 #endif
@@ -153,17 +134,17 @@ FAR struct task_group_s *group_findbypid(pid_t pid)
 
   /* Find the status structure with the matching PID  */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (group = g_grouphead; group; group = group->flink)
     {
       if (group->tg_task == pid)
         {
-          irqrestore(flags);
+          leave_critical_section(flags);
           return group;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_action.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <queue.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -219,7 +221,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
        * can be modified by the child thread.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Mark that status should be not be retained */
 
@@ -228,7 +230,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
       /* Free all pending exit status */
 
       group_removechildren(rtcb->group);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 

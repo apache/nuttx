@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer_settime.c
  *
- *   Copyright (C) 2007-2010, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/signal.h>
 
 #include "clock/clock.h"
@@ -51,18 +52,6 @@
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Data
- ********************************************************************************/
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
 
 /********************************************************************************
  * Private Function Prototypes
@@ -310,7 +299,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
                   FAR struct itimerspec *ovalue)
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-  irqstate_t state;
+  irqstate_t flags;
   int delay;
   int ret = OK;
 
@@ -350,7 +339,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
    * that the system timer is stable.
    */
 
-  state = irqsave();
+  flags = enter_critical_section();
 
   /* Check if abstime is selected */
 
@@ -392,7 +381,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
                      1, (uint32_t)((wdparm_t)timer));
     }
 
-  irqrestore(state);
+  leave_critical_section(flags);
   return ret;
 }
 

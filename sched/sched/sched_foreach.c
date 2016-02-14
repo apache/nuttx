@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_foreach.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,9 @@
  ****************************************************************************/
 
 #include <sched.h>
+
+#include <nuttx/irq.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -65,7 +68,7 @@
 
 void sched_foreach(sched_foreach_t handler, FAR void *arg)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   int ndx;
 
   /* Vist each active task */
@@ -78,7 +81,7 @@ void sched_foreach(sched_foreach_t handler, FAR void *arg)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 

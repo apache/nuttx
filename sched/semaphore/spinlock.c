@@ -43,6 +43,7 @@
 #include <assert.h>
 
 #include <nuttx/spinlock.h>
+#include <arch/irq.h>
 
 #include "sched/sched.h"
 

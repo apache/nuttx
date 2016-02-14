@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/work/work_inherit.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sched.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 
 #include "sched/sched.h"
@@ -48,10 +49,6 @@
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_LPWORK) && \
     defined(CONFIG_PRIORITY_INHERITANCE)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -333,7 +330,7 @@ void lpwork_boostpriority(uint8_t reqprio)
 
   /* Prevent context switches until we get the priorities right */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sched_lock();
 
   /* Adjust the priority of every worker thread */
@@ -344,7 +341,7 @@ void lpwork_boostpriority(uint8_t reqprio)
     }
 
   sched_unlock();
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -379,7 +376,7 @@ void lpwork_restorepriority(uint8_t reqprio)
 
   /* Prevent context switches until we get the priorities right */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sched_lock();
 
   /* Adjust the priority of every worker thread */
@@ -390,7 +387,7 @@ void lpwork_restorepriority(uint8_t reqprio)
     }
 
   sched_unlock();
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK && CONFIG_PRIORITY_INHERITANCE */

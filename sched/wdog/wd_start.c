@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_start.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -232,7 +233,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
   FAR struct wdog_s *prev;
   FAR struct wdog_s *next;
   int32_t now;
-  irqstate_t state;
+  irqstate_t flags;
   int i;
 
   /* Verify the wdog */
@@ -249,7 +250,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
    * the critical section is established.
    */
 
-  state = irqsave();
+  flags = enter_critical_section();
   if (WDOG_ISACTIVE(wdog))
     {
       wd_cancel(wdog);
@@ -394,7 +395,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
   sched_timer_resume();
 #endif
 
-  irqrestore(state);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
@@ -98,7 +99,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
    * or interrupt handlers.
    */
 
-  flags        = irqsave();
+  flags        = enter_critical_section();
   work->worker = worker;           /* Work callback. non-NULL means queued */
   work->arg    = arg;              /* Callback argument */
   work->delay  = delay;            /* Delay until work performed */
@@ -109,7 +110,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

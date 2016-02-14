@@ -45,10 +45,9 @@
 #include <assert.h>
 #include <queue.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
-
-#include <arch/irq.h>
 
 #include "wqueue/wqueue.h"
 
@@ -110,7 +109,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
    */
 
   next  = period;
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the time that we started this polling cycle in clock ticks. */
 
@@ -162,7 +161,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
                * performed... we don't have any idea how long this will take!
                */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               worker(arg);
 
               /* Now, unfortunately, since we re-enabled interrupts we don't
@@ -170,7 +169,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
                * back at the head of the list.
                */
 
-              flags = irqsave();
+              flags = enter_critical_section();
               work  = (FAR struct work_s *)wqueue->q.head;
             }
           else
@@ -264,7 +263,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

@@ -43,6 +43,7 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -81,7 +82,7 @@ int task_restart(pid_t pid)
   FAR struct tcb_s *rtcb;
   FAR struct task_tcb_s *tcb;
   FAR dq_queue_t *tasklist;
-  irqstate_t state;
+  irqstate_t flags;
   int status;
 
   /* Make sure this task does not become ready-to-run while
@@ -156,10 +157,10 @@ int task_restart(pid_t pid)
   tasklist = TLIST_HEAD(tcb->cmn.task_state);
 #endif
 
-  state = irqsave();
+  flags = enter_critical_section();
   dq_rem((FAR dq_entry_t *)tcb, tasklist);
   tcb->cmn.task_state = TSTATE_TASK_INVALID;
-  irqrestore(state);
+  leave_critical_section(flags);
 
   /* Deallocate anything left in the TCB's queues */
 
