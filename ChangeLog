@@ -11483,4 +11483,7 @@
 	* sched/sched.h and other files:  Replace the bool 'prioritized' in the task
 	  list table with a uint8_t bit set so that additional attributes of a task
 	  list can be provided without adding more booleans (2016-10-11).
+	* Everywhere: Replace irqsave() with enter_critical_section(); replace
+	  irqrestore() with leave_critical_section().  This is part of the onging
+	  development of SMP support (2016-02-13).
 
