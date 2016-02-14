@@ -525,14 +525,14 @@ static inline irqstate_t up_irq_save(void)
 
 /* Disable IRQs */
 
-static inline void irqdisable(void)
+static inline void up_irq_disable(void)
 {
   uint32_t flags = __getsr();
   __setsr(flags | 0x000000f0);
 }
 /* Enable IRQs */
 
-static inline void irqenable(void)
+static inline void up_irq_enable(void)
 {
   uint32_t flags = __getsr();
   __setsr(flags & ~0x000000f0);
@@ -544,11 +544,11 @@ static inline void up_irq_restore(irqstate_t flags)
 {
   if ((flags & 0x000000f0) != 0x000000f0)
     {
-      irqenable();
+      up_irq_enable();
     }
   else
     {
-      irqdisable();
+      up_irq_disable();
     }
 }
 #endif

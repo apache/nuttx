@@ -246,8 +246,8 @@ static inline void setbasepri(uint32_t basepri)
 
 /* Disable IRQs */
 
-static inline void irqdisable(void) inline_function;
-static inline void irqdisable(void)
+static inline void up_irq_disable(void) inline_function;
+static inline void up_irq_disable(void)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
   setbasepri(NVIC_SYSH_DISABLE_PRIORITY);
@@ -289,8 +289,8 @@ static inline irqstate_t up_irq_save(void)
 
 /* Enable IRQs */
 
-static inline void irqenable(void) inline_function;
-static inline void irqenable(void)
+static inline void up_irq_enable(void) inline_function;
+static inline void up_irq_enable(void)
 {
   setbasepri(0);
   __asm__ __volatile__ ("\tcpsie  i\n");

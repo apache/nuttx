@@ -361,7 +361,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Enable IRQs and return the previous IRQ state */
 
-static inline irqstate_t irqenable(void)
+static inline irqstate_t up_irq_enable(void)
 {
   unsigned int cpsr;
 

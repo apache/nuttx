@@ -222,26 +222,26 @@ static inline irqstate_t irqflags()
  * if the X86_FLAGS_IF is set by sti, then interrupts are enable.
  */
 
-static inline bool irqdisabled(irqstate_t flags)
+static inline bool up_irq_disabled(irqstate_t flags)
 {
   return ((flags & X86_FLAGS_IF) == 0);
 }
 
-static inline bool irqenabled(irqstate_t flags)
+static inline bool up_irq_enabled(irqstate_t flags)
 {
   return ((flags & X86_FLAGS_IF) != 0);
 }
 
 /* Disable interrupts unconditionally */
 
-static inline void irqdisable(void)
+static inline void up_irq_disable(void)
 {
   asm volatile("cli": : :"memory");
 }
 
 /* Enable interrupts unconditionally */
 
-static inline void irqenable(void)
+static inline void up_irq_enable(void)
 {
   asm volatile("sti": : :"memory");
 }
@@ -251,7 +251,7 @@ static inline void irqenable(void)
 static inline irqstate_t up_irq_save(void)
 {
   irqstate_t flags = irqflags();
-  irqdisable();
+  up_irq_disable();
   return flags;
 }
 
@@ -259,9 +259,9 @@ static inline irqstate_t up_irq_save(void)
 
 static inline void up_irq_restore(irqstate_t flags)
 {
-  if (irqenabled(flags))
+  if (up_irq_enabled(flags))
     {
-      irqenable();
+      up_irq_enable();
     }
 }
 

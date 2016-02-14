@@ -415,7 +415,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+  up_irq_enable();
 #endif
 }
 

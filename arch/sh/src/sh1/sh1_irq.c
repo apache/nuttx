@@ -72,7 +72,7 @@ void up_irqinitialize(void)
   /* Enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+  up_irq_enable();
 #endif
 }
 

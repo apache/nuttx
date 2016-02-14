@@ -160,12 +160,12 @@ static inline void putsreg(irqstate_t sreg)
 
 /* Interrupt enable/disable */
 
-static inline void irqenable()
+static inline void up_irq_enable()
 {
   asm volatile ("sei" ::);
 }
 
-static inline void irqdisable()
+static inline void up_irq_disabled()
 {
   asm volatile ("cli" ::);
 }

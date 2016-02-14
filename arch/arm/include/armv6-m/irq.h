@@ -251,8 +251,8 @@ static inline void setprimask(uint32_t primask)
 
 /* Disable IRQs */
 
-static inline void irqdisable(void) inline_function;
-static inline void irqdisable(void)
+static inline void up_irq_disable(void) inline_function;
+static inline void up_irq_disable(void)
 {
   __asm__ __volatile__ ("\tcpsid  i\n");
 }
@@ -281,8 +281,8 @@ static inline irqstate_t up_irq_save(void)
 
 /* Enable IRQs */
 
-static inline void irqenable(void) inline_function;
-static inline void irqenable(void)
+static inline void up_irq_enable(void) inline_function;
+static inline void up_irq_enable(void)
 {
   __asm__ __volatile__ ("\tcpsie  i\n");
 }
