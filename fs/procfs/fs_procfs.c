@@ -53,6 +53,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
@@ -60,8 +61,6 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/regex.h>
-
-#include <arch/irq.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 
@@ -509,9 +508,9 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        */
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-      flags = irqsave();
+      flags = enter_critical_section();
       sched_foreach(procfs_enum, level0);
-      irqrestore(flags);
+      leave_critical_section(flags);
 #else
       level0->base.index = 0;
       level0->base.nentries = 0;
@@ -752,9 +751,9 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           pid = level0->pid[index];
 
-          flags = irqsave();
+          flags = enter_critical_section();
           tcb = sched_gettcb(pid);
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           if (!tcb)
             {

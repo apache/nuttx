@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
@@ -63,8 +64,6 @@
 #ifdef CONFIG_SCHED_CPULOAD
 #  include <nuttx/clock.h>
 #endif
-
-#include <arch/irq.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
@@ -1032,9 +1031,9 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   pid = (pid_t)tmp;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   tcb = sched_gettcb(pid);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (!tcb)
     {
@@ -1122,13 +1121,13 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   /* Verify that the thread is still valid */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   tcb = sched_gettcb(procfile->pid);
 
   if (!tcb)
     {
       fdbg("ERROR: PID %d is not valid\n", (int)procfile->pid);
-      irqrestore(flags);
+      leave_critical_section(flags);
       return -ENODEV;
     }
 
@@ -1166,7 +1165,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
       break;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Update the file offset */
 
@@ -1271,9 +1270,9 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   pid = (pid_t)tmp;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   tcb = sched_gettcb(pid);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (!tcb)
     {
@@ -1403,9 +1402,9 @@ static int proc_readdir(struct fs_dirent_s *dir)
 
       pid = procdir->pid;
 
-      flags = irqsave();
+      flags = enter_critical_section();
       tcb = sched_gettcb(pid);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       if (!tcb)
         {
@@ -1513,9 +1512,9 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   pid = (pid_t)tmp;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   tcb = sched_gettcb(pid);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (!tcb)
     {
