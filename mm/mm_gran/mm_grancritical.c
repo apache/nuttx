@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_gran/mm_grancritical.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/mm/gran.h>
 
 #include "mm_gran/mm_gran.h"
@@ -83,7 +83,7 @@
 void gran_enter_critical(FAR struct gran_s *priv)
 {
 #ifdef CONFIG_GRAN_INTR
-  priv->irqstate = irqsave();
+  priv->irqstate = enter_critical_section();
 #else
   int ret;
 
@@ -104,7 +104,7 @@ void gran_enter_critical(FAR struct gran_s *priv)
 void gran_leave_critical(FAR struct gran_s *priv)
 {
 #ifdef CONFIG_GRAN_INTR
-  irqrestore(priv->irqstate);
+  leave_critical_section(priv->irqstate);
 #else
   sem_post(&priv->exclsem);
 #endif
