@@ -103,7 +103,7 @@ int board_power_off(int status)
 
   /* stop background processes */
 
-  (void)irqsave();
+  (void)up_irq_save();
 
   /* switch to internal HSI and get the PD0 and PD1 as GPIO */
 

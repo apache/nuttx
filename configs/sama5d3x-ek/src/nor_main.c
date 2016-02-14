@@ -139,7 +139,7 @@ int nor_main(int argc, char *argv)
    * are disabled!
    */
 
-  (void)irqsave();
+  (void)up_irq_save();
 
   /* Disable MATRIX write protection */
 

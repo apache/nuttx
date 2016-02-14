@@ -152,7 +152,7 @@ int dram_main(int argc, char *argv)
    * are disabled!
    */
 
-  (void)irqsave();
+  (void)up_irq_save();
 
   /* Disable the caches and the MMU.  Disabling the MMU should be safe here
    * because there is a 1-to-1 identity mapping between the physical and
