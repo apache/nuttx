@@ -97,7 +97,7 @@ irqstate_t enter_critical_section(void)
 
   /* Then disable interrupts (if they have not already been disabeld) */
 
-  return irqsave();
+  return up_irq_save();
 }
 
 /****************************************************************************
@@ -136,7 +136,7 @@ void leave_critical_section(irqstate_t flags)
    * disabled (but we don't have a mechanism to verify that now)
    */
 
-  irqrestore(flags);
+  up_irq_restore(flags);
 }
 
 #endif /* CONFIG_SMP */

@@ -109,14 +109,14 @@ int irq_attach(int irq, xcpt_t isr);
  *     specific counter is increment to indicate that the thread has IRQs
  *     disabled and to support nested calls to enter_critical_section().
  *   If SMP is not enabled:
- *     This function is equivalent to irqsave().
+ *     This function is equivalent to up_irq_save().
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
 irqstate_t enter_critical_section(void);
 #else
-#  define enter_critical_section(f) irqsave(f)
+#  define enter_critical_section(f) up_irq_save(f)
 #endif
 
 /****************************************************************************
@@ -127,14 +127,14 @@ irqstate_t enter_critical_section(void);
  *     Decrement the IRQ lock count and if it decrements to zero then release
  *     the spinlock.
  *   If SMP is not enabled:
- *     This function is equivalent to irqrestore().
+ *     This function is equivalent to up_irq_restore().
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags);
 #else
-#  define leave_critical_section(f) irqrestore(f)
+#  define leave_critical_section(f) up_irq_restore(f)
 #endif
 
 #undef EXTERN

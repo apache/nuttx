@@ -537,7 +537,7 @@ int pg_worker(int argc, char *argv[])
    */
 
   pglldbg("Started\n");
-  (void)irqsave();
+  (void)up_irq_save();
   for (; ; )
     {
       /* Wait awhile.  We will wait here until either the configurable timeout

@@ -1604,8 +1604,8 @@ o Linux/Cywgin simulation (arch/sim)
                "faked" during IDLE loop processing and, as a result, there is no
                task pre-emption because there are no asynchronous events.  This could
                probably be fixed if the "timer interrupt" were driver by Linux
-               signals. NOTE:  You would also have to implement irqsave() and
-               irqrestore() to block and (conditionally) unblock the signal.
+               signals. NOTE:  You would also have to implement up_irq_save() and
+               up_irq_restore() to block and (conditionally) unblock the signal.
   Status:      Open
   Priority:    Low
 

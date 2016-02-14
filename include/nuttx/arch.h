@@ -1350,7 +1350,7 @@ bool up_interrupt_context(void);
  *
  *   This function implements enabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (irqrestore() supports the global level, the device level is hardware
+ *   (up_irq_restore() supports the global level, the device level is hardware
  *   specific).
  *
  *   Since this API is not supported on all architectures, it should be
@@ -1368,7 +1368,7 @@ void up_enable_irq(int irq);
  * Description:
  *   This function implements disabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (irqsave() supports the global level, the device level is hardware
+ *   (up_irq_save() supports the global level, the device level is hardware
  *   specific).
  *
  *   Since this API is not supported on all architectures, it should be

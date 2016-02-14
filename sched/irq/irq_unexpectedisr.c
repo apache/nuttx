@@ -80,7 +80,7 @@
 
 int irq_unexpected_isr(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   lldbg("irq: %d\n", irq);
   PANIC();
   return OK; /* Won't get here */

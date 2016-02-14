@@ -11486,4 +11486,8 @@
 	* Everywhere: Replace irqsave() with enter_critical_section(); replace
 	  irqrestore() with leave_critical_section().  This is part of the onging
 	  development of SMP support (2016-02-13).
+	* Conform to naming convention:  Rename irqsave() to up_irq_save(); rename
+	  irqrestore() to up_irq_restore().  These should no longer be used.  If
+	  your code still uses them, please switch to enter_critical_section()
+	  and leave_critical_section() (2016-02-14).
 

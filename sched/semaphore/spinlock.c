@@ -157,7 +157,7 @@ void spin_lockr(FAR struct spinlock_s *lock)
 
   /* Disable interrupts (all CPUs) */
 
-  flags = irqsave();
+  flags = up_irq_save();
 
   /* Do we already hold the lock on this CPU? */
 
@@ -187,9 +187,9 @@ void spin_lockr(FAR struct spinlock_s *lock)
 
       while (up_testset(&lock->sp_lock) == SP_LOCKED)
         {
-          irqrestore(flags);
+          up_irq_restore(flags);
           sched_yield();
-          flags = irqsave();
+          flags = up_irq_save();
         }
 
       /* Take one count on the lock */
@@ -198,7 +198,7 @@ void spin_lockr(FAR struct spinlock_s *lock)
       lock->sp_count = 1;
     }
 
-  irqrestore(flags);
+  up_irq_restore(flags);
 
 #else /* CONFIG_SMP */
 
@@ -242,7 +242,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
 
   /* Disable interrupts (all CPUs) */
 
-  flags = irqsave();
+  flags = up_irq_save();
 
 #ifdef CONFIG_SPINLOCK_LOCKDOWN
   /* REVISIT:  What happens if this thread took the lock on a different CPU,
@@ -282,7 +282,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
         }
     }
 
-  irqrestore(flags);
+  up_irq_restore(flags);
 
 #else /* CONFIG_SMP */
   /* Just mark the spinlock unlocked */
