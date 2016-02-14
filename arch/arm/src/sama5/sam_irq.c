@@ -124,7 +124,7 @@ static void sam_dumpaic(const char *msg, uintptr_t base, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("AIC (%s, base=%08x irq=%d):\n", msg, base, irq);
 
   /* Select the register set associated with this irq */
@@ -167,7 +167,7 @@ static void sam_dumpaic(const char *msg, uintptr_t base, int irq)
         getreg32(base + SAM_AIC_WPMR_OFFSET),
         getreg32(base + SAM_AIC_WPSR_OFFSET));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define sam_dumpaic(msg, base, irq)
@@ -696,7 +696,7 @@ static void sam_disable_irq(uintptr_t base, int irq)
     {
       /* These operations must be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Select the register set associated with this irq */
 
@@ -706,7 +706,7 @@ static void sam_disable_irq(uintptr_t base, int irq)
 
       putreg32(AIC_IDCR_INTD, base + SAM_AIC_IDCR_OFFSET);
       sam_dumpaic("disable", base, irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #ifdef CONFIG_SAMA5_PIO_IRQ
   else
@@ -748,7 +748,7 @@ static void sam_enable_irq(uintptr_t base, int irq)
     {
       /* These operations must be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Select the register set associated with this irq */
 
@@ -758,7 +758,7 @@ static void sam_enable_irq(uintptr_t base, int irq)
 
       putreg32(AIC_IECR_INTEN, base + SAM_AIC_IECR_OFFSET);
       sam_dumpaic("enable", base, irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #ifdef CONFIG_SAMA5_PIO_IRQ
   else
@@ -806,7 +806,7 @@ static int sam_prioritize_irq(uint32_t base, int irq, int priority)
     {
       /* These operations must be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Select the register set associated with this irq */
 
@@ -827,7 +827,7 @@ static int sam_prioritize_irq(uint32_t base, int irq, int priority)
 
       putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, base + SAM_AIC_WPMR_OFFSET);
       sam_dumpaic("prioritize", base, irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return OK;
@@ -867,7 +867,7 @@ static void _sam_irq_srctype(uintptr_t base, int irq,
 
   /* These operations must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Select the register set associated with this irq */
 
@@ -888,7 +888,7 @@ static void _sam_irq_srctype(uintptr_t base, int irq,
 
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, base + SAM_AIC_WPMR_OFFSET);
   sam_dumpaic("srctype", base, irq);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 void sam_irq_srctype(int irq, enum sam_srctype_e srctype)

@@ -64,7 +64,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -239,10 +239,10 @@ static void lpc43_i2c_timeout(int argc, uint32_t arg, ...)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)arg;
 
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   priv->state = 0xff;
   sem_post(&priv->wait);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -471,7 +471,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_LPC43_I2C0
   if (port == 0)
@@ -535,7 +535,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
       return NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC43_I2C_CONSET_OFFSET);
 

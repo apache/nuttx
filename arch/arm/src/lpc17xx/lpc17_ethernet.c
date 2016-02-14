@@ -1129,14 +1129,14 @@ static void lpc17_rxdone_work(FAR void *arg)
    * lp-txpending TX underrun state is in effect.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (!priv->lp_txpending)
     {
       priv->lp_inten |= ETH_RXINTS;
       lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_NET_NOINTS */
 
@@ -1896,7 +1896,7 @@ static int lpc17_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(LPC17_IRQ_ETH);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -1908,7 +1908,7 @@ static int lpc17_ifdown(struct net_driver_s *dev)
 
   lpc17_ethreset(priv);
   priv->lp_ifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3114,7 +3114,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
 
   /* Reset the MAC */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Put the MAC into the reset state */
 
@@ -3164,7 +3164,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
   /* Clear any pending interrupts (shouldn't be any) */
 
   lpc17_putreg(0xffffffff, LPC17_ETH_INTCLR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

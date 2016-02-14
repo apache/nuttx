@@ -1045,7 +1045,7 @@ static int kinetis_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupts at the NVIC */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(KINETIS_IRQ_EMACTMR);
   up_disable_irq(KINETIS_IRQ_EMACTX);
   up_disable_irq(KINETIS_IRQ_EMACRX);
@@ -1067,7 +1067,7 @@ static int kinetis_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1100,7 +1100,7 @@ static int kinetis_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1120,7 +1120,7 @@ static int kinetis_txavail(struct net_driver_s *dev)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -58,7 +58,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -1948,7 +1948,7 @@ static int lpc31_epdisable(FAR struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable Endpoint */
   if (LPC31_EPPHYIN(privep->epphy))
@@ -1961,7 +1961,7 @@ static int lpc31_epdisable(FAR struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
   lpc31_cancelrequests(privep, -ESHUTDOWN);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2104,7 +2104,7 @@ static int lpc31_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
   /* Disable Interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2127,7 +2127,7 @@ static int lpc31_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2154,7 +2154,7 @@ static int lpc31_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* FIXME: if the request is the first, then we need to flush the EP
    *         otherwise just remove it from the list
@@ -2163,7 +2163,7 @@ static int lpc31_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
    */
 
   lpc31_cancelrequests(privep, -ESHUTDOWN);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2182,7 +2182,7 @@ static int lpc31_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
   uint32_t addr    = LPC31_USBDEV_ENDPTCTRL(privep->epphy);
@@ -2204,7 +2204,7 @@ static int lpc31_epstall(FAR struct usbdev_ep_s *ep, bool resume)
       lpc31_setbits (ctrl_xs, addr);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2306,7 +2306,7 @@ static FAR struct usbdev_ep_s *lpc31_allocep(FAR struct usbdev_s *dev, uint8_t e
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       epset &= priv->epavail;
       if (epset)
         {
@@ -2320,7 +2320,7 @@ static FAR struct usbdev_ep_s *lpc31_allocep(FAR struct usbdev_s *dev, uint8_t e
                   /* Mark the IN/OUT endpoint no longer available */
 
                   priv->epavail &= ~(3 << (bit & ~1));
-                  irqrestore(flags);
+                  leave_critical_section(flags);
 
                   /* And return the pointer to the standard endpoint structure */
 
@@ -2329,7 +2329,7 @@ static FAR struct usbdev_ep_s *lpc31_allocep(FAR struct usbdev_s *dev, uint8_t e
             }
           /* Shouldn't get here */
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_NOEP), (uint16_t)eplog);
@@ -2356,9 +2356,9 @@ static void lpc31_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
     {
       /* Mark the endpoint as available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       priv->epavail |= (1 << privep->epphy);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -2403,9 +2403,9 @@ static int lpc31_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc31_setbits(USBDEV_PRTSC1_FPR, LPC31_USBDEV_PORTSC1);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2447,12 +2447,12 @@ static int lpc31_pullup(struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   if (enable)
     lpc31_setbits (USBDEV_USBCMD_RS, LPC31_USBDEV_USBCMD);
   else
     lpc31_clrbits (USBDEV_USBCMD_RS, LPC31_USBDEV_USBCMD);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2617,7 +2617,7 @@ void up_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc31_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -2637,7 +2637,7 @@ void up_usbuninitialize(void)
   lpc31_disableclock (CLKID_USBOTGAHBCLK);
   lpc31_disableclock (CLKID_EVENTROUTERPCLK);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_irq.c
- * arch/arm/src/chip/stm32_irq.c
  *
- *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,10 +88,6 @@ volatile uint32_t *current_regs;
 extern uint32_t _vectors[];
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -109,7 +104,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -138,7 +133,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
         getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
   lldbg("              %08x\n",
         getreg32(NVIC_IRQ64_67_PRIORITY));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define stm32_dumpnvic(msg, irq)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/nuc1xx/nuc_gpio.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <arch/nuc1xx/chip.h>
 
 #include "up_arch.h"
@@ -253,7 +254,7 @@ void nuc_gpiowrite(gpio_cfgset_t pinset, bool value)
 
   /* Disable interrupts -- the following operations must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Allow writing only to the selected pin in the DOUT register */
 
@@ -262,7 +263,7 @@ void nuc_gpiowrite(gpio_cfgset_t pinset, bool value)
   /* Set the pin to the selected value and re-enable interrupts */
 
   putreg32(((uint32_t)value << pin), base + NUC_GPIO_DOUT_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 }
 

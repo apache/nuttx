@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_adc.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
@@ -55,6 +55,7 @@
 #include <unistd.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 
@@ -1683,7 +1684,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #endif
 
   allvdbg("intf: %d\n", priv->intf);
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #if defined(CONFIG_STM32_STM32L15XX) && \
     (STM32_CFGR_PLLSRC != 0 || STM32_SYSCLK_SW != RCC_CFGR_SW_HSI)
@@ -1980,7 +1981,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #ifdef CONFIG_STM32_STM32F30XX
   avdbg("ISR:  0x%08x CR:   0x%08x CFGR: 0x%08x\n",

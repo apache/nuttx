@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_gpio.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 
 #include "up_arch.h"
@@ -121,7 +122,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   DEBUGASSERT(port < STM32F7_NGPIO);
 
@@ -149,7 +150,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
             g_portchar[port], getreg32(STM32_RCC_AHB1ENR));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

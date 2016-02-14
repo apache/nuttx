@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -329,7 +329,7 @@ void lpc43_usart0_setup(void)
 
   /* Connect USART0 into the clock source specified in board.h */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 
   regval  = getreg32(LPC43_BASE_USART0_CLK);
   regval &= ~BASE_USART0_CLK_CLKSEL_MASK;
@@ -366,7 +366,7 @@ void lpc43_usart0_setup(void)
   lpc43_pin_config(PINCONF_U0_DIR);
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -378,7 +378,7 @@ void lpc43_uart1_setup(void)
 
   /* Connect UART1 into the clock source specified in board.h */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 
   regval  = getreg32(LPC43_BASE_UART1_CLK);
   regval &= ~BASE_UART1_CLK_CLKSEL_MASK;
@@ -415,7 +415,7 @@ void lpc43_uart1_setup(void)
 #endif
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -427,7 +427,7 @@ void lpc43_usart2_setup(void)
 
   /* Connect USART2 the clock source specified in board.h */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 
   regval  = getreg32(LPC43_BASE_USART2_CLK);
   regval &= ~BASE_USART2_CLK_CLKSEL_MASK;
@@ -465,7 +465,7 @@ void lpc43_usart2_setup(void)
   lpc43_pin_config(PINCONF_U2_DIR);
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -477,7 +477,7 @@ void lpc43_usart3_setup(void)
 
   /* Connect USART3 into the clock source specified in board.h */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 
   regval  = getreg32(LPC43_BASE_USART3_CLK);
   regval &= ~BASE_USART3_CLK_CLKSEL_MASK;
@@ -514,7 +514,7 @@ void lpc43_usart3_setup(void)
   lpc43_pin_config(PINCONF_U3_DIR);
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 

@@ -64,7 +64,7 @@
 #include <nuttx/mtd/nand_raw.h>
 #include <nuttx/mtd/nand_model.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -685,7 +685,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
 
   /* Wait for the CMDDONE interrupt to occur */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   do
     {
       ret = sem_wait(&g_nand.waitsem);
@@ -699,7 +699,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
   /* CMDDONE received */
 
   g_nand.cmddone = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #else
   /* Poll for the CMDDONE event (latching other events as necessary) */
@@ -736,7 +736,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
    */
 
   nand_getreg(SAM_HSMC_SR);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Mark CMDDONE not received */
 
@@ -745,7 +745,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
   /* Enable the CMDDONE interrupt */
 
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_CMDDONE);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   /* Just sample and clear any pending NFC status, then clear CMDDONE status */
 
@@ -776,7 +776,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
 
   /* Wait for the XFRDONE interrupt to occur */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   do
     {
       ret = sem_wait(&g_nand.waitsem);
@@ -790,7 +790,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
   /* XFRDONE received */
 
   g_nand.xfrdone = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #else
   /* Poll for the XFRDONE event (latching other events as necessary) */
@@ -827,7 +827,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
    */
 
   nand_getreg(SAM_HSMC_SR);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Mark XFRDONE not received */
 
@@ -836,7 +836,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
   /* Enable the XFRDONE interrupt */
 
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_XFRDONE);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   /* Just sample and clear any pending NFC status, then clear XFRDONE status */
 
@@ -867,7 +867,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 
   /* Wait for the RBEDGE0 interrupt to occur */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   do
     {
       ret = sem_wait(&g_nand.waitsem);
@@ -881,7 +881,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
   /* RBEDGE0 received */
 
   g_nand.rbedge = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #else
   /* Poll for the RBEDGE0 event (latching other events as necessary) */
@@ -918,7 +918,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
    */
 
   nand_getreg(SAM_HSMC_SR);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Mark RBEDGE0 not received */
 
@@ -927,7 +927,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
   /* Enable the RBEDGE0 interrupt */
 
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_RBEDGE0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   /* Just sample and clear any pending NFC status, then clear RBEDGE0 status */
 
@@ -991,7 +991,7 @@ static uint32_t nand_nfc_poll(void)
    * the interrupt level as well.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #endif
 
   /* Read the current HSMC status, clearing most pending conditions */
@@ -1038,7 +1038,7 @@ static uint32_t nand_nfc_poll(void)
     }
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
   return sr;
 }

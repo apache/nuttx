@@ -2,7 +2,7 @@
  * arch/arm/src/samv7/sam_gpio.c
  * General Purpose Input/Output (GPIO) logic for the SAMV71
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -418,7 +419,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable writing to GPIO registers */
 
@@ -454,7 +455,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
   /* Disable writing to GPIO registers */
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return ret;
 }
@@ -530,7 +531,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("PIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
   lldbg("    PSR: %08x    OSR: %08x   IFSR: %08x   ODSR: %08x\n",
@@ -565,7 +566,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   lldbg("   PCMR: %08x  PCIMR: %08x  PCISR: %08x  PCRHR: %08x\n",
         getreg32(base + SAM_PIO_PCMR_OFFSET), getreg32(base + SAM_PIO_PCIMR_OFFSET),
         getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_timerlow32.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/timer.h>
 
@@ -472,7 +473,7 @@ static tccb_t tiva_sethandler(struct timer_lowerhalf_s *lower,
   irqstate_t flags;
   tccb_t oldhandler;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   DEBUGASSERT(priv);
   timvdbg("Entry: handler=%p\n", handler);
@@ -485,7 +486,7 @@ static tccb_t tiva_sethandler(struct timer_lowerhalf_s *lower,
 
   priv->handler = handler;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 

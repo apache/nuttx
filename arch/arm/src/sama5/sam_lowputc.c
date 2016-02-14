@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -252,18 +252,18 @@ void up_lowputc(char ch)
        * atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if ((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) &
         UART_INT_TXEMPTY) != 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, SAM_CONSOLE_VBASE + SAM_UART_THR_OFFSET);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
 #elif defined(SAMA5_HAVE_FLEXCOM_CONSOLE)
@@ -280,18 +280,18 @@ void up_lowputc(char ch)
        * atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if ((getreg32(SAM_CONSOLE_VBASE + SAM_FLEXUS_CSR_OFFSET) &
         FLEXUS_INT_TXEMPTY) != 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, SAM_CONSOLE_VBASE + SAM_FLEXUS_THR_OFFSET);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
 #elif defined(CONFIG_SAMA5_DBGU_CONSOLE)
@@ -307,17 +307,17 @@ void up_lowputc(char ch)
        * atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if ((getreg32(SAM_DBGU_SR) & DBGU_INT_TXEMPTY) != 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, SAM_DBGU_THR);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 }

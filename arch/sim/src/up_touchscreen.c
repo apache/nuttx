@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_touchscreen.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
@@ -290,7 +291,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -338,7 +339,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there

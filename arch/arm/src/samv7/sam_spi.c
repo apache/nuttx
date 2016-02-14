@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_spi.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015=2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -52,6 +52,7 @@
 
 #include <arch/board/board.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
@@ -1808,7 +1809,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
     {
       /* Enable clocking to the SPI block */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 #if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
       if (spino == 0)
 #endif
@@ -1850,7 +1851,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
       spi_putreg(spi, SPI_CR_SWRST, SAM_SPI_CR_OFFSET);
       spi_putreg(spi, SPI_CR_SWRST, SAM_SPI_CR_OFFSET);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Configure the SPI mode register */
 

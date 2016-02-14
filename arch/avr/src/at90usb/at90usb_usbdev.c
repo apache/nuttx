@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/at90usb/at90usb_usbdev.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
@@ -2255,14 +2256,14 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPDISABLE, privep->ep.eplog);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable the endpoint */
 
   avr_epreset(privep, -ESHUTDOWN);
   g_usbdev.stalled = true;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2406,7 +2407,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2465,7 +2466,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2497,9 +2498,9 @@ static int avr_epcancel(FAR struct usbdev_ep_s *ep,
    * just remove it from the list but ... all other implementations cancel all
    * requests ... */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   avr_cancelrequests(privep, -ESHUTDOWN);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2517,7 +2518,7 @@ static int avr_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (resume)
     {
       /* Clear stall and reset the data toggle */
@@ -2533,7 +2534,7 @@ static int avr_epstall(FAR struct usbdev_ep_s *ep, bool resume)
       UECONX       |= (1 << STALLRQ);
       g_usbdev.stalled = true;
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2602,7 +2603,7 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Select the lowest bit in the set of matching, available endpoints */
 
@@ -2636,14 +2637,14 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
 
               /* And return the pointer to the standard endpoint structure */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               return &privep->ep;
             }
         }
 
       /* Shouldn't get here */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   usbtrace(TRACE_DEVERROR(AVR_TRACEERR_NOEP), (uint16_t) epno);
@@ -2668,12 +2669,12 @@ static void avr_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
 
   /* Mark the endpoint as available */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   epmask = (1 << privep->ep.eplog);
   g_usbdev.epavail  |= epmask;
   g_usbdev.epinset  &= ~epmask;
   g_usbdev.epoutset &= ~epmask;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2706,9 +2707,9 @@ static int avr_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   avr_genwakeup();
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2841,7 +2842,7 @@ void up_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   avr_pullup(&g_usbdev.usbdev, false);
   g_usbdev.usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -2853,7 +2854,7 @@ void up_usbuninitialize(void)
   /* Shutdown the USB controller hardware */
 
   avr_usbshutdown();
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2962,8 +2963,8 @@ void avr_pollvbus(void)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   avr_genvbus();
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif

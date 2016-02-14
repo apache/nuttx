@@ -55,7 +55,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 
 #include "sam_freerun.h"
@@ -248,7 +248,7 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
    * If we do not handle the overflow here then, it will be lost.
    */
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
   overflow = freerun->overflow;
   counter  = sam_tc_getcounter(freerun->tch);
   sr       = sam_tc_getpending(freerun->tch);
@@ -272,7 +272,7 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
       freerun->overflow = overflow;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   tcvdbg("counter=%lu (%lu) overflow=%lu, sr=%08lx\n",
          (unsigned long)counter,  (unsigned long)verify,

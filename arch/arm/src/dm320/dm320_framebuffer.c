@@ -45,8 +45,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/video/fb.h>
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>
 
 #include "up_arch.h"
@@ -1198,7 +1199,7 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
     }
 #endif
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (i = cmap.first, len = 0; i < 256 && len < cmap.len, i++, len++)
     {
       /* Convert the RGB to YUV */
@@ -1226,6 +1227,7 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
   putreg16(regval, DM320_OSD_OSDWIN1MD);
 #endif
 
+  leave_critical_section(flags);
   return 0;
 }
 #endif
@@ -1246,7 +1248,7 @@ static int dm320_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursora
     }
 #endif
 
-  flags = irqsave();
+  flags = enter_critical_section();
   attrib->pos.x = getreg16(DM320_OSD_CURXP);
   attrib->pos.y = getreg16(DM320_OSD_CURYP);
 
@@ -1254,7 +1256,7 @@ static int dm320_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursora
   attrib->size.w = getreg16(DM320_OSD_CURXL);
   attrib->size.h = getreg16(DM320_OSD_CURYL);
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   attrib->mxsize.w = MAX_XRES;
   attrib->mxsize.h = MAX_YRES;
@@ -1291,7 +1293,7 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
 
   /* Set cursor position */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if ((settings->flags & FB_CUR_SETPOSITION) != 0)
     {
       gvdbg("x=%d y=%d\n", settings->pos.x, settings->pos.y);
@@ -1339,8 +1341,9 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
     {
       regval &= ~1;
     }
+
   putreg16(regval, DM320_OSD_RECTCUR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   gvdbg("DM320_OSD_CURXP:       %04x\n", getreg16(DM320_OSD_CURXP));
   gvdbg("DM320_OSD_CURYP:       %04x\n", getreg16(DM320_OSD_CURYP));

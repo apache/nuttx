@@ -1187,7 +1187,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX fifo is half emptied */
@@ -1216,7 +1216,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->im &= ~UART_IM_TXIM;
       up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

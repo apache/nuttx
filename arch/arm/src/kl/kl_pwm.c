@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_pwm.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 #include <arch/board/board.h>
@@ -626,7 +627,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
   */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable further interrupts and stop the timer */
 
@@ -666,7 +667,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
         return -EINVAL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   pwm_dumpregs(priv, "After stop");
   return OK;

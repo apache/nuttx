@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 
@@ -323,7 +323,7 @@ int stm32_configgpio(uint32_t cfgset)
    * exclusive access to all of the GPIO configuration registers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Decode the mode and configuration */
 
@@ -363,7 +363,7 @@ int stm32_configgpio(uint32_t cfgset)
         {
           /* Its an alternate function pin... we can return early */
 
-          irqrestore(flags);
+          leave_critical_section(flags);
           return OK;
         }
     }
@@ -390,7 +390,7 @@ int stm32_configgpio(uint32_t cfgset)
         {
           /* Neither... we can return early */
 
-          irqrestore(flags);
+          leave_critical_section(flags);
           return OK;
         }
     }
@@ -417,7 +417,7 @@ int stm32_configgpio(uint32_t cfgset)
   regval |= (1 << pin);
   putreg32(regval, regaddr);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -485,7 +485,7 @@ int stm32_configgpio(uint32_t cfgset)
    * exclusive access to all of the GPIO configuration registers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now apply the configuration to the mode register */
 
@@ -655,7 +655,7 @@ int stm32_configgpio(uint32_t cfgset)
       putreg32(regval, regaddr);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

@@ -108,7 +108,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -149,7 +149,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
         getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY));
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define kinetis_dumpnvic(msg, irq)

@@ -43,7 +43,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "chip.h"
@@ -156,7 +156,7 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("GPIO%c pin%d (pinset: %08x) -- %s\n",
         port + '0', pin, pinset, msg);
 
@@ -183,7 +183,7 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
   lldbg("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
         base+LPC11_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENR_OFFSET),
         base+LPC11_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENF_OFFSET));
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif /* CONFIG_DEBUG_GPIO */

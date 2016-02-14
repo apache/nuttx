@@ -54,7 +54,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -743,11 +743,11 @@ static inline void sam_configwaitints(struct sam_dev_s *priv,
 
   /* Save all of the data in one, atomic operation. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->waitevents = waitevents;
   priv->wkupevent  = 0;
   priv->waitmask   = waitmask;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -774,12 +774,12 @@ static void sam_disablewaitints(struct sam_dev_s *priv,
    * operation.
    */
 
-  flags            = irqsave();
+  flags            = enter_critical_section();
   priv->waitevents = 0;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = 0;
   sam_putreg(priv, ~priv->xfrmask, SAM_HSMCI_IDR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -822,10 +822,10 @@ static inline void sam_configxfrints(struct sam_dev_s *priv, uint32_t xfrmask)
 
 static void sam_disablexfrints(struct sam_dev_s *priv)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   priv->xfrmask = 0;
   sam_putreg(priv, ~priv->waitmask, SAM_HSMCI_IDR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1635,7 +1635,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   /* Reset the MCI */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_putreg(priv, HSMCI_CR_SWRST, SAM_HSMCI_CR_OFFSET);
 
   /* Disable the MCI */
@@ -1691,7 +1691,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
   /* DMA data transfer support */
 
   priv->widebus    = false;  /* Required for DMA support */
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3019,7 +3019,7 @@ static void sam_callback(void *arg)
   fvdbg("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
         priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->callback)
     {
       /* Yes.. Check for enabled callback events */
@@ -3085,7 +3085,7 @@ static void sam_callback(void *arg)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3261,7 +3261,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
    * still be atomic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
@@ -3281,7 +3281,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       sam_callback(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3307,7 +3307,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (wrprotect)
     {
       priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
@@ -3318,7 +3318,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
     }
 
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_SAMV7_HSMCI */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ehci.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
@@ -1400,7 +1401,7 @@ static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinf
 
   /* Is the device still connected? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (rhport->connected)
     {
       /* Then set iocwait to indicate that we expect to be informed when
@@ -1419,7 +1420,7 @@ static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinf
       ret              = OK;     /* We are good to go */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2390,7 +2391,7 @@ static inline int sam_ioc_async_setup(struct sam_rhport_s *rhport,
 
   /* Is the device still connected? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (rhport->connected)
     {
       /* Then save callback information to used when either (1) the
@@ -2406,7 +2407,7 @@ static inline int sam_ioc_async_setup(struct sam_rhport_s *rhport,
       ret              = OK;       /* We are good to go */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif
@@ -3287,7 +3288,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
    * ports or until an error occurs.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
@@ -3309,7 +3310,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
               connport->connected = rhport->connected;
               *hport = connport;
-              irqrestore(flags);
+              leave_critical_section(flags);
 
               usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
                               rhpndx + 1, rhport->connected);
@@ -3330,7 +3331,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
           g_ehci.hport = NULL;
 
           *hport = (struct usbhost_hubport_s *)connport;
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
                           connport->port + 1, connport->connected);
@@ -4331,7 +4332,7 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * related race conditions.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_USBHOST_ASYNCH
   callback         = epinfo->callback;
   arg              = epinfo->arg;
@@ -4343,7 +4344,7 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   epinfo->arg      = NULL;
 #endif
   epinfo->iocwait  = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Bail if there is no transfer in progress for this endpoint */
 
@@ -4503,7 +4504,7 @@ static int sam_connect(FAR struct usbhost_driver_s *drvr,
 
   /* Report the connection event */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGASSERT(g_ehci.hport == NULL); /* REVISIT */
 
   g_ehci.hport = hport;
@@ -4513,7 +4514,7 @@ static int sam_connect(FAR struct usbhost_driver_s *drvr,
       sam_givesem(&g_ehci.pscsem);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -4749,7 +4750,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   /* Enable UHP peripheral clocking */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_uhphs_enableclk();
 
   /* Enable OHCI clocks */
@@ -4778,7 +4779,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   regval &= ~SFR_OHCIICR_RES2;
 #endif
   putreg32(regval, SAM_SFR_OHCIICR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Note that no pin configuration is required.  All USB HS pins have
    * dedicated function

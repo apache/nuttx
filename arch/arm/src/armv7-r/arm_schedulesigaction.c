@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/arm_schedulesigaction.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "arm.h"
@@ -97,7 +98,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   /* Make sure that interrupts are disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Refuse to handle nested signal actions */
 
@@ -185,7 +186,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */

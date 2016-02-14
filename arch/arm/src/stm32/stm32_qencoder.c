@@ -1053,7 +1053,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Disable the update/global interrupt at the NVIC */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(priv->config->irq);
 
   /* Detach the interrupt handler */
@@ -1123,7 +1123,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   regval &= ~resetbit;
   putreg32(regval, regaddr);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   snvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   stm32_dumpregs(priv, "After stop");
@@ -1210,10 +1210,10 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
    * (if possible)
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   stm32_putreg32(priv, STM32_GTIM_CNT_OFFSET, 0);
   priv->position = 0;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   snvdbg("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);

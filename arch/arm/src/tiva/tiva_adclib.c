@@ -49,11 +49,10 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-#include <nuttx/arch.h>
-#include <nuttx/analog/adc.h>
+
+#include <nuttx/config.h>
 
 #include <sys/types.h>
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -61,6 +60,9 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -773,7 +775,7 @@ void tiva_adc_sse_int_enable(uint8_t adc, uint8_t sse, bool state)
   uintptr_t imreg = TIVA_ADC_IM(adc);
   int irq = tiva_adc_getirq(adc, sse);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(irq);
 
   tiva_adc_sse_clear_int(adc, sse);
@@ -788,7 +790,7 @@ void tiva_adc_sse_int_enable(uint8_t adc, uint8_t sse, bool state)
     }
 
   up_enable_irq(irq);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

@@ -214,7 +214,7 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
     {
       /* Get the previously attached handler as the return value */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       oldhandler = g_cnisrs[cn];
 
       /* Are we attaching or detaching? */
@@ -251,7 +251,7 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
       /* Set the new handler (perhaps NULLifying the current handler) */
 
       g_cnisrs[cn] = handler;
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return oldhandler;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17/lpc17_irq.c
  *
- *   Copyright (C) 2010-2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -127,7 +127,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define lpc17_dumpnvic(msg, irq)

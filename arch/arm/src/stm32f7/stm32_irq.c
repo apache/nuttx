@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_irq.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -164,7 +164,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
 #if NR_INTERRUPTS > 111
 #  warning Missing logic
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define stm32_dumpnvic(msg, irq)

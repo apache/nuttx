@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -275,7 +276,7 @@ int up_aesreset(void)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   regval = getreg32(STM32_RCC_AHBRSTR);
   regval |= RCC_AHBRSTR_AESRST;
@@ -283,7 +284,7 @@ int up_aesreset(void)
   regval &= ~RCC_AHBRSTR_AESRST;
   putreg32(regval, STM32_RCC_AHBRSTR);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return OK;
 }

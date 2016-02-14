@@ -699,7 +699,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Disable interrupts to prevent asynchronous accesses */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Are we enabling or disabling? */
 
@@ -721,7 +721,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   /* Write the modified SCR value to hardware */
 
   up_serialout(priv, SH1_SCI_SCR_OFFSET, priv->scr);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -779,7 +779,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
   /* Disable interrupts to prevent asynchronous accesses */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Are we enabling or disabling? */
 
@@ -816,7 +816,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   /* Write the modified SCR value to hardware */
 
   up_serialout(priv, SH1_SCI_SCR_OFFSET, priv->scr);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

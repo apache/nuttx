@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -138,10 +139,6 @@ static struct avr_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -475,7 +472,7 @@ FAR struct spi_dev_s *avr_spibus_initialize(int port)
 
   /* Make sure that clocks are provided to the SPI module */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   power_spi_enable();
 
   /* Set MOSI and SCK as outputs, all others are inputs (default on reset):
@@ -519,7 +516,7 @@ FAR struct spi_dev_s *avr_spibus_initialize(int port)
 
   sem_init(&priv->exclsem, 0, 1);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return &priv->spidev;
 }
 #endif /* CONFIG_AVR_SPI */

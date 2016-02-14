@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_irq.c
  *
- *   Copyright (C) 2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -152,7 +152,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 #if SAM_IRQ_NEXTINT > 79
 #  warning Missing logic
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define sam_dumpnvic(msg, irq)

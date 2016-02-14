@@ -770,7 +770,7 @@ static void usart0_txint(struct uart_dev_s *dev, bool enable)
    *      written.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
@@ -793,7 +793,7 @@ static void usart0_txint(struct uart_dev_s *dev, bool enable)
       UCSR0B &= ~((1 << UDRIE0) | (1 << TXCIE0));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -812,7 +812,7 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
    *      written.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
@@ -835,7 +835,7 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
       UCSR1B &= ~((1 << UDRIE1) | (1 << TXCIE1));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 

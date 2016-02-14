@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_gpioint.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,10 @@
 #include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
 #include <errno.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "chip.h"
@@ -115,7 +117,7 @@ int lpc43_gpioint_grpinitialize(int group, bool anded, bool level)
 
   /* Select the group register base address and disable the group interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (group == 0)
     {
       grpbase = LPC43_GRP0INT_BASE;
@@ -152,7 +154,7 @@ int lpc43_gpioint_grpinitialize(int group, bool anded, bool level)
 
   putreg32(regval, grpbase + LPC43_GRPINT_CTRL_OFFSET);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -280,7 +282,7 @@ int lpc43_gpioint_grpconfig(uint16_t gpiocfg)
 
   /* Select the group register base address */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (GPIO_IS_GROUP0(gpiocfg))
     {
       grpbase = LPC43_GRP0INT_BASE;
@@ -315,7 +317,7 @@ int lpc43_gpioint_grpconfig(uint16_t gpiocfg)
   regval |= bitmask;
   putreg32(regval, regaddr);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

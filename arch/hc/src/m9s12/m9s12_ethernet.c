@@ -588,7 +588,7 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_HCS12_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -604,7 +604,7 @@ static int emac_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->d_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -636,7 +636,7 @@ static int emac_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -649,7 +649,7 @@ static int emac_txavail(struct net_driver_s *dev)
       (void)devif_poll(&priv->d_dev, emac_txpoll);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

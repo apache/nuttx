@@ -2,7 +2,7 @@
  * arch/rgmp/src/x86/com.c
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Yu Qiang <yuq825@gmail.com>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -50,6 +50,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/kmalloc.h>
@@ -494,7 +495,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     irqstate_t flags;
     uint8_t ier;
 
-    flags = irqsave();
+    flags = enter_critical_section();
     ier = inb(base+COM_IER);
     if (enable) {
         ier |= COM_IER_TEI;
@@ -510,7 +511,8 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
         ier &= ~COM_IER_TEI;
         outb(base+COM_IER, ier);
     }
-    irqrestore(flags);
+
+    leave_critical_section(flags);
 }
 
 /****************************************************************************

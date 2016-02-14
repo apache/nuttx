@@ -269,14 +269,14 @@ static inline uint8_t z8_getuart(FAR struct z8_uart_s *priv, uint8_t offset)
 static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t          flags = enter_critical_section();
   uint8_t             state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
                               priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
 
   z8_txint(dev, false);
   z8_rxint(dev, false);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return state;
 }
 
@@ -286,12 +286,12 @@ static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 
 static void z8_restoreuartirq(FAR struct uart_dev_s *dev, uint8_t state)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
   z8_txint(dev, (state & STATE_TXENABLED) ? true : false);
   z8_rxint(dev, (state & STATE_RXENABLED) ? true : false);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -616,7 +616,7 @@ static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
 static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t          flags = enter_critical_section();
 
   if (enable)
     {
@@ -630,7 +630,7 @@ static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
     }
 
   priv->rxenabled = enable;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -672,7 +672,7 @@ static void z8_send(FAR struct uart_dev_s *dev, int ch)
 static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t          flags = enter_critical_section();
 
   if (enable)
     {
@@ -686,7 +686,7 @@ static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
     }
 
   priv->txenabled = enable;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

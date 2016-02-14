@@ -54,7 +54,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -455,7 +455,7 @@ static void kinetis_configwaitints(struct kinetis_dev_s *priv, uint32_t waitints
    * operation.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitints   = waitints;
@@ -464,7 +464,7 @@ static void kinetis_configwaitints(struct kinetis_dev_s *priv, uint32_t waitints
 #endif
   putreg32(priv->xfrints | priv->waitints | SDHC_INT_CINT,
            KINETIS_SDHC_IRQSIGEN);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -485,11 +485,11 @@ static void kinetis_configwaitints(struct kinetis_dev_s *priv, uint32_t waitints
 static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints)
 {
   irqstate_t flags;
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->xfrints = xfrints;
   putreg32(priv->xfrints | priv->waitints | SDHC_INT_CINT,
            KINETIS_SDHC_IRQSIGEN);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2881,7 +2881,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
@@ -2901,7 +2901,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       kinetis_callback(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2927,7 +2927,7 @@ void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (wrprotect)
     {
       priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
@@ -2938,6 +2938,6 @@ void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
     }
 
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_KINETIS_SDHC */

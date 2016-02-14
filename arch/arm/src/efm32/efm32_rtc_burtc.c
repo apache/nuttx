@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include <arch/board/board.h>
@@ -333,7 +334,7 @@ static uint64_t efm32_get_burtc_tick(void)
   uint64_t val;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   do
     {
@@ -353,7 +354,7 @@ static uint64_t efm32_get_burtc_tick(void)
 
   while (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   val = (uint64_t)cnt_carry*__CNT_TOP + cnt + cnt_zero;
 
@@ -477,7 +478,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   uint64_t val;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   cnt_reg  = getreg32(EFM32_BURTC_CNT);
 
@@ -504,7 +505,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   putreg32(cnt_carry, __CNT_CARRY_REG);
   putreg32(cnt      , __CNT_ZERO_REG);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -552,12 +553,12 @@ int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       /* The set the alarm */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       stm32_rtc_beginwr();
       putreg16(regvals.cnth, STM32_RTC_ALRH);
       putreg16(regvals.cntl, STM32_RTC_ALRL);
       stm32_rtc_endwr();
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       ret = OK;
     }
@@ -595,12 +596,12 @@ int efm32_rtc_cancelalarm(void)
 
       /* Unset the alarm */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       stm32_rtc_beginwr();
       putreg16(0xffff, STM32_RTC_ALRH);
       putreg16(0xffff, STM32_RTC_ALRL);
       stm32_rtc_endwr();
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       ret = OK;
     }

@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/sama5d2x_pio.c
  * General Purpose Input/Output (PIO) logic for the SAMA5D2x
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -431,7 +432,7 @@ int sam_configpio(pio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable writing to PIO registers.
    *
@@ -515,7 +516,7 @@ int sam_configpio(pio_pinset_t cfgset)
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPITEN | PIO_WPMR_WPKEY, SAM_PIO_WPMR);
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPITEN | PIO_WPMR_WPKEY, SAM_SPIO_WPMR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return ret;
 }
@@ -625,7 +626,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the PIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if (secure)
     {
@@ -657,7 +658,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
             getreg32(SAM_PIO_WPMR), getreg32(SAM_PIO_WPSR));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

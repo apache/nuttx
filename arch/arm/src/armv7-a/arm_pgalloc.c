@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7/arm_pgalloc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
@@ -89,7 +90,7 @@ static uintptr_t alloc_pgtable(void)
     {
       DEBUGASSERT(MM_ISALIGNED(paddr));
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
       /* Get the virtual address corresponding to the physical page address */
@@ -119,7 +120,7 @@ static uintptr_t alloc_pgtable(void)
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return paddr;
@@ -258,7 +259,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
           return 0;
         }
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
       /* Get the virtual address corresponding to the physical page address */
@@ -282,7 +283,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
           mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-          irqrestore(flags);
+          leave_critical_section(flags);
           return 0;
         }
 
@@ -311,7 +312,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return brkaddr;

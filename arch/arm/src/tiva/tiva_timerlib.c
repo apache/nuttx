@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_timerlib.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -474,12 +473,12 @@ static void tiva_modifyreg(struct tiva_gptmstate_s *priv, unsigned int offset,
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
-  regval = tiva_getreg(priv, offset);
+  flags   = enter_critical_section();
+  regval  = tiva_getreg(priv, offset);
   regval &= ~clrbits;
   regval |= setbits;
   tiva_putreg(priv, offset, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   uintptr_t regaddr = priv->attr->base + offset;
   modifyreg32(regaddr, clrbits, setbits);
@@ -2221,11 +2220,11 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
 
       do
         {
-          flags = irqsave();
+          flags  = enter_critical_section();
           checkv = getreg32(prescr);
           timerv = getreg32(timerr);
           prescv = getreg32(prescr);
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
       while (checkv != prescv);
 
@@ -2244,11 +2243,11 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
 
       do
         {
-          flags = irqsave();
+          flags  = enter_critical_section();
           checkv = getreg32(timerr);
           prescv = getreg32(prescr);
           timerv = getreg32(timerr);
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
       while (checkv != timerv);
 
@@ -2348,7 +2347,7 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 
   /* Make the following atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set the new timeout interval */
 
@@ -2374,7 +2373,7 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
       putreg32(priv->imr, imrr);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
@@ -2486,7 +2485,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 
   /* Make the following atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set the new timeout interval */
 
@@ -2521,7 +2520,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
       putreg32(priv->imr, imrr);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
@@ -2578,7 +2577,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
    * to do this is a critical section.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the time remaining until the timer expires (in clock ticks).
    * Since we have selected a count-up timer timer and the interval will
@@ -2641,7 +2640,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return remaining;
 }
 #endif /* CONFIG_TIVA_TIMER32_PERIODIC */
@@ -2701,7 +2700,7 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
 
   base = priv->attr->base;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set the match register to the current value of the timer counter plus
    * the provided relative delay value.
@@ -2726,7 +2725,7 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
   /* Enable interrupts as necessary */
 
   putreg32(priv->imr, base + TIVA_TIMER_IMR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
@@ -2805,7 +2804,7 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
    */
 
   base    = priv->attr->base;
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set the match register to the current value of the timer counter plus
    * the provided relative match value.
@@ -2830,7 +2829,7 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
   /* Enable interrupts as necessary */
 
   putreg32(priv->imr, base + TIVA_TIMER_IMR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
@@ -2984,7 +2983,7 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
    * minimum.
    */
 
-  flags = irqsave();
+  flags  = enter_critical_section();
   timerv = getreg32(timerr) & 0xffff;
   prescv = getreg32(prescr) & 0xff;
 
@@ -3032,7 +3031,7 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   /* Enable interrupts as necessary */
 
   putreg32(priv->imr, imr);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */

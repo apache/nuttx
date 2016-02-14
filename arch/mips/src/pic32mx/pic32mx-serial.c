@@ -317,10 +317,10 @@ static void up_restoreuartint(struct uart_dev_s *dev, uint8_t im)
 
   /* Re-enable/re-disable interrupts corresponding to the state of bits in im */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_rxint(dev, RX_ENABLED(im));
   up_txint(dev, TX_ENABLED(im));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -332,13 +332,13 @@ static void up_disableuartint(struct uart_dev_s *dev, uint8_t *im)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (im)
    {
      *im = priv->im;
    }
   up_restoreuartint(dev, 0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -691,7 +691,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   irqstate_t flags;
   uint8_t im;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   im = priv->im;
   if (enable)
     {
@@ -716,7 +716,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
       DISABLE_RX(im);
     }
   priv->im = im;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -764,7 +764,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   irqstate_t flags;
   uint8_t im;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   im = priv->im;
   if (enable)
     {
@@ -790,7 +790,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     }
 
   priv->im = im;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

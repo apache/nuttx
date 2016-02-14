@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_dmac.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -239,7 +238,7 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
 
   /* Disable the DMA channel */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   putreg8(dmach->dc_chan, SAM_DMAC_CHID);
   putreg8(0, SAM_DMAC_CHCTRLA);
 
@@ -250,7 +249,7 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
   /* Disable all channel interrupts */
 
   putreg8(1 << dmach->dc_chan, SAM_DMAC_CHINTENCLR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Free the DMA descriptor list */
 
@@ -871,7 +870,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
           /* Disable the DMA channel */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           putreg8(chndx, SAM_DMAC_CHID);
           putreg8(0, SAM_DMAC_CHCTRLA);
 
@@ -882,7 +881,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
           /* Disable all channel interrupts */
 
           putreg8(1 << chndx, SAM_DMAC_CHINTENCLR);
-          irqrestore(flags);
+          leave_critical_section(flags);
           break;
         }
     }
@@ -1135,7 +1134,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
       /* Clear any pending interrupts from any previous DMAC transfer. */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       putreg8(dmach->dc_chan, SAM_DMAC_CHID);
       putreg8(0, SAM_DMAC_CHCTRLA);
 
@@ -1219,7 +1218,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       /* Enable DMA channel interrupts */
 
       putreg8(DMAC_INT_TERR | DMAC_INT_TCMPL, SAM_DMAC_CHINTENSET);
-      irqrestore(flags);
+      leave_critical_section(flags);
       ret = OK;
     }
 
@@ -1244,9 +1243,9 @@ void sam_dmastop(DMA_HANDLE handle)
   dmavdbg("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_dmaterminate(dmach, -EINTR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1269,7 +1268,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 
   /* Sample DMAC registers. */
 
-  flags            = irqsave();
+  flags            = enter_critical_section();
   regs->ctrl       = getreg16(SAM_DMAC_CTRL);       /* Control Register */
   regs->crcctrl    = getreg16(SAM_DMAC_CRCCTRL);    /* CRC Control Register */
   regs->crcdatain  = getreg32(SAM_DMAC_CRCDATAIN);  /* CRC Data Input Register */

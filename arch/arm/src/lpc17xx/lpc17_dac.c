@@ -7,7 +7,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
 
@@ -117,7 +118,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_DAC_MASK;
@@ -128,7 +129,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
 
   lpc17_configgpio(GPIO_AOUT);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /* Configure the DAC. This method is called the first time that the DAC

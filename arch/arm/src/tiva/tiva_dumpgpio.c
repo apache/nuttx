@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_dumpgpio.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,16 +43,13 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
 
 #include "chip.h"
 #include "tiva_gpio.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -157,7 +154,7 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
 #ifdef TIVA_SYSCON_RCGCGPIO
   rcgcgpio = getreg32(TIVA_SYSCON_RCGCGPIO);
   enabled  = ((rcgcgpio & SYSCON_RCGCGPIO(port)) != 0);
@@ -193,7 +190,7 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
             getreg32(base + TIVA_GPIO_SLR_OFFSET));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif /* CONFIG_DEBUG */
 
   return OK;

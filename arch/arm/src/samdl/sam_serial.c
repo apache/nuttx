@@ -896,7 +896,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX holding register register
@@ -921,7 +921,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
       sam_serialout8(priv, SAM_USART_INTENCLR_OFFSET, USART_INT_DRE);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1038,7 +1038,7 @@ int up_putc(int ch)
    * interrupts from firing in the serial driver code.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check for LF */
 
@@ -1050,7 +1050,7 @@ int up_putc(int ch)
     }
 
   sam_lowputc(ch);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
   return ch;
 }

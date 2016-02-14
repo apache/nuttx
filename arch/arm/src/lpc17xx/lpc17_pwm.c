@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 #include <arch/board/board.h>
@@ -305,7 +306,7 @@ static int pwm_timer(FAR struct lpc17_pwmtimer_s *priv,
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   putreg32(info->frequency, LPC17_PWM1_MR0);         /* Set PWMMR0 = number of counts */
   putreg32(info->duty, LPC17_PWM1_MR1);              /* Set PWM cycle */
@@ -314,7 +315,7 @@ static int pwm_timer(FAR struct lpc17_pwmtimer_s *priv,
   putreg32(PWMENA1, LPC17_PWM1_PCR);                 /* Enable PWM outputs */
   putreg32(TCR_CNT_EN | TCR_PWM_EN, LPC17_PWM1_TCR); /* Enable PWM Timer */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   pwm_dumpregs(priv, "After starting");
   return OK;
 }
@@ -441,7 +442,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Power on the pwm peripheral */
 
@@ -464,7 +465,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   putreg32(1, LPC17_PWM1_PR);        /* Prescaler count frequency: Fpclk/1 */
   putreg32(1 << 1, LPC17_PWM1_MCR);  /* Reset on match register MR0 */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   pwm_dumpgpio(priv->pincfg, "PWM setup");
   return OK;
 }
@@ -552,7 +553,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
   */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable further interrupts and stop the timer */
 
@@ -570,7 +571,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * into a state where pwm_start() can be called.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   pwmvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   pwm_dumpregs(priv, "After stop");

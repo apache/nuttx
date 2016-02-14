@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "sam_gclk.h"
@@ -183,7 +183,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   regaddr  = SAM_GCLK_GENCTRL(config->gclk);
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
   regval   = getreg32(regaddr);
   regval  &= GCLK_GENCTRL_GENEN;
   genctrl |= regval;
@@ -195,19 +195,19 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
   /* Wait for synchronization */
 
   sam_gclck_waitsyncbusy(config->gclk);
-  irqrestore(flags);
+  leave_critical_section(flags);
   sam_gclck_waitsyncbusy(config->gclk);
 
   /* Enable the clock generator */
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
   genctrl |= GCLK_GENCTRL_GENEN;
   putreg32(genctrl, regaddr);
 
   /* Wait for synchronization */
 
   sam_gclck_waitsyncbusy(config->gclk);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -237,7 +237,7 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen)
 
   /* Disable generic clock channel */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_gclk_chan_disable(channel);
 
   /* Configure the peripheral channel */
@@ -253,7 +253,7 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen)
   /* Wait for clock synchronization */
 
   while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) == 0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -282,7 +282,7 @@ void sam_gclk_chan_disable(uint8_t channel)
 
   /* Disable generic clock channel */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(regaddr);
   regval &= ~GCLK_PCHCTRL_CHEN;
   putreg32(regval, regaddr);
@@ -290,7 +290,7 @@ void sam_gclk_chan_disable(uint8_t channel)
   /* Wait for clock synchronization */
 
   while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) != 0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */

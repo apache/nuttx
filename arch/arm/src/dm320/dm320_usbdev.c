@@ -53,7 +53,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -895,9 +895,9 @@ static void dm320_reqcomplete(struct dm320_ep_s *privep, int16_t result)
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   privreq = dm320_rqdequeue(privep);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -1954,11 +1954,11 @@ static int dm320_epdisable(FAR struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity and reset the endpoint */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   dm320_cancelrequests(privep);
   dm320_epreset(privep->epphy);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2093,7 +2093,7 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = irqsave();
+  flags       = enter_critical_section();
 
   /* Check for NULL packet */
 
@@ -2152,7 +2152,7 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2181,9 +2181,9 @@ static int dm320_epcancel(struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
   usbtrace(TRACE_EPCANCEL, privep->epphy);
   priv = privep->dev;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   dm320_cancelrequests(privep);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2305,10 +2305,10 @@ static int dm320_getframe(struct usbdev_s *dev)
    * because the operation is not atomic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ret = dm320_getreg8(DM320_USB_FRAME2) << 8;
   ret |= dm320_getreg8(DM320_USB_FRAME1);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2325,9 +2325,9 @@ static int dm320_wakeup(struct usbdev_s *dev)
   irqstate_t flags;
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   dm320_putreg8(USB_POWER_RESUME, DM320_USB_POWER);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2372,7 +2372,7 @@ static int dm320_pullup(struct usbdev_s *dev, bool enable)
 
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       GIO_SET_OUTPUT(CONFIG_DM320_GIO_USBDPPULLUP); /* Set D+ pullup */
@@ -2382,7 +2382,7 @@ static int dm320_pullup(struct usbdev_s *dev, bool enable)
       GIO_CLEAR_OUTPUT(CONFIG_DM320_GIO_USBDPPULLUP); /* Clear D+ pullup */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

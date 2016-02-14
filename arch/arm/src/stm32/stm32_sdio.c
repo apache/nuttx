@@ -54,7 +54,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -629,7 +629,7 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   /* Save all of the data and set the new interrupt mask in one, atomic
    * operation.
    */
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
@@ -662,7 +662,7 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   priv->xfrflags   = 0;
 #endif
   putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -683,10 +683,10 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask)
 {
   irqstate_t flags;
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->xfrmask = xfrmask;
   putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1544,7 +1544,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
   /* Disable clocking */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   putreg32(0, SDIO_CLKCR_CLKEN_BB);
   stm32_setpwrctrl(SDIO_POWER_PWRCTRL_OFF);
 
@@ -1580,7 +1580,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
   stm32_setclkcr(STM32_CLCKCR_INIT | SDIO_CLKCR_CLKEN);
   stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   fvdbg("CLCKR: %08x POWER: %08x\n",
         getreg32(STM32_SDIO_CLKCR), getreg32(STM32_SDIO_POWER));
@@ -2356,7 +2356,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
    * be non-zero (and, hopefully, the semaphore count will also be non-zero.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGASSERT(priv->waitevents != 0 || priv->wkupevent != 0);
 
   /* Check if the timeout event is specified in the event set */
@@ -2439,7 +2439,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 #endif
 
 errout:
-  irqrestore(flags);
+  leave_critical_section(flags);
   stm32_dumpsamples(priv);
   return wkupevent;
 }
@@ -2912,7 +2912,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
@@ -2923,7 +2923,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
@@ -2958,7 +2958,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (wrprotect)
     {
       priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
@@ -2968,6 +2968,6 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_STM32_SDIO */

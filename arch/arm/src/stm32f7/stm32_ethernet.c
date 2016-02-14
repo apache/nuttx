@@ -2620,7 +2620,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(STM32_IRQ_ETH);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -2638,7 +2638,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2748,12 +2748,12 @@ static int stm32_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Perform the out-of-cycle poll now */
 
   stm32_txavail_process(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   return OK;

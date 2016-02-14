@@ -755,7 +755,7 @@ static inline void a1x_uart0config(void)
 
   /* Step 1: Enable power to UART0 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART0 */
@@ -765,7 +765,7 @@ static inline void a1x_uart0config(void)
 
   a1x_pio_config(PIO_UART0_TX);
   a1x_pio_config(PIO_UART0_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -776,7 +776,7 @@ static inline void a1x_uart1config(void)
 
   /* Step 1: Enable power to UART1 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART1 */
@@ -786,7 +786,7 @@ static inline void a1x_uart1config(void)
 
   a1x_pio_config(PIO_UART1_TX);
   a1x_pio_config(PIO_UART1_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -797,7 +797,7 @@ static inline void a1x_uart2config(void)
 
   /* Step 1: Enable power to UART2 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking on UART2 */
@@ -807,7 +807,7 @@ static inline void a1x_uart2config(void)
 
   a1x_pio_config(PIO_UART2_TX);
   a1x_pio_config(PIO_UART2_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -818,7 +818,7 @@ static inline void a1x_uart3config(void)
 
   /* Step 1: Enable power to UART3 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART3 */
@@ -828,7 +828,7 @@ static inline void a1x_uart3config(void)
 
   a1x_pio_config(PIO_UART3_TX);
   a1x_pio_config(PIO_UART3_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -839,7 +839,7 @@ static inline void a1x_uart4config(void)
 
   /* Step 1: Enable power to UART4 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART4 */
@@ -849,7 +849,7 @@ static inline void a1x_uart4config(void)
 
   a1x_pio_config(PIO_UART4_TX);
   a1x_pio_config(PIO_UART4_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -860,7 +860,7 @@ static inline void a1x_uart5config(void)
 
   /* Step 1: Enable power to UART5 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART5 */
@@ -870,7 +870,7 @@ static inline void a1x_uart5config(void)
 
   a1x_pio_config(PIO_UART5_TX);
   a1x_pio_config(PIO_UART5_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -881,7 +881,7 @@ static inline void a1x_uart6config(void)
 
   /* Step 1: Enable power to UART6 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART6 */
@@ -891,7 +891,7 @@ static inline void a1x_uart6config(void)
 
   a1x_pio_config(PIO_UART6_TX);
   a1x_pio_config(PIO_UART6_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -902,7 +902,7 @@ static inline void a1x_uart7config(void)
 
   /* Step 1: Enable power to UART7 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART7 */
@@ -912,7 +912,7 @@ static inline void a1x_uart7config(void)
 
   a1x_pio_config(PIO_UART7_TX);
   a1x_pio_config(PIO_UART7_RX);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -1292,18 +1292,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         up_enablebreaks(priv, true);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         up_enablebreaks(priv, false);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
@@ -1466,7 +1466,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1486,7 +1486,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       up_serialout(priv, A1X_UART_IER_OFFSET, priv->ier);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

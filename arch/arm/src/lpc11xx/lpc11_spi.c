@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_spi.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -562,7 +563,7 @@ FAR struct spi_dev_s *lpc11_spibus_initialize(int port)
    * #define GPIO_SPI_SCK GPIO_SPI_SCK_1
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc11_configgpio(GPIO_SPI_SCK);
   lpc11_configgpio(GPIO_SPI_MISO);
   lpc11_configgpio(GPIO_SPI_MOSI);
@@ -579,7 +580,7 @@ FAR struct spi_dev_s *lpc11_spibus_initialize(int port)
   regval  = getreg32(LPC11_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCSPI;
   putreg32(regval, LPC11_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Configure 8-bit SPI mode and master mode */
 

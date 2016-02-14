@@ -53,6 +53,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
@@ -1493,7 +1494,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
   /* Enable clocking to the SERCOM module in PM */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sercom_enable(priv->sercom);
 
   /* Configure the GCLKs for the SERCOM module */
@@ -1579,7 +1580,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 #endif
 
   spi_dumpregs(priv, "After initialization");
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (struct spi_dev_s *)priv;
 }
 

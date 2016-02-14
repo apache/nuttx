@@ -1168,7 +1168,7 @@ static int stm32_ltdcirq(int irq, void *context)
  * Description:
  *   Helper waits until the ltdc irq occurs. In the current design That means
  *   that a register reload was been completed.
- *   Note! The caller must use this function within irqsave state.
+ *   Note! The caller must use this function within a critical section.
  *
  * Return:
  *   OK - On success otherwise ERROR
@@ -1182,7 +1182,7 @@ static int stm32_ltdc_waitforirq(void)
 
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Only waits if last enabled interrupt is currently not handled */
 
@@ -1204,7 +1204,7 @@ static int stm32_ltdc_waitforirq(void)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1238,14 +1238,14 @@ static int stm32_ltdc_reload(uint8_t value, bool waitvblank)
        * the application causes shadow register reload.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       ASSERT(priv->handled == true);
 
       /* Reset the handled flag */
 
       priv->handled = false;
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Reloads the shadow register.
@@ -1873,7 +1873,7 @@ static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer,
 
   stm32_ltdc_reload(LTDC_SRCR_IMR, false);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Update the clut registers */
 
@@ -1906,7 +1906,7 @@ static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer,
       putreg32(regval, stm32_clutwr_layer_t[layer->state.lid]);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Enable clut */
 

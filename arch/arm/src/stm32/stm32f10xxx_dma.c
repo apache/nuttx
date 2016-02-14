@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f10xxx_dma.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -714,13 +713,13 @@ void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   irqstate_t flags;
 
-  flags       = irqsave();
+  flags       = enter_critical_section();
   regs->isr   = dmabase_getreg(dmach, STM32_DMA_ISR_OFFSET);
   regs->ccr   = dmachan_getreg(dmach, STM32_DMACHAN_CCR_OFFSET);
   regs->cndtr = dmachan_getreg(dmach, STM32_DMACHAN_CNDTR_OFFSET);
   regs->cpar  = dmachan_getreg(dmach, STM32_DMACHAN_CPAR_OFFSET);
   regs->cmar  = dmachan_getreg(dmach, STM32_DMACHAN_CMAR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 

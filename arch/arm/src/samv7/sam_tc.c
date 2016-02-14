@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/SAMV7/sam_tc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015=2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -58,6 +58,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -1176,7 +1177,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
    * because there is no semaphore protection.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (!tc->initialized)
     {
       /* Initialize the timer counter data structure. */
@@ -1213,7 +1214,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   /* Get exclusive access to the timer/count data structure */
 
   sam_takesem(tc);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Is the requested channel already in-use? */
 
@@ -1468,7 +1469,7 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 
   /* Remember the old interrupt handler and set the new handler */
 
-  flags         = irqsave();
+  flags         = enter_critical_section();
   oldhandler    = chan->handler;
   chan->handler = handler;
 
@@ -1488,7 +1489,7 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 
   sam_chan_putreg(chan, SAM_TC_IDR_OFFSET, TC_INT_ALL & ~mask);
   sam_chan_putreg(chan, SAM_TC_IER_OFFSET, TC_INT_ALL & mask);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return oldhandler;
 }

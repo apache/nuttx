@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_dac.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Ported from from the LPC17 version:
@@ -58,6 +58,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
 
@@ -122,7 +123,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   regval  = getreg32(LPC43_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_DAC_MASK;
@@ -133,7 +134,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
 
   lpc43_configgpio(GPIO_AOUT);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /* Configure the DAC. This method is called the first time that the DAC

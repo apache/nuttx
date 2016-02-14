@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_port.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -56,14 +57,6 @@
 
 #include "chip.h"
 #include "sam_port.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -447,7 +440,7 @@ int sam_configport(port_pinset_t pinset)
 
   /* Make sure that all operations on the port are atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Put the PORT in the known, reset state.  */
 
@@ -477,7 +470,7 @@ int sam_configport(port_pinset_t pinset)
         break;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -544,7 +537,7 @@ int sam_dumpport(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the PORT registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("PORT%c pin: %d pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pin, pinset, base, msg);
   lldbg("  DIR: %08x OUT: %08x IN: %08x\n",
@@ -560,7 +553,7 @@ int sam_dumpport(uint32_t pinset, const char *msg)
         base + SAM_PORT_PINCFG_OFFSET(pin),
         getreg8(base + SAM_PORT_PINCFG_OFFSET(pin)));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

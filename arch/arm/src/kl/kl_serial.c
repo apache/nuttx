@@ -342,12 +342,12 @@ static void up_setuartint(struct up_dev_s *priv)
 
   /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
   regval   = up_serialin(priv, KL_UART_C2_OFFSET);
   regval  &= ~UART_C2_ALLINTS;
   regval  |= priv->ie;
   up_serialout(priv, KL_UART_C2_OFFSET, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -360,10 +360,10 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
 
   /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
   priv->ie = ie & UART_C2_ALLINTS;
   up_setuartint(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -374,14 +374,14 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (ie)
     {
       *ie = priv->ie;
     }
 
   up_restoreuartint(priv, 0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -697,7 +697,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register
@@ -715,7 +715,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
       up_setuartint(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -767,7 +767,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Enable the TX interrupt */
@@ -791,7 +791,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       up_setuartint(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

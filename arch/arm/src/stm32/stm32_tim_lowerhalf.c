@@ -47,6 +47,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/timers/timer.h>
 
 #include <arch/board/board.h>
@@ -593,7 +594,7 @@ static tccb_t stm32_sethandler(FAR struct timer_lowerhalf_s *lower,
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
 
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
   /* Get the old handler return value */
 
@@ -614,7 +615,7 @@ static tccb_t stm32_sethandler(FAR struct timer_lowerhalf_s *lower,
       STM32_TIM_SETISR(priv->tim, 0, 0);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 

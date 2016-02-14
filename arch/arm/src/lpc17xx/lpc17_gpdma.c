@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpdma.c
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_internal.h"
@@ -136,11 +137,11 @@ static void lpc17_dmainprogress(struct lpc17_dmach_s *dmach)
 
   /* Increment the DMA in progress counter */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGASSERT(!dmach->inprogress && g_dma_inprogress < LPC17_NDMACH);
   g_dma_inprogress++;
   dmach->inprogress = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -167,7 +168,7 @@ static void lpc17_dmadone(struct lpc17_dmach_s *dmach)
 
   /* Increment the DMA in progress counter */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (dmach->inprogress)
     {
       DEBUGASSERT(g_dma_inprogress > 0);
@@ -175,7 +176,7 @@ static void lpc17_dmadone(struct lpc17_dmach_s *dmach)
       g_dma_inprogress--;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

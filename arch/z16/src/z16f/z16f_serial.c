@@ -287,14 +287,14 @@ static uart_dev_t g_uart1port =
 static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t          flags = enter_critical_section();
   uint8_t             state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
                               priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
 
   z16f_txint(dev, false);
   z16f_rxint(dev, false);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return state;
 }
 
@@ -304,12 +304,12 @@ static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 
 static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
   z16f_txint(dev, (state & STATE_TXENABLED) ? true : false);
   z16f_rxint(dev, (state & STATE_RXENABLED) ? true : false);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -613,7 +613,7 @@ static int z16f_receive(struct uart_dev_s *dev, uint32_t *status)
 static void z16f_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t          flags = enter_critical_section();
 
   if (enable)
     {
@@ -627,7 +627,7 @@ static void z16f_rxint(struct uart_dev_s *dev, bool enable)
     }
 
   priv->rxenabled = enable;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -669,7 +669,7 @@ static void z16f_send(struct uart_dev_s *dev, int ch)
 static void z16f_txint(struct uart_dev_s *dev, bool enable)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t          flags = enter_critical_section();
 
   if (enable)
     {
@@ -689,7 +689,7 @@ static void z16f_txint(struct uart_dev_s *dev, bool enable)
     }
 
   priv->txenabled = enable;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

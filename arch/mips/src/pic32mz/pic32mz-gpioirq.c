@@ -414,7 +414,7 @@ xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler)
         {
           /* Get the previously attached handler as the return value */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           oldhandler = handlers->handler[pin];
 
           /* Are we attaching or detaching? */
@@ -468,7 +468,7 @@ xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler)
           /* Set the new handler (perhaps NULLifying the current handler) */
 
           handlers->handler[pin] = handler;
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
     }
 

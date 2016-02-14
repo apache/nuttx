@@ -47,7 +47,7 @@
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -143,7 +143,7 @@ void tms570_gioirq(gio_pinset_t pinset)
 
   if ((pinset & GIO_MODE_MASK) == GIO_INPUT && port < TMS570_NIRQPORTS)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
       switch (pinset & GIO_INT_MASK)
       {
         case GIO_INT_NONE:
@@ -193,7 +193,7 @@ void tms570_gioirq(gio_pinset_t pinset)
           break;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 

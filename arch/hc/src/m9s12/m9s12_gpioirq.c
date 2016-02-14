@@ -45,7 +45,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "m9s12.h"
@@ -259,11 +258,11 @@ void hcs12_gpioirqenable(int irq)
 
   if (hcs12_mapirq(irq, &regaddr, &pin) == OK)
     {
-       irqstate_t flags  = irqsave();
+       irqstate_t flags  = enter_critical_section();
        uint8_t    regval = getreg8(regaddr);
        regval           |= (1 << pin);
        putreg8(regval, regaddr);
-       irqrestore(flags);
+       leave_critical_section(flags);
     }
 }
 #endif /* CONFIG_GPIO_IRQ */
@@ -284,11 +283,11 @@ void hcs12_gpioirqdisable(int irq)
 
   if (hcs12_mapirq(irq, &regaddr, &pin) == OK)
     {
-       irqstate_t flags  = irqsave();
+       irqstate_t flags  = enter_critical_section();
        uint8_t    regval = getreg8(regaddr);
        regval           &= ~(1 << pin);
        putreg8(regval, regaddr);
-       irqrestore(flags);
+       leave_critical_section(flags);
     }
 }
 #endif /* CONFIG_GPIO_IRQ */

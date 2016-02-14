@@ -576,10 +576,10 @@ static void efm32_restoreuartint(struct efm32_usart_s *priv, uint32_t ien)
 
   /* Re-enable/re-disable interrupts corresponding to the state of bits in ien */
 
-  flags     = irqsave();
+  flags     = enter_critical_section();
   priv->ien = ien;
   efm32_setuartint(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -591,14 +591,14 @@ static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (ien)
     {
       *ien = priv->ien;
     }
 
   efm32_restoreuartint(priv, 0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -1086,7 +1086,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
   struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
@@ -1104,7 +1104,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
       efm32_setuartint(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1151,7 +1151,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
   struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Enable the TX interrupt */
@@ -1175,7 +1175,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
       efm32_setuartint(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

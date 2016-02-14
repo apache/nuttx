@@ -44,7 +44,7 @@
 
 #include <nuttx/pgalloc.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "cache.h"
 #include "mmu.h"
@@ -133,7 +133,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
       DEBUGASSERT(MM_ISALIGNED(paddr));
       list[i] = (FAR uintptr_t *)paddr;
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
       /* Get the virtual address corresponding to the physical page address */
@@ -163,7 +163,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
               mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-              irqrestore(flags);
+              leave_critical_section(flags);
               return -ENOMEM;
             }
 
@@ -187,7 +187,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return npages;
@@ -226,7 +226,7 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
       paddr = (uintptr_t)list[i];
       if (paddr != 0)
         {
-          flags = irqsave();
+          flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
           /* Get the virtual address corresponding to the physical page address */
@@ -265,7 +265,7 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
 
           mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           /* And free the L2 page table itself */
 

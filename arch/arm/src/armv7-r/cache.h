@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
 #include "cp15_cacheops.h"
 #include "l2cc.h"
@@ -103,10 +104,10 @@ static inline void arch_invalidate_dcache(uintptr_t start, uintptr_t end)
 static inline void arch_invalidate_dcache_all(void)
 {
 #ifdef CONFIG_ARCH_L2CACHE
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   cp15_invalidate_dcache_all();
   l2cc_invalidate_all();
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   cp15_invalidate_dcache_all();
 #endif

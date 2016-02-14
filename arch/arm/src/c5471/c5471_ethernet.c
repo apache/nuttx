@@ -1746,7 +1746,7 @@ static int c5471_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(C5471_IRQ_ETHER);
 
   /* Disable interrupts going from EIM Module to Interrupt Module. */
@@ -1770,7 +1770,7 @@ static int c5471_ifdown(struct net_driver_s *dev)
   /* Reset the device */
 
   c5471->c_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1799,7 +1799,7 @@ static int c5471_txavail(struct net_driver_s *dev)
   irqstate_t flags;
 
   ndbg("Polling\n");
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1817,7 +1817,7 @@ static int c5471_txavail(struct net_driver_s *dev)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

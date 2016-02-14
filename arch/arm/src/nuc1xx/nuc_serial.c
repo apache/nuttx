@@ -337,7 +337,7 @@ static uint32_t up_setier(struct nuc_dev_s *priv,
 
   /* Make sure that this is atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the current IER setting */
 
@@ -348,7 +348,7 @@ static uint32_t up_setier(struct nuc_dev_s *priv,
   priv->ier &= ~clrbits;
   priv->ier |= setbits;
   up_serialout(priv, NUC_UART_IER_OFFSET, priv->ier);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Return the value of the IER before modification */
 
@@ -878,7 +878,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Enable receive data, line status and buffer error interrupts */
 
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
       (void)up_setier(priv, 0,
                       (UART_IER_RDA_IEN | UART_IER_RLS_IEN |
                        UART_IER_BUF_ERR_IEN));
@@ -904,7 +904,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
           up_rxto_enable(priv);
         }
 
-    irqrestore(flags);
+    leave_critical_section(flags);
 #endif
     }
   else
@@ -964,7 +964,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Enable the THR empty interrupt */
 
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
       (void)up_setier(priv, 0, UART_IER_THRE_IEN);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -972,7 +972,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
        */
 
       uart_xmitchars(dev);
-      irqrestore(flags);
+      leave_critical_section(flags);
 #endif
     }
   else

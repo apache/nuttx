@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "tiva_enablepwr.h"
@@ -822,7 +822,7 @@ int tiva_configgpio(uint32_t pinset)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable power and clocking for this GPIO peripheral.
    *
@@ -873,7 +873,7 @@ int tiva_configgpio(uint32_t pinset)
     }
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

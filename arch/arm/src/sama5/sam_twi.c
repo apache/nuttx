@@ -59,7 +59,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -877,7 +877,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   twi_startmessage(priv, msgs);
 
   /* And wait for the transfers to complete.  Interrupts will be re-enabled
@@ -890,7 +890,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -1123,7 +1123,7 @@ static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   uint32_t regval;
   uint32_t mck;
 
@@ -1205,7 +1205,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   /* Enable Interrupts */
 
   up_enable_irq(priv->attr->irq);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1292,7 +1292,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   /* Perform one-time TWI initialization */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Allocate a watchdog timer */
 
@@ -1322,7 +1322,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   /* Perform repeatable TWI hardware initialization */
 
   twi_hw_initialize(priv, frequency);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return &priv->dev;
 
 errout_with_wdog:
@@ -1330,7 +1330,7 @@ errout_with_wdog:
   priv->timeout = NULL;
 
 errout_with_irq:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 

@@ -307,7 +307,7 @@ static void tms570_disableallints(struct tms570_dev_s *priv, uint32_t *ints)
 
   /* The following must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (ints)
     {
       /* Return the current enable bitsopop9 */
@@ -318,7 +318,7 @@ static void tms570_disableallints(struct tms570_dev_s *priv, uint32_t *ints)
   /* Disable all interrupts */
 
   tms570_serialout(priv, TMS570_SCI_CLEARINT_OFFSET, SCI_INT_ALLINTS);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -813,7 +813,7 @@ static void tms570_txint(struct uart_dev_s *dev, bool enable)
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX holding register register
@@ -837,7 +837,7 @@ static void tms570_txint(struct uart_dev_s *dev, bool enable)
       tms570_serialout(priv, TMS570_SCI_CLEARINT_OFFSET, SCI_INT_TX);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

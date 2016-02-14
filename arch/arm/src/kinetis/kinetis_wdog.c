@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "kinetis.h"
@@ -80,13 +80,13 @@ static void kinetis_wdunlock(void)
    * to assure that the following steps are atomic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Write 0xC520 followed by 0xD928 to the unlock register */
 
   putreg16(0xc520, KINETIS_WDOG_UNLOCK);
   putreg16(0xd928, KINETIS_WDOG_UNLOCK);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

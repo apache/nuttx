@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_gpio.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,9 @@
 #include <sys/types.h>
 #include <debug.h>
 
-#include "up_arch.h"
+#include <nuttx.h>
 
+#include "up_arch.h"
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
@@ -121,7 +122,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #if defined(CONFIG_STM32_STM32F10XX)
 
@@ -233,7 +234,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 #else
 # error "Unsupported STM32 chip"
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

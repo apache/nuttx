@@ -7,7 +7,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013, 2016 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 
@@ -152,7 +153,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   uint32_t clkdiv;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCADC;
@@ -236,7 +237,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       lpc17_configgpio(GPIO_AD0p7);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -573,7 +574,7 @@ static int adc_interrupt(int irq, void *context)
            LPC17_ADC_CR);
 
 //lpc17_gpiowrite(LPCXPRESSO_GPIO0_21, 0); /* Reset pin P0.21 */
-//irqrestore(saved_state);
+//leave_critical_section(saved_state);
   return OK;
 #endif /* CONFIG_ADC_BURSTMODE */
 }

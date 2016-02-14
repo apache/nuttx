@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/sama5d3x4x_pio.c
  * General Purpose Input/Output (PIO) logic for the SAMA5D3x and SAMA5D4x
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -669,7 +670,7 @@ int sam_configpio(pio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable writing to PIO registers.  The following registers are protected:
    *
@@ -722,7 +723,7 @@ int sam_configpio(pio_pinset_t cfgset)
   /* Disable writing to PIO registers */
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return ret;
 }
@@ -823,7 +824,7 @@ void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
 
   /* The remainder of this operation must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Are we enabling or disabling clocking */
 
@@ -842,7 +843,7 @@ void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
       sam_pio_disableclk(pinset);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /************************************************************************************
@@ -867,7 +868,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the PIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("PIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
 
@@ -904,7 +905,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
   lldbg("   WPMR: %08x   WPSR: %08x\n",
         getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

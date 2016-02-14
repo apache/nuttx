@@ -45,7 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "nvic.h"
 #include "ram_vectors.h"
@@ -112,7 +112,7 @@ static void efm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -145,7 +145,7 @@ static void efm32_dumpnvic(const char *msg, int irq)
 #endif
 #endif
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define efm32_dumpnvic(msg, irq)

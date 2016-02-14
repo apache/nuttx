@@ -524,7 +524,7 @@ static void flexus_disableallints(struct flexus_dev_s *priv, uint32_t *imr)
 
   /* The following must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Return the current interrupt state */
 
@@ -536,7 +536,7 @@ static void flexus_disableallints(struct flexus_dev_s *priv, uint32_t *imr)
   /* Disable all interrupts */
 
   flexus_serialout(priv, SAM_FLEXUS_IDR_OFFSET, FLEXUS_INT_ALLINTS);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1127,7 +1127,7 @@ static void flexus_txint(struct uart_dev_s *dev, bool enable)
   struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX holding register register
@@ -1152,7 +1152,7 @@ static void flexus_txint(struct uart_dev_s *dev, bool enable)
       flexus_serialout(priv, SAM_FLEXUS_IDR_OFFSET, FLEXUS_INT_TXRDY);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

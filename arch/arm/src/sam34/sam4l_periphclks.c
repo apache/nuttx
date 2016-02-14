@@ -41,7 +41,7 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -429,7 +429,7 @@ void sam_modifyperipheral(uintptr_t regaddr, uint32_t clrbits,
 
   /* Make sure that the following operations are atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable/disabling clocking */
 
@@ -440,7 +440,7 @@ void sam_modifyperipheral(uintptr_t regaddr, uint32_t clrbits,
            SAM_PM_UNLOCK);
   putreg32(regval, regaddr);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -459,7 +459,7 @@ void sam_pba_modifydivmask(uint32_t clrbits, uint32_t setbits)
 
   /* Make sure that the following operations are atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Modify the PBA DIVMASK */
 
@@ -470,7 +470,7 @@ void sam_pba_modifydivmask(uint32_t clrbits, uint32_t setbits)
            SAM_PM_UNLOCK);
   putreg32(regval, SAM_PM_PBADIVMASK);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -488,7 +488,7 @@ void sam_pba_enableperipheral(uint32_t bitset)
 
   /* The following operations must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable the APBA bridge if necessary */
 
@@ -497,7 +497,7 @@ void sam_pba_enableperipheral(uint32_t bitset)
       sam_hsb_enableperipheral(PM_HSBMASK_APBA);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Enable the module */
 
@@ -523,7 +523,7 @@ void sam_pba_disableperipheral(uint32_t bitset)
 
   /* Disable the APBA bridge if possible */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if (getreg32(SAM_PM_PBAMASK) == 0)
     {
@@ -544,7 +544,7 @@ void sam_pba_disableperipheral(uint32_t bitset)
       sam_pba_disabledivmask(PM_PBADIVMASK_TIMER_CLOCKS);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -562,7 +562,7 @@ void sam_pbb_enableperipheral(uint32_t bitset)
 
   /* The following operations must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable the APBB bridge if necessary */
 
@@ -571,7 +571,7 @@ void sam_pbb_enableperipheral(uint32_t bitset)
       sam_hsb_enableperipheral(PM_HSBMASK_APBB);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Enable the module */
 
@@ -597,14 +597,14 @@ void sam_pbb_disableperipheral(uint32_t bitset)
 
   /* Disable the APBB bridge if possible */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if (getreg32(SAM_PM_PBBMASK) == 0)
     {
       sam_hsb_disableperipheral(PM_HSBMASK_APBB);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -637,7 +637,7 @@ void sam_usbc_enableclk(void)
 
   /* Enable USBC clocking (possibly along with the PBB peripheral bridge) */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_hsb_enableperipheral(PM_HSBMASK_USBC);
   sam_pbb_enableperipheral(PM_PBBMASK_USBC);
 
@@ -669,7 +669,7 @@ void sam_usbc_enableclk(void)
   regval  = getreg32(SAM_SCIF_GCCTRL7);
   regval |= SCIF_GCCTRL_CEN;
   putreg32(regval, SAM_SCIF_GCCTRL7);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SAM34_USBC */
 

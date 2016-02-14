@@ -2,7 +2,7 @@
  * arch/arm/src/moxart/moxart_irq.c
  * Driver for MoxaRT IRQ controller
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <nuttx/arch.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/uart_16550.h>
@@ -129,7 +130,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          flags = irqsave();
+          flags = enter_critical_section();
 
           /* Update mode register with requested mode */
 
@@ -138,7 +139,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
           vmode = opmode << 2 * bitm_off;
           putreg32(getreg32(CONFIG_UART_MOXA_MODE_REG) | vmode, CONFIG_UART_MOXA_MODE_REG);
 
-          irqrestore(flags);
+          leave_critical_section(flags);
           ret = OK;
           break;
         }
@@ -146,13 +147,13 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
       case MOXA_GET_OP_MODE:
         {
           irqstate_t flags;
-          flags = irqsave();
+          flags = enter_critical_section();
 
           /* Read from mode register */
 
           opmode = (getreg32(CONFIG_UART_MOXA_MODE_REG) >> 2 * bitm_off) & OP_MODE_MASK;
 
-          irqrestore(flags);
+          leave_critical_section(flags);
           *(unsigned long *)arg = opmode;
           ret = OK;
           break;

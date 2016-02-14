@@ -54,7 +54,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -560,7 +560,7 @@ static void lpc17_configwaitints(struct lpc17_dev_s *priv, uint32_t waitmask,
    * operation.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
@@ -568,7 +568,7 @@ static void lpc17_configwaitints(struct lpc17_dev_s *priv, uint32_t waitmask,
   priv->xfrflags   = 0;
 #endif
   putreg32(priv->xfrmask | priv->waitmask, LPC17_SDCARD_MASK0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -589,10 +589,10 @@ static void lpc17_configwaitints(struct lpc17_dev_s *priv, uint32_t waitmask,
 static void lpc17_configxfrints(struct lpc17_dev_s *priv, uint32_t xfrmask)
 {
   irqstate_t flags;
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->xfrmask = xfrmask;
   putreg32(priv->xfrmask | priv->waitmask, LPC17_SDCARD_MASK0);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1436,7 +1436,7 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
 
   /* Disable clocking */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable the SD Interface */
 
@@ -1478,7 +1478,7 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
 
   lpc17_setclock(LPC17_CLCKCR_INIT | SDCARD_CLOCK_CLKEN);
   lpc17_setpwrctrl(SDCARD_PWR_CTRL_ON);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   fvdbg("CLCKR: %08x POWER: %08x\n",
         getreg32(LPC17_SDCARD_CLOCK), getreg32(LPC17_SDCARD_PWR));
@@ -2241,7 +2241,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
    * be non-zero (and, hopefully, the semaphore count will also be non-zero.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGASSERT(priv->waitevents != 0 || priv->wkupevent != 0);
 
   /* Check if the timeout event is specified in the event set */
@@ -2309,7 +2309,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
 #endif
 
 errout:
-  irqrestore(flags);
+  leave_critical_section(flags);
   lpc17_dumpsamples(priv);
   return wkupevent;
 }
@@ -2771,7 +2771,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
@@ -2789,7 +2789,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
     {
       lpc17_callback(priv);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2815,7 +2815,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 
   /* Update card status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (wrprotect)
     {
       priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
@@ -2825,6 +2825,6 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_LPC17_SDCARD */

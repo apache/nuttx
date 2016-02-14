@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/stm32/stm32_spi.c
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -1544,7 +1545,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 {
   FAR struct stm32_spidev_s *priv = NULL;
 
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
 #ifdef CONFIG_STM32_SPI1
   if (bus == 1)
@@ -1695,7 +1696,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
       return NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (FAR struct spi_dev_s *)priv;
 }
 

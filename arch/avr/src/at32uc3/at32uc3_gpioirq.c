@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "irq/irq.h"
@@ -337,7 +337,7 @@ int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr)
        * to the unexpected interrupt handler.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if (newisr == NULL)
         {
            gpio_irqdisable(irq);
@@ -354,7 +354,7 @@ int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr)
       /* Then save the new ISR in the table. */
 
       g_gpiohandler[irq] = newisr;
-      irqrestore(flags);
+      leave_critical_section(flags);
       ret = OK;
     }
   return ret;

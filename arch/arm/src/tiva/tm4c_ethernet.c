@@ -2545,7 +2545,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(TIVA_IRQ_ETHCON);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -2563,7 +2563,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2672,12 +2672,12 @@ static int tiva_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Perform the out-of-cycle poll now */
 
   tiva_txavail_process(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   return OK;
@@ -4426,7 +4426,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
    * following operations are atomic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the old interrupt handler and save the new one */
 
@@ -4446,7 +4446,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   /* Return the old handler (so that it can be restored) */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 #endif /* CONFIG_TIVA_PHY_INTERRUPTS */

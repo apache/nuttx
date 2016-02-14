@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
@@ -121,7 +121,7 @@ static void lpc17_setintedge(uint32_t intbase, unsigned int pin,
 
   /* These must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set/clear the rising edge enable bit */
 
@@ -150,7 +150,7 @@ static void lpc17_setintedge(uint32_t intbase, unsigned int pin,
     }
 
   putreg32(regval, intbase + LPC17_GPIOINT_INTENF_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

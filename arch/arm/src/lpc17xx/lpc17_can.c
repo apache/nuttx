@@ -55,6 +55,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/can.h>
 
@@ -505,7 +506,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 
   canvdbg("CAN%d\n", priv->port);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable the CAN and stop ongong transmissions */
 
@@ -530,7 +531,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   can_putreg(priv, LPC17_CAN_MOD_OFFSET, 0);           /* Leave Reset Mode */
 #endif
   can_putcommon(LPC17_CANAF_AFMR, CANAF_AFMR_ACCBP);   /* All RX messages accepted */
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -620,7 +621,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
    * to protect this code section.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   regval = can_getreg(priv, LPC17_CAN_IER_OFFSET);
   if (enable)
     {
@@ -632,7 +633,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
     }
 
   can_putreg(priv, LPC17_CAN_IER_OFFSET, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -668,14 +669,14 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
        * to protect this code section.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Disable all TX interrupts */
 
       regval = can_getreg(priv, LPC17_CAN_IER_OFFSET);
       regval &= ~(CAN_IER_TIE1 | CAN_IER_TIE2 | CAN_IER_TIE3);
       can_putreg(priv, LPC17_CAN_IER_OFFSET, regval);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
 }
@@ -780,7 +781,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       DEBUGASSERT((tid & ~CAN_TID_ID11_MASK) == 0);
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Pick a transmit buffer */
 
@@ -881,7 +882,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       ret = -EBUSY;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1241,7 +1242,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
 
   canllvdbg("CAN%d\n",  port);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_LPC17_CAN1
   if (port == 1)
@@ -1299,14 +1300,14 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
 #endif
     {
       candbg("Unsupported port: %d\n", port);
-      irqrestore(flags);
+      leave_critical_section(flags);
       return NULL;
     }
 
   /* Then just perform a CAN reset operation */
 
   can_reset(candev);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return candev;
 }
 #endif

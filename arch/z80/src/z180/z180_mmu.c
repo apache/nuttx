@@ -46,7 +46,7 @@
 
 #include <nuttx/mm/gran.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/io.h>
 
 #include "up_internal.h"
@@ -269,7 +269,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
    * address of environment might be longer than the life of the task.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   cbr = z180_mmu_alloccbr();
   if (!cbr)
     {
@@ -302,14 +302,14 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   cbr->pages   = (uint8_t)npages;
   *addrenv     = (group_addrenv_t)cbr;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 
 errout_with_cbr:
   z180_mmu_freecbr(cbr);
 
 errout_with_irq:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -463,13 +463,13 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
 
   /* Return the current CBR value from the CBR register */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   *oldenv = (save_addrenv_t)inp(Z180_MMU_CBR);
 
   /* Write the new CBR value into CBR register */
 
   outp(Z180_MMU_CBR, cbr->cbr);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

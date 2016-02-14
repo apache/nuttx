@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -557,7 +558,7 @@ FAR struct spi_dev_s *lpc23_spibus_initialize(int port)
    * #define GPIO_SPI_SCK GPIO_SPI_SCK_1
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   regval  = getreg32(LPC23XX_SCB_BASE+SCB_PCONP_OFFSET);
   regval |= PCSPI;
@@ -578,7 +579,7 @@ FAR struct spi_dev_s *lpc23_spibus_initialize(int port)
   regval |= SPI_PINSEL1;
   putreg32(regval, LPC23XX_PINSEL1);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Configure 8-bit SPI mode and master mode */
 

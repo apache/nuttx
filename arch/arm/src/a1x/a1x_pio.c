@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -232,7 +233,7 @@ int a1x_pio_config(pio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set the peripheral ID (0=input, 1=output) and interrupt mode */
 
@@ -333,7 +334,7 @@ int a1x_pio_config(pio_pinset_t cfgset)
 
   putreg32(regval, dataddr);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -355,7 +356,7 @@ void a1x_pio_write(pio_pinset_t pinset, bool value)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set the output value (will have no effect on inputs */
 
@@ -372,7 +373,7 @@ void a1x_pio_write(pio_pinset_t pinset, bool value)
     }
 
   putreg32(regval, regaddr);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -422,10 +423,10 @@ void a1x_pio_irqenable(int irq)
        * register.
        */
 
-      flags   = irqsave();
+      flags   = enter_critical_section();
       regval  = getreg32(A1X_PIO_INT_CTL);
       regval |= PIO_INT_CTL(irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #endif
@@ -455,10 +456,10 @@ void a1x_pio_irqdisable(int irq)
        * register.
        */
 
-      flags   = irqsave();
+      flags   = enter_critical_section();
       regval  = getreg32(A1X_PIO_INT_CTL);
       regval &= ~PIO_INT_CTL(irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #endif

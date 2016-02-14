@@ -114,7 +114,7 @@ int up_ramvec_attach(int irq, up_vector_t vector)
        * common exception handler.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if (vector == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might
@@ -133,7 +133,7 @@ int up_ramvec_attach(int irq, up_vector_t vector)
       /* Save the new vector in the vector table */
 
       g_ram_vectors[irq] = vector;
-      irqrestore(flags);
+      leave_critical_section(flags);
       ret = OK;
     }
 

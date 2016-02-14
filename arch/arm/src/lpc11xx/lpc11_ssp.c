@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_ssp.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -812,7 +813,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp0initialize(void)
    * #define GPIO_SSP0_SCK GPIO_SSP0_SCK_1
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc11_configgpio(GPIO_SSP0_SCK);
   lpc11_configgpio(GPIO_SSP0_MISO);
   lpc11_configgpio(GPIO_SSP0_MOSI);
@@ -831,7 +832,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp0initialize(void)
   regval  = getreg32(LPC11_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCSSP0;
   putreg32(regval, LPC11_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return &g_ssp0dev;
 }
@@ -866,7 +867,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp1initialize(void)
    * #define GPIO_SSP0_SCK GPIO_SSP0_SCK_1
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc11_configgpio(GPIO_SSP1_SCK);
   lpc11_configgpio(GPIO_SSP1_MISO);
   lpc11_configgpio(GPIO_SSP1_MOSI);
@@ -885,7 +886,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp1initialize(void)
   regval  = getreg32(LPC11_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCSSP1;
   putreg32(regval, LPC11_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return &g_ssp1dev;
 }
@@ -919,7 +920,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp2initialize(void)
    * #define GPIO_SSP2_SCK GPIO_SSP2_SCK_1
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc11_configgpio(GPIO_SSP2_SCK);
   lpc11_configgpio(GPIO_SSP2_MISO);
   lpc11_configgpio(GPIO_SSP2_MOSI);
@@ -938,7 +939,7 @@ static inline FAR struct lpc11_sspdev_s *lpc11_ssp2initialize(void)
   regval  = getreg32(LPC11_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCSSP2;
   putreg32(regval, LPC11_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return &g_ssp2dev;
 }

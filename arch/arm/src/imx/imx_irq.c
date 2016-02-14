@@ -2,7 +2,7 @@
  * arch/arm/src/imc/imx_irq.c
  * arch/arm/src/chip/imx_irq.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/irq.h>
+#include <arch/irq.h>
 
 #include "chip.h"
 #include "up_arch.h"

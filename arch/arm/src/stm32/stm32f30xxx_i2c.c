@@ -614,7 +614,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
   uint32_t regval;
   int ret;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable I2C interrupts */
 
@@ -683,7 +683,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ALLINTS, 0);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #else
@@ -1346,7 +1346,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
            */
 
 #ifdef CONFIG_I2C_POLLED
-          irqstate_t flags = irqsave();
+          irqstate_t flags = enter_critical_section();
 #endif
           /* Receive a byte */
 
@@ -1361,7 +1361,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             }
 
 #ifdef CONFIG_I2C_POLLED
-          irqrestore(flags);
+          leave_critical_section(flags);
 #endif
         }
     }
@@ -1983,7 +1983,7 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if ((volatile int)priv->refs++ == 0)
     {
@@ -1991,7 +1991,7 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
       stm32_i2c_init(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (struct i2c_master_s *)priv;
 }
 
@@ -2017,15 +2017,15 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
       return ERROR;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if (--priv->refs)
     {
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 

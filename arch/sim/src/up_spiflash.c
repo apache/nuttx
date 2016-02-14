@@ -47,6 +47,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -857,7 +858,7 @@ FAR struct spi_dev_s *up_spiflashinitialize()
 {
   FAR struct sim_spiflashdev_s *priv = NULL;
 
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
   priv = &g_spidev;
   priv->selected = 0;
@@ -868,7 +869,7 @@ FAR struct spi_dev_s *up_spiflashinitialize()
   priv->last_cmd = 0xFF;
   memset(&priv->data[0], 0xFF, sizeof(priv->data));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (FAR struct spi_dev_s *)priv;
 }
 

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_can.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/can.h>
 
@@ -556,7 +557,7 @@ static void can_reset(FAR struct can_dev_s *dev)
    * to prevent any concurrent access to the AHB1RSTR register.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Reset the CAN */
 
@@ -566,7 +567,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 
   regval &= ~regbit;
   putreg32(regval, STM32_RCC_APB1RSTR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

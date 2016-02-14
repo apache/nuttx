@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_gpio.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "lpc43_gpio.h"
@@ -166,7 +168,7 @@ int lpc43_gpio_config(uint16_t gpiocfg)
 
   /* Handle the GPIO configuration by the basic mode of the pin */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (gpiocfg & GPIO_MODE_MASK)
     {
       case GPIO_MODE_INPUT:     /* GPIO input pin */
@@ -197,7 +199,7 @@ int lpc43_gpio_config(uint16_t gpiocfg)
         break;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

@@ -966,7 +966,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 
   /* Increment statistics */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   EMAC_STAT(priv, tx_packets);
 
   /* The current packet to be sent is txnext; Calculate the new txnext and
@@ -1037,7 +1037,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    */
 
   outp(EZ80_EMAC_PTMR, EMAC_PTMR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   nllvdbg("txdesc=%p {%06x, %u, %04x}\n",
           txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
@@ -1664,10 +1664,10 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then reset the hardware */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ez80emac_ifdown(&priv->dev);
   ez80emac_ifup(&priv->dev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Then poll uIP for new XMIT data */
 
@@ -1824,7 +1824,7 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(EZ80_EMACRX_IRQ);
   up_disable_irq(EZ80_EMACTX_IRQ);
   up_disable_irq(EZ80_EMACSYS_IRQ);
@@ -1845,7 +1845,7 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
   outp(EZ80_EMAC_PTMR, 0);
 
   priv->bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1873,7 +1873,7 @@ static int ez80emac_txavail(struct net_driver_s *dev)
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1887,7 +1887,7 @@ static int ez80emac_txavail(struct net_driver_s *dev)
       (void)devif_poll(&priv->dev, ez80emac_txpoll);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_timer.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 #include <arch/board/board.h>
@@ -290,7 +291,7 @@ static int timer_timer(FAR struct lpc11_timer_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   putreg32(info->frequency, LPC11_TMR0_MR1);  /* Set TIMER0 MR1 = number of counts */
   putreg32(info->frequency, LPC11_TMR1_MR0);  /* Set TIMER1 MR0 = number of counts */
@@ -298,7 +299,7 @@ static int timer_timer(FAR struct lpc11_timer_s *priv,
   putreg32(1, LPC11_TMR0_TCR);                /* Start timer0 */
   putreg32(1, LPC11_TMR1_TCR);                /* Start timer1 */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   timer_dumpregs(priv, "After starting");
   return OK;
 }
@@ -385,7 +386,7 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Power on the timer peripherals */
 
@@ -442,7 +443,7 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
   /* configure the output pins GPIO3.26 */
 //  lpc11_configgpio(GPIO_MAT0p1_2);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   pwm_dumpgpio(priv->pincfg, "TIMER setup");
   return OK;
 }
@@ -530,7 +531,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
   */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable further interrupts and stop the timer */
 
@@ -548,7 +549,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
    * into a state where timer_start() can be called.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   pwmdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   timer_dumpregs(priv, "After stop");

@@ -329,7 +329,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   /* Make sure that clocking is enabled for the Ethernet (and PHY) peripherals */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
@@ -374,7 +374,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   regval = tiva_ethin(priv, TIVA_MAC_RIS_OFFSET);
   tiva_ethout(priv, TIVA_MAC_IACK_OFFSET, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -480,7 +480,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 
   /* Verify that the hardware is ready to send another packet */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
       /* Increment statistics */
@@ -550,7 +550,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1110,7 +1110,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Enable and reset the Ethernet controller */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   tiva_ethreset(priv);
 
   /* Set the management clock divider register for access to the PHY
@@ -1231,7 +1231,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_polltimer, 1, (uint32_t)priv);
 
   priv->ld_bifup = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1264,7 +1264,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   wd_cancel(priv->ld_txpoll);
   wd_cancel(priv->ld_txtimeout);
 
@@ -1314,7 +1314,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   /* The interface is now DOWN */
 
   priv->ld_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1350,7 +1350,7 @@ static int tiva_txavail(struct net_driver_s *dev)
    * will occur at that time.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
       /* If the interface is up and we can use the Tx FIFO, then poll uIP
@@ -1360,7 +1360,7 @@ static int tiva_txavail(struct net_driver_s *dev)
       (void)devif_poll(&priv->ld_dev, tiva_txpoll);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

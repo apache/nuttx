@@ -566,18 +566,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         up_enablebreaks(priv, true);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         up_enablebreaks(priv, false);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 

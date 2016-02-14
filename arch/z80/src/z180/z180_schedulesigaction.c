@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "chip/switch.h"
 #include "sched/sched.h"
@@ -129,7 +129,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   /* Make sure that interrupts are disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Refuse to handle nested signal actions */
 
@@ -185,7 +185,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_DISABLE_SIGNALS */

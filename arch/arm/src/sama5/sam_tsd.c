@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_tsd.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -61,6 +61,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -305,7 +306,7 @@ static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new touchscreen sample data available? */
 
@@ -340,7 +341,7 @@ static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -362,7 +363,7 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -412,7 +413,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there

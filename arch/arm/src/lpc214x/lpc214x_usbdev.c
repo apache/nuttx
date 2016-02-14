@@ -53,7 +53,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -609,7 +609,7 @@ static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
 
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc214x_putreg(USBDEV_DEVINT_CDFULL | USBDEV_DEVINT_CCEMTY,
                  LPC214X_USBDEV_DEVINTCLR);
 
@@ -727,7 +727,7 @@ static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
 
   /* Restore the interrupt flags */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return tmp;
 }
 
@@ -967,9 +967,9 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result)
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   privreq = lpc214x_rqdequeue(privep);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -2588,7 +2588,7 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc214x_cancelrequests(privep);
 
   /* Disable endpoint and interrupt */
@@ -2603,7 +2603,7 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
   reg &= ~mask;
   lpc214x_putreg(reg, LPC214X_USBDEV_EPINTEN);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2781,7 +2781,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = irqsave();
+  flags       = enter_critical_section();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2827,7 +2827,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2853,9 +2853,9 @@ static int lpc214x_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #endif
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc214x_cancelrequests(privep);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2874,7 +2874,7 @@ static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
   lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | privep->epphy, (resume ? 0 : USBDEV_EPSTALL));
 
@@ -2884,7 +2884,7 @@ static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, bool resume)
     {
       (void)lpc214x_wrrequest(privep);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2986,7 +2986,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, uint8_t
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       epset &= priv->epavail;
       if (epset)
         {
@@ -3000,7 +3000,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, uint8_t
                   /* Mark the IN/OUT endpoint no longer available */
 
                   priv->epavail &= ~(3 << (bit & ~1));
-                  irqrestore(flags);
+                  leave_critical_section(flags);
 
                   /* And return the pointer to the standard endpoint structure */
 
@@ -3009,7 +3009,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, uint8_t
             }
           /* Shouldn't get here */
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16_t)eplog);
@@ -3036,9 +3036,9 @@ static void lpc214x_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
     {
       /* Mark the endpoint as available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       priv->epavail |= (1 << privep->epphy);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -3082,14 +3082,14 @@ static int lpc214x_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, (uint16_t)g_usbdev.devstatus);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
     {
       arg |= USBDEV_DEVSTATUS_CONNECT;
     }
 
   lpc214x_usbcmd(CMD_USB_DEV_SETSTATUS, arg);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3289,7 +3289,7 @@ void up_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc214x_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
   lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
@@ -3304,7 +3304,7 @@ void up_usbuninitialize(void)
   reg = lpc214x_getreg(LPC214X_PCON_PCONP);
   reg &= ~LPC214X_PCONP_PCUSB;
   lpc214x_putreg(reg, LPC214X_PCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

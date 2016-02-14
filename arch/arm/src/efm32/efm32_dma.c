@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
@@ -686,7 +687,7 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   /* Enable DMA completion interrupts */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(EFM32_DMA_IEN);
   regval |= bit;
   putreg32(regval, EFM32_DMA_IEN);
@@ -694,7 +695,7 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   /* Enable the channel */
 
   putreg32(bit, EFM32_DMA_CHENS);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -722,7 +723,7 @@ void efm32_dmastop(DMA_HANDLE handle)
 
   /* Disable the channel */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   putreg32(bit, EFM32_DMA_CHENC);
 
   /* Disable Channel interrupts */
@@ -730,7 +731,7 @@ void efm32_dmastop(DMA_HANDLE handle)
   regval  = getreg32(EFM32_DMA_IEN);
   regval |= bit;
   putreg32(regval, EFM32_DMA_IEN);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -753,7 +754,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 
   /* Sample DMA registers. */
 
-  flags              = irqsave();
+  flags              = enter_critical_section();
 
   regs->status       = getreg32(EFM32_DMA_STATUS);
   regs->ctrlbase     = getreg32(EFM32_DMA_CTRLBASE);
@@ -782,7 +783,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
   regaddr            = EFM32_DMA_CHn_CTRL(dmach->chan)
   regs->chnctrl      = getreg32(regaddr);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 

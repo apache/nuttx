@@ -990,7 +990,7 @@ static int spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data)
    * Interrupts are disabled briefly.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   next = priv->head + 1;
   if (next >= CONFIG_SAMV7_SPI_SLAVE_QSIZE)
     {
@@ -1023,7 +1023,7 @@ static int spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   spi_semgive(priv);
   return ret;
 }
@@ -1061,7 +1061,7 @@ static bool spi_qfull(struct spi_sctrlr_s *sctrlr)
    * Interrupts are disabled briefly.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   next = priv->head + 1;
   if (next >= CONFIG_SAMV7_SPI_SLAVE_QSIZE)
     {
@@ -1069,7 +1069,7 @@ static bool spi_qfull(struct spi_sctrlr_s *sctrlr)
     }
 
   ret = (next == priv->tail);
-  irqrestore(flags);
+  leave_critical_section(flags);
   spi_semgive(priv);
   return ret;
 }
@@ -1105,10 +1105,10 @@ static void spi_qflush(struct spi_sctrlr_s *sctrlr)
 
   /* Mark the buffer empty, momentarily disabling interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->head = 0;
   priv->tail = 0;
-  irqrestore(flags);
+  leave_critical_section(flags);
   spi_semgive(priv);
 }
 
@@ -1187,7 +1187,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
     {
       /* Enable clocking to the SPI block */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 #if defined(CONFIG_SAMV7_SPI0_SLAVE) && defined(CONFIG_SAMV7_SPI1_SLAVE)
       if (spino == 0)
 #endif
@@ -1243,7 +1243,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
       spi_putreg(priv, SPI_CR_SWRST, SAM_SPI_CR_OFFSET);
       spi_putreg(priv, SPI_CR_SWRST, SAM_SPI_CR_OFFSET);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Configure the SPI mode register */
 

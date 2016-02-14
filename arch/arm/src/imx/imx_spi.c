@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -541,7 +541,7 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
   /* Prime the Tx FIFO to start the sequence (saves one interrupt) */
 
 #ifndef CONFIG_SPI_POLLWAIT
-  flags = irqsave();
+  flags = enter_critical_section();
   ntxd  = spi_performtx(priv);
   spi_startxfr(priv, ntxd);
 
@@ -550,7 +550,7 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
   regval = spi_getreg(priv, CSPI_INTCS_OFFSET);
   regval |= CSPI_INTCS_TEEN;
   spi_putreg(priv, CSPI_INTCS_OFFSET, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Wait for the transfer to complete.  Since there is no handshake
    * with SPI, the following should complete even if there are problems

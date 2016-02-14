@@ -59,7 +59,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -904,7 +904,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   twi_startmessage(priv, msgs);
 
   /* And wait for the transfers to complete.  Interrupts will be re-enabled
@@ -917,7 +917,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -1150,7 +1150,7 @@ static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   uint32_t regval;
   uint32_t mck;
 
@@ -1232,7 +1232,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   /* Enable Interrupts */
 
   up_enable_irq(priv->attr->irq);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1305,7 +1305,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   /* Perform one-time TWIHS initialization */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Has the device already been initialized? */
 
@@ -1345,7 +1345,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       priv->initd = true;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return &priv->dev;
 
 errout_with_wdog:
@@ -1353,7 +1353,7 @@ errout_with_wdog:
   priv->timeout = NULL;
 
 errout_with_irq:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 
@@ -1374,7 +1374,7 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 
   /* Disable TWIHS interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(priv->attr->irq);
 
   /* Reset data structures */
@@ -1392,7 +1392,7 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   (void)irq_detach(priv->attr->irq);
 
   priv->initd = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -58,7 +58,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -732,7 +732,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   twi_startmessage(priv, msgs);
 
   /* And wait for the transfers to complete.  Interrupts will be re-enabled
@@ -745,7 +745,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -926,7 +926,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   i2cvdbg("Initializing TWI%d\n", bus);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_SAM34_TWI0
   if (bus == 0)
@@ -983,7 +983,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   else
 #endif
     {
-      irqrestore(flags);
+      leave_critical_section(flags);
       i2cdbg("ERROR: Unsupported bus: TWI%d\n", bus);
       return NULL;
     }
@@ -1012,7 +1012,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   /* Enable Interrupts */
 
   up_enable_irq(priv->irq);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return &priv->dev;
 }
 

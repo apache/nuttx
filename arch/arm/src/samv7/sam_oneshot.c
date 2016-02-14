@@ -56,7 +56,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 
 #include "sam_oneshot.h"
@@ -264,7 +264,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
 
   /* Was the oneshot already running? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (oneshot->running)
     {
       /* Yes.. then cancel it */
@@ -314,7 +314,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
    */
 
   oneshot->running = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -354,7 +354,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
 
   /* Was the timer running? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (!oneshot->running)
     {
       /* No.. Just return zero timer remaining and successful cancellation.
@@ -364,7 +364,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
 
       ts->tv_sec  = 0;
       ts->tv_nsec = 0;
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 
@@ -392,7 +392,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
   oneshot->running = false;
   oneshot->handler = NULL;
   oneshot->arg     = NULL;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Did the caller provide us with a location to return the time
    * remaining?

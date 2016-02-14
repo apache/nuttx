@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 
 #include "up_arch.h"
@@ -197,7 +197,7 @@ int stm32_configgpio(uint32_t cfgset)
    * exclusive access to all of the GPIO configuration registers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now apply the configuration to the mode register */
 
@@ -346,7 +346,7 @@ int stm32_configgpio(uint32_t cfgset)
       putreg32(regval, regaddr);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

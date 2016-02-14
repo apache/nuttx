@@ -671,7 +671,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
@@ -692,7 +692,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
        up_serialout(priv, AVR32_USART_IDR_OFFSET, USART_INT_TXRDY);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

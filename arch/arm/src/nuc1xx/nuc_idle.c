@@ -44,7 +44,7 @@
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "up_internal.h"
@@ -97,7 +97,7 @@ static void up_idlepm(void)
 
   if (newstate != oldstate)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Perform board-specific, state-dependent logic here */
 
@@ -141,7 +141,7 @@ static void up_idlepm(void)
           break;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #else

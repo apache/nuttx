@@ -483,7 +483,7 @@ static int stm32_dma2dirq(int irq, void *context)
  * Description:
  *   Helper waits until the dma2d irq occurs. That means that an ongoing clut
  *   loading or dma transfer was completed.
- *   Note! The caller must use this function within irqsave state.
+ *   Note! The caller must use this function within a critical section.
  *
  * Return:
  *   On success OK otherwise ERROR
@@ -543,7 +543,7 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
   uint32_t   regval;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   ret = stm32_dma2d_waitforirq();
   if (ret == OK)
@@ -563,7 +563,7 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
       regvdbg("configured regval=%08x\n", getreg32(pfcreg));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -586,7 +586,7 @@ static int stm32_dma2d_start(void)
   int        ret;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   ret = stm32_dma2d_waitforirq();
   if (ret == OK)
@@ -606,7 +606,7 @@ static int stm32_dma2d_start(void)
       ret = stm32_dma2d_waitforirq();
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

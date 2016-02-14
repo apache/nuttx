@@ -1760,7 +1760,7 @@ FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if ((volatile int)priv->refs++ == 0)
     {
@@ -1768,7 +1768,7 @@ FAR struct i2c_master_s *efm32_i2cbus_initialize(int port)
       efm32_i2c_init(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (struct i2c_master_s *)priv;
 }
 
@@ -1794,15 +1794,15 @@ int efm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if (--priv->refs)
     {
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 

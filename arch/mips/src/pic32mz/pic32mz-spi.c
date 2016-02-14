@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -1280,7 +1281,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 
   /* Disable SPI interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   up_disable_irq(priv->config->firq);
   up_disable_irq(priv->config->rxirq);
@@ -1374,7 +1375,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 
   /* Enable interrupts at the interrupt controller */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return &priv->spidev;
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
@@ -1383,7 +1384,7 @@ errout_with_txirq:
 errout_with_rxirq:
   irq_detatch(priv->config->rxirq);
 errout:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 #endif
 }

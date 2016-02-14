@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ssc.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 
 #include <arch/board/board.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
@@ -881,7 +882,7 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   i2sllvdbg("%s\n", msg);
   i2sllvdbg("  Pending:\n");
   ssc_dump_queue(&xpt->pend);
@@ -889,7 +890,7 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
   ssc_dump_queue(&xpt->act);
   i2sllvdbg("  Done:\n");
   ssc_dump_queue(&xpt->done);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -988,14 +989,14 @@ static struct sam_buffer_s *ssc_buf_allocate(struct sam_ssc_s *priv)
 
   /* Get the buffer from the head of the free list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   bfcontainer = priv->freelist;
   ASSERT(bfcontainer);
 
   /* Unlink the buffer from the freelist */
 
   priv->freelist = bfcontainer->flink;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return bfcontainer;
 }
 
@@ -1023,10 +1024,10 @@ static void ssc_buf_free(struct sam_ssc_s *priv, struct sam_buffer_s *bfcontaine
 
   /* Put the buffer container back on the free list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   bfcontainer->flink  = priv->freelist;
   priv->freelist = bfcontainer;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Wake up any threads waiting for a buffer container */
 
@@ -1468,9 +1469,9 @@ static void ssc_rx_worker(void *arg)
        * disabled.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       (void)ssc_rxdma_setup(priv);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Process each buffer in the rx.done queue */
@@ -1482,9 +1483,9 @@ static void ssc_rx_worker(void *arg)
        * also modified from the interrupt level.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rx.done);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       DEBUGASSERT(bfcontainer && bfcontainer->apb && bfcontainer->callback);
       apb = bfcontainer->apb;
@@ -1880,9 +1881,9 @@ static void ssc_tx_worker(void *arg)
        * disabled.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       (void)ssc_txdma_setup(priv);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Process each buffer in the tx.done queue */
@@ -1894,9 +1895,9 @@ static void ssc_tx_worker(void *arg)
        * also modified from the interrupt level.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->tx.done);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Perform the TX transfer done callback */
 
@@ -2271,7 +2272,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Add the buffer container to the end of the RX pending queue */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
   ssc_dump_rxqueues(priv, "Receving");
 
@@ -2281,7 +2282,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   ret = ssc_rxdma_setup(priv);
   DEBUGASSERT(ret == OK);
-  irqrestore(flags);
+  leave_critical_section(flags);
   ssc_exclsem_give(priv);
   return OK;
 
@@ -2488,7 +2489,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Add the buffer container to the end of the TX pending queue */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
   ssc_dump_txqueues(priv, "Transmitting");
 
@@ -2498,7 +2499,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   ret = ssc_txdma_setup(priv);
   DEBUGASSERT(ret == OK);
-  irqrestore(flags);
+  leave_critical_section(flags);
   ssc_exclsem_give(priv);
   return OK;
 
@@ -3458,7 +3459,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
 
   ssc_buf_initialize(priv);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_SAMA5_SSC0
   if (port == 0)
     {
@@ -3508,7 +3509,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
       goto errout_with_clocking;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   scc_dump_regs(priv, "After initialization");
 
   /* Success exit */

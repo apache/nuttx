@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 
@@ -81,7 +81,7 @@ void up_dumpnvic(FAR const char *msg)
 
   /* The following requires exclusive access to the NVIC/SYSCON registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   lldbg("NVIC: %s\n", msg);
   lldbg("   ISER: %08x  ICER: %08x  ISPR: %08x  ICPR: %08x\n",
@@ -105,7 +105,7 @@ void up_dumpnvic(FAR const char *msg)
         getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
         getreg32(ARMV6M_SYSCON_SHPR3));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_DEBUG */

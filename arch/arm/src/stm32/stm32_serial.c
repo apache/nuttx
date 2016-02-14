@@ -2057,20 +2057,20 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_USART_BREAKS
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         uint32_t cr2 = up_serialin(priv, STM32_USART_CR2_OFFSET);
         up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 | USART_CR2_LINEN);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         uint32_t cr1 = up_serialin(priv, STM32_USART_CR2_OFFSET);
         up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 & ~USART_CR2_LINEN);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 #endif
@@ -2144,7 +2144,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
    * "           "      USART_SR_ORE    Overrun Error Detected
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ie = priv->ie;
   if (enable)
     {
@@ -2168,7 +2168,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   /* Then set the new interrupt state */
 
   up_restoreusartint(priv, ie);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -2443,7 +2443,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
    * USART_CR3_CTSIE    USART_SR_CTS    CTS flag                     (not used)
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
@@ -2478,7 +2478,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       up_restoreusartint(priv, priv->ie & ~USART_CR1_TXEIE);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2831,7 +2831,7 @@ void stm32_serial_dma_poll(void)
 {
     irqstate_t flags;
 
-    flags = irqsave();
+    flags = enter_critical_section();
 
 #ifdef CONFIG_USART1_RXDMA
   if (g_usart1priv.rxdma != NULL)
@@ -2889,7 +2889,7 @@ void stm32_serial_dma_poll(void)
     }
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 

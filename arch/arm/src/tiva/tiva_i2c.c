@@ -744,7 +744,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
   irqstate_t flags;
   int ret;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable the master interrupt.  The I2C master module generates an interrupt when
    * a transaction completes (either transmit or receive), when arbitration is lost,
@@ -817,7 +817,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   tiva_i2c_putreg(priv, TIVA_I2CM_IMR_OFFSET, 0);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #else
@@ -2233,7 +2233,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   priv->refs++;
   if (priv->refs == 1)
@@ -2248,7 +2248,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
       tiva_i2c_initialize(priv, 100000);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (struct i2c_master_s *)priv;
 }
 
@@ -2271,7 +2271,7 @@ int tiva_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   /* Decrement reference count and check for underflow */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the reference count will decrement to zero */
 
@@ -2293,7 +2293,7 @@ int tiva_i2cbus_uninitialize(struct i2c_master_s *dev)
       priv->refs--;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_tc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Dioron
  *
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/timers/timer.h>
 #include <arch/board/board.h>
 
@@ -527,7 +528,7 @@ static tccb_t sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
   irqstate_t flags;
   tccb_t oldhandler;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   DEBUGASSERT(priv);
   tcvdbg("Entry: handler=%p\n", handler);
@@ -540,7 +541,7 @@ static tccb_t sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
 
    priv->handler = handler;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 

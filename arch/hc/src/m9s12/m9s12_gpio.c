@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/m9s12/m9s12_gpio.c
- * arch/arm/src/chip/m9s12_gpio.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +44,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
@@ -445,7 +445,7 @@ void hcs12_gpiowrite(uint16_t pinset, bool value)
 {
   uint8_t    portndx = HCS12_PORTNDX(pinset);
   uint8_t    pin     = HCS12_PIN(pinset);
-  irqstate_t flags   = irqsave();
+  irqstate_t flags   = enter_critical_section();
 
   DEBUGASSERT((pinset & GPIO_DIRECTION) == GPIO_OUTPUT);
   if (HCS12_PIMPORT(pinset))
@@ -456,7 +456,8 @@ void hcs12_gpiowrite(uint16_t pinset, bool value)
     {
       mebi_gpiowrite(portndx, pin, value);
     }
-  irqrestore(flags);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

@@ -115,7 +115,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "pgalloc.h"
 #include "cache.h"
@@ -169,7 +169,7 @@ static int up_addrenv_initdata(uintptr_t l2table)
 #endif
 
   DEBUGASSERT(l2table);
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
   /* Get the virtual address corresponding to the physical page table address */
@@ -220,7 +220,7 @@ static int up_addrenv_initdata(uintptr_t l2table)
 
   mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif /* CONFIG_BUILD_KERNEL */

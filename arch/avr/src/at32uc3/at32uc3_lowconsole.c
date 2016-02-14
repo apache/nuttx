@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -205,9 +205,9 @@ void usart_reset(uintptr_t usart_base)
 
   /* Disable all USART interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usart_putreg(usart_base, AVR32_USART_IDR_OFFSET, 0xffffffff);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Reset mode and other registers */
 

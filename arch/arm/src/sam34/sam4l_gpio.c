@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam4l_gpio.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -55,14 +56,6 @@
 #include "chip/sam4l_gpio.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -71,8 +64,9 @@ static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_gpiobase
  *
@@ -544,7 +538,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
   lldbg("    GPER: %08x  PMR0: %08x  PMR1: %08x  PMR2: %08x\n",
@@ -562,7 +556,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   lldbg("  OSRR0: %08x   EVER: %08x PARAM: %08x  VERS: %08x\n",
         getreg32(base + SAM_GPIO_OSRR0_OFFSET), getreg32(base + SAM_GPIO_EVER_OFFSET),
         getreg32(base + SAM_GPIO_PARAMETER_OFFSET), getreg32(base + SAM_GPIO_VERSION_OFFSET));
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

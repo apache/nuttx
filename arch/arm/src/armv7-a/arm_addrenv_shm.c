@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7/arm_addrenv_shm.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/addrenv.h>
@@ -141,7 +142,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            * global resources.
            */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           group->tg_addrenv.shm[shmndx] = (FAR uintptr_t *)paddr;
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
@@ -171,7 +172,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            */
 
           paddr = (uintptr_t)l1entry & ~SECTION_MASK;
-          flags = irqsave();
+          flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
           /* Get the virtual address corresponding to the physical page\
@@ -215,7 +216,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return OK;
@@ -282,7 +283,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
        */
 
        paddr = (uintptr_t)l1entry & ~SECTION_MASK;
-       flags = irqsave();
+       flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
       /* Get the virtual address corresponding to the physical page
@@ -333,7 +334,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
 #endif
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return OK;

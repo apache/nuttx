@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/pic32mz/pic32mz_ethernet.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the PIC32MZ Ethernet Driver
@@ -52,8 +52,8 @@
 
 #include <arpa/inet.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
@@ -2246,7 +2246,7 @@ static int pic32mz_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #if CONFIG_PIC32MZ_NINTERFACES > 1
   up_disable_irq(priv->pd_irqsrc);
 #else
@@ -2262,7 +2262,7 @@ static int pic32mz_ifdown(struct net_driver_s *dev)
 
   pic32mz_ethreset(priv);
   priv->pd_ifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2294,7 +2294,7 @@ static int pic32mz_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -2312,7 +2312,7 @@ static int pic32mz_txavail(struct net_driver_s *dev)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3074,7 +3074,7 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
 
   /* Reset the MAC */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ethernet Controller Initialization *************************************/
   /* Disable Ethernet interrupts in the EVIC */
@@ -3135,7 +3135,7 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
 
   up_udelay(50);
   pic32mz_putreg(0, PIC32MZ_EMAC1_CFG1);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

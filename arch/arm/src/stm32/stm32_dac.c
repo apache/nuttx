@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_dac.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
-#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/analog/dac.h>
 
 #include "up_internal.h"
@@ -580,11 +580,11 @@ static void dac_reset(FAR struct dac_dev_s *dev)
    * functional.
    */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
 
 #warning "Missing logic"
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1016,7 +1016,7 @@ static int dac_blockinit(void)
 
   /* Put the entire DAC block in reset state */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(STM32_RCC_APB1RSTR);
   regval |= RCC_APB1RSTR_DACRST;
   putreg32(regval, STM32_RCC_APB1RSTR);
@@ -1025,7 +1025,7 @@ static int dac_blockinit(void)
 
   regval &= ~RCC_APB1RSTR_DACRST;
   putreg32(regval, STM32_RCC_APB1RSTR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Mark the DAC block as initialized */
 

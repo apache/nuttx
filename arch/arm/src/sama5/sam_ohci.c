@@ -57,7 +57,7 @@
 #include <nuttx/usb/usbhost_devaddr.h>
 #include <nuttx/usb/usbhost_trace.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include <arch/board/board.h> /* May redefine PIO settings */
 
@@ -751,14 +751,14 @@ static struct sam_gtd_s *sam_tdalloc(void)
    * interrupt handler.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ret   = (struct sam_gtd_s *)g_tdfree;
   if (ret)
     {
       g_tdfree = ((struct sam_list_s *)ret)->flink;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -841,7 +841,7 @@ static int sam_addctrled(struct sam_ed_s *ed)
 
   /* Disable control list processing while we modify the list */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_CLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -862,7 +862,7 @@ static int sam_addctrled(struct sam_ed_s *ed)
   regval |= OHCI_CTRL_CLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -884,7 +884,7 @@ static inline int sam_remctrled(struct sam_ed_s *ed)
 
   /* Disable control list processing while we modify the list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_CLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -938,7 +938,7 @@ static inline int sam_remctrled(struct sam_ed_s *ed)
       sam_putreg(regval, SAM_USBHOST_CTRL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -959,7 +959,7 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
 
   /* Disable bulk list processing while we modify the list */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_BLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -980,7 +980,7 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
   regval |= OHCI_CTRL_BLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1006,7 +1006,7 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
 
   /* Disable bulk list processing while we modify the list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_BLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -1060,7 +1060,7 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
       sam_putreg(regval, SAM_USBHOST_CTRL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1170,7 +1170,7 @@ static inline int sam_addinted(const struct usbhost_epdesc_s *epdesc,
    * at the next SOF... need to check.
    */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_PLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -1247,7 +1247,7 @@ static inline int sam_addinted(const struct usbhost_epdesc_s *epdesc,
   regval |= OHCI_CTRL_PLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1290,7 +1290,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
    * at the next SOF... need to check.
    */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_PLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -1402,7 +1402,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
       sam_putreg(regval, SAM_USBHOST_CTRL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1559,11 +1559,11 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
 
   /* Allocate a control ED and a tail TD */
 
-  flags  = irqsave();
+  flags  = enter_critical_section();
   edctrl = sam_edalloc();
   if (!edctrl)
     {
-      irqrestore(flags);
+      leave_critical_section(flags);
       return -ENOMEM;
     }
 
@@ -1571,7 +1571,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   if (!tdtail)
     {
       sam_edfree(edctrl);
-      irqrestore(flags);
+      leave_critical_section(flags);
       return -ENOMEM;
     }
 
@@ -1612,7 +1612,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   /* Add the ED to the control list */
 
   ret = sam_addctrled(edctrl);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1649,7 +1649,7 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
    * Control list.  We should never modify the control list while CLE is set.
    */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_CLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -1703,7 +1703,7 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Release any TDs that may still be attached to the ED. */
 
@@ -1742,7 +1742,7 @@ static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
                        uint8_t *buffer, uint16_t buflen)
 {
   struct sam_eplist_s *eplist;
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   int ret = -ENODEV;
 
   /* Is the device still connected? */
@@ -1769,7 +1769,7 @@ static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
       ret              = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1790,7 +1790,7 @@ static int sam_wdhasynch(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
                          uint8_t *buffer, uint16_t buflen)
 {
   struct sam_eplist_s *eplist;
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   int ret = -ENODEV;
 
   /* Is the device still connected? */
@@ -1815,7 +1815,7 @@ static int sam_wdhasynch(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
       ret              = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif
@@ -2340,7 +2340,7 @@ static int sam_wait(struct usbhost_connection_s *conn,
    * ports or until an error occurs.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
@@ -2373,7 +2373,7 @@ static int sam_wait(struct usbhost_connection_s *conn,
                * port has the connection change.
                */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               usbhost_vtrace2(OHCI_VTRACE2_WAKEUP,
                               rhpndx + 1, g_ohci.rhport[rhpndx].connected);
 
@@ -2396,7 +2396,7 @@ static int sam_wait(struct usbhost_connection_s *conn,
           g_ohci.hport = NULL;
 
           *hport = connport;
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           usbhost_vtrace2(OHCI_VTRACE2_HUBWAKEUP,
                           HPORT(connport), connport->connected);
@@ -3648,7 +3648,7 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* These first steps must be atomic as possible */
 
-  flags  = irqsave();
+  flags  = enter_critical_section();
 
   /* It might be possible for no transfer to be in progress (callback == NULL
    * and wdhwait == false)
@@ -3753,7 +3753,7 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   eplist->buffer   = NULL;
   eplist->buflen   = 0;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3792,7 +3792,7 @@ static int sam_connect(struct usbhost_driver_s *drvr,
 
   /* Report the connection event */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGASSERT(g_ohci.hport == NULL); /* REVISIT */
 
   g_ohci.hport = hport;
@@ -3802,7 +3802,7 @@ static int sam_connect(struct usbhost_driver_s *drvr,
       sam_givesem(&g_ohci.pscsem);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -3930,7 +3930,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Enable UHP peripheral clocking */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   sam_uhphs_enableclk();
 
   /* Enable OHCI clocks */
@@ -3963,7 +3963,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
   putreg32(regval, SAM_SFR_OHCIICR);
 #endif
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Note that no pin configuration is required.  All USB HS pins have
    * dedicated function

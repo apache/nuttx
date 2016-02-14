@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_spi.c
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -553,7 +554,7 @@ FAR struct spi_dev_s *lpc17_spibus_initialize(int port)
    * #define GPIO_SPI_SCK GPIO_SPI_SCK_1
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc17_configgpio(GPIO_SPI_SCK);
   lpc17_configgpio(GPIO_SPI_MISO);
   lpc17_configgpio(GPIO_SPI_MOSI);
@@ -570,7 +571,7 @@ FAR struct spi_dev_s *lpc17_spibus_initialize(int port)
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCSPI;
   putreg32(regval, LPC17_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Configure 8-bit SPI mode and master mode */
 

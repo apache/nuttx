@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/src/z16f/z16f_espi.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/spi/spi.h>
 
 #include "up_arch.h"
@@ -832,7 +833,7 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
     {
       /* Initialize the ESPI state structure */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       priv->spi.ops = &g_epsiops;
       sem_init(&priv->exclsem, 0, 1);
 
@@ -874,7 +875,7 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
       /* Now we are initialized */
 
       priv->initialized = true;
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   spi_dumpregs(priv, "After initialization");

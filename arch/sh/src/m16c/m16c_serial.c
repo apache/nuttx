@@ -843,7 +843,7 @@ static void m16c_rxint(struct up_dev_s *dev, bool enable)
 
   /* Disable interrupts to prevent asynchronous accesses */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Pick the SxTIC register and enable interrupt priority */
 
@@ -892,7 +892,7 @@ static void m16c_rxint(struct up_dev_s *dev, bool enable)
     }
 
   asm ("\tnop\n\tnop\n\tnop"); /* Three NOPs -- probably not necessary here */
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
@@ -998,7 +998,7 @@ static void m16c_txint(struct up_dev_s *dev, bool enable)
 
   /* Disable interrupts to prevent asynchronous accesses */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Pick the SxTIC register and enable interrupt priority */
 
@@ -1047,7 +1047,7 @@ static void m16c_txint(struct up_dev_s *dev, bool enable)
     }
 
   asm ("\tnop\n\tnop\n\tnop"); /* Three NOPs -- probably not necessary here */
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 static void up_txint(struct uart_dev_s *dev, bool enable)

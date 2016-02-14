@@ -69,9 +69,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
+
 #include <errno.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include <arch/board/board.h>
 
@@ -645,7 +647,7 @@ ssize_t __ramfunc__ up_progmem_erasepage(size_t page)
 
   efm32_flash_unlock();
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* enable writing to the flash */
 
@@ -706,7 +708,7 @@ ssize_t __ramfunc__ up_progmem_erasepage(size_t page)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (ret != 0)
     {
@@ -813,7 +815,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
           page_words = num_words - word_count;
         }
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* First we load address. The address is auto-incremented within a page.
        * Therefore the address phase is only needed once for each page.
@@ -828,7 +830,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
           ret = msc_load_write_data(p_data, page_words, true);
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       if (ret != 0)
         {

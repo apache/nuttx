@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/a1x/a1x_irq.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -55,22 +54,10 @@
 #include "a1x_irq.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private types
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
 volatile uint32_t *current_regs;
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -91,7 +78,7 @@ static void a1x_dumpintc(const char *msg, int irq)
 
   /* Dump some relevant ARMv7 register contents */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("ARMv7 (%s, irq=%d):\n", msg, irq);
   lldbg("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
 
@@ -126,7 +113,7 @@ static void a1x_dumpintc(const char *msg, int irq)
         getreg32(A1X_INTC_PRIO0),     getreg32(A1X_INTC_PRIO1),
         getreg32(A1X_INTC_PRIO2),     getreg32(A1X_INTC_PRIO3),
         getreg32(A1X_INTC_PRIO4));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define a1x_dumpintc(msg, irq)
@@ -339,7 +326,7 @@ void up_disable_irq(int irq)
     {
       /* These operations must be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Make sure that the interrupt is disabled. */
 
@@ -356,7 +343,7 @@ void up_disable_irq(int irq)
       putreg32(regval, regaddr);
 
       a1x_dumpintc("disable", irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
 #ifdef CONFIG_A1X_PIO_IRQ
@@ -387,7 +374,7 @@ void up_enable_irq(int irq)
     {
       /* These operations must be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Make sure that the interrupt is enabled. */
 
@@ -404,7 +391,7 @@ void up_enable_irq(int irq)
       putreg32(regval, regaddr);
 
       a1x_dumpintc("enable", irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
 #ifdef CONFIG_A1X_PIO_IRQ
@@ -440,7 +427,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* These operations must be atomic */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Set the new priority */
 
@@ -451,7 +438,7 @@ int up_prioritize_irq(int irq, int priority)
       putreg32(regval, regaddr);
 
       a1x_dumpintc("prioritize", irq);
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 

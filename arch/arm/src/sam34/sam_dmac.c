@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_dmac.c
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -1715,9 +1714,9 @@ void sam_dmastop(DMA_HANDLE handle)
   dmavdbg("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_dmaterminate(dmach, -EINTR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1743,7 +1742,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
    * cause lost interrupts.
    */
 
-  flags        = irqsave();
+  flags        = enter_critical_section();
   regs->gcfg   = getreg32(SAM_DMAC_GCFG);
   regs->en     = getreg32(SAM_DMAC_EN);
   regs->sreq   = getreg32(SAM_DMAC_SREQ);
@@ -1760,7 +1759,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->ctrla  = getreg32(dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
   regs->ctrlb  = getreg32(dmach->base + SAM_DMACHAN_CTRLB_OFFSET);
   regs->cfg    = getreg32(dmach->base + SAM_DMACHAN_CFG_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 

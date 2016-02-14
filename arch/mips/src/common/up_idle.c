@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/mips/src/common/up_idle.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -99,8 +88,8 @@ void up_idle(void)
    */
 
 #ifdef CONFIG_SCHED_WORKQUEUE
-  irqstate_t flags = irqsave();
-  irqrestore(flags);
+  irqstate_t flags = enter_critical_section();
+  leave_critical_section(flags);
 #endif
 #endif
 }

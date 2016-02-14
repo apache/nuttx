@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_mcpwm.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 #include <arch/board/board.h>
@@ -291,12 +292,12 @@ static int mcpwm_timer(FAR struct lpc17_mcpwmtimer_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   putreg32(info->frequency, LPC17_MCPWM_LIM0); /* Set PWMMR0 = number of counts */
   putreg32(info->duty, LPC17_MCPWM_MAT0);      /* Set PWM cycle */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   mcpwm_dumpregs(priv, "After starting");
   return OK;
 }
@@ -423,7 +424,7 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Power on the mcpwm peripheral */
 
@@ -493,7 +494,7 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   putreg32((1 << 0), LPC17_MCPWM_CONSET);     /* Start MCPWM timer0 */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   pwm_dumpgpio(priv->pincfg, "PWM setup");
   return OK;
 }
@@ -581,7 +582,7 @@ static int mcpwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable further interrupts and stop the timer */
 
@@ -599,7 +600,7 @@ static int mcpwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * into a state where mcpwm_start() can be called.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   pwmvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   mcpwm_dumpregs(priv, "After stop");

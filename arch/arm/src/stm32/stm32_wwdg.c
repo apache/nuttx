@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_wwdg.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
@@ -647,7 +648,7 @@ static xcpt_t stm32_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Get the old handler return value */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   oldhandler = priv->handler;
 
   /* Save the new handler */
@@ -676,7 +677,7 @@ static xcpt_t stm32_capture(FAR struct watchdog_lowerhalf_s *lower,
       up_disable_irq(STM32_IRQ_WWDG);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
 }
 

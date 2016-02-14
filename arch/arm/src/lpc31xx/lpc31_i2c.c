@@ -53,7 +53,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -409,7 +409,7 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) arg;
 
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
   if (priv->state != I2C_STATE_DONE)
     {
@@ -435,7 +435,7 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
       sem_post(&priv->wait);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -473,7 +473,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
   /* Get exclusive access to the I2C bus */
 
   sem_wait(&priv->mutex);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set up for the transfer */
 
@@ -507,7 +507,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
   wd_cancel(priv->timeout);
   ret = count - priv->nmsg;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   sem_post(&priv->mutex);
   return ret;
 }

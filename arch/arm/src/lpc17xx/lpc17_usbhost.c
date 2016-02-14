@@ -56,7 +56,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include <arch/board/board.h> /* May redefine GPIO settings */
 
@@ -660,14 +660,14 @@ static struct lpc17_gtd_s *lpc17_tdalloc(void)
    * interrupt handler.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ret   = (struct lpc17_gtd_s *)g_tdfree;
   if (ret)
     {
       g_tdfree = ((struct lpc17_list_s *)ret)->flink;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -759,14 +759,14 @@ static uint8_t *lpc17_allocio(void)
 
   /* lpc17_freeio() may be called from the interrupt level */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ret = (uint8_t *)g_iofree;
   if (ret)
     {
       g_iofree = ((struct lpc17_list_s *)ret)->flink;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif
@@ -787,11 +787,11 @@ static void lpc17_freeio(uint8_t *buffer)
 
   /* Could be called from the interrupt level */
 
-  flags         = irqsave();
+  flags         = enter_critical_section();
   iofree        = (struct lpc17_list_s *)buffer;
   iofree->flink = g_iofree;
   g_iofree      = iofree;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -814,14 +814,14 @@ static struct lpc17_xfrinfo_s *lpc17_alloc_xfrinfo(void)
 
   /* lpc17_free_xfrinfo() may be called from the interrupt level */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   ret = (struct lpc17_xfrinfo_s *)g_xfrfree;
   if (ret)
     {
       g_xfrfree = ((struct lpc17_list_s *)ret)->flink;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -840,11 +840,11 @@ static void lpc17_free_xfrinfo(struct lpc17_xfrinfo_s *xfrinfo)
 
   /* Could be called from the interrupt level */
 
-  flags        = irqsave();
+  flags        = enter_critical_section();
   node         = (struct lpc17_list_s *)xfrinfo;
   node->flink  = g_xfrfree;
   g_xfrfree    = node;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -863,7 +863,7 @@ static inline int lpc17_addctrled(struct lpc17_usbhost_s *priv,
 
   /* Disable control list processing while we modify the list */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_CLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
@@ -881,7 +881,7 @@ static inline int lpc17_addctrled(struct lpc17_usbhost_s *priv,
   regval |= OHCI_CTRL_CLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -904,7 +904,7 @@ static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
 
   /* Disable control list processing while we modify the list */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_CLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
@@ -963,7 +963,7 @@ static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
       lpc17_putreg(regval, LPC17_USBHOST_CTRL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -984,7 +984,7 @@ static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
 
   /* Disable bulk list processing while we modify the list */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_BLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
@@ -1002,7 +1002,7 @@ static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
   regval |= OHCI_CTRL_BLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1029,7 +1029,7 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
 
   /* Disable bulk list processing while we modify the list */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_BLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
@@ -1082,7 +1082,7 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
       lpc17_putreg(regval, LPC17_USBHOST_CTRL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1494,7 +1494,7 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
 static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
 {
   struct lpc17_xfrinfo_s *xfrinfo;
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   int        ret   = -ENODEV;
 
   DEBUGASSERT(ed && ed->xfrinfo);
@@ -1512,7 +1512,7 @@ static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1942,7 +1942,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
   struct usbhost_hubport_s *connport;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (; ; )
     {
       /* Is there a change in the connection state of the single root hub
@@ -1965,7 +1965,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
               /* And return the root hub port */
 
               *hport = connport;
-              irqrestore(flags);
+              leave_critical_section(flags);
 
               udbg("RHport Connected: %s\n",
                    connport->connected ? "YES" : "NO");
@@ -1985,7 +1985,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
           priv->hport = NULL;
 
           *hport = connport;
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           udbg("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
@@ -2856,7 +2856,7 @@ static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
 
   /* Could be called from the interrupt level */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (userbuffer && newbuffer)
     {
       /* If this is an IN transaction, get the user data from the AHB
@@ -2875,7 +2875,7 @@ static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
       lpc17_freeio(newbuffer);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -3313,7 +3313,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* These first steps must be atomic as possible */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* It is possible there there is no transfer to be in progress */
 
@@ -3417,7 +3417,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* Determine the return value */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3458,7 +3458,7 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
 
   /* Report the connection event */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->hport = hport;
   if (priv->pscwait)
     {
@@ -3466,7 +3466,7 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
       lpc17_givesem(&priv->pscsem);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -3644,11 +3644,11 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
    * because this register may be shared with other drivers.
    */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = lpc17_getreg(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUSB;
   lpc17_putreg(regval, LPC17_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Enable clocking on USB (USB PLL clocking was initialized in very low-
    * evel clock setup logic (see lpc17_clockconfig.c)).  We do still need
@@ -3833,11 +3833,11 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
    * because this register may be shared with other drivers.
    */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = lpc17_getreg(LPC17_SYSCON_USBINTST);
   regval |= SYSCON_USBINTST_ENINTS;
   lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* If there is a USB device in the slot at power up, then we will not
    * get the status change interrupt to signal us that the device is

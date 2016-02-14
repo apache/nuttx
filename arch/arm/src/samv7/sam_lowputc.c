@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -220,18 +220,18 @@ void up_lowputc(char ch)
        * atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) &
         UART_INT_TXEMPTY) != 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, SAM_CONSOLE_BASE + SAM_UART_THR_OFFSET);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 }

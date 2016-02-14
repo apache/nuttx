@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 #include <arch/board/board.h>
@@ -810,7 +811,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Reset the timer - stopping the output and putting the timer back
    * into a state where pwm_start() can be called.
@@ -818,7 +819,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   pwm_putreg(priv, EFM32_TIMER_CMD_OFFSET, TIMER_CMD_STOP);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   pwm_dumpregs(priv, "After stop");
   return OK;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_irq.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,7 +153,7 @@ void up_enable_irq(int irq)
     {
       /* Disable all interrupts */
 
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
 
       /* Enable the irq by setting the corresponding bit in the VIC
        * Interrupt Enable register.
@@ -161,7 +161,7 @@ void up_enable_irq(int irq)
 
       uint32_t val = vic_getreg(LPC214X_VIC_INTENABLE_OFFSET);
       vic_putreg(val | (1 << irq), LPC214X_VIC_INTENABLE_OFFSET);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -184,7 +184,7 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       /* Disable all interrupts */
 
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
 
       /* Save the vector address */
 
@@ -194,7 +194,7 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       vic_putreg(((irq << LPC214X_VECTCNTL_IRQSHIFT) | LPC214X_VECTCNTL_ENABLE),
                  LPC214X_VIC_VECTCNTL0_OFFSET + offset);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #endif

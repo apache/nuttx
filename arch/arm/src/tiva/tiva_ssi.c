@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -881,7 +881,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
    */
 
 #ifndef CONFIG_SSI_POLLWAIT
-  flags = irqsave();
+  flags = enter_critical_section();
   ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, TIVA_SSI_SR_OFFSET));
@@ -907,7 +907,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
    */
 
   ssivdbg("Waiting for transfer complete\n");
-  irqrestore(flags);
+  leave_critical_section(flags);
   do
     {
       ssi_semtake(&priv->xfrsem);
@@ -1511,7 +1511,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
   /* Set up for the selected port */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (port)
     {
 #ifdef CONFIG_TIVA_SSI0
@@ -1633,7 +1633,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 #endif /* CONFIG_TIVA_SSI1 */
 
     default:
-      irqrestore(flags);
+      leave_critical_section(flags);
       return NULL;
     }
 
@@ -1701,7 +1701,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 #endif
 #endif /* CONFIG_SSI_POLLWAIT */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return (FAR struct spi_dev_s *)priv;
 }
 

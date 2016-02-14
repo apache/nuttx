@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_irq.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -298,7 +298,7 @@ void sam_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  ISER:       %08x ICER:   %08x\n",
@@ -322,7 +322,7 @@ void sam_dumpnvic(const char *msg, int irq)
   lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #else

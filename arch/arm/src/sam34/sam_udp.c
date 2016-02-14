@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_udp.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * This driver derives in a small part from the SAMA5D3 UDP driver:
@@ -58,6 +58,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
@@ -803,9 +804,9 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   privreq = sam_req_dequeue(&privep->reqq);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -2557,7 +2558,7 @@ static int sam_ep_stall(struct sam_ep_s *privep)
 
   /* Check that endpoint is enabled and not already in Halt state */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if ((privep->epstate != UDP_EPSTATE_DISABLED) &&
       (privep->epstate != UDP_EPSTATE_STALLED))
     {
@@ -2582,7 +2583,7 @@ static int sam_ep_stall(struct sam_ep_s *privep)
       sam_csr_setbits(epno, UDPEP_CSR_FORCESTALL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2601,7 +2602,7 @@ static int sam_ep_resume(struct sam_ep_s *privep)
 
   DEBUGASSERT(/* privep->epstate == UDP_EPSTATE_IDLE && */ privep->dev);
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the endpoint is stalled */
 
@@ -2646,7 +2647,7 @@ static int sam_ep_resume(struct sam_ep_s *privep)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2665,7 +2666,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
   irqstate_t flags;
   int epndx = 0;
 
-  flags  = irqsave();
+  flags  = enter_critical_section();
   epset &= priv->epavail;
   if (epset)
     {
@@ -2690,7 +2691,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return privep;
 }
 
@@ -2706,9 +2707,9 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
 static inline void
 sam_ep_unreserve(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   priv->epavail   |= SAM_EP_BIT(USB_EPNO(privep->ep.eplog));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2955,14 +2956,14 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
 
   /* Reset the endpoint and cancel any ongoing activity */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv  = privep->dev;
   sam_ep_reset(priv, epno);
 
   /* Revert to the addressed-but-not-configured state */
 
   sam_setdevaddr(priv, priv->devaddr);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3100,7 +3101,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->result       = -EINPROGRESS;
   req->xfrd         = 0;
   privreq->inflight = 0;
-  flags             = irqsave();
+  flags             = enter_critical_section();
 
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
    * using the bi-directional EP0, then we assume that they intend the EP0
@@ -3168,7 +3169,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -3190,9 +3191,9 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 #endif
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_req_cancel(privep, -EAGAIN);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3233,7 +3234,7 @@ static int sam_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
        * requests before sending the stall.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       epno = USB_EPNO(ep->eplog);
       if (epno != 0 && USB_ISEPIN(ep->eplog))
         {
@@ -3247,7 +3248,7 @@ static int sam_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
                */
 
               privep->pending = true;
-              irqrestore(flags);
+              leave_critical_section(flags);
               return OK;
             }
         }
@@ -3257,7 +3258,7 @@ static int sam_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
        */
 
       ret = sam_ep_stall(privep);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -3418,7 +3419,7 @@ static int sam_wakeup(struct usbdev_s *dev)
 
   /* Resume normal operation */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_resume(priv);
 
   /* Activate a remote wakeup.  Setting the Enable Send Resume (ESR) bit
@@ -3461,7 +3462,7 @@ static int sam_wakeup(struct usbdev_s *dev)
   regval  = sam_getreg(SAM_UDP_GLBSTAT);
   regval |= UDP_GLBSTAT_ESR;
   sam_putreg(regval, SAM_UDP_GLBSTAT);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3883,7 +3884,7 @@ void up_usbuninitialize(void)
   struct sam_usbdev_s *priv = &g_udp;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usbtrace(TRACE_DEVUNINIT, 0);
 
   /* Disable and detach the UDP IRQ */
@@ -3901,7 +3902,7 @@ void up_usbuninitialize(void)
 
   sam_hw_shutdown(priv);
   sam_sw_shutdown(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -4011,7 +4012,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    * canceled while the class driver is still bound.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Unbind the class driver */
 
@@ -4035,7 +4036,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Unhook the driver */
 
   priv->driver = NULL;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

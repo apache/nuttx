@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_rit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Brandon Warhurst <warhurst_002@yahoo.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
 #include <errno.h>
+
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip/lpc43_rit.h"
@@ -89,7 +90,7 @@ static int lpc43_RIT_isr(int irq, FAR void *context)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   putreg32(RIT_CTRL_INT, LPC43_RIT_CTRL);
 
@@ -103,7 +104,7 @@ static int lpc43_RIT_isr(int irq, FAR void *context)
       sched_alarm_expiration(&g_ts);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

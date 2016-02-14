@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_irq.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,10 +55,6 @@
 #include "tms570_gio.h"
 #include "tms570_esm.h"
 #include "tms570_irq.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data

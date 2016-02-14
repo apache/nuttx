@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_gio.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -129,7 +130,7 @@ int tms570_configgio(gio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Force the pin to be an input for now */
 
@@ -227,7 +228,7 @@ int tms570_configgio(gio_pinset_t cfgset)
       putreg32(regval, base + TMS570_GIO_DIR_OFFSET);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -305,7 +306,7 @@ int tms570_dumpgio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Show global GIO registers */
 
@@ -324,7 +325,7 @@ int tms570_dumpgio(uint32_t pinset, const char *msg)
   lldbg(" PULDIS: %08x    PSL: %08x\n",
         getreg32(base + TMS570_GIO_PULDIS_OFFSET), getreg32(base + TMS570_GIO_PSL_OFFSET));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

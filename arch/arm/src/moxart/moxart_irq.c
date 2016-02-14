@@ -42,6 +42,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>

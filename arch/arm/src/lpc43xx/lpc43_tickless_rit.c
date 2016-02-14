@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_rit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,13 +44,15 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
 #include <errno.h>
 #include <time.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip.h"
@@ -292,7 +294,7 @@ static uint32_t lpc43_tl_tick2ts(uint32_t ticks, FAR struct timespec *ts,
 static inline void lpc43_tl_sync_up(void)
 {
   irqstate_t flags;
-  flags = irqsave();
+  flags = enter_critical_section();
 
   if (synch == 0)
     {
@@ -307,7 +309,7 @@ static inline void lpc43_tl_sync_down(void)
   synch--;
   if (synch == 0)
     {
-      irqrestore(g_flags);
+      leave_critical_section(g_flags);
     }
 }
 
@@ -596,7 +598,7 @@ static int lpc43_tl_isr(int irq, FAR void *context)
 void up_timer_initialize(void)
 {
   irqstate_t flags;
-  flags = irqsave();
+  flags = enter_critical_section();
 
   ctrl_cache = getreg32(LPC43_RIT_CTRL);
   ctrl_cache &= ~RIT_CTRL_INT; /* Set interrupt to 0 */
@@ -631,7 +633,7 @@ void up_timer_initialize(void)
 
   lpc43_tl_calibrate_init();
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /* No reg changes, only processing */

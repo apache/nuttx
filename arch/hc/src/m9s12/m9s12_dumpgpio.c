@@ -42,7 +42,7 @@
 
 #include <stdint.h>
 #include <debug.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "m9s12.h"
@@ -266,7 +266,7 @@ static inline void hcs12_mebidump(uint8_t portndx)
 int hcs12_dumpgpio(uint16_t pinset, const char *msg)
 {
   uint8_t portndx = HCS12_PORTNDX(pinset);
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
   lldbg("pinset: %08x -- %s\n", pinset, msg);
 
@@ -279,7 +279,7 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg)
       hcs12_mebidump(portndx);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

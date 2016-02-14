@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_lowputc.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -52,10 +52,10 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
+
 #include "up_arch.h"
-
 #include "sam_config.h"
-
 #include "sam_gclk.h"
 #include "sam_pm.h"
 #include "sam_sercom.h"
@@ -408,7 +408,7 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
 
   /* Reset the SERCOM so that we know that it is in its initial state */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_usart_reset(config);
 
   /* Just invoke the internal implementation, but with interrupts disabled
@@ -416,7 +416,7 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
    */
 
   ret = sam_usart_internal(config);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif

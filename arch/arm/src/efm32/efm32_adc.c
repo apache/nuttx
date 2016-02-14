@@ -52,6 +52,7 @@
 #include <unistd.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 
@@ -815,7 +816,7 @@ static void adc_hw_reset(struct efm32_dev_s *priv, bool reset)
    * is used by several different drivers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Set or clear the selected bit in the APB2 reset register */
 
@@ -834,7 +835,7 @@ static void adc_hw_reset(struct efm32_dev_s *priv, bool reset)
     }
 
   putreg32(regval, EFM32_RCC_APB2RSTR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -897,7 +898,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #endif
 
   avdbg("intf: ADC%d\n", priv->intf);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable ADC reset state */
 
@@ -1012,7 +1013,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   adc_startconv(priv, true);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   avdbg("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
         adc_getreg(priv, EFM32_ADC_SR_OFFSET),

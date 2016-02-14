@@ -690,7 +690,7 @@ static inline void lpc17_uart0config(void)
 
   /* Step 1: Enable power on UART0 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUART0;
   putreg32(regval, LPC17_SYSCON_PCONP);
@@ -708,7 +708,7 @@ static inline void lpc17_uart0config(void)
 
   lpc17_configgpio(GPIO_UART0_TXD);
   lpc17_configgpio(GPIO_UART0_RXD);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -720,7 +720,7 @@ static inline void lpc17_uart1config(void)
 
   /* Step 1: Enable power on UART1 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUART1;
   putreg32(regval, LPC17_SYSCON_PCONP);
@@ -748,7 +748,7 @@ static inline void lpc17_uart1config(void)
   lpc17_configgpio(GPIO_UART1_RI);
 #endif
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -760,7 +760,7 @@ static inline void lpc17_uart2config(void)
 
   /* Step 1: Enable power on UART2 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUART2;
   putreg32(regval, LPC17_SYSCON_PCONP);
@@ -778,7 +778,7 @@ static inline void lpc17_uart2config(void)
 
   lpc17_configgpio(GPIO_UART2_TXD);
   lpc17_configgpio(GPIO_UART2_RXD);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -790,7 +790,7 @@ static inline void lpc17_uart3config(void)
 
   /* Step 1: Enable power on UART3 */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUART3;
   putreg32(regval, LPC17_SYSCON_PCONP);
@@ -808,7 +808,7 @@ static inline void lpc17_uart3config(void)
 
   lpc17_configgpio(GPIO_UART3_TXD);
   lpc17_configgpio(GPIO_UART3_RXD);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -1196,18 +1196,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         up_enablebreaks(priv, true);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         up_enablebreaks(priv, false);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
@@ -1377,7 +1377,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1397,7 +1397,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       up_serialout(priv, LPC17_UART_IER_OFFSET, priv->ier);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

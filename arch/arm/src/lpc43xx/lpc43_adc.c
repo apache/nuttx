@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_adc.c
  *
- *   Copyright(C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Ported from from the LPC17 version:
@@ -58,6 +58,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 
@@ -188,7 +189,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       priv->mask_int &= ~(priv->mask_int >> 1);
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Clock peripheral */
 
@@ -302,7 +303,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
 #endif /* PINCONF_ADC0_C7 */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

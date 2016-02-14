@@ -466,7 +466,7 @@ time_t up_rtc_time(void)
    * interrupts will prevent suspensions and interruptions:
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* And the following loop will handle any clock rollover events that may
    * happen between samples.  Most of the time (like 99.9%), the following
@@ -488,7 +488,7 @@ time_t up_rtc_time(void)
    */
 
   while (cntl < tmp);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Okay.. the samples should be as close together in time as possible and
    * we can be assured that no clock rollover occurred between the samples.
@@ -534,7 +534,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
    * interrupts will prevent suspensions and interruptions:
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* And the following loop will handle any clock rollover events that may
    * happen between samples.  Most of the time (like 99.9%), the following
@@ -557,7 +557,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
    */
 
   while (cntl < tmp);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Okay.. the samples should be as close together in time as possible and
    * we can be assured that no clock rollover occurred between the samples.
@@ -604,7 +604,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Enable write access to the backup domain */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   (void)stm32_pwr_enablebkp(true);
 
   /* Then write the broken out values to the RTC counter and BKP overflow register
@@ -626,7 +626,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 #endif
 
   (void)stm32_pwr_enablebkp(false);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -673,12 +673,12 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       /* The set the alarm */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       stm32_rtc_beginwr();
       putreg16(regvals.cnth, STM32_RTC_ALRH);
       putreg16(regvals.cntl, STM32_RTC_ALRL);
       stm32_rtc_endwr();
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       ret = OK;
     }
@@ -715,12 +715,12 @@ int stm32_rtc_cancelalarm(void)
 
       /* Unset the alarm */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       stm32_rtc_beginwr();
       putreg16(0xffff, STM32_RTC_ALRH);
       putreg16(0xffff, STM32_RTC_ALRL);
       stm32_rtc_endwr();
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       ret = OK;
     }

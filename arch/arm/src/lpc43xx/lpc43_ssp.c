@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_ssp.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
@@ -693,7 +694,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Configure clocking */
 
@@ -720,7 +721,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
   lpc43_pin_config(PINCONF_SSP0_MISO);
   lpc43_pin_config(PINCONF_SSP0_MOSI);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return &g_ssp0dev;
 }
@@ -746,7 +747,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Configure clocking */
 
@@ -773,7 +774,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
   lpc43_pin_config(PINCONF_SSP1_MISO);
   lpc43_pin_config(PINCONF_SSP1_MOSI);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return &g_ssp1dev;
 }

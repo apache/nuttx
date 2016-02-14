@@ -921,7 +921,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
   uint64_t   tmp;
 
   DEBUGASSERT(priv && mode);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Are we enabling or disabling RS-485 support? */
 
@@ -1000,7 +1000,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
       up_serialout(priv, LPC43_UART_RS485DLY_OFFSET, regval);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -1022,7 +1022,7 @@ static inline int up_get_rs485_mode(struct up_dev_s *priv,
   uint32_t regval;
 
   DEBUGASSERT(priv && mode);
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Assume disabled */
 
@@ -1061,7 +1061,7 @@ static inline int up_get_rs485_mode(struct up_dev_s *priv,
        mode->delay_rts_after_send = (1000 * regval) / priv->baud;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif
@@ -1142,18 +1142,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         up_enablebreaks(priv, true);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         up_enablebreaks(priv, false);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
@@ -1267,7 +1267,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1286,7 +1286,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->ier &= ~UART_IER_THREIE;
       up_serialout(priv, LPC43_UART_IER_OFFSET, priv->ier);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

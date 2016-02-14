@@ -675,7 +675,7 @@ int sam_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
   /* Is there already something waiting on the ALARM? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (g_alarmcb == NULL)
     {
       /* No.. Save the callback function pointer */
@@ -746,7 +746,7 @@ int sam_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif

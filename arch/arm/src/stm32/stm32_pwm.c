@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_pwm.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -2109,7 +2109,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Disable further interrupts and stop the timer */
 
@@ -2222,7 +2222,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   regval &= ~resetbit;
   putreg32(regval, regaddr);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   pwmvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   pwm_dumpregs(priv, "After stop");

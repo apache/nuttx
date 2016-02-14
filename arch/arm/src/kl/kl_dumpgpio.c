@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_gpio.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include "up_arch.h"
 
 #include "chip.h"
@@ -120,7 +121,7 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
@@ -129,7 +130,7 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
         getreg32(base + KL_GPIO_PDIR_OFFSET),
         getreg32(base + KL_GPIO_PDDR_OFFSET));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_DEBUG */

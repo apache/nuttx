@@ -110,7 +110,7 @@ static void lpc43_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -136,7 +136,7 @@ static void lpc43_dumpnvic(const char *msg, int irq)
   lldbg("              %08x %08x %08x\n",
         getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
         getreg32(NVIC_IRQ56_59_PRIORITY));
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define lpc43_dumpnvic(msg, irq)

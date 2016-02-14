@@ -343,7 +343,7 @@ static inline void lpc11_uart0config(void)
 
   /* Step 1: Pins configuration */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   lpc11_configgpio(GPIO_UART0_TXD);
   lpc11_configgpio(GPIO_UART0_RXD);
 
@@ -356,7 +356,7 @@ static inline void lpc11_uart0config(void)
   /* Step 3: Enable clocking UART */
 
   putreg32(1, LPC11_SYSCON_UARTCLKDIV);
-  irqrestore(flags);
+  leave_critical_section(flags);
 };
 #endif
 
@@ -682,18 +682,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         up_enablebreaks(priv, true);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         up_enablebreaks(priv, false);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
@@ -863,7 +863,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -883,7 +883,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       up_serialout(priv, LPC11_UART_IER_OFFSET, priv->ier);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

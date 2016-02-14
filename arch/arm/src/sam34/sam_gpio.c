@@ -2,7 +2,7 @@
  * arch/arm/src/sam34/sam_gpio.c
  * General Purpose Input/Output (GPIO) logic for the SAM3U, SAM4S and SAM4E
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -66,14 +67,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -82,8 +75,9 @@ static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_gpiobase
  *
@@ -382,7 +376,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable writing to GPIO registers */
 
@@ -417,7 +411,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
   /* Disable writing to GPIO registers */
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return ret;
 }
@@ -493,7 +487,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("PIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
   lldbg("    PSR: %08x    OSR: %08x   IFSR: %08x   ODSR: %08x\n",
@@ -532,7 +526,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
         getreg32(base + SAM_PIO_SCHMITT_OFFSET));
 #endif
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

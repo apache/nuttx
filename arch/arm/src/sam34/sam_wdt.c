@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_wdt.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
@@ -545,7 +546,8 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
   wdvdbg("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
-  flags = irqsave();
+
+  flags = enter_critical_section();
   oldhandler = priv->handler;
 
   /* Save the new handler */
@@ -574,8 +576,9 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
       up_disable_irq(STM32_IRQ_WWDG);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldhandler;
+
 #endif
   ASSERT(0);
   return NULL;

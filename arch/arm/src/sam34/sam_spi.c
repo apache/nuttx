@@ -52,6 +52,7 @@
 
 #include <arch/board/board.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
@@ -1831,7 +1832,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
     {
       /* Enable clocking to the SPI block */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 #if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM34_SPI1)
       if (spino == 0)
 #endif
@@ -1873,7 +1874,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
       spi_putreg(spi, SPI_CR_SWRST, SAM_SPI_CR_OFFSET);
       spi_putreg(spi, SPI_CR_SWRST, SAM_SPI_CR_OFFSET);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Configure the SPI mode register */
 

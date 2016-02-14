@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_ehci.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
@@ -1588,7 +1589,7 @@ static int lpc31_ioc_setup(struct lpc31_rhport_s *rhport, struct lpc31_epinfo_s 
 
   /* Is the device still connected? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (rhport->connected)
     {
       /* Then set iocwait to indicate that we expect to be informed when
@@ -1607,7 +1608,7 @@ static int lpc31_ioc_setup(struct lpc31_rhport_s *rhport, struct lpc31_epinfo_s 
       ret              = OK;     /* We are good to go */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2575,7 +2576,7 @@ static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
 
   /* Is the device still connected? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (rhport->connected)
     {
       /* Then save callback information to used when either (1) the
@@ -2591,7 +2592,7 @@ static inline int lpc31_ioc_async_setup(struct lpc31_rhport_s *rhport,
       ret              = OK;       /* We are good to go */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif
@@ -3450,7 +3451,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
    * ports or until an error occurs.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (; ; )
     {
       /* Check for a change in the connection state on any root hub port */
@@ -3472,7 +3473,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
 
               connport->connected = rhport->connected;
               *hport = connport;
-              irqrestore(flags);
+              leave_critical_section(flags);
 
               usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
                               rhpndx + 1, rhport->connected);
@@ -3493,7 +3494,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
           g_ehci.hport = NULL;
 
           *hport = (struct usbhost_hubport_s *)connport;
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
                           connport->port + 1, connport->connected);
@@ -4510,7 +4511,7 @@ static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * related race conditions.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_USBHOST_ASYNCH
   callback         = epinfo->callback;
   arg              = epinfo->arg;
@@ -4522,7 +4523,6 @@ static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   epinfo->arg      = NULL;
 #endif
   epinfo->iocwait  = false;
-  irqrestore(flags);
 
   /* This will prevent any callbacks from occurring while are performing
    * the cancellation.  The transfer may still be in progress, however, so
@@ -4531,7 +4531,7 @@ static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   epinfo->callback = NULL;
   epinfo->arg      = NULL;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Bail if there is no transfer in progress for this endpoint */
 
@@ -4691,7 +4691,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
 
   /* Report the connection event */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGASSERT(g_ehci.hport == NULL); /* REVISIT */
 
   g_ehci.hport = hport;
@@ -4701,7 +4701,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
       lpc31_givesem(&g_ehci.pscsem);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 #endif

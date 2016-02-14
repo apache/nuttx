@@ -48,7 +48,7 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -176,18 +176,18 @@ void up_lowputc(char ch)
        * atomic.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       if ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
         SCI_FLR_TXRDY) != 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, TMS570_CONSOLE_BASE + TMS570_SCI_TD_OFFSET);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 }

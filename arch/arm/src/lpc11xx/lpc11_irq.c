@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_irq.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,10 +69,6 @@
 volatile uint32_t *current_regs;
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -89,7 +85,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  ISER:       %08x ICER:   %08x\n",
@@ -113,7 +109,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
   lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #else

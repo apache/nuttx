@@ -1,7 +1,7 @@
 /****************************************************************************
  * arm/arm/src/efm32/efm32_spi.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2014 Bouteville Pierre-Noel. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bouteville Pierre-Noel <pnb990@gmail.com>
@@ -49,6 +49,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
@@ -454,7 +455,7 @@ static void spi_dmarxwait(struct efm32_spidev_s *priv)
 
   /* Take the semaphore (perhaps waiting). */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   while (sem_wait(&priv->rxdmasem) != 0)
     {
       /* The only case that an error should occur here is if the wait was
@@ -472,7 +473,7 @@ static void spi_dmarxwait(struct efm32_spidev_s *priv)
       wd_cancel(priv->wdog);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -491,7 +492,7 @@ static void spi_dmatxwait(struct efm32_spidev_s *priv)
 
   /* Take the semaphore (perhaps waiting). */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   while (sem_wait(&priv->txdmasem) != 0)
     {
       /* The only case that an error should occur here is if the wait was
@@ -509,7 +510,7 @@ static void spi_dmatxwait(struct efm32_spidev_s *priv)
       wd_cancel(priv->wdog);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -1444,7 +1445,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Start the DMAs */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       spi_dmarxstart(priv);
       spi_dmatxstart(priv);
 
@@ -1462,7 +1463,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       spi_dmatxwait(priv);
       spi_dmarxwait(priv);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #endif /* CONFIG_EFM32_SPI_DMA */
@@ -1718,7 +1719,7 @@ struct spi_dev_s *efm32_spibus_initialize(int port)
     {
       /* No, then initialize it now */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Initialize the state structure */
 
@@ -1731,14 +1732,14 @@ struct spi_dev_s *efm32_spibus_initialize(int port)
       if (ret < 0)
         {
           spidbg("ERROR: Failed to initialize SPI port %d\n", port);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return NULL;
         }
 
       /* Now we are initialized */
 
       priv->initialized = true;
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return (struct spi_dev_s *)priv;

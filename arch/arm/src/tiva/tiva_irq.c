@@ -110,7 +110,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -176,7 +176,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
 #if NR_VECTORS > 127
 #  warning Missing output
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 #  define tiva_dumpnvic(msg, irq)

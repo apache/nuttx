@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kinetis/kinetis_pinirq.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
@@ -286,7 +287,7 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr)
   /* Get the table associated with this port */
 
   DEBUGASSERT(port < KINETIS_NPORTS);
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (port)
     {
 #ifdef CONFIG_KINETIS_PORTAINTS
@@ -315,6 +316,7 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr)
         break;
 #endif
       default:
+        leave_critical_section(flags);
         return NULL;
     }
 
@@ -325,6 +327,7 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr)
 
    /* And return the old PIN isr address */
 
+   leave_critical_section(flags);
    return oldisr;
 #else
    return NULL;

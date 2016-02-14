@@ -89,7 +89,7 @@ static void kl_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
   lldbg("  ISER:       %08x ICER:   %08x\n",
@@ -113,7 +113,7 @@ static void kl_dumpnvic(const char *msg, int irq)
   lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #else

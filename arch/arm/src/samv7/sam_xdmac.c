@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_xdmac.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
 #include <arch/samv7/chip.h>
 
 #include "up_arch.h"
@@ -2002,9 +2001,9 @@ void sam_dmastop(DMA_HANDLE handle)
   dmavdbg("xdmach: %p\n", xdmach);
   DEBUGASSERT(xdmach != NULL);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sam_dmaterminate(xdmach, -EINTR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2031,7 +2030,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
    * cause lost interrupts.
    */
 
-  flags        = irqsave();
+  flags        = enter_critical_section();
 
   regs->gtype  = sam_getdmac(xdmac, SAM_XDMAC_GTYPE_OFFSET);
   regs->gcfg   = sam_getdmac(xdmac, SAM_XDMAC_GCFG_OFFSET);
@@ -2056,7 +2055,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->csus   = sam_getdmach(xdmach, SAM_XDMACH_CSUS_OFFSET);
   regs->cdus   = sam_getdmach(xdmach, SAM_XDMACH_CDUS_OFFSET);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 

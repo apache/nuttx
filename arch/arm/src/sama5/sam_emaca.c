@@ -1779,7 +1779,7 @@ static int sam_ifdown(struct net_driver_s *dev)
 
   /* Disable the EMAC interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(SAM_IRQ_EMAC);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -1797,7 +1797,7 @@ static int sam_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1831,7 +1831,7 @@ static int sam_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1842,7 +1842,7 @@ static int sam_txavail(struct net_driver_s *dev)
       sam_dopoll(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -252,7 +252,7 @@ static void dbgu_shutdown(struct uart_dev_s *dev)
 
   /* The following must be atomic */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Reset and disable receiver and transmitter */
 
@@ -262,7 +262,7 @@ static void dbgu_shutdown(struct uart_dev_s *dev)
   /* Disable all interrupts */
 
   putreg32(DBGU_INT_ALLINTS, SAM_DBGU_IDR);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 }
 
@@ -510,7 +510,7 @@ static void dbgu_txint(struct uart_dev_s *dev, bool enable)
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX holding register register
@@ -534,7 +534,7 @@ static void dbgu_txint(struct uart_dev_s *dev, bool enable)
       putreg32(DBGU_INT_TXRDY, SAM_DBGU_IDR);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

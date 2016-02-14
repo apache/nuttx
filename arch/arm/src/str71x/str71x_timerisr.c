@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/str71x/str71x_timerisr.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -170,7 +172,7 @@ void up_timer_initialize(void)
 
   /* Make sure that timer0 is disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   putreg16(0x0000, STR71X_TIMER0_CR1);
   putreg16(0x0000, STR71X_TIMER0_CR2);
   putreg16(0x0000, STR71X_TIMER0_SR);
@@ -211,5 +213,5 @@ void up_timer_initialize(void)
   /* And enable the timer interrupt */
 
   up_enable_irq(STR71X_IRQ_SYSTIMER);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }

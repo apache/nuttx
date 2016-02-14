@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "nvic.h"
@@ -92,7 +92,7 @@ void lpc43_softreset(void)
 
   /* Disable interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Reset all of the peripherals that we can (safely) */
 
@@ -121,5 +121,5 @@ void lpc43_softreset(void)
 
   putreg32(0xffffffff, NVIC_IRQ0_31_CLRPEND);
   putreg32(0xffffffff, NVIC_IRQ32_63_CLRPEND);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }

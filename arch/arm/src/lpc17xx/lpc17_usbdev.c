@@ -53,7 +53,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -659,7 +659,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
 
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc17_putreg(USBDEV_INT_CDFULL | USBDEV_INT_CCEMPTY, LPC17_USBDEV_INTCLR);
 
   /* Shift the command in position and mask out extra bits */
@@ -782,7 +782,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
 
   /* Restore the interrupt flags */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return tmp;
 }
 
@@ -1022,9 +1022,9 @@ static void lpc17_reqcomplete(struct lpc17_ep_s *privep, int16_t result)
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   privreq = lpc17_rqdequeue(privep);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -2622,7 +2622,7 @@ static int lpc17_epdisable(FAR struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc17_cancelrequests(privep);
 
   /* Disable endpoint and interrupt */
@@ -2637,7 +2637,7 @@ static int lpc17_epdisable(FAR struct usbdev_ep_s *ep)
   regval &= ~mask;
   lpc17_putreg(regval, LPC17_USBDEV_EPINTEN);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2815,7 +2815,7 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = irqsave();
+  flags       = enter_critical_section();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2861,7 +2861,7 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2888,9 +2888,9 @@ static int lpc17_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc17_cancelrequests(privep);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2909,7 +2909,7 @@ static int lpc17_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
   lpc17_usbcmd(CMD_USBDEV_EPSETSTATUS | privep->epphy, (resume ? 0 : CMD_SETSTAUS_ST));
 
@@ -2919,7 +2919,7 @@ static int lpc17_epstall(FAR struct usbdev_ep_s *ep, bool resume)
     {
       (void)lpc17_wrrequest(privep);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3021,7 +3021,7 @@ static FAR struct usbdev_ep_s *lpc17_allocep(FAR struct usbdev_s *dev, uint8_t e
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       epset &= priv->epavail;
       if (epset)
         {
@@ -3035,7 +3035,7 @@ static FAR struct usbdev_ep_s *lpc17_allocep(FAR struct usbdev_s *dev, uint8_t e
                   /* Mark the IN/OUT endpoint no longer available */
 
                   priv->epavail &= ~(3 << (bit & ~1));
-                  irqrestore(flags);
+                  leave_critical_section(flags);
 
                   /* And return the pointer to the standard endpoint structure */
 
@@ -3044,7 +3044,7 @@ static FAR struct usbdev_ep_s *lpc17_allocep(FAR struct usbdev_s *dev, uint8_t e
             }
           /* Shouldn't get here */
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_NOEP), (uint16_t)eplog);
@@ -3071,9 +3071,9 @@ static void lpc17_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
     {
       /* Mark the endpoint as available */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       priv->epavail |= (1 << privep->epphy);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -3117,14 +3117,14 @@ static int lpc17_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, (uint16_t)g_usbdev.devstatus);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
     {
       arg |= CMD_STATUS_CONNECT;
     }
 
   lpc17_usbcmd(CMD_USBDEV_SETSTATUS, arg);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3201,7 +3201,7 @@ void up_usbinitialize(void)
 
   /* Step 1: Enable power by setting PCUSB in the PCONP register */
 
-  flags   = irqsave();
+  flags   = enter_critical_section();
   regval  = lpc17_getreg(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUSB;
   lpc17_putreg(regval, LPC17_SYSCON_PCONP);
@@ -3240,7 +3240,7 @@ void up_usbinitialize(void)
   regval = lpc17_getreg(LPC17_SYSCON_USBINTST);
   regval &= ~SYSCON_USBINTST_ENINTS;
   lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Initialize the device state structure */
 
@@ -3325,11 +3325,11 @@ void up_usbinitialize(void)
    * driver
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   regval = lpc17_getreg(LPC17_SYSCON_USBINTST);
   regval |= SYSCON_USBINTST_ENINTS;
   lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Disconnect device */
 
@@ -3373,7 +3373,7 @@ void up_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   lpc17_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
   lpc17_usbcmd(CMD_USBDEV_CONFIG, 0);
@@ -3388,7 +3388,7 @@ void up_usbuninitialize(void)
   regval = lpc17_getreg(LPC17_SYSCON_PCONP);
   regval &= ~SYSCON_PCONP_PCUSB;
   lpc17_putreg(regval, LPC17_SYSCON_PCONP);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

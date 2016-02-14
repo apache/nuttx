@@ -53,7 +53,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -1164,7 +1164,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
    * CGU registers will be modified.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* The SPIFI will receive clocking from a divider per the settings
    * provided in the board.h file.  Configure PLL1 as the input clock
@@ -1180,7 +1180,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
   /* Configure SPIFI pins */
 
   lpc43_spifi_pinconfig();
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Initialize the SPIFI ROM driver */
 
