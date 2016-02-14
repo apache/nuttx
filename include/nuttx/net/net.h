@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
- *   Copyright (C) 2007, 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
 #include <semaphore.h>
 
 #ifndef CONFIG_NET_NOINTS
-#  include <arch/irq.h>
+#  include <nuttx/irq.h>
 #endif
 
 /****************************************************************************
@@ -253,7 +253,7 @@ void net_initialize(void);
 #ifdef CONFIG_NET_NOINTS
 net_lock_t net_lock(void);
 #else
-#  define net_lock() irqsave()
+#  define net_lock() enter_critical_section()
 #endif
 
 /****************************************************************************
@@ -267,7 +267,7 @@ net_lock_t net_lock(void);
 #ifdef CONFIG_NET_NOINTS
 void net_unlock(net_lock_t flags);
 #else
-#  define net_unlock(f) irqrestore(f)
+#  define net_unlock(f) leave_critical_section(f)
 #endif
 
 /****************************************************************************

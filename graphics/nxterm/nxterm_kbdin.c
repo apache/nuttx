@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/graphics/nxterm/nxterm_kbdin.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,21 +46,11 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+
 #include "nxterm.h"
 
 #ifdef CONFIG_NXTERM_NXKBDIN
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -81,7 +71,7 @@ static void nxterm_pollnotify(FAR struct nxterm_state_s *priv, pollevent_t event
 
   for (i = 0; i < CONFIG_NXTERM_NPOLLWAITERS; i++)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
       fds   = priv->fds[i];
       if (fds)
         {
@@ -91,7 +81,8 @@ static void nxterm_pollnotify(FAR struct nxterm_state_s *priv, pollevent_t event
               sem_post(fds->sem);
             }
         }
-      irqrestore(flags);
+
+      leave_critical_section(flags);
     }
 }
 #else
