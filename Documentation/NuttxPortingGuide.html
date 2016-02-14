@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 01, 2016</p>
+      <p>Last Updated: February 14, 2016</p>
     </td>
   </tr>
 </table>
@@ -509,6 +509,7 @@
       <li>
         <code>irqstate_t irqsave(void)</code>:
         Used to disable all interrupts.
+        In the case of multi-CPU platforms, this function disables interrupts on CPUs.
       </li>
       <li>
         <code>void irqrestore(irqstate_t flags)</code>:
