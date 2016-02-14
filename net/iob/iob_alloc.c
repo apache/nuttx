@@ -50,6 +50,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
@@ -89,7 +90,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
    * we are waiting for I/O buffers to become free.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   do
     {
       /* Try to get an I/O buffer.  If successful, the semaphore count
@@ -158,7 +159,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
     }
   while (ret == OK && iob == NULL);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return iob;
 }
 
@@ -219,7 +220,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
    * to protect the free list:  We disable interrupts very briefly.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
 #if CONFIG_IOB_THROTTLE > 0
   /* If there are free I/O buffers for this allocation */
@@ -257,7 +258,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
           g_throttle_sem.semcount--;
           DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
 #endif
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           /* Put the I/O buffer in a known state */
 
@@ -269,6 +270,6 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }

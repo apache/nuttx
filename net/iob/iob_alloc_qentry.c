@@ -50,6 +50,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
@@ -83,7 +84,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
    * re-enabled while we are waiting for I/O buffers to become free.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   do
     {
       /* Try to get an I/O buffer chain container.  If successful, the
@@ -152,7 +153,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
     }
   while (ret == OK && !qentry);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return qentry;
 }
 
@@ -207,7 +208,7 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
    * to protect the free list:  We disable interrupts very briefly.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   iobq  = g_iob_freeqlist;
   if (iobq)
     {
@@ -233,7 +234,7 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
       iobq->qe_head = NULL; /* Nothing is contained */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return iobq;
 }
 

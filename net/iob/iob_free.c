@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/iob/iob_free.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,26 +50,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -128,7 +113,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * protect the free list:  We disable interrupts very briefly.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   iob->io_flink = g_iob_freelist;
   g_iob_freelist = iob;
 
@@ -138,7 +123,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 #if CONFIG_IOB_THROTTLE > 0
   sem_post(&g_throttle_sem);
 #endif
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* And return the I/O buffer after the one that was freed */
 
