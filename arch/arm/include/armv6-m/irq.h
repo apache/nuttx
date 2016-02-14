@@ -213,6 +213,15 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
+/* Name: up_irq_save, up_irq_restore, and friends.
+ *
+ * NOTE: This function should never be called from application code and,
+ * as a general rule unless you really know what you are doing, this
+ * function should not be called directly from operation system code either:
+ * Typically, the wrapper functions, enter_critical_section() and
+ * leave_critical section(), are probably what you really want.
+ */
+
 /* Get/set the PRIMASK register */
 
 static inline uint8_t getprimask(void) inline_function;
@@ -250,8 +259,8 @@ static inline void irqdisable(void)
 
 /* Save the current primask state & disable IRQs */
 
-static inline irqstate_t irqsave(void) inline_function;
-static inline irqstate_t irqsave(void)
+static inline irqstate_t up_irq_save(void) inline_function;
+static inline irqstate_t up_irq_save(void)
 {
   unsigned short primask;
 
@@ -280,8 +289,8 @@ static inline void irqenable(void)
 
 /* Restore saved primask state */
 
-static inline void irqrestore(irqstate_t flags) inline_function;
-static inline void irqrestore(irqstate_t flags)
+static inline void up_irq_restore(irqstate_t flags) inline_function;
+static inline void up_irq_restore(irqstate_t flags)
 {
   /* If bit 0 of the primask is 0, then we need to restore
    * interrupts.

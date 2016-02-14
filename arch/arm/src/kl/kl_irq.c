@@ -134,7 +134,7 @@ static void kl_dumpnvic(const char *msg, int irq)
 #ifdef CONFIG_DEBUG
 static int kl_nmi(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -142,7 +142,7 @@ static int kl_nmi(int irq, FAR void *context)
 
 static int kl_pendsv(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -150,7 +150,7 @@ static int kl_pendsv(int irq, FAR void *context)
 
 static int kl_reserved(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

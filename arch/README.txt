@@ -107,10 +107,17 @@ include/irq.h
   - struct xcptcontext.  This structures represents the saved context
     of a thread.
 
-  - irqstate_t irqsave(void) -- Used to disable all interrupts.
+  - irqstate_t up_irq_save(void) -- Used to disable all interrupts.
 
-  - void irqrestore(irqstate_t flags) -- Used to restore interrupt
-    enables to the same state as before irqsave was called.
+  - void upirq_restore(irqstate_t flags) -- Used to restore interrupt
+    enables to the same state as before up_irq_save was called.
+
+  NOTE: These interfaces are not available to application code but can
+  only be used withint the operating system code.  And, in general,
+  these functions should *never* be called directly, not unless you
+  know absolutely well what you are doing.  Rather you shoudl typically
+  use the wrapper functions enter_critical_section() and leave_critical_section()
+  as prototyped in include/nuttx/irq.h.
 
   This file must also define NR_IRQS, the total number of IRQs supported
   by the board.

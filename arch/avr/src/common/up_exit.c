@@ -136,7 +136,7 @@ void _exit(int status)
    * task is started.
    */
 
-  (void)irqsave();
+  (void)up_irq_save();
 
   slldbg("TCB=%p exiting\n", this_task());
 

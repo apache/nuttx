@@ -106,7 +106,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state */
 
-  irqrestore(regs[REG_SREG]);
+  up_irq_restore(regs[REG_SREG]);
 
   /* Deliver the signals */
 
@@ -118,7 +118,7 @@ void up_sigdeliver(void)
    */
 
   sdbg("Resuming\n");
-  (void)irqsave();
+  (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of execution. This is an

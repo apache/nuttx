@@ -513,10 +513,16 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: irqsave
+ * Name: up_irq_save
  *
  * Description:
  *   Save the current interrupt state and disable interrupts.
+ *
+ *   NOTE: This function should never be called from application code and,
+ *   as a general rule unless you really know what you are doing, this
+ *   function should not be called directly from operation system code either:
+ *   Typically, the wrapper functions, enter_critical_section() is probably
+ *   what you really want.
  *
  * Input Parameters:
  *   None
@@ -526,14 +532,20 @@ extern "C"
  *
  ****************************************************************************/
 
-irqstate_t irqsave(void);
+irqstate_t up_irq_save(void);
 
 /****************************************************************************
- * Name: irqrestore
+ * Name: up_irq_restore
  *
  * Description:
  *   Restore the previous interrupt state (i.e., the one previously returned
- *   by irqsave())
+ *   by up_irq_save())
+ *
+ *   NOTE: This function should never be called from application code and,
+ *   as a general rule unless you really know what you are doing, this
+ *   function should not be called directly from operation system code either:
+ *   Typically, the wrapper functions, leave_critical_section() is probably
+ *   what you really want.
  *
  * Input Parameters:
  *   state - The interrupt state to be restored.
@@ -543,7 +555,7 @@ irqstate_t irqsave(void);
  *
  ****************************************************************************/
 
-void irqrestore(irqstate_t irqtate);
+void up_irq_restore(irqstate_t irqtate);
 
 #undef EXTERN
 #ifdef __cplusplus

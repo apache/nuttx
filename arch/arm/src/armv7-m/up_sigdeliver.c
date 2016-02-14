@@ -124,9 +124,9 @@ void up_sigdeliver(void)
   /* Then restore the task interrupt state */
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  irqrestore((uint8_t)regs[REG_BASEPRI]);
+  up_irq_restore((uint8_t)regs[REG_BASEPRI]);
 #else
-  irqrestore((uint16_t)regs[REG_PRIMASK]);
+  up_irq_restore((uint16_t)regs[REG_PRIMASK]);
 #endif
 
   /* Deliver the signal */
@@ -139,7 +139,7 @@ void up_sigdeliver(void)
    */
 
   sdbg("Resuming\n");
-  (void)irqsave();
+  (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of

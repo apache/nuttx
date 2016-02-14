@@ -413,7 +413,7 @@
  * into the game" via a PendSV interrupt).
  *
  * In the normal course of things, interrupts must occasionally be disabled
- * using the irqsave() inline function to prevent contention in use of
+ * using the up_irq_save() inline function to prevent contention in use of
  * resources that may be shared between interrupt level and non-interrupt
  * level logic.  Now the question arises, if CONFIG_ARCH_HIPRI_INTERRUPT,
  * do we disable all interrupts (except SVCall), or do we only disable the

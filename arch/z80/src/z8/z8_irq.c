@@ -83,14 +83,14 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: irqsave
+ * Name: up_irq_save
  *
  * Description:
  *   Disable all interrupts; return previous interrupt state
  *
  ****************************************************************************/
 
-irqstate_t irqsave(void)
+irqstate_t up_irq_save(void)
 {
   /* Bit 7 (IRQE) of the IRQCTL register determines if interrupts were
    * enabled when this function was called.
@@ -108,17 +108,17 @@ irqstate_t irqsave(void)
 }
 
 /****************************************************************************
- * Name: irqrestore
+ * Name: up_irq_restore
  *
  * Description:
  *   Restore previous interrupt state
  *
  ****************************************************************************/
 
-void irqrestore(irqstate_t flags)
+void up_irq_restore(irqstate_t flags)
 {
   /* Bit 7 (IRQE) of the IRQCTL register determines if interrupts were
-   * enabled when irqsave() was called.
+   * enabled when up_irq_save() was called.
    */
 
   if ((flags & 0x80) != 0)

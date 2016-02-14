@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/types.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ typedef unsigned long long _uint64_t;
 typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
 
-/* This is the size of the interrupt state save returned by irqsave().  For
+/* This is the size of the interrupt state save returned by up_irq_save().  For
  * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
  * primask register value is returned,
  */

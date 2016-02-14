@@ -148,7 +148,7 @@ int up_hardfault(int irq, FAR void *context)
         current_regs[REG_XPSR],  current_regs[REG_PRIMASK]);
 #endif
 
-  (void)irqsave();
+  (void)up_irq_save();
   lldbg("PANIC!!! Hard fault\n");
   PANIC();
   return OK; /* Won't get here */

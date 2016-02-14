@@ -81,7 +81,7 @@ void up_irqinitialize(void)
  *
  *   This function implements disabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (irqsave() supports the global level, the device level is hardware
+ *   (up_irq_save() supports the global level, the device level is hardware
  *   specific).
  *
  ****************************************************************************/
@@ -98,7 +98,7 @@ void up_disable_irq(int irq)
  * Description:
  *   This function implements enabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (irqsave() supports the global level, the device level is hardware
+ *   (up_irq_save() supports the global level, the device level is hardware
  *   specific).
  *
  ****************************************************************************/

@@ -516,7 +516,7 @@ static inline void __setsr(irqstate_t sr)
 
 /* Return the current interrupt enable state & disable IRQs */
 
-static inline irqstate_t irqsave(void)
+static inline irqstate_t up_irq_save(void)
 {
   irqstate_t flags = __getsr();
   __setsr(flags | 0x000000f0);
@@ -540,7 +540,7 @@ static inline void irqenable(void)
 
 /* Restore saved IRQ state */
 
-static inline void irqrestore(irqstate_t flags)
+static inline void up_irq_restore(irqstate_t flags)
 {
   if ((flags & 0x000000f0) != 0x000000f0)
     {

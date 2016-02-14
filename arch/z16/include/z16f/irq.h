@@ -196,13 +196,19 @@ struct xcptcontext
 /* The ZDS-II provides built-in operations to test & disable and to restore
  * the interrupt state.
  *
- * irqstate_t irqsave(void);
- * void irqrestore(irqstate_t flags);
+ *   irqstate_t up_irq_save(void);
+ *   void up_irq_restore(irqstate_t flags);
+ *
+ * NOTE: These functions should never be called from application code and,
+ * as a general rule unless you really know what you are doing, this
+ * function should not be called directly from operation system code either:
+ * Typically, the wrapper functions, enter_critical_section() and
+ * leave_critical section(), are probably what you really want.
  */
 
 #ifdef __ZILOG__
-#  define irqsave()     TDI()
-#  define irqrestore(f) RI(f)
+#  define up_irq_save()     TDI()
+#  define up_irq_restore(f) RI(f)
 #endif
 
 /****************************************************************************
@@ -235,8 +241,8 @@ intrinsic void SET_VECTOR(int,void (* func) (void));
 intrinsic unsigned short TDI(void);
 
 #ifndef __ZILOG__
-irqstate_t irqsave(void);
-void       irqrestore(irqstate_t flags);
+irqstate_t up_irq_save(void);
+void       up_irq_restore(irqstate_t flags);
 #endif
 
 #undef EXTERN

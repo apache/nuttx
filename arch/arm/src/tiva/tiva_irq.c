@@ -196,7 +196,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
 #ifdef CONFIG_DEBUG
 static int tiva_nmi(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -204,7 +204,7 @@ static int tiva_nmi(int irq, FAR void *context)
 
 static int tiva_busfault(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
@@ -212,7 +212,7 @@ static int tiva_busfault(int irq, FAR void *context)
 
 static int tiva_usagefault(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
@@ -220,7 +220,7 @@ static int tiva_usagefault(int irq, FAR void *context)
 
 static int tiva_pendsv(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -228,7 +228,7 @@ static int tiva_pendsv(int irq, FAR void *context)
 
 static int tiva_dbgmonitor(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
@@ -236,7 +236,7 @@ static int tiva_dbgmonitor(int irq, FAR void *context)
 
 static int tiva_reserved(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

@@ -147,7 +147,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
 #ifdef CONFIG_DEBUG
 static int lpc17_nmi(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -155,7 +155,7 @@ static int lpc17_nmi(int irq, FAR void *context)
 
 static int lpc17_busfault(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
@@ -163,7 +163,7 @@ static int lpc17_busfault(int irq, FAR void *context)
 
 static int lpc17_usagefault(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
@@ -171,7 +171,7 @@ static int lpc17_usagefault(int irq, FAR void *context)
 
 static int lpc17_pendsv(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -179,7 +179,7 @@ static int lpc17_pendsv(int irq, FAR void *context)
 
 static int lpc17_dbgmonitor(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
@@ -187,7 +187,7 @@ static int lpc17_dbgmonitor(int irq, FAR void *context)
 
 static int lpc17_reserved(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

@@ -175,9 +175,18 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
-/* Save the current interrupt enable state & disable IRQs */
+/* Name: up_irq_save, up_irq_restore, and friends.
+ *
+ * NOTE: This function should never be called from application code and,
+ * as a general rule unless you really know what you are doing, this
+ * function should not be called directly from operation system code either:
+ * Typically, the wrapper functions, enter_critical_section() and
+ * leave_critical section(), are probably what you really want.
+ */
 
-static inline irqstate_t irqsave(void)
+ /* Save the current interrupt enable state & disable IRQs. */
+
+static inline irqstate_t up_irq_save(void)
 {
   unsigned int flags;
   unsigned int temp;
@@ -194,7 +203,7 @@ static inline irqstate_t irqsave(void)
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void irqrestore(irqstate_t flags)
+static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (

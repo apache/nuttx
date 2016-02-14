@@ -93,7 +93,7 @@ static void _up_assert(int errorcode) /* noreturn_function */
 
   if (up_interrupt_context() || this_task()->pid == 0)
     {
-       (void)irqsave();
+       (void)up_irq_save();
         for (;;)
           {
 #ifdef CONFIG_ARCH_LEDS

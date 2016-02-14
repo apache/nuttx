@@ -223,8 +223,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-irqstate_t irqsave(void) __naked;
-void       irqrestore(irqstate_t flags) __naked;
+/* Name: up_irq_save, up_irq_restore, and friends.
+ *
+ * NOTE: This function should never be called from application code and,
+ * as a general rule unless you really know what you are doing, this
+ * function should not be called directly from operation system code either:
+ * Typically, the wrapper functions, enter_critical_section() and
+ * leave_critical section(), are probably what you really want.
+ */
+
+irqstate_t up_irq_save(void) __naked;
+void       up_irq_restore(irqstate_t flags) __naked;
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 ;**************************************************************************
-; arch/z80/src/ez80/ez80_irqsave.asm
+; arch/z80/src/ez80/ez80_up_irq_save.asm
 ;
 ;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,8 +41,8 @@
 ; Global Symbols Expported
 ;**************************************************************************
 
-	xdef	_irqsave
-	xdef	_irqrestore
+	xdef	_up_irq_save
+	xdef	_up_irq_restore
 
 ;**************************************************************************
 ; Code
@@ -52,14 +52,14 @@
 	.assume ADL=1
 
 ;**************************************************************************
-;* Name: irqstate_t irqsave(void)
+;* Name: irqstate_t up_irq_save(void)
 ;*
 ;* Description:
 ;*   Disable all interrupts; return previous interrupt state
 ;*
 ;**************************************************************************
 
-_irqsave:
+_up_irq_save:
 	ld	a, i		; AF = interrupt state
 	di			; Interrupts are disabled (does not affect F)
 	push	af		; Transfer to HL via the stack
@@ -67,14 +67,14 @@ _irqsave:
 	ret			; And return
 
 ;**************************************************************************
-;* Name: void irqrestore(irqstate_t flags)
+;* Name: void up_irq_restore(irqstate_t flags)
 ;*
 ;* Description:
 ;*   Restore previous interrupt state
 ;*
 ;**************************************************************************
 
-_irqrestore:
+_up_irq_restore:
 	di			; Assume disabled
 	pop	hl		; HL = return address
 	pop	af		; AF Parity bit holds interrupt state

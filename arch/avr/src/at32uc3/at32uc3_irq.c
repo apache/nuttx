@@ -176,7 +176,7 @@ static int up_getgrp(unsigned int irq)
 
 static int avr32_xcptn(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   lldbg("PANIC!!! Exception IRQ: %d\n", irq);
   PANIC();
   return 0;
@@ -240,7 +240,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqrestore(0);
+  up_irq_restore(0);
 #endif
 }
 

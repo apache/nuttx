@@ -53,7 +53,7 @@
 #include <arch/chip/irq.h>
 
 /* Include architecture-specific IRQ definitions (including register
- * save structure and irqsave()/irqrestore() macros
+ * save structure and up_irq_save()/up_irq_restore() macros
  */
 
 #if defined(CONFIG_ARCH_HC12)

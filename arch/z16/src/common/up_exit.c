@@ -137,7 +137,7 @@ void _exit(int status)
    * the new task is resumed below.
    */
 
-  (void)irqsave();
+  (void)up_irq_save();
 
   slldbg("TCB=%p exiting\n", tcb);
 

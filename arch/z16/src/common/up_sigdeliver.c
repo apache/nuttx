@@ -120,7 +120,7 @@ void up_sigdeliver(void)
    */
 
   sdbg("Resuming\n");
-  (void)irqsave();
+  (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of execution. */

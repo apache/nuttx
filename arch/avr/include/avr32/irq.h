@@ -132,6 +132,15 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
+/* Name: up_irq_save, up_irq_restore, and friends.
+ *
+ * NOTE: This function should never be called from application code and,
+ * as a general rule unless you really know what you are doing, this
+ * function should not be called directly from operation system code either:
+ * Typically, the wrapper functions, enter_critical_section() and
+ * leave_critical section(), are probably what you really want.
+ */
+
 /* Read the AVR32 status register */
 
 static inline uint32_t avr32_sr(void)
@@ -160,7 +169,7 @@ static inline uint32_t avr32_evba(void)
 
 /* Save the current interrupt enable state & disable all interrupts */
 
-static inline irqstate_t irqsave(void)
+static inline irqstate_t up_irq_save(void)
 {
   irqstate_t sr = (irqstate_t)avr32_sr();
   __asm__ __volatile__ (
@@ -175,7 +184,7 @@ static inline irqstate_t irqsave(void)
 
 /* Restore saved interrupt state */
 
-static inline void irqrestore(irqstate_t flags)
+static inline void up_irq_restore(irqstate_t flags)
 {
   if ((flags & AVR32_SR_GM_MASK) == 0)
     {

@@ -83,7 +83,7 @@ typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
 
 /* This is the size of the interrupt state save returned by
- * irqsave()
+ * up_irq_save()
  */
 
 typedef unsigned int       irqstate_t;

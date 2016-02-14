@@ -90,7 +90,7 @@ volatile uint32_t *current_regs;
 #ifdef CONFIG_DEBUG
 static int sam_nmi(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -98,7 +98,7 @@ static int sam_nmi(int irq, FAR void *context)
 
 static int sam_pendsv(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -106,7 +106,7 @@ static int sam_pendsv(int irq, FAR void *context)
 
 static int sam_reserved(int irq, FAR void *context)
 {
-  (void)irqsave();
+  (void)up_irq_save();
   dbg("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

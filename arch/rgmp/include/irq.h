@@ -49,12 +49,15 @@
 #include <rgmp/trap.h>
 #include <rgmp/arch/arch.h>
 
-struct xcptcontext {
-    struct rgmp_context ctx;
-    // for signal using
-    unsigned int save_eip;
-    unsigned int save_eflags;
-    void *sigdeliver;
+struct xcptcontext
+{
+  struct rgmp_context ctx;
+
+  /* For signal using */
+
+  unsigned int save_eip;
+  unsigned int save_eflags;
+  void *sigdeliver;
 };
 
 void push_xcptcontext(struct xcptcontext *xcp);
@@ -62,16 +65,25 @@ void pop_xcptcontext(struct xcptcontext *xcp);
 
 extern int nest_irq;
 
-static inline irqstate_t irqsave(void)
+/* Name: up_irq_save, up_irq_restore, and friends.
+ *
+ * NOTE: This function should never be called from application code and,
+ * as a general rule unless you really know what you are doing, this
+ * function should not be called directly from operation system code either:
+ * Typically, the wrapper functions, enter_critical_section() and
+ * leave_critical section(), are probably what you really want.
+ */
+
+static inline irqstate_t up_irq_save(void)
 {
-	unsigned long flags;
-	local_irq_save(flags);
-    return flags;
+  unsigned long flags;
+  local_irq_save(flags);
+  return flags;
 }
 
-static inline void irqrestore(irqstate_t flags)
+static inline void up_irq_restore(irqstate_t flags)
 {
-    local_irq_restore(flags);
+  local_irq_restore(flags);
 }
 
 #endif /* !__ASSEMBLY__ */

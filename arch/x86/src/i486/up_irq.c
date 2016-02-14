@@ -272,7 +272,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqrestore(X86_FLAGS_IF);
+  up_irq_restore(X86_FLAGS_IF);
 #endif
 }
 

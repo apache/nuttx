@@ -93,7 +93,7 @@ typedef unsigned long      _uint32_t;
 typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
 
-/* This is the size of the interrupt state save returned by irqsave() */
+/* This is the size of the interrupt state save returned by up_irq_save() */
 
 typedef _uint8_t           irqstate_t;
 
