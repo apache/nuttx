@@ -2005,7 +2005,7 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
   FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  irqstate_ flags;
+  irqstate_t flags;
 
   ASSERT(dev);
 
