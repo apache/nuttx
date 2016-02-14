@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/can.h>
 
@@ -1460,7 +1461,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
         {
           /* Get the current queue status and semaphore count. */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           txfqs1 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
           (void)sem_getvalue(&priv->txfsem, &sval);
           txfqs2 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
@@ -1479,7 +1480,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
            * resynchronize, the semaphore count and try again.
            */
 
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
 
       /* We only have one useful bit of information in the TXFQS:
@@ -1523,7 +1524,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
               /* Bump up the count by one and try again */
 
               sem_post(&priv->txfsem);
-              irqrestore(flags);
+              leave_critical_section(flags);
               continue;
             }
 
@@ -1531,14 +1532,14 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
            * decrementing the count.
            */
 
-          irqrestore(flags);
+          leave_critical_section(flags);
           return;
         }
 
       /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
 
       ret = sem_wait(&priv->txfsem);
-      irqrestore(flags);
+      leave_critical_section(flags);
       DEBUGASSERT(ret == 0 || errno == EINTR);
     }
   while (ret < 0);
@@ -2301,7 +2302,7 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
 
   /* Enable/disable the receive interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   regval = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
 
   if (enable)
@@ -2314,7 +2315,7 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
     }
 
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2343,7 +2344,7 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
 
   /* Enable/disable the receive interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   regval = mcan_getreg(priv, SAM_MCAN_IE_OFFSET);
 
   if (enable)
@@ -2356,7 +2357,7 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
     }
 
   mcan_putreg(priv, SAM_MCAN_IE_OFFSET, regval);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2466,7 +2467,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
           /* Save the value of the new bit timing register */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           priv->btp = MCAN_BTP_BRP(brp) | MCAN_BTP_TSEG1(tseg1) |
                       MCAN_BTP_TSEG2(tseg2) | MCAN_BTP_SJW(sjw);
 
@@ -2502,7 +2503,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
               mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie & ~priv->txints);
             }
 
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
         break;
 

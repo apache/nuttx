@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
@@ -250,7 +251,7 @@ xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr)
   /* Get the table associated with this port */
 
   DEBUGASSERT(port < KL_NPORTS);
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (port)
     {
 #ifdef CONFIG_KL_PORTAINTS
@@ -264,6 +265,7 @@ xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr)
         break;
 #endif
       default:
+        leave_critical_section(flags);
         return NULL;
     }
 
@@ -274,6 +276,7 @@ xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr)
 
    /* And return the old PIN isr address */
 
+   leave_critical_section(flags);
    return oldisr;
 
 #else
