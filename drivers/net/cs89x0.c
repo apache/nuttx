@@ -861,7 +861,7 @@ static int cs89x0_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_CS89x0_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -872,7 +872,7 @@ static int cs89x0_ifdown(struct net_driver_s *dev)
   /* Reset the device */
 
   cs89x0->cs_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -900,7 +900,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -914,7 +914,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
       (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

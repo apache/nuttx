@@ -41,7 +41,7 @@
 
 #include <nuttx/power/pm.h>
 #include <nuttx/clock.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "pm.h"
 
@@ -116,7 +116,7 @@ enum pm_state_e pm_checkstate(void)
    * logic in pm_activity().
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check the elapsed time.  In periods of low activity, time slicing is
    * controlled by IDLE loop polling; in periods of higher activity, time
@@ -148,7 +148,7 @@ enum pm_state_e pm_checkstate(void)
       (void)pm_update(accum);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Return the recommended state.  Assuming that we are called from the
    * IDLE thread at the lowest priority level, any updates scheduled on the

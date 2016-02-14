@@ -59,7 +59,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Private Function Prototypes
@@ -134,7 +134,7 @@ static int adc_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = irqsave();
+              irqstate_t flags = enter_critical_section();
               ret = dev->ad_ops->ao_setup(dev);
               if (ret == OK)
                 {
@@ -152,7 +152,7 @@ static int adc_open(FAR struct file *filep)
                   dev->ad_ocount = tmp;
                 }
 
-              irqrestore(flags);
+              leave_critical_section(flags);
             }
         }
 
@@ -201,9 +201,9 @@ static int adc_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the ADC device */
 
-          flags = irqsave();       /* Disable interrupts */
+          flags = enter_critical_section();       /* Disable interrupts */
           dev->ad_ops->ao_shutdown(dev);       /* Disable the ADC */
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           sem_post(&dev->ad_closesem);
         }
@@ -244,7 +244,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
     {
       /* Interrupts must be disabled while accessing the ad_recv FIFO */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       while (dev->ad_recv.af_head == dev->ad_recv.af_tail)
         {
           /* The receive FIFO is empty -- was non-blocking mode selected? */
@@ -340,7 +340,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       ret = nread;
 
 return_with_irqdisabled:
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   avdbg("Returning: %d\n", ret);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/tsc2007.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -62,6 +62,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
@@ -299,7 +300,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new TSC2007 sample data available? */
 
@@ -334,7 +335,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -357,7 +358,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -403,7 +404,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
@@ -1297,10 +1298,10 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
    */
 
 #ifdef CONFIG_TSC2007_MULTIPLE
-  flags         = irqsave();
+  flags         = enter_critical_section();
   priv->flink   = g_tsc2007list;
   g_tsc2007list = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* Schedule work to perform the initial sampling and to set the data

@@ -57,7 +57,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Private Types
@@ -212,7 +212,7 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Visit each opened reference to the device */
 
@@ -262,7 +262,7 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
       lower->bl_enable(lower, 0, 0, NULL, NULL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -310,7 +310,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Sample the new button state */
 
@@ -382,7 +382,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 #endif
 
   priv->bu_sample = sample;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -481,10 +481,10 @@ static int btn_close(FAR struct file *filep)
    * detection anyway.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   closing = opriv->bo_closing;
   opriv->bo_closing = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (closing)
     {

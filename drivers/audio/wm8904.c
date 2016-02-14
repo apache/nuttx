@@ -3,7 +3,7 @@
  *
  * Audio device driver for Wolfson Microelectronics WM8904 Audio codec.
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -59,6 +59,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
@@ -71,14 +72,6 @@
 #include <nuttx/math.h>
 
 #include "wm8904.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
@@ -1324,7 +1317,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
    * against that possibility.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Add the completed buffer to the end of our doneq.  We do not yet
    * decrement the reference count.
@@ -1341,7 +1334,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
   /* REVISIT:  This can be overwritten */
 
   priv->result = result;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Now send a message to the worker thread, informing it that there are
    * buffers in the done queue that need to be cleaned up.
@@ -1376,13 +1369,13 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
    * use interrupt controls to protect against that possibility.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   while (dq_peek(&priv->doneq) != NULL)
     {
       /* Take the next buffer from the queue of completed transfers */
 
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       audvdbg("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
               apb, apb->curbyte, apb->nbytes, apb->flags);
@@ -1417,10 +1410,10 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
 #else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
 #endif
-      flags = irqsave();
+      flags = enter_critical_section();
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1468,9 +1461,9 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
        * to avoid a possible race condition.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       priv->inflight++;
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Send the entire audio buffer via I2S.  What is a reasonable timeout
        * to use?  This would depend on the bit rate and size of the buffer.

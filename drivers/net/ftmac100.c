@@ -284,7 +284,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   FAR struct ftmac100_txdes_s *txdes;
   int len = priv->ft_dev.d_len;
 //irqstate_t flags;
-//flags = irqsave();
+//flags = enter_critical_section();
 //nvdbg("flags=%08x\n", flags);
 
   txdes = ftmac100_current_txdes(priv);
@@ -323,7 +323,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   (void)wd_start(priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
                  ftmac100_txtimeout_expiry, 1, (wdparm_t)priv);
 
-//irqrestore(flags);
+//leave_critical_section(flags);
   return OK;
 }
 
@@ -981,11 +981,11 @@ static void ftmac100_interrupt_work(FAR void *arg)
   /* Process pending Ethernet interrupts */
 
   state = net_lock();
-//flags = irqsave();
+//flags = enter_critical_section();
 
   ftmac100_interrupt_process(priv);
 
-//irqrestore(flags);
+//leave_critical_section(flags);
   net_unlock(state);
 
   /* Re-enable Ethernet interrupts */
@@ -1024,7 +1024,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
    * condition here.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   priv->status = getreg32 (&iobase->isr);
 
@@ -1055,7 +1055,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
   work_queue(HPWORK, &priv->ft_work, ftmac100_interrupt_work, priv, 0);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 #else
   /* Process the interrupt now */
   putreg32 (INT_MASK_ALL_DISABLED, &iobase->imr);
@@ -1374,7 +1374,7 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_FTMAC100_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -1392,7 +1392,7 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ft_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1501,12 +1501,12 @@ static int ftmac100_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Perform the out-of-cycle poll now */
 
   ftmac100_txavail_process(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   return OK;

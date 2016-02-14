@@ -1411,7 +1411,7 @@ static int dm9x_ifdown(struct net_driver_s *dev)
 
   /* Disable the DM9X interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_DM9X_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -1428,7 +1428,7 @@ static int dm9x_ifdown(struct net_driver_s *dev)
   putreg(DM9X_ISR, DM9X_INT_ALL);     /* Clear interrupt status */
 
   dm9x->dm_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1457,7 +1457,7 @@ static int dm9x_txavail(struct net_driver_s *dev)
   irqstate_t flags;
 
   ndbg("Polling\n");
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1475,7 +1475,7 @@ static int dm9x_txavail(struct net_driver_s *dev)
           (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
         }
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

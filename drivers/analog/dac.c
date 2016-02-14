@@ -59,7 +59,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -143,7 +143,7 @@ static int dac_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = irqsave();
+              irqstate_t flags = enter_critical_section();
               ret = dev->ad_ops->ao_setup(dev);
               if (ret == OK)
                 {
@@ -157,7 +157,7 @@ static int dac_open(FAR struct file *filep)
                   dev->ad_ocount = tmp;
                 }
 
-              irqrestore(flags);
+              leave_critical_section(flags);
             }
         }
 
@@ -217,9 +217,9 @@ static int dac_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the DAC device */
 
-          flags = irqsave();       /* Disable interrupts */
+          flags = enter_critical_section();       /* Disable interrupts */
           dev->ad_ops->ao_shutdown(dev);       /* Disable the DAC */
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           sem_post(&dev->ad_closesem);
         }
@@ -289,7 +289,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
   /* Interrupts must disabled throughout the following */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the TX FIFO was empty when we started.  That is a clue that we have
    * to kick off a new TX sequence.
@@ -442,7 +442,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
   ret = nsent;
 
 return_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

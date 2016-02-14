@@ -59,7 +59,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/syslog/ramlog.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_RAMLOG
 
@@ -182,7 +182,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 
   for (i = 0; i < CONFIG_RAMLOG_NPOLLWAITERS; i++)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
       fds = priv->rl_fds[i];
       if (fds)
         {
@@ -192,7 +192,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
               sem_post(fds->sem);
             }
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #else
@@ -210,7 +210,7 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Calculate the write index AFTER the next byte is written */
 
@@ -226,7 +226,7 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
     {
       /* Yes... Return an indication that nothing was saved in the buffer. */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       return -EBUSY;
     }
 
@@ -234,7 +234,7 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   priv->rl_buffer[priv->rl_head] = ch;
   priv->rl_head = nexthead;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -494,7 +494,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
 
       /* Are there threads waiting for read data? */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 #ifndef CONFIG_RAMLOG_NONBLOCKING
       for (i = 0; i < priv->rl_nwaiters; i++)
         {
@@ -507,7 +507,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
       /* Notify all poll/select waiters that they can write to the FIFO */
 
       ramlog_pollnotify(priv, POLLIN);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 

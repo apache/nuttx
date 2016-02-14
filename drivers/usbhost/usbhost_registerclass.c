@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/usb/usbhost.h>
 
 #include "usbhost_registry.h"
@@ -104,14 +104,14 @@ int usbhost_registerclass(struct usbhost_registry_s *usbclass)
    * protected by disabling interrupts.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Add the new class ID info to the head of the list */
 
   usbclass->flink = g_classregistry;
   g_classregistry = usbclass;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

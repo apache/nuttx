@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/cc3000.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David_s5 <david_s5@nscdg.com>
  *
@@ -63,6 +63,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
@@ -1377,10 +1378,10 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           DEBUGASSERT(psize != NULL);
           rv = priv->rx_buffer_max_len;
-          flags = irqsave();
+          flags = enter_critical_section();
           priv->rx_buffer_max_len = *psize;
           priv->rx_buffer.pbuffer = kmm_realloc(priv->rx_buffer.pbuffer, *psize);
-          irqrestore(flags);
+          leave_critical_section(flags);
           DEBUGASSERT(priv->rx_buffer.pbuffer);
           *psize = rv;
           break;
@@ -1588,7 +1589,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 #ifdef CONFIG_CC3000_MULTIPLE
   priv->flink    = g_cc3000list;
   g_cc3000list = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* And return success (?) */
@@ -1726,7 +1727,7 @@ static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd)
       return sd;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       if (priv->sockets[s].sd == FREE_SLOT)
@@ -1738,7 +1739,7 @@ static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
 }
 
@@ -1769,7 +1770,7 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
       return sd;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->accepting_socket.acc.sd == sd)
     {
       priv->accepting_socket.acc.sd = CLOSE_SLOT;
@@ -1788,7 +1789,7 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   if (ps)
     {
       sched_lock();
@@ -1828,7 +1829,7 @@ static int cc3000_remote_closed_socket(FAR struct cc3000_dev_s *priv, int sd)
       return sd;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       if (priv->sockets[s].sd == sd)
@@ -1837,7 +1838,7 @@ static int cc3000_remote_closed_socket(FAR struct cc3000_dev_s *priv, int sd)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
 }

@@ -61,7 +61,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/ajoystick.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Private Types
@@ -216,7 +216,7 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Visit each opened reference to the device */
 
@@ -266,7 +266,7 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
       lower->al_enable(lower, 0, 0, NULL, NULL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -314,7 +314,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Sample the new button state */
 
@@ -386,7 +386,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 #endif
 
   priv->au_sample = sample;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -485,10 +485,10 @@ static int ajoy_close(FAR struct file *filep)
    * detection anyway.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   closing = opriv->ao_closing;
   opriv->ao_closing = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (closing)
     {

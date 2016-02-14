@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/max11802.c
  *
- *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Petteri Aimonen <jpa@nx.mail.kapsi.fi>
  *
@@ -57,6 +57,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
@@ -305,7 +306,7 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new MAX11802 sample data available? */
 
@@ -340,7 +341,7 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -363,7 +364,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -413,7 +414,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
@@ -1267,10 +1268,10 @@ int max11802_register(FAR struct spi_dev_s *spi,
    */
 
 #ifdef CONFIG_MAX11802_MULTIPLE
-  flags          = irqsave();
+  flags          = enter_critical_section();
   priv->flink    = g_max11802list;
   g_max11802list = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* Schedule work to perform the initial sampling and to set the data

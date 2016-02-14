@@ -2317,7 +2317,7 @@ static int enc_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->lower->disable(priv->lower);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -2331,7 +2331,7 @@ static int enc_ifdown(struct net_driver_s *dev)
   enc_pwrsave(priv);
 
   priv->ifstate = ENCSTATE_DOWN;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Un-lock the SPI bus */
 
@@ -2370,7 +2370,7 @@ static int enc_txavail(struct net_driver_s *dev)
 
   /* Ignore the notification if the interface is not yet up */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->ifstate == ENCSTATE_RUNNING)
     {
       /* Check if the hardware is ready to send another packet.  The driver
@@ -2389,7 +2389,7 @@ static int enc_txavail(struct net_driver_s *dev)
 
   /* Un-lock the SPI bus */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   enc_unlock(priv);
 
   return OK;

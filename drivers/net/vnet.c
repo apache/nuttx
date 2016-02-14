@@ -584,7 +584,7 @@ static int vnet_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -598,7 +598,7 @@ static int vnet_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   vnet->sk_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -630,7 +630,7 @@ static int vnet_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -652,7 +652,7 @@ static int vnet_txavail(struct net_driver_s *dev)
     }
 
 out:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

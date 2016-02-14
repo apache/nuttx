@@ -46,7 +46,7 @@
 #include <nuttx/board.h>
 #include <nuttx/input/buttons.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #undef __KERNEL__
 #include <arch/board/board.h>
@@ -135,7 +135,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
 
   /* Start with all interrupts disabled */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   btn_disable();
 
   illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
@@ -164,7 +164,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -182,7 +182,7 @@ static void btn_disable(void)
 
   /* Disable each button interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (id = 0; id < NUM_BUTTONS; id++)
     {
       (void)board_button_irq(id, NULL);
@@ -192,7 +192,7 @@ static void btn_disable(void)
 
   g_btnhandler = NULL;
   g_btnarg     = NULL;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

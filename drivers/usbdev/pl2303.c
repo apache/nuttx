@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/pl2303.c
  *
- *   Copyright (C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
@@ -53,6 +53,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
@@ -537,7 +538,7 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
 
   /* Disable interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Transfer bytes while we have bytes available and there is room in the request */
 
@@ -572,7 +573,7 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
       uart_datasent(serdev);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return nbytes;
 }
 
@@ -605,7 +606,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
     }
 #endif
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Use our IN endpoint for the transfer */
 
@@ -659,7 +660,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1216,7 +1217,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Process the received data unless this is some unusual condition */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (req->result)
     {
     case 0: /* Normal completion */
@@ -1227,7 +1228,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
     case -ESHUTDOWN: /* Disconnection */
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
       priv->nrdq--;
-      irqrestore(flags);
+      leave_critical_section(flags);
       return;
 
     default: /* Some other error occurred */
@@ -1243,7 +1244,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1279,10 +1280,10 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->reqlist);
   priv->nwrq++;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Send the next packet unless this was some unusual termination
    * condition
@@ -1448,10 +1449,10 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbclass_wrcomplete;
 
-      flags = irqsave();
+      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->reqlist);
       priv->nwrq++;     /* Count of write requests available */
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Report if we are selfpowered */
@@ -1573,7 +1574,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       DEBUGASSERT(priv->nwrq == CONFIG_PL2303_NWRREQS);
       while (!sq_empty(&priv->reqlist))
         {
@@ -1585,7 +1586,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
             }
         }
       DEBUGASSERT(priv->nwrq == 0);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Clear out all data in the circular buffer */
@@ -1900,7 +1901,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
    * connection.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_SERIAL_REMOVABLE
   uart_connected(&priv->serdev, false);
 #endif
@@ -1914,7 +1915,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
   priv->serdev.xmit.head = 0;
   priv->serdev.xmit.tail = 0;
   priv->rxhead = 0;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated.
@@ -2136,7 +2137,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
    * in the following.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* RX "interrupts" are enabled.  Is this a transition from disabled
@@ -2185,7 +2186,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
       priv->rxhead    = serdev->recv.head;
       priv->rxenabled = false;
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

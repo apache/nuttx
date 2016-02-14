@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/cdcacm.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
@@ -67,10 +68,6 @@
 #  include <nuttx/usb/composite.h>
 #  include "composite.h"
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -282,7 +279,7 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
 
   /* Disable interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Transfer bytes while we have bytes available and there is room in the request */
 
@@ -317,7 +314,7 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
       uart_datasent(serdev);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return nbytes;
 }
 
@@ -350,7 +347,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
     }
 #endif
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Use our IN endpoint for the transfer */
 
@@ -404,7 +401,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -834,7 +831,7 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Process the received data unless this is some unusual condition */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (req->result)
     {
     case 0: /* Normal completion */
@@ -845,7 +842,7 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
     case -ESHUTDOWN: /* Disconnection */
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
       priv->nrdq--;
-      irqrestore(flags);
+      leave_critical_section(flags);
       return;
 
     default: /* Some other error occurred */
@@ -862,7 +859,7 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -898,10 +895,10 @@ static void cdcacm_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->reqlist);
   priv->nwrq++;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Send the next packet unless this was some unusual termination
    * condition
@@ -1079,10 +1076,10 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = cdcacm_wrcomplete;
 
-      flags = irqsave();
+      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->reqlist);
       priv->nwrq++;     /* Count of write requests available */
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Report if we are selfpowered (unless we are part of a composite device) */
@@ -1208,7 +1205,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them)
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       DEBUGASSERT(priv->nwrq == CONFIG_CDCACM_NWRREQS);
       while (!sq_empty(&priv->reqlist))
         {
@@ -1221,7 +1218,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
         }
 
       DEBUGASSERT(priv->nwrq == 0);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Clear out all data in the circular buffer */
 
@@ -1648,7 +1645,7 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
    * connection.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_SERIAL_REMOVABLE
   uart_connected(&priv->serdev, false);
 #endif
@@ -1662,7 +1659,7 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
   priv->serdev.xmit.head = 0;
   priv->serdev.xmit.tail = 0;
   priv->rxhead = 0;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated (unless we are part of a composite device)
@@ -1988,7 +1985,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     case FIONREAD:
       {
         int count;
-        irqstate_t state = irqsave();
+        irqstate_t flags = enter_critical_section();
 
         /* Determine the number of bytes available in the buffer. */
 
@@ -2001,7 +1998,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             count = serdev->recv.size - (serdev->recv.tail - serdev->recv.head);
           }
 
-        irqrestore(state);
+        leave_critical_section(flags);
 
         *(int *)arg = count;
         ret = 0;
@@ -2011,7 +2008,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     case FIONWRITE:
       {
         int count;
-        irqstate_t state = irqsave();
+        irqstate_t flags = enter_critical_section();
 
         /* Determine the number of bytes free in the buffer. */
 
@@ -2024,7 +2021,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             count = serdev->xmit.size - (serdev->xmit.head - serdev->xmit.tail) - 1;
           }
 
-        irqrestore(state);
+        leave_critical_section(flags);
 
         *(int *)arg = count;
         ret = 0;
@@ -2083,7 +2080,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
    * in the following.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       /* RX "interrupts" are enabled.  Is this a transition from disabled
@@ -2132,7 +2129,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
       priv->rxhead    = serdev->recv.head;
       priv->rxenabled = false;
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

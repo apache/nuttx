@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/usb/usbdev_trace.h>
 #undef usbtrace
 
@@ -140,10 +140,10 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
 
   /* The following read and write must be atomic */
 
-  flags         = irqsave();
+  flags         = enter_critical_section();
   ret           = g_maskedidset;
   g_maskedidset = idset;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
@@ -166,7 +166,7 @@ void usbtrace(uint16_t event, uint16_t value)
 
   /* Check if tracing is enabled for this ID */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if ((g_maskedidset & TRACE_ID2BIT(event)) != 0)
     {
 #ifdef CONFIG_USBDEV_TRACE
@@ -196,7 +196,7 @@ void usbtrace(uint16_t event, uint16_t value)
 #endif
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 

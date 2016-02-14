@@ -911,7 +911,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_skeleton_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -927,7 +927,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->sk_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1036,12 +1036,12 @@ static int skel_txavail(FAR struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Perform the out-of-cycle poll now */
 
   skel_txavail_process(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   return OK;

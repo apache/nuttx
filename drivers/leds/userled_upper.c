@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/leds/userled_upper.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
@@ -253,10 +254,10 @@ static int userled_close(FAR struct file *filep)
    * detection anyway.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   closing = opriv->bo_closing;
   opriv->bo_closing = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (closing)
     {

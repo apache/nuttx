@@ -60,7 +60,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_PWM
 
@@ -351,7 +351,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
     {
       /* Disable interrupts to avoid race conditions */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Indicate that if will be waiting for the pulse count to complete.
        * Note that we will only wait if a non-zero pulse count is specified
@@ -398,7 +398,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
           upper->waiting = false;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return ret;

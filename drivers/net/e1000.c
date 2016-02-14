@@ -847,7 +847,7 @@ static int e1000_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   e1000_turn_off(e1000);
 
@@ -866,7 +866,7 @@ static int e1000_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   e1000->bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -900,7 +900,7 @@ static int e1000_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -914,7 +914,7 @@ static int e1000_txavail(struct net_driver_s *dev)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

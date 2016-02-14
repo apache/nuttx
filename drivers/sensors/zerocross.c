@@ -60,7 +60,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sensors/zerocross.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_ZEROCROSS
 
@@ -165,7 +165,7 @@ static void zerocross_enable(FAR struct zc_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Enable interrupts */
 
@@ -175,7 +175,7 @@ static void zerocross_enable(FAR struct zc_upperhalf_s *priv)
 
   lower->zc_enable(lower, (zc_interrupt_t)zerocross_interrupt, priv);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -193,7 +193,7 @@ static void zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Update sample value */
 
@@ -215,7 +215,7 @@ static void zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
 #endif
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /************************************************************************************
@@ -308,10 +308,10 @@ static int zc_close(FAR struct file *filep)
    * detection anyway.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   closing = opriv->do_closing;
   opriv->do_closing = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (closing)
     {

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/composite.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
@@ -54,10 +55,6 @@
 #include "composite.h"
 
 #ifdef CONFIG_USBDEV_COMPOSITE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -368,7 +365,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
     {
       /* Unbind the constituent class drivers */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       CLASS_UNBIND(priv->dev1, dev);
       CLASS_UNBIND(priv->dev2, dev);
 
@@ -380,7 +377,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
           composite_freereq(dev->ep0, priv->ctrlreq);
           priv->ctrlreq = NULL;
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -665,11 +662,11 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
    * the disconnection.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->config = COMPOSITE_CONFIGIDNONE;
   CLASS_DISCONNECT(priv->dev1, dev);
   CLASS_DISCONNECT(priv->dev2, dev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated.
@@ -716,10 +713,10 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Forward the suspend event to the constituent devices */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   CLASS_SUSPEND(priv->dev1, priv->usbdev);
   CLASS_SUSPEND(priv->dev2, priv->usbdev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -758,10 +755,10 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Forward the resume event to the constituent devices */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   CLASS_RESUME(priv->dev1, priv->usbdev);
   CLASS_RESUME(priv->dev2, priv->usbdev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

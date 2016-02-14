@@ -900,18 +900,18 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = irqsave();
+        irqstate_t flags = enter_critical_section();
         u16550_enablebreaks(priv, true);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = irqsave();
+        flags = enter_critical_section();
         u16550_enablebreaks(priv, false);
-        irqrestore(flags);
+        leave_critical_section(flags);
       }
       break;
 
@@ -1010,7 +1010,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
       priv->ier |= UART_IER_ETBEI;
@@ -1028,7 +1028,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
       u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 }
 

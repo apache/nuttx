@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -71,6 +71,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/arch.h>
@@ -360,9 +361,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbmsc_wrcomplete;
 
-      flags = irqsave();
+      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->wrreqlist);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Report if we are selfpowered (unless we are part of a composite device) */
@@ -477,7 +478,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       while (!sq_empty(&priv->wrreqlist))
         {
           reqcontainer = (struct usbmsc_req_s *)sq_remfirst(&priv->wrreqlist);
@@ -495,7 +496,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
           priv->epbulkin = NULL;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -868,14 +869,14 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Reset the configuration */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usbmsc_resetconfig(priv);
 
   /* Signal the worker thread */
 
   priv->theventset |= USBMSC_EVENT_DISCONNECT;
   usbmsc_scsi_signal(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated (unless we are part of a composite device)
@@ -1088,9 +1089,9 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Return the write request to the free list */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Process the received data unless this is some unusual condition */
 
@@ -1157,9 +1158,9 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
         /* Add the filled read request from the rdreqlist */
 
-        flags = irqsave();
+        flags = enter_critical_section();
         sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
-        irqrestore(flags);
+        leave_critical_section(flags);
 
         /* Signal the worker thread that there is received data to be processed */
 
@@ -1681,10 +1682,10 @@ int usbmsc_exportluns(FAR void *handle)
   /* Signal to start the thread */
 
   uvdbg("Signalling for the SCSI worker thread\n");
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->theventset |= USBMSC_EVENT_READY;
   usbmsc_scsi_signal(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 errout_with_lock:
   usbmsc_scsi_unlock(priv);
@@ -1792,10 +1793,10 @@ void usbmsc_uninitialize(FAR void *handle)
         {
           /* Yes.. Ask the thread to stop */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           priv->theventset |= USBMSC_EVENT_TERMINATEREQUEST;
           usbmsc_scsi_signal(priv);
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
 
       usbmsc_scsi_unlock(priv);
