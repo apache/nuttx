@@ -74,7 +74,6 @@
 
 bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 {
-  FAR struct tcb_s *ntcb = NULL;
   FAR dq_queue_t *tasklist;
   bool ret = false;
 
@@ -94,19 +93,19 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
    * occur.
    */
 
-  if (!rtcb->blink || TLIST_ISRUNNABLE(rtcb->task_state))
+  if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
 #else
   /* There is only one list, g_readytorun, and it always contains the
    * currently running task.  If we are removing the head of this list,
    * then we are removing the currently active task.
    */
 
-  if (!rtcb->blink)
+  if (rtcb->blink == NULL)
 #endif
     {
       /* There must always be at least one task in the list (the idle task) */
 
-      ntcb = (FAR struct tcb_s *)rtcb->flink;
+      FAR struct tcb_s *ntcb = (FAR struct tcb_s *)rtcb->flink;
       DEBUGASSERT(ntcb != NULL);
 
 #ifdef CONFIG_SMP

@@ -227,7 +227,7 @@ void spin_unlockr(FAR struct spinlock_s *lock);
  * Name: spin_islocked
  *
  * Description:
- *   Release one count on a renonentrant spinlock.
+ *   Release one count on a non-reentrant spinlock.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to test.
@@ -238,7 +238,7 @@ void spin_unlockr(FAR struct spinlock_s *lock);
  ****************************************************************************/
 
 /* bool spin_islocked(FAR spinlock_t lock); */
-#define spin_islocked(l) ((l) == SP_UNLOCKED)
+#define spin_islocked(l) ((l) == SP_LOCKED)
 
 /****************************************************************************
  * Name: spin_islockedr
@@ -255,7 +255,7 @@ void spin_unlockr(FAR struct spinlock_s *lock);
  ****************************************************************************/
 
 /* bool spin_islockedr(FAR struct spinlock_s *lock); */
-#define spin_islockedr(l) ((l)->sp_lock == SP_UNLOCKED)
+#define spin_islockedr(l) ((l)->sp_lock == SP_LOCKED)
 
 #endif /* CONFIG_SPINLOCK */
 #endif /* __INCLUDE_NUTTX_SPINLOCK_H */
