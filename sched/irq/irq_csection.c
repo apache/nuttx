@@ -170,6 +170,12 @@ void leave_critical_section(irqstate_t flags)
         }
       else
         {
+          /* NO.. Release the spinlock to allow other access. */
+
+          g_cpu_irqset  &= ~(1 << this_cpu());
+          rtcb->irqcount = 0;
+          spin_unlock(g_cpu_irqlock);
+
           /* Release any ready-to-run tasks that have collected in
            * g_pendingtasks if the scheduler is not locked.
            *
@@ -181,12 +187,6 @@ void leave_critical_section(irqstate_t flags)
             {
               up_release_pending();
             }
-
-          /* NO.. Release the spinlock to allow other access. */
-
-          g_cpu_irqset  &= ~(1 << this_cpu());
-          rtcb->irqcount = 0;
-          spin_unlock(g_cpu_irqlock);
         }
 
       /* Restore the previous interrupt state which may still be interrupts
