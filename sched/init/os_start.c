@@ -726,7 +726,18 @@ void os_start(void)
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
 
+  /* A few basic sanity checks */
+
   DEBUGASSERT(this_cpu() == 0 && CONFIG_MAX_TASKS > CONFIG_SMP_NCPUS);
+
+  /* Take the memory manager semaphore on this CPU so that it will not be
+   * available on the other CPUs until we have finished initialization.
+   */
+
+  DEBUGVERIFY(kmm_trysemaphore());
+
+  /* Then start the other CPUs */
+
   DEBUGVERIFY(os_smpstart());
 
 #endif /* CONFIG_SMP */
@@ -739,6 +750,13 @@ void os_start(void)
   /* Create initial tasks and bring-up the system */
 
   DEBUGVERIFY(os_bringup());
+
+#ifdef CONFIG_SMP
+  /* Let other threads have access to the memory manager */
+
+  kmm_givesemaphore();
+
+#endif /* CONFIG_SMP */
 
   /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */
