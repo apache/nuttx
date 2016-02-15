@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
-#include <nuttx.h>
+#include <nuttx/irq.h>
 
 #include "up_arch.h"
 #include "chip.h"
