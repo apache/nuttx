@@ -171,7 +171,6 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct tcb_s *next;
   FAR dq_queue_t *tasklist;
   int task_state;
   int cpu;
@@ -305,7 +304,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * and check if a context switch will occur
        */
 
-      tasklist = (FAR dq_queue_t *)g_assignedtasks[cpu].head;
+      tasklist = (FAR dq_queue_t *)&g_assignedtasks[cpu];
       switched = sched_addprioritized(btcb, tasklist);
 
       /* If the selected task was the g_assignedtasks[] list, then a context
@@ -314,6 +313,8 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (switched)
         {
+          FAR struct tcb_s *next;
+
           /* The new btcb was added at the head of the ready-to-run list.  It
            * is now the new active task!
            *
@@ -375,7 +376,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
           next = (FAR struct tcb_s *)btcb->flink;
           ASSERT(!rtcb->lockcount && next != NULL);
 
-          if ((btcb->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
+          if ((next->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
             {
               next->task_state = TSTATE_TASK_ASSIGNED;
             }
@@ -390,7 +391,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                */
 
               next->task_state = TSTATE_TASK_READYTORUN;
-              (void)sched_addprioritized(btcb,
+              (void)sched_addprioritized(next,
                                          (FAR dq_queue_t *)&g_readytorun);
             }
 
