@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <arch/irq.h>
 
@@ -56,6 +57,20 @@
 
 spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
+/* Used to keep track of which CPU(s) hold the IRQ lock.  There really should
+ * only be one.
+ */
+
+#if (CONFIG_SMP_NCPUS <= 8)
+volatile uint8_t  g_cpu_irqset;
+#elif (CONFIG_SMP_NCPUS <= 16)
+volatile uint16_t g_cpu_irqset;
+#elif (CONFIG_SMP_NCPUS <= 32)
+volatile uint32_t g_cpu_irqset;
+#else
+#  error SMP: Extensions needed to support this number of CPUs
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,10 +87,22 @@ spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
 irqstate_t enter_critical_section(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *rtcb;
+
+  /* Do nothing if called from an interrupt handler */
+
+  if (up_interrupt_context())
+    {
+      /* The value returned does not matter.  We assume only that it is a
+       * scalar here.
+       */
+
+      return (irqstate_t)0;
+    }
 
   /* Do we already have interrupts disabled? */
 
+  rtcb = this_task();
   if (rtcb->irqcount > 0)
     {
       /* Yes... make sure that the spinlock is set and increment the IRQ
@@ -89,13 +116,28 @@ irqstate_t enter_critical_section(void)
     {
       /* NO.. Take the spinlock to get exclusive access and set the lock
        * count to 1.
+       *
+       * We must avoid that case where a context occurs between taking the
+       * g_cpu_irqlock and disabling interrupts.  Also interrupts disables
+       * must follow a stacked order.  We cannot other context switches to
+       * re-order the enabling/disabling of interrupts.  We can both by
+       * locking the scheduler while interrupts are disabled.
+       *
+       * NOTE: that sched_lock() also uses a spinlock.  We will avoid
+       * deadlocks by assuring that the scheduler spinlock is always
+       * taken before the IRQ spinlock.
        */
 
+      sched_lock();
       spin_lock(&g_cpu_irqlock);
+
       rtcb->irqcount = 1;
+      g_cpu_irqset  |= (1 << this_cpu());
     }
 
-  /* Then disable interrupts (if they have not already been disabeld) */
+  /* Then disable interrupts (they may already be disabled, be we need to
+   * return valid interrupt status in any event).
+   */
 
   return up_irq_save();
 }
@@ -111,32 +153,51 @@ irqstate_t enter_critical_section(void)
 
 void leave_critical_section(irqstate_t flags)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  /* Do nothing if called from an interrupt handler */
 
-  DEBUGASSERT(rtcb->irqcount > 0);
-
-  /* Will we still have interrupts disabled after decrementing the count? */
-
-  if (rtcb->irqcount > 1)
+  if (!up_interrupt_context())
     {
-      /* Yes... make sure that the spinlock is set */
+      FAR struct tcb_s *rtcb = this_task();
 
-      DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
-      rtcb->irqcount--;
+      DEBUGASSERT(rtcb->irqcount > 0);
+
+      /* Will we still have interrupts disabled after decrementing the
+       * count?
+       */
+
+      if (rtcb->irqcount > 1)
+        {
+          /* Yes... make sure that the spinlock is set */
+
+          DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
+          rtcb->irqcount--;
+        }
+      else
+        {
+          /* NO.. Release the spinlock to allow other access.
+           *
+           * REVISIT: There is a cornercase where multiple CPUs may think
+           * they are the holder of the IRQ spinlock.  We will need to disable
+           * the scheduler to assure that the following operation is atomic
+           * Hmmm... but that could cause a deadlock!  What to do?  Perhaps
+           * an array of booleans instead of a bitset?
+           */
+
+          g_cpu_irqset  &= ~(1 << this_cpu());
+          rtcb->irqcount = 0;
+          spin_unlock(g_cpu_irqlock);
+
+          /* And re-enable pre-emption */
+
+          sched_unlock();
+        }
+
+      /* Restore the previous interrupt state which may still be interrupts
+       * disabled (but we don't have a mechanism to verify that now)
+       */
+
+      up_irq_restore(flags);
     }
-  else
-    {
-      /* NO.. Take the spinlock to get exclusive access. */
-
-      rtcb->irqcount = 0;
-      spin_unlock(g_cpu_irqlock);
-    }
-
-  /* Restore the previous interrupt state which may still be interrupts
-   * disabled (but we don't have a mechanism to verify that now)
-   */
-
-  up_irq_restore(flags);
 }
 
 #endif /* CONFIG_SMP */

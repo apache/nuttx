@@ -43,6 +43,7 @@
 #include <queue.h>
 #include <assert.h>
 
+#include "irq/irq.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -326,7 +327,10 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
           btcb->cpu        = cpu;
           btcb->task_state = TSTATE_TASK_RUNNING;
 
-          /* Adjust global pre-emption controls. */
+          /* Adjust global pre-emption controls.  If the lockcount is
+           * greater than zero, then this task/this CPU holds the scheduler
+           * lock.
+           */
 
           if (btcb->lockcount > 0)
             {
@@ -335,10 +339,28 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
             }
           else
             {
-              g_cpu_lockset &= ~(1 << cpu);
+              g_cpu_lockset  &= ~(1 << cpu);
               if (g_cpu_lockset == 0)
                 {
                   g_cpu_schedlock = SP_UNLOCKED;
+                }
+            }
+
+          /* Adjust global IRQ controls.  If irqcount is greater than zero,
+           * then this task/this CPU holds the IRQ lock
+           */
+
+          if (btcb->irqcount > 0)
+            {
+              g_cpu_irqset  |= (1 << cpu);
+              g_cpu_irqlock = SP_LOCKED;
+            }
+          else
+            {
+              g_cpu_irqset  &= ~(1 << cpu);
+              if (g_cpu_irqset == 0)
+                {
+                  g_cpu_irqlock = SP_UNLOCKED;
                 }
             }
 

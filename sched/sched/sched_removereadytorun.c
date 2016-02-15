@@ -43,6 +43,7 @@
 #include <queue.h>
 #include <assert.h>
 
+#include "irq/irq.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -109,7 +110,9 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       DEBUGASSERT(ntcb != NULL);
 
 #ifdef CONFIG_SMP
-      /* Will pre-emption be disabled after the switch? */
+      /* Will pre-emption be disabled after the switch?  If the lockcount is
+       * greater than zero, then this task/this CPU holds the scheduler lock.
+       */
 
       if (ntcb->lockcount > 0)
         {
@@ -120,14 +123,29 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         }
       else
         {
-          /* No.. we may need to perform release our hold on the lock.
-           *
-           * REVISIT: It might be possible for two CPUs to hold the logic in
-           * some strange cornercases like:
-           */
+          /* No.. we may need to perform release our hold on the lock. */
 
           g_cpu_lockset  &= ~(1 << this_cpu());
           g_cpu_schedlock = ((g_cpu_lockset == 0) ? SP_UNLOCKED : SP_LOCKED);
+        }
+
+      /* Interrupts be disabled after the switch.  If irqcount is greater
+       * than zero, then this task/this CPU holds the IRQ lock
+       */
+
+      if (ntcb->irqcount > 0)
+        {
+          /* Yes... make sure that scheduling logic knows about this */
+
+          g_cpu_irqset |= (1 << this_cpu());
+          g_cpu_irqlock = SP_LOCKED;
+        }
+      else
+        {
+          /* No.. we may need to perform release our hold on the lock. */
+
+          g_cpu_irqset &= ~(1 << this_cpu());
+          g_cpu_irqlock = ((g_cpu_irqset == 0) ? SP_UNLOCKED : SP_LOCKED);
         }
 #endif
 

@@ -73,13 +73,17 @@ int sched_unlock(void)
 
   if (rtcb && !up_interrupt_context())
     {
-      /* Prevent context switches throughout the following */
+      /* Prevent context switches throughout the following.
+       *
+       * REVISIT: This is awkward.  In the SMP case, enter_critical_section
+       * increments the lockcount!
+       */
 
       irqstate_t flags = enter_critical_section();
 
       /* Decrement the preemption lock counter */
 
-      if (rtcb->lockcount)
+      if (rtcb->lockcount > 0)
         {
           rtcb->lockcount--;
         }

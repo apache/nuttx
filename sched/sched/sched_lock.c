@@ -109,7 +109,7 @@
 volatile spinlock_t g_cpu_schedlock;
 
 #if (CONFIG_SMP_NCPUS <= 8)
-volatile uint8_t g_cpu_lockset;
+volatile uint8_t  g_cpu_lockset;
 #elif (CONFIG_SMP_NCPUS <= 16)
 volatile uint16_t g_cpu_lockset;
 #elif (CONFIG_SMP_NCPUS <= 32)
