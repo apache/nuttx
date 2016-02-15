@@ -28,6 +28,7 @@ nanosleep      NXnanosleep
 poll           NXpoll
 printf         NXprintf
 pthread_create NXpthread_create
+pthread_yield  NXpthread_yield
 pthread_mutex_init NXpthread_mutex_init
 pthread_mutex_lock NXpthread_mutex_lock
 pthread_mutex_unlock NXpthread_mutex_unlock
