@@ -92,7 +92,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Name: irq_initialize
+ *
+ * Description:
+ *   Configure the IRQ subsystem
+ *
+ ****************************************************************************/
+
 void weak_function irq_initialize(void);
+
+/****************************************************************************
+ * Name: irq_unexpected_isr
+ *
+ * Description:
+ *   An interrupt has been received for an IRQ that was never registered
+ *   with the system.
+ *
+ ****************************************************************************/
+
 int irq_unexpected_isr(int irq, FAR void *context);
 
 #undef EXTERN

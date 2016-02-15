@@ -131,7 +131,7 @@ int task_exit(void)
    * task list now
    */
 
-  if (g_pendingtasks.head)
+  if (g_pendingtasks.head != NULL)
     {
       (void)sched_mergepending();
     }

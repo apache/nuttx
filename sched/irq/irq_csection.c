@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <arch/irq.h>
 
@@ -120,15 +119,12 @@ irqstate_t enter_critical_section(void)
        * We must avoid that case where a context occurs between taking the
        * g_cpu_irqlock and disabling interrupts.  Also interrupts disables
        * must follow a stacked order.  We cannot other context switches to
-       * re-order the enabling/disabling of interrupts.  We can both by
-       * locking the scheduler while interrupts are disabled.
+       * re-order the enabling/disabling of interrupts.
        *
-       * NOTE: that sched_lock() also uses a spinlock.  We will avoid
-       * deadlocks by assuring that the scheduler spinlock is always
-       * taken before the IRQ spinlock.
+       * The scheduler accomplishes this by treating the irqcount like
+       * lockcount:  Both will disable pre-emption.
        */
 
-      sched_lock();
       spin_lock(&g_cpu_irqlock);
 
       rtcb->irqcount = 1;
@@ -174,22 +170,23 @@ void leave_critical_section(irqstate_t flags)
         }
       else
         {
-          /* NO.. Release the spinlock to allow other access.
+          /* Release any ready-to-run tasks that have collected in
+           * g_pendingtasks if the scheduler is not locked.
            *
-           * REVISIT: There is a cornercase where multiple CPUs may think
-           * they are the holder of the IRQ spinlock.  We will need to disable
-           * the scheduler to assure that the following operation is atomic
-           * Hmmm... but that could cause a deadlock!  What to do?  Perhaps
-           * an array of booleans instead of a bitset?
+           * NOTE: This operation has a very high likelihood of causing
+           * this task to be switched out!
            */
+
+          if (g_pendingtasks.head != NULL && rtcb->lockcount <= 0)
+            {
+              up_release_pending();
+            }
+
+          /* NO.. Release the spinlock to allow other access. */
 
           g_cpu_irqset  &= ~(1 << this_cpu());
           rtcb->irqcount = 0;
           spin_unlock(g_cpu_irqlock);
-
-          /* And re-enable pre-emption */
-
-          sched_unlock();
         }
 
       /* Restore the previous interrupt state which may still be interrupts

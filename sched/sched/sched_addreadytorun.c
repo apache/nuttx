@@ -86,10 +86,12 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
   /* Check if pre-emption is disabled for the current running task and if
    * the new ready-to-run task would cause the current running task to be
-   * pre-empted.
+   * pre-empted.  NOTE that IRQs disabled implies that pre-emption is
+   * also disabled.
    */
 
-  if (rtcb->lockcount && rtcb->sched_priority < btcb->sched_priority)
+  if ((rtcb->lockcount > 0 || rtcb->irqcount > 0) &&
+       rtcb->sched_priority < btcb->sched_priority)
     {
       /* Yes.  Preemption would occur!  Add the new ready-to-run task to the
        * g_pendingtasks task list for now.
@@ -112,7 +114,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * is now the new active task!
        */
 
-      ASSERT(!rtcb->lockcount && btcb->flink != NULL);
+      ASSERT(rtcb->lockcount == 0 && btcb->flink != NULL);
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;

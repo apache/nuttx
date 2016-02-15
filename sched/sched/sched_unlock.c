@@ -73,11 +73,7 @@ int sched_unlock(void)
 
   if (rtcb && !up_interrupt_context())
     {
-      /* Prevent context switches throughout the following.
-       *
-       * REVISIT: This is awkward.  In the SMP case, enter_critical_section
-       * increments the lockcount!
-       */
+      /* Prevent context switches throughout the following. */
 
       irqstate_t flags = enter_critical_section();
 
@@ -99,9 +95,6 @@ int sched_unlock(void)
 #ifdef CONFIG_SMP
           /* The lockcount has decremented to zero and we need to perform
            * release our hold on the lock.
-           *
-           * REVISIT: It might be possible for two CPUs to hold the logic in
-           * some strange cornercases like:
            */
 
           DEBUGASSERT(g_cpu_schedlock == SP_LOCKED &&
@@ -115,10 +108,18 @@ int sched_unlock(void)
 #endif
 
           /* Release any ready-to-run tasks that have collected in
-           * g_pendingtasks.
+           * g_pendingtasks.  In the SMP case, the scheduler remains
+           * locked if interrupts are disabled.
+           *
+           * NOTE: This operation has a very high likelihood of causing
+           * this task to be switched out!
            */
 
-          if (g_pendingtasks.head)
+#ifdef CONFIG_SMP
+          if (g_pendingtasks.head != NULL)
+#else
+          if (g_pendingtasks.head != NULL && rtcb->irqcount <= 0)
+#endif
             {
               up_release_pending();
             }
