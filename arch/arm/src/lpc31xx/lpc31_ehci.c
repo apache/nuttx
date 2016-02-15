@@ -5080,10 +5080,10 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
    */
 
 #ifdef CONFIG_LPC31_EHCI_SDIS
-  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
+  putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
            LPC31_USBDEV_USBMODE);
 #else
-  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_VBPS, LPC31_USBDEV_USBMODE);
+  putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_VBPS, LPC31_USBDEV_USBMODE);
 #endif
 
   /* Host Controller Initialization. Paragraph 4.1 */
@@ -5101,7 +5101,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
    * host configuration in the reset.
    */
 
-  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
+  putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
            LPC31_USBDEV_USBMODE);
 
   /* "In order to initialize the host controller, software should perform the
