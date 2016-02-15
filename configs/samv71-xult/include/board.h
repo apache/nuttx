@@ -130,9 +130,7 @@
 #define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV1  /* Prescaler = /1 */
 #define BOARD_PMC_MCKR_MDIV        PMC_MCKR_MDIV_DIV2  /* MCK divider = /2 */
 
-/* USB clocking
- * To be provided
- */
+/* USB clocking */
 
 #define BOARD_PMC_MCKR_UPLLDIV2    0           /* UPLL clock not divided by 2 */
 
