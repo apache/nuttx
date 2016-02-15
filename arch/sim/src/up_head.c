@@ -113,7 +113,13 @@ void up_assert(const uint8_t *filename, int line)
 {
   /* Show the location of the failed assertion */
 
-  fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
+#ifdef CONFIG_SMP
+  fprintf(stderr, "CPU%d: Assertion failed at file:%s line: %d\n",
+          up_cpundx(), filename, line);
+#else
+  fprintf(stderr, "Assertion failed at file:%s line: %d\n",
+          filename, line);
+#endif
 
   /* Allow for any board/configuration specific crash information */
 
