@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq_csection.c
  *
- *   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
