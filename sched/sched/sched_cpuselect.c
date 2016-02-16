@@ -65,9 +65,12 @@
  * Return Value:
  *   Index of the CPU with the lowest priority running task
  *
+ * Assumptions:
+ *   Called from within a critical section.
+ *
  ****************************************************************************/
 
-static int sched_cpu_select(void)
+int sched_cpu_select(void)
 {
   uint8_t minprio;
   int cpu;
