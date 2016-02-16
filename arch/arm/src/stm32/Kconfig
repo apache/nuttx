@@ -1004,8 +1004,6 @@ config ARCH_CHIP_STM32F446M
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
-	select STM32_HAVE_SAIPLL
-	select STM32_HAVE_I2SPLL
 
 config ARCH_CHIP_STM32F446R
 	bool "STM32F446R"
@@ -1013,8 +1011,6 @@ config ARCH_CHIP_STM32F446R
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
-	select STM32_HAVE_SAIPLL
-	select STM32_HAVE_I2SPLL
 
 config ARCH_CHIP_STM32F446V
 	bool "STM32F446V"
@@ -1022,8 +1018,6 @@ config ARCH_CHIP_STM32F446V
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
-	select STM32_HAVE_SAIPLL
-	select STM32_HAVE_I2SPLL
 
 config ARCH_CHIP_STM32F446Z
 	bool "STM32F446Z"
@@ -1031,8 +1025,37 @@ config ARCH_CHIP_STM32F446Z
 	select STM32_STM32F40XX
 	select STM32_STM32F446
 	select ARCH_HAVE_FPU
-	select STM32_HAVE_SAIPLL
-	select STM32_HAVE_I2SPLL
+
+config ARCH_CHIP_STM32F469A
+	bool "STM32F469A"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F469
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F469I
+	bool "STM32F469I"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F469
+	select ARCH_HAVE_FPU
+	select STM32_HAVE_ETHMAC
+
+config ARCH_CHIP_STM32F469B
+	bool "STM32F469B"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F469
+	select ARCH_HAVE_FPU
+	select STM32_HAVE_ETHMAC
+
+config ARCH_CHIP_STM32F469N
+	bool "STM32F469N"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F469
+	select ARCH_HAVE_FPU
+	select STM32_HAVE_ETHMAC
 
 endchoice
 
@@ -1493,6 +1516,7 @@ config STM32_STM32F429
 	bool
 	default n
 	select STM32_HAVE_FSMC
+	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -1546,6 +1570,42 @@ config STM32_STM32F446
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_SPI4
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
+
+# This is really 469/479, but we treat the two the same.
+config STM32_STM32F469
+	bool
+	default n
+	select STM32_HAVE_FSMC
+	select STM32_HAVE_LTDC
+	select STM32_HAVE_CCM
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USART6
+	select STM32_HAVE_UART7
+	select STM32_HAVE_UART8
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM9
+	select STM32_HAVE_TIM10
+	select STM32_HAVE_TIM11
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_ADC3
+	select STM32_HAVE_CAN1
+	select STM32_HAVE_CAN2
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_RNG
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_SPI5
+	select STM32_HAVE_SPI6
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -1573,6 +1633,10 @@ config STM32_HAVE_OTGFS
 	default n
 
 config STM32_HAVE_FSMC
+	bool
+	default n
+
+config STM32_HAVE_LTDC
 	bool
 	default n
 
@@ -1906,7 +1970,7 @@ config STM32_I2C3
 config STM32_LTDC
 	bool "LTDC"
 	default n
-	depends on STM32_STM32F429
+	depends on STM32_HAVE_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
 		the STM32F429 and STM32F439 devices.  It is a standard parallel

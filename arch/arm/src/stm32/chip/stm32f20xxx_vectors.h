@@ -133,7 +133,7 @@ VECTOR(stm32_i2c3er, STM32_IRQ_I2C3ER)           /* Vector 16+73: I2C3 error int
 VECTOR(stm32_otghsep1out, STM32_IRQ_OTGHSEP1OUT) /* Vector 16+74: USB On The Go HS End Point 1 Out global interrupt */
 VECTOR(stm32_otghsep1in, STM32_IRQ_OTGHSEP1IN)   /* Vector 16+75: USB On The Go HS End Point 1 In global interrupt */
 VECTOR(stm32_otghswkup, STM32_IRQ_OTGHSWKUP)     /* Vector 16+76: USB On The Go HS Wakeup through EXTI interrupt */
-VECTOR(stm32_otghs, STM32_IRQ_OTGHS	)            /* Vector 16+77: USB On The Go HS global interrupt */
+VECTOR(stm32_otghs, STM32_IRQ_OTGHS)             /* Vector 16+77: USB On The Go HS global interrupt */
 VECTOR(stm32_dcmi, STM32_IRQ_DCMI)               /* Vector 16+78: DCMI global interrupt */
 VECTOR(stm32_cryp, STM32_IRQ_CRYP)               /* Vector 16+79: CRYP crypto global interrupt */
 VECTOR(stm32_hash, STM32_IRQ_HASH)               /* Vector 16+80: Hash and Rng global interrupt */
