@@ -129,6 +129,12 @@ irqstate_t enter_critical_section(void)
 
       rtcb->irqcount = 1;
       g_cpu_irqset  |= (1 << this_cpu());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+      /* Note that we have entered the critical section */
+
+      sched_note_csection(rtcb, true);
+#endif
     }
 
   /* Then disable interrupts (they may already be disabled, be we need to
@@ -170,7 +176,12 @@ void leave_critical_section(irqstate_t flags)
         }
       else
         {
-          /* NO.. Release the spinlock to allow other access. */
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+          /* No.. Note that we have entered the critical section */
+
+          sched_note_csection(rtcb, false);
+#endif
+          /* Release the spinlock to allow other access. */
 
           g_cpu_irqset  &= ~(1 << this_cpu());
           rtcb->irqcount = 0;

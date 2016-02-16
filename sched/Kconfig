@@ -601,10 +601,32 @@ config SCHED_INSTRUMENTATION
 		If enabled, then the board-specific logic must provide the following
 		functions (see include/sched.h):
 
-		void sched_note_start(FAR struct tcb_s *tcb);
-		void sched_note_stop(FAR struct tcb_s *tcb);
-		void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
+			void sched_note_start(FAR struct tcb_s *tcb);
+			void sched_note_stop(FAR struct tcb_s *tcb);
+			void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
 
+if SCHED_INSTRUMENTATION
+config SCHED_INSTRUMENTATION_PREEMPTION
+	bool "Preemption monitor hooks
+	default n
+	---help---
+		Enables additional hooks for changes to pre-emption state.  Board-
+		specific logic must provide this additional logic.
+
+			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
+
+config SCHED_INSTRUMENTATION_CSECTION
+	bool "Critical section monitor hooks
+	default n
+	depends on SMP
+	---help---
+		Enables additional hooks for entry and exit from critical sections.
+		Interrupts are disabled while within a critical section.  Board-
+		specific logic must provide this additional logic.
+
+			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
+
+endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
 menu "Files and I/O"

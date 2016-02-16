@@ -201,6 +201,17 @@ int sched_lock(void)
        */
 
       rtcb->lockcount++;
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+      /* Check if we just acquired the lock */
+
+      if (rtcb->lockcount == 1)
+        {
+          /* Note that we have pre-emption locked */
+
+            sched_note_premption(rtcb, true);
+        }
+#endif
     }
 
   return OK;

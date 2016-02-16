@@ -145,13 +145,27 @@ int    sched_lockcount(void);
 
 void   sched_note_start(FAR struct tcb_s *tcb);
 void   sched_note_stop(FAR struct tcb_s *tcb);
-void   sched_note_switch(FAR struct tcb_s *pFromTcb,
-                         FAR struct tcb_s *pToTcb);
+void   sched_note_switch(FAR struct tcb_s *fromtcb,
+                         FAR struct tcb_s *totcb);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
+#else
+#  define sched_note_premption(t,l)
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
+#else
+#  define sched_note_csection(t,e)
+#endif
 
 #else
-# define sched_note_start(t)
-# define sched_note_stop(t)
-# define sched_note_switch(t1, t2)
+#  define sched_note_start(t)
+#  define sched_note_stop(t)
+#  define sched_note_switch(t1, t2)
+#  define sched_note_premption(t,l)
+#  define sched_note_csection(t,e)
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 
 #undef EXTERN
