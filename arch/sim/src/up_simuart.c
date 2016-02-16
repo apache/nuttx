@@ -89,7 +89,6 @@ void simuart_wait(void);
 
 static struct termios g_cooked;
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -140,12 +139,11 @@ static void *simuart_thread(void *arg)
 
       /* Check for failures (but don't do anything) */
 
-      if (nread == 1)
+      for (; nread > 0; nread--)
         {
 #ifdef CONFIG_SIM_UART_DATAPOST
           sched_lock();
 #endif
-
           /* Get the index to the next slot in the UART buffer */
 
           prev = g_uarthead;
@@ -276,7 +274,7 @@ int simuart_getc(void)
   int ch;
 
   /* Locking the scheduler should eliminate the race conditions in the
-   * unlikely case of mutliple reading threads.
+   * unlikely case of multiple reading threads.
    */
 
   sched_lock();
@@ -319,10 +317,10 @@ bool simuart_checkc(void)
 }
 
 /****************************************************************************
- * Name: simuart_teriminate
+ * Name: simuart_terminate
  ****************************************************************************/
 
-void simuart_teriminate(void)
+void simuart_terminate(void)
 {
   /* Restore the original terminal mode */
 

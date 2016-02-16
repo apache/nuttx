@@ -96,7 +96,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Restore the original terminal mode and return the exit code */
 
-  simuart_teriminate();
+  simuart_terminate();
   return g_exitcode;
 }
 

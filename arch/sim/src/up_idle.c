@@ -93,7 +93,7 @@ void up_idle(void)
    * should not matter which, however.
    */
 
-  static volatile spinlock_t lock;
+  static volatile spinlock_t lock = SP_UNLOCKED;
 
   /* The one that gets the lock is the one that executes the IDLE operations */
 
@@ -129,7 +129,6 @@ void up_idle(void)
       simuart_post();
     }
 #endif
-
 
 #ifdef CONFIG_NET_ETHERNET
   /* Run the network if enabled */
