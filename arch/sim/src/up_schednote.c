@@ -135,6 +135,13 @@ void sched_note_switch(FAR struct tcb_s *from, FAR struct tcb_s *to)
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+/* This does not work well... it interferes with the operation of the
+ * simulated /dev/console device which, of course, does disable preemption
+ * and does use critical sections.
+ */
+
+#warning CONFIG_SCHED_INSTRUMENTATION_PREEMPTION is a bad idea
+
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
 #ifdef CONFIG_SMP
@@ -158,6 +165,13 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+/* This does not work well... it interferes with the operation of the
+ * simulated /dev/console device which, of course, does disable preemption
+ * and does use critical sections.
+ */
+
+#warning CONFIG_SCHED_INSTRUMENTATION_CSECTION is a bad idea
+
 void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
 #ifdef CONFIG_SMP
