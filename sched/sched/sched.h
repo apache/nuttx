@@ -422,9 +422,12 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
+int sched_cpu_select(void);
 #  define sched_islocked(tcb) spin_islocked(g_cpu_schedlock)
 #else
 #  define sched_islocked(tcb) ((tcb)->lockcount > 0)
+#  define sched_cpu_select (0)
+
 #endif
 
 /* CPU load measurement support */

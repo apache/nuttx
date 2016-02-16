@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sched/sched_reprioritize.c
+ * sched/sched/sched_cpuselect.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,68 +39,72 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <sched.h>
-#include <errno.h>
+#include <sys/types.h>
+#include <assert.h>
+
+#include <nuttx/sched.h>
 
 #include "sched/sched.h"
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_reprioritize
+ * Name:  sched_cpu_select
  *
  * Description:
- *   This function sets the priority of a specified task.
- *
- *   NOTE: Setting a task's priority to the same value has a similar effect
- *   to sched_yield() -- The task will be moved to  after all other tasks
- *   with the same priority.
+ *   Return the index to the CPU with the lowest priority running task,
+ *   possbily its IDLE task.
  *
  * Inputs:
- *   tcb - the TCB of task to reprioritize.
- *   sched_priority - The new task priority
+ *   None
  *
  * Return Value:
- *   On success, sched_setparam() returns 0 (OK). On error, -1
- *   (ERROR) is returned, and errno is set appropriately.
- *
- *   EINVAL The parameter 'param' is invalid or does not make sense for the
- *          current scheduling policy.
- *   EPERM  The calling task does not have appropriate privileges.
- *   ESRCH  The task whose ID is pid could not be found.
- *
- * Assumptions:
+ *   Index of the CPU with the lowest priority running task
  *
  ****************************************************************************/
 
-int sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
+static int sched_cpu_select(void)
 {
-  /* This function is equivalent to sched_setpriority() BUT it also has the
-   * side effect of discarding all priority inheritance history.  This is
-   * done only on explicit, user-initiated reprioritization.
+  uint8_t minprio;
+  int cpu;
+  int i;
+
+  /* Otherwise, find the CPU that is executing the lowest priority task
+   * (possibly its IDLE task).
    */
 
-  int ret = sched_setpriority(tcb, sched_priority);
-  if (ret == 0)
+  minprio = SCHED_PRIORITY_MAX;
+  cpu     = 0;
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      /* Reset the base_priority -- the priority that the thread would return
-       * to once it posts the semaphore.
+      FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_assignedtasks[i].head;
+
+      /* If this thread is executing its IDLE task, the use it.  The IDLE
+       * task is always the last task in the assigned task list.
        */
 
-      tcb->base_priority  = (uint8_t)sched_priority;
+      if (rtcb->flink == NULL)
+        {
+          /* The IDLE task should always be assigned to this CPU and have
+           * a priority of zero.
+           */
 
-      /* Discard any pending reprioritizations as well */
-
-#if CONFIG_SEM_NNESTPRIO > 0
-      tcb->npend_reprio   = 0;
-#endif
+          DEBUGASSERT(rtcb->sched_priority == 0);
+          return i;
+        }
+      else if (rtcb->sched_priority < minprio)
+        {
+          DEBUGASSERT(rtcb->sched_priority > 0);
+          cpu = i;
+        }
     }
 
-  return ret;
+  return cpu;
 }
-#endif /* CONFIG_PRIORITY_INHERITANCE */
+
+#endif /* CONFIG_SMP */

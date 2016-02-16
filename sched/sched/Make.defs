@@ -47,6 +47,10 @@ ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sched_reprioritize.c
 endif
 
+ifeq ($(CONFIG_SMP),y)
+CSRCS += sched_cpuselect.c
+endif
+
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += sched_waitpid.c
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)

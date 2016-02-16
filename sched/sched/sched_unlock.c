@@ -116,9 +116,9 @@ int sched_unlock(void)
            */
 
 #ifdef CONFIG_SMP
-          if (g_pendingtasks.head != NULL)
-#else
           if (g_pendingtasks.head != NULL && rtcb->irqcount <= 0)
+#else
+          if (g_pendingtasks.head != NULL)
 #endif
             {
               up_release_pending();

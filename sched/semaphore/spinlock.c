@@ -120,7 +120,9 @@ void spin_lock(FAR volatile spinlock_t *lock)
 {
   while (up_testset(lock) == SP_LOCKED)
     {
+#if 0 /* Would recurse */
       sched_yield();
+#endif
     }
 }
 

@@ -90,8 +90,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
    * also disabled.
    */
 
-  if ((rtcb->lockcount > 0 || rtcb->irqcount > 0) &&
-       rtcb->sched_priority < btcb->sched_priority)
+  if (rtcb->lockcount > 0 && rtcb->sched_priority < btcb->sched_priority)
     {
       /* Yes.  Preemption would occur!  Add the new ready-to-run task to the
        * g_pendingtasks task list for now.
@@ -184,51 +183,19 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       /* Yes.. that that is the CPU we must use */
 
       cpu  = btcb->cpu;
-      rtcb = (FAR struct tcb_s *)g_assignedtasks[cpu].head;
     }
   else
     {
-      uint8_t minprio;
-      int i;
-
       /* Otherwise, find the CPU that is executing the lowest priority task
        * (possibly its IDLE task).
        */
 
-      rtcb     = NULL;
-      minprio  = SCHED_PRIORITY_MAX;
-      cpu      = 0;
-
-      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-        {
-          FAR struct tcb_s *candidate =
-            (FAR struct tcb_s *)g_assignedtasks[i].head;
-
-          /* If this thread is executing its IDLE task, the use it.  The
-           * IDLE task is always the last task in the assigned task list.
-           */
-
-          if (candidate->flink == NULL)
-            {
-              /* The IDLE task should always be assigned to this CPU and
-               * have a priority of zero.
-               */
-
-              DEBUGASSERT(candidate->sched_priority == 0);
-
-              rtcb = candidate;
-              cpu  = i;
-              break;
-            }
-          else if (candidate->sched_priority < minprio)
-            {
-              DEBUGASSERT(candidate->sched_priority > 0);
-
-              rtcb = candidate;
-              cpu  = i;
-            }
-        }
+      cpu = sched_cpu_select();
     }
+
+  /* Get the task currently running on the CPU (maybe the IDLE task) */
+
+  rtcb = (FAR struct tcb_s *)g_assignedtasks[cpu].head;
 
   /* Determine the desired new task state.  First, if the new task priority
    * is higher then the priority of the lowest priority, running task, then
