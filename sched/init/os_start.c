@@ -429,6 +429,7 @@ void os_start(void)
        */
 
       bzero((void *)&g_idletcb[cpu], sizeof(struct task_tcb_s));
+      g_idletcb[cpu].cmn.pid        = g_lastpid;
       g_idletcb[cpu].cmn.task_state = TSTATE_TASK_RUNNING;
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
