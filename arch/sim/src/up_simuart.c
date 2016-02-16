@@ -139,7 +139,7 @@ static void *simuart_thread(void *arg)
 
       /* Check for failures (but don't do anything) */
 
-      for (; nread > 0; nread--)
+      if (nread == 1)
         {
 #ifdef CONFIG_SIM_UART_DATAPOST
           sched_lock();
