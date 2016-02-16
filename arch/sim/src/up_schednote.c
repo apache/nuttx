@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <syslog.h>
 #include <nuttx/sched.h>
 
@@ -48,18 +49,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_note_start, sched_note_stop, sched_note_switch
+ * Name: sched_note_start, sched_note_stop, sched_note_switch,
+ *       sched_note_premption
  *
  * Description:
- *   Create the pthread-specific data key and set the indication of CPU0
- *   the the main thread.
+ *   Hooks to scheduler monitor
  *
  * Input Parameters:
- *   None
+ *   Varies
  *
  * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   None
  *
  ****************************************************************************/
 
@@ -69,7 +69,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
 #if CONFIG_TASK_NAME_SIZE > 0
   lowsyslog(LOG_INFO, "CPU%d: Start %s, TCB@%p, state=%d\n",
             tcb->cpu, tcb->name, tcb, tcb->task_state);
-#else  
+#else
   lowsyslog(LOG_INFO, "CPU%d: Start TCB@%p, state=%d\n"
             tcb->cpu, tcb, tcb->task_state);
 #endif
@@ -77,7 +77,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
 #if CONFIG_TASK_NAME_SIZE > 0
   lowsyslog(LOG_INFO, "Start %s, TCB@%p, state=%d\n",
             tcb->name, tcb, tcb->task_state);
-#else  
+#else
   lowsyslog(LOG_INFO, "Start TCB@%p, state=%d\n",
             tcb, tcb->task_state);
 #endif
@@ -90,7 +90,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 #if CONFIG_TASK_NAME_SIZE > 0
   lowsyslog(LOG_INFO, "CPU%d: Stop %s, TCB@%p, state=%d\n",
             tcb->cpu, tcb->name, tcb, tcb->task_state);
-#else  
+#else
   lowsyslog(LOG_INFO, "CPU%d: Stop TCB@%p, state=%d\n",
             tcb->cpu, tcb, tcb->task_state);
 #endif
@@ -98,7 +98,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 #if CONFIG_TASK_NAME_SIZE > 0
   lowsyslog(LOG_INFO, "Stop %s, TCB@%p, state=%d\n",
             tcb->name, tcb, tcb->task_state);
-#else  
+#else
   lowsyslog(LOG_INFO, "Stop TCB@%p, state=%d\n",
             tcb, tcb->task_state);
 #endif
@@ -113,25 +113,71 @@ void sched_note_switch(FAR struct tcb_s *from, FAR struct tcb_s *to)
             from->cpu, from->name, from, from->task_state);
   lowsyslog(LOG_INFO, "CPU%d: Resume %s, TCB@%p, state=%d\n",
             to->cpu, to->name, to, to->task_state);
-#else  
-  lowsyslog(LOG_INFO, "CPU%d: Stop TCB@%p, state=%d\n",
+#else
+  lowsyslog(LOG_INFO, "CPU%d: Suspend TCB@%p, state=%d\n",
             from->cpu, from, from->task_state);
   lowsyslog(LOG_INFO, "CPU%d: Resume TCB@%p, state=%d\n",
             to->cpu, to, to->task_state);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Stop %s, TCB@%p, state=%d\n",
+  lowsyslog(LOG_INFO, "Suspend %s, TCB@%p, state=%d\n",
             from->name, from, from->task_state);
-  lowsyslog(LOG_INFO, "Resume %s, TCB@%p\, state=%dn",
+  lowsyslog(LOG_INFO, "Resume %s, TCB@%p, state=%d\n",
             to->name, to, to->task_state);
-#else  
-  lowsyslog(LOG_INFO, "Stop TCB@%p, state=%d\n",
+#else
+  lowsyslog(LOG_INFO, "Suspend TCB@%p, state=%d\n",
             from, from->task_state);
   lowsyslog(LOG_INFO, "Resume TCB@%p, state=%d\n",
             to, to->task_state);
 #endif
 #endif
 }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  lowsyslog(LOG_INFO, "CPU%d: Task %s TCB@%p preemption %s\n",
+            tcb->cpu, tcb->name, tcb, locked ? "LOCKED" : "UNLOCKED");
+#else
+  lowsyslog(LOG_INFO, "CPU%d: TCB@%p preemption %s\n",
+            tcb->cpu, tcb, locked ? "LOCKED" : "UNLOCKED");
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  lowsyslog(LOG_INFO, "Task %s, TCB@%p preemption %s\n",
+            tcb->name, tcb, locked ? "LOCKED" : "UNLOCKED");
+#else
+  lowsyslog(LOG_INFO, "TCB@%p preemption %s\n",
+            tcb, locked ? "LOCKED" : "UNLOCKED");
+#endif
+#endif
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  lowsyslog(LOG_INFO, "CPU%d: Task %s TCB@%p critical section %s\n",
+            tcb->cpu, tcb->name, tcb, enter ? "ENTER" : "LEAVE");
+#else
+  lowsyslog(LOG_INFO, "CPU%d: TCB@%p critical section %s\n",
+            tcb->cpu, tcb, enter ? "ENTER" : "LEAVE");
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  lowsyslog(LOG_INFO, "Task %s, TCB@%p critical section %s\n",
+            tcb->name, tcb, enter ? "ENTER" : "LEAVE");
+#else
+  lowsyslog(LOG_INFO, "TCB@%p critical section %s\n",
+            tcb, enter ? "ENTER" : "LEAVE");
+#endif
+#endif
+}
+#endif
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */

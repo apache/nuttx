@@ -9,6 +9,7 @@ fclose         NXfclose
 fopen          NXfopen
 fputc          NXfputc
 fcntl          NXfcntl
+fputs          NXfputs
 fread          NXfread
 fwrite         NXfwrite
 fsync          NXfsync
@@ -36,6 +37,7 @@ pthread_mutex_destroy NXpthread_mutex_destroy
 pthread_key_create NXpthread_key_create
 pthread_setspecific NXpthread_setspecific
 pthread_getspecific NXpthread_getspecific
+puts           NXputs
 read           NXread
 readdir        NXreaddir
 realloc        NXrealloc
