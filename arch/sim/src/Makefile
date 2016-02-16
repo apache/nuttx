@@ -73,6 +73,10 @@ ifeq ($(CONFIG_SMP),y)
   HOSTSRCS += up_simsmp.c
 endif
 
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
+  CSRCS += up_schednote.c
+endif
+
 ifeq ($(CONFIG_DEV_CONSOLE),y)
   CSRCS += up_uartwait.c
   HOSTSRCS += up_simuart.c
