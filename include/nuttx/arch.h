@@ -1690,9 +1690,13 @@ int up_cpundx(void);
  *   initialization of the OS, just before beginning normal multitasking,
  *   the additional CPUs would be started by calling this function.
  *
- *   Each CPU is provided the entry point to is IDLE task when started.  The
- *   OS initialization logic calls this function repeatedly until each CPU
- *   has been started.
+ *   Each CPU is provided the entry point to is IDLE task when started.  A
+ *   TCB for each CPU's IDLE task has been initialized and placed in the
+ *   CPU's g_assignedtasks[cpu] list.  Not stack has been alloced or
+ *   initialized.
+ *
+ *   The OS initialization logic calls this function repeatedly until each
+ *   CPU has been started, 1 through (CONFIG_SMP_NCPUS-1).
  *
  * Input Parameters:
  *   cpu - The index of the CPU being started.  This will be a numeric
