@@ -418,8 +418,8 @@ void os_start(void)
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
-      g_pidhash[PIDHASH(0)].tcb = &g_idletcb[cpu].cmn;
-      g_pidhash[PIDHASH(0)].pid = g_lastpid;
+      g_pidhash[PIDHASH(g_lastpid)].tcb = &g_idletcb[cpu].cmn;
+      g_pidhash[PIDHASH(g_lastpid)].pid = g_lastpid;
 
       /* Initialize a TCB for this thread of execution.  NOTE:  The default
        * value for most components of the g_idletcb are zero.  The entire
@@ -444,11 +444,10 @@ void os_start(void)
           g_idletcb[cpu].cmn.entry.main = os_idletask;
         }
       else
-#else
+#endif
         {
           g_idletcb[cpu].cmn.entry.main = (main_t)os_start;
         }
-#endif
 
       /* Set the task flags to indicate that this is a kernel thread and, if
        * configured for SMP, that this task is assigned to the correct CPU.
