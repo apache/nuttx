@@ -63,21 +63,12 @@ extern FAR xcpt_t g_irqvector[NR_IRQS+1];
  * disabled.
  */
 
-extern spinlock_t g_cpu_irqlock;
+extern volatile spinlock_t g_cpu_irqlock;
 
-/* Used to keep track of which CPU(s) hold the IRQ lock.  There really should
- * only be one.
- */
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-#if (CONFIG_SMP_NCPUS <= 8)
-volatile uint8_t  g_cpu_irqset;
-#elif (CONFIG_SMP_NCPUS <= 16)
-volatile uint16_t g_cpu_irqset;
-#elif (CONFIG_SMP_NCPUS <= 32)
-volatile uint32_t g_cpu_irqset;
-#else
-#  error SMP: Extensions needed to support this number of CPUs
-#endif
+extern volatile spinlock_t g_cpu_irqsetlock;
+extern volatile cpuset_t g_cpu_irqset;
 #endif
 
 /****************************************************************************

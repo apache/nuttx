@@ -117,15 +117,15 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
-          g_cpu_lockset |= (1 << this_cpu());
-          g_cpu_schedlock = SP_LOCKED;
+          spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                      &g_cpu_schedlock);
         }
       else
         {
           /* No.. we may need to perform release our hold on the lock. */
 
-          g_cpu_lockset  &= ~(1 << this_cpu());
-          g_cpu_schedlock = ((g_cpu_lockset == 0) ? SP_UNLOCKED : SP_LOCKED);
+          spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                      &g_cpu_schedlock);
         }
 
       /* Interrupts be disabled after the switch.  If irqcount is greater
@@ -136,15 +136,15 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
-          g_cpu_irqset |= (1 << this_cpu());
-          g_cpu_irqlock = SP_LOCKED;
+          spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
         }
       else
         {
           /* No.. we may need to perform release our hold on the lock. */
 
-          g_cpu_irqset &= ~(1 << this_cpu());
-          g_cpu_irqlock = ((g_cpu_irqset == 0) ? SP_UNLOCKED : SP_LOCKED);
+          spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
         }
 #endif
 

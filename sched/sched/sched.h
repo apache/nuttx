@@ -355,15 +355,10 @@ extern volatile uint32_t g_cpuload_total;
 
 extern volatile spinlock_t g_cpu_schedlock;
 
-#if (CONFIG_SMP_NCPUS <= 8)
-extern volatile uint8_t g_cpu_lockset;
-#elif (CONFIG_SMP_NCPUS <= 16)
-extern volatile uint16_t g_cpu_lockset;
-#elif (CONFIG_SMP_NCPUS <= 32)
-extern volatile uint32_t g_cpu_lockset;
-#else
-#  error SMP: Extensions needed to support this number of CPUs
-#endif
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
+
+extern volatile spinlock_t g_cpu_locksetlock;
+extern volatile cpuset_t g_cpu_lockset;
 
 #endif /* CONFIG_SMP */
 
@@ -423,7 +418,7 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_SMP
 int sched_cpu_select(void);
-#  define sched_islocked(tcb) spin_islocked(g_cpu_schedlock)
+#  define sched_islocked(tcb) spin_islocked(&g_cpu_schedlock)
 #else
 #  define sched_islocked(tcb) ((tcb)->lockcount > 0)
 #  define sched_cpu_select (0)

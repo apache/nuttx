@@ -295,4 +295,76 @@ void spin_unlockr(FAR struct spinlock_s *lock)
 #endif /* CONFIG_SMP */
 }
 
+/****************************************************************************
+ * Name: spin_setbit
+ *
+ * Description:
+ *   Makes setting a CPU bit in a bitset an atomic action
+ *
+ * Input Parameters:
+ *   set     - A reference to the bitset to set the CPU bit in
+ *   cpu     - The bit number to be set
+ *   setlock - A reference to the lock lock protecting the set
+ *   orlock  - Will be set to SP_LOCKED while holding setlock
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spin_setbit(FAR volatile cpuset_t *set, unsigned int cpu,
+                 FAR volatile spinlock_t *setlock,
+                 FAR volatile spinlock_t *orlock)
+{
+  /* First, get the 'setlock' spinlock */
+
+  spin_lock(setlock);
+
+  /* Then set the bit and mark the 'orlock' as locked */
+
+  *set   |= (1 << cpu);
+  *orlock = SP_LOCKED;
+
+  /* Release the 'setlock' */
+
+  spin_unlock(setlock);
+}
+
+/****************************************************************************
+ * Name: spin_clrbit
+ *
+ * Description:
+ *   Makes clearing a CPU bit in a bitset an atomic action
+ *
+ * Input Parameters:
+ *   set     - A reference to the bitset to set the CPU bit in
+ *   cpu     - The bit number to be set
+ *   setlock - A reference to the lock lock protecting the set
+ *   orlock  - Will be set to SP_UNLOCKED if all bits become cleared in set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spin_clrbit(FAR volatile cpuset_t *set, unsigned int cpu,
+                 FAR volatile spinlock_t *setlock,
+                 FAR volatile spinlock_t *orlock)
+{
+  /* First, get the 'setlock' spinlock */
+
+  spin_lock(setlock);
+
+  /* Then clear the bit in the CPU set.  Set/clear the 'orlock' depending
+   * upon the resulting state of the CPU set.
+   */
+
+  *set   &= ~(1 << cpu);
+  *orlock = (*set != 0) ? SP_LOCKED : SP_UNLOCKED;
+
+  /* Release the 'setlock' */
+
+  spin_unlock(setlock);
+}
+
 #endif /* CONFIG_SPINLOCK */

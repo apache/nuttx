@@ -111,8 +111,8 @@ int task_exit(void)
 #ifdef CONFIG_SMP
   /* Make sure that the system knows about the locked state */
 
-  g_cpu_schedlock = SP_LOCKED;
-  g_cpu_lockset |= (1 << this_cpu());
+  spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+              &g_cpu_schedlock);
 #endif
 
   rtcb->task_state = TSTATE_TASK_READYTORUN;
@@ -151,11 +151,8 @@ int task_exit(void)
     {
       /* Make sure that the system knows about the unlocked state */
 
-      g_cpu_lockset &= ~(1 << this_cpu());
-      if (g_cpu_lockset == 0)
-        {
-          g_cpu_schedlock = SP_UNLOCKED;
-        }
+      spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                  &g_cpu_schedlock);
     }
 #endif
 

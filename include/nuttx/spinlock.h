@@ -73,6 +73,18 @@ struct spinlock_s
 #endif
 };
 
+/* This is the smallest integer type that will not a bitset of all CPUs */
+
+#if (CONFIG_SMP_NCPUS <= 8)
+typedef volatile uint8_t cpuset_t;
+#elif (CONFIG_SMP_NCPUS <= 16)
+typedef volatile uint16_t cpuset_t;
+#elif (CONFIG_SMP_NCPUS <= 32)
+typedef volatile uint32_t cpuset_t;
+#else
+#  error SMP: Extensions needed to support this number of CPUs
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -202,7 +214,7 @@ void spin_lockr(FAR struct spinlock_s *lock);
  ****************************************************************************/
 
 /* void spin_unlock(FAR spinlock_t *lock); */
-#define spin_unlock(l)  do { (l) = SP_UNLOCKED; } while (0)
+#define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
 
 /****************************************************************************
  * Name: spin_unlockr
@@ -238,7 +250,7 @@ void spin_unlockr(FAR struct spinlock_s *lock);
  ****************************************************************************/
 
 /* bool spin_islocked(FAR spinlock_t lock); */
-#define spin_islocked(l) ((l) == SP_LOCKED)
+#define spin_islocked(l) (*(l) == SP_LOCKED)
 
 /****************************************************************************
  * Name: spin_islockedr
@@ -256,6 +268,48 @@ void spin_unlockr(FAR struct spinlock_s *lock);
 
 /* bool spin_islockedr(FAR struct spinlock_s *lock); */
 #define spin_islockedr(l) ((l)->sp_lock == SP_LOCKED)
+
+/****************************************************************************
+ * Name: spin_setbit
+ *
+ * Description:
+ *   Makes setting a CPU bit in a bitset an atomic action
+ *
+ * Input Parameters:
+ *   set     - A reference to the bitset to set the CPU bit in
+ *   cpu     - The bit number to be set
+ *   setlock - A reference to the lock lock protecting the set
+ *   orlock  - Will be set to SP_LOCKED while holding setlock
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spin_setbit(FAR volatile cpuset_t *set, unsigned int cpu,
+                 FAR volatile spinlock_t *setlock,
+                 FAR volatile spinlock_t *orlock);
+
+/****************************************************************************
+ * Name: spin_clrbit
+ *
+ * Description:
+ *   Makes clearing a CPU bit in a bitset an atomic action
+ *
+ * Input Parameters:
+ *   set     - A reference to the bitset to set the CPU bit in
+ *   cpu     - The bit number to be set
+ *   setlock - A reference to the lock lock protecting the set
+ *   orlock  - Will be set to SP_UNLOCKED if all bits become cleared in set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spin_clrbit(FAR volatile cpuset_t *set, unsigned int cpu,
+                 FAR volatile spinlock_t *setlock,
+                 FAR volatile spinlock_t *orlock);
 
 #endif /* CONFIG_SPINLOCK */
 #endif /* __INCLUDE_NUTTX_SPINLOCK_H */

@@ -107,11 +107,8 @@ int sched_unlock(void)
           DEBUGASSERT(g_cpu_schedlock == SP_LOCKED &&
                      (g_cpu_lockset & (1 << this_cpu())) != 0);
 
-          g_cpu_lockset &= ~(1 << this_cpu());
-          if (g_cpu_lockset == 0)
-            {
-              spin_unlock(g_cpu_schedlock);
-            }
+          spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                      &g_cpu_schedlock);
 #endif
 
           /* Release any ready-to-run tasks that have collected in

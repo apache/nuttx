@@ -54,21 +54,12 @@
  * disabled.
  */
 
-spinlock_t g_cpu_irqlock = SP_UNLOCKED;
+volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
-/* Used to keep track of which CPU(s) hold the IRQ lock.  There really should
- * only be one.
- */
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-#if (CONFIG_SMP_NCPUS <= 8)
-volatile uint8_t  g_cpu_irqset;
-#elif (CONFIG_SMP_NCPUS <= 16)
-volatile uint16_t g_cpu_irqset;
-#elif (CONFIG_SMP_NCPUS <= 32)
-volatile uint32_t g_cpu_irqset;
-#else
-#  error SMP: Extensions needed to support this number of CPUs
-#endif
+volatile spinlock_t g_cpu_irqsetlock;
+volatile cpuset_t g_cpu_irqset;
 
 /****************************************************************************
  * Public Functions
@@ -125,10 +116,9 @@ irqstate_t enter_critical_section(void)
        * lockcount:  Both will disable pre-emption.
        */
 
-      spin_lock(&g_cpu_irqlock);
-
+      spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                  &g_cpu_irqlock);
       rtcb->irqcount = 1;
-      g_cpu_irqset  |= (1 << this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
       /* Note that we have entered the critical section */
@@ -186,16 +176,13 @@ void leave_critical_section(irqstate_t flags)
            */
 
           rtcb->irqcount = 0;
-          g_cpu_irqset  &= ~(1 << this_cpu());
+          spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
 
           /* Have all CPUs release the lock? */
 
-          if (g_cpu_irqset == 0)
+          if (!spin_islocked(&g_cpu_irqlock))
             {
-              /* Unlock the IRQ spinlock */
-
-              spin_unlock(g_cpu_irqlock);
-
               /* Check if there are pending tasks and that pre-emption is
                * also enabled.
                */

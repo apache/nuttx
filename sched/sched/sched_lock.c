@@ -106,17 +106,12 @@
  *    least one CPU has pre-emption disabled.
  */
 
-volatile spinlock_t g_cpu_schedlock;
+volatile spinlock_t g_cpu_schedlock = SP_UNLOCKED;
 
-#if (CONFIG_SMP_NCPUS <= 8)
-volatile uint8_t  g_cpu_lockset;
-#elif (CONFIG_SMP_NCPUS <= 16)
-volatile uint16_t g_cpu_lockset;
-#elif (CONFIG_SMP_NCPUS <= 32)
-volatile uint32_t g_cpu_lockset;
-#else
-#  error SMP: Extensions needed to support this number of CPUs
-#endif
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
+
+volatile spinlock_t g_cpu_locksetlock;
+volatile cpuset_t g_cpu_lockset;
 
 #endif /* CONFIG_SMP */
 
@@ -175,14 +170,8 @@ int sched_lock(void)
            * If the scheduler is locked on another CPU, then we for the lock.
            */
 
-          spin_lock(&g_cpu_schedlock);
-
-          /* Set a bit in g_cpu_lockset to indicate that this CPU holds the
-           * scheduler lock.  This is mostly for debug purposes but should
-           * also handle few cornercases during context switching.
-           */
-
-          g_cpu_lockset |= (1 << this_cpu());
+          spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                      &g_cpu_schedlock);
         }
       else
         {

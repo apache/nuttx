@@ -229,7 +229,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
    * start running the task.  Be we cannot do that if pre-emption is disable.
    */
 
-  if (spin_islocked(g_cpu_schedlock) && task_state == TSTATE_TASK_RUNNING)
+  if (spin_islocked(&g_cpu_schedlock) && task_state == TSTATE_TASK_RUNNING)
     {
       /* Preemption would occur!  Add the new ready-to-run task to the
        * g_pendingtasks task list for now.
@@ -304,16 +304,13 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           if (btcb->lockcount > 0)
             {
-              g_cpu_lockset  |= (1 << cpu);
-              g_cpu_schedlock = SP_LOCKED;
+              spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                          &g_cpu_schedlock);
             }
           else
             {
-              g_cpu_lockset  &= ~(1 << cpu);
-              if (g_cpu_lockset == 0)
-                {
-                  g_cpu_schedlock = SP_UNLOCKED;
-                }
+              spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                          &g_cpu_schedlock);
             }
 
           /* Adjust global IRQ controls.  If irqcount is greater than zero,
@@ -322,16 +319,13 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           if (btcb->irqcount > 0)
             {
-              g_cpu_irqset  |= (1 << cpu);
-              g_cpu_irqlock = SP_LOCKED;
+              spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
             }
           else
             {
-              g_cpu_irqset  &= ~(1 << cpu);
-              if (g_cpu_irqset == 0)
-                {
-                  g_cpu_irqlock = SP_UNLOCKED;
-                }
+              spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
             }
 
           /* If the following task is not assigned to this CPU, then it must
