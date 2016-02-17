@@ -118,11 +118,11 @@ static inline void sched_kucleanup(void)
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifndef CONFIG_BUILD_KERNEL
 static inline bool sched_have_kugarbage(void)
 {
   return (g_delayed_kufree.head != NULL);
+}
 #else
 #  define sched_have_kugarbage() false
 #endif
@@ -197,6 +197,7 @@ static inline void sched_kcleanup(void)
 static inline bool sched_have_kgarbage(void)
 {
   return (g_delayed_kfree.head != NULL);
+}
 #else
 #  define sched_have_kgarbage() false
 #endif
