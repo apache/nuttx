@@ -1660,7 +1660,7 @@ int up_timer_start(FAR const struct timespec *ts);
 /* See prototype in include/nuttx/spinlock.h */
 
 /****************************************************************************
- * Name: up_cpundx
+ * Name: up_cpu_index
  *
  * Description:
  *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
@@ -1676,13 +1676,13 @@ int up_timer_start(FAR const struct timespec *ts);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int up_cpundx(void);
+int up_cpu_index(void);
 #else
-#  define up_cpundx() (0)
+#  define up_cpu_index() (0)
 #endif
 
 /****************************************************************************
- * Name: up_cpustart
+ * Name: up_cpu_start
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -1710,15 +1710,16 @@ int up_cpundx(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int up_cpustart(int cpu, main_t idletask);
+int up_cpu_start(int cpu, main_t idletask);
 #endif
 
 /****************************************************************************
- * Name: up_cpustop
+ * Name: up_cpu_pause
  *
  * Description:
  *   Save the state of the current task at the head of the
- *   g_assignedtasks[cpu] task list and then stop the CPU.
+ *   g_assignedtasks[cpu] task list and then pause task execution on the
+ *   CPU.
  *
  *   This function is called by the OS when the logic executing on one CPU
  *   needs to modify the state of the g_assignedtasks[cpu] list for another
@@ -1733,17 +1734,18 @@ int up_cpustart(int cpu, main_t idletask);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int up_cpustop(int cpu);
+int up_cpu_pause(int cpu);
 #endif
 
 /****************************************************************************
- * Name: up_cpurestart
+ * Name: up_cpu_resume
  *
  * Description:
- *   Restart the cpu, restoring the state of the task at the head of the
- *   g_assignedtasks[cpu] list.
+ *   Restart the cpu after it was paused via up_cpu_pause(), restoring the
+ *   state of the task at the head of the g_assignedtasks[cpu] list, and
+ *   resume normal tasking.
  *
- *   This function is called after up_cpustop in order resume operation of
+ *   This function is called after up_cpu_pause in order resume operation of
  *   the CPU after modifying its g_assignedtasks[cpu] list.
  *
  * Input Parameters:
@@ -1755,7 +1757,7 @@ int up_cpustop(int cpu);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int up_cpurestart(int cpu);
+int up_cpu_resume(int cpu);
 #endif
 
 /****************************************************************************

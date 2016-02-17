@@ -168,7 +168,7 @@ int os_smpstart(void)
     {
       /* And start the CPU.  */
 
-      ret = up_cpustart(cpu, os_idletask);
+      ret = up_cpu_start(cpu, os_idletask);
       if (ret < 0)
         {
           sdbg("ERROR: Failed to start CPU%d: %d\n", cpu, ret);

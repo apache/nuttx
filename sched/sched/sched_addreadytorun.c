@@ -264,7 +264,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
-          DEBUGVERIFY(up_cpustop(cpu));
+          DEBUGVERIFY(up_cpu_pause(cpu));
         }
 
       /* Add the task to the list corresponding to the selected state
@@ -372,7 +372,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
-          DEBUGVERIFY(up_cpurestart(cpu));
+          DEBUGVERIFY(up_cpu_resume(cpu));
           doswitch = false;
         }
     }
