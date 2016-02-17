@@ -314,10 +314,15 @@ SMP
   There is no failure but, of course, the task on CPU1 does not run, i.e.,
   it does not replace the IDLE task running on CPU1.
 
-  2016-02-16: I have also tried running the NSH example with SMP enabled.
-  It currently boots, runs NSH, stops waiting for UART input, but fails
-  in random ways as soon as data is input.  This is
-  probably an issue with the simulated UART when runs on yet another pthread.
+  2016-02-16: The NSH configuration can be forced to run, but only if (1)
+  You don't try to execute built-in commands or to execute commands in the
+  background.  Those thoses cases, it will try to start the command on
+  CPU1 and the same problem as for the ostest case occurs.
+
+  Also, for NSH you have to modify arch/sim/src/up_idle.c so that the
+  IDLE loop only runfs for CPU0.  Otherwise, often simuart_post() will
+  be called from CPU1 and it will try to restart NSH on CPU0 and, again,
+  the same problem occurs.
 
 BASIC
 ^^^^^
