@@ -216,7 +216,7 @@ void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 /* up_simsmp.c ************************************************************/
 
 #ifdef CONFIG_SMP
-int sim_cpu0initialize(void);
+int sim_cpu0_initialize(void);
 int sim_cpustart(int cpu, main_t idletask);
 #endif
 

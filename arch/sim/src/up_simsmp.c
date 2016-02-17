@@ -97,7 +97,7 @@ static void *sim_idle_trampoline(void *arg)
       return NULL;
     }
 
-  /* Let up_cpustart() continue */
+  /* Let up_cpu_start() continue */
 
   (void)pthread_mutex_unlock(&cpuinfo->mutex);
 
@@ -115,7 +115,7 @@ static void *sim_idle_trampoline(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpu0initialize
+ * Name: sim_cpu0_initialize
  *
  * Description:
  *   Create the pthread-specific data key and set the indication of CPU0
@@ -130,7 +130,7 @@ static void *sim_idle_trampoline(void *arg)
  *
  ****************************************************************************/
 
-int sim_cpu0initialize(void)
+int sim_cpu0_initialize(void)
 {
   int ret;
 
@@ -154,7 +154,7 @@ int sim_cpu0initialize(void)
 }
 
 /****************************************************************************
- * Name: up_cpundx
+ * Name: up_cpu_index
  *
  * Description:
  *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
@@ -169,14 +169,14 @@ int sim_cpu0initialize(void)
  *
  ****************************************************************************/
 
-int up_cpundx(void)
+int up_cpu_index(void)
 {
   void *value = pthread_getspecific(g_cpukey);
   return (int)((uintptr_t)value);
 }
 
 /****************************************************************************
- * Name: up_cpustart
+ * Name: up_cpu_start
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -203,7 +203,7 @@ int up_cpundx(void)
  *
  ****************************************************************************/
 
-int up_cpustart(int cpu, main_t idletask)
+int up_cpu_start(int cpu, main_t idletask)
 {
   struct sim_cpuinfo_s cpuinfo;
   pthread_t thread;
@@ -258,11 +258,12 @@ errout_with_mutex:
 }
 
 /****************************************************************************
- * Name: up_cpustop
+ * Name: up_cpu_pause
  *
  * Description:
  *   Save the state of the current task at the head of the
- *   g_assignedtasks[cpu] task list and then stop the CPU.
+ *   g_assignedtasks[cpu] task list and then pause task execution on the
+ *   CPU.
  *
  *   This function is called by the OS when the logic executing on one CPU
  *   needs to modify the state of the g_assignedtasks[cpu] list for another
@@ -276,20 +277,21 @@ errout_with_mutex:
  *
  ****************************************************************************/
 
-int up_cpustop(int cpu)
+int up_cpu_pause(int cpu)
 {
 #warning Missing SMP logic
   return 0;
 }
 
 /****************************************************************************
- * Name: up_cpurestart
+ * Name: up_cpu_resume
  *
  * Description:
- *   Restart the cpu, restoring the state of the task at the head of the
- *   g_assignedtasks[cpu] list.
+ *   Restart the cpu after it was paused via up_cpu_pause(), restoring the
+ *   state of the task at the head of the g_assignedtasks[cpu] list, and
+ *   resume normal tasking.
  *
- *   This function is called after up_cpustop in order resume operation of
+ *   This function is called after up_cpu_pause in order resume operation of
  *   the CPU after modifying its g_assignedtasks[cpu] list.
  *
  * Input Parameters:
@@ -300,7 +302,7 @@ int up_cpustop(int cpu)
  *
  ****************************************************************************/
 
-int up_cpurestart(int cpu)
+int up_cpu_resume(int cpu)
 {
 #warning Missing SMP logic
   return 0;

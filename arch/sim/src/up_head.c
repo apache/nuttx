@@ -76,7 +76,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_SMP
   /* In the SMP case, configure the main thread as CPU 0 */
 
-  sim_cpu0initialize();
+  sim_cpu0_initialize();
 #endif
 
 #ifdef CONFIG_PM
@@ -115,7 +115,7 @@ void up_assert(const uint8_t *filename, int line)
 
 #ifdef CONFIG_SMP
   fprintf(stderr, "CPU%d: Assertion failed at file:%s line: %d\n",
-          up_cpundx(), filename, line);
+          up_cpu_index(), filename, line);
 #else
   fprintf(stderr, "Assertion failed at file:%s line: %d\n",
           filename, line);
