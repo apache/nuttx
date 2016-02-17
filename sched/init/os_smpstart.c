@@ -97,6 +97,7 @@ int os_idletask(int argc, FAR char *argv[])
   /* Enter the IDLE loop */
 
   sdbg("CPU%d: Beginning Idle Loop\n", this_cpu());
+
   for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker
@@ -118,9 +119,9 @@ int os_idletask(int argc, FAR char *argv[])
        * queue so that is done in a safer context.
        */
 
-      if (kmm_trysemaphore() == 0)
+      if (sched_have_garbage() && kmm_trysemaphore() == 0)
         {
-          sched_garbagecollection();
+          sched_garbage_collection();
           kmm_givesemaphore();
         }
 #endif

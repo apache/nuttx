@@ -415,11 +415,13 @@ void os_start(void)
 #endif
     {
       FAR dq_queue_t *tasklist;
+      int hashndx;
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
-      g_pidhash[PIDHASH(g_lastpid)].tcb = &g_idletcb[cpu].cmn;
-      g_pidhash[PIDHASH(g_lastpid)].pid = g_lastpid;
+      hashndx                = PIDHASH(g_lastpid);
+      g_pidhash[hashndx].tcb = &g_idletcb[cpu].cmn;
+      g_pidhash[hashndx].pid = g_lastpid;
 
       /* Initialize a TCB for this thread of execution.  NOTE:  The default
        * value for most components of the g_idletcb are zero.  The entire
@@ -783,9 +785,9 @@ void os_start(void)
        * queue so that is done in a safer context.
        */
 
-      if (kmm_trysemaphore() == 0)
+      if (sched_have_garbage() && kmm_trysemaphore() == 0)
         {
-          sched_garbagecollection();
+          sched_garbage_collection();
           kmm_givesemaphore();
         }
 #endif

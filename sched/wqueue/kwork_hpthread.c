@@ -120,7 +120,7 @@ static int work_hpthread(int argc, char *argv[])
        * thread instead.
        */
 
-      sched_garbagecollection();
+      sched_garbage_collection();
 #endif
 
       /* Then process queued work.  work_process will not return until: (1)

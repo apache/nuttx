@@ -156,7 +156,7 @@ static int work_lpthread(int argc, char *argv[])
            * the garbage collection.
            */
 
-          sched_garbagecollection();
+          sched_garbage_collection();
 
           /* Then process queued work.  work_process will not return until:
            * (1) there is no further work in the work queue, and (2) the polling
