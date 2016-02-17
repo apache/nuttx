@@ -233,8 +233,8 @@ SMP
   The simulation SMP implemention is incomplete, however.  Two critical SMP
   functions are not implemented:
 
-    - int up_cpustop(void)
-    - int up_cpuresume(void)
+    - int up_cpu_pause(void)
+    - int up_cpu_resume(void)
 
   These are used to start a new task on a different CPU:  (1) the other CPU
   is stopped or paused, (2) the OS datastructures for that CPU are modified,
