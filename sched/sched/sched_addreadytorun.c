@@ -113,7 +113,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * is now the new active task!
        */
 
-      ASSERT(rtcb->lockcount == 0 && btcb->flink != NULL);
+      ASSERT(!spin_islocked(&g_cpu_schedlock) && btcb->flink != NULL);
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
@@ -341,7 +341,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
            */
 
           next = (FAR struct tcb_s *)btcb->flink;
-          ASSERT(!rtcb->lockcount && next != NULL);
+          ASSERT(!spin_islocked(&g_cpu_schedlock) && next != NULL);
 
           if ((next->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
             {

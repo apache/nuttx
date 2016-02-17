@@ -181,22 +181,36 @@ void leave_critical_section(irqstate_t flags)
 
           sched_note_csection(rtcb, false);
 #endif
-          /* Release the spinlock to allow other access. */
-
-          g_cpu_irqset  &= ~(1 << this_cpu());
-          rtcb->irqcount = 0;
-          spin_unlock(g_cpu_irqlock);
-
-          /* Release any ready-to-run tasks that have collected in
-           * g_pendingtasks if the scheduler is not locked.
-           *
-           * NOTE: This operation has a very high likelihood of causing
-           * this task to be switched out!
+          /* Decrement our count on the lock.  If all CPUs have released,
+           * then unlock the spinlock.
            */
 
-          if (g_pendingtasks.head != NULL && rtcb->lockcount <= 0)
+          rtcb->irqcount = 0;
+          g_cpu_irqset  &= ~(1 << this_cpu());
+
+          /* Have all CPUs release the lock? */
+
+          if (g_cpu_irqset == 0)
             {
-              up_release_pending();
+              /* Unlock the IRQ spinlock */
+
+              spin_unlock(g_cpu_irqlock);
+
+              /* Check if there are pending tasks and that pre-emption is
+               * also enabled.
+               */
+
+              if (g_pendingtasks.head != NULL && !spin_islocked(&g_cpu_schedlock))
+                {
+                  /* Release any ready-to-run tasks that have collected in
+                   * g_pendingtasks if the scheduler is not locked.
+                   *
+                   * NOTE: This operation has a very high likelihood of causing
+                   * this task to be switched out!
+                   */
+
+                  up_release_pending();
+                }
             }
         }
 
