@@ -15,6 +15,7 @@ Contents
     - Networking Issues
     - X11 Issues
     - Cygwin64 Issues
+    - SMP
   o BASIC
   o Configurations
 
@@ -222,6 +223,101 @@ environment:
     values (similar to x86) are returned in RAX if 64 bits or less. Floating
     point return values are returned in XMM0. Parameters less than 64 bits
     long are not zero extended; the high bits are not zeroed.
+
+SMP
+---
+  The configuration has basic support SMP testing.  The simulation supports
+  the emulation of multiple CPUs by creating multiple pthreads, each run a
+  copy of the simulation in the same process address space.
+
+  The simulation SMP implemention is incomplete, however.  Two critical SMP
+  functions are not implemented:
+
+    - int up_cpustop(void)
+    - int up_cpuresume(void)
+
+  These are used to start a new task on a different CPU:  (1) the other CPU
+  is stopped or paused, (2) the OS datastructures for that CPU are modified,
+  then (2) the other CPU is resumed.  Unfortunately, I have not yet thought
+  of a way to implement them in the simulation.
+
+  Currently, for example, you can enable SMP for ostest configuration by
+  enabling:
+
+    -# CONFIG_EXPERIMENTAL is not set
+    +CONFIG_EXPERIMENTAL=y
+
+    +CONFIG_SPINLOCK=y
+    +CONFIG_SMP=y
+    +CONFIG_SMP_NCPUS=2
+    +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+
+  And you can enable some additional debug output with:
+
+    -# CONFIG_DEBUG_SCHED is not set
+    +CONFIG_DEBUG_SCHED=y
+
+    -# CONFIG_SCHED_INSTRUMENTATION is not set
+    +CONFIG_SCHED_INSTRUMENTATION=y
+
+  The result should be as follows:
+
+    - CPU0 initializes and starts CPU1.  CPU1 is running an executing the
+      IDLE task.
+
+      os_start: Entry
+      os_idletask: CPU1: Beginning Idle Loop
+
+    - CPU0 brings up the the OS test application on CPU0
+
+      os_do_appstart: Starting init thread
+      CPU0: Start init, TCB@42f490, state=5
+      up_unblock_task: Unblocking TCB=42f490
+      CPU0: Suspend CPU0 IDLE, TCB@42c180, state=4
+      CPU0: Resume init, TCB@42f490, state=0
+      up_unblock_task: New Active Task TCB=42f490
+
+    - OS test runs and performs some basic checks.
+
+      stdio_test: write fd=1
+      stdio_test: Standard I/O Check: printf
+      stdio_test: write fd=2
+      stdio_test: Standard I/O Check: fprintf to stderr
+      ostest_main: putenv(Variable1=BadValue3)
+
+      up_block_task: Blocking TCB=42f490
+      CPU0: Suspend init, TCB@42f490, state=4
+      CPU0: Resume CPU0 IDLE, TCB@42c180, state=3
+      up_block_task: New Active Task TCB=42c180
+      up_unblock_task: Unblocking TCB=42f490
+      CPU0: Suspend CPU0 IDLE, TCB@42c180, state=4
+      CPU0: Resume init, TCB@42f490, state=0
+      up_unblock_task: New Active Task TCB=42f490
+
+      ostest_main: setenv(Variable1, GoodValue1, TRUE)
+      ostest_main: setenv(Variable2, BadValue1, FALSE)
+      ostest_main: setenv(Variable2, GoodValue2, TRUE)
+      ostest_main: setenv(Variable3, Variable3, FALSE)
+      ostest_main: setenv(Variable3, Variable3, FALSE)
+      show_variable: Variable=Variable1 has value=GoodValue1
+      show_variable: Variable=Variable2 has value=GoodValue2
+      show_variable: Variable=Variable3 has value=GoodValue3
+
+    - Then OS test tries to start the task ostest on CPU1
+
+      CPU0: Start ostest, TCB@430e90, state=5
+      up_unblock_task: Unblocking TCB=430e90
+      CPU1: Suspend CPU1 IDLE, TCB@42c2c0, state=4
+      CPU0: Resume ostest, TCB@430e90, state=0
+      ostest_main: Started user_main at PID=4
+
+  There is no failure but, of course, the task on CPU1 does not run, i.e.,
+  it does not replace the IDLE task running on CPU1.
+
+  2016-02-16: I have also tried running the NSH example with SMP enabled.
+  It currently boots, runs NSH, stops waiting for UART input, but fails
+  in random ways as soon as data is input.  This is
+  probably an issue with the simulated UART when runs on yet another pthread.
 
 BASIC
 ^^^^^
