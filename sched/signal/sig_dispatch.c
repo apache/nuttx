@@ -305,7 +305,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        stcb, info->si_signo, info->si_code,
        info->si_value.sival_int, stcb->sigprocmask);
 
-  DEBUGASSERT(stcb && info);
+  DEBUGASSERT(stcb != NULL && info != NULL);
 
   /************************* MASKED SIGNAL HANDLING ************************/
 
@@ -439,7 +439,7 @@ int sig_dispatch(pid_t pid, FAR siginfo_t *info)
   /* Get the TCB associated with the pid */
 
   stcb = sched_gettcb(pid);
-  if (stcb)
+  if (stcb != NULL)
     {
       /* The task/thread associated with this PID is still active.  Get its
        * task group.
@@ -459,7 +459,7 @@ int sig_dispatch(pid_t pid, FAR siginfo_t *info)
 
   /* Did we locate the group? */
 
-  if (group)
+  if (group != NULL)
     {
       /* Yes.. call group_signal() to send the signal to the correct group
        * member.
@@ -478,7 +478,7 @@ int sig_dispatch(pid_t pid, FAR siginfo_t *info)
   /* Get the TCB associated with the pid */
 
   stcb = sched_gettcb(pid);
-  if (!stcb)
+  if (stcb == NULL)
     {
       return -ESRCH;
     }
