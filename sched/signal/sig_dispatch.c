@@ -72,20 +72,17 @@
 
 static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 {
-  FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
   FAR sigq_t    *sigq;
   irqstate_t     flags;
   int            ret = OK;
 
   sched_lock();
+  DEBUGASSERT(stcb != NULL && stcb->group != NULL);
 
   /* Find the group sigaction associated with this signal */
 
-  DEBUGASSERT(stcb != NULL && stcb->group != NULL);
-
-  group = stcb->group;
-  sigact = sig_findaction(group, info->si_signo);
+  sigact = sig_findaction(stcb->group, info->si_signo);
 
   /* Check if a valid signal handler is available and if the signal is
    * unblocked.  NOTE:  There is no default action.
@@ -202,7 +199,7 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
   FAR sigpendq_t *sigpend = NULL;
   irqstate_t flags;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL);
 
   /* Pending sigals can be added from interrupt level. */
 
@@ -232,13 +229,14 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
 static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
                                             FAR siginfo_t *info)
 {
-  FAR struct task_group_s *group = stcb->group;
+  FAR struct task_group_s *group;
   FAR sigpendq_t *sigpend;
   irqstate_t flags;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(stcb != NULL && stcb->group != NULL);
+  group = stcb->group;
 
-  /* Check if the signal is already pending */
+  /* Check if the signal is already pending for the group */
 
   sigpend = sig_findpendingsignal(group, info->si_signo);
   if (sigpend)
@@ -248,7 +246,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
       memcpy(&sigpend->info, info, sizeof(siginfo_t));
     }
 
-  /* No... There is nothing pending for this signo */
+  /* No... There is nothing pending in the group for this signo */
 
   else
     {
@@ -261,7 +259,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
 
           memcpy(&sigpend->info, info, sizeof(siginfo_t));
 
-          /* Add the structure to the pending signal list */
+          /* Add the structure to the group pending signal list */
 
           flags = enter_critical_section();
           sq_addlast((FAR sq_entry_t *)sigpend, &group->tg_sigpendingq);

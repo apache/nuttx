@@ -89,12 +89,11 @@ struct group_signal_s
 static int group_signal_handler(pid_t pid, FAR void *arg)
 {
   FAR struct group_signal_s *info = (FAR struct group_signal_s *)arg;
-  FAR struct task_group_s *group;
   FAR struct tcb_s *tcb;
   FAR sigactq_t *sigact;
   int ret;
 
-  DEBUGASSERT(info);
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL && info != NULL);
 
   /* Get the TCB associated with the group member */
 
@@ -154,10 +153,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
           /* Is there also a action associated with the task group? */
 
-          group = tcb->group;
-          DEBUGASSERT(group != NULL);
-
-          sigact = sig_findaction(group, info->siginfo->si_signo);
+          sigact = sig_findaction(tcb->group, info->siginfo->si_signo);
           if (sigact)
             {
               /* Yes.. then use this thread.  The requirement is this:

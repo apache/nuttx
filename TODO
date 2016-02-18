@@ -11,7 +11,7 @@ nuttx/
 
  (13)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
-  (4)  Signals (sched/signal, arch/)
+  (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (6)  Kernel/Protected Build
@@ -359,17 +359,6 @@ o Signals (sched/signal, arch/)
                to map bits appropriately.
   Status:      Open
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
-
-  Title:       THREAD COMMON SIGNAL HANDLING
-  Description: Signal handlers are assigned on a per thread basis.  Signal lists
-               and data structures are a part of the TCB.  This is incorrect.
-               Signal handlers are a global property of the task group:  The
-               main thread and all of its child threads.  Signal handlers for
-               all threads should be attach-able from the main thread, for
-               example.
-  Status:      Open
-  Priority:    Medium.  This is a pretty big violation of the signal handling
-               principles.
 
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
