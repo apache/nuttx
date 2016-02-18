@@ -113,7 +113,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * is now the new active task!
        */
 
-      ASSERT(!spin_islocked(&g_cpu_schedlock) && btcb->flink != NULL);
+      DEBUGASSERT(rtcb->lockcount == 0 && btcb->flink != NULL);
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;

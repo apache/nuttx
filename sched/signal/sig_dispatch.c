@@ -72,6 +72,7 @@
 
 static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 {
+  FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
   FAR sigq_t    *sigq;
   irqstate_t     flags;
@@ -79,9 +80,12 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 
   sched_lock();
 
-  /* Find the sigaction associated with this signal */
+  /* Find the group sigaction associated with this signal */
 
-  sigact = sig_findaction(stcb, info->si_signo);
+  DEBUGASSERT(stcb != NULL && stcb->group != NULL);
+
+  group = stcb->group;
+  sigact = sig_findaction(group, info->si_signo);
 
   /* Check if a valid signal handler is available and if the signal is
    * unblocked.  NOTE:  There is no default action.
@@ -206,7 +210,7 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
 
   /* Seach the list for a sigpendion on this signal */
 
-  for (sigpend = (FAR sigpendq_t *)group->sigpendingq.head;
+  for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend && sigpend->info.si_signo != signo);
        sigpend = sigpend->flink);
 
@@ -260,7 +264,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
           /* Add the structure to the pending signal list */
 
           flags = enter_critical_section();
-          sq_addlast((FAR sq_entry_t *)sigpend, &group->sigpendingq);
+          sq_addlast((FAR sq_entry_t *)sigpend, &group->tg_sigpendingq);
           leave_critical_section(flags);
         }
     }

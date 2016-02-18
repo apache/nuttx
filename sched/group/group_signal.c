@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_signal.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,7 @@ struct group_signal_s
 static int group_signal_handler(pid_t pid, FAR void *arg)
 {
   FAR struct group_signal_s *info = (FAR struct group_signal_s *)arg;
+  FAR struct task_group_s *group;
   FAR struct tcb_s *tcb;
   FAR sigactq_t *sigact;
   int ret;
@@ -98,7 +99,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
   /* Get the TCB associated with the group member */
 
   tcb = sched_gettcb(pid);
-  DEBUGASSERT(tcb);
+  DEBUGASSERT(tcb ! = NULL);
   if (tcb)
     {
       /* Set this one as the default if we have not already set the default. */
@@ -151,9 +152,12 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
               info->utcb = tcb;
             }
 
-          /* Is there also an action associated with the task? */
+          /* Is there also a action associated with the task group? */
 
-          sigact = sig_findaction(tcb, info->siginfo->si_signo);
+          group = tcb->group;
+          DEBUGASSERT(group != NULL);
+
+          sigact = sig_findaction(group, info->siginfo->si_signo);
           if (sigact)
             {
               /* Yes.. then use this thread.  The requirement is this:

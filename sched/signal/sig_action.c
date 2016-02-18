@@ -156,11 +156,15 @@ static FAR sigactq_t *sig_allocateaction(void)
 int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
 {
   FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
 
   /* Since sigactions can only be installed from the running thread of
    * execution, no special precautions should be necessary.
    */
+
+  DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+  group = rtcb->group;
 
   /* Verify the signal number */
 
@@ -170,9 +174,9 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
       return ERROR;
     }
 
-  /* Find the signal in the sigactionq */
+  /* Find the signal in the signal action queue */
 
-  sigact = sig_findaction(rtcb, signo);
+  sigact = sig_findaction(group, signo);
 
   /* Return the old sigaction value if so requested */
 
@@ -242,9 +246,9 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
       if (sigact)
         {
-          /* Yes.. Remove it from sigactionq */
+          /* Yes.. Remove it from signal action queue */
 
-          sq_rem((FAR sq_entry_t *)sigact, &rtcb->sigactionq);
+          sq_rem((FAR sq_entry_t *)sigact, &group->tg_sigactionq);
 
           /* And deallocate it */
 
@@ -278,9 +282,9 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
           sigact->signo = (uint8_t)signo;
 
-          /* Add the new sigaction to sigactionq */
+          /* Add the new sigaction to signal action queue */
 
-          sq_addlast((FAR sq_entry_t *)sigact, &rtcb->sigactionq);
+          sq_addlast((FAR sq_entry_t *)sigact, &group->tg_sigactionq);
         }
 
       /* Set the new sigaction */

@@ -11491,5 +11491,8 @@
 	  your code still uses them, please switch to enter_critical_section()
 	  and leave_critical_section() (2016-02-14).
 	* Also rename irqdisable() and irqenable() to up_irq_disable() and
-	  up_irq_enable (2016-02-14).
-
+	  up_irq_enable() (2016-02-14).
+	* sched/signal and include/nuttx/sched.h:  Move the list of signal
+	  actions from the TCB to the group structure.  Signal handlers are not
+	  per thread but, rather, per task group.  I know, I preferred it the
+	  other way too, but this is more compliant with POSIX (2016-02-18).

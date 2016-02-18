@@ -103,7 +103,7 @@ sigset_t sig_pendingset(FAR struct tcb_s *stcb)
   sigpendset = NULL_SIGNAL_SET;
 
   flags = enter_critical_section();
-  for (sigpend = (FAR sigpendq_t *)group->sigpendingq.head;
+  for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
       sigaddset(&sigpendset, sigpend->info.si_signo);

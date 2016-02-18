@@ -445,7 +445,8 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_SIGNALS
   /* POSIX Signal Control Fields ************************************************/
 
-  sq_queue_t sigpendingq;           /* List of pending signals                  */
+  sq_queue_t tg_sigactionq;         /* List of actions for signals              */
+  sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -599,7 +600,6 @@ struct tcb_s
 #ifndef CONFIG_DISABLE_SIGNALS
   sigset_t   sigprocmask;                /* Signals that are blocked            */
   sigset_t   sigwaitmask;                /* Waiting for pending signals         */
-  sq_queue_t sigactionq;                 /* List of actions for signals         */
   sq_queue_t sigpendactionq;             /* List of pending signal actions      */
   sq_queue_t sigpostedq;                 /* List of posted signals              */
   siginfo_t  sigunbinfo;                 /* Signal info when task unblocked     */
