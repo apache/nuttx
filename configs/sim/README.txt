@@ -252,6 +252,12 @@ SMP
     +CONFIG_SMP_NCPUS=2
     +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
+  You also must enable near-realtime-performance otherwise even long
+  timeouts will expire before a CPU thread even has a chance to execute.
+
+    -# CONFIG_SIM_WALLTIME is not set
+    +CONFIG_SIM_WALLTIME=y
+
   And you can enable some additional debug output with:
 
     -# CONFIG_DEBUG_SCHED is not set
