@@ -224,8 +224,8 @@ int sim_cpustart(int cpu, main_t idletask);
 /* up_smpsignal.c *********************************************************/
 
 #ifdef CONFIG_SMP
-void sim_cpupause(int cpu, FAR volatile spinlock_t *wait,
-                  FAR volatile unsigned char *paused);
+void sim_cpu_pause(int cpu, FAR volatile spinlock_t *wait,
+                   FAR volatile unsigned char *paused);
 #endif
 
 /* up_tickless.c **********************************************************/

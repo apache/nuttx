@@ -37,6 +37,8 @@
  * Included Files
  ****************************************************************************/
 
+#define _GNU_SOURCE 1
+
 #include <stdint.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -84,8 +86,8 @@ static volatile spinlock_t    g_sim_cpuwait[CONFIG_SMP_NCPUS];
  * NuttX domain function prototypes
  ****************************************************************************/
 
-void sim_cpupause(int cpu, volatile spinlock_t *wait,
-                  volatile unsigned char *paused);
+void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
+                   volatile unsigned char *paused);
 
 /****************************************************************************
  * Private Functions
@@ -170,7 +172,7 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
 
   /* We need to perform the actual tasking operations in the NuttX domain */
 
-  sim_cpupause(cpu, &g_sim_cpuwait[cpu], &g_sim_cpupaused[cpu]);
+  sim_cpu_pause(cpu, &g_sim_cpuwait[cpu], &g_sim_cpupaused[cpu]);
 }
 
 /****************************************************************************

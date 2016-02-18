@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpupause
+ * Name: sim_cpu_pause
  *
  * Description:
  *   This is the SIGUSR1 signal handling logic.  It implements the core
@@ -70,8 +70,8 @@
  *
  ****************************************************************************/
 
-void sim_cpupause(int cpu, volatile spinlock_t *wait,
-                  volatile unsigned char *paused)
+void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
+                   volatile unsigned char *paused)
 {
   struct tcb_s *rtcb = current_task(cpu);
 
