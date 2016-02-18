@@ -133,11 +133,11 @@ static void *sim_cpu0_trampoline(void *arg)
       return NULL;
     }
 
-  /* Give control to os_start */
+  /* Give control to os_start() */
 
   os_start();
 
-  /* The os_start() should not return */
+  /* os_start() should not return */
 
   return NULL;
 }
