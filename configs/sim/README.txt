@@ -324,6 +324,9 @@ SMP
   be called from CPU1 and it will try to restart NSH on CPU0 and, again,
   the same problem occurs.
 
+  2016-02-18:  There is an initial implementation based on signals and
+  signal handling, but this is not yet functional.
+
 BASIC
 ^^^^^
 
