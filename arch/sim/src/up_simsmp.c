@@ -86,12 +86,61 @@ static volatile spinlock_t    g_sim_cpuwait[CONFIG_SMP_NCPUS];
  * NuttX domain function prototypes
  ****************************************************************************/
 
+void os_start(void) __attribute__ ((noreturn));
 void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
                    volatile unsigned char *paused);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sim_cpu0_trampoline
+ *
+ * Description:
+ *   This is a pthread task entry point.  This (host) pthread is used to
+ *   simulate a CPU0.  It simply calls OS start.
+ *
+ * Input Parameters:
+ *   arg - Standard pthread argument
+ *
+ * Returned Value:
+ *   This function does not return
+ *
+ ****************************************************************************/
+
+static void *sim_cpu0_trampoline(void *arg)
+{
+  sigset_t set;
+  int ret;
+
+  /* Set the CPU number zero for the CPU thread */
+
+  ret = pthread_setspecific(g_cpukey, (const void *)0);
+  if (ret != 0)
+    {
+      return NULL;
+    }
+
+  /* Make sure the SIGUSR1 is not masked */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+
+  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
+  /* Give control to os_start */
+
+  os_start();
+
+  /* The os_start() should not return */
+
+  return NULL;
+}
 
 /****************************************************************************
  * Name: sim_idle_trampoline
@@ -209,14 +258,6 @@ int sim_cpu0_initialize(void)
       return -ret;
     }
 
-  /* Set the CPU number zero for the main thread */
-
-  ret = pthread_setspecific(g_cpukey, (const void *)0);
-  if (ret != 0)
-    {
-      return -ret;
-    }
-
   /* Register the common signal handler for all threads */
 
   act.sa_sigaction = sim_handle_signal;
@@ -241,6 +282,40 @@ int sim_cpu0_initialize(void)
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: sim_cpu0_start
+ *
+ * Description:
+ *   Start CPU0 and initialize the operating system.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+void sim_cpu0_start(void)
+{
+  void *value;
+  int ret;
+
+  /* Start the CPU0 emulation thread.  This is analogous to power-up reset
+   * of CPU0  in a multi-CPU hardware model.
+   */
+
+  ret = pthread_create(&g_sim_cputhread[0], NULL, sim_cpu0_trampoline, NULL);
+  if (ret == 0)
+    {
+      /* The CPU0 emulation thread should never return, the main thread will
+       * wait just in case.
+       */
+
+      (void)pthread_join(g_sim_cputhread[0], &value);
+    }
 }
 
 /****************************************************************************

@@ -91,7 +91,15 @@ int main(int argc, char **argv, char **envp)
 
   if (setjmp(g_simabort) == 0)
     {
+#ifdef CONFIG_SMP
+      /* Start the CPU0 emulation.  This should not return. */
+
+      sim_cpu0_start();
+#else
+      /* Start the Nuttx emulation.  This should not return. */
+
       os_start();
+#endif
     }
 
   /* Restore the original terminal mode and return the exit code */
