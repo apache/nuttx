@@ -275,7 +275,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       switched = sched_addprioritized(btcb, tasklist);
 
       /* If the selected task was the g_assignedtasks[] list, then a context
-       * swith will occur.
+       * switch will occur.
        */
 
       if (switched)
@@ -304,12 +304,12 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           if (btcb->lockcount > 0)
             {
-              spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+              spin_setbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
                           &g_cpu_schedlock);
             }
           else
             {
-              spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+              spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
                           &g_cpu_schedlock);
             }
 
@@ -319,12 +319,12 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           if (btcb->irqcount > 0)
             {
-              spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
             }
           else
             {
-              spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
             }
 
@@ -334,11 +334,12 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
            * lifting machinery.
            */
 
+          DEBUGASSERT(btcb->flink != NULL);
           next = (FAR struct tcb_s *)btcb->flink;
-          ASSERT(!spin_islocked(&g_cpu_schedlock) && next != NULL);
 
           if ((next->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
             {
+              DEBUGASSERT(next->cpu == cpu);
               next->task_state = TSTATE_TASK_ASSIGNED;
             }
           else

@@ -216,7 +216,9 @@ enum tstate_e
 };
 typedef enum tstate_e tstate_t;
 
-/* The following definitions are determined by tstate_t */
+/* The following definitions are determined by tstate_t.  Ordering of values
+ * in the enumeration is important!
+ */
 
 #define FIRST_READY_TO_RUN_STATE   TSTATE_TASK_READYTORUN
 #define LAST_READY_TO_RUN_STATE    TSTATE_TASK_RUNNING
