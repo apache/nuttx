@@ -75,8 +75,6 @@ void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
 {
   struct tcb_s *rtcb = current_task(cpu);
 
-  sdbg("CPU%d: Blocking TCB=%p\n", cpu, rtcb);
-
   /* Update scheduler parameters */
 
   sched_suspend_scheduler(rtcb);
@@ -106,7 +104,6 @@ void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
        */
 
       rtcb = current_task(cpu);
-      sdbg("CPU%d: New Active Task TCB=%p\n", cpu, rtcb);
 
       /* The way that we handle signals in the simulation is kind of a
        * kludge.  This would be unsafe in a truly multi-threaded,

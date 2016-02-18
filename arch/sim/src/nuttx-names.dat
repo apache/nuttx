@@ -47,6 +47,7 @@ recv           NXrecv
 recvfrom       NXrecvfrom
 rewinddir      NXrewinddir
 rmdir          NXrmdir
+sched_yield    NXsched_yield
 seekdir        NXseekdir
 select         NXselect
 sem_init       NXsem_init
