@@ -51,6 +51,7 @@
 #  include <arch/irq.h>
 #  ifdef CONFIG_SMP
 #    include <nuttx/sched.h>
+#    include <arch/spinlock.h>
 #  endif
 #endif
 
@@ -218,6 +219,13 @@ void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 #ifdef CONFIG_SMP
 int sim_cpu0_initialize(void);
 int sim_cpustart(int cpu, main_t idletask);
+#endif
+
+/* up_smpsignal.c *********************************************************/
+
+#ifdef CONFIG_SMP
+void sim_cpupause(int cpu, FAR volatile spinlock_t *wait,
+                  FAR volatile unsigned char *paused);
 #endif
 
 /* up_tickless.c **********************************************************/

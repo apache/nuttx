@@ -40,10 +40,27 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <signal.h>
+#include <errno.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Must match definitions in arch/sim/include/spinlock.h */
+
+#define SP_UNLOCKED   0   /* The Un-locked state */
+#define SP_LOCKED     1   /* The Locked state */
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* Must match definitions in arch/sim/include/spinlock.h.  Assuming that
+ * bool and unsigned char are equivalent.
+ */
+
+typedef unsigned char spinlock_t;
+
+/* Task entry point type */
 
 typedef int (*main_t)(int argc, char **argv);
 
@@ -58,7 +75,17 @@ struct sim_cpuinfo_s
  * Private Data
  ****************************************************************************/
 
-static pthread_key_t g_cpukey;
+static pthread_key_t          g_cpukey;
+static pthread_t              g_sim_cputhread[CONFIG_SMP_NCPUS];
+static volatile unsigned char g_sim_cpupaused[CONFIG_SMP_NCPUS];
+static volatile spinlock_t    g_sim_cpuwait[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
+ * NuttX domain function prototypes
+ ****************************************************************************/
+
+void sim_cpupause(int cpu, volatile spinlock_t *wait,
+                  volatile unsigned char *paused);
 
 /****************************************************************************
  * Private Functions
@@ -77,7 +104,7 @@ static pthread_key_t g_cpukey;
  *   point.
  *
  * Input Parameters:
- *   arg - Stanard pthread argument
+ *   arg - Standard pthread argument
  *
  * Returned Value:
  *   This function does not return
@@ -87,12 +114,24 @@ static pthread_key_t g_cpukey;
 static void *sim_idle_trampoline(void *arg)
 {
   struct sim_cpuinfo_s *cpuinfo = (struct sim_cpuinfo_s *)arg;
+  sigset_t set;
   int ret;
 
   /* Set the CPU number zero for the CPU thread */
 
   ret = pthread_setspecific(g_cpukey, (const void *)((uintptr_t)cpuinfo->cpu));
   if (ret != 0)
+    {
+      return NULL;
+    }
+
+  /* Make sure the SIGUSR1 is not masked */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+
+  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+  if (ret < 0)
     {
       return NULL;
     }
@@ -108,6 +147,30 @@ static void *sim_idle_trampoline(void *arg)
   /* The IDLE task will not return.  This is just to keep the compiler happy */
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: sim_handle_signal
+ *
+ * Description:
+ *   This is the SIGUSR signal handler.  It implements the core logic of
+ *   up_cpu_pause() on the thread of execution the simulated CPU.
+ *
+ * Input Parameters:
+ *   arg - Standard sigaction arguments
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sim_handle_signal(int signo, siginfo_t *info, void *context)
+{
+  int cpu = (int)((uintptr_t)pthread_getspecific(g_cpukey));
+
+  /* We need to perform the actual tasking operations in the NuttX domain */
+
+  sim_cpupause(cpu, &g_sim_cpuwait[cpu], &g_sim_cpupaused[cpu]);
 }
 
 /****************************************************************************
@@ -132,6 +195,8 @@ static void *sim_idle_trampoline(void *arg)
 
 int sim_cpu0_initialize(void)
 {
+  struct sigaction act;
+  sigset_t set;
   int ret;
 
   /* Create the pthread key */
@@ -148,6 +213,29 @@ int sim_cpu0_initialize(void)
   if (ret != 0)
     {
       return -ret;
+    }
+
+  /* Register the common signal handler for all threads */
+
+  act.sa_sigaction = sim_handle_signal;
+  act.sa_flags     = SA_SIGINFO;
+  sigemptyset(&act.sa_mask);
+
+  ret = sigaction(SIGUSR1, &act, NULL);
+  if (ret < 0)
+    {
+      return -errno;
+    }
+
+  /* Make sure the SIGUSR1 is not masked */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+
+  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+  if (ret < 0)
+    {
+      return -errno;
     }
 
   return 0;
@@ -206,7 +294,6 @@ int up_cpu_index(void)
 int up_cpu_start(int cpu, main_t idletask)
 {
   struct sim_cpuinfo_s cpuinfo;
-  pthread_t thread;
   int ret;
 
   /* Initialize the CPU info */
@@ -232,7 +319,7 @@ int up_cpu_start(int cpu, main_t idletask)
    * in a multi-CPU hardware model.
    */
 
-  ret = pthread_create(&thread, NULL, sim_idle_trampoline, &cpuinfo);
+  ret = pthread_create(&g_sim_cputhread[cpu], NULL, sim_idle_trampoline, &cpuinfo);
   if (ret != 0)
     {
       ret = -ret;  /* REVISIT:  That is a host errno value. */
@@ -279,7 +366,21 @@ errout_with_mutex:
 
 int up_cpu_pause(int cpu)
 {
-#warning Missing SMP logic
+  /* Take the spinlock that will prevent the CPU thread from running */
+
+  g_sim_cpuwait[cpu] = SP_LOCKED;
+
+  /* Signal the CPU thread */
+
+  pthread_kill(g_sim_cputhread[cpu], SIGUSR1);
+
+  /* Spin, waiting for the thread to pause */
+
+  while (!g_sim_cpupaused[cpu])
+    {
+      pthread_yield();
+    }
+
   return 0;
 }
 
@@ -304,6 +405,8 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
-#warning Missing SMP logic
+  /* Release the spinlock that will alloc the CPU thread to continue */
+
+  g_sim_cpuwait[cpu] = SP_UNLOCKED;
   return 0;
 }

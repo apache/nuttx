@@ -70,6 +70,7 @@ ifeq ($(CONFIG_SPINLOCK),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
+  CSRCS += up_smpsignal.c
   HOSTSRCS += up_simsmp.c
 endif
 
@@ -124,7 +125,7 @@ endif
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  HOSTCFLAGS += -DCONFIG_SMP=1
+  HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
 endif
 
 ifeq ($(CONFIG_FS_HOSTFS),y)
@@ -177,6 +178,10 @@ ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   REQUIREDOBJS += up_touchscreen$(OBJEXT)
 endif
+endif
+
+ifeq ($(CONFIG_SMP),y)
+  REQUIREDOBJS += up_smpsignal$(OBJEXT)
 endif
 
 # Determine which NuttX libraries will need to be linked in
