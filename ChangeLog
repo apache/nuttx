@@ -11496,3 +11496,6 @@
 	  actions from the TCB to the group structure.  Signal handlers are not
 	  per thread but, rather, per task group.  I know, I preferred it the
 	  other way too, but this is more compliant with POSIX (2016-02-18).
+	* fs/ procfs/fs_procfsproc.c: Add support for showing CPU if SMP is
+	  is enabled (2016-02-19).
+

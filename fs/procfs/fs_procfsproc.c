@@ -375,6 +375,7 @@ static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
  *   Type:       xxxxxxx            {Task, pthread, Kthread, Invalid}
  *   PPID:       xxxxx              Parent thread ID
  *   Group:      xxxxx              Group ID
+ *   CPU:        xxx                CPU (CONFIG_SMP only)
  *   State:      xxxxxxxx,xxxxxxxxx {Invalid, Waiting, Ready, Running, Inactive},
  *                                  {Unlock, Semaphore, Signal, MQ empty, MQ full}
  *   Flags:      xxx                N,P,X
@@ -448,6 +449,30 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "PPID:",
                         tcb->ppid);
 #endif
+
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+#endif
+
+#ifdef CONFIG_SMP
+  if (tcb->task_state >= FIRST_ASSIGNED_STATE &&
+      tcb->task_state <= LAST_ASSIGNED_STATE)
+    {
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "CPU:",
+                            tcb->cpu);
+    }
+  else
+    {
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s---\n", "CPU:");
+    }
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
