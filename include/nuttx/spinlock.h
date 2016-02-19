@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/type.h>
+#include <sys/types.h>
 #include <stdint.h>
 
 #ifdef CONFIG_SPINLOCK
