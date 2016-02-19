@@ -491,7 +491,7 @@ config LPC43_USB0
 config LPC43_USB0DEV_NOVBUS
 	bool "No USB0 VBUS sensing"
 	default n
-	depends on LPC43_USB0
+	depends on LPC43_USB0 && USBDEV
 
 config LPC43_USB1
 	bool "USB1"
@@ -500,7 +500,7 @@ config LPC43_USB1
 config LPC43_USB1DEV_NOVBUS
 	bool "No USB1 VBUS sensing"
 	default n
-	depends on LPC43_USB1
+	depends on LPC43_USB1 && USBDEV
 
 config LPC43_USB1_ULPI
 	bool "USB1 with ULPI"
