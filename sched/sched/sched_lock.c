@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sched.h>
 #include <assert.h>
 
@@ -111,7 +112,7 @@ volatile spinlock_t g_cpu_schedlock = SP_UNLOCKED;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 volatile spinlock_t g_cpu_locksetlock;
-volatile cpuset_t g_cpu_lockset;
+volatile cpu_set_t g_cpu_lockset;
 
 #endif /* CONFIG_SMP */
 

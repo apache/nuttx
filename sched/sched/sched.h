@@ -358,7 +358,7 @@ extern volatile spinlock_t g_cpu_schedlock;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 extern volatile spinlock_t g_cpu_locksetlock;
-extern volatile cpuset_t g_cpu_lockset;
+extern volatile cpu_set_t g_cpu_lockset;
 
 #endif /* CONFIG_SMP */
 

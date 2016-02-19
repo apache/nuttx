@@ -131,6 +131,14 @@ int    sched_get_priority_max(int policy);
 int    sched_get_priority_min(int policy);
 int    sched_rr_get_interval(pid_t pid, FAR struct timespec *interval);
 
+#ifdef CONFIG_SMP
+/* Task affinity */
+
+int sched_setaffinity(pid_t pid, size_t cpusetsize,
+                      FAR const cpu_set_t *mask);
+int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
+#endif
+
 /* Task Switching Interfaces (non-standard) */
 
 int    sched_lock(void);

@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sched.h>
 #include <assert.h>
 
@@ -312,7 +313,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
  *
  ****************************************************************************/
 
-void spin_setbit(FAR volatile cpuset_t *set, unsigned int cpu,
+void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock)
 {
@@ -347,7 +348,7 @@ void spin_setbit(FAR volatile cpuset_t *set, unsigned int cpu,
  *
  ****************************************************************************/
 
-void spin_clrbit(FAR volatile cpuset_t *set, unsigned int cpu,
+void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock)
 {

@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <sys/types.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
@@ -68,7 +70,7 @@ extern volatile spinlock_t g_cpu_irqlock;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 extern volatile spinlock_t g_cpu_irqsetlock;
-extern volatile cpuset_t g_cpu_irqset;
+extern volatile cpu_set_t g_cpu_irqset;
 #endif
 
 /****************************************************************************

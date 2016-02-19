@@ -41,6 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/type.h>
 #include <stdint.h>
 
 #ifdef CONFIG_SPINLOCK
@@ -72,18 +74,6 @@ struct spinlock_s
                                  * the lock */
 #endif
 };
-
-/* This is the smallest integer type that will not a bitset of all CPUs */
-
-#if (CONFIG_SMP_NCPUS <= 8)
-typedef volatile uint8_t cpuset_t;
-#elif (CONFIG_SMP_NCPUS <= 16)
-typedef volatile uint16_t cpuset_t;
-#elif (CONFIG_SMP_NCPUS <= 32)
-typedef volatile uint32_t cpuset_t;
-#else
-#  error SMP: Extensions needed to support this number of CPUs
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -286,7 +276,7 @@ void spin_unlockr(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-void spin_setbit(FAR volatile cpuset_t *set, unsigned int cpu,
+void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock);
 
@@ -307,7 +297,7 @@ void spin_setbit(FAR volatile cpuset_t *set, unsigned int cpu,
  *
  ****************************************************************************/
 
-void spin_clrbit(FAR volatile cpuset_t *set, unsigned int cpu,
+void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock);
 

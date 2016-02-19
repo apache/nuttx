@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+
 #include <nuttx/spinlock.h>
 #include <arch/irq.h>
 
@@ -59,7 +61,7 @@ volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 volatile spinlock_t g_cpu_irqsetlock;
-volatile cpuset_t g_cpu_irqset;
+volatile cpu_set_t g_cpu_irqset;
 
 /****************************************************************************
  * Public Functions

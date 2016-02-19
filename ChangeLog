@@ -11498,4 +11498,10 @@
 	  other way too, but this is more compliant with POSIX (2016-02-18).
 	* fs/ procfs/fs_procfsproc.c: Add support for showing CPU if SMP is
 	  is enabled (2016-02-19).
-
+	* include/pthread.h, sched.h, sys/types.h and other files: Rename
+	  cpuset_t to cpu_set_t which is the type used in some non-standard
+	  Linux/GNU interfaces.  Move definitions of cpu_set_t to include/sys/types.h.
+	  Add prototypes for sched_setaffinity(), sched_getaffinity(),
+	  pthread_attr_setaffinity_np(), pthread_attr_getaffinity_np(),
+	  pthread_setaffinity_np(), and pthread_getaffinity_np().  No implementation
+	  is yet in place (2016-02-19).

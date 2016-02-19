@@ -290,6 +290,16 @@ int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
 int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
                                  FAR int *inheritsched);
 
+#ifdef CONFIG_SMP
+/* Set or obtain thread affinity attributes */
+
+int pthread_attr_setaffinity_np(FAR pthread_attr_t *attr,
+                                size_t cpusetsize,
+                                FAR const cpu_set_t *cpuset);
+int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
+                                size_t cpusetsize, cpu_set_t *cpuset);
+#endif
+
 /* Set or obtain the default stack size */
 
 int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize);
@@ -345,6 +355,15 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
 int pthread_setschedparam(pthread_t thread, int policy,
                           FAR const struct sched_param *param);
 int pthread_setschedprio(pthread_t thread, int prio);
+
+/* Thread affinity */
+
+#ifdef CONFIG_SMP
+int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
+                           FAR const cpu_set_t *cpuset);
+int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
+                           FAR cpu_set_t *cpuset);
+#endif
 
 /* Thread-specific Data Interfaces */
 
