@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_serial.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,6 +91,9 @@ struct up_dev_s
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (7 or 8) */
   bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+#ifdef HAVE_RS485
+  bool      dtrdir;    /* DTR pin is the direction bit */
+#endif
 };
 
 /****************************************************************************
@@ -166,6 +169,9 @@ static struct up_dev_s g_uart0priv =
   .parity         = CONFIG_USART0_PARITY,
   .bits           = CONFIG_USART0_BITS,
   .stopbits2      = CONFIG_USART0_2STOP,
+#if defined(CONFIG_USART0_RS485MODE) && defined(CONFIG_USART0_RS485_DTRDIR)
+  .dtrdir         = true;
+#endif
 };
 
 static uart_dev_t g_uart0port =
@@ -198,6 +204,9 @@ static struct up_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+#if defined(CONFIG_UART1_RS485MODE) && defined(CONFIG_UART1_RS485_DTRDIR)
+  .dtrdir         = true;
+#endif
 };
 
 static uart_dev_t g_uart1port =
@@ -230,6 +239,9 @@ static struct up_dev_s g_uart2priv =
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
+#if defined(CONFIG_USART2_RS485MODE) && defined(CONFIG_USART2_RS485_DTRDIR)
+  .dtrdir         = true;
+#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -262,6 +274,9 @@ static struct up_dev_s g_uart3priv =
   .parity         = CONFIG_USART3_PARITY,
   .bits           = CONFIG_USART3_BITS,
   .stopbits2      = CONFIG_USART3_2STOP,
+#if defined(CONFIG_USART3_RS485MODE) && defined(CONFIG_USART3_RS485_DTRDIR)
+  .dtrdir         = true;
+#endif
 };
 
 static uart_dev_t g_uart3port =
@@ -939,7 +954,8 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
        *  RXDIS 0 = Receiver is not disabled
        *  AADEN 0 = Auto Address Detect (ADD) is disabled
        *  DCTRL 1 = Auto Direction Control is enabled
-       *  OINV  ? = Value control by user mode settings
+       *  OINV  ? = Value controlle by user mode settings
+       *  SEL   ? = Value controlled by user mode settings
        */
 
       regval = UART_RS485CTRL_DCTRL;
@@ -956,6 +972,17 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
         {
           regval |= UART_RS485CTRL_OINV;
         }
+
+#ifdef BOARD_LPC43_UART1_DTRDIR
+      if (priv->dtrdir)
+      {
+         /* If we ar using DTR for direction then ensure the H/W is
+          * configured correctly.
+          */
+
+         regval |= UART_RS485CTRL_SEL;
+      }
+#endif
 
       up_serialout(priv, LPC43_UART_RS485CTRL_OFFSET, regval);
 
