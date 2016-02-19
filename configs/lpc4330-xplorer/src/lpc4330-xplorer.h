@@ -51,10 +51,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- *  LEDs GPIO                         PIN     SIGNAL NAME
+ *   LEDs GPIO                         PIN     SIGNAL NAME
  *  -------------------------------- ------- --------------
  *  gpio1[12] - LED D2                J10-20  LED1
  *  gpio1[11] - LED D3                J10-17  LED2
+ *
  ****************************************************************************/
 
 /* Definitions to configure LED pins as GPIOs:
@@ -64,18 +65,15 @@
  * - No buffering, glitch filtering, slew=slow
  */
 
-#define PINCONFIG_LED1 PINCONF_GPIO1p12
-#define PINCONFIG_LED2 PINCONF_GPIO1p11
-
-/* Definitions to configure LED GPIOs as outputs */
-
-#define GPIO_LED1      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN12)
-#define GPIO_LED2      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN11)
+#define PINCONFIG_LED1 PINCONF_GPIO4p0
+#define PINCONFIG_LED2 PINCONF_GPIO1p1
+#define GPIO_LED1      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN0)
+#define GPIO_LED2      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN8)
 
 /****************************************************************************
- *  Buttons GPIO                      PIN     SIGNAL NAME
- *  -------------------------------- ------- --------------
- *  gpio0[7]  - User Button SW2       J8-25   BTN1
+ *  Buttons GPIO
+ *  ----------------------------
+ *  gpio2[7]  - User Button USR1
  ****************************************************************************/
 
 #define LPC4330_XPLORER_BUT1 (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN7)
