@@ -11512,4 +11512,6 @@
 	  Add an affinity field to the attrributes to permit controlling
 	  which CPUs a pthread may run on.  Implements pthread_att_setaffinity_np()
 	  and pthread_attr_getaffinity_np() (2016-02-19).
+	* sched/pthread:  Add pthread_setaffinity() and pthread_getaffinity()
+	  (2016-02-19).
 
