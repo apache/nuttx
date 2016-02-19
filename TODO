@@ -1619,7 +1619,9 @@ o Linux/Cywgin simulation (arch/sim)
                operate on the simulated CPU threads for a few context switches
                then fails during a setjmp() operation.  I suspect that this is
                not an issue with the NuttX SMP logic but more likely some chaos
-               in the pthread controls.
+               in the pthread controls. I have seen similar such strange behavior
+               other times that I have tried to use setjmp/longmp from a signal
+               handler!
 
                You can enable SMP for ostest configuration by enabling:
 
