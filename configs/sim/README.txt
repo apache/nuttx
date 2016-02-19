@@ -233,7 +233,13 @@ SMP
   At present, the SMP simulation is not fully functional:  It does operate
   on the simulated CPU threads for a few context switches then fails during
   a setjmp() operation.  I suspect that this is not an issue with the NuttX
-  SMP logic but more likely some chaos in the pthread controls.
+  SMP logic but more likely some chaos in the pthread controls. I have seen
+  similar such strange behavior other times that I have tried to use
+  setjmp/longmp from a signal handler! Like when I tried to implement
+  simulated interrupts using signals.
+
+  Apparently, if longjmp is invoked from the context of a signal handler,
+  the result is undefined: http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
 
   You can enable SMP for ostest configuration by enabling:
 
