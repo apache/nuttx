@@ -230,19 +230,12 @@ SMP
   the emulation of multiple CPUs by creating multiple pthreads, each run a
   copy of the simulation in the same process address space.
 
-  The simulation SMP implemention is incomplete, however.  Two critical SMP
-  functions are not implemented:
+  At present, the SMP simulation is not fully functional:  It does operate
+  on the simulated CPU threads for a few context switches then fails during
+  a setjmp() operation.  I suspect that this is not an issue with the NuttX
+  SMP logic but more likely some chaos in the pthread controls.
 
-    - int up_cpu_pause(void)
-    - int up_cpu_resume(void)
-
-  These are used to start a new task on a different CPU:  (1) the other CPU
-  is stopped or paused, (2) the OS datastructures for that CPU are modified,
-  then (2) the other CPU is resumed.  Unfortunately, I have not yet thought
-  of a way to implement them in the simulation.
-
-  Currently, for example, you can enable SMP for ostest configuration by
-  enabling:
+  You can enable SMP for ostest configuration by enabling:
 
     -# CONFIG_EXPERIMENTAL is not set
     +CONFIG_EXPERIMENTAL=y
@@ -266,72 +259,18 @@ SMP
     -# CONFIG_SCHED_INSTRUMENTATION is not set
     +CONFIG_SCHED_INSTRUMENTATION=y
 
-  The result should be as follows:
+  The NSH configuration can also be forced to run SMP, but suffers from
+  the same quirky behavior.  I can be made reliable if you modify
+  arch/sim/src/up_idle.c so that the IDLE loop only runs for CPU0.
+  Otherwise, often simuart_post() will be called from CPU1 and it will
+  try to restart NSH on CPU0 and, again, the same quirkiness occurs.
 
-    - CPU0 initializes and starts CPU1.  CPU1 is running an executing the
-      IDLE task.
+  But for example, this command:
 
-      os_start: Entry
-      os_idletask: CPU1: Beginning Idle Loop
+    nsh> sleep 1 &
 
-    - CPU0 brings up the the OS test application on CPU0
-
-      os_do_appstart: Starting init thread
-      CPU0: Start init, TCB@42f490, state=5
-      up_unblock_task: Unblocking TCB=42f490
-      CPU0: Suspend CPU0 IDLE, TCB@42c180, state=4
-      CPU0: Resume init, TCB@42f490, state=0
-      up_unblock_task: New Active Task TCB=42f490
-
-    - OS test runs and performs some basic checks.
-
-      stdio_test: write fd=1
-      stdio_test: Standard I/O Check: printf
-      stdio_test: write fd=2
-      stdio_test: Standard I/O Check: fprintf to stderr
-      ostest_main: putenv(Variable1=BadValue3)
-
-      up_block_task: Blocking TCB=42f490
-      CPU0: Suspend init, TCB@42f490, state=4
-      CPU0: Resume CPU0 IDLE, TCB@42c180, state=3
-      up_block_task: New Active Task TCB=42c180
-      up_unblock_task: Unblocking TCB=42f490
-      CPU0: Suspend CPU0 IDLE, TCB@42c180, state=4
-      CPU0: Resume init, TCB@42f490, state=0
-      up_unblock_task: New Active Task TCB=42f490
-
-      ostest_main: setenv(Variable1, GoodValue1, TRUE)
-      ostest_main: setenv(Variable2, BadValue1, FALSE)
-      ostest_main: setenv(Variable2, GoodValue2, TRUE)
-      ostest_main: setenv(Variable3, Variable3, FALSE)
-      ostest_main: setenv(Variable3, Variable3, FALSE)
-      show_variable: Variable=Variable1 has value=GoodValue1
-      show_variable: Variable=Variable2 has value=GoodValue2
-      show_variable: Variable=Variable3 has value=GoodValue3
-
-    - Then OS test tries to start the task ostest on CPU1
-
-      CPU0: Start ostest, TCB@430e90, state=5
-      up_unblock_task: Unblocking TCB=430e90
-      CPU1: Suspend CPU1 IDLE, TCB@42c2c0, state=4
-      CPU0: Resume ostest, TCB@430e90, state=0
-      ostest_main: Started user_main at PID=4
-
-  There is no failure but, of course, the task on CPU1 does not run, i.e.,
-  it does not replace the IDLE task running on CPU1.
-
-  2016-02-16: The NSH configuration can be forced to run, but only if (1)
-  You don't try to execute built-in commands or to execute commands in the
-  background.  Those thoses cases, it will try to start the command on
-  CPU1 and the same problem as for the ostest case occurs.
-
-  Also, for NSH you have to modify arch/sim/src/up_idle.c so that the
-  IDLE loop only runfs for CPU0.  Otherwise, often simuart_post() will
-  be called from CPU1 and it will try to restart NSH on CPU0 and, again,
-  the same problem occurs.
-
-  2016-02-18:  There is an initial implementation based on signals and
-  signal handling, but this is not yet functional.
+  will execute the sleep command on CPU1 which has worked every time
+  that I have tried it (which is not too many times).
 
 BASIC
 ^^^^^
@@ -942,12 +881,12 @@ unionfs
      afile.txt
      offset/
 
-   When unionfs was created, file system was joined with and offset called 
+   When unionfs was created, file system was joined with and offset called
    offset".  Therefore, all of the file system 2 root contents will appear
    to reside under a directory called offset/ (although there is no
    directory called offset/ on file system 2).  Fie system 1 on the other
    hand does have an actual directory called offset/.  If we list the
-   contents of the offset/ directory in the unified file system, we see 
+   contents of the offset/ directory in the unified file system, we see
    he merged content of the file system 1 offset/ directory and the file
    system 2 root directory:
 
