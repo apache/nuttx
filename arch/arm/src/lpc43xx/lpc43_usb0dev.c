@@ -2582,6 +2582,13 @@ static int lpc43_pullup(struct usbdev_s *dev, bool enable)
   if (enable)
     {
       lpc43_setbits (USBDEV_USBCMD_RS, LPC43_USBDEV_USBCMD);
+
+#ifdef CONFIG_LPC43_USB0DEV_NOVBUS
+      /* Create a 'false' power event on the USB port so the MAC connects */
+
+      lpc43_clrbits (USBOTG_OTGSC_VD, LPC43_USBOTG_OTGSC);
+      lpc43_setbits (USBOTG_OTGSC_VC, LPC43_USBOTG_OTGSC);
+#endif
     }
   else
     {

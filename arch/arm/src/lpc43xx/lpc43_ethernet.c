@@ -72,7 +72,9 @@
 #include "lpc43_ethernet.h"
 #include "chip/lpc43_creg.h"
 #include "chip/lpc43_cgu.h"
+#include "chip/lpc43_ccu.h"
 #include "lpc43_rgu.h"
+#include "lpc43_gpio.h"
 #include "up_arch.h"
 #include <arch/board/board.h>
 
@@ -101,10 +103,11 @@
 #  error "Both CONFIG_LPC43_MII and CONFIG_LPC43_RMII defined"
 #endif
 
-#ifdef CONFIG_LPC43_AUTONEG
 #  ifndef CONFIG_LPC43_PHYSR
 #    error "CONFIG_LPC43_PHYSR must be defined in the NuttX configuration"
 #  endif
+
+#ifndef CONFIG_LPC43_AUTONEG
 #  ifdef CONFIG_LPC43_PHYSR_ALTCONFIG
 #    ifndef CONFIG_LPC43_PHYSR_ALTMODE
 #      error "CONFIG_LPC43_PHYSR_ALTMODE must be defined in the NuttX configuration"
@@ -407,7 +410,7 @@
  * checksum is OK the DMA can handle the frame otherwise the frame is dropped
  */
 
-#if CONFIG_LPC43_ETH_HWCHECKSUM
+#ifdef CONFIG_LPC43_ETH_HWCHECKSUM
 #  define DMAOMR_SET_MASK \
     (ETH_DMAOPMODE_OSF | ETH_DMAOPMODE_RTC_64 | ETH_DMAOPMODE_TTC_64 | \
      ETH_DMAOPMODE_TSF | ETH_DMAOPMODE_RSF)
@@ -3329,6 +3332,18 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   nvdbg("PHYSR[%d]: %04x\n", CONFIG_LPC43_PHYSR, phyval);
 
+#ifdef CONFIG_ETH0_PHY_LAN8720
+  if ((phyval & (MII_MSR_100BASETXHALF | MII_MSR_100BASETXFULL)) != 0)
+    {
+      priv->mbps100 = 1;
+    }
+
+  if ((phyval & (MII_MSR_100BASETXFULL | MII_MSR_10BASETXFULL)) != 0)
+    {
+      priv->fduplex = 1;
+    }
+
+#else
   /* Different PHYs present speed and mode information in different ways.  IF
    * This CONFIG_LPC43_PHYSR_ALTCONFIG is selected, this indicates that the PHY
    * represents speed and mode information are combined, for example, with
@@ -3338,10 +3353,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_LPC43_PHYSR_ALTCONFIG
   switch (phyval & CONFIG_LPC43_PHYSR_ALTMODE)
     {
-      default:
-      case CONFIG_LPC43_PHYSR_10HD:
-        priv->fduplex = 0;
-        priv->mbps100 = 0;
+      case CONFIG_LPC43_PHYSR_100FD:
+        priv->fduplex = 1;
+        priv->mbps100 = 1;
         break;
 
       case CONFIG_LPC43_PHYSR_100HD:
@@ -3354,9 +3368,10 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
         priv->mbps100 = 0;
         break;
 
-      case CONFIG_LPC43_PHYSR_100FD:
-        priv->fduplex = 1;
-        priv->mbps100 = 1;
+      default:
+      case CONFIG_LPC43_PHYSR_10HD:
+        priv->fduplex = 0;
+        priv->mbps100 = 0;
         break;
     }
 
@@ -3378,15 +3393,27 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
     }
 #endif
 
-#else /* Auto-negotion not selected */
+#ifdef CONFIG_LPC43_ETHFD
+  priv->mbps100 = 1;
+#endif
+
+#ifdef CONFIG_LPC43_ETH100MBPS
+  priv->fduplex = 1;
+#endif
+#endif
+
+  /* However we got here, commit to the hardware */
 
   phyval = 0;
-#ifdef CONFIG_LPC43_ETHFD
-  phyval |= MII_MCR_FULLDPLX;
-#endif
-#ifdef CONFIG_LPC43_ETH100MBPS
-  phyval |= MII_MCR_SPEED100;
-#endif
+  if (priv->mbps100)
+    {
+      phyval |= MII_MCR_FULLDPLX;
+    }
+
+  if (priv->fduplex)
+    {
+      phyval |= MII_MCR_SPEED100;
+    }
 
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
@@ -3394,6 +3421,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
      ndbg("Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
+
   up_mdelay(PHY_CONFIG_DELAY);
 
   /* Remember the selected speed and duplex modes */
@@ -3537,6 +3565,14 @@ static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv)
   lpc43_pin_config(PINCONF_ENET_TXD1);
   lpc43_pin_config(PINCONF_ENET_TXEN);
 
+#ifdef PINCONF_ENET_RESET
+  lpc43_pin_config(PINCONF_ENET_RESET);
+  lpc43_gpio_config(GPIO_ENET_RESET);
+  lpc43_gpio_write(GPIO_ENET_RESET, 0);
+  up_mdelay(5);
+  lpc43_gpio_write(GPIO_ENET_RESET, 1);
+  up_mdelay(5);
+#endif
 #endif
 #endif
 }
@@ -3561,14 +3597,11 @@ static void lpc43_ethreset(FAR struct lpc43_ethmac_s *priv)
 {
   uint32_t regval;
 
+  lpc43_putreg(CCU_CLK_CFG_RUN|CCU_CLK_CFG_AUTO|CCU_CLK_CFG_WAKEUP,LPC43_CCU1_M4_ETHERNET_CFG);
+
   /* Reset the Ethernet  */
 
   lpc43_putreg(RGU_CTRL0_ETHERNET_RST, LPC43_RGU_CTRL0);
-
-  /* Perform a software reset by setting the SR bit in the DMABMR register.
-   * This Resets all MAC subsystem internal registers and logic.  After this
-   * reset all the registers holds their reset values.
-   */
 
   regval  = lpc43_getreg(LPC43_ETH_DMABMODE);
   regval |= ETH_DMABMODE_SWR;
@@ -3903,6 +3936,12 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
     {
       return ret;
     }
+
+  /* Perform a software reset by setting the SR bit in the DMABMR register.
+   * This Resets all MAC subsystem internal registers and logic.  After this
+   * reset all the registers holds their reset values.
+   */
+
 
   /* Initialize the MAC and DMA */
 

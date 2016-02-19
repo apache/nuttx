@@ -130,11 +130,11 @@
 # undef CONFIG_UART1_FLOWCONTROL
 #endif
 
-/* Check for RS-485 support (USART0,2,3 only) */
+/* Check for RS-485 support (All USARTS & UART1) */
 
 #undef HAVE_RS485
-#if defined(CONFIG_USART0_RS485MODE) || defined(CONFIG_USART2_RS485MODE) || \
-    defined(CONFIG_USART3_RS485MODE)
+#if defined(CONFIG_USART0_RS485MODE) || defined(CONFIG_UART1_RS485MODE) || \
+    defined(CONFIG_USART2_RS485MODE) || defined(CONFIG_USART3_RS485MODE)
 #  define HAVE_RS485 1
 #endif
 

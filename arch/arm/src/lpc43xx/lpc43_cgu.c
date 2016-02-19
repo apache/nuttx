@@ -437,6 +437,32 @@ void lpc43_pll0usbconfig(void)
 }
 
 /****************************************************************************
+ * Name: lpc43_enetclkconfig(void)
+ *
+ * Description:
+ *   Initialise ethernet clock block to take clock from ENET_TX_CLK.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_LPC43_ETHERNET)
+void lpc43_enetclkconfig(void)
+
+{
+  /* Note that using TXCLK for RX implies use of RMII */
+
+#if defined(CONFIG_LPC43_RMII)
+  putreg32((BASE_LCD_CLKSEL_ENET_TXCLK | BASE_LCD_CLK_AUTOBLOCK),
+           LPC43_BASE_PHYRX_CLK);
+#else
+  putreg32((BASE_LCD_CLKSEL_ENET_RXCLK | BASE_LCD_CLK_AUTOBLOCK),
+            LPC43_BASE_PHYRX_CLK);
+#endif
+  putreg32((BASE_LCD_CLKSEL_ENET_TXCLK | BASE_LCD_CLK_AUTOBLOCK),
+           LPC43_BASE_PHYTX_CLK);
+}
+#endif
+
+/****************************************************************************
  * Name: lpc43_pll0usbenable
  *
  * Description:
@@ -680,5 +706,11 @@ void lpc43_clockconfig(void)
 
 #if defined(BOARD_ABP3_CLKSRC)
   lpc43_abp3();
+#endif
+
+#if defined(CONFIG_LPC43_ETHERNET)
+  /* Configure ethernet */
+
+  lpc43_enetclkconfig();
 #endif
 }

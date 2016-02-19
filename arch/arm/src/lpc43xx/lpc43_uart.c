@@ -415,6 +415,10 @@ void lpc43_uart1_setup(void)
 #endif
 #endif
 
+#ifdef CONFIG_UART1_RS485MODE
+  lpc43_pin_config(PINCONF_U1_DIR);
+#endif
+
   leave_critical_section(flags);
 };
 #endif

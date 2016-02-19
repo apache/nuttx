@@ -770,12 +770,15 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
 
   /* Pins configuration */
 
+#ifdef PINCONF_SSP1_SCK
+  /* It is possible this is not configured if CLK0 is being used for clocking SPI */
+
   lpc43_pin_config(PINCONF_SSP1_SCK);
+#endif
   lpc43_pin_config(PINCONF_SSP1_MISO);
   lpc43_pin_config(PINCONF_SSP1_MOSI);
 
   leave_critical_section(flags);
-
   return &g_ssp1dev;
 }
 #endif
