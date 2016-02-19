@@ -74,6 +74,16 @@
 #include  "init/init.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+/* This set of all CPUs */
+
+#  define SCHED_ALL_CPUS         ((1 << CONFIG_SMP_NCPUS) - 1)
+#endif /* CONFIG_SMP */
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -452,19 +462,31 @@ void os_start(void)
         }
 
       /* Set the task flags to indicate that this is a kernel thread and, if
-       * configured for SMP, that this task is assigned to the correct CPU.
+       * configured for SMP, that this task is locked to this CPU.
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_ASSIGNED);
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
       g_idletcb[cpu].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
 #endif
 
-      /* Set the IDLE task name */
+#ifdef CONFIG_SMP
+      /* Set the affinity mask to allow the thread to run on all CPUs.  No,
+       * this IDLE thread can only run on its assigned CPU.  That is
+       * enforced by the TCB_FLAG_CPU_LOCKED which overrides the affinity
+       * mask.  This is essential because all tasks inherit the affinity
+       * mask from their parent and, ultimately, the parent of all tasks is
+       * the IDLE task.
+       */
+
+     g_idletcb[cpu].cmn.affinity = SCHED_ALL_CPUS;
+#endif
 
 #if CONFIG_TASK_NAME_SIZE > 0
+      /* Set the IDLE task name */
+
 #  ifdef CONFIG_SMP
       snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", cpu);
 #  else

@@ -148,7 +148,7 @@
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT) /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT) /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT) /* Other scheding policy */
-#define TCB_FLAG_CPU_ASSIGNED      (1 << 6) /* Bit 6: Assigned to a CPU */
+#define TCB_FLAG_CPU_LOCKED        (1 << 6) /* Bit 6: Locked to this CPU */
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 7) /* Bit 7: Exitting */
                                             /* Bits 8-15: Available */
 
@@ -562,6 +562,7 @@ struct tcb_s
   uint8_t  task_state;                   /* Current state of the thread         */
 #ifdef CONFIG_SMP
   uint8_t  cpu;                          /* CPU index if running or assigned    */
+  cpu_set_t affinity;                    /* Bit set of permitted CPUs           */
 #endif
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -403,6 +403,20 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       errcode = EBUSY;
       goto errout_with_join;
     }
+
+#ifdef CONFIG_SMP
+  /* pthread_schedsetup() will set the affinity mask by inheriting the
+   * setting from the parent task.  We need to override this setting
+   * with the value from the pthread attributes unless that value is
+   * zero:  Zero is the default value and simply means to inherit the
+   * parent thread's affinity mask.
+   */
+
+   if ( attr->affinity != 0)
+     {
+       ptcb->cmn.affinity = attr->affinity;
+     }
+#endif
 
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value

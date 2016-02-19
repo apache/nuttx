@@ -11505,3 +11505,11 @@
 	  pthread_attr_setaffinity_np(), pthread_attr_getaffinity_np(),
 	  pthread_setaffinity_np(), and pthread_getaffinity_np().  No implementation
 	  is yet in place (2016-02-19).
+	* sched/sched_cpuselect.c, include/nuttx/sched.h, and other files.  Add
+	  a CPU affinity set to the TCB if SMP is enabled and use this CPU set as
+	  a mask for determining which CPUs the thread may run on (2016-02-19).
+	* libc/pthread, sched/pthread/pthread_start.c, and include/pthread.h:
+	  Add an affinity field to the attrributes to permit controlling
+	  which CPUs a pthread may run on.  Implements pthread_att_setaffinity_np()
+	  and pthread_attr_getaffinity_np() (2016-02-19).
+

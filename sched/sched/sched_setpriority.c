@@ -131,7 +131,7 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
 
   if (tcb->task_state == TSTATE_TASK_READYTORUN)
     {
-      cpu = sched_cpu_select();
+      cpu = sched_cpu_select(tcb->affinity);
     }
 
   /* CASE 2b.  The task is ready to run, and assigned to a CPU.  An increase

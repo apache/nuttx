@@ -178,6 +178,10 @@ struct pthread_attr_s
   uint8_t max_repl;            /* Maximum pending replenishments */
 #endif
 
+#ifdef CONFIG_SMP
+  cpu_set_t affinity;          /* Set of permitted CPUs for the thread */
+#endif
+
   size_t stacksize;            /* Size of the stack allocated for the pthread */
 
 #ifdef CONFIG_SCHED_SPORADIC

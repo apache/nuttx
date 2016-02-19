@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_setup.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,6 +145,38 @@ static int task_assignpid(FAR struct tcb_s *tcb)
   (void)sched_unlock();
   return ERROR;
 }
+
+/****************************************************************************
+ * Name: task_inherit_affinity
+ *
+ * Description:
+ *   exec(), task_create(), and vfork() all inherit the affinity mask from
+ *   the parent thread.  This is the default for pthread_create() as well
+ *   but the affinity mask can be specified in the pthread attributes as
+ *   well.  pthread_setup() will have to fix up the affinity mask in this
+ *   case.
+ *
+ * Parameters:
+ *   tcb - The TCB of the new task.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The parent of the new task is the task at the head of the ready-to-run
+ *   list.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline void task_inherit_affinity(FAR struct tcb_s *tcb)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  tcb->affinity = rtcb->affinity;
+}
+#else
+#  define task_inherit_affinity(tcb)
+#endif
 
 /****************************************************************************
  * Name: task_saveparent
@@ -348,11 +380,22 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
 
       task_saveparent(tcb, ttype);
 
+#ifdef CONFIG_SMP
+      /* exec(), task_create(), and vfork() all inherit the affinity mask
+       * from the parent thread.  This is the default for pthread_create()
+       * as well but the affinity mask can be specified in the pthread
+       * attributes as well.  pthread_create() will have to fix up the
+       * affinity mask in this case.
+       */
+
+       task_inherit_affinity(tcb);
+#endif
+
+#ifndef CONFIG_DISABLE_SIGNALS
       /* exec(), pthread_create(), task_create(), and vfork() all
        * inherit the signal mask of the parent thread.
        */
 
-#ifndef CONFIG_DISABLE_SIGNALS
       (void)sigprocmask(SIG_SETMASK, NULL, &tcb->sigprocmask);
 #endif
 
@@ -628,8 +671,8 @@ int task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PTHREAD
-int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t start,
-                       pthread_startroutine_t entry)
+int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
+                       start_t start, pthread_startroutine_t entry)
 {
   /* Perform common thread setup */
 

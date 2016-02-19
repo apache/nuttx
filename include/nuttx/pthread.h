@@ -57,7 +57,24 @@
 #  define PTHREAD_DEFAULT_POLICY SCHED_RR
 #endif
 
-#ifdef CONFIG_SCHED_SPORADIC
+/* A lot of hassle to use the old-fashioned struct initializers.  But this
+ * gives us backward compatibility with some very old compilers.
+ */
+
+#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SMP)
+#  define PTHREAD_ATTR_INITIALIZER \
+  { \
+    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+    PTHREAD_DEFAULT_POLICY,   /* policy */ \
+    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    0,                        /* low_priority */ \
+    0,                        /* max_repl */ \
+    0,                        /* affinity */ \
+    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    {0, 0},                   /* repl_period */ \
+    {0, 0}                    /* budget */ \
+  }
+#elif defined(CONFIG_SCHED_SPORADIC)
 #  define PTHREAD_ATTR_INITIALIZER \
   { \
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
@@ -68,6 +85,15 @@
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
     {0, 0},                   /* repl_period */ \
     {0, 0},                   /* budget */ \
+  }
+#elif defined(CONFIG_SMP)
+#  define PTHREAD_ATTR_INITIALIZER \
+  { \
+    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+    PTHREAD_DEFAULT_POLICY,   /* policy */ \
+    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    0,                        /* affinity */ \
+    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
   }
 #else
 #  define PTHREAD_ATTR_INITIALIZER \

@@ -176,9 +176,9 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
   bool switched;
   bool doswitch;
 
-  /* Check if the blocked TCB is already assigned to a CPU */
+  /* Check if the blocked TCB is locked to this CPU */
 
-  if ((btcb->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
+  if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
     {
       /* Yes.. that that is the CPU we must use */
 
@@ -190,7 +190,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * (possibly its IDLE task).
        */
 
-      cpu = sched_cpu_select();
+      cpu = sched_cpu_select(btcb->affinity);
     }
 
   /* Get the task currently running on the CPU (maybe the IDLE task) */
@@ -207,11 +207,11 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       task_state = TSTATE_TASK_RUNNING;
     }
 
-  /* If it will not be running, but is assigned to a CPU, then it will be in
-   * the asssigned state.
+  /* If it will not be running, but is locked to a CPU, then it will be in
+   * the assigned state.
    */
 
-  else if ((btcb->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
+  else if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
     {
       task_state = TSTATE_TASK_ASSIGNED;
       cpu = btcb->cpu;
@@ -328,7 +328,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                           &g_cpu_irqlock);
             }
 
-          /* If the following task is not assigned to this CPU, then it must
+          /* If the following task is not locked to this CPU, then it must
            * be moved to the g_readytorun list.  Since it cannot be at the
            * head of the list, we can do this without invoking any heavy
            * lifting machinery.
@@ -337,7 +337,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
           DEBUGASSERT(btcb->flink != NULL);
           next = (FAR struct tcb_s *)btcb->flink;
 
-          if ((next->flags & TCB_FLAG_CPU_ASSIGNED) != 0)
+          if ((next->flags & TCB_FLAG_CPU_LOCKED) != 0)
             {
               DEBUGASSERT(next->cpu == cpu);
               next->task_state = TSTATE_TASK_ASSIGNED;

@@ -49,6 +49,12 @@
 #ifdef CONFIG_SMP
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define IMPOSSIBLE_CPU 0xff
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -60,7 +66,7 @@
  *   possbily its IDLE task.
  *
  * Inputs:
- *   None
+ *   affinity - The set of CPUs on which the thread is permitted to run.
  *
  * Return Value:
  *   Index of the CPU with the lowest priority running task
@@ -70,7 +76,7 @@
  *
  ****************************************************************************/
 
-int sched_cpu_select(void)
+int sched_cpu_select(cpu_set_t affinity)
 {
   uint8_t minprio;
   int cpu;
@@ -81,32 +87,38 @@ int sched_cpu_select(void)
    */
 
   minprio = SCHED_PRIORITY_MAX;
-  cpu     = 0;
+  cpu     = IMPOSSIBLE_CPU;
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_assignedtasks[i].head;
+      /* If the thread permitted to run on this CPU? */
 
-      /* If this thread is executing its IDLE task, the use it.  The IDLE
-       * task is always the last task in the assigned task list.
-       */
-
-      if (rtcb->flink == NULL)
+      if ((affinity & (1 << i)) != 0)
         {
-          /* The IDLE task should always be assigned to this CPU and have
-           * a priority of zero.
+          FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_assignedtasks[i].head;
+
+          /* If this thread is executing its IDLE task, the use it.  The
+           * IDLE task is always the last task in the assigned task list.
            */
 
-          DEBUGASSERT(rtcb->sched_priority == 0);
-          return i;
-        }
-      else if (rtcb->sched_priority < minprio)
-        {
-          DEBUGASSERT(rtcb->sched_priority > 0);
-          cpu = i;
+          if (rtcb->flink == NULL)
+            {
+              /* The IDLE task should always be assigned to this CPU and have
+               * a priority of zero.
+               */
+
+              DEBUGASSERT(rtcb->sched_priority == 0);
+              return i;
+            }
+          else if (rtcb->sched_priority < minprio)
+            {
+              DEBUGASSERT(rtcb->sched_priority > 0);
+              cpu = i;
+            }
         }
     }
 
+  DEBUGASSERT(cpu != IMPOSSIBLE_CPU);
   return cpu;
 }
 
