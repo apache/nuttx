@@ -72,15 +72,84 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
+bool sched_removereadytorun(FAR struct tcb_s *rtcb)
+{
+  bool doswitch = false;
+
+  /* Check if the TCB to be removed is at the head of the ready to run list.
+   * There is only one list, g_readytorun, and it always contains the
+   * currently running task.  If we are removing the head of this list,
+   * then we are removing the currently active task.
+   */
+
+  if (rtcb->blink == NULL)
+    {
+      /* There must always be at least one task in the list (the IDLE task)
+       * after the TCB being removed.
+       */
+
+      FAR struct tcb_s *ntcb = (FAR struct tcb_s *)rtcb->flink;
+      DEBUGASSERT(ntcb != NULL);
+
+      /* Inform the instrumentation layer that we are switching tasks */
+
+      sched_note_switch(rtcb, ntcb);
+      ntcb->task_state = TSTATE_TASK_RUNNING;
+      doswitch = true;
+    }
+
+  /* Remove the TCB from the ready-to-run list.  In the non-SMP case, this
+   * is always the g_readytorun list.
+   */
+
+  dq_rem((FAR dq_entry_t *)rtcb, (FAR dq_queue_t *)&g_readytorun);
+
+  /* Since the TCB is not in any list, it is now invalid */
+
+  rtcb->task_state = TSTATE_TASK_INVALID;
+  return doswitch;
+}
+#endif /* !CONFIG_SMP */
+
+/****************************************************************************
+ * Name: sched_removereadytorun
+ *
+ * Description:
+ *   This function removes a TCB from the ready to run list.
+ *
+ * Inputs:
+ *   rtcb - Points to the TCB that is ready-to-run
+ *
+ * Return Value:
+ *   true if the currently active task (the head of the ready-to-run list)
+ *     has changed.
+ *
+ * Assumptions:
+ * - The caller has established a critical section before calling this
+ *   function (calling sched_lock() first is NOT a good idea -- use
+ *   enter_critical_section()).
+ * - The caller handles the condition that occurs if the head of the
+ *   ready-to-run list is changed.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
 bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 {
   FAR dq_queue_t *tasklist;
-  bool ret = false;
+  bool doswitch = false;
+  int cpu;
 
-  /* Check if the TCB to be removed is at the head of a ready to run list. */
+  /* Which CPU (if any) is the task running on?  Which task list holds the
+   * TCB?
+   */
 
-#ifdef CONFIG_SMP
-  /* For the case of SMP, there are two lists involved:  (1) the
+  cpu      = rtcb->cpu;
+  tasklist = TLIST_HEAD(rtcb->task_state, cpu);
+
+  /* Check if the TCB to be removed is at the head of a ready to run list.
+   * For the case of SMP, there are two lists involved:  (1) the
    * g_readytorun list that holds non-running tasks that have not been
    * assigned to a CPU, and (2) and the g_assignedtasks[] lists which hold
    * tasks assigned a CPU, including the task that is currently running on
@@ -94,21 +163,27 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
    */
 
   if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
-#else
-  /* There is only one list, g_readytorun, and it always contains the
-   * currently running task.  If we are removing the head of this list,
-   * then we are removing the currently active task.
-   */
-
-  if (rtcb->blink == NULL)
-#endif
     {
-      /* There must always be at least one task in the list (the idle task) */
+      FAR struct tcb_s *ntcb;
+      int me;
 
-      FAR struct tcb_s *ntcb = (FAR struct tcb_s *)rtcb->flink;
+      /* There must always be at least one task in the list (the IDLE task)
+       * after the TCB being removed.
+       */
+
+      ntcb = (FAR struct tcb_s *)rtcb->flink;
       DEBUGASSERT(ntcb != NULL);
 
-#ifdef CONFIG_SMP
+      /* If we are modifying the head of some assigned task list other than
+       * our own, we will need to stop that CPU.
+       */
+
+      me = this_cpu();
+      if (cpu != me)
+        {
+          DEBUGVERIFY(up_cpu_pause(cpu));
+        }
+
       /* Will pre-emption be disabled after the switch?  If the lockcount is
        * greater than zero, then this task/this CPU holds the scheduler lock.
        */
@@ -117,18 +192,18 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
-          spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+          spin_setbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
                       &g_cpu_schedlock);
         }
       else
         {
           /* No.. we may need to perform release our hold on the lock. */
 
-          spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+          spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
                       &g_cpu_schedlock);
         }
 
-      /* Interrupts be disabled after the switch.  If irqcount is greater
+      /* Interrupts may be disabled after the switch.  If irqcount is greater
        * than zero, then this task/this CPU holds the IRQ lock
        */
 
@@ -136,40 +211,56 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
-          spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                       &g_cpu_irqlock);
         }
       else
         {
           /* No.. we may need to perform release our hold on the lock. */
 
-          spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                       &g_cpu_irqlock);
         }
-#endif
 
       /* Inform the instrumentation layer that we are switching tasks */
 
       sched_note_switch(rtcb, ntcb);
       ntcb->task_state = TSTATE_TASK_RUNNING;
-      ret = true;
+
+      /* The task is running but the CPU that it was running on has been
+       * paused.  We can now safely remove its TCB from the ready-to-run
+       * task list.  In the SMP case this may be either the g_readytorun()
+       * or the g_assignedtasks[cpu] list.
+       */
+
+      dq_rem((FAR dq_entry_t *)rtcb, tasklist);
+
+      /* All done, restart the other CPU (if it was paused). */
+
+      doswitch = true;
+      if (cpu != me)
+        {
+          /* In this we will not want to report a context switch to this
+           * CPU.  Only the other CPU is affected.
+           */
+
+          DEBUGVERIFY(up_cpu_resume(cpu));
+          doswitch = false;
+        }
+    }
+  else
+    {
+      /* The task is not running.  Just remove its TCB from the ready-to-run
+       * list.  In the SMP case this may be either the g_readytorun() or the
+       * g_assignedtasks[cpu] list.
+       */
+
+      dq_rem((FAR dq_entry_t *)rtcb, tasklist);
     }
 
-  /* Remove the TCB from the ready-to-run list.  In the non-SMP case, this
-   * is always the g_readytorun list; In the SMP case, however, this may be
-   * either the g_readytorun() or the g_assignedtasks[cpu] list.
-   */
-
-#ifdef CONFIG_SMP
-  tasklist = TLIST_HEAD(rtcb->task_state, rtcb->cpu);
-#else
-  tasklist = (FAR dq_queue_t *)&g_readytorun;
-#endif
-
-  dq_rem((FAR dq_entry_t *)rtcb, tasklist);
-
-  /* Since the TCB is not in any list, it is now invalid */
+  /* Since the TCB is no longer in any list, it is now invalid */
 
   rtcb->task_state = TSTATE_TASK_INVALID;
-  return ret;
+  return doswitch;
 }
+#endif /* CONFIG_SMP */

@@ -369,7 +369,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
           btcb->task_state = TSTATE_TASK_ASSIGNED;
         }
 
-      /* All done, restart the other that CPU. */
+      /* All done, restart the other CPU (if it was paused). */
 
       if (cpu != me)
         {
