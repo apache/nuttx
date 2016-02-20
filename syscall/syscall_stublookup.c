@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -289,6 +289,11 @@ uintptr_t STUB_pthread_setschedprio(int nbr, uintptr_t parm1,
 uintptr_t STUB_pthread_setspecific(int nbr, uintptr_t parm1,
             uintptr_t parm2);
 uintptr_t STUB_pthread_yield(int nbr);
+
+uintptr_t STUB_pthread_setaffinity(int nbr, uintptr_t parm1,
+            uintptr_t parm2, uintptr_t parm3);
+uintptr_t STUB_pthread_getaffinity(int nbr, uintptr_t parm1,
+            uintptr_t parm2, uintptr_t parm3);
 
 uintptr_t STUB_pthread_cond_timedwait(int nbr, uintptr_t parm1,
             uintptr_t parm2, uintptr_t parm3);

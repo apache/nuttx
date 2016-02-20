@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -259,13 +259,9 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 typedef bool pthread_once_t;
 #define __PTHREAD_ONCE_T_DEFINED 1
 
-/* Forware references */
+/* Forward references */
 
 struct sched_param; /* Defined in sched.h */
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
 
 /********************************************************************************
  * Public Function Prototypes
