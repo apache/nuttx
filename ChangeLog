@@ -11514,4 +11514,5 @@
 	  and pthread_attr_getaffinity_np() (2016-02-19).
 	* sched/pthread:  Add pthread_setaffinity() and pthread_getaffinity()
 	  (2016-02-19).
+	* sched/sched: Add sched_setaffinity() and sched_getaffinity() (2016-02-19).
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sched/sched_getscheduler.c
+ * sched/sched/sched_getaffinity.c
  *
- *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,8 @@
 
 #include <sys/types.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
-
-#include <nuttx/arch.h>
 
 #include "sched/sched.h"
 
@@ -55,32 +54,33 @@
  * Name: sched_getscheduler
  *
  * Description:
- *   sched_getscheduler() returns the scheduling policy currently
- *   applied to the task identified by pid. If pid equals zero, the
- *   policy of the calling task will be retrieved.
+ *   sched_getaffinity() writes the affinity mask of the thread whose ID
+ *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
+ *   argument specifies the size (in bytes) of mask.  If pid is zero, then
+ *   the mask of the calling thread is returned.
  *
  * Inputs:
- *   pid - the task ID of the task to query.  If pid is zero, the
- *     calling task is queried.
+ *   pid        - The ID of thread whose affinity set will be retrieved.
+ *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
+ *   cpuset     - The location to return the thread's new affinity set.
  *
  * Return Value:
- *    On success, sched_getscheduler() returns the policy for the task
- *    (either SCHED_FIFO or SCHED_RR).  On error,  ERROR (-1) is
- *    returned, and errno is set appropriately:
+ *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
+ *   set appropriately:
  *
  *      ESRCH  The task whose ID is pid could not be found.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int sched_getscheduler(pid_t pid)
+int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 {
   FAR struct tcb_s *tcb;
-  int policy;
+
+  DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
 
   /* Verify that the PID corresponds to a real task */
 
+  sched_lock();
   if (!pid)
     {
       tcb = this_task();
@@ -90,16 +90,15 @@ int sched_getscheduler(pid_t pid)
       tcb = sched_gettcb(pid);
     }
 
-  if (!tcb)
+  if (tcb == NULL)
     {
       set_errno(ESRCH);
       return ERROR;
     }
 
-  /* Return the scheduling policy from the TCB.  NOTE that the user-
-   * interpretable values are 1 based; the TCB values are zero-based.
-   */
+  /* Return the affinity mask from the TCB. */
 
-  policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
-  return policy + 1;
+  *mask = tcb->affinity;
+  sched_unlock();
+  return OK;
 }
