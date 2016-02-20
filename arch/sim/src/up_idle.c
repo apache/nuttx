@@ -43,8 +43,14 @@
 #include <time.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/power/pm.h>
+
+#ifdef CONFIG_PM
+#  include <nuttx/power/pm.h>
+#endif
+
+#ifdef CONFIG_SMP
+#  include <nuttx/spinlock.h>
+#endif
 
 #include "up_internal.h"
 
