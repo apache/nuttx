@@ -68,6 +68,10 @@
 #  include "sam_qspi.h"
 #endif
 
+#ifdef HAVE_LED_DRIVER
+#  include <nuttx/leds/userled.h>
+#endif
+
 #ifdef HAVE_PROGMEM_CHARDEV
 #  include "sam_progmem.h"
 #endif
@@ -195,6 +199,16 @@ int sam_bringup(void)
   /* Register I2C drivers on behalf of the I2C tool */
 
   sam_i2ctool();
+
+#ifdef HAVE_LED_DRIVER
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
 #if defined(HAVE_RTC_PCF85263)
   /* Get an instance of the TWIHS0 I2C interface */

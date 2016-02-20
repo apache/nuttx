@@ -71,6 +71,7 @@
 #define HAVE_RTC_DSXXXX      1
 #define HAVE_RTC_PCF85263    1
 #define HAVE_I2CTOOL         1
+#define HAVE_LED_DRIVER      1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -357,6 +358,21 @@
 
 #if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
 #  undef HAVE_I2CTOOL
+#endif
+
+/* Do we need to install the LED driver */
+
+#if defined(CONFIG_ARCH_LEDS) || !defined(CONFIG_USERLED) || \
+    !defined(CONFIG_USERLED_LOWER)
+#  undef HAVE_LED_DRIVER
+#endif
+
+#ifdef HAVE_LED_DRIVER
+#  ifdef CONFIG_EXAMPLES_LEDS_DEVPATH
+#    define LED_DRIVER_PATH CONFIG_EXAMPLES_LEDS_DEVPATH
+#  else
+#    define LED_DRIVER_PATH "/dev/userleds"
+#  endif
 #endif
 
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
