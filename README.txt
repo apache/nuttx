@@ -1548,6 +1548,8 @@ apps/
  |   |- json/README.txt
  |   |- pashello/README.txt
  |   `- README.txt
+ |- gpsutils/
+ |   `- minmea/README.txt
  |- graphics/
  |   `- tiff/README.txt
  |- interpreters/
