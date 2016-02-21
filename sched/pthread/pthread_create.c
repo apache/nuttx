@@ -412,7 +412,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
    * parent thread's affinity mask.
    */
 
-   if ( attr->affinity != 0)
+   if (attr->affinity != 0)
      {
        ptcb->cmn.affinity = attr->affinity;
      }

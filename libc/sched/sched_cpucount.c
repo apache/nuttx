@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-int sched_cpu_count(FAR const cpu_set_t *set);
+int sched_cpu_count(FAR const cpu_set_t *set)
 {
   int count;
   int cpu;

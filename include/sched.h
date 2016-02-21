@@ -67,6 +67,7 @@
 #define PTHREAD_KEYS_MAX CONFIG_NPTHREAD_KEYS
 
 /* CPU affinity mask helpers ***************************************************/
+/* These are not standard but are defined for Linux compatibility */
 
 #ifdef CONFIG_SMP
 
@@ -88,7 +89,7 @@
 
 /* int CPU_COUNT(FAR const cpu_set_t *set); */
 
-#define CPU_COUNT(s) sched_cpu_count(s)
+#  define CPU_COUNT(s) sched_cpu_count(s)
 
 /* void CPU_AND(FAR cpu_set_t *destset, FAR const cpu_set_t *srcset1,
  *              FAR const cpu_set_t *srcset2);
@@ -112,6 +113,7 @@
 
 #  define CPU_EQUAL(s1,s2) (*(s2) == *(s2))
 
+/* REVISIT: Variably sized CPU sets are not supported */
 /* FAR cpu_set_t *CPU_ALLOC(int num_cpus); */
 
 #  define CPU_ALLOC(n) (FAR cpu_set_t *)malloc(sizeof(cpu_set_t));

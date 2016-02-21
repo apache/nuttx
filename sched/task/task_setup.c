@@ -163,8 +163,8 @@ static int task_assignpid(FAR struct tcb_s *tcb)
  *   None
  *
  * Assumptions:
- *   The parent of the new task is the task at the head of the ready-to-run
- *   list.
+ *   The parent of the new task is the task at the head of the assigned task
+ *   list for the current CPU.
  *
  ****************************************************************************/
 

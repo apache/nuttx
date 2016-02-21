@@ -41,6 +41,7 @@
 
 #include <pthread.h>
 #include <debug.h>
+#include <assert.h>
 #include <errno.h>
 
 /****************************************************************************
