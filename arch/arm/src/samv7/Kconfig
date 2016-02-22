@@ -1503,6 +1503,13 @@ config SAMV7_HSMCI_UNALIGNED
 		for example, when used with the FAT file system only transfers
 		aligned blocks of data.
 
+		But under certain circumstances, the FAT file system WILL read
+		directly into the user buffer and then strict 32-bit alignment is
+		required.  That condition is:  When the user reads from the
+		beginning of a sector and at least a whole sector is being read.  So
+		this could effect certain application and so, if you are concerned,
+		you probably should enable this feature.
+
 config SAMV7_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
 	depends on DEBUG_FS && DEBUG_VERBOSE

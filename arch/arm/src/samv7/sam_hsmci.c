@@ -1612,7 +1612,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                 {
                   /* The Command-Response sequence ended with no error */
 
-                      wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE;
+                  wkupevent = SDIOWAIT_CMDDONE | SDIOWAIT_RESPONSEDONE;
                 }
 
               /* Yes.. Is there a thread waiting for this event set? */
