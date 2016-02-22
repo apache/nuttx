@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f4discovery/include/board.h
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,9 +231,7 @@
 /* The STM32F4 Discovery supports one button: */
 
 #define BUTTON_USER        0
-
 #define NUM_BUTTONS        1
-
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
@@ -279,6 +277,15 @@
  */
 
 #define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
+
+/* RGB LED
+ *
+ * R = TIM1 CH1 on PE9 | G = TIM2 CH2 on PA1 | B = TIM3 CH3 on PB0
+ */
+
+#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2
+#define GPIO_TIM2_CH2OUT GPIO_TIM2_CH2OUT_1
+#define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
 
 /* SPI - There is a MEMS device on SPI1 using these pins: */
 

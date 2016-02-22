@@ -99,7 +99,15 @@ int stm32_bringup(void)
   int ret = OK;
 
 #ifdef CONFIG_ZEROCROSS
+  /* Configure the zero-crossing driver */
+
   stm32_zerocross_initialize();
+#endif
+
+#ifdef CONFIG_RGBLED
+  /* Configure the RGB LED driver */
+
+  stm32_rgbled_setup();
 #endif
 
 #if defined(CONFIG_PCA9635PW)
