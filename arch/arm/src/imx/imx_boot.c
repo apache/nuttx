@@ -70,7 +70,7 @@ extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
 /************************************************************************************
- * Private Variables
+ * Private Data
  ************************************************************************************/
 
 /* Mapping of the external memory regions will probably have to be made board

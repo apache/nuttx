@@ -299,7 +299,7 @@ static bool efm32_txready(struct uart_dev_s *dev);
 static bool efm32_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_uart_ops =

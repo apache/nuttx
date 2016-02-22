@@ -102,7 +102,7 @@ static bool usart1_txready(struct uart_dev_s *dev);
 static bool usart1_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 struct uart_ops_s g_uart1_ops =

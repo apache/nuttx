@@ -347,7 +347,7 @@ static int up_interrupt_uart8(int irq, void *context);
 #endif
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA

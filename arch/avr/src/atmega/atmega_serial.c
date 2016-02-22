@@ -144,7 +144,7 @@ static bool usart1_txempty(struct uart_dev_s *dev);
 #endif
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* USART0 operations */

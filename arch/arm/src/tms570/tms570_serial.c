@@ -161,7 +161,7 @@ static bool tms570_txready(struct uart_dev_s *dev);
 static bool tms570_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_sci_ops =

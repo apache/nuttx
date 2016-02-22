@@ -264,7 +264,7 @@ static bool flexus_txready(struct uart_dev_s *dev);
 static bool flexus_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_flexus_ops =

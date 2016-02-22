@@ -67,7 +67,7 @@ extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
 /************************************************************************************
- * Private Variables
+ * Private Data
  ************************************************************************************/
 
 static const struct section_mapping_s section_mapping[] =

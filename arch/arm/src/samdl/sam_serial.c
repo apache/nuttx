@@ -285,7 +285,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable);
 static bool sam_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_uart_ops =

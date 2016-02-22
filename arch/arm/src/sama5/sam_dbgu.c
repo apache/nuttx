@@ -102,7 +102,7 @@ static bool dbgu_txready(struct uart_dev_s *dev);
 static bool dbgu_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_uart_ops =

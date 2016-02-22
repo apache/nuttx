@@ -266,7 +266,7 @@ static bool up_txempty(struct uart_dev_s *dev);
 #endif
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_uart_ops =

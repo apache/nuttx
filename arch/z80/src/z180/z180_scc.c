@@ -100,7 +100,7 @@ static bool z180_txready(struct uart_dev_s *dev);
 static bool z180_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct uart_ops_s g_uart_ops =
