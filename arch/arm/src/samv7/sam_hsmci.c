@@ -1548,7 +1548,6 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
               *priv->buffer++  = sam_getreg(priv, SAM_HSMCI_RDR_OFFSET);
               priv->remaining -= sizeof(uint32_t);
 #endif
-
               /* Are we finished? */
 
               if (priv->remaining <= 0)
@@ -2942,7 +2941,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       return sam_recvsetup(dev, buffer, buflen);
     }
 #else
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0 && (buflen & 3) == 0);
 #endif
 
   /* How many blocks?  That should have been saved by the sam_blocksetup()
