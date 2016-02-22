@@ -129,7 +129,7 @@ struct spi_sctrlr_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *sam_spibus_initialize(int port)
+FAR struct spi_dev_s *sam_spibus_initialize(int port);
 
 /****************************************************************************
  * Name: sam_spi_slave_initialize
