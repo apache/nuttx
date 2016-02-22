@@ -1491,13 +1491,63 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
 
           else if ((pending & HSMCI_INT_RXRDY) != 0)
             {
+#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
+              uint32_t value;
+
               /* Interrupt mode data transfer support */
 
               DEBUGASSERT(!priv->dmabusy && priv->xfrbusy && !priv->txbusy);
               DEBUGASSERT(priv->buffer && priv->remaining > 0);
 
+              /* Is the receiving buffer aligned? */
+
+              value = sam_getreg(priv, SAM_HSMCI_RDR_OFFSET);
+
+              if (((uintptr_t)priv->buffer & 3) == 0 &&
+                  priv->remaining >= sizeof(uint32_t))
+                {
+                  /* Yes.. transfer 32-bits at a time */
+
+                  *priv->buffer++  = value;
+                  priv->remaining -= sizeof(uint32_t);
+                }
+              else
+                {
+                  /* No.. transfer 8-bits at a time (little endian source) */
+
+                  uint8_t *dest8 = (uint8_t *)priv->buffer;
+
+                  /* Unpack little endian; write in native byte order */
+
+                  *dest8++ = (value & 0xff);
+                  if (--priv->remaining > 0)
+                    {
+                      *dest8++ = ((value >> 8) & 0xff);
+
+                      if (--priv->remaining > 0)
+                        {
+                          *dest8++ = ((value >> 16) & 0xff);
+
+                          if (--priv->remaining > 0)
+                            {
+                              *dest8++ = ((value >> 24) & 0xff);
+                            }
+                        }
+                    }
+
+                  priv->buffer = (uint32_t *)dest8;
+                }
+#else
+              /* Interrupt mode data transfer support */
+
+              DEBUGASSERT(!priv->dmabusy && priv->xfrbusy && !priv->txbusy);
+              DEBUGASSERT(priv->buffer && priv->remaining > 0);
+
+              /* Transfer 32-bit aligned data */
+
               *priv->buffer++  = sam_getreg(priv, SAM_HSMCI_RDR_OFFSET);
               priv->remaining -= sizeof(uint32_t);
+#endif
 
               /* Are we finished? */
 
@@ -2080,7 +2130,9 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+#ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0 && (buflen & 3) == 0);
+#endif
 
   /* Initialize register sampling */
 
@@ -2132,12 +2184,14 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
                          size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  unsigned int nwords;
-  const uint32_t *ptr;
+  unsigned int remaining;
+  const uint32_t *src;
   uint32_t sr;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+#ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
+  DEBUGASSERT(((uintptr_t)buffer & 3) == 0 && (buflen & 3) == 0);
+#endif
 
   /* Disable DMA handshaking */
 
@@ -2158,10 +2212,10 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
    * disable pre-emption around this loop.
    */
 
-  nwords = (buflen + 3) >> 2;
-  ptr = (const uint32_t *)buffer;
+  src       = (const uint32_t *)buffer;
+  remaining = buflen;
 
-  while (nwords > 0)
+  while (remaining > 0)
     {
       /* Check the HSMCI status */
 
@@ -2177,8 +2231,53 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
         {
           /* TXRDY -- transfer another word */
 
-          sam_putreg(priv, *ptr++, SAM_HSMCI_TDR_OFFSET);
-          nwords--;
+#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
+          /* First check:  Do we we have 32-bit address alignment?  Are we
+           * transferring a full 32-bits?
+           */
+
+          if (((uintptr_t)priv->buffer & 3) == 0 &&
+              priv->remaining >= sizeof(uint32_t))
+            {
+              /* Yes.. transfer 32-bits at a time */
+
+              sam_putreg(priv, *src++, SAM_HSMCI_TDR_OFFSET);
+              remaining -= sizeof(uint32_t);
+            }
+          else
+            {
+              /* No.. transfer 8-bits at a time (little endian destination) */
+
+              const uint8_t *src8 = (const uint8_t *)src;
+              uint32_t value;
+
+              /* Read data in native byte order, pack little endian */
+
+              value = (uint32_t)*src8++;
+              if (--remaining > 0)
+                {
+                  value |= ((uint32_t)*src8++ << 8);
+
+                  if (--remaining > 0)
+                    {
+                      value |= ((uint32_t)*src8++ << 16);
+
+                      if (--remaining > 0)
+                        {
+                          value |= ((uint32_t)*src8++ << 24);
+                        }
+                    }
+                }
+
+              src = (const uint32_t *)src8;
+              sam_putreg(priv, value, SAM_HSMCI_TDR_OFFSET);
+            }
+#else
+          /* Transfer 32-bit aligned data */
+
+          sam_putreg(priv, *src++, SAM_HSMCI_TDR_OFFSET);
+          remaining -= sizeof(uint32_t);
+#endif
         }
     }
 
@@ -2832,7 +2931,19 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   unsigned int i;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
+#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
+  /* 32-bit buffer alignment is required for DMA transfers */
+
+  if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
+    {
+      /* Fall back and do a non-DMA transfer */
+
+      return sam_recvsetup(dev, buffer, buflen);
+    }
+#else
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+#endif
 
   /* How many blocks?  That should have been saved by the sam_blocksetup()
    * method earlier.
@@ -2928,7 +3039,19 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
   unsigned int i;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
+  /* 32-bit buffer alignment is required for DMA transfers */
+
+  if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
+    {
+      /* Fall back and do a non-DMA transfer */
+
+      return sam_sendsetup(dev, buffer, buflen);
+    }
+#else
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0 && (buflen & 3) == 0);
+#endif
 
   /* How many blocks?  That should have been saved by the sam_blocksetup()
    * method earlier.

@@ -1493,6 +1493,16 @@ config SAMV7_HSMCI_WRPROOF
 		access if the internal FIFO is full. This will guarantee data
 		integrity, not bandwidth.
 
+config SAMV7_HSMCI_UNALIGNED
+	bool "Unaligned I/O buffers"
+	default n
+	---help---
+		This option enables additional logic to handle unaligned buffers for
+		read and write SDIO operations.  Normally this support is not
+		required because the HSCMI driver functions like a block driver and,
+		for example, when used with the FAT file system only transfers
+		aligned blocks of data.
+
 config SAMV7_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
 	depends on DEBUG_FS && DEBUG_VERBOSE
