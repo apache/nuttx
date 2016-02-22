@@ -27,6 +27,7 @@ Contents
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - LEDs
+  - RGB LED Driver
   - PWM
   - UARTs
   - Timer Inputs/Outputs
@@ -299,6 +300,32 @@ events as follows:
     is because of timer interrupts that result in the LED being illuminated
     on a small proportion of the time.
 *** LED2 may also flicker normally if signals are processed.
+
+RGB LED Driver
+==============
+
+The RGB LED driver that uses PWM to control the red, green, and blue color
+components can be enabled with the following configuratin settings:
+
+  +CONFIG_RGBLED=y
+
+  +CONFIG_PWM
+
+  +CONFIG_STM32_TIM1
+  +CONFIG_STM32_TIM2
+  +CONFIG_STM32_TIM3
+  +CONFIG_STM32_TIM1_PWM=y
+  +CONFIG_STM32_TIM1_MODE=0
+  +CONFIG_STM32_TIM1_CHANNEL=1
+  +CONFIG_STM32_TIM1_CHMODE=0
+  +CONFIG_STM32_TIM2_PWM=y
+  +CONFIG_STM32_TIM2_MODE=0
+  +CONFIG_STM32_TIM2_CHANNEL=2
+  +CONFIG_STM32_TIM2_CHMODE=0
+  +CONFIG_STM32_TIM3_PWM=y
+  +CONFIG_STM32_TIM3_MODE=0
+  +CONFIG_STM32_TIM3_CHANNEL=3
+  +CONFIG_STM32_TIM3_CHMODE=0
 
 PWM
 ===
