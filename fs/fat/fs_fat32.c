@@ -479,13 +479,16 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
   FAR struct fat_file_s *ff;
   unsigned int bytesread;
   unsigned int readsize;
-  unsigned int nsectors;
   size_t bytesleft;
   int32_t cluster;
   FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
   int sectorindex;
   int ret;
+
+#ifndef CONFIG_FAT_FORCE_INDIRECT
+  unsigned int nsectors;
   bool force_indirect = false;
+#endif
 
   /* Sanity checks */
 
@@ -590,6 +593,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
 fat_read_restart:
 #endif
 
+#ifndef CONFIG_FAT_FORCE_INDIRECT
       /* Check if the user has provided a buffer large enough to hold one
        * or more complete sectors -AND- the read is aligned to a sector
        * boundary.
@@ -636,7 +640,7 @@ fat_read_restart:
                   force_indirect = true;
                   goto fat_read_restart;
                 }
-#endif
+#endif /* CONFIG_FAT_DMAMEMORY */
 
               goto errout_with_semaphore;
             }
@@ -646,6 +650,7 @@ fat_read_restart:
           bytesread                = nsectors * fs->fs_hwsectorsize;
         }
       else
+#endif /* CONFIG_FAT_FORCE_INDIRECT */
         {
           /* We are reading a partial sector, or handling a non-DMA-able
            * whole-sector transfer.  First, read the whole sector
@@ -709,11 +714,14 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
   int32_t cluster;
   unsigned int byteswritten;
   unsigned int writesize;
-  unsigned int nsectors;
   FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
   int sectorindex;
   int ret;
+
+#ifndef CONFIG_FAT_FORCE_INDIRECT
+  unsigned int nsectors;
   bool force_indirect = false;
+#endif
 
   /* Sanity checks.  I have seen the following assertion misfire if
    * CONFIG_DEBUG_MM is enabled while re-directing output to a
@@ -844,6 +852,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
 fat_write_restart:
 #endif
 
+#ifndef CONFIG_FAT_FORCE_INDIRECT
       /* Check if the user has provided a buffer large enough to
        * hold one or more complete sectors.
        */
@@ -890,7 +899,7 @@ fat_write_restart:
                   force_indirect = true;
                   goto fat_write_restart;
                 }
-#endif
+#endif /* CONFIG_FAT_DMAMEMORY */
 
               goto errout_with_semaphore;
             }
@@ -901,6 +910,7 @@ fat_write_restart:
           ff->ff_bflags           |= FFBUFF_MODIFIED;
         }
       else
+#endif /* CONFIG_FAT_FORCE_INDIRECT */
         {
           /* Decide whether we are performing a read-modify-write
            * operation, in which case we have to read the existing sector

@@ -11515,4 +11515,12 @@
 	* sched/pthread:  Add pthread_setaffinity() and pthread_getaffinity()
 	  (2016-02-19).
 	* sched/sched: Add sched_setaffinity() and sched_getaffinity() (2016-02-19).
+	* drivers/leds/rgbled.c: Add a driver to manage a RGB LED via PWM.  From
+	  Alan Carvalho de Assis (2016-02-22).
+	* arch/arm/src/stm32fcdiscovery: Add PWM support for the onboard RGB LED
+	  From Alan Carvalho de Assis (2016-02-22).
+	* arch/arm/src/samv7: HSMCI driver can now be configured to handle unaligned
+	  data buffers (2016-02-22).
+	* fs/fat:  Add an option to force all transfers to be performed indirectly
+	  using the FAT file system's internal sector buffers (2016-02-22).
 
