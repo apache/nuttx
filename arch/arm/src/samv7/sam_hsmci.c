@@ -2131,7 +2131,7 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
 #ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
-  /* Default behavior is to transfer 32-bit values */
+  /* Default behavior is to transfer 32-bit values only */
 
   if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
     {
@@ -2198,7 +2198,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
 #ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
-  /* Default behavior is to transfer 32-bit values */
+  /* Default behavior is to transfer 32-bit values only */
 
   if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
     {
@@ -3070,7 +3070,6 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       return -EFAULT;
 #endif
-      /* Fall back and do a non-DMA transfer */
     }
 
   /* How many blocks?  That should have been saved by the sam_blocksetup()
