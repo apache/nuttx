@@ -99,7 +99,7 @@
 #define SAM_MCAN0_BASE         0x40030000 /* 0x40030000-0x40033fff: Controller Area Network 0 (MCAN0) */
 #define SAM_MCAN1_BASE         0x40034000 /* 0x40034000-0x40037fff: Controller Area Network 1 (MCAN1) */
 #define SAM_USBHS_BASE         0x40038000 /* 0x40038000-0x4003bfff: USB High-Speed (USBHS) */
-#define SAM_AFEC0_BASE         0x400b0000 /* 0x4003c000-0x4003ffff: Analog Front End 0 (AFEC0) */
+#define SAM_AFEC0_BASE         0x4003c000 /* 0x4003c000-0x4003ffff: Analog Front End 0 (AFEC0) */
 #define SAM_DACC_BASE          0x40040000 /* 0x40040000-0x40043fff: Digital To Analog Converter (DACC) */
 #define SAM_ACC_BASE           0x40044000 /* 0x40044000-0x40047fff: Analog Comparator (ACC) */
 #define SAM_ICM_BASE           0x40048000 /* 0x40048000-0x4004bfff: Integrity Check Monitor (ICM) */
