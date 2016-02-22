@@ -197,7 +197,7 @@ static int     proc_rewinddir(FAR struct fs_dirent_s *dir);
 static int     proc_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************

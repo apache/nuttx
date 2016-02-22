@@ -100,7 +100,7 @@ static int     cpuload_dup(FAR const struct file *oldp,
 static int     cpuload_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************

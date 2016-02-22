@@ -56,7 +56,7 @@ int optind = 1;   /* Index into argv */
 int optopt = '?'; /* unrecognized option character */
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static FAR char *g_optptr       = NULL;

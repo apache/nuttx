@@ -90,7 +90,7 @@ pid_t g_pgworker;
 FAR struct tcb_s *g_pftcb;
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 #ifndef CONFIG_PAGING_BLOCKINGFILL

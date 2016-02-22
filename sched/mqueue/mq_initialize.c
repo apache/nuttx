@@ -82,7 +82,7 @@ sq_queue_t  g_msgfreeirq;
 sq_queue_t  g_desfree;
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* g_msgalloc is a pointer to the start of the allocated block of

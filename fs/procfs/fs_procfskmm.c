@@ -98,7 +98,7 @@ static int     kmm_dup(FAR const struct file *oldp,
 static int     kmm_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************

@@ -110,7 +110,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
                         off_t offset, int whence);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static uint8_t  g_seminitialized = FALSE;

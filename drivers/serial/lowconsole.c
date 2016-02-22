@@ -65,7 +65,7 @@ static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t b
 static int     lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct file_operations g_consoleops =

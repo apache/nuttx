@@ -118,7 +118,7 @@ static int     hostfs_stat(FAR struct inode *mountpt,
                         FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static uint8_t  g_seminitialized = FALSE;

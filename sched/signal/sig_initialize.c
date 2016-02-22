@@ -81,7 +81,7 @@ sq_queue_t  g_sigpendingsignal;
 sq_queue_t  g_sigpendingirqsignal;
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* g_sigactionalloc is a pointer to the start of the allocated blocks of

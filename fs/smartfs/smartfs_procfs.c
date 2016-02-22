@@ -153,7 +153,7 @@ static size_t   smartfs_files_read(FAR struct file *filep, FAR char *buffer,
 #endif
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct smartfs_procfs_entry_s g_direntry[] =

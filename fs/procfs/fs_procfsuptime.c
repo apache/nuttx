@@ -102,7 +102,7 @@ static int     uptime_dup(FAR const struct file *oldp,
 static int     uptime_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************

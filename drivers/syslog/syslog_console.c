@@ -67,7 +67,7 @@ static int     syslog_console_ioctl(FAR struct file *filep, int cmd,
                                     unsigned long arg);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct file_operations g_consoleops =

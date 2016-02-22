@@ -92,7 +92,7 @@ static int     mtd_dup(FAR const struct file *oldp,
 static int     mtd_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************

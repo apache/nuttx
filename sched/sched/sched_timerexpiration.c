@@ -109,7 +109,7 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
 #endif
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 /* This is the duration of the currently active timer or, when
  * sched_timer_expiration() is called, the duration of interval timer
