@@ -243,7 +243,7 @@ config SMP
 	depends on ARCH_HAVE_MULTICPU && EXPERIMENTAL
 	select SPINLOCK
 	---help---
-		Enable support for Symmetric Multi-Processing (SMP) on a multi-CPU
+		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
 		platform.
 
 if SMP
@@ -253,16 +253,16 @@ config SMP_NCPUS
 	default 4
 	range 2 32
 	---help---
-		This value identifies the number of CPUs support by the processor
+		This value identifies the number of CPUs supported by the processor
 		that will be used for SMP.
 
 config SMP_IDLETHREAD_STACKSIZE
 	int "CPU IDLE stack size"
 	default 2048
 	---help---
-		Each CPU will have its own IDLE stack.  System initialization occurs
+		Each CPU will have its own IDLE task.  System initialization occurs
 		on CPU0 and uses CONFIG_IDLETHREAD_STACKSIZE which will probably be
-		larger than is generally needed.  This setting provides the STACK
+		larger than is generally needed.  This setting provides the stack
 		size for the IDLE task on CPUS 1 through (CONFIG_SMP_NCPUS-1).
 
 endif # SMP
