@@ -2931,18 +2931,20 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
   /* 32-bit buffer alignment is required for DMA transfers */
 
   if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
     {
-      /* Fall back and do a non-DMA transfer */
+#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
+      /* Fall back and do an unaligned, non-DMA transfer */
 
       return sam_recvsetup(dev, buffer, buflen);
-    }
 #else
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0 && (buflen & 3) == 0);
+      /* Return the -EFAULT error. */
+
+      return -EFAULT;
 #endif
+    }
 
   /* How many blocks?  That should have been saved by the sam_blocksetup()
    * method earlier.
@@ -3039,18 +3041,21 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
   /* 32-bit buffer alignment is required for DMA transfers */
 
   if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
     {
-      /* Fall back and do a non-DMA transfer */
+#ifdef CONFIG_SAMV7_HSMCI_UNALIGNED
+      /* Fall back and do an unaligned, non-DMA transfer */
 
       return sam_sendsetup(dev, buffer, buflen);
-    }
 #else
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0 && (buflen & 3) == 0);
+      /* Return the -EFAULT error. */
+
+      return -EFAULT;
 #endif
+      /* Fall back and do a non-DMA transfer */
+    }
 
   /* How many blocks?  That should have been saved by the sam_blocksetup()
    * method earlier.
