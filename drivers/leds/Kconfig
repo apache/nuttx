@@ -41,6 +41,13 @@ config USERLED_LOWER
 
 endif # USERLED
 
+config RGBLED
+        bool "RGB LED Driver Support"
+        default n
+        ---help---
+                This selection enables building of the "upper-half" RGB LED driver.
+                See include/nuttx/rgbled.h for further PWM driver information.
+
 config PCA9635PW
 	bool "PCA9635PW I2C LED Driver"
 	default n
