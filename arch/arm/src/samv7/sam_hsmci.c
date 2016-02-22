@@ -2129,8 +2129,16 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
 #ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0 && (buflen & 3) == 0);
+  /* Default behavior is to transfer 32-bit values */
+
+  if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
+    {
+      /* Return the -EFAULT error. */
+
+      return -EFAULT;
+    }
 #endif
 
   /* Initialize register sampling */
@@ -2188,8 +2196,16 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
   uint32_t sr;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
 #ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
-  DEBUGASSERT(((uintptr_t)buffer & 3) == 0 && (buflen & 3) == 0);
+  /* Default behavior is to transfer 32-bit values */
+
+  if (((uintptr_t)buffer & 3) != 0 || (buflen & 3) != 0)
+    {
+      /* Return the -EFAULT error. */
+
+      return -EFAULT;
+    }
 #endif
 
   /* Disable DMA handshaking */
