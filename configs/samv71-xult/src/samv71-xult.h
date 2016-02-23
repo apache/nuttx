@@ -586,7 +586,7 @@ int sam_bringup(void);
 #endif
 
 /************************************************************************************
- * Name: sam_spi_initialize
+ * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAMV71-XULT board.
@@ -594,7 +594,7 @@ int sam_bringup(void);
  ************************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI
-void sam_spi_initialize(void);
+void sam_spidev_initialize(void);
 #endif
 
 /************************************************************************************
