@@ -161,7 +161,7 @@ int stm32_rgbled_setup(void)
       ledb->ops->setup(ledb);
       ledb->ops->start(ledb, &info);
 
-      /* Register the PWM driver at "/dev/pwm0" */
+      /* Register the RGB LED diver at "/dev/rgbled0" */
 
       ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
       if (ret < 0)
