@@ -602,7 +602,7 @@ int stm32_rgbled_setup(void);
 #endif
 
 /****************************************************************************
- * Name: up_timer_init
+ * Name: stm32_timer_driver_setup
  *
  * Description:
  *   Configure the timer driver.
@@ -619,7 +619,7 @@ int stm32_rgbled_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int up_timer_init(FAR const char *devpath, int timer);
+int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */

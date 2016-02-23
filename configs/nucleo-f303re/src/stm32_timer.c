@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_init
+ * Name: stm32_timer_driver_setup
  *
  * Description:
  *   Configure the timer driver.
@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-int up_timer_init(FAR const char *devpath, int timer)
+int stm32_timer_driver_setup(FAR const char *devpath, int timer)
 {
   return stm32_timer_initialize(devpath, timer);
 }

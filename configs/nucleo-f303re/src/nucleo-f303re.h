@@ -134,7 +134,7 @@ void weak_function stm32_spidev_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: up_timer_init
+ * Name: stm32_timer_driver_setup
  *
  * Description:
  *   Configure the timer driver.
@@ -150,7 +150,7 @@ void weak_function stm32_spidev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int up_timer_init(FAR const char *devpath, int timer);
+int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */
