@@ -304,6 +304,13 @@ events as follows:
 RGB LED Driver
 ==============
 
+Alan Carvalho de Assis has used the STM32F4-Discovery to drive an RGB LED
+using PWM output.  The external RGB connected this way:
+
+   R = TIM1 CH1 on PE9
+   G = TIM2 CH2 on PA1
+   B = TIM3 CH3 on PB0
+
 The RGB LED driver that uses PWM to control the red, green, and blue color
 components can be enabled with the following configuratin settings:
 
@@ -1926,6 +1933,21 @@ Where <subdir> is one of the following:
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
+
+  rgbled:
+  -------
+
+    Alan Carvalho de Assis has used the STM32F4-Discovery to drive an RGB LED
+    using PWM output.  The external RGB connected this way:
+
+     R = TIM1 CH1 on PE9
+     G = TIM2 CH2 on PA1
+     B = TIM3 CH3 on PB0
+
+    as described about in the section "RGB LED Driver".
+
+    This configuration uses the example at apps/examples/rgbled to drive the
+    external RGB LED>
 
   usbnsh:
   -------
