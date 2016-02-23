@@ -1506,9 +1506,16 @@ config SAMV7_HSMCI_UNALIGNED
 		But under certain circumstances, the FAT file system WILL read
 		directly into the user buffer and then strict 32-bit alignment is
 		required.  That condition is:  When the user reads from the
-		beginning of a sector and at least a whole sector is being read.  So
-		this could effect certain application and so, if you are concerned,
-		you probably should enable this feature.
+		beginning of a sector and at least a whole sector is being read.
+
+		This option is not recommended.  There are better ways to handle
+		the unalaigned case:
+
+			CONFIG_SAMV7_HSMCI_UNALIGNED=y
+				Just return -EFAULT if unaligned
+			CONFIG_FAT_DIRECT_RETRY=y
+				If -EFAULT is returned, then try again with aligned
+				sector buffers.
 
 config SAMV7_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
