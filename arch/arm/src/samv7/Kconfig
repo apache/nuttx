@@ -1511,7 +1511,7 @@ config SAMV7_HSMCI_UNALIGNED
 		This option is not recommended.  There are better ways to handle
 		the unalaigned case:
 
-			CONFIG_SAMV7_HSMCI_UNALIGNED=y
+			# CONFIG_SAMV7_HSMCI_UNALIGNED is not set
 				Just return -EFAULT if unaligned
 			CONFIG_FAT_DIRECT_RETRY=y
 				If -EFAULT is returned, then try again with aligned
