@@ -185,7 +185,7 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
 
       /* Put it back into the correct ready-to-run task list */
 
-      DEBUGASSERT(!sched_addreadytorun(tcb));
+      ASSERT(!sched_addreadytorun(tcb));
     }
 }
 
