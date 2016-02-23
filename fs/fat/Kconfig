@@ -83,6 +83,20 @@ config FAT_FORCE_INDIRECT
 		without CONFIG_FAT_DMAMEMORY if there is, for example, only a
 		memory aligment constraints.
 
+			FORCE_   DMA    DIRECT EXAMPLE USAGE
+			INDIRECT MEMORY RETRY
+			  Y        Y      *    Use specially allocated memory;
+			                       Never use caller provided buffer
+			  Y        N      *    Not recommended
+			  N        Y     **    Special memory required; user memory
+			                       has mixed capability; sometimes
+			                       caller memory is not usable
+			  N        N      Y    No special memory but there are
+			                       alignment requirements; return is
+			                       caller buffer is not properly aligned
+			  N        N      N    User memory can always be used for
+			                       transfer.
+
 config FAT_DMAMEMORY
 	bool "DMA memory allocator"
 	default n
@@ -100,6 +114,20 @@ config FAT_DMAMEMORY
 		DMA-capable memory of the specified size; fat_dmafree() is the
 		corresponding function that will be called to free the DMA-capable
 		memory.
+
+			FORCE_   DMA    DIRECT EXAMPLE USAGE
+			INDIRECT MEMORY RETRY
+			  Y        Y      *    Use specially allocated memory;
+			                       Never use caller provided buffer
+			  Y        N      *    Not recommended
+			  N        Y     **    Special memory required; user memory
+			                       has mixed capability; sometimes
+			                       caller memory is not usable
+			  N        N      Y    No special memory but there are
+			                       alignment requirements; return is
+			                       caller buffer is not properly aligned
+			  N        N      N    User memory can always be used for
+			                       transfer.
 
 config FAT_DIRECT_RETRY
 	bool "Direct transfer retry"
@@ -128,5 +156,19 @@ config FAT_DIRECT_RETRY
 		try the user provided I/O buffer under above conditions.  If the
 		transfer fails with -EFAULT. then the FAT file system will try one
 		more time using the internal sector buffers.
+
+			FORCE_   DMA    DIRECT EXAMPLE USAGE
+			INDIRECT MEMORY RETRY
+			  Y        Y      *    Use specially allocated memory;
+			                       Never use caller provided buffer
+			  Y        N      *    Not recommended
+			  N        Y     **    Special memory required; user memory
+			                       has mixed capability; sometimes
+			                       caller memory is not usable
+			  N        N      Y    No special memory but there are
+			                       alignment requirements; return is
+			                       caller buffer is not properly aligned
+			  N        N      N    User memory can always be used for
+			                       transfer.
 
 endif # FAT
