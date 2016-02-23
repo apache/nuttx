@@ -459,8 +459,6 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   int index;
   int pin;
 
-  int ret;
-
   /* Get exclusive access to the PCA555 */
 
   pca9555_lock(pca);
