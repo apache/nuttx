@@ -51,9 +51,9 @@ config FS_FATTIME
 		hardware RTC or other way to get the time and date.
 
 config FAT_FORCE_INDIRECT
-bool "Force all in-direct transfers"
-default n
----help---
+	bool "Force direct transfers"
+	default n
+	---help---
 		Normally, the default behavior for the FAT file system is to perform
 		data transfers indirectly though specially allocated sector buffers
 		or, under certain circumstances, directly through user provided
@@ -73,9 +73,20 @@ default n
 		systems internal sector buffers, and (2) A loss of performance
 		because I/O will be limited to one sector at a time.
 
+		This would typically be used with CONFIG_FAT_DMAMEMORY so that
+		special memory allocators are also used and transfers are also
+		performed using only that specially allocated memory.
+		CONFIG_FAT_DMAMEMORY, on the other hand, is often used without
+		CONFIG_FAT_FORCE_INDIRECT when the user memory buffers may come
+		from mixed locations, some of which are DMA-able and some of
+		which are not.  But CONFIG_FAT_FORCE_INDIRECT could be used
+		without CONFIG_FAT_DMAMEMORY if there is, for example, only a
+		memory aligment constraints.
+
 config FAT_DMAMEMORY
 	bool "DMA memory allocator"
 	default n
+	select FAT_DIRECT_RETRY if !FAT_FORCE_INDIRECT
 	---help---
 		The FAT file system allocates two I/O buffers for data transfer, each
 		are the size of one device sector.  One of the buffers is allocated
@@ -89,5 +100,33 @@ config FAT_DMAMEMORY
 		DMA-capable memory of the specified size; fat_dmafree() is the
 		corresponding function that will be called to free the DMA-capable
 		memory.
+
+config FAT_DIRECT_RETRY
+	bool "Direct transfer retry"
+	default y if FAT_DMAMEMORY
+	default n if !FAT_DMAMEMORY
+	depends on !FAT_FORCE_INDIRECT
+	---help---
+		The FAT file system contains internal, well aligned sector buffers
+		for indirect data transfer.  These transfers are indirect in the
+		sense that that the actual transfer occurs into/out of the sector
+		buffers and an additional copy is necessary to/from the user-
+		provided I/O buffers.  But under certain conditions, the FAT file
+		system will use the caller-provided I/O buffers directly to improve
+		efficiency.  Those conditions are (1) CONFIG_FAT_FORCE_INDIRECT is
+		not defined, (2) The access is to/from the beginning of a sector,
+		and (3) the user provided buffer is large enough to hold an entire
+		sector.
+
+		The lower level SDIO driver may have, certain requirements on the
+		memory buffer in order to perform the transfer.  Perhaps special
+		DMA memory should be used (with CONFIG_FAT_DMAMEMORY) or perhaps
+		some special memory alignment is required to interace with the
+		hardware.
+
+		If this option is selected, then the FAT file system will first
+		try the user provided I/O buffer under above conditions.  If the
+		transfer fails with -EFAULT. then the FAT file system will try one
+		more time using the internal sector buffers.
 
 endif # FAT
