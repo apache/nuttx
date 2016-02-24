@@ -94,7 +94,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
- struct eth_hdr_s; /* Forward reference */
+struct eth_hdr_s; /* Forward reference */
 
 /* Defined in pkt_conn.c ****************************************************/
 /****************************************************************************
