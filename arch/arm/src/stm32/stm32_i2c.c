@@ -935,7 +935,6 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
  *   Set the I2C clock
  *
  ************************************************************************************/
-
 static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequency)
 {
   uint16_t cr1;
@@ -1554,8 +1553,12 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   /* Set peripheral frequency, where it must be at least 2 MHz  for 100 kHz
    * or 4 MHz for 400 kHz.  This also disables all I2C interrupts.
    */
-
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, (STM32_PCLK1_FREQUENCY / 1000000));
+
+  /* Force a frequency update */
+
+  priv->frequency = 0;
+
   stm32_i2c_setclock(priv, 100000);
 
   /* Enable I2C */
@@ -1829,6 +1832,7 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
   uint32_t scl_gpio;
   uint32_t sda_gpio;
   int ret = ERROR;
+  uint32_t freqency;
 
   ASSERT(dev);
 
@@ -1839,6 +1843,10 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
   /* Lock out other clients */
 
   stm32_i2c_sem_wait(priv);
+
+  /* Save the current frequency */
+
+  freqency = priv->frequency;
 
   /* De-init the port */
 
@@ -1918,6 +1926,10 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
   /* Re-init the port */
 
   stm32_i2c_init(priv);
+
+  /* Restore the frequecncy */
+
+  stm32_i2c_setclock(priv, freqency);
   ret = OK;
 
 out:
