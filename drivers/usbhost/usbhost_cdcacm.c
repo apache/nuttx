@@ -249,7 +249,7 @@ struct usbhost_cdcacm_s
   bool           rxena;          /* True: RX "interrupts" enabled */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool           iflow;          /* True: Input flow control (RTS) enabled */
-  bool           rts;            /* True: Input flow control is effect */
+  bool           rts;            /* True: Input flow control is in effect */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool           oflow;          /* True: Output flow control (CTS) enabled */
@@ -2562,7 +2562,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
        */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->rts))
+      if (priv->rts)
 #endif
         {
           ret = work_queue(LPWORK, &priv->rxwork,
@@ -2654,7 +2654,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * RTS.
        */
 
-       priv ->rts = false;
+       priv->rts = false;
 
        /* Cancel any pending RX data reception work */
 
@@ -2668,7 +2668,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * RTS.
        */
 
-       priv ->rts = true;
+       priv->rts = true;
 
       /* Restart RX data reception work flow unless RX reception is
        * disabled.

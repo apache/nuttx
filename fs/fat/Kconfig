@@ -97,6 +97,9 @@ config FAT_FORCE_INDIRECT
 			  N        N      N    User memory can always be used for
 			                       transfer.
 
+			*  CONFIG_DIRECT_RETRY cannot be selected with CONFIG_FORCE_INDIRECT
+			** CONFIG_DIRECT_RETRY is automatically selected with CONFIG_DMA_MEMORY
+
 config FAT_DMAMEMORY
 	bool "DMA memory allocator"
 	default n
@@ -128,6 +131,9 @@ config FAT_DMAMEMORY
 			                       caller buffer is not properly aligned
 			  N        N      N    User memory can always be used for
 			                       transfer.
+
+			*  CONFIG_DIRECT_RETRY cannot be selected with CONFIG_FORCE_INDIRECT
+			** CONFIG_DIRECT_RETRY is automatically selected with CONFIG_DMA_MEMORY
 
 config FAT_DIRECT_RETRY
 	bool "Direct transfer retry"
@@ -170,5 +176,8 @@ config FAT_DIRECT_RETRY
 			                       caller buffer is not properly aligned
 			  N        N      N    User memory can always be used for
 			                       transfer.
+
+			*  CONFIG_DIRECT_RETRY cannot be selected with CONFIG_FORCE_INDIRECT
+			** CONFIG_DIRECT_RETRY is automatically selected with CONFIG_DMA_MEMORY
 
 endif # FAT
