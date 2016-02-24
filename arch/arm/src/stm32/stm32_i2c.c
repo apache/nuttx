@@ -1929,7 +1929,7 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
 
   stm32_i2c_init(priv);
 
-  /* Restore the frequency*/
+  /* Restore the frequency */
 
   stm32_i2c_setclock(priv, frequency);
   ret = OK;
