@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/same70-xplained/src/sam_appinit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,13 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+
 #include <nuttx/board.h>
 
 #include "same70-xplained.h"
 
 #if defined(CONFIG_LIB_BOARDCTL) && !defined(CONFIG_BUILD_KERNEL)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
