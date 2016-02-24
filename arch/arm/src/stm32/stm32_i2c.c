@@ -1833,8 +1833,8 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
   unsigned int stretch_count;
   uint32_t scl_gpio;
   uint32_t sda_gpio;
+  uint32_t frequency;
   int ret = ERROR;
-  uint32_t freqency;
 
   ASSERT(dev);
 
@@ -1848,7 +1848,7 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Save the current frequency */
 
-  freqency = priv->frequency;
+  frequency = priv->frequency;
 
   /* De-init the port */
 
@@ -1931,7 +1931,7 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Restore the frequecncy */
 
-  stm32_i2c_setclock(priv, freqency);
+  stm32_i2c_setclock(priv, frequency);
   ret = OK;
 
 out:
