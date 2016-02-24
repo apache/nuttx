@@ -935,7 +935,7 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
  *   Set the I2C clock
  *
  ************************************************************************************/
- 
+
 static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequency)
 {
   uint16_t cr1;
@@ -1554,7 +1554,7 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   /* Set peripheral frequency, where it must be at least 2 MHz  for 100 kHz
    * or 4 MHz for 400 kHz.  This also disables all I2C interrupts.
    */
-   
+
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, (STM32_PCLK1_FREQUENCY / 1000000));
 
   /* Force a frequency update */
