@@ -382,7 +382,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
       addrlen  = sizeof(struct sockaddr_in6);
       addrtype = AF_INET6;
-      addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin_addr;
+      addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
     }
 #endif
 
@@ -524,7 +524,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
           DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
           addrlen  = sizeof(struct sockaddr_in6);
           addrtype = AF_INET6;
-          addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin_addr;
+          addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
         }
 #endif
 

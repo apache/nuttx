@@ -190,7 +190,7 @@ static int dns_send_query(int sd, FAR const char *name,
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (uaddr->addr.sa_family == AF_INET)
+  if (uaddr->ipv4.sin_family == AF_INET)
 #endif
     {
       addrlen = sizeof(struct sockaddr_in);
@@ -521,7 +521,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 #ifdef CONFIG_NET_IPv6
       /* Is this an IPv4 address? */
 
-      if (query->addr.sa_family == AF_INET6)
+      if (query->addr->sa_family == AF_INET6)
         {
           /* Yes.. verify the address size */
 
