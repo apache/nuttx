@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/socket.h
  *
- *   Copyright (C) 2007, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,7 @@
 #define PF_ATMPVC       8 /* Access to raw ATM PVCs */
 #define PF_APPLETALK    9 /* Appletalk */
 #define PF_PACKET      10 /* Low level packet interface */
+#define PF_IEEE802154  11 /* IEEE802154 sockets */
 
 /* Address families */
 
