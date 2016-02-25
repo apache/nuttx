@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp_conn.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -115,7 +115,7 @@ static inline void _udp_semtake(FAR sem_t *sem)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      ASSERT(get_errno() == EINTR);
     }
 }
 

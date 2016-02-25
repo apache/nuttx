@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/bind.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -316,7 +316,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
   return OK;
 
 errout:
-  *get_errno_ptr() = err;
+  set_errno(err);
   return ERROR;
 }
 

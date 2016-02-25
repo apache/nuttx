@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1083,26 +1083,28 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
   /* Execute the command */
 
   ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
+
 #ifdef CONFIG_NET_IGMP
+  /* Check for address filtering commands */
+
   if (ret == -ENOTTY)
     {
-
       ret = netdev_imsfioctl(psock, cmd, (FAR struct ip_msfilter *)((uintptr_t)arg));
     }
 #endif
 
+#ifdef CONFIG_NET_ARP
   /* Check for ARP table IOCTL commands */
 
-#ifdef CONFIG_NET_ARP
   if (ret == -ENOTTY)
     {
       ret = netdev_arpioctl(psock, cmd, (FAR struct arpreq *)((uintptr_t)arg));
     }
 #endif
 
+#ifdef CONFIG_NET_ROUTE
   /* Check for Routing table IOCTL commands */
 
-#ifdef CONFIG_NET_ROUTE
   if (ret == -ENOTTY)
     {
       ret = netdev_rtioctl(psock, cmd, (FAR struct rtentry *)((uintptr_t)arg));
