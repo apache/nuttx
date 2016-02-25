@@ -65,7 +65,7 @@
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
 
-static const uint16_t g_buttons[NUM_BUTTONS] =
+static const uint32_t g_buttons[NUM_BUTTONS] =
 {
   GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_USER
 };
