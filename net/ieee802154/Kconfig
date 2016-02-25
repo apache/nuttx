@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "IEEE802.15-4 Configuration"
+
+config NET_IEEE802154
+	bool "IEEE802.15-4 support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable IEEE802.15-4 protocol socket support
+
+if NET_IEEE802154
+
+
+endif # NET_IEEE802154
+endmenu # IEEE802.15-4 Configuration

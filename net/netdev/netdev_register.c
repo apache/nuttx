@@ -194,7 +194,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       switch (lltype)
         {
 #ifdef CONFIG_NET_LOOPBACK
-          case NET_LL_LOOPBACK:  /* Local loopback */
+          case NET_LL_LOOPBACK:   /* Local loopback */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = NET_LO_MTU;
 #ifdef CONFIG_NET_TCP
@@ -205,7 +205,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
-          case NET_LL_ETHERNET:  /* Ethernet */
+          case NET_LL_ETHERNET:   /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_mtu      = CONFIG_NET_ETH_MTU;
 #ifdef CONFIG_NET_TCP
@@ -215,8 +215,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             break;
 #endif
 
+#ifdef CONFIG_NET_IEEE802154
+          case NET_LL_IEEE802154: /* IEEE802.15-4 */
+            nlldbg("ERROR: IEEE 802.15-4 not yet supported\n");
+            return -ENOSYS;
+#endif
+
 #ifdef CONFIG_NET_SLIP
-          case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
+          case NET_LL_SLIP:       /* Serial Line Internet Protocol (SLIP) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_SLIP_MTU;
 #ifdef CONFIG_NET_TCP
@@ -227,7 +233,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
 #ifdef CONFIG_NET_TUN
-          case NET_LL_TUN:       /* Virtual Network Device (TUN) */
+          case NET_LL_TUN:        /* Virtual Network Device (TUN) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_TUN_MTU;
 #ifdef CONFIG_NET_TCP

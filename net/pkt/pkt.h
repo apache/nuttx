@@ -61,7 +61,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Representation of a uIP packet socket connection */
+/* Representation of a packet socket connection */
 
 struct devif_callback_s; /* Forward reference */
 
