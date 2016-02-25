@@ -738,12 +738,6 @@ endchoice # SPI1 Configuration
 if SAMV7_SPI_MASTER
 comment "SPI Master Configuration"
 
-config SAMV7_SPI_CS_DECODING
-	bool "SPI Peripheral Chip Select Decoding"
-	default n
-	---help---
-		Use Peripheral Chip Select Decoding on SPI Master
-
 config SAMV7_SPI_DMA
 	bool "SPI DMA"
 	default n

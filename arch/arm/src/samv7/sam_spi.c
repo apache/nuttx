@@ -601,11 +601,7 @@ static inline void spi_flush(struct sam_spidev_s *spi)
 
 static inline uint32_t spi_cs2pcs(struct sam_spics_s *spics)
 {
-#ifndef CONFIG_SAMV7_SPI_CS_DECODING
   return ((uint32_t)1 << (spics->cs)) - 1;
-#else
-  return spics->cs;
-#endif
 }
 
 /****************************************************************************
@@ -1845,14 +1841,6 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
           sam_configgpio(GPIO_SPI1_MOSI);
           sam_configgpio(GPIO_SPI1_SPCK);
         }
-#endif
-
-#if defined(CONFIG_SAMV7_SPI_CS_DECODING)
-      /* Enable Peripheral Chip Select Decoding? */
-
-      regval  = spi_getreg(spi, SAM_SPI_MR_OFFSET);
-      regval |= SPI_MR_PCSDEC;
-      spi_putreg(spi, regval, SAM_SPI_MR_OFFSET);
 #endif
 
       /* Disable SPI clocking */
