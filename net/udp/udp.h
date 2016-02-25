@@ -85,7 +85,7 @@ struct udp_conn_s
   union ip_binding_u u;   /* IP address binding */
   uint16_t lport;         /* Bound local port number (network byte order) */
   uint16_t rport;         /* Remote port number (network byte order) */
-  uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
+  uint8_t  domain;        /* IP domain: PF_INET, PF_INET6, or PF_IEEE802145 */
   uint8_t  ttl;           /* Default time-to-live */
   uint8_t  crefs;         /* Reference counts on this instance */
 

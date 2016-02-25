@@ -61,22 +61,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NETDEV_ETH_FORMAT       "eth%d"
-#define NETDEV_LO_FORMAT        "lo"
-#define NETDEV_SLIP_FORMAT      "sl%d"
-#define NETDEV_TUN_FORMAT       "tun%d"
+#define NETDEV_ETH_FORMAT        "eth%d"
+#define NETDEV_LO_FORMAT         "lo"
+#define NETDEV_IEEE802154_FORMAT "wpan%d"
+#define NETDEV_SLIP_FORMAT       "sl%d"
+#define NETDEV_TUN_FORMAT        "tun%d"
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
 #elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
+#elif defined(CONFIG_NET_IEEE802154)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_IEEE802154_FORMAT
 #else /* if defined(CONFIG_NET_LOOPBACK) */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_LO_FORMAT
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -217,8 +216,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #ifdef CONFIG_NET_IEEE802154
           case NET_LL_IEEE802154: /* IEEE802.15-4 */
-            nlldbg("ERROR: IEEE 802.15-4 not yet supported\n");
-            return -ENOSYS;
+#  warning Missing IEEE 802.15-4 logic: Header length
+            //dev->d_llhdrlen = ???;
+            dev->d_mtu      = CONFIG_NET_IEEE802154_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_IEEE802154_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_IEEE802154_FORMAT;
+            break;
 #endif
 
 #ifdef CONFIG_NET_SLIP

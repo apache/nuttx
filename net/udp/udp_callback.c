@@ -134,7 +134,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
        * class of addresses, the IPv4-mapped IPv6 addresses.
        */
 
-      if (conn->domain == PF_INET6)
+      if (conn->domain == PF_INET6 || conn->domain == PF_IEEE802154)
         {
           FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
           FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;

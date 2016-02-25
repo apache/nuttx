@@ -977,6 +977,8 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
   domain = ipv6 ? PF_INET6 : PF_INET;
 #elif defined(CONFIG_NET_IPv4)
   domain = PF_INET;
+#elif defined(CONFIG_NET_IEEE802154)
+  domain = PF_IEEE80254;
 #else /* defined(CONFIG_NET_IPv6) */
   domain = PF_INET6;
 #endif

@@ -175,7 +175,8 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
       if (IFF_IS_IPv6(dev->d_flags))
 #endif
         {
-          DEBUGASSERT(pstate->snd_sock == PF_INET6);
+          DEBUGASSERT(pstate->snd_sock == PF_INET6 ||
+                      pstate->snd_sock == PF_IEEE802154);
           tcp = TCPIPv6BUF;
         }
 #endif /* CONFIG_NET_IPv6 */
@@ -514,12 +515,14 @@ static inline void sendfile_txnotify(FAR struct socket *psock,
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
+  else /* if (psock->s_domain == PF_INET6 || psock->s_domain == PF_IEEE802154) */
 #endif /* CONFIG_NET_IPv4 */
     {
       /* Notify the device driver that send data is available */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6);
+      DEBUGASSERT(psock->s_domain == PF_INET6 ||
+                  psock->s_domain == PF_IEEE802154);
+
 #ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
 #else

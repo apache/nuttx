@@ -39,7 +39,7 @@ ifeq ($(CONFIG_NET_IEEE802154),y)
 
 # Include IEEE802.15-4 file in the build
 
-# NET_CSRCS += 
+# NET_CSRCS +=
 
 # Include the ieee802154 directory in the build
 

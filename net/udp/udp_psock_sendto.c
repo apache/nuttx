@@ -188,11 +188,13 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
 
       udp_ipv4_select(dev);
     }
-  else /* if (psock->s_domain == PF_INET6) */
+  else /* if (psock->s_domain == PF_INET6 || psock->s_domain == PF_IEEE802154) */
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6);
+      DEBUGASSERT(psock->s_domain == PF_INET6 ||
+                  psock->s_domain == PF_IEEE802154);
+
       udp_ipv4_select(dev);
     }
 }
