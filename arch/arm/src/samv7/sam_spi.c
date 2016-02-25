@@ -297,13 +297,24 @@ static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
  * Private Data
  ****************************************************************************/
 
-/* This array maps chip select numbers (0-3) to CSR register offsets */
+/* This array maps chip select numbers (0-3 or 1-15) to CSR register offsets */
 
+#if defined(CONFIG_SAMV7_SPI_CS_DECODING)
+static const uint8_t g_csroffset[16] =
+{
+  0, /* the CS counts from 1 to 15 */
+  SAM_SPI_CSR0_OFFSET, SAM_SPI_CSR0_OFFSET, SAM_SPI_CSR0_OFFSET, SAM_SPI_CSR0_OFFSET,
+  SAM_SPI_CSR1_OFFSET, SAM_SPI_CSR1_OFFSET, SAM_SPI_CSR1_OFFSET, SAM_SPI_CSR1_OFFSET,
+  SAM_SPI_CSR2_OFFSET, SAM_SPI_CSR2_OFFSET, SAM_SPI_CSR2_OFFSET, SAM_SPI_CSR2_OFFSET,
+  SAM_SPI_CSR3_OFFSET, SAM_SPI_CSR3_OFFSET, SAM_SPI_CSR3_OFFSET
+};
+#else
 static const uint8_t g_csroffset[4] =
 {
   SAM_SPI_CSR0_OFFSET, SAM_SPI_CSR1_OFFSET,
   SAM_SPI_CSR2_OFFSET, SAM_SPI_CSR3_OFFSET
 };
+#endif
 
 #ifdef CONFIG_SAMV7_SPI0_MASTER
 /* SPI0 driver operations */
@@ -581,7 +592,11 @@ static inline void spi_flush(struct sam_spidev_s *spi)
  *   registers.  A chip select number is used for indexing and identifying
  *   chip selects.  However, the chip select information is represented by
  *   a bit set in the SPI registers.  This function maps those chip select
- *   numbers to the correct bit set:
+ *   numbers to the correct bit set.
+ *
+ *   The SAMx7 Processors can handle the chip selects in two different modes.
+ *   The first and default mode assigns one of the four chip select pins
+ *   to one hardware slave.  In this mode the function behaviors like:
  *
  *    CS  Returned   Spec    Effective
  *    No.   PCS      Value    NPCS
@@ -591,17 +606,28 @@ static inline void spi_flush(struct sam_spidev_s *spi)
  *    2    0011      x011     1011
  *    3    0111      0111     0111
  *
+ *   The second mode, activated via CONFIG_SAMV7_SPI_CS_DECODING uses the four
+ *   chip select pins in "encoded mode" which means, that up to 15 slaves can
+ *   be selected via an additional multiplex electronic to decode the values
+ *   represented by the four lines. In that mode this function returns the
+ *   Bitmask the chip select number represents itself.
+ *
  * Input Parameters:
  *   spics - Device-specific state data
  *
  * Returned Value:
- *   None
+ *   Bitmask the pcs part of the SPI data transfer register should be switched
+ *   to for the chip select used.
  *
  ****************************************************************************/
 
 static inline uint32_t spi_cs2pcs(struct sam_spics_s *spics)
 {
+#ifndef CONFIG_SAMV7_SPI_CS_DECODING
   return ((uint32_t)1 << (spics->cs)) - 1;
+#else
+  return spics->cs;
+#endif
 }
 
 /****************************************************************************
@@ -1855,7 +1881,14 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
       /* Configure the SPI mode register */
 
+#if defined(CONFIG_SAMV7_SPI_CS_DECODING)
+      /* Enable Peripheral Chip Select Decoding? */
+
+      spi_putreg(spi, SPI_MR_MSTR | SPI_MR_MODFDIS | SPI_MR_PCSDEC,
+                 SAM_SPI_MR_OFFSET);
+#else
       spi_putreg(spi, SPI_MR_MSTR | SPI_MR_MODFDIS, SAM_SPI_MR_OFFSET);
+#endif
 
       /* And enable the SPI */
 

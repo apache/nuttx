@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_spi.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,26 +63,72 @@
  * sam_spibus_initialize().
  */
 
-#define __SPI_CS_SHIFT  (0)      /* Bits 0-1: SPI chip select number */
-#define __SPI_CS_MASK   (3 << __SPI_CS_SHIFT)
-#  define __SPI_CS0     (0 << __SPI_CS_SHIFT)
-#  define __SPI_CS1     (1 << __SPI_CS_SHIFT)
-#  define __SPI_CS2     (2 << __SPI_CS_SHIFT)
-#  define __SPI_CS3     (3 << __SPI_CS_SHIFT)
-#define __SPI_SPI_SHIFT (2) /* Bit 2: SPI controller number */
-#define __SPI_SPI_MASK  (1 << __SPI_SPI_SHIFT)
-#  define __SPI_SPI0    (0 << __SPI_SPI_SHIFT) /* SPI0 */
-#  define __SPI_SPI1    (1 << __SPI_SPI_SHIFT) /* SPI1 */
+#ifdef CONFIG_SAMV7_SPI_CS_DECODING
 
-#define SPI0_CS0        (__SPI_SPI0 | __SPI_CS0)
-#define SPI0_CS1        (__SPI_SPI0 | __SPI_CS1)
-#define SPI0_CS2        (__SPI_SPI0 | __SPI_CS2)
-#define SPI0_CS3        (__SPI_SPI0 | __SPI_CS3)
+#  define __SPI_CS_SHIFT  (0)      /* Bits 0-3: SPI chip select number */
+#  define __SPI_CS_MASK   (15 << __SPI_CS_SHIFT)
 
-#define SPI1_CS0        (__SPI_SPI1 | __SPI_CS0)
-#define SPI1_CS1        (__SPI_SPI1 | __SPI_CS1)
-#define SPI1_CS2        (__SPI_SPI1 | __SPI_CS2)
-#define SPI1_CS3        (__SPI_SPI1 | __SPI_CS3)
+#  define __SPI_SPI_SHIFT (4) /* Bit 4: SPI controller number */
+#  define __SPI_SPI_MASK  (1 << __SPI_SPI_SHIFT)
+#    define __SPI_SPI0    (0 << __SPI_SPI_SHIFT) /* SPI0 */
+#    define __SPI_SPI1    (1 << __SPI_SPI_SHIFT) /* SPI1 */
+
+#  define SPI0_CS1        (__SPI_SPI0 | 1)
+#  define SPI0_CS2        (__SPI_SPI0 | 2)
+#  define SPI0_CS3        (__SPI_SPI0 | 3)
+#  define SPI0_CS4        (__SPI_SPI0 | 4)
+#  define SPI0_CS5        (__SPI_SPI0 | 5)
+#  define SPI0_CS6        (__SPI_SPI0 | 6)
+#  define SPI0_CS7        (__SPI_SPI0 | 7)
+#  define SPI0_CS8        (__SPI_SPI0 | 8)
+#  define SPI0_CS9        (__SPI_SPI0 | 9)
+#  define SPI0_CS10       (__SPI_SPI0 | 10)
+#  define SPI0_CS11       (__SPI_SPI0 | 11)
+#  define SPI0_CS12       (__SPI_SPI0 | 12)
+#  define SPI0_CS13       (__SPI_SPI0 | 13)
+#  define SPI0_CS14       (__SPI_SPI0 | 14)
+#  define SPI0_CS15       (__SPI_SPI0 | 15)
+
+#  define SPI1_CS1        (__SPI_SPI1 | 1)
+#  define SPI1_CS2        (__SPI_SPI1 | 2)
+#  define SPI1_CS3        (__SPI_SPI1 | 3)
+#  define SPI1_CS4        (__SPI_SPI1 | 4)
+#  define SPI1_CS5        (__SPI_SPI1 | 5)
+#  define SPI1_CS6        (__SPI_SPI1 | 6)
+#  define SPI1_CS7        (__SPI_SPI1 | 7)
+#  define SPI1_CS8        (__SPI_SPI1 | 8)
+#  define SPI1_CS9        (__SPI_SPI1 | 9)
+#  define SPI1_CS10       (__SPI_SPI1 | 10)
+#  define SPI1_CS11       (__SPI_SPI1 | 11)
+#  define SPI1_CS12       (__SPI_SPI1 | 12)
+#  define SPI1_CS13       (__SPI_SPI1 | 13)
+#  define SPI1_CS14       (__SPI_SPI1 | 14)
+#  define SPI1_CS15       (__SPI_SPI1 | 15)
+
+#else /* CONFIG_SAMV7_SPI_CS_DECODING */
+
+#  define __SPI_CS_SHIFT  (0)      /* Bits 0-1: SPI chip select number */
+#  define __SPI_CS_MASK   (3 << __SPI_CS_SHIFT)
+#    define __SPI_CS0     (0 << __SPI_CS_SHIFT)
+#    define __SPI_CS1     (1 << __SPI_CS_SHIFT)
+#    define __SPI_CS2     (2 << __SPI_CS_SHIFT)
+#    define __SPI_CS3     (3 << __SPI_CS_SHIFT)
+#  define __SPI_SPI_SHIFT (2) /* Bit 2: SPI controller number */
+#  define __SPI_SPI_MASK  (1 << __SPI_SPI_SHIFT)
+#    define __SPI_SPI0    (0 << __SPI_SPI_SHIFT) /* SPI0 */
+#    define __SPI_SPI1    (1 << __SPI_SPI_SHIFT) /* SPI1 */
+
+#  define SPI0_CS0        (__SPI_SPI0 | __SPI_CS0)
+#  define SPI0_CS1        (__SPI_SPI0 | __SPI_CS1)
+#  define SPI0_CS2        (__SPI_SPI0 | __SPI_CS2)
+#  define SPI0_CS3        (__SPI_SPI0 | __SPI_CS3)
+
+#  define SPI1_CS0        (__SPI_SPI1 | __SPI_CS0)
+#  define SPI1_CS1        (__SPI_SPI1 | __SPI_CS1)
+#  define SPI1_CS2        (__SPI_SPI1 | __SPI_CS2)
+#  define SPI1_CS3        (__SPI_SPI1 | __SPI_CS3)
+
+#endif /* CONFIG_SAMV7_SPI_CS_DECODING */
 
 /****************************************************************************
  * Public Types
