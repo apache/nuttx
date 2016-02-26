@@ -56,7 +56,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wireless/wireless.h>
 
-#if defined(CONFIG_WIRELESS) && defined(CONFIG_WL_CC3000)
+#if defined(CONFIG_DRIVERS_WIRELESS) && defined(CONFIG_WL_CC3000)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -188,5 +188,5 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* CONFIG_WIRELESS && CONFIG_INPUT_CC3000 */
+#endif /* CONFIG_DRIVERS_WIRELESS && CONFIG_INPUT_CC3000 */
 #endif /* __INCLUDE_NUTTX_WIRELESS_CC3000_INCLUDE_CC3000_UPIFL_H */

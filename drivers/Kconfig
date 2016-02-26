@@ -550,15 +550,15 @@ if USBHOST
 source drivers/usbhost/Kconfig
 endif # USBHOST
 
-menuconfig WIRELESS
+menuconfig DRIVERS_WIRELESS
 	bool "Wireless Device Support"
 	default n
 	---help---
 		Drivers for various wireless devices.
 
-if WIRELESS
+if DRIVERS_WIRELESS
 source drivers/wireless/Kconfig
-endif # WIRELESS
+endif # DRIVERS_WIRELESS
 
 comment "System Logging Device Options"
 

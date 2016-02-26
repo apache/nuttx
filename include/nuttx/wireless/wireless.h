@@ -47,7 +47,7 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_WIRELESS
+#ifdef CONFIG_DRIVERS_WIRELESS
 
 /************************************************************************************
  * Pre-processor Definitions

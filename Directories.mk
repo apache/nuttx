@@ -124,6 +124,12 @@ else
 OTHERDIRS += audio
 endif
 
+ifeq ($(CONFIG_DRIVERS_WIRELESS),y)
+NONFSDIRS += wireless
+else
+OTHERDIRS += wireless
+endif
+
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
