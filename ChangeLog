@@ -11527,4 +11527,6 @@
 	* wireless/: New top level directory.  Nothing there yet (2015-02-26).
 	* wireless/ieee802154: Add an new directory to the build.  Nothing there
 	  yet (2016-02-26).
+	* include/nuttx/wireless/ieee802154: Add directory (and dummy header file)
+	  (2016-02-16).
 

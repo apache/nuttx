@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/6lowpan.h
+ * include/nuttx/net/ieee802154.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_6LOWPAN_H
-#define __INCLUDE_NUTTX_NET_6LOWPAN_H
+#ifndef __INCLUDE_NUTTX_NET_IEEE802154_H
+#define __INCLUDE_NUTTX_NET_IEEE802154_H
 
 /****************************************************************************
  * Included Files
@@ -59,4 +59,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_NET_6LOWPAN_H */
+#endif /* __INCLUDE_NUTTX_NET_IEEE802154_H */
