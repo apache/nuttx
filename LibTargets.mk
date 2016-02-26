@@ -118,6 +118,12 @@ audio$(DELIM)libaudio$(LIBEXT): context
 lib$(DELIM)libaudio$(LIBEXT): audio$(DELIM)libaudio$(LIBEXT)
 	$(Q) install audio$(DELIM)libaudio$(LIBEXT) lib$(DELIM)libaudio$(LIBEXT)
 
+wireless$(DELIM)libwireless$(LIBEXT): context
+	$(Q) $(MAKE) -C wireless TOPDIR="$(TOPDIR)" libwireless$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+lib$(DELIM)libwireless$(LIBEXT): wireless$(DELIM)libwireless$(LIBEXT)
+	$(Q) install wireless$(DELIM)libwireless$(LIBEXT) lib$(DELIM)libwireless$(LIBEXT)
+
 $(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
 	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 

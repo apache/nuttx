@@ -418,6 +418,7 @@ comment "Subsystem Debug Options"
 config DEBUG_AUDIO
 	bool "Audio Device Debug Output"
 	default n
+	depends on AUDIO
 	---help---
 		Enable low level debug SYSLOG output from the audio subsystem and
 		device drivers. (disabled by default).  Support for this debug option
@@ -426,6 +427,7 @@ config DEBUG_AUDIO
 config DEBUG_BINFMT
 	bool "Binary Loader Debug Output"
 	default n
+	depends on !BINFMT_DISABLE
 	---help---
 		Enable binary loader debug SYSLOG output (disabled by default)
 
@@ -487,6 +489,15 @@ config DEBUG_SYSCALL
 	---help---
 		Enable very low level output related to system calls.  This gives
 		you basically a poor man's version of strace.
+
+config DEBUG_WIRELESS
+	bool "Wireless Device Debug Output"
+	default n
+	depends on WIRELESS
+	---help---
+		Enable low level debug SYSLOG output from the wireless subsystem and
+		device drivers. (disabled by default).  Support for this debug option
+		is architecture-specific and may not be available for some MCUs.
 
 comment "OS Function Debug Options"
 
@@ -780,6 +791,10 @@ endmenu
 
 menu "Audio Support"
 source audio/Kconfig
+endmenu
+
+menu "Wireless Support"
+source wireless/Kconfig
 endmenu
 
 menu "Binary Loader"
