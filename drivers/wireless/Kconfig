@@ -15,6 +15,17 @@ menuconfig WL_CC3000
 
 source drivers/wireless/cc3000/Kconfig
 
+menuconfig IEEE802154
+	bool "IEEE 802.15.4 Device Support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		This directory holds implementations of IEEE802.15.4 device drivers.
+
+if IEEE802154
+source drivers/wireless/ieee802154/Kconfig
+endif
+
 config WL_NRF24L01
 	bool "nRF24l01+ transceiver support"
 	default n

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/ieee802154.h
+ * include/nuttx/net/6lowpan.h
  * Definitions for use with PF_IEEE802154 sockets
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -37,8 +37,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_IEEE802154_H
-#define __INCLUDE_NUTTX_NET_IEEE802154_H
+#ifndef __INCLUDE_NUTTX_NET_6LOWPAN_H
+#define __INCLUDE_NUTTX_NET_6LOWPAN_H
 
 /****************************************************************************
  * Included Files
@@ -60,23 +60,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: ieee802154_input
- *
- * Description:
- *   This function provides the interface between IEEE 802.15.4 device driver
- *   and IEEE 802.15.4 socket logic.  All IPv6 frames that are received should
- *   be provided to ieee802154_input().
- *
- * Input Parameters:
- *   dev - The device providing the IPv6 frame
- *
- * Returned Value:
- *    OK  The packet has been processed and can be deleted.
- *
- ****************************************************************************/
-
-struct net_driver_s; /* Forward reference */
-int ieee802154_input(FAR struct net_driver_s *dev);
-
-#endif /* __INCLUDE_NUTTX_NET_IEEE802154_H */
+#endif /* __INCLUDE_NUTTX_NET_6LOWPAN_H */

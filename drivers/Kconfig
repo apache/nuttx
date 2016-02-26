@@ -373,17 +373,6 @@ if IOEXPANDER
 source drivers/ioexpander/Kconfig
 endif # IOEXPANDER
 
-menuconfig IEEE802154
-	bool "IEEE 802.15.4 Device Support"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		This directory holds implementations of IEEE802.15.4 device drivers.
-
-if IEEE802154
-source drivers/ieee802154/Kconfig
-endif
-
 menuconfig LCD
 	bool "LCD Driver Support"
 	default n

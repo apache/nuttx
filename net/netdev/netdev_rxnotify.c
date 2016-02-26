@@ -104,7 +104,7 @@ void netdev_ipv4_rxnotify(in_addr_t ripaddr)
  *
  * Description:
  *   Notify the device driver that forwards the IPv6 address that the
- *  application waits for RX data.
+ *   application waits for RX data.
  *
  * Parameters:
  *   lipaddr - The local board IPv6 address of the socket
