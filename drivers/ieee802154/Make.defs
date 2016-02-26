@@ -33,11 +33,11 @@
 #
 ############################################################################
 
-# Include nothing if IEEE 802.15-4 is disabled
+# Include nothing if IEEE 802.15.4 is disabled
 
 ifeq ($(CONFIG_IEEE802154),y)
 
-# Include common IEEE 802.15-4
+# Include common IEEE 802.15.4
 
 # Include IEEE 802.15.4 drivers
 

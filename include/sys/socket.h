@@ -64,7 +64,7 @@
 #define PF_ATMPVC       8 /* Access to raw ATM PVCs */
 #define PF_APPLETALK    9 /* Appletalk */
 #define PF_PACKET      10 /* Low level packet interface */
-#define PF_IEEE802154  11 /* IEEE802.15-4 sockets */
+#define PF_IEEE802154  11 /* IEEE 802.15.4 sockets */
 
 /* Address families */
 

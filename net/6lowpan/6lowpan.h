@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ieee802154/ieee802154.h
+ * net/6lowpan/6lowpan.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

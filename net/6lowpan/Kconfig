@@ -3,26 +3,24 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "IEEE802.15-4 Configuration"
+menu "IEEE 802.15.4 Configuration"
 
 config NET_IEEE802154
-	bool "IEEE802.15-4 support"
+	bool "IEEE 802.15.4 support"
 	default n
 	depends on EXPERIMENTAL && NET_IPv6
 	---help---
-		Enable IEEE802.15-4 protocol socket support
+		Enable IEEE 802.15.4 protocol socket support
 
 if NET_IEEE802154
 
 config NET_IEEE802154_MTU
-	int "IEEE 802.15-4 packet buffer size (MTU)"
-	default 1294 if NET_IPv6
-	default 590 if !NET_IPv6
-	depends on NET_ETHERNET
+	int "IEEE 802.15.4 packet buffer size (MTU)"
+	default 1294
 	range 590 1518
 	---help---
 		Packet buffer size.  This size includes the TCP/UDP payload plus the
-		size of TCP/UDP header, the IP header, and the IEEE 802.15-4 header.
+		size of TCP/UDP header, the IP header, and the IEEE 802.15.4 header.
 		This value is normally referred to as the MTU (Maximum Transmission
 		Unit); the payload is the MSS (Maximum Segment Size).
 
@@ -34,10 +32,9 @@ config NET_IEEE802154_MTU
 		resulting in a minimum buffer size of of 1220+20+40+xx = xx. REVISIT!
 
 config IEEE802154_TCP_RECVWNDO
-	int "EEE 802.15-4 TCP receive window size"
-	default 1220 if NET_IPv6
-	default 536 if !NET_IPv6
-	depends on NET_ETHERNET && NET_TCP
+	int "IEEE 802.15.4 TCP receive window size"
+	default 1220
+	depends on NET_TCP
 	---help---
 		The size of the advertised receiver's window.   Should be set low
 		(i.e., to the size of the MSS) if the application is slow to process
@@ -45,4 +42,4 @@ config IEEE802154_TCP_RECVWNDO
 		data quickly. REVISIT!
 
 endif # NET_IEEE802154
-endmenu # IEEE802.15-4 Configuration
+endmenu # IEEE 802.15.4 Configuration

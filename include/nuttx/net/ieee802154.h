@@ -64,8 +64,8 @@
  * Name: ieee802154_input
  *
  * Description:
- *   This function provides the interface between IEEE 802.15-4 device driver
- *   and IEEE 802.15-4 socket logic.  All IPv6 frames that are received should
+ *   This function provides the interface between IEEE 802.15.4 device driver
+ *   and IEEE 802.15.4 socket logic.  All IPv6 frames that are received should
  *   be provided to ieee802154_input().
  *
  * Input Parameters:

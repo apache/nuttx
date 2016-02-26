@@ -215,7 +215,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
 #ifdef CONFIG_NET_IEEE802154
-          case NET_LL_IEEE802154: /* IEEE802.15-4 */
+          case NET_LL_IEEE802154: /* IEEE 802.15.4 */
             dev->d_llhdrlen = 0;  /* REVISIT */
             dev->d_mtu      = CONFIG_NET_IEEE802154_MTU;
 #ifdef CONFIG_NET_TCP
