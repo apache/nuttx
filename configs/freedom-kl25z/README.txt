@@ -391,7 +391,7 @@ Where <subdir> is one of the following:
          CONFIG_SPI_EXCHANGE=y
 
        Drivers -> Wireless
-         CONFIG_WIRELESS=y                       : Enable wireless support
+         CONFIG_DRIVERS_WIRELESS=y               : Enable wireless support
          CONFIG_WL_CC3000=y                      : Build the CC3000 driver
 
        Applications -> Examples

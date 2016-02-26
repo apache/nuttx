@@ -61,8 +61,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_WL_CC3000
-#ifndef CONFIG_WIRELESS
-#  error "Wireless support requires CONFIG_WIRELESS"
+#ifndef CONFIG_DRIVERS_WIRELESS
+#  error "Wireless support requires CONFIG_DRIVERS_WIRELESS"
 #endif
 
 #ifndef CONFIG_KL_SPI0
