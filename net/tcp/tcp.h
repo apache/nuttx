@@ -126,6 +126,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* Representation of a TCP connection.
  *
  * The tcp_conn_s structure is used for identifying a connection. All
