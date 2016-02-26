@@ -11525,4 +11525,6 @@
 	  using the FAT file system's internal sector buffers (2016-02-22).
 	* drivers/wireless/ieee802154: New directory.  Nothing there yet (2016-02-25).
 	* wireless/: New top level directory.  Nothing there yet (2015-02-26).
+	* wireless/ieee802154: Add an new directory to the build.  Nothing there
+	  yet (2016-02-26).
 

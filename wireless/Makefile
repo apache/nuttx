@@ -40,10 +40,17 @@ ifeq ($(WINTOOL),y)
 INCDIROPT = -w
 endif
 
+# Add files to the build
+
 DEPPATH = --dep-path .
+
 ASRCS =
 CSRCS =
 VPATH = .
+
+# Add IEEE 802.15.4 files to the build
+
+include ieee802154$(DELIM)Make.defs
 
 # Include support for various drivers.  Each Make.defs file will add its
 # files to the source file list, add its DEPPATH info, and will add

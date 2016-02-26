@@ -35,7 +35,7 @@
 
 # Include nothing if IEEE 802.15.4 is disabled
 
-ifeq ($(CONFIG_IEEE802154),y)
+ifeq ($(CONFIG_DRIVERS_IEEE802154),y)
 
 # Include common IEEE 802.15.4
 
@@ -47,4 +47,4 @@ DEPPATH += --dep-path wireless$(DELIM)ieee802154
 VPATH += :wireless$(DELIM)ieee802154
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154}
 
-endif # CONFIG_IEEE802154
+endif # CONFIG_DRIVERS_IEEE802154
