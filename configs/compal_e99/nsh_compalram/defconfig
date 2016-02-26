@@ -440,7 +440,7 @@ CONFIG_OTHER_SERIAL_CONSOLE=y
 # CONFIG_NO_SERIAL_CONSOLE is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options

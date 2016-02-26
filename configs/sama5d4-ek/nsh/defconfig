@@ -852,7 +852,7 @@ CONFIG_HIDKBD_NPOLLWAITERS=2
 # CONFIG_USBHOST_HIDMOUSE is not set
 # CONFIG_USBHOST_RTL8187 is not set
 # CONFIG_USBHOST_TRACE is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options

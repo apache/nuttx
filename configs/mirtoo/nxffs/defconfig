@@ -554,7 +554,7 @@ CONFIG_UART1_2STOP=0
 # CONFIG_UART1_OFLOWCONTROL is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options

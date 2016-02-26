@@ -327,7 +327,7 @@ CONFIG_SERIAL=y
 # CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options

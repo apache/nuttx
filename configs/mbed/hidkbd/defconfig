@@ -400,7 +400,7 @@ CONFIG_HIDKBD_NPOLLWAITERS=2
 # CONFIG_HIDKBD_NODEBOUNCE is not set
 # CONFIG_USBHOST_HIDMOUSE is not set
 # CONFIG_USBHOST_TRACE is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options

@@ -578,7 +578,7 @@ CONFIG_USBDEV_MAXPOWER=100
 # CONFIG_CDCACM is not set
 # CONFIG_USBMSC is not set
 # CONFIG_USBHOST is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options

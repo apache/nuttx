@@ -559,7 +559,7 @@ CONFIG_CDCACM_VENDORSTR="nuttx"
 CONFIG_CDCACM_PRODUCTSTR="lpc4337-ws"
 # CONFIG_USBMSC is not set
 # CONFIG_USBHOST is not set
-# CONFIG_WIRELESS is not set
+# CONFIG_DRIVERS_WIRELESS is not set
 
 #
 # System Logging Device Options
