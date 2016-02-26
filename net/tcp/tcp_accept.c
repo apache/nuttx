@@ -139,9 +139,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
         {
           FAR struct sockaddr_in6 *inaddr = (FAR struct sockaddr_in6 *)addr;
 
-          DEBUGASSERT(psock->s_domain == PF_INET6 ||
-                      psock->s_domain == PF_IEEE802154);
-
+          DEBUGASSERT(psock->s_domain == PF_INET6);
           inaddr->sin6_family = AF_INET6;
           inaddr->sin6_port   = conn->rport;
           net_ipv6addr_copy(inaddr->sin6_addr.s6_addr, conn->u.ipv6.raddr);

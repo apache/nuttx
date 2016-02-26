@@ -11523,6 +11523,4 @@
 	  data buffers (2016-02-22).
 	* fs/fat:  Add an option to force all transfers to be performed indirectly
 	  using the FAT file system's internal sector buffers (2016-02-22).
-	* net/: Add basic support for IEEE 802.15-4 sockets.  Compiles but still
-	  missing a few things (2016-02-25).
 

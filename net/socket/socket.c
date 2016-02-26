@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/socket.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -250,7 +250,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   int ret;
   int err;
 
-  /* Only PF_INET, PF_INET6, PF_PACKET, PF_IEEE802154 domains supported */
+  /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
 
   switch (domain)
     {
@@ -265,9 +265,6 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
 #ifdef CONFIG_NET_IPv6
     case PF_INET6:
-#ifdef CONFIG_NET_IEEE802154
-    case PF_IEEE802154:
-#endif
 #ifdef CONFIG_NET_LOCAL
       ipdomain = true;
 #endif

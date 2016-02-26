@@ -1024,7 +1024,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
            * class of addresses, the IPv4-mapped IPv6 addresses.
            */
 
-          if (conn->domain == PF_INET6 || conn->domain == PF_IEEE802154)
+          if (conn->domain == PF_INET6)
             {
               FAR struct sockaddr_in6 *infrom6 = (FAR struct sockaddr_in6 *)infrom;
               FAR socklen_t *fromlen = pstate->rf_fromlen;
@@ -1350,12 +1350,12 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6 || psock->s_domain == PF_INET6) */
+  else /* if (psock->s_domain == PF_INET6) */
 #endif /* CONFIG_NET_IPv4 */
     {
       /* Notify the device driver of the receive ready */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6 || psock->s_domain == PF_INET6);
+      DEBUGASSERT(psock->s_domain == PF_INET6);
 #ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_rxnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
 #else
@@ -1892,9 +1892,6 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
 #ifdef CONFIG_NET_IPv6
         case PF_INET6:
-#ifdef CONFIG_NET_IEEE802145
-        case PF_IEEE802154:
-#endif
           {
             minlen = sizeof(struct sockaddr_in6);
           }

@@ -109,7 +109,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
       if (conn->domain == PF_INET ||
-          ((conn->domain == PF_INET6  || conn->domain == PF_IEEE802154) &&
+          (conn->domain == PF_INET6 &&
            ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr)))
 #endif
         {
@@ -135,7 +135,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
           net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
 
 #ifdef CONFIG_NET_IPv6
-          if ((conn->domain == PF_INET6  || conn->domain == PF_IEEE802154) &&
+          if (conn->domain == PF_INET6 &&
               ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr))
             {
               in_addr_t raddr = ip6_get_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr);
@@ -229,7 +229,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
       if (conn->domain == PF_INET ||
-          ((conn->domain == PF_INET6  || conn->domain == PF_IEEE802154) &&
+          (conn->domain == PF_INET6 &&
            ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr)))
 #endif
         {
