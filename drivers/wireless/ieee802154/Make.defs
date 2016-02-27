@@ -37,9 +37,13 @@
 
 ifeq ($(CONFIG_DRIVERS_IEEE802154),y)
 
-# Include common IEEE 802.15.4
+# Include common IEEE 802.15.4 files into the build
 
-# Include IEEE 802.15.4 drivers
+# Include IEEE 802.15.4 drivers into the build
+
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
+  CSRCS += mrf24j40.c
+endif
 
 # Include IEEE 802.15.4 build support
 

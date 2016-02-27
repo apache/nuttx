@@ -556,9 +556,7 @@ menuconfig DRIVERS_WIRELESS
 	---help---
 		Drivers for various wireless devices.
 
-if DRIVERS_WIRELESS
 source drivers/wireless/Kconfig
-endif # DRIVERS_WIRELESS
 
 comment "System Logging Device Options"
 
