@@ -65,7 +65,7 @@ ARM/i.MX1-specific Configuration Options
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=imx
+	   CONFIG_ARCH_CHIP=imx1
 
 	CONFIG_ARCH_CHIP_name - For use in C code.  Could be line _IMX1,
 	   _IMXL, _IMX21, _IMX27, _IMX31, etc. (not all of which are
