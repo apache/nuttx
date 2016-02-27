@@ -52,18 +52,12 @@
 
 /* Protocol families */
 
-#define PF_UNSPEC       0 /* Protocol family unspecified */
-#define PF_UNIX         1 /* Local communication */
-#define PF_LOCAL        1 /* Local communication */
-#define PF_INET         2 /* IPv4 Internet protocols */
-#define PF_INET6        3 /* IPv6 Internet protocols */
-#define PF_IPX          4 /* IPX - Novell protocols */
-#define PF_NETLINK      5 /* Kernel user interface device */
-#define PF_X25          6 /* ITU-T X.25 / ISO-8208 protocol */
-#define PF_AX25         7 /* Amateur radio AX.25 protocol */
-#define PF_ATMPVC       8 /* Access to raw ATM PVCs */
-#define PF_APPLETALK    9 /* Appletalk */
-#define PF_PACKET      10 /* Low level packet interface */
+#define PF_UNSPEC      0 /* Protocol family unspecified */
+#define PF_UNIX        1 /* Local communication */
+#define PF_LOCAL       1 /* Local communication */
+#define PF_INET        2 /* IPv4 Internet protocols */
+#define PF_INET6       3 /* IPv6 Internet protocols */
+#define PF_PACKET      4 /* Low level packet interface */
 
 /* Address families */
 
@@ -72,12 +66,6 @@
 #define AF_LOCAL       PF_LOCAL
 #define AF_INET        PF_INET
 #define AF_INET6       PF_INET6
-#define AF_IPX         PF_IPX
-#define AF_NETLINK     PF_NETLINK
-#define AF_X25         PF_X25
-#define AF_AX25        PF_AX25
-#define AF_ATMPVC      PF_ATMPVC
-#define AF_APPLETALK   PF_APPLETALK
 #define AF_PACKET      PF_PACKET
 
 /* The socket created by socket() has the indicated type, which specifies
