@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/arm/src/imx/imx_lowputc.S
+ * arch/arm/src/imx1/imx_lowputc.S
  * arch/arm/src/chip/imx_lowputc.S
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imx/imx_serial.c
+ * arch/arm/src/imx1/imx_serial.c
  * arch/arm/src/chip/imx_serial.c
  *
  *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.

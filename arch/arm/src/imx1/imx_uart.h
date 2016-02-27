@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_uart.h
+ * arch/arm/src/imx1/imx_uart.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

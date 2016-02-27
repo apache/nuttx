@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/imx/imx_timerisr.c
- * arch/arm/src/chip/imx_timerisr.c
+ * arch/arm/src/imx1/imx_gpio.c
+ * arch/arm/src/chip/imx_gpio.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,125 +40,83 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <debug.h>
-#include <errno.h>
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
-
 #include "chip.h"
 #include "up_arch.h"
-#include "clock/clock.h"
-#include "up_internal.h"
+#include "imx_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
- *
- * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
- *
+ * Public Funtions
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+/****************************************************************************
+ * Name: imxgpio_configoutput
+ ****************************************************************************/
+
+void imxgpio_configoutput(int port, int bit, int value)
 {
-  uint32_t tstat;
-  int    ret = -EIO;
+  imxgpio_configinput(port, bit);            /* Same as input except: */
+  imxgpio_dirout(port, bit);                 /* Output */
 
-  /* Get and clear the interrupt status */
-
-  tstat = getreg32(IMX_TIMER1_TSTAT);
-  putreg32(0, IMX_TIMER1_TSTAT);
-
-  /* Verify that this is a timer interrupt */
-
-  if ((tstat & TIMER_TSTAT_COMP) != 0)
+  if (value)
     {
-      /* Process timer interrupt */
-
-      sched_process_timer();
-      ret = OK;
+      imxgpio_setoutput(port, bit);          /* Set output = 1 */
     }
-
-  return ret;
+  else
+    {
+      imxgpio_clroutput(port, bit);          /* Set output = 0 */
+    }
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
- *
- * Description:
- *   This function is called during start-up to initialize the timer
- *   interrupt.
- *
+ * Name: imxgpio_configinput
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void imxgpio_configinput(int port, int bit)
 {
-  uint32_t tctl;
-
-  /* Make sure the timer interrupts are disabled */
-
-  up_disable_irq(IMX_IRQ_SYSTIMER);
-
-  /* Make sure that timer1 is disabled */
-
-  putreg32(0, IMX_TIMER1_TCTL);
-  putreg32(0, IMX_TIMER1_TPRER);
-
-  /* Select restart mode with source = PERCLK1. In restart mode, after
-   * the compare value is reached, the counter resets to 0x00000000, the
-   * compare event (COMP) bit of the timer status register is set, an
-   * interrupt is issued if the interrupt request enable (IRQEN) bit of
-   * the corresponding TCTL register is set, and the counter resumes
-   * counting.
-   */
-
-  tctl = TCTL_CLKSOURCE_PERCLK1;
-  putreg32(tctl, IMX_TIMER1_TCTL);
-
-  /* The timer is driven by PERCLK1.  Set prescaler for division by one
-   * so that the clock is driven at PERCLK1.
-   *
-   * putreg(0, IMX_TIMER1_TPRER); -- already the case
-   *
-   * Set the compare register so that the COMP interrupt is generated
-   * with a period of USEC_PER_TICK.  The value IMX_PERCLK1_FREQ/1000
-   * (defined in board.h) is the number of counts in millisecond, so:
-   */
-
-   putreg32(MSEC2TICK(IMX_PERCLK1_FREQ / 1000), IMX_TIMER1_TCMP);
-
-  /* Configure to provide timer COMP interrupts when TCN increments
-   * to TCMP.
-   */
-
-  tctl |= TIMER_TCTL_IRQEN;
-  putreg32(tctl, IMX_TIMER1_TCTL);
-
-  /* Finally, enable the timer (be be the last operation on TCTL) */
-
-  tctl |= TIMER_TCTL_TEN;
-  putreg32(tctl, IMX_TIMER1_TCTL);
-
-  /* Attach and enable the timer interrupt */
-
-  irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
-  up_enable_irq(IMX_IRQ_SYSTIMER);
+  imxgpio_pullupdisable(port, bit);          /* No pullup */
+  imxgpio_dirin(port, bit);                  /* Input */
+  imxgpio_gpiofunc(port, bit);               /* Use as GPIO */
+  imxgpio_primaryperipheralfunc(port, bit);  /* Not necessary */
+  imxgpio_ocrain(port, bit);                 /* Output AIN */
+  imxgpio_aoutgpio(port, bit);               /* AOUT input is GPIO */
+  imxgpio_boutgpio(port, bit);               /* BOUT input is GPIO */
 }
 
+/****************************************************************************
+ * Name: imxgpio_configpfoutput
+ ****************************************************************************/
+
+void imxgpio_configpfoutput(int port, int bit)
+{
+  imxgpio_configinput(port, bit);            /* Same as input except: */
+  imxgpio_peripheralfunc(port, bit);         /*   Use as peripheral */
+  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function */
+  imxgpio_dirout(port, bit);                 /*   Make output */
+}
+
+/****************************************************************************
+ * Name: imxgpio_configpfinput
+ ****************************************************************************/
+
+void imxgpio_configpfinput(int port, int bit)
+{
+  imxgpio_configinput(port, bit);            /* Same as input except: */
+  imxgpio_peripheralfunc(port, bit);         /*   Use as peripheral */
+  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function */
+}

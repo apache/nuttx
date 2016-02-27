@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_dma.h
+ * arch/arm/src/imx1/imx_dma.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

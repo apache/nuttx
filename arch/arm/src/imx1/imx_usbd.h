@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_usbd.h
+ * arch/arm/src/imx1/imx_usbd.h
  *
  *   Copyright (c) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

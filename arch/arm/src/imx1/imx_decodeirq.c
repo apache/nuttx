@@ -1,5 +1,5 @@
 /********************************************************************************
- * arch/arm/src/imx/imx_decodeirq.c
+ * arch/arm/src/imx1/imx_decodeirq.c
  *
  *   Copyright (C) 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

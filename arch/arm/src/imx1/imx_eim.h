@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_wdog.h
+ * arch/arm/src/imx1/imx_eim.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_WDOG_H
-#define __ARCH_ARM_IMX_WDOG_H
+#ifndef __ARCH_ARM_IMX_WIEM_H
+#define __ARCH_ARM_IMX_WIEM_H
 
 /************************************************************************************
  * Included Files
@@ -44,38 +44,42 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* WDOG Register Offsets ************************************************************/
+/* EIM Register Offsets ************************************************************/
 
-#define WDOG_WCR_OFFSET     0x0000 /* Watchdog Control Register */
-#define WDOG_WSR_OFFSET     0x0004 /* Watchdog Service Register */
-#define WDOG_WSTR_OFFSET    0x0008 /* Watchdog Status Register */
+#define EIM_CS0H_OFFSET             0x00
+#define EIM_CS0L_OFFSET             0x04
+#define EIM_CS1H_OFFSET             0x08
+#define EIM_CS1L_OFFSET             0x0c
+#define EIM_CS2H_OFFSET             0x10
+#define EIM_CS2L_OFFSET             0x14
+#define EIM_CS3H_OFFSET             0x18
+#define EIM_CS3L_OFFSET             0x1c
+#define EIM_CS4H_OFFSET             0x20
+#define EIM_CS4L_OFFSET             0x24
+#define EIM_CS5H_OFFSET             0x28
+#define EIM_CS5L_OFFSET             0x2c
+#define EIM_WEIM_OFFSET             0x30
 
-/* WDOG Register Addresses **********************************************************/
+/* EIM Register Addresses ***********************************************************/
 
-#define IMX_WDOG_WCR        (IMX_WDOG_VBASE + WDOG_WCR_OFFSET)
-#define IMX_WDOG_WSR        (IMX_WDOG_VBASE + WDOG_WSR_OFFSET)
-#define IMX_WDOG_WSTRT      (IMX_WDOG_VBASE + WDOG_WSTR_OFFSET)
+#define IMX_EIM_CS0H                (EIM_BASE_ADDR + EIM_CS0H_OFFSET)
+#define IMX_EIM_CS0L                (EIM_BASE_ADDR + EIM_CS0L_OFFSET)
+#define IMX_EIM_CS1H                (EIM_BASE_ADDR + EIM_CS1H_OFFSET)
+#define IMX_EIM_CS1L                (EIM_BASE_ADDR + EIM_CS1L_OFFSET)
+#define IMX_EIM_CS2H                (EIM_BASE_ADDR + EIM_CS2H_OFFSET)
+#define IMX_EIM_CS2L                (EIM_BASE_ADDR + EIM_CS2L_OFFSET)
+#define IMX_EIM_CS3H                (EIM_BASE_ADDR + EIM_CS3H_OFFSET)
+#define IMX_EIM_CS3L                (EIM_BASE_ADDR + EIM_CS3L_OFFSET)
+#define IMX_EIM_CS4H                (EIM_BASE_ADDR + EIM_CS4H_OFFSET)
+#define IMX_EIM_CS4L                (EIM_BASE_ADDR + EIM_CS4L_OFFSET)
+#define IMX_EIM_CS5H                (EIM_BASE_ADDR + EIM_CS5H_OFFSET)
+#define IMX_EIM_CS5L                (EIM_BASE_ADDR + EIM_CS5L_OFFSET)
+#define IMX_EIM_WEIM                (EIM_BASE_ADDR + EIM_WEIM_OFFSET)
 
-/* WDOG Register Bit Definitions ****************************************************/
-
-/* Watchdog Control Register */
-
-#define WDOG_WCR_WDE        (1 << 0)  /* Bit 0: Watchdog Enable */
-#define WDOG_WCR_WDEC       (1 << 1)  /* Bit 1: Watchdog Enable Control */
-#define WDOG_WCR_SWR        (1 << 2)  /* Bit 2: Software Reset Enable */
-#define WDOG_WCR_TMD        (1 << 3)  /* Bit 3: Test Mode Enable */
-#define WDOG_WCR_WIE        (1 << 4)  /* Bit 4: Watchdog Interrupt Enable */
-#define WDOG_WCR_WT_SHIFT   8 /* Bit 8-14: Watchdog Timeout */
-#define WDOG_WCR_WT_MASK    (0x7f << WDOG_WCR_WT_SHIFT)
-#define WDOG_WCR_WHALT      (1 << 15) /* Bit 15: Watchdog Halt */
-
-/* Watchdog Service Register */
-
-#define WDOG_WSR_SHIFT      0 /* Bit 0-15: Watchdog Service Register */
-#define WDOG_WT_MASK        (0xffff << WDOG_WSR_SHIFT)
+/* EIM Register Bit Definitions *****************************************************/
 
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_WDOG_H */
+#endif  /* __ARCH_ARM_IMX_EIM_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_eim.h
+ * arch/arm/src/imx1/imx_rtc.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_WIEM_H
-#define __ARCH_ARM_IMX_WIEM_H
+#ifndef __ARCH_ARM_IMX_RTC_H
+#define __ARCH_ARM_IMX_RTC_H
 
 /************************************************************************************
  * Included Files
@@ -44,42 +44,42 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* EIM Register Offsets ************************************************************/
+/* RTC Register Offsets *************************************************************/
 
-#define EIM_CS0H_OFFSET             0x00
-#define EIM_CS0L_OFFSET             0x04
-#define EIM_CS1H_OFFSET             0x08
-#define EIM_CS1L_OFFSET             0x0c
-#define EIM_CS2H_OFFSET             0x10
-#define EIM_CS2L_OFFSET             0x14
-#define EIM_CS3H_OFFSET             0x18
-#define EIM_CS3L_OFFSET             0x1c
-#define EIM_CS4H_OFFSET             0x20
-#define EIM_CS4L_OFFSET             0x24
-#define EIM_CS5H_OFFSET             0x28
-#define EIM_CS5L_OFFSET             0x2c
-#define EIM_WEIM_OFFSET             0x30
+#define RTC_HOURMIN_OFFSET           0x0000
+#define RTC_SECOND_OFFSET            0x0004
+#define RTC_ALRM_HM_OFFSET           0x0008
+#define RTC_ALRM_SEC_OFFSET          0x000c
+#define RTC_RTCCTL_OFFSET            0x0010
+#define RTC_RTCISR_OFFSET            0x0014
+#define RTC_RTCIENR_OFFSET           0x0018
+#define RTC_STPWCH_OFFSET            0x001c
+#define RTC_DAYR_OFFSET              0x0020
+#define RTC_DAYALARM_OFFSET          0x0024
+#define RTC_TEST1_OFFSET             0x0028
+#define RTC_TEST2_OFFSET             0x002c
+#define RTC_TEST3_OFFSET             0x0030
 
-/* EIM Register Addresses ***********************************************************/
+/* RTC Register Addresses ***********************************************************/
 
-#define IMX_EIM_CS0H                (EIM_BASE_ADDR + EIM_CS0H_OFFSET)
-#define IMX_EIM_CS0L                (EIM_BASE_ADDR + EIM_CS0L_OFFSET)
-#define IMX_EIM_CS1H                (EIM_BASE_ADDR + EIM_CS1H_OFFSET)
-#define IMX_EIM_CS1L                (EIM_BASE_ADDR + EIM_CS1L_OFFSET)
-#define IMX_EIM_CS2H                (EIM_BASE_ADDR + EIM_CS2H_OFFSET)
-#define IMX_EIM_CS2L                (EIM_BASE_ADDR + EIM_CS2L_OFFSET)
-#define IMX_EIM_CS3H                (EIM_BASE_ADDR + EIM_CS3H_OFFSET)
-#define IMX_EIM_CS3L                (EIM_BASE_ADDR + EIM_CS3L_OFFSET)
-#define IMX_EIM_CS4H                (EIM_BASE_ADDR + EIM_CS4H_OFFSET)
-#define IMX_EIM_CS4L                (EIM_BASE_ADDR + EIM_CS4L_OFFSET)
-#define IMX_EIM_CS5H                (EIM_BASE_ADDR + EIM_CS5H_OFFSET)
-#define IMX_EIM_CS5L                (EIM_BASE_ADDR + EIM_CS5L_OFFSET)
-#define IMX_EIM_WEIM                (EIM_BASE_ADDR + EIM_WEIM_OFFSET)
+#define IMX_RTC_HOURMIN             (IMX_RTC_VBASE + RTC_HOURMIN_OFFSET)
+#define IMX_RTC_SECOND              (IMX_RTC_VBASE + RTC_SECOND_OFFSET)
+#define IMX_RTC_ALRM_HM             (IMX_RTC_VBASE + RTC_ALRM_HM_OFFSET)
+#define IMX_RTC_ALRM_SEC            (IMX_RTC_VBASE + RTC_ALRM_SEC_OFFSET)
+#define IMX_RTC_RTCCTL              (IMX_RTC_VBASE + RTC_RTCCTL_OFFSET)
+#define IMX_RTC_RTCISR              (IMX_RTC_VBASE + RTC_RTCISR_OFFSET)
+#define IMX_RTC_RTCIENR             (IMX_RTC_VBASE + RTC_RTCIENR_OFFSET)
+#define IMX_RTC_STPWCH              (IMX_RTC_VBASE + RTC_STPWCH_OFFSET)
+#define IMX_RTC_DAYR                (IMX_RTC_VBASE + RTC_DAYR_OFFSET)
+#define IMX_RTC_DAYALARM            (IMX_RTC_VBASE + RTC_DAYALARM_OFFSET)
+#define IMX_RTC_TEST1               (IMX_RTC_VBASE + RTC_TEST1_OFFSET)
+#define IMX_RTC_TEST2               (IMX_RTC_VBASE + RTC_TEST2_OFFSET)
+#define IMX_RTC_TEST3               (IMX_RTC_VBASE + RTC_TEST3_OFFSET)
 
-/* EIM Register Bit Definitions *****************************************************/
+/* RTC Register Bit Definitions *****************************************************/
 
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_EIM_H */
+#endif  /* __ARCH_ARM_IMX_RTC_H */

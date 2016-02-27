@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_gpio.h
+ * arch/arm/src/imx1/imx_gpio.h
  * arch/arm/src/chip/imx_gpio.h
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.

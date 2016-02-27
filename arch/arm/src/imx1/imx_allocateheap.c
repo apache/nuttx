@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imx/imx_allocateheap.c
+ * arch/arm/src/imx1/imx_allocateheap.c
  *
  *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

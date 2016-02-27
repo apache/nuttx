@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_cspi.h
+ * arch/arm/src/imx1/imx_cspi.h
  *
  *   Copyright (C) 2009-2010, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

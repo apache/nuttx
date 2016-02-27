@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/imx/imx_i2c.h
+ * arch/arm/src/imx1/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,37 +33,33 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_I2C_H
-#define __ARCH_ARM_IMX_I2C_H
+#ifndef __ARCH_ARM_IMX_CHIP_H
+#define __ARCH_ARM_IMX_CHIP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
+#include "imx_memorymap.h"
+#include "imx_system.h"
+#include "imx_wdog.h"
+#include "imx_timer.h"
+#include "imx_rtc.h"
+#include "imx_uart.h"
+#include "imx_dma.h"
+#include "imx_usbd.h"
+#include "imx_i2c.h"
+#include "imx_cspi.h"
+#include "imx_gpio.h"
+#include "imx_eim.h"
+#include "imx_aitc.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* I2C Register Offsets *************************************************************/
-
-#define I2C_IADR_OFFSET             0x0000
-#define I2C_IFDR_OFFSET             0x0004
-#define I2C_I2CR_OFFSET             0x0008
-#define I2C_I2SR_OFFSET             0x000c
-#define I2C_I2DR_OFFSET             0x0010
-
-/* I2C Register Addresses ***********************************************************/
-
-#define IMX_I2C_IADR                (IMX_I2C_VBASE + I2C_IADR_OFFSET)
-#define IMX_I2C_IFDR                (IMX_I2C_VBASE + I2C_IFDR_OFFSET)
-#define IMX_I2C_I2CR                (IMX_I2C_VBASE + I2C_I2CR_OFFSET)
-#define IMX_I2C_I2SR                (IMX_I2C_VBASE + I2C_I2SR_OFFSET)
-#define IMX_I2C_I2DR                (IMX_I2C_VBASE + I2C_I2DR_OFFSET)
-
-/* I2C Register Bit Definitions *****************************************************/
 
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_I2C_H */
+#endif  /* __ARCH_ARM_IMX_CHIP_H */
