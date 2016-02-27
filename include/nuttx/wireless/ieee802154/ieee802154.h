@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_IEEE802154_H
-#define __INCLUDE_NUTTX_NET_IEEE802154_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
 
 /****************************************************************************
  * Included Files
@@ -59,4 +59,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_NET_IEEE802154_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H */

@@ -79,7 +79,7 @@ enum net_lltype_e
   NET_LL_LOOPBACK,     /* Local loopback */
   NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
   NET_LL_TUN,          /* TUN Virtual Network Device */
-  NET_LL_IEEE802154    /* IEEE 802.15.4 */
+  NET_LL_6LOWPAN       /* IEEE 802.15.4 6LoWPAN*/
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */

@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IEEE802_15_4_IEEE802154_H
-#define __NET_IEEE802_15_4_IEEE802154_H
+#ifndef __NET_6LOWPAN_6LOWPAN_H
+#define __NET_6LOWPAN_6LOWPAN_H
 
 /****************************************************************************
  * Included Files
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET_IEEE802154
+#ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
  * Public Types
@@ -52,5 +52,5 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* CONFIG_NET_IEEE802154 */
-#endif /* __NET_IEEE802_15_4_IEEE802154_H */
+#endif /* CONFIG_NET_6LOWPAN */
+#endif /* __NET_6LOWPAN_6LOWPAN_H */

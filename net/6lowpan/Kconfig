@@ -3,36 +3,31 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "IEEE 802.15.4 Configuration"
-
-config NET_IEEE802154
-	bool "IEEE 802.15.4 support"
+menuconfig NET_6LOWPAN
+	bool "IEEE 802.15.4 6LoWPAN support"
 	default n
 	depends on EXPERIMENTAL && NET_IPv6
 	---help---
-		Enable IEEE 802.15.4 protocol socket support
+		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
+		Networking (6LoWPAN).
 
-if NET_IEEE802154
+if NET_6LOWPAN
 
-config NET_IEEE802154_MTU
-	int "IEEE 802.15.4 packet buffer size (MTU)"
+config NET_6LOWPAN_MTU
+	int "6LoWPAN packet buffer size (MTU)"
 	default 1294
 	range 590 1518
 	---help---
 		Packet buffer size.  This size includes the TCP/UDP payload plus the
-		size of TCP/UDP header, the IP header, and the IEEE 802.15.4 header.
+		size of TCP/UDP header, the IP header, and data link layer headers.
 		This value is normally referred to as the MTU (Maximum Transmission
 		Unit); the payload is the MSS (Maximum Segment Size).
-
-		IPv4 hosts are required to be able to handle an MSS of at least
-		536 octets, resulting in a minimum buffer size of 536+20+20+xx =
-		xx. REVISIT!
 
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
 		resulting in a minimum buffer size of of 1220+20+40+xx = xx. REVISIT!
 
-config IEEE802154_TCP_RECVWNDO
-	int "IEEE 802.15.4 TCP receive window size"
+config NET_6LOWPAN_TCP_RECVWNDO
+	int "6LoWPAN TCP receive window size"
 	default 1220
 	depends on NET_TCP
 	---help---
@@ -41,5 +36,4 @@ config IEEE802154_TCP_RECVWNDO
 		incoming data, or high (32768 bytes) if the application processes
 		data quickly. REVISIT!
 
-endif # NET_IEEE802154
-endmenu # IEEE 802.15.4 Configuration
+endif # NET_6LOWPAN

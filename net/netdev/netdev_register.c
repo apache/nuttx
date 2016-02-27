@@ -61,18 +61,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NETDEV_ETH_FORMAT        "eth%d"
-#define NETDEV_LO_FORMAT         "lo"
-#define NETDEV_IEEE802154_FORMAT "wpan%d"
-#define NETDEV_SLIP_FORMAT       "sl%d"
-#define NETDEV_TUN_FORMAT        "tun%d"
+#define NETDEV_ETH_FORMAT   "eth%d"
+#define NETDEV_LO_FORMAT    "lo"
+#define NETDEV_WPAN_FORMAT  "wpan%d"
+#define NETDEV_SLIP_FORMAT  "sl%d"
+#define NETDEV_TUN_FORMAT   "tun%d"
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
 #elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
-#elif defined(CONFIG_NET_IEEE802154)
-#  define NETDEV_DEFAULT_FORMAT NETDEV_IEEE802154_FORMAT
+#elif defined(CONFIG_NET_6LOWPAN)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_WPAN_FORMAT
 #else /* if defined(CONFIG_NET_LOOPBACK) */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_LO_FORMAT
 #endif
@@ -214,14 +214,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             break;
 #endif
 
-#ifdef CONFIG_NET_IEEE802154
-          case NET_LL_IEEE802154: /* IEEE 802.15.4 */
+#ifdef CONFIG_NET_6LOWPAN
+          case NET_LL_6LOWPAN:    /* IEEE 802.15.4 */
             dev->d_llhdrlen = 0;  /* REVISIT */
-            dev->d_mtu      = CONFIG_NET_IEEE802154_MTU;
+            dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
 #ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_IEEE802154_TCP_RECVWNDO;
+            dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
 #endif
-            devfmt          = NETDEV_IEEE802154_FORMAT;
+            devfmt          = NETDEV_WPAN_FORMAT;
             break;
 #endif
 

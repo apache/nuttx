@@ -255,13 +255,15 @@ config NET_IPv4
 	---help---
 		Build in support for IPv4.
 
-config NET_IPv6
+menuconfig NET_IPv6
 	bool "IPv6"
 	default n
 	---help---
 		Build in support for IPv6.
 
 source "net/neighbor/Kconfig"
+source "net/6lowpan/Kconfig"
+
 endmenu # Internet Protocol Selection
 
 source "net/socket/Kconfig"
@@ -269,7 +271,6 @@ source "net/pkt/Kconfig"
 source "net/local/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
-source "net/6lowpan/Kconfig"
 source "net/icmp/Kconfig"
 source "net/icmpv6/Kconfig"
 source "net/igmp/Kconfig"
