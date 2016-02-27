@@ -1118,7 +1118,8 @@ static int mrf24j40_transmit(FAR struct ieee802154_dev_s *ieee, FAR struct ieee8
 
 static void mrf24j40_irqwork_tx(FAR struct mrf24j40_dev_s *dev)
 {
-  uint8_t reg,txstat;
+  uint8_t txstat;
+  uint8_t reg;
 
   txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
 
@@ -1130,6 +1131,7 @@ static void mrf24j40_irqwork_tx(FAR struct mrf24j40_dev_s *dev)
 
   //dbg("TXSTAT%02X!\n", txstat);
 #warning TODO report errors
+  UNUSED(txstat);
 
   /* Disable tx int */
 
