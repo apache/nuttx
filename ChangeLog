@@ -11529,4 +11529,6 @@
 	  yet (2016-02-26).
 	* include/nuttx/wireless/ieee802154: Add directory (and dummy header file)
 	  (2016-02-16).
+	* arch/arm/include and src: Rename the imx directories to imx1 to make room
+	  in the namespace for other members of the i.MX family (2016-02-27).
 

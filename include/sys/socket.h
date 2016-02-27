@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/socket.h
  *
- *   Copyright (C) 2007, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
  * the protocol family which will be used for communication.
  */
 
-/* Protocol families */
+/* Supported Protocol Families */
 
 #define PF_UNSPEC      0 /* Protocol family unspecified */
 #define PF_UNIX        1 /* Local communication */
@@ -59,7 +59,9 @@
 #define PF_INET6       3 /* IPv6 Internet protocols */
 #define PF_PACKET      4 /* Low level packet interface */
 
-/* Address families */
+/* Supported Address Families. Opengroup.org requires only AF_UNSPEC,
+ * AF_UNIX, AF_INET and AF_INET6.
+ */
 
 #define AF_UNSPEC      PF_UNSPEC
 #define AF_UNIX        PF_UNIX
