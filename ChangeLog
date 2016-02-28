@@ -11531,4 +11531,8 @@
 	  (2016-02-16).
 	* arch/arm/include and src: Rename the imx directories to imx1 to make room
 	  in the namespace for other members of the i.MX family (2016-02-27).
+	* arch/arm/include/imx6 and src/imx6:  Evolving support for the NXP/Freescale
+	  i.MX6Q (2016-02-28).
+	* configs/sabre-6quad:  Placeholder that will eventually become board support
+	  for the NXP/Freescale Sabre 6Quad board (2016-02-28).
 
