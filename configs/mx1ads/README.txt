@@ -126,13 +126,13 @@ ARM/i.MX1-specific Configuration Options
 
   IMX USB Configuration
 
-	CONFIG_IMX_GIO_USBATTACH
+	CONFIG_IMX1_GIO_USBATTACH
 	   GIO that detects USB attach/detach events
-	CONFIG_IMX_GIO_USBDPPULLUP
+	CONFIG_IMX1_GIO_USBDPPULLUP
 	   GIO
 	CONFIG_DMA320_USBDEV_DMA
 	   Enable IMX-specific DMA support
-	CONFIG_IMX_GIO_USBATTACH=6
+	CONFIG_IMX1_GIO_USBATTACH=6
 
 Configurations
 ^^^^^^^^^^^^^^
