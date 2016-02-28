@@ -59,9 +59,9 @@
 
 #include "mrf24j40.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SCHED_HPWORK
 #error High priority work queue required in this driver
@@ -73,6 +73,10 @@
 
 #ifndef CONFIG_IEEE802154_MRF24J40_FREQUENCY
 #  define CONFIG_IEEE802154_MRF24J40_FREQUENCY 8000000
+#endif
+
+#ifndef CONFIG_SPI_EXCHANGE
+#  error CONFIG_SPI_EXCHANGE required for this driver
 #endif
 
 /* Definitions for the device structure */
@@ -87,9 +91,9 @@
 #define MRF24J40_PA_ED    2
 #define MRF24J40_PA_SLEEP 3
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* A MRF24J40 device instance */
 
@@ -185,10 +189,6 @@ static const struct ieee802154_devops_s mrf24j40_devops =
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_EXCHANGE
-#error CONFIG_SPI_EXCHANGE required for this driver
-#endif
-
 /* Hardware access routines */
 
 /****************************************************************************
@@ -232,6 +232,7 @@ static void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t va
 {
   uint8_t buf[3];
   int     len;
+
   if (!(addr&0x80000000))
     {
       addr  &= 0x3F; /* 6-bit address */
@@ -249,6 +250,7 @@ static void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t va
       buf[1] = (addr & 0xFF);
       len    = 2;
     }
+
   buf[len++] = val;
 
   mrf24j40_lock(spi);
