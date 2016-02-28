@@ -3,37 +3,33 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_CHIP_IMX
+if ARCH_CHIP_IMX1
 
-# choice "iMX Chip Selection"
+# choice "iMX.1 Chip Selection"
 
-config ARCH_CHIP_IMX1
-	bool
-	default y
+menu "iMX.1 Peripheral Selection"
 
-menu "iMX Peripheral Selection"
-
-config IMX_UART1
+config IMX1_UART1
 	bool "UART1"
 	default n
 	select ARCH_HAVE_UART1
 
-config IMX_UART2
+config IMX1_UART2
 	bool "UART2"
 	default n
 	select ARCH_HAVE_UART2
 
-config IMX_UART3
+config IMX1_UART3
 	bool "UART2"
 	default n
 	select ARCH_HAVE_UART3
 
-config IMX_SPI1
+config IMX1_SPI1
 	bool "SPI1"
 	default n
 	select SPI
 
-config IMX_SPI2
+config IMX1_SPI2
 	bool "SPI2"
 	default n
 	select SPI
@@ -46,4 +42,4 @@ config RAM_NUTTXENTRY
 	---help---
 		The virtual address of the NuttX entry point
 
-endif
+endif # ARCH_CHIP_IMX1

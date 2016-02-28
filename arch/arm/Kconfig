@@ -57,13 +57,13 @@ config ARCH_CHIP_EFM32
 	---help---
 		Energy Micro EFM32 microcontrollers (ARM Cortex-M).
 
-config ARCH_CHIP_IMX
-	bool "Freescale iMX"
+config ARCH_CHIP_IMX1
+	bool "Freescale iMX.1"
 	select ARCH_ARM920T
 	select ARCH_HAVE_HEAP2
 	select ARCH_HAVE_LOWVECTORS
 	---help---
-		Freescale iMX architectures (ARM920T)
+		Freescale iMX.1 architectures (ARM920T)
 
 config ARCH_CHIP_KINETIS
 	bool "Freescale Kinetis"
@@ -370,7 +370,7 @@ config ARCH_CHIP
 	default "calypso"	if ARCH_CHIP_CALYPSO
 	default "dm320"		if ARCH_CHIP_DM320
 	default "efm32"		if ARCH_CHIP_EFM32
-	default "imx"		if ARCH_CHIP_IMX
+	default "imx1"		if ARCH_CHIP_IMX1
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
 	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA
@@ -554,8 +554,8 @@ endif
 if ARCH_CHIP_EFM32
 source arch/arm/src/efm32/Kconfig
 endif
-if ARCH_CHIP_IMX
-source arch/arm/src/imx/Kconfig
+if ARCH_CHIP_IMX1
+source arch/arm/src/imx1/Kconfig
 endif
 if ARCH_CHIP_KINETIS
 source arch/arm/src/kinetis/Kconfig
