@@ -15,20 +15,20 @@ Platform Features
 =================
 
 Processor:
-  - i.MX 6Quad or 6DualLite 1 GHz ARM® Cortex®-A9 processor
+  - i.MX 6Quad or 6DualLite 1 GHz ARM Cortex-A9 processor
 Memory/storage:
   - 1 GB DDR3 SDRAM up to 533 MHz (1066 MTPS) memory
   - 8 GB eMMC flash
   - 4 MB SPI NOR flash
 Display:
-  - 10.1” 1024 x 768 LVDS display with integrated P-cap sensing
+  - 10.1" 1024 x 768 LVDS display with integrated P-cap sensing
   - HDMI connector
   - LVDS connector (for optional second display)
   - LCD expansion connector (parallel, 24-bit)
   - EPDC expansion connector (for 6DualLite only)
   - MIPI DSI connector (two data lanes, 1 GHz each)
 User Interface:
-  - 10.1” capacitive multitouch display
+  - 10.1" capacitive multitouch display
   - Buttons: power, reset, volume
 Power Management:
   - Proprietary PF0100 PMIC
