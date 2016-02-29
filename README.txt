@@ -1388,6 +1388,8 @@ nuttx/
  |   |   `- README.txt
  |   |- rgmp/
  |   |   `- README.txt
+ |   |- sabre-6quad/
+ |   |   `- README.txt
  |   |- sama5d2-xult/
  |   |   `- README.txt
  |   |- sama5d3x-ek/
