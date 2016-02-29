@@ -46,6 +46,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
  * values unless we force them to unsigned long:
  */
@@ -245,7 +246,6 @@
 #define SAMA5_SDMMC1_HEAP_OFFSET   MKULONG(CONFIG_SAMA5_SDMMC1_HEAP_OFFSET)
 #define SAMA5_QSPI0_HEAP_OFFSET    MKULONG(CONFIG_SAMA5_QSPI0_HEAP_OFFSET)
 #define SAMA5_QSPI1_HEAP_OFFSET    MKULONG(CONFIG_SAMA5_QSPI1_HEAP_OFFSET)
-
 
 #define SAMA5_EBICS0_HEAP_SIZE   MKULONG(CONFIG_SAMA5_EBICS0_HEAP_SIZE)
 #define SAMA5_DDRCS_HEAP_SIZE    MKULONG(CONFIG_SAMA5_DDRCS_HEAP_SIZE)

@@ -637,4 +637,4 @@ if ARCH_CHIP_MOXART
 source arch/arm/src/moxart/Kconfig
 endif
 
-endif
+endif # ARCH_ARM
