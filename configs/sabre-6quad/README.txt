@@ -107,16 +107,17 @@ must be is one of the following.
 NOTES:
 
   1. These configurations use the mconf-based configuration tool.  To
-    change any of these configurations using that tool, you should:
+     change any of these configurations using that tool, you should:
 
-    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-       see additional README.txt files in the NuttX tools repository.
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
 
-    b. Execute 'make menuconfig' in nuttx/ in order to start the
-       reconfiguration process.
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on TBD.
+     output on UART1 which is a available to the host PC from the USB
+     micro AB as a VCOM part.
 
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
@@ -136,3 +137,10 @@ NOTES:
 
 Configuration sub-directories
 -----------------------------
+
+  nsh
+  ---
+    This is a NuttShell (NSH) configuration that uses the NSH library
+    at apps/nshlib with the start logic at apps/examples/nsh.
+
+    NOTES:
