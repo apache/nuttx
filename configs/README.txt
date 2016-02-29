@@ -540,6 +540,10 @@ configs/rgmp
   See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
   information about RGMP.
 
+configs/sabre-6quad
+  This directory holds a port of NuttX to the NXP/Freescale Sabre board
+  featuring the iMX 6Quad CPU.
+
 configs/sama5d2-xult
   This is the  port of NuttX to the Atmel SAMA5D2-Xplained Ultra development
   board.  This board features the Atmel SAMA5D27.  See http://www.atmel.com.

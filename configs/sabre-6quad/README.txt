@@ -7,9 +7,17 @@ featuring the iMX 6Quad CPU.
 Contents
 ========
 
+  - Status
   - Platform Features
   - Serial Console
   - Configurations
+
+Status
+======
+
+2016-02-28: The i.MX6Q port is just beginning. A few files have been
+populated with the port is a long way from being complete or even ready to
+begin any kind of testing.
 
 Platform Features
 =================
@@ -66,6 +74,9 @@ Additional Features:
 
 Serial Console
 ==============
+
+A DEBUG VCOM is available MICRO USB AB 5 J509.  This corresponds to UART1
+from the i.MX6.
 
 Configurations
 ==============
