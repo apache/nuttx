@@ -5,7 +5,27 @@
 
 if ARCH_CHIP_IMX6
 
-# choice "iMX.6 Chip Selection"
+menu "iMX.6 Chip Selection"
+
+choice
+	prompt "iMX.6 Core Configuration"
+	default IMX6_6QUAD
+
+config ARCH_CHIP_IMX6_6DUAL
+	bool "i.MX 6Dual"
+
+config ARCH_CHIP_IMX6_6QUAD
+	bool "i.MX 6Quad"
+
+endchoice # iMX.6 Chip Selection
+
+config IMX6_HAVE_HDCP
+	bool "HDCP enabled"
+	default n
+	---help---
+		HDCP - High-bandwidth Digital Content Protection
+
+endmenu # "iMX.6 Chip Selection"
 
 menu "iMX.6 Peripheral Selection"
 

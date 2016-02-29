@@ -66,6 +66,8 @@ config ARCH_CHIP_IMX1
 config ARCH_CHIP_IMX6
 	bool "NXP/Freescale iMX.6"
 	select ARCH_CORTEXA9
+	select ARCH_HAVE_MULTICPU
+	select ARMV7A_HAVE_L2CC_PL310
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_SDRAM
