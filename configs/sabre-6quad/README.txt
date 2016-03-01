@@ -10,6 +10,7 @@ Contents
   - Status
   - Platform Features
   - Serial Console
+  - LEDs and Buttons
   - Configurations
 
 Status
@@ -134,6 +135,38 @@ NOTES:
 
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+LEDs and Buttons
+----------------
+
+LEDs
+----
+A single LED is available driven by USR_DEF_RED_LED.
+
+This LED is not used by the board port unless CONFIG_ARCH_LEDS is
+defined.  In that case, the usage by the board port is defined in
+include/board.h and src/sam_autoleds.c. The LED is used to encode
+OS-related events as follows:
+
+  ------------------- ----------------------- ------
+  SYMBOL              Meaning                 LED
+  ------------------- ----------------------- ------
+  LED_STARTED         NuttX has been started  OFF
+  LED_HEAPALLOCATE    Heap has been allocated OFF
+  LED_IRQSENABLED     Interrupts enabled      OFF
+  LED_STACKCREATED    Idle stack created      ON
+  LED_INIRQ           In an interrupt         N/C
+  LED_SIGNAL          In a signal handler     N/C
+  LED_ASSERTION       An assertion failed     N/C
+  LED_PANIC           The system has crashed  FLASH
+
+Thus if the LED is statically on, NuttX has successfully  booted and is,
+apparently, running normally.  If the LED is flashing at approximately
+2Hz, then a fatal error has been detected and the system has halted.
+
+Buttons
+-------
+
 
 Configuration sub-directories
 -----------------------------
