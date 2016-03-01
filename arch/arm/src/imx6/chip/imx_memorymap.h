@@ -113,7 +113,7 @@
 #define IMX_SATA_PSECTION        0x02200000  /* 02200000-0220bfff  48 KB SATA */
                                              /* 0220c000-023fffff   2 MB Reserved */
 #define IMX_IPU1_PSECTION        0x02600000  /* 02600000-029fffff   4 MB IPU-1 */
-#define IMX_IPU2MIPIHSI_PSECTION 0x02a00000  /* 02a00000-02dfffff   4 MB IPU-2 */
+#define IMX_IPU2_PSECTION        0x02a00000  /* 02a00000-02dfffff   4 MB IPU-2 */
 #define IMX_EIM_PSECTION         0x08000000  /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
 #define IMX_MMDCDDR_PSECTION     0x10000000  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
@@ -461,7 +461,7 @@
 #define IMX_SATA_SIZE              (48*1024) /* 02200000-0220bfff  48 KB SATA */
                                              /* 0220c000-023fffff   2 MB Reserved */
 #define IMX_IPU1_SIZE          (4*1024*1024) /* 02600000-029fffff   4 MB IPU-1 */
-#define IMX_IPU2MIPIHSI_SIZE   (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
+#define IMX_IPU2_SIZE          (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
 #define IMX_EIM_SIZE     MKULONG(CONFIG_IMX_EIM_SIZE) /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
 #define IMX_MMDCDDR_SIZE MKULONG(CONFIG_IMX_DDR_SIZE  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
@@ -492,7 +492,7 @@
 #define IMX_AIPS2_NSECTIONS      _NSECTIONS(IMX_AIPS2_SIZE
 #define IMX_SATA_NSECTIONS       _NSECTIONS(IMX_SATA_SIZE
 #define IMX_IPU1_NSECTIONS       _NSECTIONS(IMX_IPU1_SIZE
-#define IMX_IPU2MIPIHSI_NSECTIONS _NSECTIONS(IMX_IPU2MIPIHSI_SIZE
+#define IMX_IPU2_NSECTIONS       _NSECTIONS(IMX_IPU2_SIZE
 #define IMX_EIM_NSECTIONS        _NSECTIONS(IMX_EIM_SIZE
 #define IMX_MMDCDDR_NSECTIONS    _NSECTIONS(IMX_MMDCDDR_SIZE
 
@@ -516,7 +516,7 @@
 #define IMX_AIPS2_MMUFLAGS       MMU_IOFLAGS
 #define IMX_SATA_MMUFLAGS        MMU_IOFLAGS
 #define IMX_IPU1_MMUFLAGS        MMU_IOFLAGS
-#define IMX_IPU2MIPIHSI_MMUFLAGS MMU_IOFLAGS
+#define IMX_IPU2_MMUFLAGS        MMU_IOFLAGS
 #define IMX_EIM_MMUFLAGS         MMU_ROMFLAGS
 #define IMX_MMDCDDR_MMUFLAGS     MMU_MEMFLAGS
 
@@ -553,7 +553,7 @@
 #define IMX_AIPS2_VSECTION       IMX_AIPS2_PSECTION        /*   1 MB Peripheral IPs via AIPS-2 */
 #define IMX_SATA_VSECTION        IMX_SATA_PSECTION         /*  48 KB SATA */
 #define IMX_IPU1_VSECTION        IMX_IPU1_PSECTION         /*   4 MB IPU-1 */
-#define IMX_IPU2MIPIHSI_VSECTION IMX_IPU2MIPIHSI_PSECTION  /*   4 MB IPU-2 */
+#define IMX_IPU2_VSECTION        IMX_IPU2_PSECTION         /*   4 MB IPU-2 */
 #define IMX_EIM_VSECTION         IMX_EIM_PSECTION          /* 128 MB EIM - (NOR/SRAM) */
 #define IMX_MMDCDDR_VSECTION     IMX_MMDCDDR_PSECTION      /* 3840 MB MMDC-DDR Controller */
 
@@ -743,7 +743,7 @@
 
 #else /* CONFIG_BOOT_RUNFROMFLASH */
 
-  /* Otherwise we are running from some kind of RAM (SRAM or SDRAM).
+  /* Otherwise we are running from some kind of RAM (OCRAM, SRAM, or SDRAM).
    * Setup the RAM region as the NUTTX .txt, .bss, and .data region.
    */
 
@@ -787,83 +787,39 @@
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  endif
 
-  /* We must declare the page table at the bottom or at the top of SRAM or
-   * DRAM.  First, do we have IEM SRAM?
+  /* We must declare the page table at the bottom or at the top of OCRAM. */
+  /* Yes.. do the vectors lie in low memory? */
+
+#  ifdef CONFIG_ARCH_LOWVECTORS
+
+  /* In this case, page table must lie at the top 16Kb of OCRAM. */
+
+#    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PADDR - PGTABLE_SIZE)
+#    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VADDR - PGTABLE_SIZE)
+#    define PGTABLE_IN_HIGHSRAM   1
+
+  /* We will force the IDLE stack to precede the page table */
+
+#    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR - CONFIG_IDLETHREAD_STACKSIZE)
+#    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR - CONFIG_IDLETHREAD_STACKSIZE)
+
+#  else /* CONFIG_ARCH_LOWVECTORS */
+
+  /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH,
+   * perhaps elsewhere in OCRAM).  The page table will then be positioned
+   * at the first 16Kb of SRAM.
    */
 
-#  if defined(CONFIG_IMX_BOOT_SRAM)
+#    define PGTABLE_BASE_PADDR    IMX_OCRAM_PADDR
+#    define PGTABLE_BASE_VADDR    IMX_OCRAM_VADDR
+#    define PGTABLE_IN_LOWSRAM    1
 
-    /* Yes.. do the vectors lie in low memory? */
+   /* We will force the IDLE stack to follow the page table */
 
-#    ifdef (CONFIG_ARCH_LOWVECTORS)
+#    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
+#    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
 
-      /* In this case, page table must lie at the top 16Kb IEM SRAM.
-       *
-       * If CONFIG_PAGING is defined, then mmu.h assign the virtual address
-       * of the page table.
-       */
-
-#      define PGTABLE_BASE_PADDR    (IMX_EIM_SRAM_PADDR-PGTABLE_SIZE)
-#      define PGTABLE_BASE_VADDR    (IMX_EIM_SRAM_VADDR-PGTABLE_SIZE)
-#      define PGTABLE_IN_HIGHSRAM   1
-
-      /* We will always force the IDLE stack to follow the page table */
-
-#      define IDLE_STACK_PBASE      (IMX_EIM_SRAM_PADDR + 0x0001000)
-#      define IDLE_STACK_VBASE      (IMX_EIM_SRAM_VADDR + 0x0001000)
-
-#    else /* CONFIG_ARCH_LOWVECTORS */
-
-    /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH, perhaps
-     * elsewhere in internal SRAM).  The page table will then be positioned at
-     * the first 16Kb of SRAM.
-     */
-
-#      define PGTABLE_BASE_PADDR    IMX_EIM_SRAM_PADDR
-#      define PGTABLE_BASE_VADDR    IMX_EIM_SRAM_VADDR
-#      define PGTABLE_IN_LOWSRAM    1
-
-      /* We will always force the IDLE stack to follow the page table */
-
-#      define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
-#      define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
-
-#    endif /* CONFIG_ARCH_LOWVECTORS */
-
-/* No SRAM?  Then we must have DRAM. */
-
-#  else /* Must be CONFIG_IMX_BOOT_DRAM */
-#    ifdef (CONFIG_ARCH_LOWVECTORS)
-
-    /* In this case, page table must lie at the top 16Kb DRAM.
-     *
-     * If CONFIG_PAGING is defined, then mmu.h assign the virtual address
-     * of the page table.
-     */
-
-#      define PGTABLE_BASE_PADDR    (IMX_MMDC_DRAM_PADDR-PGTABLE_SIZE)
-#      define PGTABLE_BASE_VADDR    (IMX_MMDC_DRAM_VADDR-PGTABLE_SIZE)
-#      define PGTABLE_IN_HIGHSRAM   1
-
-#      define IDLE_STACK_PBASE      (IMX_MMDC_DRAM_PADDR + 0x0001000)
-#      define IDLE_STACK_VBASE      (IMX_MMDC_DRAM_VADDR + 0x0001000)
-
-#    else /* CONFIG_ARCH_LOWVECTORS */
-
-    /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH, perhaps
-     * elsewhere in internal SRAM).  The page table will then be positioned at
-     * the first 16Kb of SRAM.
-     */
-
-#      define PGTABLE_BASE_PADDR    IMX_MMDC_DRAM_PADDR
-#      define PGTABLE_BASE_VADDR    IMX_MMDC_DRAM_VADDR
-#      define PGTABLE_IN_LOWSRAM    1
-
-#      define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
-#      define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
-
-#    endif /* CONFIG_ARCH_LOWVECTORS */
-#  endif /* CONFIG_IMX_BOOT_SRAM/DRAM */
+#  endif /* CONFIG_ARCH_LOWVECTORS */
 #else /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
 
   /* Sanity check.. if one is defined, both should be defined */
@@ -872,19 +828,18 @@
 #    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is undefined"
 #  endif
 
-  /* The page table then lies at the beginning of the boot RAM and
+  /* The page table then lies at the beginning of the OSSRAM and
    * the IDLE stack follows immediately.
    */
 
-#  if defined(CONFIG_IMX_BOOT_SRAM)
+#    define PGTABLE_BASE_PADDR    IMX_OCRAM_PADDR
+#    define PGTABLE_BASE_VADDR    IMX_OCRAM_VADDR
+#    define PGTABLE_IN_LOWSRAM    1
 
-#    define IDLE_STACK_PBASE      (IMX_EIM_SRAM_PADDR + PGTABLE_SIZE)
-#    define IDLE_STACK_VBASE      (IMX_EIM_SRAM_VADDR + PGTABLE_SIZE)
+   /* We will force the IDLE stack to follow the page table */
 
-#else /* Must be CONFIG_IMX_BOOT_DRAM */
-
-#    define IDLE_STACK_PBASE      (IMX_MMDC_DRAM_PADDR + PGTABLE_SIZE)
-#    define IDLE_STACK_VBASE      (IMX_MMDC_DRAM_VADDR + PGTABLE_SIZE)
+#    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
+#    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
 
 #endif /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
 
@@ -972,8 +927,8 @@
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 
 #  ifdef CONFIG_IMX_BOOT_SRAM
-#    define IMX_VECTOR_PADDR      IMX_EIM_SRAM_PADDR
-#    define IMX_VECTOR_VSRAM      IMX_EIM_SRAM_VADDR
+#    define IMX_VECTOR_PADDR      IMX_OCRAM_PADDR
+#    define IMX_VECTOR_VSRAM      IMX_OCRAM_VADDR
 #  else /* Must be CONFIG_IMX_BOOT_DRAM */
 #    define IMX_VECTOR_PADDR      IMX_MMDC_DRAM_PADDR
 #    define IMX_VECTOR_VSRAM      IMX_MMDC_DRAM_VADDR
@@ -983,8 +938,8 @@
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
 
 #  ifdef CONFIG_IMX_BOOT_SRAM
-#    define IMX_VECTOR_PADDR      (IMX_EIM_SRAM_PADDR+IMX_EIM_SRAM_SIZE-VECTOR_TABLE_SIZE)
-#    define IMX_VECTOR_VSRAM      (IMX_EIM_SRAM_VADDR+IMX_EIM_SRAM_SIZE-VECTOR_TABLE_SIZE)
+#    define IMX_VECTOR_PADDR      (IMX_OCRAM_PADDR+IMX_EIM_SRAM_SIZE-VECTOR_TABLE_SIZE)
+#    define IMX_VECTOR_VSRAM      (IMX_OCRAM_VADDR+IMX_EIM_SRAM_SIZE-VECTOR_TABLE_SIZE)
 #  else /* Must be CONFIG_IMX_BOOT_DRAM */
 #    define IMX_VECTOR_PADDR      (IMX_MMDC_DRAM_PADDR+IMX_MMDC_DRAM_SIZE-VECTOR_TABLE_SIZE)
 #    define IMX_VECTOR_VSRAM      (IMX_MMDC_DRAM_VADDR+IMX_MMDC_DRAM_SIZE-VECTOR_TABLE_SIZE)
