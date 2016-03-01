@@ -51,10 +51,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GIC registers are memory mapped and accessed through a processor specific
- * private address space via the SCU.  The Cortex-A9 MCU chip.h header file
- * must provide the definition CHIP_MPCORE_VBASE to access this the registers
- * in this memory region.
+/* MPCore registers are memory mapped and accessed through a processor
+ * specific private address space via the SCU.  The Cortex-A9 MCU chip.h
+ * header file must provide the definition CHIP_MPCORE_VBASE to access this
+ * the registers in this memory region.
  */
 
 /* Peripheral Base Offsets **************************************************/

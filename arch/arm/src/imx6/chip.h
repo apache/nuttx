@@ -41,10 +41,19 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip/imx_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* MPCore registers are memory mapped and accessed through a processor
+ * specific private address space via the SCU.  The Cortex-A9 MCU chip.h
+ * header file must provide the definition CHIP_MPCORE_VBASE to access this
+ * the registers in this memory region.
+ */
+
+#define CHIP_MPCORE_VBASE IMX_ARMMP_VSECTION
 
 /****************************************************************************
  * Public Types
