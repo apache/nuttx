@@ -139,13 +139,13 @@
 
 /* i.MX6 ARM MP PSECTION Offsets */
 
-#define IMX_SCU_OFFSET           0x00000000  /* 00000000-000000fc        SCU registers */
-#define IMX_INTCTL_OFFSET        0x00000100  /* 00000100-000001ff        Interrupt controller interfaces */
-#define IMX_GLBTIMER_OFFSET      0x00000200  /* 00000200-000002ff        Global timer */
+#define IMX_MPSCU_OFFSET         0x00000000  /* 00000000-000000fc        SCU registers */
+#define IMX_MPICC_OFFSET         0x00000100  /* 00000100-000001ff        Interrupt controller interfaces */
+#define IMX_MPGTM_OFFSET         0x00000200  /* 00000200-000002ff        Global timer */
                                              /* 00000300-000005ff        Reserved */
-#define IMX_PRIVTIMR_OFFSET      0x00000600  /* 00000600-000006ff        Private timers and watchdogs */
+#define IMX_MPPTM_OFFSET         0x00000600  /* 00000600-000006ff        Private timers and watchdogs */
                                              /* 00000700-00000fff        Reserved */
-#define IMX_INTDISTR_OFFSET      0x00001000  /* 00001000-00001fff        Interrupt distributor */
+#define IMX_MPICD_OFFSET         0x00001000  /* 00001000-00001fff        Interrupt distributor */
 #define IMX_PL310_OFFSET         0x00002000  /* 00002000-00002fff   4 KB PL310 (L2 Cache controller) */
                                              /* 00003000-000fffff 1012 KB Reserved */
 
@@ -307,11 +307,11 @@
 
 /* i.MX6 ARM MP Physical Base Addresses */
 
-#define IMX_SCU_PBASE            (IMX_ARMMP_PSECTION+IMX_SCU_OFFSET)
-#define IMX_INTCTL_PBASE         (IMX_ARMMP_PSECTION+IMX_INTCTL_OFFSET)
-#define IMX_GLBTIMER_PBASE       (IMX_ARMMP_PSECTION+IMX_GLBTIMER_OFFSET)
-#define IMX_PRIVTIMR_PBASE       (IMX_ARMMP_PSECTION+IMX_PRIVTIMR_OFFSET)
-#define IMX_INTDISTR_PBASE       (IMX_ARMMP_PSECTION+IMX_INTDISTR_OFFSET)
+#define IMX_MPSCU_PBASE          (IMX_ARMMP_PSECTION+IMX_MPSCU_OFFSET)
+#define IMX_MPICC_PBASE          (IMX_ARMMP_PSECTION+IMX_MPICC_OFFSET)
+#define IMX_MPGTM_PBASE          (IMX_ARMMP_PSECTION+IMX_MPGTM_OFFSET)
+#define IMX_MPPTM_PBASE          (IMX_ARMMP_PSECTION+IMX_MPPTM_OFFSET)
+#define IMX_MPICD_PBASE          (IMX_ARMMP_PSECTION+IMX_MPICD_OFFSET)
 #define IMX_PL310_PBASE          (IMX_ARMMP_PSECTION+IMX_PL310_OFFSET)
 
 /* i.MX6 PCIE Physical Base Addresses */
@@ -575,11 +575,11 @@
 
 /* i.MX6 ARM MP Virtual Base Addresses */
 
-#define IMX_SCU_VBASE            (IMX_ARMMP_VSECTION+IMX_SCU_OFFSET)
-#define IMX_INTCTL_VBASE         (IMX_ARMMP_VSECTION+IMX_INTCTL_OFFSET)
-#define IMX_GLBTIMER_VBASE       (IMX_ARMMP_VSECTION+IMX_GLBTIMER_OFFSET)
-#define IMX_PRIVTIMR_VBASE       (IMX_ARMMP_VSECTION+IMX_PRIVTIMR_OFFSET)
-#define IMX_INTDISTR_VBASE       (IMX_ARMMP_VSECTION+IMX_INTDISTR_OFFSET)
+#define IMX_MPSCU_VBASE          (IMX_ARMMP_VSECTION+IMX_MPSCU_OFFSET)
+#define IMX_MPICC_VBASE          (IMX_ARMMP_VSECTION+IMX_MPICC_OFFSET)
+#define IMX_MPGTM_VBASE          (IMX_ARMMP_VSECTION+IMX_MPGTM_OFFSET)
+#define IMX_MPPTM_VBASE          (IMX_ARMMP_VSECTION+IMX_MPPTM_OFFSET)
+#define IMX_MPICD_VBASE          (IMX_ARMMP_VSECTION+IMX_MPICD_OFFSET)
 #define IMX_PL310_VBASE          (IMX_ARMMP_VSECTION+IMX_PL310_OFFSET)
 
 /* i.MX6 PCIE Virtual Base Addresses */
