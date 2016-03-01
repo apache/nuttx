@@ -2,7 +2,7 @@
  * configs/nucleo-f303re/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
+ *   Copyright (C) 2015-2016 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
@@ -119,8 +119,8 @@ static const uint32_t g_pinlist[ADC_NCHANNELS]  =
   GPIO_ADC1_IN1,
 #ifdef ADC1_HAVE_DMA
   GPIO_ADC1_IN2,
-  GPIO_ADC12_IN6,
-  GPIO_ADC12_IN7,
+  GPIO_ADC1_IN6,
+  GPIO_ADC1_IN7,
 #endif
 };
 
@@ -143,8 +143,8 @@ static const uint32_t g_pinlist[ADC_NCHANNELS]  =
 {
   GPIO_ADC2_IN1,
 #ifdef ADC2_HAVE_DMA
-  GPIO_ADC12_IN6,
-  GPIO_ADC12_IN7,
+  GPIO_ADC2_IN6,
+  GPIO_ADC2_IN7,
 #endif
 };
 
