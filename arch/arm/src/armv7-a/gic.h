@@ -9,6 +9,9 @@
  *   Cortex™-A9 MPCore, Revision: r4p1, Technical Reference Manual, ARM DDI
  *   0407I (ID091612).
  *
+ *   Includes some removed registers from the r2p2 version as well. ARM DDI
+ *   0407F (ID050110)
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -231,7 +234,7 @@
 #define GIC_ICCPMR_MASK            (15 << GIC_ICCPMR_SHIFT)
 #  define GIC_ICCPMR_VALUE(n)      ((uint32_t)(n) << GIC_ICCPMR_SHIFT)
                                              /* Bits 8-31: Reserved */
-/* Binary point Register */
+/* Binary point Register and liased Non-secure Binary Point Register */
 
 #define GIC_ICCBPR_SHIFT           (0)       /* Bits 0-2: Binary point */
 #define GIC_ICCBPR_MASK            (7 << GIC_ICCBPR_SHIFT)
@@ -275,10 +278,6 @@
 #define GIC_ICCHPIR_CPUSRC_MASK    (7 << GIC_ICCHPIR_CPUSRC_SHIFT)
 #  define GIC_ICCHPIR_CPUSRC(n)    ((uint32_t)(n) << GIC_ICCHPIR_CPUSRC_SHIFT)
                                              /* Bits 13-31: Reserved */
-
-/* Aliased Non-secure Binary Point Register */
-
-#define GIC_ICCABPR_
 
 /* CPU Interface Implementer ID Register */
 
