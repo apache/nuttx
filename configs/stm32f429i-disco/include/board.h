@@ -312,7 +312,10 @@
 #define BOARD_LTDC_PLLSAIN              192
 #define BOARD_LTDC_PLLSAIR              4
 #define BOARD_LTDC_PLLSAIQ              7
-#define BOARD_LTDC_PLLSAIDIVR           RCC_PLLSAIDIVR_DIV8
+
+/* Division factor for LCD clock */
+
+#define STM32_RCC_DCKCFGR_PLLSAIDIVR    RCC_DCKCFGR_PLLSAIDIVR_DIV8
 
 /* Pixel Clock Polarity */
 #define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
@@ -369,7 +372,10 @@
 #define BOARD_LTDC_PLLSAIN              ???
 #define BOARD_LTDC_PLLSAIR              ???
 #define BOARD_LTDC_PLLSAIQ              ???
-#define BOARD_LTDC_PLLSAIDIVR           ???
+
+/* Division factor for LCD clock */
+
+#define STM32_RCC_DCKCFGR_PLLSAIDIVR    ???
 
 /* Pixel Clock Polarity */
 #define BOARD_LTDC_GCR_PCPOL            ???
@@ -417,12 +423,6 @@
 #define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(BOARD_LTDC_PLLSAIQ)
-
-/* Configure division factor for LCD clock */
-
-#define STM32_RCC_DCKCFGR_PLLSAIDIVR \
-           RCC_DCKCFGR_PLLSAIDIVR(BOARD_LTDC_PLLSAIDIVR)
-
 
 #endif /* CONFIG_STM32_LTDC */
 
