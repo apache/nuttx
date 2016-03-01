@@ -795,8 +795,8 @@
 
   /* In this case, page table must lie at the top 16Kb of OCRAM. */
 
-#    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PBASE - PGTABLE_SIZE)
-#    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VBASE - PGTABLE_SIZE)
+#    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PBASE + IMX_OCRAM_SIZE - PGTABLE_SIZE)
+#    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - PGTABLE_SIZE)
 #    define PGTABLE_IN_HIGHSRAM   1
 
   /* We will force the IDLE stack to precede the page table */
@@ -882,13 +882,13 @@
 
   /* Vector L2 page table base addresses */
 
-#  define VECTOR_L2_PBASE         (PGTABLE_BASE_PADDR+VECTOR_L2_OFFSET)
-#  define VECTOR_L2_VBASE         (PGTABLE_BASE_VADDR+VECTOR_L2_OFFSET)
+#  define VECTOR_L2_PBASE         (PGTABLE_BASE_PADDR + VECTOR_L2_OFFSET)
+#  define VECTOR_L2_VBASE         (PGTABLE_BASE_VADDR + VECTOR_L2_OFFSET)
 
   /* Vector L2 page table end addresses */
 
-#  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
-#  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
+#  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE + VECTOR_L2_SIZE)
+#  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE + VECTOR_L2_SIZE)
 
   /* Paging L2 page table offset/size */
 
@@ -908,13 +908,13 @@
  * address of the page table.
  */
 
-#define PGTABLE_L2_PBASE          (PGTABLE_BASE_PADDR+PGTABLE_L2_OFFSET)
-#define PGTABLE_L2_VBASE          (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
+#define PGTABLE_L2_PBASE          (PGTABLE_BASE_PADDR + PGTABLE_L2_OFFSET)
+#define PGTABLE_L2_VBASE          (PGTABLE_BASE_VADDR + PGTABLE_L2_OFFSET)
 
 /* Paging L2 page table end addresses */
 
-#define PGTABLE_L2_END_PADDR      (PGTABLE_L2_PBASE+PGTABLE_L2_SIZE)
-#define PGTABLE_L2_END_VADDR      (PGTABLE_L2_VBASE+PGTABLE_L2_SIZE)
+#define PGTABLE_L2_END_PADDR      (PGTABLE_L2_PBASE + PGTABLE_L2_SIZE)
+#define PGTABLE_L2_END_VADDR      (PGTABLE_L2_VBASE + PGTABLE_L2_SIZE)
 
 /* Base address of the interrupt vector table.
  *
@@ -935,8 +935,8 @@
 
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
 
-#  define IMX_VECTOR_PADDR        (IMX_OCRAM_PBASE+IMX_OCRAM_SIZE-VECTOR_TABLE_SIZE)
-#  define IMX_VECTOR_VSRAM        (IMX_OCRAM_VBASE+IMX_OCRAM_SIZE-VECTOR_TABLE_SIZE)
+#  define IMX_VECTOR_PADDR        (IMX_OCRAM_PBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)
+#  define IMX_VECTOR_VSRAM        (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)
 #  define IMX_VECTOR_VADDR        0xffff0000
 
 #endif
