@@ -46,11 +46,7 @@
 
 #include "stm32.h"
 
-#if defined(CONFIG_STM32_STM32F446)
-# include "chip/stm32f44xxx_otgfs.h"
-#else
-# include "chip/stm32fxxxxx_otgfs.h"
-#endif
+#include "chip/stm32fxxxxx_otgfs.h"
 
 #if defined(CONFIG_STM32_OTGFS)
 
