@@ -11535,4 +11535,5 @@
 	  i.MX6Q (2016-02-28).
 	* configs/sabre-6quad:  Placeholder that will eventually become board support
 	  for the NXP/Freescale Sabre 6Quad board (2016-02-28).
-
+	* arch/arm/src/stm32:  Support for STM32F46xx from Paul Alexander Patience
+	  (2016-03-01).
