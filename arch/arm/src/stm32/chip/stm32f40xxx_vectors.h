@@ -1,8 +1,11 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32f40xxx_vectors.h
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           David Sidrane <david_s5@nscdg.com>
+ *           Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,7 +41,7 @@
  ************************************************************************************/
 
 /* This file is included by stm32_vectors.S.  It provides the macro VECTOR that
- * supplies ach STM32F40xxx vector in terms of a (lower-case) ISR label and an
+ * supplies each STM32F40xxx vector in terms of a (lower-case) ISR label and an
  * (upper-case) IRQ number as defined in arch/arm/include/stm32/stm32f40xxx_irq.h.
  * stm32_vectors.S will define the VECTOR macro in different ways in order to generate
  * the interrupt vectors and handlers in their final form.
@@ -52,7 +55,18 @@
 
 /* Reserve interrupt table entries for I/O interrupts. */
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS 82
+#  if defined(CONFIG_STM32_STM32F401) || defined(CONFIG_STM32_STM32F411) || \
+      defined(CONFIG_STM32_STM32F405) || defined(CONFIG_STM32_STM32F407)
+#    define ARMV7M_PERIPHERAL_INTERRUPTS 82
+#  elif defined(CONFIG_STM32_STM32F427)
+#    define ARMV7M_PERIPHERAL_INTERRUPTS 87
+#  elif defined(CONFIG_STM32_STM32F429)
+#    define ARMV7M_PERIPHERAL_INTERRUPTS 91
+#  elif defined(CONFIG_STM32_STM32F446)
+#    define ARMV7M_PERIPHERAL_INTERRUPTS 97
+#  elif defined(CONFIG_STM32_STM32F469)
+#    define ARMV7M_PERIPHERAL_INTERRUPTS 93
+#  endif
 
 #else
 
@@ -117,8 +131,13 @@ VECTOR(stm32_dma2s1, STM32_IRQ_DMA2S1)           /* Vector 16+57: DMA2 Stream 1 
 VECTOR(stm32_dma2s2, STM32_IRQ_DMA2S2)           /* Vector 16+58: DMA2 Stream 2 global interrupt */
 VECTOR(stm32_dma2s3, STM32_IRQ_DMA2S3)           /* Vector 16+59: DMA2 Stream 3 global interrupt */
 VECTOR(stm32_dma2s4, STM32_IRQ_DMA2S4)           /* Vector 16+60: DMA2 Stream 4 global interrupt */
+#if defined(CONFIG_STM32_STM32F446)
+UNUSED(STM32_IRQ_RESERVED61)                     /* Vector 16+61: Reserved */
+UNUSED(STM32_IRQ_RESERVED62)                     /* Vector 16+62: Reserved */
+#else
 VECTOR(stm32_eth, STM32_IRQ_ETH)                 /* Vector 16+61: Ethernet global interrupt */
 VECTOR(stm32_ethwkup, STM32_IRQ_ETHWKUP)         /* Vector 16+62: Ethernet Wakeup through EXTI line interrupt */
+#endif
 VECTOR(stm32_can2tx, STM32_IRQ_CAN2TX)           /* Vector 16+63: CAN2 TX interrupts */
 VECTOR(stm32_can2rx0, STM32_IRQ_CAN2RX0)         /* Vector 16+64: CAN2 RX0 interrupts */
 VECTOR(stm32_can2rx1, STM32_IRQ_CAN2RX1)         /* Vector 16+65: CAN2 RX1 interrupt */
@@ -135,8 +154,59 @@ VECTOR(stm32_otghsep1in, STM32_IRQ_OTGHSEP1IN)   /* Vector 16+75: USB On The Go 
 VECTOR(stm32_otghswkup, STM32_IRQ_OTGHSWKUP)     /* Vector 16+76: USB On The Go HS Wakeup through EXTI interrupt */
 VECTOR(stm32_otghs, STM32_IRQ_OTGHS)             /* Vector 16+77: USB On The Go HS global interrupt */
 VECTOR(stm32_dcmi, STM32_IRQ_DCMI)               /* Vector 16+78: DCMI global interrupt */
+#if defined(CONFIG_STM32_STM32F446)
+UNUSED(STM32_IRQ_RESERVED79)                     /* Vector 16+79: Reserved */
+UNUSED(STM32_IRQ_RESERVED80)                     /* Vector 16+80: Reserved */
+#else
 VECTOR(stm32_cryp, STM32_IRQ_CRYP)               /* Vector 16+79: CRYP crypto global interrupt */
 VECTOR(stm32_hash, STM32_IRQ_HASH)               /* Vector 16+80: Hash and Rng global interrupt */
+#endif
 VECTOR(stm32_fpu, STM32_IRQ_FPU)                 /* Vector 16+81: FPU global interrupt */
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F469)
+VECTOR(stm32_uart7, STM32_IRQ_UART7)             /* Vector 16+82: UART7 interrupt */
+VECTOR(stm32_uart8, STM32_IRQ_UART8)             /* Vector 16+83: UART8 interrupt */
+#elif defined(CONFIG_STM32_STM32F446)
+UNUSED(STM32_IRQ_RESERVED82)                     /* Vector 16+82: Reserved */
+UNUSED(STM32_IRQ_RESERVED83)                     /* Vector 16+83: Reserved */
+#endif
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+VECTOR(stm32_spi4, STM32_IRQ_SPI4)               /* Vector 16+84: SPI4 interrupt */
+#endif
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F469)
+VECTOR(stm32_spi5, STM32_IRQ_SPI5)               /* Vector 16+85: SPI5 interrupt */
+VECTOR(stm32_spi6, STM32_IRQ_SPI6)               /* Vector 16+86: SPI6 interrupt */
+#elif defined(CONFIG_STM32_STM32F446)
+UNUSED(STM32_IRQ_RESERVED85)                     /* Vector 16+85: Reserved */
+UNUSED(STM32_IRQ_RESERVED86)                     /* Vector 16+86: Reserved */
+#endif
+#if defined(CONFIG_STM32_STM32F429) || defined(CONFIG_STM32_STM32F446) || \
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+VECTOR(stm32_sai1, STM32_IRQ_SAI1)               /* Vector 16+87: SAI1 interrupt */
+#endif
+#if defined(CONFIG_STM32_STM32F429) || defined(CONFIG_STM32_STM32F469)
+VECTOR(stm32_ltdcint, STM32_IRQ_LTDCINT)         /* Vector 16+88: LTDC interrupt */
+VECTOR(stm32_ltdcerrint, STM32_IRQ_LTDCERRINT)   /* Vector 16+89: LTDC Error interrupt */
+VECTOR(stm32_dma2d, STM32_IRQ_DMA2D)             /* Vector 16+90: DMA2D interrupt */
+#elif defined(CONFIG_STM32_STM32F446)
+UNUSED(STM32_IRQ_RESERVED88)                     /* Vector 16+88: Reserved */
+UNUSED(STM32_IRQ_RESERVED89)                     /* Vector 16+89: Reserved */
+UNUSED(STM32_IRQ_RESERVED90)                     /* Vector 16+90: Reserved */
+#endif
+#if defined(CONFIG_STM32_STM32F446)
+VECTOR(stm32_sai2, STM32_IRQ_SAI2)               /* Vector 16+91: SAI2 Global interrupt */
+VECTOR(stm32_quadspi, STM32_IRQ_QUADSPI)         /* Vector 16+92: QuadSPI Global interrupt */
+#elif defined(CONFIG_STM32_STM32F469)
+VECTOR(stm32_quadspi, STM32_IRQ_QUADSPI)         /* Vector 16+91: QuadSPI Global interrupt */
+VECTOR(stm32_dsi, STM32_IRQ_DSI)                 /* Vector 16+92: DSI Global interrupt */
+#endif
+#if defined(CONFIG_STM32_STM32F446)
+VECTOR(stm32_hdmicec, STM32_IRQ_HDMICEC)         /* Vector 16+93: HDMI-CEC Global interrupt */
+VECTOR(stm32_spdifrx, STM32_IRQ_SPDIFRX)         /* Vector 16+94: SPDIF-Rx Global interrupt */
+VECTOR(stm32_fmpi2c1, STM32_IRQ_FMPI2C1)         /* Vector 16+95: FMPI2C1 event interrupt */
+VECTOR(stm32_fmpi2c1err, STM32_IRQ_FMPI2C1ERR)   /* Vector 16+96: FMPI2C1 Error event interrupt */
+#endif
 
 #endif /* CONFIG_ARMV7M_CMNVECTOR */
