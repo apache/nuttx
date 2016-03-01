@@ -40,6 +40,8 @@ ifeq ($(CONFIG_ARCH_CORTEXA5),y)        # Cortex-A5 is ARMv7-A
 ARCH_SUBDIR = armv7-a
 else ifeq ($(CONFIG_ARCH_CORTEXA8),y)   # Cortex-A8 is ARMv7-A
 ARCH_SUBDIR = armv7-a
+else ifeq ($(CONFIG_ARCH_CORTEXA9),y)   # Cortex-A9 is ARMv7-A
+ARCH_SUBDIR = armv7-a
 else ifeq ($(CONFIG_ARCH_CORTEXR4),y)   # Cortex-R4 is ARMv7-R
 ARCH_SUBDIR = armv7-r
 else ifeq ($(CONFIG_ARCH_CORTEXR4F),y)  # Cortex-R4F is ARMv7-R

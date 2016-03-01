@@ -42,16 +42,7 @@
 #include "mmu.h"
 
 #include "chip/imx_memorymap.h"
-#include "imx_lcd.h"
 #include "imx_memorymap.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -212,6 +203,7 @@ const struct section_mapping_s g_operational_mapping[] =
     MMU_IOFLAGS, IMX6_LCDC_FBNSECTIONS
   },
 #endif
+
 };
 
 /* The number of entries in the operational mapping table */

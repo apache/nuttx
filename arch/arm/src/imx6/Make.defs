@@ -132,4 +132,4 @@ CHIP_ASRCS  =
 
 # i.MX6-specific C source files
 
-CHIP_CSRCS  = 
+CHIP_CSRCS  = imx_memorymap.c

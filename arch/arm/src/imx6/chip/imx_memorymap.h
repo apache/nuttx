@@ -120,7 +120,7 @@
 
 /* i.MX6 DMA PSECTION Offsets */
 
-#define IMX_CAAM_OFFSET          0x00000000  /* 00000000-00003fff  16 KB CAAM (16K secure RAM) */
+#define IMX_CAAMRAM_OFFSET       0x00000000  /* 00000000-00003fff  16 KB CAAM (16K secure RAM) */
                                              /* 00004000-0000ffff  48 KB Reserved */
 #define IMX_APBHDMA_OFFSET       0x00010000  /* 00010000-00011fff   8 KB APBH-Bridge-DMA */
 #define IMX_GPMI_OFFSET          0x00012000  /* 00012000-00013fff   8 KB GPMI */
@@ -139,13 +139,13 @@
 
 /* i.MX6 ARM MP PSECTION Offsets */
 
-#define IMX_MPSCU_OFFSET         0x00000000  /* 00000000-000000fc        SCU registers */
-#define IMX_MPICC_OFFSET         0x00000100  /* 00000100-000001ff        Interrupt controller interfaces */
-#define IMX_MPGTM_OFFSET         0x00000200  /* 00000200-000002ff        Global timer */
+#define IMX_MPSCU_OFFSET         0x00000000  /* 00000000-000000fc  0.25 KB SCU registers */
+#define IMX_MPICC_OFFSET         0x00000100  /* 00000100-000001ff  0.25 KB Interrupt controller interfaces */
+#define IMX_MPGTM_OFFSET         0x00000200  /* 00000200-000002ff  0.25 KB Global timer */
                                              /* 00000300-000005ff        Reserved */
-#define IMX_MPPTM_OFFSET         0x00000600  /* 00000600-000006ff        Private timers and watchdogs */
+#define IMX_MPPTM_OFFSET         0x00000600  /* 00000600-000006ff  0.25 KB Private timers and watchdogs */
                                              /* 00000700-00000fff        Reserved */
-#define IMX_MPICD_OFFSET         0x00001000  /* 00001000-00001fff        Interrupt distributor */
+#define IMX_MPICD_OFFSET         0x00001000  /* 00001000-00001fff   4 KB Interrupt distributor */
 #define IMX_PL310_OFFSET         0x00002000  /* 00002000-00002fff   4 KB PL310 (L2 Cache controller) */
                                              /* 00003000-000fffff 1012 KB Reserved */
 
@@ -291,7 +291,7 @@
                                              /* 0020c000-000fffff   2 MB Reserved */
 /* i.MX6 DMA Physical Base Addresses */
 
-#define IMX_CAAM_PBASE           (IMX_DMA_PSECTION+IMX_CAAM_OFFSET)
+#define IMX_CAAMRAM_PBASE        (IMX_DMA_PSECTION+IMX_CAAMRAM_OFFSET)
 #define IMX_APBHDMA_PBASE        (IMX_DMA_PSECTION+IMX_APBHDMA_OFFSET)
 #define IMX_GPMI_PBASE           (IMX_DMA_PSECTION+IMX_GPMI_OFFSET)
 #define IMX_BCH_PBASE            (IMX_DMA_PSECTION+IMX_BCH_OFFSET)
@@ -443,27 +443,27 @@
  * are not known apriori and must be specified with configuration settings.
  */
 
-#define IMX_ROMCP_SIZE             (96*1024) /* 00000000-00017fff  96 KB Boot ROM (ROMCP) */
+#define IMX_ROMCP_SECSIZE          (96*1024) /* 00000000-00017fff  96 KB Boot ROM (ROMCP) */
                                              /* 00018000-000fffff 928 KB Reserved */
-#define IMX_DMA_SIZE             (1024*1024) /* 00100000-001fffff   1 MB See offsets below */
-#define IMX_GPV2_SIZE            (1024*1024) /* 00200000-002fffff   1 MB GPV_2 PL301 (per1) configuration port */
-#define IMX_GPV3_SIZE            (1024*1024) /* 00300000-003fffff   1 MB GPV_3 PL301 (per2) configuration port */
+#define IMX_DMA_SECSIZE          (1024*1024) /* 00100000-001fffff   1 MB See offsets below */
+#define IMX_GPV2_SECSIZE         (1024*1024) /* 00200000-002fffff   1 MB GPV_2 PL301 (per1) configuration port */
+#define IMX_GPV3_SECSIZE         (1024*1024) /* 00300000-003fffff   1 MB GPV_3 PL301 (per2) configuration port */
                                              /* 00400000-007fffff   4 MB Reserved */
-#define IMX_GPV4_SIZE            (1024*1024) /* 00800000-008fffff   1 MB GPV_4 PL301 (fast3) configuration port */
-#define IMX_OCRAM_SIZE           (1024*1024) /* 00900000-009fffff   1 MB OCRAM */
-#define IMX_ARMMP_SIZE              (8*1024) /* 00a00000-00afffff   8 KB ARM MP */
-#define IMX_GPV0PL301_SIZE       (1024*1024) /* 00b00000-00bfffff   1 MB GPV0 PL301 (fast2) configuration port */
-#define IMX_GPV1PL301_SIZE       (1024*1024) /* 00c00000-00cfffff   1 MB GPV1 PL301 (fast1) configuration port */
+#define IMX_GPV4_SECSIZE         (1024*1024) /* 00800000-008fffff   1 MB GPV_4 PL301 (fast3) configuration port */
+#define IMX_OCRAM_SECSIZE        (1024*1024) /* 00900000-009fffff   1 MB OCRAM section size */
+#define IMX_ARMMP_SECSIZE           (8*1024) /* 00a00000-00afffff   8 KB ARM MP */
+#define IMX_GPV0PL301_SECSIZE    (1024*1024) /* 00b00000-00bfffff   1 MB GPV0 PL301 (fast2) configuration port */
+#define IMX_GPV1PL301_SECSIZE    (1024*1024) /* 00c00000-00cfffff   1 MB GPV1 PL301 (fast1) configuration port */
                                              /* 00d00000-00ffffff 3072 KB Reserved */
-#define IMX_PCIE_SIZE         (16*1024*1024) /* 01000000-01ffffff  16 MB PCIe */
-#define IMX_AIPS1_SIZE           (1024*1024) /* 02000000-020fffff   1 MB Peripheral IPs via AIPS-1 */
-#define IMX_AIPS2_SIZE           (1024*1024) /* 02100000-021fffff   1 MB Peripheral IPs via AIPS-2 */
-#define IMX_SATA_SIZE              (48*1024) /* 02200000-0220bfff  48 KB SATA */
+#define IMX_PCIE_SECSIZE      (16*1024*1024) /* 01000000-01ffffff  16 MB PCIe */
+#define IMX_AIPS1_SECSIZE        (1024*1024) /* 02000000-020fffff   1 MB Peripheral IPs via AIPS-1 */
+#define IMX_AIPS2_SECSIZE        (1024*1024) /* 02100000-021fffff   1 MB Peripheral IPs via AIPS-2 */
+#define IMX_SATA_SECSIZE           (48*1024) /* 02200000-0220bfff  48 KB SATA */
                                              /* 0220c000-023fffff   2 MB Reserved */
-#define IMX_IPU1_SIZE          (4*1024*1024) /* 02600000-029fffff   4 MB IPU-1 */
-#define IMX_IPU2_SIZE          (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
-#define IMX_EIM_SIZE     MKULONG(CONFIG_IMX_EIM_SIZE) /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
-#define IMX_MMDCDDR_SIZE MKULONG(CONFIG_IMX_DDR_SIZE  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
+#define IMX_IPU1_SECSIZE       (4*1024*1024) /* 02600000-029fffff   4 MB IPU-1 */
+#define IMX_IPU2_SECSIZE       (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
+#define IMX_EIM_SECSIZE     MKULONG(CONFIG_IMX_EIM_SIZE) /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
+#define IMX_MMDCDDR_SECSIZE MKULONG(CONFIG_IMX_DDR_SIZE  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
 
 /* Convert size in bytes to number of sections (in Mb). */
@@ -478,23 +478,23 @@
  * region.
  */
 
-#define IMX_ROMCP_NSECTIONS      _NSECTIONS(IMX_ROMCP_SIZE
-#define IMX_DMA_NSECTIONS        _NSECTIONS(IMX_DMA_SIZE
-#define IMX_GPV2_NSECTIONS       _NSECTIONS(IMX_GPV2_SIZE
-#define IMX_GPV3_NSECTIONS       _NSECTIONS(IMX_GPV3_SIZE
-#define IMX_GPV4_NSECTIONS       _NSECTIONS(IMX_GPV4_SIZE
-#define IMX_OCRAM_NSECTIONS      _NSECTIONS(IMX_OCRAM_SIZE
-#define IMX_ARMMP_NSECTIONS      _NSECTIONS(IMX_ARMMP_SIZE
-#define IMX_GPV0PL301_NSECTIONS  _NSECTIONS(IMX_GPV0PL301_SIZE
-#define IMX_GPV1PL301_NSECTIONS  _NSECTIONS(IMX_GPV1PL301_SIZE
-#define IMX_PCIE_NSECTIONS       _NSECTIONS(IMX_PCIE_SIZE
-#define IMX_AIPS1_NSECTIONS      _NSECTIONS(IMX_AIPS1_SIZE
-#define IMX_AIPS2_NSECTIONS      _NSECTIONS(IMX_AIPS2_SIZE
-#define IMX_SATA_NSECTIONS       _NSECTIONS(IMX_SATA_SIZE
-#define IMX_IPU1_NSECTIONS       _NSECTIONS(IMX_IPU1_SIZE
-#define IMX_IPU2_NSECTIONS       _NSECTIONS(IMX_IPU2_SIZE
-#define IMX_EIM_NSECTIONS        _NSECTIONS(IMX_EIM_SIZE
-#define IMX_MMDCDDR_NSECTIONS    _NSECTIONS(IMX_MMDCDDR_SIZE
+#define IMX_ROMCP_NSECTIONS      _NSECTIONS(IMX_ROMCP_SECSIZE)
+#define IMX_DMA_NSECTIONS        _NSECTIONS(IMX_DMA_SECSIZE)
+#define IMX_GPV2_NSECTIONS       _NSECTIONS(IMX_GPV2_SECSIZE)
+#define IMX_GPV3_NSECTIONS       _NSECTIONS(IMX_GPV3_SECSIZE)
+#define IMX_GPV4_NSECTIONS       _NSECTIONS(IMX_GPV4_SECSIZE)
+#define IMX_OCRAM_NSECTIONS      _NSECTIONS(IMX_OCRAM_SECSIZE)
+#define IMX_ARMMP_NSECTIONS      _NSECTIONS(IMX_ARMMP_SECSIZE)
+#define IMX_GPV0PL301_NSECTIONS  _NSECTIONS(IMX_GPV0PL301_SECSIZE)
+#define IMX_GPV1PL301_NSECTIONS  _NSECTIONS(IMX_GPV1PL301_SECSIZE)
+#define IMX_PCIE_NSECTIONS       _NSECTIONS(IMX_PCIE_SECSIZE)
+#define IMX_AIPS1_NSECTIONS      _NSECTIONS(IMX_AIPS1_SECSIZE)
+#define IMX_AIPS2_NSECTIONS      _NSECTIONS(IMX_AIPS2_SECSIZE)
+#define IMX_SATA_NSECTIONS       _NSECTIONS(IMX_SATA_SECSIZE)
+#define IMX_IPU1_NSECTIONS       _NSECTIONS(IMX_IPU1_SECSIZE)
+#define IMX_IPU2_NSECTIONS       _NSECTIONS(IMX_IPU2_SECSIZE)
+#define IMX_EIM_NSECTIONS        _NSECTIONS(IMX_EIM_SECSIZE)
+#define IMX_MMDCDDR_NSECTIONS    _NSECTIONS(IMX_MMDCDDR_SECSIZE)
 
 /* Section MMU Flags 
  *
@@ -539,27 +539,28 @@
 
 /* The default mappings are a simple 1-to-1 mapping */
 
-#define IMX_ROMCP_VSECTION       IMX_ROMCP_PSECTION        /*  96 KB Boot ROM (ROMCP) */
-#define IMX_DMA_VSECTION         IMX_DMA_PSECTION          /*   1 MB See offsets below */
-#define IMX_GPV2_VSECTION        IMX_GPV2_PSECTION         /*   1 MB GPV_2 PL301 (per1) configuration port */
-#define IMX_GPV3_VSECTION        IMX_GPV3_PSECTION         /*   1 MB GPV_3 PL301 (per2) configuration port */
-#define IMX_GPV4_VSECTION        IMX_GPV4_PSECTION         /*   1 MB GPV_4 PL301 (fast3) configuration port */
-#define IMX_OCRAM_VSECTION       IMX_OCRAM_PSECTION        /*   1 MB OCRAM */
-#define IMX_ARMMP_VSECTION       IMX_ARMMP_PSECTION        /*   8 KB ARM MP */
-#define IMX_GPV0PL301_VSECTION   IMX_GPV0PL301_PSECTION    /*   1 MB GPV0 PL301 (fast2) configuration port */
-#define IMX_GPV1PL301_VSECTION   IMX_GPV1PL301_PSECTION    /*   1 MB GPV1 PL301 (fast1) configuration port */
-#define IMX_PCIE_VSECTION        IMX_PCIE_PSECTION         /*  16 MB PCIe */
-#define IMX_AIPS1_VSECTION       IMX_AIPS1_PSECTION        /*   1 MB Peripheral IPs via AIPS-1 */
-#define IMX_AIPS2_VSECTION       IMX_AIPS2_PSECTION        /*   1 MB Peripheral IPs via AIPS-2 */
-#define IMX_SATA_VSECTION        IMX_SATA_PSECTION         /*  48 KB SATA */
-#define IMX_IPU1_VSECTION        IMX_IPU1_PSECTION         /*   4 MB IPU-1 */
-#define IMX_IPU2_VSECTION        IMX_IPU2_PSECTION         /*   4 MB IPU-2 */
-#define IMX_EIM_VSECTION         IMX_EIM_PSECTION          /* 128 MB EIM - (NOR/SRAM) */
-#define IMX_MMDCDDR_VSECTION     IMX_MMDCDDR_PSECTION      /* 3840 MB MMDC-DDR Controller */
+#  define IMX_ROMCP_VSECTION     IMX_ROMCP_PSECTION        /*  96 KB Boot ROM (ROMCP) */
+#  define IMX_DMA_VSECTION       IMX_DMA_PSECTION          /*   1 MB See offsets below */
+#  define IMX_GPV2_VSECTION      IMX_GPV2_PSECTION         /*   1 MB GPV_2 PL301 (per1) configuration port */
+#  define IMX_GPV3_VSECTION      IMX_GPV3_PSECTION         /*   1 MB GPV_3 PL301 (per2) configuration port */
+#  define IMX_GPV4_VSECTION      IMX_GPV4_PSECTION         /*   1 MB GPV_4 PL301 (fast3) configuration port */
+#  define IMX_OCRAM_VSECTION     IMX_OCRAM_PSECTION        /*   1 MB OCRAM */
+#  define IMX_ARMMP_VSECTION     IMX_ARMMP_PSECTION        /*   8 KB ARM MP */
+#  define IMX_GPV0PL301_VSECTION IMX_GPV0PL301_PSECTION    /*   1 MB GPV0 PL301 (fast2) configuration port */
+#  define IMX_GPV1PL301_VSECTION IMX_GPV1PL301_PSECTION    /*   1 MB GPV1 PL301 (fast1) configuration port */
+#  define IMX_PCIE_VSECTION      IMX_PCIE_PSECTION         /*  16 MB PCIe */
+#  define IMX_AIPS1_VSECTION     IMX_AIPS1_PSECTION        /*   1 MB Peripheral IPs via AIPS-1 */
+#  define IMX_AIPS2_VSECTION     IMX_AIPS2_PSECTION        /*   1 MB Peripheral IPs via AIPS-2 */
+#  define IMX_SATA_VSECTION      IMX_SATA_PSECTION         /*  48 KB SATA */
+#  define IMX_IPU1_VSECTION      IMX_IPU1_PSECTION         /*   4 MB IPU-1 */
+#  define IMX_IPU2_VSECTION      IMX_IPU2_PSECTION         /*   4 MB IPU-2 */
+#  define IMX_EIM_VSECTION       IMX_EIM_PSECTION          /* 128 MB EIM - (NOR/SRAM) */
+#  define IMX_MMDCDDR_VSECTION   IMX_MMDCDDR_PSECTION      /* 3840 MB MMDC-DDR Controller */
+#endif /* CONFIG_ARCH_ROMPGTABLE */
 
 /* i.MX6 DMA Virtual Base Addresses */
 
-#define IMX_CAAM_VBASE           (IMX_DMA_VSECTION+IMX_CAAM_OFFSET)
+#define IMX_CAAMRAM_VBASE        (IMX_DMA_VSECTION+IMX_CAAMRAM_OFFSET)
 #define IMX_APBHDMA_VBASE        (IMX_DMA_VSECTION+IMX_APBHDMA_OFFSET)
 #define IMX_GPMI_VBASE           (IMX_DMA_VSECTION+IMX_GPMI_OFFSET)
 #define IMX_BCH_VBASE            (IMX_DMA_VSECTION+IMX_BCH_OFFSET)
@@ -794,8 +795,8 @@
 
   /* In this case, page table must lie at the top 16Kb of OCRAM. */
 
-#    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PADDR - PGTABLE_SIZE)
-#    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VADDR - PGTABLE_SIZE)
+#    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PBASE - PGTABLE_SIZE)
+#    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VBASE - PGTABLE_SIZE)
 #    define PGTABLE_IN_HIGHSRAM   1
 
   /* We will force the IDLE stack to precede the page table */
@@ -810,8 +811,8 @@
    * at the first 16Kb of SRAM.
    */
 
-#    define PGTABLE_BASE_PADDR    IMX_OCRAM_PADDR
-#    define PGTABLE_BASE_VADDR    IMX_OCRAM_VADDR
+#    define PGTABLE_BASE_PADDR    IMX_OCRAM_PBASE
+#    define PGTABLE_BASE_VADDR    IMX_OCRAM_VBASE
 #    define PGTABLE_IN_LOWSRAM    1
 
    /* We will force the IDLE stack to follow the page table */
@@ -832,8 +833,8 @@
    * the IDLE stack follows immediately.
    */
 
-#    define PGTABLE_BASE_PADDR    IMX_OCRAM_PADDR
-#    define PGTABLE_BASE_VADDR    IMX_OCRAM_VADDR
+#    define PGTABLE_BASE_PADDR    IMX_OCRAM_PBASE
+#    define PGTABLE_BASE_VADDR    IMX_OCRAM_VBASE
 #    define PGTABLE_IN_LOWSRAM    1
 
    /* We will force the IDLE stack to follow the page table */
@@ -926,24 +927,16 @@
 
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 
-#  ifdef CONFIG_IMX_BOOT_SRAM
-#    define IMX_VECTOR_PADDR      IMX_OCRAM_PADDR
-#    define IMX_VECTOR_VSRAM      IMX_OCRAM_VADDR
-#  else /* Must be CONFIG_IMX_BOOT_DRAM */
-#    define IMX_VECTOR_PADDR      IMX_MMDC_DRAM_PADDR
-#    define IMX_VECTOR_VSRAM      IMX_MMDC_DRAM_VADDR
-#  endif
+  /* Vectors will always lie at the beginnin of OCRAM */
+
+#  define IMX_VECTOR_PADDR        IMX_OCRAM_PBASE
+#  define IMX_VECTOR_VSRAM        IMX_OCRAM_VBASE
 #  define IMX_VECTOR_VADDR        0x00000000
 
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
 
-#  ifdef CONFIG_IMX_BOOT_SRAM
-#    define IMX_VECTOR_PADDR      (IMX_OCRAM_PADDR+IMX_EIM_SRAM_SIZE-VECTOR_TABLE_SIZE)
-#    define IMX_VECTOR_VSRAM      (IMX_OCRAM_VADDR+IMX_EIM_SRAM_SIZE-VECTOR_TABLE_SIZE)
-#  else /* Must be CONFIG_IMX_BOOT_DRAM */
-#    define IMX_VECTOR_PADDR      (IMX_MMDC_DRAM_PADDR+IMX_MMDC_DRAM_SIZE-VECTOR_TABLE_SIZE)
-#    define IMX_VECTOR_VSRAM      (IMX_MMDC_DRAM_VADDR+IMX_MMDC_DRAM_SIZE-VECTOR_TABLE_SIZE)
-#  endif
+#  define IMX_VECTOR_PADDR        (IMX_OCRAM_PBASE+IMX_OCRAM_SIZE-VECTOR_TABLE_SIZE)
+#  define IMX_VECTOR_VSRAM        (IMX_OCRAM_VBASE+IMX_OCRAM_SIZE-VECTOR_TABLE_SIZE)
 #  define IMX_VECTOR_VADDR        0xffff0000
 
 #endif
