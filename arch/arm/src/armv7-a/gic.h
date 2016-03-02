@@ -48,7 +48,10 @@
  * Included Files
  ****************************************************************************/
 
+#include "nuttx/config.h"
 #include "mpcore.h"
+
+#ifdef CONFIG_ARMV7A_HAVE_GIC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -401,4 +404,57 @@
 #  define GIC_ICDSGIR_TGTFILTER_OTHER (1 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to all but requesting CPU */
 #  define GIC_ICDSGIR_TGTFILTER_THIS  (2 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to requesting CPU only */
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_initialize
+ *
+ * Description:
+ *   Perform basic GIC initialization for the current CPU
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm_gic_initialize(void);
+
+/****************************************************************************
+ * Name: arm_decodeirq
+ *
+ * Description:
+ *   This function is called from the IRQ vector handler in arm_vectors.S.
+ *   At this point, the interrupt has been taken and the registers have
+ *   been saved on the stack.  This function simply needs to determine the
+ *   the irq number of the interrupt and then to call arm_doirq to dispatch
+ *   the interrupt.
+ *
+ *  Input parameters:
+ *   regs - A pointer to the register save area on the stack.
+ *
+ ****************************************************************************/
+
+uint32_t *arm_decodeirq(uint32_t *regs);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* CONFIG_ARMV7A_HAVE_GIC */
 #endif /* __ARCH_ARM_SRC_ARMV7_A_GIC_H */
