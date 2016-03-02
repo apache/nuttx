@@ -46,10 +46,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* The i.MX6 6Quad and 6Dual/DualLite are the only support i.MX6 family
- * members.
+ * members.  Individual differences between members of the families are not
+ * accounted for.
  */
 
-#define IMX_OCRAM_SIZE (256*1024)  /* Size of the On-Chip RAM (OCRAM) */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6QUAD)
+#  define IMX_OCRAM_SIZE (256*1024)  /* Size of the On-Chip RAM (OCRAM) */
+#  define IMX_NXCPUS     4           /* 4 CPUs */
+#elif defined(CONFIG_ARCH_CHIP_IMX6_6DUAL)
+#  define IMX_OCRAM_SIZE (256*1024)  /* Size of the On-Chip RAM (OCRAM) */
+#  define IMX_NXCPUS     2           /* 2 CPUs */
+#else
+#  error Unspecified i.MX6 chip
+#endif
 
 /****************************************************************************
  * Public Types
