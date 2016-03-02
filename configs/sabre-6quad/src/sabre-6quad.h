@@ -66,7 +66,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: imx6_bringup
+ * Name: imx_bringup
  *
  * Description:
  *   Bring up board features
@@ -74,7 +74,7 @@
  ************************************************************************************/
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
-int imx6_bringup(void);
+int imx_bringup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

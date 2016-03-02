@@ -36,10 +36,16 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = imx6_boardinit.c imx6_bringup.c
+CSRCS = imx_boardinit.c imx_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += imx6_appinit.c
+CSRCS += imx_appinit.c
+endif
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += imx_autoleds.c
+else
+CSRCS += imx_userleds.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sabre-6quad/src/imx6_appinit.c
+ * config/sabre-6quad/src/imx_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,7 +64,7 @@ int board_app_initialize(void)
 #ifndef CONFIG_BOARD_INITIALIZE
   /* Perform board initialization */
 
-  return imx6_bringup();
+  return imx_bringup();
 #else
   return OK;
 #endif

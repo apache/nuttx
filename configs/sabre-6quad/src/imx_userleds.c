@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sabre-6quad/src/imx6_bringup.c
+ * configs/sabre-6quad/src/imx_userleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,22 +39,21 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
+
+#include <arch/board/board.h>
 
 #include "sabre-6quad.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
+/* REVISIT:  There is no GPIO logic in place yet */
+#warning Missing logic
+#define imx_configgpio(a)
+#define imx_gpiowrite(a,b)
 
 /****************************************************************************
  * Private Functions
@@ -65,14 +64,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx6_bringup
- *
- * Description:
- *   Bring up board features
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int imx6_bringup(void)
+void board_userled_initialize(void)
 {
-  return OK;
+  /* Configure LED PIOs for output */
+
+  imx_configgpio(GPIO_LED0);
+}
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if (led == BOARD_LED0)
+    {
+      imx_gpiowrite(GPIO_LED0, !ledon); /* Low illuminates */
+    }
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  /* Low illuminates */
+
+  imx_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0));
 }
