@@ -2498,7 +2498,14 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
            */
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
-          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
+
+          /* Assume that will wait for the TXIN interrupt.  Enable it
+           * now.  We do this PRIOR to sampling the BYCT and BUSBK
+           * fields to avoid the race condition that would occur if
+           * the interrupt were enabled afterward.
+           */
+
+          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
 
           /* Have all of the bytes in the FIFO been transmitted to the
            * host?
@@ -2521,22 +2528,20 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
           if (byct > 0 || nbusybk > 0)
             {
               /* Not all of the data has been sent to the host.  A TXIN
-               * interrupt will be generated later.  Enable the TXIN
-               * interrupt now and wait for the transfer to complete.
+               * interrupt will be generated later.  We have already enabled
+               * the TXIN interrupt.  Now wait for the transfer to complete.
                */
-
-              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIER(epno));
             }
           else
             {
               /* All bytes have been sent to the host.  We must call
                * sam_req_write() now in the IDLE state with the number of
-               * bytes transferred in 'inflight'
-               *
-               * REVISIT: Isn't there a race condition here?  Could TXIN
-               * have fired just before calculating byct?  Could TXIN be
-               * pending here?
+               * bytes transferred in 'inflight'.  First disable and
+               * clear the TXIN interrupt.
                */
+
+              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIDR(epno));
+              sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
 
               privep->epstate = USBHS_EPSTATE_IDLE;
               (void)sam_req_write(priv, privep);
