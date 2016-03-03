@@ -106,7 +106,7 @@ static const struct section_mapping_s section_mapping[] =
  * and mapped but before any devices have been initialized.
  */
 
-extern void imx_boardinitialize(void);
+void imx_board_initialize(void);
 
 /************************************************************************************
  * Private Functions
@@ -211,7 +211,7 @@ void up_boot(void)
 
   /* Perform board-specific initialiation */
 
-  imx_boardinitialize();
+  imx_board_initialize();
 
   /* Set up the board-specific LEDs */
 
