@@ -266,8 +266,8 @@ static void imx_copyvectorblock(void)
   /* Copy the vectors into OCRAM at the address that will be mapped to the vector
    * address:
    *
-   *   IMX_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
-   *   IMX_VECTOR_VSRAM - Virtual address of vector table in SRAM
+   *   IMX_VECTOR_PADDR - Unmapped, physical address of vector table in OCRAM
+   *   IMX_VECTOR_VSRAM - Virtual address of vector table in OCRAM
    *   IMX_VECTOR_VADDR - Virtual address of vector table (0x00000000 or
    *                      0xffff0000)
    */
@@ -395,7 +395,7 @@ static inline void imx_wdtdisable(void)
  *       memories (NVM): SPI0 CS0 Flash Boot, SD Card Boot, NAND Flash Boot,
  *       SPI0 CS1 Flash Boot, or TWI EEPROM Boot.  Different heuristics are
  *       used with each media type.  If a valid image is found, it is copied
- *       to internal SRAM and started.
+ *       to internal OCRAM and started.
  *
  ****************************************************************************/
 
@@ -407,13 +407,13 @@ void up_boot(void)
 #endif
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-  /* __start provided the basic MMU mappings for SRAM.  Now provide mappings
+  /* __start provided the basic MMU mappings for OCRAM.  Now provide mappings
    * for all IO regions (Including the vector region).
    */
 
   imx_setupmappings();
 
-  /* Provide a special mapping for the IRAM interrupt vector positioned in
+  /* Provide a special mapping for the OCRAM interrupt vector positioned in
    * high memory.
    */
 
@@ -423,7 +423,7 @@ void up_boot(void)
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
+   * destination in OCRAM is given by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initialization code
    * at _framfuncs
    */

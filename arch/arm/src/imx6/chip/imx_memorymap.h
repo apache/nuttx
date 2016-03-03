@@ -925,6 +925,11 @@
 
 #define VECTOR_TABLE_SIZE         0x00010000
 
+/* REVISIT: These definitions are not used:  The vector table is at some
+ * arbitrary (but aligned) position in RAM or NOR FLASH and is positioned
+ * using the VBAR register.
+ */
+
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 
   /* Vectors will always lie at the beginnin of OCRAM */

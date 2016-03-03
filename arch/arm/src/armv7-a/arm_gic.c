@@ -111,7 +111,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
 void up_enable_irq(int irq)
 {
-#  warning Missnig logic
+#  warning Missing logic
 }
 
 /****************************************************************************
@@ -130,7 +130,7 @@ void up_enable_irq(int irq)
 
 void up_disable_irq(int irq)
 {
-#  warning Missnig logic
+#  warning Missing logic
 }
 
 /****************************************************************************
@@ -146,7 +146,7 @@ void up_disable_irq(int irq)
 
 int up_prioritize_irq(int irq, int priority)
 {
-#  warning Missnig logic
+#  warning Missing logic
   return OK;
 }
 
