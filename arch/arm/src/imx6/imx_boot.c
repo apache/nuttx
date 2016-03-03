@@ -108,6 +108,8 @@ static inline void imx_setupmappings(void)
       mmu_l1_map_region(&g_section_mapping[i]);
     }
 }
+#else
+#  define imx_setupmappings()
 #endif
 
 /****************************************************************************
@@ -191,16 +193,12 @@ static inline size_t imx_vectorsize(void)
  * Name: imx_vectormapping
  *
  * Description:
- *   Setup a special mapping for the interrupt vectors when (1) the
- *   interrupt vectors are not positioned in ROM, and when (2) the interrupt
- *   vectors are located at the high address, 0xffff0000.  When the
- *   interrupt vectors are located in ROM, we just have to assume that they
- *   were set up correctly;  When vectors  are located in low memory,
- *   0x00000000, the mapping for the ROM memory region will be suppressed.
+ *   Setup a special mapping for the interrupt vectors when the interrupt
+ *   vectors are located at the high address, 0xffff0000.
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_ARCH_LOWVECTORS)
+#ifndef CONFIG_ARCH_LOWVECTORS
 static void imx_vectormapping(void)
 {
   uint32_t vector_paddr = IMX_VECTOR_PADDR & PTE_SMALL_PADDR_MASK;
@@ -248,7 +246,7 @@ static void imx_vectormapping(void)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_LOWVECTORS)
+#ifndef CONFIG_ARCH_LOWVECTORS
 static void imx_copyvectorblock(void)
 {
   uint32_t *src;
@@ -406,7 +404,6 @@ void up_boot(void)
   uint32_t *dest;
 #endif
 
-#ifndef CONFIG_ARCH_ROMPGTABLE
   /* __start provided the basic MMU mappings for OCRAM.  Now provide mappings
    * for all IO regions (Including the vector region).
    */
@@ -418,8 +415,6 @@ void up_boot(void)
    */
 
   imx_vectormapping();
-
-#endif /* CONFIG_ARCH_ROMPGTABLE */
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
