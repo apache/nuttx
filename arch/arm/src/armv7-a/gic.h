@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 #include "nuttx/config.h"
+#include <stdint.h>
 #include "mpcore.h"
 
 #ifdef CONFIG_ARMV7A_HAVE_GIC
@@ -160,11 +161,11 @@
 
 /* PPI Status Register: 0x0d00 */
 
-#define GIC_ICPPISR_OFFSET         0x0d00    /* PPI Status Register */
+#define GIC_ICDPPISR_OFFSET        0x0d00    /* PPI Status Register */
 
 /* SPI Status Registers: 0x0d04-0x0d1c */
 
-#define GIC_ICSPISR_OFFSET(n)      (0x0d04 + GIC_OFFSET32(n))
+#define GIC_ICDSPISR_OFFSET(n)     (0x0d04 + GIC_OFFSET32(n))
 
 /* 0x0d80-0x0efc: Reserved */
 /* Software Generated Interrupt Register: 0x0f00 */
@@ -174,11 +175,11 @@
 /* 0x0f0c-0x0fcc: Reserved */
 /* Peripheral Identification Registers: 0x0fd0-0xfe8 */
 
-#define GIC_ICPIDR_OFFSET(n)       (0x0fd0 + ((n) << 2))
+#define GIC_ICDPIDR_OFFSET(n)      (0x0fd0 + ((n) << 2))
 
 /* Component Identification Registers: 0x0ff0-0x0ffc */
 
-#define GIC_ICCIDR_OFFSET(n)       (0x0ff0 + ((n) << 2))
+#define GIC_ICDCIDR_OFFSET(n)      (0x0ff0 + ((n) << 2))
 
 /* 0x0f04-0x0ffc: Reserved */
 
@@ -199,7 +200,7 @@
 #define GIC_ICCRPR                 (MPCORE_ICC_VBASE+GIC_ICCRPR_OFFSET)
 #define GIC_ICCHPIR                (MPCORE_ICC_VBASE+GIC_ICCHPIR_OFFSET)
 #define GIC_ICCABPR                (MPCORE_ICC_VBASE+GIC_ICCABPR_OFFSET)
-#define GIC_ICCIDR                 (MPCORE_ICC_VBASE+GIC_ICCIDR_OFFSET_
+#define GIC_ICCIDR                 (MPCORE_ICC_VBASE+GIC_ICCIDR_OFFSET)
 
 /* Distributor Registers */
 
@@ -214,15 +215,11 @@
 #define GIC_ICDIPR(n)              (MPCORE_ICD_VBASE+GIC_ICDIPR_OFFSET(n))
 #define GIC_ICDIPTR(n)             (MPCORE_ICD_VBASE+GIC_ICDIPTR_OFFSET(n))
 #define GIC_ICDICFR(n)             (MPCORE_ICD_VBASE+GIC_ICDICFR_OFFSET(n))
-#define GIC_ICPPISR                (MPCORE_ICD_VBASE+GIC_ICPPISR_OFFSET)
-#define GIC_ICSPISR(n)             (MPCORE_ICD_VBASE+GIC_ICSPISR_OFFSET(n))
+#define GIC_ICDPPISR               (MPCORE_ICD_VBASE+GIC_ICDPPISR_OFFSET)
+#define GIC_ICDSPISR(n)            (MPCORE_ICD_VBASE+GIC_ICDSPISR_OFFSET(n))
 #define GIC_ICDSGIR                (MPCORE_ICD_VBASE+GIC_ICDSGIR_OFFSET)
-#define GIC_ICPIDR(n)              (MPCORE_ICD_VBASE+GIC_ICPIDR_OFFSET(n))
-#define GIC_ICCIDR(n)              (MPCORE_ICD_VBASE+GIC_ICCIDR_OFFSET(n))
-
-/* PrimeCell Identification Registers: 0x0ff0-0x0ffc */
-
-#define        (0x0ff0 + GIC_OFFSET32(n))
+#define GIC_ICDPIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDPIDR_OFFSET(n))
+#define GIC_ICDCIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDCIDR_OFFSET(n))
 
 /* GIC Register Bit Definitions *********************************************/
 
@@ -377,16 +374,16 @@
 
 /* PPI Status Register */
 
-#define GIC_ICPPISR(n)             (1 << ((n) + 11)) /* Bits 11-15:  PPI(n) status, n=0-4 */
-#  define GIC_ICPPISR_GTM          (1 << 11) /* Bit 11:  PPI[0], Global Timer */
-#  define GIC_ICPPISR_NFIQ         (1 << 12) /* Bit 12:  PPI[1], FIQ, active low */
-#  define GIC_ICPPISR_PTM          (1 << 13) /* Bit 13:  PPI[2], Private Timer */
-#  define GIC_ICPPISR_PWDT         (1 << 14) /* Bit 14:  PPI[3], Private Watchdog */
-#  define GIC_ICPPISR_NIRQ         (1 << 15) /* Bit 15:  PPI[3], IRQ, active low */
+#define GIC_ICDPPISR_PPI(n)        (1 << ((n) + 11)) /* Bits 11-15:  PPI(n) status, n=0-4 */
+#  define GIC_ICDPPISR_GTM         (1 << 11) /* Bit 11:  PPI[0], Global Timer */
+#  define GIC_ICDPPISR_NFIQ        (1 << 12) /* Bit 12:  PPI[1], FIQ, active low */
+#  define GIC_ICDPPISR_PTM         (1 << 13) /* Bit 13:  PPI[2], Private Timer */
+#  define GIC_ICDPPISR_PWDT        (1 << 14) /* Bit 14:  PPI[3], Private Watchdog */
+#  define GIC_ICDPPISR_NIRQ        (1 << 15) /* Bit 15:  PPI[3], IRQ, active low */
 
 /* SPI Status Registers */
 
-#define GIC_ICSPISR_INT(n)         GIC_MASK32(n)
+#define GIC_ICDSPISR_INT(n)         GIC_MASK32(n)
 
 /* Software Generated Interrupt Register */
 
