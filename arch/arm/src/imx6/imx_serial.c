@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/imx1/imx_serial.c
- * arch/arm/src/chip/imx_serial.c
+ * arch/arm/src/imx6/imx_serial.c
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,8 +56,10 @@
 
 #include "chip.h"
 #include "up_arch.h"
-#include "imx_gpio.h"
 #include "up_internal.h"
+
+#include "imx_config.h"
+#include "chip/imx_uart.h"
 
 #ifdef USE_SERIALDRIVER
 
@@ -66,29 +67,141 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+/* Which UART with be tty0/console and which tty1-4?  The console will always
+ * be ttyS0.  If there is no console then will use the lowest numbered UART.
+ */
 
-/* The i.MXL chip has only two UARTs */
+/* First pick the console and ttys0.  This could be any of UART1-5 */
 
-#if defined(CONFIG_ARCH_CHIP_IMXL) && defined(CONFIG_IMX1_UART3)
-#  undef CONFIG_IMX1_UART3
+#if defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart2port /* UART2 is console */
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart3port /* UART3 is console */
+#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
+#    define UART3_ASSIGNED      1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart4port /* UART4 is console */
+#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
+#    define UART4_ASSIGNED      1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart5port /* UART5 is console */
+#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
+#else
+#  undef CONSOLE_DEV                        /* No console */
+#  if defined(CONFIG_IMX6_UART1)
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_IMX6_UART2)
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#  elif defined(CONFIG_IMX6_UART3)
+#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
+#    define UART3_ASSIGNED      1
+#  elif defined(CONFIG_IMX6_UART4)
+#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
+#    define UART4_ASSIGNED      1
+#  elif defined(CONFIG_IMX6_UART5)
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
+#  endif
+#endif
+
+/* Pick ttys1.  This could be any of UART1-5 excluding the console UART.
+ * One of UART1-5 could be the console; one of UART1-5 has already been
+ * assigned to ttys0.
+ */
+
+#if defined(CONFIG_IMX6_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys2.  This could be one of UART2-5. It can't be UART1 because that
+ * was either assigned as ttyS0 or ttys1.  One of UART 1-5 could be the
+ * console.  One of UART2-5 has already been assigned to ttys0 or ttyS1.
+ */
+
+#if defined(CONFIG_IMX6_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys3. This could be one of UART3-5. It can't be UART1-2 because
+ * those have already been assigned to ttsyS0, 1, or 2.  One of
+ * UART32-5 could also be the console.  One of UART3-5 has already
+ * been assigned to ttys0, 1, or 3.
+ */
+
+#if defined(CONFIG_IMX6_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys4. This could be one of UART4-5. It can't be UART1-3 because
+ * those have already been assigned to ttsyS0, 1, 2 or 3.  One of
+ * UART 4-5 could be the console.  One of UART4-5 has already been
+ * assigned to ttys0, 1, 3, or 4.
+ */
+
+#if defined(CONFIG_IMX6_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_IMX6_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* UART, if avaialble, should have been assigned to ttyS0-4. */
+
+#if defined(CONFIG_IMX6_UART5) && !defined(UART5_ASSIGNED)
+#  errnor UART5 was not assigned to a TTY.
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct up_dev_s
+struct imx_uart_s
 {
+  xcpt_t   handler;     /* Interrupt handler */
   uint32_t uartbase;    /* Base address of UART registers */
   uint32_t baud;        /* Configured baud */
   uint32_t ucr1;        /* Saved UCR1 value */
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  uint8_t  rxirq;       /* Rx IRQ associated with this UART */
-  uint8_t  txirq;       /* Tx IRQ associated with this UART */
-#else
   uint8_t  irq;         /* IRQ associated with this UART */
-#endif
   uint8_t  parity;      /* 0=none, 1=odd, 2=even */
   uint8_t  bits;        /* Number of bits (7 or 8) */
   uint8_t  stopbits2:1; /* 1: Configure with 2 stop bits vs 1 */
@@ -100,26 +213,46 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline uint32_t up_serialin(struct up_dev_s *priv, uint32_t offset);
-static inline void up_serialout(struct up_dev_s *priv, uint32_t offset, uint32_t value);
-static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *ucr1);
-static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ucr1);
-static inline void up_waittxready(struct up_dev_s *priv);
+static inline uint32_t imx_serialin(struct imx_uart_s *priv,
+              uint32_t offset);
+static inline void imx_serialout(struct imx_uart_s *priv, uint32_t offset,
+              uint32_t value);
+static inline void imx_disableuartint(struct imx_uart_s *priv,
+              uint32_t *ucr1);
+static inline void imx_restoreuartint(struct imx_uart_s *priv,
+              uint32_t ucr1);
+static inline void imx_waittxready(struct imx_uart_s *priv);
 
-static int  up_setup(struct uart_dev_s *dev);
-static void up_shutdown(struct uart_dev_s *dev);
-static int  up_attach(struct uart_dev_s *dev);
-static void up_detach(struct uart_dev_s *dev);
-static inline struct uart_dev_s *up_mapirq(int irq);
-static int  up_interrupt(int irq, void *context);
-static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
-static void up_rxint(struct uart_dev_s *dev, bool enable);
-static bool up_rxavailable(struct uart_dev_s *dev);
-static void up_send(struct uart_dev_s *dev, int ch);
-static void up_txint(struct uart_dev_s *dev, bool enable);
-static bool up_txready(struct uart_dev_s *dev);
-static bool up_txempty(struct uart_dev_s *dev);
+static int  imx_setup(struct uart_dev_s *dev);
+static void imx_shutdown(struct uart_dev_s *dev);
+static int  imx_attach(struct uart_dev_s *dev);
+static void imx_detach(struct uart_dev_s *dev);
+
+static int  imx_interrupt(struct uart_dev_s *priv);
+#ifdef CONFIG_IMX6_UART1
+static int  imx_uart1_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_IMX6_UART2
+static int  imx_uart2_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_IMX6_UART3
+static int  imx_uart3_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_IMX6_UART4
+static int  imx_uart4_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_IMX6_UART5
+static int  imx_uart5_interrupt(int irq, void *context);
+#endif
+
+static int  imx_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  imx_receive(struct uart_dev_s *dev, uint32_t *status);
+static void imx_rxint(struct uart_dev_s *dev, bool enable);
+static bool imx_rxavailable(struct uart_dev_s *dev);
+static void imx_send(struct uart_dev_s *dev, int ch);
+static void imx_txint(struct uart_dev_s *dev, bool enable);
+static bool imx_txready(struct uart_dev_s *dev);
+static bool imx_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -127,53 +260,59 @@ static bool up_txempty(struct uart_dev_s *dev);
 
 static const struct uart_ops_s g_uart_ops =
 {
-  .setup          = up_setup,
-  .shutdown       = up_shutdown,
-  .attach         = up_attach,
-  .detach         = up_detach,
-  .ioctl          = up_ioctl,
-  .receive        = up_receive,
-  .rxint          = up_rxint,
-  .rxavailable    = up_rxavailable,
+  .setup          = imx_setup,
+  .shutdown       = imx_shutdown,
+  .attach         = imx_attach,
+  .detach         = imx_detach,
+  .ioctl          = imx_ioctl,
+  .receive        = imx_receive,
+  .rxint          = imx_rxint,
+  .rxavailable    = imx_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rxflowcontrol  = NULL,
 #endif
-  .send           = up_send,
-  .txint          = up_txint,
-  .txready        = up_txready,
-  .txempty        = up_txempty,
+  .send           = imx_send,
+  .txint          = imx_txint,
+  .txready        = imx_txready,
+  .txempty        = imx_txempty,
 };
 
 /* I/O buffers */
 
-#ifdef CONFIG_IMX1_UART1
+#ifdef CONFIG_IMX6_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
 
-#ifdef CONFIG_IMX1_UART2
+#ifdef CONFIG_IMX6_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
 
-#ifdef CONFIG_IMX1_UART3
+#ifdef CONFIG_IMX6_UART3
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 #endif
 
+#ifdef CONFIG_IMX6_UART4
+static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
+static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_IMX6_UART5
+static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
+static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
+#endif
+
 /* This describes the state of the IMX uart1 port. */
 
-#ifdef CONFIG_IMX1_UART1
-static struct up_dev_s g_uart1priv =
+#ifdef CONFIG_IMX6_UART1
+static struct imx_uart_s g_uart1priv =
 {
+  .handler        = imx_uart1_interrupt,
   .uartbase       = IMX_UART1_VBASE,
   .baud           = CONFIG_UART1_BAUD,
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  .rxirq          = IMX_IRQ_UART1RX,
-  .txirq          = IMX_IRQ_UART1TX,
-#else
   .irq            = IMX_IRQ_UART1,
-#endif
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
@@ -198,17 +337,13 @@ static struct uart_dev_s g_uart1port =
 
 /* This describes the state of the IMX uart2 port. */
 
-#ifdef CONFIG_IMX1_UART2
-static struct up_dev_s g_uart2priv =
+#ifdef CONFIG_IMX6_UART2
+static struct imx_uart_s g_uart2priv =
 {
+  .handler        = imx_uart2_interrupt,
   .uartbase       = IMX_UART2_VBASE,
   .baud           = CONFIG_UART2_BAUD,
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  .rxirq          = IMX_IRQ_UART2RX,
-  .txirq          = IMX_IRQ_UART2TX,
-#else
   .irq            = IMX_IRQ_UART2,
-#endif
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
@@ -231,17 +366,13 @@ static struct uart_dev_s g_uart2port =
 };
 #endif
 
-#ifdef CONFIG_IMX1_UART3
-static struct up_dev_s g_uart3priv =
+#ifdef CONFIG_IMX6_UART3
+static struct imx_uart_s g_uart3priv =
 {
+  .handler        = imx_uart3_interrupt,
   .uartbase       = IMX_UART3_REGISTER_BASE,
   .baud           = IMX_UART3_VBASE,
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  .rxirq          = IMX_IRQ_UART3RX,
-  .txirq          = IMX_IRQ_UART3TX,
-#else
   .irq            = IMX_IRQ_UART3,
-#endif
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
@@ -264,110 +395,62 @@ static struct uart_dev_s g_uart3port =
 };
 #endif
 
-/* Now, which one with be tty0/console and which tty1 and tty2? */
+#ifdef CONFIG_IMX6_UART4
+static struct imx_uart_s g_uart4priv =
+{
+  .handler        = imx_uart4_interrupt,
+  .uartbase       = IMX_UART4_REGISTER_BASE,
+  .baud           = IMX_UART4_VBASE,
+  .irq            = IMX_IRQ_UART4,
+  .parity         = CONFIG_UART4_PARITY,
+  .bits           = CONFIG_UART4_BITS,
+  .stopbits2      = CONFIG_UART4_2STOP,
+};
 
-#if defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_IMX1_UART1)
-# define CONSOLE_DEV     g_uart1port /* UART1 is /dev/console */
-# undef  CONFIG_UART2_SERIAL_CONSOLE
-# undef  CONFIG_UART3_SERIAL_CONSOLE
-# define TTYS0_DEV       g_uart1port /* UART1 is /dev/ttyS0 */
-# if defined(CONFIG_IMX1_UART2)
-#   define TTYS1_DEV     g_uart2port /* UART2 is /dev/ttyS1 */
-#   if defined(CONFIG_IMX1_UART3)
-#     define TTYS2_DEV   g_uart3port /* UART3 is /dev/ttyS2 */
-#   else
-#     undef TTYS2_DEV                /* No /dev/ttyS2 */
-#   endif
-# elif defined(CONFIG_IMX1_UART3)
-#   define TTYS1_DEV     g_uart3port /* UART3 is /dev/ttyS1 */
-#   undef  TTYS2_DEV                 /* No /dev/ttyS2 */
-# else
-#   undef  TTYS1_DEV                 /* No /dev/ttyS1 */
-#   undef  TTYS2_DEV                 /* No /dev/ttyS2 */
-# endif
+static struct uart_dev_s g_uart4port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART4_RXBUFSIZE,
+    .buffer = g_uart4rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART4_TXBUFSIZE,
+    .buffer = g_uart4txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart4priv,
+};
+#endif
 
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_IMX1_UART2)
-# define CONSOLE_DEV     g_uart2port  /* UART2 is /dev/console */
-# undef  CONFIG_UART1_SERIAL_CONSOLE
-# undef  CONFIG_UART3_SERIAL_CONSOLE
-# define TTYS0_DEV       g_uart2port  /* UART2 is /dev/ttyS0 */
-# if defined(CONFIG_IMX1_UART1)
-#   define TTYS1_DEV     g_uart1port  /* UART1 is /dev/ttyS1 */
-#   if defined(CONFIG_IMX1_UART3)
-#     define TTYS2_DEV   g_uart3port  /* UART3 is /dev/ttyS2 */
-#   else
-#     undef TTYS2_DEV                 /* No /dev/ttyS2 */
-#   endif
-# elif defined(CONFIG_IMX1_UART3)
-#   define TTYS1_DEV     g_uart3port  /* UART3 is /dev/ttyS1 */
-# else
-#   undef TTYS1_DEV                   /* No /dev/ttyS1 */
-#   undef TTYS2_DEV                   /* No /dev/ttyS2 */
-# endif
+#ifdef CONFIG_IMX6_UART5
+static struct imx_uart_s g_uart5priv =
+{
+  .handler        = imx_uart5_interrupt,
+  .uartbase       = IMX_UART5_REGISTER_BASE,
+  .baud           = IMX_UART5_VBASE,
+  .irq            = IMX_IRQ_UART5,
+  .parity         = CONFIG_UART5_PARITY,
+  .bits           = CONFIG_UART5_BITS,
+  .stopbits2      = CONFIG_UART5_2STOP,
+};
 
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_IMX1_UART3)
-# define CONSOLE_DEV     g_uart3port  /* UART3 is /dev/console */
-# undef CONFIG_UART1_SERIAL_CONSOLE
-# undef CONFIG_UART2_SERIAL_CONSOLE
-# define TTYS0_DEV       g_uart3port  /* UART3 is /dev/ttyS0 */
-# if defined(CONFIG_IMX1_UART1)
-#   define TTYS1_DEV     g_uart1port  /* UART1 is /dev/ttyS1 */
-#   if defined(CONFIG_IMX1_UART2)
-#     define TTYS2_DEV   g_uart2port  /* UART2 is /dev/ttyS2 */
-#   else
-#     undef TTYS2_DEV                 /* No /dev/ttyS2 */
-#   endif
-# elif defined(CONFIG_IMX1_UART2)
-#   define TTYS1_DEV     g_uart2port  /* UART2 is /dev/ttyS1 */
-#   undef  TTYS2_DEV                  /* No /dev/ttyS2 */
-# else
-#   undef  TTYS1_DEV                  /* No /dev/ttyS1 */
-#   undef  TTYS2_DEV                  /* No /dev/ttyS2 */
-# endif
-
-#else
-# undef CONSOLE_DEV     g_uart1port   /* No /dev/console */
-# undef CONFIG_UART1_SERIAL_CONSOLE
-# undef CONFIG_UART2_SERIAL_CONSOLE
-# undef CONFIG_UART3_SERIAL_CONSOLE
-
-# if defined(CONFIG_IMX1_UART1)
-#  define TTYS0_DEV       g_uart1port /* UART1 is /dev/ttyS0 */
-#  if defined(CONFIG_IMX1_UART2)
-#    define TTYS1_DEV     g_uart2port /* UART2 is /dev/ttyS1 */
-#    if defined(CONFIG_IMX1_UART3)
-#     define TTYS2_DEV   g_uart3port  /* UART3 is /dev/ttyS2 */
-#    else
-#     undef TTYS2_DEV                 /* No /dev/ttyS2 */
-#    endif
-#  elif defined(CONFIG_IMX1_UART3)
-#    define TTYS1_DEV     g_uart3port /* UART3 is /dev/ttyS1 */
-#    undef TTYS2_DEV                  /* No /dev/ttyS2 */
-#  else
-#    undef TTYS1_DEV                  /* No /dev/ttyS1 */
-#    undef TTYS2_DEV                  /* No /dev/ttyS2 */
-#  endif
-
-# elif defined(CONFIG_IMX1_UART2)
-#  define TTYS0_DEV       g_uart2port /* UART2 is /dev/ttyS0 */
-#  undef  TTYS2_DEV                   /* No /dev/ttyS2 */
-#  if defined(CONFIG_IMX1_UART3)
-#    define TTYS1_DEV     g_uart2port /* UART2 is /dev/ttyS1 */
-#  else
-#    undef TTYS1_DEV                  /* No /dev/ttyS1 */
-#  endif
-
-# elif defined(CONFIG_IMX1_UART3)
-#  define TTYS0_DEV       g_uart3port /* UART3 is /dev/ttyS0 */
-#  undef  TTYS1_DEV                   /* No /dev/ttyS1 */
-#  undef  TTYS2_DEV                   /* No /dev/ttyS2 */
-
-# else
-#  error "No UARTs enabled"
-#  undef  TTYS0_DEV                   /* No /dev/ttyS0 */
-#  undef  TTYS1_DEV                   /* No /dev/ttyS1 */
-#  undef  TTYS2_DEV                   /* No /dev/ttyS2 */
-# endif
+static struct uart_dev_s g_uart5port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART5_RXBUFSIZE,
+    .buffer = g_uart5rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART5_TXBUFSIZE,
+    .buffer = g_uart5txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart5priv,
+};
 #endif
 
 /****************************************************************************
@@ -375,32 +458,34 @@ static struct uart_dev_s g_uart3port =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialin
+ * Name: imx_serialin
  ****************************************************************************/
 
-static inline uint32_t up_serialin(struct up_dev_s *priv, uint32_t offset)
+static inline uint32_t imx_serialin(struct imx_uart_s *priv, uint32_t offset)
 {
   return getreg32(priv->uartbase + offset);
 }
 
 /****************************************************************************
- * Name: up_serialout
+ * Name: imx_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, uint32_t offset, uint32_t value)
+static inline void imx_serialout(struct imx_uart_s *priv, uint32_t offset,
+                                 uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
 
 /****************************************************************************
- * Name: up_disableuartint
+ * Name: imx_disableuartint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *ucr1)
+static inline void imx_disableuartint(struct imx_uart_s *priv,
+                                      uint32_t *ucr1)
 {
   /* Return the current Rx and Tx interrupt state */
 
-  if (ucr1)
+  if (ucr1 != NULL)
     {
       *ucr1 = priv->ucr1 & (UART_UCR1_RRDYEN | UART_UCR1_TXEMPTYEN);
     }
@@ -408,14 +493,14 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *ucr1)
   /* Then disable both Rx and Tx interrupts */
 
   priv->ucr1 &= ~(UART_UCR1_RRDYEN | UART_UCR1_TXEMPTYEN);
-  up_serialout(priv, UART_UCR1, priv->ucr1);
+  imx_serialout(priv, UART_UCR1_OFFSET, priv->ucr1);
 }
 
 /****************************************************************************
- * Name: up_restoreuartint
+ * Name: imx_restoreuartint
  ****************************************************************************/
 
-static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ucr1)
+static inline void imx_restoreuartint(struct imx_uart_s *priv, uint32_t ucr1)
 {
   /* Enable/disable any interrupts that are currently disabled but should be
    * enabled/disabled.
@@ -423,20 +508,20 @@ static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ucr1)
 
   priv->ucr1 &= ~(UART_UCR1_RRDYEN | UART_UCR1_TXEMPTYEN);
   priv->ucr1 |= ucr1 & (UART_UCR1_RRDYEN | UART_UCR1_TXEMPTYEN);
-  up_serialout(priv, UART_UCR1, priv->ucr1);
+  imx_serialout(priv, UART_UCR1_OFFSET, priv->ucr1);
 }
 
 /****************************************************************************
- * Name: up_waittxready
+ * Name: imx_waittxready
  ****************************************************************************/
 
-static inline void up_waittxready(struct up_dev_s *priv)
+static inline void imx_waittxready(struct imx_uart_s *priv)
 {
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      if ((up_serialin(priv, UART_UTS) & UART_UTS_TXFULL) == 0)
+      if ((imx_serialin(priv, UART_UTS_OFFSET) & UART_UTS_TXFULL) == 0)
         {
           break;
         }
@@ -444,7 +529,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: up_setup
+ * Name: imx_setup
  *
  * Description:
  *   Configure the UART baud, bits, parity, fifos, etc. This
@@ -453,10 +538,10 @@ static inline void up_waittxready(struct up_dev_s *priv)
  *
  ****************************************************************************/
 
-static int up_setup(struct uart_dev_s *dev)
+static int imx_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
   uint32_t regval;
   uint32_t ucr2;
   uint32_t div;
@@ -465,14 +550,14 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Disable the UART */
 
-  up_serialout(priv, UART_UCR1, 0);
-  up_serialout(priv, UART_UCR2, 0);
-  up_serialout(priv, UART_UCR3, 0);
-  up_serialout(priv, UART_UCR4, 0);
+  imx_serialout(priv, UART_UCR1_OFFSET, 0);
+  imx_serialout(priv, UART_UCR2_OFFSET, 0);
+  imx_serialout(priv, UART_UCR3_OFFSET, 0);
+  imx_serialout(priv, UART_UCR4_OFFSET, 0);
 
   /* Set up UCR2 */
 
-  ucr2  = up_serialin(priv, UART_UCR2);
+  ucr2  = imx_serialin(priv, UART_UCR2_OFFSET);
   ucr2 |= (UART_UCR2_SRST | UART_UCR2_IRTS)
 
   /* Select the number of data bits */
@@ -529,11 +614,11 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* i.MX reference clock (PERCLK1) is configured for 16MHz */
 
-  up_serialout(priv, UART_UCR4, regval | UART_UCR4_REF16);
+  imx_serialout(priv, UART_UCR4_OFFSET, regval | UART_UCR4_REF16);
 
   /* Setup the new UART configuration */
 
-  up_serialout(priv, UART_UCR2, ucr2);
+  imx_serialout(priv, UART_UCR2_OFFSET, ucr2);
 
   /* Set the baud.
    *
@@ -546,7 +631,7 @@ static int up_setup(struct uart_dev_s *dev)
    * First, select a closest value we can for the divider
    */
 
-  div = (IMX_PERCLK1_FREQ >> 4) / priv->baud;
+  div = (BOARD_PERCLK1_FREQUENCY >> 4) / priv->baud;
   if (div > 7)
     {
       div = 7;
@@ -562,7 +647,7 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   num = priv->baud;
-  den = (IMX_PERCLK1_FREQ << 4) / div;
+  den = (BOARD_PERCLK1_FREQUENCY << 4) / div;
 
   if (num > den)
     {
@@ -603,8 +688,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* The UBIR must be set before the UBMR register */
 
-  up_serialout(priv, UART_UBIR, num);
-  up_serialout(priv, UART_UBMR, den);
+  imx_serialout(priv, UART_UBIR_OFFSET, num);
+  imx_serialout(priv, UART_UBMR_OFFSET, den);
 
   /* Fixup the divisor, the value in the UFCR regiser is
    *
@@ -625,18 +710,20 @@ static int up_setup(struct uart_dev_s *dev)
     {
       div = 6 - div;
     }
+
   regval = div << UART_UFCR_RFDIV_SHIFT;
 
-  /* Set the TX trigger level to interrupt when the TxFIFO has 2 or fewer characters.
-   * Set the RX trigger level to interrupt when the RxFIFO has 1 character.
+  /* Set the TX trigger level to interrupt when the TxFIFO has 2 or fewer
+   * characters.  Set the RX trigger level to interrupt when the RxFIFO has
+   * 1 character.
    */
 
   regval |= ((2 << UART_UFCR_TXTL_SHIFT) | (1 << UART_UFCR_RXTL_SHIFT));
-  up_serialout(priv, UART_UFCR, regval);
+  imx_serialout(priv, UART_UFCR_OFFSET, regval);
 
   /* Initialize the UCR1 shadow register */
 
-  priv->ucr1 = up_serialin(priv, UART_UCR1);
+  priv->ucr1 = imx_serialin(priv, UART_UCR1_OFFSET);
 
   /* Enable the UART
    *
@@ -644,16 +731,17 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   ucr2 |= (UART_UCR2_TXEN | UART_UCR2_RXEN);
-  up_serialout(priv, UART_UCR1, ucr2);
+  imx_serialout(priv, UART_UCR1_OFFSET, ucr2);
 
   priv->ucr1 |= UART_UCR1_UARTCLEN;
-  up_serialout(priv, UART_UCR1, priv->ucr1);
+  imx_serialout(priv, UART_UCR1_OFFSET, priv->ucr1);
 #endif
+
   return OK;
 }
 
 /****************************************************************************
- * Name: up_shutdown
+ * Name: imx_shutdown
  *
  * Description:
  *   Disable the UART.  This method is called when the serial
@@ -661,20 +749,20 @@ static int up_setup(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_shutdown(struct uart_dev_s *dev)
+static void imx_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
   /* Disable the UART */
 
-  up_serialout(priv, UART_UCR1, 0);
-  up_serialout(priv, UART_UCR2, 0);
-  up_serialout(priv, UART_UCR3, 0);
-  up_serialout(priv, UART_UCR4, 0);
+  imx_serialout(priv, UART_UCR1_OFFSET, 0);
+  imx_serialout(priv, UART_UCR2_OFFSET, 0);
+  imx_serialout(priv, UART_UCR3_OFFSET, 0);
+  imx_serialout(priv, UART_UCR4_OFFSET, 0);
 }
 
 /****************************************************************************
- * Name: up_attach
+ * Name: imx_attach
  *
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method is
@@ -688,34 +776,14 @@ static void up_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_attach(struct uart_dev_s *dev)
+static int imx_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
 
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  ret = irq_attach(priv->rxirq, up_interrupt);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = irq_attach(priv->txirq, up_interrupt);
-  if (ret < 0)
-    {
-      irq_detach(priv->rxirq);
-      return ret;
-    }
-
-  /* Enable the interrupts (interrupts are still disabled in the UART) */
-
-  up_enable_irq(priv->rxirq);
-  up_enable_irq(priv->txirq);
-
-#else
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, priv->handler);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -724,12 +792,12 @@ static int up_attach(struct uart_dev_s *dev)
 
       up_enable_irq(priv->irq);
     }
-#endif
+
   return ret;
 }
 
 /****************************************************************************
- * Name: up_detach
+ * Name: imx_detach
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
@@ -738,97 +806,29 @@ static int up_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_detach(struct uart_dev_s *dev)
+static void imx_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  up_disable_irq(priv->rxirq);
-  up_disable_irq(priv->txirq);
-  irq_detach(priv->rxirq);
-  irq_detach(priv->txirq);
-#else
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
-#endif
 }
 
 /****************************************************************************
- * Name: up_mapirq
+ * Name: imx_interrupt (and front-ends)
  *
  * Description:
- *   Map an IRQ number to internal UART state structure
+ *   This is the common UART interrupt handler.  It should cal
+ *   uart_transmitchars or uart_receivechar to perform the appropriate data
+ *   transfers.
  *
  ****************************************************************************/
 
-static inline struct uart_dev_s *up_mapirq(int irq)
+static int imx_interrupt(struct uart_dev_s *priv)
 {
   struct uart_dev_s *dev;
-
-  switch (irq)
-    {
-#ifdef CONFIG_IMX1_UART1
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-      case IMX_IRQ_UART1RX:
-      case IMX_IRQ_UART1TX:
-#else
-      case IMX_IRQ_UART1:
-#endif
-        dev = &g_uart1port;
-        break;
-#endif
-
-#ifdef CONFIG_IMX1_UART2
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-      case IMX_IRQ_UART2RX:
-      case IMX_IRQ_UART2TX:
-#else
-      case IMX_IRQ_UART2:
-#endif
-        dev = &g_uart2port;
-        break;
-#endif
-
-#ifdef CONFIG_IMX1_UART3
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-      case IMX_IRQ_UART3RX:
-      case IMX_IRQ_UART3TX:
-#else
-      case IMX_IRQ_UART3:
-#endif
-        dev = &g_uart3port;
-        break;
-#endif
-
-      default:
-        PANIC();
-        break;
-    }
-  return dev;
-}
-
-/****************************************************************************
- * Name: up_interrupt (and front-ends)
- *
- * Description:
- *   This is the UART interrupt handler.  It will be invoked
- *   when an interrupt received on the 'irq'  It should call
- *   uart_transmitchars or uart_receivechar to perform the
- *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
- *   uart_dev_s structure in order to call these functions.
- *
- ****************************************************************************/
-
-static int up_interrupt(int irq, void *context)
-{
-  struct uart_dev_s *dev;
-  struct up_dev_s   *priv;
   uint32_t usr1;
-  int    passes = 0;
-
-  dev  = up_mapirq(irq);
-  priv = (struct up_dev_s *)dev->priv;
+  int passes = 0;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -840,7 +840,7 @@ static int up_interrupt(int irq, void *context)
        * termination conditions
        */
 
-      usr1 = up_serialin(priv, UART_USR1);
+      usr1 = imx_serialin(priv, UART_USR1_OFFSET);
       usr1 &= (UART_USR1_RRDY | UART_USR1_TRDY);
 
       if (usr1 == 0 || passes > 256)
@@ -858,7 +858,7 @@ static int up_interrupt(int irq, void *context)
       /* Handle outgoing, transmit bytes */
 
       if (usr1 & UART_USR1_TRDY &&
-          (up_serialin(priv, UART_UCR1) & UART_UCR1_TXEMPTYEN) != 0)
+          (imx_serialin(priv, UART_UCR1_OFFSET) & UART_UCR1_TXEMPTYEN) != 0)
         {
           uart_xmitchars(dev);
         }
@@ -872,34 +872,74 @@ static int up_interrupt(int irq, void *context)
 }
 
 /****************************************************************************
- * Name: up_ioctl
+ * Name: imx_uart[n]_interrupt
+ *
+ * Description:
+ *   UART-specific interrupt handlers just transfer control to the common
+ *   UART interrupt handler, passing the relevant driver state structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMX6_UART1
+static int  imx_uart1_interrupt(int irq, void *context)
+{
+  return imx_interrupt(&g_uart1port);
+}
+#endif
+#ifdef CONFIG_IMX6_UART2
+static int  imx_uart2_interrupt(int irq, void *context)
+{
+  return imx_interrupt(&g_uart2port);
+}
+#endif
+#ifdef CONFIG_IMX6_UART3
+static int  imx_uart3_interrupt(int irq, void *context)
+{
+  return imx_interrupt(&g_uart3port);
+}
+#endif
+#ifdef CONFIG_IMX6_UART4
+static int  imx_uart4_interrupt(int irq, void *context)
+{
+  return imx_interrupt(&g_uart4port);
+}
+#endif
+#ifdef CONFIG_IMX6_UART5
+static int  imx_uart5_interrupt(int irq, void *context)
+{
+  return imx_interrupt(&g_uart5port);
+}
+#endif
+
+/****************************************************************************
+ * Name: imx_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int imx_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-  struct inode      *inode = filep->f_inode;
+  struct inode *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
-  int                ret   = OK;
+  int ret   = OK;
 
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-         struct up_dev_s *user = (struct up_dev_s *)arg;
+         struct imx_uart_s *user = (struct imx_uart_s *)arg;
          if (!user)
            {
              ret = -EINVAL;
            }
          else
            {
-             memcpy(user, dev, sizeof(struct up_dev_s));
+             memcpy(user, dev, sizeof(struct imx_uart_s));
            }
        }
        break;
@@ -916,7 +956,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: up_receive
+ * Name: imx_receive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -925,27 +965,27 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int imx_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
   uint32_t rxd0;
 
-  rxd0    = up_serialin(priv, UART_RXD0);
+  rxd0    = imx_serialin(priv, UART_RXD_OFFSET);
   *status = rxd0;
   return (rxd0 & UART_RXD_DATA_MASK) >> UART_RXD_DATA_SHIFT;
 }
 
 /****************************************************************************
- * Name: up_rxint
+ * Name: imx_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void up_rxint(struct uart_dev_s *dev, bool enable)
+static void imx_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
   /* Enable interrupts for data availab at Rx FIFO */
 
@@ -959,51 +999,52 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       priv->ucr1 &= ~UART_UCR1_RRDYEN;
     }
-  up_serialout(priv, UART_UCR1, priv->ucr1);
+
+  imx_serialout(priv, UART_UCR1_OFFSET, priv->ucr1);
 }
 
 /****************************************************************************
- * Name: up_rxavailable
+ * Name: imx_rxavailable
  *
  * Description:
  *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static bool up_rxavailable(struct uart_dev_s *dev)
+static bool imx_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
   /* Return true is data is ready in the Rx FIFO */
 
-  return ((up_serialin(priv, UART_USR2) & UART_USR2_RDR) != 0);
+  return ((imx_serialin(priv, UART_USR2_OFFSET) & UART_USR2_RDR) != 0);
 }
 
 /****************************************************************************
- * Name: up_send
+ * Name: imx_send
  *
  * Description:
  *   This method will send one byte on the UART
  *
  ****************************************************************************/
 
-static void up_send(struct uart_dev_s *dev, int ch)
+static void imx_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  up_serialout(priv, UART_TXD0, (uint32_t)ch);
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
+  imx_serialout(priv, UART_TXD_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
- * Name: up_txint
+ * Name: imx_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void up_txint(struct uart_dev_s *dev, bool enable)
+static void imx_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
   /* We won't take an interrupt until the FIFO is completely empty (although
    * there may still be a transmission in progress).
@@ -1019,41 +1060,42 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       priv->ucr1 &= ~UART_UCR1_TXEMPTYEN;
     }
-  up_serialout(priv, UART_UCR1, priv->ucr1);
+
+  imx_serialout(priv, UART_UCR1_OFFSET, priv->ucr1);
 }
 
 /****************************************************************************
- * Name: up_txready
+ * Name: imx_txready
  *
  * Description:
  *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static bool up_txready(struct uart_dev_s *dev)
+static bool imx_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
   /* When TXFULL is set, there is no space in the Tx FIFO  */
 
-  return ((up_serialin(priv, UART_UTS) & UART_UTS_TXFULL) == 0);
+  return ((imx_serialin(priv, UART_UTS_OFFSET) & UART_UTS_TXFULL) == 0);
 }
 
 /****************************************************************************
- * Name: up_txempty
+ * Name: imx_txempty
  *
  * Description:
  *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static bool up_txempty(struct uart_dev_s *dev)
+static bool imx_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
 
   /* When TXDC is set, the FIFO is empty and the transmission is complete */
 
-  return ((up_serialin(priv, UART_USR2) & UART_USR2_TXDC) != 0);
+  return ((imx_serialin(priv, UART_USR2_OFFSET) & UART_USR2_TXDC) != 0);
 }
 
 /****************************************************************************
@@ -1061,22 +1103,22 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: imx_serialinit
  *
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_serialinit.
+ *   during bootup.  This must be called before imx_serialinit.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void imx_earlyserialinit(void)
 {
   /* Configure and disable the UART1 */
 
-#ifdef CONFIG_IMX1_UART1
-  up_serialout(&g_uart1priv, UART_UCR1, 0);
-  up_serialout(&g_uart1priv, UART_UCR2, 0);
+#ifdef CONFIG_IMX6_UART1
+  imx_serialout(&g_uart1priv, UART_UCR1_OFFSET, 0);
+  imx_serialout(&g_uart1priv, UART_UCR2_OFFSET, 0);
 
   /* Configure UART1 pins: RXD, TXD, RTS, and CTS */
 
@@ -1088,9 +1130,9 @@ void up_earlyserialinit(void)
 
   /* Configure and disable the UART2 */
 
-#ifdef CONFIG_IMX1_UART2
-  up_serialout(&g_uart2priv, UART_UCR1, 0);
-  up_serialout(&g_uart2priv, UART_UCR2, 0);
+#ifdef CONFIG_IMX6_UART2
+  imx_serialout(&g_uart2priv, UART_UCR1_OFFSET, 0);
+  imx_serialout(&g_uart2priv, UART_UCR2_OFFSET, 0);
 
   /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
    * supports DTR, DCD, RI, and DSR -- not configured)
@@ -1104,9 +1146,9 @@ void up_earlyserialinit(void)
 
   /* Configure and disable the UART3 */
 
-#ifdef CONFIG_IMX1_UART3
-  up_serialout(&g_uart3priv, UART_UCR1, 0);
-  up_serialout(&g_uart3priv, UART_UCR2, 0);
+#ifdef CONFIG_IMX6_UART3
+  imx_serialout(&g_uart3priv, UART_UCR1_OFFSET, 0);
+  imx_serialout(&g_uart3priv, UART_UCR2_OFFSET, 0);
 
   /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
    * supports DTR, DCD, RI, and DSR -- not configured)
@@ -1124,20 +1166,20 @@ void up_earlyserialinit(void)
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
-  up_setup(&CONSOLE_DEV);
+  imx_setup(&CONSOLE_DEV);
 #endif
 }
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: imx_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that imx_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void imx_serialinit(void)
 {
 #ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
@@ -1149,13 +1191,19 @@ void up_serialinit(void)
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #  ifdef TTYS2_DEV
   (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+#    ifdef TTYS3_DEV
+  (void)uart_register("/dev/ttyS3", &TTYS2_DEV);
+#      ifdef TTYS4_DEV
+  (void)uart_register("/dev/ttyS4", &TTYS2_DEV);
+#      endif
+#    endif
 #  endif
 # endif
 #endif
 }
 
 /****************************************************************************
- * Name: up_putc
+ * Name: imx_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug
@@ -1163,13 +1211,13 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+int imx_putc(int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
+  struct imx_uart_s *priv = (struct imx_uart_s *)CONSOLE_DEV.priv;
   uint32_t ier;
 
-  up_disableuartint(priv, &ier);
-  up_waittxready(priv);
+  imx_disableuartint(priv, &ier);
+  imx_waittxready(priv);
 
   /* Check for LF */
 
@@ -1177,13 +1225,13 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_serialout(priv, UART_TXD0, (uint32_t)'\r');
-      up_waittxready(priv);
+      imx_serialout(priv, UART_TXD_OFFSET, (uint32_t)'\r');
+      imx_waittxready(priv);
     }
 
-  up_serialout(priv, UART_TXD0, (uint32_t)ch);
-  up_waittxready(priv);
-  up_restoreuartint(priv, ier);
+  imx_serialout(priv, UART_TXD_OFFSET, (uint32_t)ch);
+  imx_waittxready(priv);
+  imx_restoreuartint(priv, ier);
   return ch;
 }
 
@@ -1193,19 +1241,25 @@ int up_putc(int ch)
  * Pre-processor Definitions
  ****************************************************************************/
 
+#  undef IMX_REGISTER_BASE
 #  if defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define IMX_REGISTER_BASE IMX_UART1_VBASE
 #  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    define IMX_REGISTER_BASE IMX_UART2_VBASE
 #  elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #    define IMX_REGISTER_BASE IMX_UART3_VBASE
+#  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#    define IMX_REGISTER_BASE IMX_UART4_VBASE
+#  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define IMX_REGISTER_BASE IMX_UART5_VBASE
 #  endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline void up_waittxready(void)
+#ifdef IMX_REGISTER_BASE
+static inline void imx_waittxready(void)
 {
   int tmp;
 
@@ -1221,14 +1275,16 @@ static inline void up_waittxready(void)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int up_putc(int ch)
+int imx_putc(int ch)
 {
-  up_waittxready();
+#ifdef IMX_REGISTER_BASE
+  imx_waittxready();
 
   /* Check for LF */
 
@@ -1236,14 +1292,14 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      putreg32((uint16_t)'\r', IMX_REGISTER_BASE + UART_TXD0);
-      up_waittxready();
+      putreg32((uint16_t)'\r', IMX_REGISTER_BASE + UART_TXD_OFFSET);
+      imx_waittxready();
     }
 
-  putreg32((uint16_t)ch, IMX_REGISTER_BASE + UART_TXD0);
+  putreg32((uint16_t)ch, IMX_REGISTER_BASE + UART_TXD_OFFSET);
+#endif
+
   return ch;
 }
 
 #endif /* USE_SERIALDRIVER */
-
-
