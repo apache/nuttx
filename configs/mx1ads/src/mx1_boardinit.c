@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/mx1ads/src/mx1_boot.c
+ * configs/mx1ads/src/mx1_boardinit`.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,7 +60,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: imx_boardinitialize
+ * Name: imx_board_initialize
  *
  * Description:
  *   All i.MX architectures must provide the following entry point.  This entry point
@@ -68,7 +68,7 @@
  *   and mapped but before any devices have been initialized.
  ************************************************************************************/
 
-void imx_boardinitialize(void)
+void imx_board_initialize(void)
 {
   uint32_t regval;
 

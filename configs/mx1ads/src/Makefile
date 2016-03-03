@@ -36,6 +36,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = mx1_boot.c mx1_leds.c mx1_network.c
+CSRCS = mx1_boardinit.c mx1_leds.c mx1_network.c
 
 include $(TOPDIR)/configs/Board.mk
