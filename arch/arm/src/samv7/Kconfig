@@ -1829,6 +1829,10 @@ endmenu # USB High Speed Device Controller driver (DCD) options
 
 if SAMV7_MCAN
 
+config SAMV7_MCAN_QUEUE_MODE
+	bool "MCAN QUEUE mode (vs FIFO mode)"
+	default n
+
 menu "MCAN device driver options"
 
 choice

@@ -1438,6 +1438,9 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
   irqstate_t flags;
   uint32_t txfqs1;
   uint32_t txfqs2;
+#ifndef CONFIG_SAMV7_MCAN_QUEUE_MODE
+  int tffl;
+#endif
   int sval;
   int ret;
 
@@ -1483,6 +1486,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
           leave_critical_section(flags);
         }
 
+#ifdef CONFIG_SAMV7_MCAN_QUEUE_MODE
       /* We only have one useful bit of information in the TXFQS:
        * Is the TX FIFOQ full or not?  We can only do limited checks
        * with that single bit of information.
@@ -1535,6 +1539,28 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
           leave_critical_section(flags);
           return;
         }
+#else
+      /* Tx FIFO Free Level */
+
+      tffl = (txfqs1 & MCAN_TXFQS_TFFL_MASK) >> MCAN_TXFQS_TFFL_SHIFT;
+
+      /* Check if the configured number is less than the number of buffers
+       * in the chip
+       */
+
+      if (tffl > priv->config->ntxfifoq)
+        {
+          candbg("ERROR: TX FIFO reports %d but max is %d\n",
+                 tffl, priv->config->ntxfifoq);
+          tffl = priv->config->ntxfifoq;
+        }
+
+      if (sval != tffl)
+        {
+          candbg("ERROR: TX FIFO reports %d but txfsem is %d\n", tffl, sval);
+          sem_init(&priv->txfsem, 0, tffl);
+        }
+#endif
 
       /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
 
@@ -2846,7 +2872,11 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   uint32_t regval;
+#ifdef CONFIG_SAMV7_MCAN_QUEUE_MODE
   int sval;
+#else
+  int tffl;
+#endif
   bool empty;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
@@ -2868,6 +2898,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
       return false;
     }
 
+#ifdef CONFIG_SAMV7_MCAN_QUEUE_MODE
   /* The TX FIFO/Queue is not full, but is it empty?  The txfsem should
    * track the number of elements the TX FIFO/queue in use.
    *
@@ -2880,6 +2911,13 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
   DEBUGASSERT(sval > 0 && sval <= priv->config->ntxfifoq);
 
   empty = (sval ==  priv->config->ntxfifoq);
+#else
+  /* Tx FIFO Free Level */
+
+  tffl  = (regval & MCAN_TXFQS_TFFL_MASK) >> MCAN_TXFQS_TFFL_SHIFT;
+  empty = (tffl >= priv->config->ntxfifoq);
+#endif
+
   mcan_dev_unlock(priv);
   return empty;
 }
@@ -2938,9 +2976,11 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
 static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
                        uint32_t oldstatus)
 {
+  FAR struct sam_mcan_s *priv = dev->cd_priv;
   struct can_hdr_s hdr;
-  uint8_t data[CAN_ERROR_DLC];
+  uint32_t psr;
   uint16_t errbits;
+  uint8_t data[CAN_ERROR_DLC];
   int ret;
 
   /* Encode error bits */
@@ -2948,35 +2988,42 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
   errbits = 0;
   memset(data, 0, sizeof(data));
 
-  if ((status & MCAN_INT_EP) != 0)
-    {
-      /* Error Passive */
+  /* Always fill in "static" error conditions, but set the signaling bit
+   * only if the condition has changed (see IRQ-Flags below)
+   * They have to be filled in every time CAN_ERROR_CONTROLLER is set.
+   */
 
-      errbits |= CAN_ERROR_CONTROLLER;
+  psr = mcan_getreg(priv, SAM_MCAN_PSR_OFFSET);
+  if (psr & MCAN_PSR_BO)
+    {
+      errbits |= CAN_ERROR_BUSOFF;
+    }
+
+  if (psr & MCAN_PSR_EP)
+    {
       data[1] |= (CAN_ERROR1_RXPASSIVE | CAN_ERROR1_TXPASSIVE);
     }
-  else if ((oldstatus & MCAN_INT_EP) != 0)
-    {
-      errbits |= CAN_ERROR_CONTROLLER;
-    }
 
-  if ((status & MCAN_INT_EW) != 0)
+  if (psr & MCAN_PSR_EW)
     {
-      /* Warning Status */
-
-      errbits |= CAN_ERROR_CONTROLLER;
       data[1] |= (CAN_ERROR1_RXWARNING | CAN_ERROR1_TXWARNING);
     }
-  else if ((oldstatus & MCAN_INT_EW) != 0)
+
+  if ((status & (MCAN_INT_EP | MCAN_INT_EW)) != 0)
     {
+      /* "Error Passive" or "Error Warning" status changed */
+
       errbits |= CAN_ERROR_CONTROLLER;
     }
 
   if ((status & MCAN_INT_BO) != 0)
     {
-      /* Bus_Off Status */
+      /* Bus_Off Status changed */
 
-      errbits |= CAN_ERROR_BUSOFF;
+      if (!(psr & MCAN_PSR_BO))
+        {
+          errbits |= CAN_ERROR_RESTARTED;
+        }
     }
 
   if ((status & (MCAN_INT_RF0L | MCAN_INT_RF1L)) != 0)
@@ -3070,7 +3117,7 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
   if ((status & MCAN_INT_STE) != 0)
     {
       /* Stuff Error */
- 
+
       errbits |= CAN_ERROR_PROTOCOL;
       data[2] |= CAN_ERROR2_STUFF;
     }
@@ -3262,14 +3309,14 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
               mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
 
               /* REVISIT:  Will MCAN_INT_TC also be set in the event of
-              * a transmission error?  Each write must conclude with a
-              * call to man_buffer_release(), whether or not the write
-              * was successful.
-              *
-              * We assume that MCAN_INT_TC will be called for each
-              * message buffer. Except the transfer is cancelled.
-              * TODO: add handling for MCAN_INT_TCF
-              */
+               * a transmission error?  Each write must conclude with a
+               * call to man_buffer_release(), whether or not the write
+               * was successful.
+               *
+               * We assume that MCAN_INT_TC will be called for each
+               * message buffer. Except the transfer is cancelled.
+               * TODO: add handling for MCAN_INT_TCF
+               */
             }
 
           /* Check for reception errors */
@@ -3733,7 +3780,11 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
    */
 
   regval  = mcan_getreg(priv, SAM_MCAN_TXBC_OFFSET);
+#ifdef CONFIG_SAMV7_MCAN_QUEUE_MODE
   regval |= MCAN_TXBC_TFQM;
+#else
+  regval &= ~MCAN_TXBC_TFQM;
+#endif
   mcan_putreg(priv, SAM_MCAN_TXBC_OFFSET, regval);
 
 #ifdef SAMV7_MCAN_LOOPBACK
