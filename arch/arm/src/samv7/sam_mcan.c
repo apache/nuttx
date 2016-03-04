@@ -1558,6 +1558,17 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
       if (sval != tffl)
         {
           candbg("ERROR: TX FIFO reports %d but txfsem is %d\n", tffl, sval);
+
+          /* REVISIT:  The following is dangerous and non-standard usage of the
+           * semaphore count.  It can only work if the count is non-negative.
+           * If the count because negative, then forcing it to a non-negative
+           * value will cause the system to hang.
+           *
+           * A proper solution might be a loop that calls sem_post() or sem_wait()
+           * repeteadly to adjust the count.
+           */
+
+          DEBUGASSERT(priv->txfsem.count >= 0);
           sem_init(&priv->txfsem, 0, tffl);
         }
 #endif
