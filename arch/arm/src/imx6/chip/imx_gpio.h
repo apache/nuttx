@@ -141,8 +141,8 @@
 
 /* GPIO interrupt configuration register1/2 */
 
-#define GPIO_ICR_INDEX(n)        ((n) >> 4)
-#define GPIO_ICR_OFFSET(n)       (GPIO_ICR1_OFFSET + (GPIO_ICR_INDEX(n) << 2));
+#define GPIO_ICR_INDEX(n)        (((n) >> 4) & 1)
+#define GPIO_ICR_OFFSET(n)       (GPIO_ICR1_OFFSET + (GPIO_ICR_INDEX(n) << 2))
 
 #define GPIO_ICR_LOWLEVEL        0          /* Interrupt is low-level sensitive */
 #define GPIO_ICR_HIGHLEVEL       1          /* Interrupt is high-level sensitive */

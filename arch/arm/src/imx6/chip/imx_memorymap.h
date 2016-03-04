@@ -181,7 +181,7 @@
 #define IMX_CAN1_OFFSET          0x00090000  /* 00090000 00093fff CAN1 16 KB */
 #define IMX_CAN2_OFFSET          0x00094000  /* 00094000 00097fff CAN2 16 KB */
 #define IMX_GPT_OFFSET           0x00098000  /* 00098000 0009bfff GPT 16 KB */
-#define IMX_GPIO_OFFSET(n)       (0x0009c000 - ((n) << 14)) /* n=0..6 */
+#define IMX_GPIO_OFFSET(n)       (0x0009c000 + ((n) << 14)) /* n=0..6 */
 #define IMX_GPIO1_OFFSET         0x0009c000  /* 0009c000 0009ffff GPIO1 16 KB */
 #define IMX_GPIO2_OFFSET         0x000a0000  /* 000a0000 000a3fff GPIO2 16 KB */
 #define IMX_GPIO3_OFFSET         0x000a4000  /* 000a4000 000a7fff GPIO3 16 KB */
