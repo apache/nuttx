@@ -139,7 +139,7 @@
 
 #define GPIO_PIN(n)              (1 << (n)) /* Bit n: Pin n, n=0-31 */
 
-/* GPIO interrupt configuration register1/2 */
+/* GPIO interrupt configuration register 1/2 */
 
 #define GPIO_ICR_INDEX(n)        (((n) >> 4) & 1)
 #define GPIO_ICR_OFFSET(n)       (GPIO_ICR1_OFFSET + (GPIO_ICR_INDEX(n) << 2))

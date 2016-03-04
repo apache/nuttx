@@ -78,7 +78,7 @@
  */
 
 #undef NEED_SDRAM_CONFIGURATION
-#if defined(CONFIG_IMX_MMDC) && !defined(CONFIG_IMX_BOOT_SDRAM)
+#if defined(CONFIG_IMX6_MMDC) && !defined(CONFIG_IMX_BOOT_SDRAM)
 #  define NEED_SDRAM_CONFIGURATION 1
 #endif
 
