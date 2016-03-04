@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/arm/src/imx1/imx_gpio.h
- * arch/arm/src/chip/imx_gpio.h
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_GPIO_H
-#define __ARCH_ARM_IMX_GPIO_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_GPIO_H
+#define __ARCH_ARM_SRC_IMX1_IMX_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -185,7 +184,7 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_GPIO_H */
+#endif  /* __ARCH_ARM_SRC_IMX1_IMX_GPIO_H */
 
 #ifndef __ASSEMBLY__
 
