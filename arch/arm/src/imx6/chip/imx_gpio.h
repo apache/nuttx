@@ -40,10 +40,8 @@
  * Included Files
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif
-#include "up_arch.h"                     /* getreg32(), putreg32() */
+#include <nuttx/config.h>
+#include <chip/imx_memorymap.h>
 
 /************************************************************************************
  * Pre-processor Definitions
