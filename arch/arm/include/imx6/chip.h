@@ -102,8 +102,8 @@
 #  define IMX_OCRAM_SIZE   (256*1024)   /* Size of the On-Chip RAM (OCRAM) */
 #  define IMX_L2CACHE_SIZE (256*1024)   /* 256KB L2 Cache */
 #  define IMX_NXCPUS       1            /* One CPU */
-#  define IMX_NGPU3D       1            /* One 3D graphics engine */
-#  define IMX_N32SHADERS   1            /* One 3D shaders */
+#  undef  IMX_NGPU3D                    /* No 3D graphics engine */
+#  define IMX_N32SHADERS   0            /* No 3D shaders */
 #  define IMX_NGPU2D       1            /* One 2D graphics engine */
 #  undef  IMX_HAVE_DDR64                /* No 64-bit DDR3 */
 #  define IMX_HAVE_DDR32   1            /* 32-bit DDR3 */
