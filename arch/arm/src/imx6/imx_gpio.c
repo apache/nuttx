@@ -198,7 +198,7 @@ void imx_gpio_write(gpio_pinset_t pinset, bool value)
   irqstate_t flags;
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  
+
   flags = enter_critical_section();
   imx_gpio_setoutput(port, pin, value);
   leave_critical_section(flags);
@@ -218,7 +218,7 @@ bool imx_gpio_read(gpio_pinset_t pinset)
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   bool value;
-  
+
   flags = enter_critical_section();
   value = imx_gpio_getinput(port, pin);
   leave_critical_section(flags);

@@ -498,7 +498,7 @@
 #define IMX_EIM_NSECTIONS        _NSECTIONS(IMX_EIM_SECSIZE)
 #define IMX_MMDCDDR_NSECTIONS    _NSECTIONS(IMX_MMDCDDR_SECSIZE)
 
-/* Section MMU Flags 
+/* Section MMU Flags
  *
  * SDRAM is a special case because it requires non-cached access of its
  * initial configuration, then cached access thereafter.

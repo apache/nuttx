@@ -110,7 +110,7 @@
 
 #define GPIO_SLEW_SLOW         (0)        /* Bit 12: 0=Slow Slew Rate */
 #define GPIO_SLEW_FAST         (1 << 12)  /* Bit 12: 1=Fast Slew Rate */
- 
+
 /* Output Speed:
  *
  *   GPIO OUTPUT ...1 .... .... SS.. .... ....
@@ -129,7 +129,7 @@
 
 #define GPIO_OUTPUT_ZERO       (0)        /* Bit 9: 0=Initial output is low */
 #define GPIO_OUTPUT_ONE        (1 << 9)   /* Bit 9: 1=Initial output is high */
- 
+
 /* Input Schmitt Trigger:
  *
  *   GPIO INPUT  ...0 .... .... ...T .... ....
