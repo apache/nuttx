@@ -55,6 +55,7 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/can.h>
 
 #include "cache.h"
@@ -1502,7 +1503,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
           if (sval > 0)
             {
               candbg("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
-              sem_init(&priv->txfsem, 0, 0);
+              sem_reset(&priv->txfsem, 0);
             }
         }
 
@@ -1555,21 +1556,19 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
           tffl = priv->config->ntxfifoq;
         }
 
+      /* REVISIT:  There may be issues with this logic in a multi-thread
+       * environment.  If there is only a single thread, then certainly
+       * sval and tff1 should match, but that may not be true in any multi-
+       * threaded use of this driver.
+       */
+
       if (sval != tffl)
         {
           candbg("ERROR: TX FIFO reports %d but txfsem is %d\n", tffl, sval);
 
-          /* REVISIT:  The following is dangerous and non-standard usage of the
-           * semaphore count.  It can only work if the count is non-negative.
-           * If the count because negative, then forcing it to a non-negative
-           * value will cause the system to hang.
-           *
-           * A proper solution might be a loop that calls sem_post() or sem_wait()
-           * repeteadly to adjust the count.
-           */
+          /* Reset the semaphore count to the Tx FIFO free level. */
 
-          DEBUGASSERT(priv->txfsem.count >= 0);
-          sem_init(&priv->txfsem, 0, tffl);
+          sem_reset(&priv->txfsem, tffl);
         }
 #endif
 
