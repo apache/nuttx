@@ -42,32 +42,35 @@
 
 #include <nuttx/config.h>
 
-#include <chip/imx_gpio.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "chip/imx_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 /* Encoding:
  *
- *   ENCODING    IRRR ODDD SSLT GGGP PPPP
- *   GPIO INPUT  0... .... ...T GGGP PPPP
- *   GPIO OUTPUT 1RRR ODDD SSL. GGGP PPPP
+ *   ENCODING    ...I RRRO DDDL SSVT GGGP PPPP
+ *   GPIO INPUT  ...0 .... .... ...T GGGP PPPP
+ *   GPIO OUTPUT ...1 RRRO DDDL SSV. GGGP PPPP
  */
 
 /* Input/Output Selection:
  *
- *   ENCODING    I... .... .... .... ....
+ *   ENCODING    ...I .... .... .... .... ....
  */
 
-#define GPIO_INPUT             (0)        /* Bit 19: 0=input */
-#define GPIO_INPUT             (1 << 19)  /* Bit 19: 1=input */
+#define GPIO_INPUT             (0)        /* Bit 20: 0=input */
+#define GPIO_OUTPUT            (1 << 19)  /* Bit 20: 1=output */
 
 /* Output Pull Up/Down:
  *
- *   GPIO OUTPUT .RRR .... .... .... ....
+ *   GPIO OUTPUT ...1 RRR. .... .... .... ....
  */
 
-#define GPIO_PULL_SHIFT        (16)       /* Bits 16-18: Pull up/down selection */
+#define GPIO_PULL_SHIFT        (17)       /* Bits 17-19: Pull up/down selection */
 #define GPIO_PULL_MASK         (7 << GPIO_PULL_SHIFT)
 #  define GPIO_PULL_NONE       (0 << GPIO_PULL_SHIFT) /* Pull/keeper disabled */
 #  define GPIO_PULL_KEEP       (1 << GPIO_PULL_SHIFT) /* Output determined by keeper */
@@ -78,31 +81,39 @@
 
 /* Open Drain Output:
  *
- *   GPIO OUTPUT .... O... .... .... ....
+ *   GPIO OUTPUT ...1 ...O .... .... .... ....
  */
 
-#define GPIO_CMOS_OUTPUT       (1 << 15)  /* Bit 15: 0=CMOS output */
-#define GPIO_OPENDRAIN         (1 << 15)  /* Bit 15: 1=Enable open-drain output */
+#define GPIO_CMOS_OUTPUT       (1 << 16)  /* Bit 16: 0=CMOS output */
+#define GPIO_OPENDRAIN         (1 << 16)  /* Bit 16: 1=Enable open-drain output */
 
 /* Output Drive Strength:
  *
- *   GPIO OUTPUT .... .DDD .... .... ....
+ *   GPIO OUTPUT ...1 .... DDD. .... .... ....
  */
 
-#define GPIO_DRIVE_SHIFT       (12)       /* Bits 12-14: Output Drive Strength */
+#define GPIO_DRIVE_SHIFT       (13)       /* Bits 13-15: Output Drive Strength */
 #define GPIO_DRIVE_MASK        (7 << GPIO_DRIVE_SHIFT)
-#  define GPIO_DRIVE_HIZ      (0 << GPIO_DRIVE_SHIFT) /* HI-Z */
-#  define GPIO_DRIVE_260OHM   (1 << GPIO_DRIVE_SHIFT) /* 150 Ohm @3.3V, 260 Ohm @1.8V */
-#  define GPIO_DRIVE_130OHM   (2 << GPIO_DRIVE_SHIFT) /* 75 Ohm @3.3V, 130 Ohm @1.8V */
-#  define GPIO_DRIVE_90OHM    (3 << GPIO_DRIVE_SHIFT) /* 50 Ohm @3.3V, 90 Ohm @1.8V */
-#  define GPIO_DRIVE_60OHM    (4 << GPIO_DRIVE_SHIFT) /* 37 Ohm @3.3V, 60 Ohm @1.8V */
-#  define GPIO_DRIVE_50OHM    (5 << GPIO_DRIVE_SHIFT) /* 30 Ohm @3.3V, 50 Ohm @1.8V */
-#  define GPIO_DRIVE_40OHM    (6 << GPIO_DRIVE_SHIFT) /* 25 Ohm @3.3V, 40 Ohm @1.8V */
-#  define GPIO_DRIVE_33OHM    (7 << GPIO_DRIVE_SHIFT) /* 20 Ohm @3.3V, 33 Ohm @1.8V */
+#  define GPIO_DRIVE_HIZ       (0 << GPIO_DRIVE_SHIFT) /* HI-Z */
+#  define GPIO_DRIVE_260OHM    (1 << GPIO_DRIVE_SHIFT) /* 150 Ohm @3.3V, 260 Ohm @1.8V */
+#  define GPIO_DRIVE_130OHM    (2 << GPIO_DRIVE_SHIFT) /* 75 Ohm @3.3V, 130 Ohm @1.8V */
+#  define GPIO_DRIVE_90OHM     (3 << GPIO_DRIVE_SHIFT) /* 50 Ohm @3.3V, 90 Ohm @1.8V */
+#  define GPIO_DRIVE_60OHM     (4 << GPIO_DRIVE_SHIFT) /* 37 Ohm @3.3V, 60 Ohm @1.8V */
+#  define GPIO_DRIVE_50OHM     (5 << GPIO_DRIVE_SHIFT) /* 30 Ohm @3.3V, 50 Ohm @1.8V */
+#  define GPIO_DRIVE_40OHM     (6 << GPIO_DRIVE_SHIFT) /* 25 Ohm @3.3V, 40 Ohm @1.8V */
+#  define GPIO_DRIVE_33OHM     (7 << GPIO_DRIVE_SHIFT) /* 20 Ohm @3.3V, 33 Ohm @1.8V */
 
+/* Output Slew Rate:
+ *
+ *   GPIO OUTPUT ...1 .... ...L .... .... ....
+ */
+
+#define GPIO_SLEW_SLOW         (0)        /* Bit 12: 0=Slow Slew Rate */
+#define GPIO_SLEW_FAST         (1 << 12)  /* Bit 12: 1=Fast Slew Rate */
+ 
 /* Output Speed:
  *
- *   GPIO OUTPUT .... .... SS.. .... ....
+ *   GPIO OUTPUT ...1 .... .... SS.. .... ....
  */
 
 #define GPIO_SPEED_SHIFT       (10)       /* Bits 10-11: Speed */
@@ -111,17 +122,17 @@
 #  define GPIO_SPEED_MEDIUM    (1 << GPIO_SPEED_SHIFT) /* Medium frequency (100, 150 MHz) */
 #  define GPIO_SPEED_MAX       (3 << GPIO_SPEED_SHIFT) /* Maximum frequency (100, 150, 200 MHz) */
 
-/* Output Slew Rate:
+/* Initial Ouptut Value:
  *
- *   GPIO OUTPUT .... .... ..L. .... ....
+ *   GPIO OUTPUT ...1 .... .... ..V. .... ....
  */
 
-#define GPIO_SLEW_SLOW         (0)        /* Bit 9: 0=Slow Slew Rate */
-#define GPIO_SLEW_FAST         (1 << 9)   /* Bit 9: 1=Fast Slew Rate */
+#define GPIO_OUTPUT_ZERO       (0)        /* Bit 9: 0=Initial output is low */
+#define GPIO_OUTPUT_ONE        (1 << 9)   /* Bit 9: 1=Initial output is high */
  
 /* Input Schmitt Trigger:
  *
- *   GPIO INPUT  0... .... ...T .... ....
+ *   GPIO INPUT  ...0 .... .... ...T .... ....
  */
 
 #define GPIO_CMOS_INPUT        (0)        /* Bit 8: 0=CMOS input */
@@ -129,7 +140,7 @@
 
 /* GPIO Port Number
  *
- *   ENCODING    .... .... .... GGG. ....
+ *   ENCODING    .... .... .... .... GGG. ....
  */
 
 #define GPIO_PORT_SHIFT        (5)       /* Bits 5-7: Speed */
@@ -144,7 +155,7 @@
 
 /* GPIO Pin Number:
  *
- *   ENCODING    .... .... .... ...P PPPP
+ *   ENCODING    .... .... .... .... ...P PPPP
  */
 
 #define GPIO_PIN_SHIFT         (5)       /* Bits 0-4: Speed */
@@ -191,12 +202,6 @@
 typedef uint32_t gpio_pinset_t;
 
 /************************************************************************************
- * Inline Functions
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
  * Public Data
  ************************************************************************************/
 
@@ -214,15 +219,15 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
- * Name: imx_gpioirqinitialize
+ * Name: imx_gpioirq_initialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for PIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_IMX6_GPIO_IRQ
-void imx_gpioirqinitialize(void);
+void imx_gpioirq_initialize(void);
 #else
 #  define imx_gpioirqinitialize()
 #endif
@@ -231,17 +236,17 @@ void imx_gpioirqinitialize(void);
  * Name: imx_config_gpio
  *
  * Description:
- *   Configure a PIO pin based on bit-encoded description of the pin.
+ *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
  ************************************************************************************/
 
-int imx_config_gpio(gpio_pinset_t cfgset);
+int imx_config_gpio(gpio_pinset_t pinset);
 
 /************************************************************************************
  * Name: imx_gpio_write
  *
  * Description:
- *   Write one or zero to the selected PIO pin
+ *   Write one or zero to the selected GPIO pin
  *
  ************************************************************************************/
 
@@ -251,7 +256,7 @@ void imx_gpio_write(gpio_pinset_t pinset, bool value);
  * Name: imx_gpio_read
  *
  * Description:
- *   Read one or zero from the selected PIO pin
+ *   Read one or zero from the selected GPIO pin
  *
  ************************************************************************************/
 
@@ -261,7 +266,7 @@ bool imx_gpio_read(gpio_pinset_t pinset);
  * Name: imx_gpioirq
  *
  * Description:
- *   Configure an interrupt for the specified PIO pin.
+ *   Configure an interrupt for the specified GPIO pin.
  *
  ************************************************************************************/
 
@@ -275,7 +280,7 @@ void imx_gpioirq(gpio_pinset_t pinset);
  * Name: imx_gpioirq_enable
  *
  * Description:
- *   Enable the interrupt for specified PIO IRQ
+ *   Enable the interrupt for specified GPIO IRQ
  *
  ************************************************************************************/
 
@@ -289,7 +294,7 @@ void imx_gpioirq_enable(int irq);
  * Name: imx_gpioirq_disable
  *
  * Description:
- *   Disable the interrupt for specified PIO IRQ
+ *   Disable the interrupt for specified GPIO IRQ
  *
  ************************************************************************************/
 
@@ -303,7 +308,7 @@ void imx_gpioirq_disable(int irq);
  * Function:  imx_dump_gpio
  *
  * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided pinset.
  *
  ************************************************************************************/
 

@@ -57,79 +57,88 @@
 
 /* GPIO Register Offsets ************************************************************/
 
-#define GPIO_DR_OFFSET           0x0000  /* Data Register */
-#define GPIO_GDIR_OFFSET         0x0004  /* Data Direction Register */
-#define GPIO_PSR_OFFSET          0x0008  /* Pad Status Register */
-#define GPIO_ICR1_OFFSET         0x000c  /* Interrupt Configuration Register 1 */
-#define GPIO_ICR2_OFFSET         0x0010  /* Interrupt Configuration Register 2 */
-#define GPIO_IMR_OFFSET          0x0014  /* Interrupt Mask Register */
-#define GPIO_ISR_OFFSET          0x0018  /* Interrupt Status Register */
-#define GPIO_EDGE_OFFSET         0x001c  /* Interrupt Status Register */
+#define IMX_GPIO_DR_OFFSET       0x0000  /* Data Register */
+#define IMX_GPIO_GDIR_OFFSET     0x0004  /* Data Direction Register */
+#define IMX_GPIO_PSR_OFFSET      0x0008  /* Pad Status Register */
+#define IMX_GPIO_ICR1_OFFSET     0x000c  /* Interrupt Configuration Register 1 */
+#define IMX_GPIO_ICR2_OFFSET     0x0010  /* Interrupt Configuration Register 2 */
+#define IMX_GPIO_IMR_OFFSET      0x0014  /* Interrupt Mask Register */
+#define IMX_GPIO_ISR_OFFSET      0x0018  /* Interrupt Status Register */
+#define IMX_GPIO_EDGE_OFFSET     0x001c  /* Interrupt Status Register */
 
 /* GPIO Register Addresses **********************************************************/
 
-#define GPIO1_DR                 (IMX_GPIO1_VBASE+GPIO_DR_OFFSET)
-#define GPIO1_GDIR               (IMX_GPIO1_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO1_PSR                (IMX_GPIO1_VBASE+GPIO_PSR_OFFSET)
-#define GPIO1_ICR1               (IMX_GPIO1_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO1_ICR2               (IMX_GPIO1_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO1_IMR                (IMX_GPIO1_VBASE+GPIO_IMR_OFFSET)
-#define GPIO1_ISR                (IMX_GPIO1_VBASE+GPIO_ISR_OFFSET)
-#define GPIO1_EDGE               (IMX_GPIO1_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO_DR(n)           (IMX_GPIO_VBASE(n)+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO_GDIR(n)         (IMX_GPIO_VBASE(n)+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO_PSR(n)          (IMX_GPIO_VBASE(n)+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO_ICR1(n)         (IMX_GPIO_VBASE(n)+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO_ICR2(n)         (IMX_GPIO_VBASE(n)+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO_IMR(n)          (IMX_GPIO_VBASE(n)+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO_ISR(n)          (IMX_GPIO_VBASE(n)+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO_EDGE(n)         (IMX_GPIO_VBASE(n)+IMX_GPIO_EDGE_OFFSET)
 
-#define GPIO2_DR                 (IMX_GPIO2_VBASE+GPIO_DR_OFFSET)
-#define GPIO2_GDIR               (IMX_GPIO2_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO2_PSR                (IMX_GPIO2_VBASE+GPIO_PSR_OFFSET)
-#define GPIO2_ICR1               (IMX_GPIO2_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO2_ICR2               (IMX_GPIO2_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO2_IMR                (IMX_GPIO2_VBASE+GPIO_IMR_OFFSET)
-#define GPIO2_ISR                (IMX_GPIO2_VBASE+GPIO_ISR_OFFSET)
-#define GPIO2_EDGE               (IMX_GPIO2_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO1_DR             (IMX_GPIO1_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO1_GDIR           (IMX_GPIO1_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO1_PSR            (IMX_GPIO1_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO1_ICR1           (IMX_GPIO1_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO1_ICR2           (IMX_GPIO1_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO1_IMR            (IMX_GPIO1_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO1_ISR            (IMX_GPIO1_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO1_EDGE           (IMX_GPIO1_VBASE+IMX_GPIO_EDGE_OFFSET)
 
-#define GPIO3_DR                 (IMX_GPIO3_VBASE+GPIO_DR_OFFSET)
-#define GPIO3_GDIR               (IMX_GPIO3_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO3_PSR                (IMX_GPIO3_VBASE+GPIO_PSR_OFFSET)
-#define GPIO3_ICR1               (IMX_GPIO3_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO3_ICR2               (IMX_GPIO3_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO3_IMR                (IMX_GPIO3_VBASE+GPIO_IMR_OFFSET)
-#define GPIO3_ISR                (IMX_GPIO3_VBASE+GPIO_ISR_OFFSET)
-#define GPIO3_EDGE               (IMX_GPIO3_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO2_DR             (IMX_GPIO2_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO2_GDIR           (IMX_GPIO2_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO2_PSR            (IMX_GPIO2_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO2_ICR1           (IMX_GPIO2_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO2_ICR2           (IMX_GPIO2_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO2_IMR            (IMX_GPIO2_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO2_ISR            (IMX_GPIO2_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO2_EDGE           (IMX_GPIO2_VBASE+IMX_GPIO_EDGE_OFFSET)
 
-#define GPIO4_DR                 (IMX_GPIO4_VBASE+GPIO_DR_OFFSET)
-#define GPIO4_GDIR               (IMX_GPIO4_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO4_PSR                (IMX_GPIO4_VBASE+GPIO_PSR_OFFSET)
-#define GPIO4_ICR1               (IMX_GPIO4_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO4_ICR2               (IMX_GPIO4_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO4_IMR                (IMX_GPIO4_VBASE+GPIO_IMR_OFFSET)
-#define GPIO4_ISR                (IMX_GPIO4_VBASE+GPIO_ISR_OFFSET)
-#define GPIO4_EDGE               (IMX_GPIO4_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO3_DR             (IMX_GPIO3_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO3_GDIR           (IMX_GPIO3_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO3_PSR            (IMX_GPIO3_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO3_ICR1           (IMX_GPIO3_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO3_ICR2           (IMX_GPIO3_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO3_IMR            (IMX_GPIO3_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO3_ISR            (IMX_GPIO3_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO3_EDGE           (IMX_GPIO3_VBASE+IMX_GPIO_EDGE_OFFSET)
 
-#define GPIO5_DR                 (IMX_GPIO5_VBASE+GPIO_DR_OFFSET)
-#define GPIO5_GDIR               (IMX_GPIO5_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO5_PSR                (IMX_GPIO5_VBASE+GPIO_PSR_OFFSET)
-#define GPIO5_ICR1               (IMX_GPIO5_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO5_ICR2               (IMX_GPIO5_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO5_IMR                (IMX_GPIO5_VBASE+GPIO_IMR_OFFSET)
-#define GPIO5_ISR                (IMX_GPIO5_VBASE+GPIO_ISR_OFFSET)
-#define GPIO5_EDGE               (IMX_GPIO5_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO4_DR             (IMX_GPIO4_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO4_GDIR           (IMX_GPIO4_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO4_PSR            (IMX_GPIO4_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO4_ICR1           (IMX_GPIO4_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO4_ICR2           (IMX_GPIO4_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO4_IMR            (IMX_GPIO4_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO4_ISR            (IMX_GPIO4_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO4_EDGE           (IMX_GPIO4_VBASE+IMX_GPIO_EDGE_OFFSET)
 
-#define GPIO6_DR                 (IMX_GPIO6_VBASE+GPIO_DR_OFFSET)
-#define GPIO6_GDIR               (IMX_GPIO6_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO6_PSR                (IMX_GPIO6_VBASE+GPIO_PSR_OFFSET)
-#define GPIO6_ICR1               (IMX_GPIO6_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO6_ICR2               (IMX_GPIO6_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO6_IMR                (IMX_GPIO6_VBASE+GPIO_IMR_OFFSET)
-#define GPIO6_ISR                (IMX_GPIO6_VBASE+GPIO_ISR_OFFSET)
-#define GPIO6_EDGE               (IMX_GPIO6_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO5_DR             (IMX_GPIO5_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO5_GDIR           (IMX_GPIO5_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO5_PSR            (IMX_GPIO5_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO5_ICR1           (IMX_GPIO5_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO5_ICR2           (IMX_GPIO5_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO5_IMR            (IMX_GPIO5_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO5_ISR            (IMX_GPIO5_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO5_EDGE           (IMX_GPIO5_VBASE+IMX_GPIO_EDGE_OFFSET)
 
-#define GPIO7_DR                 (IMX_GPIO7_VBASE+GPIO_DR_OFFSET)
-#define GPIO7_GDIR               (IMX_GPIO7_VBASE+GPIO_GDIR_OFFSET)
-#define GPIO7_PSR                (IMX_GPIO7_VBASE+GPIO_PSR_OFFSET)
-#define GPIO7_ICR1               (IMX_GPIO7_VBASE+GPIO_ICR1_OFFSET)
-#define GPIO7_ICR2               (IMX_GPIO7_VBASE+GPIO_ICR2_OFFSET)
-#define GPIO7_IMR                (IMX_GPIO7_VBASE+GPIO_IMR_OFFSET)
-#define GPIO7_ISR                (IMX_GPIO7_VBASE+GPIO_ISR_OFFSET)
-#define GPIO7_EDGE               (IMX_GPIO7_VBASE+GPIO_EDGE_OFFSET)
+#define IMX_GPIO6_DR             (IMX_GPIO6_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO6_GDIR           (IMX_GPIO6_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO6_PSR            (IMX_GPIO6_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO6_ICR1           (IMX_GPIO6_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO6_ICR2           (IMX_GPIO6_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO6_IMR            (IMX_GPIO6_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO6_ISR            (IMX_GPIO6_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO6_EDGE           (IMX_GPIO6_VBASE+IMX_GPIO_EDGE_OFFSET)
+
+#define IMX_GPIO7_DR             (IMX_GPIO7_VBASE+IMX_GPIO_DR_OFFSET)
+#define IMX_GPIO7_GDIR           (IMX_GPIO7_VBASE+IMX_GPIO_GDIR_OFFSET)
+#define IMX_GPIO7_PSR            (IMX_GPIO7_VBASE+IMX_GPIO_PSR_OFFSET)
+#define IMX_GPIO7_ICR1           (IMX_GPIO7_VBASE+IMX_GPIO_ICR1_OFFSET)
+#define IMX_GPIO7_ICR2           (IMX_GPIO7_VBASE+IMX_GPIO_ICR2_OFFSET)
+#define IMX_GPIO7_IMR            (IMX_GPIO7_VBASE+IMX_GPIO_IMR_OFFSET)
+#define IMX_GPIO7_ISR            (IMX_GPIO7_VBASE+IMX_GPIO_ISR_OFFSET)
+#define IMX_GPIO7_EDGE           (IMX_GPIO7_VBASE+IMX_GPIO_EDGE_OFFSET)
 
 /* GPIO Register Bit Definitions ****************************************************/
 
