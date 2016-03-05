@@ -48,18 +48,6 @@
 #include "sabre-6quad.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* REVISIT:  There is no GPIO logic in place yet */
-#warning Missing logic
-#define imx_configgpio(a)
-#define imx_gpiowrite(a,b)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -71,7 +59,7 @@ void board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
-  imx_configgpio(GPIO_LED0);
+  imx_config_gpio(GPIO_LED0);
 }
 
 /****************************************************************************
@@ -82,7 +70,7 @@ void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED0)
     {
-      imx_gpiowrite(GPIO_LED0, !ledon); /* Low illuminates */
+      imx_gpio_write(GPIO_LED0, !ledon); /* Low illuminates */
     }
 }
 
@@ -94,5 +82,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  imx_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0));
+  imx_gpio_write(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0));
 }

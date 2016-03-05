@@ -72,6 +72,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "imx_gpio.h"
 #include "sabre-6quad.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -79,10 +80,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* REVISIT:  There is no GPIO logic in place yet */
-#warning Missing logic
-#define imx_configgpio(a)
-#define imx_gpiowrite(a,b)
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
  * with CONFIG_DEBUG_VERBOSE too)
@@ -97,14 +94,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -116,7 +105,7 @@ void board_autoled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
-  imx_configgpio(GPIO_LED0);
+  imx_config_gpio(GPIO_LED0);
 }
 
 /****************************************************************************
